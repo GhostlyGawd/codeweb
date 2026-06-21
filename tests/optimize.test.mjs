@@ -9,7 +9,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { runNode, tmpDir, cleanup, script } from './helpers.mjs';
 
 const node = (id, file, { loc = 5, kind = 'function', exports = true } = {}) => ({
@@ -174,6 +174,29 @@ test('opportunities are ordered ready -> blocked -> review (actionable first)', 
   const { payload } = runOpt(graph, 'ordering');
   assert.deepEqual(payload.opportunities.map((o) => o.tier), ['ready', 'review']);
   assert.equal(payload.opportunities[0].id, 'ovReady', 'ready sorts ahead of review even though drift is listed first');
+});
+
+test('--out writes an optimize.md artifact with the tiered sections', () => {
+  const graph = {
+    nodes: [node('a/r.js:dup', 'a/r.js'), node('b/r.js:dup', 'b/r.js')],
+    edges: [],
+    overlaps: [{
+      id: 'ov1', kind: 'duplicate-logic', confidence: 'high', bodySim: 0.9, drifted: false,
+      severity: 'high', title: '`dup` re-implemented in 2 files', domains: ['a'],
+      nodes: ['a/r.js:dup', 'b/r.js:dup'], evidence: '', recommendation: 'Extract one `dup`.',
+    }],
+  };
+  const p = join(WS, 'mdcase.json');
+  const mdPath = join(WS, 'optimize.md');
+  writeFileSync(p, JSON.stringify({ meta: { target: 'mdcase' }, domains: [], ...graph }));
+  const r = runNode(script('optimize.mjs'), [p, '--out', mdPath]);
+  assert.equal(r.status, 0, r.stderr);
+  const md = readFileSync(mdPath, 'utf8');
+  assert.match(md, /# codeweb — consolidation advisory/);
+  assert.match(md, /## Ready/);
+  assert.match(md, /## Blocked/);
+  assert.match(md, /## Review/);
+  assert.match(md, /`dup` re-implemented in 2 files/);
 });
 
 test('missing graph path exits 2 (usage)', () => {

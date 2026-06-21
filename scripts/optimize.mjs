@@ -7,7 +7,7 @@
 // whether the gate would accept it. No code is written. Built on ./lib/graph-ops.mjs so the
 // call/cycle primitives live ONCE (codeweb dogfooding its own anti-duplication mission).
 //
-// Usage: node optimize.mjs <graph.json> [--json]   (or set CODEWEB_WS and omit the path)
+// Usage: node optimize.mjs <graph.json> [--json] [--out <optimize.md>]   (or set CODEWEB_WS)
 //
 // Tiers (per finding):
 //   ready   — body-confirmed high (bodySim >= 0.6), not drifted, kind duplicate-logic, AND the
@@ -21,17 +21,22 @@
 // clean read regardless of how many opportunities exist (it ADVISES; diff.mjs is the gate). Exit:
 // 0 ok, 2 usage/IO.
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit } from './lib/graph-ops.mjs';
 
-const USAGE = 'usage: optimize.mjs <graph.json> [--json]   (or set CODEWEB_WS)';
+const USAGE = 'usage: optimize.mjs <graph.json> [--json] [--out <optimize.md>]   (or set CODEWEB_WS)';
 const READY_BODYSIM = 0.6; // body-confirmed "high" floor — must match overlap.mjs's confidence band
 function die(msg, code) { console.error(msg); process.exit(code); }
 
 const argv = process.argv.slice(2);
-let json = false; const paths = [];
-for (const t of argv) { if (t === '--json') json = true; else if (!t.startsWith('-')) paths.push(t); }
+let json = false, outMd = null; const paths = [];
+for (let i = 0; i < argv.length; i++) {
+  const t = argv[i];
+  if (t === '--json') json = true;
+  else if (t === '--out') outMd = argv[++i];
+  else if (!t.startsWith('-')) paths.push(t);
+}
 const graphPath = paths[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath) die(USAGE, 2);
 
@@ -57,24 +62,6 @@ function chooseCanonical(ids) {
   })[0];
 }
 
-// Model "delete the duplicate definitions, route every reference at the canonical": drop the
-// non-canonical copies, redirect any edge touching a copy to the canonical, de-dup, drop self-loops.
-// Returns the simulated graph so we can recompute file cycles on it. Never mutates `graph`.
-function simulateMerge(ids, canonical) {
-  const copies = new Set(ids);
-  const keptNodes = graph.nodes.filter((n) => !(copies.has(n.id) && n.id !== canonical));
-  const seen = new Set(); const edges = [];
-  for (const e of graph.edges) {
-    const from = copies.has(e.from) ? canonical : e.from;
-    const to = copies.has(e.to) ? canonical : e.to;
-    if (from === to) continue;
-    const k = `${from} ${to} ${e.kind}`;
-    if (seen.has(k)) continue; seen.add(k);
-    edges.push({ from, to, kind: e.kind });
-  }
-  return normalizeGraph({ meta: graph.meta, nodes: keptNodes, edges, domains: graph.domains, overlaps: [] });
-}
-
 // actionable findings only: precision gate drops low/refuted (overlap.mjs's own "findings" set).
 const candidates = graph.overlaps.filter((o) => o.confidence === 'high' || o.confidence === 'medium');
 
@@ -87,7 +74,7 @@ const opportunities = candidates.map((o) => {
   if (mergeable && o.nodes.length >= 2) {
     canonical = chooseCanonical(o.nodes);
     const losers = o.nodes.filter((id) => id !== canonical);
-    const sim = simulateMerge(o.nodes, canonical);
+    const sim = applyEdit(graph, { kind: 'merge', ids: o.nodes, into: canonical });
     projectedNewCycles = fileCycles(sim).filter((c) => !beforeCycles.has(cycKey(c)));
     removesNodes = losers.length;
     callersRewired = callersOf(index, losers).length;
@@ -135,6 +122,32 @@ const payload = {
   },
   opportunities,
 };
+
+// ---- markdown artifact (written alongside overlap.md when --out is given) ----------
+if (outMd) {
+  const t0 = payload.totals;
+  const item = (o) => {
+    const body = o.bodySim != null ? `  ·  **Body:** ${(o.bodySim * 100).toFixed(0)}%` : '';
+    const keep = o.canonical ? `\nKeep \`${o.canonical}\` · removes ${o.removesNodes} copy(ies) · rewires ${o.callersRewired} caller(s) · blast ${o.blastRadius} · ~${o.locSaved} LOC` : '';
+    return [`### ${o.id} · [${o.severity.toUpperCase()}] ${o.title}`,
+      `**Gate:** ${o.gate}${body}  ·  **Confidence:** ${o.confidence}`, keep, ``, `**→ ${o.recommendation}**`, ``].join('\n');
+  };
+  const section = (title, blurb, tier) => {
+    const items = opportunities.filter((o) => o.tier === tier);
+    return [`## ${title}`, '', `_${blurb}_`, '', ...(items.length ? items.map(item) : ['_none_', ''])].join('\n');
+  };
+  const md = [
+    '# codeweb — consolidation advisory',
+    '',
+    `> **${t0.findings} actionable findings** · ${t0.ready} ready · ${t0.blocked} blocked · ${t0.review} review on **${payload.target}**.`,
+    `> Applying all **ready** merges would remove ${t0.duplicationRemovable} duplication finding(s) and reclaim ~${t0.locReclaimable} LOC while keeping the gate green. Advisory only — no code is written; each merge stays a human + gate decision.`,
+    '',
+    section('Ready — the gate would accept these', 'Body-confirmed ≥60%, not drifted, and the simulated merge stays acyclic. Each is a checklist item.', 'ready'),
+    section('Blocked — the gate would reject a naive merge', 'The simulated merge introduces a new file-level dependency cycle. Host the canonical in a neutral module first, then route both sides there.', 'blocked'),
+    section('Review — needs human or agent judgement', 'Drifted copies, merely-structural confidence, or non-duplicate-logic findings. Read before acting.', 'review'),
+  ].join('\n');
+  writeFileSync(resolve(outMd), md);
+}
 
 if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
 

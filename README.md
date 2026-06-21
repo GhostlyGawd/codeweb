@@ -117,6 +117,24 @@ LOC then id) and reports the copies removed, callers rewired, blast radius, and 
 **advisory only** — it never writes code and never exits non-zero on a clean read; the merge stays a
 human + gate decision.
 
+## Agent tools — context & pre-flight (`context-pack`, `simulate-edit`)
+
+Two read-only tools that move work off the LLM and into the graph (full spec:
+[`docs/agent-tools.md`](docs/agent-tools.md)):
+
+```
+node scripts/context-pack.mjs  <graph.json> <symbol> [--json]   # minimal context to edit <symbol>
+node scripts/simulate-edit.mjs <graph.json> --delete <sym> | --merge <a,b> [--into <id>] | --move <sym> --to <file>
+```
+
+`context-pack` returns the **blast-radius-scoped** context for a symbol — its body, the direct
+callers (call sites, with body), the direct callees (location-only), and the transitive impact set
+(ids only) — so an agent edits with a small window instead of reading whole files. `simulate-edit`
+predicts the regression gate's **structural verdict** (`{newCycles, lostCallers, ok}`) for a
+hypothetical delete/merge/move **without performing it**, so doomed edits are discarded cheaply. Both
+share the pure `applyEdit` primitive in `graph-ops.mjs` with `optimize.mjs` (one truth), and are
+covered by property tests that pin the tool's output to an independent oracle.
+
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing
