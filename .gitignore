@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Orchestrator output workspace (per-target runs; regenerable via scripts/run.mjs)
+.codeweb/
+
+# Canonical dev workspace: keep the hand-written dev tools (.live/*.mjs, .live/cli-sketch/),
+# ignore the generated analysis artifacts (large, regenerable, and they drift over time).
+.live/runs/
+.live/*.json
+.live/*.html
+.live/*.md
+.live/*.before
+*.before
+
+# OS / editor noise
+.DS_Store
+Thumbs.db

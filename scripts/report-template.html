@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>codeweb — system map</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#30363d;
+    --fg:#e6edf3; --muted:#8b949e; --accent:#58a6ff;
+    --hi:#ff5c5c; --med:#ffb65c; --low:#c9d11f; --good:#3fb950;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+    font:13px/1.5 ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+  #top{height:48px;display:flex;align-items:center;gap:6px;padding:0 14px;
+    border-bottom:1px solid var(--line);background:var(--panel)}
+  #top b{font-size:15px;letter-spacing:.5px;margin-right:8px}
+  #top .meta{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+  #top .spacer{flex:1}
+  .tab{background:transparent;color:var(--muted);border:1px solid transparent;border-radius:7px;
+    padding:6px 12px;cursor:pointer;font-size:13px}
+  .tab:hover{color:var(--fg)}
+  .tab.on{color:var(--fg);background:var(--panel2);border-color:var(--line)}
+  #wrap{display:flex;height:calc(100% - 48px)}
+  #main{flex:1;position:relative;min-width:0;overflow:hidden}
+  .view{position:absolute;inset:0;overflow:auto;padding:16px 18px;display:none}
+  .view.on{display:block}
+  #view-graph.on,#view-treemap.on{padding:0}
+  #detail{width:340px;border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:14px}
+  #detail h3{margin:0 0 4px;font-size:14px;word-break:break-all}
+  #detail .kv{color:var(--muted);font-size:12px;margin:3px 0}
+  #detail .sec{margin-top:14px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  #detail .lst div{padding:3px 0;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #detail .lst div:hover{color:var(--accent)}
+  .empty{color:var(--muted);padding:24px;text-align:center}
+  code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:11px}
+  /* findings */
+  .fsec{margin-bottom:26px}
+  .fhead{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+  .fhead h2{margin:0;font-size:15px}
+  .fhead .sub{color:var(--muted);font-size:12px}
+  table.f{width:100%;border-collapse:collapse;font-size:13px}
+  table.f td{padding:6px 8px;border-bottom:1px solid var(--line);cursor:pointer}
+  table.f tr:hover td{background:var(--panel2)}
+  .badge{display:inline-block;min-width:22px;text-align:center;padding:1px 7px;border-radius:11px;font-size:11px;font-weight:700;color:#0d1117}
+  .b-hi{background:var(--hi)} .b-med{background:var(--med)} .b-low{background:var(--low)} .b-acc{background:var(--accent)} .b-good{background:var(--good)}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+  .dim{color:var(--muted)}
+  .pill{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 6px;margin-left:4px}
+  /* matrix */
+  table.m{border-collapse:collapse;font-size:11px}
+  table.m th{padding:4px 6px;color:var(--muted);font-weight:600;text-align:left;white-space:nowrap}
+  table.m th.rot{height:96px;vertical-align:bottom;text-align:center}
+  table.m th.rot span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
+  table.m td{width:30px;height:30px;text-align:center;border:1px solid #0d1117;cursor:pointer;color:#0d1117;font-weight:600}
+  table.m td.diag{outline:1px solid var(--line)}
+  table.m td.zero{color:var(--line);background:var(--panel)!important;cursor:default}
+  .legend{color:var(--muted);font-size:12px;margin:10px 0}
+  /* treemap */
+  #tm{position:absolute;inset:0}
+  .tmbox{position:absolute;overflow:hidden;border:1px solid #0d1117;cursor:pointer;font-size:10px;color:#0d1117}
+  .tmbox:hover{outline:2px solid #fff;z-index:5}
+  .tmlabel{position:absolute;top:1px;left:3px;right:2px;color:#e6edf3;font-size:10px;text-shadow:0 1px 2px #000;pointer-events:none;white-space:nowrap;overflow:hidden}
+  .tmdomlabel{position:absolute;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none}
+  /* graph */
+  #cv{display:block;background:radial-gradient(circle at 50% 38%,#11161f,#0d1117)}
+  #gsearch{position:absolute;top:10px;left:10px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:6px 9px;width:220px}
+  #gctrl{position:absolute;top:10px;right:10px;display:flex;gap:6px}
+  #gctrl button{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:12px}
+</style>
+</head>
+<body>
+<div id="top">
+  <b>codeweb</b>
+  <span class="meta" id="metaTarget"></span>
+  <span class="meta" id="metaStats"></span>
+  <span class="spacer"></span>
+  <button class="tab on" data-view="findings">Findings</button>
+  <button class="tab" data-view="matrix">Matrix</button>
+  <button class="tab" data-view="treemap">Treemap</button>
+  <button class="tab" data-view="graph">Graph</button>
+</div>
+<div id="wrap">
+  <div id="main">
+    <div class="view on" id="view-findings"></div>
+    <div class="view" id="view-matrix"></div>
+    <div class="view" id="view-treemap"><div id="tm"></div></div>
+    <div class="view" id="view-graph">
+      <canvas id="cv"></canvas>
+      <input id="gsearch" placeholder="search symbols…" autocomplete="off">
+      <div id="gctrl"><button id="gFit">Fit</button><button id="gToggle"></button></div>
+    </div>
+  </div>
+  <div id="detail"><div class="empty">Pick an item to inspect it.</div></div>
+</div>
+
+<script id="graph-data" type="application/json">__GRAPH_DATA__</script>
+
+<script>
+(function () {
+  "use strict";
+  var G;
+  try { G = JSON.parse(document.getElementById('graph-data').textContent); }
+  catch (e) { document.body.innerHTML = '<p style="color:#f88;padding:24px">Failed to parse graph data: ' + e.message + '</p>'; return; }
+  G.nodes = G.nodes || []; G.edges = G.edges || []; G.domains = G.domains || []; G.overlaps = G.overlaps || []; G.meta = G.meta || {};
+  G.nodes.forEach(function (n) { if (!n.domain) n.domain = 'unassigned'; });
+
+  // ---------- indexes & derived metrics ----------
+  var nodeById = new Map(G.nodes.map(function (n) { return [n.id, n]; }));
+  var outAdj = new Map(), inAdj = new Map(), inDeg = new Map(), outDeg = new Map();
+  G.nodes.forEach(function (n) { outAdj.set(n.id, []); inAdj.set(n.id, []); inDeg.set(n.id, 0); outDeg.set(n.id, 0); });
+  G.edges.forEach(function (e) {
+    if (!nodeById.has(e.from) || !nodeById.has(e.to)) return;
+    outAdj.get(e.from).push(e.to); inAdj.get(e.to).push(e.from);
+    outDeg.set(e.from, outDeg.get(e.from) + 1); inDeg.set(e.to, inDeg.get(e.to) + 1);
+  });
+
+  var domainNames = (G.domains.length ? G.domains.map(function (d) { return d.name; })
+    : Array.from(new Set(G.nodes.map(function (n) { return n.domain; }))));
+  var domColor = {};
+  domainNames.forEach(function (nm, i) { domColor[nm] = 'hsl(' + Math.round((i * 137.508) % 360) + ',60%,57%)'; });
+  function colorOf(nm) { return domColor[nm] || '#8b949e'; }
+  var domSummary = {}; G.domains.forEach(function (d) { domSummary[d.name] = d; });
+  function domCount(nm) { return G.nodes.filter(function (n) { return n.domain === nm; }).length; }
+  domainNames = domainNames.slice().filter(function (nm) { return domCount(nm) > 0; }).sort(function (a, b) { return domCount(b) - domCount(a); });
+
+  // duplicates: same symbol name defined in >=2 files
+  var ENTRY = /^(main|index|cli|run|start|default|setup|init|activate|handler|middleware|module)$/i;
+  var byName = new Map();
+  G.nodes.forEach(function (n) {
+    if (!['function', 'method', 'class'].includes(n.kind)) return;
+    if (!byName.has(n.label)) byName.set(n.label, []); byName.get(n.label).push(n);
+  });
+  var duplicates = [];
+  byName.forEach(function (arr, name) {
+    var files = new Set(arr.map(function (n) { return n.file; }));
+    if (files.size >= 2 && name.length > 3) {
+      var doms = new Set(arr.map(function (n) { return n.domain; }));
+      duplicates.push({ name: name, files: files.size, count: arr.length, nodes: arr, domains: Array.from(doms) });
+    }
+  });
+  duplicates.sort(function (a, b) { return b.files - a.files; });
+  var dupNodeIds = new Set(); duplicates.forEach(function (d) { d.nodes.forEach(function (n) { dupNodeIds.add(n.id); }); });
+
+  // hotspots: highest in-degree
+  var hotspots = G.nodes.slice().filter(function (n) { return inDeg.get(n.id) > 0; })
+    .sort(function (a, b) { return inDeg.get(b.id) - inDeg.get(a.id); }).slice(0, 30);
+
+  // dead code: no callers, not an entrypoint-ish name
+  var dead = G.nodes.filter(function (n) {
+    return inDeg.get(n.id) === 0 && ['function', 'method'].includes(n.kind) && !ENTRY.test(n.label) && (n.loc || 0) >= 3;
+  }).sort(function (a, b) { return (b.loc || 0) - (a.loc || 0); });
+
+  // ---------- meta bar ----------
+  document.getElementById('metaTarget').textContent = (G.meta.target || '') + (G.meta.mode ? ' · ' + G.meta.mode : '');
+  var st = G.meta.stats || {};
+  document.getElementById('metaStats').textContent = [
+    (st.nodes || G.nodes.length) + ' symbols', (st.edges || G.edges.length) + ' edges',
+    domainNames.length + ' areas', duplicates.length + ' dup-groups',
+    G.meta.engine ? 'engine: ' + G.meta.engine : ''
+  ].filter(Boolean).join('  ·  ');
+
+  // ---------- detail panel ----------
+  var detail = document.getElementById('detail');
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function detailEmpty() { detail.innerHTML = '<div class="empty">Pick an item to inspect it.</div>'; }
+  function nodeRow(id) { var t = nodeById.get(id); return '<div data-node="' + esc(id) + '">' + esc(t ? (t.label || id) : id) + ' <span class="dim mono">' + esc(t ? t.file : '') + '</span></div>'; }
+  function bindNodeRows(scope) { (scope || detail).querySelectorAll('[data-node]').forEach(function (el) { el.onclick = function () { showNode(el.getAttribute('data-node')); }; }); }
+  function showNode(id) {
+    var n = nodeById.get(id); if (!n) return;
+    var outs = outAdj.get(id) || [], ins = inAdj.get(id) || [];
+    detail.innerHTML = '<h3>' + esc(n.label) + '</h3>' +
+      '<div class="kv">' + esc(n.kind || '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--hi)">duplicated</span>' : '') + '</div>' +
+      '<div class="kv"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:' + colorOf(n.domain) + '"></span> ' + esc(n.domain) + '</div>' +
+      (n.file ? '<div class="kv"><code>' + esc(n.file) + (n.line ? ':' + n.line : '') + '</code>' + (n.loc ? ' · ' + n.loc + ' loc' : '') + '</div>' : '') +
+      (n.summary ? '<div class="kv">' + esc(n.summary) + '</div>' : '') +
+      '<div class="sec">used by (' + ins.length + ')</div><div class="lst" id="d_in"></div>' +
+      '<div class="sec">calls (' + outs.length + ')</div><div class="lst" id="d_out"></div>';
+    document.getElementById('d_in').innerHTML = ins.slice(0, 60).map(nodeRow).join('') || '<div class="empty">— (nothing calls this)</div>';
+    document.getElementById('d_out').innerHTML = outs.slice(0, 60).map(nodeRow).join('') || '<div class="empty">—</div>';
+    bindNodeRows();
+  }
+  function showDup(d) {
+    detail.innerHTML = '<h3>' + esc(d.name) + '()</h3>' +
+      '<div class="kv">defined in <b>' + d.files + ' files</b> · ' + d.domains.length + ' area(s)</div>' +
+      '<div class="kv">' + esc(d.domains.join(', ')) + '</div>' +
+      '<div class="sec">every definition</div><div class="lst" id="d_dup"></div>';
+    document.getElementById('d_dup').innerHTML = d.nodes.map(function (n) { return nodeRow(n.id); }).join('');
+    bindNodeRows();
+  }
+
+  // ---------- FINDINGS ----------
+  function sev(files) { return files >= 6 ? 'hi' : files >= 4 ? 'med' : 'low'; }
+  function section(title, sub, n, body) {
+    return '<div class="fsec"><div class="fhead"><h2>' + esc(title) + '</h2><span class="sub">' + esc(sub) + '</span><span class="pill">' + n + '</span></div>' + body + '</div>';
+  }
+  function renderFindings() {
+    var v = document.getElementById('view-findings');
+    var dupRows = duplicates.slice(0, 40).map(function (d, i) {
+      return '<tr data-dup="' + i + '"><td><span class="badge b-' + sev(d.files) + '">' + d.files + '</span></td>' +
+        '<td class="mono">' + esc(d.name) + '()</td>' +
+        '<td class="dim">' + esc(d.domains.slice(0, 4).join(', ')) + (d.domains.length > 4 ? '…' : '') + '</td>' +
+        '<td class="dim">defined in ' + d.files + ' files</td></tr>';
+    }).join('');
+    var hotRows = hotspots.map(function (n) {
+      return '<tr data-node="' + esc(n.id) + '"><td><span class="badge b-acc">' + inDeg.get(n.id) + '</span></td>' +
+        '<td class="mono">' + esc(n.label) + '</td><td class="dim mono">' + esc(n.file) + '</td>' +
+        '<td class="dim">used by ' + inDeg.get(n.id) + '</td></tr>';
+    }).join('');
+    var deadRows = dead.slice(0, 40).map(function (n) {
+      return '<tr data-node="' + esc(n.id) + '"><td class="mono">' + esc(n.label) + '</td>' +
+        '<td class="dim mono">' + esc(n.file) + (n.line ? ':' + n.line : '') + '</td>' +
+        '<td class="dim">' + (n.loc || 0) + ' loc' + (n.exports ? ' · exported' : '') + '</td></tr>';
+    }).join('');
+    v.innerHTML =
+      section('Duplication', 'merge these — same function defined in many files', duplicates.length,
+        dupRows ? '<table class="f">' + dupRows + '</table>' : '<div class="empty">No duplication found 🎉</div>') +
+      section('Hotspots', 'most depended-on code — change with care', hotspots.length,
+        hotRows ? '<table class="f">' + hotRows + '</table>' : '<div class="empty">—</div>') +
+      section('Likely dead code', 'nothing in this graph calls these', dead.length,
+        deadRows ? '<table class="f">' + deadRows + '</table>' : '<div class="empty">—</div>');
+    v.querySelectorAll('tr[data-dup]').forEach(function (tr) { tr.onclick = function () { showDup(duplicates[+tr.getAttribute('data-dup')]); }; });
+    bindNodeRows(v);
+  }
+
+  // ---------- MATRIX ----------
+  function renderMatrix() {
+    var v = document.getElementById('view-matrix');
+    var idx = {}; domainNames.forEach(function (d, i) { idx[d] = i; });
+    var M = domainNames.map(function () { return domainNames.map(function () { return 0; }); });
+    G.edges.forEach(function (e) {
+      var a = nodeById.get(e.from), b = nodeById.get(e.to); if (!a || !b) return;
+      if (idx[a.domain] == null || idx[b.domain] == null) return;
+      M[idx[a.domain]][idx[b.domain]] += (e.weight || 1);
+    });
+    var max = 1; M.forEach(function (r, i) { r.forEach(function (val, j) { if (i !== j && val > max) max = val; }); });
+    var head = '<th></th>' + domainNames.map(function (d) { return '<th class="rot"><span>' + esc(d) + '</span></th>'; }).join('');
+    var rows = domainNames.map(function (da, i) {
+      var cells = domainNames.map(function (db, j) {
+        var val = M[i][j];
+        if (val === 0) return '<td class="zero' + (i === j ? ' diag' : '') + '">·</td>';
+        var t = Math.min(1, Math.log(val + 1) / Math.log(max + 1));
+        var bg = i === j ? 'rgba(63,185,80,' + (0.25 + t * 0.6) + ')' : 'rgba(88,166,255,' + (0.15 + t * 0.8) + ')';
+        return '<td class="' + (i === j ? 'diag' : '') + '" style="background:' + bg + '" data-a="' + i + '" data-b="' + j + '">' + val + '</td>';
+      }).join('');
+      return '<tr><th>' + esc(da) + '</th>' + cells + '</tr>';
+    }).join('');
+    v.innerHTML = '<div class="fhead"><h2>Area coupling</h2><span class="sub">rows call columns · blue = cross-area dependency (tangling), green diagonal = internal cohesion</span></div>' +
+      '<table class="m"><tr>' + head + '</tr>' + rows + '</table>' +
+      '<div class="legend">Big off-diagonal numbers mean two areas are tightly entangled — candidates to merge or to put behind a clean interface. Click a cell to see its edges.</div>';
+    v.querySelectorAll('td[data-a]').forEach(function (td) {
+      td.onclick = function () { showCoupling(domainNames[+td.getAttribute('data-a')], domainNames[+td.getAttribute('data-b')]); };
+    });
+  }
+  function showCoupling(a, b) {
+    var es = G.edges.filter(function (e) { var x = nodeById.get(e.from), y = nodeById.get(e.to); return x && y && x.domain === a && y.domain === b; });
+    detail.innerHTML = '<h3>' + esc(a) + ' → ' + esc(b) + '</h3><div class="kv">' + es.length + ' call edge(s)</div>' +
+      '<div class="sec">edges</div><div class="lst" id="d_e"></div>';
+    document.getElementById('d_e').innerHTML = es.slice(0, 80).map(function (e) {
+      return '<div data-node="' + esc(e.from) + '">' + esc(nodeById.get(e.from).label) + ' <span class="dim">→ ' + esc(nodeById.get(e.to).label) + '</span></div>';
+    }).join('') || '<div class="empty">—</div>';
+    bindNodeRows();
+  }
+
+  // ---------- TREEMAP ----------
+  function bisect(items, x, y, w, h, out) {
+    if (!items.length) return;
+    if (items.length === 1) { out.push(Object.assign({}, items[0], { x: x, y: y, w: w, h: h })); return; }
+    var total = items.reduce(function (s, i) { return s + i.value; }, 0), acc = 0, k = 0;
+    for (; k < items.length - 1; k++) { if (acc + items[k].value > total / 2) break; acc += items[k].value; }
+    var a = items.slice(0, k + 1), b = items.slice(k + 1);
+    var frac = a.reduce(function (s, i) { return s + i.value; }, 0) / total;
+    if (w >= h) { bisect(a, x, y, w * frac, h, out); bisect(b, x + w * frac, y, w * (1 - frac), h, out); }
+    else { bisect(a, x, y, w, h * frac, out); bisect(b, x, y + h * frac, w, h * (1 - frac), out); }
+  }
+  function dupColor(density) {
+    var r = Math.round(63 + (248 - 63) * density), g = Math.round(185 + (81 - 185) * density), b = Math.round(80 + (73 - 80) * density);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+  function renderTreemap() {
+    var tm = document.getElementById('tm'); tm.innerHTML = '';
+    var Wd = tm.clientWidth || 800, Hd = tm.clientHeight || 600;
+    var doms = domainNames.map(function (d) {
+      var ns = G.nodes.filter(function (n) { return n.domain === d; });
+      return { name: d, value: ns.reduce(function (s, n) { return s + (n.loc || 1); }, 0), nodes: ns };
+    }).filter(function (d) { return d.value > 0; }).sort(function (a, b) { return b.value - a.value; });
+    var drects = []; bisect(doms.map(function (d) { return { value: d.value, ref: d }; }), 0, 0, Wd, Hd, drects);
+    drects.forEach(function (dr) {
+      var d = dr.ref;
+      var border = document.createElement('div');
+      border.className = 'tmbox'; border.style.left = dr.x + 'px'; border.style.top = dr.y + 'px';
+      border.style.width = dr.w + 'px'; border.style.height = dr.h + 'px'; border.style.borderColor = colorOf(d.name);
+      border.style.borderWidth = '2px'; tm.appendChild(border);
+      var fmap = new Map();
+      d.nodes.forEach(function (n) { if (!fmap.has(n.file)) fmap.set(n.file, []); fmap.get(n.file).push(n); });
+      var files = Array.from(fmap.entries()).map(function (kv) {
+        var loc = kv[1].reduce(function (s, n) { return s + (n.loc || 1); }, 0);
+        var dups = kv[1].filter(function (n) { return dupNodeIds.has(n.id); }).length;
+        return { value: loc, file: kv[0], nodes: kv[1], density: kv[1].length ? dups / kv[1].length : 0 };
+      }).sort(function (a, b) { return b.value - a.value; });
+      var pad = 14, frects = [];
+      bisect(files.map(function (f) { return { value: f.value, ref: f }; }), dr.x + 2, dr.y + pad, Math.max(1, dr.w - 4), Math.max(1, dr.h - pad - 2), frects);
+      frects.forEach(function (fr) {
+        var f = fr.ref, box = document.createElement('div');
+        box.className = 'tmbox'; box.style.left = fr.x + 'px'; box.style.top = fr.y + 'px';
+        box.style.width = fr.w + 'px'; box.style.height = fr.h + 'px';
+        box.style.background = dupColor(f.density);
+        box.title = f.file + '  (' + f.value + ' loc, ' + Math.round(f.density * 100) + '% duplicated)';
+        if (fr.w > 46 && fr.h > 14) { var lab = document.createElement('div'); lab.className = 'tmlabel'; lab.textContent = f.file.split('/').pop(); box.appendChild(lab); }
+        box.onclick = function () { showFile(f); };
+        tm.appendChild(box);
+      });
+      var dl = document.createElement('div'); dl.className = 'tmdomlabel'; dl.style.left = (dr.x + 4) + 'px'; dl.style.top = (dr.y + 1) + 'px';
+      dl.textContent = d.name + ' · ' + d.nodes.length; tm.appendChild(dl);
+    });
+  }
+  function showFile(f) {
+    detail.innerHTML = '<h3 class="mono">' + esc(f.file) + '</h3>' +
+      '<div class="kv">' + f.nodes.length + ' symbols · ' + f.value + ' loc · ' + Math.round(f.density * 100) + '% duplicated</div>' +
+      '<div class="sec">symbols</div><div class="lst" id="d_f"></div>';
+    document.getElementById('d_f').innerHTML = f.nodes.map(function (n) {
+      return '<div data-node="' + esc(n.id) + '">' + (dupNodeIds.has(n.id) ? '⚠ ' : '') + esc(n.label) + ' <span class="dim">' + (n.loc || 0) + ' loc</span></div>';
+    }).join('');
+    bindNodeRows();
+  }
+
+  // ---------- GRAPH (demoted) ----------
+  var gInit = false, gView = (G.nodes.length > 600 ? 'domain' : 'symbol'), W = null, sim = null, selectedNode = null, searchTerm = '';
+  var cv = document.getElementById('cv'), ctx = cv.getContext('2d'), DPR = window.devicePixelRatio || 1, cam = { x: 0, y: 0, k: 1 };
+  function gResize() { var r = cv.parentElement.getBoundingClientRect(); cv.width = r.width * DPR; cv.height = r.height * DPR; cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px'; }
+  function buildW() {
+    if (gView === 'domain') {
+      var dn = domainNames.map(function (nm) { var c = domCount(nm); return { id: 'd:' + nm, label: nm, domain: nm, r: Math.max(12, Math.min(60, 8 + Math.sqrt(c) * 5)) }; });
+      var agg = new Map();
+      G.edges.forEach(function (e) { var a = nodeById.get(e.from), b = nodeById.get(e.to); if (!a || !b || a.domain === b.domain) return; var k = a.domain < b.domain ? a.domain + '␟' + b.domain : b.domain + '␟' + a.domain; agg.set(k, (agg.get(k) || 0) + 1); });
+      var de = Array.from(agg.entries()).map(function (kv) { var p = kv[0].split('␟'); return { from: 'd:' + p[0], to: 'd:' + p[1], weight: kv[1] }; });
+      return { nodes: dn, edges: de, idx: new Map(dn.map(function (d) { return [d.id, d]; })) };
+    }
+    var wn = G.nodes.map(function (n) { return { id: n.id, label: n.label, domain: n.domain, r: Math.max(3, Math.min(18, 3 + Math.sqrt(n.loc || 6))) }; });
+    var we = G.edges.map(function (e) { return { from: e.from, to: e.to, cross: nodeById.get(e.from).domain !== nodeById.get(e.to).domain }; });
+    return { nodes: wn, edges: we, idx: new Map(wn.map(function (n) { return [n.id, n]; })) };
+  }
+  function gLayout() { W = buildW(); var n = W.nodes.length, R = Math.max(120, n * 8); W.nodes.forEach(function (nd, i) { var a = i * 2.39996, rad = R * Math.sqrt(i / Math.max(1, n)); nd.x = Math.cos(a) * rad; nd.y = Math.sin(a) * rad; nd.vx = 0; nd.vy = 0; }); sim = { alpha: 1, running: false }; gFit(); gStart(); }
+  function gStart() { if (!sim) return; sim.alpha = Math.max(sim.alpha, 0.7); if (!sim.running) { sim.running = true; requestAnimationFrame(gTick); } }
+  function gTick() { if (!sim || !document.getElementById('view-graph').classList.contains('on')) { if (sim) sim.running = false; return; } gStep(); gDraw(); sim.alpha *= 0.985; if (sim.alpha > 0.02) requestAnimationFrame(gTick); else sim.running = false; }
+  function gStep() {
+    var ns = W.nodes, es = W.edges, a = sim.alpha, repK = gView === 'domain' ? 4500 : 1200, L = gView === 'domain' ? 170 : 50, i, j;
+    for (i = 0; i < ns.length; i++) { ns[i].fx = 0; ns[i].fy = 0; }
+    for (i = 0; i < ns.length; i++) { var A = ns[i]; for (j = i + 1; j < ns.length; j++) { var B = ns[j], dx = A.x - B.x, dy = A.y - B.y, d2 = dx * dx + dy * dy || 0.01, d = Math.sqrt(d2), f = repK / d2; A.fx += dx / d * f; A.fy += dy / d * f; B.fx -= dx / d * f; B.fy -= dy / d * f; } }
+    for (i = 0; i < es.length; i++) { var e = es[i], P = W.idx.get(e.from), Q = W.idx.get(e.to); if (!P || !Q) continue; var ex = Q.x - P.x, ey = Q.y - P.y, ed = Math.sqrt(ex * ex + ey * ey) || 0.01, df = (ed - L) / ed * 0.03; P.fx += ex * df; P.fy += ey * df; Q.fx -= ex * df; Q.fy -= ey * df; }
+    for (i = 0; i < ns.length; i++) { var nd = ns[i]; nd.fx += -nd.x * 0.015; nd.fy += -nd.y * 0.015; nd.vx = (nd.vx + nd.fx * a) * 0.86; nd.vy = (nd.vy + nd.fy * a) * 0.86; nd.x += nd.vx; nd.y += nd.vy; }
+  }
+  function gFit() { var ns = W.nodes; if (!ns.length) return; var a = 1e9, b = 1e9, c = -1e9, d = -1e9; ns.forEach(function (n) { a = Math.min(a, n.x); b = Math.min(b, n.y); c = Math.max(c, n.x); d = Math.max(d, n.y); }); var w = cv.width / DPR, h = cv.height / DPR; cam.k = Math.max(0.05, Math.min((w - 70) / Math.max(1, c - a), (h - 70) / Math.max(1, d - b), 2.5)); cam.x = w / 2 - (a + c) / 2 * cam.k; cam.y = h / 2 - (b + d) / 2 * cam.k; }
+  function X(x) { return x * cam.k + cam.x; } function Y(y) { return y * cam.k + cam.y; }
+  function gDraw() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+    var hl = null; if (searchTerm) { var t = searchTerm.toLowerCase(); hl = new Set(W.nodes.filter(function (n) { return n.label.toLowerCase().indexOf(t) >= 0; }).map(function (n) { return n.id; })); }
+    else if (selectedNode) { hl = new Set([selectedNode]); (outAdj.get(selectedNode) || []).forEach(function (x) { hl.add(x); }); (inAdj.get(selectedNode) || []).forEach(function (x) { hl.add(x); }); }
+    W.edges.forEach(function (e) { var A = W.idx.get(e.from), B = W.idx.get(e.to); if (!A || !B) return; var on = !hl || (hl.has(e.from) && hl.has(e.to)); ctx.strokeStyle = on ? (e.cross ? 'rgba(255,182,92,0.4)' : 'rgba(139,148,158,0.25)') : 'rgba(139,148,158,0.04)'; ctx.lineWidth = gView === 'domain' ? Math.max(0.6, Math.min(7, Math.log(e.weight + 1))) : 1; ctx.beginPath(); ctx.moveTo(X(A.x), Y(A.y)); ctx.lineTo(X(B.x), Y(B.y)); ctx.stroke(); });
+    W.nodes.forEach(function (nd) { var vis = !hl || hl.has(nd.id); ctx.globalAlpha = vis ? 1 : 0.12; ctx.beginPath(); ctx.arc(X(nd.x), Y(nd.y), nd.r, 0, 6.2832); ctx.fillStyle = colorOf(nd.domain); ctx.fill(); if (selectedNode === nd.id) { ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke(); } ctx.globalAlpha = 1; if ((gView === 'domain' || nd.r > 11 || (hl && hl.has(nd.id) && hl.size < 30)) && vis) { ctx.fillStyle = '#c9d1d9'; ctx.font = (gView === 'domain' ? '12px ' : '10px ') + 'ui-sans-serif'; ctx.fillText(nd.label, X(nd.x) + nd.r + 3, Y(nd.y) + 3); } });
+  }
+  function gPick(mx, my) { var best = null, bd = 1e9; W.nodes.forEach(function (nd) { var dx = X(nd.x) - mx, dy = Y(nd.y) - my, d = Math.sqrt(dx * dx + dy * dy); if (d < nd.r + 4 && d < bd) { bd = d; best = nd; } }); return best; }
+  var gdrag = null, gmoved = false;
+  cv.addEventListener('mousedown', function (ev) { var r = cv.getBoundingClientRect(); gmoved = false; gdrag = { mx: ev.clientX - r.left, my: ev.clientY - r.top, cx: cam.x, cy: cam.y }; });
+  window.addEventListener('mousemove', function (ev) { if (!gdrag) return; var r = cv.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top; if (Math.abs(mx - gdrag.mx) + Math.abs(my - gdrag.my) > 3) gmoved = true; cam.x = gdrag.cx + (mx - gdrag.mx); cam.y = gdrag.cy + (my - gdrag.my); gDraw(); });
+  window.addEventListener('mouseup', function (ev) { if (gdrag && !gmoved && document.getElementById('view-graph').classList.contains('on')) { var r = cv.getBoundingClientRect(), nd = gPick(ev.clientX - r.left, ev.clientY - r.top); if (nd) { if (gView === 'domain') { gView = 'symbol'; gLayout(); } else { selectedNode = nd.id; showNode(nd.id); gDraw(); } } else { selectedNode = null; gDraw(); } } gdrag = null; });
+  cv.addEventListener('wheel', function (ev) { ev.preventDefault(); var r = cv.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top, f = ev.deltaY < 0 ? 1.12 : 0.89, nk = Math.max(0.05, Math.min(6, cam.k * f)); cam.x = mx - (mx - cam.x) * (nk / cam.k); cam.y = my - (my - cam.y) * (nk / cam.k); cam.k = nk; gDraw(); }, { passive: false });
+  document.getElementById('gFit').onclick = function () { gFit(); gDraw(); };
+  var gToggle = document.getElementById('gToggle');
+  function syncToggle() { gToggle.textContent = gView === 'domain' ? 'Expand symbols' : 'Collapse to areas'; }
+  gToggle.onclick = function () { gView = gView === 'domain' ? 'symbol' : 'domain'; selectedNode = null; gLayout(); syncToggle(); };
+  document.getElementById('gsearch').addEventListener('input', function (e) { searchTerm = e.target.value.trim(); gDraw(); });
+
+  // ---------- tab routing ----------
+  var rendered = {};
+  function activate(view) {
+    document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('on', t.getAttribute('data-view') === view); });
+    document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('on', v.id === 'view-' + view); });
+    if (view === 'findings' && !rendered.findings) { renderFindings(); rendered.findings = true; }
+    if (view === 'matrix' && !rendered.matrix) { renderMatrix(); rendered.matrix = true; }
+    if (view === 'treemap') { renderTreemap(); }
+    if (view === 'graph') { gResize(); if (!gInit) { gInit = true; syncToggle(); gLayout(); } else gDraw(); }
+  }
+  document.querySelectorAll('.tab').forEach(function (t) { t.onclick = function () { activate(t.getAttribute('data-view')); }; });
+  window.addEventListener('resize', function () { if (document.getElementById('view-treemap').classList.contains('on')) renderTreemap(); if (document.getElementById('view-graph').classList.contains('on')) { gResize(); gDraw(); } });
+
+  // boot
+  renderFindings(); rendered.findings = true; detailEmpty();
+})();
+</script>
+</body>
+</html>
