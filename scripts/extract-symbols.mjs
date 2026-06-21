@@ -237,7 +237,7 @@ for (const f of files) {
   // definition — a bare reference to a name defined in many files (log/run/get) can't be attributed
   // to a specific def, and wiring it to byName[0] fabricates false super-hubs (the "lib · log"
   // mega-cluster). Drop instead. caller=null means module/top-level scope -> the synthetic module node.
-  const addEdge = (lineIdx, name) => {
+  const addEdge = (lineIdx, name, kind = 'call') => {
     if (KEYWORDS.has(name)) return;
     const aliased = aliasMap && aliasMap.get(name);
     if (!aliased && !byName.has(name)) return;
@@ -255,14 +255,32 @@ for (const f of files) {
     const key = callerId + ' ' + calleeId;
     if (edgeSet.has(key)) return;
     edgeSet.add(key);
-    edges.push({ from: callerId, to: calleeId, kind: 'call', weight: 1 });
+    edges.push({ from: callerId, to: calleeId, kind, weight: 1 });
   };
   // A function name in argument position passed WITHOUT parens — arr.map(fn), rl.on('x', fn) — is a
   // higher-order reference: the callee invokes fn, so the dependency is real. Captured as a call edge
   // (same precision gate) so --impact/--callers/--orphans see it.
   const refRe = /[(,]\s*([A-Za-z_$][\w$]*)\s*(?=[,)])/g;
+  const isPy = r.endsWith('.py');
+  const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g; // JS/TS single super
+  const pyBasesRe = /^\s*class\s+[A-Za-z_]\w*\s*\(([^)]*)\)/;                     // Python base list
   for (let i = 0; i < lines.length; i++) {
     const ln = lines[i];
+    // inherit edges FIRST: `class X extends Y` / `class X(Y):` -> X inherits Y. The class node's
+    // range starts here, so enclosing() resolves the `from` to X automatically. Run before call/ref
+    // so a Python `class X(Base):` keys X->Base as inheritance, not as a call arg (first writer wins).
+    if (isPy) {
+      const pm = pyBasesRe.exec(ln);
+      if (pm) for (const part of pm[1].split(',')) {
+        const base = part.trim();
+        if (!base || base.includes('=')) continue;     // skip metaclass=/keyword bases
+        const name = base.replace(/^.*\./, '');          // last segment of a dotted base
+        if (/^[A-Za-z_]\w*$/.test(name)) addEdge(i, name, 'inherit');
+      }
+    } else {
+      extendsRe.lastIndex = 0; let xm;
+      while ((xm = extendsRe.exec(ln))) addEdge(i, xm[1], 'inherit');
+    }
     callRe.lastIndex = 0; let m;
     while ((m = callRe.exec(ln))) {
       if (ln[m.index - 1] === '.') continue; // method/property call (obj.fn()) — not our top-level symbol

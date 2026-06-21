@@ -27,6 +27,7 @@ export function buildIndex(graph) {
   const byId = new Map(graph.nodes.map((n) => [n.id, n]));
   const callIn = new Map();
   const callOut = new Map();
+  const inheritIn = new Map(); // reverse inherit: base -> {subclasses}, for impact reachability
   const hasIncoming = new Set();
   for (const e of graph.edges) {
     if (e.kind === 'call') {
@@ -35,9 +36,13 @@ export function buildIndex(graph) {
       if (!callOut.has(e.from)) callOut.set(e.from, new Set());
       callOut.get(e.from).add(e.to);
     }
-    if (e.kind === 'call' || e.kind === 'import') hasIncoming.add(e.to);
+    if (e.kind === 'inherit') {
+      if (!inheritIn.has(e.to)) inheritIn.set(e.to, new Set());
+      inheritIn.get(e.to).add(e.from);
+    }
+    if (e.kind === 'call' || e.kind === 'import' || e.kind === 'inherit') hasIncoming.add(e.to);
   }
-  return { byId, callIn, callOut, hasIncoming };
+  return { byId, callIn, callOut, inheritIn, hasIncoming };
 }
 
 // Resolve a symbol to node ids: exact id wins; else every node whose label matches (sorted).
@@ -61,8 +66,11 @@ export function impactOf(index, seedIds) {
   const queue = [...seedIds];
   while (queue.length) {
     const cur = queue.shift();
-    for (const caller of (index.callIn.get(cur) || [])) {
-      if (!visited.has(caller)) { visited.add(caller); queue.push(caller); }
+    // reverse-reachability over callers AND subclasses: changing a node affects what calls it and
+    // what inherits from it.
+    const upstream = [...(index.callIn.get(cur) || []), ...(index.inheritIn?.get(cur) || [])];
+    for (const dep of upstream) {
+      if (!visited.has(dep)) { visited.add(dep); queue.push(dep); }
     }
   }
   return [...visited].filter((id) => !seeds.has(id)).sort();
@@ -76,7 +84,7 @@ export function fileCycles(graph) {
   const adj = new Map();
   const files = new Set();
   for (const e of graph.edges) {
-    if (e.kind !== 'call' && e.kind !== 'import') continue;
+    if (e.kind !== 'call' && e.kind !== 'import' && e.kind !== 'inherit') continue;
     const f = fileOf.get(e.from), t = fileOf.get(e.to);
     if (!f || !t || f === t) continue;
     files.add(f); files.add(t);

@@ -66,6 +66,17 @@ renderer. All examples below use synthetic values.
 }
 ```
 
+## Edge kinds
+
+- **`call`** — a function/method invokes another, OR passes it by name as a higher-order argument
+  (`arr.map(fn)`, `rl.on('x', fn)`). The deterministic extractor resolves the target by import alias,
+  same-file definition, or a unique global definition, and DROPS ambiguous multi-definition names
+  rather than guess (precision over recall). A method call `obj.fn()` is NOT wired to a top-level `fn`.
+- **`import`** — a module imports a symbol from another module.
+- **`inherit`** — a class extends/subclasses another (`class X extends Y`, `class X(Y):`), resolved
+  with the same precision gate as calls. Counts toward reachability: an extended base is not a
+  dead-code orphan, and `--impact` of a base includes its subclasses.
+
 ## Merge rules (orchestrator)
 
 - Dissectors emit `nodes` + `edges` per scope. Deduplicate by node `id`; an edge is unique by
