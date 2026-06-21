@@ -90,6 +90,44 @@ function ctagsSymbols(file) {
   return syms.length ? syms : null;
 }
 
+// ---- function body extent -----------------------------------------------------------------
+// Real end-of-body so a symbol's range never runs to EOF and absorbs the trailing top-level code
+// (the root cause of fabricated call edges — e.g. query.mjs:parseArgs credited with 9 calls it
+// never makes). Brace-matched for JS/TS; dedent for Python. Strings + line/inline-block comments
+// are stripped before brace counting — best-effort: multi-line strings and template `${}` are not
+// state-tracked, so the worst case is a slightly-off end, never a run-to-EOF. startIdx is 0-based;
+// returns the 0-based inclusive last line of the body.
+const stripSC = (line) => line
+  .replace(/\/\/.*$/, '')                        // line comment
+  .replace(/\/\*.*?\*\//g, ' ')                  // single-line block comment
+  .replace(/(['"`])(?:\\.|(?!\1).)*?\1/g, ' ')   // same-line string / template literal
+  .replace(/\[(?:\\.|[^\]\n])*\]/g, ' ')         // regex char classes — strip stray [{] / [^}]
+  .replace(/\\./g, ' ');                         // escaped chars — \{ \} in regex literals (e.g. /\s*\{/)
+function bodyEnd(lines, startIdx, isPy) {
+  if (isPy) {
+    const indent = (s) => s.length - s.replace(/^\s+/, '').length;
+    const base = indent(lines[startIdx] || '');
+    let end = startIdx;
+    for (let i = startIdx + 1; i < lines.length; i++) {
+      if (lines[i].trim() === '') continue;        // blank lines don't end a body
+      if (indent(lines[i]) <= base) break;         // dedent to <= the def -> body ended above
+      end = i;
+    }
+    return end;
+  }
+  let depth = 0, started = false;
+  for (let i = startIdx; i < lines.length; i++) {
+    const s = stripSC(lines[i]);
+    for (let c = 0; c < s.length; c++) {
+      const ch = s[c];
+      if (ch === '{') { depth++; started = true; }
+      else if (ch === '}') { depth--; if (started && depth <= 0) return i; }
+    }
+    if (!started && /;\s*$/.test(s)) return i;     // brace-less body (arrow/expr) ending in ';'
+  }
+  return lines.length - 1;
+}
+
 const useCtags = opts.ctags && toolExists('ctags');
 const files = listFiles();
 
@@ -102,11 +140,15 @@ for (const f of files) {
   let syms = (useCtags && ctagsSymbols(f)) || scanSymbols(f, text);
   const seen = new Set();
   syms = syms.filter((s) => { const k = s.name + ':' + s.line; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a.line - b.line);
-  const total = text.split(/\r?\n/).length;
+  const lines = text.split(/\r?\n/);
+  const total = lines.length;
+  const isPy = r.endsWith('.py');
   const ranges = [];
-  syms.forEach((s, idx) => {
+  syms.forEach((s) => {
     const start = s.line;
-    const end = idx + 1 < syms.length ? Math.max(start, syms[idx + 1].line - 1) : total;
+    // real body extent (brace match / dedent), NOT next-symbol-line — so the last symbol can't
+    // run to EOF and absorb the trailing top-level code (the fabricated-edge bug).
+    const end = Math.min(bodyEnd(lines, start - 1, isPy) + 1, total);
     const id = r + ':' + s.name;
     ranges.push({ id, name: s.name, start, end, kind: s.kind });
     nodes.push({ id, label: s.name, kind: s.kind, file: r, line: start, loc: Math.min(end - start + 1, 2000), exports: s.exports, domain: '', summary: '' });
@@ -167,13 +209,28 @@ const edges = [];
 let ambiguousDropped = 0; // bare calls to multi-def names with no import/same-file resolution
 const LEGACY_FALLBACK = !!process.env.CODEWEB_LEGACY_FALLBACK; // A/B: restore pre-fix byName[0] wiring for regression testing
 const callRe = /([A-Za-z_$][\w$]*)\s*\(/g;
+// Module/top-level scope gets a synthetic per-file `module` node (created lazily, on first
+// top-level call) so calls made outside any function body are attributed honestly to the module
+// instead of dropped or blamed on whichever function's range happened to reach that line.
+const moduleId = new Map();
+const ensureModule = (fAbs, rPath) => {
+  if (moduleId.has(fAbs)) return moduleId.get(fAbs);
+  const id = rPath + ':<module>';
+  moduleId.set(fAbs, id);
+  nodes.push({ id, label: '<module>', kind: 'module', file: rPath, line: 1, loc: 1, exports: false, domain: '', summary: '' });
+  nodeIdSet.add(id);
+  return id;
+};
 for (const f of files) {
   const fs = fileSyms.get(f); if (!fs) continue;
   const { text, ranges } = fs;
   if (!ranges.length) continue;
+  const r = rel(f);
   const lines = text.split(/\r?\n/);
-  const enclosing = (lineNo) => { for (const r of ranges) if (lineNo >= r.start && lineNo <= r.end) return r; return null; };
-  const sameFileByName = new Map(ranges.map((r) => [r.name, r.id]));
+  // innermost containing range wins (a call inside a nested fn/method attributes to it, not the
+  // enclosing class); null = module/top-level scope.
+  const enclosing = (lineNo) => { let best = null; for (const rg of ranges) if (lineNo >= rg.start && lineNo <= rg.end && (!best || rg.start > best.start)) best = rg; return best; };
+  const sameFileByName = new Map(ranges.map((rg) => [rg.name, rg.id]));
   const aliasMap = aliasByFile.get(f);
   for (let i = 0; i < lines.length; i++) {
     const ln = lines[i]; callRe.lastIndex = 0; let m;
@@ -182,8 +239,9 @@ for (const f of files) {
       if (KEYWORDS.has(name)) continue;
       const aliased = aliasMap && aliasMap.get(name);
       if (!aliased && !byName.has(name)) continue;
-      const caller = enclosing(i + 1); if (!caller) continue;
-      if (caller.name === name && i + 1 === caller.start) continue; // its own definition
+      const caller = enclosing(i + 1);
+      if (caller && caller.name === name && i + 1 === caller.start) continue; // its own definition
+      const callerId = caller ? caller.id : ensureModule(f, r); // null -> module/top-level scope
       // Resolve the callee: alias (import) and same-file defs are authoritative. The global
       // byName fallback is only safe when the name has exactly ONE definition — a bare call to
       // a name defined in many files (log/run/get/readFile) cannot be attributed to a specific
@@ -196,11 +254,11 @@ for (const f of files) {
         else if (LEGACY_FALLBACK) calleeId = defs && defs[0]; // pre-fix: wire to first global def (fabricates false hubs)
         else { ambiguousDropped++; continue; }
       }
-      if (!calleeId || calleeId === caller.id) continue;
-      const key = caller.id + ' ' + calleeId;
+      if (!calleeId || calleeId === callerId) continue;
+      const key = callerId + ' ' + calleeId;
       if (edgeSet.has(key)) continue;
       edgeSet.add(key);
-      edges.push({ from: caller.id, to: calleeId, kind: 'call', weight: 1 });
+      edges.push({ from: callerId, to: calleeId, kind: 'call', weight: 1 });
     }
   }
 }

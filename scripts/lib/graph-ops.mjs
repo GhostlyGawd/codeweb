@@ -121,7 +121,7 @@ export function fileCycles(graph) {
 // Dead-code candidates: no incoming call|import edge AND not exported. Sorted by id.
 export function orphans(graph, index) {
   return graph.nodes
-    .filter((n) => !index.hasIncoming.has(n.id) && !n.exports)
+    .filter((n) => n.kind !== 'module' && !index.hasIncoming.has(n.id) && !n.exports)
     .map((n) => ({ id: n.id, file: n.file, domain: n.domain }))
     .sort(byIdLt);
 }

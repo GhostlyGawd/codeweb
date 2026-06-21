@@ -4,7 +4,8 @@
 // The target is a living tree (the CLI-consolidation dogfooding edits it), so exact node/edge
 // counts drift over time. This test therefore pins DRIFT-ROBUST invariants, not snapshot numbers:
 //   · the fix collapses the max `log` in-degree from >=100 (super-hub) to well under 60 (genuine);
-//   · discord/ecc-bot.mjs:log — the original false hub — sits at its genuine in-degree of 2;
+//   · discord/ecc-bot.mjs:log — the original false hub (indeg 127) — now sits at a genuine
+//     single-digit in-degree (real in-file callers + module-scope log() calls), not a hub;
 //   · the CODEWEB_LEGACY_FALLBACK toggle resurrects the super-hub, so the fix is load-bearing.
 // Guarded by existsSync: if the target isn't on disk the test SKIPS with a logged reason
 // (no silent pass).
@@ -59,8 +60,9 @@ test('FIXED: no `log` super-hub — max log in-degree is genuine (<60), discord:
   assert.ok(def.frag.nodes.some((n) => n.label === 'log'), 'target still defines `log` symbols');
   assert.ok(maxLogIndeg(def.frag) < GENUINE_MAX,
     `max log in-degree ${maxLogIndeg(def.frag)} is genuine (< ${GENUINE_MAX}), not a fabricated hub`);
-  assert.equal(indegree(callEdges(def.frag), DISCORD_LOG), 2,
-    'the original false hub sits at its genuine resolved in-degree of 2');
+  const discordLogIndeg = indegree(callEdges(def.frag), DISCORD_LOG);
+  assert.ok(discordLogIndeg >= 2 && discordLogIndeg < 10,
+    `the original false hub now sits at a genuine single-digit in-degree (${discordLogIndeg}: real callers + module-scope calls), not the 127 super-hub`);
   assert.ok(def.dropped > 300, `hundreds of ambiguous bare calls dropped (${def.dropped})`);
 });
 
