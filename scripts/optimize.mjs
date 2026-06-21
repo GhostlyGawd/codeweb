@@ -23,7 +23,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: optimize.mjs <graph.json> [--json] [--out <optimize.md>]   (or set CODEWEB_WS)';
 const READY_BODYSIM = 0.6; // body-confirmed "high" floor — must match overlap.mjs's confidence band
@@ -62,24 +62,6 @@ function chooseCanonical(ids) {
   })[0];
 }
 
-// Model "delete the duplicate definitions, route every reference at the canonical": drop the
-// non-canonical copies, redirect any edge touching a copy to the canonical, de-dup, drop self-loops.
-// Returns the simulated graph so we can recompute file cycles on it. Never mutates `graph`.
-function simulateMerge(ids, canonical) {
-  const copies = new Set(ids);
-  const keptNodes = graph.nodes.filter((n) => !(copies.has(n.id) && n.id !== canonical));
-  const seen = new Set(); const edges = [];
-  for (const e of graph.edges) {
-    const from = copies.has(e.from) ? canonical : e.from;
-    const to = copies.has(e.to) ? canonical : e.to;
-    if (from === to) continue;
-    const k = `${from} ${to} ${e.kind}`;
-    if (seen.has(k)) continue; seen.add(k);
-    edges.push({ from, to, kind: e.kind });
-  }
-  return normalizeGraph({ meta: graph.meta, nodes: keptNodes, edges, domains: graph.domains, overlaps: [] });
-}
-
 // actionable findings only: precision gate drops low/refuted (overlap.mjs's own "findings" set).
 const candidates = graph.overlaps.filter((o) => o.confidence === 'high' || o.confidence === 'medium');
 
@@ -92,7 +74,7 @@ const opportunities = candidates.map((o) => {
   if (mergeable && o.nodes.length >= 2) {
     canonical = chooseCanonical(o.nodes);
     const losers = o.nodes.filter((id) => id !== canonical);
-    const sim = simulateMerge(o.nodes, canonical);
+    const sim = applyEdit(graph, { kind: 'merge', ids: o.nodes, into: canonical });
     projectedNewCycles = fileCycles(sim).filter((c) => !beforeCycles.has(cycKey(c)));
     removesNodes = losers.length;
     callersRewired = callersOf(index, losers).length;

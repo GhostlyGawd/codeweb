@@ -152,3 +152,39 @@ export function structuralRegressions(before, after) {
   }
   return { newCycles, lostCallers: lostCallers.sort() };
 }
+
+// Pure structural edit simulation — models delete / merge / move on a DEEP COPY of the graph and
+// never mutates its argument, so simulate-edit and optimize build the hypothetical graph through
+// ONE path (codeweb dogfooding "logic lives once"). Returns a normalized graph; overlaps are
+// dropped (they'd be stale — recompute via the pipeline if needed).
+//   op = { kind:'delete', ids:[...] } | { kind:'merge', ids:[...], into } | { kind:'move', id, to }
+export function applyEdit(graph, op) {
+  const g = normalizeGraph(structuredClone(graph)); // clone first: normalizeGraph mutates, the input must not change
+  const base = { meta: g.meta, domains: g.domains, overlaps: [] };
+  if (op.kind === 'delete') {
+    const drop = new Set(op.ids);
+    return normalizeGraph({ ...base,
+      nodes: g.nodes.filter((n) => !drop.has(n.id)),
+      edges: g.edges.filter((e) => !drop.has(e.from) && !drop.has(e.to)) });
+  }
+  if (op.kind === 'move') {
+    return normalizeGraph({ ...base,
+      nodes: g.nodes.map((n) => (n.id === op.id ? { ...n, file: op.to } : n)),
+      edges: g.edges });
+  }
+  if (op.kind === 'merge') {
+    const copies = new Set(op.ids);
+    const map = (id) => (copies.has(id) ? op.into : id);
+    const nodes = g.nodes.filter((n) => !(copies.has(n.id) && n.id !== op.into));
+    const seen = new Set(); const edges = [];
+    for (const e of g.edges) {
+      const from = map(e.from), to = map(e.to);
+      if (from === to) continue;               // self-loop (incl. merged-into-itself) -> dropped
+      const k = `${from} ${to} ${e.kind}`;
+      if (seen.has(k)) continue; seen.add(k);   // de-dup redirected edges
+      edges.push({ from, to, kind: e.kind });
+    }
+    return normalizeGraph({ ...base, nodes, edges });
+  }
+  throw new Error(`applyEdit: unknown op kind '${op && op.kind}'`);
+}

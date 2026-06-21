@@ -8,7 +8,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, impactOf, fileCycles, orphans,
+  structuralRegressions,
 } from '../scripts/lib/graph-ops.mjs';
+import { prng, randomGraph, randomOp, naiveApply } from './_proptest.mjs';
 
 test('normalizeGraph fills sane defaults (mirrors build-report)', () => {
   const g = normalizeGraph({ nodes: [{ id: 'x.js:f', label: 'f' }] });
@@ -88,4 +90,46 @@ test('orphans: zero incoming (call|import) AND not exported', () => {
   });
   const ix = buildIndex(g);
   assert.deepEqual(orphans(g, ix).map((o) => o.id), ['a.js:dead'], 'used has a caller; pub is exported');
+});
+
+// ---- structuralRegressions: the "trusted oracle" the SE-FAITHFUL anti-cheat design leans on.
+// Pin its semantics directly (C1) so its correctness isn't merely implied by the post-edit hook
+// tests. Hand cases for the exact rules, then invariants over random before/after pairs.
+test('structuralRegressions: a surviving node that loses its only caller is a lostCaller; a deleted one is not', () => {
+  const before = normalizeGraph({
+    nodes: [{ id: 'a.js:f', file: 'a.js' }, { id: 'b.js:g', file: 'b.js' }, { id: 'c.js:h', file: 'c.js' }],
+    edges: [{ from: 'a.js:f', to: 'b.js:g', kind: 'call' }, { from: 'a.js:f', to: 'c.js:h', kind: 'call' }],
+  });
+  // delete f and h: g survives with no callers (regression); h is gone (not a regression).
+  const after = normalizeGraph({ nodes: [{ id: 'a.js:f', file: 'a.js' }, { id: 'b.js:g', file: 'b.js' }], edges: [] });
+  assert.deepEqual(structuralRegressions(before, after), { newCycles: [], lostCallers: ['b.js:g'] });
+});
+
+test('structuralRegressions: a file cycle present only in after is a newCycle', () => {
+  const before = normalizeGraph({
+    nodes: [{ id: 'x.js:a', file: 'x.js' }, { id: 'y.js:b', file: 'y.js' }],
+    edges: [{ from: 'x.js:a', to: 'y.js:b', kind: 'call' }],
+  });
+  const after = normalizeGraph({
+    nodes: [{ id: 'x.js:a', file: 'x.js' }, { id: 'y.js:b', file: 'y.js' }],
+    edges: [{ from: 'x.js:a', to: 'y.js:b', kind: 'call' }, { from: 'y.js:b', to: 'x.js:a', kind: 'call' }],
+  });
+  assert.deepEqual(structuralRegressions(before, after), { newCycles: [['x.js', 'y.js']], lostCallers: [] });
+});
+
+test('structuralRegressions (property): lostCallers ⊆ surviving before-nodes, newCycles ∉ before-cycles', () => {
+  const rng = prng(909);
+  const cycKey = (c) => c.join('|');
+  for (let i = 0; i < 300; i++) {
+    const before = normalizeGraph(randomGraph(rng));
+    const after = naiveApply(before, randomOp(rng, before)); // any structural edit
+    const { newCycles, lostCallers } = structuralRegressions(before, after);
+    const beforeIds = new Set(before.nodes.map((n) => n.id));
+    const afterIds = new Set(after.nodes.map((n) => n.id));
+    const beforeCyc = new Set(fileCycles(before).map(cycKey));
+    for (const id of lostCallers) {
+      assert.ok(beforeIds.has(id) && afterIds.has(id), `lostCaller ${id} must exist before AND after (case ${i})`);
+    }
+    for (const c of newCycles) assert.ok(!beforeCyc.has(cycKey(c)), `newCycle ${cycKey(c)} was already present before (case ${i})`);
+  }
 });
