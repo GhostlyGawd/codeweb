@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 220" width="760" height="220" font-family="ui-sans-serif,system-ui,'Segoe UI',Roboto,Arial,sans-serif">
+  <defs>
+    <radialGradient id="bgB" cx="50%" cy="40%" r="80%">
+      <stop offset="0" stop-color="#11161f"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </radialGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="759" height="219" rx="18" fill="url(#bgB)" stroke="#30363d"/>
+
+  <!-- wordmark, type-forward -->
+  <text x="80" y="118" font-size="84" font-weight="650" letter-spacing="1.5" fill="#e6edf3">codeweb</text>
+
+  <!-- single node-edge accent rising off the wordmark -->
+  <g stroke-linecap="round">
+    <line x1="612" y1="96" x2="660" y2="60" stroke="#30363d" stroke-width="2.5"/>
+    <line x1="660" y1="60" x2="700" y2="84" stroke="#58a6ff" stroke-width="2.5"/>
+    <circle cx="612" cy="96" r="6" fill="#3fb950"/>
+    <circle cx="660" cy="60" r="8" fill="#58a6ff"/>
+    <circle cx="700" cy="84" r="6" fill="#ffb65c"/>
+  </g>
+
+  <!-- blue rule + tagline -->
+  <rect x="82" y="140" width="300" height="3" rx="1.5" fill="#58a6ff"/>
+  <text x="82" y="172" font-size="20" letter-spacing="0.3" fill="#8b949e">the system map for your codebase</text>
+</svg>

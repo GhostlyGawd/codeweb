@@ -1,8 +1,66 @@
-# codeweb
+<div align="center">
 
-> Dissect a codebase to its atomic parts, wire them into a living system web, tag each node's
-> domain, and surface where the system does overlapping work — so it can be restructured into
-> well-defined, non-duplicative systems. Renders a self-contained interactive HTML map.
+<img src="assets/brand/hero.svg" alt="codeweb — the system map for your codebase" width="840">
+
+[![Claude Code plugin](https://img.shields.io/badge/Claude_Code-plugin-58a6ff?style=flat-square)](#install)
+[![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)
+[![deterministic engine](https://img.shields.io/badge/engine-deterministic-58a6ff?style=flat-square)](#how-it-works)
+[![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
+[![tests](https://img.shields.io/badge/tests-142_passing-3fb950?style=flat-square)](tests/)
+
+**Dissect a codebase to its atomic parts, wire them into a living system web, tag each node's
+domain, and surface where the system does overlapping work** — so it can be restructured into
+well-defined, non-duplicative systems. Renders a self-contained, interactive HTML map.
+
+[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[Outputs](#outputs)&nbsp;·&nbsp;[Query the graph](#query-the-graph-for-agents--humans)&nbsp;·&nbsp;[How it works](#how-it-works)
+
+</div>
+
+---
+
+## See it in action
+
+<div align="center">
+<img src="assets/brand/demo.svg" alt="The codeweb pipeline: extract → cluster → overlap → render, looping" width="840">
+</div>
+
+One command runs the whole deterministic pipeline and drops an interactive map at
+`<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report** —
+codeweb pointed at a real ~1,956-symbol, 17-domain codebase. No mockups.
+
+### Findings — stop guessing what to refactor
+
+Ranked **duplication** (the same function defined across many files), the most depended-on
+**hotspots** to change with care, and likely-**dead code** — every row clickable to inspect what
+calls it and what it calls.
+
+<img src="assets/screens/01-findings.png" alt="codeweb Findings tab: ranked duplication, hotspots, and likely-dead code, with a clickable detail panel" width="100%">
+
+### See duplication density, and where areas tangle
+
+<table>
+<tr>
+<td width="50%" valign="top">
+<img src="assets/screens/03-treemap.png" alt="codeweb Treemap: every file sized by lines of code and shaded green-to-red by duplication density">
+<br><b>Treemap</b> — every file sized by lines of code and shaded green→red by how duplicated it
+is. The red blocks are your consolidation targets, at a glance.
+</td>
+<td width="50%" valign="top">
+<img src="assets/screens/02-matrix.png" alt="codeweb Matrix: a heatmap of call coupling between domains">
+<br><b>Matrix</b> — area-to-area coupling. A big off-diagonal cell means two areas are tangled:
+merge them, or put a clean interface between them.
+</td>
+</tr>
+</table>
+
+### Navigate the whole system
+
+A force-directed map of every symbol, collapsible to domains. Search, drag, zoom, and click any
+node to trace what depends on it and what it reaches.
+
+<img src="assets/screens/04-graph-domains.png" alt="codeweb Graph tab: a force-directed domain map of the codebase on a dark canvas" width="100%">
+
+---
 
 codeweb is the missing **atomic-analysis + overlap-detective** layer. Where `repo-scan`
 classifies *files* and flags duplicate *modules*, and `codebase-onboarding` writes high-level
@@ -160,6 +218,10 @@ For JavaScript, TypeScript, and Python the default is a **deterministic Node pip
 command, no LLM in the loop, reproducible byte-for-byte. `scripts/run.mjs` chains four stages
 into a per-target workspace:
 
+<div align="center">
+<img src="assets/brand/pipeline.svg" alt="codeweb's four deterministic stages: extract, cluster, overlap, render" width="100%">
+</div>
+
 1. **Extract** (`extract-symbols.mjs`) — parse every source file into atomic nodes (functions,
    classes, methods) and call/import edges. Unresolved bare calls only wire to a global
    definition when the name is unambiguous; multi-def names drop the edge rather than fabricate a
@@ -204,6 +266,7 @@ codeweb/
 │       ├── graph-schema.md
 │       ├── overlap-heuristics.md
 │       └── engine-detection.md
+├── assets/                          # brand art (logo, hero, animated demo) + report screenshots
 └── README.md
 ```
 
