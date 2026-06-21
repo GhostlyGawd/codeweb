@@ -46,7 +46,8 @@ const targetArg = opts.target ? ['--target', opts.target] : [];
 run('extract', S('scripts/extract-symbols.mjs'), [opts.src, ...targetArg, '--out', join(ws, 'fragment.json')], false);
 run('cluster', S('scripts/cluster3.mjs'), [], true);
 run('overlap', S('scripts/overlap.mjs'), [], true);
+run('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--out', join(ws, 'optimize.md')], false);
 run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json')], false);
 
 console.error(`\n[run] done -> ${ws}`);
-console.error(`[run]   ${ws}/report.html · report.md · overlap.md · graph.json · fragment.json`);
+console.error(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);

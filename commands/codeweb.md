@@ -33,8 +33,11 @@ overlap graph for restructuring.
 4. Tags every node with a semantic domain and clusters the domains.
 5. Builds the overlap graph — duplicated logic, parallel implementations, tangled domains —
    and ranks consolidation opportunities.
-6. Renders a self-contained interactive HTML map plus `graph.json` and `overlap.md`.
-7. In external mode, adds an adoption review (risk, dependency, architecture verdict).
+6. Runs the consolidation advisor — tiers each duplicate-logic finding into **ready** (a
+   body-confirmed merge the regression gate would accept), **blocked** (a merge that would
+   introduce a new dependency cycle), or **review** (drifted/structural) — and writes `optimize.md`.
+7. Renders a self-contained interactive HTML map plus `graph.json`, `overlap.md`, and `optimize.md`.
+8. In external mode, adds an adoption review (risk, dependency, architecture verdict).
 
 ## Instructions for Claude
 
@@ -47,7 +50,8 @@ deterministic command:
 node "${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs" "<target>" --target "<label>" --out-dir "<target>/.codeweb"
 ```
 
-which runs extract → cluster → overlap → render in one shot; fall back to the agent-based
+which runs extract → cluster → overlap → optimize → render in one shot; fall back to the agent-based
 dissection only for languages it can't parse or `--engine read`. Write all outputs under
 `<target>/.codeweb/` (or a temp dir for cloned external repos) and finish by reporting the artifact
-paths and the top consolidation opportunities.
+paths and the top consolidation opportunities — lead with the **ready** tier from `optimize.md`
+(merges the regression gate would accept), then call out anything **blocked** by a projected cycle.
