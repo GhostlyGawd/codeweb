@@ -97,6 +97,26 @@ new duplication finding, or makes an existing symbol lose all its callers. It **
 removals — deleting code/cycles/dups is an improvement, not a regression — and a brand-new uncalled
 node is reported but does not trip the gate (agents add functions before wiring them).
 
+## Advise consolidations (`optimize.mjs`)
+
+Where `diff.mjs` *gates* (pass/fail on an edit), `optimize.mjs` *advises*: it reads a graph's
+body-confirmed `overlaps[]` and ranks the `duplicate-logic` findings into consolidation
+opportunities, **pre-flighting each proposed merge against the gate's own cycle check** — without
+editing a line of source.
+
+```
+node scripts/optimize.mjs <graph.json> [--json]   # or set CODEWEB_WS
+```
+
+Each opportunity is tiered: **ready** (body-confirmed ≥60%, not drifted, and the simulated merge
+stays acyclic → the gate would pass, duplication −1), **blocked** (the naive merge would introduce a
+new file cycle → the gate would reject it; needs a neutral home), or **review** (drifted copies,
+merely-structural confidence, or non-`duplicate-logic` findings — human/agent judgement required).
+Low/refuted findings are excluded outright. It picks a canonical survivor (most-called, tie-broken by
+LOC then id) and reports the copies removed, callers rewired, blast radius, and LOC reclaimed. It is
+**advisory only** — it never writes code and never exits non-zero on a clean read; the merge stays a
+human + gate decision.
+
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing

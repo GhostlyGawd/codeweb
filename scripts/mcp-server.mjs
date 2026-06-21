@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const QUERY = join(HERE, 'query.mjs');
+const DIFF = join(HERE, 'diff.mjs');
 const SERVER = { name: 'codeweb', version: '0.1.0' };
 const DEFAULT_PROTOCOL = '2025-06-18';
 
@@ -31,15 +32,16 @@ const TOOLS = [
     description: 'File-level dependency cycles (circular imports/calls) in a codeweb graph.json.' },
   { name: 'codeweb_orphans', need: ['graph'], flags: () => ['--orphans'],
     description: 'Uncalled and unexported symbols (dead-code candidates) in a codeweb graph.json.' },
+  { name: 'codeweb_diff', need: ['before', 'after'], bin: DIFF, argv: (a) => [a.before, a.after],
+    description: 'Structural delta + regression verdict between two codeweb graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, the cross-domain coupling delta, and ok:false with reasons when a regression (new dependency cycle, new duplication, or a symbol that lost all its callers) appears. Call AFTER an edit to gate it.' },
 ];
-const schema = (need) => ({
-  type: 'object',
-  properties: {
-    graph: { type: 'string', description: 'Path to the codeweb graph.json to query' },
-    ...(need.includes('symbol') ? { symbol: { type: 'string', description: 'A node id (file:label) or a bare label' } } : {}),
-  },
-  required: need,
-});
+const PROP = {
+  graph: { type: 'string', description: 'Path to the codeweb graph.json to query' },
+  symbol: { type: 'string', description: 'A node id (file:label) or a bare label' },
+  before: { type: 'string', description: 'Path to the BEFORE graph.json snapshot' },
+  after: { type: 'string', description: 'Path to the AFTER graph.json snapshot' },
+};
+const schema = (need) => ({ type: 'object', properties: Object.fromEntries(need.map((k) => [k, PROP[k]])), required: need });
 
 function handleToolCall(id, params) {
   const name = params && params.name;
@@ -51,7 +53,9 @@ function handleToolCall(id, params) {
       return reply(id, { content: [{ type: 'text', text: `missing required argument: ${k}` }], isError: true });
     }
   }
-  const r = spawnSync(process.execPath, [QUERY, args.graph, ...tool.flags(args), '--json'], { encoding: 'utf8', maxBuffer: 1 << 28 });
+  const bin = tool.bin || QUERY;
+  const cliArgs = tool.argv ? tool.argv(args) : [args.graph, ...tool.flags(args)];
+  const r = spawnSync(process.execPath, [bin, ...cliArgs, '--json'], { encoding: 'utf8', maxBuffer: 1 << 28 });
   if (r.status === 2 || r.error) {
     const text = (r.stderr || (r.error && r.error.message) || 'query failed').trim();
     return reply(id, { content: [{ type: 'text', text }], isError: true });
