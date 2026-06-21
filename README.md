@@ -82,6 +82,40 @@ impact of lib/state-store/index.js:get: 120 functions across 12 domains
 > `--orphans` is a *candidate* list: extraction deliberately drops ambiguous call edges (precision
 > over recall), so genuinely-called functions and entrypoints can surface — cross-check before deleting.
 
+## Guard agent edits (`diff`)
+
+`scripts/diff.mjs` compares two `graph.json` snapshots (before vs after an edit) and flags
+structural **regressions**, so it can run as a PostToolUse hook or CI gate:
+
+```
+node scripts/diff.mjs <before.json> <after.json> [--json]
+```
+
+It reports nodes/edges/overlaps/cycles/orphans added & removed plus the cross-domain coupling
+delta, and **exits 1** (listing `regressions`) when an edit introduces a new dependency cycle, a
+new duplication finding, or makes an existing symbol lose all its callers. It **exits 0** for pure
+removals — deleting code/cycles/dups is an improvement, not a regression — and a brand-new uncalled
+node is reported but does not trip the gate (agents add functions before wiring them).
+
+## Use it as an MCP tool
+
+`scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing
+the five queries as tools (`codeweb_callers/callees/impact/cycles/orphans`) any MCP client can call
+mid-task. Register it with Claude Code:
+
+```
+claude mcp add codeweb -- node /abs/path/to/codeweb/scripts/mcp-server.mjs
+```
+
+or in an `.mcp.json`:
+
+```json
+{ "mcpServers": { "codeweb": { "command": "node", "args": ["/abs/path/to/codeweb/scripts/mcp-server.mjs"] } } }
+```
+
+Each tool takes a `graph` (path to a `graph.json`) plus, for callers/callees/impact, a `symbol`
+(node id or bare label) — so an agent can ask "what breaks if I change X?" before editing.
+
 ## How it works
 
 For JavaScript, TypeScript, and Python the default is a **deterministic Node pipeline** — one
@@ -119,7 +153,10 @@ codeweb/
 │   ├── overlap.mjs                 # stage 3: body-confirmed duplication/overlap detection
 │   ├── build-report.mjs            # stage 4: graph.json -> interactive report.html + report.md
 │   ├── report-template.html        # the renderer's self-contained HTML shell
-│   └── query.mjs                   # structural queries over graph.json (callers/callees/impact/cycles/orphans)
+│   ├── query.mjs                   # structural queries over graph.json (callers/callees/impact/cycles/orphans)
+│   ├── diff.mjs                    # graph-delta / post-edit regression gate (before vs after)
+│   ├── mcp-server.mjs              # MCP stdio server exposing the queries as agent tools
+│   └── lib/graph-ops.mjs           # shared pure graph primitives (index, cycles, orphans, impact)
 ├── agents/                          # fallback path (unparseable langs / --engine read)
 │   ├── codeweb-dissector.md         # atomic dissection (parallel, read-only)
 │   └── codeweb-domain-mapper.md     # domain tagging + overlap detection
