@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 220" width="760" height="220" font-family="ui-sans-serif,system-ui,'Segoe UI',Roboto,Arial,sans-serif">
+  <defs>
+    <linearGradient id="badgeC" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c2330"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </linearGradient>
+    <radialGradient id="bgC" cx="50%" cy="40%" r="80%">
+      <stop offset="0" stop-color="#11161f"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </radialGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="759" height="219" rx="18" fill="url(#bgC)" stroke="#30363d"/>
+
+  <!-- app badge -->
+  <rect x="44" y="40" width="140" height="140" rx="32" fill="url(#badgeC)" stroke="#30363d" stroke-width="1.5"/>
+  <!-- abstract node-graph glyph (scales down to a favicon) -->
+  <g stroke="#3a4250" stroke-width="3" stroke-linecap="round">
+    <line x1="114" y1="110" x2="114" y2="70"/>
+    <line x1="114" y1="110" x2="82"  y2="142"/>
+    <line x1="114" y1="110" x2="146" y2="142"/>
+  </g>
+  <circle cx="114" cy="110" r="12" fill="#58a6ff"/>
+  <circle cx="114" cy="70"  r="8"  fill="#3fb950"/>
+  <circle cx="82"  cy="142" r="8"  fill="#ffb65c"/>
+  <circle cx="146" cy="142" r="8"  fill="#ff5c5c"/>
+
+  <!-- wordmark -->
+  <text x="214" y="116" font-size="62" font-weight="600" letter-spacing="1" fill="#e6edf3">codeweb</text>
+  <text x="216" y="150" font-size="18" letter-spacing="0.3" fill="#8b949e">the system map for your codebase</text>
+</svg>

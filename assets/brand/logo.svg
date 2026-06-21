@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="720" height="200" font-family="ui-sans-serif,system-ui,'Segoe UI',Roboto,Arial,sans-serif">
+  <!-- codeweb primary logo: node-web glyph + wordmark. Durable positioning (no feature list). -->
+  <!-- self-contained dark brand surface so the light wordmark reads on any theme (GitHub light/dark). -->
+  <defs>
+    <radialGradient id="bgL" cx="50%" cy="42%" r="78%">
+      <stop offset="0" stop-color="#11161f"/><stop offset="1" stop-color="#0d1117"/>
+    </radialGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="719" height="199" rx="18" fill="url(#bgL)" stroke="#30363d"/>
+  <g stroke-linecap="round">
+    <g stroke="#30363d" stroke-width="2">
+      <line x1="104" y1="100" x2="50" y2="58"/>
+      <line x1="104" y1="100" x2="160" y2="60"/>
+      <line x1="104" y1="100" x2="168" y2="134"/>
+      <line x1="104" y1="100" x2="44" y2="146"/>
+      <line x1="50" y1="58" x2="108" y2="42"/>
+      <line x1="44" y1="146" x2="168" y2="134"/>
+    </g>
+    <g stroke="#58a6ff" stroke-width="2" opacity="0.9">
+      <line x1="104" y1="100" x2="108" y2="42"/>
+      <line x1="160" y1="60" x2="108" y2="42"/>
+    </g>
+    <circle cx="104" cy="100" r="14" fill="#58a6ff"/>
+    <circle cx="50"  cy="58"  r="10" fill="#3fb950"/>
+    <circle cx="160" cy="60"  r="9"  fill="#ffb65c"/>
+    <circle cx="168" cy="134" r="9"  fill="#ff5c5c"/>
+    <circle cx="44"  cy="146" r="10" fill="#a371f7"/>
+    <circle cx="108" cy="42"  r="7"  fill="#39c5cf"/>
+  </g>
+  <text x="214" y="112" font-size="64" font-weight="600" letter-spacing="1" fill="#e6edf3">codeweb</text>
+  <text x="216" y="146" font-size="19" letter-spacing="0.3" fill="#8b949e">the system map for your codebase</text>
+</svg>
