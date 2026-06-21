@@ -74,7 +74,9 @@ renderer. All examples below use synthetic values.
   edge whose `from` or `to` id does not exist as a node (dangling reference to skipped code).
 - The domain-mapper returns `{nodes:[{id,domain}], domains, overlaps}`. Merge each `domain`
   back onto the matching full node by `id`.
-- The renderer (`build-report.mjs`) computes `meta.stats` and stamps `meta.generatedAt`.
+- The renderer (`build-report.mjs`) computes `meta.stats`, stamps `meta.generatedAt`, and persists
+  both back into `graph.json` (along with the dangling-edge drop), so the on-disk graph matches the
+  rendered report.
 
 ## Minimum viable graph
 

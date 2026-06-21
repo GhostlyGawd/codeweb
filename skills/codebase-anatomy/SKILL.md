@@ -89,7 +89,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs" "<target>" --target "<label>" --out
 
 It chains extract → cluster (directory-anchored domains) → overlap (body-confirmed duplication)
 → render, writing `fragment.json`, `graph.json`, `overlap.md`, `report.html`, `report.md` into the
-workspace (defaults to `<plugin>/.live/runs/<slug>/` when `--out-dir` is omitted). The script is
+workspace (defaults to `<plugin>/.codeweb/runs/<slug>/` when `--out-dir` is omitted). The script is
 read-only over the target and resolves its own paths, so it works from any cwd. **When it
 succeeds, skip steps 1–5 and go to step 6.** Use the agent-based passes below only as a
 **fallback** — for languages the extractor can't parse, an explicit `--engine read`, or to enrich
@@ -127,7 +127,8 @@ findings the scripts left `low`-confidence.
   node "${CLAUDE_PLUGIN_ROOT}/scripts/build-report.mjs" "<target>/.codeweb/graph.json"
   ```
   (add `--open` to launch it). It computes `meta.stats`, stamps `generatedAt`, drops any
-  remaining dangling edges, and writes `report.html` beside the graph.
+  remaining dangling edges, writes the normalized graph back to `graph.json`, and writes
+  `report.html` + `report.md` beside it.
 
 ### 6 — Overlap.md + summary
 

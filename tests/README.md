@@ -42,6 +42,6 @@ both ways. Both default to the shipped behavior:
 **skips with a logged reason** (it never silently passes). Point it elsewhere with
 `CODEWEB_GOLDEN_TARGET=/path/to/some/repo`.
 
-> Note: the canonical `.live/` snapshot (1794 nodes / 2533 edges) predates later edits to
-> `ecc/scripts`; a fresh extract drifts slightly. That's why the golden test pins **invariants**
-> (the super-hub stays dead), not snapshot counts.
+> Note: the canonical `.live/` snapshot (1796 nodes / 2524 edges) is a point-in-time capture of a
+> living target (`ecc/scripts`); a later extract drifts as that tree changes. That's why the golden
+> test pins **invariants** (the super-hub stays dead), not snapshot counts.

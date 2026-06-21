@@ -72,6 +72,12 @@ graph.meta.stats = {
   overlaps: graph.overlaps.length,
 };
 
+// Persist the normalized graph back to disk so graph.json matches what the report renders:
+// generatedAt, the computed meta.stats, default-filled domains, and the dangling-edge drop
+// become part of the machine-readable artifact (they previously lived only in report.html/md).
+// Minified, matching the upstream writers (cluster3.mjs / overlap.mjs).
+writeFileSync(graphPath, JSON.stringify(graph));
+
 // --- render ---
 const templatePath = join(here, 'report-template.html');
 if (!existsSync(templatePath)) {
@@ -97,6 +103,7 @@ console.log(
   `[codeweb] ${s.nodes} nodes, ${s.edges} edges, ${s.domains} domains, ${s.overlaps} overlaps` +
     (droppedEdges ? ` (dropped ${droppedEdges} dangling edges)` : '')
 );
+console.log(`[codeweb] updated ${graphPath} (meta.generatedAt + meta.stats persisted)`);
 
 if (args.md) {
   const mdPath = join(dirname(outPath), 'report.md');
