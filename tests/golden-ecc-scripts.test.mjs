@@ -23,7 +23,6 @@ const skip = present ? undefined : `golden target not on disk: ${TARGET} (set CO
 if (!present) console.error(`[golden] SKIP — ${skip}`);
 
 const DISCORD_LOG = 'discord/ecc-bot.mjs:log'; // the original false super-hub (was indeg 127)
-const SUPER_HUB = 100; // legacy fabrication pushes some `log` def to >=100 in-degree
 const GENUINE_MAX = 60; // fixed: the largest genuine `log` hub (utils.log) sits well under this
 
 let WS, def, leg;
@@ -54,7 +53,7 @@ test('the extractor parses the full target into a substantial graph', { skip }, 
   assert.equal(def.frag.meta.engine, 'regex', '--no-ctags forces deterministic regex engine');
 });
 
-test('FIXED: no `log` super-hub — max log in-degree is genuine (<60), discord:log == 2', { skip }, () => {
+test('FIXED: no `log` super-hub — max log in-degree genuine (<60), discord:log single-digit', { skip }, () => {
   // Guard the drift-robust assertion: if the living target ever loses ALL `log` symbols,
   // Math.max(...[]) is -Infinity and `-Infinity < 60` would silently pass. Fail loudly instead.
   assert.ok(def.frag.nodes.some((n) => n.label === 'log'), 'target still defines `log` symbols');
@@ -63,13 +62,15 @@ test('FIXED: no `log` super-hub — max log in-degree is genuine (<60), discord:
   const discordLogIndeg = indegree(callEdges(def.frag), DISCORD_LOG);
   assert.ok(discordLogIndeg >= 2 && discordLogIndeg < 10,
     `the original false hub now sits at a genuine single-digit in-degree (${discordLogIndeg}: real callers + module-scope calls), not the 127 super-hub`);
-  assert.ok(def.dropped > 300, `hundreds of ambiguous bare calls dropped (${def.dropped})`);
+  assert.ok(def.dropped > 20, `genuine ambiguous bare calls still dropped (${def.dropped}); method calls (obj.log()) are now excluded earlier by the leading-dot guard, not counted as drops`);
 });
 
-test('LEGACY toggle resurrects the super-hub (the fix is load-bearing)', { skip }, () => {
+test('LEGACY toggle is load-bearing — fabricates the dropped edges back', { skip }, () => {
+  // The 127-log super-hub had TWO causes: ambiguous bare calls wired to byName[0] AND method calls
+  // (obj.log()) matched to a top-level `log`. The leading-dot guard now fixes the method-call cause
+  // permanently, so toggling only the bare-call fallback no longer rebuilds the full hub — but it is
+  // still load-bearing: legacy drops nothing and fabricates the ambiguous edges back.
   assert.equal(leg.dropped, 0, 'legacy fabricates instead of dropping');
-  assert.ok(maxLogIndeg(leg.frag) >= SUPER_HUB,
-    `legacy pushes a log def to a super-hub in-degree (${maxLogIndeg(leg.frag)} >= ${SUPER_HUB})`);
   assert.ok(leg.frag.edges.length > def.frag.edges.length,
     `legacy re-adds the fabricated edges (${leg.frag.edges.length} > ${def.frag.edges.length})`);
 });

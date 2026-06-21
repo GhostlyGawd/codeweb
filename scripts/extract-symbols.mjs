@@ -232,34 +232,44 @@ for (const f of files) {
   const enclosing = (lineNo) => { let best = null; for (const rg of ranges) if (lineNo >= rg.start && lineNo <= rg.end && (!best || rg.start > best.start)) best = rg; return best; };
   const sameFileByName = new Map(ranges.map((rg) => [rg.name, rg.id]));
   const aliasMap = aliasByFile.get(f);
-  for (let i = 0; i < lines.length; i++) {
-    const ln = lines[i]; callRe.lastIndex = 0; let m;
-    while ((m = callRe.exec(ln))) {
-      const name = m[1];
-      if (KEYWORDS.has(name)) continue;
-      const aliased = aliasMap && aliasMap.get(name);
-      if (!aliased && !byName.has(name)) continue;
-      const caller = enclosing(i + 1);
-      if (caller && caller.name === name && i + 1 === caller.start) continue; // its own definition
-      const callerId = caller ? caller.id : ensureModule(f, r); // null -> module/top-level scope
-      // Resolve the callee: alias (import) and same-file defs are authoritative. The global
-      // byName fallback is only safe when the name has exactly ONE definition — a bare call to
-      // a name defined in many files (log/run/get/readFile) cannot be attributed to a specific
-      // def, and wiring it to byName[0] fabricates false super-hubs that bridge the whole graph
-      // (the root cause of the "lib · log" mega-cluster). Drop the edge instead.
-      let calleeId = aliased || sameFileByName.get(name);
-      if (!calleeId) {
-        const defs = byName.get(name);
-        if (defs && defs.length === 1) calleeId = defs[0];
-        else if (LEGACY_FALLBACK) calleeId = defs && defs[0]; // pre-fix: wire to first global def (fabricates false hubs)
-        else { ambiguousDropped++; continue; }
-      }
-      if (!calleeId || calleeId === callerId) continue;
-      const key = callerId + ' ' + calleeId;
-      if (edgeSet.has(key)) continue;
-      edgeSet.add(key);
-      edges.push({ from: callerId, to: calleeId, kind: 'call', weight: 1 });
+  // Resolve a referenced name to a callee node and record the edge. alias (import) and same-file
+  // defs are authoritative; the global byName fallback is only safe when the name has exactly ONE
+  // definition — a bare reference to a name defined in many files (log/run/get) can't be attributed
+  // to a specific def, and wiring it to byName[0] fabricates false super-hubs (the "lib · log"
+  // mega-cluster). Drop instead. caller=null means module/top-level scope -> the synthetic module node.
+  const addEdge = (lineIdx, name) => {
+    if (KEYWORDS.has(name)) return;
+    const aliased = aliasMap && aliasMap.get(name);
+    if (!aliased && !byName.has(name)) return;
+    const caller = enclosing(lineIdx + 1);
+    if (caller && caller.name === name && lineIdx + 1 === caller.start) return; // its own definition
+    const callerId = caller ? caller.id : ensureModule(f, r);
+    let calleeId = aliased || sameFileByName.get(name);
+    if (!calleeId) {
+      const defs = byName.get(name);
+      if (defs && defs.length === 1) calleeId = defs[0];
+      else if (LEGACY_FALLBACK) calleeId = defs && defs[0]; // pre-fix: wire to first global def (fabricates hubs)
+      else { ambiguousDropped++; return; }
     }
+    if (!calleeId || calleeId === callerId) return;
+    const key = callerId + ' ' + calleeId;
+    if (edgeSet.has(key)) return;
+    edgeSet.add(key);
+    edges.push({ from: callerId, to: calleeId, kind: 'call', weight: 1 });
+  };
+  // A function name in argument position passed WITHOUT parens — arr.map(fn), rl.on('x', fn) — is a
+  // higher-order reference: the callee invokes fn, so the dependency is real. Captured as a call edge
+  // (same precision gate) so --impact/--callers/--orphans see it.
+  const refRe = /[(,]\s*([A-Za-z_$][\w$]*)\s*(?=[,)])/g;
+  for (let i = 0; i < lines.length; i++) {
+    const ln = lines[i];
+    callRe.lastIndex = 0; let m;
+    while ((m = callRe.exec(ln))) {
+      if (ln[m.index - 1] === '.') continue; // method/property call (obj.fn()) — not our top-level symbol
+      addEdge(i, m[1]);
+    }
+    refRe.lastIndex = 0;
+    while ((m = refRe.exec(ln))) addEdge(i, m[1]);
   }
 }
 
