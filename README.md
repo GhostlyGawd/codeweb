@@ -56,6 +56,32 @@ Flags: `--depth module|symbol|auto`, `--engine hybrid|read|tools`, `--focus <glo
 | `overlap.md` | The ranked consolidation opportunities in plain markdown. |
 | `fragment.json` | The raw extractor output (atomic nodes + edges) before clustering — the pipeline's first stage. |
 
+## Query the graph (for agents & humans)
+
+Once `graph.json` exists, `scripts/query.mjs` answers the structural questions an agent needs
+before it edits — read-only, deterministic, no LLM in the loop:
+
+```
+node scripts/query.mjs <graph.json> --impact  <symbol>   # blast radius: transitive callers + domains touched
+node scripts/query.mjs <graph.json> --callers <symbol>   # direct callers
+node scripts/query.mjs <graph.json> --callees <symbol>   # direct callees
+node scripts/query.mjs <graph.json> --cycles             # file-level dependency cycles (SCCs)
+node scripts/query.mjs <graph.json> --orphans            # uncalled & unexported (dead-code candidates)
+```
+
+`<symbol>` is a node id (`file:label`) or a bare label (a label matching several nodes operates on
+the union, reported in `matched`). Add `--json` for stable, machine-readable output. Exit codes:
+`0` success (even when empty), `1` symbol not found, `2` usage/IO error. Example — *"what could I
+break if I change the state store?"*:
+
+```
+$ node scripts/query.mjs .codeweb/graph.json --impact lib/state-store/index.js:get
+impact of lib/state-store/index.js:get: 120 functions across 12 domains
+```
+
+> `--orphans` is a *candidate* list: extraction deliberately drops ambiguous call edges (precision
+> over recall), so genuinely-called functions and entrypoints can surface — cross-check before deleting.
+
 ## How it works
 
 For JavaScript, TypeScript, and Python the default is a **deterministic Node pipeline** — one
@@ -92,7 +118,8 @@ codeweb/
 │   ├── cluster3.mjs                # stage 2: hub-strip + directory-anchored domains
 │   ├── overlap.mjs                 # stage 3: body-confirmed duplication/overlap detection
 │   ├── build-report.mjs            # stage 4: graph.json -> interactive report.html + report.md
-│   └── report-template.html        # the renderer's self-contained HTML shell
+│   ├── report-template.html        # the renderer's self-contained HTML shell
+│   └── query.mjs                   # structural queries over graph.json (callers/callees/impact/cycles/orphans)
 ├── agents/                          # fallback path (unparseable langs / --engine read)
 │   ├── codeweb-dissector.md         # atomic dissection (parallel, read-only)
 │   └── codeweb-domain-mapper.md     # domain tagging + overlap detection

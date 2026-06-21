@@ -25,6 +25,7 @@ force `--no-ctags` so symbol discovery is deterministic regardless of the host.
 | `overlap.test.mjs` | **Body-confirmed precision.** Same-name clusters are banded by token-shingle Jaccard of the real bodies: identical → `high`, partially diverged → `medium`/`drifted`, disjoint → `refuted`. CLI-scaffold names fold into one `shared-responsibility` finding. Structural fallback when source is absent. |
 | `golden-ecc-scripts.test.mjs` | **The fix stays fixed on the real target** (`plugins/marketplaces/ecc/scripts`). Drift-robust (the target is a living tree): the max `log` in-degree stays genuine (<60), `discord/ecc-bot.mjs:log` sits at its real indeg of 2, and the legacy toggle resurrects the super-hub (≥100). |
 | `pipeline.test.mjs` | **End-to-end orchestration.** `run.mjs` emits all five artifacts into an isolated workspace, carries the target label through every stage, surfaces the cross-domain duplicate, and renders a self-contained `report.html`. |
+| `query.test.mjs` | **Structural query CLI** (`scripts/query.mjs`). `--callers`/`--callees` (direct call edges, import edges excluded), `--impact` (transitive reverse-call blast radius + domains; terminates on recursion/multi-seed), `--cycles` (file-level SCCs, deterministically ordered), `--orphans` (uncalled + unexported). Symbol resolves by id or bare label (multi-match → union); `--json` is byte-stable; exit codes 0/1/2 = success/not-found/usage; robust to missing fields + edgeless graphs. |
 
 ## A/B regression levers (env toggles)
 
