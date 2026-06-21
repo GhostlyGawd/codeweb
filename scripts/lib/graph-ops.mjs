@@ -125,3 +125,22 @@ export function orphans(graph, index) {
     .map((n) => ({ id: n.id, file: n.file, domain: n.domain }))
     .sort(byIdLt);
 }
+
+// Edges-only structural regressions between two snapshots — the fast subset the post-edit hook
+// checks (re-extraction gives nodes+edges, not domains/overlaps): a file-level cycle present in
+// `after` but not `before`, and a symbol that EXISTS in both but lost ALL its callers (deleting a
+// symbol entirely is not a regression — only a surviving-but-orphaned one is). Duplication and
+// coupling deltas need the full pipeline; that stays diff.mjs.
+export function structuralRegressions(before, after) {
+  const b = normalizeGraph(before), a = normalizeGraph(after);
+  const cycleKey = (c) => c.join('|');
+  const beforeCycles = new Set(fileCycles(b).map(cycleKey));
+  const newCycles = fileCycles(a).filter((c) => !beforeCycles.has(cycleKey(c)));
+  const bi = buildIndex(b), ai = buildIndex(a);
+  const afterIds = new Set(a.nodes.map((n) => n.id));
+  const lostCallers = [];
+  for (const [id, callers] of bi.callIn) {
+    if (callers.size && afterIds.has(id) && !(ai.callIn.get(id)?.size)) lostCallers.push(id);
+  }
+  return { newCycles, lostCallers: lostCallers.sort() };
+}

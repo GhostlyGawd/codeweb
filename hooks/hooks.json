@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/post-edit-diff.mjs\"",
+            "timeout": 30
+          }
+        ],
+        "description": "codeweb: after an edit to a .codeweb-mapped target, flag new dependency cycles or symbols that lost all callers (edges-only subset; fail-open, non-blocking, inert until /codeweb has mapped the target)",
+        "id": "codeweb:post-edit-diff"
+      }
+    ]
+  }
+}

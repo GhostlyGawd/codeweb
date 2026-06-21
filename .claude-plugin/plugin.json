@@ -6,6 +6,7 @@
     "name": "rhenmcleod",
     "email": "rhenmcleod@gmail.com"
   },
+  "hooks": "./hooks/hooks.json",
   "keywords": [
     "codebase-analysis",
     "dependency-graph",
