@@ -33,7 +33,7 @@ renderer. All examples below use synthetic values.
     {
       "from": "src/auth/login.ts:loginUser",
       "to": "src/db/query.ts:runQuery",
-      "kind": "call",                          // call | import | inherit | dataflow
+      "kind": "call",                          // call | import | inherit (emitted) · dataflow (reserved)
       "weight": 1                              // number of occurrences; optional, default 1
     }
   ],
@@ -76,6 +76,12 @@ renderer. All examples below use synthetic values.
 - **`inherit`** — a class extends/subclasses another (`class X extends Y`, `class X(Y):`), resolved
   with the same precision gate as calls. Counts toward reachability: an extended base is not a
   dead-code orphan, and `--impact` of a base includes its subclasses.
+- **`dataflow`** — RESERVED, not emitted by any stage today. Precise value/taint tracking
+  (source→sink) needs type/dispatch resolution and alias awareness the deterministic regex extractor
+  does not have; a noisy approximation would undermine the precision the other edge kinds guarantee
+  (codeweb's whole contract is "don't guess"). Reserved for a future optional type-resolution tier —
+  the schema lists it so consumers can forward-handle it, but no code produces it. Use an external
+  analyzer (Semgrep/CodeQL) for taint until then.
 
 ## Merge rules (orchestrator)
 
