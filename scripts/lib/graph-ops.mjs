@@ -90,6 +90,32 @@ export function impactOf(index, seedIds) {
   return [...visited].filter((id) => !seeds.has(id)).sort();
 }
 
+// F5: map changed line-ranges to the symbols they touch, plus blast radius. hunks =
+// [{ file, ranges:[[start,end],...] }]; ranges null/empty = the whole file. A node is "changed"
+// iff its recorded span [line, line+loc-1] intersects a changed range — best-effort, inheriting
+// bodyEnd's clamp limits (can under-select on truncated bodies; documented in review.mjs).
+export function reviewImpact(graph, hunks) {
+  const index = buildIndex(graph);
+  const byFile = new Map();
+  for (const h of hunks) {
+    if (!byFile.has(h.file)) byFile.set(h.file, []);
+    if (h.ranges == null || h.ranges.length === 0) byFile.get(h.file).push(null);
+    else for (const r of h.ranges) byFile.get(h.file).push(r);
+  }
+  const changed = [];
+  for (const n of graph.nodes) {
+    const rs = byFile.get(n.file);
+    if (!rs) continue;
+    const start = n.line, end = n.line + (n.loc || 1) - 1;
+    if (rs.some((r) => r == null || !(end < r[0] || start > r[1]))) changed.push(n.id);
+  }
+  changed.sort();
+  const blast = impactOf(index, changed);
+  const domainsTouched = [...new Set(changed.map((id) => index.byId.get(id)?.domain || 'unassigned'))].sort();
+  const callerCounts = changed.map((id) => ({ id, callers: index.callIn.get(id)?.size || 0 })).sort((a, b) => b.callers - a.callers || (a.id < b.id ? -1 : 1));
+  return { changedSymbols: changed, blastRadius: { count: blast.length, ids: blast }, domainsTouched, callerCounts };
+}
+
 // File-level dependency cycles: strongly-connected components of size >= 2 in the file graph built
 // from call+import edges. ITERATIVE Tarjan (explicit work stack) so deep graphs can't overflow the
 // JS call stack. Deterministic: neighbors and the final list are sorted.
