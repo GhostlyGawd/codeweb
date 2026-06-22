@@ -1,6 +1,6 @@
 {
   "cluster": "C4-detection-accuracy",
-  "generatedAt": "2026-06-22T20:21:23.551Z",
+  "generatedAt": "2026-06-22T21:40:44.571Z",
   "node": "v24.14.1",
   "seedScheme": "committed integer seeds per hypothesis (see source); re-running reproduces byte-for-byte",
   "perHypothesis": [
@@ -62,7 +62,11 @@
       "metric": "max false in-degree shipped vs CODEWEB_LEGACY_FALLBACK on same-name-heavy corpus",
       "value": {
         "worstShipped": 0,
-        "worstLegacy": 11
+        "worstLegacy": 30,
+        "legacyRange": [
+          11,
+          30
+        ]
       },
       "ci": null,
       "passed": true,
@@ -519,5 +523,5 @@
       "pass": true
     }
   },
-  "elapsedMs": 99395
+  "elapsedMs": 112074
 }

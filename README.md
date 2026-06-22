@@ -85,13 +85,14 @@ rigorous enough to **find and fix two real bugs** the engine's own 286-test suit
 
 <img src="paper/figures/fig-scorecard.svg" alt="Scorecard: 32 of 33 pre-registered checks pass across determinism, correctness, edit-safety, detection, performance, and feature coverage" width="100%">
 
-- **Correctness is exact** — **0 disagreements across ~120,000 comparisons** against independently
-  written oracles (cycles, impact, callers/callees, context-pack); 0 violations over 20,000 edit-safety trials.
+- **Correctness held against independent oracles** — **zero observed disagreements across >490,000
+  comparisons** (cycles, impact, callers/callees, context-pack); 0 violations over 20,000 edit-safety trials.
 - **Detection is accurate** — exact-clone **F1 1.0** (vs 0.67 name-match), renamed-clone recall **1.0
   structural vs 0.0 lexical**, reuse-ranking **MRR 0.99**.
-- **It scales** — runtime grows **sub-linearly** (exponent 0.33); structural queries answer in **~120 ms**
-  on a 3,201-symbol graph; zero runtime dependencies.
-- **It's honest** — the one miss (incremental speedup at high churn) is reported as a measured curve, not spun.
+- **It scales** — runtime grows **sub-quadratically** (sub-linear in this corpus, b=0.33); structural
+  queries answer in **~95–120 ms** on a 3,201-symbol graph; zero runtime dependencies.
+- **It's honest** — the one pass/fail miss (incremental speedup at high churn) is reported as a measured
+  curve; the agent A/B capstone returned a null (no headroom on clean tasks) and says so plainly.
 
 > **▶ Read the full study — [live on GitHub Pages](https://ghostlygawd.github.io/codeweb/paper/).**
 > Or dig into the [pre-registration](paper/PRE-REGISTRATION.md) and [raw results](paper/results/) — every

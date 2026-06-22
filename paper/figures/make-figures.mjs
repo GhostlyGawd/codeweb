@@ -81,7 +81,8 @@ function detection() {
     b += txt(cx + bw + 9, baseY + 40, g.label, { size: 13, weight: 600, anchor: 'middle' });
   });
   b += rect(padX, baseY + 56, W - 2 * padX, 1, { fill: C.line, rx: 0 });
-  b += txt(padX, baseY + 82, `Plus the false-hub defense: a same-name-heavy corpus fabricates a hub of in-degree ${hyp(d, 'H12').value.worstLegacy} under the legacy path, ${hyp(d, 'H12').value.worstShipped} when shipped.`, { size: 12.5, fill: C.mut });
+  const h12 = hyp(d, 'H12').value, lr = h12.legacyRange || [h12.worstLegacy, h12.worstLegacy];
+  b += txt(padX, baseY + 82, `Plus the false-hub defense: a same-name-heavy corpus fabricates a hub of in-degree ${lr[0]}–${lr[1]} across seeds under the legacy path, ${h12.worstShipped} when shipped.`, { size: 12.5, fill: C.mut });
   return frame(W, baseY + 100, b, 'Detection accuracy vs baselines');
 }
 
@@ -108,8 +109,10 @@ function scaling() {
   b += txt(pt, axY - 16, `b = ${h14.slope}`, { size: 14, weight: 700, fill: C.green, anchor: 'middle', mono: true });
   b += txt(ax0, axY + 64, `95% CI [${h14.slopeLo}, ${h14.slopeHi}], R² ${h14.r2} — far below the 1.5 ceiling; a quadratic engine would land at 2.0 and fail.`, { size: 12.5, fill: C.mut });
   const q = h17.perQuery || {};
-  const med = q.impact?.medianMs ?? h17.worstMedianMs;
-  b += txt(ax0, axY + 90, `Query latency: ~${Math.round(med)} ms median on the largest graph (${h17.graph.repo}, ${h17.graph.symbols} symbols) — inside an agent's edit loop.`, { size: 12.5, fill: C.blue });
+  const meds = Object.values(q).map((x) => x.medianMs).filter((v) => typeof v === 'number');
+  const typ = meds.length ? Math.round(Math.min(...meds)) : 96;
+  const worst = Math.round(h17.worstMedianMs ?? 117);
+  b += txt(ax0, axY + 90, `Query latency on the largest graph (${h17.graph.repo}, ${h17.graph.symbols} symbols): ~${typ} ms typical, ${worst} ms worst-case median — inside an agent's edit loop.`, { size: 12.5, fill: C.blue });
   return frame(W, axY + 112, b, 'Sub-linear scaling');
 }
 
