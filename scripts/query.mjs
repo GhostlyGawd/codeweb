@@ -18,14 +18,14 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, impactOf, fileCycles, orphans } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, testersOf, impactOf, fileCycles, orphans } from './lib/graph-ops.mjs';
 
-const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--impact <symbol> | --cycles | --orphans> [--json]`;
+const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--impact <symbol> | --cycles | --orphans> [--json]`;
 function die(msg, code) { console.error(msg); process.exit(code); }
 
 function parseArgs(argv) {
   const o = { graph: null, query: null, symbol: null, json: false, help: false, queries: 0 };
-  const withVal = { '--callers': 'callers', '--callees': 'callees', '--impact': 'impact' };
+  const withVal = { '--callers': 'callers', '--callees': 'callees', '--tests': 'tests', '--impact': 'impact' };
   const noVal = { '--cycles': 'cycles', '--orphans': 'orphans' };
   for (let i = 0; i < argv.length; i++) {
     const t = argv[i];
@@ -41,7 +41,7 @@ function parseArgs(argv) {
 }
 
 const opts = parseArgs(process.argv.slice(2));
-const needsSymbol = ['callers', 'callees', 'impact'].includes(opts.query);
+const needsSymbol = ['callers', 'callees', 'tests', 'impact'].includes(opts.query);
 if (opts.help || opts.queries !== 1 || (needsSymbol && !opts.symbol)) die(USAGE, 2);
 
 const graphPath = resolve(opts.graph || join('.codeweb', 'graph.json'));
@@ -54,11 +54,11 @@ const graph = normalizeGraph(raw);
 const index = buildIndex(graph);
 
 let payload, code = 0;
-if (opts.query === 'callers' || opts.query === 'callees') {
+if (opts.query === 'callers' || opts.query === 'callees' || opts.query === 'tests') {
   const matched = resolveSymbol(graph, opts.symbol);
   if (!matched.length) { payload = { query: opts.query, symbol: opts.symbol, found: false }; code = 1; }
   else {
-    const results = opts.query === 'callers' ? callersOf(index, matched) : calleesOf(index, matched);
+    const results = opts.query === 'callers' ? callersOf(index, matched) : opts.query === 'callees' ? calleesOf(index, matched) : testersOf(index, matched);
     payload = { query: opts.query, symbol: opts.symbol, matched, results, count: results.length };
   }
 } else if (opts.query === 'impact') {
@@ -84,7 +84,7 @@ if (opts.json) {
 
 if (payload.found === false) die(`symbol not found: ${opts.symbol}`, 1);
 const p = payload;
-if (p.query === 'callers' || p.query === 'callees') {
+if (p.query === 'callers' || p.query === 'callees' || p.query === 'tests') {
   const extra = p.matched.length > 1 ? ` (${p.matched.length} matches: ${p.matched.join(', ')})` : '';
   console.log(`${p.query} of ${p.symbol}${extra}: ${p.count}`);
   for (const r of p.results) console.log(`  ${r}`);

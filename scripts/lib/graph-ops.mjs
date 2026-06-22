@@ -6,6 +6,12 @@
 const asArray = (x) => (Array.isArray(x) ? x : []);
 const byIdLt = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
+// Test-file predicate (shared by find-similar, the extractor's test-edge classification, and the
+// dead-code workflow — one truth). Matches `*.test.*`, `*.spec.*`, `*_test.*`, or a path segment
+// `tests/` | `test/` | `__tests__/`. Forward-slashed relative paths.
+export const isTestFile = (file) =>
+  /(?:^|\/)(?:tests?|__tests__)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.)/.test(file || '');
+
 // Fill the same defaults build-report.mjs applies, so every consumer sees a well-formed graph.
 export function normalizeGraph(graph) {
   const g = graph || {};
@@ -28,6 +34,7 @@ export function buildIndex(graph) {
   const callIn = new Map();
   const callOut = new Map();
   const inheritIn = new Map(); // reverse inherit: base -> {subclasses}, for impact reachability
+  const testIn = new Map();    // F4: reverse `test` edges: prod symbol -> {test nodes exercising it}
   const hasIncoming = new Set();
   for (const e of graph.edges) {
     if (e.kind === 'call') {
@@ -40,9 +47,15 @@ export function buildIndex(graph) {
       if (!inheritIn.has(e.to)) inheritIn.set(e.to, new Set());
       inheritIn.get(e.to).add(e.from);
     }
+    if (e.kind === 'test') {
+      if (!testIn.has(e.to)) testIn.set(e.to, new Set());
+      testIn.get(e.to).add(e.from);
+    }
+    // NOTE: `test` is intentionally EXCLUDED from hasIncoming — a symbol referenced only by tests is
+    // still a production orphan (the signal F10 consumes). Production callers also exclude tests.
     if (e.kind === 'call' || e.kind === 'import' || e.kind === 'inherit') hasIncoming.add(e.to);
   }
-  return { byId, callIn, callOut, inheritIn, hasIncoming };
+  return { byId, callIn, callOut, inheritIn, testIn, hasIncoming };
 }
 
 // Resolve a symbol to node ids: exact id wins; else every node whose label matches (sorted).
@@ -56,8 +69,21 @@ const unionSorted = (ids, adj) => {
   for (const id of ids) for (const x of (adj.get(id) || [])) out.add(x);
   return [...out].sort();
 };
+// Pick the canonical survivor of a merge cluster: most callers (least disruptive to keep), tie ->
+// smallest loc, tie -> lexicographically smallest id. Deterministic. Shared by optimize + codemod.
+export function chooseCanonical(index, ids) {
+  return ids.slice().sort((a, b) => {
+    const ca = index.callIn.get(a)?.size || 0, cb = index.callIn.get(b)?.size || 0;
+    if (cb !== ca) return cb - ca;
+    const la = index.byId.get(a)?.loc || 0, lb = index.byId.get(b)?.loc || 0;
+    if (la !== lb) return la - lb;
+    return a < b ? -1 : a > b ? 1 : 0;
+  })[0];
+}
+
 export const callersOf = (index, ids) => unionSorted(ids, index.callIn);
 export const calleesOf = (index, ids) => unionSorted(ids, index.callOut);
+export const testersOf = (index, ids) => unionSorted(ids, index.testIn); // F4: tests exercising a symbol
 
 // Transitive reverse-call closure (blast radius) from all seeds, excluding the seeds themselves.
 export function impactOf(index, seedIds) {
@@ -74,6 +100,32 @@ export function impactOf(index, seedIds) {
     }
   }
   return [...visited].filter((id) => !seeds.has(id)).sort();
+}
+
+// F5: map changed line-ranges to the symbols they touch, plus blast radius. hunks =
+// [{ file, ranges:[[start,end],...] }]; ranges null/empty = the whole file. A node is "changed"
+// iff its recorded span [line, line+loc-1] intersects a changed range — best-effort, inheriting
+// bodyEnd's clamp limits (can under-select on truncated bodies; documented in review.mjs).
+export function reviewImpact(graph, hunks) {
+  const index = buildIndex(graph);
+  const byFile = new Map();
+  for (const h of hunks) {
+    if (!byFile.has(h.file)) byFile.set(h.file, []);
+    if (h.ranges == null || h.ranges.length === 0) byFile.get(h.file).push(null);
+    else for (const r of h.ranges) byFile.get(h.file).push(r);
+  }
+  const changed = [];
+  for (const n of graph.nodes) {
+    const rs = byFile.get(n.file);
+    if (!rs) continue;
+    const start = n.line, end = n.line + (n.loc || 1) - 1;
+    if (rs.some((r) => r == null || !(end < r[0] || start > r[1]))) changed.push(n.id);
+  }
+  changed.sort();
+  const blast = impactOf(index, changed);
+  const domainsTouched = [...new Set(changed.map((id) => index.byId.get(id)?.domain || 'unassigned'))].sort();
+  const callerCounts = changed.map((id) => ({ id, callers: index.callIn.get(id)?.size || 0 })).sort((a, b) => b.callers - a.callers || (a.id < b.id ? -1 : 1));
+  return { changedSymbols: changed, blastRadius: { count: blast.length, ids: blast }, domainsTouched, callerCounts };
 }
 
 // File-level dependency cycles: strongly-connected components of size >= 2 in the file graph built

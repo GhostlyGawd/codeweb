@@ -16,6 +16,7 @@
 //   0.15-0.35 low · <0.15 refuted (dismissed as coincidental).  Precision over recall.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { shingles, jaccard } from './lib/shingles.mjs'; // shared body-shingle primitives (one truth)
 
 const WS = process.env.CODEWEB_WS || '.live';   // per-target workspace dir (orchestrator sets this)
 const GRAPH_PATH = `${WS}/graph.json`;
@@ -26,7 +27,7 @@ const HAVE_SOURCE = !!SOURCE_ROOT && existsSync(SOURCE_ROOT);
 
 const ENTRYPOINTS = new Set(['main']);
 const SCAFFOLD = new Set(['parseArgs', 'parseArgv', 'usage', 'showHelp', 'printUsage', 'help', 'printHelp', 'cli']);
-const KW = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','const','let','var','async','else','try','finally','class','case','of','in','throw']);
+// KW / tokenize / jaccard / shingles now imported from ./lib/shingles.mjs (lifted, one truth).
 
 // TWIN_JACCARD is a cheap RECALL pre-filter on shared downstream-call names; body-shingle
 // confirmation (below) is the precision gate, so this can be loose. At 0.8 it never fired on
@@ -43,13 +44,11 @@ const band = (n) => (n >= 5 ? 3 : n >= 3 ? 2 : 1);
 const severityFor = (files, domains) => SEV_NAME[Math.max(band(files), band(domains))];
 const cv = (xs) => { const m = xs.reduce((a, b) => a + b, 0) / xs.length; if (!m) return 0; return Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / xs.length) / m; };
 const intersectAll = (sets) => { if (sets.length < 2) return new Set(); let acc = new Set(sets[0]); for (const s of sets.slice(1)) acc = new Set([...acc].filter((x) => s.has(x))); return acc; };
-const jaccard = (a, b) => { if (!a.size || !b.size) return 0; let i = 0; for (const x of a) if (b.has(x)) i++; return i / (a.size + b.size - i); };
 
 // ---- body access (read-only, by line range) ----
 const fileCache = new Map();
 const readLines = (rel) => { if (!fileCache.has(rel)) { try { fileCache.set(rel, readFileSync(SOURCE_ROOT + '/' + rel, 'utf8').split(/\r?\n/)); } catch { fileCache.set(rel, null); } } return fileCache.get(rel); };
-const tokenize = (src) => src.replace(/\/\/[^\n]*/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(['"`])(?:\\.|(?!\1).)*\1/g, ' STR ').toLowerCase().match(/[a-z_$][\w$]*|[{}();=><!+\-*/%]/g)?.filter((t) => !KW.has(t)) || [];
-const bodyShingles = (n) => { const lines = readLines(n.file); if (!lines) return null; const toks = tokenize(lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n')); const s = new Set(); for (let i = 0; i + K <= toks.length; i++) s.add(toks.slice(i, i + K).join(' ')); return s.size ? s : null; };
+const bodyShingles = (n) => { const lines = readLines(n.file); if (!lines) return null; const s = shingles(lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n'), K); return s.size ? s : null; };
 const bodyConfidence = (nodes) => {
   const sets = nodes.map(bodyShingles).filter(Boolean);
   if (sets.length < 2) return null;

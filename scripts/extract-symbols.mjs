@@ -15,14 +15,25 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { relative, resolve, join, dirname, extname } from 'node:path';
+import { isTestFile } from './lib/graph-ops.mjs'; // F4: test-file predicate (shared, one truth)
+
+// F0: bump when scanSymbols/ctagsSymbols OUTPUT changes — invalidates stale scan caches.
+const SCANNER_VERSION = 1;
+const sha1 = (s) => createHash('sha1').update(s).digest('hex');
+
+// Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
+// label separator, so the last ':' splits them.
+const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
 
 const argv = process.argv.slice(2);
-const opts = { path: null, out: null, ctags: true, target: null };
+const opts = { path: null, out: null, ctags: true, target: null, cache: null };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--out') opts.out = argv[++i];
   else if (t === '--target') opts.target = argv[++i];
+  else if (t === '--cache') opts.cache = argv[++i]; // F0: per-file scan cache (incremental freshness)
   else if (t === '--no-ctags') opts.ctags = false;
   else if (!opts.path) opts.path = t;
 }
@@ -128,8 +139,61 @@ function bodyEnd(lines, startIdx, isPy) {
   return lines.length - 1;
 }
 
+// ---- F3: single-line signature extraction ------------------------------------------------
+// Returns {params, returns, raw} from a function/method DECLARATION line, or null when the param
+// list isn't fully on that line (multi-line / paren-less arrow) — never a guess (best-effort, the
+// same ethos as bodyEnd). The extractor is line-oriented, so multi-line params are intentionally null.
+const splitTopLevelParams = (s) => {
+  // Track only unambiguous bracket pairs. `<`/`>` are NOT tracked — they double as comparison
+  // operators in default values (`a = x > 0, b`), and treating them as brackets would mis-balance
+  // depth and drop trailing params. TS generics (`a: Map<string, number>`) still split correctly:
+  // the inner comma yields a non-identifier fragment that paramName() discards.
+  const out = []; let depth = 0, cur = '';
+  for (const ch of s) {
+    if ('([{'.includes(ch)) depth++;
+    else if (')]}'.includes(ch)) depth--;
+    if (ch === ',' && depth === 0) { out.push(cur); cur = ''; } else cur += ch;
+  }
+  if (cur.trim() || out.length) out.push(cur);
+  return out;
+};
+const paramName = (entry) => {
+  let e = entry.trim();
+  if (!e) return null;
+  e = e.replace(/^(\*\*?|\.\.\.)/, '').split('=')[0].split(':')[0].trim(); // *args/**kw/...rest, default, annotation
+  return /^[A-Za-z_$][\w$]*$/.test(e) ? e : null;                          // destructuring/other -> dropped
+};
+function parseSignature(line, name, isPy) {
+  const nameEsc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // the param-list open-paren for BOTH `name(...)` (declaration) and `name = [async] [function [g]] (...)`
+  // (arrow / function-expression assignment) — so `const f = (a, b) => …` parses, not just `function f(a, b)`.
+  const nameRe = new RegExp(`(?:^|[^\\w$])${nameEsc}\\s*(?:=\\s*(?:async\\s+)?(?:function\\s*\\*?\\s*[\\w$]*\\s*)?)?\\(`);
+  const m = nameRe.exec(line);
+  if (!m) return null;                       // no param paren attributable to `name` on this line
+  const open = m.index + m[0].length - 1;
+  let depth = 0, close = -1;
+  for (let i = open; i < line.length; i++) { const ch = line[i]; if (ch === '(') depth++; else if (ch === ')') { depth--; if (depth === 0) { close = i; break; } } }
+  if (close === -1) return null;             // params spill onto the next line -> null
+  const raw = line.slice(open + 1, close);
+  const params = splitTopLevelParams(raw).map(paramName).filter((x) => x != null);
+  let returns = null;
+  if (isPy) { const r = /->\s*([^:]+):/.exec(line.slice(close)); if (r) returns = r[1].trim(); }
+  else { const r = /^\s*:\s*([^={]+?)\s*(?:=>|\{|$)/.exec(line.slice(close + 1)); if (r) returns = r[1].trim(); }
+  return { params, returns, raw };
+}
+
 const useCtags = opts.ctags && toolExists('ctags');
 const files = listFiles();
+
+// F0: load the scan cache (keyed by content hash + engine mode + scanner version). A re-run reuses
+// cached symbol-discovery for byte-identical files and re-scans only changed ones — edge derivation
+// is still GLOBAL (see below), so the fragment is identical with or without the cache.
+const engineMode = useCtags ? 'ctags' : 'regex';
+let oldCache = null;
+if (opts.cache) { try { const c = JSON.parse(readFileSync(opts.cache, 'utf8')); if (c && c.version === SCANNER_VERSION && c.engine === engineMode) oldCache = c; } catch { /* corrupt/absent -> cold */ } }
+const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, files: {} } : null;
+let scanCount = 0;
+const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)) || scanSymbols(f, text); };
 
 // ---- build nodes per file, with line ranges ----
 const nodes = [];
@@ -137,7 +201,15 @@ const fileSyms = new Map(); // file -> {text, ranges:[{id,name,start,end,kind}]}
 for (const f of files) {
   let text; try { text = readFileSync(f, 'utf8'); } catch { continue; }
   const r = rel(f);
-  let syms = (useCtags && ctagsSymbols(f)) || scanSymbols(f, text);
+  let syms;
+  if (opts.cache) {
+    const h = sha1(text);
+    const hit = oldCache && oldCache.files[r];
+    syms = (hit && hit.hash === h) ? hit.syms : scanFile(f, text); // cache miss -> re-scan
+    newCache.files[r] = { hash: h, syms };                          // prune deleted files (only current)
+  } else {
+    syms = scanFile(f, text);
+  }
   const seen = new Set();
   syms = syms.filter((s) => { const k = s.name + ':' + s.line; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a.line - b.line);
   const lines = text.split(/\r?\n/);
@@ -151,7 +223,9 @@ for (const f of files) {
     const end = Math.min(bodyEnd(lines, start - 1, isPy) + 1, total);
     const id = r + ':' + s.name;
     ranges.push({ id, name: s.name, start, end, kind: s.kind });
-    nodes.push({ id, label: s.name, kind: s.kind, file: r, line: start, loc: Math.min(end - start + 1, 2000), exports: s.exports, domain: '', summary: '' });
+    const node = { id, label: s.name, kind: s.kind, file: r, line: start, loc: Math.min(end - start + 1, 2000), exports: s.exports, domain: '', summary: '' };
+    if (s.kind === 'function' || s.kind === 'method') node.signature = parseSignature(lines[start - 1] || '', s.name, isPy); // F3: contract for callers
+    nodes.push(node);
   });
   fileSyms.set(f, { text, ranges });
 }
@@ -255,7 +329,11 @@ for (const f of files) {
     const key = callerId + ' ' + calleeId;
     if (edgeSet.has(key)) return;
     edgeSet.add(key);
-    edges.push({ from: callerId, to: calleeId, kind, weight: 1 });
+    // F4: a CALL from a test-file symbol to a NON-test symbol is a `test` edge (the test exercises
+    // the production symbol), not a production call — so production --callers exclude tests. Same
+    // precision gate; test->test calls stay `call` (internal test wiring, doesn't pollute prod).
+    const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
+    edges.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
   };
   // A function name in argument position passed WITHOUT parens — arr.map(fn), rl.on('x', fn) — is a
   // higher-order reference: the callee invokes fn, so the dependency is real. Captured as a call edge
@@ -298,8 +376,10 @@ for (const [a, b] of importEdges) {
   const key = a + ' ' + b;
   if (edgeSet.has(key)) continue;
   edgeSet.add(key);
-  edges.push({ from: a, to: b, kind: 'import', weight: 1 });
-  importEdgeCount++;
+  // F4: an IMPORT from a test file of a non-test symbol is a `test` edge, not a production import.
+  const ik = (isTestFile(idFile(a)) && !isTestFile(idFile(b))) ? 'test' : 'import';
+  edges.push({ from: a, to: b, kind: ik, weight: 1 });
+  if (ik === 'import') importEdgeCount++;
 }
 
 // meta — the single source of truth for the target. `root` (absolute, forward-slashed) + each
@@ -313,6 +393,7 @@ const fragment = {
   meta: { root: rootFwd, target: targetLabel, engine: useCtags ? 'ctags' : 'regex', languages, symbols: nodes.length },
   nodes, edges,
 };
-const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'} engine); dropped ${ambiguousDropped} ambiguous bare-call edges`;
+if (newCache) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
+const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'} engine); dropped ${ambiguousDropped} ambiguous bare-call edges; scanned ${scanCount}/${files.length} file(s)${opts.cache ? ' (cache on)' : ''}`;
 if (opts.out) { writeFileSync(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
 else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }

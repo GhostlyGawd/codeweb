@@ -75,10 +75,12 @@ test('M1: initialize returns protocolVersion, an object tools capability, and se
   assert.equal(res.serverInfo.name, 'codeweb');
 });
 
-test('M2: tools/list exposes the six tools with object schemas + correct required args', () => {
+test('M2: tools/list exposes the full tool set with object schemas + correct required args', () => {
   const tools = rpc([INIT, { jsonrpc: '2.0', id: 2, method: 'tools/list' }]).byId.get(2).result.tools;
   assert.deepEqual(tools.map((t) => t.name).sort(),
-    ['codeweb_callees', 'codeweb_callers', 'codeweb_cycles', 'codeweb_diff', 'codeweb_impact', 'codeweb_orphans']);
+    ['codeweb_break_cycles', 'codeweb_callees', 'codeweb_callers', 'codeweb_codemod', 'codeweb_cycles',
+      'codeweb_deadcode', 'codeweb_diff', 'codeweb_find_similar', 'codeweb_fitness', 'codeweb_impact',
+      'codeweb_orphans', 'codeweb_placement', 'codeweb_review', 'codeweb_risk', 'codeweb_tests']);
   for (const t of tools) {
     assert.ok(t.description && t.description.length > 0, `${t.name} has a description`);
     assert.equal(t.inputSchema.type, 'object', `${t.name} inputSchema is an object`);
@@ -89,7 +91,17 @@ test('M2: tools/list exposes the six tools with object schemas + correct require
   assert.deepEqual(req('codeweb_impact'), ['graph', 'symbol']);
   assert.deepEqual(req('codeweb_cycles'), ['graph']);
   assert.deepEqual(req('codeweb_orphans'), ['graph']);
-	assert.deepEqual(req('codeweb_diff'), ['before', 'after']);
+  assert.deepEqual(req('codeweb_diff'), ['before', 'after']);
+  // new agent-capability tools (F1-F10)
+  assert.deepEqual(req('codeweb_tests'), ['graph', 'symbol']);
+  assert.deepEqual(req('codeweb_find_similar'), ['graph', 'signature']);
+  assert.deepEqual(req('codeweb_placement'), ['graph', 'calls']);
+  assert.deepEqual(req('codeweb_review'), ['graph', 'changed']);
+  assert.deepEqual(req('codeweb_fitness'), ['graph', 'rules']);
+  assert.deepEqual(req('codeweb_risk'), ['graph']);
+  assert.deepEqual(req('codeweb_break_cycles'), ['graph']);
+  assert.deepEqual(req('codeweb_deadcode'), ['graph']);
+  assert.deepEqual(req('codeweb_codemod'), ['graph', 'merge', 'into']);
 });
 
 test('M3: tools/call codeweb_impact returns the query JSON as text content', () => {
@@ -99,6 +111,14 @@ test('M3: tools/call codeweb_impact returns the query JSON as text content', () 
   const payload = JSON.parse(res.content[0].text);
   assert.equal(payload.query, 'impact');
   assert.deepEqual(payload.results, ['a.js:main']);
+});
+
+test('M3b: tools/call codeweb_review (a new agent tool) returns its JSON through the server', () => {
+  const res = rpc([INIT, callTool(31, 'codeweb_review', { graph: GP, changed: 'b.js' })]).byId.get(31).result;
+  assert.ok(!res.isError, 'review is a valid result');
+  const payload = JSON.parse(res.content[0].text);
+  assert.deepEqual(payload.changedSymbols, ['b.js:helper']); // whole-file change selects b.js's symbols
+  assert.deepEqual(payload.blastRadius.ids, ['a.js:main']);   // main calls helper -> in the blast radius
 });
 
 test('M4: tools/call resolves a bare label (codeweb_callers helper)', () => {
