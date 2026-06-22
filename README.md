@@ -190,6 +190,21 @@ LOC then id) and reports the copies removed, callers rewired, blast radius, and 
 **advisory only** — it never writes code and never exits non-zero on a clean read; the merge stays a
 human + gate decision.
 
+## Track duplication over time (`trend.mjs`)
+
+A one-shot map tells you where you are; `trend.mjs` tells you which way you're heading — is the
+codebase consolidating or sprawling? It charts **body-confirmed duplication** and **cross-domain
+coupling** across snapshots, with a sparkline and a rising/falling verdict:
+
+```
+node scripts/trend.mjs --git <repo> --last 10 [--focus <subdir>] [--json]   # snapshot the last N commits
+node scripts/trend.mjs a.json b.json c.json [--labels …] [--json]           # or chart pre-built snapshots
+```
+
+The `--git` mode checks out each of the last N commits into an **ephemeral worktree** (read-only
+over your working tree), runs the deterministic pipeline, and records the metrics — so you can watch
+duplication trend down as you consolidate, or catch it creeping up in review.
+
 ## Agent tools — context & pre-flight (`context-pack`, `simulate-edit`)
 
 Two read-only tools that move work off the LLM and into the graph (full spec:
@@ -294,6 +309,7 @@ codeweb/
 │   ├── report-template.html        # the renderer's self-contained HTML shell
 │   ├── query.mjs                   # structural queries (callers/callees/tests/impact/cycles/orphans)
 │   ├── diff.mjs                    # graph-delta / post-edit regression gate (before vs after)
+│   ├── trend.mjs                   # duplication + coupling over snapshots / git history (dashboard)
 │   ├── refresh.mjs                 # F0: re-extract a graph's nodes+edges from disk (cached, fast)
 │   ├── find-similar.mjs            # F1: rank existing bodies vs a candidate (reuse-at-write-time)
 │   ├── placement.mjs               # F2: suggest a new symbol's domain/file + reuse warnings
@@ -328,10 +344,11 @@ codeweb/
   [`docs/demo/`](docs/demo/) — the axios map; goes live once Pages is enabled.)*
 - **CI regression gate** — `diff.mjs` packaged as a GitHub Action that fails a PR on a new dependency
   cycle, a new duplication finding, or a symbol that loses all its callers.
-- **More first-class languages** — Go and Rust on the deterministic fast path (today: JS/TS/Python;
-  everything else routes through the agent fallback).
-- **Trend over time** — duplication and cross-domain coupling charted across commits, so you can see
-  whether the codebase is consolidating or sprawling.
+- **More first-class languages** — Go on the deterministic fast path. (JS/TS/Python/**Rust** are
+  native today; everything else routes through the agent fallback.)
+
+_Recently shipped: Rust on the fast path · duplication-over-time trend (`trend.mjs`) · a shareable
+report that no longer embeds the local source path._
 
 ## Handoffs
 
