@@ -34,6 +34,7 @@ export function buildIndex(graph) {
   const callIn = new Map();
   const callOut = new Map();
   const inheritIn = new Map(); // reverse inherit: base -> {subclasses}, for impact reachability
+  const testIn = new Map();    // F4: reverse `test` edges: prod symbol -> {test nodes exercising it}
   const hasIncoming = new Set();
   for (const e of graph.edges) {
     if (e.kind === 'call') {
@@ -46,9 +47,15 @@ export function buildIndex(graph) {
       if (!inheritIn.has(e.to)) inheritIn.set(e.to, new Set());
       inheritIn.get(e.to).add(e.from);
     }
+    if (e.kind === 'test') {
+      if (!testIn.has(e.to)) testIn.set(e.to, new Set());
+      testIn.get(e.to).add(e.from);
+    }
+    // NOTE: `test` is intentionally EXCLUDED from hasIncoming — a symbol referenced only by tests is
+    // still a production orphan (the signal F10 consumes). Production callers also exclude tests.
     if (e.kind === 'call' || e.kind === 'import' || e.kind === 'inherit') hasIncoming.add(e.to);
   }
-  return { byId, callIn, callOut, inheritIn, hasIncoming };
+  return { byId, callIn, callOut, inheritIn, testIn, hasIncoming };
 }
 
 // Resolve a symbol to node ids: exact id wins; else every node whose label matches (sorted).
@@ -64,6 +71,7 @@ const unionSorted = (ids, adj) => {
 };
 export const callersOf = (index, ids) => unionSorted(ids, index.callIn);
 export const calleesOf = (index, ids) => unionSorted(ids, index.callOut);
+export const testersOf = (index, ids) => unionSorted(ids, index.testIn); // F4: tests exercising a symbol
 
 // Transitive reverse-call closure (blast radius) from all seeds, excluding the seeds themselves.
 export function impactOf(index, seedIds) {

@@ -16,6 +16,11 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { relative, resolve, join, dirname, extname } from 'node:path';
+import { isTestFile } from './lib/graph-ops.mjs'; // F4: test-file predicate (shared, one truth)
+
+// Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
+// label separator, so the last ':' splits them.
+const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
 
 const argv = process.argv.slice(2);
 const opts = { path: null, out: null, ctags: true, target: null };
@@ -296,7 +301,11 @@ for (const f of files) {
     const key = callerId + ' ' + calleeId;
     if (edgeSet.has(key)) return;
     edgeSet.add(key);
-    edges.push({ from: callerId, to: calleeId, kind, weight: 1 });
+    // F4: a CALL from a test-file symbol to a NON-test symbol is a `test` edge (the test exercises
+    // the production symbol), not a production call — so production --callers exclude tests. Same
+    // precision gate; test->test calls stay `call` (internal test wiring, doesn't pollute prod).
+    const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
+    edges.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
   };
   // A function name in argument position passed WITHOUT parens — arr.map(fn), rl.on('x', fn) — is a
   // higher-order reference: the callee invokes fn, so the dependency is real. Captured as a call edge
@@ -339,8 +348,10 @@ for (const [a, b] of importEdges) {
   const key = a + ' ' + b;
   if (edgeSet.has(key)) continue;
   edgeSet.add(key);
-  edges.push({ from: a, to: b, kind: 'import', weight: 1 });
-  importEdgeCount++;
+  // F4: an IMPORT from a test file of a non-test symbol is a `test` edge, not a production import.
+  const ik = (isTestFile(idFile(a)) && !isTestFile(idFile(b))) ? 'test' : 'import';
+  edges.push({ from: a, to: b, kind: ik, weight: 1 });
+  if (ik === 'import') importEdgeCount++;
 }
 
 // meta — the single source of truth for the target. `root` (absolute, forward-slashed) + each
