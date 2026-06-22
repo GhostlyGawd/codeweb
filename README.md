@@ -6,13 +6,16 @@
 [![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)
 [![deterministic engine](https://img.shields.io/badge/engine-deterministic-58a6ff?style=flat-square)](#how-it-works)
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
-[![tests](https://img.shields.io/badge/tests-193_passing-3fb950?style=flat-square)](tests/)
+[![tests](https://img.shields.io/badge/tests-195_passing-3fb950?style=flat-square)](tests/)
 
-**Dissect a codebase to its atomic parts, wire them into a living system web, tag each node's
-domain, and surface where the system does overlapping work** — so it can be restructured into
-well-defined, non-duplicative systems. Renders a self-contained, interactive HTML map.
+**You can't see where your codebase does the same work twice — and neither can the agent editing it.**
+codeweb dissects a repo to its atomic parts (functions, classes, methods), wires them into a living
+call/import graph, tags each node's domain, and surfaces cross-domain overlap. Then it serves that
+graph **two ways**: a self-contained, interactive **HTML map for you**, and **15 deterministic query
+tools** (over MCP, no LLM in the loop) **for your coding agent** to consult *before* it edits —
+*does this already exist? what breaks if I change it? where should this go?*
 
-[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[Outputs](#outputs)&nbsp;·&nbsp;[Query the graph](#query-the-graph-for-agents--humans)&nbsp;·&nbsp;[How it works](#how-it-works)
+[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)
 
 </div>
 
@@ -20,13 +23,17 @@ well-defined, non-duplicative systems. Renders a self-contained, interactive HTM
 
 ## See it in action
 
-<div align="center">
-<img src="assets/brand/demo.svg" alt="The codeweb pipeline: extract → cluster → overlap → render, looping" width="840">
-</div>
-
 One command runs the whole deterministic pipeline and drops an interactive map at
 `<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report** —
-codeweb pointed at a real ~1,956-symbol, 17-domain codebase. No mockups.
+codeweb pointed at a real ~1,956-symbol, 17-domain codebase. No mockups. *(A click-around hosted
+demo is on the way — see [Roadmap](#roadmap).)*
+
+### Navigate the whole system
+
+A force-directed map of every symbol, collapsible to domains. Search, drag, zoom, and click any
+node to trace what depends on it and what it reaches.
+
+<img src="assets/screens/04-graph-domains.png" alt="codeweb Graph tab: a force-directed domain map of the codebase on a dark canvas" width="100%">
 
 ### Findings — stop guessing what to refactor
 
@@ -53,12 +60,10 @@ merge them, or put a clean interface between them.
 </tr>
 </table>
 
-### Navigate the whole system
-
-A force-directed map of every symbol, collapsible to domains. Search, drag, zoom, and click any
-node to trace what depends on it and what it reaches.
-
-<img src="assets/screens/04-graph-domains.png" alt="codeweb Graph tab: a force-directed domain map of the codebase on a dark canvas" width="100%">
+<div align="center">
+<img src="assets/brand/demo.svg" alt="The codeweb pipeline: extract → cluster → overlap → render, looping" width="840">
+<br><sub>The deterministic pipeline, looping: extract → cluster → overlap → render.</sub>
+</div>
 
 ---
 
@@ -77,15 +82,21 @@ overlap graph.
 
 ## Install
 
-This is a self-contained Claude Code plugin. To use it:
+This is a self-contained Claude Code plugin — zero npm dependencies, just Node.js.
 
-1. Copy the `codeweb/` directory into a plugins location Claude Code discovers, **or** add the
-   directory as a local marketplace and install it:
-   ```
-   /plugin marketplace add D:/GitHub Projects/ecc-test/codeweb
-   /plugin install codeweb
-   ```
-2. Restart Claude Code so the command, agents, and skill register.
+**As a Claude Code plugin:**
+```
+/plugin marketplace add GhostlyGawd/codeweb
+/plugin install codeweb
+```
+Then restart Claude Code so the `/codeweb` command, agents, and skill register.
+
+**Or run the engine directly — no plugin, no install:**
+```
+git clone https://github.com/GhostlyGawd/codeweb.git
+node codeweb/scripts/run.mjs /path/to/your/project --out-dir /path/to/your/project/.codeweb
+# then open /path/to/your/project/.codeweb/report.html
+```
 
 Requires Node.js — the whole deterministic pipeline (extract → cluster → overlap → render) runs
 on Node, no external dependencies. Static-analysis tools (universal-ctags, ripgrep, madge, etc.)
@@ -305,6 +316,17 @@ codeweb/
 ├── assets/                          # brand art (logo, hero, animated demo) + report screenshots
 └── README.md
 ```
+
+## Roadmap
+
+- **Hosted live demo** — a click-around `report.html` of a recognizable open-source repo, published
+  to GitHub Pages, so you can explore a real map before installing anything.
+- **CI regression gate** — `diff.mjs` packaged as a GitHub Action that fails a PR on a new dependency
+  cycle, a new duplication finding, or a symbol that loses all its callers.
+- **More first-class languages** — Go and Rust on the deterministic fast path (today: JS/TS/Python;
+  everything else routes through the agent fallback).
+- **Trend over time** — duplication and cross-domain coupling charted across commits, so you can see
+  whether the codebase is consolidating or sprawling.
 
 ## Handoffs
 
