@@ -6,7 +6,6 @@
 [![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)
 [![deterministic engine](https://img.shields.io/badge/engine-deterministic-58a6ff?style=flat-square)](#how-it-works)
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
-[![tests](https://img.shields.io/badge/tests-195_passing-3fb950?style=flat-square)](tests/)
 
 **You can't see where your codebase does the same work twice — and neither can the agent editing it.**
 codeweb dissects a repo to its atomic parts (functions, classes, methods), wires them into a living
@@ -29,8 +28,8 @@ pointed read-only at **[axios](https://github.com/axios/axios)** — 274 symbols
 
 > **▶ Read the full [axios case study](docs/case-study-axios.md):** on a library downloaded ~50M
 > times a week, codeweb body-confirmed **3 real duplications** (two byte-identical across files),
-> dismissed 12 false positives, and produced a cycle-safe merge plan for each. A click-around hosted
-> version of this exact map lands with the next push — see [Roadmap](#roadmap).
+> dismissed 12 false positives, and produced a cycle-safe merge plan for each. Or **[click around
+> this exact map yourself](https://ghostlygawd.github.io/codeweb/demo/)** — it's live on GitHub Pages.
 
 ### Navigate the whole system
 
@@ -333,6 +332,9 @@ codeweb/
 │   ├── diff.mjs                    # graph-delta / post-edit regression gate (before vs after)
 │   ├── trend.mjs                   # duplication + coupling over snapshots / git history (dashboard)
 │   ├── ci-gate.mjs                 # CI gate: before(base)-vs-after(working tree) diff, exits 1 on regression
+│   ├── optimize.mjs                # advise: rank body-confirmed dups into gated consolidation opportunities
+│   ├── context-pack.mjs            # agent context: blast-radius-scoped window to edit a symbol
+│   ├── simulate-edit.mjs           # agent pre-flight: predict the gate's verdict for delete/merge/move
 │   ├── refresh.mjs                 # F0: re-extract a graph's nodes+edges from disk (cached, fast)
 │   ├── find-similar.mjs            # F1: rank existing bodies vs a candidate (reuse-at-write-time)
 │   ├── placement.mjs               # F2: suggest a new symbol's domain/file + reuse warnings
