@@ -54,7 +54,9 @@ const bodyConfidence = (nodes) => {
   if (sets.length < 2) return null;
   const sims = [];
   for (let i = 0; i < sets.length; i++) for (let j = i + 1; j < sets.length; j++) sims.push(jaccard(sets[i], sets[j]));
-  const mean = sims.reduce((a, b) => a + b, 0) / sims.length, min = Math.min(...sims);
+  // reduce, not Math.min(...sims): a large same-name cluster makes sims O(n^2), and spreading it as
+  // call args overflows the stack (express crashed here). reduce is identical in value, spread-free.
+  const mean = sims.reduce((a, b) => a + b, 0) / sims.length, min = sims.reduce((a, b) => Math.min(a, b), Infinity);
   const confidence = mean >= 0.6 ? 'high' : mean >= 0.35 ? 'medium' : mean >= 0.15 ? 'low' : 'refuted';
   return { mean, min, confidence, drifted: mean >= 0.35 && mean < 0.6 };
 };
