@@ -1,0 +1,94 @@
+#!/usr/bin/env node
+// codeweb find-similar — reuse-at-write-time. Before an agent writes a function, it asks "does
+// something already do this?": shingle a candidate body/signature and rank existing non-test
+// function bodies by token-shingle Jaccard. Turns codeweb's post-hoc duplication detection into
+// write-time PREVENTION. Read-only, deterministic. Shares the K=3 shingler with overlap.mjs via
+// ./lib/shingles.mjs (one truth).
+//
+// Usage:
+//   node find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--json]
+// Exit: 0 ok (even with zero matches), 2 usage / source unavailable.
+
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { normalizeGraph, isTestFile } from './lib/graph-ops.mjs';
+import { shingles, jaccard } from './lib/shingles.mjs';
+
+const USAGE = 'usage: find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--json]';
+function die(msg, code) { console.error(msg); process.exit(code); }
+
+const argv = process.argv.slice(2);
+let json = false, body = null, stdin = false, signature = null, k = 10; const pos = [];
+for (let i = 0; i < argv.length; i++) {
+  const t = argv[i];
+  if (t === '--json') json = true;
+  else if (t === '--stdin') stdin = true;
+  else if (t === '--body') body = argv[++i];
+  else if (t === '--signature') signature = argv[++i];
+  else if (t === '--k') k = Math.max(1, parseInt(argv[++i], 10) || 10);
+  else if (!t.startsWith('-')) pos.push(t);
+}
+const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
+if (!graphPath) die(USAGE, 2);
+
+// exactly one candidate source
+const sources = [body != null, stdin, signature != null].filter(Boolean).length;
+if (sources !== 1) die(USAGE, 2);
+
+const abs = resolve(graphPath);
+if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
+let graph;
+try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
+catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+
+const root = graph.meta?.root || null;
+if (!root || !existsSync(root)) die(`source unavailable: graph.meta.root is missing or not on disk — find-similar needs real bodies to compare (got ${root || 'none'})`, 2);
+
+// read candidate text
+let candidateText;
+try {
+  if (body != null) candidateText = readFileSync(resolve(body), 'utf8');
+  else if (stdin) candidateText = readFileSync(0, 'utf8');
+  else candidateText = signature;
+} catch (e) { die(`cannot read candidate: ${e.message}`, 2); }
+
+const candidate = shingles(candidateText, 3);
+
+// score every non-test function/method body
+const fileCache = new Map();
+const readLines = (rel) => {
+  if (!fileCache.has(rel)) { try { fileCache.set(rel, readFileSync(root + '/' + rel, 'utf8').split(/\r?\n/)); } catch { fileCache.set(rel, null); } }
+  return fileCache.get(rel);
+};
+const bodyOf = (n) => {
+  const lines = readLines(n.file);
+  if (!lines) return null;
+  return lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n');
+};
+const tierOf = (s) => (s >= 0.6 ? 'high' : s >= 0.35 ? 'medium' : 'low'); // overlap.mjs bands
+
+const matches = [];
+for (const n of graph.nodes) {
+  if (n.kind !== 'function' && n.kind !== 'method') continue;
+  if (isTestFile(n.file)) continue;
+  const src = bodyOf(n);
+  if (src == null) continue;
+  const sim = jaccard(candidate, shingles(src, 3));
+  if (sim < 0.15) continue; // exclude below the low band
+  matches.push({ id: n.id, label: n.label, file: n.file, line: n.line, domain: n.domain, sim: +sim.toFixed(6), tier: tierOf(sim) });
+}
+matches.sort((a, b) => b.sim - a.sim || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+const top = matches.slice(0, k);
+
+const payload = {
+  candidate: { source: body != null ? 'body' : stdin ? 'stdin' : 'signature', shingles: candidate.size },
+  matches: top, count: top.length, scanned: graph.nodes.filter((n) => (n.kind === 'function' || n.kind === 'method') && !isTestFile(n.file)).length,
+};
+
+if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+
+console.log(`find-similar: candidate (${payload.candidate.shingles} shingles) vs ${payload.scanned} existing symbols`);
+if (!top.length) { console.log('  no similar existing symbol (>=15%) — looks novel; safe to write.'); process.exit(0); }
+console.log(`  ${top.length} similar — consider reusing instead of re-implementing:`);
+for (const m of top) console.log(`  [${(m.sim * 100).toFixed(0).padStart(3)}% ${m.tier.padEnd(6)}] ${m.id}  (${m.file}:${m.line})`);
+process.exit(0);

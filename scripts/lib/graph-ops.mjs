@@ -6,6 +6,12 @@
 const asArray = (x) => (Array.isArray(x) ? x : []);
 const byIdLt = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
+// Test-file predicate (shared by find-similar, the extractor's test-edge classification, and the
+// dead-code workflow — one truth). Matches `*.test.*`, `*.spec.*`, `*_test.*`, or a path segment
+// `tests/` | `test/` | `__tests__/`. Forward-slashed relative paths.
+export const isTestFile = (file) =>
+  /(?:^|\/)(?:tests?|__tests__)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.)/.test(file || '');
+
 // Fill the same defaults build-report.mjs applies, so every consumer sees a well-formed graph.
 export function normalizeGraph(graph) {
   const g = graph || {};
