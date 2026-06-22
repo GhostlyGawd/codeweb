@@ -1,0 +1,36 @@
+name: 'codeweb regression gate'
+description: 'Fail a pull request on a new dependency cycle, a new duplication finding, or a symbol that loses all its callers.'
+branding:
+  icon: 'git-merge'
+  color: 'purple'
+inputs:
+  target:
+    description: 'Subdirectory to analyze, relative to the repo root.'
+    required: false
+    default: '.'
+  codeweb-ref:
+    description: 'The codeweb ref (branch/tag/sha) to run the gate with.'
+    required: false
+    default: 'main'
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Fetch codeweb
+      shell: bash
+      run: git clone --depth 1 --branch "${{ inputs.codeweb-ref }}" https://github.com/GhostlyGawd/codeweb.git "$RUNNER_TEMP/codeweb"
+    - name: Run regression gate
+      shell: bash
+      # Requires the consumer to checkout with `fetch-depth: 0` so the PR base sha is present.
+      # Pass inputs through env vars, NOT inline ${{ }}, so a consumer-supplied target can't inject
+      # shell (the shell expands $CODEWEB_TARGET as a single token after interpolation).
+      env:
+        CODEWEB_TARGET: ${{ inputs.target }}
+        CODEWEB_BASE: ${{ github.event.pull_request.base.sha }}
+      run: >
+        node "$RUNNER_TEMP/codeweb/scripts/ci-gate.mjs"
+        --base "$CODEWEB_BASE"
+        --target "$CODEWEB_TARGET"

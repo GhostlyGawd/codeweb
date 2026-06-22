@@ -6,13 +6,16 @@
 [![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)
 [![deterministic engine](https://img.shields.io/badge/engine-deterministic-58a6ff?style=flat-square)](#how-it-works)
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
-[![tests](https://img.shields.io/badge/tests-193_passing-3fb950?style=flat-square)](tests/)
+[![tests](https://img.shields.io/badge/tests-195_passing-3fb950?style=flat-square)](tests/)
 
-**Dissect a codebase to its atomic parts, wire them into a living system web, tag each node's
-domain, and surface where the system does overlapping work** — so it can be restructured into
-well-defined, non-duplicative systems. Renders a self-contained, interactive HTML map.
+**You can't see where your codebase does the same work twice — and neither can the agent editing it.**
+codeweb dissects a repo to its atomic parts (functions, classes, methods), wires them into a living
+call/import graph, tags each node's domain, and surfaces cross-domain overlap. Then it serves that
+graph **two ways**: a self-contained, interactive **HTML map for you**, and **15 deterministic query
+tools** (over MCP, no LLM in the loop) **for your coding agent** to consult *before* it edits —
+*does this already exist? what breaks if I change it? where should this go?*
 
-[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[Outputs](#outputs)&nbsp;·&nbsp;[Query the graph](#query-the-graph-for-agents--humans)&nbsp;·&nbsp;[How it works](#how-it-works)
+[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)
 
 </div>
 
@@ -20,13 +23,21 @@ well-defined, non-duplicative systems. Renders a self-contained, interactive HTM
 
 ## See it in action
 
-<div align="center">
-<img src="assets/brand/demo.svg" alt="The codeweb pipeline: extract → cluster → overlap → render, looping" width="840">
-</div>
-
 One command runs the whole deterministic pipeline and drops an interactive map at
-`<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report** —
-codeweb pointed at a real ~1,956-symbol, 17-domain codebase. No mockups.
+`<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report**, codeweb
+pointed read-only at **[axios](https://github.com/axios/axios)** — 274 symbols across 8 domains. No mockups.
+
+> **▶ Read the full [axios case study](docs/case-study-axios.md):** on a library downloaded ~50M
+> times a week, codeweb body-confirmed **3 real duplications** (two byte-identical across files),
+> dismissed 12 false positives, and produced a cycle-safe merge plan for each. A click-around hosted
+> version of this exact map lands with the next push — see [Roadmap](#roadmap).
+
+### Navigate the whole system
+
+A force-directed map of every symbol, collapsible to domains. Search, drag, zoom, and click any
+node to trace what depends on it and what it reaches.
+
+<img src="assets/screens/05-axios-graph.png" alt="codeweb Graph tab on axios: a force-directed domain map (adapters, helpers, core, cancel, defaults, platform) on a dark canvas" width="100%">
 
 ### Findings — stop guessing what to refactor
 
@@ -34,31 +45,29 @@ Ranked **duplication** (the same function defined across many files), the most d
 **hotspots** to change with care, and likely-**dead code** — every row clickable to inspect what
 calls it and what it calls.
 
-<img src="assets/screens/01-findings.png" alt="codeweb Findings tab: ranked duplication, hotspots, and likely-dead code, with a clickable detail panel" width="100%">
+<img src="assets/screens/05-axios-findings.png" alt="codeweb Findings tab on axios: ranked duplication, hotspots, and likely-dead code, with a clickable detail panel" width="100%">
 
 ### See duplication density, and where areas tangle
 
 <table>
 <tr>
 <td width="50%" valign="top">
-<img src="assets/screens/03-treemap.png" alt="codeweb Treemap: every file sized by lines of code and shaded green-to-red by duplication density">
+<img src="assets/screens/05-axios-treemap.png" alt="codeweb Treemap on axios: every file sized by lines of code and shaded green-to-red by duplication density">
 <br><b>Treemap</b> — every file sized by lines of code and shaded green→red by how duplicated it
 is. The red blocks are your consolidation targets, at a glance.
 </td>
 <td width="50%" valign="top">
-<img src="assets/screens/02-matrix.png" alt="codeweb Matrix: a heatmap of call coupling between domains">
+<img src="assets/screens/05-axios-matrix.png" alt="codeweb Matrix on axios: a heatmap of call coupling between domains">
 <br><b>Matrix</b> — area-to-area coupling. A big off-diagonal cell means two areas are tangled:
 merge them, or put a clean interface between them.
 </td>
 </tr>
 </table>
 
-### Navigate the whole system
-
-A force-directed map of every symbol, collapsible to domains. Search, drag, zoom, and click any
-node to trace what depends on it and what it reaches.
-
-<img src="assets/screens/04-graph-domains.png" alt="codeweb Graph tab: a force-directed domain map of the codebase on a dark canvas" width="100%">
+<div align="center">
+<img src="assets/brand/demo.svg" alt="The codeweb pipeline: extract → cluster → overlap → render, looping" width="840">
+<br><sub>The deterministic pipeline, looping: extract → cluster → overlap → render.</sub>
+</div>
 
 ---
 
@@ -77,15 +86,21 @@ overlap graph.
 
 ## Install
 
-This is a self-contained Claude Code plugin. To use it:
+This is a self-contained Claude Code plugin — zero npm dependencies, just Node.js.
 
-1. Copy the `codeweb/` directory into a plugins location Claude Code discovers, **or** add the
-   directory as a local marketplace and install it:
-   ```
-   /plugin marketplace add D:/GitHub Projects/ecc-test/codeweb
-   /plugin install codeweb
-   ```
-2. Restart Claude Code so the command, agents, and skill register.
+**As a Claude Code plugin:**
+```
+/plugin marketplace add GhostlyGawd/codeweb
+/plugin install codeweb
+```
+Then restart Claude Code so the `/codeweb` command, agents, and skill register.
+
+**Or run the engine directly — no plugin, no install:**
+```
+git clone https://github.com/GhostlyGawd/codeweb.git
+node codeweb/scripts/run.mjs /path/to/your/project --out-dir /path/to/your/project/.codeweb
+# then open /path/to/your/project/.codeweb/report.html
+```
 
 Requires Node.js — the whole deterministic pipeline (extract → cluster → overlap → render) runs
 on Node, no external dependencies. Static-analysis tools (universal-ctags, ripgrep, madge, etc.)
@@ -155,6 +170,28 @@ new duplication finding, or makes an existing symbol lose all its callers. It **
 removals — deleting code/cycles/dups is an improvement, not a regression — and a brand-new uncalled
 node is reported but does not trip the gate (agents add functions before wiring them).
 
+## Gate every PR (GitHub Action)
+
+`scripts/ci-gate.mjs` turns the `diff` gate into CI: it builds the graph for the PR base and head and
+**fails the build on a structural regression** (a new cycle, a new duplication, or a symbol that
+loses all its callers). Drop it into any repo (full spec: [`docs/ci-gate.md`](docs/ci-gate.md)):
+
+```yaml
+# .github/workflows/codeweb-gate.yml
+on: pull_request
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }   # required — the gate diffs against the PR base
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@main
+        with: { target: src }
+```
+
+Locally: `node scripts/ci-gate.mjs --base <ref> [--target <subdir>]`. Pure removals never trip the
+gate; a brand-new uncalled function is reported but doesn't fail the build.
+
 ## Advise consolidations (`optimize.mjs`)
 
 Where `diff.mjs` *gates* (pass/fail on an edit), `optimize.mjs` *advises*: it reads a graph's
@@ -174,6 +211,21 @@ Low/refuted findings are excluded outright. It picks a canonical survivor (most-
 LOC then id) and reports the copies removed, callers rewired, blast radius, and LOC reclaimed. It is
 **advisory only** — it never writes code and never exits non-zero on a clean read; the merge stays a
 human + gate decision.
+
+## Track duplication over time (`trend.mjs`)
+
+A one-shot map tells you where you are; `trend.mjs` tells you which way you're heading — is the
+codebase consolidating or sprawling? It charts **body-confirmed duplication** and **cross-domain
+coupling** across snapshots, with a sparkline and a rising/falling verdict:
+
+```
+node scripts/trend.mjs --git <repo> --last 10 [--focus <subdir>] [--json]   # snapshot the last N commits
+node scripts/trend.mjs a.json b.json c.json [--labels …] [--json]           # or chart pre-built snapshots
+```
+
+The `--git` mode checks out each of the last N commits into an **ephemeral worktree** (read-only
+over your working tree), runs the deterministic pipeline, and records the metrics — so you can watch
+duplication trend down as you consolidate, or catch it creeping up in review.
 
 ## Agent tools — context & pre-flight (`context-pack`, `simulate-edit`)
 
@@ -238,7 +290,7 @@ Each tool takes a `graph` (path to a `graph.json`) plus, for callers/callees/imp
 
 ## How it works
 
-For JavaScript, TypeScript, and Python the default is a **deterministic Node pipeline** — one
+For JavaScript, TypeScript, Python, and Rust the default is a **deterministic Node pipeline** — one
 command, no LLM in the loop, reproducible byte-for-byte. `scripts/run.mjs` chains four stages
 into a per-target workspace:
 
@@ -279,6 +331,8 @@ codeweb/
 │   ├── report-template.html        # the renderer's self-contained HTML shell
 │   ├── query.mjs                   # structural queries (callers/callees/tests/impact/cycles/orphans)
 │   ├── diff.mjs                    # graph-delta / post-edit regression gate (before vs after)
+│   ├── trend.mjs                   # duplication + coupling over snapshots / git history (dashboard)
+│   ├── ci-gate.mjs                 # CI gate: before(base)-vs-after(working tree) diff, exits 1 on regression
 │   ├── refresh.mjs                 # F0: re-extract a graph's nodes+edges from disk (cached, fast)
 │   ├── find-similar.mjs            # F1: rank existing bodies vs a candidate (reuse-at-write-time)
 │   ├── placement.mjs               # F2: suggest a new symbol's domain/file + reuse warnings
@@ -305,6 +359,17 @@ codeweb/
 ├── assets/                          # brand art (logo, hero, animated demo) + report screenshots
 └── README.md
 ```
+
+## Roadmap
+
+- **Hosted live demo** — a click-around `report.html` of a recognizable open-source repo, published
+  to GitHub Pages, so you can explore a real map before installing anything. *(Staged at
+  [`docs/demo/`](docs/demo/) — the axios map; goes live once Pages is enabled.)*
+- **More first-class languages** — Go on the deterministic fast path. (JS/TS/Python/**Rust** are
+  native today; everything else routes through the agent fallback.)
+
+_Recently shipped: Rust on the fast path · duplication-over-time trend (`trend.mjs`) · a one-command
+CI regression gate + GitHub Action · a shareable report that no longer embeds the local source path._
 
 ## Handoffs
 
