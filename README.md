@@ -76,6 +76,27 @@ architecture docs, codeweb works at **symbol resolution**: functions, classes, a
 call/import edges between them, the semantic domain each belongs to, and the cross-domain
 overlap graph.
 
+## Proven effective — measured, not just claimed
+
+We didn't only assert codeweb works; we **pre-registered hypotheses and measured it**, applying the
+same rigor codeweb brings to code: independent oracles, a pinned cross-language corpus, confidence
+intervals, and adversarial review. **32 of 33 pre-registered checks pass** — and the testing was
+rigorous enough to **find and fix two real bugs** the engine's own 286-test suite had missed.
+
+<img src="paper/figures/fig-scorecard.svg" alt="Scorecard: 32 of 33 pre-registered checks pass across determinism, correctness, edit-safety, detection, performance, and feature coverage" width="100%">
+
+- **Correctness is exact** — **0 disagreements across ~120,000 comparisons** against independently
+  written oracles (cycles, impact, callers/callees, context-pack); 0 violations over 20,000 edit-safety trials.
+- **Detection is accurate** — exact-clone **F1 1.0** (vs 0.67 name-match), renamed-clone recall **1.0
+  structural vs 0.0 lexical**, reuse-ranking **MRR 0.99**.
+- **It scales** — runtime grows **sub-linearly** (exponent 0.33); structural queries answer in **~120 ms**
+  on a 3,201-symbol graph; zero runtime dependencies.
+- **It's honest** — the one miss (incremental speedup at high churn) is reported as a measured curve, not spun.
+
+> **▶ Read the full study — [live on GitHub Pages](https://ghostlygawd.github.io/codeweb/paper/).**
+> Or dig into the [pre-registration](paper/PRE-REGISTRATION.md) and [raw results](paper/results/) — every
+> number regenerates with `node paper/run-all.mjs`.
+
 ## Two modes
 
 - **Internal** — map your own codebase and find consolidation opportunities to restructure.
