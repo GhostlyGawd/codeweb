@@ -69,6 +69,18 @@ const unionSorted = (ids, adj) => {
   for (const id of ids) for (const x of (adj.get(id) || [])) out.add(x);
   return [...out].sort();
 };
+// Pick the canonical survivor of a merge cluster: most callers (least disruptive to keep), tie ->
+// smallest loc, tie -> lexicographically smallest id. Deterministic. Shared by optimize + codemod.
+export function chooseCanonical(index, ids) {
+  return ids.slice().sort((a, b) => {
+    const ca = index.callIn.get(a)?.size || 0, cb = index.callIn.get(b)?.size || 0;
+    if (cb !== ca) return cb - ca;
+    const la = index.byId.get(a)?.loc || 0, lb = index.byId.get(b)?.loc || 0;
+    if (la !== lb) return la - lb;
+    return a < b ? -1 : a > b ? 1 : 0;
+  })[0];
+}
+
 export const callersOf = (index, ids) => unionSorted(ids, index.callIn);
 export const calleesOf = (index, ids) => unionSorted(ids, index.callOut);
 export const testersOf = (index, ids) => unionSorted(ids, index.testIn); // F4: tests exercising a symbol

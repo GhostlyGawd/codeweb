@@ -23,7 +23,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit, chooseCanonical } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: optimize.mjs <graph.json> [--json] [--out <optimize.md>]   (or set CODEWEB_WS)';
 const READY_BODYSIM = 0.6; // body-confirmed "high" floor — must match overlap.mjs's confidence band
@@ -50,17 +50,7 @@ const index = buildIndex(graph);
 const cycKey = (c) => c.join('|');
 const beforeCycles = new Set(fileCycles(graph).map(cycKey));
 
-// Pick the canonical survivor for a duplicate cluster: most callers wins (least disruptive to keep),
-// tie -> smallest body (LOC), tie -> lexicographically smallest id. Deterministic.
-function chooseCanonical(ids) {
-  return ids.slice().sort((a, b) => {
-    const ca = index.callIn.get(a)?.size || 0, cb = index.callIn.get(b)?.size || 0;
-    if (cb !== ca) return cb - ca;
-    const la = index.byId.get(a)?.loc || 0, lb = index.byId.get(b)?.loc || 0;
-    if (la !== lb) return la - lb;
-    return a < b ? -1 : a > b ? 1 : 0;
-  })[0];
-}
+// chooseCanonical now lives in ./lib/graph-ops.mjs (shared with codemod.mjs — one truth).
 
 // actionable findings only: precision gate drops low/refuted (overlap.mjs's own "findings" set).
 const candidates = graph.overlaps.filter((o) => o.confidence === 'high' || o.confidence === 'medium');
@@ -72,7 +62,7 @@ const opportunities = candidates.map((o) => {
 
   let canonical = null, projectedNewCycles = [], removesNodes = 0, callersRewired = 0, blastRadius = 0, locSaved = 0;
   if (mergeable && o.nodes.length >= 2) {
-    canonical = chooseCanonical(o.nodes);
+    canonical = chooseCanonical(index, o.nodes);
     const losers = o.nodes.filter((id) => id !== canonical);
     const sim = applyEdit(graph, { kind: 'merge', ids: o.nodes, into: canonical });
     projectedNewCycles = fileCycles(sim).filter((c) => !beforeCycles.has(cycKey(c)));
