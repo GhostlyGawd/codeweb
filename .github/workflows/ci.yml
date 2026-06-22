@@ -12,7 +12,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       # codeweb has zero npm dependencies — nothing to install, just run the suite.
+      # `npm test` is argless `node --test` (default discovery) so it doesn't depend on the
+      # runner expanding a glob — Node 20 did not, which is why this needs Node 22.
       - name: Run tests
         run: npm test

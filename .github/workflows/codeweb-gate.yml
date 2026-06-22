@@ -16,6 +16,6 @@ jobs:
           fetch-depth: 0 # full history so the PR base sha is available for the before/after diff
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: codeweb regression gate (self)
         run: node scripts/ci-gate.mjs --base "${{ github.event.pull_request.base.sha }}" --target scripts
