@@ -1,0 +1,526 @@
+{
+  "cluster": "C4-detection-accuracy",
+  "generatedAt": "2026-06-22T16:59:19.620Z",
+  "node": "v24.14.1",
+  "seedScheme": "committed integer seeds per hypothesis (see source); re-running reproduces byte-for-byte",
+  "perHypothesis": [
+    {
+      "id": "H9",
+      "metric": "overlap precision/recall/F1 vs name-match baseline (synthetic, Wilson CI) + axios precision",
+      "value": {
+        "codewebF1": 1,
+        "baselineF1": 0.6667,
+        "axiosCodewebPrecision": 0.9792,
+        "axiosBaselinePrecision": 0.6667
+      },
+      "ci": {
+        "codewebF1": {
+          "lo": 0.9977,
+          "hi": 1
+        },
+        "baselineF1": {
+          "lo": 0.6511,
+          "hi": 0.6814
+        }
+      },
+      "passed": true,
+      "criterion": "codeweb F1 CI lower bound > baseline F1 CI upper bound (synthetic)"
+    },
+    {
+      "id": "H10",
+      "metric": "find-similar structural recall - lexical recall on Type-2 clones (paired bootstrap CI)",
+      "value": {
+        "structuralRecall": 1,
+        "lexicalRecall": 0,
+        "pairedDiff": 1
+      },
+      "ci": {
+        "lo": 1,
+        "hi": 1
+      },
+      "passed": true,
+      "criterion": "paired-difference CI excludes 0 (structural strictly higher)"
+    },
+    {
+      "id": "H11",
+      "metric": "find-similar MRR / recall@1 / recall@5 (structural) vs random-baseline MRR",
+      "value": {
+        "mrr": 0.9875,
+        "recallAt1": 0.975,
+        "recallAt5": 1,
+        "randomMRR": 0.107
+      },
+      "ci": {
+        "lo": 0.9788,
+        "hi": 0.9938
+      },
+      "passed": true,
+      "criterion": "MRR >= 0.8 AND MRR CI lower bound > random-baseline MRR"
+    },
+    {
+      "id": "H12",
+      "metric": "max false in-degree shipped vs CODEWEB_LEGACY_FALLBACK on same-name-heavy corpus",
+      "value": {
+        "worstShipped": 0,
+        "worstLegacy": 11
+      },
+      "ci": null,
+      "passed": true,
+      "criterion": "shipped max-false-indeg <= 1/3 of legacy, on EVERY seed"
+    },
+    {
+      "id": "H13",
+      "metric": "deadcode safe-tier precision vs independent reachability (Wilson CI); recall reported",
+      "value": {
+        "safePrecision": 0.519,
+        "safeRecall": 1
+      },
+      "ci": {
+        "lo": 0.464,
+        "hi": 0.5735
+      },
+      "passed": false,
+      "criterion": "safe-tier precision CI lower bound >= 0.95"
+    }
+  ],
+  "ableToFailProbes": {
+    "H9": true,
+    "H10": true,
+    "H11": true,
+    "H12": true,
+    "H13": true
+  },
+  "details": {
+    "H9": {
+      "cw": {
+        "precision": 1,
+        "recall": 1,
+        "f1": 1,
+        "tp": 1700,
+        "fp": 0,
+        "fn": 0,
+        "f1CI": {
+          "lo": 0.9977,
+          "hi": 1
+        },
+        "precisionCI": {
+          "lo": 0.9977,
+          "hi": 1
+        },
+        "recallCI": {
+          "lo": 0.9977,
+          "hi": 1
+        }
+      },
+      "baseline": {
+        "precision": 0.5,
+        "recall": 1,
+        "f1": 0.6667,
+        "tp": 1700,
+        "fp": 1700,
+        "fn": 0,
+        "f1CI": {
+          "lo": 0.6511,
+          "hi": 0.6814
+        },
+        "precisionCI": {
+          "lo": 0.4832,
+          "hi": 0.5168
+        }
+      },
+      "Ks": [
+        20,
+        50,
+        100
+      ],
+      "seedsPerK": 10,
+      "cellsRun": 30,
+      "cliPipelinesRun": 30,
+      "axios": {
+        "available": true,
+        "disclosure": "External validity, NOT exact truth: labels are body-confirmed human-style judgments (labels-axios.json). Real-repo recall is unknowable exactly; precision is the reportable real-world number. The headline statistical PASS for H9 is the SYNTHETIC F1 contrast.",
+        "codeweb": {
+          "precision": 0.9792,
+          "tp": 47,
+          "fp": 1,
+          "findings": 48,
+          "precisionCI": {
+            "lo": 0.891,
+            "hi": 0.9963
+          },
+          "unlabeled": []
+        },
+        "baseline": {
+          "precision": 0.6667,
+          "tp": 50,
+          "fp": 25,
+          "flagged": 75,
+          "precisionCI": {
+            "lo": 0.5542,
+            "hi": 0.7629
+          }
+        },
+        "precisionGain": 0.3125
+      },
+      "probe": {
+        "coincidentalHighMedFindings": 0,
+        "ableToFail": true
+      },
+      "passSynthetic": true,
+      "pass": true
+    },
+    "H10": {
+      "N": 30,
+      "seeds": 10,
+      "lexicalRecallMean": 0,
+      "structuralRecallMean": 1,
+      "pairedDiffMean": 1,
+      "pairedDiffCI": {
+        "lo": 1,
+        "hi": 1
+      },
+      "perSeed": [
+        {
+          "seed": 659488,
+          "lexicalRecall": 0,
+          "structuralRecall": 1
+        },
+        {
+          "seed": 660465,
+          "lexicalRecall": 0,
+          "structuralRecall": 1
+        },
+        {
+          "seed": 661378,
+          "lexicalRecall": 0,
+          "structuralRecall": 1
+        },
+        {
+          "seed": 662355,
+          "lexicalRecall": 0,
+          "structuralRecall": 1
+        },
+        {
+          "seed": 663396,
+          "lexicalRecall": 0,
+          "structuralRecall": 1
+        },
+        {
+          "seed": 656181,
+          "lexicalRecall": 0,
+          "structuralRecall": 1
+        },
+        {
+          "seed": 657094,
+          "lexicalRecall": 0,
+          "structuralRecall": 1
+        },
+        {
+          "seed": 658071,
+          "lexicalRecall": 0,
+          "structuralRecall": 1
+        },
+        {
+          "seed": 659112,
+          "lexicalRecall": 0,
+          "structuralRecall": 1
+        },
+        {
+          "seed": 668281,
+          "lexicalRecall": 0,
+          "structuralRecall": 1
+        }
+      ],
+      "cliCrossCheck": {
+        "bases": 12,
+        "structuralRecalled": 12,
+        "lexicalRecalled": 0,
+        "agrees": true
+      },
+      "probe": {
+        "unrelatedQueryGotSpuriousStructuralMatch": false,
+        "ableToFail": true
+      },
+      "pass": true
+    },
+    "H11": {
+      "M": 40,
+      "seeds": 10,
+      "queries": 400,
+      "mrr": 0.9875,
+      "mrrCI": {
+        "lo": 0.9788,
+        "hi": 0.9938
+      },
+      "recallAt1": 0.975,
+      "recallAt5": 1,
+      "randomBaselineMRR": 0.107,
+      "perSeed": [
+        {
+          "seed": 725296,
+          "recallAt1": 1,
+          "recallAt5": 1
+        },
+        {
+          "seed": 726193,
+          "recallAt1": 0.95,
+          "recallAt5": 1
+        },
+        {
+          "seed": 727602,
+          "recallAt1": 0.925,
+          "recallAt5": 1
+        },
+        {
+          "seed": 721331,
+          "recallAt1": 0.975,
+          "recallAt5": 1
+        },
+        {
+          "seed": 722740,
+          "recallAt1": 1,
+          "recallAt5": 1
+        },
+        {
+          "seed": 723637,
+          "recallAt1": 1,
+          "recallAt5": 1
+        },
+        {
+          "seed": 733238,
+          "recallAt1": 1,
+          "recallAt5": 1
+        },
+        {
+          "seed": 735159,
+          "recallAt1": 0.95,
+          "recallAt5": 1
+        },
+        {
+          "seed": 736568,
+          "recallAt1": 0.975,
+          "recallAt5": 1
+        },
+        {
+          "seed": 729273,
+          "recallAt1": 0.975,
+          "recallAt5": 1
+        }
+      ],
+      "cliCrossCheck": {
+        "sampled": 60,
+        "rankedFirst": 58,
+        "agreementRate": 0.9667
+      },
+      "probe": {
+        "randomRankingSimMRR": 0.108,
+        "randomRankingFailsBar": true,
+        "ableToFail": true
+      },
+      "pass": true
+    },
+    "H12": {
+      "seeds": 10,
+      "names": [
+        "log",
+        "parse",
+        "get",
+        "format",
+        "read"
+      ],
+      "perSeed": [
+        {
+          "seed": 791040,
+          "callersPer": 17,
+          "shippedMaxFalseIndeg": 0,
+          "legacyMaxFalseIndeg": 17,
+          "ratio": 0,
+          "pass": true
+        },
+        {
+          "seed": 787945,
+          "callersPer": 19,
+          "shippedMaxFalseIndeg": 0,
+          "legacyMaxFalseIndeg": 19,
+          "ratio": 0,
+          "pass": true
+        },
+        {
+          "seed": 802258,
+          "callersPer": 11,
+          "shippedMaxFalseIndeg": 0,
+          "legacyMaxFalseIndeg": 11,
+          "ratio": 0,
+          "pass": true
+        },
+        {
+          "seed": 808379,
+          "callersPer": 17,
+          "shippedMaxFalseIndeg": 0,
+          "legacyMaxFalseIndeg": 17,
+          "ratio": 0,
+          "pass": true
+        },
+        {
+          "seed": 806308,
+          "callersPer": 19,
+          "shippedMaxFalseIndeg": 0,
+          "legacyMaxFalseIndeg": 19,
+          "ratio": 0,
+          "pass": true
+        },
+        {
+          "seed": 812429,
+          "callersPer": 27,
+          "shippedMaxFalseIndeg": 0,
+          "legacyMaxFalseIndeg": 27,
+          "ratio": 0,
+          "pass": true
+        },
+        {
+          "seed": 826742,
+          "callersPer": 30,
+          "shippedMaxFalseIndeg": 0,
+          "legacyMaxFalseIndeg": 30,
+          "ratio": 0,
+          "pass": true
+        },
+        {
+          "seed": 832863,
+          "callersPer": 13,
+          "shippedMaxFalseIndeg": 0,
+          "legacyMaxFalseIndeg": 13,
+          "ratio": 0,
+          "pass": true
+        },
+        {
+          "seed": 830792,
+          "callersPer": 12,
+          "shippedMaxFalseIndeg": 0,
+          "legacyMaxFalseIndeg": 12,
+          "ratio": 0,
+          "pass": true
+        },
+        {
+          "seed": 836913,
+          "callersPer": 17,
+          "shippedMaxFalseIndeg": 0,
+          "legacyMaxFalseIndeg": 17,
+          "ratio": 0,
+          "pass": true
+        }
+      ],
+      "legacyNodeNondeterminism": {
+        "run1Node": "def_log_4.js:log",
+        "run2Node": "def_log_4.js:log",
+        "magnitudeStable": true,
+        "magnitude": 30,
+        "nodeIdentityVaried": false
+      },
+      "goldenRealTarget": "discord:log 127->2 (documented in tests/golden-ecc-scripts.test.mjs; that repo is outside this study corpus, so the synthetic same-name-heavy corpus stands in for the controlled A/B; the golden test is the real-world anchor).",
+      "probe": {
+        "legacyFabricatesLargeHub": true,
+        "ableToFail": true
+      },
+      "pass": true
+    },
+    "H13": {
+      "seeds": 10,
+      "graphsPerSeed": 6,
+      "cliRuns": 60,
+      "safePrecision": 0.519,
+      "safePrecisionCI": {
+        "lo": 0.464,
+        "hi": 0.5735
+      },
+      "safeRecall": 1,
+      "safeTP": 164,
+      "safeFP": 152,
+      "totalTrulyDead": 164,
+      "deadCoveredBySafe": 164,
+      "falsePositiveBreakdown": {
+        "testFileFn": 152,
+        "other": 0
+      },
+      "falsePositiveExamples": [
+        "suite.test.js:t0",
+        "suite.test.js:t1",
+        "suite.test.js:t2",
+        "suite.test.js:t0",
+        "suite.test.js:t1",
+        "suite.test.js:t0",
+        "suite.test.js:t0",
+        "suite.test.js:t1"
+      ],
+      "exploratory_productionOnlySafeTier": {
+        "note": "EXPLORATORY (not the pre-registered metric): precision of the safe tier if functions defined in TEST FILES were excluded. Isolates the failure mechanism. The pre-registered metric (above) still governs PASS/FAIL.",
+        "precision": 1,
+        "precisionCI": {
+          "lo": 0.9771,
+          "hi": 1
+        },
+        "prodTP": 164,
+        "prodFP": 0
+      },
+      "realRepoSpotCheck": {
+        "axios": {
+          "available": true,
+          "totalSafe": 304,
+          "safeInTestFiles": 228,
+          "safeInProduction": 76,
+          "testFilePollutionRate": 0.75,
+          "sampleTestFileSafe": [
+            "tests/browser/adapter.browser.test.js:AllResponseHeaders",
+            "tests/browser/adapter.browser.test.js:MockXMLHttpRequest",
+            "tests/browser/adapter.browser.test.js:RequestHeader",
+            "tests/browser/adapter.browser.test.js:abort"
+          ]
+        },
+        "express": {
+          "available": true,
+          "totalSafe": 932,
+          "safeInTestFiles": 928,
+          "safeInProduction": 4,
+          "testFilePollutionRate": 0.9957,
+          "sampleTestFileSafe": [
+            "test/Route.js:it",
+            "test/Route.js:it",
+            "test/Route.js:it",
+            "test/Route.js:it"
+          ]
+        },
+        "flask": {
+          "available": true,
+          "totalSafe": 0,
+          "safeInTestFiles": 0,
+          "safeInProduction": 0,
+          "testFilePollutionRate": 0,
+          "sampleTestFileSafe": []
+        },
+        "gorilla-mux": {
+          "available": true,
+          "totalSafe": 28,
+          "safeInTestFiles": 11,
+          "safeInProduction": 17,
+          "testFilePollutionRate": 0.3929,
+          "sampleTestFileSafe": [
+            "example_authentication_middleware_test.go:authenticationMiddleware",
+            "middleware_test.go:testMiddleware",
+            "mux_test.go:customMethodNotAllowedHandler",
+            "mux_test.go:methodsSubrouterTest"
+          ]
+        }
+      },
+      "oracle": "INDEPENDENT forward-reachability BFS (roots = entrypoint-like names + exported + test functions); written from scratch in this harness, does NOT import graph-ops.orphans.",
+      "findingSummary": "H13 FAILS as shipped: the deadcode \"safe to delete\" tier does NOT exclude functions DEFINED IN TEST FILES. Such functions have no incoming code edge, are not exported, and are not entrypoint-named, so deadcode.mjs files them as safe — but a test runner invokes them, so the independent reachability oracle (correctly) counts them reachable. On real repos this dominates the safe tier (e.g. express 928/932 safe items are test-file functions like `it`). The deliberate precision-over-recall design holds for PRODUCTION symbols (see exploratory cut), but the safe tier is unsafe to apply on a repo containing tests.",
+      "probe": {
+        "testFnInSafe": true,
+        "oracleSaysReachable": true,
+        "harnessWouldCountAsFalsePositive": true,
+        "ableToFail": true
+      },
+      "pass": false
+    }
+  },
+  "elapsedMs": 220573
+}
