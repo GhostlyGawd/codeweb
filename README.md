@@ -170,6 +170,28 @@ new duplication finding, or makes an existing symbol lose all its callers. It **
 removals — deleting code/cycles/dups is an improvement, not a regression — and a brand-new uncalled
 node is reported but does not trip the gate (agents add functions before wiring them).
 
+## Gate every PR (GitHub Action)
+
+`scripts/ci-gate.mjs` turns the `diff` gate into CI: it builds the graph for the PR base and head and
+**fails the build on a structural regression** (a new cycle, a new duplication, or a symbol that
+loses all its callers). Drop it into any repo (full spec: [`docs/ci-gate.md`](docs/ci-gate.md)):
+
+```yaml
+# .github/workflows/codeweb-gate.yml
+on: pull_request
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }   # required — the gate diffs against the PR base
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@main
+        with: { target: src }
+```
+
+Locally: `node scripts/ci-gate.mjs --base <ref> [--target <subdir>]`. Pure removals never trip the
+gate; a brand-new uncalled function is reported but doesn't fail the build.
+
 ## Advise consolidations (`optimize.mjs`)
 
 Where `diff.mjs` *gates* (pass/fail on an edit), `optimize.mjs` *advises*: it reads a graph's
@@ -310,6 +332,7 @@ codeweb/
 │   ├── query.mjs                   # structural queries (callers/callees/tests/impact/cycles/orphans)
 │   ├── diff.mjs                    # graph-delta / post-edit regression gate (before vs after)
 │   ├── trend.mjs                   # duplication + coupling over snapshots / git history (dashboard)
+│   ├── ci-gate.mjs                 # CI gate: before(base)-vs-after(working tree) diff, exits 1 on regression
 │   ├── refresh.mjs                 # F0: re-extract a graph's nodes+edges from disk (cached, fast)
 │   ├── find-similar.mjs            # F1: rank existing bodies vs a candidate (reuse-at-write-time)
 │   ├── placement.mjs               # F2: suggest a new symbol's domain/file + reuse warnings
@@ -342,13 +365,11 @@ codeweb/
 - **Hosted live demo** — a click-around `report.html` of a recognizable open-source repo, published
   to GitHub Pages, so you can explore a real map before installing anything. *(Staged at
   [`docs/demo/`](docs/demo/) — the axios map; goes live once Pages is enabled.)*
-- **CI regression gate** — `diff.mjs` packaged as a GitHub Action that fails a PR on a new dependency
-  cycle, a new duplication finding, or a symbol that loses all its callers.
 - **More first-class languages** — Go on the deterministic fast path. (JS/TS/Python/**Rust** are
   native today; everything else routes through the agent fallback.)
 
-_Recently shipped: Rust on the fast path · duplication-over-time trend (`trend.mjs`) · a shareable
-report that no longer embeds the local source path._
+_Recently shipped: Rust on the fast path · duplication-over-time trend (`trend.mjs`) · a one-command
+CI regression gate + GitHub Action · a shareable report that no longer embeds the local source path._
 
 ## Handoffs
 
