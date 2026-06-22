@@ -25,7 +25,9 @@ renderer. All examples below use synthetic values.
       "loc": 120,                              // size of the symbol body, for node radius
       "exports": true,
       "domain": "auth",                        // assigned by domain-mapper (empty from dissectors)
-      "summary": "Authenticates a user and issues a session token."
+      "summary": "Authenticates a user and issues a session token.",
+      "complexity": 7,                         // F4: approximate cyclomatic complexity (function|method only; absent on class/module)
+      "maxDepth": 3                            // F4: max control-flow nesting depth (function|method only)
     }
   ],
 

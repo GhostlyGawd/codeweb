@@ -12,6 +12,10 @@
     "optimize": "node scripts/optimize.mjs",
     "trend": "node scripts/trend.mjs",
     "context-pack": "node scripts/context-pack.mjs",
-    "simulate-edit": "node scripts/simulate-edit.mjs"
+    "simulate-edit": "node scripts/simulate-edit.mjs",
+    "hotspots": "node scripts/hotspots.mjs",
+    "campaign": "node scripts/campaign.mjs",
+    "reading-order": "node scripts/reading-order.mjs",
+    "annotate": "node scripts/annotate.mjs"
   }
 }

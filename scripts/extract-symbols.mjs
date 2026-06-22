@@ -18,9 +18,11 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { relative, resolve, join, dirname, extname } from 'node:path';
 import { isTestFile } from './lib/graph-ops.mjs'; // F4: test-file predicate (shared, one truth)
+import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 
-// F0: bump when scanSymbols/ctagsSymbols OUTPUT changes — invalidates stale scan caches.
-const SCANNER_VERSION = 1;
+// F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
+// v2: nodes carry complexity/maxDepth (F4) + the cache holds per-file edge lists + a symbol signature (F9).
+const SCANNER_VERSION = 2;
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -28,12 +30,13 @@ const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
 
 const argv = process.argv.slice(2);
-const opts = { path: null, out: null, ctags: true, target: null, cache: null };
+const opts = { path: null, out: null, ctags: true, target: null, cache: null, full: false };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--out') opts.out = argv[++i];
   else if (t === '--target') opts.target = argv[++i];
   else if (t === '--cache') opts.cache = argv[++i]; // F0: per-file scan cache (incremental freshness)
+  else if (t === '--full') opts.full = true;        // F9: ignore the edge cache, derive all edges from scratch
   else if (t === '--no-ctags') opts.ctags = false;
   else if (!opts.path) opts.path = t;
 }
@@ -248,10 +251,19 @@ for (const f of files) {
     // real body extent (brace match / dedent), NOT next-symbol-line — so the last symbol can't
     // run to EOF and absorb the trailing top-level code (the fabricated-edge bug).
     const end = Math.min(bodyEnd(lines, start - 1, isPy) + 1, total);
+    const loc = Math.min(end - start + 1, 2000);
     const id = r + ':' + s.name;
     ranges.push({ id, name: s.name, start, end, kind: s.kind });
-    const node = { id, label: s.name, kind: s.kind, file: r, line: start, loc: Math.min(end - start + 1, 2000), exports: s.exports, domain: '', summary: '' };
-    if (s.kind === 'function' || s.kind === 'method') node.signature = parseSignature(lines[start - 1] || '', s.name, isPy); // F3: contract for callers
+    const node = { id, label: s.name, kind: s.kind, file: r, line: start, loc, exports: s.exports, domain: '', summary: '' };
+    if (s.kind === 'function' || s.kind === 'method') {
+      node.signature = parseSignature(lines[start - 1] || '', s.name, isPy); // F3: contract for callers
+      // F4: approximate cyclomatic complexity + max nesting from the SAME body extent (lines [start, end]).
+      // Only function/method nodes carry these (a class/module has no single control-flow body).
+      const body = lines.slice(start - 1, start - 1 + loc).join('\n');
+      const lang = isPy ? 'py' : 'js';
+      node.complexity = cyclomatic(body, lang);
+      node.maxDepth = nestingDepth(body, lang);
+    }
     nodes.push(node);
   });
   fileSyms.set(f, { text, ranges });
@@ -304,82 +316,61 @@ for (const f of files) {
   if (amap.size) aliasByFile.set(f, amap);
 }
 
-// ---- derive call edges ----
-const edgeSet = new Set();
-const edges = [];
-let ambiguousDropped = 0; // bare calls to multi-def names with no import/same-file resolution
+// ---- derive call edges (F9: incremental, per-file, cacheable) ------------------------------
 const LEGACY_FALLBACK = !!process.env.CODEWEB_LEGACY_FALLBACK; // A/B: restore pre-fix byName[0] wiring for regression testing
-const callRe = /([A-Za-z_$][\w$]*)\s*\(/g;
-// Module/top-level scope gets a synthetic per-file `module` node (created lazily, on first
-// top-level call) so calls made outside any function body are attributed honestly to the module
-// instead of dropped or blamed on whichever function's range happened to reach that line.
-const moduleId = new Map();
-const ensureModule = (fAbs, rPath) => {
-  if (moduleId.has(fAbs)) return moduleId.get(fAbs);
-  const id = rPath + ':<module>';
-  moduleId.set(fAbs, id);
-  nodes.push({ id, label: '<module>', kind: 'module', file: rPath, line: 1, loc: 1, exports: false, domain: '', summary: '' });
-  nodeIdSet.add(id);
-  return id;
-};
-for (const f of files) {
-  const fs = fileSyms.get(f); if (!fs) continue;
-  const { text, ranges } = fs;
-  if (!ranges.length) continue;
-  const r = rel(f);
-  const lines = text.split(/\r?\n/);
-  // innermost containing range wins (a call inside a nested fn/method attributes to it, not the
-  // enclosing class); null = module/top-level scope.
+
+// F9: global symbol signature — a hash of the discovered symbol-node id set (module nodes are derived,
+// so excluded). A file's edges depend ONLY on its own text + global symbol resolution (byName/alias),
+// so when the symbol set is unchanged AND a file's content is unchanged, that file's edges are
+// identical and may be reused. Any added/removed/renamed symbol flips the signature -> full re-derive
+// (correctness over speed). This is what makes warm-incremental byte-identical to a cold full extract.
+const symbolSig = sha1(nodes.map((n) => n.id).slice().sort().join('\n'));
+
+// Derive ONE file's edges (call/ref/inherit), with from-side = its own symbols or its <module> node.
+// Pure w.r.t. the file: returns {edges, hasModule, ambiguous}. The precision gate (alias > same-file >
+// unique-global, drop-ambiguous) is unchanged — only the plumbing moved into a function so it can be
+// cached per file and skipped when the file + symbol set are unchanged.
+function deriveFileEdges(r, lines, ranges, aliasMap) {
+  const local = []; const localSet = new Set();
+  let hasModule = false, ambiguous = 0;
+  const isPy = r.endsWith('.py');
   const enclosing = (lineNo) => { let best = null; for (const rg of ranges) if (lineNo >= rg.start && lineNo <= rg.end && (!best || rg.start > best.start)) best = rg; return best; };
   const sameFileByName = new Map(ranges.map((rg) => [rg.name, rg.id]));
-  const aliasMap = aliasByFile.get(f);
-  // Resolve a referenced name to a callee node and record the edge. alias (import) and same-file
-  // defs are authoritative; the global byName fallback is only safe when the name has exactly ONE
-  // definition — a bare reference to a name defined in many files (log/run/get) can't be attributed
-  // to a specific def, and wiring it to byName[0] fabricates false super-hubs (the "lib · log"
-  // mega-cluster). Drop instead. caller=null means module/top-level scope -> the synthetic module node.
   const addEdge = (lineIdx, name, kind = 'call') => {
     if (KEYWORDS.has(name)) return;
     const aliased = aliasMap && aliasMap.get(name);
     if (!aliased && !byName.has(name)) return;
     const caller = enclosing(lineIdx + 1);
     if (caller && caller.name === name && lineIdx + 1 === caller.start) return; // its own definition
-    const callerId = caller ? caller.id : ensureModule(f, r);
+    let callerId;
+    if (caller) callerId = caller.id;
+    else { callerId = r + ':<module>'; hasModule = true; } // module/top-level scope
     let calleeId = aliased || sameFileByName.get(name);
     if (!calleeId) {
       const defs = byName.get(name);
       if (defs && defs.length === 1) calleeId = defs[0];
-      else if (LEGACY_FALLBACK) calleeId = defs && defs[0]; // pre-fix: wire to first global def (fabricates hubs)
-      else { ambiguousDropped++; return; }
+      else if (LEGACY_FALLBACK) calleeId = defs && defs[0];
+      else { ambiguous++; return; }
     }
     if (!calleeId || calleeId === callerId) return;
     const key = callerId + ' ' + calleeId;
-    if (edgeSet.has(key)) return;
-    edgeSet.add(key);
-    // F4: a CALL from a test-file symbol to a NON-test symbol is a `test` edge (the test exercises
-    // the production symbol), not a production call — so production --callers exclude tests. Same
-    // precision gate; test->test calls stay `call` (internal test wiring, doesn't pollute prod).
+    if (localSet.has(key)) return;
+    localSet.add(key);
     const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
-    edges.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
+    local.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
   };
-  // A function name in argument position passed WITHOUT parens — arr.map(fn), rl.on('x', fn) — is a
-  // higher-order reference: the callee invokes fn, so the dependency is real. Captured as a call edge
-  // (same precision gate) so --impact/--callers/--orphans see it.
+  const callRe = /([A-Za-z_$][\w$]*)\s*\(/g;
   const refRe = /[(,]\s*([A-Za-z_$][\w$]*)\s*(?=[,)])/g;
-  const isPy = r.endsWith('.py');
-  const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g; // JS/TS single super
-  const pyBasesRe = /^\s*class\s+[A-Za-z_]\w*\s*\(([^)]*)\)/;                     // Python base list
+  const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g;
+  const pyBasesRe = /^\s*class\s+[A-Za-z_]\w*\s*\(([^)]*)\)/;
   for (let i = 0; i < lines.length; i++) {
     const ln = lines[i];
-    // inherit edges FIRST: `class X extends Y` / `class X(Y):` -> X inherits Y. The class node's
-    // range starts here, so enclosing() resolves the `from` to X automatically. Run before call/ref
-    // so a Python `class X(Base):` keys X->Base as inheritance, not as a call arg (first writer wins).
     if (isPy) {
       const pm = pyBasesRe.exec(ln);
       if (pm) for (const part of pm[1].split(',')) {
         const base = part.trim();
-        if (!base || base.includes('=')) continue;     // skip metaclass=/keyword bases
-        const name = base.replace(/^.*\./, '');          // last segment of a dotted base
+        if (!base || base.includes('=')) continue;
+        const name = base.replace(/^.*\./, '');
         if (/^[A-Za-z_]\w*$/.test(name)) addEdge(i, name, 'inherit');
       }
     } else {
@@ -388,22 +379,52 @@ for (const f of files) {
     }
     callRe.lastIndex = 0; let m;
     while ((m = callRe.exec(ln))) {
-      if (ln[m.index - 1] === '.') continue; // method/property call (obj.fn()) — not our top-level symbol
+      if (ln[m.index - 1] === '.') continue; // method/property call (obj.fn()) — not a top-level symbol
       addEdge(i, m[1]);
     }
     refRe.lastIndex = 0;
     while ((m = refRe.exec(ln))) addEdge(i, m[1]);
   }
+  return { edges: local, hasModule, ambiguous };
 }
 
+const edges = [];
+let ambiguousDropped = 0, edgedCount = 0;
+const edgeFiles = files.filter((f) => fileSyms.get(f)?.ranges.length);
+const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; // edge cache valid iff symbol set unchanged
+for (const f of edgeFiles) {
+  const { text, ranges } = fileSyms.get(f);
+  const r = rel(f);
+  const lines = text.split(/\r?\n/);
+  const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
+  const prev = reuseEdges && oldCache.files[r];
+  let result;
+  if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges) {
+    result = { edges: prev.edges, hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0 }; // reuse
+  } else {
+    result = deriveFileEdges(r, lines, ranges, aliasByFile.get(f));
+    edgedCount++;
+  }
+  if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; }
+  if (result.hasModule && !nodeIdSet.has(r + ':<module>')) {
+    nodes.push({ id: r + ':<module>', label: '<module>', kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '' });
+    nodeIdSet.add(r + ':<module>');
+  }
+  for (const e of result.edges) edges.push(e);
+  ambiguousDropped += result.ambiguous;
+}
+if (newCache) newCache.symbolSig = symbolSig;
+
 // ---- append import edges (file anchor -> imported symbol) ----
+// Deduped against the call edges by (from,to): caller ids are file-local, so this set has no
+// cross-file collisions and matches the original single-edgeSet behaviour exactly.
 let importEdgeCount = 0;
+const edgeKeys = new Set(edges.map((e) => e.from + ' ' + e.to));
 for (const [a, b] of importEdges) {
   if (!nodeIdSet.has(a) || !nodeIdSet.has(b) || a === b) continue;
   const key = a + ' ' + b;
-  if (edgeSet.has(key)) continue;
-  edgeSet.add(key);
-  // F4: an IMPORT from a test file of a non-test symbol is a `test` edge, not a production import.
+  if (edgeKeys.has(key)) continue;
+  edgeKeys.add(key);
   const ik = (isTestFile(idFile(a)) && !isTestFile(idFile(b))) ? 'test' : 'import';
   edges.push({ from: a, to: b, kind: ik, weight: 1 });
   if (ik === 'import') importEdgeCount++;
@@ -421,6 +442,6 @@ const fragment = {
   nodes, edges,
 };
 if (newCache) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
-const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'} engine); dropped ${ambiguousDropped} ambiguous bare-call edges; scanned ${scanCount}/${files.length} file(s)${opts.cache ? ' (cache on)' : ''}`;
+const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'} engine); dropped ${ambiguousDropped} ambiguous bare-call edges; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}`;
 if (opts.out) { writeFileSync(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
 else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }

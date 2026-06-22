@@ -10,8 +10,9 @@
 // Exit: 0 (advisory), 2 usage/IO.
 
 import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { resolve, dirname, join } from 'node:path';
 import { normalizeGraph, buildIndex, orphans } from './lib/graph-ops.mjs';
+import { fingerprint, loadAnnotations } from './lib/annotations.mjs'; // F7: false-positive suppression memory
 
 // Entrypoint-like names that may be invoked by a framework / CLI / test runner rather than via a
 // code edge — so an uncalled one is "review", not "safe to delete". (Mirrored by the test oracle.)
@@ -20,8 +21,14 @@ const USAGE = 'usage: deadcode.mjs <graph.json> [--json]   (or set CODEWEB_WS)';
 function die(msg, code) { console.error(msg); process.exit(code); }
 
 const argv = process.argv.slice(2);
-let json = false; const pos = [];
-for (const t of argv) { if (t === '--json') json = true; else if (!t.startsWith('-')) pos.push(t); }
+let json = false, showSuppressed = false, annDir = null; const pos = [];
+for (let i = 0; i < argv.length; i++) {
+  const t = argv[i];
+  if (t === '--json') json = true;
+  else if (t === '--show-suppressed') showSuppressed = true;
+  else if (t === '--annotations') annDir = argv[++i];
+  else if (!t.startsWith('-')) pos.push(t);
+}
 const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath) die(USAGE, 2);
 
@@ -43,12 +50,23 @@ for (const o of orphans(graph, index)) {           // orphans = no call|import|i
   else safe.push({ ...o, reason: `no production caller, not exported, no test edge — high-confidence dead (${CAVEAT})` });
 }
 
-const payload = { target: graph.meta?.target || 'target', totals: { orphans: safe.length + review.length, safe: safe.length, review: review.length }, safe, review };
+// F7: every finding carries a stable fingerprint (kind 'orphan' + its id). A '.codeweb/annotations.json'
+// false-positive suppression hides a safe finding by default (so a confirmed not-dead symbol stops
+// resurfacing) and is COUNTED; --show-suppressed reveals them. Suppression keys on identity, so if the
+// symbol id changes the fingerprint changes and it is NOT silently hidden.
+for (const o of safe) o.fingerprint = fingerprint({ kind: 'orphan', nodes: [o.id] });
+for (const o of review) o.fingerprint = fingerprint({ kind: 'orphan', nodes: [o.id] });
+const dir = annDir || join(dirname(abs), '.codeweb');
+const killed = new Set(loadAnnotations(dir).suppressions.filter((s) => s.verdict === 'false-positive').map((s) => s.fingerprint));
+const suppressed = safe.filter((o) => killed.has(o.fingerprint));
+const visibleSafe = showSuppressed ? safe : safe.filter((o) => !killed.has(o.fingerprint));
+
+const payload = { target: graph.meta?.target || 'target', totals: { orphans: visibleSafe.length + review.length, safe: visibleSafe.length, review: review.length, suppressed: suppressed.length }, safe: visibleSafe, review, suppressed };
 
 if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
 
 const t = payload.totals;
-console.log(`codeweb deadcode: ${payload.target} — ${t.orphans} orphan(s): ${t.safe} safe, ${t.review} review`);
+console.log(`codeweb deadcode: ${payload.target} — ${t.orphans} orphan(s): ${t.safe} safe, ${t.review} review${t.suppressed ? `, ${t.suppressed} suppressed` : ''}`);
 console.log(`\nsafe to delete (no caller, not exported, no test):`);
 for (const o of safe) console.log(`  ${o.id}  [${o.domain}]`);
 if (!safe.length) console.log('  (none)');

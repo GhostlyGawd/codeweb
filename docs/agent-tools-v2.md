@@ -378,3 +378,31 @@ For each dependency cycle, propose the cheapest edge to sever — and **prove** 
 - Each feature ships failing tests + properties **written and reviewed before** implementation, driven
   to green; the full suite stays green throughout; then each tool is verified in practice against a
   real generated graph end-to-end.
+
+## Tier 0–3 agent-intelligence additions
+
+Ten features extending the agent surface and auto-optimization intelligence, all deterministic and
+zero-runtime-dependency (full spec + property catalog: `docs/tier0-3-spec.md`):
+
+**Close the edit loop.** `codeweb_context` (MCP) returns a symbol's body + direct callers/callees +
+blast-radius ids in one call. `codeweb_refresh` (MCP) re-extracts from disk so mid-task queries aren't
+stale. `review --before` now reports `newDuplications` — a body-confirmed duplicate introduced by the
+edit fails the gate (closing the prevent-duplication hole at the moment of editing).
+
+**New deterministic intelligence.** Function/method nodes carry `complexity` + `maxDepth`
+(`lib/complexity.mjs`); `codeweb_hotspots` ranks by complexity × fan-in × churn — where to refactor
+first at scale. `codeweb_campaign` composes dead-code deletes + verified cycle cuts + body-confirmed
+merges into one ordered, cumulatively pre-flighted worklist that stays gate-green step by step
+("auto-optimize at any scale" — a read-only plan the agent executes).
+
+**Deepen the moat.** `find-similar --structural` catches Type-2 clones (renamed copies) via an
+identifier-normalized skeleton (`lib/skeleton.mjs`). `annotate.mjs` + `deadcode` honor
+`.codeweb/annotations.json` false-positive suppressions, keyed to a finding's identity so a changed
+symbol resurfaces (`lib/annotations.mjs`). `codeweb_reading_order` emits a foundations-first tour.
+
+**Scale.** The extractor caches per-file edges behind a global symbol signature (`--full` forces a
+cold derive): a body-only edit re-derives edges for just the changed file, byte-identical to a full
+extract. `lib/shards.mjs` splits a graph into per-shard subgraphs + a boundary index whose
+callers/callees/impact answers equal the monolith — for repos too big to hold in memory.
+
+MCP now exposes **20 tools** (`+codeweb_context/refresh/hotspots/campaign/reading_order`).

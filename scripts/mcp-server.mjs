@@ -22,6 +22,11 @@ const RISK = join(HERE, 'risk.mjs');
 const BREAKCYCLES = join(HERE, 'break-cycles.mjs');
 const DEADCODE = join(HERE, 'deadcode.mjs');
 const CODEMOD = join(HERE, 'codemod.mjs');
+const CONTEXT = join(HERE, 'context-pack.mjs');       // F1
+const REFRESH = join(HERE, 'refresh.mjs');            // F2
+const HOTSPOTS = join(HERE, 'hotspots.mjs');          // F4
+const CAMPAIGN = join(HERE, 'campaign.mjs');          // F5
+const READINGORDER = join(HERE, 'reading-order.mjs'); // F8
 const SERVER = { name: 'codeweb', version: '0.1.0' };
 const DEFAULT_PROTOCOL = '2025-06-18';
 
@@ -60,6 +65,17 @@ const TOOLS = [
     description: 'Confidence-tiered dead-code: partitions orphans into safe-to-delete vs review-first (test-guarded or entrypoint-like).' },
   { name: 'codeweb_codemod', need: ['graph', 'merge', 'into'], bin: CODEMOD, argv: (a) => [a.graph, '--merge', a.merge, '--into', a.into],
     description: 'Plan a consolidation merge (report-only): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, and the projected regression-gate verdict. Read-only — does NOT modify source.' },
+  // Tier 0-3 additions
+  { name: 'codeweb_context', need: ['graph', 'symbol'], bin: CONTEXT, argv: (a) => [a.graph, a.symbol],
+    description: 'Blast-radius-scoped context for a symbol in ONE call: its body, direct callers (with bodies — the call sites that break if its contract changes), direct callees (location-only), and the transitive impact ids. Call this to get a bounded edit window instead of grepping whole files.' },
+  { name: 'codeweb_refresh', need: ['graph'], bin: REFRESH, argv: (a) => [a.graph],
+    description: 'Re-extract the graph from disk (meta.root) so mid-task queries reflect your edits, not a stale snapshot. Incremental (only changed files re-scanned); preserves domains, drops stale overlaps. Call AFTER you edit source and BEFORE re-querying impact/callers/context.' },
+  { name: 'codeweb_hotspots', need: ['graph'], bin: HOTSPOTS, argv: (a) => [a.graph],
+    description: 'Rank symbols by refactoring priority (complexity x fan-in x churn — the hotspot model): where to focus first in a large codebase. Each result carries its raw components.' },
+  { name: 'codeweb_campaign', need: ['graph'], bin: CAMPAIGN, argv: (a) => [a.graph],
+    description: 'One ordered, gated optimization worklist composing dead-code deletes + verified cycle cuts + body-confirmed duplicate merges, each pre-flighted so applying them in order never introduces a cycle. Read-only PLAN — the agent executes each step. "Auto-optimize this codebase" at any scale.' },
+  { name: 'codeweb_reading_order', need: ['graph'], bin: READINGORDER, argv: (a) => [a.graph],
+    description: 'A foundations-first reading path (depended-upon leaves before orchestrators) to understand a codebase or scope fast — a curated tour instead of blind grep. Optional --scope and --budget via the CLI.' },
 ];
 const PROP = {
   graph: { type: 'string', description: 'Path to the codeweb graph.json to query' },

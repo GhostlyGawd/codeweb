@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { writeFileSync } from 'node:fs';
-import { tmpDir, cleanup, script } from './helpers.mjs';
+import { tmpDir, cleanup, script, writeTree, runNode, readJSON } from './helpers.mjs';
 
 const GRAPH = {
   meta: { target: 'mcp-fixture' },
@@ -78,9 +78,10 @@ test('M1: initialize returns protocolVersion, an object tools capability, and se
 test('M2: tools/list exposes the full tool set with object schemas + correct required args', () => {
   const tools = rpc([INIT, { jsonrpc: '2.0', id: 2, method: 'tools/list' }]).byId.get(2).result.tools;
   assert.deepEqual(tools.map((t) => t.name).sort(),
-    ['codeweb_break_cycles', 'codeweb_callees', 'codeweb_callers', 'codeweb_codemod', 'codeweb_cycles',
-      'codeweb_deadcode', 'codeweb_diff', 'codeweb_find_similar', 'codeweb_fitness', 'codeweb_impact',
-      'codeweb_orphans', 'codeweb_placement', 'codeweb_review', 'codeweb_risk', 'codeweb_tests']);
+    ['codeweb_break_cycles', 'codeweb_callees', 'codeweb_callers', 'codeweb_campaign', 'codeweb_codemod',
+      'codeweb_context', 'codeweb_cycles', 'codeweb_deadcode', 'codeweb_diff', 'codeweb_find_similar',
+      'codeweb_fitness', 'codeweb_hotspots', 'codeweb_impact', 'codeweb_orphans', 'codeweb_placement',
+      'codeweb_reading_order', 'codeweb_refresh', 'codeweb_review', 'codeweb_risk', 'codeweb_tests']);
   for (const t of tools) {
     assert.ok(t.description && t.description.length > 0, `${t.name} has a description`);
     assert.equal(t.inputSchema.type, 'object', `${t.name} inputSchema is an object`);
@@ -102,6 +103,12 @@ test('M2: tools/list exposes the full tool set with object schemas + correct req
   assert.deepEqual(req('codeweb_break_cycles'), ['graph']);
   assert.deepEqual(req('codeweb_deadcode'), ['graph']);
   assert.deepEqual(req('codeweb_codemod'), ['graph', 'merge', 'into']);
+  // Tier 0-3 additions (F1/F2/F4/F5/F8)
+  assert.deepEqual(req('codeweb_context'), ['graph', 'symbol']);
+  assert.deepEqual(req('codeweb_refresh'), ['graph']);
+  assert.deepEqual(req('codeweb_hotspots'), ['graph']);
+  assert.deepEqual(req('codeweb_campaign'), ['graph']);
+  assert.deepEqual(req('codeweb_reading_order'), ['graph']);
 });
 
 test('M3: tools/call codeweb_impact returns the query JSON as text content', () => {
@@ -225,4 +232,95 @@ test('MD4: codeweb_diff on a nonexistent graph file -> isError:true (IO), stdout
 	assert.ok(!r.error);
 	assert.ok(r.result.isError, 'diff.mjs exit 2 (IO) -> isError');
 	assert.match(r.result.content[0].text, /not found|no such|cannot/i);
+});
+
+// --- Tier 0-3 new tools: context (F1), refresh (F2), hotspots (F4), campaign (F5), reading_order (F8) ---
+// context + refresh need a graph whose meta.root points at real source on disk.
+
+let SRCWS, SRCGP;
+before(() => {
+	SRCWS = tmpDir('codeweb-mcp-src-');
+	const root = join(SRCWS, 'src');
+	writeTree(root, {
+		'main.js': 'import { helper } from "./util.js";\nexport function main() { return helper(2); }\n',
+		'util.js': 'export function helper(x) {\n  if (x > 0) return x * 2;\n  return 0;\n}\n',
+	});
+	const G = {
+		meta: { root: root.replace(/\\/g, '/'), target: 'mcp-src' }, domains: [], overlaps: [],
+		nodes: [
+			{ id: 'main.js:main', label: 'main', kind: 'function', file: 'main.js', line: 2, loc: 1, exports: true, domain: 'app', complexity: 1, maxDepth: 0 },
+			{ id: 'util.js:helper', label: 'helper', kind: 'function', file: 'util.js', line: 1, loc: 4, exports: true, domain: 'lib', complexity: 2, maxDepth: 1 },
+		],
+		edges: [{ from: 'main.js:main', to: 'util.js:helper', kind: 'call' }],
+	};
+	SRCGP = join(SRCWS, 'graph.json'); writeFileSync(SRCGP, JSON.stringify(G));
+});
+after(() => { if (SRCWS) cleanup(SRCWS); });
+
+// CTX-MCP-PARITY: the MCP tool result must be BYTE-IDENTICAL to context-pack.mjs --json stdout — the
+// server is a faithful pass-through, not a re-implementation (so there is one context impl, not two).
+test('M11 / CTX-MCP-PARITY: codeweb_context output == context-pack.mjs --json, verbatim (F1)', () => {
+	for (const sym of ['util.js:helper', 'main.js:main', 'zzzNope']) {
+		const res = rpc([INIT, callTool(40, 'codeweb_context', { graph: SRCGP, symbol: sym })]).byId.get(40)?.result;
+		assert.ok(res, `got a tools/call result for ${sym}`);
+		const cli = runNode(script('context-pack.mjs'), [SRCGP, sym, '--json']);
+		assert.equal((res.content?.[0]?.text ?? '').trim(), cli.stdout.trim(), `MCP context parity for ${sym}`);
+	}
+	// sanity that the parity payload is the real thing (caller/blast), not an empty echo
+	const res = rpc([INIT, callTool(45, 'codeweb_context', { graph: SRCGP, symbol: 'util.js:helper' })]).byId.get(45)?.result;
+	const payload = JSON.parse(res.content[0].text);
+	assert.equal(payload.callers[0].id, 'main.js:main');
+	assert.ok(/helper/.test(payload.target[0].body), 'target body included from source');
+});
+
+// RFS-MCP-PARITY + RFS-IDEMPOTENT: refresh through MCP equals refresh.mjs --json, and a second refresh
+// on an unchanged tree yields identical node+edge id-sets (overlaps always emptied).
+test('M12 / RFS-MCP-PARITY + IDEMPOTENT: codeweb_refresh matches the CLI and is idempotent (F2)', () => {
+	// isolate a copy so the CLI parity run and the MCP run don't fight over the same on-disk graph
+	const dir = tmpDir('codeweb-rfs-');
+	try {
+		const root = join(SRCWS, 'src').replace(/\\/g, '/');
+		const G = readJSON(SRCGP);
+		const gpCli = join(dir, 'cli.json'); writeFileSync(gpCli, JSON.stringify(G));
+		const gpMcp = join(dir, 'mcp.json'); writeFileSync(gpMcp, JSON.stringify(G));
+		const cli = runNode(script('refresh.mjs'), [gpCli, '--json']);
+		const res = rpc([INIT, callTool(41, 'codeweb_refresh', { graph: gpMcp })]).byId.get(41)?.result;
+		assert.ok(res && !res.isError, res?.content?.[0]?.text);
+		// the refreshed on-disk graphs must be identical (the summary paths differ, so compare the graphs)
+		const a = readJSON(gpCli), b = readJSON(gpMcp);
+		assert.deepEqual(a.nodes.map((n) => n.id).sort(), b.nodes.map((n) => n.id).sort(), 'MCP refresh == CLI refresh (nodes)');
+		assert.deepEqual(a.edges.map((e) => `${e.from} ${e.to} ${e.kind}`).sort(), b.edges.map((e) => `${e.from} ${e.to} ${e.kind}`).sort(), 'edges');
+		// idempotent: refresh again, id-sets unchanged, overlaps empty
+		const before = b.nodes.map((n) => n.id).sort();
+		rpc([INIT, callTool(46, 'codeweb_refresh', { graph: gpMcp })]);
+		const c = readJSON(gpMcp);
+		assert.deepEqual(c.nodes.map((n) => n.id).sort(), before, 'second refresh on an unchanged tree is idempotent');
+		assert.deepEqual(c.overlaps, [], 'refresh always empties overlaps');
+	} finally { cleanup(dir); }
+});
+
+test('M13: codeweb_hotspots ranks symbols (F4)', () => {
+	const r = rpc([INIT, callTool(42, 'codeweb_hotspots', { graph: SRCGP })]).byId.get(42)?.result;
+	assert.ok(r && !r.isError, r?.content?.[0]?.text);
+	const payload = JSON.parse(r.content[0].text);
+	assert.ok(Array.isArray(payload.ranked) && payload.ranked.length >= 2);
+	assert.ok('complexity' in payload.ranked[0].components);
+});
+
+test('M14: codeweb_campaign returns an ordered worklist (F5)', () => {
+	const r = rpc([INIT, callTool(43, 'codeweb_campaign', { graph: SRCGP })]).byId.get(43)?.result;
+	assert.ok(r && !r.isError, r?.content?.[0]?.text);
+	const payload = JSON.parse(r.content[0].text);
+	assert.ok(Array.isArray(payload.steps), 'emits steps[]');
+	assert.ok('totals' in payload);
+});
+
+test('M15: codeweb_reading_order returns a bounded foundations-first path (F8)', () => {
+	const r = rpc([INIT, callTool(44, 'codeweb_reading_order', { graph: SRCGP })]).byId.get(44)?.result;
+	assert.ok(r && !r.isError, r?.content?.[0]?.text);
+	const payload = JSON.parse(r.content[0].text);
+	assert.ok(Array.isArray(payload.order) && payload.order.length >= 1);
+	// helper is a foundation (called by main) -> must precede main in the reading order
+	const ids = payload.order.map((o) => o.id);
+	assert.ok(ids.indexOf('util.js:helper') < ids.indexOf('main.js:main'), 'callee precedes caller');
 });

@@ -13,21 +13,26 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { normalizeGraph, isTestFile } from './lib/graph-ops.mjs';
 import { shingles, jaccard } from './lib/shingles.mjs';
+import { structuralShingles } from './lib/skeleton.mjs'; // F6: Type-2 (rename-invariant) similarity
 
-const USAGE = 'usage: find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--json]';
+const USAGE = 'usage: find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--structural] [--json]';
 function die(msg, code) { console.error(msg); process.exit(code); }
 
 const argv = process.argv.slice(2);
-let json = false, body = null, stdin = false, signature = null, k = 10; const pos = [];
+let json = false, body = null, stdin = false, signature = null, k = 10, structural = false; const pos = [];
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--json') json = true;
   else if (t === '--stdin') stdin = true;
+  else if (t === '--structural') structural = true;
   else if (t === '--body') body = argv[++i];
   else if (t === '--signature') signature = argv[++i];
   else if (t === '--k') k = Math.max(1, parseInt(argv[++i], 10) || 10);
   else if (!t.startsWith('-')) pos.push(t);
 }
+// F6: --structural ranks by skeleton (identifier-normalized) shingles, so a clone with all variables
+// renamed scores ~1 even when its lexical (token) similarity is lower. Lexical is the default.
+const shg = structural ? (s) => structuralShingles(s, 3) : (s) => shingles(s, 3);
 const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath) die(USAGE, 2);
 
@@ -52,7 +57,7 @@ try {
   else candidateText = signature;
 } catch (e) { die(`cannot read candidate: ${e.message}`, 2); }
 
-const candidate = shingles(candidateText, 3);
+const candidate = shg(candidateText);
 
 // score every non-test function/method body
 const fileCache = new Map();
@@ -73,7 +78,7 @@ for (const n of graph.nodes) {
   if (isTestFile(n.file)) continue;
   const src = bodyOf(n);
   if (src == null) continue;
-  const sim = jaccard(candidate, shingles(src, 3));
+  const sim = jaccard(candidate, shg(src));
   if (sim < 0.15) continue; // exclude below the low band
   matches.push({ id: n.id, label: n.label, file: n.file, line: n.line, domain: n.domain, sim: +sim.toFixed(6), tier: tierOf(sim) });
 }
@@ -81,7 +86,7 @@ matches.sort((a, b) => b.sim - a.sim || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
 const top = matches.slice(0, k);
 
 const payload = {
-  candidate: { source: body != null ? 'body' : stdin ? 'stdin' : 'signature', shingles: candidate.size },
+  candidate: { source: body != null ? 'body' : stdin ? 'stdin' : 'signature', shingles: candidate.size, mode: structural ? 'structural' : 'lexical' },
   matches: top, count: top.length, scanned: graph.nodes.filter((n) => (n.kind === 'function' || n.kind === 'method') && !isTestFile(n.file)).length,
 };
 
