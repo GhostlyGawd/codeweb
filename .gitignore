@@ -17,6 +17,9 @@ node_modules/
 # Keep the clone script + manifest; ignore the cloned repos and any scratch run dirs.
 paper/corpus/*/
 paper/results/*.tmp
+# Reproduction run outputs from paper/run-all.mjs (_env.json, _summary.json, _reproduce.log) —
+# regenerable; the committed result JSONs are the source of truth.
+paper/results/_*
 paper/**/.cw/
 
 # OS / editor noise
