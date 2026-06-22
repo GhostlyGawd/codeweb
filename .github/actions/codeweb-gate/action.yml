@@ -25,7 +25,12 @@ runs:
     - name: Run regression gate
       shell: bash
       # Requires the consumer to checkout with `fetch-depth: 0` so the PR base sha is present.
+      # Pass inputs through env vars, NOT inline ${{ }}, so a consumer-supplied target can't inject
+      # shell (the shell expands $CODEWEB_TARGET as a single token after interpolation).
+      env:
+        CODEWEB_TARGET: ${{ inputs.target }}
+        CODEWEB_BASE: ${{ github.event.pull_request.base.sha }}
       run: >
         node "$RUNNER_TEMP/codeweb/scripts/ci-gate.mjs"
-        --base "${{ github.event.pull_request.base.sha }}"
-        --target "${{ inputs.target }}"
+        --base "$CODEWEB_BASE"
+        --target "$CODEWEB_TARGET"

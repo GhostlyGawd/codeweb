@@ -61,3 +61,16 @@ test('ci-gate without --base exits 2 (usage)', () => {
   const r = runNode(script('ci-gate.mjs'), []);
   assert.equal(r.status, 2);
 });
+
+test('ci-gate exits 2 (not a crash) when the base ref cannot be resolved', { skip: hasGit ? false : 'git not available' }, () => {
+  const { repo } = repoWithBase();
+  try {
+    // an unresolvable base must fail gracefully via the cleanup path (throw -> catch -> finally),
+    // never a bare process.exit that would leak the scratch worktree
+    const r = runNode(script('ci-gate.mjs'), ['--base', '0000000000000000000000000000000000000000', '--repo', repo, '--target', 'src']);
+    assert.equal(r.status, 2, `expected a graceful exit 2; stderr:\n${r.stderr}`);
+    assert.match(r.stderr, /worktree|base/i, 'explains the base could not be materialized');
+  } finally {
+    cleanup(repo);
+  }
+});

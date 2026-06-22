@@ -51,13 +51,19 @@ try {
   // BEFORE = the base ref, materialized read-only in an ephemeral worktree
   const r = spawnSync('git', ['-C', repo, 'worktree', 'add', '--detach', '--force', wt, opts.base], { encoding: 'utf8' });
   if (r.status !== 0) {
-    console.error(`[codeweb] cannot create base worktree for "${opts.base}" (need full history — actions/checkout with fetch-depth: 0): ${r.stderr}`);
-    process.exit(2);
+    // throw (NOT process.exit) so the finally block still removes the worktree + temp dir — a bare
+    // process.exit() runs synchronously and skips finally, leaking the scratch dir on every failure.
+    throw new Error(`cannot create base worktree for "${opts.base}" (need full history — actions/checkout with fetch-depth: 0): ${r.stderr}`);
   }
   const beforeGraph = buildGraph(join(wt, opts.target), 'before', beforeWs);
   // GATE — diff.mjs prints the delta + regressions and sets the exit code we propagate.
   const d = spawnSync(node, [join(HERE, 'diff.mjs'), beforeGraph, afterGraph], { stdio: 'inherit' });
-  code = d.status == null ? 1 : d.status;
+  if (d.status == null) {
+    console.error(`[codeweb] gate inconclusive — diff was terminated${d.signal ? ` by ${d.signal}` : ''}`);
+    code = 1;
+  } else {
+    code = d.status;
+  }
 } catch (e) {
   console.error(`[codeweb] gate error: ${(e && e.message) || e}`);
   code = 2;
