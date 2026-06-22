@@ -290,7 +290,7 @@ Each tool takes a `graph` (path to a `graph.json`) plus, for callers/callees/imp
 
 ## How it works
 
-For JavaScript, TypeScript, Python, and Rust the default is a **deterministic Node pipeline** — one
+For JavaScript, TypeScript, Python, Rust, and Go the default is a **deterministic Node pipeline** — one
 command, no LLM in the loop, reproducible byte-for-byte. `scripts/run.mjs` chains four stages
 into a per-target workspace:
 
@@ -324,7 +324,7 @@ codeweb/
 ├── commands/codeweb.md              # /codeweb trigger
 ├── scripts/                         # the deterministic engine (default fast path)
 │   ├── run.mjs                      # orchestrator — one command, runs all stages per target
-│   ├── extract-symbols.mjs         # stage 1: source -> atomic nodes + edges (JS/TS/Python)
+│   ├── extract-symbols.mjs         # stage 1: source -> atomic nodes + edges (JS/TS/Python/Rust/Go)
 │   ├── cluster3.mjs                # stage 2: hub-strip + directory-anchored domains
 │   ├── overlap.mjs                 # stage 3: body-confirmed duplication/overlap detection
 │   ├── build-report.mjs            # stage 4: graph.json -> interactive report.html + report.md
@@ -362,14 +362,14 @@ codeweb/
 
 ## Roadmap
 
-- **Hosted live demo** — a click-around `report.html` of a recognizable open-source repo, published
-  to GitHub Pages, so you can explore a real map before installing anything. *(Staged at
-  [`docs/demo/`](docs/demo/) — the axios map; goes live once Pages is enabled.)*
-- **More first-class languages** — Go on the deterministic fast path. (JS/TS/Python/**Rust** are
-  native today; everything else routes through the agent fallback.)
+- **More first-class languages** — Java, C#, and others on the deterministic fast path. (JavaScript,
+  TypeScript, Python, **Rust**, and **Go** are native today; everything else routes through the agent
+  fallback.)
 
-_Recently shipped: Rust on the fast path · duplication-over-time trend (`trend.mjs`) · a one-command
-CI regression gate + GitHub Action · a shareable report that no longer embeds the local source path._
+_Recently shipped: a **[live interactive demo](https://ghostlygawd.github.io/codeweb/demo/)** on
+GitHub Pages · Go and Rust on the fast path · duplication-over-time trend (`trend.mjs`) · a
+one-command CI regression gate + GitHub Action · a shareable report that no longer embeds the local
+source path._
 
 ## Handoffs
 

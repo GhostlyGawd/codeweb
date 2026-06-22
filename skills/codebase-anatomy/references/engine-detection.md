@@ -4,7 +4,7 @@ codeweb prefers **precise edges from static-analysis tools** when they are insta
 back to **agent reading** otherwise. Per subsystem, detect what's available, use it, and record
 the chosen engine in `meta.engine`.
 
-> **Native fast path (no tools required):** JavaScript, TypeScript, Python, and Rust are parsed
+> **Native fast path (no tools required):** JavaScript, TypeScript, Python, Rust, and Go are parsed
 > directly by the bundled regex extractor (`scripts/extract-symbols.mjs`). The table below is the
 > *optional* sharpening / agent-fallback path — for these languages it only refines edges, and for
 > the others it is the primary route.
