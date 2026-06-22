@@ -41,7 +41,7 @@ if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json
 const root = resolve(opts.path);
 if (!existsSync(root)) { console.error(`[extract] not found: ${root}`); process.exit(1); }
 
-const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs)$/;
+const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go)$/;
 const SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
 const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
 
@@ -88,6 +88,20 @@ function scanSymbols(file, text) {
       const indent = m[1].length, exported = !!m[2], key = m[3], name = m[4];
       const kind = key === 'fn' ? (indent > 0 ? 'method' : 'function') : 'class';
       syms.push({ name, line: i + 1, kind, exports: exported });
+    });
+  } else if (ext === '.go') {
+    // Go: `func F(...)` is a function; `func (r R) M(...)` (a receiver in parens before the name)
+    // is a method; `type X struct|interface { … }` is a class. Visibility is by initial case — an
+    // uppercase first letter is exported. Names after func/type are real identifiers -> push direct.
+    const methodRe = /^\s*func\s+\(([^)]*)\)\s+([A-Za-z_]\w*)/;
+    const funcRe = /^\s*func\s+([A-Za-z_]\w*)/;
+    const typeRe = /^\s*type\s+([A-Za-z_]\w*)\s+(?:struct|interface)\b/;
+    const exp = (n) => /^[A-Z]/.test(n);
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = methodRe.exec(ln))) syms.push({ name: m[2], line: i + 1, kind: 'method', exports: exp(m[2]) });
+      else if ((m = funcRe.exec(ln))) syms.push({ name: m[1], line: i + 1, kind: 'function', exports: exp(m[1]) });
+      else if ((m = typeRe.exec(ln))) syms.push({ name: m[1], line: i + 1, kind: 'class', exports: exp(m[1]) });
     });
   } else {
     const exported = (ln) => /\bexport\b/.test(ln);
@@ -173,7 +187,7 @@ const splitTopLevelParams = (s) => {
 const paramName = (entry) => {
   let e = entry.trim();
   if (!e) return null;
-  e = e.replace(/^(\*\*?|\.\.\.)/, '').split('=')[0].split(':')[0].trim(); // *args/**kw/...rest, default, annotation
+  e = e.replace(/^(\*\*?|\.\.\.)/, '').split('=')[0].split(':')[0].trim().split(/\s+/)[0]; // *args/**kw/...rest, default, annotation; trailing-token = Go `a int` -> `a`
   return /^[A-Za-z_$][\w$]*$/.test(e) ? e : null;                          // destructuring/other -> dropped
 };
 function parseSignature(line, name, isPy) {
@@ -400,7 +414,7 @@ for (const [a, b] of importEdges) {
 // body-reading, report header) read the target from here instead of re-hardcoding it.
 const rootFwd = root.replace(/\\/g, '/').replace(/\/+$/, '');
 const targetLabel = opts.target || rootFwd.split('/').slice(-2).join('/') || rootFwd;
-const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
+const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
 const languages = [...new Set(files.map(langOf))].sort();
 const fragment = {
   meta: { root: rootFwd, target: targetLabel, engine: useCtags ? 'ctags' : 'regex', languages, symbols: nodes.length },
