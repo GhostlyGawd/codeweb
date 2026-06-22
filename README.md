@@ -6,7 +6,7 @@
 [![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)
 [![deterministic engine](https://img.shields.io/badge/engine-deterministic-58a6ff?style=flat-square)](#how-it-works)
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
-[![tests](https://img.shields.io/badge/tests-142_passing-3fb950?style=flat-square)](tests/)
+[![tests](https://img.shields.io/badge/tests-193_passing-3fb950?style=flat-square)](tests/)
 
 **Dissect a codebase to its atomic parts, wire them into a living system web, tag each node's
 domain, and surface where the system does overlapping work** — so it can be restructured into
@@ -193,11 +193,35 @@ hypothetical delete/merge/move **without performing it**, so doomed edits are di
 share the pure `applyEdit` primitive in `graph-ops.mjs` with `optimize.mjs` (one truth), and are
 covered by property tests that pin the tool's output to an independent oracle.
 
+## Agent capability suite (write · review · optimize)
+
+A set of read-only, deterministic tools that make an agent better at the three jobs — each pinned by
+property tests against an independent oracle (full spec: [`docs/agent-tools-v2.md`](docs/agent-tools-v2.md)):
+
+| Tool | Job | What it answers |
+|---|---|---|
+| `find-similar.mjs <graph> --body/--stdin/--signature` | **write** | "Does code like this already exist?" — ranks existing bodies by shingle similarity, so the agent reuses instead of re-implementing. |
+| `placement.mjs <graph> --calls <ids>` | **write** | Where a new symbol belongs (domain + file by callee gravity) and whether it duplicates something. |
+| `query.mjs <graph> --tests <symbol>` | **write** | The tests that exercise a symbol — run the right subset after an edit. |
+| `review.mjs <graph> --changed <files> [--before g] [--gate]` | **review** | Maps a change to its changed symbols, blast radius, domains, and a fan-in-ranked review order; structural regression gate. |
+| `fitness.mjs <graph> --rules codeweb.rules.json` | **review** | Checks architectural invariants (forbidden deps, layering, no-cycles, fan-in/loc caps); fails on violation. |
+| `risk.mjs <graph> [--changed] [--churn/--git]` | **review** | Ranks symbols by change-risk (fan-in × fan-out × loc × blast × churn) for triage. |
+| `codemod.mjs <graph> --merge <ids> --into <id> [--write]` | **optimize** | Plans a consolidation merge (deletions + caller rewrites + projected gate); `--write` applies it, gated + reversible. |
+| `break-cycles.mjs <graph>` | **optimize** | For each dependency cycle, the cheapest edge to sever — *verified* to break it. |
+| `deadcode.mjs <graph>` | **optimize** | Tiers orphans into safe-to-delete vs review-first (test-guarded / entrypoint-like). |
+
+Plus **graph freshness**: `extract-symbols.mjs --cache <path>` re-scans only changed files, and
+`refresh.mjs <graph>` re-extracts a graph's nodes+edges from disk so mid-edit queries stay accurate.
+Nodes now carry a `signature` (params/returns), and edges from test files are a distinct `test` kind
+(so production `--callers` exclude tests). All of the above are also exposed over MCP (below).
+
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing
-the five queries as tools (`codeweb_callers/callees/impact/cycles/orphans`) any MCP client can call
-mid-task. Register it with Claude Code:
+codeweb's queries + the capability suite as tools any MCP client can call mid-task:
+`codeweb_callers/callees/impact/cycles/orphans/diff`, plus `codeweb_tests/find_similar/placement/
+review/fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not exposed).
+Register it with Claude Code:
 
 ```
 claude mcp add codeweb -- node /abs/path/to/codeweb/scripts/mcp-server.mjs
@@ -253,10 +277,22 @@ codeweb/
 │   ├── overlap.mjs                 # stage 3: body-confirmed duplication/overlap detection
 │   ├── build-report.mjs            # stage 4: graph.json -> interactive report.html + report.md
 │   ├── report-template.html        # the renderer's self-contained HTML shell
-│   ├── query.mjs                   # structural queries over graph.json (callers/callees/impact/cycles/orphans)
+│   ├── query.mjs                   # structural queries (callers/callees/tests/impact/cycles/orphans)
 │   ├── diff.mjs                    # graph-delta / post-edit regression gate (before vs after)
-│   ├── mcp-server.mjs              # MCP stdio server exposing the queries as agent tools
-│   └── lib/graph-ops.mjs           # shared pure graph primitives (index, cycles, orphans, impact)
+│   ├── refresh.mjs                 # F0: re-extract a graph's nodes+edges from disk (cached, fast)
+│   ├── find-similar.mjs            # F1: rank existing bodies vs a candidate (reuse-at-write-time)
+│   ├── placement.mjs               # F2: suggest a new symbol's domain/file + reuse warnings
+│   ├── review.mjs                  # F5: structural review of a change (blast radius, regressions)
+│   ├── fitness.mjs                 # F6: architectural fitness-rule checker
+│   ├── risk.mjs                    # F7: change-risk ranking for review triage
+│   ├── codemod.mjs                 # F8: consolidation edit plan (+ gated/reversible --write)
+│   ├── deadcode.mjs                # F10: confidence-tiered dead-code workflow
+│   ├── break-cycles.mjs            # F9: cheapest verified cut per dependency cycle
+│   ├── mcp-server.mjs              # MCP stdio server exposing all queries + the capability suite
+│   └── lib/
+│       ├── graph-ops.mjs           # shared pure graph primitives (index, cycles, orphans, impact, reviewImpact, …)
+│       ├── shingles.mjs            # F1: shared token-shingle/jaccard (also used by overlap.mjs)
+│       └── risk.mjs                # F7: the change-risk formula + weights (one truth)
 ├── agents/                          # fallback path (unparseable langs / --engine read)
 │   ├── codeweb-dissector.md         # atomic dissection (parallel, read-only)
 │   └── codeweb-domain-mapper.md     # domain tagging + overlap detection
