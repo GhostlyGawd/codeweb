@@ -1,0 +1,356 @@
+{
+  "cluster": "C6-auxiliary",
+  "generatedAt": "2026-06-22T16:46:54.889Z",
+  "elapsedMs": 162783,
+  "seeds": {
+    "place": 641553,
+    "fit": 3863,
+    "fitLayer": 6734,
+    "risk": 8540,
+    "hot": 460625,
+    "mcpGraph": 969,
+    "treemap": 30702
+  },
+  "node": "v24.14.1",
+  "realCorpus": {
+    "repo": "gorilla-mux",
+    "nodes": 261,
+    "edges": 280
+  },
+  "hasGit": true,
+  "oracleNotes": {
+    "A-LANG": "independent: expected node/edge sets authored by hand per fixture",
+    "A-SELFCONTAINED": "independent: from-scratch regex network-ref scan over shipped report.html",
+    "A-TREEMAP": "independent: pure geometry invariants over the shipped bisect() extracted from the template",
+    "A-CIGATE": "independent: git ground truth we construct (known regression/clean/removal states)",
+    "A-TREND": "independent: we plant the duplicate-logic overlaps; true confirmed sequence known",
+    "A-PLACE": "independent: plurality-domain recomputed inline from graph (not placement.mjs)",
+    "A-FIT": "independent: per-rule violating set recomputed inline with plain edge/degree filters",
+    "A-RISK": "independent: risk formula re-implemented here with own weights; CLI ranking cross-checked",
+    "A-HOT": "independent: 0.5cx+0.3fanIn+0.2churn re-implemented here with own weights vs shipped score",
+    "A-SUPP": "independent: we control the orphan + identity; expected hide/resurface is known",
+    "A-MCP": "cross-INTERFACE parity (MCP vs CLI, same input) + protocol conformance — NOT an external oracle; underlying correctness covered by C1-C5"
+  },
+  "perHypothesis": [
+    {
+      "id": "A-LANG",
+      "metric": "languages with exact node-set & no-fabricated-edge extraction",
+      "value": "5/5",
+      "ci": null,
+      "passed": true,
+      "criterion": "all 5 langs: expected nodes == extracted (no missed/spurious defs), call edges ⊆ real calls; probe trips",
+      "notes": ""
+    },
+    {
+      "id": "A-SELFCONTAINED",
+      "metric": "external network references in shipped report.html",
+      "value": 0,
+      "ci": null,
+      "passed": true,
+      "criterion": "zero external http(s)/CDN refs on synthetic+real reports; detector trips on a doctored page",
+      "notes": ""
+    },
+    {
+      "id": "A-TREEMAP",
+      "metric": "adversarial treemap cases terminating + tiling exactly",
+      "value": "4/4",
+      "ci": null,
+      "passed": true,
+      "criterion": "dominant/all-zero/large-uniform/random all terminate, rect-count==item-count, in-bounds, area exact; probe trips",
+      "notes": ""
+    },
+    {
+      "id": "A-CIGATE",
+      "metric": "exit codes [regression, clean, removal]",
+      "value": [
+        1,
+        0,
+        0
+      ],
+      "ci": null,
+      "passed": true,
+      "criterion": "regression->1 (names why), clean->0, pure-removal->0; opposite-direction cases both observed",
+      "notes": ""
+    },
+    {
+      "id": "A-TREND",
+      "metric": "confirmed-duplication sequence (oldest->newest)",
+      "value": "0,1,2,3,4",
+      "ci": null,
+      "passed": true,
+      "criterion": "tool sequence == planted [0,1,2,3,4] AND monotone non-decreasing; probe rejects a non-monotone series",
+      "notes": ""
+    },
+    {
+      "id": "A-PLACE",
+      "metric": "placement domain == inline plurality oracle",
+      "value": "200/200",
+      "ci": null,
+      "passed": true,
+      "criterion": "100% agreement over T=200 random graphs; probe confirms a wrong claim would be caught",
+      "notes": ""
+    },
+    {
+      "id": "A-FIT",
+      "metric": "recall on injected violations / false flags on clean",
+      "value": "recall=1 (134/134); falseFlags=0/78",
+      "ci": null,
+      "passed": true,
+      "criterion": "recall == 1.0 on injected (forbidden/layer/cycle/fanin/loc); 0 false flags on clean; both directions observed",
+      "notes": ""
+    },
+    {
+      "id": "A-RISK",
+      "metric": "monotonicity violations across all 5 components",
+      "value": "0/10000 bumps; perComp={\"fanIn\":0,\"fanOut\":0,\"loc\":0,\"blast\":0,\"churn\":0}",
+      "ci": "RuleOfThree 95% upper bound on violation rate <= 0.0003",
+      "passed": true,
+      "criterion": "0 monotonicity violations over T=2000 vectors (all 5 inputs); shipped CLI ranking == independent formula; probe trips",
+      "notes": ""
+    },
+    {
+      "id": "A-HOT",
+      "metric": "symbols whose shipped score != independent 0.5cx+0.3fanIn+0.2churn",
+      "value": "0/460 (maxAbsErr=0)",
+      "ci": null,
+      "passed": true,
+      "criterion": "0 mismatches within 1e-9 over T=60 random graphs; probe separates a wrong formula",
+      "notes": ""
+    },
+    {
+      "id": "A-SUPP",
+      "metric": "suppress-by-identity + resurface-on-mutation",
+      "value": "baseline=true hidden=true revealed=true resurfaced=true",
+      "ci": null,
+      "passed": true,
+      "criterion": "suppressed finding hidden+counted; --show-suppressed reveals; renamed id resurfaces (suppressed->0)",
+      "notes": ""
+    },
+    {
+      "id": "A-MCP",
+      "metric": "tools at CLI parity / protocol conformance",
+      "value": "20/20 parity; conformance=true; toolsList=20",
+      "ci": null,
+      "passed": true,
+      "criterion": "all 20 tools == CLI on same input; initialize/tools.list/tools.call + error codes (-32602/-32601/-32700, isError) conform; probe trips",
+      "notes": ""
+    }
+  ],
+  "details": {
+    "aLang": {
+      "perLang": {
+        "javascript": {
+          "extracted": true,
+          "nodes": 3,
+          "callEdges": 1,
+          "missedDefs": [],
+          "fabricated": [],
+          "spurious": [],
+          "langOk": true,
+          "ok": true
+        },
+        "typescript": {
+          "extracted": true,
+          "nodes": 2,
+          "callEdges": 1,
+          "missedDefs": [],
+          "fabricated": [],
+          "spurious": [],
+          "langOk": true,
+          "ok": true
+        },
+        "python": {
+          "extracted": true,
+          "nodes": 2,
+          "callEdges": 1,
+          "missedDefs": [],
+          "fabricated": [],
+          "spurious": [],
+          "langOk": true,
+          "ok": true
+        },
+        "rust": {
+          "extracted": true,
+          "nodes": 2,
+          "callEdges": 1,
+          "missedDefs": [],
+          "fabricated": [],
+          "spurious": [],
+          "langOk": true,
+          "ok": true
+        },
+        "go": {
+          "extracted": true,
+          "nodes": 2,
+          "callEdges": 1,
+          "missedDefs": [],
+          "fabricated": [],
+          "spurious": [],
+          "langOk": true,
+          "ok": true
+        }
+      },
+      "canFail": true
+    },
+    "aSelfContained": {
+      "perCase": {
+        "synthetic": {
+          "built": true,
+          "bytes": 30650,
+          "offenders": []
+        },
+        "real": {
+          "built": true,
+          "bytes": 126950,
+          "offenders": []
+        }
+      },
+      "canFail": true
+    },
+    "aTreemap": {
+      "per": {
+        "dominantFinal": {
+          "terminated": true,
+          "count": 10,
+          "expectCount": 10,
+          "boundsOk": true,
+          "exactOk": true,
+          "ok": true
+        },
+        "allZero": {
+          "terminated": true,
+          "count": 5,
+          "expectCount": 5,
+          "boundsOk": true,
+          "exactOk": true,
+          "ok": true
+        },
+        "largeUniform": {
+          "terminated": true,
+          "count": 500,
+          "expectCount": 500,
+          "boundsOk": true,
+          "exactOk": true,
+          "ok": true
+        },
+        "randomLarge": {
+          "terminated": true,
+          "count": 320,
+          "expectCount": 320,
+          "boundsOk": true,
+          "exactOk": true,
+          "ok": true
+        }
+      },
+      "canFail": true
+    },
+    "aCiGate": {
+      "results": {
+        "regression": {
+          "status": 1,
+          "reports": true
+        },
+        "clean": {
+          "status": 0
+        },
+        "removal": {
+          "status": 0
+        }
+      },
+      "canFail": true
+    },
+    "aTrend": {
+      "seq": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "expected": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "canFail": true
+    },
+    "aPlace": {
+      "agree": 200,
+      "total": 200,
+      "disagreements": [],
+      "canFail": true
+    },
+    "aFit": {
+      "recall": 1,
+      "injectedTotal": 134,
+      "injectedRecalled": 134,
+      "cleanFalseFlags": 0,
+      "cleanRuns": 78,
+      "canFail": true
+    },
+    "aRisk": {
+      "monoViolations": 0,
+      "total": 10000,
+      "perComp": {
+        "fanIn": {
+          "violations": 0
+        },
+        "fanOut": {
+          "violations": 0
+        },
+        "loc": {
+          "violations": 0
+        },
+        "blast": {
+          "violations": 0
+        },
+        "churn": {
+          "violations": 0
+        }
+      },
+      "cliConsistent": true,
+      "canFail": true
+    },
+    "aHot": {
+      "mismatches": 0,
+      "total": 460,
+      "maxAbsErr": 0,
+      "canFail": true
+    },
+    "aSupp": {
+      "baselineOk": true,
+      "hidden": true,
+      "revealed": true,
+      "resurfaced": true,
+      "canFail": true
+    },
+    "aMcp": {
+      "parityOk": 20,
+      "totalTools": 20,
+      "parityFail": [],
+      "conf": {
+        "pureStdout": true,
+        "initialize": true,
+        "exitsClean": true,
+        "toolsListCount": 20,
+        "toolsListMatches": true,
+        "allHaveObjectSchema": true,
+        "unknownTool": true,
+        "unknownMethod": true,
+        "parseError": true,
+        "missingArgIsError": true,
+        "notificationNoReply": true
+      },
+      "confAllTrue": true,
+      "canFail": true
+    }
+  },
+  "summary": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0,
+    "allPassed": true
+  }
+}

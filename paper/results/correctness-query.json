@@ -1,6 +1,6 @@
 {
   "cluster": "C2-query-correctness",
-  "commit": "cabf8b164af3338cc42d22dbed2a3ba93cb207ee",
+  "commit": "46cf41d31a1857b0db7829d7f9cabda162b9a931",
   "seed": 12639938,
   "cliSeed": 20759,
   "T": 10000,

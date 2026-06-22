@@ -1,0 +1,319 @@
+{
+  "cluster": "C3-edit-safety",
+  "generatedAt": "2026-06-22T17:35:14.672Z",
+  "seeds": {
+    "H5": "0x05FA17",
+    "H5_cli": "0x5C111",
+    "H6": "0x06CA3F",
+    "H7": "0x075A2D",
+    "H8": "0x08C0DE",
+    "A_CUT": "0x0AC07C",
+    "A_READ": "0x0AEAD0"
+  },
+  "T": {
+    "H5": 10000,
+    "H6": 2000,
+    "H7": 2000,
+    "H8": 2000,
+    "A-CUT": 2000,
+    "A-READ": 2000,
+    "H5_cli": 120
+  },
+  "nonVacuity": {
+    "allPass": true,
+    "checks": [
+      {
+        "name": "cycle-creating-merge flagged by BOTH tool and oracle",
+        "pass": true,
+        "detail": {
+          "toolNewCycles": [
+            [
+              "p/use.js",
+              "x/svc.js"
+            ]
+          ],
+          "oracleNewCycles": [
+            [
+              "p/use.js",
+              "x/svc.js"
+            ]
+          ]
+        }
+      },
+      {
+        "name": "tool and oracle AGREE on the cycle (no false H5 violation)",
+        "pass": true
+      },
+      {
+        "name": "H5 comparator FLAGS a wrong verdict (lost-caller case is real)",
+        "pass": true,
+        "detail": {
+          "toolVerdict": {
+            "newCycles": [],
+            "lostCallers": [
+              "b.js:g"
+            ],
+            "ok": false
+          },
+          "truth": {
+            "newCycles": [],
+            "lostCallers": [
+              "b.js:g"
+            ],
+            "ok": false
+          }
+        }
+      },
+      {
+        "name": "A-CUT re-verification catches a non-breaking cut",
+        "pass": true
+      },
+      {
+        "name": "A-CUT accepts a genuine cycle-breaking cut",
+        "pass": true
+      },
+      {
+        "name": "A-READ flags a caller-before-callee inversion (and accepts the correct order)",
+        "pass": true
+      },
+      {
+        "name": "H8 reversibility check has teeth (correct rebuild ok; corrupt rebuild fails)",
+        "pass": true
+      },
+      {
+        "name": "A-READ STRICT regime can fail on an acyclic misorder (not vacuous after scoping)",
+        "pass": true
+      },
+      {
+        "name": "self-loop collapse is genuinely non-reversible (scope is real; clean graph reverses)",
+        "pass": true
+      }
+    ]
+  },
+  "perHypothesis": [
+    {
+      "id": "H5",
+      "metric": "simulate-edit vs oracle disagreements (T + CLI sample)",
+      "value": 0,
+      "ci": {
+        "method": "ruleOfThree95",
+        "upperBound": 0.0003
+      },
+      "passed": true,
+      "criterion": "0 disagreements over T>=10000 in-process AND 0 on the CLI sample AND non-vacuity holds",
+      "detail": {
+        "T": 10000,
+        "id": "H5",
+        "metric": "simulate-edit vs oracle disagreements (T + CLI sample)",
+        "value": 0,
+        "passed": true,
+        "criterion": "0 disagreements over T>=10000 in-process AND 0 on the CLI sample AND non-vacuity holds",
+        "cliSample": {
+          "mismatches": 0,
+          "ran": 120,
+          "sampleN": 120,
+          "examples": []
+        },
+        "opKinds": {
+          "delete": 3272,
+          "merge": 3347,
+          "move": 3381
+        },
+        "ruleOfThree95UpperBound": 0.0003,
+        "examples": []
+      }
+    },
+    {
+      "id": "H6",
+      "metric": "campaign prefixes that introduce a new file cycle",
+      "value": 0,
+      "ci": {
+        "method": "exact-zero-failure",
+        "note": "0 violations is the pre-registered bar; no interval needed for an exact count"
+      },
+      "passed": true,
+      "criterion": "0 over T>=2000 (every cumulative prefix vs base)",
+      "detail": {
+        "T": 2000,
+        "id": "H6",
+        "metric": "campaign prefixes that introduce a new file cycle",
+        "value": 0,
+        "passed": true,
+        "criterion": "0 over T>=2000 (every cumulative prefix vs base)",
+        "prefixesChecked": 2831,
+        "mutatingStepsSeen": 2831,
+        "plansWithMutations": 1873,
+        "examples": []
+      }
+    },
+    {
+      "id": "H7",
+      "metric": "shard-query vs whole-graph (oracle) disagreements",
+      "value": 0,
+      "ci": {
+        "method": "exact-zero-failure",
+        "note": "0 violations is the pre-registered bar; no interval needed for an exact count"
+      },
+      "passed": true,
+      "criterion": "0 over T>=2000 x every symbol x {callers,callees,impact}",
+      "detail": {
+        "T": 2000,
+        "id": "H7",
+        "metric": "shard-query vs whole-graph (oracle) disagreements",
+        "value": 0,
+        "passed": true,
+        "criterion": "0 over T>=2000 x every symbol x {callers,callees,impact}",
+        "symbolsChecked": 11009,
+        "multiShardTrials": 1907,
+        "boundaryEdgesSeen": 7700,
+        "examples": []
+      }
+    },
+    {
+      "id": "H8",
+      "metric": "codemod gate-consistency + reversibility violations (+ CLI)",
+      "value": 0,
+      "ci": {
+        "method": "exact-zero-failure",
+        "note": "0 violations is the pre-registered bar; no interval needed for an exact count"
+      },
+      "passed": true,
+      "criterion": "0 gate-mismatch (full generator) AND 0 reversibility failures over T>=2000 self-loop-free merges AND 0 CLI --write mismatches (self-loop collapse disclosed, not counted — see header)",
+      "detail": {
+        "T": 2000,
+        "id": "H8",
+        "metric": "codemod gate-consistency + reversibility violations (+ CLI)",
+        "value": 0,
+        "passed": true,
+        "criterion": "0 gate-mismatch (full generator) AND 0 reversibility failures over T>=2000 self-loop-free merges AND 0 CLI --write mismatches (self-loop collapse disclosed, not counted — see header)",
+        "mergesChecked": 2000,
+        "reversibilityMerges": 2000,
+        "gateViolations": 0,
+        "reversibilityViolations": 0,
+        "selfLoopCollapsesDisclosed": 719,
+        "cli": {
+          "mismatches": 0,
+          "cases": 2,
+          "detail": [
+            {
+              "case": "safe-merge-applies",
+              "ok": true,
+              "why": []
+            },
+            {
+              "case": "predicted-regression-refused",
+              "ok": true,
+              "why": []
+            }
+          ]
+        },
+        "examples": []
+      }
+    },
+    {
+      "id": "A-CUT",
+      "metric": "verified break-cycles cuts that fail independent SCC re-check",
+      "value": 0,
+      "ci": {
+        "method": "exact-zero-failure",
+        "note": "0 violations is the pre-registered bar; no interval needed for an exact count"
+      },
+      "passed": true,
+      "criterion": "0 (every proposed cut, re-verified by Kosaraju, removes its cycle; and >=1 verified cut exists)",
+      "detail": {
+        "T": 2000,
+        "id": "A-CUT",
+        "metric": "verified break-cycles cuts that fail independent SCC re-check",
+        "value": 0,
+        "passed": true,
+        "criterion": "0 (every proposed cut, re-verified by Kosaraju, removes its cycle; and >=1 verified cut exists)",
+        "cyclesSeen": 2000,
+        "verifiedCuts": 2000,
+        "unverified": 0,
+        "examples": []
+      }
+    },
+    {
+      "id": "A-READ",
+      "metric": "reading-order strict misorders (acyclic) + graceful-property failures",
+      "value": 0,
+      "ci": {
+        "method": "exact-zero-failure",
+        "note": "0 violations is the pre-registered bar; no interval needed for an exact count"
+      },
+      "passed": true,
+      "criterion": "0 strict callee-before-caller violations on ACYCLIC graphs AND 0 graceful failures (no crash; total order; deterministic) over T>=2000; cyclic-regime reorderings disclosed, not counted",
+      "detail": {
+        "T": 2000,
+        "id": "A-READ",
+        "metric": "reading-order strict misorders (acyclic) + graceful-property failures",
+        "value": 0,
+        "passed": true,
+        "criterion": "0 strict callee-before-caller violations on ACYCLIC graphs AND 0 graceful failures (no crash; total order; deterministic) over T>=2000; cyclic-regime reorderings disclosed, not counted",
+        "strictViolations": 0,
+        "gracefulFailures": 0,
+        "acyclicTrials": 838,
+        "cyclicTrials": 1162,
+        "edgesCheckedAcyclic": 2211,
+        "cyclicEdgesSeen": 7454,
+        "cyclicRegimeReorderingsDisclosed": 1258,
+        "examples": []
+      }
+    }
+  ],
+  "realCorpusCrossCheck": {
+    "skipped": false,
+    "disagreements": 0,
+    "repos": [
+      {
+        "name": "axios",
+        "nodes": 859,
+        "edges": 814,
+        "toolCycles": 2,
+        "oracleCycles": 2,
+        "agree": true
+      },
+      {
+        "name": "express",
+        "nodes": 1882,
+        "edges": 296,
+        "toolCycles": 2,
+        "oracleCycles": 2,
+        "agree": true
+      },
+      {
+        "name": "zod",
+        "nodes": 1408,
+        "edges": 838,
+        "toolCycles": 3,
+        "oracleCycles": 3,
+        "agree": true
+      },
+      {
+        "name": "flask",
+        "nodes": 1656,
+        "edges": 607,
+        "toolCycles": 2,
+        "oracleCycles": 2,
+        "agree": true
+      },
+      {
+        "name": "ripgrep",
+        "nodes": 3201,
+        "edges": 1752,
+        "toolCycles": 1,
+        "oracleCycles": 1,
+        "agree": true
+      },
+      {
+        "name": "gorilla-mux",
+        "nodes": 261,
+        "edges": 280,
+        "toolCycles": 1,
+        "oracleCycles": 1,
+        "agree": true
+      }
+    ]
+  },
+  "allPass": true
+}
