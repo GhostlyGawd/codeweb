@@ -41,7 +41,7 @@ if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json
 const root = resolve(opts.path);
 if (!existsSync(root)) { console.error(`[extract] not found: ${root}`); process.exit(1); }
 
-const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py)$/;
+const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs)$/;
 const SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
 const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
 
@@ -75,6 +75,19 @@ function scanSymbols(file, text) {
       let m;
       if ((m = /^\s*def\s+([A-Za-z_]\w*)/.exec(ln))) push(m[1], i, /^\S/.test(ln) ? 'function' : 'method', true);
       else if ((m = /^\s*class\s+([A-Za-z_]\w*)/.exec(ln))) push(m[1], i, 'class', true);
+    });
+  } else if (ext === '.rs') {
+    // Rust: fn/struct/enum/trait. A `fn` indented inside an `impl`/`trait` block is a method; at
+    // column 0 it's a free function. `pub` (incl. `pub(crate)`) -> exported. The name after the
+    // keyword is always a real identifier (you can't write `fn fn`), so push directly rather than
+    // through the JS-keyword filter — that keeps idiomatic Rust names like `new`/`default`/`drop`.
+    const DEF = /^(\s*)(pub(?:\([a-z]+\))?\s+)?(?:async\s+)?(?:unsafe\s+)?(?:const\s+)?(fn|struct|enum|trait)\s+([A-Za-z_]\w*)/;
+    lines.forEach((ln, i) => {
+      const m = DEF.exec(ln);
+      if (!m) return;
+      const indent = m[1].length, exported = !!m[2], key = m[3], name = m[4];
+      const kind = key === 'fn' ? (indent > 0 ? 'method' : 'function') : 'class';
+      syms.push({ name, line: i + 1, kind, exports: exported });
     });
   } else {
     const exported = (ln) => /\bexport\b/.test(ln);
@@ -387,7 +400,7 @@ for (const [a, b] of importEdges) {
 // body-reading, report header) read the target from here instead of re-hardcoding it.
 const rootFwd = root.replace(/\\/g, '/').replace(/\/+$/, '');
 const targetLabel = opts.target || rootFwd.split('/').slice(-2).join('/') || rootFwd;
-const langOf = (f) => (f.endsWith('.py') ? 'python' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
+const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
 const languages = [...new Set(files.map(langOf))].sort();
 const fragment = {
   meta: { root: rootFwd, target: targetLabel, engine: useCtags ? 'ctags' : 'regex', languages, symbols: nodes.length },

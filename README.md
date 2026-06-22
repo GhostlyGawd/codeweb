@@ -253,7 +253,7 @@ Each tool takes a `graph` (path to a `graph.json`) plus, for callers/callees/imp
 
 ## How it works
 
-For JavaScript, TypeScript, and Python the default is a **deterministic Node pipeline** — one
+For JavaScript, TypeScript, Python, and Rust the default is a **deterministic Node pipeline** — one
 command, no LLM in the loop, reproducible byte-for-byte. `scripts/run.mjs` chains four stages
 into a per-target workspace:
 
