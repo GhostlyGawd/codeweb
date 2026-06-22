@@ -86,10 +86,17 @@ if (!existsSync(templatePath)) {
 }
 const template = readFileSync(templatePath, 'utf8');
 
+// The report is self-contained and shareable (teammate, blog post, GitHub Pages), so it must not
+// embed the absolute LOCAL source path. meta.root is only a disk pointer the query tools use to
+// read bodies — graph.json on disk (written above) keeps it; the template renders meta.target,
+// never meta.root. Strip it from the embedded copy without mutating the on-disk graph.
+const embed = { ...graph, meta: { ...graph.meta } };
+delete embed.meta.root;
+
 // Escape "<" so the JSON can live inside a <script type="application/json"> tag without ever
 // forming "</script>". Inside JSON, "<" only appears within string values, where < is a
 // valid escape that decodes back to "<".
-const json = JSON.stringify(graph).replace(/</g, '\\u003c');
+const json = JSON.stringify(embed).replace(/</g, '\\u003c');
 
 // Function replacement avoids String.replace's $-pattern interpretation in the payload.
 const html = template.replace('__GRAPH_DATA__', () => json);

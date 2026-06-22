@@ -24,20 +24,20 @@ tools** (over MCP, no LLM in the loop) **for your coding agent** to consult *bef
 ## See it in action
 
 One command runs the whole deterministic pipeline and drops an interactive map at
-`<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report** —
-codeweb pointed at a real ~1,956-symbol, 17-domain codebase. No mockups.
+`<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report**, codeweb
+pointed read-only at **[axios](https://github.com/axios/axios)** — 274 symbols across 8 domains. No mockups.
 
-> **▶ Read the [axios case study](docs/case-study-axios.md)** — codeweb run read-only on a library
-> downloaded ~50M times a week: 274 symbols, 8 domains, **3 body-confirmed duplications** (two
-> byte-identical across files), 12 false positives dismissed, and a cycle-safe merge plan for each.
-> A click-around hosted version of that exact map lands with the next push — see [Roadmap](#roadmap).
+> **▶ Read the full [axios case study](docs/case-study-axios.md):** on a library downloaded ~50M
+> times a week, codeweb body-confirmed **3 real duplications** (two byte-identical across files),
+> dismissed 12 false positives, and produced a cycle-safe merge plan for each. A click-around hosted
+> version of this exact map lands with the next push — see [Roadmap](#roadmap).
 
 ### Navigate the whole system
 
 A force-directed map of every symbol, collapsible to domains. Search, drag, zoom, and click any
 node to trace what depends on it and what it reaches.
 
-<img src="assets/screens/04-graph-domains.png" alt="codeweb Graph tab: a force-directed domain map of the codebase on a dark canvas" width="100%">
+<img src="assets/screens/05-axios-graph.png" alt="codeweb Graph tab on axios: a force-directed domain map (adapters, helpers, core, cancel, defaults, platform) on a dark canvas" width="100%">
 
 ### Findings — stop guessing what to refactor
 
@@ -45,19 +45,19 @@ Ranked **duplication** (the same function defined across many files), the most d
 **hotspots** to change with care, and likely-**dead code** — every row clickable to inspect what
 calls it and what it calls.
 
-<img src="assets/screens/01-findings.png" alt="codeweb Findings tab: ranked duplication, hotspots, and likely-dead code, with a clickable detail panel" width="100%">
+<img src="assets/screens/05-axios-findings.png" alt="codeweb Findings tab on axios: ranked duplication, hotspots, and likely-dead code, with a clickable detail panel" width="100%">
 
 ### See duplication density, and where areas tangle
 
 <table>
 <tr>
 <td width="50%" valign="top">
-<img src="assets/screens/03-treemap.png" alt="codeweb Treemap: every file sized by lines of code and shaded green-to-red by duplication density">
+<img src="assets/screens/05-axios-treemap.png" alt="codeweb Treemap on axios: every file sized by lines of code and shaded green-to-red by duplication density">
 <br><b>Treemap</b> — every file sized by lines of code and shaded green→red by how duplicated it
 is. The red blocks are your consolidation targets, at a glance.
 </td>
 <td width="50%" valign="top">
-<img src="assets/screens/02-matrix.png" alt="codeweb Matrix: a heatmap of call coupling between domains">
+<img src="assets/screens/05-axios-matrix.png" alt="codeweb Matrix on axios: a heatmap of call coupling between domains">
 <br><b>Matrix</b> — area-to-area coupling. A big off-diagonal cell means two areas are tangled:
 merge them, or put a clean interface between them.
 </td>
