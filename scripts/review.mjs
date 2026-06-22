@@ -19,6 +19,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { normalizeGraph, reviewImpact, structuralRegressions } from './lib/graph-ops.mjs';
+import { incrementalOverlap } from './lib/dup-check.mjs'; // F3: duplication-delta in the edit gate
 
 const USAGE = 'usage: review.mjs <graph.json> (--changed <file[:s-e],...> | --range <gitref>) [--before <graph.json>] [--gate] [--json]';
 function die(msg, code) { console.error(msg); process.exit(code); }
@@ -82,8 +83,14 @@ if (before != null) {
   structural = sr;
   hasRegression = sr.newCycles.length > 0 || sr.lostCallers.length > 0;
 }
+// F3: duplication delta — when the target source is readable, body-confirm whether any CHANGED symbol
+// now duplicates an existing one (the overlap delta a refreshed graph's overlaps:[] cannot show). A
+// new body-confirmed duplication is a regression (fails --gate), closing the prevent-duplication hole.
+const root = graph.meta?.root;
+const newDuplications = (root && existsSync(root)) ? incrementalOverlap(graph, impact.changedSymbols, { root }) : [];
+if (newDuplications.length) hasRegression = true;
 
-const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural };
+const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural, newDuplications };
 const code = (gate && hasRegression) ? 1 : 0;
 
 if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(code); }
@@ -96,10 +103,14 @@ if (impact.callerCounts.length) {
   for (const c of impact.callerCounts.slice(0, 8)) console.log(`    ${c.callers} caller(s)  ${c.id}`);
 }
 if (structural) {
-  if (hasRegression) {
+  if (structural.newCycles.length || structural.lostCallers.length) {
     console.log('  STRUCTURAL REGRESSIONS:');
     if (structural.newCycles.length) console.log(`    x ${structural.newCycles.length} new file cycle(s): ${structural.newCycles.map((c) => c.join('+')).join(', ')}`);
     if (structural.lostCallers.length) console.log(`    x ${structural.lostCallers.length} symbol(s) lost all callers: ${structural.lostCallers.join(', ')}`);
   } else console.log('  structural: ok — no new cycles or lost-caller regressions vs --before');
+}
+if (newDuplications.length) {
+  console.log(`  NEW DUPLICATION (body-confirmed) — ${newDuplications.length}:`);
+  for (const d of newDuplications) console.log(`    x ${d.id} duplicates ${d.dupOf} (${(d.sim * 100).toFixed(0)}%)`);
 }
 process.exit(code);

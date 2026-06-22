@@ -87,7 +87,7 @@ const opportunities = candidates.map((o) => {
   return {
     id: o.id, kind: o.kind, title: o.title, severity: o.severity, confidence: o.confidence,
     bodySim: o.bodySim, drifted: !!o.drifted, tier, gate,
-    canonical, removesNodes, callersRewired, blastRadius, locSaved,
+    canonical, nodes: o.nodes, removesNodes, callersRewired, blastRadius, locSaved,
     projectedNewCycles, recommendation,
   };
 });
