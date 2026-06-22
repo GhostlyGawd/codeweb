@@ -1,6 +1,6 @@
 {
   "cluster": "C4-detection-accuracy",
-  "generatedAt": "2026-06-22T16:59:19.620Z",
+  "generatedAt": "2026-06-22T20:21:23.551Z",
   "node": "v24.14.1",
   "seedScheme": "committed integer seeds per hypothesis (see source); re-running reproduces byte-for-byte",
   "perHypothesis": [
@@ -72,14 +72,14 @@
       "id": "H13",
       "metric": "deadcode safe-tier precision vs independent reachability (Wilson CI); recall reported",
       "value": {
-        "safePrecision": 0.519,
+        "safePrecision": 1,
         "safeRecall": 1
       },
       "ci": {
-        "lo": 0.464,
-        "hi": 0.5735
+        "lo": 0.9771,
+        "hi": 1
       },
-      "passed": false,
+      "passed": true,
       "criterion": "safe-tier precision CI lower bound >= 0.95"
     }
   ],
@@ -411,8 +411,8 @@
         }
       ],
       "legacyNodeNondeterminism": {
-        "run1Node": "def_log_4.js:log",
-        "run2Node": "def_log_4.js:log",
+        "run1Node": "def_log_0.js:log",
+        "run2Node": "def_log_0.js:log",
         "magnitudeStable": true,
         "magnitude": 30,
         "nodeIdentityVaried": false
@@ -427,31 +427,42 @@
     "H13": {
       "seeds": 10,
       "graphsPerSeed": 6,
-      "cliRuns": 60,
-      "safePrecision": 0.519,
+      "cliRuns": 120,
+      "safePrecision": 1,
       "safePrecisionCI": {
-        "lo": 0.464,
-        "hi": 0.5735
+        "lo": 0.9771,
+        "hi": 1
       },
       "safeRecall": 1,
       "safeTP": 164,
-      "safeFP": 152,
+      "safeFP": 0,
       "totalTrulyDead": 164,
       "deadCoveredBySafe": 164,
+      "legacySafePrecision": 0.519,
+      "legacySafePrecisionCI": {
+        "lo": 0.464,
+        "hi": 0.5735
+      },
+      "legacySafeTP": 164,
+      "legacySafeFP": 152,
+      "abTest": {
+        "note": "A/B on the SAME seeded synthetic corpus: fixed (shipped, test-file defns -> review) vs CODEWEB_DEADCODE_LEGACY=1 (pre-fix, test-file defns -> safe). The legacy precision is the real-world failure the fix removes.",
+        "fixedSafePrecision": 1,
+        "legacySafePrecision": 0.519,
+        "fixedSafePrecisionCI": {
+          "lo": 0.9771,
+          "hi": 1
+        },
+        "legacySafePrecisionCI": {
+          "lo": 0.464,
+          "hi": 0.5735
+        }
+      },
       "falsePositiveBreakdown": {
-        "testFileFn": 152,
+        "testFileFn": 0,
         "other": 0
       },
-      "falsePositiveExamples": [
-        "suite.test.js:t0",
-        "suite.test.js:t1",
-        "suite.test.js:t2",
-        "suite.test.js:t0",
-        "suite.test.js:t1",
-        "suite.test.js:t0",
-        "suite.test.js:t0",
-        "suite.test.js:t1"
-      ],
+      "falsePositiveExamples": [],
       "exploratory_productionOnlySafeTier": {
         "note": "EXPLORATORY (not the pre-registered metric): precision of the safe tier if functions defined in TEST FILES were excluded. Isolates the failure mechanism. The pre-registered metric (above) still governs PASS/FAIL.",
         "precision": 1,
@@ -465,29 +476,19 @@
       "realRepoSpotCheck": {
         "axios": {
           "available": true,
-          "totalSafe": 304,
-          "safeInTestFiles": 228,
+          "totalSafe": 76,
+          "safeInTestFiles": 0,
           "safeInProduction": 76,
-          "testFilePollutionRate": 0.75,
-          "sampleTestFileSafe": [
-            "tests/browser/adapter.browser.test.js:AllResponseHeaders",
-            "tests/browser/adapter.browser.test.js:MockXMLHttpRequest",
-            "tests/browser/adapter.browser.test.js:RequestHeader",
-            "tests/browser/adapter.browser.test.js:abort"
-          ]
+          "testFilePollutionRate": 0,
+          "sampleTestFileSafe": []
         },
         "express": {
           "available": true,
-          "totalSafe": 932,
-          "safeInTestFiles": 928,
+          "totalSafe": 4,
+          "safeInTestFiles": 0,
           "safeInProduction": 4,
-          "testFilePollutionRate": 0.9957,
-          "sampleTestFileSafe": [
-            "test/Route.js:it",
-            "test/Route.js:it",
-            "test/Route.js:it",
-            "test/Route.js:it"
-          ]
+          "testFilePollutionRate": 0,
+          "sampleTestFileSafe": []
         },
         "flask": {
           "available": true,
@@ -499,28 +500,24 @@
         },
         "gorilla-mux": {
           "available": true,
-          "totalSafe": 28,
-          "safeInTestFiles": 11,
+          "totalSafe": 17,
+          "safeInTestFiles": 0,
           "safeInProduction": 17,
-          "testFilePollutionRate": 0.3929,
-          "sampleTestFileSafe": [
-            "example_authentication_middleware_test.go:authenticationMiddleware",
-            "middleware_test.go:testMiddleware",
-            "mux_test.go:customMethodNotAllowedHandler",
-            "mux_test.go:methodsSubrouterTest"
-          ]
+          "testFilePollutionRate": 0,
+          "sampleTestFileSafe": []
         }
       },
       "oracle": "INDEPENDENT forward-reachability BFS (roots = entrypoint-like names + exported + test functions); written from scratch in this harness, does NOT import graph-ops.orphans.",
-      "findingSummary": "H13 FAILS as shipped: the deadcode \"safe to delete\" tier does NOT exclude functions DEFINED IN TEST FILES. Such functions have no incoming code edge, are not exported, and are not entrypoint-named, so deadcode.mjs files them as safe — but a test runner invokes them, so the independent reachability oracle (correctly) counts them reachable. On real repos this dominates the safe tier (e.g. express 928/932 safe items are test-file functions like `it`). The deliberate precision-over-recall design holds for PRODUCTION symbols (see exploratory cut), but the safe tier is unsafe to apply on a repo containing tests.",
+      "findingSummary": "H13 PASSES on the fixed engine: safe-tier precision 1.0 (CI lo >= 0.95), recall 1.0. The pre-fix behavior — restorable via CODEWEB_DEADCODE_LEGACY=1 — filed functions DEFINED IN test files (helpers/mocks/`it` registrations) as \"safe\" (precision ~0.52; on express 928/932 safe items were test-file fns). Such functions have no incoming code edge, are not exported, and are not entrypoint-named, so the legacy path filed them as safe — but a test runner invokes them, so the independent reachability oracle (correctly) counts them reachable. The fix routes them to \"review\". The lever makes the fix reproducibly falsifiable: the legacy A/B precision and the known-failing probe both reproduce the pre-fix miss on demand. The deliberate precision-over-recall design holds for PRODUCTION symbols (see exploratory cut).",
       "probe": {
-        "testFnInSafe": true,
         "oracleSaysReachable": true,
+        "fixedRoutesToReview": true,
+        "legacyRoutesToSafe": true,
         "harnessWouldCountAsFalsePositive": true,
         "ableToFail": true
       },
-      "pass": false
+      "pass": true
     }
   },
-  "elapsedMs": 220573
+  "elapsedMs": 99395
 }

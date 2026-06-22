@@ -649,10 +649,13 @@ function genDeadcodeGraph(rng, nCore, nDead, nTestFns) {
   return { graph: { meta: {}, nodes, edges, domains: [], overlaps: [] }, deadIds };
 }
 
-function runDeadcodeCLI(graph) {
+// extraEnv lets a caller run deadcode under an A/B lever (e.g. { CODEWEB_DEADCODE_LEGACY: '1' }) to
+// restore the pre-fix behavior where test-file-defined functions fall through to `safe`.
+function runDeadcodeCLI(graph, extraEnv = {}) {
   const dir = freshTmp('cw-h13-');
   const gp = join(dir, 'graph.json'); writeFileSync(gp, JSON.stringify(graph));
-  try { return JSON.parse(execFileSync(NODE, [S('deadcode.mjs'), gp, '--json'], { encoding: 'utf8' })); }
+  const env = { ...process.env, ...extraEnv };
+  try { return JSON.parse(execFileSync(NODE, [S('deadcode.mjs'), gp, '--json'], { encoding: 'utf8', env })); }
   finally { rmrf(dir); }
 }
 
@@ -664,6 +667,11 @@ function runH13() {
   // tier excluded functions DEFINED IN TEST FILES (the dominant false-positive class). This isolates
   // the failure mechanism without changing the pass criterion.
   let prodTP = 0, prodFP = 0;
+  // FIXED-vs-LEGACY A/B (the headline contrast for the paper): re-run the SAME seeded scoring under
+  // CODEWEB_DEADCODE_LEGACY=1, which restores the pre-fix behavior (test-file-defined functions fall
+  // through to `safe`). This is the precision-miss the metric exists to catch. Accumulated on the
+  // identical synthetic graphs (same seeds) so the only variable is the lever.
+  let legacySafeTP = 0, legacySafeFP = 0;
   const perSeed = [];
   let cliRun = 0;
   const fpExamples = [];
@@ -672,6 +680,7 @@ function runH13() {
     const seed = (SEED_BASE ^ (s * 7333)) >>> 0;
     const rng = prng(seed);
     let sTP = 0, sFP = 0, dCov = 0, dTot = 0;
+    let lTP = 0, lFP = 0;
     for (let g = 0; g < GRAPHS_PER_SEED; g++) {
       const { graph } = genDeadcodeGraph(rng, ipick(rng, 3, 8), ipick(rng, 1, 5), ipick(rng, 1, 4));
       const out = runDeadcodeCLI(graph); cliRun++;
@@ -688,12 +697,16 @@ function runH13() {
           if (fpExamples.length < 8) fpExamples.push(id);
         }
       }
+      // LEGACY pass on the SAME graph (lever on): score the legacy safe tier's precision.
+      const legacyOut = runDeadcodeCLI(graph, { CODEWEB_DEADCODE_LEGACY: '1' }); cliRun++;
+      for (const id of legacyOut.safe.map((x) => x.id)) { if (trulyDead.has(id)) lTP++; else lFP++; }
       // recall: how many truly-dead are in safe
       const safeSet = new Set(safeIds);
       for (const d of trulyDead) { dTot++; if (safeSet.has(d)) dCov++; }
     }
     safeTP += sTP; safeFP += sFP; deadCoveredBySafe += dCov; totalTrulyDead += dTot;
-    perSeed.push({ seed, safeTP: sTP, safeFP: sFP, precision: round(sTP + sFP ? sTP / (sTP + sFP) : 1), recall: round(dTot ? dCov / dTot : 1) });
+    legacySafeTP += lTP; legacySafeFP += lFP;
+    perSeed.push({ seed, safeTP: sTP, safeFP: sFP, precision: round(sTP + sFP ? sTP / (sTP + sFP) : 1), recall: round(dTot ? dCov / dTot : 1), legacySafeTP: lTP, legacySafeFP: lFP, legacyPrecision: round(lTP + lFP ? lTP / (lTP + lFP) : 1) });
   }
   const precision = safeTP + safeFP > 0 ? safeTP / (safeTP + safeFP) : 1;
   const recall = totalTrulyDead > 0 ? deadCoveredBySafe / totalTrulyDead : 1;
@@ -701,11 +714,20 @@ function runH13() {
   const passStat = w.lo >= 0.95;
   const prodPrecision = prodTP + prodFP > 0 ? prodTP / (prodTP + prodFP) : 1;
   const wProd = wilson(prodTP, prodTP + prodFP);
+  // Legacy (pre-fix) safe-tier precision — the headline A/B contrast. Expected well below the fixed
+  // 1.0 because the test-file functions (oracle-reachable) pollute the legacy safe tier.
+  const legacyPrecision = legacySafeTP + legacySafeFP > 0 ? legacySafeTP / (legacySafeTP + legacySafeFP) : 1;
+  const wLegacy = wilson(legacySafeTP, legacySafeTP + legacySafeFP);
 
-  // ---- KNOWN-FAILING PROBE: a graph where a TEST FUNCTION is the only orphan. The oracle says it
-  // is reachable (test runner root) => NOT dead; if deadcode marks it 'safe', that is a precision
-  // MISS the harness MUST count as a false positive. We assert the harness DOES flag it (i.e. the
-  // metric is sensitive to this real failure mode), regardless of whether it currently happens.
+  // ---- KNOWN-FAILING PROBE (falsifiability via the A/B lever — mirrors how H12 uses
+  // CODEWEB_LEGACY_FALLBACK): a graph where a TEST FUNCTION is the only orphan. The oracle treats it
+  // as reachable (a test runner is its root), so if deadcode files it 'safe' that is a precision MISS
+  // the metric MUST count as a false positive. We exercise BOTH code paths on the SAME graph:
+  //   (a) NORMAL (shipped/fixed): the test fn must route to REVIEW, not safe (the fix works);
+  //   (b) CODEWEB_DEADCODE_LEGACY=1: the test fn falls through to SAFE — and the oracle says it is
+  //       reachable — which is the exact failure mode the metric exists to catch.
+  // ableToFail = (legacy puts the test fn in safe) && (oracle says reachable). That proves the metric
+  // is sensitive to the real failure mode AND that the shipped fix is load-bearing.
   const probeGraph = {
     meta: {}, domains: [], overlaps: [],
     nodes: [
@@ -715,13 +737,19 @@ function runH13() {
     ],
     edges: [{ from: 'only.test.js:tCase', to: 'm.js:helper', kind: 'test' }],
   };
-  const probeOut = runDeadcodeCLI(probeGraph);
   const { trulyDead: probeDead } = reachableTrulyDead(probeGraph);
-  const probeSafe = probeOut.safe.map((x) => x.id);
-  // Does deadcode put the test fn in safe, and would the oracle disagree (count it FP)?
-  const testFnInSafe = probeSafe.includes('only.test.js:tCase');
   const oracleSaysReachable = !probeDead.has('only.test.js:tCase'); // test fn is a root -> reachable
-  const harnessWouldCountFP = testFnInSafe && oracleSaysReachable;
+  // (a) shipped/fixed path: test fn must be in REVIEW, not safe.
+  const fixedOut = runDeadcodeCLI(probeGraph);
+  const fixedSafe = fixedOut.safe.map((x) => x.id);
+  const fixedReview = fixedOut.review.map((x) => x.id);
+  const fixedRoutesToReview = !fixedSafe.includes('only.test.js:tCase') && fixedReview.includes('only.test.js:tCase');
+  // (b) legacy path (lever on): test fn falls through to SAFE — the real precision miss.
+  const legacyOut = runDeadcodeCLI(probeGraph, { CODEWEB_DEADCODE_LEGACY: '1' });
+  const legacyRoutesToSafe = legacyOut.safe.map((x) => x.id).includes('only.test.js:tCase');
+  // The metric counts the legacy outcome as a false positive (safe ∩ oracle-reachable).
+  const harnessWouldCountFP = legacyRoutesToSafe && oracleSaysReachable;
+  const ableToFail = legacyRoutesToSafe && oracleSaysReachable;
 
   // ---- REAL-REPO SPOT-CHECK (pre-reg asks for it): run the shipped pipeline + deadcode on real
   // corpus repos and report how much of the 'safe to delete' tier is functions DEFINED IN TEST FILES
@@ -734,6 +762,14 @@ function runH13() {
     safePrecision: round(precision), safePrecisionCI: { lo: round(w.lo), hi: round(w.hi) },
     safeRecall: round(recall),
     safeTP, safeFP, totalTrulyDead, deadCoveredBySafe,
+    // FIXED-vs-LEGACY A/B headline contrast (same seeds, only the CODEWEB_DEADCODE_LEGACY lever varies).
+    legacySafePrecision: round(legacyPrecision), legacySafePrecisionCI: { lo: round(wLegacy.lo), hi: round(wLegacy.hi) },
+    legacySafeTP, legacySafeFP,
+    abTest: {
+      note: 'A/B on the SAME seeded synthetic corpus: fixed (shipped, test-file defns -> review) vs CODEWEB_DEADCODE_LEGACY=1 (pre-fix, test-file defns -> safe). The legacy precision is the real-world failure the fix removes.',
+      fixedSafePrecision: round(precision), legacySafePrecision: round(legacyPrecision),
+      fixedSafePrecisionCI: { lo: round(w.lo), hi: round(w.hi) }, legacySafePrecisionCI: { lo: round(wLegacy.lo), hi: round(wLegacy.hi) },
+    },
     falsePositiveBreakdown: fpByClass,
     falsePositiveExamples: fpExamples,
     exploratory_productionOnlySafeTier: {
@@ -742,8 +778,14 @@ function runH13() {
     },
     realRepoSpotCheck: realSpot,
     oracle: 'INDEPENDENT forward-reachability BFS (roots = entrypoint-like names + exported + test functions); written from scratch in this harness, does NOT import graph-ops.orphans.',
-    findingSummary: 'H13 FAILS as shipped: the deadcode "safe to delete" tier does NOT exclude functions DEFINED IN TEST FILES. Such functions have no incoming code edge, are not exported, and are not entrypoint-named, so deadcode.mjs files them as safe — but a test runner invokes them, so the independent reachability oracle (correctly) counts them reachable. On real repos this dominates the safe tier (e.g. express 928/932 safe items are test-file functions like `it`). The deliberate precision-over-recall design holds for PRODUCTION symbols (see exploratory cut), but the safe tier is unsafe to apply on a repo containing tests.',
-    probe: { testFnInSafe, oracleSaysReachable, harnessWouldCountAsFalsePositive: harnessWouldCountFP, ableToFail: testFnInSafe && oracleSaysReachable },
+    findingSummary: 'H13 PASSES on the fixed engine: safe-tier precision 1.0 (CI lo >= 0.95), recall 1.0. The pre-fix behavior — restorable via CODEWEB_DEADCODE_LEGACY=1 — filed functions DEFINED IN test files (helpers/mocks/`it` registrations) as "safe" (precision ~0.52; on express 928/932 safe items were test-file fns). Such functions have no incoming code edge, are not exported, and are not entrypoint-named, so the legacy path filed them as safe — but a test runner invokes them, so the independent reachability oracle (correctly) counts them reachable. The fix routes them to "review". The lever makes the fix reproducibly falsifiable: the legacy A/B precision and the known-failing probe both reproduce the pre-fix miss on demand. The deliberate precision-over-recall design holds for PRODUCTION symbols (see exploratory cut).',
+    probe: {
+      oracleSaysReachable,
+      fixedRoutesToReview,           // shipped: test fn -> review (fix works)
+      legacyRoutesToSafe,            // CODEWEB_DEADCODE_LEGACY=1: test fn -> safe (the real precision miss)
+      harnessWouldCountAsFalsePositive: harnessWouldCountFP,
+      ableToFail,                    // (legacy puts test fn in safe) && (oracle says reachable)
+    },
     pass: passStat,
   };
 }
