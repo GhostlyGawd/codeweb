@@ -1,0 +1,119 @@
+{
+  "frozenAt": "pre-solve",
+  "tasks": [
+    {
+      "id": "axios-add-isdataurl-helper",
+      "repo": "axios",
+      "kind": "add",
+      "instruction": "In the axios library (lib/helpers/), add a new helper module that exports a default function determining whether a given string is a data URI (i.e. begins with the 'data:' scheme, e.g. 'data:text/plain;base64,...'). It must accept a single argument, return a boolean, return false for non-string inputs, and treat the scheme match case-insensitively. Then use this helper inside lib/defaults/index.js so that the request transform short-circuits and returns the data unchanged when the payload is a string that is a data URI.",
+      "criterion": "A new module file exists under lib/helpers/ exporting a default predicate function, and lib/defaults/index.js imports it and calls it within the transformRequest logic (a new node + new import edge into defaults/index.js).",
+      "rationale": "axios has a family of single-purpose URL/string predicates in lib/helpers (isAbsoluteURL, parseProtocol, fromDataURI), so a data-URI predicate is a natural, plausible add; wiring it into defaults creates a clear new import/call edge. fromDataURI exists (decodes a data URI) but there is no boolean predicate, so this lightly overlaps without duplicating. Instruction is behavior-only."
+    },
+    {
+      "id": "axios-add-combineurls-callsite-in-buildurl",
+      "repo": "axios",
+      "kind": "add",
+      "instruction": "Add an exported helper function (in an appropriate lib/helpers/ module) named appendQuery that takes a URL string and a query-string fragment (already serialized, without a leading '?' or '&') and returns the URL with that fragment appended, choosing '?' if the URL has no existing query and '&' otherwise, and stripping any existing hash fragment before appending. Refactor buildURL in lib/helpers/buildURL.js to delegate its final append-to-URL step to this new function.",
+      "criterion": "A new exported function appendQuery exists in lib/helpers/, and buildURL.js imports/calls it, replacing its inline query-append branch (new node + new import edge, and removal of inline logic from buildURL).",
+      "rationale": "Verified: buildURL.js contains an inline hashmark-strip + '?'/'&' query-append block (the serializedParams branch). Exposing it as a reusable helper is a realistic refactor-toward-reuse add that changes the call graph. Phrased by behavior only."
+    },
+    {
+      "id": "axios-refactor-merge-url-helpers",
+      "repo": "axios",
+      "kind": "refactor",
+      "instruction": "Consolidate the two single-function modules lib/helpers/isAbsoluteURL.js and lib/helpers/combineURLs.js into one module (lib/helpers/url.js) that exports both functions as named exports, preserving their exact behavior. Update every import site across the lib/ tree to import from the new module, and remove the two original files.",
+      "criterion": "lib/helpers/isAbsoluteURL.js and lib/helpers/combineURLs.js no longer exist; a new lib/helpers/url.js exports both; all former importers (lib/core/buildFullPath.js) now import from lib/helpers/url.js (import edges retargeted, two nodes removed, one added).",
+      "rationale": "Verified: both files exist and are imported together only by lib/core/buildFullPath.js. Merging them is a plausible housekeeping refactor with a measurable import-graph change (two default-import edges retargeted, two nodes removed, one node added)."
+    },
+    {
+      "id": "flask-add-config-from-json",
+      "repo": "flask",
+      "kind": "add",
+      "instruction": "Add a method from_json(self, filename, silent=False) to the Config class in src/flask/config.py that reads the JSON file at the given path and loads its top-level object into the config. Resolve the filename relative to the application's root path the same way the other file-loading config methods do. When silent is True, return False (instead of raising) if the file does not exist; re-raise other I/O errors with a clearer message. Return True on success.",
+      "criterion": "Config gains a new from_json method that internally calls the existing mapping/dict-loading method, from_mapping (new method node with an outbound call edge to from_mapping; gradeable by method addition + internal call).",
+      "rationale": "Verified: Config has from_pyfile/from_object/from_file/from_envvar/from_prefixed_env and a from_mapping that ingests a dict; a JSON loader is a natural peer that wires into from_mapping. from_file can already take load=json.load, so it overlaps conceptually, but the instruction is behavior-only and does not reference it."
+    },
+    {
+      "id": "flask-refactor-move-split-blueprint-path",
+      "repo": "flask",
+      "kind": "refactor",
+      "instruction": "Relocate the _split_blueprint_path function out of src/flask/helpers.py and into src/flask/sansio/blueprints.py (keeping its caching behavior and exact logic). Update all import sites across the package so they import it from its new location, and remove it from helpers.py.",
+      "criterion": "_split_blueprint_path is defined in sansio/blueprints.py instead of helpers.py; src/flask/sansio/app.py and src/flask/wrappers.py update their imports to the new location (function node moves modules; two import edges retargeted).",
+      "rationale": "Verified: _split_blueprint_path is defined in helpers.py (with @cache) and imported by exactly sansio/app.py and wrappers.py. It is a blueprint concern living in helpers.py; moving it to the blueprints module is a sensible cohesion refactor with a verifiable two-import-edge change."
+    },
+    {
+      "id": "flask-fix-from-envvar-empty-string",
+      "repo": "flask",
+      "kind": "fix",
+      "instruction": "Fix Config.from_envvar in src/flask/config.py so that an environment variable that is set but whose value is only whitespace is treated the same as an unset/empty variable (i.e. raise the 'not set' RuntimeError, or return False when silent=True) rather than attempting to load a file from the whitespace path. Trim the value before the emptiness check and before passing it onward to the file loader.",
+      "criterion": "from_envvar's emptiness guard now accounts for whitespace-only values before delegating to from_pyfile (localized edit to from_envvar; its downstream call to from_pyfile is gated on the corrected check).",
+      "rationale": "Verified: from_envvar only guards `if not rv`, so a whitespace value is truthy and slips through to from_pyfile (which then fails confusingly on the whitespace path). Trimming before the check is a small, real correctness fix whose effect propagates to the from_pyfile call path. Behavior-only wording."
+    },
+    {
+      "id": "express-add-res-cache-control",
+      "repo": "express",
+      "kind": "add",
+      "instruction": "Add a method res.cacheControl(directives) to lib/response.js of the express library. It accepts an object whose keys are Cache-Control directive names and whose values are either booleans (include the directive name when true) or numbers/strings (emit `name=value`, e.g. { public: true, 'max-age': 3600 } => 'public, max-age=3600'). It must set the resulting string as the Cache-Control response header using the existing header-setting method and return the response for chaining.",
+      "criterion": "lib/response.js defines a new res.cacheControl method that calls res.set/res.header to apply the header (new method node with an outbound call edge to the existing set/header method).",
+      "rationale": "Verified: express response has many small header-setting convenience methods (res.location, res.links, res.cookie, res.append) that route through res.set/this.set. A Cache-Control builder is a natural peer add that routes through res.set, yielding a clear new node + edge. Behavior-only."
+    },
+    {
+      "id": "express-refactor-extract-trustproxyfn",
+      "repo": "express",
+      "kind": "refactor",
+      "instruction": "Several getters in lib/request.js (protocol, ip, ips, host) each fetch the configured trust-proxy function via this.app.get('trust proxy fn'). Introduce a single private accessor (e.g. a non-enumerable helper or local function) that returns that trust function for a request, and update each of those getters to obtain the trust function through it instead of calling this.app.get('trust proxy fn') directly.",
+      "criterion": "A new shared accessor exists in lib/request.js and the protocol/ip/ips/host getters all call it instead of this.app.get('trust proxy fn') (multiple call sites retargeted onto one new node).",
+      "rationale": "Verified: the literal this.app.get('trust proxy fn') is repeated in exactly four getters (protocol, ip, ips, host). Centralizing it is a textbook DRY refactor with a clearly measurable many-to-one call-edge change. NOTE: the original candidate also listed `subdomains`, but subdomains does not read 'trust proxy fn' (it reads 'subdomain offset') — corrected here to keep the instruction and criterion factually accurate and gradeable."
+    },
+    {
+      "id": "express-fix-host-protocol-forwarded-parse",
+      "repo": "express",
+      "kind": "fix",
+      "instruction": "In lib/request.js of the express library, the protocol getter and the host getter each independently take the first value of a possibly comma-separated X-Forwarded header by calling indexOf(',') and substring with ad-hoc trimming, and they trim differently. Make both getters parse the first forwarded value through one shared piece of logic so the leading value is extracted and fully trimmed identically in both cases, fixing the inconsistent trimming.",
+      "criterion": "Both the protocol and host getters in lib/request.js obtain the first comma-separated forwarded value via a single shared function/helper rather than separate inline indexOf/substring blocks (two call sites converge on one node; inline duplicate parsing removed).",
+      "rationale": "Verified: protocol extracts the first X-Forwarded-Proto value with `.substring(0,index).trim()` while host extracts the first X-Forwarded-Host value with `.substring(...).trimEnd()` — a genuine inconsistency (trim vs trimEnd) across duplicated inline parsing, with a two-caller blast radius, fixable by funneling both through shared logic. Described by behavior/symptom only."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "axios-fix-parseprotocol-guard-nonstring",
+      "reason": "FALSE PREMISE / not representative. The rationale claims parseProtocol's unguarded regex `.exec(url)` throws on non-string input; it does not. Verified in Node: /^([-+\\w]{1,25}):(?:\\/\\/)?/.exec(null|undefined|123) all return null (no throw), so the existing function already returns '' safely for non-strings. The requested non-string guard is a cosmetic no-op, not a real fix, and the criterion would be satisfied by a change that alters nothing observable."
+    },
+    {
+      "id": "axios-add-retryafter-parser",
+      "reason": "WEAK GRADEABILITY (cut for balance). Plausible and neutral, but the criterion is satisfiable purely by adding an isolated module with no caller — there is no new call/import edge into existing code, so success shows up only as a free-floating node. Dropped in favor of axios adds/refactors that produce a verifiable graph edge, and to keep the kept set balanced at 3 per repo."
+    },
+    {
+      "id": "axios-refactor-extract-trim-to-helper",
+      "reason": "VALID but cut for balance. Verified (trim is defined inline in lib/utils.js, exported on the utils object, consumed via utils.trim in defaults/index.js) and would be a clean refactor. Dropped only to cap axios at 3 tasks and avoid over-weighting the refactor kind; the merge-url-helpers refactor was kept as the axios refactor representative."
+    },
+    {
+      "id": "flask-add-blueprint-path-join",
+      "reason": "VALID but cut for balance. Verified: dotted names are built by f-string concatenation with .lstrip('.') in sansio/blueprints.py (the endpoint name and the registration name sites), and a _join_blueprint_path helper pairing with _split_blueprint_path is believable with a real cross-module edge. Dropped only to cap flask at 3 (the add slot went to from_json); retained as a strong backup."
+    },
+    {
+      "id": "flask-add-is-debug-env-helper",
+      "reason": "SEMANTIC MISMATCH. get_debug_flag currently treats any value not in {'0','false','no'} as True (so e.g. 'maybe' => True), whereas the proposed get_env_bool uses a closed allowlist {'1','true','yes','on'} => True and everything-else => False. Faithfully routing get_debug_flag through the new helper silently CHANGES behavior, so the 'refactor get_debug_flag to call it' instruction conflicts with 'preserve behavior'. Dropped to avoid a task whose 'correct' completion is ambiguous."
+    },
+    {
+      "id": "flask-refactor-extract-send-file-wrapper",
+      "reason": "CONTRIVED ABSTRACTION. The two callers do NOT forward to the same Werkzeug function in the same shape: send_file calls werkzeug.utils.send_file(**_prepare_send_file_kwargs(...)) while send_from_directory calls werkzeug.utils.send_from_directory(directory, path, **_prepare_send_file_kwargs(**kwargs)) — a different target with extra positional args. A single 'forward to werkzeug' helper cannot cleanly carry the positional directory/path, so the centralization is forced and low-value rather than a natural DRY win."
+    },
+    {
+      "id": "express-refactor-merge-normalizetype",
+      "reason": "ALREADY DONE / no-op. normalizeTypes is already implemented as `return types.map(exports.normalizeType)` — it already delegates to normalizeType with no duplicated normalization logic, and both are already exported and imported by response.js. The criterion ('its body contains a call edge to normalizeType') is satisfied by the unchanged code, so the task requires no real structural change."
+    },
+    {
+      "id": "express-fix-res-set-array-content-type",
+      "reason": "FALSE PREMISE / no-op. res.set's object form already recurses via `this.set(key, field[key])`, sending every key back through the two-argument path which already throws 'Content-Type cannot be set to an Array' (the field.toLowerCase()==='content-type' check is case-insensitive). An array Content-Type passed in object form, in any casing, already raises today, so there is no silent-set bug to fix and the criterion is already met."
+    },
+    {
+      "id": "express-add-utils-mergeparams",
+      "reason": "UNSUPPORTED CALL SITE. The criterion requires lib/application.js to import/use mergeParams at a 'params-combining site', but application.js has no place that combines route/app parameters from two sources into one object: settings inheritance uses Object.setPrototypeOf(this.settings, parent.settings), app.param delegates to this.router.param, and the only object spread is renderOptions (locals/opts for rendering, not params). The required wiring edge cannot be created honestly and would force a contrived insertion."
+    },
+    {
+      "id": "express-add-getheader-firstvalue-helper",
+      "reason": "WEAK GRADEABILITY + redundant (cut for balance). Plausible and neutral, but the criterion is just 'utils.js exports a new firstCommaValue function' — an isolated export with no required caller edge, so success shows up only as a free-floating node. It also conceptually overlaps the kept express fix (host/protocol first-forwarded-value extraction). Dropped in favor of the express add/refactor/fix triad that each produce a verifiable graph edge."
+    }
+  ]
+}

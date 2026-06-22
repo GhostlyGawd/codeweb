@@ -43,7 +43,10 @@ data was collected.
 
 The single honest miss (H15) is a *characterization*, not a defect: incremental refresh is faster than
 a full rebuild for realistic small changes (≤10% of files) but reaches parity at high churn — reported
-as the measured curve, not spun as a universal win.
+as the measured curve, not spun as a universal win. The capstone agent A/B (H18) returned a **null**:
+the pre-edit tools engaged in every treatment run and answered correctly, but a capable base model
+already left no headroom on clean tasks — reported honestly as a pilot, with the thesis resting on
+Themes 1–4.
 
 ---
 
@@ -178,11 +181,24 @@ formula (**0/460** mismatch), suppression identity, and **MCP↔CLI parity acros
 
 ### 3.7 Agent outcome (Theme 5 — capstone)
 
-> _[Pending — the pre-registered agent A/B field study (H18): does a coding agent equipped with
-> codeweb's pre-edit tools introduce fewer structural regressions and less new duplication than the
-> same agent without them? Results, effect size, and confidence intervals to be inserted here once the
-> run completes. Per the pre-registration this is the weakest-evidence theme; the thesis above rests on
-> Themes 1–4.]_
+The pre-registered agent A/B (H18) asked whether a coding agent equipped with codeweb's pre-edit tools
+(`find-similar`, `placement`, `impact`, `simulate-edit`) introduces fewer structural regressions and
+less new duplication than the same agent without them. Nine tasks (add / refactor / fix across axios,
+flask, express) were proposed, adversarially screened for fairness, and **frozen before any solver
+ran**; each edit was graded by codeweb's own verified `diff.mjs` gate. 34 of 36 cells completed.
+
+**Result: no measurable difference.** Structural regressions averaged **0.11 (treatment) vs 0.13
+(control)**; **new duplication was 0 in both arms**; the paired bootstrap CI straddles 0 (Cliff's δ
+negligible). The null is *valid, not confounded*: **all 18 treatment cells actually used the tools**,
+and the tools returned correct answers — on the reuse tasks, `find-similar` correctly reported no
+existing equivalent and `placement` confirmed the right directory.
+
+Honestly: on these clean, well-scoped tasks a capable base model already avoids regressions and
+duplication, so codeweb's pre-edit intelligence **corroborated rather than corrected** — there was no
+headroom (a floor effect, both arms near zero). The experiment bounds the effect on *easy* tasks near
+zero; it neither confirms nor refutes the outcome hypothesis. Demonstrating corrective value would need
+higher-blast-radius tasks or a weaker base model — future work. As pre-registered, the thesis rests on
+Themes 1–4; H18 is an honest pilot, not load-bearing.
 
 ## 4. What the study found *in codeweb itself*
 
