@@ -10,7 +10,7 @@
 **You can't see where your codebase does the same work twice — and neither can the agent editing it.**
 codeweb dissects a repo to its atomic parts (functions, classes, methods), wires them into a living
 call/import graph, tags each node's domain, and surfaces cross-domain overlap. Then it serves that
-graph **two ways**: a self-contained, interactive **HTML map for you**, and **15 deterministic query
+graph **two ways**: a self-contained, interactive **HTML map for you**, and **20 deterministic query
 tools** (over MCP, no LLM in the loop) **for your coding agent** to consult *before* it edits —
 *does this already exist? what breaks if I change it? where should this go?*
 
@@ -126,6 +126,7 @@ Flags: `--depth module|symbol|auto`, `--engine hybrid|read|tools`, `--focus <glo
 | `report.html` | Self-contained interactive map — force-directed graph, domain tree, clickable node details, ranked overlap tab. No network/CDN required. |
 | `report.md` | The same map as plain markdown — domains, top nodes, ranked overlaps. |
 | `overlap.md` | The ranked consolidation opportunities in plain markdown. |
+| `optimize.md` | The consolidation advisory — duplicate-logic findings tiered **ready / blocked / review**, each pre-flighted against the gate's cycle check (the `optimize.mjs` report). |
 | `fragment.json` | The raw extractor output (atomic nodes + edges) before clustering — the pipeline's first stage. |
 
 ## Query the graph (for agents & humans)
@@ -226,6 +227,66 @@ The `--git` mode checks out each of the last N commits into an **ephemeral workt
 over your working tree), runs the deterministic pipeline, and records the metrics — so you can watch
 duplication trend down as you consolidate, or catch it creeping up in review.
 
+## Find the hotspots — where to refactor first (`hotspots.mjs`)
+
+In a large repo the first question is *where do I even start?* `hotspots.mjs` answers it with the
+**complexity × fan-in × churn** model — the riskiest, most-depended-on, most-churned symbols rank
+first. Cyclomatic complexity and max nesting depth are computed during the body scan (every
+`function`/`method` node carries `complexity` and `maxDepth`), so this needs no extra tooling; churn
+is optional (`--git`, or `--churn <map.json>`).
+
+```
+$ node scripts/hotspots.mjs <graph.json>
+codeweb hotspots: axios/lib — 253 symbol(s) ranked by complexity x fan-in x churn
+  weights: complexity 0.5, fanIn 0.3, churn 0.2
+  0.533  adapters/fetch.js:factory  [cx 147 in 1 churn 0]
+  0.347  adapters/http.js:httpAdapter  [cx 102 in 0 churn 0]
+  0.312  core/mergeConfig.js:mergeConfig  [cx 33 in 6 churn 0]
+  0.270  helpers/toFormData.js:toFormData  [cx 50 in 3 churn 0]
+```
+
+Every row shows its raw components, so the ranking is auditable rather than a black box. Add `--json`
+for machine output; also surfaced as the `codeweb_hotspots` MCP tool.
+
+## Plan a whole optimization campaign (`campaign.mjs`)
+
+`optimize` (ready merges), `deadcode` (safe deletes), and `break-cycles` (verified cuts) are three
+separate advisors. `campaign.mjs` composes them into **one ordered, individually-gated, ROI-ranked
+worklist** with cumulative projected deltas — "auto-optimize this codebase, at any scale." Crucially,
+every step is pre-flighted so that applying the steps **in order** never introduces a cycle that
+wasn't there before: a safe campaign is safe as a *sequence*, not merely per step. It is a read-only
+plan — codeweb never writes source; the agent (+ the gate) executes each step.
+
+```
+$ node scripts/campaign.mjs <graph.json>
+codeweb campaign: axios/lib — 80 step(s): 2 cut, 77 delete, 1 merge
+  projected: -12 LOC, 2 cycle(s) broken (all steps stay gate-green in order)
+  [DELETE] adapters/fetch.js:duplex  (roi 0; +0 LOC, +0 cycle; cumulative -0 LOC)
+  …each of 80 steps tagged [CUT|DELETE|MERGE] with its own gate verdict + cumulative delta
+```
+
+`--budget N` keeps the top-N ROI prefix; `--json` emits per-step `{op, gate:{ok}, delta, cumulative,
+roi}`. Also surfaced as `codeweb_campaign`.
+
+## Onboard in dependency order (`reading-order.mjs`)
+
+To understand a codebase — or one domain — fast, `reading-order.mjs` emits a **foundations-first**
+reading path: the depended-upon leaves before the orchestrators that call them, bounded to a budget.
+A curated tour instead of blind grep.
+
+```
+$ node scripts/reading-order.mjs <graph.json> --budget 6
+codeweb reading-order: 6 symbol(s) — read top-down (foundations first):
+    1. core/AxiosError.js:AxiosError
+        foundation — 18 in-scope caller(s)
+    2. cancel/CanceledError.js:CanceledError
+        foundation — 5 in-scope caller(s)
+    …
+```
+
+Scope it with `--scope domain|file|symbol <value>`; cycles degrade gracefully (members ordered by
+fan-in, never a crash). Deterministic and read-only; also the `codeweb_reading_order` MCP tool.
+
 ## Agent tools — context & pre-flight (`context-pack`, `simulate-edit`)
 
 Two read-only tools that move work off the LLM and into the graph (full spec:
@@ -251,7 +312,7 @@ property tests against an independent oracle (full spec: [`docs/agent-tools-v2.m
 
 | Tool | Job | What it answers |
 |---|---|---|
-| `find-similar.mjs <graph> --body/--stdin/--signature` | **write** | "Does code like this already exist?" — ranks existing bodies by shingle similarity, so the agent reuses instead of re-implementing. |
+| `find-similar.mjs <graph> --body/--stdin/--signature [--structural]` | **write** | "Does code like this already exist?" — ranks existing bodies by token-shingle similarity (or, with `--structural`, by identifier-normalized *skeleton* similarity, catching renamed/Type-2 clones), so the agent reuses instead of re-implementing. |
 | `placement.mjs <graph> --calls <ids>` | **write** | Where a new symbol belongs (domain + file by callee gravity) and whether it duplicates something. |
 | `query.mjs <graph> --tests <symbol>` | **write** | The tests that exercise a symbol — run the right subset after an edit. |
 | `review.mjs <graph> --changed <files> [--before g] [--gate]` | **review** | Maps a change to its changed symbols, blast radius, domains, and a fan-in-ranked review order; structural regression gate. |
@@ -260,19 +321,24 @@ property tests against an independent oracle (full spec: [`docs/agent-tools-v2.m
 | `codemod.mjs <graph> --merge <ids> --into <id> [--write]` | **optimize** | Plans a consolidation merge (deletions + caller rewrites + projected gate); `--write` applies it, gated + reversible. |
 | `break-cycles.mjs <graph>` | **optimize** | For each dependency cycle, the cheapest edge to sever — *verified* to break it. |
 | `deadcode.mjs <graph>` | **optimize** | Tiers orphans into safe-to-delete vs review-first (test-guarded / entrypoint-like). |
+| `annotate.mjs --suppress <fingerprint> [--note …]` | **review** | Records a false-positive suppression in `.codeweb/annotations.json` (never touches source); `overlap`/`deadcode` then hide that finding and report a `suppressedCount`. Fingerprints are identity-based, so a genuinely *new* issue can't hide behind an old suppression. |
 
-Plus **graph freshness**: `extract-symbols.mjs --cache <path>` re-scans only changed files, and
+Plus **graph freshness**: `extract-symbols.mjs --cache <path>` re-scans only changed files **and
+reuses per-file edges** (incremental edge derivation, guarded by a global symbol-set signature;
+`--full` forces a from-scratch rebuild that is byte-identical to the incremental one), and
 `refresh.mjs <graph>` re-extracts a graph's nodes+edges from disk so mid-edit queries stay accurate.
-Nodes now carry a `signature` (params/returns), and edges from test files are a distinct `test` kind
-(so production `--callers` exclude tests). All of the above are also exposed over MCP (below).
+Nodes now carry a `signature` (params/returns) and, for functions/methods, `complexity` + `maxDepth`;
+edges from test files are a distinct `test` kind (so production `--callers` exclude tests). All of the
+above are also exposed over MCP (below).
 
 ## Use it as an MCP tool
 
-`scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing
-codeweb's queries + the capability suite as tools any MCP client can call mid-task:
-`codeweb_callers/callees/impact/cycles/orphans/diff`, plus `codeweb_tests/find_similar/placement/
-review/fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not exposed).
-Register it with Claude Code:
+`scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing all
+**20** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
+`codeweb_callers/callees/impact/cycles/orphans/diff`, the edit-loop tools `codeweb_context/refresh`,
+the intelligence tools `codeweb_hotspots/campaign/reading_order`, plus `codeweb_tests/find_similar/
+placement/review/fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not
+exposed). Register it with Claude Code:
 
 ```
 claude mcp add codeweb -- node /abs/path/to/codeweb/scripts/mcp-server.mjs
@@ -284,8 +350,9 @@ or in an `.mcp.json`:
 { "mcpServers": { "codeweb": { "command": "node", "args": ["/abs/path/to/codeweb/scripts/mcp-server.mjs"] } } }
 ```
 
-Each tool takes a `graph` (path to a `graph.json`) plus, for callers/callees/impact, a `symbol`
-(node id or bare label) — so an agent can ask "what breaks if I change X?" before editing.
+Each tool takes a `graph` (path to a `graph.json`) plus, for callers/callees/impact/context, a
+`symbol` (node id or bare label) — so an agent can ask "what breaks if I change X?" or "give me a
+bounded edit window for X" before editing.
 
 ## How it works
 
@@ -300,12 +367,14 @@ into a per-target workspace:
 1. **Extract** (`extract-symbols.mjs`) — parse every source file into atomic nodes (functions,
    classes, methods) and call/import edges. Unresolved bare calls only wire to a global
    definition when the name is unambiguous; multi-def names drop the edge rather than fabricate a
-   false hub.
+   false hub. Each function/method node also gets a `signature`, cyclomatic `complexity`, and
+   `maxDepth`; edges are cached per file (incremental, byte-identical to a full rebuild) so refreshes scale.
 2. **Cluster** (`cluster3.mjs`) — strip genuine utility hubs, then group nodes into
    directory-anchored semantic domains.
 3. **Overlap** (`overlap.mjs`) — detect duplicated logic and parallel implementations, then
    confirm each candidate against the real function bodies (token-shingle similarity) so findings
-   are body-backed, not name coincidences.
+   are body-backed, not name coincidences. A structural pass over identifier-normalized *skeletons*
+   also catches renamed (Type-2) clones (`find-similar --structural`).
 4. **Render** (`build-report.mjs`) — turn `graph.json` into the self-contained `report.html`
    (and `report.md`).
 
@@ -344,10 +413,22 @@ codeweb/
 │   ├── codemod.mjs                 # F8: consolidation edit plan (+ gated/reversible --write)
 │   ├── deadcode.mjs                # F10: confidence-tiered dead-code workflow
 │   ├── break-cycles.mjs            # F9: cheapest verified cut per dependency cycle
+│   ├── hotspots.mjs                # rank symbols by complexity x fan-in x churn (where to refactor first)
+│   ├── campaign.mjs                # compose optimize+deadcode+break-cycles into one gated ROI worklist
+│   ├── reading-order.mjs           # foundations-first reading path for onboarding (bounded by budget)
+│   ├── annotate.mjs                # record false-positive suppressions in .codeweb/annotations.json
 │   ├── mcp-server.mjs              # MCP stdio server exposing all queries + the capability suite
 │   └── lib/
 │       ├── graph-ops.mjs           # shared pure graph primitives (index, cycles, orphans, impact, reviewImpact, …)
 │       ├── shingles.mjs            # F1: shared token-shingle/jaccard (also used by overlap.mjs)
+│       ├── skeleton.mjs            # identifier-normalized skeleton for Type-2 (renamed) clone detection
+│       ├── complexity.mjs          # cyclomatic complexity + nesting depth (the hotspot inputs)
+│       ├── dup-check.mjs           # incremental duplication check over changed symbols (edit gate)
+│       ├── annotations.mjs         # finding fingerprints + false-positive suppression memory
+│       ├── hotspots.mjs            # the complexity x fan-in x churn blend (shared with tests)
+│       ├── campaign.mjs            # the ordered/gated/ROI campaign planner (pure)
+│       ├── reading-order.mjs       # foundations-first DAG linearization
+│       ├── shards.mjs              # split/merge + answer-preserving sharded queries (monorepo scale)
 │       └── risk.mjs                # F7: the change-risk formula + weights (one truth)
 ├── agents/                          # fallback path (unparseable langs / --engine read)
 │   ├── codeweb-dissector.md         # atomic dissection (parallel, read-only)
@@ -368,10 +449,12 @@ codeweb/
   TypeScript, Python, **Rust**, and **Go** are native today; everything else routes through the agent
   fallback.)
 
-_Recently shipped: a **[live interactive demo](https://ghostlygawd.github.io/codeweb/demo/)** on
-GitHub Pages · Go and Rust on the fast path · duplication-over-time trend (`trend.mjs`) · a
-one-command CI regression gate + GitHub Action · a shareable report that no longer embeds the local
-source path._
+_Recently shipped: an **agent-intelligence suite** — refactoring **hotspots** (complexity × fan-in ×
+churn), a gated ROI-ranked optimization **campaign** planner, a foundations-first **reading-order**,
+**Type-2 (renamed) clone** detection, false-positive **suppression memory**, and **5 new MCP tools
+(20 total)** · a **[live interactive demo](https://ghostlygawd.github.io/codeweb/demo/)** on GitHub
+Pages · Go and Rust on the fast path · duplication-over-time trend (`trend.mjs`) · a one-command CI
+regression gate + GitHub Action._
 
 ## Handoffs
 
