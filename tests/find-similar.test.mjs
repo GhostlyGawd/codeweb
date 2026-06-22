@@ -9,6 +9,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runNode, script, tmpDir, writeTree, cleanup } from './helpers.mjs';
 import { prng, int, pick } from './_proptest.mjs';
+import { tokenize, shingles, jaccard } from '../scripts/lib/shingles.mjs';
 
 const FS = script('find-similar.mjs');
 
@@ -72,6 +73,18 @@ test('FS-ORACLE: reported sims + ranking match the independent shingler over ran
       }
     } finally { cleanup(dir); }
   }
+});
+
+// FS-DOGFOOD — lock the lifted shingler's output so a future tokenizer change to lib/shingles.mjs
+// (which also drives overlap.mjs) fails a clearly-named test instead of silently shifting detection.
+test('FS-DOGFOOD: the shared shingler is byte-stable (keywords + strings/comments handled)', () => {
+  assert.deepEqual(tokenize('alpha beta gamma'), ['alpha', 'beta', 'gamma']);
+  assert.deepEqual(tokenize('const x = 1; // gone'), ['x', '=', ';']);          // 'const' is a KW, '1' is not an identifier, comment stripped
+  assert.deepEqual(tokenize('return foo("hi")'), ['foo', '(', 'str', ')']);     // 'return' KW dropped; string -> STR placeholder
+  assert.deepEqual([...shingles('alpha beta gamma delta')], ['alpha beta gamma', 'beta gamma delta']);
+  assert.equal(jaccard(shingles('alpha beta gamma'), shingles('alpha beta gamma')), 1);
+  assert.equal(jaccard(shingles('alpha beta gamma'), shingles('x y z')), 0);
+  assert.equal(jaccard(shingles('a b c d'), shingles('a b c')), 0.5);
 });
 
 // FS-SELF — an exact body fed back must self-match at sim 1.0, ranked first.

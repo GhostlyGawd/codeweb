@@ -92,9 +92,11 @@ if (doWrite) {
         const delByFile = new Map();
         for (const d of deletions) { if (!delByFile.has(d.file)) delByFile.set(d.file, []); delByFile.get(d.file).push(d.range); }
         for (const [f, ranges] of delByFile) {
-          const p = join(root, f); const lines = readFileSync(p, 'utf8').split(/\r?\n/);
+          const p = join(root, f); const raw = readFileSync(p, 'utf8');
+          const eol = raw.includes('\r\n') ? '\r\n' : '\n'; // preserve the file's line ending (no silent CRLF->LF)
+          const lines = raw.split(/\r?\n/);
           for (const [s, e] of ranges.slice().sort((a, b) => b[0] - a[0])) lines.splice(s - 1, e - s + 1);
-          writeFileSync(p, lines.join('\n'));
+          writeFileSync(p, lines.join(eol));
         }
         // 2) rewrite each rename-loser's label token -> canonical label, across every touched file
         const renameLabels = [...new Set(renameLosers.map((id) => byId.get(id).label))];

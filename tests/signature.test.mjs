@@ -19,7 +19,10 @@ function oracleParams(line) {
   if (!m) return null;             // no single-line paren group -> null
   const inner = m[1].trim();
   if (inner === '') return [];
-  return inner.split(',').map((s) => s.trim().replace(/^(\*\*?|\.\.\.)/, '').split('=')[0].split(':')[0].trim()).filter(Boolean);
+  // strip rest/kwargs prefix, default, and annotation; keep only valid identifiers (drops generic
+  // fragments like `T0>` that a depth-naive comma split leaves behind) — the same param-name contract
+  // the implementation enforces, re-derived independently here.
+  return inner.split(',').map((s) => s.trim().replace(/^(\*\*?|\.\.\.)/, '').split('=')[0].split(':')[0].trim()).filter((p) => /^[A-Za-z_$][\w$]*$/.test(p));
 }
 
 // random single-line declarations (no nested parens/commas, so the naive oracle is exact)
@@ -27,10 +30,12 @@ function genJsDecl(rng, i) {
   const n = int(rng, 0, 4);
   const ps = Array.from({ length: n }, (_, j) => {
     const base = `p${j}`;
-    switch (int(rng, 0, 3)) {
+    switch (int(rng, 0, 5)) {
       case 1: return `${base} = ${int(rng, 0, 9)}`;
       case 2: return `...${base}`;
       case 3: return `${base}: T${j}`;
+      case 4: return `${base} = n > ${int(rng, 0, 9)}`;        // comparison-operator default (the > regression)
+      case 5: return `${base}: Map<string, T${j}>`;            // TS generic with an inner comma
       default: return base;
     }
   });

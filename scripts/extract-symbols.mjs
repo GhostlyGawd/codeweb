@@ -144,10 +144,14 @@ function bodyEnd(lines, startIdx, isPy) {
 // list isn't fully on that line (multi-line / paren-less arrow) — never a guess (best-effort, the
 // same ethos as bodyEnd). The extractor is line-oriented, so multi-line params are intentionally null.
 const splitTopLevelParams = (s) => {
+  // Track only unambiguous bracket pairs. `<`/`>` are NOT tracked — they double as comparison
+  // operators in default values (`a = x > 0, b`), and treating them as brackets would mis-balance
+  // depth and drop trailing params. TS generics (`a: Map<string, number>`) still split correctly:
+  // the inner comma yields a non-identifier fragment that paramName() discards.
   const out = []; let depth = 0, cur = '';
   for (const ch of s) {
-    if ('([{<'.includes(ch)) depth++;
-    else if (')]}>'.includes(ch)) depth--;
+    if ('([{'.includes(ch)) depth++;
+    else if (')]}'.includes(ch)) depth--;
     if (ch === ',' && depth === 0) { out.push(cur); cur = ''; } else cur += ch;
   }
   if (cur.trim() || out.length) out.push(cur);
