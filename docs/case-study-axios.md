@@ -8,6 +8,8 @@ source, builds the graph, and reports. Here is exactly what it found in `lib/`.
 > [open the live demo](https://ghostlygawd.github.io/codeweb/demo/). *(Published from
 > [`docs/demo/index.html`](demo/index.html).)*
 
+![codeweb's domain view of axios — eight auto-detected areas (adapters, helpers, core, cancel, defaults, platform) sized by symbol count and linked by their call/import coupling](../assets/screens/05-axios-graph.png)
+
 ## The map
 
 ```
@@ -23,6 +25,8 @@ $ node scripts/run.mjs path/to/axios/lib --target axios
 | **Overlap candidates** | 17 |
 
 ## The finding that matters — precision, not noise
+
+![codeweb Findings tab on axios — same-name duplication groups, each row showing the symbol and the domains it spans, including setFormDataHeaders, decodeURIComponentSafe and encodeUTF8](../assets/screens/05-axios-findings.png)
 
 Anyone can `grep` for same-named functions. The number that counts is what survives a look at the
 **actual function bodies**. codeweb confirms each overlap with token-shingle similarity of the real
