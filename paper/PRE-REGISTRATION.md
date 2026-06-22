@@ -352,3 +352,61 @@ Design (fixed now):
 
 **Reproduce:** `bash paper/corpus/clone-corpus.sh && node paper/run-all.mjs` (Themes 1–4). Theme 5:
 `node paper/experiments/agent-ab.mjs` (requires an agent runner; seeds/prompts/grader committed).
+
+---
+
+## 9. Execution log & deviations from pre-registration
+
+Recorded *after* data collection. Every deviation, fix, and criterion clarification is logged here
+transparently — that disclosure is what makes the pre-registration meaningful (§0).
+
+### 9.1 Defects the study surfaced, then fixed (find → fix → prove)
+
+Two hypotheses initially **failed** because the harnesses found real, user-visible engine defects.
+Per §0.3 we report the failures; per the project's engineering bar we also fixed the defects — each a
+genuine product improvement, not a test-passing hack — and re-ran to prove the corrected claim. The
+pre-fix failure stands on record, and each fix ships behind a **reproducible A/B lever** so its effect
+is independently verifiable (the same pattern as the engine's existing `CODEWEB_LEGACY_FALLBACK` /
+`CODEWEB_HUB_INDEG` levers).
+
+- **H1 (determinism) — FAILED → fixed → PASS.** Initial run: the pipeline was *not* byte-deterministic.
+  Root causes: (a) `rg --files` (and readdir) enumerate files in a nondeterministic order, which leaked
+  into node-array order **and** `cluster3` domain *assignment* (analysis output, not just cosmetics);
+  (b) `overlap.mjs` computed `Math.min(...sims)`, spreading an O(n²) array as call args — `express`
+  overflowed the stack and crashed every run. Fixes: sort the file list (`extract-symbols.mjs`);
+  spread-free `reduce` (`overlap.mjs`). 286 tests stayed green. Re-run (R=20, all 6 repos): **1 distinct
+  digest each, express no longer crashes** → H1 PASS.
+- **H13 (deadcode safe-tier precision) — FAILED → fixed → PASS.** Initial run: safe-tier precision
+  0.519. Root cause: the "safe-to-delete" tier excluded test-edge *targets* but not functions *defined
+  in* test files (helpers, mocks, `it`/`describe` registrations) — which have no inbound code edge, so
+  they were filed "safe", yet a test runner invokes them (deleting them breaks tests; on `express`,
+  928/932 safe items were test-file functions). Fix: route test-file definitions to "review" via the
+  already-exported `isTestFile` predicate. New `CODEWEB_DEADCODE_LEGACY` lever restores the old behavior
+  for falsifiability. Re-run: **precision 1.0** (legacy ≈ 0.52) → H13 PASS.
+
+### 9.2 Criterion clarifications (no number changed; wording reconciled to the shipped contract)
+
+- **H4 (impact)** — the pre-reg text said "call edges"; codeweb's shipped `impact` is reverse
+  reachability over **call *and* inherit** edges. The oracle was matched to the shipped contract; the
+  0-disagreement result holds for that contract, which is the semantics we report.
+- **A-TESTS** — random graphs emit no `test` edges, so most of the 120,454 comparisons are trivially
+  empty-vs-empty; the **effective** non-empty denominator is the real-repo cases (~10²). The
+  Rule-of-Three bound is reported on the effective n, not the inflated total.
+- **H9 baseline** — the name-match-only baseline's precision is pinned near 0.5 by the 1:1
+  planted-clone:distractor ratio. The F1 separation is genuine (codeweb 1.0 vs 0.67), but the
+  *magnitude* of the contrast is partly a property of the planted ratio. Stated plainly in the paper.
+
+### 9.3 Honest negatives retained (reported as measured, not spun)
+
+- **H15 (incremental speedup)** — the universal `ratio < 1 for all p` criterion is **not** met:
+  `refresh --cache` is faster at low churn but reaches **parity (~1.0×) at p≈25%**. Reported as the
+  measured speedup *curve* (a real win for realistic small-change refreshes, not a universal claim).
+- **H17 (query latency)** — a single-run threshold is noise-sensitive (it flipped pass/fail across
+  runs). Reported as a **distribution** (median / p95 over repeated runs) on the largest real graph,
+  not as a binary threshold.
+
+### 9.4 Tooling note
+
+Cloning the corpus into `paper/corpus/` made argless `node --test` discover the corpus repos' own
+test files; `npm test` was scoped to `"tests/**/*.test.mjs"` (Node-internal glob — cross-platform). CI
+is unaffected (the corpus is never cloned there).
