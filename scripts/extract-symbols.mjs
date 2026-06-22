@@ -15,19 +15,25 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { relative, resolve, join, dirname, extname } from 'node:path';
 import { isTestFile } from './lib/graph-ops.mjs'; // F4: test-file predicate (shared, one truth)
+
+// F0: bump when scanSymbols/ctagsSymbols OUTPUT changes — invalidates stale scan caches.
+const SCANNER_VERSION = 1;
+const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
 // label separator, so the last ':' splits them.
 const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
 
 const argv = process.argv.slice(2);
-const opts = { path: null, out: null, ctags: true, target: null };
+const opts = { path: null, out: null, ctags: true, target: null, cache: null };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--out') opts.out = argv[++i];
   else if (t === '--target') opts.target = argv[++i];
+  else if (t === '--cache') opts.cache = argv[++i]; // F0: per-file scan cache (incremental freshness)
   else if (t === '--no-ctags') opts.ctags = false;
   else if (!opts.path) opts.path = t;
 }
@@ -175,13 +181,31 @@ function parseSignature(line, name, isPy) {
 const useCtags = opts.ctags && toolExists('ctags');
 const files = listFiles();
 
+// F0: load the scan cache (keyed by content hash + engine mode + scanner version). A re-run reuses
+// cached symbol-discovery for byte-identical files and re-scans only changed ones — edge derivation
+// is still GLOBAL (see below), so the fragment is identical with or without the cache.
+const engineMode = useCtags ? 'ctags' : 'regex';
+let oldCache = null;
+if (opts.cache) { try { const c = JSON.parse(readFileSync(opts.cache, 'utf8')); if (c && c.version === SCANNER_VERSION && c.engine === engineMode) oldCache = c; } catch { /* corrupt/absent -> cold */ } }
+const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, files: {} } : null;
+let scanCount = 0;
+const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)) || scanSymbols(f, text); };
+
 // ---- build nodes per file, with line ranges ----
 const nodes = [];
 const fileSyms = new Map(); // file -> {text, ranges:[{id,name,start,end,kind}]}
 for (const f of files) {
   let text; try { text = readFileSync(f, 'utf8'); } catch { continue; }
   const r = rel(f);
-  let syms = (useCtags && ctagsSymbols(f)) || scanSymbols(f, text);
+  let syms;
+  if (opts.cache) {
+    const h = sha1(text);
+    const hit = oldCache && oldCache.files[r];
+    syms = (hit && hit.hash === h) ? hit.syms : scanFile(f, text); // cache miss -> re-scan
+    newCache.files[r] = { hash: h, syms };                          // prune deleted files (only current)
+  } else {
+    syms = scanFile(f, text);
+  }
   const seen = new Set();
   syms = syms.filter((s) => { const k = s.name + ':' + s.line; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a.line - b.line);
   const lines = text.split(/\r?\n/);
@@ -365,6 +389,7 @@ const fragment = {
   meta: { root: rootFwd, target: targetLabel, engine: useCtags ? 'ctags' : 'regex', languages, symbols: nodes.length },
   nodes, edges,
 };
-const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'} engine); dropped ${ambiguousDropped} ambiguous bare-call edges`;
+if (newCache) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
+const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'} engine); dropped ${ambiguousDropped} ambiguous bare-call edges; scanned ${scanCount}/${files.length} file(s)${opts.cache ? ' (cache on)' : ''}`;
 if (opts.out) { writeFileSync(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
 else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }
