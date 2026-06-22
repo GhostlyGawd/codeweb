@@ -25,8 +25,12 @@ tools** (over MCP, no LLM in the loop) **for your coding agent** to consult *bef
 
 One command runs the whole deterministic pipeline and drops an interactive map at
 `<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report** —
-codeweb pointed at a real ~1,956-symbol, 17-domain codebase. No mockups. *(A click-around hosted
-demo is on the way — see [Roadmap](#roadmap).)*
+codeweb pointed at a real ~1,956-symbol, 17-domain codebase. No mockups.
+
+> **▶ Read the [axios case study](docs/case-study-axios.md)** — codeweb run read-only on a library
+> downloaded ~50M times a week: 274 symbols, 8 domains, **3 body-confirmed duplications** (two
+> byte-identical across files), 12 false positives dismissed, and a cycle-safe merge plan for each.
+> A click-around hosted version of that exact map lands with the next push — see [Roadmap](#roadmap).
 
 ### Navigate the whole system
 
@@ -320,7 +324,8 @@ codeweb/
 ## Roadmap
 
 - **Hosted live demo** — a click-around `report.html` of a recognizable open-source repo, published
-  to GitHub Pages, so you can explore a real map before installing anything.
+  to GitHub Pages, so you can explore a real map before installing anything. *(Staged at
+  [`docs/demo/`](docs/demo/) — the axios map; goes live once Pages is enabled.)*
 - **CI regression gate** — `diff.mjs` packaged as a GitHub Action that fails a PR on a new dependency
   cycle, a new duplication finding, or a symbol that loses all its callers.
 - **More first-class languages** — Go and Rust on the deterministic fast path (today: JS/TS/Python;
