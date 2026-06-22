@@ -128,6 +128,45 @@ function bodyEnd(lines, startIdx, isPy) {
   return lines.length - 1;
 }
 
+// ---- F3: single-line signature extraction ------------------------------------------------
+// Returns {params, returns, raw} from a function/method DECLARATION line, or null when the param
+// list isn't fully on that line (multi-line / paren-less arrow) — never a guess (best-effort, the
+// same ethos as bodyEnd). The extractor is line-oriented, so multi-line params are intentionally null.
+const splitTopLevelParams = (s) => {
+  const out = []; let depth = 0, cur = '';
+  for (const ch of s) {
+    if ('([{<'.includes(ch)) depth++;
+    else if (')]}>'.includes(ch)) depth--;
+    if (ch === ',' && depth === 0) { out.push(cur); cur = ''; } else cur += ch;
+  }
+  if (cur.trim() || out.length) out.push(cur);
+  return out;
+};
+const paramName = (entry) => {
+  let e = entry.trim();
+  if (!e) return null;
+  e = e.replace(/^(\*\*?|\.\.\.)/, '').split('=')[0].split(':')[0].trim(); // *args/**kw/...rest, default, annotation
+  return /^[A-Za-z_$][\w$]*$/.test(e) ? e : null;                          // destructuring/other -> dropped
+};
+function parseSignature(line, name, isPy) {
+  const nameEsc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // the param-list open-paren for BOTH `name(...)` (declaration) and `name = [async] [function [g]] (...)`
+  // (arrow / function-expression assignment) — so `const f = (a, b) => …` parses, not just `function f(a, b)`.
+  const nameRe = new RegExp(`(?:^|[^\\w$])${nameEsc}\\s*(?:=\\s*(?:async\\s+)?(?:function\\s*\\*?\\s*[\\w$]*\\s*)?)?\\(`);
+  const m = nameRe.exec(line);
+  if (!m) return null;                       // no param paren attributable to `name` on this line
+  const open = m.index + m[0].length - 1;
+  let depth = 0, close = -1;
+  for (let i = open; i < line.length; i++) { const ch = line[i]; if (ch === '(') depth++; else if (ch === ')') { depth--; if (depth === 0) { close = i; break; } } }
+  if (close === -1) return null;             // params spill onto the next line -> null
+  const raw = line.slice(open + 1, close);
+  const params = splitTopLevelParams(raw).map(paramName).filter((x) => x != null);
+  let returns = null;
+  if (isPy) { const r = /->\s*([^:]+):/.exec(line.slice(close)); if (r) returns = r[1].trim(); }
+  else { const r = /^\s*:\s*([^={]+?)\s*(?:=>|\{|$)/.exec(line.slice(close + 1)); if (r) returns = r[1].trim(); }
+  return { params, returns, raw };
+}
+
 const useCtags = opts.ctags && toolExists('ctags');
 const files = listFiles();
 
@@ -151,7 +190,9 @@ for (const f of files) {
     const end = Math.min(bodyEnd(lines, start - 1, isPy) + 1, total);
     const id = r + ':' + s.name;
     ranges.push({ id, name: s.name, start, end, kind: s.kind });
-    nodes.push({ id, label: s.name, kind: s.kind, file: r, line: start, loc: Math.min(end - start + 1, 2000), exports: s.exports, domain: '', summary: '' });
+    const node = { id, label: s.name, kind: s.kind, file: r, line: start, loc: Math.min(end - start + 1, 2000), exports: s.exports, domain: '', summary: '' };
+    if (s.kind === 'function' || s.kind === 'method') node.signature = parseSignature(lines[start - 1] || '', s.name, isPy); // F3: contract for callers
+    nodes.push(node);
   });
   fileSyms.set(f, { text, ranges });
 }

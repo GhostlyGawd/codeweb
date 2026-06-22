@@ -52,7 +52,7 @@ const bodyOf = (n) => {
   return lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n');
 };
 const view = (n, withBody) => {
-  const o = { id: n.id, label: n.label, kind: n.kind, file: n.file, line: n.line, loc: n.loc, domain: n.domain, exports: n.exports };
+  const o = { id: n.id, label: n.label, kind: n.kind, file: n.file, line: n.line, loc: n.loc, domain: n.domain, exports: n.exports, signature: n.signature ?? null };
   if (withBody) o.body = bodyOf(n);
   return o;
 };
