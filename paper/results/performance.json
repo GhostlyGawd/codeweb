@@ -1,0 +1,384 @@
+{
+  "cluster": "C5-performance",
+  "_env": {
+    "node": "v24.14.1",
+    "platform": "win32",
+    "release": "10.0.19045",
+    "cpu": "Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz",
+    "cores": 8,
+    "totalMemGB": 11.96,
+    "date": "2026-06-22T20:27:04.465Z",
+    "seed": 3235798709
+  },
+  "smoke": false,
+  "T": {
+    "H14_reps": 5,
+    "H15_reps": 5,
+    "H17_repsPerQuery": 30
+  },
+  "_findings": [],
+  "perHypothesis": [
+    {
+      "id": "H14",
+      "metric": "log-log slope b (scaling exponent) of full pipeline runtime vs symbol count",
+      "value": {
+        "slope": 0.3313,
+        "slopeLo": 0.1298,
+        "slopeHi": 0.5329,
+        "r2": 0.5647,
+        "n": 10
+      },
+      "ci": [
+        0.1298,
+        0.5329
+      ],
+      "criterion": "slope 95% CI upper bound < 1.5",
+      "passed": true,
+      "points": [
+        {
+          "label": "synthetic-100",
+          "symbols": 100,
+          "timeMs": 422.64,
+          "iqr": 89.91,
+          "timesMs": [
+            600.44,
+            470,
+            422.64,
+            380.09,
+            362.33
+          ],
+          "overlapOk": true,
+          "overlapErr": null,
+          "includedInFit": true
+        },
+        {
+          "label": "repo:gorilla-mux",
+          "symbols": 261,
+          "timeMs": 386.49,
+          "iqr": 21.68,
+          "timesMs": [
+            396.32,
+            396.76,
+            386.49,
+            366.97,
+            374.64
+          ],
+          "overlapOk": true,
+          "overlapErr": null,
+          "includedInFit": true
+        },
+        {
+          "label": "synthetic-300",
+          "symbols": 300,
+          "timeMs": 368.25,
+          "iqr": 28.02,
+          "timesMs": [
+            363.03,
+            348.29,
+            368.25,
+            391.05,
+            396.88
+          ],
+          "overlapOk": true,
+          "overlapErr": null,
+          "includedInFit": true
+        },
+        {
+          "label": "repo:axios",
+          "symbols": 859,
+          "timeMs": 783.06,
+          "iqr": 6.24,
+          "timesMs": [
+            777.49,
+            783.73,
+            783.06,
+            795.05,
+            765.15
+          ],
+          "overlapOk": true,
+          "overlapErr": null,
+          "includedInFit": true
+        },
+        {
+          "label": "synthetic-1000",
+          "symbols": 1000,
+          "timeMs": 504.83,
+          "iqr": 20.84,
+          "timesMs": [
+            523.31,
+            495.13,
+            502.47,
+            504.83,
+            526.86
+          ],
+          "overlapOk": true,
+          "overlapErr": null,
+          "includedInFit": true
+        },
+        {
+          "label": "repo:zod",
+          "symbols": 1408,
+          "timeMs": 1046.49,
+          "iqr": 78.72,
+          "timesMs": [
+            1046.49,
+            1067.41,
+            1072.57,
+            988.69,
+            981.79
+          ],
+          "overlapOk": true,
+          "overlapErr": null,
+          "includedInFit": true
+        },
+        {
+          "label": "repo:flask",
+          "symbols": 1656,
+          "timeMs": 648.92,
+          "iqr": 12.13,
+          "timesMs": [
+            646.1,
+            648.92,
+            658.24,
+            618.43,
+            658.56
+          ],
+          "overlapOk": true,
+          "overlapErr": null,
+          "includedInFit": true
+        },
+        {
+          "label": "repo:express",
+          "symbols": 1882,
+          "timeMs": 1785.45,
+          "iqr": 49.34,
+          "timesMs": [
+            1822.94,
+            1824.5,
+            1785.45,
+            1750.01,
+            1773.59
+          ],
+          "overlapOk": true,
+          "overlapErr": null,
+          "includedInFit": true
+        },
+        {
+          "label": "synthetic-3000",
+          "symbols": 3000,
+          "timeMs": 841.77,
+          "iqr": 6.88,
+          "timesMs": [
+            841.77,
+            820.97,
+            843.97,
+            837.08,
+            985.73
+          ],
+          "overlapOk": true,
+          "overlapErr": null,
+          "includedInFit": true
+        },
+        {
+          "label": "repo:ripgrep",
+          "symbols": 3201,
+          "timeMs": 916.83,
+          "iqr": 26.2,
+          "timesMs": [
+            890.68,
+            930.52,
+            916.83,
+            948.05,
+            904.32
+          ],
+          "overlapOk": true,
+          "overlapErr": null,
+          "includedInFit": true
+        }
+      ],
+      "excludedFromFit": [],
+      "noisy": false,
+      "_falsification": {
+        "description": "Same olsLogLog fed time=c·n^2 over the real x-grid must report slope≈2 and FAIL the <1.5 criterion (proves the H14 test is able to fail).",
+        "quadSlope": 2,
+        "quadSlopeHi": 2,
+        "quadR2": 1,
+        "detectsQuadratic": true,
+        "quadraticWouldFail": true
+      },
+      "reps": 5
+    },
+    {
+      "id": "H15",
+      "metric": "time(refresh --cache, p) / time(full cold rebuild) by changed fraction p",
+      "value": {
+        "repo": "flask",
+        "curve": [
+          {
+            "p": 1,
+            "fullMs": 465.15,
+            "cacheMs": 433.23,
+            "ratio": 0.9314,
+            "fullIqr": 5.39,
+            "cacheIqr": 2.86
+          },
+          {
+            "p": 5,
+            "fullMs": 462.63,
+            "cacheMs": 441.56,
+            "ratio": 0.9545,
+            "fullIqr": 15.68,
+            "cacheIqr": 13.41
+          },
+          {
+            "p": 10,
+            "fullMs": 466.65,
+            "cacheMs": 449.89,
+            "ratio": 0.9641,
+            "fullIqr": 3.71,
+            "cacheIqr": 8.58
+          },
+          {
+            "p": 25,
+            "fullMs": 466.34,
+            "cacheMs": 466.52,
+            "ratio": 1.0004,
+            "fullIqr": 36.81,
+            "cacheIqr": 14.66
+          },
+          {
+            "p": 50,
+            "fullMs": 466.5,
+            "cacheMs": 471.04,
+            "ratio": 1.0097,
+            "fullIqr": 16.92,
+            "cacheIqr": 1.55
+          }
+        ],
+        "monotoneIncreasing": true
+      },
+      "ci": null,
+      "criterion": "ratio < 1 for all p ∈ {1,5,10,25,50}%",
+      "passed": false,
+      "reps": 5
+    },
+    {
+      "id": "H16",
+      "metric": "package.json deps empty AND full pipeline runs with empty node_modules",
+      "value": {
+        "dependenciesEmpty": true,
+        "dependencies": {},
+        "pipelineRanWithEmptyNodeModules": true,
+        "nonVacuityControl": {
+          "description": "a missing-package import in the SAME sandbox env must fail",
+          "failsAsExpected": true
+        },
+        "detail": "pipeline ok: 120 symbols, report.html produced, empty node_modules, NODE_PATH=''"
+      },
+      "ci": null,
+      "criterion": "dependencies empty/absent AND pipeline succeeds with empty node_modules (sandbox isolation control must fail on a missing import)",
+      "passed": true
+    },
+    {
+      "id": "H17",
+      "metric": "per-query median + p95 latency (ms) on the largest real graph",
+      "value": {
+        "graph": {
+          "repo": "ripgrep",
+          "symbols": 3201
+        },
+        "target": {
+          "id": "crates/core/flags/parse.rs:parse_low_raw",
+          "label": "parse_low_raw",
+          "file": "crates/core/flags/parse.rs",
+          "inDeg": 104
+        },
+        "perQuery": {
+          "callers": {
+            "medianMs": 99.87,
+            "p95Ms": 264.41,
+            "minMs": 86.88,
+            "maxMs": 413.08,
+            "iqr": 12.16
+          },
+          "callees": {
+            "medianMs": 95.66,
+            "p95Ms": 118.21,
+            "minMs": 86.21,
+            "maxMs": 128.86,
+            "iqr": 14.15
+          },
+          "impact": {
+            "medianMs": 96.79,
+            "p95Ms": 111.51,
+            "minMs": 86.24,
+            "maxMs": 374.7,
+            "iqr": 9.78
+          },
+          "cycles": {
+            "medianMs": 95.75,
+            "p95Ms": 117.71,
+            "minMs": 84.38,
+            "maxMs": 388.05,
+            "iqr": 7.55
+          },
+          "orphans": {
+            "medianMs": 94.92,
+            "p95Ms": 105.11,
+            "minMs": 87.79,
+            "maxMs": 139.04,
+            "iqr": 5.91
+          },
+          "context-pack": {
+            "medianMs": 97.6,
+            "p95Ms": 132.31,
+            "minMs": 86.33,
+            "maxMs": 164.59,
+            "iqr": 9.77
+          },
+          "simulate-edit": {
+            "medianMs": 117.28,
+            "p95Ms": 134.75,
+            "minMs": 109.63,
+            "maxMs": 141.63,
+            "iqr": 10.73
+          }
+        },
+        "worstMedianMs": 117.28,
+        "worstP95Ms": 264.41,
+        "decomposition": {
+          "note": "in-process query compute + JSON-load, isolating Node startup from algorithm",
+          "nodeStartup": {
+            "medianMs": 63.82,
+            "minMs": 57.31
+          },
+          "jsonLoadAndIndexMs": 8.587,
+          "computeMs": {
+            "callers": 0.0157,
+            "callees": 0.0005,
+            "impact": 0.0473,
+            "cycles": 0.7837,
+            "orphans": 1.0705
+          },
+          "algorithmPlusLoadMs": 9.657
+        },
+        "stability": {
+          "marginToMedianGateMs": 132.72,
+          "nodeStartupSpreadMs": 15.1,
+          "marginExceedsStartupSpread": true,
+          "observedWorstMediansMs": [
+            250.43,
+            214.61,
+            581.71
+          ],
+          "verdictObservedToFlip": true,
+          "interpretation": "The H17 PASS/FAIL is governed by the Node process-startup tax (decomposition.nodeStartup ≈ 63.82 ms, throttle-sensitive), NOT by codeweb: the query algorithms run in {\"callers\":0.0157,\"callees\":0.0005,\"impact\":0.0473,\"cycles\":0.7837,\"orphans\":1.0705} ms and the whole in-process path (JSON-load + index + worst query) is ≈ 9.657 ms. On any non-throttled machine with normal (~40-80 ms) Node startup, every query is well under 250 ms; here startup alone exceeds it under load."
+        }
+      },
+      "ci": null,
+      "criterion": "median < 250 ms AND p95 < 1000 ms (worst-case across all 7 queries)",
+      "passed": true,
+      "repsPerQuery": 30
+    }
+  ]
+}

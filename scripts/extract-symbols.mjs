@@ -62,7 +62,11 @@ function listFiles() {
     const walk = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = join(d, e.name); if (SKIP.test(p)) continue; if (e.isDirectory()) walk(p); else files.push(p); } };
     walk(root);
   }
-  return files.filter((f) => SRC.test(f) && !SKIP.test(f));
+  // Canonicalize enumeration order: `rg --files` (parallel walk) and readdir can return files in a
+  // nondeterministic order, which leaks into node-array order AND cluster3's domain-assignment
+  // tie-breaks — making the pipeline non-reproducible. Sorting pins a stable order without changing
+  // the file set. (Surfaced + verified by the determinism study, H1.)
+  return files.filter((f) => SRC.test(f) && !SKIP.test(f)).sort();
 }
 
 const rel = (f) => relative(root, f).replace(/\\/g, '/');

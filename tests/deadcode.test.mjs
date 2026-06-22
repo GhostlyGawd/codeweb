@@ -1,7 +1,7 @@
 // F10 — confidence-tiered dead-code. Tests first. ★ANTI-CHEAT DC-MEMBERSHIP pins `safe` to a POSITIVE
 // membership oracle recomputed inline (orphans minus test-targeted minus entrypoints) over random
 // graphs — the "dump everything into review" cheat fails it. DC-PARTITION/DC-SAFE-NO-TEST are
-// companions; DC-FIXTURE pins the three placements explicitly.
+// companions; DC-FIXTURE pins the four placements explicitly (incl. test-file-defined -> review).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -53,8 +53,11 @@ test('DC-MEMBERSHIP: safe == inline-recomputed (orphans − test-targeted − en
   }
 });
 
-// DC-FIXTURE: the three placements explicitly.
-test('DC-FIXTURE: test-targeted -> review, entrypoint -> review, neither -> safe', () => {
+// DC-FIXTURE: the four placements explicitly. test-targeted, entrypoint, and TEST-FILE-DEFINED all
+// go to review; only a plain production orphan is safe. The test-file-defined case (helpers/mocks/
+// case registrations) is the H13 fix: such symbols have no inbound code edge, so the old engine
+// filed them "safe" — and deleting the safe list would delete a repo's test helpers.
+test('DC-FIXTURE: test-targeted/entrypoint/test-file-defined -> review, plain orphan -> safe', () => {
   const g = {
     meta: {}, domains: [], overlaps: [],
     nodes: [
@@ -62,6 +65,7 @@ test('DC-FIXTURE: test-targeted -> review, entrypoint -> review, neither -> safe
       { id: 'a.js:main', label: 'main', kind: 'function', file: 'a.js', line: 3, loc: 1, exports: false, domain: 'd' },
       { id: 'a.js:reallyDead', label: 'reallyDead', kind: 'function', file: 'a.js', line: 5, loc: 1, exports: false, domain: 'd' },
       { id: 't.test.js:t', label: 't', kind: 'function', file: 't.test.js', line: 1, loc: 1, exports: false, domain: 'd' },
+      { id: 'helpers.test.js:mockServer', label: 'mockServer', kind: 'function', file: 'helpers.test.js', line: 1, loc: 1, exports: false, domain: 'd' },
     ],
     edges: [{ from: 't.test.js:t', to: 'a.js:tested', kind: 'test' }],
   };
@@ -72,8 +76,10 @@ test('DC-FIXTURE: test-targeted -> review, entrypoint -> review, neither -> safe
     const review = new Set(out.review.map((r) => r.id));
     assert.ok(review.has('a.js:tested'), 'test-targeted -> review');
     assert.ok(review.has('a.js:main'), 'entrypoint -> review');
-    assert.ok(safe.has('a.js:reallyDead'), 'neither -> safe');
-    assert.ok(!safe.has('a.js:tested') && !safe.has('a.js:main'));
+    assert.ok(review.has('t.test.js:t'), 'test-file-defined (case) -> review');
+    assert.ok(review.has('helpers.test.js:mockServer'), 'test-file-defined (helper/mock) -> review, NOT safe — deleting it can break tests');
+    assert.ok(safe.has('a.js:reallyDead'), 'plain production orphan -> safe');
+    assert.ok(!safe.has('a.js:tested') && !safe.has('a.js:main') && !safe.has('t.test.js:t') && !safe.has('helpers.test.js:mockServer'));
     // every entry carries a reason
     for (const e of [...out.safe, ...out.review]) assert.ok(typeof e.reason === 'string' && e.reason.length > 0, `missing reason for ${e.id}`);
   } finally { cleanup(dir); }

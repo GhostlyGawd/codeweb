@@ -1,0 +1,8 @@
+[
+  {"name":"axios","url":"https://github.com/axios/axios.git","sha":"a209bfb1e5dcbce3cecbf4bd955339d006358887","describe":"v1.18.1","sourceFiles":205},
+  {"name":"express","url":"https://github.com/expressjs/express.git","sha":"18e5985b8a9d5e8423db0a9121f22bdaecd5b120","describe":"18e5985","sourceFiles":141},
+  {"name":"zod","url":"https://github.com/colinhacks/zod.git","sha":"912f0f51b0ced654d0069741e7160834dca742ee","describe":"912f0f5","sourceFiles":377},
+  {"name":"flask","url":"https://github.com/pallets/flask.git","sha":"36e4a824f340fdee7ed50937ba8e7f6bc7d17f81","describe":"36e4a82","sourceFiles":83},
+  {"name":"ripgrep","url":"https://github.com/BurntSushi/ripgrep.git","sha":"dfe4a81d2591daca76d25ae4e052c34b26578155","describe":"dfe4a81","sourceFiles":100},
+  {"name":"gorilla-mux","url":"https://github.com/gorilla/mux.git","sha":"db9d1d0073d27a0a2d9a8c1bc52aa0af4374d265","describe":"db9d1d0","sourceFiles":17}
+]

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // codeweb deadcode (F10) — turn the orphans candidate list into a confidence-tiered action plan.
-// Partitions orphans (no production caller, not exported) into `safe` (no test edge, not an
-// entrypoint-like name — high-confidence dead) and `review` (referenced only by tests, or an
-// entrypoint-like name that a framework/CLI may invoke without a code edge). Honestly surfaces the
+// Partitions orphans (no production caller, not exported) into `safe` (no test edge, not defined in
+// a test file, not an entrypoint-like name — high-confidence dead) and `review` (referenced by a
+// test, defined in a test file (helper/mock/case registration), or an entrypoint-like name a
+// framework/CLI may invoke without a code edge). Honestly surfaces the
 // orphans caveat (extraction drops ambiguous call edges, so cross-check). Read-only, advisory,
 // deterministic. Built on ./lib/graph-ops.mjs (uses the SAME orphans + testIn as query.mjs — one truth).
 //
@@ -11,12 +12,16 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
-import { normalizeGraph, buildIndex, orphans } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, orphans, isTestFile } from './lib/graph-ops.mjs';
 import { fingerprint, loadAnnotations } from './lib/annotations.mjs'; // F7: false-positive suppression memory
 
 // Entrypoint-like names that may be invoked by a framework / CLI / test runner rather than via a
 // code edge — so an uncalled one is "review", not "safe to delete". (Mirrored by the test oracle.)
 const ENTRYPOINTS = new Set(['main', 'default', 'index', 'setup', 'teardown', 'init']);
+// A/B lever (mirrors CODEWEB_LEGACY_FALLBACK / CODEWEB_HUB_INDEG): restore the pre-fix behavior where
+// a function DEFINED IN a test file falls through to `safe`. Defaults OFF (shipped: test-file -> review).
+// The effectiveness study flips this on to prove the H13 fix is load-bearing (safe-tier precision drops).
+const DEADCODE_LEGACY = process.env.CODEWEB_DEADCODE_LEGACY === '1';
 const USAGE = 'usage: deadcode.mjs <graph.json> [--json]   (or set CODEWEB_WS)';
 function die(msg, code) { console.error(msg); process.exit(code); }
 
@@ -45,9 +50,11 @@ const safe = [], review = [];
 for (const o of orphans(graph, index)) {           // orphans = no call|import|inherit incoming, not exported
   const label = index.byId.get(o.id)?.label || o.id;
   const testers = index.testIn.get(o.id)?.size || 0;
+  const file = index.byId.get(o.id)?.file || o.file;
   if (testers > 0) review.push({ ...o, reason: `referenced only by ${testers} test(s) — the test may be its only user; remove the test too, or it is genuinely used` });
+  else if (!DEADCODE_LEGACY && isTestFile(file)) review.push({ ...o, reason: `defined in a test file '${file}' — a test runner may invoke it (helper, mock, or case registration) without a code edge, so deleting it can break tests` });
   else if (ENTRYPOINTS.has(label)) review.push({ ...o, reason: `entrypoint-like name '${label}' — may be invoked by a framework/CLI/test runner, not via a code edge` });
-  else safe.push({ ...o, reason: `no production caller, not exported, no test edge — high-confidence dead (${CAVEAT})` });
+  else safe.push({ ...o, reason: `no production caller, not exported, no test edge, not in a test file — high-confidence dead (${CAVEAT})` });
 }
 
 // F7: every finding carries a stable fingerprint (kind 'orphan' + its id). A '.codeweb/annotations.json'

@@ -13,6 +13,12 @@ node_modules/
 .live/*.before
 *.before
 
+# Paper: evaluation corpus is cloned & pinned via paper/corpus.manifest.json (large, regenerable).
+# Keep the clone script + manifest; ignore the cloned repos and any scratch run dirs.
+paper/corpus/*/
+paper/results/*.tmp
+paper/**/.cw/
+
 # OS / editor noise
 .DS_Store
 Thumbs.db

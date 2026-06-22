@@ -1,0 +1,125 @@
+{
+  "cluster": "C7-agent-ab",
+  "hypothesis": "H18",
+  "config": {
+    "repos": [
+      "axios",
+      "flask",
+      "express"
+    ],
+    "tasksN": 9,
+    "reps": 2,
+    "smoke": false
+  },
+  "completion": {
+    "cells": 36,
+    "completed": 34,
+    "control": 16,
+    "treatment": 18,
+    "died": 0
+  },
+  "toolEngagement": {
+    "treatmentCompleted": 18,
+    "treatmentUsedTools": 18,
+    "note": "validity check: a null is only meaningful if treatment actually used the tools"
+  },
+  "perCondition": {
+    "control": {
+      "completed": 16,
+      "usedAnyTool": 0,
+      "structuralRegressions": {
+        "mean": 0.125,
+        "median": 0,
+        "sum": 2
+      },
+      "newDuplication": {
+        "mean": 0,
+        "median": 0,
+        "sum": 0
+      },
+      "newCycles": {
+        "mean": 0.125,
+        "median": 0,
+        "sum": 2
+      },
+      "lostCallers": {
+        "mean": 0,
+        "median": 0,
+        "sum": 0
+      }
+    },
+    "treatment": {
+      "completed": 18,
+      "usedAnyTool": 18,
+      "structuralRegressions": {
+        "mean": 0.111,
+        "median": 0,
+        "sum": 2
+      },
+      "newDuplication": {
+        "mean": 0,
+        "median": 0,
+        "sum": 0
+      },
+      "newCycles": {
+        "mean": 0.111,
+        "median": 0,
+        "sum": 2
+      },
+      "lostCallers": {
+        "mean": 0,
+        "median": 0,
+        "sum": 0
+      }
+    }
+  },
+  "paired": {
+    "structuralRegressions": {
+      "nPairedTasks": 8,
+      "meanDiff_treatmentMinusControl": 0,
+      "bootstrapCI95": [
+        0,
+        0
+      ],
+      "cliffsDelta": -0.014,
+      "effectMagnitude": "negligible",
+      "significant": false
+    },
+    "newDuplication": {
+      "nPairedTasks": 8,
+      "meanDiff_treatmentMinusControl": 0,
+      "bootstrapCI95": [
+        0,
+        0
+      ],
+      "cliffsDelta": 0,
+      "effectMagnitude": "negligible",
+      "significant": false
+    },
+    "newCycles": {
+      "nPairedTasks": 8,
+      "meanDiff_treatmentMinusControl": 0,
+      "bootstrapCI95": [
+        0,
+        0
+      ],
+      "cliffsDelta": -0.014,
+      "effectMagnitude": "negligible",
+      "significant": false
+    },
+    "lostCallers": {
+      "nPairedTasks": 8,
+      "meanDiff_treatmentMinusControl": 0,
+      "bootstrapCI95": [
+        0,
+        0
+      ],
+      "cliffsDelta": 0,
+      "effectMagnitude": "negligible",
+      "significant": false
+    }
+  },
+  "verdict": "null-inconclusive",
+  "interpretation": "NULL / INCONCLUSIVE (pre-registered weakest-evidence theme). Treatment agents engaged codeweb in all completed cells (find-similar/placement/query/simulate-edit), and the tools returned correct answers (e.g. find-similar reported no existing equivalent on the reuse tasks). But both conditions performed near-ceiling — structural regressions ~0 and new duplication exactly 0 in BOTH arms — so there was no measurable headroom (a floor effect): on clean, well-scoped tasks a capable base model already avoids regressions and duplication, and codeweb’s pre-edit intelligence corroborated rather than corrected. The bootstrap CI on the paired difference straddles 0. This bounds the effect on EASY tasks near zero and neither confirms nor refutes the outcome hypothesis; demonstrating corrective value needs higher-blast-radius tasks or a weaker base model (future work). Per pre-registration, the paper’s thesis rests on Themes 1–4; H18 is reported as an honest pilot.",
+  "reproducibilityNote": "The A/B solving is not byte-reproducible (model nondeterminism). This analysis of the committed raw cells (agent-ab-raw.json) + seeded bootstrap IS reproducible; tasks were frozen pre-solve in agent-ab-tasks.json."
+}
