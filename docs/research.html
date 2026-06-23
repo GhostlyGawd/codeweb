@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research — codeweb</title>
+<meta name="description" content="A pre-registered effectiveness study (32/33 checks), an efficiency pilot, and an honest claim ledger: what is validated, what is preliminary, and what is a null result.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="codeweb — the evidence">
+<meta property="og:description" content="A pre-registered effectiveness study (32/33 checks), an efficiency pilot, and an honest claim ledger: what is validated, what is preliminary, and what is a null result.">
+<meta property="og:url" content="https://ghostlygawd.github.io/codeweb/research.html">
+<meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://ghostlygawd.github.io/codeweb/research.html">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header class="site-nav">
+  <a class="brand" href="index.html" aria-label="codeweb home">
+    <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="19" y2="17" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
+      <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
+      <circle cx="19" cy="17" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+    </svg>
+    codeweb
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html" data-nav="home">Home</a>
+    <a href="product.html" data-nav="product">Product</a>
+    <a href="research.html" data-nav="research" aria-current="page">Research</a>
+    <a href="start.html" data-nav="start">Get Started</a>
+    <a href="changelog.html" data-nav="changelog">Changelog</a>
+  </nav>
+  <div class="nav-right">
+    <a class="nav-ghost" href="demo/">Live demo</a>
+    <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Research</span>
+      <h2>Does codeweb work? We pre-registered the answer.</h2>
+      <p class="lead">Before collecting any data, we wrote down 33 pass/fail checks across determinism, correctness, detection accuracy, performance, and agent outcomes — then ran them against six real repositories pinned by SHA and independent reference implementations. The raw data is committed in the repo.</p>
+    </div>
+    <div class="stat-strip">
+      <div class="stat">
+        <div class="num">32 / 33</div>
+        <div class="label">pre-registered checks pass</div>
+        <div class="src">paper/results</div>
+      </div>
+      <div class="stat">
+        <div class="num">~490k</div>
+        <div class="label">oracle comparisons, 0 disagreements</div>
+        <div class="src">correctness-query.json</div>
+      </div>
+      <div class="stat">
+        <div class="num">+0.27 / −34%</div>
+        <div class="label">agent caller-discovery recall / fewer steps (pilot)</div>
+        <div class="src">efficiency-pilot</div>
+      </div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">How it was tested</span>
+      <h2>Designed to resist reward hacking</h2>
+    </div>
+    <div class="grid cols-2">
+      <div class="card"><h3>Pre-registered</h3><p>The 33 checks and their pass criteria were fixed in writing before data collection — so the bar couldn't move to fit the result.</p></div>
+      <div class="card"><h3>Independent oracles</h3><p>Cycles, impact, and callers are checked against separate implementations (Kosaraju SCC, reverse-BFS, an edit applier) — not against codeweb's own logic.</p></div>
+      <div class="card"><h3>Frozen truth</h3><p>The efficiency pilot grades agents against a hand-verified caller set, reconciled with an exhaustive independent grep. Coverage gaps count against codeweb, honestly.</p></div>
+      <div class="card"><h3>A/B levers</h3><p>Every bug fix sits behind a reproducible legacy lever, so re-running proves the fix is load-bearing rather than coincidental.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The evidence ledger</span>
+      <h2>Every claim, with its number, sample, and source</h2>
+      <p class="lead">Tagged honestly: <span class="chip chip-validated">Validated</span> stands on pre-registered checks against oracles; <span class="chip chip-preliminary">Preliminary</span> is a fresh pilot signal; <span class="chip chip-null">Null</span> is a result that did not move — published anyway.</p>
+    </div>
+    <table class="ledger">
+    <thead><tr><th>Claim</th><th>Result</th><th>Sample</th><th>Evidence</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="claim">Byte-deterministic pipeline</td>
+        <td class="num">1 distinct digest per repo across 20 runs, all 6 repos</td>
+        <td class="muted">R=20 × 6 repos</td>
+        <td class="src">determinism.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Incremental refresh ≡ full rebuild</td>
+        <td class="num">0 mismatches</td>
+        <td class="muted">360 seeded edits</td>
+        <td class="src">determinism.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Cycles, impact, callers, callees, context match independent oracles</td>
+        <td class="num">0 disagreements</td>
+        <td class="muted">~490k comparisons</td>
+        <td class="src">correctness-query.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Edit-safety pre-flight predicts the real gate verdict</td>
+        <td class="num">0 violations</td>
+        <td class="muted">10,000 ops + 120 CLI trials</td>
+        <td class="src">edit-safety.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Exact-clone detection beats name-matching</td>
+        <td class="num">F1 1.0 (CI 0.9977–1.0) vs 0.67</td>
+        <td class="muted">synthetic K∈{20,50,100}</td>
+        <td class="src">detection-accuracy.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Renamed (Type-2) clone recall</td>
+        <td class="num">1.0 structural vs 0.0 lexical</td>
+        <td class="muted">30 planted pairs</td>
+        <td class="src">detection-accuracy.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Reuse ranking (find-similar)</td>
+        <td class="num">MRR 0.9875 vs 0.107 random</td>
+        <td class="muted">400 queries</td>
+        <td class="src">detection-accuracy.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Dead-code safe-tier precision (after fix)</td>
+        <td class="num">1.0 precision & recall (was 0.52)</td>
+        <td class="muted">120 synthetic graphs</td>
+        <td class="src">detection-accuracy.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Sub-quadratic scaling</td>
+        <td class="num">exponent b=0.33, CI [0.13, 0.53]</td>
+        <td class="muted">100–3,201 symbols</td>
+        <td class="src">performance.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Zero runtime dependencies</td>
+        <td class="num">full pipeline runs on empty node_modules</td>
+        <td class="muted">non-vacuity control passes</td>
+        <td class="src">performance.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Five-language extraction parity</td>
+        <td class="num">JS · TS · Python · Rust · Go</td>
+        <td class="muted">per-language fixtures</td>
+        <td class="src">auxiliary.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">MCP tool / CLI parity</td>
+        <td class="num">20 / 20 tools</td>
+        <td class="muted">JSON-RPC conformance</td>
+        <td class="src">auxiliary.json</td>
+        <td><span class="chip chip-validated">Validated</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Agent caller-discovery recall (vs grep)</td>
+        <td class="num">+0.265 ± 0.045 (all 8 reps positive, ~6× the noise floor)</td>
+        <td class="muted">8 engine-frozen reps, frontier agents</td>
+        <td class="src">efficiency-pilot.reps8.json</td>
+        <td><span class="chip chip-preliminary">Preliminary</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Agent discovery steps (vs grep)</td>
+        <td class="num">−6.84 ± 3.33 steps (~34% fewer)</td>
+        <td class="muted">8 engine-frozen reps</td>
+        <td class="src">efficiency-pilot.reps8.json</td>
+        <td><span class="chip chip-preliminary">Preliminary</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Agent edit-quality on clean, well-scoped tasks</td>
+        <td class="num">paired difference = 0 (floor effect, not a power result)</td>
+        <td class="muted">8 paired tasks (H18)</td>
+        <td class="src">agent-ab.json</td>
+        <td><span class="chip chip-null">Null (honest)</span></td>
+      </tr>
+    </tbody>
+  </table>
+    <p class="figcap" style="margin-top:var(--s-4)">Sources are files under <code>paper/results/</code> and <code>paper/experiments/</code> in the repository. <a href="https://github.com/GhostlyGawd/codeweb/tree/main/paper" rel="noopener">Browse the raw data →</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <span class="eyebrow">The efficiency pilot</span>
+        <h2>Frontier agents find more, in fewer steps</h2>
+        <p>On a caller-discovery micro-benchmark against a grep baseline, with the engine frozen across 8 repetitions, codeweb improved a frontier agent's recall by <strong>+0.265 ± 0.045</strong> — every one of the 8 reps positive, roughly six times the noise floor — while cutting discovery steps by <strong>~34%</strong> (−6.84 ± 3.33).</p>
+        <p class="muted">Precision was a weaker positive (+0.199 ± 0.147, one negative rep). The mechanism is deterministic: fixing import-alias and member-access resolution took axios <code>AxiosError</code>'s recovered callers from 1 to 20 — no model involved. We label the pilot preliminary because the truth set is fresh and grading is strict at the symbol level.</p>
+      </div>
+      <div class="callout callout-good">
+        <h3>Why it's believable</h3>
+        <p>The step reduction is oracle-independent — it doesn't depend on how the truth set is scored. The recall gain clears the measurement noise by ~6×, and the paired design cancels the shared oracle noise that swung the grep baseline run-to-run.</p>
+        <p class="muted" style="margin-bottom:0">Source: <code>paper/experiments/efficiency-pilot.reps8.json</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="callout callout-warn">
+      <h3>The honest null: agent edit quality (H18)</h3>
+      <p>We also tested whether agents produce <em>better edits</em> with codeweb on 8 paired tasks. The result was a clean zero — a bootstrap CI of [0, 0]. On clean, well-scoped tasks, a capable base model already avoids regressions, so there was no headroom to improve: a floor effect, not a power result. The thesis does not rest on this check, and we report it rather than bury it.</p>
+      <p class="muted" style="margin-bottom:0">Source: <code>paper/results/agent-ab.json</code> · paper §3.7</p>
+    </div>
+    <div class="callout">
+      <h3>It found bugs its own test suite missed</h3>
+      <p>The study is credible partly because it failed first. It surfaced a determinism leak (file-enumeration order bleeding into domain assignment, plus an overlap stack-overflow on express) and a dead-code precision failure (test-file functions wrongly marked safe-to-delete, 0.52 precision). Both were fixed surgically behind A/B levers; re-runs establish the fixes. The 286-test suite had been green throughout.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Calibrated, not inflated</span>
+      <h2>What we deliberately don't claim</h2>
+      <p class="lead">The fastest way to lose trust is to overstate. Here's where we hold back, and the precise claim we make instead.</p>
+    </div>
+    <div class="callout honesty"><ul><li><strong>"Finds all clones / 100% recall"</strong> → High-precision, body-confirmed overlap on the clones it surfaces (F1 1.0 synthetic, 0.98 on real axios) — it deliberately drops ambiguous edges because a false positive costs more than a miss.</li><li><strong>"Replaces human review"</strong> → It produces candidate lists and shows which merges are cycle-safe to apply — a structural pre-flight, not a semantic verdict.</li><li><strong>"Agents provably edit better"</strong> → It improves caller-discovery recall (+0.27) and cuts discovery steps (~34%) on frontier agents. The full edit-quality A/B (H18) was a null on clean tasks — a floor effect, reported honestly.</li><li><strong>"100% deterministic"</strong> → Byte-deterministic, set-valued output — one digest across 20 runs per repo for nodes, edges, domains, and overlaps.</li><li><strong>"Sub-second every time"</strong> → Typical query ~95–120 ms; worst-case p95 264 ms on 3,201 symbols, where Node startup (~63 ms) dominates.</li><li><strong>"Beats commercial tools"</strong> → We compare only to stated, reproducible baselines (name-matching, lexical, random, the legacy fallback) — no head-to-head against tools we can't reproduce.</li></ul></div>
+    <div class="btn-row" style="margin-top:var(--s-6)">
+      <a class="btn btn-primary" href="paper/">Read the full paper</a>
+      <a class="btn" href="https://github.com/GhostlyGawd/codeweb/tree/main/paper/results" rel="noopener">Inspect the raw results</a>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
+            <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+          </svg>
+          codeweb
+        </a>
+        <p>The system map for your codebase. A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="product.html">Features</a>
+        <a href="demo/">Live demo</a>
+        <a href="start.html">Get started</a>
+        <a href="changelog.html">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Proof</h5>
+        <a href="research.html">Research</a>
+        <a href="paper/">The paper</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/paper/results" rel="noopener">Raw results</a>
+      </div>
+      <div class="footer-col">
+        <h5>Project</h5>
+        <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>codeweb v0.2.0 · MIT · © 2026 rhenmcleod</span>
+      <span>Deterministic build · zero third-party requests on this page</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

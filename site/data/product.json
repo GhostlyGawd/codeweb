@@ -1,0 +1,140 @@
+{
+  "name": "codeweb",
+  "tagline": "the system map for your codebase",
+  "repo": "https://github.com/GhostlyGawd/codeweb",
+  "pagesBase": "https://ghostlygawd.github.io/codeweb/",
+  "elevator": "codeweb dissects a repository to its atomic parts — functions, classes, methods — wires them into a living call/import graph, tags each node's domain, and surfaces cross-domain overlap. It serves that one graph two ways: a self-contained interactive HTML map for humans, and 20 deterministic query tools over MCP for coding agents, so an agent can check what already exists and what an edit breaks before it writes a line.",
+  "philosophy": [
+    "Deterministic — no LLM in the analysis loop; the same repo always yields the same graph.",
+    "Zero runtime dependencies — the whole pipeline runs on an empty node_modules.",
+    "Read-only by default — codeweb never executes the code it maps.",
+    "Evidence over guesswork — every finding is body-confirmed and pre-flighted against a regression gate."
+  ],
+  "languages": ["JavaScript", "TypeScript", "Python", "Rust", "Go"],
+  "modes": [
+    { "key": "internal", "title": "Map your own codebase", "desc": "See the real dependency web, find where logic is duplicated, and get an ordered, cycle-safe plan to consolidate it." },
+    { "key": "external", "title": "Review before you adopt", "desc": "Clone a third-party repo read-only, fully map it, and get an adoption review before you commit to depending on it. codeweb never runs the target." }
+  ],
+  "proof": {
+    "headline": [
+      { "num": "32 / 33", "label": "pre-registered checks pass", "src": "paper/results" },
+      { "num": "~490k", "label": "oracle comparisons, 0 disagreements", "src": "correctness-query.json" },
+      { "num": "+0.27 / −34%", "label": "agent caller-discovery recall / fewer steps (pilot)", "src": "efficiency-pilot" }
+    ]
+  },
+  "toolPhases": [
+    {
+      "key": "structural", "title": "Structural queries", "color": "var(--accent)",
+      "blurb": "The foundation — read the graph.",
+      "tools": [
+        { "name": "codeweb_callers", "desc": "Direct callers of a symbol (call-edge in-neighbors)." },
+        { "name": "codeweb_callees", "desc": "The functions a symbol calls." },
+        { "name": "codeweb_impact", "desc": "Blast radius: every function transitively affected by a change, plus domains touched. Call before editing." },
+        { "name": "codeweb_cycles", "desc": "File-level dependency cycles (circular imports/calls)." },
+        { "name": "codeweb_orphans", "desc": "Uncalled, unexported symbols — dead-code candidates." }
+      ]
+    },
+    {
+      "key": "write", "title": "Write-time intelligence", "color": "var(--teal)",
+      "blurb": "Before you add code — reuse, don't reinvent.",
+      "tools": [
+        { "name": "codeweb_find_similar", "desc": "\"Does something already do this?\" Ranks existing bodies by token-shingle or structural-skeleton similarity to your candidate." },
+        { "name": "codeweb_placement", "desc": "Where a new symbol belongs (domain + file) by callee gravity, with a duplicate warning." },
+        { "name": "codeweb_tests", "desc": "The tests that exercise a symbol — run the right subset after editing." }
+      ]
+    },
+    {
+      "key": "review", "title": "Review-time intelligence", "color": "var(--med)",
+      "blurb": "Assess impact and risk.",
+      "tools": [
+        { "name": "codeweb_review", "desc": "Structural review of a change: changed symbols, blast radius, domains touched, fan-in-ranked review order." },
+        { "name": "codeweb_fitness", "desc": "Check the graph against architectural fitness rules (forbidden-dependency, layering, no-cycles, max-fan-in, max-LOC)." },
+        { "name": "codeweb_risk", "desc": "Rank symbols by change-risk (fan-in, fan-out, LOC, blast radius, churn) for triage." },
+        { "name": "codeweb_break_cycles", "desc": "For each file cycle, propose the cheapest edge to sever — verified to actually break it." },
+        { "name": "codeweb_deadcode", "desc": "Confidence-tiered dead code: safe-to-delete vs review-first (test-guarded / entrypoint-like)." }
+      ]
+    },
+    {
+      "key": "optimize", "title": "Optimize-time intelligence", "color": "var(--purple)",
+      "blurb": "Act on findings — safely.",
+      "tools": [
+        { "name": "codeweb_codemod", "desc": "Plan a consolidation merge (report-only over MCP): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, projected gate verdict." },
+        { "name": "codeweb_hotspots", "desc": "Rank symbols by complexity × fan-in × churn — where to refactor first." },
+        { "name": "codeweb_campaign", "desc": "An ordered, cumulatively pre-flighted ROI worklist (dead code + cycle cuts + merges). Read-only plan." }
+      ]
+    },
+    {
+      "key": "freshness", "title": "Freshness & context", "color": "var(--good)",
+      "blurb": "Close the edit loop.",
+      "tools": [
+        { "name": "codeweb_context", "desc": "Blast-radius-scoped context in one call: a symbol's body, direct callers (with bodies), callees (location-only), and transitive impact ids." },
+        { "name": "codeweb_refresh", "desc": "Re-extract from disk so mid-task queries reflect edits, not a stale snapshot. Incremental; preserves domains." }
+      ]
+    },
+    {
+      "key": "meta", "title": "Comparison & onboarding", "color": "var(--pink)",
+      "blurb": "Meta-analysis across snapshots and time.",
+      "tools": [
+        { "name": "codeweb_diff", "desc": "Structural delta + regression verdict between two graph snapshots: nodes/edges/cycles/overlaps/orphans added & removed, coupling delta." },
+        { "name": "codeweb_reading_order", "desc": "Foundations-first reading path (depended-upon leaves before orchestrators) for onboarding at scale." }
+      ]
+    }
+  ],
+  "tiers": [
+    {
+      "tier": "Tier 0", "theme": "Close the edit-loop holes",
+      "features": [
+        { "id": "F1", "name": "Scoped context", "desc": "codeweb_context — a bounded edit window instead of grepping whole files." },
+        { "id": "F2", "name": "Live refresh", "desc": "codeweb_refresh — incremental re-extract so queries reflect edits." },
+        { "id": "F3", "name": "Duplication-delta gate", "desc": "review --before — fail the gate when a changed symbol becomes a body-confirmed duplicate." }
+      ]
+    },
+    {
+      "tier": "Tier 1", "theme": "New deterministic brains",
+      "features": [
+        { "id": "F4", "name": "Hotspots", "desc": "complexity × fan-in × churn — where to focus first." },
+        { "id": "F5", "name": "Campaign", "desc": "One ordered, gated worklist of dead-code deletes, cycle cuts, and merges." }
+      ]
+    },
+    {
+      "tier": "Tier 2", "theme": "Deepen the moat",
+      "features": [
+        { "id": "F6", "name": "Structural clones", "desc": "Catch renamed (Type-2) clones via an identifier-normalized skeleton." },
+        { "id": "F7", "name": "Suppression memory", "desc": "Fingerprinted false-positive suppression that a genuinely new issue can't hide behind." },
+        { "id": "F8", "name": "Reading order", "desc": "A deterministic, foundations-first onboarding tour." }
+      ]
+    },
+    {
+      "tier": "Tier 3", "theme": "The scale track",
+      "features": [
+        { "id": "F9", "name": "Incremental edges", "desc": "Per-file edge cache — byte-identical to a full extract, re-derived only for changed files." },
+        { "id": "F10", "name": "Sharded subgraphs", "desc": "Answer queries from one shard + a boundary index, same result as the monolith." }
+      ]
+    }
+  ],
+  "claims": [
+    { "claim": "Byte-deterministic pipeline", "tag": "validated", "metric": "1 distinct digest per repo across 20 runs, all 6 repos", "sample": "R=20 × 6 repos", "source": "determinism.json" },
+    { "claim": "Incremental refresh ≡ full rebuild", "tag": "validated", "metric": "0 mismatches", "sample": "360 seeded edits", "source": "determinism.json" },
+    { "claim": "Cycles, impact, callers, callees, context match independent oracles", "tag": "validated", "metric": "0 disagreements", "sample": "~490k comparisons", "source": "correctness-query.json" },
+    { "claim": "Edit-safety pre-flight predicts the real gate verdict", "tag": "validated", "metric": "0 violations", "sample": "10,000 ops + 120 CLI trials", "source": "edit-safety.json" },
+    { "claim": "Exact-clone detection beats name-matching", "tag": "validated", "metric": "F1 1.0 (CI 0.9977–1.0) vs 0.67", "sample": "synthetic K∈{20,50,100}", "source": "detection-accuracy.json" },
+    { "claim": "Renamed (Type-2) clone recall", "tag": "validated", "metric": "1.0 structural vs 0.0 lexical", "sample": "30 planted pairs", "source": "detection-accuracy.json" },
+    { "claim": "Reuse ranking (find-similar)", "tag": "validated", "metric": "MRR 0.9875 vs 0.107 random", "sample": "400 queries", "source": "detection-accuracy.json" },
+    { "claim": "Dead-code safe-tier precision (after fix)", "tag": "validated", "metric": "1.0 precision & recall (was 0.52)", "sample": "120 synthetic graphs", "source": "detection-accuracy.json" },
+    { "claim": "Sub-quadratic scaling", "tag": "validated", "metric": "exponent b=0.33, CI [0.13, 0.53]", "sample": "100–3,201 symbols", "source": "performance.json" },
+    { "claim": "Zero runtime dependencies", "tag": "validated", "metric": "full pipeline runs on empty node_modules", "sample": "non-vacuity control passes", "source": "performance.json" },
+    { "claim": "Five-language extraction parity", "tag": "validated", "metric": "JS · TS · Python · Rust · Go", "sample": "per-language fixtures", "source": "auxiliary.json" },
+    { "claim": "MCP tool / CLI parity", "tag": "validated", "metric": "20 / 20 tools", "sample": "JSON-RPC conformance", "source": "auxiliary.json" },
+    { "claim": "Agent caller-discovery recall (vs grep)", "tag": "preliminary", "metric": "+0.265 ± 0.045 (all 8 reps positive, ~6× the noise floor)", "sample": "8 engine-frozen reps, frontier agents", "source": "efficiency-pilot.reps8.json" },
+    { "claim": "Agent discovery steps (vs grep)", "tag": "preliminary", "metric": "−6.84 ± 3.33 steps (~34% fewer)", "sample": "8 engine-frozen reps", "source": "efficiency-pilot.reps8.json" },
+    { "claim": "Agent edit-quality on clean, well-scoped tasks", "tag": "null", "metric": "paired difference = 0 (floor effect, not a power result)", "sample": "8 paired tasks (H18)", "source": "agent-ab.json" }
+  ],
+  "dontClaim": [
+    { "instead_of": "\"Finds all clones / 100% recall\"", "we_say": "High-precision, body-confirmed overlap on the clones it surfaces (F1 1.0 synthetic, 0.98 on real axios) — it deliberately drops ambiguous edges because a false positive costs more than a miss." },
+    { "instead_of": "\"Replaces human review\"", "we_say": "It produces candidate lists and shows which merges are cycle-safe to apply — a structural pre-flight, not a semantic verdict." },
+    { "instead_of": "\"Agents provably edit better\"", "we_say": "It improves caller-discovery recall (+0.27) and cuts discovery steps (~34%) on frontier agents. The full edit-quality A/B (H18) was a null on clean tasks — a floor effect, reported honestly." },
+    { "instead_of": "\"100% deterministic\"", "we_say": "Byte-deterministic, set-valued output — one digest across 20 runs per repo for nodes, edges, domains, and overlaps." },
+    { "instead_of": "\"Sub-second every time\"", "we_say": "Typical query ~95–120 ms; worst-case p95 264 ms on 3,201 symbols, where Node startup (~63 ms) dominates." },
+    { "instead_of": "\"Beats commercial tools\"", "we_say": "We compare only to stated, reproducible baselines (name-matching, lexical, random, the legacy fallback) — no head-to-head against tools we can't reproduce." }
+  ]
+}

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get started — codeweb</title>
+<meta name="description" content="Install codeweb as a Claude Code plugin, run the engine directly, or register the MCP server. A five-minute quickstart and the core concepts.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="Get started with codeweb">
+<meta property="og:description" content="Install codeweb as a Claude Code plugin, run the engine directly, or register the MCP server. A five-minute quickstart and the core concepts.">
+<meta property="og:url" content="https://ghostlygawd.github.io/codeweb/start.html">
+<meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://ghostlygawd.github.io/codeweb/start.html">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header class="site-nav">
+  <a class="brand" href="index.html" aria-label="codeweb home">
+    <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="19" y2="17" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
+      <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
+      <circle cx="19" cy="17" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+    </svg>
+    codeweb
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html" data-nav="home">Home</a>
+    <a href="product.html" data-nav="product">Product</a>
+    <a href="research.html" data-nav="research">Research</a>
+    <a href="start.html" data-nav="start" aria-current="page">Get Started</a>
+    <a href="changelog.html" data-nav="changelog">Changelog</a>
+  </nav>
+  <div class="nav-right">
+    <a class="nav-ghost" href="demo/">Live demo</a>
+    <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Get started</span>
+      <h2>Three ways in — pick the one that fits your loop</h2>
+      <p class="lead">codeweb has zero runtime dependencies. You need Node.js; optional tools (ctags, ripgrep) sharpen extraction but are never required.</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card">
+        <div class="eyebrow">Recommended</div>
+        <h3>As a Claude Code plugin</h3>
+        <p>Registers the <code>/codeweb</code> command, the agents, and the skill.</p>
+<pre><code>/plugin marketplace add GhostlyGawd/codeweb
+/plugin install codeweb</code></pre>
+        <p class="muted">Restart Claude Code, then run <code>/codeweb</code> on any project.</p>
+      </div>
+      <div class="card">
+        <h3>Run the engine directly</h3>
+        <p>No plugin needed — just clone and run the deterministic pipeline.</p>
+<pre><code>git clone https://github.com/GhostlyGawd/codeweb.git
+node codeweb/scripts/run.mjs /path/to/project \
+  --out-dir /path/to/project/.codeweb</code></pre>
+        <p class="muted">Open <code>.codeweb/report.html</code> when it finishes.</p>
+      </div>
+      <div class="card">
+        <h3>Register the MCP server</h3>
+        <p>Expose all 20 tools to any MCP-capable agent.</p>
+<pre><code>claude mcp add codeweb -- \
+  node /path/to/codeweb/scripts/mcp-server.mjs</code></pre>
+        <p class="muted">Zero-dependency stdio server (JSON-RPC 2.0).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Five-minute quickstart</span>
+      <h2>From a cold repo to a queryable map</h2>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="eyebrow">1 · Map it</div>
+        <p>Build the graph and the interactive report for a target.</p>
+<pre><code>node scripts/run.mjs ./my-app --out-dir ./my-app/.codeweb
+# open ./my-app/.codeweb/report.html</code></pre>
+      </div>
+      <div class="card">
+        <div class="eyebrow">2 · Query the graph</div>
+        <p>Ask what a change touches before you make it.</p>
+<pre><code>node scripts/query.mjs ./my-app/.codeweb/graph.json \
+  --impact myFunction --json</code></pre>
+      </div>
+      <div class="card">
+        <div class="eyebrow">3 · Guard the edit</div>
+        <p>Diff two snapshots and get a regression verdict.</p>
+<pre><code>node scripts/diff.mjs before.json after.json
+# exit 1 on a new cycle, new duplication, or lost callers</code></pre>
+      </div>
+      <div class="card">
+        <div class="eyebrow">4 · Gate the PR</div>
+        <p>Run the same verdict automatically on every pull request.</p>
+<pre><code>node scripts/ci-gate.mjs --base origin/main --target src</code></pre>
+        <p class="muted">Or drop in the GitHub Action — see <a href="product.html">the CI gate</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Concepts</span>
+      <h2>Five ideas that make the rest click</h2>
+    </div>
+    <div class="grid cols-2">
+      <div class="card"><h3>Node &amp; edge</h3><p>Every function, class, and method is a <strong>node</strong>; calls, imports, inheritance, and test links are <strong>edges</strong>. That graph is the substrate for every query.</p></div>
+      <div class="card"><h3>Domain</h3><p>Nodes are clustered into semantic <strong>domains</strong> so you can reason about subsystems, not just files. Cross-domain overlap is where consolidation lives.</p></div>
+      <div class="card"><h3>Overlap</h3><p>Two nodes that do the same work. codeweb confirms overlap by comparing bodies — same name with different bodies is dismissed, not flagged.</p></div>
+      <div class="card"><h3>Blast radius</h3><p>Everything transitively affected by changing a symbol. Ask for it <em>before</em> editing so you know what an edit can break.</p></div>
+      <div class="card"><h3>The gate</h3><p>A structural regression check: a change fails if it adds a cycle, adds a body-confirmed duplicate, or orphans a symbol. Pure removals always pass.</p></div>
+      <div class="card"><h3>Severity</h3><p>Findings carry a red → amber → green scale so attention goes where it matters first, the same scale used across the report and the brand.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap center">
+    <div class="section-head center">
+      <span class="eyebrow">Next</span>
+      <h2>Drive it from your agent</h2>
+      <p class="lead">The real win is in the loop: let the agent call <code>codeweb_find_similar</code> before writing, <code>codeweb_impact</code> before editing, and <code>codeweb_review</code> before opening a PR.</p>
+    </div>
+    <div class="btn-row" style="justify-content:center"><a class="btn btn-primary btn-lg" href="product.html">See all 20 tools</a><a class="btn btn-lg" href="research.html">Read the evidence</a></div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
+            <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+          </svg>
+          codeweb
+        </a>
+        <p>The system map for your codebase. A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="product.html">Features</a>
+        <a href="demo/">Live demo</a>
+        <a href="start.html">Get started</a>
+        <a href="changelog.html">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Proof</h5>
+        <a href="research.html">Research</a>
+        <a href="paper/">The paper</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/paper/results" rel="noopener">Raw results</a>
+      </div>
+      <div class="footer-col">
+        <h5>Project</h5>
+        <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>codeweb v0.2.0 · MIT · © 2026 rhenmcleod</span>
+      <span>Deterministic build · zero third-party requests on this page</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

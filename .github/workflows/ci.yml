@@ -18,3 +18,19 @@ jobs:
       # runner expanding a glob — Node 20 did not, which is why this needs Node 22.
       - name: Run tests
         run: npm test
+
+  consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Public-comms lock-step: every version string agrees with package.json and the documented
+      # MCP tool count equals the real TOOLS table in scripts/mcp-server.mjs. codeweb's own
+      # "fail on regression" gate, applied to its marketing.
+      - name: Check consistency
+        run: node scripts/check-consistency.mjs
+      # The website is a zero-dependency, deterministic build — it must build cleanly.
+      - name: Build site
+        run: node site/build.mjs

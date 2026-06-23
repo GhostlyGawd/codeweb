@@ -6,6 +6,8 @@
 [![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)
 [![deterministic engine](https://img.shields.io/badge/engine-deterministic-58a6ff?style=flat-square)](#how-it-works)
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
+[![version](https://img.shields.io/badge/version-0.2.0-58a6ff?style=flat-square)](CHANGELOG.md)
+[![changelog](https://img.shields.io/badge/changelog-Keep_a_Changelog-ffb65c?style=flat-square)](CHANGELOG.md)
 
 **You can't see where your codebase does the same work twice — and neither can the agent editing it.**
 codeweb dissects a repo to its atomic parts (functions, classes, methods), wires them into a living
@@ -14,7 +16,7 @@ graph **two ways**: a self-contained, interactive **HTML map for you**, and **20
 tools** (over MCP, no LLM in the loop) **for your coding agent** to consult *before* it edits —
 *does this already exist? what breaks if I change it? where should this go?*
 
-[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)
+**[Website](https://ghostlygawd.github.io/codeweb/)**&nbsp;·&nbsp;[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)&nbsp;·&nbsp;[Changelog](CHANGELOG.md)
 
 </div>
 
@@ -477,6 +479,27 @@ churn), a gated ROI-ranked optimization **campaign** planner, a foundations-firs
 (20 total)** · a **[live interactive demo](https://ghostlygawd.github.io/codeweb/demo/)** on GitHub
 Pages · Go and Rust on the fast path · duplication-over-time trend (`trend.mjs`) · a one-command CI
 regression gate + GitHub Action._
+
+## Versioning & releases
+
+codeweb follows [Semantic Versioning](https://semver.org/) and keeps a
+[Keep a Changelog](https://keepachangelog.com/)-formatted [`CHANGELOG.md`](CHANGELOG.md). Every new
+capability, paper, or fix is recorded there and shipped as a **tagged GitHub release** — product,
+marketing, and research move as one front, never lost in commit history.
+
+One source of truth keeps it honest. The version lives in `package.json`; the MCP tool count lives in
+`scripts/mcp-server.mjs`. Everything else is derived and verified:
+
+```bash
+npm run version-sync        # propagate version + tool count -> plugin.json, SKILL.md, README badge
+npm run check-consistency   # fail if any public-facing surface has drifted
+npm run build:site          # regenerate the docs/ website (zero-dependency, deterministic)
+npm run release -- --minor  # roll the changelog, bump, sync, rebuild; prints the git/tag steps
+```
+
+`check-consistency` runs in CI, applying codeweb's own "fail on regression" philosophy to its public
+comms — the reason this README and the plugin manifest can't quietly disagree about how many tools
+ship.
 
 ## Handoffs
 

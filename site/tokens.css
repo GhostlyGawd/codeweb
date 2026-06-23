@@ -1,0 +1,75 @@
+/* codeweb design tokens — the single source of truth for the public site.
+ *
+ * The core palette is the engine's own palette (scripts/report-template.html :root),
+ * so the website and every generated report.html speak one visual language.
+ * Extended here with a prose-scale type system, spacing, motion, and layout tokens
+ * for the marketing + docs surfaces. No web fonts, no CDN — system stacks only. */
+:root {
+  /* ---- surfaces ---- */
+  --bg: #0d1117;          /* page background (engine canonical) */
+  --bg-deep: #0a0e14;     /* deeper backdrop for hero gradients */
+  --panel: #161b22;       /* cards, raised surfaces */
+  --panel-2: #1c2330;     /* nested / hover surfaces */
+  --line: #30363d;        /* borders, idle graph edges */
+  --line-soft: #21262d;   /* hairlines, subtle dividers */
+
+  /* ---- text ---- */
+  --fg: #e6edf3;          /* primary text */
+  --muted: #8b949e;       /* secondary text */
+  --faint: #6e7681;       /* tertiary / disabled */
+
+  /* ---- brand + accents ---- */
+  --accent: #58a6ff;      /* primary action, hub nodes, links */
+  --accent-2: #79c0ff;    /* lighter accent for gradients */
+  --purple: #a371f7;
+  --teal: #39c5cf;
+  --pink: #f778ba;
+
+  /* ---- severity / status scale (engine canonical) ---- */
+  --hi: #ff5c5c;          /* high / red */
+  --med: #ffb65c;         /* medium / amber */
+  --low: #c9d11f;         /* low / yellow-green */
+  --good: #3fb950;        /* good / green */
+
+  /* ---- evidence-ledger semantics ---- */
+  --validated: #3fb950;
+  --preliminary: #ffb65c;
+  --null: #8b949e;
+
+  /* ---- typography ---- */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --fs-display: clamp(40px, 6vw, 66px);
+  --fs-h1: clamp(30px, 4vw, 44px);
+  --fs-h2: clamp(23px, 3vw, 31px);
+  --fs-h3: 20px;
+  --fs-h4: 16px;
+  --fs-body: 16px;
+  --fs-sm: 14px;
+  --fs-xs: 12.5px;
+  --lh-tight: 1.14;
+  --lh-snug: 1.35;
+  --lh-prose: 1.65;
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.08em;
+
+  /* ---- spacing scale (4px base) ---- */
+  --s-1: 4px;  --s-2: 8px;   --s-3: 12px;  --s-4: 16px;  --s-5: 24px;
+  --s-6: 32px; --s-7: 48px;  --s-8: 64px;  --s-9: 96px;  --s-10: 128px;
+
+  /* ---- radii / borders / shadow ---- */
+  --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --r-pill: 999px;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-2: 0 10px 34px rgba(0, 0, 0, .45);
+  --glow-accent: 0 0 0 1px rgba(88, 166, 255, .35), 0 8px 30px rgba(88, 166, 255, .12);
+
+  /* ---- layout ---- */
+  --content: 1080px;      /* wide content column */
+  --prose: 760px;         /* readable prose column */
+  --nav-h: 60px;
+
+  /* ---- motion ---- */
+  --dur-1: 120ms; --dur-2: 240ms; --dur-3: 460ms;
+  --ease: cubic-bezier(.2, .6, .2, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+}

@@ -1,0 +1,102 @@
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Product</span>
+      <h2>One graph. Twenty tools. Every phase of the edit loop.</h2>
+      <p class="lead">codeweb turns a repository into a queryable structural graph, then exposes it as deterministic tools an agent calls at exactly the moment it needs them — before writing, while reviewing, and when optimizing.</p>
+    </div>
+    {{tool_phases}}
+    <p class="muted" style="margin-top:var(--s-5)">All 20 tools are read-only. The one mutating operation — <code>codeweb_codemod --write</code> — is gated, reversible, and deliberately <strong>not</strong> exposed over MCP. Every tool has CLI/MCP parity, verified by JSON-RPC conformance tests.</p>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The build, in tiers</span>
+      <h2>Ten features across four tiers</h2>
+      <p class="lead">From closing the holes in the agent edit loop (Tier 0) to the architectural scale track (Tier 3) — all deterministic, all zero-dependency, all tested.</p>
+    </div>
+    {{tiers}}
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <span class="eyebrow">Fast path</span>
+        <h2>Five languages, parse-free</h2>
+        <p>The deterministic extractor emits atomic nodes and edges for these languages without a heavyweight parser. Everything else routes through an agent fallback that returns the same node/edge shape.</p>
+        <p>{{languages}}</p>
+        <p class="muted">Engine modes: <code>hybrid</code> (default — uses ctags/ripgrep when available, falls back to regex), <code>tools</code>, and <code>read</code>. Five-language extraction parity is a validated check in the study.</p>
+      </div>
+      <div>
+        <div class="card">
+          <div class="eyebrow">Outputs, per target</div>
+          <ul class="kicker-list">
+            <li><span class="dot"></span><span><strong>graph.json</strong> — the machine-readable web (nodes, edges, domains, overlaps, meta).</span></li>
+            <li><span class="dot"></span><span><strong>report.html</strong> — a self-contained interactive map (no CDN, no network).</span></li>
+            <li><span class="dot"></span><span><strong>report.md / overlap.md</strong> — the same findings in plain markdown.</span></li>
+            <li><span class="dot"></span><span><strong>optimize.md</strong> — consolidation advice tiered ready / blocked / review, each pre-flighted against the gate.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The human view</span>
+      <h2>A report that earns trust by spending it carefully</h2>
+      <p class="lead">Four views over the same graph — generated live from the axios codebase, not mocked up.</p>
+    </div>
+    <div class="grid cols-2">
+      <div><a class="shot" href="demo/"><img src="assets/05-axios-findings.png" alt="Findings view: ranked duplication, hotspots, and dead code" loading="lazy"></a><p class="figcap">Findings — ranked duplication, hotspots, dead code.</p></div>
+      <div><a class="shot" href="demo/"><img src="assets/05-axios-graph.png" alt="Graph view: force-directed domain map" loading="lazy"></a><p class="figcap">Graph — the force-directed domain web.</p></div>
+      <div><a class="shot" href="demo/"><img src="assets/05-axios-treemap.png" alt="Treemap view: file size by lines of code with duplication heat" loading="lazy"></a><p class="figcap">Treemap — file LOC × duplication heat.</p></div>
+      <div><a class="shot" href="demo/"><img src="assets/05-axios-matrix.png" alt="Matrix view: cross-domain coupling heatmap" loading="lazy"></a><p class="figcap">Matrix — cross-domain coupling.</p></div>
+    </div>
+    <div class="btn-row" style="margin-top:var(--s-6)"><a class="btn btn-primary" href="demo/">Open the interactive report</a></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <span class="eyebrow">Keep structure honest</span>
+        <h2>A CI gate that fails the PR when an edit makes structure worse</h2>
+        <p>The same regression verdict as <code>codeweb_diff</code>, run on every pull request. It builds the graph before and after, and fails on a new dependency cycle, a new body-confirmed duplication, or a symbol that loses all its callers. Pure removals never trip it — deleting code is an improvement, not a regression.</p>
+        <p class="muted">codeweb dogfoods its own gate: PRs that touch the engine run it, and it stays green.</p>
+      </div>
+      <div>
+<pre><code>name: codeweb gate
+on: pull_request
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@main
+        with:
+          target: src</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow">Principles</span>
+      <h2>Why it can be trusted in the loop</h2>
+    </div>
+    <div class="prose">{{philosophy}}</div>
+    <div class="btn-row" style="justify-content:center;margin-top:var(--s-6)"><a class="btn btn-primary" href="start.html">Install codeweb</a><a class="btn" href="research.html">See the evidence</a></div>
+  </div>
+</section>

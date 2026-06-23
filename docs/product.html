@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product — codeweb</title>
+<meta name="description" content="The 20 deterministic MCP tools, the Tier 0–3 feature map, five-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="codeweb — one graph, two interfaces">
+<meta property="og:description" content="The 20 deterministic MCP tools, the Tier 0–3 feature map, five-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.">
+<meta property="og:url" content="https://ghostlygawd.github.io/codeweb/product.html">
+<meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://ghostlygawd.github.io/codeweb/product.html">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header class="site-nav">
+  <a class="brand" href="index.html" aria-label="codeweb home">
+    <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="19" y2="17" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
+      <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
+      <circle cx="19" cy="17" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+    </svg>
+    codeweb
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html" data-nav="home">Home</a>
+    <a href="product.html" data-nav="product" aria-current="page">Product</a>
+    <a href="research.html" data-nav="research">Research</a>
+    <a href="start.html" data-nav="start">Get Started</a>
+    <a href="changelog.html" data-nav="changelog">Changelog</a>
+  </nav>
+  <div class="nav-right">
+    <a class="nav-ghost" href="demo/">Live demo</a>
+    <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Product</span>
+      <h2>One graph. Twenty tools. Every phase of the edit loop.</h2>
+      <p class="lead">codeweb turns a repository into a queryable structural graph, then exposes it as deterministic tools an agent calls at exactly the moment it needs them — before writing, while reviewing, and when optimizing.</p>
+    </div>
+    
+    <div class="phase">
+      <div class="phase-head" style="--phase:var(--accent)">
+        <h3>Structural queries</h3>
+        <span class="count">5 tools · The foundation — read the graph.</span>
+      </div>
+      <div class="grid cols-3">
+        <div class="tool" style="--phase:var(--accent)">
+          <div class="name">codeweb_callers</div>
+          <div class="desc">Direct callers of a symbol (call-edge in-neighbors).</div>
+        </div>
+        <div class="tool" style="--phase:var(--accent)">
+          <div class="name">codeweb_callees</div>
+          <div class="desc">The functions a symbol calls.</div>
+        </div>
+        <div class="tool" style="--phase:var(--accent)">
+          <div class="name">codeweb_impact</div>
+          <div class="desc">Blast radius: every function transitively affected by a change, plus domains touched. Call before editing.</div>
+        </div>
+        <div class="tool" style="--phase:var(--accent)">
+          <div class="name">codeweb_cycles</div>
+          <div class="desc">File-level dependency cycles (circular imports/calls).</div>
+        </div>
+        <div class="tool" style="--phase:var(--accent)">
+          <div class="name">codeweb_orphans</div>
+          <div class="desc">Uncalled, unexported symbols — dead-code candidates.</div>
+        </div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head" style="--phase:var(--teal)">
+        <h3>Write-time intelligence</h3>
+        <span class="count">3 tools · Before you add code — reuse, don't reinvent.</span>
+      </div>
+      <div class="grid cols-3">
+        <div class="tool" style="--phase:var(--teal)">
+          <div class="name">codeweb_find_similar</div>
+          <div class="desc">"Does something already do this?" Ranks existing bodies by token-shingle or structural-skeleton similarity to your candidate.</div>
+        </div>
+        <div class="tool" style="--phase:var(--teal)">
+          <div class="name">codeweb_placement</div>
+          <div class="desc">Where a new symbol belongs (domain + file) by callee gravity, with a duplicate warning.</div>
+        </div>
+        <div class="tool" style="--phase:var(--teal)">
+          <div class="name">codeweb_tests</div>
+          <div class="desc">The tests that exercise a symbol — run the right subset after editing.</div>
+        </div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head" style="--phase:var(--med)">
+        <h3>Review-time intelligence</h3>
+        <span class="count">5 tools · Assess impact and risk.</span>
+      </div>
+      <div class="grid cols-3">
+        <div class="tool" style="--phase:var(--med)">
+          <div class="name">codeweb_review</div>
+          <div class="desc">Structural review of a change: changed symbols, blast radius, domains touched, fan-in-ranked review order.</div>
+        </div>
+        <div class="tool" style="--phase:var(--med)">
+          <div class="name">codeweb_fitness</div>
+          <div class="desc">Check the graph against architectural fitness rules (forbidden-dependency, layering, no-cycles, max-fan-in, max-LOC).</div>
+        </div>
+        <div class="tool" style="--phase:var(--med)">
+          <div class="name">codeweb_risk</div>
+          <div class="desc">Rank symbols by change-risk (fan-in, fan-out, LOC, blast radius, churn) for triage.</div>
+        </div>
+        <div class="tool" style="--phase:var(--med)">
+          <div class="name">codeweb_break_cycles</div>
+          <div class="desc">For each file cycle, propose the cheapest edge to sever — verified to actually break it.</div>
+        </div>
+        <div class="tool" style="--phase:var(--med)">
+          <div class="name">codeweb_deadcode</div>
+          <div class="desc">Confidence-tiered dead code: safe-to-delete vs review-first (test-guarded / entrypoint-like).</div>
+        </div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head" style="--phase:var(--purple)">
+        <h3>Optimize-time intelligence</h3>
+        <span class="count">3 tools · Act on findings — safely.</span>
+      </div>
+      <div class="grid cols-3">
+        <div class="tool" style="--phase:var(--purple)">
+          <div class="name">codeweb_codemod</div>
+          <div class="desc">Plan a consolidation merge (report-only over MCP): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, projected gate verdict.</div>
+        </div>
+        <div class="tool" style="--phase:var(--purple)">
+          <div class="name">codeweb_hotspots</div>
+          <div class="desc">Rank symbols by complexity × fan-in × churn — where to refactor first.</div>
+        </div>
+        <div class="tool" style="--phase:var(--purple)">
+          <div class="name">codeweb_campaign</div>
+          <div class="desc">An ordered, cumulatively pre-flighted ROI worklist (dead code + cycle cuts + merges). Read-only plan.</div>
+        </div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head" style="--phase:var(--good)">
+        <h3>Freshness & context</h3>
+        <span class="count">2 tools · Close the edit loop.</span>
+      </div>
+      <div class="grid cols-3">
+        <div class="tool" style="--phase:var(--good)">
+          <div class="name">codeweb_context</div>
+          <div class="desc">Blast-radius-scoped context in one call: a symbol's body, direct callers (with bodies), callees (location-only), and transitive impact ids.</div>
+        </div>
+        <div class="tool" style="--phase:var(--good)">
+          <div class="name">codeweb_refresh</div>
+          <div class="desc">Re-extract from disk so mid-task queries reflect edits, not a stale snapshot. Incremental; preserves domains.</div>
+        </div>
+      </div>
+    </div>
+    <div class="phase">
+      <div class="phase-head" style="--phase:var(--pink)">
+        <h3>Comparison & onboarding</h3>
+        <span class="count">2 tools · Meta-analysis across snapshots and time.</span>
+      </div>
+      <div class="grid cols-3">
+        <div class="tool" style="--phase:var(--pink)">
+          <div class="name">codeweb_diff</div>
+          <div class="desc">Structural delta + regression verdict between two graph snapshots: nodes/edges/cycles/overlaps/orphans added & removed, coupling delta.</div>
+        </div>
+        <div class="tool" style="--phase:var(--pink)">
+          <div class="name">codeweb_reading_order</div>
+          <div class="desc">Foundations-first reading path (depended-upon leaves before orchestrators) for onboarding at scale.</div>
+        </div>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:var(--s-5)">All 20 tools are read-only. The one mutating operation — <code>codeweb_codemod --write</code> — is gated, reversible, and deliberately <strong>not</strong> exposed over MCP. Every tool has CLI/MCP parity, verified by JSON-RPC conformance tests.</p>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The build, in tiers</span>
+      <h2>Ten features across four tiers</h2>
+      <p class="lead">From closing the holes in the agent edit loop (Tier 0) to the architectural scale track (Tier 3) — all deterministic, all zero-dependency, all tested.</p>
+    </div>
+    <div class="grid cols-2">
+    <div class="card">
+      <div class="eyebrow">Tier 0 — Close the edit-loop holes</div>
+      <ul class="kicker-list">
+        <li><span class="dot"></span><span><strong>F1 · Scoped context</strong> — codeweb_context — a bounded edit window instead of grepping whole files.</span></li>
+        <li><span class="dot"></span><span><strong>F2 · Live refresh</strong> — codeweb_refresh — incremental re-extract so queries reflect edits.</span></li>
+        <li><span class="dot"></span><span><strong>F3 · Duplication-delta gate</strong> — review --before — fail the gate when a changed symbol becomes a body-confirmed duplicate.</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Tier 1 — New deterministic brains</div>
+      <ul class="kicker-list">
+        <li><span class="dot"></span><span><strong>F4 · Hotspots</strong> — complexity × fan-in × churn — where to focus first.</span></li>
+        <li><span class="dot"></span><span><strong>F5 · Campaign</strong> — One ordered, gated worklist of dead-code deletes, cycle cuts, and merges.</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Tier 2 — Deepen the moat</div>
+      <ul class="kicker-list">
+        <li><span class="dot"></span><span><strong>F6 · Structural clones</strong> — Catch renamed (Type-2) clones via an identifier-normalized skeleton.</span></li>
+        <li><span class="dot"></span><span><strong>F7 · Suppression memory</strong> — Fingerprinted false-positive suppression that a genuinely new issue can't hide behind.</span></li>
+        <li><span class="dot"></span><span><strong>F8 · Reading order</strong> — A deterministic, foundations-first onboarding tour.</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Tier 3 — The scale track</div>
+      <ul class="kicker-list">
+        <li><span class="dot"></span><span><strong>F9 · Incremental edges</strong> — Per-file edge cache — byte-identical to a full extract, re-derived only for changed files.</span></li>
+        <li><span class="dot"></span><span><strong>F10 · Sharded subgraphs</strong> — Answer queries from one shard + a boundary index, same result as the monolith.</span></li>
+      </ul>
+    </div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <span class="eyebrow">Fast path</span>
+        <h2>Five languages, parse-free</h2>
+        <p>The deterministic extractor emits atomic nodes and edges for these languages without a heavyweight parser. Everything else routes through an agent fallback that returns the same node/edge shape.</p>
+        <p><span class="chip">JavaScript</span> <span class="chip">TypeScript</span> <span class="chip">Python</span> <span class="chip">Rust</span> <span class="chip">Go</span></p>
+        <p class="muted">Engine modes: <code>hybrid</code> (default — uses ctags/ripgrep when available, falls back to regex), <code>tools</code>, and <code>read</code>. Five-language extraction parity is a validated check in the study.</p>
+      </div>
+      <div>
+        <div class="card">
+          <div class="eyebrow">Outputs, per target</div>
+          <ul class="kicker-list">
+            <li><span class="dot"></span><span><strong>graph.json</strong> — the machine-readable web (nodes, edges, domains, overlaps, meta).</span></li>
+            <li><span class="dot"></span><span><strong>report.html</strong> — a self-contained interactive map (no CDN, no network).</span></li>
+            <li><span class="dot"></span><span><strong>report.md / overlap.md</strong> — the same findings in plain markdown.</span></li>
+            <li><span class="dot"></span><span><strong>optimize.md</strong> — consolidation advice tiered ready / blocked / review, each pre-flighted against the gate.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The human view</span>
+      <h2>A report that earns trust by spending it carefully</h2>
+      <p class="lead">Four views over the same graph — generated live from the axios codebase, not mocked up.</p>
+    </div>
+    <div class="grid cols-2">
+      <div><a class="shot" href="demo/"><img src="assets/05-axios-findings.png" alt="Findings view: ranked duplication, hotspots, and dead code" loading="lazy"></a><p class="figcap">Findings — ranked duplication, hotspots, dead code.</p></div>
+      <div><a class="shot" href="demo/"><img src="assets/05-axios-graph.png" alt="Graph view: force-directed domain map" loading="lazy"></a><p class="figcap">Graph — the force-directed domain web.</p></div>
+      <div><a class="shot" href="demo/"><img src="assets/05-axios-treemap.png" alt="Treemap view: file size by lines of code with duplication heat" loading="lazy"></a><p class="figcap">Treemap — file LOC × duplication heat.</p></div>
+      <div><a class="shot" href="demo/"><img src="assets/05-axios-matrix.png" alt="Matrix view: cross-domain coupling heatmap" loading="lazy"></a><p class="figcap">Matrix — cross-domain coupling.</p></div>
+    </div>
+    <div class="btn-row" style="margin-top:var(--s-6)"><a class="btn btn-primary" href="demo/">Open the interactive report</a></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <span class="eyebrow">Keep structure honest</span>
+        <h2>A CI gate that fails the PR when an edit makes structure worse</h2>
+        <p>The same regression verdict as <code>codeweb_diff</code>, run on every pull request. It builds the graph before and after, and fails on a new dependency cycle, a new body-confirmed duplication, or a symbol that loses all its callers. Pure removals never trip it — deleting code is an improvement, not a regression.</p>
+        <p class="muted">codeweb dogfoods its own gate: PRs that touch the engine run it, and it stays green.</p>
+      </div>
+      <div>
+<pre><code>name: codeweb gate
+on: pull_request
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@main
+        with:
+          target: src</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow">Principles</span>
+      <h2>Why it can be trusted in the loop</h2>
+    </div>
+    <div class="prose"><ul class="kicker-list"><li><span class="dot"></span><span>Deterministic — no LLM in the analysis loop; the same repo always yields the same graph.</span></li><li><span class="dot"></span><span>Zero runtime dependencies — the whole pipeline runs on an empty node_modules.</span></li><li><span class="dot"></span><span>Read-only by default — codeweb never executes the code it maps.</span></li><li><span class="dot"></span><span>Evidence over guesswork — every finding is body-confirmed and pre-flighted against a regression gate.</span></li></ul></div>
+    <div class="btn-row" style="justify-content:center;margin-top:var(--s-6)"><a class="btn btn-primary" href="start.html">Install codeweb</a><a class="btn" href="research.html">See the evidence</a></div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
+            <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+          </svg>
+          codeweb
+        </a>
+        <p>The system map for your codebase. A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="product.html">Features</a>
+        <a href="demo/">Live demo</a>
+        <a href="start.html">Get started</a>
+        <a href="changelog.html">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Proof</h5>
+        <a href="research.html">Research</a>
+        <a href="paper/">The paper</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/paper/results" rel="noopener">Raw results</a>
+      </div>
+      <div class="footer-col">
+        <h5>Project</h5>
+        <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>codeweb v0.2.0 · MIT · © 2026 rhenmcleod</span>
+      <span>Deterministic build · zero third-party requests on this page</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
