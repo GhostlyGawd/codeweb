@@ -448,9 +448,11 @@ for (const f of files) {
     // A default import binds the target's default export: attribute to its single owning symbol when
     // there is one (class/fn AxiosError), else the module object (object-default barrel -> <module>).
     // A namespace import (`import * as X`) is always the module object.
+    // Alias the default import ONLY to a detected single-symbol default (class/fn/identifier). NO anchor
+    // fallback: for an object-literal or anonymous default the anchor is a DIFFERENT symbol, so aliasing
+    // to it made a bare `utils` reference fabricate a call to utils.js's largest symbol (e.g. merge).
     const defSym = isDefault ? defaultExportByFile.get(t) : null;
-    const aliasTarget = defSym || anchorId(t);
-    if (isDefault && local && aliasTarget && !amap.has(local) && aId !== aliasTarget) amap.set(local, aliasTarget);
+    if (isDefault && local && defSym && !amap.has(local) && aId !== defSym) amap.set(local, defSym);
     if (isDefault && local && defSym && kindById.get(defSym) === 'class') classmap.set(local, defSym); // X.static()/instanceof X -> ref to class
     const edgeTarget = defSym || (t + ':<module>');
     if (aId && aId !== edgeTarget) importEdges.push([aId, edgeTarget]);
