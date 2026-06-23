@@ -359,6 +359,26 @@ function resolvePyModule(fromAbs, level, dotted) {
   }
   return best;
 }
+// A file's DEFAULT EXPORT, when it is a single named symbol defined in that file (`export default
+// class X` / `export default function X` / `export default X;` / `export { X as default }` /
+// `module.exports = X`). Returns its node id, else null (an object/array/expression default — e.g.
+// `export default { merge, ... }` — has no single owning symbol, so a default import of it is a
+// MODULE dependency). Lets a default import attribute its coarse edge to the real exported symbol
+// (AxiosError) instead of an arbitrary anchor, while object-default barrels (utils) fall back to <module>.
+function defaultExportOf(r, text, names) {
+  let m;
+  if ((m = /export\s+default\s+(?:abstract\s+)?(?:async\s+)?(?:class|function\s*\*?)\s+([A-Za-z_$][\w$]*)/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
+  if ((m = /export\s*\{[^}]*?\b([A-Za-z_$][\w$]*)\s+as\s+default\b/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
+  if ((m = /export\s+default\s+([A-Za-z_$][\w$]*)\s*;/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
+  if ((m = /module\.exports\s*=\s*([A-Za-z_$][\w$]*)\s*;/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
+  return null;
+}
+const defaultExportByFile = new Map(); // rel -> node id of the single-symbol default export (if any)
+for (const [fabs, recd] of fileSyms) {
+  const rr = rel(fabs);
+  const ds = defaultExportOf(rr, recd.text, new Set(recd.ranges.map((rg) => rg.name)));
+  if (ds && nodeIdSet.has(ds)) defaultExportByFile.set(rr, ds);
+}
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
 const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
 const importEdges = [];
@@ -423,9 +443,14 @@ for (const f of files) {
   const addModuleBinding = (local, spec, isDefault) => {
     const t = resolveImport(f, spec); if (!t) return;
     if (local) nsmap.set(local, t);
-    const tA = anchorId(t);
-    if (isDefault && local && tA && !amap.has(local) && aId !== tA) amap.set(local, tA);
-    if (aId) importEdges.push([aId, t + ':<module>']);
+    // A default import binds the target's default export: attribute to its single owning symbol when
+    // there is one (class/fn AxiosError), else the module object (object-default barrel -> <module>).
+    // A namespace import (`import * as X`) is always the module object.
+    const defSym = isDefault ? defaultExportByFile.get(t) : null;
+    const aliasTarget = defSym || anchorId(t);
+    if (isDefault && local && aliasTarget && !amap.has(local) && aId !== aliasTarget) amap.set(local, aliasTarget);
+    const edgeTarget = defSym || (t + ':<module>');
+    if (aId && aId !== edgeTarget) importEdges.push([aId, edgeTarget]);
   };
   const addSide = (spec) => { const t = resolveImport(f, spec); if (!t) return; if (aId) importEdges.push([aId, t + ':<module>']); };
   if (isPy) {
