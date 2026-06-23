@@ -90,8 +90,61 @@ the SAME pilot (`run4.json`):
   oracle scores as extras) and `<module>`-only importers / the anonymous default-export fn node
   (xhr.js:dispatchXhrRequest has no symbol node).
 
+## Lever #1 (2026-06-23): frozen truth FROZEN + harness wired + regraded + 8 ENGINE-FROZEN REPS DONE
+The freeze-truth blocker is CLEARED and the noise floor is measured. What landed (branch `feat/pilot-frozen-truth`):
+- **`paper/experiments/efficiency-pilot.truth.json`** — hand-verified caller sets for all 4 targets,
+  built by reconciling codeweb `--dependents` against an INDEPENDENT exhaustive grep+read (one thorough
+  pass/target) + adjudication. Truth is independent of codeweb's coverage (a real site in a file the
+  graph dropped — e.g. `merge.test.js` — is still truth, so coverage gaps count honestly). Validated by
+  an invariant `truth == (codewebReturned \ codewebExtra) ∪ codewebMissedReal` + file-existence (caught
+  2 transcription misses). Truth sizes: merge 7 ids/6 files, AxiosError 58/42, AxiosHeaders 40/28,
+  render_template 26/11.
+- **Grading policy (in the truth file):** FILE-LEVEL is PRIMARY (robust to the attribution artifact —
+  codeweb attributes imports/test-callbacks to enclosing fns while truth uses `<file>:<module>`, so
+  symbol-level dings codeweb even when it found the right file). Symbol-level is reported as a stricter,
+  attribution-noisy secondary. Also an INDEXED-SCOPE partition (truth ∩ files the graph indexed) to
+  separate discovery quality from coverage gaps. `external` variant drops def-file self-refs.
+- **Harness now accepts `args.truth` + `args.reps`** (`efficiency-pilot.workflow.js`): with frozen truth
+  the per-run oracle is SKIPPED (8 agents/rep, not 12); reps report the **paired delta (treatment−control)
+  per rep** and the headline = `mean ± SD` of the per-rep paired delta (recall/precision/steps). Covered
+  by `tests/efficiency-pilot-harness.test.mjs` (stubs the runtime, no real agents; suite now **322 green**).
+- **Regrade (`efficiency-pilot.regrade.mjs` → `.regrade.json`, no agents):** reconstructs each historical
+  arm's found-set (`F = (T\missed) ∪ extra`, exact) and rescores run3/run4 against the FROZEN truth so the
+  two runs are finally comparable. Paired delta = treatment(codeweb) − control(grep):
+
+  | run  | file-lvl indexed ΔR | file-lvl full ΔR | steps Δ | symbol indexed ΔR |
+  |------|---------------------|------------------|---------|-------------------|
+  | run3 | **+0.09** (.84/.75) | −0.01 (.68/.69)  | −4.25   | +0.17             |
+  | run4 | **+0.20** (.90/.70) | +0.13 (.73/.61)  | −8.25   | +0.31             |
+
+  Paired delta is POSITIVE for codeweb in 9/10 lenses (lone exception: run3 file-full −0.01, a tie); the
+  step win is large + oracle-independent; run4 > run3 on every lens. BUT the engine CHANGED between run3
+  and run4, so that gap still conflates noise + real effect — hence the reps below.
+- **8 ENGINE-FROZEN REPS — DONE (`efficiency-pilot.reps8.json`, run `wf_12660328-d4d`, engine `c892f50`):**
+  oracle skipped, graded vs the frozen truth at SYMBOL level (the stricter lens). Headline = mean ± SD of
+  the per-rep paired delta (treatment − control), n=8:
+
+  | metric    | mean ± SD        | signal                                                    |
+  |-----------|------------------|-----------------------------------------------------------|
+  | recall    | **+0.265 ± 0.045** | ~5.9× SD; **all 8 reps positive (0.19–0.31)** → robust    |
+  | steps     | **−6.84 ± 3.33**   | ~2.1× SD; 7/8 reps negative (~34% fewer: 13.4 vs 20.2)    |
+  | precision | +0.199 ± 0.147   | ~1.4× SD; one rep negative → positive lean, not robust     |
+
+  Per-task ΔR ± SD: merge +0.43±0.19, AxiosError +0.36±0.03 (treatment recall SD=0 — codeweb's
+  `--dependents` is deterministic and the agent reported it faithfully), AxiosHeaders +0.17±0.06,
+  render_template +0.10±0.14. **The recall win clears the noise floor by ~6×** even under the stricter
+  symbol-level grading (file-level is higher; see regrade) — this is the defensible result lever #1 was
+  set up to produce: codeweb measurably improves frontier-agent caller-discovery recall + cuts steps ~34%.
+  Caveat: precision is a weak/noisy positive; render_template is the softest target (ΔR within ~1 SD of 0).
+  - **NOTE on the misfire:** the first launch passed `args` but the Workflow runtime delivered it as a JSON
+    STRING, so `args.truth` was undefined → it silently ran the legacy oracle path at reps=1 (~920k tokens
+    wasted). Fixed in `c…`→ the harness now `JSON.parse`s string args (commit `b626015`) with a regression
+    test. Re-launched clean. Lesson saved to memory `workflow-args-string`.
+
 ## Git state
-- Branch: `feat/efficiency-pilot`, now **9 commits ahead** of `origin/main` (`48ad354`):
+- Branch: `feat/pilot-frozen-truth` (off `origin/main` `1cfb4f5`), carrying the lever-#1 work + the folded
+  post-merge STATE commit (`a5b45e8`, cherry-picked as `dfd9f96`). PR-ready; not yet pushed.
+- Prior branch: `feat/efficiency-pilot`, **9 commits ahead** of the old `origin/main` (`48ad354`):
   - `3693d69` test(pilot): harness · `670d9d8` feat: member-access + `--dependents`
   - `aee5619` fix: coarse module-import edges off the anchor → `<module>` (merge `--dependents` 35→7)
   - `73ea164` feat: Python import resolution (flask import edges 0→84)
@@ -101,13 +154,23 @@ the SAME pilot (`run4.json`):
   - `dcc3e42` feat: `ref` edges for class usage (instanceof + static-method) — AxiosHeaders ref users 2→13
   - `e662e5f` feat: resolve `X.member.call()/.apply()` chains (merge gains fetch.factory)
   - `c892f50` fix: drop default-import anchor-alias fallback (kills bare-object→anchor pollution)
-- NOT pushed to origin (local only). NOT PR'd to main. Suite **320 green**. Every engine fix carries a
-  deterministic proof + TDD test; re-extraction byte-identical (axios + flask); full-pipeline identical 2×.
-- Working tree: clean except gitignored `.codeweb/` (rebuilt pilot graphs + scratch). `run3.json`/`run4.json` committed.
+- **MERGED to `main` via PR #12** (merge commit `1cfb4f5`, 2026-06-23) — CI green (gate + test). The whole
+  efficiency-pilot workstream (harness + member-access + the 7 precision/Python/class-usage fixes + result
+  docs) is now on main. Suite **320 green**. Every engine fix carries a deterministic proof + TDD test;
+  re-extraction byte-identical (axios + flask); full-pipeline identical 2×.
+- Working tree: clean except gitignored `.codeweb/` (rebuilt pilot graphs + scratch). `run3.json`/`run4.json`
+  committed. (This STATE update is a post-merge doc follow-up on the branch — fold into the next PR.)
 
 ## Key files
-- Harness: `paper/experiments/efficiency-pilot.workflow.js` (Workflow script; 4 targets, oracle +
-  control + treatment per target).
+- Harness: `paper/experiments/efficiency-pilot.workflow.js` (Workflow script; 4 targets; control +
+  treatment per target; oracle SKIPPED when `args.truth` supplied; `args.reps` → paired-delta mean±SD).
+- **Frozen truth: `paper/experiments/efficiency-pilot.truth.json`** (lever #1; hand-verified, validated).
+- **Regrade: `paper/experiments/efficiency-pilot.regrade.mjs`** → `efficiency-pilot.regrade.json`
+  (deterministic; rescores committed runs vs frozen truth; symbol/file × full/indexed/external lenses).
+- **Engine-frozen reps result: `paper/experiments/efficiency-pilot.reps8.json`** (8 reps, frozen truth,
+  symbol-level; headline mean±SD paired delta + per-task + per-rep; commands omitted for size).
+- **Harness test: `tests/efficiency-pilot-harness.test.mjs`** (stubs runtime, validates oracle-skip +
+  rep loop + mean±SD aggregation without real agents).
 - Engine fix: `scripts/extract-symbols.mjs` (import bindings + member-access), `scripts/lib/graph-ops.mjs`
   (`dependentsOf`, `importIn`), `scripts/query.mjs` (`--dependents`).
 - Test: `tests/import-member-edges.test.mjs`.
@@ -116,12 +179,20 @@ the SAME pilot (`run4.json`):
 - Rebuild pilot graphs (after any extractor change):
   `node scripts/run.mjs paper/corpus/axios --out-dir .codeweb/pilot/axios`
   `node scripts/run.mjs paper/corpus/flask --out-dir .codeweb/pilot/flask`
-- Re-run the agent pilot (multi-agent — needs user opt-in / "ultracode" or explicit ask):
-  `Workflow({scriptPath: "D:/GitHub Projects/ecc-test/codeweb/paper/experiments/efficiency-pilot.workflow.js"})`
-  (~12 agents, ~15 min, ~0.9M tokens/run; returns means + perTask recall/precision/steps.)
+- **Engine-frozen reps (lever #1; multi-agent — needs user opt-in / "ultracode" or explicit ask):** the
+  CALLER reads the truth file (the workflow sandbox has no fs) and passes it in as `args.truth`, plus N reps:
+  ```js
+  const truth = JSON.parse(readFileSync(".../efficiency-pilot.truth.json","utf8"))
+  Workflow({scriptPath: ".../efficiency-pilot.workflow.js", args: {truth, reps: 5}})
+  ```
+  Oracle skipped → ~8 agents/rep (~0.6M tok/rep, ~12 min); returns `headline` = mean±SD of the per-rep
+  paired delta, `perTaskAgg`, `perRepMeanDelta`. Stamp runDate/runId after it returns. Suggested N≥5.
+- Re-run the FULL pilot WITH a fresh oracle (legacy, no frozen truth): omit `args.truth`
+  (`Workflow({scriptPath: "...workflow.js"})`) — ~12 agents/run; for comparison only.
+- Regrade committed runs vs frozen truth (no agents): `node paper/experiments/efficiency-pilot.regrade.mjs`.
 - Quick deterministic tool check (no agents):
   `node scripts/query.mjs .codeweb/pilot/axios/graph.json --dependents lib/utils.js:merge --json`
-- Full suite: `npm test` (expect 320 green).
+- Full suite: `npm test` (expect **322 green**).
 
 ## Next levers (prioritized — pick up here, post run 4)
 DONE: barrel-anchor precision (`aee5619`), Python imports (`73ea164`), docstring masking (`4c09a92`),
@@ -129,10 +200,22 @@ default-export attribution (`cb325f4`), class-usage `ref` edges (`dcc3e42`, the 
 `.call()/.apply()` chains (`e662e5f`, the merge gap), object-alias anchor pollution (`c892f50`). Run 4
 = codeweb wins all axes. Remaining, in priority:
 
-1. **FREEZE a hand-verified truth set** per target (THE blocker for a defensible claim). The oracle
-   re-reconciles each run → grep recall swung 0.79→0.50 across runs; only within-run + the step win are
-   trustworthy. Hand-curate truth for the 4 targets (+ new ones), commit it, regrade run3/run4 against
-   the FROZEN set, and make the harness accept `--truth frozen.json` instead of re-dereconciling.
+1. **FREEZE a hand-verified truth set** — ✅ DONE INCL. THE REPS (see "Lever #1" section above): `truth.json`
+   committed + validated; harness takes `args.truth`/`args.reps`; run3/run4 regraded; **8 engine-frozen reps
+   measured the noise floor — recall +0.265 ± 0.045 (all 8 reps positive, ~6× SD), steps −6.84 ± 3.33.** The
+   defensible claim holds: codeweb improves frontier-agent caller-discovery recall above the noise + cuts
+   steps ~34%. NOTE the truth is STRICTER than the old per-run oracles (it includes the import/test/smoke
+   sites codeweb misses), so frozen ABSOLUTE recalls are lower than run4's oracle reported — the POSITIVE
+   PAIRED DELTA is the trustworthy signal. Next: fold into the paper (Theme-5b) + lever #3 (tokens/wall-clock,
+   more targets/repos). To re-confirm or extend, bump `args.reps` and re-run.
+   - **On the swing as a metric (design note):** the run-to-run swing is oracle *measurement noise*
+     shared by both arms, not a codeweb-vs-grep quantity — record it as a test-retest RELIABILITY caveat
+     (limitations section), not a head-to-head metric. Track the **paired delta** (treatment−control) per
+     run, NOT absolute recall: the paired delta cancels the shared per-run truth and is far more stable.
+     Run 3 delta −0.13, run 4 delta +0.32 — but the engine CHANGED between them, so that gap conflates
+     noise + real effect. To isolate the noise floor, run **N reps with the engine FROZEN** and report
+     `mean(delta) ± SD(delta)`; an engine change whose delta-shift exceeds that SD is a real win. Steps
+     are already noise-free (a count of agent actions) → the −42% step win is the most defensible result.
 2. **AxiosHeaders precision (cw's weak spot, 0.52 symbol / 0.73 file):** the `ref` + anchor-import edges
    add dependents the oracle scores as extras. Options: tighten the anchor import-edge attribution (it
    still lands on the file's first fn, not the using fn or `<module>`); and/or extract anonymous

@@ -1,0 +1,256 @@
+{
+  "version": 1,
+  "createdAt": "2026-06-23",
+  "title": "Frozen, hand-verified ground-truth caller sets for the efficiency pilot (lever #1)",
+  "purpose": "Remove the per-run oracle re-reconciliation that made cross-run absolutes incomparable (grep recall swung 0.79->0.50 between runs). This set is committed and stable, so reps grade against a fixed target and the paired delta (treatment-control) becomes a defensible quantity.",
+  "method": "Per target: codeweb --dependents was reconciled against an INDEPENDENT exhaustive grep+read of the corpus (one thorough pass per target), then hand-adjudicated. Truth = real reference sites by NATURAL attribution, independent of codeweb's graph coverage (a real site in a file codeweb failed to index is still truth, so coverage gaps count honestly).",
+  "attributionRule": "id = `<relative-path>:<enclosing-named-symbol>`; module-scope refs (imports, top-level re-exports, module-scope code) and refs inside anonymous it()/describe()/callback bodies use `<file>:<module>`. Usages inside a named function/method use that name. Dedupe: many refs in one enclosing symbol collapse to ONE id. The target's own declaration line is NOT a caller; its module-scope self-uses (recursion via an enclosing named fn, re-export, static setup) ARE.",
+  "gradingPolicy": {
+    "primary": "FILE-LEVEL recall/precision (collapse every id to its file). This is robust to the attribution-convention mismatch below and answers the real refactor question: which FILES must I open and edit. Lead with this + the (oracle-free) step delta.",
+    "secondary": "SYMBOL-LEVEL recall/precision against the ids here. Conservative and HONEST but attribution-noisy: codeweb attributes a file's import / test-callback ref to an enclosing NAMED function (createInstance, makeResponse, ...) while this set uses `<file>:<module>` per the rule, so codeweb is dinged at symbol level even when it found the right file. Report it, but do not lead with it.",
+    "scopePartition": "Also grade truth INTERSECTED with the files codeweb actually indexed (derivable from the graph). The in-indexed-scope number isolates discovery quality from coverage gaps; the full-repo number includes coverage gaps (e.g. unindexed .ts/smoke fixtures, merge.test.js). Report both; the gap is itself an honest finding.",
+    "variants": "external = drop ids whose file == the target's own definition file. Computed mechanically by the regrade/harness; shows the result is not driven by self-references."
+  },
+  "targets": {
+    "axios-merge": {
+      "repo": "axios",
+      "symbol": "merge",
+      "symbolId": "lib/utils.js:merge",
+      "file": "lib/utils.js",
+      "kind": "function",
+      "truth": [
+        "lib/adapters/fetch.js:factory",
+        "lib/core/Axios.js:_request",
+        "lib/core/mergeConfig.js:getMergedValue",
+        "lib/utils.js:assignValue",
+        "lib/utils.js:<module>",
+        "tests/unit/prototypePollution.test.js:<module>",
+        "tests/unit/utils/merge.test.js:<module>"
+      ],
+      "otherAreaRefs": [],
+      "provenance": {
+        "codewebReturned": [
+          "lib/adapters/fetch.js:factory",
+          "lib/core/Axios.js:_request",
+          "lib/core/mergeConfig.js:getMergedValue",
+          "lib/core/mergeConfig.js:mergeConfig",
+          "lib/utils.js:<module>",
+          "lib/utils.js:assignValue",
+          "tests/unit/prototypePollution.test.js:<module>"
+        ],
+        "codewebMissedReal": [
+          "tests/unit/utils/merge.test.js:<module>"
+        ],
+        "codewebExtra": [
+          "lib/core/mergeConfig.js:mergeConfig"
+        ]
+      },
+      "notes": "VERIFIED by adjudicator. mergeConfig.js: the real utils.merge calls (L39/41) are inside the NESTED helper getMergedValue (truth) — mergeConfig's own body has only a local `const merge = mergeMap[prop]` strategy selector (L139), NOT utils.merge, so codeweb's `mergeConfig` id is a mis-attribution (excluded). Recursion (merge calling merge, L477/479) sits inside the named arrow assignValue -> lib/utils.js:assignValue. lib/utils.js:<module> = the `export default { merge }` re-export line (def-file). tests/unit/utils/merge.test.js is the dedicated unit test codeweb's graph DROPPED (sibling files in tests/unit/utils/ ARE indexed) — lever #4 coverage gap, a real codeweb miss."
+    },
+    "axios-AxiosError": {
+      "repo": "axios",
+      "symbol": "AxiosError",
+      "symbolId": "lib/core/AxiosError.js:AxiosError",
+      "file": "lib/core/AxiosError.js",
+      "kind": "class",
+      "truth": [
+        "lib/adapters/adapters.js:getAdapter",
+        "lib/adapters/fetch.js:factory",
+        "lib/adapters/fetch.js:maxBodyLengthError",
+        "lib/adapters/fetch.js:onChunkProgress",
+        "lib/adapters/http.js:createTimeoutError",
+        "lib/adapters/http.js:enforceMaxContentLength",
+        "lib/adapters/http.js:httpAdapter",
+        "lib/adapters/http.js:setProxy",
+        "lib/adapters/http.js:transform",
+        "lib/adapters/xhr.js:<module>",
+        "lib/adapters/xhr.js:onloadend",
+        "lib/axios.js:createInstance",
+        "lib/axios.js:<module>",
+        "lib/cancel/CanceledError.js:CanceledError",
+        "lib/core/AxiosError.js:from",
+        "lib/core/buildFullPath.js:assertValidHttpProtocolURL",
+        "lib/core/settle.js:settle",
+        "lib/defaults/index.js:transformRequest",
+        "lib/defaults/index.js:transformResponse",
+        "lib/helpers/composeSignals.js:composeSignals",
+        "lib/helpers/composeSignals.js:onabort",
+        "lib/helpers/formDataToJSON.js:formDataToJSON",
+        "lib/helpers/formDataToJSON.js:throwIfDepthExceeded",
+        "lib/helpers/fromDataURI.js:fromDataURI",
+        "lib/helpers/resolveConfig.js:resolveConfig",
+        "lib/helpers/toFormData.js:convertValue",
+        "lib/helpers/toFormData.js:throwIfMaxDepthExceeded",
+        "lib/helpers/toFormData.js:toFormData",
+        "lib/helpers/validator.js:assertOptions",
+        "lib/helpers/validator.js:<module>",
+        "index.js:<module>",
+        "tests/unit/adapters/adapters.test.js:<module>",
+        "tests/unit/adapters/fetch.test.js:<module>",
+        "tests/unit/adapters/http.test.js:<module>",
+        "tests/unit/core/AxiosError.test.js:<module>",
+        "tests/unit/core/buildFullPath.test.js:<module>",
+        "tests/unit/core/dispatchRequest.test.js:<module>",
+        "tests/unit/core/settle.test.js:<module>",
+        "tests/unit/helpers/formDataToJSON.test.js:<module>",
+        "tests/unit/helpers/isAxiosError.test.js:<module>",
+        "tests/unit/helpers/resolveConfig.test.js:<module>",
+        "tests/unit/helpers/validator.test.js:<module>",
+        "tests/unit/prototypePollution.test.js:<module>",
+        "tests/unit/toFormData.test.js:<module>",
+        "tests/unit/transformResponse.test.js:<module>",
+        "tests/browser/requests.browser.test.js:<module>",
+        "tests/browser/settle.browser.test.js:<module>",
+        "tests/browser/transform.browser.test.js:<module>",
+        "tests/smoke/cjs/tests/import.smoke.test.cjs:<module>",
+        "tests/smoke/esm/tests/import.smoke.test.js:<module>",
+        "tests/smoke/deno/tests/import.smoke.test.ts:<module>",
+        "tests/module/cjs/tests/helpers/ts-require.ts:<module>",
+        "tests/module/cjs/tests/helpers/ts-require-default.ts:<module>",
+        "tests/module/cjs/tests/helpers/cjs-typing.ts:<module>",
+        "tests/module/cjs/tests/helpers/cjs-typing.ts:handleError",
+        "tests/module/esm/tests/helpers/esm-functions.ts:<module>",
+        "tests/module/esm/tests/helpers/esm-index.ts:<module>",
+        "tests/module/esm/tests/helpers/esm-index.ts:handleError"
+      ],
+      "otherAreaRefs": [
+        "index.d.ts:<module>",
+        "index.d.cts:<module>"
+      ],
+      "provenance": {
+        "codewebReturned": [
+          "lib/adapters/adapters.js:getAdapter","lib/adapters/fetch.js:factory","lib/adapters/fetch.js:maxBodyLengthError","lib/adapters/fetch.js:onChunkProgress","lib/adapters/http.js:createTimeoutError","lib/adapters/http.js:enforceMaxContentLength","lib/adapters/http.js:httpAdapter","lib/adapters/http.js:setProxy","lib/adapters/http.js:transform","lib/adapters/xhr.js:<module>","lib/adapters/xhr.js:onloadend","lib/axios.js:createInstance","lib/cancel/CanceledError.js:CanceledError","lib/core/AxiosError.js:from","lib/core/buildFullPath.js:assertValidHttpProtocolURL","lib/core/settle.js:settle","lib/defaults/index.js:transformRequest","lib/defaults/index.js:transformResponse","lib/helpers/composeSignals.js:composeSignals","lib/helpers/composeSignals.js:onabort","lib/helpers/formDataToJSON.js:formDataToJSON","lib/helpers/formDataToJSON.js:throwIfDepthExceeded","lib/helpers/fromDataURI.js:fromDataURI","lib/helpers/resolveConfig.js:resolveConfig","lib/helpers/toFormData.js:convertValue","lib/helpers/toFormData.js:throwIfMaxDepthExceeded","lib/helpers/toFormData.js:toFormData","lib/helpers/validator.js:<module>","lib/helpers/validator.js:assertOptions","tests/browser/requests.browser.test.js:<module>","tests/browser/requests.browser.test.js:MockXMLHttpRequest","tests/browser/transform.browser.test.js:MockXMLHttpRequest","tests/unit/adapters/adapters.test.js:<module>","tests/unit/adapters/adapters.test.js:adapter","tests/unit/adapters/fetch.test.js:<module>","tests/unit/adapters/fetch.test.js:makeUploadStream","tests/unit/adapters/http.test.js:<module>","tests/unit/adapters/http.test.js:request","tests/unit/core/AxiosError.test.js:<module>","tests/unit/core/AxiosError.test.js:makeCircularCause","tests/unit/core/dispatchRequest.test.js:<module>","tests/unit/core/dispatchRequest.test.js:ReactNativeFormData","tests/unit/core/settle.test.js:<module>","tests/unit/core/settle.test.js:makeResponse","tests/unit/helpers/resolveConfig.test.js:<module>","tests/unit/helpers/resolveConfig.test.js:ReactNativeFormData","tests/unit/prototypePollution.test.js:<module>","tests/unit/prototypePollution.test.js:startEcho","tests/unit/toFormData.test.js:<module>","tests/unit/toFormData.test.js:createRNFormDataSpy"
+        ],
+        "codewebMissedReal": [
+          "lib/axios.js:<module>","index.js:<module>","tests/unit/transformResponse.test.js:<module>","tests/unit/core/buildFullPath.test.js:<module>","tests/unit/helpers/formDataToJSON.test.js:<module>","tests/unit/helpers/isAxiosError.test.js:<module>","tests/unit/helpers/validator.test.js:<module>","tests/browser/settle.browser.test.js:<module>","tests/browser/transform.browser.test.js:<module>","tests/smoke/cjs/tests/import.smoke.test.cjs:<module>","tests/smoke/esm/tests/import.smoke.test.js:<module>","tests/smoke/deno/tests/import.smoke.test.ts:<module>","tests/module/cjs/tests/helpers/ts-require.ts:<module>","tests/module/cjs/tests/helpers/ts-require-default.ts:<module>","tests/module/cjs/tests/helpers/cjs-typing.ts:<module>","tests/module/cjs/tests/helpers/cjs-typing.ts:handleError","tests/module/esm/tests/helpers/esm-functions.ts:<module>","tests/module/esm/tests/helpers/esm-index.ts:<module>","tests/module/esm/tests/helpers/esm-index.ts:handleError"
+        ],
+        "codewebExtra": [
+          "tests/browser/requests.browser.test.js:MockXMLHttpRequest","tests/browser/transform.browser.test.js:MockXMLHttpRequest","tests/unit/adapters/adapters.test.js:adapter","tests/unit/adapters/fetch.test.js:makeUploadStream","tests/unit/adapters/http.test.js:request","tests/unit/core/AxiosError.test.js:makeCircularCause","tests/unit/core/dispatchRequest.test.js:ReactNativeFormData","tests/unit/core/settle.test.js:makeResponse","tests/unit/helpers/resolveConfig.test.js:ReactNativeFormData","tests/unit/prototypePollution.test.js:startEcho","tests/unit/toFormData.test.js:createRNFormDataSpy"
+        ]
+      },
+      "notes": "codebweExtra are all TEST-FILE mis-attributions: codeweb attached the ref to an in-file named helper (makeResponse, makeCircularCause, ReactNativeFormData, startEcho, createRNFormDataSpy, makeUploadStream, request, adapter, MockXMLHttpRequest) whose body contains NO AxiosError ref; 6 verified by reading. codeweb ALSO emits the correct `:<module>` for those files, so these are spurious EXTRAS (precision hit), not recall losses. codewebMissedReal: re-export hubs lib/axios.js:<module> (`axios.AxiosError = AxiosError`) and index.js:<module> (codeweb omitted both); plus .ts/smoke/module fixtures the graph does not index. isAxiosError (the duck-typed helper) is a DIFFERENT symbol and is excluded throughout. lib/core/AxiosError.js:from is the static self-ref (`new AxiosError` inside from()). CanceledError extends AxiosError (inherit). .d.ts/.d.cts -> otherAreaRefs."
+    },
+    "axios-AxiosHeaders": {
+      "repo": "axios",
+      "symbol": "AxiosHeaders",
+      "symbolId": "lib/core/AxiosHeaders.js:AxiosHeaders",
+      "file": "lib/core/AxiosHeaders.js",
+      "kind": "class",
+      "truth": [
+        "lib/adapters/fetch.js:<module>",
+        "lib/adapters/fetch.js:factory",
+        "lib/adapters/http.js:<module>",
+        "lib/adapters/http.js:dispatchHttpRequest",
+        "lib/adapters/xhr.js:<module>",
+        "lib/adapters/xhr.js:dispatchXhrRequest",
+        "lib/adapters/xhr.js:onloadend",
+        "lib/axios.js:<module>",
+        "lib/core/Axios.js:<module>",
+        "lib/core/Axios.js:_request",
+        "lib/core/AxiosError.js:<module>",
+        "lib/core/AxiosError.js:visit",
+        "lib/core/AxiosHeaders.js:<module>",
+        "lib/core/dispatchRequest.js:<module>",
+        "lib/core/dispatchRequest.js:dispatchRequest",
+        "lib/core/dispatchRequest.js:onAdapterResolution",
+        "lib/core/dispatchRequest.js:onAdapterRejection",
+        "lib/core/mergeConfig.js:<module>",
+        "lib/core/transformData.js:<module>",
+        "lib/core/transformData.js:transformData",
+        "lib/helpers/resolveConfig.js:<module>",
+        "lib/helpers/resolveConfig.js:resolveConfig",
+        "index.js:<module>",
+        "tests/browser/defaults.browser.test.js:<module>",
+        "tests/browser/headers.browser.test.js:<module>",
+        "tests/unit/axiosHeaders.test.js:<module>",
+        "tests/unit/core/AxiosError.test.js:<module>",
+        "tests/unit/core/mergeConfig.test.js:<module>",
+        "tests/unit/prototypePollution.test.js:<module>",
+        "tests/smoke/cjs/tests/import.smoke.test.cjs:<module>",
+        "tests/smoke/esm/tests/import.smoke.test.js:<module>",
+        "tests/smoke/deno/tests/import.smoke.test.ts:<module>",
+        "tests/module/cjs/tests/helpers/cjs-typing.ts:<module>",
+        "tests/module/cjs/tests/helpers/cjs-added-types.ts:<module>",
+        "tests/module/cjs/tests/helpers/ts-require.ts:<module>",
+        "tests/module/cjs/tests/helpers/ts-require-default.ts:<module>",
+        "tests/module/esm/tests/helpers/esm-index.ts:<module>",
+        "tests/module/esm/tests/helpers/esm-index.ts:getRequestConfig2",
+        "tests/module/esm/tests/helpers/esm-added-types.ts:<module>",
+        "tests/module/esm/tests/helpers/esm-functions.ts:<module>"
+      ],
+      "otherAreaRefs": [
+        "index.d.ts:<module>",
+        "index.d.cts:<module>",
+        "docs/pages/advanced/headers.md:<module>",
+        "docs/pages/advanced/header-methods.md:<module>",
+        "docs/pages/advanced/api-reference.md:<module>"
+      ],
+      "provenance": {
+        "codewebReturned": [
+          "lib/adapters/fetch.js:factory","lib/adapters/http.js:httpAdapter","lib/adapters/xhr.js:<module>","lib/adapters/xhr.js:onloadend","lib/axios.js:createInstance","lib/core/Axios.js:Axios","lib/core/Axios.js:_request","lib/core/AxiosError.js:AxiosError","lib/core/AxiosError.js:visit","lib/core/AxiosHeaders.js:<module>","lib/core/dispatchRequest.js:dispatchRequest","lib/core/dispatchRequest.js:onAdapterRejection","lib/core/dispatchRequest.js:onAdapterResolution","lib/core/mergeConfig.js:headersToObject","lib/core/mergeConfig.js:mergeConfig","lib/core/transformData.js:transformData","lib/helpers/resolveConfig.js:resolveConfig","tests/browser/defaults.browser.test.js:<module>","tests/browser/defaults.browser.test.js:MockXMLHttpRequest","tests/unit/axiosHeaders.test.js:<module>","tests/unit/axiosHeaders.test.js:HeaderBag","tests/unit/core/AxiosError.test.js:<module>","tests/unit/core/AxiosError.test.js:makeCircularCause","tests/unit/prototypePollution.test.js:<module>","tests/unit/prototypePollution.test.js:startEcho"
+        ],
+        "codewebMissedReal": [
+          "lib/adapters/fetch.js:<module>","lib/adapters/http.js:<module>","lib/adapters/http.js:dispatchHttpRequest","lib/adapters/xhr.js:dispatchXhrRequest","lib/axios.js:<module>","lib/core/Axios.js:<module>","lib/core/AxiosError.js:<module>","lib/core/dispatchRequest.js:<module>","lib/core/mergeConfig.js:<module>","lib/core/transformData.js:<module>","lib/helpers/resolveConfig.js:<module>","index.js:<module>","tests/browser/headers.browser.test.js:<module>","tests/unit/core/mergeConfig.test.js:<module>","tests/smoke/cjs/tests/import.smoke.test.cjs:<module>","tests/smoke/esm/tests/import.smoke.test.js:<module>","tests/smoke/deno/tests/import.smoke.test.ts:<module>","tests/module/cjs/tests/helpers/cjs-typing.ts:<module>","tests/module/cjs/tests/helpers/cjs-added-types.ts:<module>","tests/module/cjs/tests/helpers/ts-require.ts:<module>","tests/module/cjs/tests/helpers/ts-require-default.ts:<module>","tests/module/esm/tests/helpers/esm-index.ts:<module>","tests/module/esm/tests/helpers/esm-index.ts:getRequestConfig2","tests/module/esm/tests/helpers/esm-added-types.ts:<module>","tests/module/esm/tests/helpers/esm-functions.ts:<module>"
+        ],
+        "codewebExtra": [
+          "lib/adapters/http.js:httpAdapter","lib/axios.js:createInstance","lib/core/Axios.js:Axios","lib/core/AxiosError.js:AxiosError","lib/core/mergeConfig.js:mergeConfig","lib/core/mergeConfig.js:headersToObject","tests/browser/defaults.browser.test.js:MockXMLHttpRequest","tests/unit/axiosHeaders.test.js:HeaderBag","tests/unit/core/AxiosError.test.js:makeCircularCause","tests/unit/prototypePollution.test.js:startEcho"
+        ]
+      },
+      "notes": "The known-hard target: AxiosHeaders is used via STATIC AxiosHeaders.from(...)/.concat()/.accessor() and instanceof AxiosHeaders. Every such site resolved to its enclosing caller. codewebExtra mixes (a) import-attributed-to-function in lib (createInstance/Axios:Axios/AxiosError:AxiosError = the module-scope `import AxiosHeaders` -> correct id `<file>:<module>`), (b) httpAdapter vs the strict nearest-named dispatchHttpRequest, (c) mergeConfig:mergeConfig (the import + module-scope arrow headersToObject -> <module>; codeweb ALSO emits headersToObject which is the strict id for the L6 instanceof), and (d) 4 spurious test-helper FPs (MockXMLHttpRequest/HeaderBag/makeCircularCause/startEcho whose bodies lack any AxiosHeaders ref). These mostly hurt codeweb at SYMBOL level but NOT file level (same file). codewebMissedReal: the module-scope import ids it folds into a function, the dispatchXhrRequest site, index.js re-export, header.browser+mergeConfig tests, and the .ts/smoke fixtures the graph does not index. NO examples/sandbox refs in this corpus."
+    },
+    "flask-render_template": {
+      "repo": "flask",
+      "symbol": "render_template",
+      "symbolId": "src/flask/templating.py:render_template",
+      "file": "src/flask/templating.py",
+      "kind": "function",
+      "truth": [
+        "src/flask/__init__.py:<module>",
+        "examples/celery/src/task_app/__init__.py:<module>",
+        "examples/celery/src/task_app/__init__.py:index",
+        "examples/javascript/js_example/views.py:<module>",
+        "examples/javascript/js_example/views.py:index",
+        "examples/tutorial/flaskr/auth.py:<module>",
+        "examples/tutorial/flaskr/auth.py:register",
+        "examples/tutorial/flaskr/auth.py:login",
+        "examples/tutorial/flaskr/blog.py:<module>",
+        "examples/tutorial/flaskr/blog.py:index",
+        "examples/tutorial/flaskr/blog.py:create",
+        "examples/tutorial/flaskr/blog.py:update",
+        "tests/test_apps/blueprintapp/apps/admin/__init__.py:<module>",
+        "tests/test_apps/blueprintapp/apps/admin/__init__.py:index",
+        "tests/test_apps/blueprintapp/apps/admin/__init__.py:index2",
+        "tests/test_apps/blueprintapp/apps/frontend/__init__.py:<module>",
+        "tests/test_apps/blueprintapp/apps/frontend/__init__.py:index",
+        "tests/test_apps/blueprintapp/apps/frontend/__init__.py:missing_template",
+        "tests/type_check/typing_route.py:<module>",
+        "tests/type_check/typing_route.py:return_template",
+        "tests/type_check/typing_route.py:dispatch_request",
+        "tests/test_templating.py:index",
+        "tests/test_templating.py:test_escaping_without_template_filename",
+        "tests/test_blueprints.py:index",
+        "tests/test_blueprints.py:test_templates_and_static",
+        "tests/test_signals.py:index"
+      ],
+      "otherAreaRefs": [
+        "docs/api.rst:<module>",
+        "docs/templating.rst:<module>",
+        "docs/quickstart.rst:<module>",
+        "docs/patterns/viewdecorators.rst:<module>",
+        "CHANGES.rst:<module>"
+      ],
+      "provenance": {
+        "codewebReturned": [
+          "examples/celery/src/task_app/__init__.py:index","examples/javascript/js_example/views.py:index","examples/tutorial/flaskr/auth.py:login","examples/tutorial/flaskr/auth.py:register","examples/tutorial/flaskr/blog.py:create","examples/tutorial/flaskr/blog.py:index","examples/tutorial/flaskr/blog.py:update","tests/test_apps/blueprintapp/apps/admin/__init__.py:index","tests/test_apps/blueprintapp/apps/admin/__init__.py:index2","tests/test_apps/blueprintapp/apps/frontend/__init__.py:index","tests/test_apps/blueprintapp/apps/frontend/__init__.py:missing_template","tests/type_check/typing_route.py:dispatch_request","tests/type_check/typing_route.py:hello_generator","tests/type_check/typing_route.py:return_template"
+        ],
+        "codewebMissedReal": [
+          "src/flask/__init__.py:<module>","examples/celery/src/task_app/__init__.py:<module>","examples/javascript/js_example/views.py:<module>","examples/tutorial/flaskr/auth.py:<module>","examples/tutorial/flaskr/blog.py:<module>","tests/test_apps/blueprintapp/apps/admin/__init__.py:<module>","tests/test_apps/blueprintapp/apps/frontend/__init__.py:<module>","tests/type_check/typing_route.py:<module>","tests/test_templating.py:index","tests/test_templating.py:test_escaping_without_template_filename","tests/test_blueprints.py:index","tests/test_blueprints.py:test_templates_and_static","tests/test_signals.py:index"
+        ],
+        "codewebExtra": [
+          "tests/type_check/typing_route.py:hello_generator"
+        ]
+      },
+      "notes": "render_template_string is a DIFFERENT symbol and is excluded throughout. codewebExtra: typing_route.py:hello_generator is a PHANTOM (the function, L50-56, only yields f-strings via a nested show(); the real call at L88 belongs to return_template, which codeweb ALSO lists). codewebMissedReal: (a) the src/flask/__init__.py public re-export `from .templating import render_template as render_template`; (b) every module-level `from flask import render_template` import site (codeweb emits ZERO import-kind edges here); (c) the in-file pytest call sites in test_templating.py / test_blueprints.py / test_signals.py — these files ARE indexed by the graph but their render_template calls were not extracted (an attribution gap, not pure coverage). Dedupe note: test_templating.py and test_blueprints.py each contain MANY nested view fns named `index`, all collapsing to one `<file>:index` id per file under set semantics."
+    }
+  }
+}
