@@ -12,13 +12,21 @@
 //
 // Launch:  Workflow({scriptPath: ".../efficiency-pilot.workflow.js"})
 //          Workflow({scriptPath: "...", args: {tasks: [ ...override ]}})
+// Lever #1 (engine-frozen reps for a defensible claim) — read efficiency-pilot.truth.json and pass it
+// in (the workflow sandbox has no fs), then ask for N reps:
+//          Workflow({scriptPath: "...", args: {truth: <parsed truth.json>, reps: 5}})
+//   - args.truth present  -> SKIP the per-run oracle (4 fewer agents/rep); grade vs the frozen set.
+//   - args.reps = N       -> N engine-frozen reps; returns headline = mean +/- SD of the per-rep
+//                            paired delta (treatment - control) for recall / precision / steps.
+//   The paired delta cancels the per-run shared truth; steps are oracle-free. A real engine win is a
+//   delta-shift exceeding the frozen-engine SD reported here.
 
 export const meta = {
   name: 'codeweb-efficiency-pilot',
-  description: 'Pilot: does codeweb improve a frontier agent on high-fan-out caller-discovery — recall (effectiveness) + steps (efficiency) vs grep-only',
+  description: 'Pilot: does codeweb improve a frontier agent on high-fan-out caller-discovery — recall (effectiveness) + steps (efficiency) vs grep-only. Supports frozen truth (args.truth) + engine-frozen reps (args.reps) for a paired-delta noise floor.',
   phases: [
-    { title: 'Oracle', detail: 'per task: reconcile codeweb + independent grep into a confirmed ground-truth caller set' },
-    { title: 'Discover', detail: 'control (grep only) vs treatment (codeweb) each find the caller set; graded on recall + steps' },
+    { title: 'Oracle', detail: 'per task: reconcile codeweb + independent grep into a confirmed ground-truth caller set (SKIPPED when args.truth is supplied)' },
+    { title: 'Discover', detail: 'control (grep only) vs treatment (codeweb) each find the caller set; graded on recall + steps; paired delta per rep' },
   ],
 }
 
@@ -110,7 +118,13 @@ Report ${ID_FMT} (query --callers already returns this format). Log every action
 // ---- grading (pure JS) ------------------------------------------------------------------------
 const norm = (s) => String(s).trim().toLowerCase().replace(/\\/g, '/').replace(/^\.\//, '')
 const r2 = (x) => (x == null ? null : Math.round(x * 100) / 100)
-const avg = (xs) => { const v = xs.filter((x) => typeof x === 'number'); return v.length ? r2(v.reduce((a, b) => a + b, 0) / v.length) : null }
+const r3 = (x) => (x == null ? null : Math.round(x * 1000) / 1000)
+const nums = (xs) => xs.filter((x) => typeof x === 'number')
+const avg = (xs) => { const v = nums(xs); return v.length ? r2(v.reduce((a, b) => a + b, 0) / v.length) : null }
+const mean_ = (xs) => { const v = nums(xs); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null }
+// sample SD (n-1); null for n<2. The point of engine-frozen reps is to estimate this spread.
+const sd_ = (xs) => { const v = nums(xs); if (v.length < 2) return null; const m = mean_(v); return Math.sqrt(v.reduce((a, b) => a + (b - m) ** 2, 0) / (v.length - 1)) }
+const stat = (xs) => ({ mean: r3(mean_(xs)), sd: r3(sd_(xs)), n: nums(xs).length })
 
 function score(found, truth) {
   const T = new Set((truth || []).map(norm))
@@ -126,46 +140,125 @@ function score(found, truth) {
   }
 }
 
-// ---- run --------------------------------------------------------------------------------------
-phase('Oracle')
-log(`efficiency pilot: ${TASKS.length} high-fan-out targets · control(grep) vs treatment(codeweb) · graded on recall + steps`)
+// ---- frozen truth + reps ----------------------------------------------------------------------
+// FROZEN TRUTH (lever #1): pass a hand-verified, committed truth set via args.truth to remove the
+// per-run oracle re-reconciliation that made cross-run absolutes incomparable (grep recall swung
+// 0.79->0.50 between runs). When frozen truth is present we SKIP the oracle agent entirely (4 fewer
+// agents/rep) and grade both arms against the stable set. args.truth may be the truth-file object
+// ({ targets: { <taskId>: { truth: [...] } } }) or a plain { <taskId>: [...] } map. The workflow
+// sandbox has no fs, so the CALLER reads efficiency-pilot.truth.json and passes it in as args.truth.
+const TRUTH = (args && args.truth) || null
+const truthFor = (taskId) => {
+  if (!TRUTH) return null
+  const node = (TRUTH.targets && TRUTH.targets[taskId]) || TRUTH[taskId]
+  if (!node) return null
+  return Array.isArray(node) ? node : (Array.isArray(node.truth) ? node.truth : null)
+}
+// REPS (lever #1): run R engine-frozen reps to estimate the noise floor of the agent-driven measure.
+// Report mean(paired delta) +/- SD(paired delta); a real engine win is a delta-shift exceeding SD.
+const REPS = Math.max(1, Math.floor((args && args.reps) || 1))
 
-const perTask = await parallel(TASKS.map((t) => async () => {
-  const [oracle, control, treatment] = await parallel([
-    () => agent(oraclePrompt(t), { label: `oracle:${t.id}`, phase: 'Oracle', schema: ORACLE_SCHEMA, agentType: 'general-purpose' }),
-    () => agent(controlPrompt(t), { label: `control:${t.id}`, phase: 'Discover', schema: ARM_SCHEMA, agentType: 'general-purpose' }),
-    () => agent(treatmentPrompt(t), { label: `treat:${t.id}`, phase: 'Discover', schema: ARM_SCHEMA, agentType: 'general-purpose' }),
-  ])
-  if (!oracle) return { task: t.id, repo: t.repo, symbol: t.symbol, error: 'no-oracle' }
-  const truth = oracle.confirmedTruth || []
+const oracleSummary = (oracle) => ({
+  confirmedTruth: oracle.confirmedTruth || [],
+  codewebN: (oracle.codewebCallers || []).length,
+  manualN: (oracle.manualCallers || []).length,
+  codewebMissedReal: (oracle.discrepancies || []).filter((d) => d.verdict === 'codeweb-missed-real').length,
+  manualMissedCodewebCaught: (oracle.discrepancies || []).filter((d) => d.verdict === 'manual-missed-codeweb-caught').length,
+  codewebFalsePositives: (oracle.discrepancies || []).filter((d) => d.verdict === 'codeweb-false-positive').length,
+  discrepancies: oracle.discrepancies || [],
+})
+
+// One task within one rep: optional oracle (skipped if frozen) + control + treatment, scored + paired delta.
+async function runTask(t, rep) {
+  const frozen = truthFor(t.id)
+  const tag = REPS > 1 ? `#${rep}` : ''
+  const armThunks = [
+    () => agent(controlPrompt(t), { label: `control:${t.id}${tag}`, phase: 'Discover', schema: ARM_SCHEMA, agentType: 'general-purpose' }),
+    () => agent(treatmentPrompt(t), { label: `treat:${t.id}${tag}`, phase: 'Discover', schema: ARM_SCHEMA, agentType: 'general-purpose' }),
+  ]
+  const oracleThunk = frozen ? null : () => agent(oraclePrompt(t), { label: `oracle:${t.id}${tag}`, phase: 'Oracle', schema: ORACLE_SCHEMA, agentType: 'general-purpose' })
+  const res = await parallel(oracleThunk ? [oracleThunk, ...armThunks] : armThunks)
+  const [oracle, control, treatment] = oracleThunk ? res : [null, ...res]
+  if (!frozen && !oracle) return { task: t.id, repo: t.repo, symbol: t.symbol, rep, error: 'no-oracle' }
+  const truth = frozen || (oracle && oracle.confirmedTruth) || []
+  const cs = control ? score(control.foundCallers, truth) : null
+  const ts = treatment ? score(treatment.foundCallers, truth) : null
+  // PAIRED delta (treatment - control): cancels the per-rep shared truth, so it is far more stable
+  // across reps than either absolute. Steps delta is oracle-independent (a count of agent actions).
+  const delta = (cs && ts) ? {
+    recall: (cs.recall != null && ts.recall != null) ? r2(ts.recall - cs.recall) : null,
+    precision: (cs.precision != null && ts.precision != null) ? r2(ts.precision - cs.precision) : null,
+    steps: (control.stepCount != null && treatment.stepCount != null) ? treatment.stepCount - control.stepCount : null,
+  } : null
   return {
-    task: t.id, repo: t.repo, symbol: t.symbol, kind: t.kind, note: t.note,
-    truthN: truth.length,
-    oracle: {
-      confirmedTruth: truth,
-      codewebN: (oracle.codewebCallers || []).length,
-      manualN: (oracle.manualCallers || []).length,
-      codewebMissedReal: (oracle.discrepancies || []).filter((d) => d.verdict === 'codeweb-missed-real').length,
-      manualMissedCodewebCaught: (oracle.discrepancies || []).filter((d) => d.verdict === 'manual-missed-codeweb-caught').length,
-      codewebFalsePositives: (oracle.discrepancies || []).filter((d) => d.verdict === 'codeweb-false-positive').length,
-      discrepancies: oracle.discrepancies || [],
-    },
-    control: control ? { ...score(control.foundCallers, truth), steps: control.stepCount, usedCodeweb: control.usedCodeweb, commands: control.commands } : null,
-    treatment: treatment ? { ...score(treatment.foundCallers, truth), steps: treatment.stepCount, usedCodeweb: treatment.usedCodeweb, commands: treatment.commands } : null,
+    task: t.id, repo: t.repo, symbol: t.symbol, kind: t.kind, note: t.note, rep,
+    truthN: truth.length, frozenTruth: !!frozen,
+    oracle: frozen ? { frozen: true } : (oracle ? oracleSummary(oracle) : null),
+    control: control ? { ...cs, steps: control.stepCount, usedCodeweb: control.usedCodeweb, foundCallers: control.foundCallers, commands: control.commands } : null,
+    treatment: treatment ? { ...ts, steps: treatment.stepCount, usedCodeweb: treatment.usedCodeweb, foundCallers: treatment.foundCallers, commands: treatment.commands } : null,
+    delta,
   }
-}))
+}
 
-const ok = perTask.filter((o) => o && !o.error && o.control && o.treatment)
+// ---- run --------------------------------------------------------------------------------------
+if (!TRUTH) phase('Oracle')
+log(`efficiency pilot: ${TASKS.length} targets x ${REPS} rep(s) · control(grep) vs treatment(codeweb) · ${TRUTH ? 'FROZEN truth (oracle skipped)' : 'per-run oracle'} · graded on recall + steps`)
+
+// reps x tasks; reps run concurrently (the workflow's own concurrency cap pipelines the agents).
+const repResults = await parallel(
+  Array.from({ length: REPS }, (_, r) => () => parallel(TASKS.map((t) => () => runTask(t, r + 1)))),
+)
+const allRows = repResults.flat().filter(Boolean)
+const ok = allRows.filter((o) => o && !o.error && o.control && o.treatment)
+
+// per-arm absolute means (context only — NOT comparable across runs when truth re-reconciles)
 const means = {
   control: { recall: avg(ok.map((o) => o.control.recall)), precision: avg(ok.map((o) => o.control.precision)), steps: avg(ok.map((o) => o.control.steps)) },
   treatment: { recall: avg(ok.map((o) => o.treatment.recall)), precision: avg(ok.map((o) => o.treatment.precision)), steps: avg(ok.map((o) => o.treatment.steps)) },
 }
-// validity: did control honor the no-codeweb rule, and did treatment actually use codeweb?
-const integrity = {
-  controlUsedCodewebViolations: ok.filter((o) => o.control.usedCodeweb).map((o) => o.task),
-  treatmentSkippedCodeweb: ok.filter((o) => !o.treatment.usedCodeweb).map((o) => o.task),
+
+// per-task aggregate across reps: arm absolutes + paired delta, each as mean +/- SD
+const perTaskAgg = TASKS.map((t) => {
+  const rows = ok.filter((o) => o.task === t.id)
+  if (!rows.length) return { task: t.id, repo: t.repo, symbol: t.symbol, reps: 0, error: 'no-graded-reps' }
+  return {
+    task: t.id, repo: t.repo, symbol: t.symbol, kind: t.kind, truthN: rows[0].truthN, reps: rows.length,
+    control: { recall: stat(rows.map((r) => r.control.recall)), precision: stat(rows.map((r) => r.control.precision)), steps: stat(rows.map((r) => r.control.steps)) },
+    treatment: { recall: stat(rows.map((r) => r.treatment.recall)), precision: stat(rows.map((r) => r.treatment.precision)), steps: stat(rows.map((r) => r.treatment.steps)) },
+    delta: { recall: stat(rows.map((r) => r.delta.recall)), precision: stat(rows.map((r) => r.delta.precision)), steps: stat(rows.map((r) => r.delta.steps)) },
+  }
+})
+
+// per-rep mean-over-tasks paired delta -> R numbers whose mean +/- SD IS the noise-floor headline
+const perRepMeanDelta = Array.from({ length: REPS }, (_, r) => {
+  const rows = ok.filter((o) => o.rep === r + 1)
+  return {
+    rep: r + 1, tasksGraded: rows.length,
+    deltaRecall: avg(rows.map((o) => o.delta.recall)),
+    deltaPrecision: avg(rows.map((o) => o.delta.precision)),
+    deltaSteps: avg(rows.map((o) => o.delta.steps)),
+    controlRecall: avg(rows.map((o) => o.control.recall)),
+    treatmentRecall: avg(rows.map((o) => o.treatment.recall)),
+  }
+})
+const headline = {
+  reps: REPS,
+  pairedDeltaRecall: stat(perRepMeanDelta.map((x) => x.deltaRecall)),
+  pairedDeltaPrecision: stat(perRepMeanDelta.map((x) => x.deltaPrecision)),
+  pairedDeltaSteps: stat(perRepMeanDelta.map((x) => x.deltaSteps)),
 }
 
-log(`graded ${ok.length}/${TASKS.length} tasks · control recall ${means.control.recall} @ ${means.control.steps} steps · treatment recall ${means.treatment.recall} @ ${means.treatment.steps} steps`)
+// validity: did control honor the no-codeweb rule, and did treatment actually use codeweb?
+const integrity = {
+  controlUsedCodewebViolations: [...new Set(ok.filter((o) => o.control.usedCodeweb).map((o) => `${o.task}#${o.rep}`))],
+  treatmentSkippedCodeweb: [...new Set(ok.filter((o) => !o.treatment.usedCodeweb).map((o) => `${o.task}#${o.rep}`))],
+}
 
-return { config: { tasks: TASKS.map((t) => t.id), repos: [...new Set(TASKS.map((t) => t.repo))], frontierBaseModel: true }, means, integrity, perTask }
+const hl = headline.pairedDeltaRecall
+log(`graded ${ok.length}/${TASKS.length * REPS} task-reps · paired delta recall ${hl.mean ?? 'n/a'}${hl.sd != null ? ` +/- ${hl.sd}` : ''} · paired delta steps ${headline.pairedDeltaSteps.mean ?? 'n/a'}${headline.pairedDeltaSteps.sd != null ? ` +/- ${headline.pairedDeltaSteps.sd}` : ''}`)
+
+return {
+  config: { tasks: TASKS.map((t) => t.id), repos: [...new Set(TASKS.map((t) => t.repo))], reps: REPS, frozenTruth: !!TRUTH, frontierBaseModel: true },
+  headline, perTaskAgg, perRepMeanDelta, means, integrity,
+  perRep: repResults,
+}
