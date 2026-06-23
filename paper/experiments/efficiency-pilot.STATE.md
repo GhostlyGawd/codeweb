@@ -90,8 +90,44 @@ the SAME pilot (`run4.json`):
   oracle scores as extras) and `<module>`-only importers / the anonymous default-export fn node
   (xhr.js:dispatchXhrRequest has no symbol node).
 
+## Lever #1 (2026-06-23): frozen truth FROZEN + harness wired + run3/run4 REGRADED
+The freeze-truth blocker is largely cleared. What landed (branch `feat/pilot-frozen-truth`):
+- **`paper/experiments/efficiency-pilot.truth.json`** — hand-verified caller sets for all 4 targets,
+  built by reconciling codeweb `--dependents` against an INDEPENDENT exhaustive grep+read (one thorough
+  pass/target) + adjudication. Truth is independent of codeweb's coverage (a real site in a file the
+  graph dropped — e.g. `merge.test.js` — is still truth, so coverage gaps count honestly). Validated by
+  an invariant `truth == (codewebReturned \ codewebExtra) ∪ codewebMissedReal` + file-existence (caught
+  2 transcription misses). Truth sizes: merge 7 ids/6 files, AxiosError 58/42, AxiosHeaders 40/28,
+  render_template 26/11.
+- **Grading policy (in the truth file):** FILE-LEVEL is PRIMARY (robust to the attribution artifact —
+  codeweb attributes imports/test-callbacks to enclosing fns while truth uses `<file>:<module>`, so
+  symbol-level dings codeweb even when it found the right file). Symbol-level is reported as a stricter,
+  attribution-noisy secondary. Also an INDEXED-SCOPE partition (truth ∩ files the graph indexed) to
+  separate discovery quality from coverage gaps. `external` variant drops def-file self-refs.
+- **Harness now accepts `args.truth` + `args.reps`** (`efficiency-pilot.workflow.js`): with frozen truth
+  the per-run oracle is SKIPPED (8 agents/rep, not 12); reps report the **paired delta (treatment−control)
+  per rep** and the headline = `mean ± SD` of the per-rep paired delta (recall/precision/steps). Covered
+  by `tests/efficiency-pilot-harness.test.mjs` (stubs the runtime, no real agents; suite now **322 green**).
+- **Regrade (`efficiency-pilot.regrade.mjs` → `.regrade.json`, no agents):** reconstructs each historical
+  arm's found-set (`F = (T\missed) ∪ extra`, exact) and rescores run3/run4 against the FROZEN truth so the
+  two runs are finally comparable. Paired delta = treatment(codeweb) − control(grep):
+
+  | run  | file-lvl indexed ΔR | file-lvl full ΔR | steps Δ | symbol indexed ΔR |
+  |------|---------------------|------------------|---------|-------------------|
+  | run3 | **+0.09** (.84/.75) | −0.01 (.68/.69)  | −4.25   | +0.17             |
+  | run4 | **+0.20** (.90/.70) | +0.13 (.73/.61)  | −8.25   | +0.31             |
+
+  Paired delta is POSITIVE for codeweb in 9/10 lenses (lone exception: run3 file-full −0.01, a tie); the
+  step win is large + oracle-independent; run4 > run3 on every lens. BUT the engine CHANGED between run3
+  and run4, so that gap still conflates noise + real effect — hence the reps below.
+- **REMAINING sub-step (needs user opt-in — multi-agent, ~0.6M tok/rep):** run N engine-frozen reps at
+  the current `main` engine to get `mean(delta) ± SD(delta)`. The SD is the noise floor; an engine change
+  whose delta-shift exceeds it is a real win. See "How to re-run".
+
 ## Git state
-- Branch: `feat/efficiency-pilot`, now **9 commits ahead** of `origin/main` (`48ad354`):
+- Branch: `feat/pilot-frozen-truth` (off `origin/main` `1cfb4f5`), carrying the lever-#1 work + the folded
+  post-merge STATE commit (`a5b45e8`, cherry-picked as `dfd9f96`). PR-ready; not yet pushed.
+- Prior branch: `feat/efficiency-pilot`, **9 commits ahead** of the old `origin/main` (`48ad354`):
   - `3693d69` test(pilot): harness · `670d9d8` feat: member-access + `--dependents`
   - `aee5619` fix: coarse module-import edges off the anchor → `<module>` (merge `--dependents` 35→7)
   - `73ea164` feat: Python import resolution (flask import edges 0→84)
@@ -109,8 +145,13 @@ the SAME pilot (`run4.json`):
   committed. (This STATE update is a post-merge doc follow-up on the branch — fold into the next PR.)
 
 ## Key files
-- Harness: `paper/experiments/efficiency-pilot.workflow.js` (Workflow script; 4 targets, oracle +
-  control + treatment per target).
+- Harness: `paper/experiments/efficiency-pilot.workflow.js` (Workflow script; 4 targets; control +
+  treatment per target; oracle SKIPPED when `args.truth` supplied; `args.reps` → paired-delta mean±SD).
+- **Frozen truth: `paper/experiments/efficiency-pilot.truth.json`** (lever #1; hand-verified, validated).
+- **Regrade: `paper/experiments/efficiency-pilot.regrade.mjs`** → `efficiency-pilot.regrade.json`
+  (deterministic; rescores committed runs vs frozen truth; symbol/file × full/indexed/external lenses).
+- **Harness test: `tests/efficiency-pilot-harness.test.mjs`** (stubs runtime, validates oracle-skip +
+  rep loop + mean±SD aggregation without real agents).
 - Engine fix: `scripts/extract-symbols.mjs` (import bindings + member-access), `scripts/lib/graph-ops.mjs`
   (`dependentsOf`, `importIn`), `scripts/query.mjs` (`--dependents`).
 - Test: `tests/import-member-edges.test.mjs`.
@@ -119,12 +160,20 @@ the SAME pilot (`run4.json`):
 - Rebuild pilot graphs (after any extractor change):
   `node scripts/run.mjs paper/corpus/axios --out-dir .codeweb/pilot/axios`
   `node scripts/run.mjs paper/corpus/flask --out-dir .codeweb/pilot/flask`
-- Re-run the agent pilot (multi-agent — needs user opt-in / "ultracode" or explicit ask):
-  `Workflow({scriptPath: "D:/GitHub Projects/ecc-test/codeweb/paper/experiments/efficiency-pilot.workflow.js"})`
-  (~12 agents, ~15 min, ~0.9M tokens/run; returns means + perTask recall/precision/steps.)
+- **Engine-frozen reps (lever #1; multi-agent — needs user opt-in / "ultracode" or explicit ask):** the
+  CALLER reads the truth file (the workflow sandbox has no fs) and passes it in as `args.truth`, plus N reps:
+  ```js
+  const truth = JSON.parse(readFileSync(".../efficiency-pilot.truth.json","utf8"))
+  Workflow({scriptPath: ".../efficiency-pilot.workflow.js", args: {truth, reps: 5}})
+  ```
+  Oracle skipped → ~8 agents/rep (~0.6M tok/rep, ~12 min); returns `headline` = mean±SD of the per-rep
+  paired delta, `perTaskAgg`, `perRepMeanDelta`. Stamp runDate/runId after it returns. Suggested N≥5.
+- Re-run the FULL pilot WITH a fresh oracle (legacy, no frozen truth): omit `args.truth`
+  (`Workflow({scriptPath: "...workflow.js"})`) — ~12 agents/run; for comparison only.
+- Regrade committed runs vs frozen truth (no agents): `node paper/experiments/efficiency-pilot.regrade.mjs`.
 - Quick deterministic tool check (no agents):
   `node scripts/query.mjs .codeweb/pilot/axios/graph.json --dependents lib/utils.js:merge --json`
-- Full suite: `npm test` (expect 320 green).
+- Full suite: `npm test` (expect **322 green**).
 
 ## Next levers (prioritized — pick up here, post run 4)
 DONE: barrel-anchor precision (`aee5619`), Python imports (`73ea164`), docstring masking (`4c09a92`),
@@ -132,10 +181,12 @@ default-export attribution (`cb325f4`), class-usage `ref` edges (`dcc3e42`, the 
 `.call()/.apply()` chains (`e662e5f`, the merge gap), object-alias anchor pollution (`c892f50`). Run 4
 = codeweb wins all axes. Remaining, in priority:
 
-1. **FREEZE a hand-verified truth set** per target (THE blocker for a defensible claim). The oracle
-   re-reconciles each run → grep recall swung 0.79→0.50 across runs; only within-run + the step win are
-   trustworthy. Hand-curate truth for the 4 targets (+ new ones), commit it, regrade run3/run4 against
-   the FROZEN set, and make the harness accept `--truth frozen.json` instead of re-dereconciling.
+1. **FREEZE a hand-verified truth set** — ✅ DONE (see "Lever #1" section above): `truth.json` committed +
+   validated, harness takes `args.truth`/`args.reps`, run3/run4 regraded (paired delta +0.09→+0.20 file-
+   indexed, step win −4.25→−8.25). **Only the engine-frozen REPS remain** (multi-agent; needs opt-in) to
+   get `mean(delta) ± SD(delta)` and pin the noise floor. NOTE the truth is STRICTER than the old per-run
+   oracles (it includes the import/test/smoke sites codeweb misses), so frozen ABSOLUTE recalls are lower
+   than run4's oracle reported — the POSITIVE PAIRED DELTA across lenses is the trustworthy signal.
    - **On the swing as a metric (design note):** the run-to-run swing is oracle *measurement noise*
      shared by both arms, not a codeweb-vs-grep quantity — record it as a test-retest RELIABILITY caveat
      (limitations section), not a head-to-head metric. Track the **paired delta** (treatment−control) per
