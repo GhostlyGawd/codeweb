@@ -317,16 +317,17 @@ for (const f of files) {
   // Namespace (`import * as X`) / default (`import X from` / `const X = require`): X is the imported
   // MODULE OBJECT. Record X -> target file so `X.member(...)` resolves to target:member in
   // deriveFileEdges; for a default import also alias X -> the target's default export (≈ anchor) so
-  // `new X()` / `X()` resolve. The coarse file-anchor import edge is preserved either way.
+  // `new X()` / `X()` resolve. The COARSE "imports this module" edge lands on the target's <module>
+  // node (created on demand below), NOT on its anchor symbol — member-access now produces the precise
+  // per-symbol edges, so attributing the coarse edge to one symbol only pollutes its dependents.
   const addModuleBinding = (local, spec, isDefault) => {
     const t = resolveImport(f, spec); if (!t) return;
     if (local) nsmap.set(local, t);
     const tA = anchorId(t);
-    if (!tA) return;
-    if (isDefault && local && !amap.has(local) && aId !== tA) amap.set(local, tA);
-    if (aId && aId !== tA) importEdges.push([aId, tA]);
+    if (isDefault && local && tA && !amap.has(local) && aId !== tA) amap.set(local, tA);
+    if (aId) importEdges.push([aId, t + ':<module>']);
   };
-  const addSide = (spec) => { const t = resolveImport(f, spec); if (!t) return; const tA = anchorId(t); if (aId && tA && aId !== tA) importEdges.push([aId, tA]); };
+  const addSide = (spec) => { const t = resolveImport(f, spec); if (!t) return; if (aId) importEdges.push([aId, t + ':<module>']); };
   while ((m = reqNamed.exec(text))) addNamed(m[1], m[2]);
   while ((m = esNamed.exec(text))) addNamed(m[1], m[2]);
   while ((m = reqDefault.exec(text))) addModuleBinding(m[1], m[2], true);
@@ -464,7 +465,16 @@ if (newCache) newCache.symbolSig = symbolSig;
 // cross-file collisions and matches the original single-edgeSet behaviour exactly.
 let importEdgeCount = 0;
 const edgeKeys = new Set(edges.map((e) => e.from + ' ' + e.to));
+// A coarse module-import edge (namespace/default/side) targets the imported file's <module> node,
+// created on demand here so a symbol-less barrel still gets a node. This keeps the file-level "imports
+// this module" signal (fileCycles/coupling unchanged — same file-pair) without polluting a symbol.
+const ensureModuleNode = (id) => {
+  if (nodeIdSet.has(id)) return;
+  nodes.push({ id, label: '<module>', kind: 'module', file: idFile(id), line: 1, loc: 1, exports: false, domain: '', summary: '' });
+  nodeIdSet.add(id);
+};
 for (const [a, b] of importEdges) {
+  if (b.endsWith(':<module>')) ensureModuleNode(b);
   if (!nodeIdSet.has(a) || !nodeIdSet.has(b) || a === b) continue;
   const key = a + ' ' + b;
   if (edgeKeys.has(key)) continue;
