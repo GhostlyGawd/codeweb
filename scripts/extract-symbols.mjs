@@ -19,6 +19,7 @@ import { createHash } from 'node:crypto';
 import { relative, resolve, join, dirname, extname } from 'node:path';
 import { isTestFile } from './lib/graph-ops.mjs'; // F4: test-file predicate (shared, one truth)
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
+import { loadTsEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tier: exact cyclomatic (opt-in)
 
 // F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
 // v2: nodes carry complexity/maxDepth (F4) + the cache holds per-file edge lists + a symbol signature (F9).
@@ -32,7 +33,7 @@ const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
 
 const argv = process.argv.slice(2);
-const opts = { path: null, out: null, ctags: true, target: null, cache: null, full: false };
+const opts = { path: null, out: null, ctags: true, target: null, cache: null, full: false, engine: process.env.CODEWEB_ENGINE || null };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--out') opts.out = argv[++i];
@@ -40,6 +41,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--cache') opts.cache = argv[++i]; // F0: per-file scan cache (incremental freshness)
   else if (t === '--full') opts.full = true;        // F9: ignore the edge cache, derive all edges from scratch
   else if (t === '--no-ctags') opts.ctags = false;
+  else if (t === '--engine') opts.engine = argv[++i]; // optional tree-sitter tier (exact cyclomatic); default regex
   else if (!opts.path) opts.path = t;
 }
 if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--no-ctags]'); process.exit(1); }
@@ -274,6 +276,15 @@ const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, fi
 let scanCount = 0;
 const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)) || scanSymbols(f, text); };
 
+// Optional tree-sitter engine (exact cyclomatic for JS/TS). Opt-in via `--engine tree-sitter` or
+// CODEWEB_ENGINE=tree-sitter. web-tree-sitter is an optionalDependency — if it or the vendored grammar
+// is unavailable, loadTsEngine() returns null and complexity falls back to the regex F4 per-file.
+let tsEngine = null;
+if (opts.engine === 'tree-sitter' || opts.engine === 'ts') {
+  tsEngine = await loadTsEngine();
+  if (!tsEngine) console.error('[extract] --engine tree-sitter requested but web-tree-sitter/grammar unavailable; falling back to regex F4');
+}
+
 // ---- build nodes per file, with line ranges ----
 const nodes = [];
 const fileSyms = new Map(); // file -> {text, ranges:[{id,name,start,end,kind}]}
@@ -310,7 +321,11 @@ for (const f of files) {
       // Only function/method nodes carry these (a class/module has no single control-flow body).
       const body = lines.slice(start - 1, start - 1 + loc).join('\n');
       const lang = isPy ? 'py' : 'js';
-      node.complexity = cyclomatic(body, lang);
+      // Exact McCabe via tree-sitter for JS/TS when the engine is active (TS grammar is a JS superset
+      // for control-flow counting); otherwise the regex F4 approximation. maxDepth stays regex F4 —
+      // exact nesting is a later increment. Rust/Go/Python always use regex (no TS grammar match).
+      const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
+      node.complexity = (tsEngine && isJsTs) ? tsEngine.cyclomaticExact(body) : cyclomatic(body, lang);
       node.maxDepth = nestingDepth(body, lang);
     }
     nodes.push(node);
@@ -649,7 +664,13 @@ const targetLabel = opts.target || rootFwd.split('/').slice(-2).join('/') || roo
 const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
 const languages = [...new Set(files.map(langOf))].sort();
 const fragment = {
-  meta: { root: rootFwd, target: targetLabel, engine: useCtags ? 'ctags' : 'regex', languages, symbols: nodes.length },
+  meta: {
+    root: rootFwd, target: targetLabel, engine: useCtags ? 'ctags' : 'regex',
+    // additive: only present when the opt-in tree-sitter tier actually computed complexity, so the
+    // default (regex) output is byte-identical to before. Pins the grammar version for determinism.
+    ...(tsEngine ? { complexityEngine: tsEngine.version } : {}),
+    languages, symbols: nodes.length,
+  },
   nodes, edges,
 };
 if (newCache) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
