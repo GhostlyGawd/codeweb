@@ -29,16 +29,54 @@ control(grep) vs treatment(codeweb), frontier agents, deterministic recall + ste
   partial 0.61 in 7 steps vs grep 0.85 in 24; AxiosHeaders 0.41 vs 0.22; render_template (Python)
   0.27 vs 0.31 (lost).
 
-**Bottom line:** bar provisionally MET for JS discovery. codeweb beats grep on recall + steps
+**Bottom line (run 2):** bar provisionally MET for JS discovery. codeweb beats grep on recall + steps
 within-run, with a deterministic mechanism proof.
 
+## Run 3 (2026-06-23): widen-the-margin fixes landed → SPLIT result, margin did NOT widen at the mean
+Four engine commits (precision pollution + Python imports + docstring masking + default-export
+attribution; see "Git state"). Pilot re-run on the rebuilt graphs (`run3.json`):
+
+| target            | truthN | grep recall | **cw recall** | grep prec | **cw prec** | grep steps | **cw steps** |
+|-------------------|--------|-------------|---------------|-----------|-------------|------------|--------------|
+| axios-AxiosError  | 42     | 0.40        | **0.71** ✅   | 0.59      | **0.67**    | 32         | **27**       |
+| flask-render_tmpl | 19     | 0.89        | **0.95** ✅   | 0.89      | **1.00**    | 15         | 16           |
+| axios-merge       | 4      | **1.00** ❌ | 0.50          | 0.67      | 0.33        | 14         | 11           |
+| axios-AxiosHeaders| 13     | **0.85** ❌ | 0.46          | 0.79      | 0.33        | 26         | 16           |
+| **mean**          |        | **0.79**    | 0.66          | **0.74**  | 0.58        | 21.75      | **17.5**     |
+
+- **The two fix targets BOTH flipped to wins.** AxiosError 0.71 (run2 was 0.61) — the default-export
+  refinement put importers back on the class + `--dependents` surfaced the test importers grep missed.
+  render_template **precision 1.00** — docstring masking removed every false caller (helpers.py phantoms
+  gone); recall 0.95 via the clean Python graph + `--tests`/`--dependents`.
+- **The two losses are NAMED gaps the fixes didn't touch:**
+  - **AxiosHeaders** is used via `AxiosHeaders.from(...)` (static method) + `instanceof AxiosHeaders`.
+    codeweb models `.from()` as an edge to the `from` METHOD (not the class) and `instanceof` as NO edge,
+    so `--callers`/`--dependents` of the CLASS miss the real per-function users (codeweb `--callers`
+    returned 2). This is the dominant drag (−0.39 vs grep).
+  - **merge** (n=4, high variance): self-recursion attributed to the innermost closure `assignValue`
+    (truth wanted `merge`); `utils.merge.call(...)` (a `.call()` member chain) unresolved → fetch.factory missed.
+- **Systematic GRADING artifact understates codeweb:** the oracle grades EXACT symbol, but codeweb's
+  attribution (innermost closure / file-anchor / specific test helper) often names a *different valid*
+  symbol than the oracle's `<file>:<function>` or `<file>:<module>` label for the SAME real reference —
+  scoring one correct file-level find as 0 TP + 1 FP + 1 FN. The oracle's own notes repeatedly say "the
+  FILE is correctly identified by codeweb; only the symbol name is mis-attributed." File-level recall
+  would be markedly higher (esp. AxiosError/AxiosHeaders).
+
+**Honest read:** the targeted fixes WORKED (both addressed targets now beat grep); the mean fell because
+two *other* gaps (instanceof + static-method-on-class resolution; attribution granularity) dominate, and
+symbol-exact grading penalizes codeweb's valid-but-different attribution. Margin not widened at the mean —
+but the bottleneck is now precisely located.
+
 ## Git state
-- Branch: `feat/efficiency-pilot`, 2 commits ahead of `origin/main` (`48ad354`):
-  - `3693d69` test(pilot): the harness
-  - `670d9d8` feat(engine): the import-alias member-access fix + `--dependents`
-- NOT pushed to origin (local only). NOT PR'd to main.
-- Working tree: clean except untracked `.cwpilot/` scratch (safe to delete) and gitignored
-  `.codeweb/pilot/` (prebuilt pilot graphs — keep; or rebuild, see below).
+- Branch: `feat/efficiency-pilot`, now **6 commits ahead** of `origin/main` (`48ad354`):
+  - `3693d69` test(pilot): the harness · `670d9d8` feat(engine): member-access + `--dependents`
+  - `aee5619` fix: coarse module-import edges off the anchor symbol (merge `--dependents` 35→7)
+  - `73ea164` feat: Python import resolution (flask import edges 0→84)
+  - `4c09a92` fix: mask Python docstrings/comments (flask −36 phantom symbols, −34 fabricated edges)
+  - `cb325f4` fix: default-import edges → single-symbol default export (AxiosError importers recovered)
+- NOT pushed to origin (local only). NOT PR'd to main. Suite **310 green**. All four engine fixes carry a
+  deterministic proof + TDD test; re-extraction byte-identical; full-pipeline nodes+edges identical 2×.
+- Working tree: clean except gitignored `.codeweb/` (rebuilt pilot graphs + scratch). `run3.json` committed.
 
 ## Key files
 - Harness: `paper/experiments/efficiency-pilot.workflow.js` (Workflow script; 4 targets, oracle +
@@ -58,22 +96,32 @@ within-run, with a deterministic mechanism proof.
   `node scripts/query.mjs .codeweb/pilot/axios/graph.json --dependents lib/utils.js:merge --json`
 - Full suite: `npm test` (expect 291 green).
 
-## Next levers (prioritized — pick up here)
-1. **Widen the margin (engine):**
-   - `--dependents` PRECISION pollution on barrel-export anchors: a namespace import (`import utils
-     from './utils.js'`) emits a file-anchor import edge, so `merge` (utils.js's anchor) collects a
-     false dep from every utils-importer (e.g. `toFormData`). Fix: redirect namespace/default import
-     edges off the anchor SYMBOL (e.g. to the target file's `<module>` node) now that member-access
-     creates precise edges. Watch fileCycles/coupling + determinism; suite-gate.
-   - **Python import resolution** is unwired (extractor import regexes are JS/TS only) — `from X import
-     Y` / `import X` + `X.member()`. This is why `render_template` lagged. Add a Python import pass.
-   - `AxiosError` still misses ~16 import/re-export deps — re-export following + attribution.
-2. **Make it rigorous (study):** the LLM oracle re-reconciles ground truth each run (merge truth was
-   7 then 5; AxiosError 76 then 33) → cross-run absolute recall is noisy; within-run control-vs-
-   treatment is valid. **FREEZE a hand-verified truth set** per target, then scale N (more targets,
-   more repos incl. a 2nd language, reps) for the end-to-end Theme-5b study + paper section.
-3. **Ship it:** PR `feat/efficiency-pilot` to `main` (engine fix is suite-green and net-positive).
-   Repo PR convention = merge commits, no attribution trailer.
+## Next levers (prioritized — pick up here, post run 3)
+DONE in run 3: barrel-anchor precision (`aee5619`), Python imports (`73ea164`), docstring masking
+(`4c09a92`), default-export attribution (`cb325f4`). Run 3 located the NEW bottleneck:
+
+1. **Class-usage resolution (the AxiosHeaders gap — biggest single drag, −0.39):** a class consumed via
+   `X.from(...)` / `X.staticMethod(...)` and `obj instanceof X` is a real dependent of X-the-class, but
+   codeweb routes `.from()` to the `from` METHOD and emits NO edge for `instanceof`. So `--callers`/
+   `--dependents` of the class miss those users. Options: (a) emit a dependency edge to the CLASS for
+   `instanceof X` and `new X`/`X.static()` (already have the nsAlias binding); (b) have `--dependents
+   <class>` union callers of the class's own static methods. Decide the SEMANTICS (does `instanceof`
+   count?) before coding. Precision-gate against the suite.
+2. **`.call()`/`.apply()` + member-chain resolution (the merge gap):** `utils.merge.call(...)` and
+   `a.b.c()` chains don't resolve (member resolver only handles single-alias `.member()`). Lower value
+   (n=4 target), but a real recall hole.
+3. **Attribution granularity / grading methodology:** symbol-exact grading penalizes codeweb when it
+   names the innermost closure (`assignValue`) or file anchor instead of the oracle's chosen
+   `<file>:<function>`/`<file>:<module>` — SAME real reference, different valid label. Either (a) grade
+   FILE-level (or symbol-OR-module credit) to measure true dependency-finding, or (b) align codeweb's
+   attribution to "nearest enclosing NAMED function" + always surface the file `<module>` node. This is
+   the cleanest way to show codeweb's real signal; the engine work above is the way to raise it.
+4. **Make it rigorous (study):** the LLM oracle re-reconciles truth each run (merge 4 this run, 5/7
+   before; AxiosError 42 vs 33/76) → cross-run absolute recall noisy; within-run control-vs-treatment is
+   valid. **FREEZE a hand-verified truth set** per target, then scale N (targets/repos/reps) for Theme-5b.
+5. **Ship it:** PR `feat/efficiency-pilot` to `main` — the 4 engine fixes are suite-green, deterministic,
+   net-positive on their targets (AxiosError/render_template now beat grep). Repo PR convention = merge
+   commits, no attribution trailer. Mean-margin not yet won, but the engine is strictly more correct.
 
 ## Conventions (this repo)
 - Strict TDD (tests spawn the real CLI against fixtures). Commit conventional, NO attribution trailer.
