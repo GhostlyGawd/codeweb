@@ -83,6 +83,18 @@ test('frozen truth (args.truth) SKIPS the oracle and runs reps with a paired-del
   assert.equal(result.integrity.treatmentSkippedCodeweb.length, 0)
 })
 
+test('args delivered as a JSON STRING is parsed (regression: must not silently fall back to the oracle)', async () => {
+  // The Workflow runtime can hand the script `args` as a JSON string, not an object. If the script
+  // reads args.truth/args.reps off the raw string they are undefined -> oracle path at reps=1 (the
+  // cause of a wasted run). The script must normalize string args first.
+  const REPS = 2
+  const { result, oracleSpawns } = await runHarness({ args: JSON.stringify({ truth: TRUTH, reps: REPS }), cannedArm })
+  assert.equal(oracleSpawns, 0, 'string args.truth must still SKIP the oracle')
+  assert.equal(result.config.frozenTruth, true, 'string args must be parsed so frozen truth is used')
+  assert.equal(result.config.reps, REPS, 'string args.reps must be honored')
+  assert.equal(result.perRep.length, REPS)
+})
+
 test('without args.truth the per-run oracle IS spawned (backward compatible)', async () => {
   // oracle returns a real confirmed set so the legacy grading path produces valid scores
   const oracle = (label) => {

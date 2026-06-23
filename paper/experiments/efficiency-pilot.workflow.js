@@ -33,9 +33,16 @@ export const meta = {
 const ROOT = 'D:/GitHub Projects/ecc-test/codeweb'
 const GRAPHS = `${ROOT}/.codeweb/pilot` // pre-built graphs (steady-state: codeweb already set up)
 
+// The Workflow runtime may deliver `args` as a JSON STRING (not the parsed object). Normalize once
+// so args.truth / args.reps / args.tasks resolve regardless. (Skipping this silently runs the legacy
+// oracle path at reps=1 — the cause of a wasted run.)
+const ARGS = (typeof args === 'string')
+  ? (() => { try { return JSON.parse(args) } catch { return {} } })()
+  : (args || {})
+
 // High-fan-out targets chosen from the actual graphs (incoming call/import degree). These are the
 // cases where a refactor must touch many sites and manual grep is most likely to miss one.
-const TASKS = (args && args.tasks) || [
+const TASKS = (ARGS.tasks) || [
   { id: 'axios-merge', repo: 'axios', symbol: 'merge', symbolId: 'lib/utils.js:merge', file: 'lib/utils.js', kind: 'function', note: 'core util, very common name -> grep-hostile (27 callers in-graph)' },
   { id: 'axios-AxiosError', repo: 'axios', symbol: 'AxiosError', symbolId: 'lib/core/AxiosError.js:AxiosError', file: 'lib/core/AxiosError.js', kind: 'class', note: 'distinctive name -> grep-friendlier (16 in-graph)' },
   { id: 'axios-AxiosHeaders', repo: 'axios', symbol: 'AxiosHeaders', symbolId: 'lib/core/AxiosHeaders.js:AxiosHeaders', file: 'lib/core/AxiosHeaders.js', kind: 'class', note: 'class usage sites (11 in-graph)' },
@@ -147,7 +154,7 @@ function score(found, truth) {
 // agents/rep) and grade both arms against the stable set. args.truth may be the truth-file object
 // ({ targets: { <taskId>: { truth: [...] } } }) or a plain { <taskId>: [...] } map. The workflow
 // sandbox has no fs, so the CALLER reads efficiency-pilot.truth.json and passes it in as args.truth.
-const TRUTH = (args && args.truth) || null
+const TRUTH = ARGS.truth || null
 const truthFor = (taskId) => {
   if (!TRUTH) return null
   const node = (TRUTH.targets && TRUTH.targets[taskId]) || TRUTH[taskId]
@@ -156,7 +163,7 @@ const truthFor = (taskId) => {
 }
 // REPS (lever #1): run R engine-frozen reps to estimate the noise floor of the agent-driven measure.
 // Report mean(paired delta) +/- SD(paired delta); a real engine win is a delta-shift exceeding SD.
-const REPS = Math.max(1, Math.floor((args && args.reps) || 1))
+const REPS = Math.max(1, Math.floor(ARGS.reps || 1))
 
 const oracleSummary = (oracle) => ({
   confirmedTruth: oracle.confirmedTruth || [],
