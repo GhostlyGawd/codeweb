@@ -14,17 +14,17 @@
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { getVersion, mcpToolCount, applySync, bumpVersion, rollChangelog, checkConsistency, read, write } from './release-utils.mjs';
+import { getVersion, mcpToolCount, applySync, bumpVersion, rollChangelog, checkConsistency, readText, writeText } from './release-utils.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const dry = args.includes('--dry-run');
-const level = (args.find((a) => ['--major', '--minor', '--patch'].includes(a)) || '').slice(2);
+const bumpLevel = (args.find((a) => ['--major', '--minor', '--patch'].includes(a)) || '').slice(2);
 const explicit = (args.find((a) => a.startsWith('--version=')) || '').split('=')[1];
 const today = new Date().toISOString().slice(0, 10);
 
 const current = getVersion(ROOT);
-const next = explicit || (level ? bumpVersion(current, level) : null);
+const next = explicit || (bumpLevel ? bumpVersion(current, bumpLevel) : null);
 if (!next) {
   process.stderr.write('usage: release.mjs (--major|--minor|--patch | --version=X.Y.Z) [--dry-run]\n');
   process.exit(2);
@@ -39,7 +39,7 @@ console.log(`codeweb release: ${current} -> ${next}  (${count} MCP tools)${dry ?
 
 if (dry) {
   try {
-    const preview = rollChangelog(read(join(ROOT, 'CHANGELOG.md')), next, today).split('\n').slice(0, 16).join('\n');
+    const preview = rollChangelog(readText(join(ROOT, 'CHANGELOG.md')), next, today).split('\n').slice(0, 16).join('\n');
     console.log('\n--- CHANGELOG preview ---\n' + preview);
   } catch (e) { console.log(`  (changelog: ${e.message})`); }
   console.log('\nDry run — no files changed.');
@@ -47,8 +47,8 @@ if (dry) {
 }
 
 const pkgPath = join(ROOT, 'package.json');
-write(pkgPath, read(pkgPath).replace(/("version":\s*")[^"]+(")/, `$1${next}$2`));
-write(join(ROOT, 'CHANGELOG.md'), rollChangelog(read(join(ROOT, 'CHANGELOG.md')), next, today));
+writeText(pkgPath, readText(pkgPath).replace(/("version":\s*")[^"]+(")/, `$1${next}$2`));
+writeText(join(ROOT, 'CHANGELOG.md'), rollChangelog(readText(join(ROOT, 'CHANGELOG.md')), next, today));
 const changed = applySync(ROOT, next, count);
 execFileSync(process.execPath, [join(ROOT, 'site', 'build.mjs')], { stdio: 'inherit' });
 

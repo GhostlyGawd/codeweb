@@ -11,23 +11,23 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-export const read = (p) => readFileSync(p, 'utf8');
-export const write = (p, s) => writeFileSync(p, s);
+export const readText = (p) => readFileSync(p, 'utf8');
+export const writeText = (p, s) => writeFileSync(p, s);
 
 /** Canonical version (from package.json). */
 export function getVersion(root) {
-  return JSON.parse(read(join(root, 'package.json'))).version;
+  return JSON.parse(readText(join(root, 'package.json'))).version;
 }
 
 /** Count the MCP tools at the source: the TOOLS table in scripts/mcp-server.mjs. */
 export function mcpToolCount(root) {
-  const src = read(join(root, 'scripts', 'mcp-server.mjs'));
+  const src = readText(join(root, 'scripts', 'mcp-server.mjs'));
   return (src.match(/name:\s*'codeweb_[a-z_]+'/g) || []).length;
 }
 
 /** Count the tools the website advertises (sum of toolPhases in product.json). */
 export function productToolCount(root) {
-  const p = JSON.parse(read(join(root, 'site', 'data', 'product.json')));
+  const p = JSON.parse(readText(join(root, 'site', 'data', 'product.json')));
   return p.toolPhases.reduce((n, ph) => n + ph.tools.length, 0);
 }
 
@@ -62,10 +62,10 @@ export function applySync(root, version, count) {
   for (const t of syncTargets(version, count)) {
     const p = join(root, t.file);
     if (!existsSync(p)) continue;
-    const before = read(p);
+    const before = readText(p);
     let after = before;
     for (const [re, rep] of t.subs) after = after.replace(re, rep);
-    if (after !== before) { write(p, after); changed.push(t.file); }
+    if (after !== before) { writeText(p, after); changed.push(t.file); }
   }
   return changed;
 }
@@ -76,12 +76,12 @@ export function checkConsistency(root) {
   const count = mcpToolCount(root);
   const problems = [];
 
-  const plugin = JSON.parse(read(join(root, '.claude-plugin', 'plugin.json')));
+  const plugin = JSON.parse(readText(join(root, '.claude-plugin', 'plugin.json')));
   if (plugin.version !== version) problems.push(`plugin.json version ${plugin.version} != package.json ${version}`);
   const advertised = (plugin.description.match(/(\d+)\s+deterministic read-only query tools/) || [])[1];
   if (advertised && Number(advertised) !== count) problems.push(`plugin.json advertises ${advertised} tools; MCP server exposes ${count}`);
 
-  const skill = read(join(root, 'skills', 'codebase-anatomy', 'SKILL.md'));
+  const skill = readText(join(root, 'skills', 'codebase-anatomy', 'SKILL.md'));
   const skillVer = (skill.match(/^version:\s*(.+)$/m) || [])[1];
   if (skillVer && skillVer.trim() !== version) problems.push(`SKILL.md version ${skillVer.trim()} != ${version}`);
 
@@ -90,13 +90,13 @@ export function checkConsistency(root) {
 
   const readmePath = join(root, 'README.md');
   if (existsSync(readmePath)) {
-    const rb = (read(readmePath).match(/badge\/version-(\d+\.\d+\.\d+)-/) || [])[1];
+    const rb = (readText(readmePath).match(/badge\/version-(\d+\.\d+\.\d+)-/) || [])[1];
     if (rb && rb !== version) problems.push(`README version badge ${rb} != ${version}`);
   }
 
   const clPath = join(root, 'CHANGELOG.md');
   if (existsSync(clPath)) {
-    const cl = read(clPath);
+    const cl = readText(clPath);
     const verRe = new RegExp(`^##\\s*\\[${version.replace(/\./g, '\\.')}\\]`, 'm');
     if (!verRe.test(cl)) problems.push(`CHANGELOG.md has no section for v${version}`);
   } else {
