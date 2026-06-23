@@ -101,9 +101,12 @@ the SAME pilot (`run4.json`):
   - `dcc3e42` feat: `ref` edges for class usage (instanceof + static-method) — AxiosHeaders ref users 2→13
   - `e662e5f` feat: resolve `X.member.call()/.apply()` chains (merge gains fetch.factory)
   - `c892f50` fix: drop default-import anchor-alias fallback (kills bare-object→anchor pollution)
-- NOT pushed to origin (local only). NOT PR'd to main. Suite **320 green**. Every engine fix carries a
-  deterministic proof + TDD test; re-extraction byte-identical (axios + flask); full-pipeline identical 2×.
-- Working tree: clean except gitignored `.codeweb/` (rebuilt pilot graphs + scratch). `run3.json`/`run4.json` committed.
+- **MERGED to `main` via PR #12** (merge commit `1cfb4f5`, 2026-06-23) — CI green (gate + test). The whole
+  efficiency-pilot workstream (harness + member-access + the 7 precision/Python/class-usage fixes + result
+  docs) is now on main. Suite **320 green**. Every engine fix carries a deterministic proof + TDD test;
+  re-extraction byte-identical (axios + flask); full-pipeline identical 2×.
+- Working tree: clean except gitignored `.codeweb/` (rebuilt pilot graphs + scratch). `run3.json`/`run4.json`
+  committed. (This STATE update is a post-merge doc follow-up on the branch — fold into the next PR.)
 
 ## Key files
 - Harness: `paper/experiments/efficiency-pilot.workflow.js` (Workflow script; 4 targets, oracle +
@@ -133,6 +136,14 @@ default-export attribution (`cb325f4`), class-usage `ref` edges (`dcc3e42`, the 
    re-reconciles each run → grep recall swung 0.79→0.50 across runs; only within-run + the step win are
    trustworthy. Hand-curate truth for the 4 targets (+ new ones), commit it, regrade run3/run4 against
    the FROZEN set, and make the harness accept `--truth frozen.json` instead of re-dereconciling.
+   - **On the swing as a metric (design note):** the run-to-run swing is oracle *measurement noise*
+     shared by both arms, not a codeweb-vs-grep quantity — record it as a test-retest RELIABILITY caveat
+     (limitations section), not a head-to-head metric. Track the **paired delta** (treatment−control) per
+     run, NOT absolute recall: the paired delta cancels the shared per-run truth and is far more stable.
+     Run 3 delta −0.13, run 4 delta +0.32 — but the engine CHANGED between them, so that gap conflates
+     noise + real effect. To isolate the noise floor, run **N reps with the engine FROZEN** and report
+     `mean(delta) ± SD(delta)`; an engine change whose delta-shift exceeds that SD is a real win. Steps
+     are already noise-free (a count of agent actions) → the −42% step win is the most defensible result.
 2. **AxiosHeaders precision (cw's weak spot, 0.52 symbol / 0.73 file):** the `ref` + anchor-import edges
    add dependents the oracle scores as extras. Options: tighten the anchor import-edge attribution (it
    still lands on the file's first fn, not the using fn or `<module>`); and/or extract anonymous
