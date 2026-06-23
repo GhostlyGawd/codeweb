@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changelog — codeweb</title>
+<meta name="description" content="Every release, capability, paper, and fix — kept in lock-step with the product under Keep a Changelog and Semantic Versioning.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="codeweb changelog">
+<meta property="og:description" content="Every release, capability, paper, and fix — kept in lock-step with the product under Keep a Changelog and Semantic Versioning.">
+<meta property="og:url" content="https://ghostlygawd.github.io/codeweb/changelog.html">
+<meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://ghostlygawd.github.io/codeweb/changelog.html">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header class="site-nav">
+  <a class="brand" href="index.html" aria-label="codeweb home">
+    <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="19" y2="17" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
+      <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
+      <circle cx="19" cy="17" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+    </svg>
+    codeweb
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html" data-nav="home">Home</a>
+    <a href="product.html" data-nav="product">Product</a>
+    <a href="research.html" data-nav="research">Research</a>
+    <a href="start.html" data-nav="start">Get Started</a>
+    <a href="changelog.html" data-nav="changelog" aria-current="page">Changelog</a>
+  </nav>
+  <div class="nav-right">
+    <a class="nav-ghost" href="demo/">Live demo</a>
+    <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Changelog</span>
+      <h2>Every release, in lock-step</h2>
+      <p class="lead">codeweb follows <a href="https://keepachangelog.com/en/1.1.0/" rel="noopener">Keep a Changelog</a> and <a href="https://semver.org/" rel="noopener">Semantic Versioning</a>. New capabilities, papers, and fixes are recorded here and shipped as tagged GitHub releases — never lost in commit history.</p>
+      <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
+    </div>
+    <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
+<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h2 class="cl-ver">[0.2.0] - 2026-06-23</h2>
+<p>The first managed release: codeweb gets a real public front and the machinery to keep</p>
+<p>product, marketing, and research in lock-step.</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>Public website</strong> built from a zero-dependency Node builder (<code>site/build.mjs</code>) into</li>
+</ul>
+<p>  <code>docs/</code> — Home, Product, Research, Get Started, and Changelog pages, all self-contained</p>
+<p>  with zero third-party requests, served by GitHub Pages.</p>
+<ul>
+<li><strong>Design system</strong> (<code>site/tokens.css</code> + <code>site/styles.css</code>): the engine's palette codified</li>
+</ul>
+<p>  into reusable tokens and components, plus a polished animated hero.</p>
+<ul>
+<li><strong>Evidence ledger</strong> on the Research page — every claim tagged <code>Validated</code>,</li>
+</ul>
+<p>  <code>Preliminary</code>, or <code>Null</code> with its exact number, sample size, and source file.</p>
+<ul>
+<li><strong>Single source of truth</strong> (<code>site/data/product.json</code>) for the tagline, the 20 MCP tools,</li>
+</ul>
+<p>  the Tier 0–3 map, supported languages, and the claim ledger.</p>
+<ul>
+<li><strong>Release ecosystem</strong>: this <code>CHANGELOG.md</code>, plus <code>scripts/version-sync.mjs</code>,</li>
+</ul>
+<p>  <code>scripts/check-consistency.mjs</code>, and <code>scripts/release.mjs</code>.</p>
+<ul>
+<li>Shared navigation injected into the existing interactive demo and research paper, so</li>
+</ul>
+<p>  they are no longer orphaned pages.</p>
+<h3 class="cl-grp">Changed</h3>
+<ul>
+<li>Corrected the Claude Code plugin manifest, which advertised <strong>15</strong> query tools; the real</li>
+</ul>
+<p>  surface is <strong>20</strong>. The tool count is now derived from the MCP server and verified in CI.</p>
+<ul>
+<li>README updated for the new site, version, and a <code>Versioning &amp; Releases</code> section.</li>
+</ul>
+<h3 class="cl-grp">Fixed</h3>
+<ul>
+<li>Per-page Open Graph metadata and favicon (the Pages root previously 404'd — there was no</li>
+</ul>
+<p>  landing page at all).</p>
+<h3 class="cl-grp">Research</h3>
+<ul>
+<li>Surfaced the <strong>efficiency pilot</strong>: frontier-agent caller discovery improves by</li>
+</ul>
+<p>  <strong>+0.265 ± 0.045</strong> recall and <strong>~34% fewer steps</strong> vs grep over 8 engine-frozen reps</p>
+<p>  (<code>paper/experiments/efficiency-pilot.reps8.json</code>). Labelled preliminary.</p>
+<h2 class="cl-ver">[0.1.0] - 2026-06-22</h2>
+<p>The deterministic engine and its evidence base.</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>Core pipeline</strong> — extract → cluster → overlap → render: a parse-free, zero-dependency</li>
+</ul>
+<p>  code-structure graph with a self-contained interactive <code>report.html</code>.</p>
+<ul>
+<li><strong>Ten features across four tiers</strong> (F1–F10): scoped context, live refresh, the</li>
+</ul>
+<p>  duplication-delta gate, hotspots, campaign planning, structural clone detection,</p>
+<p>  suppression memory, reading order, incremental edge derivation, and sharded subgraphs.</p>
+<ul>
+<li><strong>20 deterministic MCP tools</strong> spanning structural queries, write-time, review-time,</li>
+</ul>
+<p>  optimize-time, freshness, and comparison.</p>
+<ul>
+<li><strong>Five-language fast path</strong>: JavaScript, TypeScript, Python, Rust, and Go.</li>
+<li><strong>CI gate</strong> — a GitHub Action that fails a PR on a new cycle, a new duplication, or a</li>
+</ul>
+<p>  symbol that loses all callers.</p>
+<h3 class="cl-grp">Research</h3>
+<ul>
+<li><strong>Pre-registered effectiveness study</strong> — 32 of 33 checks pass; 0 disagreements across</li>
+</ul>
+<p>  ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test</p>
+<p>  suite had missed (<code>paper/</code>).</p></div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
+            <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+          </svg>
+          codeweb
+        </a>
+        <p>The system map for your codebase. A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="product.html">Features</a>
+        <a href="demo/">Live demo</a>
+        <a href="start.html">Get started</a>
+        <a href="changelog.html">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Proof</h5>
+        <a href="research.html">Research</a>
+        <a href="paper/">The paper</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/paper/results" rel="noopener">Raw results</a>
+      </div>
+      <div class="footer-col">
+        <h5>Project</h5>
+        <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>codeweb v0.2.0 · MIT · © 2026 rhenmcleod</span>
+      <span>Deterministic build · zero third-party requests on this page</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

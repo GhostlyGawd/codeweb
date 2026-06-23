@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 220" width="1040" height="220" font-family="ui-sans-serif,system-ui,'Segoe UI',Roboto,Arial,sans-serif">
+  <defs>
+    <radialGradient id="bgP" cx="50%" cy="40%" r="80%">
+      <stop offset="0" stop-color="#11161f"/><stop offset="1" stop-color="#0d1117"/>
+    </radialGradient>
+  </defs>
+  <rect x="1" y="1" width="1038" height="218" rx="18" fill="url(#bgP)" stroke="#30363d"/>
+
+  <g stroke="#58a6ff" stroke-width="2" opacity="0.8">
+    <line x1="262" y1="110" x2="286" y2="110"/><line x1="517" y1="110" x2="541" y2="110"/>
+    <line x1="772" y1="110" x2="796" y2="110"/>
+  </g>
+
+  <!-- stage template: box + number + name + description -->
+  <g>
+    <rect x="30" y="34" width="232" height="152" rx="12" fill="#161b22" stroke="#30363d"/>
+    <circle cx="56" cy="60" r="12" fill="#58a6ff"/><text x="56" y="65" font-size="14" font-weight="700" fill="#0d1117" text-anchor="middle">1</text>
+    <text x="80" y="65" font-size="22" font-weight="600" fill="#e6edf3">extract</text>
+    <text font-size="14" fill="#8b949e"><tspan x="52" y="104">parse every file into atomic</tspan><tspan x="52" y="126">nodes &#8212; functions, classes,</tspan><tspan x="52" y="148">methods &#8212; plus call &amp; import</tspan><tspan x="52" y="170">edges.</tspan></text>
+  </g>
+  <g>
+    <rect x="285" y="34" width="232" height="152" rx="12" fill="#161b22" stroke="#30363d"/>
+    <circle cx="311" cy="60" r="12" fill="#58a6ff"/><text x="311" y="65" font-size="14" font-weight="700" fill="#0d1117" text-anchor="middle">2</text>
+    <text x="335" y="65" font-size="22" font-weight="600" fill="#e6edf3">cluster</text>
+    <text font-size="14" fill="#8b949e"><tspan x="307" y="104">strip genuine utility hubs,</tspan><tspan x="307" y="126">then group nodes into</tspan><tspan x="307" y="148">directory-anchored semantic</tspan><tspan x="307" y="170">domains.</tspan></text>
+  </g>
+  <g>
+    <rect x="540" y="34" width="232" height="152" rx="12" fill="#161b22" stroke="#30363d"/>
+    <circle cx="566" cy="60" r="12" fill="#58a6ff"/><text x="566" y="65" font-size="14" font-weight="700" fill="#0d1117" text-anchor="middle">3</text>
+    <text x="590" y="65" font-size="22" font-weight="600" fill="#e6edf3">overlap</text>
+    <text font-size="14" fill="#8b949e"><tspan x="562" y="104">detect duplicated logic,</tspan><tspan x="562" y="126">confirmed against the real</tspan><tspan x="562" y="148">function bodies &#8212; not name</tspan><tspan x="562" y="170">coincidences.</tspan></text>
+  </g>
+  <g>
+    <rect x="795" y="34" width="215" height="152" rx="12" fill="#161b22" stroke="#30363d"/>
+    <circle cx="821" cy="60" r="12" fill="#58a6ff"/><text x="821" y="65" font-size="14" font-weight="700" fill="#0d1117" text-anchor="middle">4</text>
+    <text x="845" y="65" font-size="22" font-weight="600" fill="#e6edf3">render</text>
+    <text font-size="14" fill="#8b949e"><tspan x="817" y="104">emit a self-contained,</tspan><tspan x="817" y="126">interactive HTML map</tspan><tspan x="817" y="148">(plus machine-readable</tspan><tspan x="817" y="170">graph.json).</tspan></text>
+  </g>
+</svg>

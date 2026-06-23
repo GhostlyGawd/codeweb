@@ -1,0 +1,84 @@
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Research</span>
+      <h2>Does codeweb work? We pre-registered the answer.</h2>
+      <p class="lead">Before collecting any data, we wrote down 33 pass/fail checks across determinism, correctness, detection accuracy, performance, and agent outcomes — then ran them against six real repositories pinned by SHA and independent reference implementations. The raw data is committed in the repo.</p>
+    </div>
+    <div class="stat-strip">{{headline_stats}}</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">How it was tested</span>
+      <h2>Designed to resist reward hacking</h2>
+    </div>
+    <div class="grid cols-2">
+      <div class="card"><h3>Pre-registered</h3><p>The 33 checks and their pass criteria were fixed in writing before data collection — so the bar couldn't move to fit the result.</p></div>
+      <div class="card"><h3>Independent oracles</h3><p>Cycles, impact, and callers are checked against separate implementations (Kosaraju SCC, reverse-BFS, an edit applier) — not against codeweb's own logic.</p></div>
+      <div class="card"><h3>Frozen truth</h3><p>The efficiency pilot grades agents against a hand-verified caller set, reconciled with an exhaustive independent grep. Coverage gaps count against codeweb, honestly.</p></div>
+      <div class="card"><h3>A/B levers</h3><p>Every bug fix sits behind a reproducible legacy lever, so re-running proves the fix is load-bearing rather than coincidental.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The evidence ledger</span>
+      <h2>Every claim, with its number, sample, and source</h2>
+      <p class="lead">Tagged honestly: <span class="chip chip-validated">Validated</span> stands on pre-registered checks against oracles; <span class="chip chip-preliminary">Preliminary</span> is a fresh pilot signal; <span class="chip chip-null">Null</span> is a result that did not move — published anyway.</p>
+    </div>
+    {{claim_ledger}}
+    <p class="figcap" style="margin-top:var(--s-4)">Sources are files under <code>paper/results/</code> and <code>paper/experiments/</code> in the repository. <a href="https://github.com/GhostlyGawd/codeweb/tree/main/paper" rel="noopener">Browse the raw data →</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <span class="eyebrow">The efficiency pilot</span>
+        <h2>Frontier agents find more, in fewer steps</h2>
+        <p>On a caller-discovery micro-benchmark against a grep baseline, with the engine frozen across 8 repetitions, codeweb improved a frontier agent's recall by <strong>+0.265 ± 0.045</strong> — every one of the 8 reps positive, roughly six times the noise floor — while cutting discovery steps by <strong>~34%</strong> (−6.84 ± 3.33).</p>
+        <p class="muted">Precision was a weaker positive (+0.199 ± 0.147, one negative rep). The mechanism is deterministic: fixing import-alias and member-access resolution took axios <code>AxiosError</code>'s recovered callers from 1 to 20 — no model involved. We label the pilot preliminary because the truth set is fresh and grading is strict at the symbol level.</p>
+      </div>
+      <div class="callout callout-good">
+        <h3>Why it's believable</h3>
+        <p>The step reduction is oracle-independent — it doesn't depend on how the truth set is scored. The recall gain clears the measurement noise by ~6×, and the paired design cancels the shared oracle noise that swung the grep baseline run-to-run.</p>
+        <p class="muted" style="margin-bottom:0">Source: <code>paper/experiments/efficiency-pilot.reps8.json</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="callout callout-warn">
+      <h3>The honest null: agent edit quality (H18)</h3>
+      <p>We also tested whether agents produce <em>better edits</em> with codeweb on 8 paired tasks. The result was a clean zero — a bootstrap CI of [0, 0]. On clean, well-scoped tasks, a capable base model already avoids regressions, so there was no headroom to improve: a floor effect, not a power result. The thesis does not rest on this check, and we report it rather than bury it.</p>
+      <p class="muted" style="margin-bottom:0">Source: <code>paper/results/agent-ab.json</code> · paper §3.7</p>
+    </div>
+    <div class="callout">
+      <h3>It found bugs its own test suite missed</h3>
+      <p>The study is credible partly because it failed first. It surfaced a determinism leak (file-enumeration order bleeding into domain assignment, plus an overlap stack-overflow on express) and a dead-code precision failure (test-file functions wrongly marked safe-to-delete, 0.52 precision). Both were fixed surgically behind A/B levers; re-runs establish the fixes. The 286-test suite had been green throughout.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Calibrated, not inflated</span>
+      <h2>What we deliberately don't claim</h2>
+      <p class="lead">The fastest way to lose trust is to overstate. Here's where we hold back, and the precise claim we make instead.</p>
+    </div>
+    <div class="callout honesty">{{dont_claim}}</div>
+    <div class="btn-row" style="margin-top:var(--s-6)">
+      <a class="btn btn-primary" href="paper/">Read the full paper</a>
+      <a class="btn" href="https://github.com/GhostlyGawd/codeweb/tree/main/paper/results" rel="noopener">Inspect the raw results</a>
+    </div>
+  </div>
+</section>

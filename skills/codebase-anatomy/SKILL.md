@@ -1,7 +1,7 @@
 ---
 name: codebase-anatomy
 description: Dissect a codebase to atomic nodes (functions, classes, symbols), wire the call/import web, tag each node's domain, and build a cross-domain overlap graph that ranks consolidation/de-duplication opportunities, then render an interactive HTML map. Use to restructure your own codebase into well-defined non-duplicative systems, OR to fully map and review an external repo (git URL / owner-repo) before adopting it. Triggers include "map this codebase", "dependency/relationship graph", "find duplication/overlap", "atomic dissection", "review this repo before I use it", and the /codeweb command.
-version: 0.1.0
+version: 0.2.0
 metadata:
   origin: community
 ---

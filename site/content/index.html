@@ -1,0 +1,140 @@
+<section class="hero">
+  <div class="hero-grid" aria-hidden="true">
+    <svg class="constellation" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice">
+      <g class="edges">
+        <line class="edge" x1="600" y1="250" x2="360" y2="140"/>
+        <line class="edge" x1="600" y1="250" x2="840" y2="150"/>
+        <line class="edge" x1="600" y1="250" x2="420" y2="380"/>
+        <line class="edge" x1="600" y1="250" x2="800" y2="370"/>
+        <line class="edge" x1="360" y1="140" x2="180" y2="220"/>
+        <line class="edge" x1="840" y1="150" x2="1020" y2="240"/>
+        <line class="edge" x1="420" y1="380" x2="260" y2="440"/>
+        <line class="edge" x1="800" y1="370" x2="980" y2="430"/>
+        <line class="edge" x1="360" y1="140" x2="600" y2="250"/>
+        <line class="edge" x1="840" y1="150" x2="600" y2="250"/>
+      </g>
+      <g class="nodes">
+        <circle class="node drift" cx="180" cy="220" r="6"/>
+        <circle class="node drift" cx="1020" cy="240" r="6"/>
+        <circle class="node" cx="260" cy="440" r="5" stroke="#ffb65c"/>
+        <circle class="node" cx="980" cy="430" r="5" stroke="#3fb950"/>
+        <circle class="node drift" cx="360" cy="140" r="8"/>
+        <circle class="node drift" cx="840" cy="150" r="8"/>
+        <circle class="node" cx="420" cy="380" r="7"/>
+        <circle class="node" cx="800" cy="370" r="7"/>
+        <circle class="node hub" cx="600" cy="250" r="12"/>
+      </g>
+      <circle class="pulse" r="3.5">
+        <animateMotion dur="6s" repeatCount="indefinite" path="M360,140 L600,250 L840,150"/>
+        <animate attributeName="opacity" values="0;1;1;0" dur="6s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+  <div class="wrap hero-inner">
+    <span class="eyebrow">Deterministic · zero-dependency · MIT</span>
+    <h1>The system map for <span class="tagline">your codebase</span></h1>
+    <p class="hero-sub">{{elevator}}</p>
+    <div class="btn-row">
+      <a class="btn btn-primary btn-lg" href="start.html">Install codeweb</a>
+      <a class="btn btn-lg" href="demo/">See the live demo</a>
+      <a class="btn btn-lg" href="research.html">Read the evidence</a>
+    </div>
+    <div class="hero-note">v{{version}} · runs on an empty node_modules · never executes the code it maps</div>
+    <div class="stat-strip">{{headline_stats}}</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow">One graph, two interfaces</span>
+      <h2>Built for the humans <em>and</em> the agents editing the code</h2>
+      <p class="lead">codeweb computes one structural graph and serves it two ways — so a person and the AI agent working beside them finally share the same map.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>For humans — an interactive map</h3>
+        <p>A self-contained HTML report: the dependency web, duplication, hotspots, and ranked, cycle-safe consolidation opportunities. No CDN, no network, opens straight from disk.</p>
+      </div>
+      <div class="card">
+        <h3>For agents — 20 deterministic tools</h3>
+        <p>Over MCP, a coding agent can ask <em>what already does this</em>, <em>what an edit breaks</em>, and <em>which fix is safe</em> — before it writes a line. No LLM in the analysis loop, so the answers don't drift.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">How it works</span>
+      <h2>A four-stage deterministic pipeline</h2>
+      <p class="lead">Parse-free extraction on the fast path for {{languages_inline}}, with an agent fallback for everything else.</p>
+    </div>
+    {{pipeline}}
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Two ways to use it</span>
+      <h2>Restructure your own code — or vet someone else's</h2>
+    </div>
+    {{modes}}
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow">Proven, not promised</span>
+      <h2>Every claim is backed by reproducible evidence</h2>
+      <p class="lead">codeweb is pre-registered and tested against independent oracles. We publish the nulls too — because trustworthy tooling shows its work.</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card"><h3>32 / 33</h3><p>pre-registered checks pass. The study found and fixed two real engine bugs the 286-test suite missed.</p></div>
+      <div class="card"><h3>0 disagreements</h3><p>across ~490k comparisons of cycles, impact, and callers against independent reference implementations.</p></div>
+      <div class="card"><h3>+0.27 recall · −34% steps</h3><p>frontier agents discovering callers, vs grep — over 8 engine-frozen reps. Preliminary, and labelled as such.</p></div>
+    </div>
+    <div class="btn-row" style="margin-top:var(--s-6)">
+      <a class="btn" href="research.html">See the full evidence ledger</a>
+      <a class="btn" href="paper/">Read the paper</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <span class="eyebrow">For learners and experts alike</span>
+        <h2>Approachable at the surface, deep when you need it</h2>
+        <p>New to the codebase? Open the map, follow the foundations-first reading order, and see the domains at a glance. Shipping at scale? Wire the CI gate, drive the 20 MCP tools from your agent, and shard graphs too big to hold in memory.</p>
+        <ul class="kicker-list">
+          <li><span class="dot"></span><span><strong>Beginners</strong> — one command, one map, plain-language findings.</span></li>
+          <li><span class="dot"></span><span><strong>Advanced</strong> — deterministic tools, fitness rules, sharded subgraphs, a PR gate.</span></li>
+        </ul>
+        <div class="btn-row"><a class="btn btn-primary" href="start.html">Get started</a><a class="btn" href="product.html">Explore the product</a></div>
+      </div>
+      <div>
+        <a class="shot" href="demo/"><img src="assets/05-axios-graph.png" alt="codeweb interactive report: a force-directed domain graph of the axios codebase" loading="lazy"></a>
+        <p class="figcap">The live report — a real map of axios (274 symbols, 8 domains). <a href="demo/">Open the interactive demo →</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap center">
+    <div class="section-head center">
+      <span class="eyebrow">The point of all of it</span>
+      <h2>Make AI coding agents more efficient, effective, and capable</h2>
+      <p class="lead">Fewer tokens and steps to find what matters; higher-quality edits because the agent can see structure before it acts. Validated the right way — free of reward hacking.</p>
+    </div>
+    <div class="btn-row" style="justify-content:center">
+      <a class="btn btn-primary btn-lg" href="start.html">Install the plugin</a>
+      <a class="btn btn-lg" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">Star on GitHub</a>
+    </div>
+  </div>
+</section>

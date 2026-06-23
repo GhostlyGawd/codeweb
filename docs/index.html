@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>codeweb — the system map for your codebase</title>
+<meta name="description" content="A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable. An interactive map for humans; 20 query tools for agents. 32/33 pre-registered checks pass.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="codeweb — the system map for your codebase">
+<meta property="og:description" content="A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable. An interactive map for humans; 20 query tools for agents. 32/33 pre-registered checks pass.">
+<meta property="og:url" content="https://ghostlygawd.github.io/codeweb/">
+<meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://ghostlygawd.github.io/codeweb/">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header class="site-nav">
+  <a class="brand" href="index.html" aria-label="codeweb home">
+    <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
+      <line x1="12" y1="12" x2="19" y2="17" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
+      <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
+      <circle cx="19" cy="17" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+    </svg>
+    codeweb
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html" data-nav="home" aria-current="page">Home</a>
+    <a href="product.html" data-nav="product">Product</a>
+    <a href="research.html" data-nav="research">Research</a>
+    <a href="start.html" data-nav="start">Get Started</a>
+    <a href="changelog.html" data-nav="changelog">Changelog</a>
+  </nav>
+  <div class="nav-right">
+    <a class="nav-ghost" href="demo/">Live demo</a>
+    <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero">
+  <div class="hero-grid" aria-hidden="true">
+    <svg class="constellation" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice">
+      <g class="edges">
+        <line class="edge" x1="600" y1="250" x2="360" y2="140"/>
+        <line class="edge" x1="600" y1="250" x2="840" y2="150"/>
+        <line class="edge" x1="600" y1="250" x2="420" y2="380"/>
+        <line class="edge" x1="600" y1="250" x2="800" y2="370"/>
+        <line class="edge" x1="360" y1="140" x2="180" y2="220"/>
+        <line class="edge" x1="840" y1="150" x2="1020" y2="240"/>
+        <line class="edge" x1="420" y1="380" x2="260" y2="440"/>
+        <line class="edge" x1="800" y1="370" x2="980" y2="430"/>
+        <line class="edge" x1="360" y1="140" x2="600" y2="250"/>
+        <line class="edge" x1="840" y1="150" x2="600" y2="250"/>
+      </g>
+      <g class="nodes">
+        <circle class="node drift" cx="180" cy="220" r="6"/>
+        <circle class="node drift" cx="1020" cy="240" r="6"/>
+        <circle class="node" cx="260" cy="440" r="5" stroke="#ffb65c"/>
+        <circle class="node" cx="980" cy="430" r="5" stroke="#3fb950"/>
+        <circle class="node drift" cx="360" cy="140" r="8"/>
+        <circle class="node drift" cx="840" cy="150" r="8"/>
+        <circle class="node" cx="420" cy="380" r="7"/>
+        <circle class="node" cx="800" cy="370" r="7"/>
+        <circle class="node hub" cx="600" cy="250" r="12"/>
+      </g>
+      <circle class="pulse" r="3.5">
+        <animateMotion dur="6s" repeatCount="indefinite" path="M360,140 L600,250 L840,150"/>
+        <animate attributeName="opacity" values="0;1;1;0" dur="6s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+  <div class="wrap hero-inner">
+    <span class="eyebrow">Deterministic · zero-dependency · MIT</span>
+    <h1>The system map for <span class="tagline">your codebase</span></h1>
+    <p class="hero-sub">codeweb dissects a repository to its atomic parts — functions, classes, methods — wires them into a living call/import graph, tags each node's domain, and surfaces cross-domain overlap. It serves that one graph two ways: a self-contained interactive HTML map for humans, and 20 deterministic query tools over MCP for coding agents, so an agent can check what already exists and what an edit breaks before it writes a line.</p>
+    <div class="btn-row">
+      <a class="btn btn-primary btn-lg" href="start.html">Install codeweb</a>
+      <a class="btn btn-lg" href="demo/">See the live demo</a>
+      <a class="btn btn-lg" href="research.html">Read the evidence</a>
+    </div>
+    <div class="hero-note">v0.2.0 · runs on an empty node_modules · never executes the code it maps</div>
+    <div class="stat-strip">
+      <div class="stat">
+        <div class="num">32 / 33</div>
+        <div class="label">pre-registered checks pass</div>
+        <div class="src">paper/results</div>
+      </div>
+      <div class="stat">
+        <div class="num">~490k</div>
+        <div class="label">oracle comparisons, 0 disagreements</div>
+        <div class="src">correctness-query.json</div>
+      </div>
+      <div class="stat">
+        <div class="num">+0.27 / −34%</div>
+        <div class="label">agent caller-discovery recall / fewer steps (pilot)</div>
+        <div class="src">efficiency-pilot</div>
+      </div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow">One graph, two interfaces</span>
+      <h2>Built for the humans <em>and</em> the agents editing the code</h2>
+      <p class="lead">codeweb computes one structural graph and serves it two ways — so a person and the AI agent working beside them finally share the same map.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>For humans — an interactive map</h3>
+        <p>A self-contained HTML report: the dependency web, duplication, hotspots, and ranked, cycle-safe consolidation opportunities. No CDN, no network, opens straight from disk.</p>
+      </div>
+      <div class="card">
+        <h3>For agents — 20 deterministic tools</h3>
+        <p>Over MCP, a coding agent can ask <em>what already does this</em>, <em>what an edit breaks</em>, and <em>which fix is safe</em> — before it writes a line. No LLM in the analysis loop, so the answers don't drift.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">How it works</span>
+      <h2>A four-stage deterministic pipeline</h2>
+      <p class="lead">Parse-free extraction on the fast path for JavaScript, TypeScript, Python, Rust, and Go, with an agent fallback for everything else.</p>
+    </div>
+    <div class="pipeline">
+    <div class="stage"><div class="n">01</div><h4>extract</h4><p>Parse-free atomic nodes + edges, per language (JS/TS/Python/Rust/Go).</p></div>
+    <div class="stage"><div class="n">02</div><h4>cluster</h4><p>Group nodes into semantic domains.</p></div>
+    <div class="stage"><div class="n">03</div><h4>overlap</h4><p>Body-confirm cross-domain duplication and rank it.</p></div>
+    <div class="stage"><div class="n">04</div><h4>render</h4><p>A self-contained interactive map + 20 agent tools.</p></div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Two ways to use it</span>
+      <h2>Restructure your own code — or vet someone else's</h2>
+    </div>
+    <div class="grid cols-2">
+    <div class="card">
+      <h3>Map your own codebase</h3>
+      <p>See the real dependency web, find where logic is duplicated, and get an ordered, cycle-safe plan to consolidate it.</p>
+    </div>
+    <div class="card">
+      <h3>Review before you adopt</h3>
+      <p>Clone a third-party repo read-only, fully map it, and get an adoption review before you commit to depending on it. codeweb never runs the target.</p>
+    </div></div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow">Proven, not promised</span>
+      <h2>Every claim is backed by reproducible evidence</h2>
+      <p class="lead">codeweb is pre-registered and tested against independent oracles. We publish the nulls too — because trustworthy tooling shows its work.</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card"><h3>32 / 33</h3><p>pre-registered checks pass. The study found and fixed two real engine bugs the 286-test suite missed.</p></div>
+      <div class="card"><h3>0 disagreements</h3><p>across ~490k comparisons of cycles, impact, and callers against independent reference implementations.</p></div>
+      <div class="card"><h3>+0.27 recall · −34% steps</h3><p>frontier agents discovering callers, vs grep — over 8 engine-frozen reps. Preliminary, and labelled as such.</p></div>
+    </div>
+    <div class="btn-row" style="margin-top:var(--s-6)">
+      <a class="btn" href="research.html">See the full evidence ledger</a>
+      <a class="btn" href="paper/">Read the paper</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <span class="eyebrow">For learners and experts alike</span>
+        <h2>Approachable at the surface, deep when you need it</h2>
+        <p>New to the codebase? Open the map, follow the foundations-first reading order, and see the domains at a glance. Shipping at scale? Wire the CI gate, drive the 20 MCP tools from your agent, and shard graphs too big to hold in memory.</p>
+        <ul class="kicker-list">
+          <li><span class="dot"></span><span><strong>Beginners</strong> — one command, one map, plain-language findings.</span></li>
+          <li><span class="dot"></span><span><strong>Advanced</strong> — deterministic tools, fitness rules, sharded subgraphs, a PR gate.</span></li>
+        </ul>
+        <div class="btn-row"><a class="btn btn-primary" href="start.html">Get started</a><a class="btn" href="product.html">Explore the product</a></div>
+      </div>
+      <div>
+        <a class="shot" href="demo/"><img src="assets/05-axios-graph.png" alt="codeweb interactive report: a force-directed domain graph of the axios codebase" loading="lazy"></a>
+        <p class="figcap">The live report — a real map of axios (274 symbols, 8 domains). <a href="demo/">Open the interactive demo →</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap center">
+    <div class="section-head center">
+      <span class="eyebrow">The point of all of it</span>
+      <h2>Make AI coding agents more efficient, effective, and capable</h2>
+      <p class="lead">Fewer tokens and steps to find what matters; higher-quality edits because the agent can see structure before it acts. Validated the right way — free of reward hacking.</p>
+    </div>
+    <div class="btn-row" style="justify-content:center">
+      <a class="btn btn-primary btn-lg" href="start.html">Install the plugin</a>
+      <a class="btn btn-lg" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">Star on GitHub</a>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
+            <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
+            <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
+            <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+          </svg>
+          codeweb
+        </a>
+        <p>The system map for your codebase. A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="product.html">Features</a>
+        <a href="demo/">Live demo</a>
+        <a href="start.html">Get started</a>
+        <a href="changelog.html">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Proof</h5>
+        <a href="research.html">Research</a>
+        <a href="paper/">The paper</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/paper/results" rel="noopener">Raw results</a>
+      </div>
+      <div class="footer-col">
+        <h5>Project</h5>
+        <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>codeweb v0.2.0 · MIT · © 2026 rhenmcleod</span>
+      <span>Deterministic build · zero third-party requests on this page</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
