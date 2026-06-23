@@ -291,6 +291,30 @@ function resolveImport(fromAbs, spec) {
   for (const c of cands) if (relSet.has(c)) return c;
   return null;
 }
+// Resolve a Python module spec to a repo-relative file (`x.py` or a package's `x/__init__.py`).
+//   level > 0 -> RELATIVE: climb `level` package dirs from the importing file, then append the dotted
+//               path. Anchored to the file's real location, so it can't collide with stdlib.
+//   level = 0 -> ABSOLUTE: suffix-match the dotted path against known files (sys.path roots unknown).
+//               Require >=2 segments so `import json`/`import os` can't grab a local single-name package
+//               (e.g. flask's own src/flask/json); the shortest match wins (deterministic).
+const pyFile = (stem) => { if (!stem) return null; for (const c of [stem + '.py', stem + '/__init__.py']) if (relSet.has(c)) return c; return null; };
+function resolvePyModule(fromAbs, level, dotted) {
+  const parts = dotted ? dotted.split('.').filter(Boolean) : [];
+  if (level > 0) {
+    let baseAbs = dirname(fromAbs);
+    for (let i = 1; i < level; i++) baseAbs = dirname(baseAbs);
+    const baseRel = rel(baseAbs).replace(/\\/g, '/');
+    return pyFile([baseRel, ...parts].filter(Boolean).join('/'));
+  }
+  if (parts.length < 2) return null;
+  const tail = parts.join('/');
+  let best = null;
+  for (const rp of relSet) {
+    const hit = rp === tail + '.py' || rp.endsWith('/' + tail + '.py') || rp === tail + '/__init__.py' || rp.endsWith('/' + tail + '/__init__.py');
+    if (hit && (!best || rp.length < best.length || (rp.length === best.length && rp < best))) best = rp;
+  }
+  return best;
+}
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
 const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
 const importEdges = [];
@@ -300,9 +324,13 @@ const esNamed = /import\s+(?:[\w$]+\s*,\s*)?\{([^}]*)\}\s*from\s*['"]([^'"]+)['"
 const esStar = /import\s+\*\s+as\s+([\w$]+)\s+from\s*['"]([^'"]+)['"]/g;
 const esDefault = /import\s+([\w$]+)\s*(?:,\s*\{[^}]*\})?\s+from\s*['"]([^'"]+)['"]/g;
 const esSide = /import\s+['"]([^'"]+)['"]/g;
+// Python (line-oriented, `m` flag): `from [.]*MODULE import NAMES` and `import MODULE [as A][, ...]`.
+const pyFrom = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
+const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]*(?:\s+as\s+\w+)?)*)/gm;
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
-  const text = fsRec.text, aId = anchorId(rel(f)), amap = new Map(), nsmap = new Map();
+  const r = rel(f), isPy = r.endsWith('.py');
+  const text = fsRec.text, aId = anchorId(r), amap = new Map(), nsmap = new Map();
   let m;
   const addNamed = (namesStr, spec) => {
     const target = resolveImport(f, spec); if (!target) return;
@@ -312,6 +340,34 @@ for (const f of files) {
       if (!orig) continue;
       const symId = target + ':' + orig;
       if (nodeIdSet.has(symId)) { amap.set(local, symId); if (aId && aId !== symId) importEdges.push([aId, symId]); }
+    }
+  };
+  // Python `from [.]*MOD import a, b as c`: each name is EITHER a submodule of MOD (-> module object,
+  // member-access binding) OR a symbol defined in MOD's file (-> precise alias, like addNamed). The
+  // coarse "imports this module" edge lands on the target's <module> node.
+  const addPyFrom = (level, dotted, namesStr) => {
+    const pkgFile = resolvePyModule(f, level, dotted);
+    for (const part of namesStr.replace(/[()]/g, '').split(',')) {
+      const seg = part.trim().split(/\s+as\s+/);
+      const orig = (seg[0] || '').trim(), local = (seg[seg.length - 1] || '').trim();
+      if (!orig || orig === '*') continue;
+      const sub = resolvePyModule(f, level, dotted ? dotted + '.' + orig : orig);
+      if (sub && sub !== pkgFile) { nsmap.set(local, sub); if (aId) importEdges.push([aId, sub + ':<module>']); continue; }
+      if (pkgFile) { const symId = pkgFile + ':' + orig; if (nodeIdSet.has(symId)) { amap.set(local, symId); if (aId && aId !== symId) importEdges.push([aId, symId]); } }
+    }
+  };
+  // Python `import a.b [as c], d`: bind a usable local name -> module object for member access. A
+  // dotted path with no alias binds Python's FIRST segment (`a` of `a.b.c`), which member-resolution
+  // can't key on, so it gets only the coarse module edge — no false member binding.
+  const addPyImports = (namesStr) => {
+    for (const part of namesStr.split(',')) {
+      const seg = part.trim().split(/\s+as\s+/);
+      const dotted = (seg[0] || '').trim(); if (!dotted) continue;
+      const alias = seg.length > 1 ? seg[1].trim() : null;
+      const t = resolvePyModule(f, 0, dotted); if (!t) continue;
+      const local = alias || (dotted.includes('.') ? null : dotted);
+      if (local) nsmap.set(local, t);
+      if (aId) importEdges.push([aId, t + ':<module>']);
     }
   };
   // Namespace (`import * as X`) / default (`import X from` / `const X = require`): X is the imported
@@ -328,12 +384,17 @@ for (const f of files) {
     if (aId) importEdges.push([aId, t + ':<module>']);
   };
   const addSide = (spec) => { const t = resolveImport(f, spec); if (!t) return; if (aId) importEdges.push([aId, t + ':<module>']); };
-  while ((m = reqNamed.exec(text))) addNamed(m[1], m[2]);
-  while ((m = esNamed.exec(text))) addNamed(m[1], m[2]);
-  while ((m = reqDefault.exec(text))) addModuleBinding(m[1], m[2], true);
-  while ((m = esStar.exec(text))) addModuleBinding(m[1], m[2], false);
-  while ((m = esDefault.exec(text))) addModuleBinding(m[1], m[2], true);
-  while ((m = esSide.exec(text))) addSide(m[1]);
+  if (isPy) {
+    while ((m = pyFrom.exec(text))) addPyFrom(m[1].length, m[2], m[3]);
+    while ((m = pyImport.exec(text))) addPyImports(m[1]);
+  } else {
+    while ((m = reqNamed.exec(text))) addNamed(m[1], m[2]);
+    while ((m = esNamed.exec(text))) addNamed(m[1], m[2]);
+    while ((m = reqDefault.exec(text))) addModuleBinding(m[1], m[2], true);
+    while ((m = esStar.exec(text))) addModuleBinding(m[1], m[2], false);
+    while ((m = esDefault.exec(text))) addModuleBinding(m[1], m[2], true);
+    while ((m = esSide.exec(text))) addSide(m[1]);
+  }
   if (amap.size) aliasByFile.set(f, amap);
   if (nsmap.size) nsAliasByFile.set(f, nsmap);
 }
