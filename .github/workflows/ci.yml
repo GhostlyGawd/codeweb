@@ -13,9 +13,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      # codeweb has zero npm dependencies — nothing to install, just run the suite.
-      # `npm test` is argless `node --test` (default discovery) so it doesn't depend on the
-      # runner expanding a glob — Node 20 did not, which is why this needs Node 22.
+      # codeweb's core has ZERO required deps; web-tree-sitter is an optionalDependency (the opt-in
+      # exact-complexity tier). Install it so the tree-sitter tests actually run in CI instead of
+      # taking their graceful no-engine skip — otherwise the tier ships untested.
+      - name: Install (optional tree-sitter tier)
+        run: npm ci
+      # `node --test "tests/**/*.test.mjs"` needs Node 22 to expand the glob (Node 20 did not).
       - name: Run tests
         run: npm test
 
