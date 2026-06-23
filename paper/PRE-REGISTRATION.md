@@ -410,3 +410,29 @@ is independently verifiable (the same pattern as the engine's existing `CODEWEB_
 Cloning the corpus into `paper/corpus/` made argless `node --test` discover the corpus repos' own
 test files; `npm test` was scoped to `"tests/**/*.test.mjs"` (Node-internal glob — cross-platform). CI
 is unaffected (the corpus is never cloned there).
+
+### 9.5 Post-hoc addition — Theme-5b (agent discovery & efficiency pilot)
+
+H18 (§3.7) returned a null we diagnosed as a *floor effect*. **After** data collection — and disclosed
+here as a **post-hoc, exploratory** extension, **not** a pre-registered confirmatory test, and **not**
+counted among the 33 pre-registered checks — we ran a separate pilot to probe the mechanism H18 could not
+move on easy tasks: pre-edit **caller discovery** on high-fan-out targets, control (grep) vs treatment
+(codeweb `--dependents`), frontier base model (`paper/experiments/efficiency-pilot.*`). Deviations from
+the H18 design, stated plainly:
+
+- **Different (proxy) primary metric.** Discovery recall/precision of the caller set, *not* the
+  edit-quality regression count. Discovery is upstream of editing; a win here does **not** establish a
+  win on edit quality, and the H18 edit-quality null stands.
+- **Secondary metrics promoted to reported.** H18's secondary tokens/wall-clock are reported here,
+  recovered runtime-side via [`experiments/efficiency-pilot.usage.mjs`](experiments/efficiency-pilot.usage.mjs)
+  (deterministic, no agents), alongside runtime-counted tool-calls.
+- **Truth & power.** A hand-verified **frozen** truth set (independent of codeweb's coverage); **8
+  engine-frozen reps**; headline = the per-rep **paired delta** `mean ± SD` (the SD is the measured noise
+  floor). Scope: 4 targets, 2 repos (axios, flask), n=8.
+- **Result.** Recall +0.265 ± 0.045 (all 8 reps positive); tool-calls −6.44 ± 3.11 (≈34% fewer); total
+  tokens −910k ± 394k (≈44% fewer) — each clearing the noise floor; output-tokens and wall-clock within
+  noise (nulls). Engine fixes made while building the pilot ship behind the same find→fix→prove pattern
+  as §9.1 (deterministic proofs, e.g. `AxiosError --callers` 1 → 20).
+
+This is the weakest-pre-registration, strongest-recent-signal part of the study; it is reported as
+exploratory, and the confirmatory thesis remains Themes 1–4.

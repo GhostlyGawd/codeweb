@@ -95,6 +95,10 @@ rigorous enough to **find and fix two real bugs** the engine's own 286-test suit
   queries answer in **~95–120 ms** on a 3,201-symbol graph; zero runtime dependencies.
 - **It's honest** — the one pass/fail miss (incremental speedup at high churn) is reported as a measured
   curve; the agent A/B capstone returned a null (no headroom on clean tasks) and says so plainly.
+- **And it measurably helps a frontier agent** — a post-hoc discovery pilot (Theme-5b, §3.8) found codeweb
+  lifts a frontier agent's caller-discovery **recall +0.27** while using **~34% fewer tool-calls** and
+  **~44% fewer tokens** than grep (all 8 engine-frozen reps positive); the harder edit-quality capstone
+  stays an honest null.
 
 > **▶ Read the full study — [live on GitHub Pages](https://ghostlygawd.github.io/codeweb/paper/).**
 > Or dig into the [pre-registration](paper/PRE-REGISTRATION.md) and [raw results](paper/results/) — every
