@@ -558,7 +558,8 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
         // member call obj.fn(): resolve ONLY when obj is a namespace/default import alias (a param or
         // local obj.method() must stay unresolved — see reference-edges PRECISION). This recovers the
         // cross-file usage the bare-name pass can't see (util.merge(), AxiosHeaders.from()).
-        const om = /([A-Za-z_$][\w$]*)$/.exec(ln.slice(0, m.index - 1));
+        const before = ln.slice(0, m.index - 1);
+        const om = /([A-Za-z_$][\w$]*)$/.exec(before);
         if (om) {
           if (nsAliasMap && nsAliasMap.has(om[1])) {
             const calleeId = nsAliasMap.get(om[1]) + ':' + m[1];
@@ -566,6 +567,14 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
           }
           const cls = classOf(om[1]);
           if (cls) addResolved(i, cls, 'ref'); // X.staticMethod() -> the caller depends on the class X
+          // X.member.call(...) / X.member.apply(...): the real invocation is of X-file:member.
+          if ((m[1] === 'call' || m[1] === 'apply') && nsAliasMap) {
+            const chain = /([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)$/.exec(before);
+            if (chain && nsAliasMap.has(chain[1])) {
+              const calleeId = nsAliasMap.get(chain[1]) + ':' + chain[2];
+              if (nodeIdSet.has(calleeId)) addResolved(i, calleeId, 'call');
+            }
+          }
         }
         continue; // not an import-alias member -> stay precision-safe (no edge)
       }
