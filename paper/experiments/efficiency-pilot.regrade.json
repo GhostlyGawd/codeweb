@@ -1,0 +1,828 @@
+{
+  "generatedFrom": "efficiency-pilot.truth.json",
+  "truthVersion": 1,
+  "runs": {
+    "run3": {
+      "tasksGraded": 4,
+      "means": {
+        "steps": {
+          "control": 21.75,
+          "treatment": 17.5,
+          "delta": -4.25
+        },
+        "original": {
+          "deltaRecall": -0.13
+        },
+        "symbolAll": {
+          "control": {
+            "recall": 0.41,
+            "precision": 0.68
+          },
+          "treatment": {
+            "recall": 0.55,
+            "precision": 0.77
+          },
+          "deltaRecall": 0.15,
+          "deltaPrecision": 0.09
+        },
+        "symbolExternal": {
+          "control": {
+            "recall": 0.46,
+            "precision": 0.68
+          },
+          "treatment": {
+            "recall": 0.52,
+            "precision": 0.68
+          },
+          "deltaRecall": 0.07,
+          "deltaPrecision": 0
+        },
+        "symbolIndexed": {
+          "control": {
+            "recall": 0.47,
+            "precision": 0.68
+          },
+          "treatment": {
+            "recall": 0.64,
+            "precision": 0.77
+          },
+          "deltaRecall": 0.17,
+          "deltaPrecision": 0.09
+        },
+        "fileAll": {
+          "control": {
+            "recall": 0.69,
+            "precision": 1
+          },
+          "treatment": {
+            "recall": 0.68,
+            "precision": 1
+          },
+          "deltaRecall": -0.01,
+          "deltaPrecision": 0
+        },
+        "fileIndexed": {
+          "control": {
+            "recall": 0.75,
+            "precision": 0.94
+          },
+          "treatment": {
+            "recall": 0.84,
+            "precision": 1
+          },
+          "deltaRecall": 0.09,
+          "deltaPrecision": 0.07
+        }
+      },
+      "perTask": [
+        {
+          "task": "axios-merge",
+          "repo": "axios",
+          "symbol": "merge",
+          "oldTruthN": 4,
+          "frozenTruthN": 7,
+          "frozenExternalN": 5,
+          "steps": {
+            "control": 14,
+            "treatment": 11,
+            "delta": -3
+          },
+          "original": {
+            "control": {
+              "recall": 1,
+              "precision": 0.67
+            },
+            "treatment": {
+              "recall": 0.5,
+              "precision": 0.33
+            },
+            "deltaRecall": -0.5
+          },
+          "symbolAll": {
+            "control": {
+              "recall": 0.43,
+              "precision": 0.5
+            },
+            "treatment": {
+              "recall": 0.71,
+              "precision": 0.83
+            },
+            "deltaRecall": 0.28,
+            "deltaPrecision": 0.33
+          },
+          "symbolExternal": {
+            "control": {
+              "recall": 0.6,
+              "precision": 0.5
+            },
+            "treatment": {
+              "recall": 0.6,
+              "precision": 0.5
+            },
+            "deltaRecall": 0,
+            "deltaPrecision": 0
+          },
+          "symbolIndexed": {
+            "control": {
+              "recall": 0.5,
+              "precision": 0.5
+            },
+            "treatment": {
+              "recall": 0.83,
+              "precision": 0.83
+            },
+            "deltaRecall": 0.33,
+            "deltaPrecision": 0.33
+          },
+          "fileAll": {
+            "control": {
+              "recall": 1,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.67,
+              "precision": 1
+            },
+            "deltaRecall": -0.33,
+            "deltaPrecision": 0
+          },
+          "fileIndexed": {
+            "control": {
+              "recall": 1,
+              "precision": 0.83
+            },
+            "treatment": {
+              "recall": 0.8,
+              "precision": 1
+            },
+            "deltaRecall": -0.2,
+            "deltaPrecision": 0.17
+          }
+        },
+        {
+          "task": "axios-AxiosError",
+          "repo": "axios",
+          "symbol": "AxiosError",
+          "oldTruthN": 42,
+          "frozenTruthN": 58,
+          "frozenExternalN": 57,
+          "steps": {
+            "control": 32,
+            "treatment": 27,
+            "delta": -5
+          },
+          "original": {
+            "control": {
+              "recall": 0.4,
+              "precision": 0.59
+            },
+            "treatment": {
+              "recall": 0.71,
+              "precision": 0.67
+            },
+            "deltaRecall": 0.31
+          },
+          "symbolAll": {
+            "control": {
+              "recall": 0.31,
+              "precision": 0.62
+            },
+            "treatment": {
+              "recall": 0.59,
+              "precision": 0.76
+            },
+            "deltaRecall": 0.28,
+            "deltaPrecision": 0.14
+          },
+          "symbolExternal": {
+            "control": {
+              "recall": 0.32,
+              "precision": 0.62
+            },
+            "treatment": {
+              "recall": 0.58,
+              "precision": 0.73
+            },
+            "deltaRecall": 0.26,
+            "deltaPrecision": 0.11
+          },
+          "symbolIndexed": {
+            "control": {
+              "recall": 0.39,
+              "precision": 0.62
+            },
+            "treatment": {
+              "recall": 0.74,
+              "precision": 0.76
+            },
+            "deltaRecall": 0.35,
+            "deltaPrecision": 0.14
+          },
+          "fileAll": {
+            "control": {
+              "recall": 0.36,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.64,
+              "precision": 1
+            },
+            "deltaRecall": 0.28,
+            "deltaPrecision": 0
+          },
+          "fileIndexed": {
+            "control": {
+              "recall": 0.5,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.9,
+              "precision": 1
+            },
+            "deltaRecall": 0.4,
+            "deltaPrecision": 0
+          }
+        },
+        {
+          "task": "axios-AxiosHeaders",
+          "repo": "axios",
+          "symbol": "AxiosHeaders",
+          "oldTruthN": 13,
+          "frozenTruthN": 40,
+          "frozenExternalN": 39,
+          "steps": {
+            "control": 26,
+            "treatment": 16,
+            "delta": -10
+          },
+          "original": {
+            "control": {
+              "recall": 0.85,
+              "precision": 0.79
+            },
+            "treatment": {
+              "recall": 0.46,
+              "precision": 0.33
+            },
+            "deltaRecall": -0.39
+          },
+          "symbolAll": {
+            "control": {
+              "recall": 0.25,
+              "precision": 0.71
+            },
+            "treatment": {
+              "recall": 0.23,
+              "precision": 0.5
+            },
+            "deltaRecall": -0.02,
+            "deltaPrecision": -0.21
+          },
+          "symbolExternal": {
+            "control": {
+              "recall": 0.26,
+              "precision": 0.71
+            },
+            "treatment": {
+              "recall": 0.23,
+              "precision": 0.5
+            },
+            "deltaRecall": -0.03,
+            "deltaPrecision": -0.21
+          },
+          "symbolIndexed": {
+            "control": {
+              "recall": 0.29,
+              "precision": 0.71
+            },
+            "treatment": {
+              "recall": 0.26,
+              "precision": 0.5
+            },
+            "deltaRecall": -0.03,
+            "deltaPrecision": -0.21
+          },
+          "fileAll": {
+            "control": {
+              "recall": 0.39,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.5,
+              "precision": 1
+            },
+            "deltaRecall": 0.11,
+            "deltaPrecision": 0
+          },
+          "fileIndexed": {
+            "control": {
+              "recall": 0.5,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.64,
+              "precision": 1
+            },
+            "deltaRecall": 0.14,
+            "deltaPrecision": 0
+          }
+        },
+        {
+          "task": "flask-render_template",
+          "repo": "flask",
+          "symbol": "render_template",
+          "oldTruthN": 19,
+          "frozenTruthN": 26,
+          "frozenExternalN": 26,
+          "steps": {
+            "control": 15,
+            "treatment": 16,
+            "delta": 1
+          },
+          "original": {
+            "control": {
+              "recall": 0.89,
+              "precision": 0.89
+            },
+            "treatment": {
+              "recall": 0.95,
+              "precision": 1
+            },
+            "deltaRecall": 0.06
+          },
+          "symbolAll": {
+            "control": {
+              "recall": 0.65,
+              "precision": 0.89
+            },
+            "treatment": {
+              "recall": 0.69,
+              "precision": 1
+            },
+            "deltaRecall": 0.04,
+            "deltaPrecision": 0.11
+          },
+          "symbolExternal": {
+            "control": {
+              "recall": 0.65,
+              "precision": 0.89
+            },
+            "treatment": {
+              "recall": 0.69,
+              "precision": 1
+            },
+            "deltaRecall": 0.04,
+            "deltaPrecision": 0.11
+          },
+          "symbolIndexed": {
+            "control": {
+              "recall": 0.68,
+              "precision": 0.89
+            },
+            "treatment": {
+              "recall": 0.72,
+              "precision": 1
+            },
+            "deltaRecall": 0.04,
+            "deltaPrecision": 0.11
+          },
+          "fileAll": {
+            "control": {
+              "recall": 1,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.91,
+              "precision": 1
+            },
+            "deltaRecall": -0.09,
+            "deltaPrecision": 0
+          },
+          "fileIndexed": {
+            "control": {
+              "recall": 1,
+              "precision": 0.91
+            },
+            "treatment": {
+              "recall": 1,
+              "precision": 1
+            },
+            "deltaRecall": 0,
+            "deltaPrecision": 0.09
+          }
+        }
+      ]
+    },
+    "run4": {
+      "tasksGraded": 4,
+      "means": {
+        "steps": {
+          "control": 19.75,
+          "treatment": 11.5,
+          "delta": -8.25
+        },
+        "original": {
+          "deltaRecall": 0.32
+        },
+        "symbolAll": {
+          "control": {
+            "recall": 0.39,
+            "precision": 0.77
+          },
+          "treatment": {
+            "recall": 0.65,
+            "precision": 0.81
+          },
+          "deltaRecall": 0.26,
+          "deltaPrecision": 0.04
+        },
+        "symbolExternal": {
+          "control": {
+            "recall": 0.43,
+            "precision": 0.77
+          },
+          "treatment": {
+            "recall": 0.63,
+            "precision": 0.72
+          },
+          "deltaRecall": 0.2,
+          "deltaPrecision": -0.04
+        },
+        "symbolIndexed": {
+          "control": {
+            "recall": 0.44,
+            "precision": 0.77
+          },
+          "treatment": {
+            "recall": 0.75,
+            "precision": 0.81
+          },
+          "deltaRecall": 0.31,
+          "deltaPrecision": 0.04
+        },
+        "fileAll": {
+          "control": {
+            "recall": 0.61,
+            "precision": 1
+          },
+          "treatment": {
+            "recall": 0.73,
+            "precision": 1
+          },
+          "deltaRecall": 0.13,
+          "deltaPrecision": 0
+        },
+        "fileIndexed": {
+          "control": {
+            "recall": 0.7,
+            "precision": 0.98
+          },
+          "treatment": {
+            "recall": 0.9,
+            "precision": 1
+          },
+          "deltaRecall": 0.2,
+          "deltaPrecision": 0.02
+        }
+      },
+      "perTask": [
+        {
+          "task": "axios-merge",
+          "repo": "axios",
+          "symbol": "merge",
+          "oldTruthN": 8,
+          "frozenTruthN": 7,
+          "frozenExternalN": 5,
+          "steps": {
+            "control": 17,
+            "treatment": 13,
+            "delta": -4
+          },
+          "original": {
+            "control": {
+              "recall": 0.38,
+              "precision": 0.75
+            },
+            "treatment": {
+              "recall": 0.88,
+              "precision": 1
+            },
+            "deltaRecall": 0.5
+          },
+          "symbolAll": {
+            "control": {
+              "recall": 0.43,
+              "precision": 0.75
+            },
+            "treatment": {
+              "recall": 0.86,
+              "precision": 0.86
+            },
+            "deltaRecall": 0.43,
+            "deltaPrecision": 0.11
+          },
+          "symbolExternal": {
+            "control": {
+              "recall": 0.6,
+              "precision": 0.75
+            },
+            "treatment": {
+              "recall": 0.8,
+              "precision": 0.57
+            },
+            "deltaRecall": 0.2,
+            "deltaPrecision": -0.18
+          },
+          "symbolIndexed": {
+            "control": {
+              "recall": 0.5,
+              "precision": 0.75
+            },
+            "treatment": {
+              "recall": 1,
+              "precision": 0.86
+            },
+            "deltaRecall": 0.5,
+            "deltaPrecision": 0.11
+          },
+          "fileAll": {
+            "control": {
+              "recall": 0.67,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.83,
+              "precision": 1
+            },
+            "deltaRecall": 0.16,
+            "deltaPrecision": 0
+          },
+          "fileIndexed": {
+            "control": {
+              "recall": 0.8,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 1,
+              "precision": 1
+            },
+            "deltaRecall": 0.2,
+            "deltaPrecision": 0
+          }
+        },
+        {
+          "task": "axios-AxiosError",
+          "repo": "axios",
+          "symbol": "AxiosError",
+          "oldTruthN": 37,
+          "frozenTruthN": 58,
+          "frozenExternalN": 57,
+          "steps": {
+            "control": 22,
+            "treatment": 8,
+            "delta": -14
+          },
+          "original": {
+            "control": {
+              "recall": 0.32,
+              "precision": 0.71
+            },
+            "treatment": {
+              "recall": 0.92,
+              "precision": 0.68
+            },
+            "deltaRecall": 0.6
+          },
+          "symbolAll": {
+            "control": {
+              "recall": 0.22,
+              "precision": 0.76
+            },
+            "treatment": {
+              "recall": 0.67,
+              "precision": 0.78
+            },
+            "deltaRecall": 0.45,
+            "deltaPrecision": 0.02
+          },
+          "symbolExternal": {
+            "control": {
+              "recall": 0.23,
+              "precision": 0.76
+            },
+            "treatment": {
+              "recall": 0.67,
+              "precision": 0.76
+            },
+            "deltaRecall": 0.44,
+            "deltaPrecision": 0
+          },
+          "symbolIndexed": {
+            "control": {
+              "recall": 0.28,
+              "precision": 0.76
+            },
+            "treatment": {
+              "recall": 0.85,
+              "precision": 0.78
+            },
+            "deltaRecall": 0.57,
+            "deltaPrecision": 0.02
+          },
+          "fileAll": {
+            "control": {
+              "recall": 0.36,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.64,
+              "precision": 1
+            },
+            "deltaRecall": 0.28,
+            "deltaPrecision": 0
+          },
+          "fileIndexed": {
+            "control": {
+              "recall": 0.5,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.9,
+              "precision": 1
+            },
+            "deltaRecall": 0.4,
+            "deltaPrecision": 0
+          }
+        },
+        {
+          "task": "axios-AxiosHeaders",
+          "repo": "axios",
+          "symbol": "AxiosHeaders",
+          "oldTruthN": 24,
+          "frozenTruthN": 40,
+          "frozenExternalN": 39,
+          "steps": {
+            "control": 21,
+            "treatment": 8,
+            "delta": -13
+          },
+          "original": {
+            "control": {
+              "recall": 0.42,
+              "precision": 0.67
+            },
+            "treatment": {
+              "recall": 0.54,
+              "precision": 0.52
+            },
+            "deltaRecall": 0.12
+          },
+          "symbolAll": {
+            "control": {
+              "recall": 0.25,
+              "precision": 0.67
+            },
+            "treatment": {
+              "recall": 0.38,
+              "precision": 0.6
+            },
+            "deltaRecall": 0.13,
+            "deltaPrecision": -0.07
+          },
+          "symbolExternal": {
+            "control": {
+              "recall": 0.26,
+              "precision": 0.67
+            },
+            "treatment": {
+              "recall": 0.36,
+              "precision": 0.56
+            },
+            "deltaRecall": 0.1,
+            "deltaPrecision": -0.11
+          },
+          "symbolIndexed": {
+            "control": {
+              "recall": 0.29,
+              "precision": 0.67
+            },
+            "treatment": {
+              "recall": 0.44,
+              "precision": 0.6
+            },
+            "deltaRecall": 0.15,
+            "deltaPrecision": -0.07
+          },
+          "fileAll": {
+            "control": {
+              "recall": 0.39,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.54,
+              "precision": 1
+            },
+            "deltaRecall": 0.15,
+            "deltaPrecision": 0
+          },
+          "fileIndexed": {
+            "control": {
+              "recall": 0.5,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.68,
+              "precision": 1
+            },
+            "deltaRecall": 0.18,
+            "deltaPrecision": 0
+          }
+        },
+        {
+          "task": "flask-render_template",
+          "repo": "flask",
+          "symbol": "render_template",
+          "oldTruthN": 19,
+          "frozenTruthN": 26,
+          "frozenExternalN": 26,
+          "steps": {
+            "control": 19,
+            "treatment": 17,
+            "delta": -2
+          },
+          "original": {
+            "control": {
+              "recall": 0.89,
+              "precision": 0.89
+            },
+            "treatment": {
+              "recall": 0.95,
+              "precision": 1
+            },
+            "deltaRecall": 0.06
+          },
+          "symbolAll": {
+            "control": {
+              "recall": 0.65,
+              "precision": 0.89
+            },
+            "treatment": {
+              "recall": 0.69,
+              "precision": 1
+            },
+            "deltaRecall": 0.04,
+            "deltaPrecision": 0.11
+          },
+          "symbolExternal": {
+            "control": {
+              "recall": 0.65,
+              "precision": 0.89
+            },
+            "treatment": {
+              "recall": 0.69,
+              "precision": 1
+            },
+            "deltaRecall": 0.04,
+            "deltaPrecision": 0.11
+          },
+          "symbolIndexed": {
+            "control": {
+              "recall": 0.68,
+              "precision": 0.89
+            },
+            "treatment": {
+              "recall": 0.72,
+              "precision": 1
+            },
+            "deltaRecall": 0.04,
+            "deltaPrecision": 0.11
+          },
+          "fileAll": {
+            "control": {
+              "recall": 1,
+              "precision": 1
+            },
+            "treatment": {
+              "recall": 0.91,
+              "precision": 1
+            },
+            "deltaRecall": -0.09,
+            "deltaPrecision": 0
+          },
+          "fileIndexed": {
+            "control": {
+              "recall": 1,
+              "precision": 0.91
+            },
+            "treatment": {
+              "recall": 1,
+              "precision": 1
+            },
+            "deltaRecall": 0,
+            "deltaPrecision": 0.09
+          }
+        }
+      ]
+    }
+  }
+}
