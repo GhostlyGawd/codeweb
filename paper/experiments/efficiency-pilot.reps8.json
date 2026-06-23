@@ -1,0 +1,50 @@
+{
+  "runDate": "2026-06-23",
+  "runId": "wf_12660328-d4d",
+  "engineCommit": "c892f50",
+  "gradingLevel": "symbol (flat frozen-truth id set; the stricter lens — penalizes codeweb's import/test attribution being a function vs the rule's <module>). File-level paired delta is higher (see regrade.json).",
+  "note": "8 ENGINE-FROZEN reps (engine held at main/c892f50), graded against the committed frozen truth (efficiency-pilot.truth.json); the per-run oracle was SKIPPED. The headline is mean +/- SD of the per-rep paired delta (treatment[codeweb] - control[grep]); the SD is the noise floor a real engine effect must clear. Per-rep foundCallers/commands omitted here for size (reproducible via the workflow). integrity: control honored no-codeweb; treatment used codeweb every rep.",
+  "config": { "tasks": ["axios-merge", "axios-AxiosError", "axios-AxiosHeaders", "flask-render_template"], "repos": ["axios", "flask"], "reps": 8, "frozenTruth": true, "frontierBaseModel": true },
+  "headline": {
+    "reps": 8,
+    "pairedDeltaRecall": { "mean": 0.265, "sd": 0.045, "n": 8 },
+    "pairedDeltaPrecision": { "mean": 0.199, "sd": 0.147, "n": 8 },
+    "pairedDeltaSteps": { "mean": -6.844, "sd": 3.327, "n": 8 }
+  },
+  "interpretation": {
+    "recall": "mean / sd ~= 5.9; all 8 per-rep deltas positive (0.19-0.31). Robust real effect well above the noise floor.",
+    "steps": "mean / sd ~= 2.1; 7/8 reps negative (one rep tied at 0). Real efficiency win, noisier than recall.",
+    "precision": "mean / sd ~= 1.4; one rep negative. Positive lean but not robust at n=8.",
+    "verdict": "Under engine-frozen reps and the stricter symbol-level frozen truth, codeweb improves caller-discovery RECALL by ~0.27 with the effect ~6x its measurement noise, plus a ~34% step reduction. This is the defensible signal: it is not noise."
+  },
+  "perTaskAgg": [
+    { "task": "axios-merge", "repo": "axios", "symbol": "merge", "kind": "function", "truthN": 7, "reps": 8,
+      "control": { "recall": { "mean": 0.43, "sd": 0.075 }, "precision": { "mean": 0.678, "sd": 0.103 }, "steps": { "mean": 14.25, "sd": 2.375 } },
+      "treatment": { "recall": { "mean": 0.859, "sd": 0.133 }, "precision": { "mean": 0.933, "sd": 0.072 }, "steps": { "mean": 15.375, "sd": 2.504 } },
+      "delta": { "recall": { "mean": 0.429, "sd": 0.187 }, "precision": { "mean": 0.255, "sd": 0.145 }, "steps": { "mean": 1.125, "sd": 4.051 } } },
+    { "task": "axios-AxiosError", "repo": "axios", "symbol": "AxiosError", "kind": "class", "truthN": 58, "reps": 8,
+      "control": { "recall": { "mean": 0.308, "sd": 0.032 }, "precision": { "mean": 0.544, "sd": 0.104 }, "steps": { "mean": 27.75, "sd": 7.166 } },
+      "treatment": { "recall": { "mean": 0.67, "sd": 0 }, "precision": { "mean": 0.78, "sd": 0 }, "steps": { "mean": 11.625, "sd": 3.852 } },
+      "delta": { "recall": { "mean": 0.363, "sd": 0.032 }, "precision": { "mean": 0.236, "sd": 0.104 }, "steps": { "mean": -16.125, "sd": 9.109 } } },
+    { "task": "axios-AxiosHeaders", "repo": "axios", "symbol": "AxiosHeaders", "kind": "class", "truthN": 40, "reps": 8,
+      "control": { "recall": { "mean": 0.232, "sd": 0.032 }, "precision": { "mean": 0.61, "sd": 0.138 }, "steps": { "mean": 23.125, "sd": 2.475 } },
+      "treatment": { "recall": { "mean": 0.405, "sd": 0.038 }, "precision": { "mean": 0.628, "sd": 0.055 }, "steps": { "mean": 12.125, "sd": 5.842 } },
+      "delta": { "recall": { "mean": 0.173, "sd": 0.059 }, "precision": { "mean": 0.017, "sd": 0.143 }, "steps": { "mean": -11, "sd": 5.345 } } },
+    { "task": "flask-render_template", "repo": "flask", "symbol": "render_template", "kind": "function", "truthN": 26, "reps": 8,
+      "control": { "recall": { "mean": 0.571, "sd": 0.092 }, "precision": { "mean": 0.553, "sd": 0.355 }, "steps": { "mean": 15.75, "sd": 4.59 } },
+      "treatment": { "recall": { "mean": 0.668, "sd": 0.056 }, "precision": { "mean": 0.838, "sd": 0.286 }, "steps": { "mean": 14.375, "sd": 1.996 } },
+      "delta": { "recall": { "mean": 0.096, "sd": 0.142 }, "precision": { "mean": 0.285, "sd": 0.604 }, "steps": { "mean": -1.375, "sd": 4.749 } } }
+  ],
+  "perRepMeanDelta": [
+    { "rep": 1, "deltaRecall": 0.3, "deltaPrecision": 0.35, "deltaSteps": -5.5, "controlRecall": 0.36, "treatmentRecall": 0.66 },
+    { "rep": 2, "deltaRecall": 0.31, "deltaPrecision": 0.27, "deltaSteps": -5.25, "controlRecall": 0.37, "treatmentRecall": 0.69 },
+    { "rep": 3, "deltaRecall": 0.25, "deltaPrecision": 0.12, "deltaSteps": -9, "controlRecall": 0.41, "treatmentRecall": 0.65 },
+    { "rep": 4, "deltaRecall": 0.21, "deltaPrecision": -0.06, "deltaSteps": -7.75, "controlRecall": 0.41, "treatmentRecall": 0.62 },
+    { "rep": 5, "deltaRecall": 0.27, "deltaPrecision": 0.04, "deltaSteps": -7.75, "controlRecall": 0.4, "treatmentRecall": 0.67 },
+    { "rep": 6, "deltaRecall": 0.28, "deltaPrecision": 0.29, "deltaSteps": -11, "controlRecall": 0.37, "treatmentRecall": 0.65 },
+    { "rep": 7, "deltaRecall": 0.19, "deltaPrecision": 0.3, "deltaSteps": 0, "controlRecall": 0.4, "treatmentRecall": 0.59 },
+    { "rep": 8, "deltaRecall": 0.31, "deltaPrecision": 0.28, "deltaSteps": -8.5, "controlRecall": 0.37, "treatmentRecall": 0.68 }
+  ],
+  "means": { "control": { "recall": 0.39, "precision": 0.6, "steps": 20.22 }, "treatment": { "recall": 0.65, "precision": 0.79, "steps": 13.38 } },
+  "integrity": { "controlUsedCodewebViolations": [], "treatmentSkippedCodeweb": [] }
+}

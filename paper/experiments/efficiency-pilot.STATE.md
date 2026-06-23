@@ -90,8 +90,8 @@ the SAME pilot (`run4.json`):
   oracle scores as extras) and `<module>`-only importers / the anonymous default-export fn node
   (xhr.js:dispatchXhrRequest has no symbol node).
 
-## Lever #1 (2026-06-23): frozen truth FROZEN + harness wired + run3/run4 REGRADED
-The freeze-truth blocker is largely cleared. What landed (branch `feat/pilot-frozen-truth`):
+## Lever #1 (2026-06-23): frozen truth FROZEN + harness wired + regraded + 8 ENGINE-FROZEN REPS DONE
+The freeze-truth blocker is CLEARED and the noise floor is measured. What landed (branch `feat/pilot-frozen-truth`):
 - **`paper/experiments/efficiency-pilot.truth.json`** — hand-verified caller sets for all 4 targets,
   built by reconciling codeweb `--dependents` against an INDEPENDENT exhaustive grep+read (one thorough
   pass/target) + adjudication. Truth is independent of codeweb's coverage (a real site in a file the
@@ -120,9 +120,26 @@ The freeze-truth blocker is largely cleared. What landed (branch `feat/pilot-fro
   Paired delta is POSITIVE for codeweb in 9/10 lenses (lone exception: run3 file-full −0.01, a tie); the
   step win is large + oracle-independent; run4 > run3 on every lens. BUT the engine CHANGED between run3
   and run4, so that gap still conflates noise + real effect — hence the reps below.
-- **REMAINING sub-step (needs user opt-in — multi-agent, ~0.6M tok/rep):** run N engine-frozen reps at
-  the current `main` engine to get `mean(delta) ± SD(delta)`. The SD is the noise floor; an engine change
-  whose delta-shift exceeds it is a real win. See "How to re-run".
+- **8 ENGINE-FROZEN REPS — DONE (`efficiency-pilot.reps8.json`, run `wf_12660328-d4d`, engine `c892f50`):**
+  oracle skipped, graded vs the frozen truth at SYMBOL level (the stricter lens). Headline = mean ± SD of
+  the per-rep paired delta (treatment − control), n=8:
+
+  | metric    | mean ± SD        | signal                                                    |
+  |-----------|------------------|-----------------------------------------------------------|
+  | recall    | **+0.265 ± 0.045** | ~5.9× SD; **all 8 reps positive (0.19–0.31)** → robust    |
+  | steps     | **−6.84 ± 3.33**   | ~2.1× SD; 7/8 reps negative (~34% fewer: 13.4 vs 20.2)    |
+  | precision | +0.199 ± 0.147   | ~1.4× SD; one rep negative → positive lean, not robust     |
+
+  Per-task ΔR ± SD: merge +0.43±0.19, AxiosError +0.36±0.03 (treatment recall SD=0 — codeweb's
+  `--dependents` is deterministic and the agent reported it faithfully), AxiosHeaders +0.17±0.06,
+  render_template +0.10±0.14. **The recall win clears the noise floor by ~6×** even under the stricter
+  symbol-level grading (file-level is higher; see regrade) — this is the defensible result lever #1 was
+  set up to produce: codeweb measurably improves frontier-agent caller-discovery recall + cuts steps ~34%.
+  Caveat: precision is a weak/noisy positive; render_template is the softest target (ΔR within ~1 SD of 0).
+  - **NOTE on the misfire:** the first launch passed `args` but the Workflow runtime delivered it as a JSON
+    STRING, so `args.truth` was undefined → it silently ran the legacy oracle path at reps=1 (~920k tokens
+    wasted). Fixed in `c…`→ the harness now `JSON.parse`s string args (commit `b626015`) with a regression
+    test. Re-launched clean. Lesson saved to memory `workflow-args-string`.
 
 ## Git state
 - Branch: `feat/pilot-frozen-truth` (off `origin/main` `1cfb4f5`), carrying the lever-#1 work + the folded
@@ -150,6 +167,8 @@ The freeze-truth blocker is largely cleared. What landed (branch `feat/pilot-fro
 - **Frozen truth: `paper/experiments/efficiency-pilot.truth.json`** (lever #1; hand-verified, validated).
 - **Regrade: `paper/experiments/efficiency-pilot.regrade.mjs`** → `efficiency-pilot.regrade.json`
   (deterministic; rescores committed runs vs frozen truth; symbol/file × full/indexed/external lenses).
+- **Engine-frozen reps result: `paper/experiments/efficiency-pilot.reps8.json`** (8 reps, frozen truth,
+  symbol-level; headline mean±SD paired delta + per-task + per-rep; commands omitted for size).
 - **Harness test: `tests/efficiency-pilot-harness.test.mjs`** (stubs runtime, validates oracle-skip +
   rep loop + mean±SD aggregation without real agents).
 - Engine fix: `scripts/extract-symbols.mjs` (import bindings + member-access), `scripts/lib/graph-ops.mjs`
@@ -181,12 +200,14 @@ default-export attribution (`cb325f4`), class-usage `ref` edges (`dcc3e42`, the 
 `.call()/.apply()` chains (`e662e5f`, the merge gap), object-alias anchor pollution (`c892f50`). Run 4
 = codeweb wins all axes. Remaining, in priority:
 
-1. **FREEZE a hand-verified truth set** — ✅ DONE (see "Lever #1" section above): `truth.json` committed +
-   validated, harness takes `args.truth`/`args.reps`, run3/run4 regraded (paired delta +0.09→+0.20 file-
-   indexed, step win −4.25→−8.25). **Only the engine-frozen REPS remain** (multi-agent; needs opt-in) to
-   get `mean(delta) ± SD(delta)` and pin the noise floor. NOTE the truth is STRICTER than the old per-run
-   oracles (it includes the import/test/smoke sites codeweb misses), so frozen ABSOLUTE recalls are lower
-   than run4's oracle reported — the POSITIVE PAIRED DELTA across lenses is the trustworthy signal.
+1. **FREEZE a hand-verified truth set** — ✅ DONE INCL. THE REPS (see "Lever #1" section above): `truth.json`
+   committed + validated; harness takes `args.truth`/`args.reps`; run3/run4 regraded; **8 engine-frozen reps
+   measured the noise floor — recall +0.265 ± 0.045 (all 8 reps positive, ~6× SD), steps −6.84 ± 3.33.** The
+   defensible claim holds: codeweb improves frontier-agent caller-discovery recall above the noise + cuts
+   steps ~34%. NOTE the truth is STRICTER than the old per-run oracles (it includes the import/test/smoke
+   sites codeweb misses), so frozen ABSOLUTE recalls are lower than run4's oracle reported — the POSITIVE
+   PAIRED DELTA is the trustworthy signal. Next: fold into the paper (Theme-5b) + lever #3 (tokens/wall-clock,
+   more targets/repos). To re-confirm or extend, bump `args.reps` and re-run.
    - **On the swing as a metric (design note):** the run-to-run swing is oracle *measurement noise*
      shared by both arms, not a codeweb-vs-grep quantity — record it as a test-retest RELIABILITY caveat
      (limitations section), not a head-to-head metric. Track the **paired delta** (treatment−control) per
