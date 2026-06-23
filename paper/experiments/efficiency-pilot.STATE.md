@@ -141,6 +141,38 @@ The freeze-truth blocker is CLEARED and the noise floor is measured. What landed
     wasted). Fixed in `c…`→ the harness now `JSON.parse`s string args (commit `b626015`) with a regression
     test. Re-launched clean. Lesson saved to memory `workflow-args-string`.
 
+## Lever #3 (2026-06-23): TOKENS + WALL-CLOCK instrumented — the missing efficiency axis, measured POST-HOC on the reps8 run (no new spend)
+reps8 measured recall + steps, but steps were SELF-REPORTED and tokens/wall-clock were never captured.
+Instead of re-running (~5M tok), I recovered runtime efficiency from the reps8 run's OWN Workflow journal
++ per-agent transcripts (they survive in the session dir). New `paper/experiments/efficiency-pilot.usage.mjs`
+(deterministic, NO agents) joins the 64 `workflow_agent` events (label→arm/task/rep, agentId, toolCalls,
+durationMs) to `agent-<id>.jsonl` (summed Anthropic usage + timestamp span) and emits the SAME paired-delta
+(treatment−control) mean±SD the harness uses, into `efficiency-pilot.usage.json`. Covered by
+`tests/efficiency-pilot-usage.test.mjs` (pure parseLabel/stat/aggregateUsage + a synthetic journal+transcript
+CLI fixture; +4 tests → suite **342 green**). NOTE: the journal's own `tokens` field has opaque semantics (≠ input+output),
+so tokens are summed from transcripts, not read off the journal.
+
+Headline (n=8 reps, 64/64 agents joined, model `claude-opus-4-8[1m]`; NEGATIVE = codeweb cheaper):
+
+| metric              | paired delta ± SD        | S/N  | read                                                                 |
+|---------------------|--------------------------|------|---------------------------------------------------------------------|
+| toolCalls (runtime) | **−6.44 ± 3.11**         | 2.07 | robust win; **VALIDATES** the self-reported step delta −6.84 ± 3.33  |
+| totalTokens         | **−910,139 ± 394,157**   | 2.31 | robust win — ~44% fewer (control 2.07M → treatment 1.16M tokens/rep) |
+| outputTokens        | −827 ± 2393              | 0.35 | WASH (honest null) — generation effort unchanged                    |
+| wallMs              | −35,932 ± 57,009         | 0.63 | weak/noisy lean, concurrency-confounded — NOT load-bearing          |
+
+- The win is **less context-loading, not less thinking**: the total-token drop is cacheRead (1.83M→0.99M)
+  + input (67k→50k); output (generation) is flat (7.75k→6.92k). Fewer tool calls → fewer reads → less
+  context processed — exactly codeweb's claimed mechanism (one `--dependents` query replaces grep→read→trace).
+- Concentrated on the high-fan-out targets: AxiosError (tools −15.9, total −2.8M) + AxiosHeaders (−10.9,
+  −1.07M); merge/render_template ~flat — matches the recall story (those two were codeweb's recall wins).
+- **Net: the efficiency claim no longer rests on self-reported steps alone.** Two robust RUNTIME-measured
+  axes (tool-calls + total tokens) clear the noise floor (S/N ~2); output-tokens + wall-clock are honest nulls.
+- Re-run on any pilot run: `node paper/experiments/efficiency-pilot.usage.mjs --journal <path/to/wf_*.json>`.
+- CAVEAT: usage.json is a MEASURED artifact like reps8.json — derived from session-local transcripts (not
+  committed, like `.codeweb/`); source run id is recorded in `usage.json.source` for traceability. wallMs is
+  contention-sensitive (agents ran under a shared concurrency cap) — a clean wall-clock would need serialized runs.
+
 ## Git state
 - Branch: `feat/pilot-frozen-truth` (off `origin/main` `1cfb4f5`), carrying the lever-#1 work + the folded
   post-merge STATE commit (`a5b45e8`, cherry-picked as `dfd9f96`). PR-ready; not yet pushed.
@@ -222,8 +254,12 @@ default-export attribution (`cb325f4`), class-usage `ref` edges (`dcc3e42`, the 
    default-export fns as named `<file>:<default>` nodes (xhr.js dispatchXhrRequest has no node → its
    AxiosHeaders.from use can't attribute). Both are real attribution-granularity fixes.
 3. **Scale the study (Theme-5b):** more targets (incl. low-fan-out controls), more repos (2nd Python +
-   a 3rd language), reps, AND the missing axis — instrument **tokens/wall-clock**, not just steps. The
-   step win (42% fewer) is the efficiency headline; tokens make it rigorous.
+   a 3rd language), reps. The missing **tokens/wall-clock axis is now DONE** (Lever #3 above: runtime
+   tool-calls −6.4±3.1 AND total tokens −910k±394k both clear the noise floor on the reps8 run; output-
+   tokens + wall-clock are honest nulls). Remaining for Theme-5b: fold Lever-#1 (recall) + Lever-#3
+   (tokens/tool-calls) into `paper.md` as Theme-5b (the published paper still reports only the H18 null),
+   and scale targets/repos. For NEW runs, run `efficiency-pilot.usage.mjs` against the run's journal to
+   get tokens/tool-calls/wall-clock for free.
 4. **Coverage gap:** `tests/unit/utils/` subdir tests were NOT indexed (merge.test.js absent from the
    graph) — the extractor/run excluded that path. Confirm the file-enumeration filter isn't dropping
    real source.
