@@ -1,9 +1,19 @@
 # Backlog — a parser-backed (tree-sitter) intelligence tier
 
-Status: **EXPLORE NEXT SESSION.** Approved in principle by the maintainer: *"I'm OK with dependencies
-that add significant intelligence and capability that aligns with our product goal."* This is the one
-deliberate fork away from the current zero-dependency, regex-based engine — so it gets its own
-exploration with an explicit go/no-go, not a quiet creep.
+Status: **SPIKED — recommendation: GO, staged & conditional.** The exploration called for below is
+done; see [`spike/tree-sitter/GO-NO-GO.md`](../spike/tree-sitter/GO-NO-GO.md) for the decision and
+[`spike/tree-sitter/`](../spike/tree-sitter/) for the quarantined proof (own `package.json`, nothing
+wired into the engine). Headline evidence on a TypeScript fixture: exact McCabe complexity diverges
+from the regex on **60% of symbols** (errors in *both* directions, so per-symbol ranking is corrupted,
+not merely noisy); **3** dynamic-dispatch call edges resolved (`this.m()` + typed receiver) vs **0**
+from the regex with the precision contract intact; output **byte-identical** across runs on a pinned
+grammar; ~**1.6 MB**/language vendored, pure WASM, no native toolchain. The actual merge (codeweb's
+first shipped runtime dependency) remains the maintainer's call — the spike informs it.
+
+Originally approved in principle by the maintainer: *"I'm OK with dependencies that add significant
+intelligence and capability that aligns with our product goal."* This is the one deliberate fork away
+from the current zero-dependency, regex-based engine — so it gets its own exploration with an explicit
+go/no-go, not a quiet creep.
 
 ## Why this is the next frontier
 
