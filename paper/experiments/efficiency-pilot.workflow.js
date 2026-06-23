@@ -101,9 +101,9 @@ const treatmentPrompt = (t) => `${COMMON}
 
 TASK: find ALL caller symbols that reference **${t.symbol}** (${t.kind}) — defined in ${t.repo} at \`${t.file}\` — i.e. every function/method/module you would have to update if you changed it.
 
-CONDITION: TREATMENT. codeweb is already set up; the graph for ${t.repo} is at \`${graphOf(t)}\`. Use it — that is your advantage:
-  node ${ROOT}/scripts/query.mjs ${graphOf(t)} --callers ${t.symbolId} --json
-(\`--impact ${t.symbolId} --json\` gives transitive blast radius.) Verify/triage as much as you judge necessary, but lean on the tool.
+CONDITION: TREATMENT. codeweb is already set up; the graph for ${t.repo} is at \`${graphOf(t)}\`. Use it — that is your advantage. The unified query returns EVERY dependent (call ∪ import ∪ inherit ∪ test) in ONE shot, with a byKind breakdown:
+  node ${ROOT}/scripts/query.mjs ${graphOf(t)} --dependents ${t.symbolId} --json
+Also available: --callers (call-only, highest precision), --tests, --impact (transitive blast radius). Lean on the tool; triage/verify with the source as much as you judge necessary (e.g. a barrel-import dependent may be a file-level edge worth confirming).
 
 Report ${ID_FMT} (query --callers already returns this format). Log every action in \`commands\` (one verbatim entry each, in order), set stepCount accordingly, usedCodeweb=true. Return foundCallers, commands, stepCount, usedCodeweb, confidence.`
 

@@ -22,7 +22,8 @@ import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symb
 
 // F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
 // v2: nodes carry complexity/maxDepth (F4) + the cache holds per-file edge lists + a symbol signature (F9).
-const SCANNER_VERSION = 2;
+// v3: namespace/default-import member-access resolution (util.merge() / new Default()) -> new call edges.
+const SCANNER_VERSION = 3;
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -290,16 +291,18 @@ function resolveImport(fromAbs, spec) {
   for (const c of cands) if (relSet.has(c)) return c;
   return null;
 }
-const aliasByFile = new Map(); // fileAbs -> Map(localName -> symbolId in the target file)
+const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
+const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
 const importEdges = [];
 const reqNamed = /(?:const|let|var)\s*\{([^}]*)\}\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
-const reqNs = /(?:const|let|var)\s+[\w$]+\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
+const reqDefault = /(?:const|let|var)\s+([\w$]+)\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
 const esNamed = /import\s+(?:[\w$]+\s*,\s*)?\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g;
-const esOther = /import\s+(?:[\w$]+|\*\s+as\s+[\w$]+)\s+from\s*['"]([^'"]+)['"]/g;
+const esStar = /import\s+\*\s+as\s+([\w$]+)\s+from\s*['"]([^'"]+)['"]/g;
+const esDefault = /import\s+([\w$]+)\s*(?:,\s*\{[^}]*\})?\s+from\s*['"]([^'"]+)['"]/g;
 const esSide = /import\s+['"]([^'"]+)['"]/g;
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
-  const text = fsRec.text, aId = anchorId(rel(f)), amap = new Map();
+  const text = fsRec.text, aId = anchorId(rel(f)), amap = new Map(), nsmap = new Map();
   let m;
   const addNamed = (namesStr, spec) => {
     const target = resolveImport(f, spec); if (!target) return;
@@ -311,13 +314,27 @@ for (const f of files) {
       if (nodeIdSet.has(symId)) { amap.set(local, symId); if (aId && aId !== symId) importEdges.push([aId, symId]); }
     }
   };
-  const addNs = (spec) => { const t = resolveImport(f, spec); if (!t) return; const tA = anchorId(t); if (aId && tA && aId !== tA) importEdges.push([aId, tA]); };
+  // Namespace (`import * as X`) / default (`import X from` / `const X = require`): X is the imported
+  // MODULE OBJECT. Record X -> target file so `X.member(...)` resolves to target:member in
+  // deriveFileEdges; for a default import also alias X -> the target's default export (≈ anchor) so
+  // `new X()` / `X()` resolve. The coarse file-anchor import edge is preserved either way.
+  const addModuleBinding = (local, spec, isDefault) => {
+    const t = resolveImport(f, spec); if (!t) return;
+    if (local) nsmap.set(local, t);
+    const tA = anchorId(t);
+    if (!tA) return;
+    if (isDefault && local && !amap.has(local) && aId !== tA) amap.set(local, tA);
+    if (aId && aId !== tA) importEdges.push([aId, tA]);
+  };
+  const addSide = (spec) => { const t = resolveImport(f, spec); if (!t) return; const tA = anchorId(t); if (aId && tA && aId !== tA) importEdges.push([aId, tA]); };
   while ((m = reqNamed.exec(text))) addNamed(m[1], m[2]);
   while ((m = esNamed.exec(text))) addNamed(m[1], m[2]);
-  while ((m = reqNs.exec(text))) addNs(m[1]);
-  while ((m = esOther.exec(text))) addNs(m[1]);
-  while ((m = esSide.exec(text))) addNs(m[1]);
+  while ((m = reqDefault.exec(text))) addModuleBinding(m[1], m[2], true);
+  while ((m = esStar.exec(text))) addModuleBinding(m[1], m[2], false);
+  while ((m = esDefault.exec(text))) addModuleBinding(m[1], m[2], true);
+  while ((m = esSide.exec(text))) addSide(m[1]);
   if (amap.size) aliasByFile.set(f, amap);
+  if (nsmap.size) nsAliasByFile.set(f, nsmap);
 }
 
 // ---- derive call edges (F9: incremental, per-file, cacheable) ------------------------------
@@ -334,7 +351,7 @@ const symbolSig = sha1(nodes.map((n) => n.id).slice().sort().join('\n'));
 // Pure w.r.t. the file: returns {edges, hasModule, ambiguous}. The precision gate (alias > same-file >
 // unique-global, drop-ambiguous) is unchanged — only the plumbing moved into a function so it can be
 // cached per file and skipped when the file + symbol set are unchanged.
-function deriveFileEdges(r, lines, ranges, aliasMap) {
+function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap) {
   const local = []; const localSet = new Set();
   let hasModule = false, ambiguous = 0;
   const isPy = r.endsWith('.py');
@@ -363,6 +380,19 @@ function deriveFileEdges(r, lines, ranges, aliasMap) {
     const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
     local.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
   };
+  // Push an edge to an ALREADY-RESOLVED callee id — used for namespace/default import member-access,
+  // where the callee is resolved via the import binding rather than bare-name lookup.
+  const addResolved = (lineIdx, calleeId, kind = 'call') => {
+    const caller = enclosing(lineIdx + 1);
+    let callerId;
+    if (caller) callerId = caller.id; else { callerId = r + ':<module>'; hasModule = true; }
+    if (!calleeId || calleeId === callerId) return;
+    const key = callerId + ' ' + calleeId;
+    if (localSet.has(key)) return;
+    localSet.add(key);
+    const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
+    local.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
+  };
   const callRe = /([A-Za-z_$][\w$]*)\s*\(/g;
   const refRe = /[(,]\s*([A-Za-z_$][\w$]*)\s*(?=[,)])/g;
   const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g;
@@ -383,7 +413,17 @@ function deriveFileEdges(r, lines, ranges, aliasMap) {
     }
     callRe.lastIndex = 0; let m;
     while ((m = callRe.exec(ln))) {
-      if (ln[m.index - 1] === '.') continue; // method/property call (obj.fn()) — not a top-level symbol
+      if (ln[m.index - 1] === '.') {
+        // member call obj.fn(): resolve ONLY when obj is a namespace/default import alias (a param or
+        // local obj.method() must stay unresolved — see reference-edges PRECISION). This recovers the
+        // cross-file usage the bare-name pass can't see (util.merge(), AxiosHeaders.from()).
+        const om = /([A-Za-z_$][\w$]*)$/.exec(ln.slice(0, m.index - 1));
+        if (om && nsAliasMap && nsAliasMap.has(om[1])) {
+          const calleeId = nsAliasMap.get(om[1]) + ':' + m[1];
+          if (nodeIdSet.has(calleeId)) addResolved(i, calleeId, 'call');
+        }
+        continue; // not an import-alias member -> stay precision-safe (no edge)
+      }
       addEdge(i, m[1]);
     }
     refRe.lastIndex = 0;
@@ -406,7 +446,7 @@ for (const f of edgeFiles) {
   if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges) {
     result = { edges: prev.edges, hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0 }; // reuse
   } else {
-    result = deriveFileEdges(r, lines, ranges, aliasByFile.get(f));
+    result = deriveFileEdges(r, lines, ranges, aliasByFile.get(f), nsAliasByFile.get(f));
     edgedCount++;
   }
   if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; }
