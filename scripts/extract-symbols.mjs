@@ -325,6 +325,7 @@ for (const n of nodes) { if (!byName.has(n.label)) byName.set(n.label, []); byNa
 // ---- resolve imports: aliases (for accurate cross-file calls) + import edges ----
 const relSet = new Set(files.map(rel));
 const nodeIdSet = new Set(nodes.map((n) => n.id));
+const kindById = new Map(nodes.map((n) => [n.id, n.kind])); // for class-usage ref edges
 const anchorByFile = new Map(); // rel -> {id, loc} most-substantial symbol of the file
 for (const n of nodes) { const cur = anchorByFile.get(n.file); if (!cur || (n.loc || 0) > cur.loc) anchorByFile.set(n.file, { id: n.id, loc: n.loc || 0 }); }
 const anchorId = (r) => { const a = anchorByFile.get(r); return a ? a.id : null; };
@@ -381,6 +382,7 @@ for (const [fabs, recd] of fileSyms) {
 }
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
 const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
+const classAliasByFile = new Map(); // fileAbs -> Map(localName -> CLASS node id) [default import whose default export is a class — for instanceof/static-method ref edges]
 const importEdges = [];
 const reqNamed = /(?:const|let|var)\s*\{([^}]*)\}\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
 const reqDefault = /(?:const|let|var)\s+([\w$]+)\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
@@ -394,7 +396,7 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
   const r = rel(f), isPy = r.endsWith('.py');
-  const text = fsRec.text, aId = anchorId(r), amap = new Map(), nsmap = new Map();
+  const text = fsRec.text, aId = anchorId(r), amap = new Map(), nsmap = new Map(), classmap = new Map();
   let m;
   const addNamed = (namesStr, spec) => {
     const target = resolveImport(f, spec); if (!target) return;
@@ -449,6 +451,7 @@ for (const f of files) {
     const defSym = isDefault ? defaultExportByFile.get(t) : null;
     const aliasTarget = defSym || anchorId(t);
     if (isDefault && local && aliasTarget && !amap.has(local) && aId !== aliasTarget) amap.set(local, aliasTarget);
+    if (isDefault && local && defSym && kindById.get(defSym) === 'class') classmap.set(local, defSym); // X.static()/instanceof X -> ref to class
     const edgeTarget = defSym || (t + ':<module>');
     if (aId && aId !== edgeTarget) importEdges.push([aId, edgeTarget]);
   };
@@ -467,6 +470,7 @@ for (const f of files) {
   }
   if (amap.size) aliasByFile.set(f, amap);
   if (nsmap.size) nsAliasByFile.set(f, nsmap);
+  if (classmap.size) classAliasByFile.set(f, classmap);
 }
 
 // ---- derive call edges (F9: incremental, per-file, cacheable) ------------------------------
@@ -483,12 +487,16 @@ const symbolSig = sha1(nodes.map((n) => n.id).slice().sort().join('\n'));
 // Pure w.r.t. the file: returns {edges, hasModule, ambiguous}. The precision gate (alias > same-file >
 // unique-global, drop-ambiguous) is unchanged — only the plumbing moved into a function so it can be
 // cached per file and skipped when the file + symbol set are unchanged.
-function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap) {
+function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) {
   const local = []; const localSet = new Set();
   let hasModule = false, ambiguous = 0;
   const isPy = r.endsWith('.py');
   const enclosing = (lineNo) => { let best = null; for (const rg of ranges) if (lineNo >= rg.start && lineNo <= rg.end && (!best || rg.start > best.start)) best = rg; return best; };
   const sameFileByName = new Map(ranges.map((rg) => [rg.name, rg.id]));
+  const sameFileClasses = new Map(ranges.filter((rg) => rg.kind === 'class').map((rg) => [rg.name, rg.id]));
+  // The CLASS node a name refers to (imported class alias OR a same-file class) — for ref edges from
+  // `instanceof X` and `X.staticMethod()`. Null for non-classes (an object alias like `utils`).
+  const classOf = (name) => (classAliasMap && classAliasMap.get(name)) || sameFileClasses.get(name) || null;
   const addEdge = (lineIdx, name, kind = 'call') => {
     if (KEYWORDS.has(name)) return;
     const aliased = aliasMap && aliasMap.get(name);
@@ -506,10 +514,10 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap) {
       else { ambiguous++; return; }
     }
     if (!calleeId || calleeId === callerId) return;
-    const key = callerId + ' ' + calleeId;
+    const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
+    const key = callerId + ' ' + calleeId + ' ' + edgeKind;
     if (localSet.has(key)) return;
     localSet.add(key);
-    const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
     local.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
   };
   // Push an edge to an ALREADY-RESOLVED callee id — used for namespace/default import member-access,
@@ -519,15 +527,16 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap) {
     let callerId;
     if (caller) callerId = caller.id; else { callerId = r + ':<module>'; hasModule = true; }
     if (!calleeId || calleeId === callerId) return;
-    const key = callerId + ' ' + calleeId;
+    const edgeKind = ((kind === 'call' || kind === 'ref') && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
+    const key = callerId + ' ' + calleeId + ' ' + edgeKind; // call & ref to the same target coexist
     if (localSet.has(key)) return;
     localSet.add(key);
-    const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
     local.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
   };
   const callRe = /([A-Za-z_$][\w$]*)\s*\(/g;
   const refRe = /[(,]\s*([A-Za-z_$][\w$]*)\s*(?=[,)])/g;
   const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g;
+  const instanceofRe = /\binstanceof\s+([A-Za-z_$][\w$]*)/g; // `x instanceof X` -> ref to class X
   const pyBasesRe = /^\s*class\s+[A-Za-z_]\w*\s*\(([^)]*)\)/;
   for (let i = 0; i < lines.length; i++) {
     const ln = lines[i];
@@ -550,9 +559,13 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap) {
         // local obj.method() must stay unresolved — see reference-edges PRECISION). This recovers the
         // cross-file usage the bare-name pass can't see (util.merge(), AxiosHeaders.from()).
         const om = /([A-Za-z_$][\w$]*)$/.exec(ln.slice(0, m.index - 1));
-        if (om && nsAliasMap && nsAliasMap.has(om[1])) {
-          const calleeId = nsAliasMap.get(om[1]) + ':' + m[1];
-          if (nodeIdSet.has(calleeId)) addResolved(i, calleeId, 'call');
+        if (om) {
+          if (nsAliasMap && nsAliasMap.has(om[1])) {
+            const calleeId = nsAliasMap.get(om[1]) + ':' + m[1];
+            if (nodeIdSet.has(calleeId)) addResolved(i, calleeId, 'call');
+          }
+          const cls = classOf(om[1]);
+          if (cls) addResolved(i, cls, 'ref'); // X.staticMethod() -> the caller depends on the class X
         }
         continue; // not an import-alias member -> stay precision-safe (no edge)
       }
@@ -560,6 +573,8 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap) {
     }
     refRe.lastIndex = 0;
     while ((m = refRe.exec(ln))) addEdge(i, m[1]);
+    instanceofRe.lastIndex = 0;
+    while ((m = instanceofRe.exec(ln))) { const cls = classOf(m[1]); if (cls) addResolved(i, cls, 'ref'); }
   }
   return { edges: local, hasModule, ambiguous };
 }
@@ -578,7 +593,7 @@ for (const f of edgeFiles) {
   if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges) {
     result = { edges: prev.edges, hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0 }; // reuse
   } else {
-    result = deriveFileEdges(r, lines, ranges, aliasByFile.get(f), nsAliasByFile.get(f));
+    result = deriveFileEdges(r, lines, ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f));
     edgedCount++;
   }
   if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; }

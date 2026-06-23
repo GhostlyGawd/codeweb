@@ -18,7 +18,7 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, testersOf, importersOf, dependentsOf, impactOf, fileCycles, orphans } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, testersOf, importersOf, refsOf, dependentsOf, impactOf, fileCycles, orphans } from './lib/graph-ops.mjs';
 
 const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--json]`;
 function die(msg, code) { console.error(msg); process.exit(code); }
@@ -67,7 +67,7 @@ if (opts.query === 'callers' || opts.query === 'callees' || opts.query === 'test
   else {
     const results = dependentsOf(index, matched);
     const inheritIn = [...new Set(matched.flatMap((id) => [...(index.inheritIn.get(id) || [])]))].sort();
-    const byKind = { call: callersOf(index, matched), import: importersOf(index, matched), inherit: inheritIn, test: testersOf(index, matched) };
+    const byKind = { call: callersOf(index, matched), import: importersOf(index, matched), inherit: inheritIn, test: testersOf(index, matched), ref: refsOf(index, matched) };
     payload = { query: 'dependents', symbol: opts.symbol, matched, results, byKind, count: results.length };
   }
 } else if (opts.query === 'impact') {
@@ -99,7 +99,7 @@ if (p.query === 'callers' || p.query === 'callees' || p.query === 'tests') {
   for (const r of p.results) console.log(`  ${r}`);
 } else if (p.query === 'dependents') {
   const extra = p.matched.length > 1 ? ` (${p.matched.length} matches)` : '';
-  console.log(`dependents of ${p.symbol}${extra}: ${p.count} (call ${p.byKind.call.length}, import ${p.byKind.import.length}, inherit ${p.byKind.inherit.length}, test ${p.byKind.test.length})`);
+  console.log(`dependents of ${p.symbol}${extra}: ${p.count} (call ${p.byKind.call.length}, import ${p.byKind.import.length}, inherit ${p.byKind.inherit.length}, test ${p.byKind.test.length}, ref ${p.byKind.ref.length})`);
   for (const r of p.results) console.log(`  ${r}`);
 } else if (p.query === 'impact') {
   console.log(`impact of ${p.symbol}: ${p.count} functions across ${p.domains.length} domains`);
