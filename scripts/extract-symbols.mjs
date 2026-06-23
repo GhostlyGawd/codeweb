@@ -22,7 +22,9 @@ import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symb
 
 // F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
 // v2: nodes carry complexity/maxDepth (F4) + the cache holds per-file edge lists + a symbol signature (F9).
-const SCANNER_VERSION = 2;
+// v3: namespace/default-import member-access resolution (util.merge() / new Default()) -> new call edges.
+// v4: Python docstrings/comments masked before symbol+edge scan -> drops phantom symbols/edges.
+const SCANNER_VERSION = 4;
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -51,6 +53,49 @@ const KEYWORDS = new Set(['if','for','while','switch','catch','return','function
 function tryExec(cmd, args) { try { return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 28 }); } catch { return null; } }
 function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
 
+// Blank Python triple-quoted strings (docstrings) and `#` comments so the symbol/edge scanners never
+// see `def`/`class`/calls that live INSIDE documentation — the root cause of phantom symbols and
+// fabricated edges (e.g. flask helpers.py's make_response docstring fabricates a render_template
+// caller). Column- AND line-count-preserving (masked regions -> spaces) so the unmasked text's
+// bodyEnd/signature line offsets are unaffected. Single-line '...'/"..." strings are blanked first so
+// a `#` or `"""` inside them can't be mistaken for a comment/docstring delimiter. Best-effort, same
+// ethos as stripSC: escapes inside triple-strings aren't tracked, worst case is a slightly-off mask.
+function maskPy(text) {
+  const lines = text.split(/\r?\n/);
+  const out = [];
+  let triple = null; // active multi-line triple-quote delimiter ('"""' or "'''")
+  for (const line of lines) {
+    const n = line.length; let res = '', i = 0;
+    while (i < n) {
+      if (triple) {
+        const end = line.indexOf(triple, i);
+        if (end === -1) { res += ' '.repeat(n - i); i = n; }
+        else { res += ' '.repeat(end + 3 - i); i = end + 3; triple = null; }
+        continue;
+      }
+      const ch = line[i];
+      if (ch === '#') { res += ' '.repeat(n - i); i = n; continue; }      // comment to EOL
+      if (ch === '"' || ch === "'") {
+        const tri = line.substr(i, 3);
+        if (tri === '"""' || tri === "'''") {
+          const end = line.indexOf(tri, i + 3);
+          if (end === -1) { triple = tri; res += ' '.repeat(n - i); i = n; }   // opens, spans lines
+          else { res += ' '.repeat(end + 3 - i); i = end + 3; }                // single-line triple
+          continue;
+        }
+        let j = i + 1;                                                         // single-line string
+        while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
+        const stop = Math.min(j + 1, n);
+        res += ' '.repeat(stop - i); i = stop;
+        continue;
+      }
+      res += ch; i++;
+    }
+    out.push(res);
+  }
+  return out.join('\n');
+}
+
 // ---- enumerate source files ----
 function listFiles() {
   const viaRg = tryExec('rg', ['--files', root]);
@@ -74,7 +119,7 @@ const rel = (f) => relative(root, f).replace(/\\/g, '/');
 // ---- per-language regex symbol scan ----
 function scanSymbols(file, text) {
   const ext = extname(file).toLowerCase();
-  const lines = text.split(/\r?\n/);
+  const lines = (ext === '.py' ? maskPy(text) : text).split(/\r?\n/); // hide def/class inside docstrings
   const syms = [];
   const push = (name, line, kind, exported) => { if (name && !KEYWORDS.has(name)) syms.push({ name, line: line + 1, kind, exports: !!exported }); };
   if (ext === '.py') {
@@ -280,6 +325,7 @@ for (const n of nodes) { if (!byName.has(n.label)) byName.set(n.label, []); byNa
 // ---- resolve imports: aliases (for accurate cross-file calls) + import edges ----
 const relSet = new Set(files.map(rel));
 const nodeIdSet = new Set(nodes.map((n) => n.id));
+const kindById = new Map(nodes.map((n) => [n.id, n.kind])); // for class-usage ref edges
 const anchorByFile = new Map(); // rel -> {id, loc} most-substantial symbol of the file
 for (const n of nodes) { const cur = anchorByFile.get(n.file); if (!cur || (n.loc || 0) > cur.loc) anchorByFile.set(n.file, { id: n.id, loc: n.loc || 0 }); }
 const anchorId = (r) => { const a = anchorByFile.get(r); return a ? a.id : null; };
@@ -290,16 +336,67 @@ function resolveImport(fromAbs, spec) {
   for (const c of cands) if (relSet.has(c)) return c;
   return null;
 }
-const aliasByFile = new Map(); // fileAbs -> Map(localName -> symbolId in the target file)
+// Resolve a Python module spec to a repo-relative file (`x.py` or a package's `x/__init__.py`).
+//   level > 0 -> RELATIVE: climb `level` package dirs from the importing file, then append the dotted
+//               path. Anchored to the file's real location, so it can't collide with stdlib.
+//   level = 0 -> ABSOLUTE: suffix-match the dotted path against known files (sys.path roots unknown).
+//               Require >=2 segments so `import json`/`import os` can't grab a local single-name package
+//               (e.g. flask's own src/flask/json); the shortest match wins (deterministic).
+const pyFile = (stem) => { if (!stem) return null; for (const c of [stem + '.py', stem + '/__init__.py']) if (relSet.has(c)) return c; return null; };
+function resolvePyModule(fromAbs, level, dotted) {
+  const parts = dotted ? dotted.split('.').filter(Boolean) : [];
+  if (level > 0) {
+    let baseAbs = dirname(fromAbs);
+    for (let i = 1; i < level; i++) baseAbs = dirname(baseAbs);
+    const baseRel = rel(baseAbs).replace(/\\/g, '/');
+    return pyFile([baseRel, ...parts].filter(Boolean).join('/'));
+  }
+  if (parts.length < 2) return null;
+  const tail = parts.join('/');
+  let best = null;
+  for (const rp of relSet) {
+    const hit = rp === tail + '.py' || rp.endsWith('/' + tail + '.py') || rp === tail + '/__init__.py' || rp.endsWith('/' + tail + '/__init__.py');
+    if (hit && (!best || rp.length < best.length || (rp.length === best.length && rp < best))) best = rp;
+  }
+  return best;
+}
+// A file's DEFAULT EXPORT, when it is a single named symbol defined in that file (`export default
+// class X` / `export default function X` / `export default X;` / `export { X as default }` /
+// `module.exports = X`). Returns its node id, else null (an object/array/expression default — e.g.
+// `export default { merge, ... }` — has no single owning symbol, so a default import of it is a
+// MODULE dependency). Lets a default import attribute its coarse edge to the real exported symbol
+// (AxiosError) instead of an arbitrary anchor, while object-default barrels (utils) fall back to <module>.
+function defaultExportOf(r, text, names) {
+  let m;
+  if ((m = /export\s+default\s+(?:abstract\s+)?(?:async\s+)?(?:class|function\s*\*?)\s+([A-Za-z_$][\w$]*)/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
+  if ((m = /export\s*\{[^}]*?\b([A-Za-z_$][\w$]*)\s+as\s+default\b/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
+  if ((m = /export\s+default\s+([A-Za-z_$][\w$]*)\s*;/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
+  if ((m = /module\.exports\s*=\s*([A-Za-z_$][\w$]*)\s*;/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
+  return null;
+}
+const defaultExportByFile = new Map(); // rel -> node id of the single-symbol default export (if any)
+for (const [fabs, recd] of fileSyms) {
+  const rr = rel(fabs);
+  const ds = defaultExportOf(rr, recd.text, new Set(recd.ranges.map((rg) => rg.name)));
+  if (ds && nodeIdSet.has(ds)) defaultExportByFile.set(rr, ds);
+}
+const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
+const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
+const classAliasByFile = new Map(); // fileAbs -> Map(localName -> CLASS node id) [default import whose default export is a class — for instanceof/static-method ref edges]
 const importEdges = [];
 const reqNamed = /(?:const|let|var)\s*\{([^}]*)\}\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
-const reqNs = /(?:const|let|var)\s+[\w$]+\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
+const reqDefault = /(?:const|let|var)\s+([\w$]+)\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
 const esNamed = /import\s+(?:[\w$]+\s*,\s*)?\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g;
-const esOther = /import\s+(?:[\w$]+|\*\s+as\s+[\w$]+)\s+from\s*['"]([^'"]+)['"]/g;
+const esStar = /import\s+\*\s+as\s+([\w$]+)\s+from\s*['"]([^'"]+)['"]/g;
+const esDefault = /import\s+([\w$]+)\s*(?:,\s*\{[^}]*\})?\s+from\s*['"]([^'"]+)['"]/g;
 const esSide = /import\s+['"]([^'"]+)['"]/g;
+// Python (line-oriented, `m` flag): `from [.]*MODULE import NAMES` and `import MODULE [as A][, ...]`.
+const pyFrom = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
+const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]*(?:\s+as\s+\w+)?)*)/gm;
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
-  const text = fsRec.text, aId = anchorId(rel(f)), amap = new Map();
+  const r = rel(f), isPy = r.endsWith('.py');
+  const text = fsRec.text, aId = anchorId(r), amap = new Map(), nsmap = new Map(), classmap = new Map();
   let m;
   const addNamed = (namesStr, spec) => {
     const target = resolveImport(f, spec); if (!target) return;
@@ -311,13 +408,71 @@ for (const f of files) {
       if (nodeIdSet.has(symId)) { amap.set(local, symId); if (aId && aId !== symId) importEdges.push([aId, symId]); }
     }
   };
-  const addNs = (spec) => { const t = resolveImport(f, spec); if (!t) return; const tA = anchorId(t); if (aId && tA && aId !== tA) importEdges.push([aId, tA]); };
-  while ((m = reqNamed.exec(text))) addNamed(m[1], m[2]);
-  while ((m = esNamed.exec(text))) addNamed(m[1], m[2]);
-  while ((m = reqNs.exec(text))) addNs(m[1]);
-  while ((m = esOther.exec(text))) addNs(m[1]);
-  while ((m = esSide.exec(text))) addNs(m[1]);
+  // Python `from [.]*MOD import a, b as c`: each name is EITHER a submodule of MOD (-> module object,
+  // member-access binding) OR a symbol defined in MOD's file (-> precise alias, like addNamed). The
+  // coarse "imports this module" edge lands on the target's <module> node.
+  const addPyFrom = (level, dotted, namesStr) => {
+    const pkgFile = resolvePyModule(f, level, dotted);
+    for (const part of namesStr.replace(/[()]/g, '').split(',')) {
+      const seg = part.trim().split(/\s+as\s+/);
+      const orig = (seg[0] || '').trim(), local = (seg[seg.length - 1] || '').trim();
+      if (!orig || orig === '*') continue;
+      const sub = resolvePyModule(f, level, dotted ? dotted + '.' + orig : orig);
+      if (sub && sub !== pkgFile) { nsmap.set(local, sub); if (aId) importEdges.push([aId, sub + ':<module>']); continue; }
+      if (pkgFile) { const symId = pkgFile + ':' + orig; if (nodeIdSet.has(symId)) { amap.set(local, symId); if (aId && aId !== symId) importEdges.push([aId, symId]); } }
+    }
+  };
+  // Python `import a.b [as c], d`: bind a usable local name -> module object for member access. A
+  // dotted path with no alias binds Python's FIRST segment (`a` of `a.b.c`), which member-resolution
+  // can't key on, so it gets only the coarse module edge — no false member binding.
+  const addPyImports = (namesStr) => {
+    for (const part of namesStr.split(',')) {
+      const seg = part.trim().split(/\s+as\s+/);
+      const dotted = (seg[0] || '').trim(); if (!dotted) continue;
+      const alias = seg.length > 1 ? seg[1].trim() : null;
+      const t = resolvePyModule(f, 0, dotted); if (!t) continue;
+      const local = alias || (dotted.includes('.') ? null : dotted);
+      if (local) nsmap.set(local, t);
+      if (aId) importEdges.push([aId, t + ':<module>']);
+    }
+  };
+  // Namespace (`import * as X`) / default (`import X from` / `const X = require`): X is the imported
+  // MODULE OBJECT. Record X -> target file so `X.member(...)` resolves to target:member in
+  // deriveFileEdges; for a default import also alias X -> the target's default export (≈ anchor) so
+  // `new X()` / `X()` resolve. The COARSE "imports this module" edge lands on the target's <module>
+  // node (created on demand below), NOT on its anchor symbol — member-access now produces the precise
+  // per-symbol edges, so attributing the coarse edge to one symbol only pollutes its dependents.
+  const addModuleBinding = (local, spec, isDefault) => {
+    const t = resolveImport(f, spec); if (!t) return;
+    if (local) nsmap.set(local, t);
+    // A default import binds the target's default export: attribute to its single owning symbol when
+    // there is one (class/fn AxiosError), else the module object (object-default barrel -> <module>).
+    // A namespace import (`import * as X`) is always the module object.
+    // Alias the default import ONLY to a detected single-symbol default (class/fn/identifier). NO anchor
+    // fallback: for an object-literal or anonymous default the anchor is a DIFFERENT symbol, so aliasing
+    // to it made a bare `utils` reference fabricate a call to utils.js's largest symbol (e.g. merge).
+    const defSym = isDefault ? defaultExportByFile.get(t) : null;
+    if (isDefault && local && defSym && !amap.has(local) && aId !== defSym) amap.set(local, defSym);
+    if (isDefault && local && defSym && kindById.get(defSym) === 'class') classmap.set(local, defSym); // X.static()/instanceof X -> ref to class
+    const edgeTarget = defSym || (t + ':<module>');
+    if (aId && aId !== edgeTarget) importEdges.push([aId, edgeTarget]);
+  };
+  const addSide = (spec) => { const t = resolveImport(f, spec); if (!t) return; if (aId) importEdges.push([aId, t + ':<module>']); };
+  if (isPy) {
+    const pyText = maskPy(text); // don't bind imports that live in a docstring/comment
+    while ((m = pyFrom.exec(pyText))) addPyFrom(m[1].length, m[2], m[3]);
+    while ((m = pyImport.exec(pyText))) addPyImports(m[1]);
+  } else {
+    while ((m = reqNamed.exec(text))) addNamed(m[1], m[2]);
+    while ((m = esNamed.exec(text))) addNamed(m[1], m[2]);
+    while ((m = reqDefault.exec(text))) addModuleBinding(m[1], m[2], true);
+    while ((m = esStar.exec(text))) addModuleBinding(m[1], m[2], false);
+    while ((m = esDefault.exec(text))) addModuleBinding(m[1], m[2], true);
+    while ((m = esSide.exec(text))) addSide(m[1]);
+  }
   if (amap.size) aliasByFile.set(f, amap);
+  if (nsmap.size) nsAliasByFile.set(f, nsmap);
+  if (classmap.size) classAliasByFile.set(f, classmap);
 }
 
 // ---- derive call edges (F9: incremental, per-file, cacheable) ------------------------------
@@ -334,12 +489,16 @@ const symbolSig = sha1(nodes.map((n) => n.id).slice().sort().join('\n'));
 // Pure w.r.t. the file: returns {edges, hasModule, ambiguous}. The precision gate (alias > same-file >
 // unique-global, drop-ambiguous) is unchanged — only the plumbing moved into a function so it can be
 // cached per file and skipped when the file + symbol set are unchanged.
-function deriveFileEdges(r, lines, ranges, aliasMap) {
+function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) {
   const local = []; const localSet = new Set();
   let hasModule = false, ambiguous = 0;
   const isPy = r.endsWith('.py');
   const enclosing = (lineNo) => { let best = null; for (const rg of ranges) if (lineNo >= rg.start && lineNo <= rg.end && (!best || rg.start > best.start)) best = rg; return best; };
   const sameFileByName = new Map(ranges.map((rg) => [rg.name, rg.id]));
+  const sameFileClasses = new Map(ranges.filter((rg) => rg.kind === 'class').map((rg) => [rg.name, rg.id]));
+  // The CLASS node a name refers to (imported class alias OR a same-file class) — for ref edges from
+  // `instanceof X` and `X.staticMethod()`. Null for non-classes (an object alias like `utils`).
+  const classOf = (name) => (classAliasMap && classAliasMap.get(name)) || sameFileClasses.get(name) || null;
   const addEdge = (lineIdx, name, kind = 'call') => {
     if (KEYWORDS.has(name)) return;
     const aliased = aliasMap && aliasMap.get(name);
@@ -357,15 +516,29 @@ function deriveFileEdges(r, lines, ranges, aliasMap) {
       else { ambiguous++; return; }
     }
     if (!calleeId || calleeId === callerId) return;
-    const key = callerId + ' ' + calleeId;
+    const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
+    const key = callerId + ' ' + calleeId + ' ' + edgeKind;
     if (localSet.has(key)) return;
     localSet.add(key);
-    const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
+    local.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
+  };
+  // Push an edge to an ALREADY-RESOLVED callee id — used for namespace/default import member-access,
+  // where the callee is resolved via the import binding rather than bare-name lookup.
+  const addResolved = (lineIdx, calleeId, kind = 'call') => {
+    const caller = enclosing(lineIdx + 1);
+    let callerId;
+    if (caller) callerId = caller.id; else { callerId = r + ':<module>'; hasModule = true; }
+    if (!calleeId || calleeId === callerId) return;
+    const edgeKind = ((kind === 'call' || kind === 'ref') && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
+    const key = callerId + ' ' + calleeId + ' ' + edgeKind; // call & ref to the same target coexist
+    if (localSet.has(key)) return;
+    localSet.add(key);
     local.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
   };
   const callRe = /([A-Za-z_$][\w$]*)\s*\(/g;
   const refRe = /[(,]\s*([A-Za-z_$][\w$]*)\s*(?=[,)])/g;
   const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g;
+  const instanceofRe = /\binstanceof\s+([A-Za-z_$][\w$]*)/g; // `x instanceof X` -> ref to class X
   const pyBasesRe = /^\s*class\s+[A-Za-z_]\w*\s*\(([^)]*)\)/;
   for (let i = 0; i < lines.length; i++) {
     const ln = lines[i];
@@ -383,11 +556,36 @@ function deriveFileEdges(r, lines, ranges, aliasMap) {
     }
     callRe.lastIndex = 0; let m;
     while ((m = callRe.exec(ln))) {
-      if (ln[m.index - 1] === '.') continue; // method/property call (obj.fn()) — not a top-level symbol
+      if (ln[m.index - 1] === '.') {
+        // member call obj.fn(): resolve ONLY when obj is a namespace/default import alias (a param or
+        // local obj.method() must stay unresolved — see reference-edges PRECISION). This recovers the
+        // cross-file usage the bare-name pass can't see (util.merge(), AxiosHeaders.from()).
+        const before = ln.slice(0, m.index - 1);
+        const om = /([A-Za-z_$][\w$]*)$/.exec(before);
+        if (om) {
+          if (nsAliasMap && nsAliasMap.has(om[1])) {
+            const calleeId = nsAliasMap.get(om[1]) + ':' + m[1];
+            if (nodeIdSet.has(calleeId)) addResolved(i, calleeId, 'call');
+          }
+          const cls = classOf(om[1]);
+          if (cls) addResolved(i, cls, 'ref'); // X.staticMethod() -> the caller depends on the class X
+          // X.member.call(...) / X.member.apply(...): the real invocation is of X-file:member.
+          if ((m[1] === 'call' || m[1] === 'apply') && nsAliasMap) {
+            const chain = /([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)$/.exec(before);
+            if (chain && nsAliasMap.has(chain[1])) {
+              const calleeId = nsAliasMap.get(chain[1]) + ':' + chain[2];
+              if (nodeIdSet.has(calleeId)) addResolved(i, calleeId, 'call');
+            }
+          }
+        }
+        continue; // not an import-alias member -> stay precision-safe (no edge)
+      }
       addEdge(i, m[1]);
     }
     refRe.lastIndex = 0;
     while ((m = refRe.exec(ln))) addEdge(i, m[1]);
+    instanceofRe.lastIndex = 0;
+    while ((m = instanceofRe.exec(ln))) { const cls = classOf(m[1]); if (cls) addResolved(i, cls, 'ref'); }
   }
   return { edges: local, hasModule, ambiguous };
 }
@@ -399,14 +597,14 @@ const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; /
 for (const f of edgeFiles) {
   const { text, ranges } = fileSyms.get(f);
   const r = rel(f);
-  const lines = text.split(/\r?\n/);
+  const lines = (r.endsWith('.py') ? maskPy(text) : text).split(/\r?\n/); // no calls from docstrings/comments
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
   const prev = reuseEdges && oldCache.files[r];
   let result;
   if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges) {
     result = { edges: prev.edges, hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0 }; // reuse
   } else {
-    result = deriveFileEdges(r, lines, ranges, aliasByFile.get(f));
+    result = deriveFileEdges(r, lines, ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f));
     edgedCount++;
   }
   if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; }
@@ -424,7 +622,16 @@ if (newCache) newCache.symbolSig = symbolSig;
 // cross-file collisions and matches the original single-edgeSet behaviour exactly.
 let importEdgeCount = 0;
 const edgeKeys = new Set(edges.map((e) => e.from + ' ' + e.to));
+// A coarse module-import edge (namespace/default/side) targets the imported file's <module> node,
+// created on demand here so a symbol-less barrel still gets a node. This keeps the file-level "imports
+// this module" signal (fileCycles/coupling unchanged — same file-pair) without polluting a symbol.
+const ensureModuleNode = (id) => {
+  if (nodeIdSet.has(id)) return;
+  nodes.push({ id, label: '<module>', kind: 'module', file: idFile(id), line: 1, loc: 1, exports: false, domain: '', summary: '' });
+  nodeIdSet.add(id);
+};
 for (const [a, b] of importEdges) {
+  if (b.endsWith(':<module>')) ensureModuleNode(b);
   if (!nodeIdSet.has(a) || !nodeIdSet.has(b) || a === b) continue;
   const key = a + ' ' + b;
   if (edgeKeys.has(key)) continue;

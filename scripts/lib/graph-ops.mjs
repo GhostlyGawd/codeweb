@@ -35,6 +35,8 @@ export function buildIndex(graph) {
   const callOut = new Map();
   const inheritIn = new Map(); // reverse inherit: base -> {subclasses}, for impact reachability
   const testIn = new Map();    // F4: reverse `test` edges: prod symbol -> {test nodes exercising it}
+  const importIn = new Map();  // reverse `import` edges: symbol -> {symbols that import it}
+  const refIn = new Map();     // reverse `ref` edges: class -> {symbols using it via instanceof / static method}
   const hasIncoming = new Set();
   for (const e of graph.edges) {
     if (e.kind === 'call') {
@@ -51,11 +53,19 @@ export function buildIndex(graph) {
       if (!testIn.has(e.to)) testIn.set(e.to, new Set());
       testIn.get(e.to).add(e.from);
     }
+    if (e.kind === 'import') {
+      if (!importIn.has(e.to)) importIn.set(e.to, new Set());
+      importIn.get(e.to).add(e.from);
+    }
+    if (e.kind === 'ref') {
+      if (!refIn.has(e.to)) refIn.set(e.to, new Set());
+      refIn.get(e.to).add(e.from);
+    }
     // NOTE: `test` is intentionally EXCLUDED from hasIncoming — a symbol referenced only by tests is
     // still a production orphan (the signal F10 consumes). Production callers also exclude tests.
-    if (e.kind === 'call' || e.kind === 'import' || e.kind === 'inherit') hasIncoming.add(e.to);
+    if (e.kind === 'call' || e.kind === 'import' || e.kind === 'inherit' || e.kind === 'ref') hasIncoming.add(e.to);
   }
-  return { byId, callIn, callOut, inheritIn, testIn, hasIncoming };
+  return { byId, callIn, callOut, inheritIn, testIn, importIn, refIn, hasIncoming };
 }
 
 // Resolve a symbol to node ids: exact id wins; else every node whose label matches (sorted).
@@ -84,6 +94,19 @@ export function chooseCanonical(index, ids) {
 export const callersOf = (index, ids) => unionSorted(ids, index.callIn);
 export const calleesOf = (index, ids) => unionSorted(ids, index.callOut);
 export const testersOf = (index, ids) => unionSorted(ids, index.testIn); // F4: tests exercising a symbol
+export const importersOf = (index, ids) => unionSorted(ids, index.importIn); // symbols that import a symbol
+export const refsOf = (index, ids) => unionSorted(ids, index.refIn); // symbols using a class via instanceof / static method
+
+// Every distinct symbol that DEPENDS on a target, across all in-edge kinds (call ∪ import ∪ inherit ∪
+// test ∪ ref) — the "who would I have to touch if I changed this?" set. Unlike callersOf (call-only),
+// this surfaces cross-file importers, subclasses, and instanceof/static-method users an agent must
+// update on a refactor. Deterministic.
+export const dependentsOf = (index, ids) => {
+  const out = new Set();
+  for (const adj of [index.callIn, index.importIn, index.inheritIn, index.testIn, index.refIn])
+    for (const id of ids) for (const x of (adj.get(id) || [])) out.add(x);
+  return [...out].sort();
+};
 
 // Transitive reverse-call closure (blast radius) from all seeds, excluding the seeds themselves.
 export function impactOf(index, seedIds) {
@@ -136,7 +159,7 @@ export function fileCycles(graph) {
   const adj = new Map();
   const files = new Set();
   for (const e of graph.edges) {
-    if (e.kind !== 'call' && e.kind !== 'import' && e.kind !== 'inherit') continue;
+    if (e.kind !== 'call' && e.kind !== 'import' && e.kind !== 'inherit' && e.kind !== 'ref') continue;
     const f = fileOf.get(e.from), t = fileOf.get(e.to);
     if (!f || !t || f === t) continue;
     files.add(f); files.add(t);

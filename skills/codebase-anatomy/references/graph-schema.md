@@ -35,7 +35,7 @@ renderer. All examples below use synthetic values.
     {
       "from": "src/auth/login.ts:loginUser",
       "to": "src/db/query.ts:runQuery",
-      "kind": "call",                          // call | import | inherit (emitted) · dataflow (reserved)
+      "kind": "call",                          // call | import | inherit | ref | test (emitted) · dataflow (reserved)
       "weight": 1                              // number of occurrences; optional, default 1
     }
   ],
@@ -78,6 +78,15 @@ renderer. All examples below use synthetic values.
 - **`inherit`** — a class extends/subclasses another (`class X extends Y`, `class X(Y):`), resolved
   with the same precision gate as calls. Counts toward reachability: an extended base is not a
   dead-code orphan, and `--impact` of a base includes its subclasses.
+- **`ref`** — a symbol references a CLASS by identity without invoking it directly: `obj instanceof X`
+  or a static-method call `X.from(...)` (where `X` is an imported class or a same-file class). The
+  `.from()` site ALSO emits a `call` edge to the static method; the `ref` edge records the dependency on
+  the class itself so `--dependents <class>` surfaces every user (an `instanceof`/static-factory user is
+  not a `call`-edge caller). Precision-safe: an object-default alias (`import utils from './utils'`)
+  emits no `ref` — `utils` is not a class. Counts toward `--dependents` and reachability (not an orphan).
+- **`test`** — a `call`/`ref` originating in a test file (`*.test.*`, `tests/` …) to a production
+  symbol, reclassified so production caller/orphan queries can exclude test-only usage while
+  `--dependents`/`--tests` still surface it.
 - **`dataflow`** — RESERVED, not emitted by any stage today. Precise value/taint tracking
   (source→sink) needs type/dispatch resolution and alias awareness the deterministic regex extractor
   does not have; a noisy approximation would undermine the precision the other edge kinds guarantee
