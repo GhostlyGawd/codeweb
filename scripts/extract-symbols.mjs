@@ -23,7 +23,8 @@ import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symb
 // F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
 // v2: nodes carry complexity/maxDepth (F4) + the cache holds per-file edge lists + a symbol signature (F9).
 // v3: namespace/default-import member-access resolution (util.merge() / new Default()) -> new call edges.
-const SCANNER_VERSION = 3;
+// v4: Python docstrings/comments masked before symbol+edge scan -> drops phantom symbols/edges.
+const SCANNER_VERSION = 4;
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -52,6 +53,49 @@ const KEYWORDS = new Set(['if','for','while','switch','catch','return','function
 function tryExec(cmd, args) { try { return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 28 }); } catch { return null; } }
 function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
 
+// Blank Python triple-quoted strings (docstrings) and `#` comments so the symbol/edge scanners never
+// see `def`/`class`/calls that live INSIDE documentation — the root cause of phantom symbols and
+// fabricated edges (e.g. flask helpers.py's make_response docstring fabricates a render_template
+// caller). Column- AND line-count-preserving (masked regions -> spaces) so the unmasked text's
+// bodyEnd/signature line offsets are unaffected. Single-line '...'/"..." strings are blanked first so
+// a `#` or `"""` inside them can't be mistaken for a comment/docstring delimiter. Best-effort, same
+// ethos as stripSC: escapes inside triple-strings aren't tracked, worst case is a slightly-off mask.
+function maskPy(text) {
+  const lines = text.split(/\r?\n/);
+  const out = [];
+  let triple = null; // active multi-line triple-quote delimiter ('"""' or "'''")
+  for (const line of lines) {
+    const n = line.length; let res = '', i = 0;
+    while (i < n) {
+      if (triple) {
+        const end = line.indexOf(triple, i);
+        if (end === -1) { res += ' '.repeat(n - i); i = n; }
+        else { res += ' '.repeat(end + 3 - i); i = end + 3; triple = null; }
+        continue;
+      }
+      const ch = line[i];
+      if (ch === '#') { res += ' '.repeat(n - i); i = n; continue; }      // comment to EOL
+      if (ch === '"' || ch === "'") {
+        const tri = line.substr(i, 3);
+        if (tri === '"""' || tri === "'''") {
+          const end = line.indexOf(tri, i + 3);
+          if (end === -1) { triple = tri; res += ' '.repeat(n - i); i = n; }   // opens, spans lines
+          else { res += ' '.repeat(end + 3 - i); i = end + 3; }                // single-line triple
+          continue;
+        }
+        let j = i + 1;                                                         // single-line string
+        while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
+        const stop = Math.min(j + 1, n);
+        res += ' '.repeat(stop - i); i = stop;
+        continue;
+      }
+      res += ch; i++;
+    }
+    out.push(res);
+  }
+  return out.join('\n');
+}
+
 // ---- enumerate source files ----
 function listFiles() {
   const viaRg = tryExec('rg', ['--files', root]);
@@ -75,7 +119,7 @@ const rel = (f) => relative(root, f).replace(/\\/g, '/');
 // ---- per-language regex symbol scan ----
 function scanSymbols(file, text) {
   const ext = extname(file).toLowerCase();
-  const lines = text.split(/\r?\n/);
+  const lines = (ext === '.py' ? maskPy(text) : text).split(/\r?\n/); // hide def/class inside docstrings
   const syms = [];
   const push = (name, line, kind, exported) => { if (name && !KEYWORDS.has(name)) syms.push({ name, line: line + 1, kind, exports: !!exported }); };
   if (ext === '.py') {
@@ -385,8 +429,9 @@ for (const f of files) {
   };
   const addSide = (spec) => { const t = resolveImport(f, spec); if (!t) return; if (aId) importEdges.push([aId, t + ':<module>']); };
   if (isPy) {
-    while ((m = pyFrom.exec(text))) addPyFrom(m[1].length, m[2], m[3]);
-    while ((m = pyImport.exec(text))) addPyImports(m[1]);
+    const pyText = maskPy(text); // don't bind imports that live in a docstring/comment
+    while ((m = pyFrom.exec(pyText))) addPyFrom(m[1].length, m[2], m[3]);
+    while ((m = pyImport.exec(pyText))) addPyImports(m[1]);
   } else {
     while ((m = reqNamed.exec(text))) addNamed(m[1], m[2]);
     while ((m = esNamed.exec(text))) addNamed(m[1], m[2]);
@@ -501,7 +546,7 @@ const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; /
 for (const f of edgeFiles) {
   const { text, ranges } = fileSyms.get(f);
   const r = rel(f);
-  const lines = text.split(/\r?\n/);
+  const lines = (r.endsWith('.py') ? maskPy(text) : text).split(/\r?\n/); // no calls from docstrings/comments
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
   const prev = reuseEdges && oldCache.files[r];
   let result;
