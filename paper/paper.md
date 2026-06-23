@@ -49,6 +49,19 @@ The capstone agent A/B (H18) returned a **null**: the pre-registered paired diff
 not a defect: incremental refresh is faster for realistic small changes but reaches parity at high
 churn — reported as the measured curve.
 
+**A post-hoc follow-up (Theme-5b) found the first measurable agent win.** The H18 null was a *floor
+effect* — on easy, well-scoped edit tasks a capable model already avoids regressions, so codeweb had no
+headroom to correct. A separate pilot removed that ceiling by isolating the *mechanism* the efficiency
+thesis rests on — pre-edit **discovery** ("find the complete caller set you'd have to update") — on
+deliberately high-fan-out targets: control (grep-only) vs treatment (codeweb's `--dependents`), same
+**frontier** base model. Across 8 engine-frozen reps graded against a hand-verified frozen truth set,
+codeweb lifted caller-discovery **recall by +0.265 ± 0.045** (all 8 reps positive; ≈6× the run-to-run
+noise) while using **≈34% fewer tool-calls** (−6.4 ± 3.1, runtime-counted) and **≈44% fewer tokens**
+(−910k ± 394k); output-token and wall-clock deltas were within noise (honest nulls). This is a
+*post-hoc, exploratory* result on *discovery* — upstream of, not identical to, edit quality, and **not**
+one of the 33 pre-registered checks — but it is the first evidence that codeweb moves a frontier agent
+where the task has headroom (§3.8; deviation logged in §9.5).
+
 ---
 
 ## 1. Why test a tool this way
@@ -67,7 +80,7 @@ honest reporting of whatever the data shows.
 | **Correct** | Do the structural answers match independent ground truth? | 2 |
 | **Accurate** | Do the detectors hit real precision/recall? | 3 |
 | **Performant** | Does it scale; is it fast enough for an edit loop? | 4 |
-| **Useful** | Do agents edit better *with* it? | 5 (capstone) |
+| **Useful** | Do agents edit better *with* it? And is pre-edit *discovery* cheaper for a frontier agent? | 5 (capstone) · 5b (pilot) |
 
 ## 2. Methodology
 
@@ -215,6 +228,61 @@ effect). The experiment bounds the effect on *easy* tasks near zero; it neither 
 outcome hypothesis. Showing corrective value would need higher-blast-radius tasks or a weaker base model
 (future work). As pre-registered, the thesis rests on Themes 1–4; H18 is an honest pilot.
 
+### 3.8 Agent discovery & efficiency (Theme-5b — post-hoc pilot): a measurable win
+
+§3.7's null was a *floor effect*, not evidence of no value: on clean, well-scoped edit tasks a capable
+frontier model already makes regression-free edits, so codeweb's pre-edit intelligence had nothing to
+correct. Theme-5b removes that ceiling by isolating the **mechanism** the efficiency thesis actually
+rests on — pre-edit **discovery**: *"find the complete set of callers you would have to update if you
+changed this symbol."* We took four deliberately high-fan-out targets (axios `merge`, `AxiosError`,
+`AxiosHeaders`; flask `render_template`) where manual grep is most likely to miss a site, and ran a
+read-only A/B — **control** (grep/read only) vs **treatment** (codeweb's one-shot `--dependents` query)
+— with the same **frontier base model**, graded on recall/precision of the recovered caller set and on
+cost.
+
+This is **not** a pre-registered confirmatory test (it is logged as a post-hoc deviation in §9.5); its
+trustworthiness comes from three design choices. (1) **Frozen truth:** a hand-verified caller set per
+target, reconciled from an exhaustive independent grep+read and *independent of codeweb's own coverage*
+(a real site in a file codeweb's graph dropped still counts against it). (2) **Engine-frozen reps:** 8
+reps with the engine pinned, reporting the **paired delta** (treatment − control) per rep — which
+cancels the per-run shared truth — as `mean ± SD`, where the SD *is* the noise floor a real effect must
+clear. (3) **Oracle-independent mechanism proofs:** the deterministic query results behind the win are
+checkable with no agent at all (e.g. after the scanner fix, axios `AxiosError --callers` went **1 → 20**
+and `merge` **3 → 6**).
+
+**Effectiveness — recall clears the noise floor.** Caller-discovery recall rose from **0.39 (control)
+to 0.65 (treatment)**, a paired delta of **+0.265 ± 0.045** (n=8, *every one of the 8 reps positive*,
+0.19–0.31 — about 6× the SD) under the stricter *symbol-level* grading (file-level is higher). Per-target
+ΔR: `merge` +0.43, `AxiosError` +0.36, `AxiosHeaders` +0.17, `render_template` +0.10 (the softest,
+within ~1 SD of 0). Precision is a weak positive (+0.20 ± 0.15, one rep negative) — codeweb surfaces a
+few extras the strict oracle scores against it.
+
+**Efficiency — the pre-registered-but-unmeasured secondary metrics, finally measured.** H18 named tokens
+and wall-clock as secondary metrics but never reported them; Theme-5b does, recovered *runtime-side* from
+the run's own Workflow journal + per-agent transcripts ([`efficiency-pilot.usage.mjs`](experiments/efficiency-pilot.usage.mjs),
+deterministic, no agents), as the same paired delta (negative = codeweb cheaper):
+
+| efficiency metric (treatment − control) | paired Δ ± SD | signal/noise | reading |
+|---|---|---|---|
+| **tool-calls** (runtime-counted) | **−6.44 ± 3.11** | 2.1 | **≈34% fewer**; corroborates the agents' *self-reported* steps (−6.84 ± 3.33) with an unbiased count |
+| **total tokens** (context processed) | **−910k ± 394k** | 2.3 | **≈44% fewer** (2.07M → 1.16M per rep) |
+| output tokens (generation) | −827 ± 2393 | 0.35 | within noise — *honest null* |
+| wall-clock | −36k ± 57k ms | 0.63 | within noise & concurrency-confounded — *honest null* |
+
+The saving is **less context-loading, not less thinking**: the token reduction is cache-read (1.83M →
+0.99M) and input, while *output* (generation) is flat — exactly what "one deterministic query replaces
+grep→read→trace" predicts, and it concentrates on the high-fan-out classes (`AxiosError`, `AxiosHeaders`)
+where discovery is hardest.
+
+**What it does and doesn't show.** It bounds the H18 floor effect to *easy edit tasks* and gives the
+first defensible evidence that codeweb moves a **frontier** agent — on *discovery* (recall + cost), which
+is upstream of, not the same as, edit quality. It does **not** overturn the H18 edit-quality null. Scope
+is 4 targets / 2 repos / n=8; tool-calls and total tokens are the trustworthy axes (wall-clock is not).
+As with H18 this rests on agent runs (not byte-reproducible) — the frozen truth, the deterministic
+mechanism proofs, and the runtime-side cost recovery are what make the paired delta defensible. Data:
+[`efficiency-pilot.reps8.json`](experiments/efficiency-pilot.reps8.json) (recall) and
+[`efficiency-pilot.usage.json`](experiments/efficiency-pilot.usage.json) (cost).
+
 ## 4. What the study found *in codeweb itself*
 
 A study that only confirms is suspect. The strongest evidence that this evaluation is rigorous is that
@@ -254,6 +322,11 @@ flip the fix off and watch the metric regress.
 - **Agent A/B (Theme 5).** Not byte-reproducible (model nondeterminism); rests on 8 paired tasks with a
   degenerate (floor-effect) CI and self-reported (if deterministic) grading; the weakest-evidence theme
   by design, explicitly not load-bearing for the thesis.
+- **Theme-5b (discovery pilot, §3.8).** Post-hoc, *not* pre-registered (§9.5); measures caller
+  *discovery*, a proxy upstream of edit quality, not edit quality itself; 4 targets / 2 repos / n=8;
+  agent-driven (not byte-reproducible). Recall, tool-calls, and total tokens clear the noise floor;
+  output-tokens and wall-clock do **not** (reported as nulls), and wall-clock is additionally
+  concurrency-confounded (agents ran under a shared cap).
 
 ## 6. Reproduce it
 
@@ -272,5 +345,9 @@ codeweb's deterministic guarantees are not marketing: its structural analysis **
 oracles in every one of ~490,000 trials**, its detectors are accurate against labeled ground truth, and
 it is fast and dependency-free. Where it fell short, the evaluation said so — and in two cases that
 honesty produced a *better tool*, because the harnesses found defects the existing test suite did not.
+And in the one place we gave codeweb headroom to help a **frontier** agent — recovering the complete
+caller set of a high-fan-out symbol — it did, measurably and above the noise floor (recall +0.27, ≈34%
+fewer tool-calls, ≈44% fewer tokens; §3.8), even as the easier edit-quality capstone (H18) stayed a
+null. The thesis still rests on Themes 1–4; Theme-5b is where the agent payoff first shows up.
 Outcomes over promises: the data is in [`paper/results/`](results/), and the deterministic results
 regenerate with one command.
