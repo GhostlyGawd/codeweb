@@ -47,3 +47,31 @@ test('graceful fallback: with the engine unavailable, --engine tree-sitter == re
   assert.equal(ts.meta.complexityEngine, undefined);
   assert.deepEqual(ts.nodes.map((n) => n.complexity), dflt.nodes.map((n) => n.complexity));
 });
+
+// --- Increment 2: class-qualified method ids + dynamic-dispatch edges (opt-in tree-sitter) -------
+const idsEndingWith = (frag, suffix) => frag.nodes.some((n) => n.id.endsWith(suffix));
+const hasEdge = (frag, fromSuf, toSuf) =>
+  frag.edges.some((e) => e.from.endsWith(fromSuf) && e.to.endsWith(toSuf) && (e.kind === 'call' || e.kind === 'test'));
+
+test('tree-sitter: method node ids are class-qualified; class/function ids stay bare', { skip: !tsAvailable && 'web-tree-sitter unavailable' }, () => {
+  assert.ok(idsEndingWith(ts, ':Pipeline.run'), 'qualified method id');
+  assert.ok(idsEndingWith(ts, ':Pipeline.validate'));
+  assert.ok(idsEndingWith(ts, ':Pipeline.execute'));
+  assert.ok(idsEndingWith(ts, ':Pipeline'), 'class id stays bare');
+  assert.ok(idsEndingWith(ts, ':render'), 'top-level function id stays bare');
+  // label stays bare even though the id is qualified (so existing label lookups & byName keep working)
+  assert.ok(ts.nodes.some((n) => n.label === 'run' && n.id.endsWith(':Pipeline.run')));
+});
+
+test('tree-sitter: dynamic-dispatch call edges (this.* + typed receiver) are wired', { skip: !tsAvailable && 'web-tree-sitter unavailable' }, () => {
+  assert.ok(hasEdge(ts, ':Pipeline.run', ':Pipeline.validate'), 'this.validate()');
+  assert.ok(hasEdge(ts, ':Pipeline.run', ':Pipeline.execute'), 'this.execute()');
+  assert.ok(hasEdge(ts, ':bootstrap', ':Pipeline.run'), 'typed receiver p: Pipeline');
+});
+
+test('default (regex) run: method ids stay BARE and NO dispatch edges (proves opt-in/additive)', () => {
+  assert.ok(idsEndingWith(dflt, ':run') && !idsEndingWith(dflt, ':Pipeline.run'), 'bare method id, not qualified');
+  assert.ok(!dflt.nodes.some((n) => n.id.endsWith(':Pipeline.validate')), 'no qualified ids in regex output');
+  assert.ok(!hasEdge(dflt, ':run', ':validate'), 'regex drops this.* member calls (no dispatch)');
+  assert.ok(!hasEdge(dflt, ':bootstrap', ':run'), 'regex drops typed-receiver member calls');
+});

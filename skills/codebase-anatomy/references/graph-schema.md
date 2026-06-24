@@ -9,6 +9,8 @@ renderer. All examples below use synthetic values.
     "target": "src/ or https://github.com/owner/repo",
     "mode": "internal | external",
     "engine": "hybrid | tools | read",
+    "complexityEngine": "tree-sitter(...)",  // present ONLY under --engine tree-sitter; signals exact
+                                             // complexity + class-qualified method ids + dispatch edges
     "depth": "module | symbol | auto",
     "languages": ["typescript", "python"],
     "generatedAt": "ISO-8601 string, stamped by the renderer (not by agents)",
@@ -17,8 +19,10 @@ renderer. All examples below use synthetic values.
 
   "nodes": [
     {
-      "id": "src/auth/login.ts:loginUser",   // <repo-relative-path>:<symbol>  (path alone for file/module nodes)
-      "label": "loginUser",
+      "id": "src/auth/login.ts:loginUser",   // <repo-relative-path>:<symbol>  (path alone for file/module nodes).
+                                             // Under --engine tree-sitter a METHOD's <symbol> is class-qualified
+                                             // (`Class.method`) so same-named methods don't collide; bare otherwise.
+      "label": "loginUser",                  // display name — a method label stays BARE (`method`, never `Class.method`)
       "kind": "function",                     // function | class | method | module | file
       "file": "src/auth/login.ts",
       "line": 42,
@@ -73,7 +77,10 @@ renderer. All examples below use synthetic values.
 - **`call`** — a function/method invokes another, OR passes it by name as a higher-order argument
   (`arr.map(fn)`, `rl.on('x', fn)`). The deterministic extractor resolves the target by import alias,
   same-file definition, or a unique global definition, and DROPS ambiguous multi-definition names
-  rather than guess (precision over recall). A method call `obj.fn()` is NOT wired to a top-level `fn`.
+  rather than guess (precision over recall). A method call `obj.fn()` is NOT wired to a top-level `fn`
+  by the regex engine. Under `--engine tree-sitter`, dynamic-dispatch calls DO resolve: `this.m()`
+  (within a class) and typed-receiver `x.m()` (where `x: T` is a known class) wire to the
+  class-qualified method id (`<path>:T.m`); untyped/array/generic receivers are still dropped.
 - **`import`** — a module imports a symbol from another module.
 - **`inherit`** — a class extends/subclasses another (`class X extends Y`, `class X(Y):`), resolved
   with the same precision gate as calls. Counts toward reachability: an extended base is not a

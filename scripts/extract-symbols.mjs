@@ -25,7 +25,8 @@ import { loadTsEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tier
 // v2: nodes carry complexity/maxDepth (F4) + the cache holds per-file edge lists + a symbol signature (F9).
 // v3: namespace/default-import member-access resolution (util.merge() / new Default()) -> new call edges.
 // v4: Python docstrings/comments masked before symbol+edge scan -> drops phantom symbols/edges.
-const SCANNER_VERSION = 4;
+// v5: opt-in tree-sitter engine owns JS/TS method nodes (class-qualified ids) + dispatch edges.
+const SCANNER_VERSION = 5;
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -266,28 +267,32 @@ function parseSignature(line, name, isPy) {
 const useCtags = opts.ctags && toolExists('ctags');
 const files = listFiles();
 
-// F0: load the scan cache (keyed by content hash + engine mode + scanner version). A re-run reuses
-// cached symbol-discovery for byte-identical files and re-scans only changed ones — edge derivation
-// is still GLOBAL (see below), so the fragment is identical with or without the cache.
-const engineMode = useCtags ? 'ctags' : 'regex';
-let oldCache = null;
-if (opts.cache) { try { const c = JSON.parse(readFileSync(opts.cache, 'utf8')); if (c && c.version === SCANNER_VERSION && c.engine === engineMode) oldCache = c; } catch { /* corrupt/absent -> cold */ } }
-const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, files: {} } : null;
-let scanCount = 0;
-const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)) || scanSymbols(f, text); };
-
-// Optional tree-sitter engine (exact cyclomatic for JS/TS). Opt-in via `--engine tree-sitter` or
-// CODEWEB_ENGINE=tree-sitter. web-tree-sitter is an optionalDependency — if it or the vendored grammar
-// is unavailable, loadTsEngine() returns null and complexity falls back to the regex F4 per-file.
+// Optional tree-sitter engine. Opt-in via `--engine tree-sitter` or CODEWEB_ENGINE=tree-sitter.
+// web-tree-sitter is an optionalDependency — if it or the vendored grammar is unavailable,
+// loadTsEngine() returns null and we fall back to the regex scanner per-file. When active it OWNS
+// JS/TS method nodes (class-qualified ids `file:Class.method`) + dynamic-dispatch call edges and
+// supplies exact cyclomatic complexity. Loaded before the cache key so it can namespace the cache.
 let tsEngine = null;
 if (opts.engine === 'tree-sitter' || opts.engine === 'ts') {
   tsEngine = await loadTsEngine();
   if (!tsEngine) console.error('[extract] --engine tree-sitter requested but web-tree-sitter/grammar unavailable; falling back to regex F4');
 }
 
+// F0: load the scan cache (keyed by content hash + engine mode + scanner version). A re-run reuses
+// cached symbol-discovery for byte-identical files and re-scans only changed ones — edge derivation
+// is still GLOBAL (see below), so the fragment is identical with or without the cache. tree-sitter is
+// its own engine namespace (`+ts`) so class-qualified syms can't be served to a regex run, or vice versa.
+const engineMode = (useCtags ? 'ctags' : 'regex') + (tsEngine ? '+ts' : '');
+let oldCache = null;
+if (opts.cache) { try { const c = JSON.parse(readFileSync(opts.cache, 'utf8')); if (c && c.version === SCANNER_VERSION && c.engine === engineMode) oldCache = c; } catch { /* corrupt/absent -> cold */ } }
+const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, files: {} } : null;
+let scanCount = 0;
+const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)) || scanSymbols(f, text); };
+
 // ---- build nodes per file, with line ranges ----
 const nodes = [];
 const fileSyms = new Map(); // file -> {text, ranges:[{id,name,start,end,kind}]}
+const dispatchByFile = new Map(); // file -> [{from,to}] dispatch edges (tree-sitter engine only)
 for (const f of files) {
   let text; try { text = readFileSync(f, 'utf8'); } catch { continue; }
   const r = rel(f);
@@ -305,6 +310,17 @@ for (const f of files) {
   const lines = text.split(/\r?\n/);
   const total = lines.length;
   const isPy = r.endsWith('.py');
+  const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
+  // When the tree-sitter engine is active it OWNS JS/TS method discovery (class-qualified ids) and the
+  // dispatch edges; the regex scanner still owns classes, functions and const-arrow functions (which
+  // the parse-tree walk doesn't cover). extractJsTs returns null on any parse failure -> keep the regex
+  // methods (graceful per-file fallback). Build the qualified ids in ONE parser so dispatch from/to
+  // always match an emitted node — never a second line-containment guess that could silently disagree.
+  let tsResult = null;
+  if (tsEngine && isJsTs) {
+    tsResult = tsEngine.extractJsTs(text, r);
+    if (tsResult) syms = syms.filter((s) => s.kind !== 'method');
+  }
   const ranges = [];
   syms.forEach((s) => {
     const start = s.line;
@@ -324,12 +340,34 @@ for (const f of files) {
       // Exact McCabe via tree-sitter for JS/TS when the engine is active (TS grammar is a JS superset
       // for control-flow counting); otherwise the regex F4 approximation. maxDepth stays regex F4 —
       // exact nesting is a later increment. Rust/Go/Python always use regex (no TS grammar match).
-      const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
       node.complexity = (tsEngine && isJsTs) ? tsEngine.cyclomaticExact(body) : cyclomatic(body, lang);
       node.maxDepth = nestingDepth(body, lang);
     }
     nodes.push(node);
   });
+  // Tree-sitter method nodes: class-qualified id, BARE label (so byName / codemod's ambiguity guard /
+  // overlap clustering keep keying on the same bare name), exact complexity from the parse tree;
+  // signature + maxDepth reuse the regex F3/F4 helpers on the method's source slice (exact nesting is a
+  // later increment). Added to `ranges` so deriveFileEdges attributes a call FROM a method to its
+  // qualified id — the same id the dispatch edge uses for `from` (enclosing() prefers the method over
+  // its containing class by largest start, so the qualified method id wins).
+  if (tsResult) {
+    for (const m of tsResult.methods) {
+      const start = m.line;
+      const end = Math.min(m.endLine, total);
+      const loc = Math.min(end - start + 1, 2000);
+      const body = lines.slice(start - 1, end).join('\n');
+      ranges.push({ id: m.id, name: m.label, start, end, kind: 'method' });
+      nodes.push({
+        id: m.id, label: m.label, kind: 'method', file: r, line: start, loc,
+        exports: false, domain: '', summary: '',
+        signature: parseSignature(lines[start - 1] || '', m.label, false),
+        complexity: m.complexity,
+        maxDepth: nestingDepth(body, 'js'),
+      });
+    }
+    if (tsResult.dispatch.length) dispatchByFile.set(f, tsResult.dispatch);
+  }
   fileSyms.set(f, { text, ranges });
 }
 
@@ -656,6 +694,27 @@ for (const [a, b] of importEdges) {
   if (ik === 'import') importEdgeCount++;
 }
 
+// ---- append dynamic-dispatch call edges (tree-sitter engine: this.m() + typed-receiver x.m()) ----
+// The member-call edges the regex engine deliberately drops. Endpoints are guarded against the final
+// node set; deduped by (from,to,kind) so a dispatch `call` can coexist with a `ref`/`import` of the
+// same pair but never duplicates an identical edge. Iterate the already-sorted edgeFiles so the
+// appended order is deterministic. A test-file caller reclassifies to `test`, matching call edges.
+let dispatchEdgeCount = 0, dispatchDropped = 0;
+const edgeTriKeys = new Set(edges.map((e) => e.from + '\t' + e.to + '\t' + e.kind));
+for (const f of edgeFiles) {
+  const disp = dispatchByFile.get(f);
+  if (!disp) continue;
+  for (const d of disp) {
+    if (d.from === d.to || !nodeIdSet.has(d.from) || !nodeIdSet.has(d.to)) { dispatchDropped++; continue; }
+    const kind = (isTestFile(idFile(d.from)) && !isTestFile(idFile(d.to))) ? 'test' : 'call';
+    const key = d.from + '\t' + d.to + '\t' + kind;
+    if (edgeTriKeys.has(key)) continue;
+    edgeTriKeys.add(key);
+    edges.push({ from: d.from, to: d.to, kind, weight: 1 });
+    dispatchEdgeCount++;
+  }
+}
+
 // meta — the single source of truth for the target. `root` (absolute, forward-slashed) + each
 // node's relative `file` path reconstruct any source file, so downstream stages (overlap/confirm
 // body-reading, report header) read the target from here instead of re-hardcoding it.
@@ -674,6 +733,7 @@ const fragment = {
   nodes, edges,
 };
 if (newCache) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
-const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'} engine); dropped ${ambiguousDropped} ambiguous bare-call edges; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}`;
+const dispatchNote = tsEngine ? `; wired ${dispatchEdgeCount} dispatch edge(s)${dispatchDropped ? `, dropped ${dispatchDropped} (missing endpoint)` : ''}` : '';
+const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${tsEngine ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}`;
 if (opts.out) { writeFileSync(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
 else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }
