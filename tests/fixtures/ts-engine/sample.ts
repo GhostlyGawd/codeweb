@@ -27,6 +27,12 @@ export function render(items: string[]) {   // exact 3 (&& + ternary in the temp
   return `${items.map((x) => (x && x.length > 0 ? x : 'none')).join(',')}`;
 }
 
+// Typed-receiver dispatch: `p: Pipeline` lets the parse tree resolve `p.run()` to Pipeline.run —
+// a cross-symbol call edge the regex engine drops (p is a local param, not an import alias).
+export function bootstrap(p: Pipeline) {    // exact 1
+  p.run();
+}
+
 interface Config { enabled: boolean; }
 declare function doWork(): Promise<void>;
 declare function onError(e: unknown): void;

@@ -72,3 +72,62 @@ test('always >= 1, and empty/garbage input does not throw', { skip: !have && 'tr
   assert.ok(engine.cyclomaticExact('') >= 1);
   assert.ok(engine.cyclomaticExact('}{ not valid (((') >= 1);
 });
+
+// --- Increment 2: whole-file extractor — class-qualified method ids + dispatch edges -------------
+// extractJsTs(text, rel) is the source of truth for JS/TS METHOD nodes (qualified ids) and the
+// dynamic-dispatch call edges the regex engine drops. Ported from spike/tree-sitter/extract-ts.mjs.
+const G_SRC = `export class Pipeline {
+  run() {
+    this.validate();
+    this.execute();
+  }
+  validate(cfg?: Config) {
+    if (cfg && cfg.enabled) { return true; }
+    return false;
+  }
+  execute() {
+    doWork().catch(onError);
+  }
+}
+export function render(items) {
+  return items.join(',');
+}
+export function bootstrap(p: Pipeline) {
+  p.run();
+}
+`;
+const skipG = !have && 'tree-sitter engine unavailable';
+
+test('extractJsTs: method ids are class-qualified (file:Class.method), labels stay bare', { skip: skipG }, () => {
+  const g = engine.extractJsTs(G_SRC, 'x.ts');
+  assert.ok(g && Array.isArray(g.methods), 'returns {methods, dispatch} when available');
+  assert.deepEqual(
+    g.methods.map((m) => m.id).sort(),
+    ['x.ts:Pipeline.execute', 'x.ts:Pipeline.run', 'x.ts:Pipeline.validate'],
+  );
+  const run = g.methods.find((m) => m.id === 'x.ts:Pipeline.run');
+  assert.equal(run.label, 'run', 'label stays bare for byName/codemod/overlap compatibility');
+  assert.equal(run.complexity, 1);
+  assert.equal(g.methods.find((m) => m.id === 'x.ts:Pipeline.validate').complexity, 3); // if + &&
+});
+
+test('extractJsTs: this.m() + typed-receiver dispatch resolve to qualified method ids', { skip: skipG }, () => {
+  const g = engine.extractJsTs(G_SRC, 'x.ts');
+  const has = (from, to) => g.dispatch.some((e) => e.from === from && e.to === to);
+  assert.ok(has('x.ts:Pipeline.run', 'x.ts:Pipeline.validate'), 'this.validate()');
+  assert.ok(has('x.ts:Pipeline.run', 'x.ts:Pipeline.execute'), 'this.execute()');
+  assert.ok(has('x.ts:bootstrap', 'x.ts:Pipeline.run'), 'typed receiver p: Pipeline');
+  // precision contract: every emitted edge targets a real qualified method (no guesses)
+  const ids = new Set(g.methods.map((m) => m.id));
+  assert.ok(g.dispatch.every((e) => ids.has(e.to)), 'dispatch targets only emitted methods');
+  assert.equal(g.dispatch.length, 3, 'no spurious edges (doWork().catch / items.join are dropped)');
+});
+
+test('extractJsTs: deterministic across runs', { skip: skipG }, () => {
+  assert.deepEqual(engine.extractJsTs(G_SRC, 'x.ts'), engine.extractJsTs(G_SRC, 'x.ts'));
+});
+
+test('extractJsTs: garbage input never throws (graceful per-file fallback signal)', { skip: skipG }, () => {
+  const g = engine.extractJsTs('}{ not valid (((', 'x.ts');
+  assert.ok(g === null || (Array.isArray(g.methods) && Array.isArray(g.dispatch)));
+});
