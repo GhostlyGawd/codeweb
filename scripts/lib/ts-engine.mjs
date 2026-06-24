@@ -53,8 +53,10 @@ const countDecisions = (root) => {
 };
 const complexityOf = (bodyNode) => (bodyNode ? 1 + countDecisions(bodyNode) : 1);
 
-// Visit every node once (iterative DFS).
-const walk = (root, visit) => {
+// Visit every node once (iterative DFS). Named walkTree (not `walk`) so codeweb's own regex extractor
+// can't confuse it with extract-symbols.mjs's directory `walk` — a generic name collides into a
+// spurious duplication finding / dep cycle when the engine dogfoods itself.
+const walkTree = (root, visit) => {
   const stack = [root];
   while (stack.length) {
     const n = stack.pop();
@@ -132,16 +134,16 @@ export async function loadTsEngine() {
     // (`this.m()` and typed-receiver `x.m()`). One parse per file; ported from the proven precision
     // contract in spike/tree-sitter/extract-ts.mjs. Returns null on any failure so the caller falls
     // back to the regex scanner per-file. Classes/functions keep bare ids (regex still owns them).
-    const extractJsTs = (text, rel) => {
+    const extractJsTs = (text, relPath) => {
       try {
         const tree = parser.parse(String(text || ''));
-        const r = String(rel).replace(/\\/g, '/');
-        const id = (name) => `${r}:${name}`;
+        const r = String(relPath).replace(/\\/g, '/');
+        const mkId = (name) => `${r}:${name}`;
         const methods = [];
         const methodIds = new Set();
         const methodsByClass = new Map(); // className -> Set(methodName)
 
-        walk(tree.rootNode, (n) => {
+        walkTree(tree.rootNode, (n) => {
           if (n.type !== 'class_declaration') return;
           const cname = n.childForFieldName('name')?.text;
           if (!cname) return;
@@ -154,7 +156,7 @@ export async function loadTsEngine() {
               const mname = m.childForFieldName('name')?.text;
               if (!mname) continue;
               set.add(mname);
-              const mid = id(`${cname}.${mname}`);
+              const mid = mkId(`${cname}.${mname}`);
               if (methodIds.has(mid)) continue; // overloads collapse to one node
               methodIds.add(mid);
               methods.push({
@@ -177,7 +179,7 @@ export async function loadTsEngine() {
           seen.add(k);
           dispatch.push({ from, to });
         };
-        walk(tree.rootNode, (n) => {
+        walkTree(tree.rootNode, (n) => {
           if (n.type !== 'call_expression') return;
           const fn = n.childForFieldName('function');
           if (!fn || fn.type !== 'member_expression') return; // plain identifier calls = regex's job
@@ -187,14 +189,14 @@ export async function loadTsEngine() {
           const owner = enclosingSymbol(n);
           if (!owner?.name) return;
           const ownerClass = owner.classNode?.childForFieldName('name')?.text;
-          const from = id(ownerClass ? `${ownerClass}.${owner.name}` : owner.name);
+          const from = mkId(ownerClass ? `${ownerClass}.${owner.name}` : owner.name);
           if (obj.type === 'this' && ownerClass) {
-            if (methodsByClass.get(ownerClass)?.has(prop)) addDispatch(from, id(`${ownerClass}.${prop}`));
+            if (methodsByClass.get(ownerClass)?.has(prop)) addDispatch(from, mkId(`${ownerClass}.${prop}`));
             return;
           }
           if (obj.type === 'identifier') {
             const t = paramTypes(owner.fnNode).get(obj.text);
-            if (t && methodsByClass.get(t)?.has(prop)) addDispatch(from, id(`${t}.${prop}`));
+            if (t && methodsByClass.get(t)?.has(prop)) addDispatch(from, mkId(`${t}.${prop}`));
           }
         });
 
