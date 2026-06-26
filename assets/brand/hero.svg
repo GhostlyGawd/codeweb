@@ -1,57 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" font-family="ui-sans-serif,system-ui,'Segoe UI',Roboto,Arial,sans-serif">
   <defs>
-    <radialGradient id="bgH" cx="62%" cy="42%" r="75%">
-      <stop offset="0" stop-color="#11161f"/>
-      <stop offset="1" stop-color="#0d1117"/>
+    <radialGradient id="glow" cx="80%" cy="6%" r="62%">
+      <stop offset="0" stop-color="#c6f24e" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#100e14" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect x="1" y="1" width="1278" height="398" rx="24" fill="url(#bgH)" stroke="#30363d" stroke-width="2"/>
+  <rect x="1" y="1" width="1278" height="398" rx="24" fill="#100e14" stroke="#322e3a" stroke-width="2"/>
+  <rect x="1" y="1" width="1278" height="398" rx="24" fill="url(#glow)"/>
 
-  <!-- faint backdrop nodes for depth -->
-  <g fill="#8b949e" opacity="0.16">
-    <circle cx="690" cy="70" r="4"/><circle cx="760" cy="350" r="5"/><circle cx="1230" cy="320" r="4"/>
-    <circle cx="640" cy="250" r="3"/><circle cx="1240" cy="70" r="3"/><circle cx="560" cy="150" r="3"/>
+  <!-- right: a schematic call graph (the signature device) -->
+  <g transform="translate(720,38)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <g stroke="#322e3a" stroke-width="1.5" fill="none">
+      <path d="M120 86 H210"/><path d="M270 104 C330 104 320 150 360 168"/>
+      <path d="M120 86 C70 86 70 250 150 256"/><path d="M210 256 H300"/>
+    </g>
+    <path d="M360 192 C360 230 320 250 270 256" stroke="#ff5d5d" stroke-width="1.8" fill="none"/>
+    <rect x="44" y="68" width="78" height="38" rx="6" fill="#14121a" stroke="#c6f24e" stroke-width="1.5"/>
+    <text x="60" y="92" fill="#e7f6bf" font-size="13">router</text>
+    <rect x="206" y="68" width="92" height="38" rx="6" fill="#14121a" stroke="#322e3a" stroke-width="1.5"/>
+    <text x="221" y="92" fill="#cfcdd6" font-size="13">resolve</text>
+    <rect x="120" y="238" width="92" height="38" rx="6" fill="#14121a" stroke="#322e3a" stroke-width="1.5"/>
+    <text x="136" y="262" fill="#cfcdd6" font-size="13">render</text>
+    <circle cx="360" cy="180" r="26" fill="none" stroke="#ff5d5d" stroke-width="1" opacity="0.35"/>
+    <rect x="318" y="162" width="84" height="38" rx="6" fill="#1f1216" stroke="#ff5d5d" stroke-width="1.8"/>
+    <text x="333" y="186" fill="#ffd2d0" font-size="13">login()</text>
+    <path d="M404 181 H468" stroke="#ff5d5d" stroke-width="1"/>
+    <circle cx="404" cy="181" r="2.5" fill="#ff5d5d"/>
+    <text x="430" y="166" fill="#ff5d5d" font-size="12">23 in blast</text>
+    <text x="430" y="180" fill="#ff5d5d" font-size="12">radius</text>
+    <text x="44" y="54" fill="#6a6775" font-size="11.5">// call graph · src/router</text>
   </g>
 
-  <!-- right-side "system map" constellation -->
-  <g stroke-linecap="round">
-    <g stroke="#30363d" stroke-width="2">
-      <line x1="1000" y1="205" x2="905" y2="120"/>
-      <line x1="1000" y1="205" x2="1095" y2="128"/>
-      <line x1="1000" y1="205" x2="885" y2="285"/>
-      <line x1="1000" y1="205" x2="985" y2="92"/>
-      <line x1="1000" y1="205" x2="1165" y2="195"/>
-      <line x1="1000" y1="205" x2="828" y2="200"/>
-      <line x1="905" y1="120" x2="985" y2="92"/>
-      <line x1="1095" y1="128" x2="1165" y2="195"/>
-      <line x1="1120" y1="255" x2="1070" y2="322"/>
-      <line x1="885" y1="285" x2="955" y2="330"/>
-      <line x1="885" y1="285" x2="812" y2="278"/>
-      <line x1="1095" y1="128" x2="1185" y2="110"/>
-    </g>
-    <g stroke="#58a6ff" stroke-width="2.5" opacity="0.9">
-      <line x1="1000" y1="205" x2="1095" y2="128"/>
-      <line x1="1000" y1="205" x2="1120" y2="255"/>
-    </g>
-    <line x1="1000" y1="205" x2="828" y2="200" stroke="#ffb65c" stroke-width="2.5" opacity="0.8"/>
-
-    <circle cx="1000" cy="205" r="22" fill="#58a6ff"/>
-    <circle cx="905"  cy="120" r="13" fill="#3fb950"/>
-    <circle cx="1095" cy="128" r="12" fill="#ffb65c"/>
-    <circle cx="1120" cy="255" r="13" fill="#ff5c5c"/>
-    <circle cx="885"  cy="285" r="14" fill="#a371f7"/>
-    <circle cx="985"  cy="92"  r="9"  fill="#39c5cf"/>
-    <circle cx="1165" cy="195" r="8"  fill="#79c0ff"/>
-    <circle cx="828"  cy="200" r="9"  fill="#f778ba"/>
-    <circle cx="955"  cy="330" r="8"  fill="#56d364"/>
-    <circle cx="1070" cy="322" r="7"  fill="#e3b341"/>
-    <circle cx="1185" cy="110" r="6"  fill="#58a6ff"/>
-    <circle cx="812"  cy="278" r="6"  fill="#a371f7"/>
+  <!-- mark -->
+  <g transform="translate(92,74) scale(2.0)">
+    <path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
+    <rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
   </g>
-
-  <!-- wordmark + durable positioning -->
-  <text x="90" y="208" font-size="116" font-weight="600" letter-spacing="1.5" fill="#e6edf3">codeweb</text>
-  <rect x="94" y="236" width="330" height="4" rx="2" fill="#58a6ff"/>
-  <text x="94" y="286" font-size="32" letter-spacing="0.4" fill="#c9d1d9">the system map for your codebase</text>
-  <text x="94" y="322" font-size="19" letter-spacing="0.2" fill="#8b949e">every symbol, call, and domain in your repo &#8212; one navigable, self-contained map</text>
+  <!-- wordmark -->
+  <text x="172" y="150" font-size="96" font-weight="800" letter-spacing="-4" fill="#ececee">code<tspan fill="#c6f24e">web</tspan></text>
+  <text x="92" y="248" font-size="44" font-weight="800" letter-spacing="-1.4" fill="#ececee">Know what <tspan fill="#c6f24e">breaks</tspan> before you write.</text>
+  <text x="94" y="300" font-size="20" fill="#9c99a6">A deterministic map of your codebase — read by you and the agents editing it.</text>
+  <text x="94" y="338" font-size="14" letter-spacing="2.4" fill="#6a6775" font-family="ui-monospace, Menlo, monospace">DETERMINISTIC · READ-ONLY · ZERO-DEPENDENCY</text>
 </svg>

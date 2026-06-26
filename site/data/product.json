@@ -1,6 +1,6 @@
 {
   "name": "codeweb",
-  "tagline": "the system map for your codebase",
+  "tagline": "Know what breaks before you write.",
   "repo": "https://github.com/GhostlyGawd/codeweb",
   "pagesBase": "https://ghostlygawd.github.io/codeweb/",
   "elevator": "codeweb dissects a repository to its atomic parts — functions, classes, methods — wires them into a living call/import graph, tags each node's domain, and surfaces cross-domain overlap. It serves that one graph two ways: a self-contained interactive HTML map for humans, and 20 deterministic query tools over MCP for coding agents, so an agent can check what already exists and what an edit breaks before it writes a line.",

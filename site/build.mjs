@@ -186,7 +186,7 @@ function nav(active) {
 }
 
 const PAGES = [
-  { slug: 'index', nav: 'home', title: 'codeweb — the system map for your codebase', ogTitle: 'codeweb — the system map for your codebase', description: 'A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable. An interactive map for humans; 20 query tools for agents. 32/33 pre-registered checks pass.' },
+  { slug: 'index', nav: 'home', title: 'codeweb — know what breaks before you write', ogTitle: 'codeweb — know what breaks before you write', description: 'codeweb computes one deterministic map of your codebase and serves it two ways — an interactive map for you, and 20 deterministic tools for the agents editing alongside you. No LLM in the loop; it never runs your code.' },
   { slug: 'product', nav: 'product', title: 'Product — codeweb', ogTitle: 'codeweb — one graph, two interfaces', description: 'The 20 deterministic MCP tools, the Tier 0–3 feature map, five-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.' },
   { slug: 'research', nav: 'research', title: 'Research — codeweb', ogTitle: 'codeweb — the evidence', description: 'A pre-registered effectiveness study (32/33 checks), an efficiency pilot, and an honest claim ledger: what is validated, what is preliminary, and what is a null result.' },
   { slug: 'start', nav: 'start', title: 'Get started — codeweb', ogTitle: 'Get started with codeweb', description: 'Install codeweb as a Claude Code plugin, run the engine directly, or register the MCP server. A five-minute quickstart and the core concepts.' },
@@ -213,14 +213,10 @@ function buildPage(page) {
 }
 
 // ---------------------------------------------------------------- assets
-const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-<line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.6"/>
-<line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.6"/>
-<line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.6"/>
-<circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.6"/>
-<circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.6"/>
-<circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.6"/>
-<circle cx="12" cy="12" r="3.6" fill="#58a6ff"/>
+const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+<rect width="32" height="32" rx="7" fill="#1a1820"/>
+<path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
+<rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
 </svg>`;
 
 function copyDir(srcDir, pattern) {
