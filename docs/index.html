@@ -3,35 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>codeweb — the system map for your codebase</title>
-<meta name="description" content="A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable. An interactive map for humans; 20 query tools for agents. 32/33 pre-registered checks pass.">
+<title>codeweb — know what breaks before you write</title>
+<meta name="description" content="codeweb computes one deterministic map of your codebase and serves it two ways — an interactive map for you, and 20 deterministic tools for the agents editing alongside you. No LLM in the loop; it never runs your code.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="codeweb">
-<meta property="og:title" content="codeweb — the system map for your codebase">
-<meta property="og:description" content="A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable. An interactive map for humans; 20 query tools for agents. 32/33 pre-registered checks pass.">
+<meta property="og:title" content="codeweb — know what breaks before you write">
+<meta property="og:description" content="codeweb computes one deterministic map of your codebase and serves it two ways — an interactive map for you, and 20 deterministic tools for the agents editing alongside you. No LLM in the loop; it never runs your code.">
 <meta property="og:url" content="https://ghostlygawd.github.io/codeweb/">
 <meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0d1117">
+<meta name="theme-color" content="#100e14">
 <link rel="canonical" href="https://ghostlygawd.github.io/codeweb/">
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
 <header class="site-nav">
   <a class="brand" href="index.html" aria-label="codeweb home">
-    <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
-      <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
-      <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
-      <line x1="12" y1="12" x2="19" y2="17" stroke="#30363d" stroke-width="1.5"/>
-      <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
-      <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
-      <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
-      <circle cx="19" cy="17" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
-      <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+    <svg class="glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
+      <rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
     </svg>
-    codeweb
+    <span class="wm">code<span class="w">web</span></span>
   </a>
   <nav class="nav-links" aria-label="Primary">
     <a href="index.html" data-nav="home" aria-current="page">Home</a>
@@ -48,48 +41,48 @@
 
 <main id="main">
 <section class="hero">
-  <div class="hero-grid" aria-hidden="true">
-    <svg class="constellation" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice">
-      <g class="edges">
-        <line class="edge" x1="600" y1="250" x2="360" y2="140"/>
-        <line class="edge" x1="600" y1="250" x2="840" y2="150"/>
-        <line class="edge" x1="600" y1="250" x2="420" y2="380"/>
-        <line class="edge" x1="600" y1="250" x2="800" y2="370"/>
-        <line class="edge" x1="360" y1="140" x2="180" y2="220"/>
-        <line class="edge" x1="840" y1="150" x2="1020" y2="240"/>
-        <line class="edge" x1="420" y1="380" x2="260" y2="440"/>
-        <line class="edge" x1="800" y1="370" x2="980" y2="430"/>
-        <line class="edge" x1="360" y1="140" x2="600" y2="250"/>
-        <line class="edge" x1="840" y1="150" x2="600" y2="250"/>
-      </g>
-      <g class="nodes">
-        <circle class="node drift" cx="180" cy="220" r="6"/>
-        <circle class="node drift" cx="1020" cy="240" r="6"/>
-        <circle class="node" cx="260" cy="440" r="5" stroke="#ffb65c"/>
-        <circle class="node" cx="980" cy="430" r="5" stroke="#3fb950"/>
-        <circle class="node drift" cx="360" cy="140" r="8"/>
-        <circle class="node drift" cx="840" cy="150" r="8"/>
-        <circle class="node" cx="420" cy="380" r="7"/>
-        <circle class="node" cx="800" cy="370" r="7"/>
-        <circle class="node hub" cx="600" cy="250" r="12"/>
-      </g>
-      <circle class="pulse" r="3.5">
-        <animateMotion dur="6s" repeatCount="indefinite" path="M360,140 L600,250 L840,150"/>
-        <animate attributeName="opacity" values="0;1;1;0" dur="6s" repeatCount="indefinite"/>
-      </circle>
-    </svg>
-  </div>
   <div class="wrap hero-inner">
-    <span class="eyebrow">Deterministic · zero-dependency · MIT</span>
-    <h1>The system map for <span class="tagline">your codebase</span></h1>
-    <p class="hero-sub">codeweb dissects a repository to its atomic parts — functions, classes, methods — wires them into a living call/import graph, tags each node's domain, and surfaces cross-domain overlap. It serves that one graph two ways: a self-contained interactive HTML map for humans, and 20 deterministic query tools over MCP for coding agents, so an agent can check what already exists and what an edit breaks before it writes a line.</p>
-    <div class="btn-row">
-      <a class="btn btn-primary btn-lg" href="start.html">Install codeweb</a>
-      <a class="btn btn-lg" href="demo/">See the live demo</a>
-      <a class="btn btn-lg" href="research.html">Read the evidence</a>
+    <div class="hero-copy">
+      <span class="eyebrow">Deterministic code map</span>
+      <h1>Know what <span class="hl">breaks</span> before you write.</h1>
+      <p class="hero-sub">codeweb computes <strong>one exact map</strong> of your codebase and serves it two ways — an interactive map for you, and <strong>20 deterministic tools</strong> for the agents editing alongside you. No LLM in the loop. It never runs your code.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary btn-lg" href="start.html">Map your repo</a>
+        <a class="btn btn-lg" href="demo/">See the live demo</a>
+      </div>
+      <div class="hero-note">v0.2.0 · runs on an empty node_modules · never executes the code it maps</div>
     </div>
-    <div class="hero-note">v0.2.0 · runs on an empty node_modules · never executes the code it maps</div>
-    <div class="stat-strip">
+    <div class="hero-panel" aria-hidden="true">
+      <div class="hp-bar"><span class="dots"><i></i><i></i><i></i></span><span>impact · src/router/index.ts</span><span class="hp-tag">codeweb</span></div>
+      <div class="hp-body">
+        <svg viewBox="0 0 540 360" width="100%" fill="none" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+          <g stroke="#322e3a" stroke-width="1.5">
+            <path d="M120 86 H210"/><path d="M270 104 C330 104 320 150 360 168"/>
+            <path d="M120 86 C70 86 70 250 150 256"/><path d="M210 256 H300"/>
+          </g>
+          <g stroke="#ff5d5d" stroke-width="1.8"><path d="M360 192 C360 230 320 250 270 256"/></g>
+          <rect x="44" y="68" width="78" height="38" rx="6" fill="#14121a" stroke="#c6f24e" stroke-width="1.5"/>
+          <text x="60" y="92" fill="#e7f6bf" font-size="13">router</text>
+          <rect x="206" y="68" width="92" height="38" rx="6" fill="#14121a" stroke="#322e3a" stroke-width="1.5"/>
+          <text x="221" y="92" fill="#cfcdd6" font-size="13">resolve</text>
+          <rect x="120" y="238" width="92" height="38" rx="6" fill="#14121a" stroke="#322e3a" stroke-width="1.5"/>
+          <text x="136" y="262" fill="#cfcdd6" font-size="13">render</text>
+          <circle cx="360" cy="180" r="26" fill="none" stroke="#ff5d5d" stroke-width="1" opacity="0.35"/>
+          <rect x="318" y="162" width="84" height="38" rx="6" fill="#1f1216" stroke="#ff5d5d" stroke-width="1.8"/>
+          <text x="333" y="186" fill="#ffd2d0" font-size="13">login()</text>
+          <path d="M404 181 H470" stroke="#ff5d5d" stroke-width="1"/>
+          <circle cx="404" cy="181" r="2.5" fill="#ff5d5d"/>
+          <text x="430" y="166" fill="#ff5d5d" font-size="12">23 in blast</text>
+          <text x="430" y="180" fill="#ff5d5d" font-size="12">radius</text>
+          <text x="44" y="54" fill="#6a6775" font-size="11.5">// call graph · src/router</text>
+          <g stroke="#322e3a" stroke-width="1"><path d="M44 326 H212"/><path d="M44 322 V330 M212 322 V330"/></g>
+          <text x="96" y="345" fill="#6a6775" font-size="11.5">1,796 nodes</text>
+          <path d="M512 40 V64 M500 52 H524" stroke="#c6f24e" stroke-width="1" opacity="0.8"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="wrap"><div class="stat-strip">
       <div class="stat">
         <div class="num">32 / 33</div>
         <div class="label">pre-registered checks pass</div>
@@ -104,8 +97,7 @@
         <div class="num">+0.27 / −34%</div>
         <div class="label">agent caller-discovery recall / fewer steps (pilot)</div>
         <div class="src">efficiency-pilot</div>
-      </div></div>
-  </div>
+      </div></div></div>
 </section>
 
 <section class="section">
@@ -221,18 +213,13 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <a class="brand" href="index.html">
-          <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <line x1="12" y1="12" x2="5" y2="5" stroke="#30363d" stroke-width="1.5"/>
-            <line x1="12" y1="12" x2="19" y2="6" stroke="#30363d" stroke-width="1.5"/>
-            <line x1="12" y1="12" x2="6" y2="18" stroke="#30363d" stroke-width="1.5"/>
-            <circle cx="5" cy="5" r="2" fill="#1c2330" stroke="#30363d" stroke-width="1.5"/>
-            <circle cx="19" cy="6" r="2" fill="#1c2330" stroke="#3fb950" stroke-width="1.5"/>
-            <circle cx="6" cy="18" r="2" fill="#1c2330" stroke="#ffb65c" stroke-width="1.5"/>
-            <circle cx="12" cy="12" r="3.4" fill="#58a6ff"/>
+          <svg class="glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
+            <rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
           </svg>
-          codeweb
+          <span class="wm">code<span class="w">web</span></span>
         </a>
-        <p>The system map for your codebase. A deterministic code-structure graph that makes AI coding agents more efficient, effective, and capable.</p>
+        <p>A deterministic map of your codebase — one graph, read by humans and the agents editing alongside them.</p>
       </div>
       <div class="footer-col">
         <h5>Product</h5>
