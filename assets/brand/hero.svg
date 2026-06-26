@@ -38,7 +38,7 @@
   </g>
   <!-- wordmark -->
   <text x="172" y="150" font-size="96" font-weight="800" letter-spacing="-4" fill="#ececee">code<tspan fill="#c6f24e">web</tspan></text>
-  <text x="92" y="248" font-size="44" font-weight="800" letter-spacing="-1.4" fill="#ececee">Know what <tspan fill="#c6f24e">breaks</tspan> before you write.</text>
-  <text x="94" y="300" font-size="20" fill="#9c99a6">A deterministic map of your codebase — read by you and the agents editing it.</text>
+  <text x="92" y="248" font-size="44" font-weight="800" letter-spacing="-1.4" fill="#ececee">The <tspan fill="#c6f24e">living map</tspan> of your codebase.</text>
+  <text x="94" y="300" font-size="20" fill="#9c99a6">Know what exists, and what an edit breaks — before you write.</text>
   <text x="94" y="338" font-size="14" letter-spacing="2.4" fill="#6a6775" font-family="ui-monospace, Menlo, monospace">DETERMINISTIC · READ-ONLY · ZERO-DEPENDENCY</text>
 </svg>

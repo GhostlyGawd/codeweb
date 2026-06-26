@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/brand/hero.svg" alt="codeweb — know what breaks before you write" width="840">
+<img src="assets/brand/hero.svg" alt="codeweb — the living map of your codebase" width="840">
 
 [![Claude Code plugin](https://img.shields.io/badge/Claude_Code-plugin-c6f24e?style=flat-square)](#install)
 [![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)

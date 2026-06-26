@@ -186,7 +186,7 @@ function nav(active) {
 }
 
 const PAGES = [
-  { slug: 'index', nav: 'home', title: 'codeweb — know what breaks before you write', ogTitle: 'codeweb — know what breaks before you write', description: 'codeweb computes one deterministic map of your codebase and serves it two ways — an interactive map for you, and 20 deterministic tools for the agents editing alongside you. No LLM in the loop; it never runs your code.' },
+  { slug: 'index', nav: 'home', title: 'codeweb — the living map of your codebase', ogTitle: 'codeweb — the living map of your codebase', description: 'codeweb is the living map of your codebase — one deterministic graph served two ways: an interactive map for you, and 20 deterministic tools for the agents editing alongside you. Know what exists, and what an edit breaks, before you write.' },
   { slug: 'product', nav: 'product', title: 'Product — codeweb', ogTitle: 'codeweb — one graph, two interfaces', description: 'The 20 deterministic MCP tools, the Tier 0–3 feature map, five-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.' },
   { slug: 'research', nav: 'research', title: 'Research — codeweb', ogTitle: 'codeweb — the evidence', description: 'A pre-registered effectiveness study (32/33 checks), an efficiency pilot, and an honest claim ledger: what is validated, what is preliminary, and what is a null result.' },
   { slug: 'start', nav: 'start', title: 'Get started — codeweb', ogTitle: 'Get started with codeweb', description: 'Install codeweb as a Claude Code plugin, run the engine directly, or register the MCP server. A five-minute quickstart and the core concepts.' },
