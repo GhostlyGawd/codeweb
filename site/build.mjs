@@ -230,6 +230,7 @@ function buildAssets() {
   // one same-origin stylesheet, cached across pages — design system in one place
   writeFileSync(join(ASSETS, 'site.css'), `${readSite('tokens.css')}\n${readSite('styles.css')}`);
   writeFileSync(join(ASSETS, 'favicon.svg'), FAVICON);
+  copyDir(join(SITE, 'assets'), /\.js$/);   // interactive engine (livemap.js) — same-origin, zero-dep
   copyDir(join(ROOT, 'assets', 'brand'), /\.(svg|png)$/);
   copyDir(join(ROOT, 'assets', 'screens'), /\.png$/);
   const og = join(ROOT, 'assets', 'brand', 'social-preview.png');
