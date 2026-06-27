@@ -261,14 +261,14 @@ function buildAssets() {
 // Both are self-contained generated artifacts with their own CSS, so we inject inline-styled
 // navigation (no shared stylesheet, no class collisions), guarded by a marker so re-runs are idempotent.
 const MARKER = '<!--cw-nav-->';
-const A = (href, label, home) => `<a href="${href}" style="color:${home ? '#e6edf3' : '#8b949e'};text-decoration:none">${label}</a>`;
+const A = (href, label, home) => `<a href="${href}" style="color:${home ? '#C6F24E' : '#9C99A6'};text-decoration:none">${label}</a>`;
 
 function injectPaperNav() {
   const p = join(DOCS, 'paper', 'index.html');
   if (!existsSync(p)) return false;
   let html = read(p);
   if (html.includes(MARKER)) return false;
-  const strip = `${MARKER}<nav style="position:sticky;top:0;z-index:9999;display:flex;gap:15px;align-items:center;height:38px;padding:0 16px;background:rgba(10,14,20,.94);border-bottom:1px solid #30363d;font:600 13px/1 -apple-system,system-ui,'Segoe UI',sans-serif">`
+  const strip = `${MARKER}<nav style="position:sticky;top:0;z-index:9999;display:flex;gap:15px;align-items:center;height:38px;padding:0 16px;background:rgba(16,14,20,.94);border-bottom:1px solid #322E3A;font:600 13px/1 -apple-system,system-ui,'Segoe UI',sans-serif">`
     + `${A('../index.html', '‹ codeweb', true)}${A('../product.html', 'Product')}${A('../research.html', 'Research')}${A('../demo/', 'Live demo')}<span style="flex:1"></span>${A('https://github.com/GhostlyGawd/codeweb', 'GitHub')}</nav>`;
   html = html.replace(/(<body[^>]*>)/, `$1\n${strip}`);
   writeFileSync(p, html);
@@ -282,9 +282,9 @@ function injectDemoNav() {
   if (html.includes(MARKER)) return false;
   // weave links into the report's existing 48px top bar — no layout disruption on the full-viewport app
   const wm = `${MARKER}<b><a href="../index.html" style="color:inherit;text-decoration:none">codeweb</a></b>`
-    + `<a href="../index.html" style="color:#8b949e;text-decoration:none;font-size:12px;margin-left:10px">Home</a>`
-    + `<a href="../research.html" style="color:#8b949e;text-decoration:none;font-size:12px;margin-left:10px">Research</a>`
-    + `<a href="../paper/" style="color:#8b949e;text-decoration:none;font-size:12px;margin-left:10px">Paper</a>`;
+    + `<a href="../index.html" style="color:#9C99A6;text-decoration:none;font-size:12px;margin-left:10px">Home</a>`
+    + `<a href="../research.html" style="color:#9C99A6;text-decoration:none;font-size:12px;margin-left:10px">Research</a>`
+    + `<a href="../paper/" style="color:#9C99A6;text-decoration:none;font-size:12px;margin-left:10px">Paper</a>`;
   if (!html.includes('<b>codeweb</b>')) return false;
   html = html.replace('<b>codeweb</b>', wm);
   writeFileSync(p, html);

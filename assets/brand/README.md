@@ -19,18 +19,20 @@ The screenshots in `../screens/` are the **actual generated `report.html`**, not
 
 ## Palette (from `scripts/report-template.html`)
 
+Crafted Dark — warm ink + electric chartreuse. Red is reserved for risk / blast radius.
+
 | Token | Hex | |
 |---|---|---|
-| bg | `#0d1117` | page |
-| surface | `#161b22` / `#1c2330` | panels |
-| line | `#30363d` | borders, idle edges |
-| fg | `#e6edf3` | text |
-| muted | `#8b949e` | secondary text |
-| accent | `#58a6ff` | primary / links / hub node |
-| severity | `#ff5c5c` `#ffb65c` `#c9d11f` `#3fb950` | high → good |
+| bg | `#100E14` | page (warm near-black) |
+| surface | `#1A1820` / `#232029` | panels |
+| line | `#322E3A` | borders, idle edges |
+| fg | `#ECECEE` | text |
+| muted | `#9C99A6` | secondary text |
+| accent | `#C6F24E` | primary / links / hub node (chartreuse) |
+| severity | `#FF5D5D` `#FFB14E` `#E8C44E` `#5BD17A` | high → good |
 
-Node colours echo the report's domain hues (green/amber/red/purple/teal). Wordmark font is the
-system UI stack (`ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial`).
+Domain node colours echo the report's ramp (chartreuse → purple → teal → amber → pink → green).
+Wordmark font is the system UI stack (`ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial`).
 
 ## Positioning
 

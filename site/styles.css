@@ -51,7 +51,7 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 .prose { max-width: var(--prose); margin: 0 auto; padding: 0 var(--s-5); }
 .section { padding: var(--s-9) 0; }
 .section + .section { padding-top: 0; }
-.section-tint { background: linear-gradient(180deg, transparent, #0b0f15 50%, transparent); }
+.section-tint { background: linear-gradient(180deg, transparent, #15131b 50%, transparent); }
 .eyebrow {
   font-size: var(--fs-xs); font-weight: 700; letter-spacing: var(--tracking-wide);
   text-transform: uppercase; color: var(--accent); margin: 0 0 var(--s-3);
@@ -104,11 +104,11 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 }
 .btn:hover { border-color: var(--faint); background: var(--panel-2); text-decoration: none; transform: translateY(-1px); }
 .btn-primary {
-  background: linear-gradient(180deg, #2a7bff, #1f6feb);
-  border-color: #2a7bff; color: #fff;
+  background: var(--accent);
+  border-color: var(--accent); color: var(--bg-deep);
   box-shadow: var(--glow-accent);
 }
-.btn-primary:hover { background: linear-gradient(180deg, #3b88ff, #2a7bff); border-color: #3b88ff; }
+.btn-primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
 .btn-lg { padding: 13px 22px; font-size: 15px; }
 .btn-row { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
 
@@ -116,7 +116,7 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
 .hero::before {
   content: ""; position: absolute; inset: 0;
-  background: radial-gradient(900px 420px at 50% -8%, #16243b 0%, var(--bg-deep) 58%, var(--bg) 100%);
+  background: radial-gradient(900px 420px at 50% -8%, #1a1726 0%, var(--bg-deep) 58%, var(--bg) 100%);
   z-index: 0;
 }
 .hero-grid {

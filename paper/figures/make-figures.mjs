@@ -13,7 +13,7 @@ const R = (f) => JSON.parse(readFileSync(join(ROOT, 'paper', 'results', f), 'utf
 const hyp = (j, id) => (j.perHypothesis || []).find((h) => h.id === id);
 
 // palette
-const C = { bg: '#0d1117', panel: '#161b22', line: '#30363d', text: '#e6edf3', mut: '#7d8590', blue: '#58a6ff', green: '#3fb950', purple: '#a371f7', red: '#f85149', amber: '#d29922' };
+const C = { bg: '#100E14', panel: '#1A1820', line: '#322E3A', text: '#ECECEE', mut: '#9C99A6', blue: '#C6F24E', green: '#5BD17A', purple: '#A78BFA', red: '#FF5D5D', amber: '#FFB14E' };
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const txt = (x, y, s, { size = 14, fill = C.text, weight = 400, anchor = 'start', mono = false } = {}) =>
