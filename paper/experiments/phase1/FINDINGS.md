@@ -36,5 +36,27 @@ for both gorilla-mux and ripgrep. Consequences, measured against independent tru
   discovery is the core value prop) and re-prove on the frozen truth; **(B)** scope H19 to what holds
   today. We take **(A)** — it makes codeweb genuinely better on an independently-measured recall gap,
   verified by before/after recall on the same frozen truth (not a reward hack).
-- The Go `Route` target will be **re-scoped** to the call/import/inherit/test convention (drop the
-  return-type-only signature methods) so it is comparable to the JS class targets before it grades H19.
+- The Go `Route` target is **replaced** by a clean function target `mux.go:NewRouter` (call-site
+  dependents only — no return-type-signature confound), comparable to the JS function targets.
+
+## Update — clean Go function target `NewRouter` (frozen graph)
+
+| target | truthN | cwN | symbol recall | symbol prec | file recall | file prec |
+|---|---|---|---|---|---|---|
+| Go `mux.go:NewRouter` | 58 | 54 | **0.91** | 0.98 | 0.56 | 1.00 |
+
+codeweb resolves **same-package bare `NewRouter()` calls almost perfectly** (symbol recall 0.91,
+precision 0.98). The only files it misses are the four `example_*_test.go` files in `package mux_test`,
+which call it **qualified** as `mux.NewRouter()` — a cross-package call needing Go import resolution.
+
+## Consolidated Phase 1 characterization (deterministic, engine-frozen)
+
+| layer | Go (NewRouter) | Rust (escape) | verdict |
+|---|---|---|---|
+| same-file / same-package | recall 0.91 | recall 0.75 | **codeweb strong** |
+| cross-file / cross-package | misses qualified `mux.NewRouter()` | misses `use`-imported callers | **recall-capped: missing import/use edges** |
+
+The query is sound; the ceiling is **extraction of cross-module import edges**. Rust `use`-edge fix is
+the first increment (verified by re-grading the frozen `escape` target). Go qualified-call resolution
+(`pkg.Symbol()` via imported `pkg`) is the analogous increment. H19's confirmatory set (JS proven,
+Python supporting, Rust post-fix) reaches ≥3 languages; Go is a strong supporting fourth.
