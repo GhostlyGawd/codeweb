@@ -99,6 +99,60 @@ function maskPy(text) {
   return out.join('\n');
 }
 
+// Go counterpart of maskPy: blanks `//` line comments and `/* */` block comments (and string/rune/
+// raw-string literal interiors) to spaces, preserving line + column counts, for the edge-derivation
+// scan. Without it, example code INSIDE a package-doc block comment (gorilla-mux's doc.go) fabricates
+// call edges — the same phantom-edge class as the Python docstring bug. `//`/`/*` inside a string,
+// rune, or raw (backtick) literal is NOT a comment, so those are skipped; block comments and raw
+// strings may span lines, so their open state is carried across the loop.
+function maskGo(text) {
+  const lines = text.split(/\r?\n/);
+  const out = [];
+  let inBlockComment = false; // inside /* */ spanning lines
+  let inRawString = false;    // inside `...` raw string spanning lines
+  for (const line of lines) {
+    const n = line.length; let res = '', i = 0;
+    while (i < n) {
+      if (inBlockComment) {
+        const end = line.indexOf('*/', i);
+        if (end === -1) { res += ' '.repeat(n - i); i = n; }
+        else { res += ' '.repeat(end + 2 - i); i = end + 2; inBlockComment = false; }
+        continue;
+      }
+      if (inRawString) {
+        const end = line.indexOf('`', i);
+        if (end === -1) { res += ' '.repeat(n - i); i = n; }
+        else { res += ' '.repeat(end + 1 - i); i = end + 1; inRawString = false; }
+        continue;
+      }
+      const ch = line[i];
+      if (ch === '/' && line[i + 1] === '/') { res += ' '.repeat(n - i); i = n; continue; } // line comment
+      if (ch === '/' && line[i + 1] === '*') {                                               // block comment
+        const end = line.indexOf('*/', i + 2);
+        if (end === -1) { inBlockComment = true; res += ' '.repeat(n - i); i = n; }
+        else { res += ' '.repeat(end + 2 - i); i = end + 2; }
+        continue;
+      }
+      if (ch === '"' || ch === "'") {                                                        // interpreted string / rune
+        let j = i + 1;
+        while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
+        const stop = Math.min(j + 1, n);
+        res += ' '.repeat(stop - i); i = stop;
+        continue;
+      }
+      if (ch === '`') {                                                                       // raw string (may span lines)
+        const end = line.indexOf('`', i + 1);
+        if (end === -1) { inRawString = true; res += ' '.repeat(n - i); i = n; }
+        else { res += ' '.repeat(end + 1 - i); i = end + 1; }
+        continue;
+      }
+      res += ch; i++;
+    }
+    out.push(res);
+  }
+  return out.join('\n');
+}
+
 // ---- enumerate source files ----
 function listFiles() {
   const viaRg = tryExec('rg', ['--files', root]);
@@ -379,6 +433,44 @@ for (const n of nodes) { if (!byName.has(n.label)) byName.set(n.label, []); byNa
 const relSet = new Set(files.map(rel));
 const nodeIdSet = new Set(nodes.map((n) => n.id));
 const kindById = new Map(nodes.map((n) => [n.id, n.kind])); // for class-usage ref edges
+
+// ---- Go cross-package qualified-call resolution (precision-safe, package-anchored) ---------
+// A Go file's `package X` clause names the package its top-level symbols belong to. A cross-package
+// call writes `X.Func(...)` (the package selector) — but X is NOT a value binding the JS/Rust alias
+// machinery can see, so it falls through the member-call pass. Build a map from in-repo package name
+// -> exported top-level symbol name -> node ids, so `X.Func()` resolves to that symbol when X is an
+// IN-REPO package (the disambiguator that keeps stdlib `fmt.`/`http.` out) AND Func names exactly one
+// exported top-level symbol there. Only function/class (type) symbols are package-selector-reachable;
+// methods belong to a receiver value, not the package, so they're excluded (and never add ambiguity).
+// gorilla-mux: library files are `package mux`, example tests are `package mux_test` calling
+// `mux.NewRouter()` -> resolves to mux.go:NewRouter; stdlib `regexp.MustCompile()` -> skipped.
+const goPackageOfFile = new Map(); // rel .go file -> declared package name
+const goPackageClauseRe = /^[ \t]*package\s+([A-Za-z_]\w*)/m;
+for (const [fabs, recd] of fileSyms) {
+  const rr = rel(fabs);
+  if (!rr.endsWith('.go')) continue;
+  const pkgMatch = goPackageClauseRe.exec(recd.text);
+  if (pkgMatch) goPackageOfFile.set(rr, pkgMatch[1]);
+}
+const goPackageSymbols = new Map(); // pkgName -> Map(symbolName -> [node id, ...])
+for (const goNode of nodes) {
+  if (!goNode.exports || (goNode.kind !== 'function' && goNode.kind !== 'class')) continue;
+  const goPkg = goPackageOfFile.get(goNode.file);
+  if (!goPkg) continue;
+  let bySymbol = goPackageSymbols.get(goPkg);
+  if (!bySymbol) { bySymbol = new Map(); goPackageSymbols.set(goPkg, bySymbol); }
+  if (!bySymbol.has(goNode.label)) bySymbol.set(goNode.label, []);
+  bySymbol.get(goNode.label).push(goNode.id);
+}
+// Resolve a qualified selector `pkgName.symbolName` to its single in-repo node id, else null
+// (unknown package, unknown leaf, or >1 candidate -> no edge).
+function goQualifiedTarget(pkgName, symbolName) {
+  const bySymbol = goPackageSymbols.get(pkgName);
+  if (!bySymbol) return null;
+  const candidates = bySymbol.get(symbolName);
+  return candidates && candidates.length === 1 ? candidates[0] : null;
+}
+
 const anchorByFile = new Map(); // rel -> {id, loc} most-substantial symbol of the file
 for (const n of nodes) { const cur = anchorByFile.get(n.file); if (!cur || (n.loc || 0) > cur.loc) anchorByFile.set(n.file, { id: n.id, loc: n.loc || 0 }); }
 const anchorId = (r) => { const a = anchorByFile.get(r); return a ? a.id : null; };
@@ -659,6 +751,7 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
   const local = []; const localSet = new Set();
   let hasModule = false, ambiguous = 0;
   const isPy = r.endsWith('.py');
+  const isGo = r.endsWith('.go');
   const enclosing = (lineNo) => { let best = null; for (const rg of ranges) if (lineNo >= rg.start && lineNo <= rg.end && (!best || rg.start > best.start)) best = rg; return best; };
   const sameFileByName = new Map(ranges.map((rg) => [rg.name, rg.id]));
   const sameFileClasses = new Map(ranges.filter((rg) => rg.kind === 'class').map((rg) => [rg.name, rg.id]));
@@ -729,6 +822,13 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
         const before = ln.slice(0, m.index - 1);
         const om = /([A-Za-z_$][\w$]*)$/.exec(before);
         if (om) {
+          // Go package selector `pkg.Func()`: resolve when `pkg` is an in-repo package and `Func`
+          // names exactly one exported top-level symbol there (precision-safe; stdlib pkgs aren't in
+          // the map). Guarded by isGo so JS/TS/Python/Rust member-access is untouched.
+          if (isGo) {
+            const goCalleeId = goQualifiedTarget(om[1], m[1]);
+            if (goCalleeId) addResolved(i, goCalleeId, 'call');
+          }
           if (nsAliasMap && nsAliasMap.has(om[1])) {
             const calleeId = nsAliasMap.get(om[1]) + ':' + m[1];
             if (nodeIdSet.has(calleeId)) addResolved(i, calleeId, 'call');
@@ -763,7 +863,7 @@ const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; /
 for (const f of edgeFiles) {
   const { text, ranges } = fileSyms.get(f);
   const r = rel(f);
-  const lines = (r.endsWith('.py') ? maskPy(text) : text).split(/\r?\n/); // no calls from docstrings/comments
+  const lines = (r.endsWith('.py') ? maskPy(text) : r.endsWith('.go') ? maskGo(text) : text).split(/\r?\n/); // no calls from docstrings/comments
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
   const prev = reuseEdges && oldCache.files[r];
   let result;
