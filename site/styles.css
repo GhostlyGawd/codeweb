@@ -392,7 +392,8 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 /* ============================ animated pipeline (flow) ============================ */
 .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-3); }
 .flow-stage { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-4);
-  opacity: 0; transform: translateY(12px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+  transition: opacity .5s var(--ease), transform .5s var(--ease); }
+.cw-js .flow-stage { opacity: 0; transform: translateY(12px); }
 .flow.in .flow-stage { opacity: 1; transform: none; }
 .flow.in .flow-stage:nth-child(2) { transition-delay: .09s; }
 .flow.in .flow-stage:nth-child(3) { transition-delay: .18s; }
@@ -408,8 +409,8 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 .flow-stage p { font-size: 13px; color: var(--muted); margin: 0; }
 
 /* ============================ scroll reveal ============================ */
-[data-reveal] { opacity: 0; transform: translateY(16px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
-[data-reveal].in { opacity: 1; transform: none; }
+.cw-js [data-reveal] { opacity: 0; transform: translateY(16px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+.cw-js [data-reveal].in { opacity: 1; transform: none; }
 
 @media (max-width: 880px) {
   .duo { grid-template-columns: 1fr; }
