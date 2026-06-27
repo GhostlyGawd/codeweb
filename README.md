@@ -33,6 +33,18 @@ pointed read-only at **[axios](https://github.com/axios/axios)** — 274 symbols
 > dismissed 12 false positives, and produced a cycle-safe merge plan for each. Or **[click around
 > this exact map yourself](https://ghostlygawd.github.io/codeweb/demo/)** — it's live on GitHub Pages.
 
+### Know what an edit breaks — before you write
+
+That's the whole point. Ask *if I change this function, what else moves?* — and codeweb answers from
+structure, not a guess. Click any node in the [living map](https://ghostlygawd.github.io/codeweb/) and
+its **blast radius** lights up: every function transitively affected, and the domains it crosses. It's
+the `codeweb_impact` tool — the same answer an agent gets over MCP, before it writes a line.
+
+<div align="center">
+<img src="assets/screens/06-blast-radius.png" alt="codeweb blast radius: clicking merge() in the axios graph lights up 56 transitively-affected functions across 5 domains in red, with a codeweb_impact readout that says 'editing merge() in utils.js touches 56 functions across 5 domains — review before you write'" width="540">
+<br><sub>Editing <code>merge()</code> in axios touches <b>56 functions across 5 domains</b> — try it yourself in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
+</div>
+
 ### Navigate the whole system
 
 A force-directed map of every symbol, collapsible to domains. Search, drag, zoom, and click any
