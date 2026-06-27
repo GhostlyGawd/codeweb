@@ -60,3 +60,23 @@ The query is sound; the ceiling is **extraction of cross-module import edges**. 
 the first increment (verified by re-grading the frozen `escape` target). Go qualified-call resolution
 (`pkg.Symbol()` via imported `pkg`) is the analogous increment. H19's confirmatory set (JS proven,
 Python supporting, Rust post-fix) reaches ≥3 languages; Go is a strong supporting fourth.
+
+## Engine-fix results (find → fix → prove, deterministic on frozen truth)
+
+| increment | target | recall (sym) before → after | file recall before → after | precision | commit |
+|---|---|---|---|---|---|
+| Rust `use`-import edges | `escape.rs:escape` | 0.75 → **0.94** | 0.33 → **1.00** | 0.88 | `4095e9f` |
+| Go qualified-call edges | `mux.go:NewRouter` | 0.91 → _(pending verify)_ | 0.56 → _(target 1.00)_ | — | _(staged)_ |
+
+Rust: ripgrep import edges **0 → 311**; the lone remaining miss is a `mod tests` node (mod discovery
+out of scope). Suite 363 → 367 (4 new tests), ci-gate green, JS/Python paths byte-stable. This is the
+same find→fix→prove pattern the JS pilot used (§9.1) — the recall gain is measured against the *same
+frozen, codeweb-blind truth set*, so it is a genuine capability gain, not a reward hack.
+
+## What remains for H19 (the actual north-star test)
+
+The above proves the **engine's** recall improved. H19 is an **agent** claim: an agent equipped with
+codeweb out-discovers a grep-only agent (recall delta > 0, ≥8 frozen-engine reps, ≥3 languages). The
+engine fixes raise codeweb's ceiling so the agent *can* win cross-file (the JS pilot showed engine
+quality decides the agent outcome). The agent A/B reps over {JS, Python, Rust(+Go)} targets are the
+next step and the confirmatory test.
