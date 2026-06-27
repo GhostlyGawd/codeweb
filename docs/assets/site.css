@@ -465,6 +465,24 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 .cw-line.cw-ok .cw-pfx { color: var(--accent); }
 @keyframes cwIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
+/* ============================ animated pipeline (flow) ============================ */
+.flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-3); }
+.flow-stage { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-4);
+  opacity: 0; transform: translateY(12px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+.flow.in .flow-stage { opacity: 1; transform: none; }
+.flow.in .flow-stage:nth-child(2) { transition-delay: .09s; }
+.flow.in .flow-stage:nth-child(3) { transition-delay: .18s; }
+.flow.in .flow-stage:nth-child(4) { transition-delay: .27s; }
+.flow-stage:not(:last-child)::after { content: "→"; position: absolute; right: -13px; top: calc(var(--s-4) + 38px); transform: translateY(-50%); color: var(--faint); z-index: 1; font-size: 14px; }
+.flow-viz { height: 76px; margin-bottom: var(--s-3); background: var(--bg-deep); border: 1px solid var(--line-soft); border-radius: var(--r-sm);
+  background-image: linear-gradient(var(--line-soft) 1px, transparent 1px), linear-gradient(90deg, var(--line-soft) 1px, transparent 1px); background-size: 19px 19px; }
+.flow-viz svg { display: block; width: 100%; height: 100%; }
+.flow-dash { stroke-dasharray: 4 4; animation: flowMarch 1s linear infinite; }
+@keyframes flowMarch { to { stroke-dashoffset: -8; } }
+.flow-n { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--accent); }
+.flow-stage h4 { margin: var(--s-2) 0; font-size: 15px; }
+.flow-stage p { font-size: 13px; color: var(--muted); margin: 0; }
+
 /* ============================ scroll reveal ============================ */
 [data-reveal] { opacity: 0; transform: translateY(16px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
 [data-reveal].in { opacity: 1; transform: none; }
@@ -472,8 +490,15 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 @media (max-width: 880px) {
   .duo { grid-template-columns: 1fr; }
   .duo-link span { writing-mode: horizontal-tb; }
+  .flow { grid-template-columns: 1fr 1fr; }
+  .flow-stage:nth-child(2)::after { content: none; }
+}
+@media (max-width: 620px) {
+  .flow { grid-template-columns: 1fr; }
+  .flow-stage::after { content: none !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] { opacity: 1; transform: none; transition: none; }
-  .cw-line { animation: none; }
+  .flow-stage { opacity: 1; transform: none; transition: none; }
+  .cw-line, .flow-dash { animation: none; }
 }

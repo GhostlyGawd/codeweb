@@ -114,11 +114,59 @@
       <h2>A four-stage deterministic pipeline</h2>
       <p class="lead">Parse-free extraction on the fast path for JavaScript, TypeScript, Python, Rust, and Go, with an agent fallback for everything else.</p>
     </div>
-    <div class="pipeline">
-    <div class="stage"><div class="n">01</div><h4>extract</h4><p>Parse-free atomic nodes + edges, per language (JS/TS/Python/Rust/Go).</p></div>
-    <div class="stage"><div class="n">02</div><h4>cluster</h4><p>Group nodes into semantic domains.</p></div>
-    <div class="stage"><div class="n">03</div><h4>overlap</h4><p>Body-confirm cross-domain duplication and rank it.</p></div>
-    <div class="stage"><div class="n">04</div><h4>render</h4><p>A self-contained interactive map + 20 agent tools.</p></div></div>
+    <div class="flow" data-reveal>
+      <div class="flow-stage">
+        <div class="flow-viz">
+          <svg viewBox="0 0 120 76" fill="none" aria-hidden="true">
+            <g stroke="var(--line)" stroke-width="1.4" fill="var(--panel-2)">
+              <rect x="10" y="12" width="30" height="40" rx="3"/><rect x="16" y="8" width="30" height="40" rx="3" fill="var(--panel)"/>
+            </g>
+            <g stroke="var(--faint)" stroke-width="1.2"><path d="M22 18h18M22 24h18M22 30h12M22 36h16"/></g>
+            <path class="flow-dash" d="M52 30h22" stroke="var(--accent)" stroke-width="1.6"/>
+            <g fill="var(--accent)"><circle cx="84" cy="16" r="3.2"/><circle cx="98" cy="26" r="3.2"/><circle cx="88" cy="40" r="3.2"/><circle cx="104" cy="48" r="3.2"/><circle cx="76" cy="44" r="3.2"/></g>
+          </svg>
+        </div>
+        <div class="flow-n">01</div><h4>extract</h4>
+        <p>Parse-free atomic nodes + edges, per language (JS/TS/Python/Rust/Go).</p>
+      </div>
+      <div class="flow-stage">
+        <div class="flow-viz">
+          <svg viewBox="0 0 120 76" fill="none" aria-hidden="true">
+            <ellipse cx="38" cy="28" rx="24" ry="19" fill="color-mix(in srgb, var(--accent) 12%, transparent)" stroke="color-mix(in srgb, var(--accent) 40%, var(--line))"/>
+            <ellipse cx="80" cy="48" rx="22" ry="17" fill="color-mix(in srgb, #a78bfa 12%, transparent)" stroke="color-mix(in srgb, #a78bfa 40%, var(--line))"/>
+            <g fill="var(--accent)"><circle cx="30" cy="24" r="3.2"/><circle cx="44" cy="22" r="3.2"/><circle cx="38" cy="34" r="3.2"/><circle cx="50" cy="32" r="3.2"/></g>
+            <g fill="#a78bfa"><circle cx="74" cy="44" r="3.2"/><circle cx="86" cy="46" r="3.2"/><circle cx="80" cy="54" r="3.2"/></g>
+          </svg>
+        </div>
+        <div class="flow-n">02</div><h4>cluster</h4>
+        <p>Group nodes into semantic domains by call gravity.</p>
+      </div>
+      <div class="flow-stage">
+        <div class="flow-viz">
+          <svg viewBox="0 0 120 76" fill="none" aria-hidden="true">
+            <rect x="8" y="22" width="44" height="32" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+            <rect x="68" y="22" width="44" height="32" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+            <g stroke="var(--faint)" stroke-width="1.2"><path d="M16 32h28M16 40h22M76 32h28M76 40h22"/></g>
+            <path class="flow-dash" d="M52 38h16" stroke="var(--hi)" stroke-width="1.8"/>
+            <circle cx="60" cy="14" r="9" fill="none" stroke="var(--hi)" stroke-width="1.4"/><text x="60" y="18" fill="var(--hi)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">≈</text>
+          </svg>
+        </div>
+        <div class="flow-n">03</div><h4>overlap</h4>
+        <p>Body-confirm cross-domain duplication and rank it.</p>
+      </div>
+      <div class="flow-stage">
+        <div class="flow-viz">
+          <svg viewBox="0 0 120 76" fill="none" aria-hidden="true">
+            <g stroke="var(--line)" stroke-width="1.3"><path d="M30 22 52 38M30 22 26 48M52 38 26 48M52 38 70 30"/></g>
+            <g><circle cx="30" cy="22" r="4" fill="var(--accent)"/><circle cx="52" cy="38" r="5" fill="var(--accent)"/><circle cx="26" cy="48" r="4" fill="#4fd6c4"/><circle cx="70" cy="30" r="4" fill="#a78bfa"/></g>
+            <g stroke="var(--accent)" stroke-width="1.4"><path d="M86 22h22M86 34h22M86 46h16"/></g>
+            <g fill="var(--accent)"><circle cx="82" cy="22" r="2"/><circle cx="82" cy="34" r="2"/><circle cx="82" cy="46" r="2"/></g>
+          </svg>
+        </div>
+        <div class="flow-n">04</div><h4>render</h4>
+        <p>A self-contained interactive map + 20 agent tools.</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -147,7 +195,7 @@
       <h2>Every claim is backed by reproducible evidence</h2>
       <p class="lead">codeweb is pre-registered and tested against independent oracles. We publish the nulls too — because trustworthy tooling shows its work.</p>
     </div>
-    <div class="grid cols-3">
+    <div class="grid cols-3" data-reveal>
       <div class="card"><h3>32 / 33</h3><p>pre-registered checks pass. The study found and fixed two real engine bugs the 286-test suite missed.</p></div>
       <div class="card"><h3>0 disagreements</h3><p>across ~490k comparisons of cycles, impact, and callers against independent reference implementations.</p></div>
       <div class="card"><h3>+0.27 recall · −34% steps</h3><p>frontier agents discovering callers, vs grep — over 8 engine-frozen reps. Preliminary, and labelled as such.</p></div>
