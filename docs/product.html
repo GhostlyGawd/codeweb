@@ -47,133 +47,108 @@
       <h2>One graph. Twenty tools. Every phase of the edit loop.</h2>
       <p class="lead">codeweb turns a repository into a queryable structural graph, then exposes it as deterministic tools an agent calls at exactly the moment it needs them — before writing, while reviewing, and when optimizing.</p>
     </div>
-    
-    <div class="phase">
-      <div class="phase-head" style="--phase:var(--accent)">
-        <h3>Structural queries</h3>
-        <span class="count">5 tools · The foundation — read the graph.</span>
+    <div class="tool-explorer">
+      <div class="te-rail" role="tablist" aria-label="codeweb tool phases, in edit-loop order">
+      <button class="te-station active" type="button" role="tab" aria-selected="true" data-te="0" style="--phase:var(--accent)">
+        <span class="te-step">01</span>
+        <span class="te-title">Structural queries</span>
+        <span class="te-badge">5</span>
+      </button>
+      <button class="te-station" type="button" role="tab" aria-selected="false" data-te="1" style="--phase:var(--teal)">
+        <span class="te-step">02</span>
+        <span class="te-title">Write-time intelligence</span>
+        <span class="te-badge">3</span>
+      </button>
+      <button class="te-station" type="button" role="tab" aria-selected="false" data-te="2" style="--phase:var(--med)">
+        <span class="te-step">03</span>
+        <span class="te-title">Review-time intelligence</span>
+        <span class="te-badge">5</span>
+      </button>
+      <button class="te-station" type="button" role="tab" aria-selected="false" data-te="3" style="--phase:var(--purple)">
+        <span class="te-step">04</span>
+        <span class="te-title">Optimize-time intelligence</span>
+        <span class="te-badge">3</span>
+      </button>
+      <button class="te-station" type="button" role="tab" aria-selected="false" data-te="4" style="--phase:var(--good)">
+        <span class="te-step">05</span>
+        <span class="te-title">Freshness & context</span>
+        <span class="te-badge">2</span>
+      </button>
+      <button class="te-station" type="button" role="tab" aria-selected="false" data-te="5" style="--phase:var(--pink)">
+        <span class="te-step">06</span>
+        <span class="te-title">Comparison & onboarding</span>
+        <span class="te-badge">2</span>
+      </button>
       </div>
-      <div class="grid cols-3">
-        <div class="tool" style="--phase:var(--accent)">
-          <div class="name">codeweb_callers</div>
-          <div class="desc">Direct callers of a symbol (call-edge in-neighbors).</div>
-        </div>
-        <div class="tool" style="--phase:var(--accent)">
-          <div class="name">codeweb_callees</div>
-          <div class="desc">The functions a symbol calls.</div>
-        </div>
-        <div class="tool" style="--phase:var(--accent)">
-          <div class="name">codeweb_impact</div>
-          <div class="desc">Blast radius: every function transitively affected by a change, plus domains touched. Call before editing.</div>
-        </div>
-        <div class="tool" style="--phase:var(--accent)">
-          <div class="name">codeweb_cycles</div>
-          <div class="desc">File-level dependency cycles (circular imports/calls).</div>
-        </div>
-        <div class="tool" style="--phase:var(--accent)">
-          <div class="name">codeweb_orphans</div>
-          <div class="desc">Uncalled, unexported symbols — dead-code candidates.</div>
-        </div>
-      </div>
-    </div>
-    <div class="phase">
-      <div class="phase-head" style="--phase:var(--teal)">
-        <h3>Write-time intelligence</h3>
-        <span class="count">3 tools · Before you add code — reuse, don't reinvent.</span>
-      </div>
-      <div class="grid cols-3">
-        <div class="tool" style="--phase:var(--teal)">
-          <div class="name">codeweb_find_similar</div>
-          <div class="desc">"Does something already do this?" Ranks existing bodies by token-shingle or structural-skeleton similarity to your candidate.</div>
-        </div>
-        <div class="tool" style="--phase:var(--teal)">
-          <div class="name">codeweb_placement</div>
-          <div class="desc">Where a new symbol belongs (domain + file) by callee gravity, with a duplicate warning.</div>
-        </div>
-        <div class="tool" style="--phase:var(--teal)">
-          <div class="name">codeweb_tests</div>
-          <div class="desc">The tests that exercise a symbol — run the right subset after editing.</div>
-        </div>
-      </div>
-    </div>
-    <div class="phase">
-      <div class="phase-head" style="--phase:var(--med)">
-        <h3>Review-time intelligence</h3>
-        <span class="count">5 tools · Assess impact and risk.</span>
-      </div>
-      <div class="grid cols-3">
-        <div class="tool" style="--phase:var(--med)">
-          <div class="name">codeweb_review</div>
-          <div class="desc">Structural review of a change: changed symbols, blast radius, domains touched, fan-in-ranked review order.</div>
-        </div>
-        <div class="tool" style="--phase:var(--med)">
-          <div class="name">codeweb_fitness</div>
-          <div class="desc">Check the graph against architectural fitness rules (forbidden-dependency, layering, no-cycles, max-fan-in, max-LOC).</div>
-        </div>
-        <div class="tool" style="--phase:var(--med)">
-          <div class="name">codeweb_risk</div>
-          <div class="desc">Rank symbols by change-risk (fan-in, fan-out, LOC, blast radius, churn) for triage.</div>
-        </div>
-        <div class="tool" style="--phase:var(--med)">
-          <div class="name">codeweb_break_cycles</div>
-          <div class="desc">For each file cycle, propose the cheapest edge to sever — verified to actually break it.</div>
-        </div>
-        <div class="tool" style="--phase:var(--med)">
-          <div class="name">codeweb_deadcode</div>
-          <div class="desc">Confidence-tiered dead code: safe-to-delete vs review-first (test-guarded / entrypoint-like).</div>
+      <div class="te-stack">
+      <div class="te-panel active" data-te-panel="0" role="tabpanel" style="--phase:var(--accent)">
+        <div class="te-viz"><svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><g stroke="var(--line)" stroke-width="1.6"><path class="flow-dash" d="M44 34 100 60"/><path class="flow-dash" d="M44 86 100 60"/><path d="M100 60 168 38"/><path d="M100 60 168 82"/></g><g fill="var(--phase)"><circle cx="44" cy="34" r="6"/><circle cx="44" cy="86" r="6"/><circle cx="100" cy="60" r="10"/></g><g fill="var(--faint)"><circle cx="168" cy="38" r="6"/><circle cx="168" cy="82" r="6"/></g><text x="44" y="18" fill="var(--phase)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">callers</text><text x="168" y="104" fill="var(--faint)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">callees</text></svg></div>
+        <div class="te-detail">
+          <p class="te-blurb">The foundation — read the graph.</p>
+          <div class="te-tools">
+            <div class="te-tool"><span class="te-name">codeweb_callers</span><span class="te-desc">Direct callers of a symbol (call-edge in-neighbors).</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_callees</span><span class="te-desc">The functions a symbol calls.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_impact</span><span class="te-desc">Blast radius: every function transitively affected by a change, plus domains touched. Call before editing.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_cycles</span><span class="te-desc">File-level dependency cycles (circular imports/calls).</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_orphans</span><span class="te-desc">Uncalled, unexported symbols — dead-code candidates.</span></div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="phase">
-      <div class="phase-head" style="--phase:var(--purple)">
-        <h3>Optimize-time intelligence</h3>
-        <span class="count">3 tools · Act on findings — safely.</span>
-      </div>
-      <div class="grid cols-3">
-        <div class="tool" style="--phase:var(--purple)">
-          <div class="name">codeweb_codemod</div>
-          <div class="desc">Plan a consolidation merge (report-only over MCP): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, projected gate verdict.</div>
-        </div>
-        <div class="tool" style="--phase:var(--purple)">
-          <div class="name">codeweb_hotspots</div>
-          <div class="desc">Rank symbols by complexity × fan-in × churn — where to refactor first.</div>
-        </div>
-        <div class="tool" style="--phase:var(--purple)">
-          <div class="name">codeweb_campaign</div>
-          <div class="desc">An ordered, cumulatively pre-flighted ROI worklist (dead code + cycle cuts + merges). Read-only plan.</div>
+      <div class="te-panel" data-te-panel="1" role="tabpanel" style="--phase:var(--teal)">
+        <div class="te-viz"><svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><rect x="30" y="42" width="64" height="36" rx="5" fill="var(--panel)" stroke="var(--phase)" stroke-dasharray="4 3"/><text x="62" y="64" fill="var(--phase)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">new()</text><rect x="126" y="42" width="64" height="36" rx="5" fill="var(--panel)" stroke="var(--line)"/><text x="158" y="64" fill="var(--muted)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">exists()</text><circle cx="110" cy="28" r="11" fill="none" stroke="var(--phase)" stroke-width="1.5"/><text x="110" y="32" fill="var(--phase)" font-size="13" font-family="var(--font-mono)" text-anchor="middle">≈</text><path class="flow-dash" d="M94 60 126 60" stroke="var(--phase)" stroke-width="1.6"/></svg></div>
+        <div class="te-detail">
+          <p class="te-blurb">Before you add code — reuse, don't reinvent.</p>
+          <div class="te-tools">
+            <div class="te-tool"><span class="te-name">codeweb_find_similar</span><span class="te-desc">"Does something already do this?" Ranks existing bodies by token-shingle or structural-skeleton similarity to your candidate.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_placement</span><span class="te-desc">Where a new symbol belongs (domain + file) by callee gravity, with a duplicate warning.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_tests</span><span class="te-desc">The tests that exercise a symbol — run the right subset after editing.</span></div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="phase">
-      <div class="phase-head" style="--phase:var(--good)">
-        <h3>Freshness & context</h3>
-        <span class="count">2 tools · Close the edit loop.</span>
-      </div>
-      <div class="grid cols-3">
-        <div class="tool" style="--phase:var(--good)">
-          <div class="name">codeweb_context</div>
-          <div class="desc">Blast-radius-scoped context in one call: a symbol's body, direct callers (with bodies), callees (location-only), and transitive impact ids.</div>
-        </div>
-        <div class="tool" style="--phase:var(--good)">
-          <div class="name">codeweb_refresh</div>
-          <div class="desc">Re-extract from disk so mid-task queries reflect edits, not a stale snapshot. Incremental; preserves domains.</div>
+      <div class="te-panel" data-te-panel="2" role="tabpanel" style="--phase:var(--med)">
+        <div class="te-viz"><svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><g stroke="var(--hi)" stroke-width="1.4"><path class="flow-dash" d="M110 60 60 32"/><path class="flow-dash" d="M110 60 56 78"/><path class="flow-dash" d="M110 60 78 100"/></g><circle cx="110" cy="60" r="24" fill="none" stroke="var(--hi)" stroke-width="1" opacity=".35"/><g fill="var(--hi)"><circle cx="110" cy="60" r="10"/><circle cx="60" cy="32" r="6"/><circle cx="56" cy="78" r="6"/><circle cx="78" cy="100" r="6"/></g><text x="150" y="56" fill="var(--hi)" font-size="11" font-family="var(--font-mono)">blast</text><text x="150" y="70" fill="var(--hi)" font-size="11" font-family="var(--font-mono)">radius</text></svg></div>
+        <div class="te-detail">
+          <p class="te-blurb">Assess impact and risk.</p>
+          <div class="te-tools">
+            <div class="te-tool"><span class="te-name">codeweb_review</span><span class="te-desc">Structural review of a change: changed symbols, blast radius, domains touched, fan-in-ranked review order.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_fitness</span><span class="te-desc">Check the graph against architectural fitness rules (forbidden-dependency, layering, no-cycles, max-fan-in, max-LOC).</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_risk</span><span class="te-desc">Rank symbols by change-risk (fan-in, fan-out, LOC, blast radius, churn) for triage.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_break_cycles</span><span class="te-desc">For each file cycle, propose the cheapest edge to sever — verified to actually break it.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_deadcode</span><span class="te-desc">Confidence-tiered dead code: safe-to-delete vs review-first (test-guarded / entrypoint-like).</span></div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="phase">
-      <div class="phase-head" style="--phase:var(--pink)">
-        <h3>Comparison & onboarding</h3>
-        <span class="count">2 tools · Meta-analysis across snapshots and time.</span>
+      <div class="te-panel" data-te-panel="3" role="tabpanel" style="--phase:var(--purple)">
+        <div class="te-viz"><svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><g fill="var(--phase)"><circle cx="44" cy="42" r="8"/><circle cx="44" cy="82" r="8"/></g><g stroke="var(--line)" stroke-width="1.5"><path class="flow-dash" d="M52 42 120 62"/><path class="flow-dash" d="M52 82 120 62"/></g><circle cx="138" cy="62" r="13" fill="var(--phase)"/><path d="M120 62 126 62" stroke="var(--phase)"/><text x="138" y="40" fill="var(--muted)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">merge</text><path d="M166 62 188 62" stroke="var(--faint)" stroke-width="1.4" marker-end=""/><text x="186" y="58" fill="var(--good)" font-size="11" font-family="var(--font-mono)" text-anchor="end">−LOC</text></svg></div>
+        <div class="te-detail">
+          <p class="te-blurb">Act on findings — safely.</p>
+          <div class="te-tools">
+            <div class="te-tool"><span class="te-name">codeweb_codemod</span><span class="te-desc">Plan a consolidation merge (report-only over MCP): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, projected gate verdict.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_hotspots</span><span class="te-desc">Rank symbols by complexity × fan-in × churn — where to refactor first.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_campaign</span><span class="te-desc">An ordered, cumulatively pre-flighted ROI worklist (dead code + cycle cuts + merges). Read-only plan.</span></div>
+          </div>
+        </div>
       </div>
-      <div class="grid cols-3">
-        <div class="tool" style="--phase:var(--pink)">
-          <div class="name">codeweb_diff</div>
-          <div class="desc">Structural delta + regression verdict between two graph snapshots: nodes/edges/cycles/overlaps/orphans added & removed, coupling delta.</div>
+      <div class="te-panel" data-te-panel="4" role="tabpanel" style="--phase:var(--good)">
+        <div class="te-viz"><svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><path class="flow-spin" d="M110 28 A32 32 0 1 1 82 44" stroke="var(--phase)" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M110 24 L110 36 L120 30 Z" fill="var(--phase)"/><circle cx="110" cy="60" r="9" fill="var(--phase)"/><text x="110" y="108" fill="var(--muted)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">re-extract on edit</text></svg></div>
+        <div class="te-detail">
+          <p class="te-blurb">Close the edit loop.</p>
+          <div class="te-tools">
+            <div class="te-tool"><span class="te-name">codeweb_context</span><span class="te-desc">Blast-radius-scoped context in one call: a symbol's body, direct callers (with bodies), callees (location-only), and transitive impact ids.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_refresh</span><span class="te-desc">Re-extract from disk so mid-task queries reflect edits, not a stale snapshot. Incremental; preserves domains.</span></div>
+          </div>
         </div>
-        <div class="tool" style="--phase:var(--pink)">
-          <div class="name">codeweb_reading_order</div>
-          <div class="desc">Foundations-first reading path (depended-upon leaves before orchestrators) for onboarding at scale.</div>
+      </div>
+      <div class="te-panel" data-te-panel="5" role="tabpanel" style="--phase:var(--pink)">
+        <div class="te-viz"><svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><g stroke="var(--line)" stroke-width="1.4" fill="var(--panel)"><rect x="24" y="26" width="64" height="64" rx="5"/><rect x="132" y="26" width="64" height="64" rx="5"/></g><g fill="var(--muted)"><circle cx="44" cy="48" r="4"/><circle cx="68" cy="64" r="4"/></g><g fill="var(--phase)"><circle cx="152" cy="48" r="4"/><circle cx="176" cy="64" r="4"/><circle cx="160" cy="78" r="4"/></g><path class="flow-dash" d="M92 58 128 58" stroke="var(--phase)" stroke-width="1.6"/><text x="110" y="50" fill="var(--phase)" font-size="12" font-family="var(--font-mono)" text-anchor="middle">Δ</text></svg></div>
+        <div class="te-detail">
+          <p class="te-blurb">Meta-analysis across snapshots and time.</p>
+          <div class="te-tools">
+            <div class="te-tool"><span class="te-name">codeweb_diff</span><span class="te-desc">Structural delta + regression verdict between two graph snapshots: nodes/edges/cycles/overlaps/orphans added & removed, coupling delta.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_reading_order</span><span class="te-desc">Foundations-first reading path (depended-upon leaves before orchestrators) for onboarding at scale.</span></div>
+          </div>
         </div>
+      </div>
       </div>
     </div>
     <p class="muted" style="margin-top:var(--s-5)">All 20 tools are read-only. The one mutating operation — <code>codeweb_codemod --write</code> — is gated, reversible, and deliberately <strong>not</strong> exposed over MCP. Every tool has CLI/MCP parity, verified by JSON-RPC conformance tests.</p>

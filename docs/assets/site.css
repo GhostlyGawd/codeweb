@@ -484,6 +484,36 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 .flow-stage h4 { margin: var(--s-2) 0; font-size: 15px; }
 .flow-stage p { font-size: 13px; color: var(--muted); margin: 0; }
 
+/* ============================ tool explorer (lifecycle map) ============================ */
+.te-rail { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s-2); margin-bottom: var(--s-5); }
+.te-station { display: flex; flex-direction: column; gap: 5px; text-align: left; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--phase); border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4); position: relative;
+  transition: background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease), transform var(--dur-1) var(--ease); }
+.te-station:hover { background: var(--panel-2); transform: translateY(-2px); }
+.te-station.active { background: var(--panel-2); border-color: color-mix(in srgb, var(--phase) 55%, var(--line)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--phase) 35%, transparent); }
+.te-station .te-step { font: 700 11px/1 var(--font-mono); color: var(--phase); }
+.te-station .te-title { font-size: 12.5px; font-weight: 600; color: var(--muted); line-height: 1.3; }
+.te-station.active .te-title { color: var(--fg); }
+.te-station .te-badge { position: absolute; top: var(--s-3); right: var(--s-3); font: 700 10px/1 var(--font-mono);
+  color: var(--phase); background: color-mix(in srgb, var(--phase) 14%, transparent); border-radius: var(--r-pill); padding: 3px 7px; }
+.te-rail::after { content: ""; }
+
+.te-panel { display: grid; grid-template-columns: 240px 1fr; gap: var(--s-6); align-items: center;
+  background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--phase); border-radius: var(--r-md); padding: var(--s-6); }
+.cw-js .te-panel { display: none; }
+.cw-js .te-panel.active { display: grid; animation: cwIn .35s var(--ease) both; }
+.te-viz { background: var(--bg-deep); border: 1px solid var(--line-soft); border-radius: var(--r-sm); height: 150px;
+  background-image: linear-gradient(var(--line-soft) 1px, transparent 1px), linear-gradient(90deg, var(--line-soft) 1px, transparent 1px); background-size: 22px 22px; }
+.te-viz svg { display: block; width: 100%; height: 100%; }
+.te-blurb { font-size: 15px; color: var(--fg); font-weight: 550; margin: 0 0 var(--s-4); }
+.te-tools { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+.te-tool { border-left: 2px solid color-mix(in srgb, var(--phase) 45%, var(--line)); padding-left: var(--s-3); }
+.te-name { display: block; font: 600 13px/1.3 var(--font-mono); color: var(--fg); }
+.te-desc { display: block; font-size: 12.5px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.flow-spin { transform-origin: 110px 60px; animation: teSpin 3.4s linear infinite; }
+@keyframes teSpin { to { transform: rotate(360deg); } }
+
 /* ============================ scroll reveal ============================ */
 .cw-js [data-reveal] { opacity: 0; transform: translateY(16px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
 .cw-js [data-reveal].in { opacity: 1; transform: none; }
@@ -494,12 +524,19 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
   .flow { grid-template-columns: 1fr 1fr; }
   .flow-stage:nth-child(2)::after { content: none; }
 }
+@media (max-width: 880px) {
+  .te-rail { grid-template-columns: repeat(3, 1fr); }
+  .te-panel { grid-template-columns: 1fr; }
+  .te-viz { height: 120px; }
+}
 @media (max-width: 620px) {
   .flow { grid-template-columns: 1fr; }
   .flow-stage::after { content: none !important; }
+  .te-rail { grid-template-columns: 1fr 1fr; }
+  .te-tools { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] { opacity: 1; transform: none; transition: none; }
   .flow-stage { opacity: 1; transform: none; transition: none; }
-  .cw-line, .flow-dash { animation: none; }
+  .cw-line, .flow-dash, .flow-spin { animation: none; }
 }

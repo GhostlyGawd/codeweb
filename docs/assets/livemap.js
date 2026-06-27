@@ -249,6 +249,28 @@
     els.forEach(function (e) { io.observe(e); });
   }
 
+  /* ---- tool explorer: phase tabs ---- */
+  function toolExplorer() {
+    var rail = document.querySelector('.te-rail');
+    if (!rail) return;
+    var stations = [].slice.call(document.querySelectorAll('.te-station'));
+    var panels = [].slice.call(document.querySelectorAll('.te-panel'));
+    function activate(idx) {
+      stations.forEach(function (s, i) { var on = i === idx; s.classList.toggle('active', on); s.setAttribute('aria-selected', on); });
+      panels.forEach(function (p, i) { p.classList.toggle('active', i === idx); });
+    }
+    stations.forEach(function (s, i) {
+      s.addEventListener('click', function () { activate(i); });
+      s.addEventListener('keydown', function (ev) {
+        if (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft') {
+          ev.preventDefault();
+          var next = (i + (ev.key === 'ArrowRight' ? 1 : stations.length - 1)) % stations.length;
+          stations[next].focus(); activate(next);
+        }
+      });
+    });
+  }
+
   function init() {
     var hero = document.getElementById('cw-hero-map');
     if (hero) {
@@ -273,6 +295,7 @@
     if (mini) LiveMap(mini, { interactive: false });
     var con = document.getElementById('cw-console');
     if (con) AgentConsole(con);
+    toolExplorer();
     reveals();
   }
 

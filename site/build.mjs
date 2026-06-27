@@ -47,20 +47,40 @@ function renderStats() {
       </div>`).join('');
 }
 
+// per-phase schematic glyph — what this phase does to the graph (geometry from tokens)
+const PHASE_GLYPH = {
+  structural: `<svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><g stroke="var(--line)" stroke-width="1.6"><path class="flow-dash" d="M44 34 100 60"/><path class="flow-dash" d="M44 86 100 60"/><path d="M100 60 168 38"/><path d="M100 60 168 82"/></g><g fill="var(--phase)"><circle cx="44" cy="34" r="6"/><circle cx="44" cy="86" r="6"/><circle cx="100" cy="60" r="10"/></g><g fill="var(--faint)"><circle cx="168" cy="38" r="6"/><circle cx="168" cy="82" r="6"/></g><text x="44" y="18" fill="var(--phase)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">callers</text><text x="168" y="104" fill="var(--faint)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">callees</text></svg>`,
+  write: `<svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><rect x="30" y="42" width="64" height="36" rx="5" fill="var(--panel)" stroke="var(--phase)" stroke-dasharray="4 3"/><text x="62" y="64" fill="var(--phase)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">new()</text><rect x="126" y="42" width="64" height="36" rx="5" fill="var(--panel)" stroke="var(--line)"/><text x="158" y="64" fill="var(--muted)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">exists()</text><circle cx="110" cy="28" r="11" fill="none" stroke="var(--phase)" stroke-width="1.5"/><text x="110" y="32" fill="var(--phase)" font-size="13" font-family="var(--font-mono)" text-anchor="middle">≈</text><path class="flow-dash" d="M94 60 126 60" stroke="var(--phase)" stroke-width="1.6"/></svg>`,
+  review: `<svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><g stroke="var(--hi)" stroke-width="1.4"><path class="flow-dash" d="M110 60 60 32"/><path class="flow-dash" d="M110 60 56 78"/><path class="flow-dash" d="M110 60 78 100"/></g><circle cx="110" cy="60" r="24" fill="none" stroke="var(--hi)" stroke-width="1" opacity=".35"/><g fill="var(--hi)"><circle cx="110" cy="60" r="10"/><circle cx="60" cy="32" r="6"/><circle cx="56" cy="78" r="6"/><circle cx="78" cy="100" r="6"/></g><text x="150" y="56" fill="var(--hi)" font-size="11" font-family="var(--font-mono)">blast</text><text x="150" y="70" fill="var(--hi)" font-size="11" font-family="var(--font-mono)">radius</text></svg>`,
+  optimize: `<svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><g fill="var(--phase)"><circle cx="44" cy="42" r="8"/><circle cx="44" cy="82" r="8"/></g><g stroke="var(--line)" stroke-width="1.5"><path class="flow-dash" d="M52 42 120 62"/><path class="flow-dash" d="M52 82 120 62"/></g><circle cx="138" cy="62" r="13" fill="var(--phase)"/><path d="M120 62 126 62" stroke="var(--phase)"/><text x="138" y="40" fill="var(--muted)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">merge</text><path d="M166 62 188 62" stroke="var(--faint)" stroke-width="1.4" marker-end=""/><text x="186" y="58" fill="var(--good)" font-size="11" font-family="var(--font-mono)" text-anchor="end">−LOC</text></svg>`,
+  freshness: `<svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><path class="flow-spin" d="M110 28 A32 32 0 1 1 82 44" stroke="var(--phase)" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M110 24 L110 36 L120 30 Z" fill="var(--phase)"/><circle cx="110" cy="60" r="9" fill="var(--phase)"/><text x="110" y="108" fill="var(--muted)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">re-extract on edit</text></svg>`,
+  meta: `<svg viewBox="0 0 220 120" fill="none" aria-hidden="true"><g stroke="var(--line)" stroke-width="1.4" fill="var(--panel)"><rect x="24" y="26" width="64" height="64" rx="5"/><rect x="132" y="26" width="64" height="64" rx="5"/></g><g fill="var(--muted)"><circle cx="44" cy="48" r="4"/><circle cx="68" cy="64" r="4"/></g><g fill="var(--phase)"><circle cx="152" cy="48" r="4"/><circle cx="176" cy="64" r="4"/><circle cx="160" cy="78" r="4"/></g><path class="flow-dash" d="M92 58 128 58" stroke="var(--phase)" stroke-width="1.6"/><text x="110" y="50" fill="var(--phase)" font-size="12" font-family="var(--font-mono)" text-anchor="middle">Δ</text></svg>`,
+};
+
 function renderToolPhases() {
-  return product.toolPhases.map((ph) => `
-    <div class="phase">
-      <div class="phase-head" style="--phase:${ph.color}">
-        <h3>${ph.title}</h3>
-        <span class="count">${ph.tools.length} tool${ph.tools.length > 1 ? 's' : ''} · ${ph.blurb}</span>
+  const ph = product.toolPhases;
+  const rail = ph.map((p, i) => `<button class="te-station${i === 0 ? ' active' : ''}" type="button" role="tab" aria-selected="${i === 0}" data-te="${i}" style="--phase:${p.color}">
+        <span class="te-step">0${i + 1}</span>
+        <span class="te-title">${p.title}</span>
+        <span class="te-badge">${p.tools.length}</span>
+      </button>`).join('\n      ');
+  const panels = ph.map((p, i) => `<div class="te-panel${i === 0 ? ' active' : ''}" data-te-panel="${i}" role="tabpanel" style="--phase:${p.color}">
+        <div class="te-viz">${PHASE_GLYPH[p.key] || ''}</div>
+        <div class="te-detail">
+          <p class="te-blurb">${p.blurb}</p>
+          <div class="te-tools">
+            ${p.tools.map((t) => `<div class="te-tool"><span class="te-name">${t.name}</span><span class="te-desc">${t.desc}</span></div>`).join('\n            ')}
+          </div>
+        </div>
+      </div>`).join('\n      ');
+  return `<div class="tool-explorer">
+      <div class="te-rail" role="tablist" aria-label="codeweb tool phases, in edit-loop order">
+      ${rail}
       </div>
-      <div class="grid cols-3">
-        ${ph.tools.map((t) => `<div class="tool" style="--phase:${ph.color}">
-          <div class="name">${t.name}</div>
-          <div class="desc">${t.desc}</div>
-        </div>`).join('\n        ')}
+      <div class="te-stack">
+      ${panels}
       </div>
-    </div>`).join('');
+    </div>`;
 }
 
 function renderTiers() {
