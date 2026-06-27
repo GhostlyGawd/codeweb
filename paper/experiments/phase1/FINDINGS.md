@@ -80,3 +80,29 @@ codeweb out-discovers a grep-only agent (recall delta > 0, ≥8 frozen-engine re
 engine fixes raise codeweb's ceiling so the agent *can* win cross-file (the JS pilot showed engine
 quality decides the agent outcome). The agent A/B reps over {JS, Python, Rust(+Go)} targets are the
 next step and the confirmatory test.
+
+## Validation pilot (reps=2, run wf_13055407-3c2) — a USEFUL null (validate-small worked)
+
+Ran the agent A/B at reps=2 on the two new targets before scaling. Result: paired recall delta
+**+0.035 ± 0.049 (null)**, steps delta +1.25 (treatment slower). Per target:
+
+| target | control recall | treatment recall | Δ | why |
+|---|---|---|---|---|
+| Go `NewRouter` | **1.00** | 1.00 | 0 | grep SATURATES — distinctive name, every caller writes `NewRouter(` |
+| Rust `escape` | 0.81 | 0.875 | +0.065 (noise) | codeweb's cross-file `use` callers helped marginally; grep `escape(` also found most |
+
+**This is the H18 floor effect one level up — a TARGET-SELECTION problem, not a codeweb failure:**
+- Harness integrity clean (no control used codeweb; both treatments used it); grading correct.
+- codeweb **never regressed** recall (treatment ≥ control on both targets).
+- The null is because I picked **distinctive-name** targets — exactly where grep already wins. The
+  prior JS pilot's win (recall +0.265) came from **grep-HOSTILE** targets: common ambiguous names
+  (`merge`) and import/test-mediated callers (`AxiosError`, 76 deps) that grep buries or misses.
+- **Decision: do NOT scale these targets to 8 reps** (would only confirm a null). H19's
+  cross-language test needs grep-hostile targets: aliased imports (grep on the original name misses
+  the aliased call sites — codeweb's alias edges find them), common method names with multiple
+  receiver types (dispatch edges disambiguate), and re-export chains.
+
+**Refined H19 (honest, forming):** codeweb's discovery advantage is **conditional on grep-hostility**
+— it wins where discovery is import/alias/dispatch-mediated, and ties grep on distinctive names while
+never regressing recall. Proving "generalizes across ≥3 languages" therefore means proving it on
+grep-hostile targets in JS (done), Rust, and Go — the next cycle.

@@ -1,0 +1,17 @@
+{
+  "run": "wf_13055407-3c2",
+  "date": "2026-06-27",
+  "purpose": "Phase 1 H19 validation pilot (reps=2) — does a frontier agent equipped with the import-edge-improved codeweb out-discover grep on Go+Rust targets",
+  "config": { "tasks": ["gorilla-newrouter", "ripgrep-escape"], "reps": 2, "frozenTruth": true, "frontierBaseModel": true },
+  "headline": {
+    "pairedDeltaRecall": { "mean": 0.035, "sd": 0.049, "n": 2 },
+    "pairedDeltaPrecision": { "mean": -0.07, "sd": 0, "n": 2 },
+    "pairedDeltaSteps": { "mean": 1.25, "sd": 0.354, "n": 2 }
+  },
+  "perTask": {
+    "gorilla-newrouter": { "truthN": 58, "controlRecall": 1.0, "treatmentRecall": 1.0, "deltaRecall": 0.0, "controlSteps": 2.5, "treatmentSteps": 5.0, "note": "grep SATURATES — distinctive name, every caller writes NewRouter(; no headroom for codeweb" },
+    "ripgrep-escape": { "truthN": 16, "controlRecall": 0.81, "treatmentRecall": 0.875, "deltaRecall": 0.065, "deltaPrecision": -0.125, "controlSteps": 5.5, "treatmentSteps": 5.5, "note": "codeweb's cross-file use-callers helped marginally but grep 'escape(' also found most; within noise at n=2" }
+  },
+  "integrity": { "controlUsedCodewebViolations": [], "treatmentSkippedCodeweb": [] },
+  "verdict": "NULL on these targets, but a VALID, useful null: (1) harness behaved correctly (integrity clean, grading correct, treatment used the new engine and recovered the Rust cross-file callers); (2) codeweb never REGRESSED recall (treatment recall >= control on both); (3) the null is a TARGET-SELECTION artifact — both targets have distinctive names where grep already saturates. The prior JS pilot's win came from grep-HOSTILE targets (common names like 'merge', import/test-mediated callers like AxiosError's 76 deps). H19 generalization must be tested on grep-hostile Go/Rust targets, not distinctive-name ones. Do NOT scale these targets to 8 reps — it would only confirm a null. Validate-small worked exactly as intended."
+}
