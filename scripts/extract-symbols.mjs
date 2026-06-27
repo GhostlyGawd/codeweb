@@ -389,6 +389,95 @@ function resolveImport(fromAbs, spec) {
   for (const c of cands) if (relSet.has(c)) return c;
   return null;
 }
+// ---- Rust `use` import resolution (precision-safe, file-anchored) --------------------------
+// A Rust file IS a module named by its stem (`pattern.rs` -> module `pattern`, `lib.rs` -> crate
+// root `lib`); a `mod.rs` is named by its parent dir. Import edges are attributed to this module
+// node so the `use` site reads as a module-scope dependent of the imported symbol.
+function rustModuleStem(rustRel) {
+  const base = rustRel.slice(rustRel.lastIndexOf('/') + 1).replace(/\.rs$/, '');
+  if (base === 'mod') { const dir = rustRel.slice(0, rustRel.lastIndexOf('/')); return dir.slice(dir.lastIndexOf('/') + 1) || base; }
+  return base;
+}
+// The crate's source root = nearest ancestor dir (incl. the file's own dir) holding lib.rs/main.rs.
+// `crate::` paths resolve against it; falls back to the file's own dir when no root is found.
+function rustCrateRoot(rustRel) {
+  let dir = rustRel.includes('/') ? rustRel.slice(0, rustRel.lastIndexOf('/')) : '';
+  while (dir) {
+    if (relSet.has(dir + '/lib.rs') || relSet.has(dir + '/main.rs')) return dir;
+    const upDir = dir.includes('/') ? dir.slice(0, dir.lastIndexOf('/')) : '';
+    if (upDir === dir) break;
+    dir = upDir;
+  }
+  return rustRel.includes('/') ? rustRel.slice(0, rustRel.lastIndexOf('/')) : '';
+}
+// Split a `use` tree body on commas at brace/paren depth 0 (so `{a, b}` groups stay intact).
+function splitRustUseCommas(body) {
+  const parts = []; let depth = 0, cur = '';
+  for (const ch of body) {
+    if (ch === '{' || ch === '(') depth++;
+    else if (ch === '}' || ch === ')') depth--;
+    if (ch === ',' && depth === 0) { parts.push(cur); cur = ''; } else cur += ch;
+  }
+  if (cur.trim()) parts.push(cur);
+  return parts;
+}
+// Flatten a `use` spec (the text between `use` and `;`) into {segs, leaf, alias} entries, where
+// `segs` is the module path (sans leaf). Handles nested groups (`crate::{a, m::{x, y as z}}`),
+// `as` renames; skips glob (`*`) and module-self (`self`) leaves. Iterative (explicit stack) so it
+// emits no nested function symbol that ci-gate could read as a duplicate.
+function parseRustUseTree(spec) {
+  const entries = [];
+  const stack = [{ body: spec, prefix: [] }];
+  while (stack.length) {
+    const frame = stack.pop();
+    for (const piece of splitRustUseCommas(frame.body)) {
+      const item = piece.trim();
+      if (!item) continue;
+      const brace = item.indexOf('{');
+      if (brace !== -1) {
+        const headRaw = item.slice(0, brace).replace(/::\s*$/, '').trim();
+        const closeIdx = item.lastIndexOf('}');
+        const inner = item.slice(brace + 1, closeIdx === -1 ? item.length : closeIdx);
+        const headSegs = headRaw ? headRaw.split('::').map((s) => s.trim()).filter(Boolean) : [];
+        stack.push({ body: inner, prefix: [...frame.prefix, ...headSegs] });
+        continue;
+      }
+      const asMatch = /\s+as\s+/.exec(item);
+      const pathPart = (asMatch ? item.slice(0, asMatch.index) : item).trim();
+      const aliasRaw = asMatch ? item.slice(asMatch.index + asMatch[0].length).trim() : null;
+      const localSegs = pathPart.split('::').map((s) => s.trim()).filter(Boolean);
+      const fullSegs = [...frame.prefix, ...localSegs];
+      if (!fullSegs.length) continue;
+      const rustUseLeaf = fullSegs[fullSegs.length - 1];
+      if (rustUseLeaf === '*' || rustUseLeaf === 'self') continue;
+      entries.push({ segs: fullSegs.slice(0, -1), leaf: rustUseLeaf, alias: aliasRaw && /^[A-Za-z_]\w*$/.test(aliasRaw) ? aliasRaw : null });
+    }
+  }
+  return entries;
+}
+// Resolve a use-path's module segments to a repo-relative .rs file (crate/super/self/bare anchors).
+function resolveRustModuleFile(rustRel, segs) {
+  let baseDir, rest;
+  const fileDir = rustRel.includes('/') ? rustRel.slice(0, rustRel.lastIndexOf('/')) : '';
+  if (segs[0] === 'crate') { baseDir = rustCrateRoot(rustRel); rest = segs.slice(1); }
+  else if (segs[0] === 'self') { baseDir = fileDir; rest = segs.slice(1); }
+  else if (segs[0] === 'super') { baseDir = fileDir.includes('/') ? fileDir.slice(0, fileDir.lastIndexOf('/')) : ''; rest = segs.slice(1); }
+  else { baseDir = rustCrateRoot(rustRel); rest = segs.slice(0); } // bare module path -> crate-relative
+  if (!rest.length) { for (const c of [baseDir + '/lib.rs', baseDir + '/main.rs']) if (relSet.has(c)) return c; return null; }
+  const joined = (baseDir ? baseDir + '/' : '') + rest.join('/');
+  for (const c of [joined + '.rs', joined + '/mod.rs']) if (relSet.has(c)) return c;
+  return null;
+}
+// Resolve a `use` entry to an EXISTING symbol node id, or null. File-anchored only: a leaf that
+// can't be tied to a known module file + node is dropped (no phantom edge, no byName guessing) —
+// this is what keeps a foreign `escape` (globset/pcre2) from being conflated with cli's escape.
+function resolveRustUse(rustRel, entry) {
+  const modFile = resolveRustModuleFile(rustRel, entry.segs);
+  if (!modFile) return null;
+  const symId = modFile + ':' + entry.leaf;
+  return nodeIdSet.has(symId) ? symId : null;
+}
+
 // Resolve a Python module spec to a repo-relative file (`x.py` or a package's `x/__init__.py`).
 //   level > 0 -> RELATIVE: climb `level` package dirs from the importing file, then append the dotted
 //               path. Anchored to the file's real location, so it can't collide with stdlib.
@@ -448,7 +537,7 @@ const pyFrom = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
 const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]*(?:\s+as\s+\w+)?)*)/gm;
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
-  const r = rel(f), isPy = r.endsWith('.py');
+  const r = rel(f), isPy = r.endsWith('.py'), isRust = r.endsWith('.rs');
   const text = fsRec.text, aId = anchorId(r), amap = new Map(), nsmap = new Map(), classmap = new Map();
   let m;
   const addNamed = (namesStr, spec) => {
@@ -515,6 +604,30 @@ for (const f of files) {
     const pyText = maskPy(text); // don't bind imports that live in a docstring/comment
     while ((m = pyFrom.exec(pyText))) addPyFrom(m[1].length, m[2], m[3]);
     while ((m = pyImport.exec(pyText))) addPyImports(m[1]);
+  } else if (isRust) {
+    // Rust `use a::b::name;` / `{name1, name2}` / `name as alias` / `pub use` (re-export). Each
+    // resolvable leaf (a) aliases its local name to the imported symbol id (so a later bare call
+    // resolves cross-file) and (b) emits an import edge from THIS file's module node (`<file>:<stem>`,
+    // created on demand) to that symbol — a module-scope dependent of the import. Anchored at line
+    // start (after optional `pub`) so a `use` word inside a doc comment is never parsed.
+    const rustStem = rustModuleStem(r);
+    const rustModuleNodeId = r + ':' + rustStem;
+    const ensureRustModuleNode = () => {
+      if (nodeIdSet.has(rustModuleNodeId)) return;
+      nodes.push({ id: rustModuleNodeId, label: rustStem, kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '' });
+      nodeIdSet.add(rustModuleNodeId);
+    };
+    const rustUseRe = /^[ \t]*(?:pub(?:\([^)]*\))?\s+)?use\s+([^;]+);/gm;
+    while ((m = rustUseRe.exec(text))) {
+      for (const entry of parseRustUseTree(m[1])) {
+        const symId = resolveRustUse(r, entry);
+        if (!symId) continue;
+        const localName = entry.alias || entry.leaf;
+        if (!amap.has(localName)) amap.set(localName, symId);
+        ensureRustModuleNode();
+        if (rustModuleNodeId !== symId) importEdges.push([rustModuleNodeId, symId]);
+      }
+    }
   } else {
     while ((m = reqNamed.exec(text))) addNamed(m[1], m[2]);
     while ((m = esNamed.exec(text))) addNamed(m[1], m[2]);
