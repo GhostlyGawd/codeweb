@@ -436,3 +436,68 @@ the H18 design, stated plainly:
 
 This is the weakest-pre-registration, strongest-recent-signal part of the study; it is reported as
 exploratory, and the confirmatory thesis remains Themes 1–4.
+
+---
+
+## 10. North-Star Program (H19–H24) — pre-registered 2026-06-27
+
+Registered **before** their runs, against codeweb `science/north-star-program` branch. These close
+the open gap from §9.5: discovery + efficiency are proven on one slice; this program extends them
+across languages (H19–H20), ships the efficiency win as a tool (H21), attacks the H18 edit-quality
+null on *harder* tasks (H22), and tests a novel pre-edit signal (H23–H24). The cross-cutting
+guardrails are in `docs/ROADMAP.md`; all six (pre-register, freeze engine, symmetric authoring,
+clear noise floor, agent-facing metric, ship nulls) bind every hypothesis below.
+
+### 10.1 Phase 1 — generalization & scaling
+
+- **H19 (generalizes).** The caller-discovery recall advantage over a grep baseline holds across
+  ≥3 languages. Confirmatory languages: **JS** (axios, proven), **Go** (gorilla-mux), **Rust**
+  (ripgrep); Python (flask) is supporting. **Metric:** per-rep paired recall delta (treatment −
+  control), engine frozen, ≥8 reps/target. **Pass:** lower-CI of the mean paired delta > 0 in ≥3/4
+  languages. **H0:** delta ≤ 0. **Falsifier:** delta crosses 0 in ≥2 languages ⇒ scope the claim to
+  the languages where it holds; do not claim "generalizes."
+- **H20 (scales).** Token-saving percentage does not decline as graph size grows. **Metric:** OLS
+  slope of (token-saving %) vs log(graph node count) across corpus repos. **Pass:** slope ≥ 0 within
+  95% CI. **H0:** slope < 0. Negative result reported as a measured ceiling, not hidden.
+
+### 10.2 Phase 2 — context compiler (shipped command)
+
+- **H21 (non-inferior + cheaper).** On a fixed task set, an agent given one `context-pack <symbol>`
+  call instead of free grep exploration completes tasks at **non-inferior success** while spending
+  fewer tokens/tool-calls — measured on the **shipped CLI/MCP command**, not the pilot harness.
+  **Metric:** task-success rate (binary, blind-graded) with pre-registered non-inferiority margin
+  **δ = 0.10** (treatment success ≥ control − 0.10); token & tool-call paired deltas with S/N.
+  **Pass:** success non-inferiority holds AND token delta < 0 with S/N > 2 AND `context-pack` output
+  is byte-stable for fixed (input, engine hash). **Anti-hack:** a token win bought by lower success
+  fails the margin gate and is reported as a loss.
+
+### 10.3 Phase 3 — edit-quality on context-sensitive tasks (the H18 redo)
+
+- **H22 (context raises edit correctness).** On tasks **constructed so the correct edit depends on
+  non-local information** (a distant caller's invariant, a multi-file ripple, a dynamic-dispatch
+  target), agents with codeweb pre-edit context produce more correct edits than grep-only agents.
+  **Metric:** edit correctness — objective downstream test-pass where a test exists; otherwise a
+  blind rubric (graders see neither arm label nor whether codeweb was used). **Pass:** correctness
+  paired-delta lower-CI > 0 across ≥8 reps **AND** both arms are off the floor (>0%) and ceiling
+  (<100%) — a result where either arm saturates is *void* (re-design tasks), not a pass/fail.
+  **H0:** delta ≤ 0. **Pre-commitments:** (a) the task set is frozen and committed **before** any
+  run; (b) tasks are authored by an *independent* agent that does not see codeweb's graph, to remove
+  the cherry-pick confound; (c) **a persistent null on genuinely context-sensitive tasks is a
+  publishable boundary** — codeweb helps discovery + efficiency but not edit-quality — reported
+  plainly, not buried.
+
+### 10.4 Phase 4 — edit blast-radius pre-flight (novel mechanism)
+
+- **H23 (reduces collateral breakage).** Agents shown a pre-edit blast-radius signal (transitive
+  callers, dynamic-dispatch sites, covering tests, cyclomatic risk) break fewer downstream tests and
+  miss fewer call sites than agents without it. **Metric:** downstream-test-breakage rate and
+  missed-call-site rate, both **objectively measured by running the suite / diffing the required
+  call-site set** — never self-reported. **Pass:** both rates lower with CI above the noise floor.
+  **H0:** rates equal or worse.
+- **H24 (the signal is actually used).** A novel signal that agents ignore is a null even if breakage
+  drops for unrelated reasons. **Metric:** instrumented evidence the agent's edit plan references the
+  surfaced blast-radius (e.g. it visits/edits a call site it would not have found via its own search
+  trace). **Pass (for the mechanism claim):** H23 improvement co-occurs with measured uptake in ≥
+  the majority of winning reps; H23 win without uptake is reported as "improvement not attributable
+  to the signal."
+

@@ -6,9 +6,11 @@
 <title>codeweb — system map</title>
 <style>
   :root{
-    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#30363d;
-    --fg:#e6edf3; --muted:#8b949e; --accent:#58a6ff;
-    --hi:#ff5c5c; --med:#ffb65c; --low:#c9d11f; --good:#3fb950;
+    /* Crafted Dark — warm ink + electric chartreuse; mirrors the site tokens + brand.json.
+       Red is reserved for risk / blast radius. No web fonts; system stacks only. */
+    --bg:#100E14; --panel:#1A1820; --panel2:#232029; --line:#322E3A;
+    --fg:#ECECEE; --muted:#9C99A6; --accent:#C6F24E; --accentFg:#0A090D;
+    --hi:#FF5D5D; --med:#FFB14E; --low:#E8C44E; --good:#5BD17A;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
@@ -43,7 +45,7 @@
   table.f{width:100%;border-collapse:collapse;font-size:13px}
   table.f td{padding:6px 8px;border-bottom:1px solid var(--line);cursor:pointer}
   table.f tr:hover td{background:var(--panel2)}
-  .badge{display:inline-block;min-width:22px;text-align:center;padding:1px 7px;border-radius:11px;font-size:11px;font-weight:700;color:#0d1117}
+  .badge{display:inline-block;min-width:22px;text-align:center;padding:1px 7px;border-radius:11px;font-size:11px;font-weight:700;color:var(--accentFg)}
   .b-hi{background:var(--hi)} .b-med{background:var(--med)} .b-low{background:var(--low)} .b-acc{background:var(--accent)} .b-good{background:var(--good)}
   .mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
   .dim{color:var(--muted)}
@@ -53,18 +55,18 @@
   table.m th{padding:4px 6px;color:var(--muted);font-weight:600;text-align:left;white-space:nowrap}
   table.m th.rot{height:96px;vertical-align:bottom;text-align:center}
   table.m th.rot span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
-  table.m td{width:30px;height:30px;text-align:center;border:1px solid #0d1117;cursor:pointer;color:#0d1117;font-weight:600}
+  table.m td{width:30px;height:30px;text-align:center;border:1px solid #100E14;cursor:pointer;color:#100E14;font-weight:600}
   table.m td.diag{outline:1px solid var(--line)}
   table.m td.zero{color:var(--line);background:var(--panel)!important;cursor:default}
   .legend{color:var(--muted);font-size:12px;margin:10px 0}
   /* treemap */
   #tm{position:absolute;inset:0}
-  .tmbox{position:absolute;overflow:hidden;border:1px solid #0d1117;cursor:pointer;font-size:10px;color:#0d1117}
+  .tmbox{position:absolute;overflow:hidden;border:1px solid #100E14;cursor:pointer;font-size:10px;color:#100E14}
   .tmbox:hover{outline:2px solid #fff;z-index:5}
-  .tmlabel{position:absolute;top:1px;left:3px;right:2px;color:#e6edf3;font-size:10px;text-shadow:0 1px 2px #000;pointer-events:none;white-space:nowrap;overflow:hidden}
+  .tmlabel{position:absolute;top:1px;left:3px;right:2px;color:#ECECEE;font-size:10px;text-shadow:0 1px 2px #000;pointer-events:none;white-space:nowrap;overflow:hidden}
   .tmdomlabel{position:absolute;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none}
   /* graph */
-  #cv{display:block;background:radial-gradient(circle at 50% 38%,#11161f,#0d1117)}
+  #cv{display:block;background:radial-gradient(circle at 50% 38%,#16131d,#100E14)}
   #gsearch{position:absolute;top:10px;left:10px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:6px 9px;width:220px}
   #gctrl{position:absolute;top:10px;right:10px;display:flex;gap:6px}
   #gctrl button{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:12px}
@@ -119,8 +121,9 @@
   var domainNames = (G.domains.length ? G.domains.map(function (d) { return d.name; })
     : Array.from(new Set(G.nodes.map(function (n) { return n.domain; }))));
   var domColor = {};
-  domainNames.forEach(function (nm, i) { domColor[nm] = 'hsl(' + Math.round((i * 137.508) % 360) + ',60%,57%)'; });
-  function colorOf(nm) { return domColor[nm] || '#8b949e'; }
+  var DOMC = ['#C6F24E', '#A78BFA', '#4FD6C4', '#FFB14E', '#F778BA', '#5BD17A', '#7FA8FF', '#E8C44E'];
+  domainNames.forEach(function (nm, i) { domColor[nm] = DOMC[i] || ('hsl(' + Math.round((i * 137.508) % 360) + ',55%,62%)'); });
+  function colorOf(nm) { return domColor[nm] || '#9C99A6'; }
   var domSummary = {}; G.domains.forEach(function (d) { domSummary[d.name] = d; });
   function domCount(nm) { return G.nodes.filter(function (n) { return n.domain === nm; }).length; }
   domainNames = domainNames.slice().filter(function (nm) { return domCount(nm) > 0; }).sort(function (a, b) { return domCount(b) - domCount(a); });
@@ -361,7 +364,7 @@
     var hl = null; if (searchTerm) { var t = searchTerm.toLowerCase(); hl = new Set(W.nodes.filter(function (n) { return n.label.toLowerCase().indexOf(t) >= 0; }).map(function (n) { return n.id; })); }
     else if (selectedNode) { hl = new Set([selectedNode]); (outAdj.get(selectedNode) || []).forEach(function (x) { hl.add(x); }); (inAdj.get(selectedNode) || []).forEach(function (x) { hl.add(x); }); }
     W.edges.forEach(function (e) { var A = W.idx.get(e.from), B = W.idx.get(e.to); if (!A || !B) return; var on = !hl || (hl.has(e.from) && hl.has(e.to)); ctx.strokeStyle = on ? (e.cross ? 'rgba(255,182,92,0.4)' : 'rgba(139,148,158,0.25)') : 'rgba(139,148,158,0.04)'; ctx.lineWidth = gView === 'domain' ? Math.max(0.6, Math.min(7, Math.log(e.weight + 1))) : 1; ctx.beginPath(); ctx.moveTo(X(A.x), Y(A.y)); ctx.lineTo(X(B.x), Y(B.y)); ctx.stroke(); });
-    W.nodes.forEach(function (nd) { var vis = !hl || hl.has(nd.id); ctx.globalAlpha = vis ? 1 : 0.12; ctx.beginPath(); ctx.arc(X(nd.x), Y(nd.y), nd.r, 0, 6.2832); ctx.fillStyle = colorOf(nd.domain); ctx.fill(); if (selectedNode === nd.id) { ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke(); } ctx.globalAlpha = 1; if ((gView === 'domain' || nd.r > 11 || (hl && hl.has(nd.id) && hl.size < 30)) && vis) { ctx.fillStyle = '#c9d1d9'; ctx.font = (gView === 'domain' ? '12px ' : '10px ') + 'ui-sans-serif'; ctx.fillText(nd.label, X(nd.x) + nd.r + 3, Y(nd.y) + 3); } });
+    W.nodes.forEach(function (nd) { var vis = !hl || hl.has(nd.id); ctx.globalAlpha = vis ? 1 : 0.12; ctx.beginPath(); ctx.arc(X(nd.x), Y(nd.y), nd.r, 0, 6.2832); ctx.fillStyle = colorOf(nd.domain); ctx.fill(); if (selectedNode === nd.id) { ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke(); } ctx.globalAlpha = 1; if ((gView === 'domain' || nd.r > 11 || (hl && hl.has(nd.id) && hl.size < 30)) && vis) { ctx.fillStyle = '#ECECEE'; ctx.font = (gView === 'domain' ? '12px ' : '10px ') + 'ui-sans-serif'; ctx.fillText(nd.label, X(nd.x) + nd.r + 3, Y(nd.y) + 3); } });
   }
   function gPick(mx, my) { var best = null, bd = 1e9; W.nodes.forEach(function (nd) { var dx = X(nd.x) - mx, dy = Y(nd.y) - my, d = Math.sqrt(dx * dx + dy * dy); if (d < nd.r + 4 && d < bd) { bd = d; best = nd; } }); return best; }
   var gdrag = null, gmoved = false;

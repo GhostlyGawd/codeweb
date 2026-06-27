@@ -24,35 +24,35 @@ const ab = (() => { try { return JSON.parse(readFileSync(join(ROOT, 'paper/resul
 const abN = (path, dflt) => { try { return path.split('.').reduce((o, k) => o[k], ab); } catch { return dflt; } };
 
 const CSS = `
-:root{--bg:#0d1117;--panel:#161b22;--line:#30363d;--tx:#e6edf3;--mut:#8b949e;--blue:#58a6ff;--green:#3fb950;--purple:#a371f7;--amber:#ffb65c;--red:#f85149}
+:root{--bg:#100E14;--panel:#1A1820;--line:#322E3A;--tx:#ECECEE;--mut:#9C99A6;--blue:#C6F24E;--green:#5BD17A;--purple:#A78BFA;--amber:#FFB14E;--red:#FF5D5D}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.65 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-.hero{background:radial-gradient(circle at 50% 0%,#11161f,#0d1117 70%);border-bottom:1px solid var(--line);padding:64px 24px 40px}
+.hero{background:radial-gradient(circle at 76% -12%,rgba(198,242,78,.08),#0A090D 56%,#100E14 100%);border-bottom:1px solid var(--line);padding:64px 24px 40px}
 .wrap{max-width:880px;margin:0 auto;padding:0 24px}
 h1{font-size:38px;line-height:1.15;margin:0 0 12px;letter-spacing:-.5px}
 .sub{font-size:18px;color:var(--mut);margin:0 0 20px;max-width:760px}
 .meta{font-size:13px;color:var(--mut);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
 .nav{margin:22px 0 0;display:flex;flex-wrap:wrap;gap:8px}
-.nav a{font-size:13px;color:var(--blue);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 13px;background:#161b2266}
-.nav a:hover{border-color:var(--blue);background:#1f6feb22}
+.nav a{font-size:13px;color:var(--blue);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:5px 13px;background:#1A182066}
+.nav a:hover{border-color:var(--blue);background:#C6F24E22}
 section{padding:8px 0}
 h2{font-size:26px;margin:46px 0 6px;padding-top:18px;border-top:1px solid var(--line);letter-spacing:-.3px}
 h3{font-size:19px;margin:30px 0 4px;color:var(--tx)}
 p{margin:12px 0}
 a{color:var(--blue)}
-code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.88em;background:#161b22;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
-pre{background:#161b22;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow:auto}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.88em;background:#1A1820;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+pre{background:#1A1820;border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow:auto}
 pre code{background:none;border:none;padding:0;font-size:13px;line-height:1.6}
-.abstract{background:linear-gradient(180deg,#161b22,#0d1117);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:12px;padding:8px 24px;margin:30px 0}
-.callout{background:#161b22;border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:10px;padding:6px 20px;margin:22px 0}
-figure.fig{margin:26px 0;background:#0d111788;border:1px solid var(--line);border-radius:12px;padding:14px}
+.abstract{background:linear-gradient(180deg,#1A1820,#100E14);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:12px;padding:8px 24px;margin:30px 0}
+.callout{background:#1A1820;border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:10px;padding:6px 20px;margin:22px 0}
+figure.fig{margin:26px 0;background:#100E1488;border:1px solid var(--line);border-radius:12px;padding:14px}
 figure.fig svg{width:100%;height:auto;display:block}
 figcaption{color:var(--mut);font-size:13px;margin-top:10px;text-align:center;line-height:1.5}
 table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
 th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:var(--mut);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.4px}
-tr:hover td{background:#161b2255}
+tr:hover td{background:#1A182055}
 .mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
 .pass{color:var(--green);font-weight:700}.fail{color:var(--amber);font-weight:700}
 .big{font-weight:800}
