@@ -10,33 +10,17 @@
       </div>
       <div class="hero-note">v{{version}} · runs on an empty node_modules · never executes the code it maps</div>
     </div>
-    <div class="hero-panel" aria-hidden="true">
-      <div class="hp-bar"><span class="dots"><i></i><i></i><i></i></span><span>impact · src/router/index.ts</span><span class="hp-tag">codeweb</span></div>
-      <div class="hp-body">
-        <svg viewBox="0 0 540 360" width="100%" fill="none" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
-          <g stroke="#322e3a" stroke-width="1.5">
-            <path d="M120 86 H210"/><path d="M270 104 C330 104 320 150 360 168"/>
-            <path d="M120 86 C70 86 70 250 150 256"/><path d="M210 256 H300"/>
-          </g>
-          <g stroke="#ff5d5d" stroke-width="1.8"><path d="M360 192 C360 230 320 250 270 256"/></g>
-          <rect x="44" y="68" width="78" height="38" rx="6" fill="#14121a" stroke="#c6f24e" stroke-width="1.5"/>
-          <text x="60" y="92" fill="#e7f6bf" font-size="13">router</text>
-          <rect x="206" y="68" width="92" height="38" rx="6" fill="#14121a" stroke="#322e3a" stroke-width="1.5"/>
-          <text x="221" y="92" fill="#cfcdd6" font-size="13">resolve</text>
-          <rect x="120" y="238" width="92" height="38" rx="6" fill="#14121a" stroke="#322e3a" stroke-width="1.5"/>
-          <text x="136" y="262" fill="#cfcdd6" font-size="13">render</text>
-          <circle cx="360" cy="180" r="26" fill="none" stroke="#ff5d5d" stroke-width="1" opacity="0.35"/>
-          <rect x="318" y="162" width="84" height="38" rx="6" fill="#1f1216" stroke="#ff5d5d" stroke-width="1.8"/>
-          <text x="333" y="186" fill="#ffd2d0" font-size="13">login()</text>
-          <path d="M404 181 H470" stroke="#ff5d5d" stroke-width="1"/>
-          <circle cx="404" cy="181" r="2.5" fill="#ff5d5d"/>
-          <text x="430" y="166" fill="#ff5d5d" font-size="12">23 in blast</text>
-          <text x="430" y="180" fill="#ff5d5d" font-size="12">radius</text>
-          <text x="44" y="54" fill="#6a6775" font-size="11.5">// call graph · src/router</text>
-          <g stroke="#322e3a" stroke-width="1"><path d="M44 326 H212"/><path d="M44 322 V330 M212 322 V330"/></g>
-          <text x="96" y="345" fill="#6a6775" font-size="11.5">1,796 nodes</text>
-          <path d="M512 40 V64 M500 52 H524" stroke="#c6f24e" stroke-width="1" opacity="0.8"/>
-        </svg>
+    <div class="hero-panel">
+      <div class="hp-bar"><span class="dots"><i></i><i></i><i></i></span><span>live · axios call graph · 70 of 274 symbols</span><span class="hp-tag">codeweb</span></div>
+      <div class="hp-map">
+        <canvas id="cw-hero-map" aria-label="Interactive call graph of the axios codebase. Click a function to see its blast radius."></canvas>
+        <div class="cw-legend" aria-hidden="true">
+          <span><i style="background:#c6f24e"></i>helpers</span><span><i style="background:#a78bfa"></i>core</span><span><i style="background:#4fd6c4"></i>adapters</span><span><i style="background:#f0b35a"></i>utils</span><span><i style="background:#f778ba"></i>cancel</span>
+        </div>
+      </div>
+      <div class="hp-foot">
+        <div id="cw-readout" class="cw-readout"><span class="cw-hint">Click any function to trace its blast radius.</span></div>
+        <div class="cw-try"><span>Try:</span><button class="cw-chip" data-blast="merge">merge()</button><button class="cw-chip" data-blast="AxiosError">AxiosError()</button><button class="cw-chip" data-blast="httpAdapter">httpAdapter()</button></div>
       </div>
     </div>
   </div>
@@ -50,14 +34,17 @@
       <h2>Built for the humans <em>and</em> the agents editing the code</h2>
       <p class="lead">codeweb computes one structural graph and serves it two ways — so a person and the AI agent working beside them finally share the same map.</p>
     </div>
-    <div class="grid cols-2">
-      <div class="card">
-        <h3>For humans — an interactive map</h3>
-        <p>A self-contained HTML report: the dependency web, duplication, hotspots, and ranked, cycle-safe consolidation opportunities. No CDN, no network, opens straight from disk.</p>
+    <div class="duo" data-reveal>
+      <div class="duo-side">
+        <div class="duo-cap"><span class="duo-tag">For humans</span><h3>An interactive map</h3></div>
+        <div class="duo-stage"><canvas id="cw-mini-map" aria-hidden="true"></canvas></div>
+        <p>One self-contained HTML report — the dependency web, duplication, hotspots, and ranked, cycle-safe consolidation. No CDN, no network, opens straight from disk.</p>
       </div>
-      <div class="card">
-        <h3>For agents — 20 deterministic tools</h3>
-        <p>Over MCP, a coding agent can ask <em>what already does this</em>, <em>what an edit breaks</em>, and <em>which fix is safe</em> — before it writes a line. No LLM in the analysis loop, so the answers don't drift.</p>
+      <div class="duo-link" aria-hidden="true"><span>same graph</span></div>
+      <div class="duo-side">
+        <div class="duo-cap"><span class="duo-tag duo-tag-2">For agents</span><h3>20 deterministic tools</h3></div>
+        <div class="duo-stage"><div id="cw-console" class="cw-console" aria-hidden="true"></div></div>
+        <p>Over MCP, an agent asks <em>what already does this</em>, <em>what an edit breaks</em>, and <em>which fix is safe</em> — before it writes a line. No LLM in the analysis loop, so answers don't drift.</p>
       </div>
     </div>
   </div>
@@ -70,7 +57,59 @@
       <h2>A four-stage deterministic pipeline</h2>
       <p class="lead">Parse-free extraction on the fast path for {{languages_inline}}, with an agent fallback for everything else.</p>
     </div>
-    {{pipeline}}
+    <div class="flow" data-reveal>
+      <div class="flow-stage">
+        <div class="flow-viz">
+          <svg viewBox="0 0 120 76" fill="none" aria-hidden="true">
+            <g stroke="var(--line)" stroke-width="1.4" fill="var(--panel-2)">
+              <rect x="10" y="12" width="30" height="40" rx="3"/><rect x="16" y="8" width="30" height="40" rx="3" fill="var(--panel)"/>
+            </g>
+            <g stroke="var(--faint)" stroke-width="1.2"><path d="M22 18h18M22 24h18M22 30h12M22 36h16"/></g>
+            <path class="flow-dash" d="M52 30h22" stroke="var(--accent)" stroke-width="1.6"/>
+            <g fill="var(--accent)"><circle cx="84" cy="16" r="3.2"/><circle cx="98" cy="26" r="3.2"/><circle cx="88" cy="40" r="3.2"/><circle cx="104" cy="48" r="3.2"/><circle cx="76" cy="44" r="3.2"/></g>
+          </svg>
+        </div>
+        <div class="flow-n">01</div><h4>extract</h4>
+        <p>Parse-free atomic nodes + edges, per language (JS/TS/Python/Rust/Go).</p>
+      </div>
+      <div class="flow-stage">
+        <div class="flow-viz">
+          <svg viewBox="0 0 120 76" fill="none" aria-hidden="true">
+            <ellipse cx="38" cy="28" rx="24" ry="19" fill="color-mix(in srgb, var(--accent) 12%, transparent)" stroke="color-mix(in srgb, var(--accent) 40%, var(--line))"/>
+            <ellipse cx="80" cy="48" rx="22" ry="17" fill="color-mix(in srgb, #a78bfa 12%, transparent)" stroke="color-mix(in srgb, #a78bfa 40%, var(--line))"/>
+            <g fill="var(--accent)"><circle cx="30" cy="24" r="3.2"/><circle cx="44" cy="22" r="3.2"/><circle cx="38" cy="34" r="3.2"/><circle cx="50" cy="32" r="3.2"/></g>
+            <g fill="#a78bfa"><circle cx="74" cy="44" r="3.2"/><circle cx="86" cy="46" r="3.2"/><circle cx="80" cy="54" r="3.2"/></g>
+          </svg>
+        </div>
+        <div class="flow-n">02</div><h4>cluster</h4>
+        <p>Group nodes into semantic domains by call gravity.</p>
+      </div>
+      <div class="flow-stage">
+        <div class="flow-viz">
+          <svg viewBox="0 0 120 76" fill="none" aria-hidden="true">
+            <rect x="8" y="22" width="44" height="32" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+            <rect x="68" y="22" width="44" height="32" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+            <g stroke="var(--faint)" stroke-width="1.2"><path d="M16 32h28M16 40h22M76 32h28M76 40h22"/></g>
+            <path class="flow-dash" d="M52 38h16" stroke="var(--hi)" stroke-width="1.8"/>
+            <circle cx="60" cy="14" r="9" fill="none" stroke="var(--hi)" stroke-width="1.4"/><text x="60" y="18" fill="var(--hi)" font-size="11" font-family="var(--font-mono)" text-anchor="middle">≈</text>
+          </svg>
+        </div>
+        <div class="flow-n">03</div><h4>overlap</h4>
+        <p>Body-confirm cross-domain duplication and rank it.</p>
+      </div>
+      <div class="flow-stage">
+        <div class="flow-viz">
+          <svg viewBox="0 0 120 76" fill="none" aria-hidden="true">
+            <g stroke="var(--line)" stroke-width="1.3"><path d="M30 22 52 38M30 22 26 48M52 38 26 48M52 38 70 30"/></g>
+            <g><circle cx="30" cy="22" r="4" fill="var(--accent)"/><circle cx="52" cy="38" r="5" fill="var(--accent)"/><circle cx="26" cy="48" r="4" fill="#4fd6c4"/><circle cx="70" cy="30" r="4" fill="#a78bfa"/></g>
+            <g stroke="var(--accent)" stroke-width="1.4"><path d="M86 22h22M86 34h22M86 46h16"/></g>
+            <g fill="var(--accent)"><circle cx="82" cy="22" r="2"/><circle cx="82" cy="34" r="2"/><circle cx="82" cy="46" r="2"/></g>
+          </svg>
+        </div>
+        <div class="flow-n">04</div><h4>render</h4>
+        <p>A self-contained interactive map + 20 agent tools.</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -91,7 +130,7 @@
       <h2>Every claim is backed by reproducible evidence</h2>
       <p class="lead">codeweb is pre-registered and tested against independent oracles. We publish the nulls too — because trustworthy tooling shows its work.</p>
     </div>
-    <div class="grid cols-3">
+    <div class="grid cols-3" data-reveal>
       <div class="card"><h3>32 / 33</h3><p>pre-registered checks pass. The study found and fixed two real engine bugs the 286-test suite missed.</p></div>
       <div class="card"><h3>0 disagreements</h3><p>across ~490k comparisons of cycles, impact, and callers against independent reference implementations.</p></div>
       <div class="card"><h3>+0.27 recall · −34% steps</h3><p>frontier agents discovering callers, vs grep — over 8 engine-frozen reps. Preliminary, and labelled as such.</p></div>
