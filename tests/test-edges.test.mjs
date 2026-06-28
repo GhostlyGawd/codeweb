@@ -114,3 +114,49 @@ test('SC3: test edges do not count as callers/imports (orphan + callers contract
     assert.deepEqual(callers, ['p.js:caller']);
   } finally { cleanup(dir); }
 });
+
+// TE-ANON — a `node:test`-style anonymous test callback `test('…', () => { foo() })` has no named
+// enclosing symbol, so its file discovers ZERO symbols. It must STILL produce a `test` edge to the
+// imported prod symbol (attributed to the test file's <module>) — the blast-radius coveringTests
+// signal. Before the fix the file was excluded from edge derivation entirely.
+test('TE-ANON: anonymous test callback edges <module> -> prod:foo as a test edge', () => {
+  const { dir, graph } = extract({
+    'prod.js': 'export function foo() { return 1; }',
+    'foo.test.js': [
+      "import { test } from 'node:test';",
+      "import { foo } from './prod.js';",
+      "test('foo works', () => { foo(); });",
+    ].join('\n'),
+  });
+  try {
+    const testEdges = graph.edges.filter((e) => e.kind === 'test' && e.to === 'prod.js:foo');
+    assert.equal(testEdges.length, 1, `expected one test edge to prod.js:foo, got ${JSON.stringify(graph.edges)}`);
+    assert.match(testEdges[0].from, /foo\.test\.js:/, 'test edge originates in the test file');
+  } finally { cleanup(dir); }
+});
+
+// TE-DESTRUCTURE — a function with a destructuring param (`f({ x }) { … }`) must own the calls in
+// its body and stay in the transitive blast radius. Before the fix bodyEnd terminated at the
+// signature line (the param `{ }` balanced to zero before the real body brace opened), so body
+// calls were mis-attributed to <module> and the function fell out of impactOf().
+test('TE-DESTRUCTURE: destructuring-param fn owns its body call and stays in impactOf', () => {
+  const { dir, graph } = extract({
+    'a.js': 'export function inner() { return 1; }',
+    'b.js': [
+      "import { inner } from './a.js';",
+      'export function outer({ x }) {',
+      '  return inner() + x;',
+      '}',
+    ].join('\n'),
+  });
+  try {
+    const fromOuter = graph.edges.filter((e) => e.kind === 'call' && e.from === 'b.js:outer' && e.to === 'a.js:inner');
+    assert.equal(fromOuter.length, 1, `expected outer -> inner call edge, got ${JSON.stringify(graph.edges)}`);
+    const fromModule = graph.edges.filter((e) => e.kind === 'call' && e.from === 'b.js:<module>' && e.to === 'a.js:inner');
+    assert.equal(fromModule.length, 0, 'body call must NOT be attributed to <module>');
+
+    writeTree(dir, { 'graph.json': JSON.stringify(graph) });
+    const impact = JSON.parse(runNode(QUERY, [join(dir, 'graph.json'), '--impact', 'inner', '--json']).stdout).results;
+    assert.ok(impact.includes('b.js:outer'), `outer must be in impactOf(inner): ${JSON.stringify(impact)}`);
+  } finally { cleanup(dir); }
+});
