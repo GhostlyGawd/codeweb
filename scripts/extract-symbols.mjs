@@ -208,13 +208,23 @@ function bodyEnd(lines, startIdx, isPy) {
     }
     return end;
   }
-  let depth = 0, started = false;
+  // Brace count gated on paren depth 0: a `{`/`}` inside a parameter list — destructuring
+  // (`function f({ a, b }) {`) or an object-literal default (`f(o = { x: 1 }) {`) — must NOT be
+  // read as the body brace, or the body would end at the signature line (the destructuring `{ }`
+  // balances to zero before the real body opens), mis-attributing every body call to <module>. The
+  // structural body braces are always at paren depth 0; object-literal call args inside the body sit
+  // at paren depth >= 1 and are balanced, so skipping them is strictly safe.
+  let depth = 0, started = false, paren = 0;
   for (let i = startIdx; i < lines.length; i++) {
     const s = stripSC(lines[i]);
     for (let c = 0; c < s.length; c++) {
       const ch = s[c];
-      if (ch === '{') { depth++; started = true; }
-      else if (ch === '}') { depth--; if (started && depth <= 0) return i; }
+      if (ch === '(') paren++;
+      else if (ch === ')') { if (paren > 0) paren--; }
+      else if (paren === 0) {
+        if (ch === '{') { depth++; started = true; }
+        else if (ch === '}') { depth--; if (started && depth <= 0) return i; }
+      }
     }
     if (!started && /;\s*$/.test(s)) return i;     // brace-less body (arrow/expr) ending in ';'
   }
@@ -645,7 +655,12 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
 
 const edges = [];
 let ambiguousDropped = 0, edgedCount = 0;
-const edgeFiles = files.filter((f) => fileSyms.get(f)?.ranges.length);
+// Every successfully-read file derives edges — NOT only files with discovered symbols. A test file
+// whose only "functions" are anonymous callbacks (`test('…', () => { foo() })`) discovers zero
+// symbols; excluding it dropped its module-scope call to `foo` entirely, so the imported prod symbol
+// got no `test` edge (the blast-radius coveringTests signal). With empty ranges, enclosing() returns
+// null and the call is correctly attributed to the file's <module> (created on demand).
+const edgeFiles = files.filter((f) => fileSyms.has(f));
 const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; // edge cache valid iff symbol set unchanged
 for (const f of edgeFiles) {
   const { text, ranges } = fileSyms.get(f);
