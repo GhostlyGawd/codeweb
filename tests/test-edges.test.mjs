@@ -160,3 +160,58 @@ test('TE-DESTRUCTURE: destructuring-param fn owns its body call and stays in imp
     assert.ok(impact.includes('b.js:outer'), `outer must be in impactOf(inner): ${JSON.stringify(impact)}`);
   } finally { cleanup(dir); }
 });
+
+// JM-* — JS/TS comment/string masking for edge derivation (the maskJs counterpart of maskPy). A call
+// named only inside a `//` or `/* */` comment must fabricate no edge; masking is string-aware (`//`
+// inside "http://…" is not a comment) and template-aware (a call in a `${ … }` interpolation is real
+// code and must still edge).
+const callsTo = (graph, to) => graph.edges.filter((e) => e.kind === 'call' && e.to === to);
+
+test('JM-COMMENT: calls inside // and /* */ comments produce no call edge', () => {
+  const { dir, graph } = extract({
+    'prod.js': 'export function ghost() { return 1; }\nexport function real() { return 2; }',
+    'use.js': [
+      "import { ghost, real } from './prod.js';",
+      'export function host() {',
+      '  // this comment mentions ghost() but must not edge',
+      '  /* block also mentions ghost() here */',
+      '  return real(); // real() IS called',
+      '}',
+    ].join('\n'),
+  });
+  try {
+    assert.equal(callsTo(graph, 'prod.js:ghost').length, 0, `ghost() in a comment must not edge: ${JSON.stringify(graph.edges)}`);
+    assert.equal(callsTo(graph, 'prod.js:real').length, 1, 'real() is a genuine call and must edge');
+  } finally { cleanup(dir); }
+});
+
+test('JM-STRING: // inside a string does not blank the rest of the line', () => {
+  const { dir, graph } = extract({
+    'prod.js': 'export function used() { return 1; }',
+    'use.js': [
+      "import { used } from './prod.js';",
+      'export function host() {',
+      '  const url = "http://example.com";',
+      '  return used(url);',
+      '}',
+    ].join('\n'),
+  });
+  try {
+    assert.equal(callsTo(graph, 'prod.js:used').length, 1, `used() after a string with // must still edge: ${JSON.stringify(graph.edges)}`);
+  } finally { cleanup(dir); }
+});
+
+test('JM-TEMPLATE: call inside ${} interpolation still edges', () => {
+  const { dir, graph } = extract({
+    'prod.js': 'export function fmt() { return "x"; }',
+    'use.js': [
+      "import { fmt } from './prod.js';",
+      'export function host() {',
+      '  return `value is ${fmt()} ok`;',
+      '}',
+    ].join('\n'),
+  });
+  try {
+    assert.equal(callsTo(graph, 'prod.js:fmt').length, 1, `fmt() inside \${} must edge: ${JSON.stringify(graph.edges)}`);
+  } finally { cleanup(dir); }
+});

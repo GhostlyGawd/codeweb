@@ -99,6 +99,67 @@ function maskPy(text) {
   return out.join('\n');
 }
 
+// JS/TS counterpart of maskPy for the edge-derivation scan: blanks `//` line comments and `/* */`
+// block comments (and ' " string interiors) to spaces, preserving line + column counts, so a call
+// written INSIDE a comment can't fabricate a call edge (e.g. a checkout.mjs doc comment
+// `cartSubtotal() -> computeLineTotal()` fabricating two edges — the same phantom-edge class the
+// Python docstring mask already fixes). STRING-AWARE: a `//` inside a string (`"http://…"`) is not a
+// comment. Template literals are special — their TEXT is blanked but a `${ … }` interpolation is REAL
+// code and is kept verbatim (so `${ fmt() }` still edges). Block comments and template literals may
+// span lines, so that open state is carried across the loop. Best-effort (same ethos as maskPy):
+// escapes inside template exprs and nested templates aren't fully state-tracked; worst case is a
+// slightly-off mask, never a crash.
+function maskJs(text) {
+  const lines = text.split(/\r?\n/);
+  const out = [];
+  let inBlock = false;   // inside /* */ spanning lines
+  let inTemplate = false; // inside `...` template TEXT (not inside ${})
+  let exprDepth = 0;      // brace depth inside a template ${ ... } interpolation (0 = not in expr)
+  for (const line of lines) {
+    const n = line.length; let res = '', i = 0;
+    while (i < n) {
+      if (inBlock) {
+        const end = line.indexOf('*/', i);
+        if (end === -1) { res += ' '.repeat(n - i); i = n; }
+        else { res += ' '.repeat(end + 2 - i); i = end + 2; inBlock = false; }
+        continue;
+      }
+      if (inTemplate && exprDepth === 0) {           // template TEXT — blank it, watch for `${` / closing backtick
+        const ch = line[i];
+        if (ch === '`') { res += ' '; i++; inTemplate = false; continue; }
+        if (ch === '$' && line[i + 1] === '{') { res += '${'; i += 2; exprDepth = 1; continue; } // keep expr
+        res += ' '; i++; continue;                   // blank template literal text
+      }
+      if (exprDepth > 0) {                            // inside ${ ... } — keep verbatim (real code), match braces
+        const ch = line[i];
+        if (ch === '"' || ch === "'") {               // skip string interior so a `}` inside it can't miscount
+          let j = i + 1; while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
+          const stop = Math.min(j + 1, n); res += line.slice(i, stop); i = stop; continue;
+        }
+        if (ch === '{') exprDepth++;
+        else if (ch === '}') { exprDepth--; if (exprDepth === 0) { res += ch; i++; inTemplate = true; continue; } }
+        res += ch; i++; continue;
+      }
+      const ch = line[i];                             // normal code
+      if (ch === '/' && line[i + 1] === '/') { res += ' '.repeat(n - i); i = n; continue; } // line comment
+      if (ch === '/' && line[i + 1] === '*') {                                               // block comment
+        const end = line.indexOf('*/', i + 2);
+        if (end === -1) { inBlock = true; res += ' '.repeat(n - i); i = n; }
+        else { res += ' '.repeat(end + 2 - i); i = end + 2; }
+        continue;
+      }
+      if (ch === '"' || ch === "'") {                                                        // string literal
+        let j = i + 1; while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
+        const stop = Math.min(j + 1, n); res += ' '.repeat(stop - i); i = stop; continue;
+      }
+      if (ch === '`') { res += ' '; i++; inTemplate = true; continue; }                      // open template literal
+      res += ch; i++;
+    }
+    out.push(res);
+  }
+  return out.join('\n');
+}
+
 // ---- enumerate source files ----
 function listFiles() {
   const viaRg = tryExec('rg', ['--files', root]);
@@ -665,7 +726,7 @@ const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; /
 for (const f of edgeFiles) {
   const { text, ranges } = fileSyms.get(f);
   const r = rel(f);
-  const lines = (r.endsWith('.py') ? maskPy(text) : text).split(/\r?\n/); // no calls from docstrings/comments
+  const lines = (r.endsWith('.py') ? maskPy(text) : /\.(jsx?|mjs|cjs|tsx?)$/.test(r) ? maskJs(text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
   const prev = reuseEdges && oldCache.files[r];
   let result;
