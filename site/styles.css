@@ -276,6 +276,15 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 .cw-strip .home { color: var(--fg); }
 .cw-strip .sp { flex: 1; }
 
+/* ============================ mobile robustness (no horizontal scroll) ============================ */
+/* grid/flex children default to min-width:auto, so a wide child (pre, canvas, table) forces the
+   whole page wider on phones. Let them shrink, and keep wide blocks scrolling inside themselves. */
+.split > *, .duo > *, .grid > *, .flow-stage, .te-panel, .te-tools > *, .hero-copy, .hero-panel,
+.section-head, .prose, .wrap > * { min-width: 0; }
+pre { max-width: 100%; }
+table.ledger { display: block; overflow-x: auto; }
+img, svg, canvas { max-width: 100%; }
+
 /* ============================ responsive ============================ */
 @media (max-width: 880px) {
   .cols-3, .cols-4, .stat-strip, .pipeline, .footer-grid { grid-template-columns: 1fr 1fr; }
@@ -285,8 +294,24 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 @media (max-width: 620px) {
   .cols-2, .cols-3, .cols-4, .stat-strip, .pipeline, .footer-grid { grid-template-columns: 1fr; }
   .nav-links { display: none; }
-  .hero-inner { padding: var(--s-8) 0 var(--s-7); }
   .section { padding: var(--s-7) 0; }
+  .section + .section { padding-top: 0; }
+  /* tighter hero rhythm — the desktop hero is far too tall on a phone */
+  .hero-inner { padding: var(--s-7) 0 var(--s-6); gap: var(--s-5); }
+  .hero h1 { font-size: clamp(32px, 9vw, 46px); line-height: 1.02; }
+  .hero-sub { font-size: 16px; }
+  #cw-hero-map { height: 260px; }
+  .hp-map { min-height: 260px; }
+  .stat-strip { gap: var(--s-3); margin-top: var(--s-5); }
+  .stat { padding: var(--s-4); }
+  .section-head { margin-bottom: var(--s-5); }
+  .lead { font-size: 16px; }
+  .duo-stage { height: 200px; }
+  #cw-mini-map { height: 200px; }
+  .te-panel { padding: var(--s-4); }
+  .te-station { padding: var(--s-3); }
+  pre { padding: var(--s-3) var(--s-4); }
+  pre code { font-size: 12px; }
 }
 
 /* ============================ motion preferences ============================ */
