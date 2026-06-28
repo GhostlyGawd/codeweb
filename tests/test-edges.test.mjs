@@ -215,3 +215,40 @@ test('JM-TEMPLATE: call inside ${} interpolation still edges', () => {
     assert.equal(callsTo(graph, 'prod.js:fmt').length, 1, `fmt() inside \${} must edge: ${JSON.stringify(graph.edges)}`);
   } finally { cleanup(dir); }
 });
+
+// RX-* — renamed re-export resolution (`export {x as y} from './impl'`). A call through a renamed
+// re-export must edge to the underlying symbol (transitively through the rename) — the one indirection
+// grep structurally cannot follow by the primitive's original name.
+test('RX-RENAME: call via `export {x as y} from` barrel edges to impl:x', () => {
+  const { dir, graph } = extract({
+    'impl.js': 'export function primitive() { return 1; }',
+    'index.js': "export { primitive as renamed } from './impl.js';",
+    'consumer.js': [
+      "import { renamed } from './index.js';",
+      'export function useIt() { return renamed(); }',
+    ].join('\n'),
+  });
+  try {
+    const edge = graph.edges.filter((e) => e.kind === 'call' && e.from === 'consumer.js:useIt' && e.to === 'impl.js:primitive');
+    assert.equal(edge.length, 1, `useIt -> impl.js:primitive must edge through the rename: ${JSON.stringify(graph.edges)}`);
+    writeTree(dir, { 'graph.json': JSON.stringify(graph) });
+    const impact = JSON.parse(runNode(QUERY, [join(dir, 'graph.json'), '--impact', 'primitive', '--json']).stdout).results;
+    assert.ok(impact.includes('consumer.js:useIt'), `useIt must be in impactOf(primitive): ${JSON.stringify(impact)}`);
+  } finally { cleanup(dir); }
+});
+
+test('RX-CHAIN: re-export through two barrels resolves transitively', () => {
+  const { dir, graph } = extract({
+    'impl.js': 'export function deep() { return 1; }',
+    'mid.js': "export { deep as midName } from './impl.js';",
+    'top.js': "export { midName as topName } from './mid.js';",
+    'consumer.js': [
+      "import { topName } from './top.js';",
+      'export function caller() { return topName(); }',
+    ].join('\n'),
+  });
+  try {
+    const edge = graph.edges.filter((e) => e.kind === 'call' && e.from === 'consumer.js:caller' && e.to === 'impl.js:deep');
+    assert.equal(edge.length, 1, `caller -> impl.js:deep must edge through a 2-hop re-export chain: ${JSON.stringify(graph.edges)}`);
+  } finally { cleanup(dir); }
+});
