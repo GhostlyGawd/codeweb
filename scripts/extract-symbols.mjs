@@ -504,6 +504,45 @@ for (const [fabs, recd] of fileSyms) {
   const ds = defaultExportOf(rr, recd.text, new Set(recd.ranges.map((rg) => rg.name)));
   if (ds && nodeIdSet.has(ds)) defaultExportByFile.set(rr, ds);
 }
+// ---- JS/TS re-export resolution (precision-safe, file-anchored) ---------------------------------
+// `export { x as y } from './impl'` re-exports impl's `x` under the public name `y` WITHOUT defining a
+// symbol in the barrel — so a downstream `import { y } from './barrel'` has no `barrel:y` node to bind
+// to, and the call to `y()` was silently dropped (the name-changing-indirection gap: the one case grep
+// also can't follow by the original name). Build, per file, a table of exported-name -> {target, orig}
+// and resolve it TRANSITIVELY (a re-export of a re-export) so an import of a renamed re-export binds to
+// the real underlying symbol. Named re-exports only; `export * from` is a later increment.
+const esReExportRe = /export\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g;
+const reExportByFile = new Map(); // rel file -> Map(exportedName -> { target: rel file, orig })
+for (const f of files) {
+  const fsRec = fileSyms.get(f); if (!fsRec) continue;
+  const r = rel(f);
+  if (!/\.(jsx?|mjs|cjs|tsx?)$/.test(r)) continue; // JS/TS only
+  const map = new Map();
+  let m;
+  esReExportRe.lastIndex = 0;
+  while ((m = esReExportRe.exec(fsRec.text))) {
+    const target = resolveImport(f, m[2]); if (!target) continue;
+    for (const part of m[1].split(',')) {
+      const seg = part.trim().split(/\s+as\s+/);
+      const orig = (seg[0] || '').trim(), exported = (seg[seg.length - 1] || '').trim();
+      if (orig && orig !== 'default') map.set(exported, { target, orig });
+    }
+  }
+  if (map.size) reExportByFile.set(r, map);
+}
+// Resolve `targetRel`'s exported `name` to a real symbol node id, following renamed re-export chains.
+// Returns the node id or null (unknown name / dead-ends at a non-symbol). Cycle-guarded.
+function resolveReExport(targetRel, name, seen) {
+  const key = targetRel + ':' + name;
+  if (nodeIdSet.has(key)) return key;          // a real symbol in the target file
+  seen = seen || new Set();
+  if (seen.has(key)) return null;              // re-export cycle -> give up (no phantom edge)
+  seen.add(key);
+  const reMap = reExportByFile.get(targetRel);
+  const hop = reMap && reMap.get(name);
+  return hop ? resolveReExport(hop.target, hop.orig, seen) : null;
+}
+
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
 const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
 const classAliasByFile = new Map(); // fileAbs -> Map(localName -> CLASS node id) [default import whose default export is a class — for instanceof/static-method ref edges]
@@ -529,7 +568,9 @@ for (const f of files) {
       const orig = seg[0].trim(), local = seg[seg.length - 1].trim();
       if (!orig) continue;
       const symId = target + ':' + orig;
-      if (nodeIdSet.has(symId)) { amap.set(local, symId); if (aId && aId !== symId) importEdges.push([aId, symId]); }
+      // Direct symbol in the target, else follow a renamed re-export chain (`export {orig as …} from`).
+      const resolved = nodeIdSet.has(symId) ? symId : resolveReExport(target, orig);
+      if (resolved) { amap.set(local, resolved); if (aId && aId !== resolved) importEdges.push([aId, resolved]); }
     }
   };
   // Python `from [.]*MOD import a, b as c`: each name is EITHER a submodule of MOD (-> module object,
