@@ -12,7 +12,7 @@
 **You can't see where your codebase does the same work twice — and neither can the agent editing it.**
 codeweb dissects a repo to its atomic parts (functions, classes, methods), wires them into a living
 call/import graph, tags each node's domain, and surfaces cross-domain overlap. Then it serves that
-graph **two ways**: a self-contained, interactive **HTML map for you**, and **21 deterministic query
+graph **two ways**: a self-contained, interactive **HTML map for you**, and **22 deterministic query
 tools** (over MCP, no LLM in the loop) **for your coding agent** to consult *before* it edits —
 *does this already exist? what breaks if I change it? where should this go?*
 
@@ -374,7 +374,7 @@ above are also exposed over MCP (below).
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing all
-**21** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
+**22** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
 `codeweb_map` (build/rebuild the graph over MCP), `codeweb_callers/callees/impact/cycles/orphans/
 diff`, the edit-loop tools `codeweb_context/refresh`, the intelligence tools
 `codeweb_hotspots/campaign/reading_order`, plus `codeweb_tests/find_similar/placement/review/

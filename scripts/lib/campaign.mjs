@@ -44,8 +44,11 @@ export function planCampaign(graph, { optimize = { opportunities: [] }, deadcode
   }).sort(byRoiThenId);
 
   // Phase 3 — ready merges, cumulatively pre-flighted from the graph-with-prior-steps-applied.
-  let cur = g0;
-  for (const s of delSteps) cur = applyEdit(cur, s.op);
+  // Deletes are independent node removals, so applying them as ONE batched op is equivalent to the
+  // sequential chain — and O(1) whole-graph clones instead of O(deletes). (549 per-step clones of a
+  // 1.8MB graph made campaign the 8.9s outlier while every other tool answered in ~100ms.)
+  const delIds = delSteps.map((s) => s.op.ids[0]);
+  let cur = delIds.length ? applyEdit(g0, { kind: 'delete', ids: delIds }) : g0;
   const idx0 = buildIndex(g0);
   const cands = (optimize.opportunities || [])
     .filter((o) => o.tier === 'ready' && o.kind === 'duplicate-logic' && Array.isArray(o.nodes) && o.nodes.length >= 2)

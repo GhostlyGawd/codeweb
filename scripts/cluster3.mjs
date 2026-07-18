@@ -79,12 +79,21 @@ for (const [lbl, idxs] of groups) {
 }
 nodes.forEach((n, i) => { n.domain = nameOf.get(label[i]); });
 
-// domain summaries (top symbols by in-degree)
+// domain summaries — deterministic DESCRIPTIVE labels: size, file count, the key symbols (exported
+// preferred, then fan-in), and the role composition when a domain is mostly supporting code. This is
+// the "what does this area do" one-liner the report + reading-order surface.
 const byDomain = new Map();
 nodes.forEach((n, i) => { if (!byDomain.has(n.domain)) byDomain.set(n.domain, []); byDomain.get(n.domain).push(i); });
 const domains = [...byDomain.entries()].map(([name, idxs]) => {
-  const top = idxs.slice().sort((a, b) => indeg[b] - indeg[a]).slice(0, 5).map((i) => nodes[i].label);
-  return { name, nodes: idxs.length, summary: `${idxs.length} symbols in ${name}; key: ${top.join(', ')}.` };
+  const top = idxs.slice()
+    .sort((a, b) => (nodes[b].exports === true) - (nodes[a].exports === true) || indeg[b] - indeg[a])
+    .slice(0, 5).map((i) => nodes[i].label).filter((l) => l !== '<module>');
+  const files = new Set(idxs.map((i) => nodes[i].file)).size;
+  const roles = {};
+  idxs.forEach((i) => { const r = nodes[i].role || 'product'; roles[r] = (roles[r] || 0) + 1; });
+  const domRole = Object.entries(roles).sort((a, b) => b[1] - a[1])[0][0];
+  const roleNote = domRole !== 'product' ? ` (mostly ${domRole} code)` : '';
+  return { name, nodes: idxs.length, role: domRole, summary: `${idxs.length} symbols across ${files} file(s)${roleNote}; key: ${top.join(', ')}.` };
 }).sort((a, b) => b.nodes - a.nodes);
 
 const graph = {

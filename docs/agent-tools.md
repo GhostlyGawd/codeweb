@@ -2,7 +2,7 @@
 
 > **Historical spec.** This documents the first two agent tools only. The current surface is the
 > full capability suite in [`agent-tools-v2.md`](agent-tools-v2.md) + [`tier0-3-spec.md`](tier0-3-spec.md),
-> all exposed over MCP (21 tools — see the README's "Use it as an MCP tool").
+> all exposed over MCP (22 tools — see the README's "Use it as an MCP tool").
 
 Two read-only, deterministic tools that move work out of the stochastic LLM and into the graph:
 `context-pack` answers *"what's the minimal context to safely change X?"* and `simulate-edit`

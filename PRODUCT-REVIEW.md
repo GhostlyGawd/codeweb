@@ -219,3 +219,37 @@ node scripts/context-pack.mjs /tmp/vite-out/graph.json packages/vite/src/node/ut
 ```
 
 *Screenshots and raw probe scripts from this review live outside the repo (session scratchpad); all numbers above are reproducible with the commands shown.*
+
+---
+
+## Addendum (2026-07-18): the roadmap, implemented and re-measured
+
+Every phase above was implemented on this branch (P0 → P1 → P2 → P3, one commit each). Same
+methodology as the review: every number below re-measured on the same vite checkout (3,036 symbols).
+
+| Metric | Before (review) | After | Change |
+|---|---|---|---|
+| Piped CLI output > 64KB | truncated at exactly 65,536 B, invalid JSON | complete + parses (306KB verified) | **P0 bug fixed** |
+| `codeweb_context` response | 306KB (~76k tokens) | **9.6KB** (call-site windows, 12 callers) | −97% |
+| `codeweb_impact` response | 16.4KB | **1.5KB** (summary + top-20 by fan-in) | −91% |
+| `codeweb_deadcode` response | 265.8KB (~66k tokens) | **14.3KB** (top-20/tier by span, true totals) | −95% |
+| Representative agent session (7 calls) | ~600KB raw / clipped by client caps | **49.2KB (~12.6k tokens), all valid JSON** | ~12× |
+| MCP query round-trip | 75–122ms (spawn+parse per call) | **4–6ms** (in-process, cached graph) | ~20× |
+| `campaign` on vite | 8,903ms | **1,253ms** (batched delete simulation) | 7× |
+| Full pipeline on vite | 2.84s | 2.44s | no regression |
+| Install → tools available | ~7 manual steps (no `mcpServers`) | plugin install auto-registers; `graph` optional; `codeweb_map` builds on demand | ≤2 steps |
+| vite overlap findings | 76 (top: plugin hooks ×32, fixture merges) | **17 findings + 15 labeled interface patterns**, product-scoped (1,021 non-product symbols excluded, counted) | precision |
+| vite graph areas (report) | 82 (fixture-dominated) | **8 product areas** (toggle shows all) | readable |
+| Body-span ground truth | `cleanUrl` 550 loc (real 5), `resolveBaseUrl` 605 (real 39) | **5 / 39 exact** | fixed |
+| Top fan-in symbols | `id`, `expect` (test global, 215), `url` | `normalizePath` 76, `cleanUrl` 55 (real) | fixed |
+| Same-file same-name methods | one colliding id | owner-qualified `file:Type.method` in every tier | fixed |
+| Staleness | undetectable | per-file stamps; queries annotate + point at `codeweb_refresh` | aware |
+| Pre-edit awareness | none (post-edit only, full re-extract per edit) | one-line PreToolUse advisory; post-edit incremental (`--cache`) | aware |
+| Report a11y | 0 ARIA, 0 tabbable, no reduced-motion | tablist/tabs, 122 tabbable, aria-live, `prefers-reduced-motion` | accessible |
+| Search / deep links | dim-only, no navigation | Enter cycles + centers + selects; `#s=<id>` deep links | navigable |
+| MCP tools | 20 (subset of CLI power; version 0.1.0) | **22** (`codeweb_map`, `codeweb_explain`; body/structural/gate/scope exposed; version derived) | complete |
+| Test suite | 370 tests | **394 tests, 0 fail** (+24 pinning every fix above) | guarded |
+
+Still open (honestly): the efficiency-pilot re-run against budgeted responses needs an agent
+harness this environment doesn't have — the per-tool token measurements above are the input to it;
+language expansion (Java/C#/…) remains sequenced behind trust, as planned.

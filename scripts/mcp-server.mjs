@@ -16,9 +16,12 @@
 
 import { createInterface } from 'node:readline';
 import { spawnSync } from 'node:child_process';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { normalizeGraph, buildIndex } from './lib/graph-ops.mjs';
+import { runQuery } from './lib/query-core.mjs';
+import { checkStaleness } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const S = (f) => join(HERE, f);
@@ -69,6 +72,24 @@ function discoverGraph() {
 }
 const NO_GRAPH = 'no graph found — pass `graph`, or build one for this repo with the codeweb_map tool (or /codeweb). The graph lives at <target>/.codeweb/graph.json.';
 
+// ---- persistent graph cache (in-process serving) ---------------------------------------------
+// The stdio server lives for the whole session, so structural queries answer from a PARSED,
+// INDEXED graph kept in memory — sub-ms after the first call instead of spawn+parse (~100ms)
+// every time. Keyed by (path, mtime, size): a rebuilt/refreshed graph reloads transparently.
+// The payloads come from the same lib/query-core.mjs the CLI ships — one truth, two transports.
+const graphCache = new Map(); // abs path -> { m, s, graph, index }
+function cachedGraph(absPath) {
+  const st = statSync(absPath);
+  const hit = graphCache.get(absPath);
+  if (hit && hit.m === st.mtimeMs && hit.s === st.size) return hit;
+  const graph = normalizeGraph(JSON.parse(readFileSync(absPath, 'utf8')));
+  const entry = { m: st.mtimeMs, s: st.size, graph, index: buildIndex(graph) };
+  graphCache.set(absPath, entry);
+  if (graphCache.size > 8) graphCache.delete(graphCache.keys().next().value); // a session touches few graphs
+  return entry;
+}
+const QUERY_KIND = { codeweb_callers: 'callers', codeweb_callees: 'callees', codeweb_tests: 'tests', codeweb_impact: 'impact', codeweb_cycles: 'cycles', codeweb_orphans: 'orphans' };
+
 // ---- tool table ------------------------------------------------------------------------------
 // need: required args (validated). opt: optional args (schema only). budget: {arg, flag, value} —
 // when the caller passes neither that arg nor full:true, `flag value` is injected (default top-N).
@@ -96,6 +117,9 @@ const TOOLS = [
   { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: S('diff.mjs'), graphless: true,
     argv: (a) => [a.before, a.after],
     description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression (new cycle, new duplication, a symbol that lost all callers). Call AFTER an edit to gate it.' },
+  { name: 'codeweb_explain', need: ['symbol'], opt: ['graph'], bin: S('explain.mjs'),
+    argv: (a) => [a.symbol],
+    description: '"Tell me about X before I touch it" in ONE ~1KB card: identity, role, signature, complexity, fan-in/out, tests, blast radius + domains, top-5 callers/callees, and any duplication/pattern findings it belongs to. Start here; drill down with impact/context/callers.' },
   { name: 'codeweb_context', need: ['symbol'], opt: ['graph', 'limit', 'window', 'full'], budget: { arg: 'limit', flag: '--limit', value: 12 },
     bin: S('context-pack.mjs'),
     argv: (a) => [a.symbol, ...(a.full ? ['--full-bodies'] : []), ...(a.window != null ? ['--window', String(a.window)] : [])],
@@ -201,10 +225,31 @@ function handleToolCall(id, params) {
   if (tool.map) return handleMap(id, args);
 
   const cliArgs = [];
+  let graphPath = null;
   if (!tool.graphless) {
-    const graph = args.graph || discoverGraph();
-    if (!graph) return errResult(id, NO_GRAPH);
-    cliArgs.push(graph);
+    graphPath = args.graph || discoverGraph();
+    if (!graphPath) return errResult(id, NO_GRAPH);
+    cliArgs.push(graphPath);
+  }
+
+  // Fast path: structural queries answer in-process from the cached graph (same payloads as the
+  // CLI via query-core). Any surprise falls back to the spawned, tested artifact.
+  const qkind = QUERY_KIND[tool.name];
+  if (qkind) {
+    try {
+      const { graph, index } = cachedGraph(resolve(graphPath));
+      const limit = args.limit != null ? Number(args.limit) : (args.full ? null : tool.budget.value);
+      const offset = args.offset != null ? Number(args.offset) : 0;
+      const { payload, code } = runQuery(graph, index, { query: qkind, symbol: args.symbol, limit, offset });
+      if (code === 0 || payload) {
+        const stale = payload.found === false ? null : checkStaleness(graph);
+        if (stale) {
+          payload.stale = stale;
+          if (payload.summary) payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`;
+        }
+        return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
+      }
+    } catch { /* fall through to the spawned artifact */ }
   }
   cliArgs.push(...tool.argv(args));
   // budget injection: default top-N unless the caller set the budget arg explicitly or asked full

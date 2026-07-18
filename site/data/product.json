@@ -60,6 +60,10 @@
           "desc": "Build (or rebuild) the graph for a repo — the deterministic pipeline over MCP, so a session never dead-ends on \"no graph found\"."
         },
         {
+          "name": "codeweb_explain",
+          "desc": "One ~1KB card: identity, contract, dependents, blast radius, findings — \"tell me about X\" in a single call."
+        },
+        {
           "name": "codeweb_callers",
           "desc": "Direct callers of a symbol (call-edge in-neighbors)."
         },

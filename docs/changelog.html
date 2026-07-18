@@ -96,10 +96,14 @@
 <p>  <code>limit</code>/<code>offset</code> override. <code>codeweb_context</code> returns call-site windows (±3 lines)</p>
 <p>  instead of whole caller bodies (~300KB → ~10KB on a busy vite symbol).</p>
 <ul>
-<li><strong><code>codeweb_map</code></strong> (21st tool): build/rebuild the graph over MCP; <code>graph</code> becomes</li>
+<li><strong><code>codeweb_map</code></strong>: build/rebuild the graph over MCP; <code>graph</code> becomes</li>
 </ul>
 <p>  optional on every tool (nearest <code>.codeweb/graph.json</code> above cwd, or <code>CODEWEB_WS</code>),</p>
 <p>  and a missing graph returns an actionable error naming the fix.</p>
+<ul>
+<li><strong><code>codeweb_explain</code></strong>: one ~1KB card (identity, contract, dependents, blast radius,</li>
+</ul>
+<p>  findings) answering "tell me about X" — previously 3-4 calls. 22 tools total.</p>
 <ul>
 <li><strong>Plugin auto-registration</strong>: <code>.claude-plugin/plugin.json</code> now carries <code>mcpServers</code>,</li>
 </ul>
@@ -142,7 +146,24 @@
 <li><code>lib/cli.mjs</code>: the shared CLI harness (die/emit/loadGraph/capList/staleness) —</li>
 </ul>
 <p>  deleting the die()×16 / graph-load×13 duplication codeweb's own overlap report flagged.</p>
+<ul>
+<li><strong>In-process query serving</strong>: the MCP server answers structural queries from a</li>
+</ul>
+<p>  cached parsed graph (4–6ms vs 75–122ms spawn+parse), via the same</p>
+<p>  <code>lib/query-core.mjs</code> the CLI ships — one truth, two transports.</p>
+<ul>
+<li><strong>Rename-aware diff</strong>: a removed+added pair with an identifier-normalized</li>
+</ul>
+<p>  (Type-2) body match ≥85% reports as <code>renamed[]</code> instead of delete+add churn.</p>
+<ul>
+<li>Domain summaries are genuinely descriptive: size, file count, exported-first</li>
+</ul>
+<p>  key symbols, and role composition ("mostly test code").</p>
 <h3 class="cl-grp">Changed</h3>
+<ul>
+<li><code>campaign</code> batches its delete simulation (one clone instead of one per step):</li>
+</ul>
+<p>  8.9s → 1.25s on a 3k-symbol monorepo.</p>
 <ul>
 <li>MCP <code>initialize</code> returns workflow <code>instructions</code> and negotiates a SUPPORTED protocol</li>
 </ul>

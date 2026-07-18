@@ -41,9 +41,11 @@ window, and a map that tells you when it's stale. Driven by the measured product
   most-relevant items + TRUE totals + explicit `more.remaining`; `full: true` or
   `limit`/`offset` override. `codeweb_context` returns call-site windows (±3 lines)
   instead of whole caller bodies (~300KB → ~10KB on a busy vite symbol).
-- **`codeweb_map`** (21st tool): build/rebuild the graph over MCP; `graph` becomes
+- **`codeweb_map`**: build/rebuild the graph over MCP; `graph` becomes
   optional on every tool (nearest `.codeweb/graph.json` above cwd, or `CODEWEB_WS`),
   and a missing graph returns an actionable error naming the fix.
+- **`codeweb_explain`**: one ~1KB card (identity, contract, dependents, blast radius,
+  findings) answering "tell me about X" — previously 3-4 calls. 22 tools total.
 - **Plugin auto-registration**: `.claude-plugin/plugin.json` now carries `mcpServers`,
   so `/plugin install codeweb` delivers the tools without a manual `claude mcp add`.
 - **Code roles**: every node carries `role` (product|test|fixture|example|bench|
@@ -69,7 +71,17 @@ window, and a map that tells you when it's stale. Driven by the measured product
 - `lib/cli.mjs`: the shared CLI harness (die/emit/loadGraph/capList/staleness) —
   deleting the die()×16 / graph-load×13 duplication codeweb's own overlap report flagged.
 
+- **In-process query serving**: the MCP server answers structural queries from a
+  cached parsed graph (4–6ms vs 75–122ms spawn+parse), via the same
+  `lib/query-core.mjs` the CLI ships — one truth, two transports.
+- **Rename-aware diff**: a removed+added pair with an identifier-normalized
+  (Type-2) body match ≥85% reports as `renamed[]` instead of delete+add churn.
+- Domain summaries are genuinely descriptive: size, file count, exported-first
+  key symbols, and role composition ("mostly test code").
+
 ### Changed
+- `campaign` batches its delete simulation (one clone instead of one per step):
+  8.9s → 1.25s on a 3k-symbol monorepo.
 - MCP `initialize` returns workflow `instructions` and negotiates a SUPPORTED protocol
   version instead of echoing arbitrary client strings; tool calls get a 120s timeout.
 - `codeweb_find_similar` accepts `body` (stdin plumbing) + `structural` over MCP;

@@ -18,7 +18,8 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, testersOf, importersOf, refsOf, dependentsOf, impactOf, fileCycles, orphans } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex } from './lib/graph-ops.mjs';
+import { runQuery } from './lib/query-core.mjs'; // payload assembly lives once (CLI + in-process MCP)
 
 const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--limit N] [--offset N] [--json]`;
 import { die, emitJson, finish, capList, checkStaleness } from './lib/cli.mjs';
@@ -42,17 +43,6 @@ function parseArgs(argv) {
   return o;
 }
 
-// Budgeted output: cap a payload's list field to --limit/--offset. `count` stays the TRUE total;
-// the capped list replaces the field; `more` describes the remainder (absent when nothing was cut) —
-// top-N + an explicit handle instead of an unbounded dump.
-function budget(payload, field) {
-  if (opts.limit == null && !opts.offset) return payload;
-  const c = capList(payload[field], opts.limit, opts.offset);
-  payload[field] = c.items;
-  if (c.remaining > 0) payload.more = { remaining: c.remaining, nextOffset: c.offset + c.items.length };
-  return payload;
-}
-
 const opts = parseArgs(process.argv.slice(2));
 const needsSymbol = ['callers', 'callees', 'tests', 'dependents', 'impact'].includes(opts.query);
 if (opts.help || opts.queries !== 1 || (needsSymbol && !opts.symbol)) die(USAGE, 2);
@@ -66,46 +56,7 @@ catch (e) { die(`invalid JSON in ${graphPath}: ${e.message}`, 2); }
 const graph = normalizeGraph(raw);
 const index = buildIndex(graph);
 
-let payload, code = 0;
-if (opts.query === 'callers' || opts.query === 'callees' || opts.query === 'tests') {
-  const matched = resolveSymbol(graph, opts.symbol);
-  if (!matched.length) { payload = { query: opts.query, symbol: opts.symbol, found: false }; code = 1; }
-  else {
-    const results = opts.query === 'callers' ? callersOf(index, matched) : opts.query === 'callees' ? calleesOf(index, matched) : testersOf(index, matched);
-    payload = budget({ query: opts.query, symbol: opts.symbol, summary: `${results.length} ${opts.query === 'tests' ? 'test(s) exercise' : opts.query + ' of'} ${opts.symbol}`, matched, results, count: results.length }, 'results');
-  }
-} else if (opts.query === 'dependents') {
-  const matched = resolveSymbol(graph, opts.symbol);
-  if (!matched.length) { payload = { query: 'dependents', symbol: opts.symbol, found: false }; code = 1; }
-  else {
-    const results = dependentsOf(index, matched);
-    const inheritIn = [...new Set(matched.flatMap((id) => [...(index.inheritIn.get(id) || [])]))].sort();
-    const byKind = { call: callersOf(index, matched), import: importersOf(index, matched), inherit: inheritIn, test: testersOf(index, matched), ref: refsOf(index, matched) };
-    const kindCounts = Object.fromEntries(Object.entries(byKind).map(([k, v]) => [k, v.length]));
-    // under a budget, byKind collapses to counts (the full per-kind lists are the bulk of the payload)
-    payload = { query: 'dependents', symbol: opts.symbol, summary: `${results.length} dependent(s) of ${opts.symbol} (${Object.entries(kindCounts).map(([k, v]) => `${k} ${v}`).join(', ')})`, matched, results, byKind: opts.limit != null ? kindCounts : byKind, count: results.length };
-    budget(payload, 'results');
-  }
-} else if (opts.query === 'impact') {
-  const matched = resolveSymbol(graph, opts.symbol);
-  if (!matched.length) { payload = { query: 'impact', symbol: opts.symbol, found: false }; code = 1; }
-  else {
-    const results = impactOf(index, matched);
-    const domains = [...new Set(results.map((id) => index.byId.get(id)?.domain || 'unassigned'))].sort();
-    // under a budget, rank the surviving ids by fan-in (the callers most likely to matter first)
-    // instead of alphabetically — top-N must be the most RELEVANT N, not the first N by name.
-    const ranked = opts.limit != null
-      ? results.slice().sort((a, b) => (index.callIn.get(b)?.size || 0) - (index.callIn.get(a)?.size || 0) || (a < b ? -1 : 1))
-      : results;
-    payload = budget({ query: 'impact', symbol: opts.symbol, summary: `editing ${opts.symbol} touches ${results.length} function(s) across ${domains.length} domain(s)`, matched, results: ranked, domains, count: results.length }, 'results');
-  }
-} else if (opts.query === 'cycles') {
-  const cycles = fileCycles(graph);
-  payload = budget({ query: 'cycles', summary: `${cycles.length} file-level dependency cycle(s)`, cycles, count: cycles.length }, 'cycles');
-} else if (opts.query === 'orphans') {
-  const results = orphans(graph, index);
-  payload = budget({ query: 'orphans', summary: `${results.length} orphan(s) — no callers and not exported`, results, count: results.length }, 'results');
-}
+const { payload, code } = runQuery(graph, index, { query: opts.query, symbol: opts.symbol, limit: opts.limit, offset: opts.offset });
 
 // awareness: annotate (never block) when the graph no longer matches disk
 const staleInfo = checkStaleness(graph);

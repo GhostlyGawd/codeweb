@@ -82,7 +82,7 @@ test('M2: tools/list exposes the full tool set with object schemas + correct req
   const tools = rpc([INIT, { jsonrpc: '2.0', id: 2, method: 'tools/list' }]).byId.get(2).result.tools;
   assert.deepEqual(tools.map((t) => t.name).sort(),
     ['codeweb_break_cycles', 'codeweb_callees', 'codeweb_callers', 'codeweb_campaign', 'codeweb_codemod',
-      'codeweb_context', 'codeweb_cycles', 'codeweb_deadcode', 'codeweb_diff', 'codeweb_find_similar',
+      'codeweb_context', 'codeweb_cycles', 'codeweb_deadcode', 'codeweb_diff', 'codeweb_explain', 'codeweb_find_similar',
       'codeweb_fitness', 'codeweb_hotspots', 'codeweb_impact', 'codeweb_map', 'codeweb_orphans',
       'codeweb_placement', 'codeweb_reading_order', 'codeweb_refresh', 'codeweb_review', 'codeweb_risk',
       'codeweb_tests']);
@@ -115,6 +115,7 @@ test('M2: tools/list exposes the full tool set with object schemas + correct req
   assert.deepEqual(req('codeweb_campaign'), []);
   assert.deepEqual(req('codeweb_reading_order'), []);
   assert.deepEqual(req('codeweb_map'), []);
+  assert.deepEqual(req('codeweb_explain'), ['symbol']);
   // the previously CLI-only power is now agent-reachable
   assert.ok(opt('codeweb_find_similar').includes('body') && opt('codeweb_find_similar').includes('structural'), 'find_similar exposes body+structural');
   assert.ok(opt('codeweb_review').includes('before') && opt('codeweb_review').includes('gate'), 'review exposes before+gate');
