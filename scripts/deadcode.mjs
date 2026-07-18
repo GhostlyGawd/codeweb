@@ -23,7 +23,7 @@ const ENTRYPOINTS = new Set(['main', 'default', 'index', 'setup', 'teardown', 'i
 // The effectiveness study flips this on to prove the H13 fix is load-bearing (safe-tier precision drops).
 const DEADCODE_LEGACY = process.env.CODEWEB_DEADCODE_LEGACY === '1';
 const USAGE = 'usage: deadcode.mjs <graph.json> [--json]   (or set CODEWEB_WS)';
-import { die, emitJson, finish, capList } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, showSuppressed = false, annDir = null, limit = null; const pos = [];
@@ -35,14 +35,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
   else if (!t.startsWith('-')) pos.push(t);
 }
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
-
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const index = buildIndex(graph);
 const CAVEAT = 'extraction drops ambiguous call edges (precision over recall), so a genuinely-called symbol can surface here — cross-check before deleting';

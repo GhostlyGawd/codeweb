@@ -12,7 +12,7 @@
 **You can't see where your codebase does the same work twice — and neither can the agent editing it.**
 codeweb dissects a repo to its atomic parts (functions, classes, methods), wires them into a living
 call/import graph, tags each node's domain, and surfaces cross-domain overlap. Then it serves that
-graph **two ways**: a self-contained, interactive **HTML map for you**, and **20 deterministic query
+graph **two ways**: a self-contained, interactive **HTML map for you**, and **21 deterministic query
 tools** (over MCP, no LLM in the loop) **for your coding agent** to consult *before* it edits —
 *does this already exist? what breaks if I change it? where should this go?*
 
@@ -374,11 +374,14 @@ above are also exposed over MCP (below).
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing all
-**20** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
-`codeweb_callers/callees/impact/cycles/orphans/diff`, the edit-loop tools `codeweb_context/refresh`,
-the intelligence tools `codeweb_hotspots/campaign/reading_order`, plus `codeweb_tests/find_similar/
-placement/review/fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not
-exposed). Register it with Claude Code:
+**21** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
+`codeweb_map` (build/rebuild the graph over MCP), `codeweb_callers/callees/impact/cycles/orphans/
+diff`, the edit-loop tools `codeweb_context/refresh`, the intelligence tools
+`codeweb_hotspots/campaign/reading_order`, plus `codeweb_tests/find_similar/placement/review/
+fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not exposed).
+
+**Installing the plugin registers the server automatically** (`.claude-plugin/plugin.json` carries
+the `mcpServers` entry). Standalone — without the plugin — register it yourself:
 
 ```
 claude mcp add codeweb -- node /abs/path/to/codeweb/scripts/mcp-server.mjs
@@ -390,14 +393,23 @@ or in an `.mcp.json`:
 { "mcpServers": { "codeweb": { "command": "node", "args": ["/abs/path/to/codeweb/scripts/mcp-server.mjs"] } } }
 ```
 
-Each tool takes a `graph` (path to a `graph.json`) plus, for callers/callees/impact/context, a
-`symbol` (node id or bare label) — so an agent can ask "what breaks if I change X?" or "give me a
-bounded edit window for X" before editing.
+Built for agents, not just reachable by them:
+
+- **`graph` is optional everywhere** — the server resolves the nearest `.codeweb/graph.json` above
+  its cwd (or `CODEWEB_WS`). No graph yet? The error names `codeweb_map`, which builds one (~3s for
+  a 3k-symbol repo) without leaving MCP.
+- **Budgeted responses by default** — list-heavy tools answer with a one-line `summary`, the top-N
+  most relevant items, TRUE totals, and an explicit `more.remaining`; `full: true` (or
+  `limit`/`offset`) overrides. A `codeweb_context` that used to weigh ~300KB on a busy symbol now
+  answers in ~10KB of call-site windows.
+- **Staleness awareness** — when the graph no longer matches disk, query results say so and point
+  at `codeweb_refresh`.
+- The handshake carries `instructions` teaching the loop: *context → edit → refresh → diff-gate*.
 
 ## How it works
 
 For JavaScript, TypeScript, Python, Rust, and Go the default is a **deterministic Node pipeline** — one
-command, no LLM in the loop, reproducible byte-for-byte. `scripts/run.mjs` chains four stages
+command, no LLM in the loop, reproducible byte-for-byte. `scripts/run.mjs` chains five stages
 into a per-target workspace:
 
 <div align="center">

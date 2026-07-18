@@ -16,7 +16,7 @@ import { planCampaign } from './lib/campaign.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: campaign.mjs <graph.json> [--json] [--budget N] [--git]   (or set CODEWEB_WS)';
-import { die, emitJson, finish } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, budget = Infinity, git = false; const pos = [];
@@ -27,13 +27,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--git') git = true;
   else if (!t.startsWith('-')) pos.push(t);
 }
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 // run each advisor as its tested artifact (--json); a failed advisor degrades to empty (the campaign
 // still composes whatever the others found).

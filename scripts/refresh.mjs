@@ -48,7 +48,7 @@ catch (e) { die(`extractor produced invalid JSON: ${e.message}`, 2); }
 // re-attach each surviving node's domain by id (domains[] summaries kept; node domains carried over)
 const oldDomainById = new Map(graph.nodes.filter((n) => n.domain && n.domain !== 'unassigned').map((n) => [n.id, n.domain]));
 let reattached = 0;
-for (const n of fresh.nodes) { const d = oldDomainById.get(n.id); if (d) { n.domain = d; reattached++; } else if (n.domain === '') n.domain = ''; }
+for (const n of fresh.nodes) { const d = oldDomainById.get(n.id); if (d) { n.domain = d; reattached++; } else if (n.domain == null) n.domain = ''; }
 
 const before = { nodes: graph.nodes.length, edges: graph.edges.length };
 const updated = {

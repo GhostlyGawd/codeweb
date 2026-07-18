@@ -53,11 +53,15 @@ Auto-detect: a URL or `owner/repo` ⇒ external; a path or `.` ⇒ internal. `--
 
 ## Outputs (under `<target>/.codeweb/`)
 
-1. `graph.json` — the web: `nodes`, `edges`, `domains`, `overlaps` (schema reference).
+1. `graph.json` — the web: `nodes`, `edges`, `domains`, `overlaps`, plus `meta` (roles,
+   staleness stamps, stats).
 2. `report.html` — self-contained interactive map (force graph, domain tree, node details,
-   ranked overlap tab). No network/CDN.
-3. `overlap.md` — the ranked consolidation opportunities in plain markdown.
-4. (external mode) an adoption review section appended to `overlap.md` and your final summary.
+   ranked overlap tab; product-only filter by default). No network/CDN.
+3. `report.md` — the same map as plain markdown (mermaid domain graph + overlaps).
+4. `overlap.md` — the ranked consolidation opportunities in plain markdown.
+5. `optimize.md` — the consolidation advisory (ready / blocked / review tiers).
+6. `fragment.json` — the raw extractor output (pipeline stage 1).
+7. (external mode) an adoption review section appended to `overlap.md` and your final summary.
 
 ## References
 
@@ -88,7 +92,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs" "<target>" --target "<label>" --out
 ```
 
 It chains extract → cluster (directory-anchored domains) → overlap (body-confirmed duplication)
-→ render, writing `fragment.json`, `graph.json`, `overlap.md`, `report.html`, `report.md` into the
+→ optimize (consolidation advisory) → render, writing `fragment.json`, `graph.json`, `overlap.md`, `optimize.md`, `report.html`, `report.md` into the
 workspace (defaults to `<plugin>/.codeweb/runs/<slug>/` when `--out-dir` is omitted). The script is
 read-only over the target and resolves its own paths, so it works from any cwd. **When it
 succeeds, skip steps 1–5 and go to step 6.** Use the agent-based passes below only as a

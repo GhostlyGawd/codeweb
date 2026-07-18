@@ -16,7 +16,7 @@ import { shingles, jaccard } from './lib/shingles.mjs';
 import { structuralShingles } from './lib/skeleton.mjs'; // F6: Type-2 (rename-invariant) similarity
 
 const USAGE = 'usage: find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--structural] [--json]';
-import { die, emitJson, finish } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, body = null, stdin = false, signature = null, k = 10, structural = false; const pos = [];
@@ -33,18 +33,11 @@ for (let i = 0; i < argv.length; i++) {
 // F6: --structural ranks by skeleton (identifier-normalized) shingles, so a clone with all variables
 // renamed scores ~1 even when its lexical (token) similarity is lower. Lexical is the default.
 const shg = structural ? (s) => structuralShingles(s, 3) : (s) => shingles(s, 3);
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
-
 // exactly one candidate source
 const sources = [body != null, stdin, signature != null].filter(Boolean).length;
 if (sources !== 1) die(USAGE, 2);
 
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const root = graph.meta?.root || null;
 if (!root || !existsSync(root)) die(`source unavailable: graph.meta.root is missing or not on disk — find-similar needs real bodies to compare (got ${root || 'none'})`, 2);

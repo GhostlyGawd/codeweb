@@ -45,7 +45,10 @@ export function check(raw) {
   let baseline; try { baseline = JSON.parse(readFileSync(t.baseline, 'utf8')); } catch { return null; }
   const tmpOut = join(tmpdir(), `codeweb-hook-${process.pid}.json`);
   try {
-    execFileSync(process.execPath, [EXTRACT, t.root, '--no-ctags', '--out', tmpOut], { stdio: 'ignore' });
+    // Incremental: the per-file scan cache lives beside the graph, so an edit re-scans only the
+    // changed file(s) instead of the whole target on every keystroke-batch.
+    const cache = join(dirname(t.baseline), 'scan-cache.json');
+    execFileSync(process.execPath, [EXTRACT, t.root, '--no-ctags', '--cache', cache, '--out', tmpOut], { stdio: 'ignore' });
   } catch { return null; }
   let after; try { after = JSON.parse(readFileSync(tmpOut, 'utf8')); } catch { return null; }
   const reg = structuralRegressions(baseline, after);

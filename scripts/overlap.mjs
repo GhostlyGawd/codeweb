@@ -17,6 +17,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { shingles, jaccard } from './lib/shingles.mjs'; // shared body-shingle primitives (one truth)
+import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
 
 const WS = process.env.CODEWEB_WS || '.live';   // per-target workspace dir (orchestrator sets this)
 const GRAPH_PATH = `${WS}/graph.json`;
@@ -62,8 +63,19 @@ const bodyConfidence = (nodes) => {
 };
 
 const isDecl = (file) => /\.d\.ts$/.test(file);
-const defs = graph.nodes.filter((n) => n.kind !== 'module' && !isDecl(n.file));
+// v7: findings scope to PRODUCT code by default — duplicated test fixtures are intentional
+// isolation, not consolidation targets ("merge 23 playground text() helpers" was the flagship bad
+// advice). CODEWEB_ALL_ROLES=1 restores the old everything-scope; the skipped count is reported in
+// the .md header (no silent truncation).
+const ALL_ROLES = process.env.CODEWEB_ALL_ROLES === '1';
+const nodeRole = (n) => n.role || roleOf(n.file);
+const allDefs = graph.nodes.filter((n) => n.kind !== 'module' && !isDecl(n.file));
+const defs = ALL_ROLES ? allDefs : allDefs.filter((n) => nodeRole(n) === 'product');
+const nonProductSkipped = allDefs.length - defs.length;
 const byId = new Map(graph.nodes.map((n) => [n.id, n]));
+// reverse call-degree for the interface-pattern check (framework hooks have no in-repo callers)
+const callIn = new Map();
+for (const e of graph.edges) { if (e.kind !== 'call') continue; callIn.set(e.to, (callIn.get(e.to) || 0) + 1); }
 
 const outLabels = new Map();
 for (const e of graph.edges) { if (e.kind !== 'call') continue; const to = byId.get(e.to); if (!to) continue; if (!outLabels.has(e.from)) outLabels.set(e.from, new Set()); outLabels.get(e.from).add(to.label); }
@@ -84,6 +96,22 @@ for (const [label, nodes] of byLabel) {
   const domains = [...new Set(nodes.map(domainOf))];
   const locs = nodes.map((n) => n.loc);
   const medLoc = locs.slice().sort((a, b) => a - b)[locs.length >> 1];
+
+  // INTERFACE PATTERN, not duplication: >=4 same-named implementations of which >=75% have no
+  // in-repo caller — a framework contract (bundler plugin hooks, visitors, handlers). "Merge these"
+  // is wrong advice; emit a demoted informational finding instead.
+  const uncalled = nodes.filter((n) => !(callIn.get(n.id) > 0)).length;
+  if (files.length >= 4 && uncalled / nodes.length >= 0.75) {
+    overlaps.push({
+      kind: 'interface-pattern', confidence: 'low', drifted: false, bodySim: null,
+      severity: 'low', rank: files.length,
+      title: `\`${label}\` implemented ${files.length}× — framework contract, not duplication`,
+      domains, nodes: nodes.map((n) => n.id),
+      evidence: `${nodes.length} same-named implementations across ${files.length} files; ${uncalled} have no in-repo caller (invoked by a framework/runner, not by this codebase).`,
+      recommendation: `Do NOT merge — these implement a shared interface/hook contract. If the copies share setup logic, extract the shared part; the \`${label}\` entry points stay separate.`,
+    });
+    continue;
+  }
 
   // authoritative: body confirmation; fallback: structural corroboration
   const body = HAVE_SOURCE ? bodyConfidence(nodes) : null;
@@ -209,8 +237,9 @@ overlaps.forEach((o, i) => { o.id = 'ov' + (i + 1); delete o.rank; });
 graph.overlaps = overlaps;
 writeFileSync(GRAPH_PATH, JSON.stringify(graph));
 
-const findings = overlaps.filter((o) => o.confidence === 'high' || o.confidence === 'medium');
-const unverified = overlaps.filter((o) => o.confidence === 'low');
+const patternFindings = overlaps.filter((o) => o.kind === 'interface-pattern');
+const findings = overlaps.filter((o) => o.kind !== 'interface-pattern' && (o.confidence === 'high' || o.confidence === 'medium'));
+const unverified = overlaps.filter((o) => o.kind !== 'interface-pattern' && o.confidence === 'low');
 const dismissed = overlaps.filter((o) => o.confidence === 'refuted');
 const fmt = (o) => {
   const syms = o.nodes.slice(0, 10).map((id) => '  - `' + id + '`').join('\n') + (o.nodes.length > 10 ? `\n  - …+${o.nodes.length - 10} more` : '');
@@ -219,9 +248,11 @@ const fmt = (o) => {
 const md = [
   '# codeweb — overlap / consolidation opportunities',
   '',
-  `> **${findings.length} findings** · ${unverified.length} unverified · ${dismissed.length} dismissed (body-refuted) on **${graph.meta?.target || 'target'}**.`,
+  `> **${findings.length} findings** · ${patternFindings.length} interface patterns · ${unverified.length} unverified · ${dismissed.length} dismissed (body-refuted) on **${graph.meta?.target || 'target'}**.`,
   `> ${HAVE_SOURCE ? 'Confidence is **body-confirmed** (token-shingle similarity of real function bodies).' : 'Source unavailable — confidence is structural (shared calls + LOC).'} Each finding is a checklist item.`,
+  ...(nonProductSkipped ? ['', `> Scope: **product code** — ${nonProductSkipped} test/fixture/example/bench symbols excluded (set CODEWEB_ALL_ROLES=1 to include them).`] : []),
   '', '## Findings', '', ...findings.map(fmt),
+  ...(patternFindings.length ? ['## Interface patterns (not duplication)', '', '_Same-named implementations of a framework contract — nothing in-repo calls them. Do not merge._', '', ...patternFindings.map(fmt)] : []),
   '## Unverified candidates', '', '_Borderline body similarity (15–35%); confirm by reading before acting._', '', ...unverified.map(fmt),
   '## Dismissed (body-refuted)', '', '_Same name, <15% body similarity — different logic, not duplication. Listed for transparency (no silent truncation)._', '',
   ...dismissed.map((o) => `- ${o.id} \`${o.title.replace(/`/g, '')}\` — body ${(o.bodySim * 100).toFixed(0)}%`),

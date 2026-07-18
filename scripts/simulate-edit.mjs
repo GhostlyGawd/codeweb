@@ -18,7 +18,7 @@ import { resolve } from 'node:path';
 import { normalizeGraph, resolveSymbol, applyEdit, structuralRegressions } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: simulate-edit.mjs <graph.json> (--delete <sym> | --merge <s1,s2,..> [--into <id>] | --move <sym> --to <file>) [--json]';
-import { die, emitJson, finish } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, del = null, merge = null, into = null, move = null, to = null; const pos = [];
@@ -32,16 +32,10 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--to') to = argv[++i];
   else if (!t.startsWith('-')) pos.push(t);
 }
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
 if ([del, merge, move].filter((x) => x != null).length !== 1) die(USAGE, 2);
 if (move != null && to == null) die('move requires --to <file>', 2);
 
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 let opName, after, target, intoOut = null, toOut = null;
 if (del != null) {

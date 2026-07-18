@@ -14,7 +14,7 @@ import { normalizeGraph } from './lib/graph-ops.mjs';
 import { rankHotspots } from './lib/hotspots.mjs';
 
 const USAGE = 'usage: hotspots.mjs <graph.json> [--churn <map.json> | --git] [--json]';
-import { die, emitJson, finish, capList } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, churnPath = null, useGit = false, limit = null; const pos = [];
@@ -26,14 +26,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--git') useGit = true;
   else if (!t.startsWith('-')) pos.push(t);
 }
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
-
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 let churn = {};
 if (churnPath) { try { churn = JSON.parse(readFileSync(resolve(churnPath), 'utf8')); } catch (e) { die(`invalid churn JSON: ${e.message}`, 2); } }

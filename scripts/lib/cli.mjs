@@ -6,7 +6,7 @@
 // documented Node way to guarantee a full flush. stderr messages are small (< pipe buffer), so
 // die() may still hard-exit.
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { normalizeGraph } from './graph-ops.mjs';
 
@@ -50,6 +50,26 @@ export function loadGraph(pathArg, { usage = null } = {}) {
   try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
   catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
   return { graph, abs };
+}
+
+/**
+ * Staleness check against the extractor's per-file stamps (meta.sources: {rel: {s,m}}). Returns
+ * null when the graph matches disk (or has no stamps/root); else { count, files: [up to 8 rels] }.
+ * stat-only — a few ms even on thousands of files. New files can't be detected without a walk
+ * (documented); changed + deleted are.
+ */
+export function checkStaleness(graph) {
+  const root = graph?.meta?.root, sources = graph?.meta?.sources;
+  if (!root || !sources || !existsSync(root)) return null;
+  const stale = [];
+  for (const [relPath, st] of Object.entries(sources)) {
+    try {
+      const cur = statSync(root + '/' + relPath);
+      if (cur.size !== st.s || Math.round(cur.mtimeMs) !== st.m) stale.push(relPath);
+    } catch { stale.push(relPath + ' (deleted)'); }
+    if (stale.length >= 64) break; // enough to know it's stale; don't stat forever
+  }
+  return stale.length ? { count: stale.length, files: stale.slice(0, 8) } : null;
 }
 
 /**

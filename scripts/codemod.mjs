@@ -18,7 +18,7 @@ import { normalizeGraph, buildIndex, callersOf, impactOf, applyEdit, structuralR
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]';
-import { die, emitJson, finish } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, doWrite = false, opp = null, merge = null, into = null; const pos = [];
@@ -34,11 +34,7 @@ for (let i = 0; i < argv.length; i++) {
 const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath || (opp == null && merge == null)) die(USAGE, 2);
 
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(graphPath, { usage: USAGE });
 
 const index = buildIndex(graph);
 

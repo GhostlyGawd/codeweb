@@ -1,6 +1,20 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/pre-edit-impact.mjs\"",
+            "timeout": 10
+          }
+        ],
+        "description": "codeweb: before an edit in a .codeweb-mapped target, surface one line of blast-radius awareness (symbols + dependents in the file) so contract changes get impact-checked first (advisory; fail-open; inert until /codeweb has mapped the target)",
+        "id": "codeweb:pre-edit-impact"
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",

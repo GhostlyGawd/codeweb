@@ -44,13 +44,18 @@ function extract() {
 
 test('RECALL: a function passed to .map(fn) is captured as a reference edge', () => {
   const frag = extract();
-  assert.ok(hasEdge(frag.edges, 'ho.mjs:setup', 'ho.mjs:score', 'call'),
+  // v7: a bare identifier ARGUMENT is a `ref` edge — the symbol is referenced (its signature is
+  // load-bearing for the caller) but not invoked here. It still counts for dependents/orphans;
+  // it no longer fabricates a call edge.
+  assert.ok(hasEdge(frag.edges, 'ho.mjs:setup', 'ho.mjs:score', 'ref'),
     'setup -> score via items.map(score)');
+  assert.ok(!hasEdge(frag.edges, 'ho.mjs:setup', 'ho.mjs:score', 'call'),
+    'passing score as an argument is not an invocation by setup');
 });
 
 test('RECALL: a function passed as a callback argument is captured', () => {
   const frag = extract();
-  assert.ok(hasEdge(frag.edges, 'ho.mjs:setup', 'ho.mjs:handle', 'call'),
+  assert.ok(hasEdge(frag.edges, 'ho.mjs:setup', 'ho.mjs:handle', 'ref'),
     'setup -> handle via rl.on("line", handle)');
 });
 

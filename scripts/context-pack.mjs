@@ -17,7 +17,7 @@ import { resolve } from 'node:path';
 import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, impactOf } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--json]   (or set CODEWEB_WS)';
-import { die, emitJson, finish, capList } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, checkStaleness, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, windowN = 3, fullBodies = false, limit = null; const pos = [];
@@ -34,11 +34,7 @@ if (pos.length >= 2) { graphPath = pos[0]; symbol = pos[1]; }
 else if (pos.length === 1 && process.env.CODEWEB_WS) { graphPath = `${process.env.CODEWEB_WS}/graph.json`; symbol = pos[0]; }
 else die(USAGE, 2);
 
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(graphPath, { usage: USAGE });
 
 const ids = resolveSymbol(graph, symbol);
 if (!ids.length) die(`symbol not found: ${symbol}`, 1);
@@ -109,6 +105,8 @@ const payload = {
   blastRadius: { count: blast.length, ids: cappedBlast.items }, // transitive impact: ids only
 };
 if (cappedCallers.truncated) payload.moreCallers = { remaining: cappedCallers.remaining };
+const staleInfo = checkStaleness(graph);
+if (staleInfo) { payload.stale = staleInfo; payload.summary += ` — graph is stale for ${staleInfo.count}+ file(s); run codeweb_refresh`; }
 if (cappedCallees.truncated) payload.moreCallees = { remaining: cappedCallees.remaining };
 
 if (json) { emitJson(payload); } else {

@@ -13,11 +13,11 @@
 // Usage:
 //   node extract-symbols.mjs <path> [--out fragment.json] [--no-ctags]
 
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { relative, resolve, join, dirname, extname } from 'node:path';
-import { isTestFile } from './lib/graph-ops.mjs'; // F4: test-file predicate (shared, one truth)
+import { isTestFile, roleOf } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { loadTsEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tier: exact cyclomatic (opt-in)
 
@@ -28,7 +28,11 @@ import { loadTsEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tier
 // v5: opt-in tree-sitter engine owns JS/TS method nodes (class-qualified ids) + dispatch edges.
 // v6: methods carry an owner (class / Rust impl type / Go receiver) -> owner-qualified ids
 //     (`file:Type.method`) in EVERY tier, ending same-file same-name id collisions.
-const SCANNER_VERSION = 6;
+// v7: nodes carry a `role` (product|test|fixture|example|bench|generated); bodyEnd scans MASKED
+//     lines (multi-line templates/comments can no longer desync brace matching); class-field arrow
+//     methods discovered; bare-identifier arguments become `ref` edges (not fabricated `call`s);
+//     bare-name resolution is package-scoped (no more cross-package name-collision edges).
+const SCANNER_VERSION = 7;
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -53,6 +57,7 @@ if (!existsSync(root)) { console.error(`[extract] not found: ${root}`); process.
 
 const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go)$/;
 const SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
+
 const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
 
 function tryExec(cmd, args) { try { return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 28 }); } catch { return null; } }
@@ -182,6 +187,32 @@ function listFiles() {
 
 const rel = (f) => relative(root, f).replace(/\\/g, '/');
 
+// ---- package boundaries (workspace scoping) -------------------------------------------------
+// The nearest manifest dir above a file ('' = target root). Bare-name call resolution never crosses
+// a package boundary: in a monorepo, cross-package calls go through imports (which resolve
+// precisely); a cross-package NAME COLLISION is exactly how `create-vite` template files ended up
+// "calling" vite's normalizePath. Single-package repos (or trees with no manifests) all map to ''
+// — behavior there is unchanged.
+const MANIFESTS = ['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml'];
+const manifestMemo = new Map(); // dir -> boolean
+const hasManifest = (dir) => {
+  if (!manifestMemo.has(dir)) manifestMemo.set(dir, MANIFESTS.some((m) => existsSync(join(root, dir, m))));
+  return manifestMemo.get(dir);
+};
+const pkgMemo = new Map(); // file's dir -> package dir
+function pkgOf(relFile) {
+  const dir0 = relFile.includes('/') ? relFile.slice(0, relFile.lastIndexOf('/')) : '';
+  if (pkgMemo.has(dir0)) return pkgMemo.get(dir0);
+  let dir = dir0, found = '';
+  while (dir) {
+    if (hasManifest(dir)) { found = dir; break; }
+    const i = dir.lastIndexOf('/');
+    dir = i === -1 ? '' : dir.slice(0, i);
+  }
+  pkgMemo.set(dir0, found);
+  return found;
+}
+
 // ---- per-language regex symbol scan ----
 function scanSymbols(file, text) {
   const ext = extname(file).toLowerCase();
@@ -246,6 +277,11 @@ function scanSymbols(file, text) {
       else if ((m = /^\s*(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\*?\s*\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/.exec(ln))) push(m[1], i, 'function', exported(ln));
       else if ((m = /^\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)/.exec(ln))) push(m[1], i, 'class', exported(ln));
       else if ((m = /^\s{2,}(?:public|private|protected|static|readonly|async|get|set|\*)?\s*([A-Za-z_$][\w$]*)\s*\([^;=]*\)\s*\{/.exec(ln))) push(m[1], i, 'method', false);
+      // class-field arrow methods (`handleClick = () => {` / `run = async (x) => …`) — the standard
+      // React/TS pattern the method regex (name + paren) can't see. Marked `field`: the node is only
+      // kept when an ENCLOSING CLASS confirms it (a bare local `cb = () => {}` reassignment inside a
+      // function must not become a phantom method).
+      else if ((m = /^\s{2,}(?:public\s+|private\s+|protected\s+|readonly\s+|static\s+)*([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>/.exec(ln))) { if (m[1] && !KEYWORDS.has(m[1])) syms.push({ name: m[1], line: i + 1, kind: 'method', exports: false, field: true }); }
     });
   }
   return syms;
@@ -383,9 +419,13 @@ const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)
 const nodes = [];
 const fileSyms = new Map(); // file -> {text, ranges:[{id,name,start,end,kind}]}
 const dispatchByFile = new Map(); // file -> [{from,to}] dispatch edges (tree-sitter engine only)
+// v7 STALENESS STAMPS: per-file size+mtime recorded in meta.sources so query tools can cheaply
+// detect that the graph no longer matches disk ("aware" — an agent must know its map is stale).
+const sources = {};
 for (const f of files) {
   let text; try { text = readFileSync(f, 'utf8'); } catch { continue; }
   const r = rel(f);
+  try { const st = statSync(f); sources[r] = { s: st.size, m: Math.round(st.mtimeMs) }; } catch { /* stamp is best-effort */ }
   let syms;
   if (opts.cache) {
     const h = sha1(text);
@@ -401,6 +441,13 @@ for (const f of files) {
   const total = lines.length;
   const isPy = r.endsWith('.py');
   const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
+  // Body extents are measured on MASKED lines: stripSC alone is line-local, so a multi-line template
+  // literal (or block comment) containing braces desynced the brace counter and bodies swallowed
+  // whole neighboring functions (a 5-line helper recorded as 550 loc on vite — poisoning
+  // context-pack size, complexity, and body-confirmed duplication). maskJs/maskPy carry string/
+  // comment state ACROSS lines; ${} interpolations stay live so real code still counts.
+  const scanLines = (isPy ? maskPy(text) : isJsTs ? maskJs(text) : text).split(/\r?\n/);
+  const fileRole = roleOf(r);
   // When the tree-sitter engine is active it OWNS JS/TS method discovery (class-qualified ids) and the
   // dispatch edges; the regex scanner still owns classes, functions and const-arrow functions (which
   // the parse-tree walk doesn't cover). extractJsTs returns null on any parse failure -> keep the regex
@@ -417,7 +464,7 @@ for (const f of files) {
     const start = s.line;
     // real body extent (brace match / dedent), NOT next-symbol-line — so the last symbol can't
     // run to EOF and absorb the trailing top-level code (the fabricated-edge bug).
-    const end = Math.min(bodyEnd(lines, start - 1, isPy) + 1, total);
+    const end = Math.min(bodyEnd(scanLines, start - 1, isPy) + 1, total);
     const loc = Math.min(end - start + 1, 2000);
     // Owner-qualified id (`file:Type.method`, matching the tree-sitter tier's scheme). Rust/Go owners
     // come from the scan (impl/receiver); Python + JS/TS methods resolve to the ENCLOSING class range
@@ -429,11 +476,12 @@ for (const f of files) {
       for (const rg of ranges) if (rg.kind === 'class' && start > rg.start && start <= rg.end && (!best || rg.start > best.start)) best = rg;
       if (best) owner = best.name;
     }
+    if (s.field && !owner) return; // arrow-field candidate with no enclosing class -> not a method
     let id = r + ':' + (owner ? owner + '.' + s.name : s.name);
     if (fileIds.has(id)) id += '@' + start; // last-resort disambiguator (e.g. TS overload stubs)
     fileIds.add(id);
     ranges.push({ id, name: s.name, start, end, kind: s.kind });
-    const node = { id, label: s.name, kind: s.kind, file: r, line: start, loc, exports: s.exports, domain: '', summary: '' };
+    const node = { id, label: s.name, kind: s.kind, file: r, line: start, loc, exports: s.exports, domain: '', summary: '', role: fileRole };
     if (s.kind === 'function' || s.kind === 'method') {
       node.signature = parseSignature(lines[start - 1] || '', s.name, isPy); // F3: contract for callers
       // F4: approximate cyclomatic complexity + max nesting from the SAME body extent (lines [start, end]).
@@ -465,7 +513,7 @@ for (const f of files) {
       ranges.push({ id: m.id, name: m.label, start, end, kind: 'method' });
       nodes.push({
         id: m.id, label: m.label, kind: 'method', file: r, line: start, loc,
-        exports: false, domain: '', summary: '',
+        exports: false, domain: '', summary: '', role: fileRole,
         signature: parseSignature(lines[start - 1] || '', m.label, false),
         complexity: m.complexity,
         maxDepth: nestingDepth(body, 'js'),
@@ -701,7 +749,10 @@ const LEGACY_FALLBACK = !!process.env.CODEWEB_LEGACY_FALLBACK; // A/B: restore p
 // so when the symbol set is unchanged AND a file's content is unchanged, that file's edges are
 // identical and may be reused. Any added/removed/renamed symbol flips the signature -> full re-derive
 // (correctness over speed). This is what makes warm-incremental byte-identical to a cold full extract.
-const symbolSig = sha1(nodes.map((n) => n.id).slice().sort().join('\n'));
+// Package boundaries participate in the signature: adding/removing a manifest changes bare-name
+// resolution, so cached per-file edges must invalidate then too.
+const pkgBoundaries = [...new Set(files.map((f) => pkgOf(rel(f))))].sort();
+const symbolSig = sha1(nodes.map((n) => n.id).slice().sort().join('\n') + '\0' + pkgBoundaries.join('\n'));
 
 // Derive ONE file's edges (call/ref/inherit), with from-side = its own symbols or its <module> node.
 // Pure w.r.t. the file: returns {edges, hasModule, ambiguous}. The precision gate (alias > same-file >
@@ -728,13 +779,17 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
     else { callerId = r + ':<module>'; hasModule = true; } // module/top-level scope
     let calleeId = aliased || sameFileByName.get(name);
     if (!calleeId) {
-      const defs = byName.get(name);
-      if (defs && defs.length === 1) calleeId = defs[0];
-      else if (LEGACY_FALLBACK) calleeId = defs && defs[0];
+      // package-scoped unique-name fallback: resolve only within the caller's package (imports
+      // handle legitimate cross-package calls; cross-package bare-name matches are collisions).
+      const defs = byName.get(name) || [];
+      const pkg = pkgOf(r);
+      const inPkg = defs.filter((d) => pkgOf(idFile(d)) === pkg);
+      if (inPkg.length === 1) calleeId = inPkg[0];
+      else if (LEGACY_FALLBACK) calleeId = defs[0];
       else { ambiguous++; return; }
     }
     if (!calleeId || calleeId === callerId) return;
-    const edgeKind = (kind === 'call' && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
+    const edgeKind = ((kind === 'call' || kind === 'ref') && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
     const key = callerId + ' ' + calleeId + ' ' + edgeKind;
     if (localSet.has(key)) return;
     localSet.add(key);
@@ -801,7 +856,7 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
       addEdge(i, m[1]);
     }
     refRe.lastIndex = 0;
-    while ((m = refRe.exec(ln))) addEdge(i, m[1]);
+    while ((m = refRe.exec(ln))) addEdge(i, m[1], 'ref'); // a bare identifier ARGUMENT is a reference (callback/value), not an invocation
     instanceofRe.lastIndex = 0;
     while ((m = instanceofRe.exec(ln))) { const cls = classOf(m[1]); if (cls) addResolved(i, cls, 'ref'); }
   }
@@ -832,7 +887,7 @@ for (const f of edgeFiles) {
   }
   if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; }
   if (result.hasModule && !nodeIdSet.has(r + ':<module>')) {
-    nodes.push({ id: r + ':<module>', label: '<module>', kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '' });
+    nodes.push({ id: r + ':<module>', label: '<module>', kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleOf(r) });
     nodeIdSet.add(r + ':<module>');
   }
   for (const e of result.edges) edges.push(e);
@@ -850,7 +905,7 @@ const edgeKeys = new Set(edges.map((e) => e.from + ' ' + e.to));
 // this module" signal (fileCycles/coupling unchanged — same file-pair) without polluting a symbol.
 const ensureModuleNode = (id) => {
   if (nodeIdSet.has(id)) return;
-  nodes.push({ id, label: '<module>', kind: 'module', file: idFile(id), line: 1, loc: 1, exports: false, domain: '', summary: '' });
+  nodes.push({ id, label: '<module>', kind: 'module', file: idFile(id), line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleOf(idFile(id)) });
   nodeIdSet.add(id);
 };
 for (const [a, b] of importEdges) {
@@ -899,6 +954,7 @@ const fragment = {
     // default (regex) output is byte-identical to before. Pins the grammar version for determinism.
     ...(tsEngine ? { complexityEngine: tsEngine.version } : {}),
     languages, symbols: nodes.length,
+    sources, // per-file {s: size, m: mtimeMs} staleness stamps
   },
   nodes, edges,
 };

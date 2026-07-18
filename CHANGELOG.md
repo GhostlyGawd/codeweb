@@ -9,7 +9,72 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+The agent-efficiency release: outputs that can't corrupt, answers that fit a context
+window, and a map that tells you when it's stale. Driven by the measured product review
+(`PRODUCT-REVIEW.md`).
+
+### Fixed
+- **Flush-safe output everywhere**: `process.exit()` after a large stdout write silently
+  truncated anything past the 64KB pipe buffer (piped CLI JSON cut at exactly 65,536
+  bytes; MCP responses clipped mid-string). All CLIs now end naturally via
+  `lib/cli.mjs` emitters; `| head` (EPIPE) exits cleanly.
+- `run.mjs` resolves a relative `<SRC>` against the caller's cwd (it resolved against the
+  plugin root while `--out-dir` used the cwd) and reports stage failures in one clean
+  line instead of a raw `execFileSync` stack. `--open` is parsed and forwarded (it was
+  documented but inert).
+- Campaign delete steps ranked ROI 0: `deadcode` now emits `loc` per item and the
+  planner reads it (`locSaved` stays as a legacy alias).
+- Same-file same-name methods collided into one node id: v6/v7 extraction emits
+  owner-qualified ids (`file:Type.method`) in every tier (Python classes, Rust impls,
+  Go receivers, JS/TS classes), with member-access resolution following.
+- Body spans no longer desync on multi-line template literals / block comments (bodies
+  swallowed whole neighboring functions — a 5-line helper recorded as 550 loc on vite,
+  poisoning complexity, context-pack, and body-confirmation). Extents are measured on
+  masked lines.
+- `mcp-server` advertised version 0.1.0 on a 0.2.0 product; `serverInfo.version` now
+  derives from package.json and `check-consistency` audits it.
+- Signal-B twins de-duplicate by label pair (several `<module>` nodes produced N
+  byte-identical findings).
+
+### Added
+- **Budgeted MCP responses**: list-heavy tools default to a one-line `summary` + top-N
+  most-relevant items + TRUE totals + explicit `more.remaining`; `full: true` or
+  `limit`/`offset` override. `codeweb_context` returns call-site windows (±3 lines)
+  instead of whole caller bodies (~300KB → ~10KB on a busy vite symbol).
+- **`codeweb_map`** (21st tool): build/rebuild the graph over MCP; `graph` becomes
+  optional on every tool (nearest `.codeweb/graph.json` above cwd, or `CODEWEB_WS`),
+  and a missing graph returns an actionable error naming the fix.
+- **Plugin auto-registration**: `.claude-plugin/plugin.json` now carries `mcpServers`,
+  so `/plugin install codeweb` delivers the tools without a manual `claude mcp add`.
+- **Code roles**: every node carries `role` (product|test|fixture|example|bench|
+  generated). Overlap findings, deadcode tiers, and the report's default view scope to
+  product code (`CODEWEB_ALL_ROLES=1` / an in-report toggle widen it).
+- **Interface-pattern detection**: ≥4 same-named implementations that nothing in-repo
+  calls demote from "merge these" to an informational `interface-pattern` finding
+  (framework hooks like a bundler plugin's `resolveId()`).
+- **Workspace scoping**: bare-name call resolution never crosses a package (manifest)
+  boundary — cross-package name collisions no longer fabricate edges in monorepos.
+- **Staleness awareness**: the extractor stamps per-file size+mtime into
+  `meta.sources`; query/context results annotate when the graph no longer matches disk
+  and point at `codeweb_refresh`.
+- **Pre-edit hook**: one advisory line of blast radius before an edit lands in a mapped
+  target (PreToolUse; fail-open). The post-edit hook re-extracts incrementally
+  (`--cache`) instead of full-scanning per edit.
+- Bare-identifier arguments become `ref` edges (a callback passed is a reference, not an
+  invocation); class-field arrow methods (`handleClick = () => {}`) are discovered and
+  owner-qualified.
+- Report: product-only filter, interface-pattern section, search that navigates
+  (Enter cycles + selects matches), `#s=<id>` deep links, keyboard/ARIA support, and
+  `prefers-reduced-motion` (layout settles without animation).
+- `lib/cli.mjs`: the shared CLI harness (die/emit/loadGraph/capList/staleness) —
+  deleting the die()×16 / graph-load×13 duplication codeweb's own overlap report flagged.
+
+### Changed
+- MCP `initialize` returns workflow `instructions` and negotiates a SUPPORTED protocol
+  version instead of echoing arbitrary client strings; tool calls get a 120s timeout.
+- `codeweb_find_similar` accepts `body` (stdin plumbing) + `structural` over MCP;
+  `codeweb_review` accepts `before` + `gate`; `codeweb_reading_order` accepts
+  scope/value/budget — previously CLI-only capability, now agent-reachable.
 
 ## [0.2.0] - 2026-06-23
 

@@ -21,7 +21,7 @@ import { resolve, join } from 'node:path';
 import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, testersOf, importersOf, refsOf, dependentsOf, impactOf, fileCycles, orphans } from './lib/graph-ops.mjs';
 
 const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--limit N] [--offset N] [--json]`;
-import { die, emitJson, finish, capList } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, checkStaleness } from './lib/cli.mjs';
 
 function parseArgs(argv) {
   const o = { graph: null, query: null, symbol: null, json: false, help: false, queries: 0, limit: null, offset: 0 };
@@ -107,6 +107,13 @@ if (opts.query === 'callers' || opts.query === 'callees' || opts.query === 'test
   payload = budget({ query: 'orphans', summary: `${results.length} orphan(s) — no callers and not exported`, results, count: results.length }, 'results');
 }
 
+// awareness: annotate (never block) when the graph no longer matches disk
+const staleInfo = checkStaleness(graph);
+if (staleInfo && payload && payload.found !== false) {
+  payload.stale = staleInfo;
+  if (payload.summary) payload.summary += ` — graph is stale for ${staleInfo.count}+ file(s); run codeweb_refresh`;
+}
+
 if (opts.json) { emitJson(payload, code); } else {
 
 if (payload.found === false) die(`symbol not found: ${opts.symbol}`, 1);
@@ -131,5 +138,6 @@ if (p.query === 'callers' || p.query === 'callees' || p.query === 'tests') {
   for (const o of p.results) console.log(`  ${o.id}  [${o.domain}]`);
 }
 if (p.more) console.log(`  … +${p.more.remaining} more (rerun with --offset ${p.more.nextOffset})`);
+if (p.stale) console.log(`  ⚠ graph is stale for ${p.stale.count}+ file(s) (${p.stale.files.slice(0, 3).join(', ')}…) — run codeweb_refresh`);
 finish(code);
 }

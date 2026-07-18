@@ -18,11 +18,12 @@ import { dirname, join, resolve } from 'node:path';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..'); // plugin root (parent of scripts/)
 
 const argv = process.argv.slice(2);
-const opts = { src: null, target: null, outDir: null };
+const opts = { src: null, target: null, outDir: null, open: false };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--target') opts.target = argv[++i];
   else if (t === '--out-dir') opts.outDir = argv[++i];
+  else if (t === '--open') opts.open = true;
   else if (!opts.src) opts.src = t;
 }
 if (!opts.src) { console.error('usage: run.mjs <SRC> [--target <label>] [--out-dir <dir>]'); process.exit(1); }
@@ -59,7 +60,7 @@ run('extract', S('scripts/extract-symbols.mjs'), [opts.src, ...targetArg, '--out
 run('cluster', S('scripts/cluster3.mjs'), [], true);
 run('overlap', S('scripts/overlap.mjs'), [], true);
 run('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--out', join(ws, 'optimize.md')], false);
-run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json')], false);
+run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json'), ...(opts.open ? ['--open'] : [])], false);
 
 console.error(`\n[run] done -> ${ws}`);
 console.error(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);
