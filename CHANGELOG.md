@@ -42,7 +42,7 @@ notes so validated results, papers, and new tools never get lost in commit histo
   compiler's own reference finder over 30 seeded vite symbols — codeweb recall 0.94 /
   precision 0.89 at **1/3 of an idealized grep's context cost** (0.8KB vs 2.5KB per
   task); blast-radius ("what transitively breaks") in one ~1KB call vs a recursive
-  grep loop's ~119KB (**115×**, simulated generously for grep). Mechanical and
+  grep loop's ~130KB (**126× on the canonical run**, simulated generously for grep). Mechanical and
   reproducible — complements (does not replace) the frozen frontier-agent pilot,
   whose run stays the evidence for agent-loop behavior (+0.27 recall, ~44% fewer
   tokens). The 6/30 under-recalled symbols are the known dispatch/re-export gap.

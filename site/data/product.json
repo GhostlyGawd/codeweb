@@ -275,7 +275,7 @@
     {
       "claim": "Blast-radius context cost vs recursive grep",
       "tag": "validated",
-      "metric": "~1KB/call vs ~119KB (115x), grep loop simulated generously (graph-assisted frontier)",
+      "metric": "~1KB/call vs ~130KB (126x), grep loop simulated generously (graph-assisted frontier)",
       "sample": "30 vite symbols, mean impact 18 symbols",
       "source": "oracle-ab.json"
     },
