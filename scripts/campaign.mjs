@@ -16,7 +16,7 @@ import { planCampaign } from './lib/campaign.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: campaign.mjs <graph.json> [--json] [--budget N] [--git]   (or set CODEWEB_WS)';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, budget = Infinity, git = false; const pos = [];
@@ -48,7 +48,7 @@ const breakCycles = advise('break-cycles.mjs') || { cycles: [] };
 const plan = planCampaign(graph, { optimize, deadcode, breakCycles, budget });
 const payload = { target: graph.meta?.target || 'target', ...plan };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 const t = plan.totals;
 console.log(`codeweb campaign: ${payload.target} — ${t.steps} step(s): ${t.cuts} cut, ${t.deletes} delete, ${t.merges} merge`);
@@ -58,4 +58,5 @@ for (const s of plan.steps) {
   const what = s.type === 'cut' ? `${s.files.join(' <-> ')}` : s.type === 'delete' ? s.op.ids.join(', ') : `${s.op.ids.join(' + ')} -> ${s.op.into}`;
   console.log(`  [${tag}] ${what}  (roi ${s.roi}; +${s.delta.locReclaimed} LOC, +${s.delta.cyclesBroken} cycle; cumulative -${s.cumulative.locReclaimed} LOC)`);
 }
-process.exit(0);
+finish();
+}

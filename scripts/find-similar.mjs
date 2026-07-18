@@ -16,7 +16,7 @@ import { shingles, jaccard } from './lib/shingles.mjs';
 import { structuralShingles } from './lib/skeleton.mjs'; // F6: Type-2 (rename-invariant) similarity
 
 const USAGE = 'usage: find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--structural] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, body = null, stdin = false, signature = null, k = 10, structural = false; const pos = [];
@@ -90,10 +90,12 @@ const payload = {
   matches: top, count: top.length, scanned: graph.nodes.filter((n) => (n.kind === 'function' || n.kind === 'method') && !isTestFile(n.file)).length,
 };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
-
-console.log(`find-similar: candidate (${payload.candidate.shingles} shingles) vs ${payload.scanned} existing symbols`);
-if (!top.length) { console.log('  no similar existing symbol (>=15%) — looks novel; safe to write.'); process.exit(0); }
-console.log(`  ${top.length} similar — consider reusing instead of re-implementing:`);
-for (const m of top) console.log(`  [${(m.sim * 100).toFixed(0).padStart(3)}% ${m.tier.padEnd(6)}] ${m.id}  (${m.file}:${m.line})`);
-process.exit(0);
+if (json) { emitJson(payload); } else {
+  console.log(`find-similar: candidate (${payload.candidate.shingles} shingles) vs ${payload.scanned} existing symbols`);
+  if (!top.length) console.log('  no similar existing symbol (>=15%) — looks novel; safe to write.');
+  else {
+    console.log(`  ${top.length} similar — consider reusing instead of re-implementing:`);
+    for (const m of top) console.log(`  [${(m.sim * 100).toFixed(0).padStart(3)}% ${m.tier.padEnd(6)}] ${m.id}  (${m.file}:${m.line})`);
+  }
+  finish(0);
+}

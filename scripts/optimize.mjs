@@ -27,7 +27,7 @@ import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit,
 
 const USAGE = 'usage: optimize.mjs <graph.json> [--json] [--out <optimize.md>]   (or set CODEWEB_WS)';
 const READY_BODYSIM = 0.6; // body-confirmed "high" floor — must match overlap.mjs's confidence band
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, outMd = null; const paths = [];
@@ -139,7 +139,7 @@ if (outMd) {
   writeFileSync(resolve(outMd), md);
 }
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 const t = payload.totals;
 console.log(`codeweb optimize: ${payload.target}`);
@@ -152,4 +152,5 @@ for (const o of opportunities) {
   if (o.canonical) console.log(`  keep \`${o.canonical}\` · removes ${o.removesNodes} copy(ies) · rewires ${o.callersRewired} caller(s) · blast ${o.blastRadius} · ~${o.locSaved} LOC`);
   console.log(`  -> ${o.recommendation}`);
 }
-process.exit(0);
+finish();
+}

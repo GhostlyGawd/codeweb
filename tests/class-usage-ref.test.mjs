@@ -64,8 +64,8 @@ test('a static-method call on an imported class refs the CLASS (and still calls 
   const frag = extract();
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:build', 'AxiosHeaders.mjs:AxiosHeaders', 'ref'),
     'build -> AxiosHeaders (class) via AxiosHeaders.from()');
-  assert.ok(hasEdge(frag.edges, 'consumer.mjs:build', 'AxiosHeaders.mjs:from', 'call'),
-    'build -> AxiosHeaders.from (method) call edge preserved');
+  assert.ok(hasEdge(frag.edges, 'consumer.mjs:build', 'AxiosHeaders.mjs:AxiosHeaders.from', 'call'),
+    'build -> AxiosHeaders.from (method, owner-qualified id) call edge preserved');
 });
 
 test('instanceof on an imported class refs the CLASS', () => {

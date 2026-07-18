@@ -26,7 +26,9 @@ import { loadTsEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tier
 // v3: namespace/default-import member-access resolution (util.merge() / new Default()) -> new call edges.
 // v4: Python docstrings/comments masked before symbol+edge scan -> drops phantom symbols/edges.
 // v5: opt-in tree-sitter engine owns JS/TS method nodes (class-qualified ids) + dispatch edges.
-const SCANNER_VERSION = 5;
+// v6: methods carry an owner (class / Rust impl type / Go receiver) -> owner-qualified ids
+//     (`file:Type.method`) in EVERY tier, ending same-file same-name id collisions.
+const SCANNER_VERSION = 6;
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -185,7 +187,7 @@ function scanSymbols(file, text) {
   const ext = extname(file).toLowerCase();
   const lines = (ext === '.py' ? maskPy(text) : text).split(/\r?\n/); // hide def/class inside docstrings
   const syms = [];
-  const push = (name, line, kind, exported) => { if (name && !KEYWORDS.has(name)) syms.push({ name, line: line + 1, kind, exports: !!exported }); };
+  const push = (name, line, kind, exported, owner) => { if (name && !KEYWORDS.has(name)) syms.push({ name, line: line + 1, kind, exports: !!exported, ...(owner ? { owner } : {}) }); };
   if (ext === '.py') {
     lines.forEach((ln, i) => {
       let m;
@@ -197,25 +199,42 @@ function scanSymbols(file, text) {
     // column 0 it's a free function. `pub` (incl. `pub(crate)`) -> exported. The name after the
     // keyword is always a real identifier (you can't write `fn fn`), so push directly rather than
     // through the JS-keyword filter — that keeps idiomatic Rust names like `new`/`default`/`drop`.
+    // Owner: a prescan records `impl [Trait for] Type { … }` extents (column-0 `impl` to the first
+    // column-0 `}`, idiomatic rustfmt shape) so a method knows its impl type — two `fn new` across
+    // two impls in one file must not share an id.
+    const implRe = /^impl(?:\s*<[^>]*>)?\s+(?:.*?\bfor\s+)?([A-Za-z_]\w*)/;
+    const implRanges = [];
+    for (let i = 0; i < lines.length; i++) {
+      const im = implRe.exec(lines[i]);
+      if (!im) continue;
+      let end = lines.length - 1;
+      for (let j = i + 1; j < lines.length; j++) { if (/^\}/.test(lines[j])) { end = j; break; } }
+      implRanges.push({ type: im[1], start: i + 1, end: end + 1 });
+    }
+    const implOwner = (lineNo) => { let best = null; for (const r of implRanges) if (lineNo > r.start && lineNo <= r.end && (!best || r.start > best.start)) best = r; return best ? best.type : undefined; };
     const DEF = /^(\s*)(pub(?:\([a-z]+\))?\s+)?(?:async\s+)?(?:unsafe\s+)?(?:const\s+)?(fn|struct|enum|trait)\s+([A-Za-z_]\w*)/;
     lines.forEach((ln, i) => {
       const m = DEF.exec(ln);
       if (!m) return;
       const indent = m[1].length, exported = !!m[2], key = m[3], name = m[4];
       const kind = key === 'fn' ? (indent > 0 ? 'method' : 'function') : 'class';
-      syms.push({ name, line: i + 1, kind, exports: exported });
+      const owner = kind === 'method' ? implOwner(i + 1) : undefined;
+      syms.push({ name, line: i + 1, kind, exports: exported, ...(owner ? { owner } : {}) });
     });
   } else if (ext === '.go') {
     // Go: `func F(...)` is a function; `func (r R) M(...)` (a receiver in parens before the name)
     // is a method; `type X struct|interface { … }` is a class. Visibility is by initial case — an
     // uppercase first letter is exported. Names after func/type are real identifiers -> push direct.
+    // Owner: the receiver TYPE (last identifier in the receiver, `*`/generics stripped) qualifies the
+    // id — `func (a A) Do` and `func (b B) Do` in one file are different methods, not one.
     const methodRe = /^\s*func\s+\(([^)]*)\)\s+([A-Za-z_]\w*)/;
     const funcRe = /^\s*func\s+([A-Za-z_]\w*)/;
     const typeRe = /^\s*type\s+([A-Za-z_]\w*)\s+(?:struct|interface)\b/;
     const exp = (n) => /^[A-Z]/.test(n);
+    const recvType = (recv) => { const m2 = /([A-Za-z_]\w*)\s*$/.exec(recv.replace(/\[[^\]]*\]/g, '').replace(/\*/g, '').trim()); return m2 ? m2[1] : undefined; };
     lines.forEach((ln, i) => {
       let m;
-      if ((m = methodRe.exec(ln))) syms.push({ name: m[2], line: i + 1, kind: 'method', exports: exp(m[2]) });
+      if ((m = methodRe.exec(ln))) syms.push({ name: m[2], line: i + 1, kind: 'method', exports: exp(m[2]), ...(recvType(m[1]) ? { owner: recvType(m[1]) } : {}) });
       else if ((m = funcRe.exec(ln))) syms.push({ name: m[1], line: i + 1, kind: 'function', exports: exp(m[1]) });
       else if ((m = typeRe.exec(ln))) syms.push({ name: m[1], line: i + 1, kind: 'class', exports: exp(m[1]) });
     });
@@ -393,13 +412,26 @@ for (const f of files) {
     if (tsResult) syms = syms.filter((s) => s.kind !== 'method');
   }
   const ranges = [];
+  const fileIds = new Set(); // per-file id uniqueness — duplicate ids corrupt byName/edges/diff keys
   syms.forEach((s) => {
     const start = s.line;
     // real body extent (brace match / dedent), NOT next-symbol-line — so the last symbol can't
     // run to EOF and absorb the trailing top-level code (the fabricated-edge bug).
     const end = Math.min(bodyEnd(lines, start - 1, isPy) + 1, total);
     const loc = Math.min(end - start + 1, 2000);
-    const id = r + ':' + s.name;
+    // Owner-qualified id (`file:Type.method`, matching the tree-sitter tier's scheme). Rust/Go owners
+    // come from the scan (impl/receiver); Python + JS/TS methods resolve to the ENCLOSING class range
+    // (classes precede their methods in the line-sorted ranges). Same-file same-name methods across
+    // classes/impls/receivers were previously ONE colliding id.
+    let owner = s.owner;
+    if (!owner && s.kind === 'method') {
+      let best = null;
+      for (const rg of ranges) if (rg.kind === 'class' && start > rg.start && start <= rg.end && (!best || rg.start > best.start)) best = rg;
+      if (best) owner = best.name;
+    }
+    let id = r + ':' + (owner ? owner + '.' + s.name : s.name);
+    if (fileIds.has(id)) id += '@' + start; // last-resort disambiguator (e.g. TS overload stubs)
+    fileIds.add(id);
     ranges.push({ id, name: s.name, start, end, kind: s.kind });
     const node = { id, label: s.name, kind: s.kind, file: r, line: start, loc, exports: s.exports, domain: '', summary: '' };
     if (s.kind === 'function' || s.kind === 'method') {
@@ -428,6 +460,8 @@ for (const f of files) {
       const end = Math.min(m.endLine, total);
       const loc = Math.min(end - start + 1, 2000);
       const body = lines.slice(start - 1, end).join('\n');
+      if (fileIds.has(m.id)) continue; // regex tier already owns this id (defensive)
+      fileIds.add(m.id);
       ranges.push({ id: m.id, name: m.label, start, end, kind: 'method' });
       nodes.push({
         id: m.id, label: m.label, kind: 'method', file: r, line: start, loc,
@@ -542,6 +576,25 @@ function resolveReExport(targetRel, name, seen) {
   const hop = reMap && reMap.get(name);
   return hop ? resolveReExport(hop.target, hop.orig, seen) : null;
 }
+
+// v6: methods carry owner-qualified ids (`file:Type.method`), so a member access resolved by FILE +
+// NAME (`X.from()` where X is an import alias of `file`) can no longer assume `file:name` exists.
+// This map answers "the one member called `name` in `file`" — exactly one match resolves; several
+// same-named methods across owners is ambiguous and stays dropped (precision over recall).
+const AMBIGUOUS_MEMBER = Symbol('ambiguous');
+const memberByFile = new Map(); // `${file}:${label}` -> qualified id | AMBIGUOUS_MEMBER
+for (const n of nodes) {
+  const key = n.file + ':' + n.label;
+  if (key === n.id) continue; // top-level symbol — nodeIdSet already resolves it
+  memberByFile.set(key, memberByFile.has(key) ? AMBIGUOUS_MEMBER : n.id);
+}
+// `file:name` if it exists as a node id, else the unique qualified member, else null.
+const resolveFileMember = (fileRel, name) => {
+  const exact = fileRel + ':' + name;
+  if (nodeIdSet.has(exact)) return exact;
+  const m = memberByFile.get(exact);
+  return m && m !== AMBIGUOUS_MEMBER ? m : null;
+};
 
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
 const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
@@ -729,8 +782,8 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
         const om = /([A-Za-z_$][\w$]*)$/.exec(before);
         if (om) {
           if (nsAliasMap && nsAliasMap.has(om[1])) {
-            const calleeId = nsAliasMap.get(om[1]) + ':' + m[1];
-            if (nodeIdSet.has(calleeId)) addResolved(i, calleeId, 'call');
+            const calleeId = resolveFileMember(nsAliasMap.get(om[1]), m[1]);
+            if (calleeId) addResolved(i, calleeId, 'call');
           }
           const cls = classOf(om[1]);
           if (cls) addResolved(i, cls, 'ref'); // X.staticMethod() -> the caller depends on the class X
@@ -738,8 +791,8 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
           if ((m[1] === 'call' || m[1] === 'apply') && nsAliasMap) {
             const chain = /([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)$/.exec(before);
             if (chain && nsAliasMap.has(chain[1])) {
-              const calleeId = nsAliasMap.get(chain[1]) + ':' + chain[2];
-              if (nodeIdSet.has(calleeId)) addResolved(i, calleeId, 'call');
+              const calleeId = resolveFileMember(nsAliasMap.get(chain[1]), chain[2]);
+              if (calleeId) addResolved(i, calleeId, 'call');
             }
           }
         }

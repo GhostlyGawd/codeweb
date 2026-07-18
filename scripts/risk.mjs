@@ -15,7 +15,7 @@ import { normalizeGraph, buildIndex, impactOf } from './lib/graph-ops.mjs';
 import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
 
 const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--churn <map.json> | --git] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, changed = null, churnPath = null, useGit = false; const pos = [];
@@ -69,7 +69,7 @@ if (changed != null) {
 
 const payload = { target: graph.meta?.target || 'target', weights: RISK_WEIGHTS, maxes, count: ranked.length, ranked };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 console.log(`codeweb risk: ${payload.target} — ${ranked.length} symbol(s) ranked by change-risk${changed != null ? ' (changed only)' : ''}`);
 console.log(`  weights: ${Object.entries(RISK_WEIGHTS).map(([k, v]) => `${k} ${v}`).join(', ')}`);
@@ -77,4 +77,5 @@ for (const r of ranked.slice(0, 15)) {
   const c = r.components;
   console.log(`  ${r.risk.toFixed(3)}  ${r.id}  [in ${c.fanIn} out ${c.fanOut} loc ${c.loc} blast ${c.blast} churn ${c.churn}]`);
 }
-process.exit(0);
+finish();
+}

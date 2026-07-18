@@ -11,7 +11,7 @@
 // Read-only over the target; never executes target code.
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
@@ -26,6 +26,11 @@ for (let i = 0; i < argv.length; i++) {
   else if (!opts.src) opts.src = t;
 }
 if (!opts.src) { console.error('usage: run.mjs <SRC> [--target <label>] [--out-dir <dir>]'); process.exit(1); }
+// Resolve the target against the CALLER's cwd (not the plugin root the stages run in) — a relative
+// <SRC> must mean the same thing as a relative --out-dir. Fail here with one clean line, not a
+// stage-level stack trace.
+opts.src = resolve(opts.src);
+if (!existsSync(opts.src)) { console.error(`[run] target not found: ${opts.src}`); process.exit(1); }
 
 // slug = whole target label (or last 2 path segments of src), so e.g. ecc/scripts -> "ecc-scripts"
 // rather than a collision-prone "scripts".
@@ -39,7 +44,14 @@ const node = process.execPath;
 const S = (p) => join(ROOT, p);
 const run = (label, file, args, useEnv) => {
   console.error(`\n[run] ${label}`);
-  execFileSync(node, [file, ...args], { stdio: 'inherit', env: useEnv ? env : process.env, cwd: ROOT });
+  try {
+    execFileSync(node, [file, ...args], { stdio: 'inherit', env: useEnv ? env : process.env, cwd: ROOT });
+  } catch (e) {
+    // The stage already printed its own diagnostics (stdio inherited) — add one clean line, not a
+    // raw execFileSync stack dump.
+    console.error(`\n[run] stage '${label}' failed${typeof e?.status === 'number' ? ` (exit ${e.status})` : ''} — aborting`);
+    process.exit(1);
+  }
 };
 
 const targetArg = opts.target ? ['--target', opts.target] : [];

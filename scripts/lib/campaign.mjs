@@ -28,11 +28,15 @@ export function planCampaign(graph, { optimize = { opportunities: [] }, deadcode
     gate: { ok: true }, delta: { locReclaimed: 0, cyclesBroken: 1 }, detail: c.cut || null, files: c.files || [],
   })).sort(byRoiThenId);
 
-  // Phase 2 — safe dead-code deletes (cycle-neutral: an orphan is in no SCC).
-  const delSteps = (deadcode.safe || []).map((o) => ({
-    id: `del:${o.id}`, type: 'delete', op: { kind: 'delete', ids: [o.id] }, roi: o.locSaved || 0,
-    gate: { ok: true }, delta: { locReclaimed: o.locSaved || 0, cyclesBroken: 0 },
-  })).sort(byRoiThenId);
+  // Phase 2 — safe dead-code deletes (cycle-neutral: an orphan is in no SCC). ROI = the symbol's
+  // span: deadcode emits `loc` (locSaved kept as a legacy alias so older advisor output still ranks).
+  const delSteps = (deadcode.safe || []).map((o) => {
+    const saved = o.locSaved ?? o.loc ?? 0;
+    return {
+      id: `del:${o.id}`, type: 'delete', op: { kind: 'delete', ids: [o.id] }, roi: saved,
+      gate: { ok: true }, delta: { locReclaimed: saved, cyclesBroken: 0 },
+    };
+  }).sort(byRoiThenId);
 
   // Phase 3 — ready merges, cumulatively pre-flighted from the graph-with-prior-steps-applied.
   let cur = g0;

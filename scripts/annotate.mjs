@@ -13,7 +13,7 @@ import { resolve } from 'node:path';
 import { addSuppression, loadAnnotations } from './lib/annotations.mjs';
 
 const USAGE = 'usage: annotate.mjs (--suppress <fingerprint> [--note "..."] | --list) [--dir <.codeweb>] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, list = false, fp = null, note = '', dir = '.codeweb';
@@ -29,14 +29,18 @@ const annDir = resolve(dir);
 
 if (list) {
   const ann = loadAnnotations(annDir);
-  if (json) { process.stdout.write(JSON.stringify(ann) + '\n'); process.exit(0); }
-  console.log(`codeweb annotations (${annDir}): ${ann.suppressions.length} suppression(s)`);
-  for (const s of ann.suppressions) console.log(`  ${s.fingerprint}  ${s.verdict}${s.note ? `  — ${s.note}` : ''}`);
-  process.exit(0);
+  if (json) emitJson(ann);
+  else {
+    console.log(`codeweb annotations (${annDir}): ${ann.suppressions.length} suppression(s)`);
+    for (const s of ann.suppressions) console.log(`  ${s.fingerprint}  ${s.verdict}${s.note ? `  — ${s.note}` : ''}`);
+    finish(0);
+  }
+} else {
+  if (!fp) die(USAGE, 2);
+  const ann = addSuppression(annDir, fp, { note, verdict: 'false-positive' });
+  if (json) emitJson({ dir: annDir, fingerprint: fp, suppressions: ann.suppressions.length });
+  else {
+    console.log(`codeweb annotate: suppressed ${fp} in ${annDir} (${ann.suppressions.length} total). Source untouched.`);
+    finish(0);
+  }
 }
-
-if (!fp) die(USAGE, 2);
-const ann = addSuppression(annDir, fp, { note, verdict: 'false-positive' });
-if (json) { process.stdout.write(JSON.stringify({ dir: annDir, fingerprint: fp, suppressions: ann.suppressions.length }) + '\n'); process.exit(0); }
-console.log(`codeweb annotate: suppressed ${fp} in ${annDir} (${ann.suppressions.length} total). Source untouched.`);
-process.exit(0);

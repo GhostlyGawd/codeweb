@@ -23,7 +23,7 @@ const ENTRYPOINTS = new Set(['main', 'default', 'index', 'setup', 'teardown', 'i
 // The effectiveness study flips this on to prove the H13 fix is load-bearing (safe-tier precision drops).
 const DEADCODE_LEGACY = process.env.CODEWEB_DEADCODE_LEGACY === '1';
 const USAGE = 'usage: deadcode.mjs <graph.json> [--json]   (or set CODEWEB_WS)';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, showSuppressed = false, annDir = null; const pos = [];
@@ -48,13 +48,15 @@ const CAVEAT = 'extraction drops ambiguous call edges (precision over recall), s
 
 const safe = [], review = [];
 for (const o of orphans(graph, index)) {           // orphans = no call|import|inherit incoming, not exported
-  const label = index.byId.get(o.id)?.label || o.id;
+  const node = index.byId.get(o.id);
+  const label = node?.label || o.id;
   const testers = index.testIn.get(o.id)?.size || 0;
-  const file = index.byId.get(o.id)?.file || o.file;
-  if (testers > 0) review.push({ ...o, reason: `referenced only by ${testers} test(s) — the test may be its only user; remove the test too, or it is genuinely used` });
-  else if (!DEADCODE_LEGACY && isTestFile(file)) review.push({ ...o, reason: `defined in a test file '${file}' — a test runner may invoke it (helper, mock, or case registration) without a code edge, so deleting it can break tests` });
-  else if (ENTRYPOINTS.has(label)) review.push({ ...o, reason: `entrypoint-like name '${label}' — may be invoked by a framework/CLI/test runner, not via a code edge` });
-  else safe.push({ ...o, reason: `no production caller, not exported, no test edge, not in a test file — high-confidence dead (${CAVEAT})` });
+  const file = node?.file || o.file;
+  const loc = node?.loc || 0; // deleting this orphan reclaims its span — campaign's delete-ROI signal
+  if (testers > 0) review.push({ ...o, loc, reason: `referenced only by ${testers} test(s) — the test may be its only user; remove the test too, or it is genuinely used` });
+  else if (!DEADCODE_LEGACY && isTestFile(file)) review.push({ ...o, loc, reason: `defined in a test file '${file}' — a test runner may invoke it (helper, mock, or case registration) without a code edge, so deleting it can break tests` });
+  else if (ENTRYPOINTS.has(label)) review.push({ ...o, loc, reason: `entrypoint-like name '${label}' — may be invoked by a framework/CLI/test runner, not via a code edge` });
+  else safe.push({ ...o, loc, reason: `no production caller, not exported, no test edge, not in a test file — high-confidence dead (${CAVEAT})` });
 }
 
 // F7: every finding carries a stable fingerprint (kind 'orphan' + its id). A '.codeweb/annotations.json'
@@ -70,7 +72,7 @@ const visibleSafe = showSuppressed ? safe : safe.filter((o) => !killed.has(o.fin
 
 const payload = { target: graph.meta?.target || 'target', totals: { orphans: visibleSafe.length + review.length, safe: visibleSafe.length, review: review.length, suppressed: suppressed.length }, safe: visibleSafe, review, suppressed };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 const t = payload.totals;
 console.log(`codeweb deadcode: ${payload.target} — ${t.orphans} orphan(s): ${t.safe} safe, ${t.review} review${t.suppressed ? `, ${t.suppressed} suppressed` : ''}`);
@@ -81,4 +83,5 @@ console.log(`\nreview first (tests reference it, or entrypoint-like):`);
 for (const o of review) console.log(`  ${o.id}  — ${o.reason}`);
 if (!review.length) console.log('  (none)');
 console.log(`\nnote: ${CAVEAT}.`);
-process.exit(0);
+finish();
+}

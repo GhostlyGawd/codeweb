@@ -18,7 +18,7 @@ import { normalizeGraph, buildIndex, callersOf, impactOf, applyEdit, structuralR
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, doWrite = false, opp = null, merge = null, into = null; const pos = [];
@@ -121,7 +121,7 @@ if (doWrite) {
 }
 
 const payload = { ...plan, write: writeResult };
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(code); }
+if (json) { emitJson(payload, code); } else {
 
 console.log(`codeweb codemod: merge ${ids.length} -> keep ${canonical}`);
 console.log(`  removes ${losers.length} copy(ies), rewires ${rewrites.length} caller(s), ~${locReclaimed} LOC, blast ${plan.blastRadius}`);
@@ -130,4 +130,5 @@ console.log('  deletions:'); for (const d of deletions) console.log(`    ${d.fil
 console.log('  rewrites:'); for (const r of rewrites) console.log(`    ${r.file}:${r.line}  (${r.callerId})`);
 if (writeResult) console.log(`  write: ${writeResult.applied ? `APPLIED to ${writeResult.filesTouched.length} file(s)` : `NOT applied — ${writeResult.reason}`}`);
 else console.log('  (plan-only — pass --write to apply, gated + reversible)');
-process.exit(code);
+finish(code);
+}

@@ -8,6 +8,7 @@
 
 import { createInterface } from 'node:readline';
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -27,7 +28,14 @@ const REFRESH = join(HERE, 'refresh.mjs');            // F2
 const HOTSPOTS = join(HERE, 'hotspots.mjs');          // F4
 const CAMPAIGN = join(HERE, 'campaign.mjs');          // F5
 const READINGORDER = join(HERE, 'reading-order.mjs'); // F8
-const SERVER = { name: 'codeweb', version: '0.1.0' };
+// serverInfo.version derives from package.json at startup — the ONE version truth — so the MCP
+// handshake can never drift from the shipped release again (it sat at 0.1.0 while the product was
+// 0.2.0, uncaught because check-consistency didn't look here; it now does).
+const PKG_VERSION = (() => {
+  try { return JSON.parse(readFileSync(join(HERE, '..', 'package.json'), 'utf8')).version || '0.0.0'; }
+  catch { return '0.0.0'; }
+})();
+const SERVER = { name: 'codeweb', version: PKG_VERSION };
 const DEFAULT_PROTOCOL = '2025-06-18';
 
 const send = (msg) => process.stdout.write(JSON.stringify(msg) + '\n');

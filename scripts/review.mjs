@@ -22,7 +22,7 @@ import { normalizeGraph, reviewImpact, structuralRegressions } from './lib/graph
 import { incrementalOverlap } from './lib/dup-check.mjs'; // F3: duplication-delta in the edit gate
 
 const USAGE = 'usage: review.mjs <graph.json> (--changed <file[:s-e],...> | --range <gitref>) [--before <graph.json>] [--gate] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, gate = false, changed = null, range = null, before = null; const pos = [];
@@ -93,7 +93,7 @@ if (newDuplications.length) hasRegression = true;
 const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural, newDuplications };
 const code = (gate && hasRegression) ? 1 : 0;
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(code); }
+if (json) { emitJson(payload, code); } else {
 
 console.log(`codeweb review: ${impact.changedSymbols.length} changed symbol(s) across ${payload.filesChanged.length} file(s)`);
 console.log(`  domains touched: ${impact.domainsTouched.join(', ') || '(none)'}`);
@@ -113,4 +113,5 @@ if (newDuplications.length) {
   console.log(`  NEW DUPLICATION (body-confirmed) — ${newDuplications.length}:`);
   for (const d of newDuplications) console.log(`    x ${d.id} duplicates ${d.dupOf} (${(d.sim * 100).toFixed(0)}%)`);
 }
-process.exit(code);
+finish(code);
+}

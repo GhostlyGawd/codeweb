@@ -49,8 +49,8 @@ test('Rust: fn/struct/impl-method become nodes with the right kind and exports',
     const add = byId.get('math.rs:add');
     const helper = byId.get('math.rs:helper');
     const calc = byId.get('math.rs:Calculator');
-    const ctor = byId.get('math.rs:new');
-    const compute = byId.get('math.rs:compute');
+    const ctor = byId.get('math.rs:Calculator.new');
+    const compute = byId.get('math.rs:Calculator.compute');
 
     assert.ok(add && add.kind === 'function', 'top-level fn -> function');
     assert.equal(add.exports, true, 'pub fn is exported');
@@ -70,7 +70,7 @@ test('Rust: in-body calls wire by name (with ambiguity drop)', () => {
   const { dir, g } = extract();
   try {
     assert.ok(hasEdge(g.edges, 'math.rs:helper', 'math.rs:add', 'call'), 'helper() calls add()');
-    assert.ok(hasEdge(g.edges, 'math.rs:compute', 'math.rs:helper', 'call'), 'compute() calls helper()');
+    assert.ok(hasEdge(g.edges, 'math.rs:Calculator.compute', 'math.rs:helper', 'call'), 'compute() calls helper()');
   } finally {
     cleanup(dir);
   }

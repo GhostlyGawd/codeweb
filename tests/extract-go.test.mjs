@@ -52,8 +52,8 @@ test('Go: func/method/struct/interface become nodes with the right kind and Go v
     const add = byId.get('math.go:Add');
     const helper = byId.get('math.go:helper');
     const calc = byId.get('math.go:Calculator');
-    const compute = byId.get('math.go:Compute');
-    const reset = byId.get('math.go:Reset');
+    const compute = byId.get('math.go:Calculator.Compute');
+    const reset = byId.get('math.go:Calculator.Reset');
     const shape = byId.get('math.go:Shape');
 
     assert.ok(add && add.kind === 'function', 'plain func -> function');
@@ -61,7 +61,7 @@ test('Go: func/method/struct/interface become nodes with the right kind and Go v
     assert.ok(helper && helper.kind === 'function', 'lowercase func -> function');
     assert.equal(helper.exports, false, 'lowercase initial -> not exported');
     assert.ok(calc && calc.kind === 'class', 'struct -> class');
-    assert.ok(compute && compute.kind === 'method', 'func with value receiver -> method');
+    assert.ok(compute && compute.kind === 'method', 'func with value receiver -> method (receiver-qualified id)');
     assert.ok(reset && reset.kind === 'method', 'func with pointer receiver -> method');
     assert.ok(shape && shape.kind === 'class', 'interface -> class');
     assert.deepEqual(add.signature && add.signature.params, ['a', 'b'], 'space-typed Go params parsed');
@@ -74,7 +74,7 @@ test('Go: in-body calls wire by name (with ambiguity drop)', () => {
   const { dir, g } = extract();
   try {
     assert.ok(hasEdge(g.edges, 'math.go:helper', 'math.go:Add', 'call'), 'helper() calls Add()');
-    assert.ok(hasEdge(g.edges, 'math.go:Compute', 'math.go:helper', 'call'), 'Compute() calls helper()');
+    assert.ok(hasEdge(g.edges, 'math.go:Calculator.Compute', 'math.go:helper', 'call'), 'Compute() calls helper()');
   } finally {
     cleanup(dir);
   }

@@ -53,6 +53,12 @@ export function syncTargets(version, count) {
       file: 'README.md',
       subs: [[/(badge\/version-)\d+\.\d+\.\d+(-)/, `$1${version}$2`]],
     },
+    {
+      // no-op for the shipped server (version derives from package.json, no literal); repairs a
+      // hardcoded serverInfo literal if one is ever reintroduced.
+      file: 'scripts/mcp-server.mjs',
+      subs: [[/(version:\s*')\d+\.\d+\.\d+(')/, `$1${version}$2`]],
+    },
   ];
 }
 
@@ -101,6 +107,16 @@ export function checkConsistency(root) {
     if (!verRe.test(cl)) problems.push(`CHANGELOG.md has no section for v${version}`);
   } else {
     problems.push('CHANGELOG.md is missing');
+  }
+
+  // The MCP handshake surface: serverInfo.version must agree with package.json. The shipped server
+  // derives it dynamically (no literal — nothing to drift); a hardcoded literal is tolerated only
+  // while it matches, and version-sync repairs it. (A literal '0.1.0' drifted for a whole release
+  // because nothing audited this file.)
+  const mcpPath = join(root, 'scripts', 'mcp-server.mjs');
+  if (existsSync(mcpPath)) {
+    const hard = readText(mcpPath).match(/version:\s*'(\d+\.\d+\.\d+)'/);
+    if (hard && hard[1] !== version) problems.push(`mcp-server.mjs hardcodes serverInfo version ${hard[1]} != package.json ${version}`);
   }
 
   return { ok: problems.length === 0, version, count, problems };

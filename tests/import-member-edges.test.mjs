@@ -21,7 +21,7 @@ const FILES = {
     'export default { merge };\n',
   'widget.mjs':
     'export default class Widget {\n' +       // widget.mjs:Widget (anchor / default export)
-    '  static from(x) {\n' +                  // widget.mjs:from
+    '  static from(x) {\n' +                  // widget.mjs:Widget.from
     '    return new Widget();\n' +
     '  }\n' +
     '}\n',
@@ -31,7 +31,7 @@ const FILES = {
     'export function build(a, b) {\n' +       // consumer.mjs:build
     '  const merged = util.merge(a, b);\n' +  //   build -> util.mjs:merge    (member access via alias)
     '  const w = new Widget();\n' +           //   build -> widget.mjs:Widget (default-import direct use)
-    '  return Widget.from(merged) || w;\n' +  //   build -> widget.mjs:from    (static member via alias)
+    '  return Widget.from(merged) || w;\n' +  //   build -> widget.mjs:Widget.from    (static member via alias)
     '}\n',
   'precision.mjs':
     'export function run(obj) {\n' +          // precision.mjs:run
@@ -63,8 +63,8 @@ test('RECALL: default-import construction (new Widget()) resolves to the class',
 
 test('RECALL: a static member call on a default-import alias resolves (Widget.from())', () => {
   const frag = extract();
-  assert.ok(hasEdge(frag.edges, 'consumer.mjs:build', 'widget.mjs:from', 'call'),
-    'build -> widget.mjs:from via Widget.from()');
+  assert.ok(hasEdge(frag.edges, 'consumer.mjs:build', 'widget.mjs:Widget.from', 'call'),
+    'build -> widget.mjs:Widget.from via Widget.from()');
 });
 
 test('PRECISION: a param obj.merge() does NOT fabricate an edge to the imported merge', () => {

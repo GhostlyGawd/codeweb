@@ -21,7 +21,7 @@ import { resolve, join } from 'node:path';
 import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, testersOf, importersOf, refsOf, dependentsOf, impactOf, fileCycles, orphans } from './lib/graph-ops.mjs';
 
 const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--json]`;
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 function parseArgs(argv) {
   const o = { graph: null, query: null, symbol: null, json: false, help: false, queries: 0 };
@@ -86,10 +86,7 @@ if (opts.query === 'callers' || opts.query === 'callees' || opts.query === 'test
   payload = { query: 'orphans', results, count: results.length };
 }
 
-if (opts.json) {
-  process.stdout.write(JSON.stringify(payload) + '\n');
-  process.exit(code);
-}
+if (opts.json) { emitJson(payload, code); } else {
 
 if (payload.found === false) die(`symbol not found: ${opts.symbol}`, 1);
 const p = payload;
@@ -112,4 +109,5 @@ if (p.query === 'callers' || p.query === 'callees' || p.query === 'tests') {
   console.log(`${p.count} orphan(s) — no callers and not exported:`);
   for (const o of p.results) console.log(`  ${o.id}  [${o.domain}]`);
 }
-process.exit(code);
+finish(code);
+}

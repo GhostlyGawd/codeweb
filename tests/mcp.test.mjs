@@ -7,8 +7,8 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { writeFileSync } from 'node:fs';
-import { tmpDir, cleanup, script, writeTree, runNode, readJSON } from './helpers.mjs';
+import { writeFileSync, readFileSync } from 'node:fs';
+import { tmpDir, cleanup, script, writeTree, runNode, readJSON, PLUGIN_ROOT } from './helpers.mjs';
 
 const GRAPH = {
   meta: { target: 'mcp-fixture' },
@@ -73,6 +73,9 @@ test('M1: initialize returns protocolVersion, an object tools capability, and se
   assert.ok(res.protocolVersion, 'a protocol version is set');
   assert.equal(typeof res.capabilities.tools, 'object', 'tools capability is an object, not a bare bool');
   assert.equal(res.serverInfo.name, 'codeweb');
+  // serverInfo.version tracks package.json — the drift the consistency gate previously missed
+  const pkg = JSON.parse(readFileSync(join(PLUGIN_ROOT, 'package.json'), 'utf8'));
+  assert.equal(res.serverInfo.version, pkg.version, 'serverInfo.version derives from package.json');
 });
 
 test('M2: tools/list exposes the full tool set with object schemas + correct required args', () => {

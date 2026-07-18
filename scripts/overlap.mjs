@@ -156,11 +156,23 @@ for (const callers of inv.values()) {
   }
 }
 twins.sort((a, b) => b.sim - a.sim);
+// De-duplicate by LABEL PAIR before emitting: several `<module>` nodes (one per file) pairing with
+// the same function used to yield N findings with byte-identical titles ("X and <module> call the
+// same 63% of helpers" ×3 — pure noise). Keep the highest-similarity pair per label pair; fold the
+// other members into that finding's node list so nothing is silently dropped.
+const byLabelPair = new Map();
+for (const t of twins) {
+  const key = [t.nx.label, t.ny.label].sort().join(' ');
+  const cur = byLabelPair.get(key);
+  if (!cur) byLabelPair.set(key, { ...t, extraNodes: [] });
+  else cur.extraNodes.push(t.nx.id, t.ny.id);
+}
+const twinGroups = [...byLabelPair.values()];
 // Body-confirm each twin like Signal A: a shared downstream-call shape is only suggestive —
 // confirm against the real bodies (token-shingle Jaccard). Body sim becomes the authoritative
 // confidence, so genuine parallel impls rank up, drifted copies are flagged, and pairs that
 // merely call the same helpers but implement different logic get demoted/dismissed as coincidental.
-for (const t of twins.slice(0, 16)) {
+for (const t of twinGroups.slice(0, 16)) {
   const domains = [...new Set([domainOf(t.nx), domainOf(t.ny)])];
   const body = HAVE_SOURCE ? bodyConfidence([t.nx, t.ny]) : null;
   let confidence, drifted = false, bodySim = null, basis;
@@ -177,12 +189,14 @@ for (const t of twins.slice(0, 16)) {
     confidence = 'medium';
     basis = 'structural only (body unreadable / source absent): matched on downstream call names';
   }
+  const groupNodes = [...new Set([t.nx.id, t.ny.id, ...t.extraNodes])].sort();
+  const alsoNote = t.extraNodes.length ? ` (+${new Set(t.extraNodes).size} more same-shaped pairing(s), folded into this finding)` : '';
   overlaps.push({
     kind: 'parallel-impl', confidence, drifted, bodySim, severity: severityFor(2, domains.length),
     rank: Math.round((bodySim != null ? bodySim : t.sim) * 5),
     title: `\`${t.nx.label}\` and \`${t.ny.label}\` call the same ${Math.round(t.sim * 100)}% of helpers` + (drifted ? ' (drifted)' : ''),
-    domains, nodes: [t.nx.id, t.ny.id],
-    evidence: `${t.nx.id} and ${t.ny.id} share downstream calls (name-Jaccard ${t.sim.toFixed(2)}): {${t.sh.slice(0, 6).join(', ')}}. ${basis}.`,
+    domains, nodes: groupNodes,
+    evidence: `${t.nx.id} and ${t.ny.id} share downstream calls (name-Jaccard ${t.sim.toFixed(2)}): {${t.sh.slice(0, 6).join(', ')}}${alsoNote}. ${basis}.`,
     recommendation: body && body.confidence === 'refuted'
       ? 'Despite the shared call shape the bodies differ — probably not the same logic; verify before merging.'
       : 'Compare the two; if behaviour matches, keep one and route both call sites through it.',

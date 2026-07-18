@@ -69,9 +69,13 @@ test('tree-sitter: dynamic-dispatch call edges (this.* + typed receiver) are wir
   assert.ok(hasEdge(ts, ':bootstrap', ':Pipeline.run'), 'typed receiver p: Pipeline');
 });
 
-test('default (regex) run: method ids stay BARE and NO dispatch edges (proves opt-in/additive)', () => {
-  assert.ok(idsEndingWith(dflt, ':run') && !idsEndingWith(dflt, ':Pipeline.run'), 'bare method id, not qualified');
-  assert.ok(!dflt.nodes.some((n) => n.id.endsWith(':Pipeline.validate')), 'no qualified ids in regex output');
+// v6: the regex tier ALSO owner-qualifies method ids (same `file:Class.method` scheme as the
+// tree-sitter tier — same-file same-name methods must never collide). What stays tree-sitter-only
+// is DISPATCH: this.* and typed-receiver member calls are still dropped by the regex tier.
+test('default (regex) run: method ids match the tree-sitter qualification scheme; still NO dispatch edges', () => {
+  assert.ok(idsEndingWith(dflt, ':Pipeline.run'), 'regex tier qualifies method ids (id parity with ts tier)');
+  assert.ok(idsEndingWith(dflt, ':Pipeline.validate'));
+  assert.ok(dflt.nodes.some((n) => n.label === 'run' && n.id.endsWith(':Pipeline.run')), 'label stays bare');
   assert.ok(!hasEdge(dflt, ':run', ':validate'), 'regex drops this.* member calls (no dispatch)');
   assert.ok(!hasEdge(dflt, ':bootstrap', ':run'), 'regex drops typed-receiver member calls');
 });

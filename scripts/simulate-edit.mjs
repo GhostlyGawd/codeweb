@@ -18,7 +18,7 @@ import { resolve } from 'node:path';
 import { normalizeGraph, resolveSymbol, applyEdit, structuralRegressions } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: simulate-edit.mjs <graph.json> (--delete <sym> | --merge <s1,s2,..> [--into <id>] | --move <sym> --to <file>) [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, del = null, merge = null, into = null, move = null, to = null; const pos = [];
@@ -65,11 +65,12 @@ const { newCycles, lostCallers } = structuralRegressions(graph, after);
 const projected = { newCycles, lostCallers, ok: newCycles.length === 0 && lostCallers.length === 0 };
 const payload = { op: opName, target, into: intoOut, to: toOut, projected };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 console.log(`simulate-edit: ${opName} ${target.join(', ')}${intoOut ? ` -> ${intoOut}` : ''}${toOut ? ` -> ${toOut}` : ''}`);
 console.log(`projected gate: ${projected.ok ? 'PASS — the gate would accept this edit (exit 0)' : 'BLOCK — the gate would reject this edit (exit 1)'}`);
 if (newCycles.length) console.log(`  new file cycle(s): ${newCycles.map((c) => c.join(' -> ')).join(' | ')}`);
 if (lostCallers.length) console.log(`  symbol(s) left with no callers: ${lostCallers.join(', ')}`);
 console.log('  (structural pre-flight: duplication delta is out of scope — run the full pipeline for that.)');
-process.exit(0);
+finish();
+}

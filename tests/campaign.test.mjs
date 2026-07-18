@@ -46,7 +46,10 @@ function synthAdvisors(graph, rng) {
       ready.push({ id: `ov${i}`, kind: 'duplicate-logic', nodes: pair, canonical: chooseCanonical(idx, pair), locSaved: int(rng, 1, 9), tier: 'ready' });
     }
   }
-  const safe = orphans(graph, idx).filter((o) => !usedNodes.has(o.id)).slice(0, 2).map((o) => ({ id: o.id, locSaved: 2 }));
+  // Mirror the REAL deadcode.mjs output shape ({id,file,domain,loc,reason,fingerprint} — `loc`, not
+  // `locSaved`), so this synthetic advisor can't drift from the producer again (the drift previously
+  // masked campaign delete-ROI always ranking 0).
+  const safe = orphans(graph, idx).filter((o) => !usedNodes.has(o.id)).slice(0, 2).map((o) => ({ ...o, loc: 2, reason: 'synthetic' }));
   const cuts = fileCycles(graph).map((c) => ({ files: c, verified: true, cut: { fromFile: c[0], toFile: c[1] || c[0] } }));
   return { optimize: { opportunities: ready }, deadcode: { safe }, breakCycles: { cycles: cuts } };
 }
@@ -185,4 +188,30 @@ test('CMP-CLI: campaign.mjs --json composes all three advisors — a delete AND 
     const mi = payload.steps.findIndex((s) => s.op?.kind === 'merge');
     assert.ok(di < mi, 'delete is planned before merge');
   } finally { cleanup(dir); }
+});
+
+// CMP-DELETE-ROI: a delete step's ROI is the orphan's real span. deadcode.mjs emits `loc` on every
+// safe item (locSaved remains a legacy alias) — before this contract, campaign read a field the
+// producer never emitted, so every delete ranked roi 0 and contributed 0 to locReclaimed.
+test('CMP-DELETE-ROI: delete steps rank and project by the deadcode `loc` field', () => {
+  const g = normalizeGraph({
+    meta: {},
+    nodes: [
+      { id: 'a.js:big', label: 'big', kind: 'function', file: 'a.js', line: 1, loc: 40, exports: false },
+      { id: 'b.js:small', label: 'small', kind: 'function', file: 'b.js', line: 1, loc: 3, exports: false },
+    ],
+    edges: [],
+  });
+  const plan = planCampaign(g, { deadcode: { safe: [
+    { id: 'b.js:small', file: 'b.js', domain: 'unassigned', loc: 3, reason: 'synthetic' },
+    { id: 'a.js:big', file: 'a.js', domain: 'unassigned', loc: 40, reason: 'synthetic' },
+  ] } });
+  assert.equal(plan.steps.length, 2);
+  assert.equal(plan.steps[0].op.ids[0], 'a.js:big', 'higher-loc delete ranks first');
+  assert.equal(plan.steps[0].roi, 40);
+  assert.equal(plan.steps[1].roi, 3);
+  assert.equal(plan.totals.locReclaimed, 43, 'projected reclaim sums real spans, not 0');
+  // legacy alias still honored
+  const legacy = planCampaign(g, { deadcode: { safe: [{ id: 'a.js:big', locSaved: 7 }] } });
+  assert.equal(legacy.steps[0].roi, 7);
 });

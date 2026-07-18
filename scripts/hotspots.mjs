@@ -14,7 +14,7 @@ import { normalizeGraph } from './lib/graph-ops.mjs';
 import { rankHotspots } from './lib/hotspots.mjs';
 
 const USAGE = 'usage: hotspots.mjs <graph.json> [--churn <map.json> | --git] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, churnPath = null, useGit = false; const pos = [];
@@ -44,7 +44,7 @@ else if (useGit) {
 
 const payload = { target: graph.meta?.target || 'target', ...rankHotspots(graph, { churn }) };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 console.log(`codeweb hotspots: ${payload.target} — ${payload.count} symbol(s) ranked by complexity x fan-in x churn`);
 console.log(`  weights: ${Object.entries(payload.weights).map(([k, v]) => `${k} ${v}`).join(', ')}`);
@@ -52,4 +52,5 @@ for (const r of payload.ranked.slice(0, 15)) {
   const c = r.components;
   console.log(`  ${r.score.toFixed(3)}  ${r.id}  [cx ${c.complexity} in ${c.fanIn} churn ${c.churn}]`);
 }
-process.exit(0);
+finish();
+}

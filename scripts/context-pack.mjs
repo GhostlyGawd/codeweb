@@ -13,7 +13,7 @@ import { resolve } from 'node:path';
 import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, impactOf } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--json]   (or set CODEWEB_WS)';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false; const pos = [];
@@ -65,7 +65,7 @@ const payload = {
   blastRadius: { count: blast.length, ids: blast },           // transitive impact: ids only
 };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 console.log(`context-pack: ${symbol} -> ${ids.join(', ')}`);
 console.log(`source: ${sourceAvailable ? 'available — bodies included' : 'absent — bodies null'}`);
@@ -78,4 +78,5 @@ for (const c of payload.callers) console.log(`  ${c.id}  (${c.file}:${c.line})`)
 console.log(`callees (${payload.callees.length}) — dependencies:`);
 for (const c of payload.callees) console.log(`  ${c.id}`);
 console.log(`blast radius: ${payload.blastRadius.count} transitive caller(s)`);
-process.exit(0);
+finish();
+}
