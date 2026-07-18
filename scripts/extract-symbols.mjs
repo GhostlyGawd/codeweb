@@ -35,7 +35,9 @@ import { loadTsEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tier
 // v8: Java + C# discovery (class/interface/enum/record/struct + methods with owner-qualified ids,
 //     visibility-as-export, C# base-list inherit edges); pom.xml/build.gradle/.csproj join the
 //     package-boundary manifests.
-const SCANNER_VERSION = 8;
+// v9: tree-sitter tier default-on when installed (dispatch recall); export-star re-export chains
+//     resolve (barrel files no longer swallow edges).
+const SCANNER_VERSION = 9;
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -429,15 +431,19 @@ function parseSignature(line, name, isPy) {
 const useCtags = opts.ctags && toolExists('ctags');
 const files = listFiles();
 
-// Optional tree-sitter engine. Opt-in via `--engine tree-sitter` or CODEWEB_ENGINE=tree-sitter.
-// web-tree-sitter is an optionalDependency — if it or the vendored grammar is unavailable,
-// loadTsEngine() returns null and we fall back to the regex scanner per-file. When active it OWNS
-// JS/TS method nodes (class-qualified ids `file:Class.method`) + dynamic-dispatch call edges and
-// supplies exact cyclomatic complexity. Loaded before the cache key so it can namespace the cache.
+// Tree-sitter tier — DEFAULT-ON since v9 (it was opt-in): dynamic-dispatch call edges (this.m(),
+// typed-receiver x.m()) are the regex tier's one recall gap, measured directly in the oracle A/B
+// (6/30 under-recalled symbols, all dispatch/re-export). web-tree-sitter is an optionalDependency —
+// when it or the vendored grammar is unavailable, loadTsEngine() returns null and every file falls
+// back to the regex scanner (CI without npm install keeps working; meta.engine records which tier
+// ran, and the scan cache is namespaced per engine, so reproducibility holds per install state).
+// `--engine regex` / CODEWEB_ENGINE=regex force the old behavior.
 let tsEngine = null;
-if (opts.engine === 'tree-sitter' || opts.engine === 'ts') {
+if (opts.engine !== 'regex') {
   tsEngine = await loadTsEngine();
-  if (!tsEngine) console.error('[extract] --engine tree-sitter requested but web-tree-sitter/grammar unavailable; falling back to regex F4');
+  if (!tsEngine && (opts.engine === 'tree-sitter' || opts.engine === 'ts')) {
+    console.error('[extract] --engine tree-sitter requested but web-tree-sitter/grammar unavailable; falling back to regex F4');
+  }
 }
 
 // F0: load the scan cache (keyed by content hash + engine mode + scanner version). A re-run reuses
@@ -493,7 +499,9 @@ for (const f of files) {
   let tsResult = null;
   if (tsEngine && isJsTs) {
     tsResult = tsEngine.extractJsTs(text, r);
-    if (tsResult) syms = syms.filter((s) => s.kind !== 'method');
+    // the parse tree owns method_definition nodes; class-FIELD arrows (`handleClick = () => {}`)
+    // are only discovered by the regex scan (field: true), so they must survive the handoff.
+    if (tsResult) syms = syms.filter((s) => s.kind !== 'method' || s.field);
   }
   const ranges = [];
   const fileIds = new Set(); // per-file id uniqueness — duplicate ids corrupt byName/edges/diff keys
@@ -629,9 +637,12 @@ for (const [fabs, recd] of fileSyms) {
 // to, and the call to `y()` was silently dropped (the name-changing-indirection gap: the one case grep
 // also can't follow by the original name). Build, per file, a table of exported-name -> {target, orig}
 // and resolve it TRANSITIVELY (a re-export of a re-export) so an import of a renamed re-export binds to
-// the real underlying symbol. Named re-exports only; `export * from` is a later increment.
+// the real underlying symbol. v9: `export * from './m'` chains resolve too — a barrel that star-forwards
+// a module no longer swallows the edge (one of the two measured recall gaps in the oracle A/B).
 const esReExportRe = /export\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g;
-const reExportByFile = new Map(); // rel file -> Map(exportedName -> { target: rel file, orig })
+const esStarReExportRe = /export\s*\*\s*from\s*['"]([^'"]+)['"]/g; // plain form only (`export * as ns` binds a namespace, not names)
+const reExportByFile = new Map();     // rel file -> Map(exportedName -> { target: rel file, orig })
+const starReExportByFile = new Map(); // rel file -> [target rel files, in source order]
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
   const r = rel(f);
@@ -648,8 +659,31 @@ for (const f of files) {
     }
   }
   if (map.size) reExportByFile.set(r, map);
+  const stars = [];
+  esStarReExportRe.lastIndex = 0;
+  while ((m = esStarReExportRe.exec(fsRec.text))) {
+    const target = resolveImport(f, m[1]);
+    if (target) stars.push(target);
+  }
+  if (stars.length) starReExportByFile.set(r, stars);
 }
-// Resolve `targetRel`'s exported `name` to a real symbol node id, following renamed re-export chains.
+// v9: a BARREL IS A DEPENDENT. `export { X } from './impl'` means the barrel file must change when
+// X is renamed — the compiler counts that export specifier as a reference, and so must we (it was a
+// measured recall gap: index.ts barrels missing from every dependents answer). Named re-exports edge
+// the barrel's <module> to the resolved SYMBOL; `export *` edges it to the target's <module>
+// (file-level dependency — the names aren't enumerable without reading the target's exports).
+const reExportEdges = []; // [fromModuleId, toId] — appended with the import edges below
+for (const [r, map] of reExportByFile) {
+  for (const { target, orig } of map.values()) {
+    const resolved = resolveReExport(target, orig);
+    if (resolved) reExportEdges.push([r + ':<module>', resolved]);
+  }
+}
+for (const [r, stars] of starReExportByFile) {
+  for (const target of stars) reExportEdges.push([r + ':<module>', target + ':<module>']);
+}
+// Resolve `targetRel`'s exported `name` to a real symbol node id, following renamed re-export chains
+// and `export *` forwards (first star target that resolves wins — source order, deterministic).
 // Returns the node id or null (unknown name / dead-ends at a non-symbol). Cycle-guarded.
 function resolveReExport(targetRel, name, seen) {
   const key = targetRel + ':' + name;
@@ -659,7 +693,12 @@ function resolveReExport(targetRel, name, seen) {
   seen.add(key);
   const reMap = reExportByFile.get(targetRel);
   const hop = reMap && reMap.get(name);
-  return hop ? resolveReExport(hop.target, hop.orig, seen) : null;
+  if (hop) { const hit = resolveReExport(hop.target, hop.orig, seen); if (hit) return hit; }
+  for (const star of starReExportByFile.get(targetRel) || []) {
+    const hit = resolveReExport(star, name, seen);
+    if (hit) return hit;
+  }
+  return null;
 }
 
 // v6: methods carry owner-qualified ids (`file:Type.method`), so a member access resolved by FILE +
@@ -951,7 +990,8 @@ const ensureModuleNode = (id) => {
   nodes.push({ id, label: '<module>', kind: 'module', file: idFile(id), line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleOf(idFile(id)) });
   nodeIdSet.add(id);
 };
-for (const [a, b] of importEdges) {
+for (const [a, b] of [...importEdges, ...reExportEdges]) {
+  if (a.endsWith(':<module>')) ensureModuleNode(a); // a symbol-less barrel still gets its node
   if (b.endsWith(':<module>')) ensureModuleNode(b);
   if (!nodeIdSet.has(a) || !nodeIdSet.has(b) || a === b) continue;
   const key = a + ' ' + b;
@@ -998,6 +1038,11 @@ const fragment = {
     ...(tsEngine ? { complexityEngine: tsEngine.version } : {}),
     languages, symbols: nodes.length,
     sources, // per-file {s: size, m: mtimeMs} staleness stamps
+    // per-DIRECTORY mtime stamps: adding/deleting a file touches its directory, so NEW files (which
+    // per-file stamps cannot see) still flip the staleness check.
+    dirs: Object.fromEntries([...new Set(Object.keys(sources).map((r) => (r.includes('/') ? r.slice(0, r.lastIndexOf('/')) : '.')))].sort().map((d) => {
+      try { return [d, Math.round(statSync(join(root, d)).mtimeMs)]; } catch { return [d, 0]; }
+    })),
   },
   nodes, edges,
 };

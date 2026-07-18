@@ -90,6 +90,14 @@ export function checkStaleness(graph) {
     } catch { stale.push(relPath + ' (deleted)'); }
     if (stale.length >= 64) break; // enough to know it's stale; don't stat forever
   }
+  // directory stamps catch NEW files (a created file touches its directory's mtime)
+  for (const [relDir, m] of Object.entries(graph?.meta?.dirs || {})) {
+    if (stale.length >= 64) break;
+    try {
+      const cur = statSync(relDir === '.' ? root : root + '/' + relDir);
+      if (Math.round(cur.mtimeMs) !== m) stale.push(relDir + '/ (dir changed — new/removed files)');
+    } catch { stale.push(relDir + '/ (dir deleted)'); }
+  }
   return stale.length ? { count: stale.length, files: stale.slice(0, 8) } : null;
 }
 

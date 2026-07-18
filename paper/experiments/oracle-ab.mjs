@@ -36,10 +36,11 @@ try { ts = require_(process.env.TS_MODULE || 'typescript'); }
 catch { console.log(JSON.stringify({ skipped: 'typescript not resolvable from cwd (npm i typescript, or set TS_MODULE)' })); process.exit(0); }
 
 const argv = process.argv.slice(2);
-let N = 30, outPath = null; const pos = [];
+let N = 30, outPath = null, symbolsPath = null; const pos = [];
 for (let i = 0; i < argv.length; i++) {
   if (argv[i] === '--n') N = Math.max(1, parseInt(argv[++i], 10) || 30);
   else if (argv[i] === '--json') outPath = argv[++i];
+  else if (argv[i] === '--symbols') symbolsPath = argv[++i]; // fixed task list (A/B across ENGINE versions needs identical tasks)
   else if (!argv[i].startsWith('-')) pos.push(argv[i]);
 }
 if (pos.length < 2) { console.error('usage: oracle-ab.mjs <graph.json> <src-root> [--n N] [--json out]'); process.exit(2); }
@@ -59,9 +60,18 @@ const candidates = graph.nodes.filter((n) =>
   n.file.startsWith(scope) && n.label.length >= 4 &&
   (index.callIn.get(n.id)?.size || 0) + (index.importIn.get(n.id)?.size || 0) >= 3
 ).sort((a, b) => (a.id < b.id ? -1 : 1));
-const sample = [];
-const pool = candidates.slice();
-while (sample.length < Math.min(N, pool.length) && pool.length) sample.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
+let sample = [];
+if (symbolsPath) {
+  // fixed task list: grade exactly these ids (missing ids are reported, not silently skipped)
+  const wanted = JSON.parse(readFileSync(resolve(symbolsPath), 'utf8'));
+  const byId = new Map(graph.nodes.map((n) => [n.id, n]));
+  const missing = wanted.filter((id) => !byId.has(id));
+  if (missing.length) console.error(`[oracle-ab] ${missing.length} fixed symbol(s) absent from this graph: ${missing.slice(0, 5).join(', ')}`);
+  sample = wanted.map((id) => byId.get(id)).filter(Boolean);
+} else {
+  const pool = candidates.slice();
+  while (sample.length < Math.min(N, pool.length) && pool.length) sample.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
+}
 
 // ---- TS language service over the scope ----
 const tsFiles = [];

@@ -108,3 +108,16 @@ test('class-field arrow methods: discovered inside a class (qualified), NOT outs
   assert.ok(ids.includes('comp.js:Button.handleClick'), `class-field arrow becomes an owner-qualified method (got ${ids.join(', ')})`);
   assert.ok(!ids.some((i) => /:cb$|\.cb$/.test(i)), 'a local arrow reassignment inside a function is not a phantom method');
 });
+
+test('v9: `export * from` barrel chains resolve to the real symbol (no swallowed edges)', () => {
+  const frag = extract({
+    'impl/core.js': 'export function realWork(x) {\n  return x + 1;\n}\n',
+    'impl/index.js': 'export * from "./core.js";\n',
+    'barrel.js': 'export * from "./impl/index.js";\n',
+    'app.js': 'import { realWork } from "./barrel.js";\nexport function go() {\n  return realWork(1);\n}\n',
+  });
+  assert.ok(
+    frag.edges.some((e) => e.from === 'app.js:go' && e.to === 'impl/core.js:realWork' && e.kind === 'call'),
+    `star-chained import resolves through two barrels; got ${JSON.stringify(frag.edges.filter((e) => e.from === 'app.js:go'))}`
+  );
+});

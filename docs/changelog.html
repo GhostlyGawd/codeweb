@@ -61,6 +61,27 @@
 <p>  restsharp/RestSharp (1,542 symbols, Allman style, 0.9s). Method-dispatch recall</p>
 <p>  (<code>obj.Method()</code>) stays precision-gated as in the JS regex tier — a tree-sitter tier</p>
 <p>  for Java/C# is the next increment.</p>
+<h3 class="cl-grp">Added (recall ceiling + ambient loop)</h3>
+<ul>
+<li><strong>Tree-sitter tier default-on</strong> when web-tree-sitter is installed (<code>--engine regex</code></li>
+</ul>
+<p>  opts out; absent dependency degrades to regex byte-identically). Class-field arrow</p>
+<p>  methods survive the AST handoff.</p>
+<ul>
+<li><strong>Barrels are dependents</strong> (the measured recall gap): <code>export { X } from</code> edges the</li>
+</ul>
+<p>  barrel's <code>&lt;module&gt;</code> to the resolved symbol; <code>export * from</code> chains resolve</p>
+<p>  transitively AND edge the barrel to the target module. Oracle A/B moved from</p>
+<p>  recall 0.94 to <strong>1.00</strong> (precision 0.94 vs grep 0.87) on both the fixed and a</p>
+<p>  fresh-seeded 30-task sample.</p>
+<ul>
+<li><strong>Ambient loop</strong>: the pre-edit hook now injects the ~1KB explain card (identity, top</li>
+</ul>
+<p>  callers, tests) instead of a pointer — blast radius arrives with zero agent</p>
+<p>  discipline; the MCP server <strong>auto-refreshes a stale graph inline</strong> (~1s incremental,</p>
+<p>  throttled, CODEWEB_NO_AUTOREFRESH=1 opts out) before structural queries, and</p>
+<p>  per-DIRECTORY mtime stamps make brand-new files trip the staleness check (per-file</p>
+<p>  stamps cannot see a file that didn't exist).</p>
 <h3 class="cl-grp">Research</h3>
 <ul>
 <li><strong>Oracle A/B</strong> (<code>paper/experiments/oracle-ab.mjs</code>, results in</li>

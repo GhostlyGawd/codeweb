@@ -90,6 +90,27 @@ function cachedGraph(absPath) {
 }
 const QUERY_KIND = { codeweb_callers: 'callers', codeweb_callees: 'callees', codeweb_tests: 'tests', codeweb_impact: 'impact', codeweb_cycles: 'cycles', codeweb_orphans: 'orphans' };
 
+// ---- self-healing freshness -------------------------------------------------------------------
+// Structural queries answered from a stale map are the trap an agent can't see; annotating helped,
+// but the ambient fix is to REFRESH inline (incremental, ~1s) before answering. Scoped to the
+// structural tools (refresh preserves domains but drops overlaps, so overlap-consuming advisors
+// keep their input). Throttled per graph; CODEWEB_NO_AUTOREFRESH=1 disables; failure -> serve the
+// stale answer WITH its stale annotation (never a dead end).
+const AUTOREFRESH_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_context', 'codeweb_explain']);
+const refreshAttempt = new Map(); // abs graph path -> last attempt ms
+function autoRefresh(absGraph) {
+  if (process.env.CODEWEB_NO_AUTOREFRESH === '1') return;
+  try {
+    const { graph } = cachedGraph(absGraph);
+    if (!checkStaleness(graph)) return;
+    const last = refreshAttempt.get(absGraph) || 0;
+    if (Date.now() - last < 15_000) return; // one attempt per 15s per graph
+    refreshAttempt.set(absGraph, Date.now());
+    spawnSync(process.execPath, [scriptOf('refresh.mjs'), absGraph], { encoding: 'utf8', timeout: 60_000, maxBuffer: 1 << 24 });
+    // the rewrite changed mtime/size — the next cachedGraph() reloads and serves fresh
+  } catch { /* stale-but-annotated beats broken */ }
+}
+
 // ---- tool table ------------------------------------------------------------------------------
 // need: required args (validated). opt: optional args (schema only). budget: {arg, flag, value} —
 // when the caller passes neither that arg nor full:true, `flag value` is injected (default top-N).
@@ -231,6 +252,8 @@ function handleToolCall(id, params) {
     if (!graphPath) return errResult(id, NO_GRAPH);
     cliArgs.push(graphPath);
   }
+
+  if (graphPath && AUTOREFRESH_TOOLS.has(tool.name)) autoRefresh(resolve(graphPath));
 
   // Fast path: structural queries answer in-process from the cached graph (same payloads as the
   // CLI via query-core). Any surprise falls back to the spawned, tested artifact.

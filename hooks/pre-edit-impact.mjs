@@ -10,10 +10,13 @@
 // whole check is one JSON parse + an in-memory count (~50-100ms on a 3k-symbol graph).
 
 import { readFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, relative } from 'node:path';
 
-const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go)$/;
+const HERE = dirname(fileURLToPath(import.meta.url));
+const EXPLAIN = join(HERE, '..', 'scripts', 'explain.mjs');
+const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs)$/;
 
 function findTarget(filePath) {
   let dir = dirname(resolve(filePath));
@@ -50,9 +53,25 @@ export function preview(raw) {
     if (!top || c > top.c) top = { label: n.label, c };
   }
   if (total === 0) return null; // nothing depends on this file — stay quiet
-  return `[codeweb] editing ${rel}: ${nodes.length} symbol(s), ${total} in-repo dependent edge(s)` +
-    (top && top.c > 0 ? ` (most depended-on: ${top.label} ×${top.c})` : '') +
-    ` — check codeweb_impact/codeweb_context before changing contracts.`;
+  let msg = `[codeweb] editing ${rel}: ${nodes.length} symbol(s), ${total} in-repo dependent edge(s)` +
+    (top && top.c > 0 ? ` (most depended-on: ${top.label} ×${top.c})` : '') + '.';
+  // AMBIENT context: don't just point at the tools — inject the ~1KB explain card for the file's
+  // most-depended-on symbol, so the blast radius arrives without the agent having to ask. This is
+  // the attack on the edit-quality null: awareness with zero discipline required. Fail-open.
+  if (top && top.c > 0) {
+    try {
+      const topNode = nodes.slice().sort((a, b) => (inCount.get(b.id) || 0) - (inCount.get(a.id) || 0))[0];
+      const r = execFileSync(process.execPath, [EXPLAIN, t.baseline, topNode.id, '--json'], { encoding: 'utf8', timeout: 8000, maxBuffer: 1 << 22 });
+      const card = JSON.parse(r).cards?.[0];
+      if (card) {
+        msg += `\n  ${card.summary}`;
+        if (card.topCallers?.length) msg += `\n  top callers: ${card.topCallers.slice(0, 4).join(', ')}`;
+        if (card.tests?.length) msg += `\n  tests: ${card.tests.slice(0, 2).join(', ')}`;
+      }
+    } catch { /* card is a bonus, never a blocker */ }
+  }
+  msg += `\n  → codeweb_context for a bounded edit window; codeweb_impact for the full blast radius.`;
+  return msg;
 }
 
 // Execute as a hook only when run directly (not when imported by tests).

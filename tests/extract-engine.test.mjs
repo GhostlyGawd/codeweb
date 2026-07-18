@@ -1,7 +1,8 @@
-// Integration test: the --engine tree-sitter opt-in flows exact cyclomatic through the REAL extractor
-// (run as a subprocess, like the rest of the suite). Covers both modes: when web-tree-sitter (an
-// optionalDependency) is present the exact values + meta.complexityEngine appear; when it is absent the
-// flag must fall back to byte-identical regex output. The DEFAULT (no flag) path is asserted unchanged.
+// Integration test for the engine tiers through the REAL extractor (run as a subprocess, like the
+// rest of the suite). v9: tree-sitter is the DEFAULT when web-tree-sitter (an optionalDependency)
+// is installed — dispatch recall was the measured gap — and `--engine regex` forces the old tier.
+// When the dependency is absent, the default degrades to regex byte-identically (CI without
+// npm install keeps working).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -18,15 +19,21 @@ function extract(engine) {
   return JSON.parse(res.stdout);
 }
 
-const dflt = extract(null);
+const dflt = extract('regex'); // the forced-regex tier (the pre-v9 default)
 const ts = extract('tree-sitter');
+const auto = extract(null); // the actual default: tree-sitter when available, regex otherwise
 const cx = (frag, label) => frag.nodes.find((n) => n.label === label)?.complexity;
 const tsAvailable = ts.meta.complexityEngine !== undefined;
 
-test('default run: regex F4, no complexityEngine field (output shape unchanged)', () => {
+test('forced --engine regex: no complexityEngine field (output shape unchanged)', () => {
   assert.equal(dflt.meta.engine, 'regex'); // --no-ctags
   assert.equal(dflt.meta.complexityEngine, undefined);
   assert.equal(cx(dflt, 'run'), 1); // a non-divergent control symbol
+});
+
+test('default (no flag) = tree-sitter when installed, regex fallback otherwise', () => {
+  if (tsAvailable) assert.match(auto.meta.complexityEngine || '', /tree-sitter/, 'default engages the AST tier');
+  else assert.equal(auto.meta.complexityEngine, undefined, 'absent dependency degrades to regex');
 });
 
 test('tree-sitter run: exact complexity + meta records the pinned engine', { skip: !tsAvailable && 'web-tree-sitter unavailable' }, () => {

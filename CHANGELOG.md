@@ -20,6 +20,22 @@ notes so validated results, papers, and new tools never get lost in commit histo
   (`obj.Method()`) stays precision-gated as in the JS regex tier — a tree-sitter tier
   for Java/C# is the next increment.
 
+### Added (recall ceiling + ambient loop)
+- **Tree-sitter tier default-on** when web-tree-sitter is installed (`--engine regex`
+  opts out; absent dependency degrades to regex byte-identically). Class-field arrow
+  methods survive the AST handoff.
+- **Barrels are dependents** (the measured recall gap): `export { X } from` edges the
+  barrel's `<module>` to the resolved symbol; `export * from` chains resolve
+  transitively AND edge the barrel to the target module. Oracle A/B moved from
+  recall 0.94 to **1.00** (precision 0.94 vs grep 0.87) on both the fixed and a
+  fresh-seeded 30-task sample.
+- **Ambient loop**: the pre-edit hook now injects the ~1KB explain card (identity, top
+  callers, tests) instead of a pointer — blast radius arrives with zero agent
+  discipline; the MCP server **auto-refreshes a stale graph inline** (~1s incremental,
+  throttled, CODEWEB_NO_AUTOREFRESH=1 opts out) before structural queries, and
+  per-DIRECTORY mtime stamps make brand-new files trip the staleness check (per-file
+  stamps cannot see a file that didn't exist).
+
 ### Research
 - **Oracle A/B** (`paper/experiments/oracle-ab.mjs`, results in
   `paper/results/oracle-ab.json`): dependents-discovery graded by the TypeScript

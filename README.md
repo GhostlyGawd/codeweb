@@ -23,7 +23,7 @@ compiler as an independent referee ([`paper/results/oracle-ab.json`](paper/resul
 
 | The question | codeweb | grep |
 |---|---|---|
-| *"Who depends on X?"* (30 symbols) | **94% of compiler-verified files, 0.8 KB, one call** | 100% of files but 3× the tokens, as raw text lines the agent must still read |
+| *"Who depends on X?"* (30 symbols) | **100% of compiler-verified files, better precision than grep, 0.7 KB, one call** | 100% of files but 3× the tokens, as raw text lines the agent must still read |
 | *"What breaks if I change X?"* | **one ~1 KB answer** | no transitive operator: ~5 recursive rounds, **115× the tokens** |
 | *"Does this already exist? Is this dead? Did my edit break structure?"* | one call each (`find_similar` / `deadcode` / `diff` gate) | not answerable by search |
 
