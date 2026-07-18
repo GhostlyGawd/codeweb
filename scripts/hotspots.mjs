@@ -14,25 +14,19 @@ import { normalizeGraph } from './lib/graph-ops.mjs';
 import { rankHotspots } from './lib/hotspots.mjs';
 
 const USAGE = 'usage: hotspots.mjs <graph.json> [--churn <map.json> | --git] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
-let json = false, churnPath = null, useGit = false; const pos = [];
+let json = false, churnPath = null, useGit = false, limit = null; const pos = [];
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--json') json = true;
+  else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
   else if (t === '--churn') churnPath = argv[++i];
   else if (t === '--git') useGit = true;
   else if (!t.startsWith('-')) pos.push(t);
 }
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
-
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 let churn = {};
 if (churnPath) { try { churn = JSON.parse(readFileSync(resolve(churnPath), 'utf8')); } catch (e) { die(`invalid churn JSON: ${e.message}`, 2); } }
@@ -42,9 +36,12 @@ else if (useGit) {
   if (r.status === 0) for (const f of r.stdout.split(/\r?\n/)) if (f.trim()) churn[f.trim()] = (churn[f.trim()] || 0) + 1;
 }
 
-const payload = { target: graph.meta?.target || 'target', ...rankHotspots(graph, { churn }) };
+const full = rankHotspots(graph, { churn });
+const capped = capList(full.ranked, limit);
+const payload = { target: graph.meta?.target || 'target', summary: `${full.count} symbol(s) ranked by complexity x fan-in x churn`, ...full, ranked: capped.items };
+if (capped.truncated) payload.more = { remaining: capped.remaining };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 console.log(`codeweb hotspots: ${payload.target} — ${payload.count} symbol(s) ranked by complexity x fan-in x churn`);
 console.log(`  weights: ${Object.entries(payload.weights).map(([k, v]) => `${k} ${v}`).join(', ')}`);
@@ -52,4 +49,5 @@ for (const r of payload.ranked.slice(0, 15)) {
   const c = r.components;
   console.log(`  ${r.score.toFixed(3)}  ${r.id}  [cx ${c.complexity} in ${c.fanIn} churn ${c.churn}]`);
 }
-process.exit(0);
+finish();
+}

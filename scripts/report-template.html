@@ -97,10 +97,13 @@
   <span class="meta" id="metaTarget"></span>
   <span class="meta" id="metaStats"></span>
   <span class="spacer"></span>
-  <button class="tab on" data-view="findings">Findings</button>
-  <button class="tab" data-view="matrix">Matrix</button>
-  <button class="tab" data-view="treemap">Treemap</button>
-  <button class="tab" data-view="graph">Graph</button>
+  <button id="roleFilter" title="Hide tests, fixtures, examples and generated code from every view" aria-pressed="true" hidden></button>
+  <div role="tablist" aria-label="Report views" style="display:contents">
+  <button class="tab on" role="tab" aria-selected="true" data-view="findings">Findings</button>
+  <button class="tab" role="tab" aria-selected="false" data-view="matrix">Matrix</button>
+  <button class="tab" role="tab" aria-selected="false" data-view="treemap">Treemap</button>
+  <button class="tab" role="tab" aria-selected="false" data-view="graph">Graph</button>
+  </div>
 </div>
 <div id="wrap">
   <div id="main">
@@ -108,12 +111,13 @@
     <div class="view" id="view-matrix"></div>
     <div class="view" id="view-treemap"><div id="tm"></div></div>
     <div class="view" id="view-graph">
-      <canvas id="cv"></canvas>
-      <input id="gsearch" placeholder="search symbols…" autocomplete="off">
+      <canvas id="cv" role="img" aria-label="Force-directed dependency graph"></canvas>
+      <input id="gsearch" placeholder="search symbols… (Enter jumps)" autocomplete="off" aria-label="Search symbols; press Enter to jump to the next match, Escape to clear">
+      <span id="gcount" class="meta" style="position:absolute;top:16px;left:245px" aria-live="polite"></span>
       <div id="gctrl"><button id="gFit">Fit</button><button id="gToggle"></button></div>
     </div>
   </div>
-  <div id="detail"><div class="empty">Pick an item to inspect it.</div></div>
+  <div id="detail" aria-live="polite"><div class="empty">Pick an item to inspect it.</div></div>
 </div>
 
 <script id="graph-data" type="application/json">__GRAPH_DATA__</script>
@@ -127,7 +131,24 @@
   G.nodes = G.nodes || []; G.edges = G.edges || []; G.domains = G.domains || []; G.overlaps = G.overlaps || []; G.meta = G.meta || {};
   G.nodes.forEach(function (n) { if (!n.domain) n.domain = 'unassigned'; });
 
-  // ---------- indexes & derived metrics ----------
+  // ---------- code roles ----------
+  // Product code vs supporting code (tests / fixtures / examples / benches / generated). The
+  // extractor stamps node.role; older graphs fall back to a path heuristic here. Rankings and
+  // views default to PRODUCT scope — on a monorepo the map otherwise drowns in playground noise.
+  function deriveRole(file) {
+    var f = file || '';
+    if (/(^|\/)(tests?|__tests__)\//.test(f) || /(\.test\.|\.spec\.|_test\.)/.test(f)) return 'test';
+    if (/(^|\/)(fixtures?|__fixtures__|__mocks__|mocks?)\//.test(f)) return 'fixture';
+    if (/(^|\/)(examples?|samples?|demos?|playgrounds?|playground|sandbox|e2e)\//.test(f)) return 'example';
+    if (/(^|\/)(benchmarks?|bench|perf)\//.test(f)) return 'bench';
+    if (/\.(min|bundle)\.[cm]?js$/.test(f) || /(^|\/)(generated|__generated__)\//.test(f)) return 'generated';
+    return 'product';
+  }
+  G.nodes.forEach(function (n) { if (!n.role) n.role = deriveRole(n.file); });
+  var nonProduct = G.nodes.filter(function (n) { return n.role !== 'product'; }).length;
+  var productOnly = nonProduct > 0; // default: product scope whenever there is anything to hide
+
+  // ---------- indexes (full graph — the detail panel always shows the whole truth) ----------
   var nodeById = new Map(G.nodes.map(function (n) { return [n.id, n]; }));
   var outAdj = new Map(), inAdj = new Map(), inDeg = new Map(), outDeg = new Map();
   G.nodes.forEach(function (n) { outAdj.set(n.id, []); inAdj.set(n.id, []); inDeg.set(n.id, 0); outDeg.set(n.id, 0); });
@@ -137,63 +158,105 @@
     outDeg.set(e.from, outDeg.get(e.from) + 1); inDeg.set(e.to, inDeg.get(e.to) + 1);
   });
 
-  var domainNames = (G.domains.length ? G.domains.map(function (d) { return d.name; })
-    : Array.from(new Set(G.nodes.map(function (n) { return n.domain; }))));
   var domColor = {};
   var DOMC = ['#C6F24E', '#A78BFA', '#4FD6C4', '#FFB14E', '#F778BA', '#5BD17A', '#7FA8FF', '#E8C44E'];
-  domainNames.forEach(function (nm, i) { domColor[nm] = DOMC[i] || ('hsl(' + Math.round((i * 137.508) % 360) + ',55%,62%)'); });
   function colorOf(nm) { return domColor[nm] || '#9C99A6'; }
   var domSummary = {}; G.domains.forEach(function (d) { domSummary[d.name] = d; });
-  function domCount(nm) { return G.nodes.filter(function (n) { return n.domain === nm; }).length; }
-  domainNames = domainNames.slice().filter(function (nm) { return domCount(nm) > 0; }).sort(function (a, b) { return domCount(b) - domCount(a); });
 
-  // duplicates: same symbol name defined in >=2 files
+  // ---------- active scope + derived metrics (recomputed when the role filter toggles) ----------
+  var AN = [], AE = [], activeIds = null, domainNames = [], duplicates = [], patterns = [], dupNodeIds = new Set(), hotspots = [], dead = [];
   var ENTRY = /^(main|index|cli|run|start|default|setup|init|activate|handler|middleware|module)$/i;
-  var byName = new Map();
-  G.nodes.forEach(function (n) {
-    if (!['function', 'method', 'class'].includes(n.kind)) return;
-    if (!byName.has(n.label)) byName.set(n.label, []); byName.get(n.label).push(n);
-  });
-  var duplicates = [];
-  byName.forEach(function (arr, name) {
-    var files = new Set(arr.map(function (n) { return n.file; }));
-    if (files.size >= 2 && name.length > 3) {
-      var doms = new Set(arr.map(function (n) { return n.domain; }));
-      duplicates.push({ name: name, files: files.size, count: arr.length, nodes: arr, domains: Array.from(doms) });
-    }
-  });
-  duplicates.sort(function (a, b) { return b.files - a.files; });
-  var dupNodeIds = new Set(); duplicates.forEach(function (d) { d.nodes.forEach(function (n) { dupNodeIds.add(n.id); }); });
+  function domCount(nm) { return AN.filter(function (n) { return n.domain === nm; }).length; }
+  function computeDerived() {
+    AN = productOnly ? G.nodes.filter(function (n) { return n.role === 'product'; }) : G.nodes;
+    activeIds = new Set(AN.map(function (n) { return n.id; }));
+    AE = G.edges.filter(function (e) { return activeIds.has(e.from) && activeIds.has(e.to); });
 
-  // hotspots: highest in-degree
-  var hotspots = G.nodes.slice().filter(function (n) { return inDeg.get(n.id) > 0; })
-    .sort(function (a, b) { return inDeg.get(b.id) - inDeg.get(a.id); }).slice(0, 30);
+    domainNames = Array.from(new Set(AN.map(function (n) { return n.domain; })));
+    domainNames = domainNames.filter(function (nm) { return domCount(nm) > 0; }).sort(function (a, b) { return domCount(b) - domCount(a); });
+    domainNames.forEach(function (nm, i) { if (!domColor[nm]) domColor[nm] = DOMC[i] || ('hsl(' + Math.round((i * 137.508) % 360) + ',55%,62%)'); });
 
-  // dead code: no callers, not an entrypoint-ish name
-  var dead = G.nodes.filter(function (n) {
-    return inDeg.get(n.id) === 0 && ['function', 'method'].includes(n.kind) && !ENTRY.test(n.label) && (n.loc || 0) >= 3;
-  }).sort(function (a, b) { return (b.loc || 0) - (a.loc || 0); });
+    // duplicates: same symbol name defined in >=2 files — split off INTERFACE PATTERNS (many
+    // same-named implementations that nothing in-repo calls: framework hooks/contracts like a
+    // bundler plugin's resolveId(). "Merge these" is wrong advice for those.)
+    var byName = new Map();
+    AN.forEach(function (n) {
+      if (!['function', 'method', 'class'].includes(n.kind)) return;
+      if (!byName.has(n.label)) byName.set(n.label, []); byName.get(n.label).push(n);
+    });
+    duplicates = []; patterns = [];
+    byName.forEach(function (arr, name) {
+      var files = new Set(arr.map(function (n) { return n.file; }));
+      if (files.size >= 2 && name.length > 3) {
+        var doms = new Set(arr.map(function (n) { return n.domain; }));
+        var uncalled = arr.filter(function (n) { return inDeg.get(n.id) === 0; }).length;
+        var g = { name: name, files: files.size, count: arr.length, nodes: arr, domains: Array.from(doms) };
+        if (files.size >= 4 && uncalled / arr.length >= 0.75) patterns.push(g); else duplicates.push(g);
+      }
+    });
+    duplicates.sort(function (a, b) { return b.files - a.files; });
+    patterns.sort(function (a, b) { return b.files - a.files; });
+    dupNodeIds = new Set(); duplicates.forEach(function (d) { d.nodes.forEach(function (n) { dupNodeIds.add(n.id); }); });
 
-  // ---------- meta bar ----------
-  document.getElementById('metaTarget').textContent = (G.meta.target || '') + (G.meta.mode ? ' · ' + G.meta.mode : '');
-  var st = G.meta.stats || {};
-  document.getElementById('metaStats').textContent = [
-    (st.nodes || G.nodes.length) + ' symbols', (st.edges || G.edges.length) + ' edges',
-    domainNames.length + ' areas', duplicates.length + ' dup-groups',
-    G.meta.engine ? 'engine: ' + G.meta.engine : ''
-  ].filter(Boolean).join('  ·  ');
+    hotspots = AN.slice().filter(function (n) { return inDeg.get(n.id) > 0; })
+      .sort(function (a, b) { return inDeg.get(b.id) - inDeg.get(a.id); }).slice(0, 30);
+
+    dead = AN.filter(function (n) {
+      return inDeg.get(n.id) === 0 && ['function', 'method'].includes(n.kind) && !ENTRY.test(n.label) && (n.loc || 0) >= 3;
+    }).sort(function (a, b) { return (b.loc || 0) - (a.loc || 0); });
+  }
+  computeDerived();
+
+  // ---------- meta bar + role filter ----------
+  function renderMeta() {
+    document.getElementById('metaTarget').textContent = (G.meta.target || '') + (G.meta.mode ? ' · ' + G.meta.mode : '');
+    var el = document.getElementById('metaStats');
+    el.textContent = [
+      AN.length + ' symbols' + (productOnly && nonProduct ? ' (+' + nonProduct + ' hidden)' : ''),
+      AE.length + ' edges', domainNames.length + ' areas', duplicates.length + ' dup-groups',
+      G.meta.engine ? 'engine: ' + G.meta.engine : ''
+    ].filter(Boolean).join('  ·  ');
+    el.title = G.meta.engine ? 'engine: ' + G.meta.engine : '';
+  }
+  renderMeta();
+  var roleBtn = document.getElementById('roleFilter');
+  if (nonProduct > 0) {
+    roleBtn.hidden = false;
+    var syncRoleBtn = function () {
+      roleBtn.textContent = productOnly ? 'Product only ✓' : 'All code';
+      roleBtn.setAttribute('aria-pressed', String(productOnly));
+      roleBtn.className = 'tab' + (productOnly ? ' on' : '');
+    };
+    syncRoleBtn();
+    roleBtn.onclick = function () {
+      productOnly = !productOnly; syncRoleBtn();
+      computeDerived(); renderMeta();
+      rendered = {}; // every view re-renders against the new scope
+      var cur = document.querySelector('.tab[role="tab"].on').getAttribute('data-view');
+      if (gInit) { gLayout(); syncToggle(); }
+      activate(cur);
+    };
+  }
 
   // ---------- detail panel ----------
   var detail = document.getElementById('detail');
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function detailEmpty() { detail.innerHTML = '<div class="empty">Pick an item to inspect it.</div>'; }
   function nodeRow(id) { var t = nodeById.get(id); return '<div data-node="' + esc(id) + '">' + esc(t ? (t.label || id) : id) + ' <span class="dim mono">' + esc(t ? t.file : '') + '</span></div>'; }
-  function bindNodeRows(scope) { (scope || detail).querySelectorAll('[data-node]').forEach(function (el) { el.onclick = function () { showNode(el.getAttribute('data-node')); }; }); }
+  function bindNodeRows(scope) {
+    (scope || detail).querySelectorAll('[data-node]').forEach(function (el) {
+      var go = function () { showNode(el.getAttribute('data-node')); };
+      el.onclick = go;
+      el.setAttribute('tabindex', '0');
+      el.onkeydown = function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } };
+    });
+  }
   function showNode(id) {
     var n = nodeById.get(id); if (!n) return;
+    try { history.replaceState(null, '', '#s=' + encodeURIComponent(id)); } catch (e) { /* file:// quirk */ }
     var outs = outAdj.get(id) || [], ins = inAdj.get(id) || [];
     detail.innerHTML = '<h3>' + esc(n.label) + '</h3>' +
-      '<div class="kv">' + esc(n.kind || '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--hi)">duplicated</span>' : '') + '</div>' +
+      '<div class="kv">' + esc(n.kind || '') + (n.role && n.role !== 'product' ? ' · ' + esc(n.role) : '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--hi)">duplicated</span>' : '') + '</div>' +
       '<div class="kv"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:' + colorOf(n.domain) + '"></span> ' + esc(n.domain) + '</div>' +
       (n.file ? '<div class="kv"><code>' + esc(n.file) + (n.line ? ':' + n.line : '') + '</code>' + (n.loc ? ' · ' + n.loc + ' loc' : '') + '</div>' : '') +
       (n.summary ? '<div class="kv">' + esc(n.summary) + '</div>' : '') +
@@ -235,14 +298,27 @@
         '<td class="dim mono">' + esc(n.file) + (n.line ? ':' + n.line : '') + '</td>' +
         '<td class="dim">' + (n.loc || 0) + ' loc' + (n.exports ? ' · exported' : '') + '</td></tr>';
     }).join('');
+    var patRows = patterns.slice(0, 20).map(function (d, i) {
+      return '<tr data-pat="' + i + '"><td><span class="badge b-low">' + d.files + '</span></td>' +
+        '<td class="mono">' + esc(d.name) + '()</td>' +
+        '<td class="dim">' + esc(d.domains.slice(0, 4).join(', ')) + (d.domains.length > 4 ? '…' : '') + '</td>' +
+        '<td class="dim">' + d.files + ' implementations, none called in-repo</td></tr>';
+    }).join('');
     v.innerHTML =
       section('Duplication', 'merge these — same function defined in many files', duplicates.length,
         dupRows ? '<table class="f">' + dupRows + '</table>' : '<div class="empty">No duplication found 🎉</div>') +
+      (patterns.length ? section('Interface patterns', 'same-name implementations of a framework contract (nothing in-repo calls them) — NOT copy-paste; don’t merge', patterns.length,
+        '<table class="f">' + patRows + '</table>') : '') +
       section('Hotspots', 'most depended-on code — change with care', hotspots.length,
         hotRows ? '<table class="f">' + hotRows + '</table>' : '<div class="empty">—</div>') +
       section('Likely dead code', 'nothing in this graph calls these', dead.length,
         deadRows ? '<table class="f">' + deadRows + '</table>' : '<div class="empty">—</div>');
     v.querySelectorAll('tr[data-dup]').forEach(function (tr) { tr.onclick = function () { showDup(duplicates[+tr.getAttribute('data-dup')]); }; });
+    v.querySelectorAll('tr[data-pat]').forEach(function (tr) { tr.onclick = function () { showDup(patterns[+tr.getAttribute('data-pat')]); }; });
+    v.querySelectorAll('tr[data-dup],tr[data-pat],tr[data-node]').forEach(function (tr) {
+      tr.setAttribute('tabindex', '0');
+      tr.onkeydown = function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tr.onclick(); } };
+    });
     bindNodeRows(v);
   }
 
@@ -251,7 +327,7 @@
     var v = document.getElementById('view-matrix');
     var idx = {}; domainNames.forEach(function (d, i) { idx[d] = i; });
     var M = domainNames.map(function () { return domainNames.map(function () { return 0; }); });
-    G.edges.forEach(function (e) {
+    AE.forEach(function (e) {
       var a = nodeById.get(e.from), b = nodeById.get(e.to); if (!a || !b) return;
       if (idx[a.domain] == null || idx[b.domain] == null) return;
       M[idx[a.domain]][idx[b.domain]] += (e.weight || 1);
@@ -307,7 +383,7 @@
     var tm = document.getElementById('tm'); tm.innerHTML = '';
     var Wd = tm.clientWidth || 800, Hd = tm.clientHeight || 600;
     var doms = domainNames.map(function (d) {
-      var ns = G.nodes.filter(function (n) { return n.domain === d; });
+      var ns = AN.filter(function (n) { return n.domain === d; });
       return { name: d, value: ns.reduce(function (s, n) { return s + (n.loc || 1); }, 0), nodes: ns };
     }).filter(function (d) { return d.value > 0; }).sort(function (a, b) { return b.value - a.value; });
     var drects = []; bisect(doms.map(function (d) { return { value: d.value, ref: d }; }), 0, 0, Wd, Hd, drects);
@@ -358,16 +434,25 @@
     if (gView === 'domain') {
       var dn = domainNames.map(function (nm) { var c = domCount(nm); return { id: 'd:' + nm, label: nm, domain: nm, r: Math.max(12, Math.min(60, 8 + Math.sqrt(c) * 5)) }; });
       var agg = new Map();
-      G.edges.forEach(function (e) { var a = nodeById.get(e.from), b = nodeById.get(e.to); if (!a || !b || a.domain === b.domain) return; var k = a.domain < b.domain ? a.domain + '␟' + b.domain : b.domain + '␟' + a.domain; agg.set(k, (agg.get(k) || 0) + 1); });
+      AE.forEach(function (e) { var a = nodeById.get(e.from), b = nodeById.get(e.to); if (!a || !b || a.domain === b.domain) return; var k = a.domain < b.domain ? a.domain + '␟' + b.domain : b.domain + '␟' + a.domain; agg.set(k, (agg.get(k) || 0) + 1); });
       var de = Array.from(agg.entries()).map(function (kv) { var p = kv[0].split('␟'); return { from: 'd:' + p[0], to: 'd:' + p[1], weight: kv[1] }; });
       return { nodes: dn, edges: de, idx: new Map(dn.map(function (d) { return [d.id, d]; })) };
     }
-    var wn = G.nodes.map(function (n) { return { id: n.id, label: n.label, domain: n.domain, r: Math.max(3, Math.min(18, 3 + Math.sqrt(n.loc || 6))) }; });
-    var we = G.edges.map(function (e) { return { from: e.from, to: e.to, cross: nodeById.get(e.from).domain !== nodeById.get(e.to).domain }; });
+    var wn = AN.map(function (n) { return { id: n.id, label: n.label, domain: n.domain, r: Math.max(3, Math.min(18, 3 + Math.sqrt(n.loc || 6))) }; });
+    var we = AE.map(function (e) { return { from: e.from, to: e.to, cross: nodeById.get(e.from).domain !== nodeById.get(e.to).domain }; });
     return { nodes: wn, edges: we, idx: new Map(wn.map(function (n) { return [n.id, n]; })) };
   }
   function gLayout() { W = buildW(); var n = W.nodes.length, R = Math.max(120, n * 8); W.nodes.forEach(function (nd, i) { var a = i * 2.39996, rad = R * Math.sqrt(i / Math.max(1, n)); nd.x = Math.cos(a) * rad; nd.y = Math.sin(a) * rad; nd.vx = 0; nd.vy = 0; }); sim = { alpha: 1, running: false }; gFit(); gStart(); }
-  function gStart() { if (!sim) return; sim.alpha = Math.max(sim.alpha, 0.7); if (!sim.running) { sim.running = true; requestAnimationFrame(gTick); } }
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function gStart() {
+    if (!sim) return;
+    if (REDUCED) { // settle synchronously — no animation for motion-sensitive users
+      sim.alpha = 1;
+      for (var it = 0; it < 260 && sim.alpha > 0.02; it++) { gStep(); sim.alpha *= 0.985; }
+      gFit(); gDraw(); sim.running = false; return;
+    }
+    sim.alpha = Math.max(sim.alpha, 0.7); if (!sim.running) { sim.running = true; requestAnimationFrame(gTick); }
+  }
   function gTick() { if (!sim || !document.getElementById('view-graph').classList.contains('on')) { if (sim) sim.running = false; return; } gStep(); gDraw(); sim.alpha *= 0.985; if (sim.alpha > 0.02) requestAnimationFrame(gTick); else sim.running = false; }
   function gStep() {
     var ns = W.nodes, es = W.edges, a = sim.alpha, repK = gView === 'domain' ? 4500 : 1200, L = gView === 'domain' ? 170 : 50, i, j;
@@ -395,23 +480,63 @@
   var gToggle = document.getElementById('gToggle');
   function syncToggle() { gToggle.textContent = gView === 'domain' ? 'Expand symbols' : 'Collapse to areas'; }
   gToggle.onclick = function () { gView = gView === 'domain' ? 'symbol' : 'domain'; selectedNode = null; gLayout(); syncToggle(); };
-  document.getElementById('gsearch').addEventListener('input', function (e) { searchTerm = e.target.value.trim(); gDraw(); });
+  // Search NAVIGATES: live typing dims non-matches; Enter cycles matches (centering + selecting
+  // each), Escape clears. The count chip narrates n/N for screen readers too.
+  var gsearchEl = document.getElementById('gsearch'), gcountEl = document.getElementById('gcount');
+  var searchHits = [], searchIx = -1;
+  function centerOn(nd) { var w = cv.width / DPR, h = cv.height / DPR; cam.k = Math.max(cam.k, 0.9); cam.x = w / 2 - nd.x * cam.k; cam.y = h / 2 - nd.y * cam.k; }
+  function refreshHits() {
+    // search SYMBOLS (the active scope), not whatever bubbles the current view draws — a domain
+    // view must still find normalizePath and expand to it on Enter.
+    var t = searchTerm.toLowerCase();
+    searchHits = t ? AN.filter(function (n) { return n.label.toLowerCase().indexOf(t) >= 0; }) : [];
+    searchIx = -1;
+    gcountEl.textContent = searchTerm ? (searchHits.length ? searchHits.length + ' match(es) — Enter jumps' : 'no matches') : '';
+  }
+  gsearchEl.addEventListener('input', function (e) { searchTerm = e.target.value.trim(); refreshHits(); gDraw(); });
+  gsearchEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { gsearchEl.value = ''; searchTerm = ''; refreshHits(); selectedNode = null; gDraw(); return; }
+    if (e.key !== 'Enter' || !searchHits.length) return;
+    e.preventDefault();
+    if (gView === 'domain') { gView = 'symbol'; gLayout(); syncToggle(); }
+    searchIx = (searchIx + 1) % searchHits.length;
+    var hit = searchHits[searchIx];
+    var nd = W.idx.get(hit.id);
+    if (nd) { centerOn(nd); selectedNode = hit.id; showNode(hit.id); }
+    gcountEl.textContent = (searchIx + 1) + '/' + searchHits.length + '  ' + hit.label;
+    gDraw();
+  });
 
   // ---------- tab routing ----------
   var rendered = {};
   function activate(view) {
-    document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('on', t.getAttribute('data-view') === view); });
+    document.querySelectorAll('.tab[role="tab"]').forEach(function (t) { var on = t.getAttribute('data-view') === view; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); });
     document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('on', v.id === 'view-' + view); });
     if (view === 'findings' && !rendered.findings) { renderFindings(); rendered.findings = true; }
     if (view === 'matrix' && !rendered.matrix) { renderMatrix(); rendered.matrix = true; }
     if (view === 'treemap') { renderTreemap(); }
     if (view === 'graph') { gResize(); if (!gInit) { gInit = true; syncToggle(); gLayout(); } else gDraw(); }
   }
-  document.querySelectorAll('.tab').forEach(function (t) { t.onclick = function () { activate(t.getAttribute('data-view')); }; });
+  document.querySelectorAll('.tab[role="tab"]').forEach(function (t) { t.onclick = function () { activate(t.getAttribute('data-view')); }; });
   window.addEventListener('resize', function () { if (document.getElementById('view-treemap').classList.contains('on')) renderTreemap(); if (document.getElementById('view-graph').classList.contains('on')) { gResize(); gDraw(); } });
 
   // boot
   renderFindings(); rendered.findings = true; detailEmpty();
+
+  // deep link: #s=<node id> selects the symbol on load (shareable findings)
+  (function () {
+    var m = /^#s=(.+)$/.exec(location.hash || '');
+    if (!m) return;
+    var id = decodeURIComponent(m[1]);
+    if (!nodeById.has(id)) return;
+    activate('graph');
+    // after the first layout pass, center + select the linked node
+    setTimeout(function () {
+      var nd = W && W.idx.get(id);
+      if (gView === 'domain') { gView = 'symbol'; gLayout(); syncToggle(); nd = W.idx.get(id); }
+      if (nd) { selectedNode = id; centerOn(nd); showNode(id); gDraw(); }
+    }, REDUCED ? 50 : 900);
+  })();
 })();
 </script>
 </body>

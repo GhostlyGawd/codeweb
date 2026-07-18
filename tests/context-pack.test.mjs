@@ -121,12 +121,19 @@ test('CP-BODY-FIDELITY: target & caller bodies are byte-for-byte the real source
   };
   const p = join(WS, 'fidelity.json');
   writeFileSync(p, JSON.stringify(graph));
+  // default mode: target body full; callers as CALL-SITE WINDOWS containing the exact call line
   const r = runNode(script('context-pack.mjs'), [p, 'area', '--json']);
   assert.equal(r.status, 0, r.stderr);
   const payload = JSON.parse(r.stdout);
   assert.equal(payload.sourceAvailable, true);
   assert.equal(payload.target[0].body, helperBody, 'target body is the exact source slice');
-  assert.equal(payload.callers[0].body, appBody, 'caller body is the exact source slice');
+  assert.ok(Array.isArray(payload.callers[0].windows) && payload.callers[0].windows.length === 1, 'caller carries call-site windows by default');
+  assert.match(payload.callers[0].windows[0].text, /return area\(r\);/, 'the window contains the exact call site');
+  assert.deepEqual(payload.callers[0].windows[0].callLines, [2], 'the call line is identified');
+  // --full-bodies: the old byte-for-byte whole-caller contract
+  const rf = runNode(script('context-pack.mjs'), [p, 'area', '--full-bodies', '--json']);
+  const pf = JSON.parse(rf.stdout);
+  assert.equal(pf.callers[0].body, appBody, 'caller body is the exact source slice under --full-bodies');
   cleanup(SRC);
 });
 

@@ -11,7 +11,7 @@ import { normalizeGraph } from './lib/graph-ops.mjs';
 import { readingOrder } from './lib/reading-order.mjs';
 
 const USAGE = 'usage: reading-order.mjs <graph.json> [--scope domain|file|symbol <value>] [--budget N] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, budget = 40, scopeKind = 'all', scopeValue = null; const pos = [];
@@ -22,21 +22,15 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--scope') { scopeKind = argv[++i]; scopeValue = argv[++i]; }
   else if (!t.startsWith('-')) pos.push(t);
 }
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
-
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const scope = { kind: scopeKind, value: scopeValue };
 const order = readingOrder(graph, { scope, budget });
 const payload = { target: graph.meta?.target || 'target', scope, budget, count: order.length, order };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 console.log(`codeweb reading-order: ${order.length} symbol(s)${scopeKind !== 'all' ? ` in ${scopeKind} ${scopeValue}` : ''} — read top-down (foundations first):`);
 order.forEach((o, i) => console.log(`  ${String(i + 1).padStart(3)}. ${o.id}\n        ${o.why}`));
-process.exit(0);
+finish();
+}

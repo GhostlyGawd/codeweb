@@ -1,7 +1,7 @@
 ---
 name: codebase-anatomy
 description: Dissect a codebase to atomic nodes (functions, classes, symbols), wire the call/import web, tag each node's domain, and build a cross-domain overlap graph that ranks consolidation/de-duplication opportunities, then render an interactive HTML map. Use to restructure your own codebase into well-defined non-duplicative systems, OR to fully map and review an external repo (git URL / owner-repo) before adopting it. Triggers include "map this codebase", "dependency/relationship graph", "find duplication/overlap", "atomic dissection", "review this repo before I use it", and the /codeweb command.
-version: 0.2.0
+version: 0.3.0
 metadata:
   origin: community
 ---
@@ -53,11 +53,15 @@ Auto-detect: a URL or `owner/repo` ⇒ external; a path or `.` ⇒ internal. `--
 
 ## Outputs (under `<target>/.codeweb/`)
 
-1. `graph.json` — the web: `nodes`, `edges`, `domains`, `overlaps` (schema reference).
+1. `graph.json` — the web: `nodes`, `edges`, `domains`, `overlaps`, plus `meta` (roles,
+   staleness stamps, stats).
 2. `report.html` — self-contained interactive map (force graph, domain tree, node details,
-   ranked overlap tab). No network/CDN.
-3. `overlap.md` — the ranked consolidation opportunities in plain markdown.
-4. (external mode) an adoption review section appended to `overlap.md` and your final summary.
+   ranked overlap tab; product-only filter by default). No network/CDN.
+3. `report.md` — the same map as plain markdown (mermaid domain graph + overlaps).
+4. `overlap.md` — the ranked consolidation opportunities in plain markdown.
+5. `optimize.md` — the consolidation advisory (ready / blocked / review tiers).
+6. `fragment.json` — the raw extractor output (pipeline stage 1).
+7. (external mode) an adoption review section appended to `overlap.md` and your final summary.
 
 ## References
 
@@ -79,7 +83,7 @@ Auto-detect: a URL or `owner/repo` ⇒ external; a path or `.` ⇒ internal. `--
 
 ### Fast path (default) — one-command deterministic engine
 
-For languages the bundled extractor handles (**JavaScript, TypeScript, Python, Rust, Go**), run the whole
+For languages the bundled extractor handles (**JavaScript, TypeScript, Python, Rust, Go, Java, C#**), run the whole
 pipeline in a single command instead of dissecting by hand. It is faster, cheaper, and
 reproducible, and emits the same `graph.json` schema:
 
@@ -88,7 +92,7 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs" "<target>" --target "<label>" --out
 ```
 
 It chains extract → cluster (directory-anchored domains) → overlap (body-confirmed duplication)
-→ render, writing `fragment.json`, `graph.json`, `overlap.md`, `report.html`, `report.md` into the
+→ optimize (consolidation advisory) → render, writing `fragment.json`, `graph.json`, `overlap.md`, `optimize.md`, `report.html`, `report.md` into the
 workspace (defaults to `<plugin>/.codeweb/runs/<slug>/` when `--out-dir` is omitted). The script is
 read-only over the target and resolves its own paths, so it works from any cwd. **When it
 succeeds, skip steps 1–5 and go to step 6.** Use the agent-based passes below only as a

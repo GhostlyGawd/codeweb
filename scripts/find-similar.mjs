@@ -16,7 +16,7 @@ import { shingles, jaccard } from './lib/shingles.mjs';
 import { structuralShingles } from './lib/skeleton.mjs'; // F6: Type-2 (rename-invariant) similarity
 
 const USAGE = 'usage: find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--structural] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish, loadGraph, sourceReader } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, body = null, stdin = false, signature = null, k = 10, structural = false; const pos = [];
@@ -33,18 +33,11 @@ for (let i = 0; i < argv.length; i++) {
 // F6: --structural ranks by skeleton (identifier-normalized) shingles, so a clone with all variables
 // renamed scores ~1 even when its lexical (token) similarity is lower. Lexical is the default.
 const shg = structural ? (s) => structuralShingles(s, 3) : (s) => shingles(s, 3);
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
-
 // exactly one candidate source
 const sources = [body != null, stdin, signature != null].filter(Boolean).length;
 if (sources !== 1) die(USAGE, 2);
 
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const root = graph.meta?.root || null;
 if (!root || !existsSync(root)) die(`source unavailable: graph.meta.root is missing or not on disk — find-similar needs real bodies to compare (got ${root || 'none'})`, 2);
@@ -60,16 +53,8 @@ try {
 const candidate = shg(candidateText);
 
 // score every non-test function/method body
-const fileCache = new Map();
-const readLines = (rel) => {
-  if (!fileCache.has(rel)) { try { fileCache.set(rel, readFileSync(root + '/' + rel, 'utf8').split(/\r?\n/)); } catch { fileCache.set(rel, null); } }
-  return fileCache.get(rel);
-};
-const bodyOf = (n) => {
-  const lines = readLines(n.file);
-  if (!lines) return null;
-  return lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n');
-};
+const reader = sourceReader(root);
+const bodyOf = reader.bodyOf;
 const tierOf = (s) => (s >= 0.6 ? 'high' : s >= 0.35 ? 'medium' : 'low'); // overlap.mjs bands
 
 const matches = [];
@@ -90,10 +75,12 @@ const payload = {
   matches: top, count: top.length, scanned: graph.nodes.filter((n) => (n.kind === 'function' || n.kind === 'method') && !isTestFile(n.file)).length,
 };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
-
-console.log(`find-similar: candidate (${payload.candidate.shingles} shingles) vs ${payload.scanned} existing symbols`);
-if (!top.length) { console.log('  no similar existing symbol (>=15%) — looks novel; safe to write.'); process.exit(0); }
-console.log(`  ${top.length} similar — consider reusing instead of re-implementing:`);
-for (const m of top) console.log(`  [${(m.sim * 100).toFixed(0).padStart(3)}% ${m.tier.padEnd(6)}] ${m.id}  (${m.file}:${m.line})`);
-process.exit(0);
+if (json) { emitJson(payload); } else {
+  console.log(`find-similar: candidate (${payload.candidate.shingles} shingles) vs ${payload.scanned} existing symbols`);
+  if (!top.length) console.log('  no similar existing symbol (>=15%) — looks novel; safe to write.');
+  else {
+    console.log(`  ${top.length} similar — consider reusing instead of re-implementing:`);
+    for (const m of top) console.log(`  [${(m.sim * 100).toFixed(0).padStart(3)}% ${m.tier.padEnd(6)}] ${m.id}  (${m.file}:${m.line})`);
+  }
+  finish(0);
+}

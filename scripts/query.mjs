@@ -18,18 +18,21 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
-import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, testersOf, importersOf, refsOf, dependentsOf, impactOf, fileCycles, orphans } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex } from './lib/graph-ops.mjs';
+import { runQuery } from './lib/query-core.mjs'; // payload assembly lives once (CLI + in-process MCP)
 
-const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--json]`;
-function die(msg, code) { console.error(msg); process.exit(code); }
+const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--limit N] [--offset N] [--json]`;
+import { die, emitJson, finish, capList, checkStaleness } from './lib/cli.mjs';
 
 function parseArgs(argv) {
-  const o = { graph: null, query: null, symbol: null, json: false, help: false, queries: 0 };
+  const o = { graph: null, query: null, symbol: null, json: false, help: false, queries: 0, limit: null, offset: 0 };
   const withVal = { '--callers': 'callers', '--callees': 'callees', '--tests': 'tests', '--dependents': 'dependents', '--impact': 'impact' };
   const noVal = { '--cycles': 'cycles', '--orphans': 'orphans' };
   for (let i = 0; i < argv.length; i++) {
     const t = argv[i];
     if (t === '--json') o.json = true;
+    else if (t === '--limit') o.limit = Math.max(0, parseInt(argv[++i], 10) || 0);
+    else if (t === '--offset') o.offset = Math.max(0, parseInt(argv[++i], 10) || 0);
     else if (t === '--help' || t === '-h') o.help = true;
     else if (t in withVal) {
       o.query = withVal[t]; o.queries++;
@@ -53,43 +56,16 @@ catch (e) { die(`invalid JSON in ${graphPath}: ${e.message}`, 2); }
 const graph = normalizeGraph(raw);
 const index = buildIndex(graph);
 
-let payload, code = 0;
-if (opts.query === 'callers' || opts.query === 'callees' || opts.query === 'tests') {
-  const matched = resolveSymbol(graph, opts.symbol);
-  if (!matched.length) { payload = { query: opts.query, symbol: opts.symbol, found: false }; code = 1; }
-  else {
-    const results = opts.query === 'callers' ? callersOf(index, matched) : opts.query === 'callees' ? calleesOf(index, matched) : testersOf(index, matched);
-    payload = { query: opts.query, symbol: opts.symbol, matched, results, count: results.length };
-  }
-} else if (opts.query === 'dependents') {
-  const matched = resolveSymbol(graph, opts.symbol);
-  if (!matched.length) { payload = { query: 'dependents', symbol: opts.symbol, found: false }; code = 1; }
-  else {
-    const results = dependentsOf(index, matched);
-    const inheritIn = [...new Set(matched.flatMap((id) => [...(index.inheritIn.get(id) || [])]))].sort();
-    const byKind = { call: callersOf(index, matched), import: importersOf(index, matched), inherit: inheritIn, test: testersOf(index, matched), ref: refsOf(index, matched) };
-    payload = { query: 'dependents', symbol: opts.symbol, matched, results, byKind, count: results.length };
-  }
-} else if (opts.query === 'impact') {
-  const matched = resolveSymbol(graph, opts.symbol);
-  if (!matched.length) { payload = { query: 'impact', symbol: opts.symbol, found: false }; code = 1; }
-  else {
-    const results = impactOf(index, matched);
-    const domains = [...new Set(results.map((id) => index.byId.get(id)?.domain || 'unassigned'))].sort();
-    payload = { query: 'impact', symbol: opts.symbol, matched, results, domains, count: results.length };
-  }
-} else if (opts.query === 'cycles') {
-  const cycles = fileCycles(graph);
-  payload = { query: 'cycles', cycles, count: cycles.length };
-} else if (opts.query === 'orphans') {
-  const results = orphans(graph, index);
-  payload = { query: 'orphans', results, count: results.length };
+const { payload, code } = runQuery(graph, index, { query: opts.query, symbol: opts.symbol, limit: opts.limit, offset: opts.offset });
+
+// awareness: annotate (never block) when the graph no longer matches disk
+const staleInfo = checkStaleness(graph);
+if (staleInfo && payload && payload.found !== false) {
+  payload.stale = staleInfo;
+  if (payload.summary) payload.summary += ` — graph is stale for ${staleInfo.count}+ file(s); run codeweb_refresh`;
 }
 
-if (opts.json) {
-  process.stdout.write(JSON.stringify(payload) + '\n');
-  process.exit(code);
-}
+if (opts.json) { emitJson(payload, code); } else {
 
 if (payload.found === false) die(`symbol not found: ${opts.symbol}`, 1);
 const p = payload;
@@ -112,4 +88,7 @@ if (p.query === 'callers' || p.query === 'callees' || p.query === 'tests') {
   console.log(`${p.count} orphan(s) — no callers and not exported:`);
   for (const o of p.results) console.log(`  ${o.id}  [${o.domain}]`);
 }
-process.exit(code);
+if (p.more) console.log(`  … +${p.more.remaining} more (rerun with --offset ${p.more.nextOffset})`);
+if (p.stale) console.log(`  ⚠ graph is stale for ${p.stale.count}+ file(s) (${p.stale.files.slice(0, 3).join(', ')}…) — run codeweb_refresh`);
+finish(code);
+}

@@ -16,7 +16,7 @@ import { normalizeGraph, buildIndex, resolveSymbol } from './lib/graph-ops.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: placement.mjs <graph.json> --calls <id|label,...> [--name <label>] [--body <file>] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, calls = null, name = null, body = null; const pos = [];
@@ -31,11 +31,7 @@ for (let i = 0; i < argv.length; i++) {
 const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath || calls == null) die(USAGE, 2);
 
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(graphPath, { usage: USAGE });
 
 const index = buildIndex(graph);
 
@@ -84,7 +80,7 @@ if (body) {
 
 const payload = { calls: { resolved: calleeIds, unresolved }, domain, file, rationale, reuseWarnings };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 console.log(`placement: ${calleeIds.length} resolved callee(s)${unresolved.length ? `, ${unresolved.length} unresolved` : ''}`);
 console.log(`  domain: ${domain}${file ? `   file: ${file}` : ''}`);
@@ -93,4 +89,5 @@ if (reuseWarnings.length) {
   console.log(`  ⚠ ${reuseWarnings.length} possible reuse target(s) — consider reusing instead of writing new:`);
   for (const w of reuseWarnings) console.log(`    [${w.kind}${w.sim != null ? ` ${(w.sim * 100).toFixed(0)}%` : ''}] ${w.id}`);
 }
-process.exit(0);
+finish();
+}

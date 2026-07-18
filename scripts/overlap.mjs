@@ -17,6 +17,8 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { shingles, jaccard } from './lib/shingles.mjs'; // shared body-shingle primitives (one truth)
+import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
+import { sourceReader } from './lib/cli.mjs'; // shared body access (one truth)
 
 const WS = process.env.CODEWEB_WS || '.live';   // per-target workspace dir (orchestrator sets this)
 const GRAPH_PATH = `${WS}/graph.json`;
@@ -46,9 +48,8 @@ const cv = (xs) => { const m = xs.reduce((a, b) => a + b, 0) / xs.length; if (!m
 const intersectAll = (sets) => { if (sets.length < 2) return new Set(); let acc = new Set(sets[0]); for (const s of sets.slice(1)) acc = new Set([...acc].filter((x) => s.has(x))); return acc; };
 
 // ---- body access (read-only, by line range) ----
-const fileCache = new Map();
-const readLines = (rel) => { if (!fileCache.has(rel)) { try { fileCache.set(rel, readFileSync(SOURCE_ROOT + '/' + rel, 'utf8').split(/\r?\n/)); } catch { fileCache.set(rel, null); } } return fileCache.get(rel); };
-const bodyShingles = (n) => { const lines = readLines(n.file); if (!lines) return null; const s = shingles(lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n'), K); return s.size ? s : null; };
+const reader = sourceReader(SOURCE_ROOT);
+const bodyShingles = (n) => { const body = reader.bodyOf(n); if (body == null) return null; const s = shingles(body, K); return s.size ? s : null; };
 const bodyConfidence = (nodes) => {
   const sets = nodes.map(bodyShingles).filter(Boolean);
   if (sets.length < 2) return null;
@@ -62,8 +63,19 @@ const bodyConfidence = (nodes) => {
 };
 
 const isDecl = (file) => /\.d\.ts$/.test(file);
-const defs = graph.nodes.filter((n) => n.kind !== 'module' && !isDecl(n.file));
+// v7: findings scope to PRODUCT code by default — duplicated test fixtures are intentional
+// isolation, not consolidation targets ("merge 23 playground text() helpers" was the flagship bad
+// advice). CODEWEB_ALL_ROLES=1 restores the old everything-scope; the skipped count is reported in
+// the .md header (no silent truncation).
+const ALL_ROLES = process.env.CODEWEB_ALL_ROLES === '1';
+const nodeRole = (n) => n.role || roleOf(n.file);
+const allDefs = graph.nodes.filter((n) => n.kind !== 'module' && !isDecl(n.file));
+const defs = ALL_ROLES ? allDefs : allDefs.filter((n) => nodeRole(n) === 'product');
+const nonProductSkipped = allDefs.length - defs.length;
 const byId = new Map(graph.nodes.map((n) => [n.id, n]));
+// reverse call-degree for the interface-pattern check (framework hooks have no in-repo callers)
+const callIn = new Map();
+for (const e of graph.edges) { if (e.kind !== 'call') continue; callIn.set(e.to, (callIn.get(e.to) || 0) + 1); }
 
 const outLabels = new Map();
 for (const e of graph.edges) { if (e.kind !== 'call') continue; const to = byId.get(e.to); if (!to) continue; if (!outLabels.has(e.from)) outLabels.set(e.from, new Set()); outLabels.get(e.from).add(to.label); }
@@ -84,6 +96,22 @@ for (const [label, nodes] of byLabel) {
   const domains = [...new Set(nodes.map(domainOf))];
   const locs = nodes.map((n) => n.loc);
   const medLoc = locs.slice().sort((a, b) => a - b)[locs.length >> 1];
+
+  // INTERFACE PATTERN, not duplication: >=4 same-named implementations of which >=75% have no
+  // in-repo caller — a framework contract (bundler plugin hooks, visitors, handlers). "Merge these"
+  // is wrong advice; emit a demoted informational finding instead.
+  const uncalled = nodes.filter((n) => !(callIn.get(n.id) > 0)).length;
+  if (files.length >= 4 && uncalled / nodes.length >= 0.75) {
+    overlaps.push({
+      kind: 'interface-pattern', confidence: 'low', drifted: false, bodySim: null,
+      severity: 'low', rank: files.length,
+      title: `\`${label}\` implemented ${files.length}× — framework contract, not duplication`,
+      domains, nodes: nodes.map((n) => n.id),
+      evidence: `${nodes.length} same-named implementations across ${files.length} files; ${uncalled} have no in-repo caller (invoked by a framework/runner, not by this codebase).`,
+      recommendation: `Do NOT merge — these implement a shared interface/hook contract. If the copies share setup logic, extract the shared part; the \`${label}\` entry points stay separate.`,
+    });
+    continue;
+  }
 
   // authoritative: body confirmation; fallback: structural corroboration
   const body = HAVE_SOURCE ? bodyConfidence(nodes) : null;
@@ -156,11 +184,23 @@ for (const callers of inv.values()) {
   }
 }
 twins.sort((a, b) => b.sim - a.sim);
+// De-duplicate by LABEL PAIR before emitting: several `<module>` nodes (one per file) pairing with
+// the same function used to yield N findings with byte-identical titles ("X and <module> call the
+// same 63% of helpers" ×3 — pure noise). Keep the highest-similarity pair per label pair; fold the
+// other members into that finding's node list so nothing is silently dropped.
+const byLabelPair = new Map();
+for (const t of twins) {
+  const key = [t.nx.label, t.ny.label].sort().join(' ');
+  const cur = byLabelPair.get(key);
+  if (!cur) byLabelPair.set(key, { ...t, extraNodes: [] });
+  else cur.extraNodes.push(t.nx.id, t.ny.id);
+}
+const twinGroups = [...byLabelPair.values()];
 // Body-confirm each twin like Signal A: a shared downstream-call shape is only suggestive —
 // confirm against the real bodies (token-shingle Jaccard). Body sim becomes the authoritative
 // confidence, so genuine parallel impls rank up, drifted copies are flagged, and pairs that
 // merely call the same helpers but implement different logic get demoted/dismissed as coincidental.
-for (const t of twins.slice(0, 16)) {
+for (const t of twinGroups.slice(0, 16)) {
   const domains = [...new Set([domainOf(t.nx), domainOf(t.ny)])];
   const body = HAVE_SOURCE ? bodyConfidence([t.nx, t.ny]) : null;
   let confidence, drifted = false, bodySim = null, basis;
@@ -177,12 +217,14 @@ for (const t of twins.slice(0, 16)) {
     confidence = 'medium';
     basis = 'structural only (body unreadable / source absent): matched on downstream call names';
   }
+  const groupNodes = [...new Set([t.nx.id, t.ny.id, ...t.extraNodes])].sort();
+  const alsoNote = t.extraNodes.length ? ` (+${new Set(t.extraNodes).size} more same-shaped pairing(s), folded into this finding)` : '';
   overlaps.push({
     kind: 'parallel-impl', confidence, drifted, bodySim, severity: severityFor(2, domains.length),
     rank: Math.round((bodySim != null ? bodySim : t.sim) * 5),
     title: `\`${t.nx.label}\` and \`${t.ny.label}\` call the same ${Math.round(t.sim * 100)}% of helpers` + (drifted ? ' (drifted)' : ''),
-    domains, nodes: [t.nx.id, t.ny.id],
-    evidence: `${t.nx.id} and ${t.ny.id} share downstream calls (name-Jaccard ${t.sim.toFixed(2)}): {${t.sh.slice(0, 6).join(', ')}}. ${basis}.`,
+    domains, nodes: groupNodes,
+    evidence: `${t.nx.id} and ${t.ny.id} share downstream calls (name-Jaccard ${t.sim.toFixed(2)}): {${t.sh.slice(0, 6).join(', ')}}${alsoNote}. ${basis}.`,
     recommendation: body && body.confidence === 'refuted'
       ? 'Despite the shared call shape the bodies differ — probably not the same logic; verify before merging.'
       : 'Compare the two; if behaviour matches, keep one and route both call sites through it.',
@@ -195,8 +237,9 @@ overlaps.forEach((o, i) => { o.id = 'ov' + (i + 1); delete o.rank; });
 graph.overlaps = overlaps;
 writeFileSync(GRAPH_PATH, JSON.stringify(graph));
 
-const findings = overlaps.filter((o) => o.confidence === 'high' || o.confidence === 'medium');
-const unverified = overlaps.filter((o) => o.confidence === 'low');
+const patternFindings = overlaps.filter((o) => o.kind === 'interface-pattern');
+const findings = overlaps.filter((o) => o.kind !== 'interface-pattern' && (o.confidence === 'high' || o.confidence === 'medium'));
+const unverified = overlaps.filter((o) => o.kind !== 'interface-pattern' && o.confidence === 'low');
 const dismissed = overlaps.filter((o) => o.confidence === 'refuted');
 const fmt = (o) => {
   const syms = o.nodes.slice(0, 10).map((id) => '  - `' + id + '`').join('\n') + (o.nodes.length > 10 ? `\n  - …+${o.nodes.length - 10} more` : '');
@@ -205,9 +248,11 @@ const fmt = (o) => {
 const md = [
   '# codeweb — overlap / consolidation opportunities',
   '',
-  `> **${findings.length} findings** · ${unverified.length} unverified · ${dismissed.length} dismissed (body-refuted) on **${graph.meta?.target || 'target'}**.`,
+  `> **${findings.length} findings** · ${patternFindings.length} interface patterns · ${unverified.length} unverified · ${dismissed.length} dismissed (body-refuted) on **${graph.meta?.target || 'target'}**.`,
   `> ${HAVE_SOURCE ? 'Confidence is **body-confirmed** (token-shingle similarity of real function bodies).' : 'Source unavailable — confidence is structural (shared calls + LOC).'} Each finding is a checklist item.`,
+  ...(nonProductSkipped ? ['', `> Scope: **product code** — ${nonProductSkipped} test/fixture/example/bench symbols excluded (set CODEWEB_ALL_ROLES=1 to include them).`] : []),
   '', '## Findings', '', ...findings.map(fmt),
+  ...(patternFindings.length ? ['## Interface patterns (not duplication)', '', '_Same-named implementations of a framework contract — nothing in-repo calls them. Do not merge._', '', ...patternFindings.map(fmt)] : []),
   '## Unverified candidates', '', '_Borderline body similarity (15–35%); confirm by reading before acting._', '', ...unverified.map(fmt),
   '## Dismissed (body-refuted)', '', '_Same name, <15% body similarity — different logic, not duplication. Listed for transparency (no silent truncation)._', '',
   ...dismissed.map((o) => `- ${o.id} \`${o.title.replace(/`/g, '')}\` — body ${(o.bodySim * 100).toFixed(0)}%`),

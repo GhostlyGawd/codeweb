@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: refresh.mjs <graph.json> [--cache <path>] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, cache = null; const pos = [];
@@ -48,7 +48,7 @@ catch (e) { die(`extractor produced invalid JSON: ${e.message}`, 2); }
 // re-attach each surviving node's domain by id (domains[] summaries kept; node domains carried over)
 const oldDomainById = new Map(graph.nodes.filter((n) => n.domain && n.domain !== 'unassigned').map((n) => [n.id, n.domain]));
 let reattached = 0;
-for (const n of fresh.nodes) { const d = oldDomainById.get(n.id); if (d) { n.domain = d; reattached++; } else if (n.domain === '') n.domain = ''; }
+for (const n of fresh.nodes) { const d = oldDomainById.get(n.id); if (d) { n.domain = d; reattached++; } else if (n.domain == null) n.domain = ''; }
 
 const before = { nodes: graph.nodes.length, edges: graph.edges.length };
 const updated = {
@@ -65,8 +65,9 @@ const payload = {
   before, after: { nodes: updated.nodes.length, edges: updated.edges.length },
   domainsReattached: reattached, scanned: /scanned (\d+)/.exec(r.stderr)?.[1] ?? null,
 };
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 console.log(`codeweb refresh: ${root}`);
 console.log(`  nodes ${before.nodes} -> ${updated.nodes.length}   edges ${before.edges} -> ${updated.edges.length}   domains re-attached ${reattached}`);
 console.log(`  overlaps dropped (run the full pipeline to recompute). scanned ${payload.scanned ?? '?'} file(s).`);
-process.exit(0);
+finish();
+}

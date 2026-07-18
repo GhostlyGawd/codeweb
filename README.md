@@ -6,15 +6,31 @@
 [![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)
 [![deterministic engine](https://img.shields.io/badge/engine-deterministic-c6f24e?style=flat-square)](#how-it-works)
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
-[![version](https://img.shields.io/badge/version-0.2.0-c6f24e?style=flat-square)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.3.0-c6f24e?style=flat-square)](CHANGELOG.md)
 [![changelog](https://img.shields.io/badge/changelog-Keep_a_Changelog-ffb65c?style=flat-square)](CHANGELOG.md)
 
-**You can't see where your codebase does the same work twice — and neither can the agent editing it.**
-codeweb dissects a repo to its atomic parts (functions, classes, methods), wires them into a living
-call/import graph, tags each node's domain, and surfaces cross-domain overlap. Then it serves that
-graph **two ways**: a self-contained, interactive **HTML map for you**, and **20 deterministic query
-tools** (over MCP, no LLM in the loop) **for your coding agent** to consult *before* it edits —
-*does this already exist? what breaks if I change it? where should this go?*
+**Your coding agent greps. codeweb knows.**
+
+Every serious change starts with the same questions: *who uses this? what breaks if I change it?
+does this already exist? is this dead?* Today an agent answers them by grepping and reading whole
+files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import
+graph once (~3 s for 3,000 symbols), then answers those questions **exactly, in milliseconds, for
+about a kilobyte each** — as **22 deterministic MCP tools for your agent** (no LLM in the loop) and
+a self-contained **interactive map for you**.
+
+Measured on [vite](https://github.com/vitejs/vite) (3,000+ symbols), graded by the TypeScript
+compiler as an independent referee ([`paper/results/oracle-ab.json`](paper/results/oracle-ab.json)):
+
+| The question | codeweb | grep |
+|---|---|---|
+| *"Who depends on X?"* (30 symbols) | **100% of compiler-verified files, better precision than grep, 0.7 KB, one call** | 100% of files but 3× the tokens, as raw text lines the agent must still read |
+| *"What breaks if I change X?"* | **one ~1 KB answer** | no transitive operator: ~5 recursive rounds, **126× the tokens** |
+| *"Does this already exist? Is this dead? Did my edit break structure?"* | one call each (`find_similar` / `deadcode` / `diff` gate) | not answerable by search |
+
+In the paper's frontier-agent A/B, the same channel lifted caller-discovery recall **+0.27** with
+**~34% fewer tool calls and ~44% fewer tokens** than grep. And the byproduct is the part you can
+see: the map also surfaces **duplication, dead code, hotspots, and tangled domains** — where your
+codebase does the same work twice, which neither you nor the agent can see from inside a file.
 
 **[Website](https://ghostlygawd.github.io/codeweb/)**&nbsp;·&nbsp;[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)&nbsp;·&nbsp;[Changelog](CHANGELOG.md)
 
@@ -374,11 +390,14 @@ above are also exposed over MCP (below).
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing all
-**20** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
-`codeweb_callers/callees/impact/cycles/orphans/diff`, the edit-loop tools `codeweb_context/refresh`,
-the intelligence tools `codeweb_hotspots/campaign/reading_order`, plus `codeweb_tests/find_similar/
-placement/review/fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not
-exposed). Register it with Claude Code:
+**22** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
+`codeweb_map` (build/rebuild the graph over MCP), `codeweb_callers/callees/impact/cycles/orphans/
+diff`, the edit-loop tools `codeweb_context/refresh`, the intelligence tools
+`codeweb_hotspots/campaign/reading_order`, plus `codeweb_tests/find_similar/placement/review/
+fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not exposed).
+
+**Installing the plugin registers the server automatically** (`.claude-plugin/plugin.json` carries
+the `mcpServers` entry). Standalone — without the plugin — register it yourself:
 
 ```
 claude mcp add codeweb -- node /abs/path/to/codeweb/scripts/mcp-server.mjs
@@ -390,14 +409,23 @@ or in an `.mcp.json`:
 { "mcpServers": { "codeweb": { "command": "node", "args": ["/abs/path/to/codeweb/scripts/mcp-server.mjs"] } } }
 ```
 
-Each tool takes a `graph` (path to a `graph.json`) plus, for callers/callees/impact/context, a
-`symbol` (node id or bare label) — so an agent can ask "what breaks if I change X?" or "give me a
-bounded edit window for X" before editing.
+Built for agents, not just reachable by them:
+
+- **`graph` is optional everywhere** — the server resolves the nearest `.codeweb/graph.json` above
+  its cwd (or `CODEWEB_WS`). No graph yet? The error names `codeweb_map`, which builds one (~3s for
+  a 3k-symbol repo) without leaving MCP.
+- **Budgeted responses by default** — list-heavy tools answer with a one-line `summary`, the top-N
+  most relevant items, TRUE totals, and an explicit `more.remaining`; `full: true` (or
+  `limit`/`offset`) overrides. A `codeweb_context` that used to weigh ~300KB on a busy symbol now
+  answers in ~10KB of call-site windows.
+- **Staleness awareness** — when the graph no longer matches disk, query results say so and point
+  at `codeweb_refresh`.
+- The handshake carries `instructions` teaching the loop: *context → edit → refresh → diff-gate*.
 
 ## How it works
 
-For JavaScript, TypeScript, Python, Rust, and Go the default is a **deterministic Node pipeline** — one
-command, no LLM in the loop, reproducible byte-for-byte. `scripts/run.mjs` chains four stages
+For JavaScript, TypeScript, Python, Rust, Go, Java, and C# the default is a **deterministic Node pipeline** — one
+command, no LLM in the loop, reproducible byte-for-byte. `scripts/run.mjs` chains five stages
 into a per-target workspace:
 
 <div align="center">
@@ -485,9 +513,10 @@ codeweb/
 
 ## Roadmap
 
-- **More first-class languages** — Java, C#, and others on the deterministic fast path. (JavaScript,
-  TypeScript, Python, **Rust**, and **Go** are native today; everything else routes through the agent
-  fallback.)
+- **More first-class languages** — beyond the seven native today (JavaScript, TypeScript, Python,
+  **Rust**, **Go**, **Java**, **C#**), the next tier (Ruby, PHP, Kotlin, Swift) still routes through
+  the agent fallback. Java/C# dynamic-dispatch recall (a tree-sitter tier like the JS/TS one) is the
+  next increment there.
 
 _Recently shipped: an **agent-intelligence suite** — refactoring **hotspots** (complexity × fan-in ×
 churn), a gated ROI-ranked optimization **campaign** planner, a foundations-first **reading-order**,

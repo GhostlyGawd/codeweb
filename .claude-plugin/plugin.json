@@ -1,7 +1,7 @@
 {
   "name": "codeweb",
-  "version": "0.2.0",
-  "description": "Dissect a codebase to its atomic parts (functions, classes, symbols), wire them into a living system web (call/import graph), tag each node's domain, and surface cross-domain overlap and consolidation opportunities. Renders a self-contained interactive HTML map for humans, and exposes 20 deterministic read-only query tools over MCP (impact, callers, duplication, risk, dead code, …) so a coding agent can check what already exists and what an edit breaks before writing. Works on the current project or any external repo you want to review before adopting.",
+  "version": "0.3.0",
+  "description": "Dissect a codebase to its atomic parts (functions, classes, symbols), wire them into a living system web (call/import graph), tag each node's domain, and surface cross-domain overlap and consolidation opportunities. Renders a self-contained interactive HTML map for humans, and exposes 22 deterministic read-only query tools over MCP (impact, callers, duplication, risk, dead code, …) so a coding agent can check what already exists and what an edit breaks before writing. Works on the current project or any external repo you want to review before adopting.",
   "author": {
     "name": "rhenmcleod",
     "email": "rhenmcleod@gmail.com"
@@ -9,6 +9,12 @@
   "homepage": "https://github.com/GhostlyGawd/codeweb",
   "repository": "https://github.com/GhostlyGawd/codeweb",
   "hooks": "./hooks/hooks.json",
+  "mcpServers": {
+    "codeweb": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/mcp-server.mjs"]
+    }
+  },
   "keywords": [
     "codebase-analysis",
     "dependency-graph",

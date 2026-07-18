@@ -49,7 +49,176 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
-<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>Java + C# on the deterministic fast path</strong> (extractor v8): class/interface/enum/</li>
+</ul>
+<p>  record/struct discovery with visibility-as-export, owner-qualified method ids</p>
+<p>  (constructors included), Allman-brace + expression-bodied members (C#), <code>extends</code> /</p>
+<p>  base-list inheritance edges, control-flow phantom guards, Maven/Gradle test-layout</p>
+<p>  and <code>*Test.java</code> / <code>*Tests.cs</code> role detection, and pom.xml / build.gradle / .csproj</p>
+<p>  package boundaries. Verified on square/javapoet (497 symbols, 0 phantoms, 0.7s) and</p>
+<p>  restsharp/RestSharp (1,542 symbols, Allman style, 0.9s). Method-dispatch recall</p>
+<p>  (<code>obj.Method()</code>) stays precision-gated as in the JS regex tier — a tree-sitter tier</p>
+<p>  for Java/C# is the next increment.</p>
+<h3 class="cl-grp">Added (recall ceiling + ambient loop)</h3>
+<ul>
+<li><strong>Tree-sitter tier default-on</strong> when web-tree-sitter is installed (<code>--engine regex</code></li>
+</ul>
+<p>  opts out; absent dependency degrades to regex byte-identically). Class-field arrow</p>
+<p>  methods survive the AST handoff.</p>
+<ul>
+<li><strong>Barrels are dependents</strong> (the measured recall gap): <code>export { X } from</code> edges the</li>
+</ul>
+<p>  barrel's <code>&lt;module&gt;</code> to the resolved symbol; <code>export * from</code> chains resolve</p>
+<p>  transitively AND edge the barrel to the target module. Oracle A/B moved from</p>
+<p>  recall 0.94 to <strong>1.00</strong> (precision 0.94 vs grep 0.87) on both the fixed and a</p>
+<p>  fresh-seeded 30-task sample.</p>
+<ul>
+<li><strong>Ambient loop</strong>: the pre-edit hook now injects the ~1KB explain card (identity, top</li>
+</ul>
+<p>  callers, tests) instead of a pointer — blast radius arrives with zero agent</p>
+<p>  discipline; the MCP server <strong>auto-refreshes a stale graph inline</strong> (~1s incremental,</p>
+<p>  throttled, CODEWEB_NO_AUTOREFRESH=1 opts out) before structural queries, and</p>
+<p>  per-DIRECTORY mtime stamps make brand-new files trip the staleness check (per-file</p>
+<p>  stamps cannot see a file that didn't exist).</p>
+<h3 class="cl-grp">Research</h3>
+<ul>
+<li><strong>Oracle A/B</strong> (<code>paper/experiments/oracle-ab.mjs</code>, results in</li>
+</ul>
+<p>  <code>paper/results/oracle-ab.json</code>): dependents-discovery graded by the TypeScript</p>
+<p>  compiler's own reference finder over 30 seeded vite symbols — codeweb recall 0.94 /</p>
+<p>  precision 0.89 at <strong>1/3 of an idealized grep's context cost</strong> (0.8KB vs 2.5KB per</p>
+<p>  task); blast-radius ("what transitively breaks") in one ~1KB call vs a recursive</p>
+<p>  grep loop's ~130KB (<strong>126× on the canonical run</strong>, simulated generously for grep). Mechanical and</p>
+<p>  reproducible — complements (does not replace) the frozen frontier-agent pilot,</p>
+<p>  whose run stays the evidence for agent-loop behavior (+0.27 recall, ~44% fewer</p>
+<p>  tokens). The 6/30 under-recalled symbols are the known dispatch/re-export gap.</p>
+<h2 class="cl-ver">[0.3.0] - 2026-07-18</h2>
+<p>The agent-efficiency release: outputs that can't corrupt, answers that fit a context</p>
+<p>window, and a map that tells you when it's stale. Driven by the measured product review</p>
+<p>(<code>PRODUCT-REVIEW.md</code>).</p>
+<h3 class="cl-grp">Fixed</h3>
+<ul>
+<li><strong>Flush-safe output everywhere</strong>: <code>process.exit()</code> after a large stdout write silently</li>
+</ul>
+<p>  truncated anything past the 64KB pipe buffer (piped CLI JSON cut at exactly 65,536</p>
+<p>  bytes; MCP responses clipped mid-string). All CLIs now end naturally via</p>
+<p>  <code>lib/cli.mjs</code> emitters; <code>| head</code> (EPIPE) exits cleanly.</p>
+<ul>
+<li><code>run.mjs</code> resolves a relative <code>&lt;SRC&gt;</code> against the caller's cwd (it resolved against the</li>
+</ul>
+<p>  plugin root while <code>--out-dir</code> used the cwd) and reports stage failures in one clean</p>
+<p>  line instead of a raw <code>execFileSync</code> stack. <code>--open</code> is parsed and forwarded (it was</p>
+<p>  documented but inert).</p>
+<ul>
+<li>Campaign delete steps ranked ROI 0: <code>deadcode</code> now emits <code>loc</code> per item and the</li>
+</ul>
+<p>  planner reads it (<code>locSaved</code> stays as a legacy alias).</p>
+<ul>
+<li>Same-file same-name methods collided into one node id: v6/v7 extraction emits</li>
+</ul>
+<p>  owner-qualified ids (<code>file:Type.method</code>) in every tier (Python classes, Rust impls,</p>
+<p>  Go receivers, JS/TS classes), with member-access resolution following.</p>
+<ul>
+<li>Body spans no longer desync on multi-line template literals / block comments (bodies</li>
+</ul>
+<p>  swallowed whole neighboring functions — a 5-line helper recorded as 550 loc on vite,</p>
+<p>  poisoning complexity, context-pack, and body-confirmation). Extents are measured on</p>
+<p>  masked lines.</p>
+<ul>
+<li><code>mcp-server</code> advertised version 0.1.0 on a 0.2.0 product; <code>serverInfo.version</code> now</li>
+</ul>
+<p>  derives from package.json and <code>check-consistency</code> audits it.</p>
+<ul>
+<li>Signal-B twins de-duplicate by label pair (several <code>&lt;module&gt;</code> nodes produced N</li>
+</ul>
+<p>  byte-identical findings).</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>Budgeted MCP responses</strong>: list-heavy tools default to a one-line <code>summary</code> + top-N</li>
+</ul>
+<p>  most-relevant items + TRUE totals + explicit <code>more.remaining</code>; <code>full: true</code> or</p>
+<p>  <code>limit</code>/<code>offset</code> override. <code>codeweb_context</code> returns call-site windows (±3 lines)</p>
+<p>  instead of whole caller bodies (~300KB → ~10KB on a busy vite symbol).</p>
+<ul>
+<li><strong><code>codeweb_map</code></strong>: build/rebuild the graph over MCP; <code>graph</code> becomes</li>
+</ul>
+<p>  optional on every tool (nearest <code>.codeweb/graph.json</code> above cwd, or <code>CODEWEB_WS</code>),</p>
+<p>  and a missing graph returns an actionable error naming the fix.</p>
+<ul>
+<li><strong><code>codeweb_explain</code></strong>: one ~1KB card (identity, contract, dependents, blast radius,</li>
+</ul>
+<p>  findings) answering "tell me about X" — previously 3-4 calls. 22 tools total.</p>
+<ul>
+<li><strong>Plugin auto-registration</strong>: <code>.claude-plugin/plugin.json</code> now carries <code>mcpServers</code>,</li>
+</ul>
+<p>  so <code>/plugin install codeweb</code> delivers the tools without a manual <code>claude mcp add</code>.</p>
+<ul>
+<li><strong>Code roles</strong>: every node carries <code>role</code> (product|test|fixture|example|bench|</li>
+</ul>
+<p>  generated). Overlap findings, deadcode tiers, and the report's default view scope to</p>
+<p>  product code (<code>CODEWEB_ALL_ROLES=1</code> / an in-report toggle widen it).</p>
+<ul>
+<li><strong>Interface-pattern detection</strong>: ≥4 same-named implementations that nothing in-repo</li>
+</ul>
+<p>  calls demote from "merge these" to an informational <code>interface-pattern</code> finding</p>
+<p>  (framework hooks like a bundler plugin's <code>resolveId()</code>).</p>
+<ul>
+<li><strong>Workspace scoping</strong>: bare-name call resolution never crosses a package (manifest)</li>
+</ul>
+<p>  boundary — cross-package name collisions no longer fabricate edges in monorepos.</p>
+<ul>
+<li><strong>Staleness awareness</strong>: the extractor stamps per-file size+mtime into</li>
+</ul>
+<p>  <code>meta.sources</code>; query/context results annotate when the graph no longer matches disk</p>
+<p>  and point at <code>codeweb_refresh</code>.</p>
+<ul>
+<li><strong>Pre-edit hook</strong>: one advisory line of blast radius before an edit lands in a mapped</li>
+</ul>
+<p>  target (PreToolUse; fail-open). The post-edit hook re-extracts incrementally</p>
+<p>  (<code>--cache</code>) instead of full-scanning per edit.</p>
+<ul>
+<li>Bare-identifier arguments become <code>ref</code> edges (a callback passed is a reference, not an</li>
+</ul>
+<p>  invocation); class-field arrow methods (<code>handleClick = () =&gt; {}</code>) are discovered and</p>
+<p>  owner-qualified.</p>
+<ul>
+<li>Report: product-only filter, interface-pattern section, search that navigates</li>
+</ul>
+<p>  (Enter cycles + selects matches), <code>#s=&lt;id&gt;</code> deep links, keyboard/ARIA support, and</p>
+<p>  <code>prefers-reduced-motion</code> (layout settles without animation).</p>
+<ul>
+<li><code>lib/cli.mjs</code>: the shared CLI harness (die/emit/loadGraph/capList/staleness) —</li>
+</ul>
+<p>  deleting the die()×16 / graph-load×13 duplication codeweb's own overlap report flagged.</p>
+<ul>
+<li><strong>In-process query serving</strong>: the MCP server answers structural queries from a</li>
+</ul>
+<p>  cached parsed graph (4–6ms vs 75–122ms spawn+parse), via the same</p>
+<p>  <code>lib/query-core.mjs</code> the CLI ships — one truth, two transports.</p>
+<ul>
+<li><strong>Rename-aware diff</strong>: a removed+added pair with an identifier-normalized</li>
+</ul>
+<p>  (Type-2) body match ≥85% reports as <code>renamed[]</code> instead of delete+add churn.</p>
+<ul>
+<li>Domain summaries are genuinely descriptive: size, file count, exported-first</li>
+</ul>
+<p>  key symbols, and role composition ("mostly test code").</p>
+<h3 class="cl-grp">Changed</h3>
+<ul>
+<li><code>campaign</code> batches its delete simulation (one clone instead of one per step):</li>
+</ul>
+<p>  8.9s → 1.25s on a 3k-symbol monorepo.</p>
+<ul>
+<li>MCP <code>initialize</code> returns workflow <code>instructions</code> and negotiates a SUPPORTED protocol</li>
+</ul>
+<p>  version instead of echoing arbitrary client strings; tool calls get a 120s timeout.</p>
+<ul>
+<li><code>codeweb_find_similar</code> accepts <code>body</code> (stdin plumbing) + <code>structural</code> over MCP;</li>
+</ul>
+<p>  <code>codeweb_review</code> accepts <code>before</code> + <code>gate</code>; <code>codeweb_reading_order</code> accepts</p>
+<p>  scope/value/budget — previously CLI-only capability, now agent-reachable.</p>
 <h2 class="cl-ver">[0.2.0] - 2026-06-23</h2>
 <p>The first managed release: codeweb gets a real public front and the machinery to keep</p>
 <p>product, marketing, and research in lock-step.</p>
@@ -163,7 +332,7 @@
       </div>
     </div>
     <div class="footer-base">
-      <span>codeweb v0.2.0 · MIT · © 2026 rhenmcleod</span>
+      <span>codeweb v0.3.0 · MIT · © 2026 rhenmcleod</span>
       <span>Deterministic build · zero third-party requests on this page</span>
     </div>
   </div>

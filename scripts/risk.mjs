@@ -15,26 +15,20 @@ import { normalizeGraph, buildIndex, impactOf } from './lib/graph-ops.mjs';
 import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
 
 const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--churn <map.json> | --git] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
-let json = false, changed = null, churnPath = null, useGit = false; const pos = [];
+let json = false, changed = null, churnPath = null, useGit = false, limit = null; const pos = [];
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--json') json = true;
+  else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
   else if (t === '--changed') changed = argv[++i];
   else if (t === '--churn') churnPath = argv[++i];
   else if (t === '--git') useGit = true;
   else if (!t.startsWith('-')) pos.push(t);
 }
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
-
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 // churn map: file -> commit count
 let churn = {};
@@ -67,9 +61,11 @@ if (changed != null) {
   ranked = ranked.filter((r) => files.has(r.file));
 }
 
-const payload = { target: graph.meta?.target || 'target', weights: RISK_WEIGHTS, maxes, count: ranked.length, ranked };
+const capped = capList(ranked, limit);
+const payload = { target: graph.meta?.target || 'target', summary: `${ranked.length} symbol(s) ranked by change-risk${changed != null ? ' (changed only)' : ''}`, weights: RISK_WEIGHTS, maxes, count: ranked.length, ranked: capped.items };
+if (capped.truncated) payload.more = { remaining: capped.remaining };
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 console.log(`codeweb risk: ${payload.target} — ${ranked.length} symbol(s) ranked by change-risk${changed != null ? ' (changed only)' : ''}`);
 console.log(`  weights: ${Object.entries(RISK_WEIGHTS).map(([k, v]) => `${k} ${v}`).join(', ')}`);
@@ -77,4 +73,5 @@ for (const r of ranked.slice(0, 15)) {
   const c = r.components;
   console.log(`  ${r.risk.toFixed(3)}  ${r.id}  [in ${c.fanIn} out ${c.fanOut} loc ${c.loc} blast ${c.blast} churn ${c.churn}]`);
 }
-process.exit(0);
+finish();
+}

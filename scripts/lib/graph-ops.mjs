@@ -10,7 +10,22 @@ const byIdLt = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 // dead-code workflow — one truth). Matches `*.test.*`, `*.spec.*`, `*_test.*`, or a path segment
 // `tests/` | `test/` | `__tests__/`. Forward-slashed relative paths.
 export const isTestFile = (file) =>
-  /(?:^|\/)(?:tests?|__tests__)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.)/.test(file || '');
+  /(?:^|\/)(?:tests?|__tests__)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.)/.test(file || '') ||
+  /(?:^|\/)src\/test\//.test(file || '') ||               // Maven/Gradle convention
+  /(?:Tests?|Spec)\.(?:java|cs)$/.test(file || '');       // FooTest.java / FooTests.cs / FooSpec.java
+
+// Code ROLE by path — product code vs the supporting cast (one truth: the extractor stamps it on
+// every node; normalizeGraph back-fills older graphs). Rankings and default report views scope to
+// `product` so monorepo fixture noise can't dominate recommendations.
+export function roleOf(file) {
+  const f = file || '';
+  if (isTestFile(f)) return 'test';
+  if (/(^|\/)(fixtures?|__fixtures__|__mocks__|mocks?)\//.test(f)) return 'fixture';
+  if (/(^|\/)(examples?|samples?|demos?|playgrounds?|playground|sandbox|e2e)\//.test(f)) return 'example';
+  if (/(^|\/)(benchmarks?|bench|perf)\//.test(f)) return 'bench';
+  if (/\.(min|bundle)\.[cm]?js$/.test(f) || /(^|\/)(generated|__generated__)\//.test(f)) return 'generated';
+  return 'product';
+}
 
 // Fill the same defaults build-report.mjs applies, so every consumer sees a well-formed graph.
 export function normalizeGraph(graph) {
@@ -24,6 +39,7 @@ export function normalizeGraph(graph) {
     if (n.domain == null || n.domain === '') n.domain = 'unassigned';
     if (typeof n.exports !== 'boolean') n.exports = false;
     if (n.file == null) n.file = '';
+    if (!n.role) n.role = roleOf(n.file); // pre-v7 graphs: derive
   }
   return g;
 }

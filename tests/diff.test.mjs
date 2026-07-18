@@ -74,7 +74,7 @@ test('D1b: a missing graph file exits 2 with a clear message (no raw stack)', ()
 test('D5: identical snapshots -> empty deltas, ok:true, exit 0', () => {
   const { status, json } = dj(B, B);
   assert.equal(status, 0);
-  assert.deepEqual(json.nodes, { added: [], removed: [] });
+  assert.deepEqual(json.nodes, { added: [], removed: [], renamed: [] });
   assert.equal(json.edges.added, 0);
   assert.equal(json.edges.removed, 0);
   assert.deepEqual(json.cycles.added, []);

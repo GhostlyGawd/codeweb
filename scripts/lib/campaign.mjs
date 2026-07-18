@@ -22,21 +22,33 @@ export function planCampaign(graph, { optimize = { opportunities: [] }, deadcode
   const baseSets = fileCycles(g0).map((c) => new Set(c));
   const introducesCoupling = (cycles) => cycles.some((c) => !baseSets.some((bc) => c.every((f) => bc.has(f))));
 
-  // Phase 1 — cuts (advisory; each verified cut breaks one cycle).
-  const cutSteps = (breakCycles.cycles || []).filter((c) => c.verified).map((c) => ({
-    id: `cut:${(c.files || []).join('+')}`, type: 'cut', op: null, roi: 10,
-    gate: { ok: true }, delta: { locReclaimed: 0, cyclesBroken: 1 }, detail: c.cut || null, files: c.files || [],
-  })).sort(byRoiThenId);
+  // Phase 1 — cuts (advisory; each verified cut breaks one cycle). Step ids stay COMPACT: SCCs are
+  // disjoint, so the first (sorted) file names the cycle uniquely — a 60-file SCC must not put a
+  // multi-KB file list into every step id.
+  const cutSteps = (breakCycles.cycles || []).filter((c) => c.verified).map((c) => {
+    const files = c.files || [];
+    return {
+      id: `cut:${files[0] || '?'}${files.length > 1 ? `(+${files.length - 1})` : ''}`, type: 'cut', op: null, roi: 10,
+      gate: { ok: true }, delta: { locReclaimed: 0, cyclesBroken: 1 }, detail: c.cut || null, files,
+    };
+  }).sort(byRoiThenId);
 
-  // Phase 2 — safe dead-code deletes (cycle-neutral: an orphan is in no SCC).
-  const delSteps = (deadcode.safe || []).map((o) => ({
-    id: `del:${o.id}`, type: 'delete', op: { kind: 'delete', ids: [o.id] }, roi: o.locSaved || 0,
-    gate: { ok: true }, delta: { locReclaimed: o.locSaved || 0, cyclesBroken: 0 },
-  })).sort(byRoiThenId);
+  // Phase 2 — safe dead-code deletes (cycle-neutral: an orphan is in no SCC). ROI = the symbol's
+  // span: deadcode emits `loc` (locSaved kept as a legacy alias so older advisor output still ranks).
+  const delSteps = (deadcode.safe || []).map((o) => {
+    const saved = o.locSaved ?? o.loc ?? 0;
+    return {
+      id: `del:${o.id}`, type: 'delete', op: { kind: 'delete', ids: [o.id] }, roi: saved,
+      gate: { ok: true }, delta: { locReclaimed: saved, cyclesBroken: 0 },
+    };
+  }).sort(byRoiThenId);
 
   // Phase 3 — ready merges, cumulatively pre-flighted from the graph-with-prior-steps-applied.
-  let cur = g0;
-  for (const s of delSteps) cur = applyEdit(cur, s.op);
+  // Deletes are independent node removals, so applying them as ONE batched op is equivalent to the
+  // sequential chain — and O(1) whole-graph clones instead of O(deletes). (549 per-step clones of a
+  // 1.8MB graph made campaign the 8.9s outlier while every other tool answered in ~100ms.)
+  const delIds = delSteps.map((s) => s.op.ids[0]);
+  let cur = delIds.length ? applyEdit(g0, { kind: 'delete', ids: delIds }) : g0;
   const idx0 = buildIndex(g0);
   const cands = (optimize.opportunities || [])
     .filter((o) => o.tier === 'ready' && o.kind === 'duplicate-logic' && Array.isArray(o.nodes) && o.nodes.length >= 2)

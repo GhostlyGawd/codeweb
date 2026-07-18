@@ -13,7 +13,7 @@ import { resolve, join, dirname } from 'node:path';
 import { normalizeGraph, buildIndex, fileCycles } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: fitness.mjs <graph.json> [--rules codeweb.rules.json] [--json]';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, rulesArg = null; const pos = [];
@@ -77,7 +77,7 @@ const errors = violations.filter((v) => v.severity === 'error');
 const payload = { target: graph.meta?.target || 'target', rulesChecked: rules.length, violations, ok: errors.length === 0, errorCount: errors.length, warningCount: violations.length - errors.length };
 const code = errors.length ? 1 : 0;
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(code); }
+if (json) { emitJson(payload, code); } else {
 
 console.log(`codeweb fitness: ${payload.target} — ${rules.length} rule(s), ${violations.length} violation(s) (${payload.errorCount} error, ${payload.warningCount} warning)`);
 for (const v of violations) {
@@ -86,4 +86,5 @@ for (const v of violations) {
   if (v.subjects.length > 12) console.log(`    …+${v.subjects.length - 12} more`);
 }
 if (payload.ok) console.log('\nok — no error-level violations');
-process.exit(code);
+finish(code);
+}

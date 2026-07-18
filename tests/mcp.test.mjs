@@ -7,8 +7,8 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { writeFileSync } from 'node:fs';
-import { tmpDir, cleanup, script, writeTree, runNode, readJSON } from './helpers.mjs';
+import { writeFileSync, readFileSync } from 'node:fs';
+import { tmpDir, cleanup, script, writeTree, runNode, readJSON, PLUGIN_ROOT } from './helpers.mjs';
 
 const GRAPH = {
   meta: { target: 'mcp-fixture' },
@@ -73,42 +73,64 @@ test('M1: initialize returns protocolVersion, an object tools capability, and se
   assert.ok(res.protocolVersion, 'a protocol version is set');
   assert.equal(typeof res.capabilities.tools, 'object', 'tools capability is an object, not a bare bool');
   assert.equal(res.serverInfo.name, 'codeweb');
+  // serverInfo.version tracks package.json — the drift the consistency gate previously missed
+  const pkg = JSON.parse(readFileSync(join(PLUGIN_ROOT, 'package.json'), 'utf8'));
+  assert.equal(res.serverInfo.version, pkg.version, 'serverInfo.version derives from package.json');
 });
 
 test('M2: tools/list exposes the full tool set with object schemas + correct required args', () => {
   const tools = rpc([INIT, { jsonrpc: '2.0', id: 2, method: 'tools/list' }]).byId.get(2).result.tools;
   assert.deepEqual(tools.map((t) => t.name).sort(),
     ['codeweb_break_cycles', 'codeweb_callees', 'codeweb_callers', 'codeweb_campaign', 'codeweb_codemod',
-      'codeweb_context', 'codeweb_cycles', 'codeweb_deadcode', 'codeweb_diff', 'codeweb_find_similar',
-      'codeweb_fitness', 'codeweb_hotspots', 'codeweb_impact', 'codeweb_orphans', 'codeweb_placement',
-      'codeweb_reading_order', 'codeweb_refresh', 'codeweb_review', 'codeweb_risk', 'codeweb_tests']);
+      'codeweb_context', 'codeweb_cycles', 'codeweb_deadcode', 'codeweb_diff', 'codeweb_explain', 'codeweb_find_similar',
+      'codeweb_fitness', 'codeweb_hotspots', 'codeweb_impact', 'codeweb_map', 'codeweb_orphans',
+      'codeweb_placement', 'codeweb_reading_order', 'codeweb_refresh', 'codeweb_review', 'codeweb_risk',
+      'codeweb_tests']);
   for (const t of tools) {
     assert.ok(t.description && t.description.length > 0, `${t.name} has a description`);
     assert.equal(t.inputSchema.type, 'object', `${t.name} inputSchema is an object`);
   }
+  // `graph` is OPTIONAL everywhere now (auto-discovery: CODEWEB_WS or nearest .codeweb/graph.json) —
+  // the recurring path-threading tax was pure friction. Only the true inputs stay required.
   const req = (n) => tools.find((t) => t.name === n).inputSchema.required;
-  assert.deepEqual(req('codeweb_callers'), ['graph', 'symbol']);
-  assert.deepEqual(req('codeweb_callees'), ['graph', 'symbol']);
-  assert.deepEqual(req('codeweb_impact'), ['graph', 'symbol']);
-  assert.deepEqual(req('codeweb_cycles'), ['graph']);
-  assert.deepEqual(req('codeweb_orphans'), ['graph']);
+  const opt = (n) => Object.keys(tools.find((t) => t.name === n).inputSchema.properties);
+  assert.deepEqual(req('codeweb_callers'), ['symbol']);
+  assert.deepEqual(req('codeweb_callees'), ['symbol']);
+  assert.deepEqual(req('codeweb_impact'), ['symbol']);
+  assert.deepEqual(req('codeweb_cycles'), []);
+  assert.deepEqual(req('codeweb_orphans'), []);
   assert.deepEqual(req('codeweb_diff'), ['before', 'after']);
-  // new agent-capability tools (F1-F10)
-  assert.deepEqual(req('codeweb_tests'), ['graph', 'symbol']);
-  assert.deepEqual(req('codeweb_find_similar'), ['graph', 'signature']);
-  assert.deepEqual(req('codeweb_placement'), ['graph', 'calls']);
-  assert.deepEqual(req('codeweb_review'), ['graph', 'changed']);
-  assert.deepEqual(req('codeweb_fitness'), ['graph', 'rules']);
-  assert.deepEqual(req('codeweb_risk'), ['graph']);
-  assert.deepEqual(req('codeweb_break_cycles'), ['graph']);
-  assert.deepEqual(req('codeweb_deadcode'), ['graph']);
-  assert.deepEqual(req('codeweb_codemod'), ['graph', 'merge', 'into']);
-  // Tier 0-3 additions (F1/F2/F4/F5/F8)
-  assert.deepEqual(req('codeweb_context'), ['graph', 'symbol']);
-  assert.deepEqual(req('codeweb_refresh'), ['graph']);
-  assert.deepEqual(req('codeweb_hotspots'), ['graph']);
-  assert.deepEqual(req('codeweb_campaign'), ['graph']);
-  assert.deepEqual(req('codeweb_reading_order'), ['graph']);
+  assert.deepEqual(req('codeweb_tests'), ['symbol']);
+  assert.deepEqual(req('codeweb_find_similar'), [], 'signature|body validated at call time');
+  assert.deepEqual(req('codeweb_placement'), ['calls']);
+  assert.deepEqual(req('codeweb_review'), ['changed']);
+  assert.deepEqual(req('codeweb_fitness'), ['rules']);
+  assert.deepEqual(req('codeweb_risk'), []);
+  assert.deepEqual(req('codeweb_break_cycles'), []);
+  assert.deepEqual(req('codeweb_deadcode'), []);
+  assert.deepEqual(req('codeweb_codemod'), ['merge', 'into']);
+  assert.deepEqual(req('codeweb_context'), ['symbol']);
+  assert.deepEqual(req('codeweb_refresh'), []);
+  assert.deepEqual(req('codeweb_hotspots'), []);
+  assert.deepEqual(req('codeweb_campaign'), []);
+  assert.deepEqual(req('codeweb_reading_order'), []);
+  assert.deepEqual(req('codeweb_map'), []);
+  assert.deepEqual(req('codeweb_explain'), ['symbol']);
+  // the previously CLI-only power is now agent-reachable
+  assert.ok(opt('codeweb_find_similar').includes('body') && opt('codeweb_find_similar').includes('structural'), 'find_similar exposes body+structural');
+  assert.ok(opt('codeweb_review').includes('before') && opt('codeweb_review').includes('gate'), 'review exposes before+gate');
+  assert.ok(opt('codeweb_reading_order').includes('scope') && opt('codeweb_reading_order').includes('budget'), 'reading_order exposes scope+budget');
+  // budgeted tools advertise limit/full
+  for (const n of ['codeweb_impact', 'codeweb_callers', 'codeweb_deadcode', 'codeweb_context', 'codeweb_risk', 'codeweb_hotspots']) {
+    assert.ok(opt(n).includes('full'), `${n} exposes full`);
+  }
+});
+
+test('M2b: initialize carries workflow instructions; unknown client protocol falls back to ours', () => {
+  const res = rpc([INIT]).byId.get(1).result;
+  assert.ok(res.instructions && /codeweb_context|codeweb_impact/.test(res.instructions), 'instructions teach the loop');
+  const weird = rpc([{ ...INIT, params: { ...INIT.params, protocolVersion: '1999-01-01' } }]).byId.get(1).result;
+  assert.equal(weird.protocolVersion, '2025-06-18', 'unsupported client version -> our latest, not an echo');
 });
 
 test('M3: tools/call codeweb_impact returns the query JSON as text content', () => {

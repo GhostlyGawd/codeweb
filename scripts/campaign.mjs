@@ -16,7 +16,7 @@ import { planCampaign } from './lib/campaign.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: campaign.mjs <graph.json> [--json] [--budget N] [--git]   (or set CODEWEB_WS)';
-function die(msg, code) { console.error(msg); process.exit(code); }
+import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, budget = Infinity, git = false; const pos = [];
@@ -27,13 +27,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--git') git = true;
   else if (!t.startsWith('-')) pos.push(t);
 }
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 // run each advisor as its tested artifact (--json); a failed advisor degrades to empty (the campaign
 // still composes whatever the others found).
@@ -46,9 +40,14 @@ const deadcode = advise('deadcode.mjs') || { safe: [] };
 const breakCycles = advise('break-cycles.mjs') || { cycles: [] };
 
 const plan = planCampaign(graph, { optimize, deadcode, breakCycles, budget });
-const payload = { target: graph.meta?.target || 'target', ...plan };
+const t0 = plan.totals;
+const payload = {
+  target: graph.meta?.target || 'target',
+  summary: `${t0.steps} step(s): ${t0.cuts} cut, ${t0.deletes} delete, ${t0.merges} merge — projected -${t0.locReclaimed} LOC, ${t0.cyclesBroken} cycle(s) broken (gate-green in order)`,
+  ...plan,
+};
 
-if (json) { process.stdout.write(JSON.stringify(payload) + '\n'); process.exit(0); }
+if (json) { emitJson(payload); } else {
 
 const t = plan.totals;
 console.log(`codeweb campaign: ${payload.target} — ${t.steps} step(s): ${t.cuts} cut, ${t.deletes} delete, ${t.merges} merge`);
@@ -58,4 +57,5 @@ for (const s of plan.steps) {
   const what = s.type === 'cut' ? `${s.files.join(' <-> ')}` : s.type === 'delete' ? s.op.ids.join(', ') : `${s.op.ids.join(' + ')} -> ${s.op.into}`;
   console.log(`  [${tag}] ${what}  (roi ${s.roi}; +${s.delta.locReclaimed} LOC, +${s.delta.cyclesBroken} cycle; cumulative -${s.cumulative.locReclaimed} LOC)`);
 }
-process.exit(0);
+finish();
+}
