@@ -9,6 +9,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+_Nothing yet. Open work lands here before it ships in the next tagged release._
+
+## [0.3.0] - 2026-07-18
+
 The agent-efficiency release: outputs that can't corrupt, answers that fit a context
 window, and a map that tells you when it's stale. Driven by the measured product review
 (`PRODUCT-REVIEW.md`).
@@ -149,6 +153,7 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/GhostlyGawd/codeweb/releases/tag/v0.1.0
