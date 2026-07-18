@@ -9,12 +9,28 @@
 [![version](https://img.shields.io/badge/version-0.3.0-c6f24e?style=flat-square)](CHANGELOG.md)
 [![changelog](https://img.shields.io/badge/changelog-Keep_a_Changelog-ffb65c?style=flat-square)](CHANGELOG.md)
 
-**You can't see where your codebase does the same work twice — and neither can the agent editing it.**
-codeweb dissects a repo to its atomic parts (functions, classes, methods), wires them into a living
-call/import graph, tags each node's domain, and surfaces cross-domain overlap. Then it serves that
-graph **two ways**: a self-contained, interactive **HTML map for you**, and **22 deterministic query
-tools** (over MCP, no LLM in the loop) **for your coding agent** to consult *before* it edits —
-*does this already exist? what breaks if I change it? where should this go?*
+**Your coding agent greps. codeweb knows.**
+
+Every serious change starts with the same questions: *who uses this? what breaks if I change it?
+does this already exist? is this dead?* Today an agent answers them by grepping and reading whole
+files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import
+graph once (~3 s for 3,000 symbols), then answers those questions **exactly, in milliseconds, for
+about a kilobyte each** — as **22 deterministic MCP tools for your agent** (no LLM in the loop) and
+a self-contained **interactive map for you**.
+
+Measured on [vite](https://github.com/vitejs/vite) (3,000+ symbols), graded by the TypeScript
+compiler as an independent referee ([`paper/results/oracle-ab.json`](paper/results/oracle-ab.json)):
+
+| The question | codeweb | grep |
+|---|---|---|
+| *"Who depends on X?"* (30 symbols) | **94% of compiler-verified files, 0.8 KB, one call** | 100% of files but 3× the tokens, as raw text lines the agent must still read |
+| *"What breaks if I change X?"* | **one ~1 KB answer** | no transitive operator: ~5 recursive rounds, **115× the tokens** |
+| *"Does this already exist? Is this dead? Did my edit break structure?"* | one call each (`find_similar` / `deadcode` / `diff` gate) | not answerable by search |
+
+In the paper's frontier-agent A/B, the same channel lifted caller-discovery recall **+0.27** with
+**~34% fewer tool calls and ~44% fewer tokens** than grep. And the byproduct is the part you can
+see: the map also surfaces **duplication, dead code, hotspots, and tangled domains** — where your
+codebase does the same work twice, which neither you nor the agent can see from inside a file.
 
 **[Website](https://ghostlygawd.github.io/codeweb/)**&nbsp;·&nbsp;[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)&nbsp;·&nbsp;[Changelog](CHANGELOG.md)
 

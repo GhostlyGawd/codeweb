@@ -1,0 +1,752 @@
+{
+  "design": "oracle-graded dependents-discovery: control=rg dump, treatment=codeweb --dependents (budgeted pages), oracle=TS LanguageService references; file-level grading; seed 42. Plus blast-radius COST: one codeweb_impact call vs the recursive grep loop (graph-assisted, i.e. generous to grep).",
+  "corpus": {
+    "graph": "/tmp/claude-0/-home-user-codeweb/3bcef4c9-1d7b-5d4f-a5a6-d91627d96990/scratchpad/vite-v7/graph.json",
+    "scope": "packages/vite/src",
+    "sampled": 30,
+    "graded": 30,
+    "oracleExcluded": 0
+  },
+  "codeweb": {
+    "meanRecall": 0.942,
+    "meanPrecision": 0.886,
+    "totalBytes": 25301,
+    "meanBytes": 843
+  },
+  "grep": {
+    "meanRecall": 1,
+    "meanPrecision": 0.88,
+    "totalBytes": 75330,
+    "meanBytes": 2511
+  },
+  "impact": {
+    "meanImpactSize": 18,
+    "codewebMeanBytes": 1034,
+    "grepMeanBytes": 119278,
+    "grepMeanRounds": 5.1,
+    "costRatio": 115.4
+  },
+  "tokensNote": "tokens ~ bytes/4; cost = what the channel injects into the agent context",
+  "rows": [
+    {
+      "symbol": "packages/vite/src/node/ssr/ssrStacktrace.ts:ssrRewriteStacktrace",
+      "label": "ssrRewriteStacktrace",
+      "truthFiles": 1,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 629,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 1354
+      },
+      "impact": {
+        "codewebBytes": 765,
+        "impactSize": 7,
+        "grepBytes": 24556,
+        "grepRounds": 5
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/plugins/worker.ts:workerFileToUrl",
+      "label": "workerFileToUrl",
+      "truthFiles": 1,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 576,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 773
+      },
+      "impact": {
+        "codewebBytes": 444,
+        "impactSize": 2,
+        "grepBytes": 25652,
+        "grepRounds": 2
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/utils.ts:removeUrlQuery",
+      "label": "removeUrlQuery",
+      "truthFiles": 2,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 555,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 825
+      },
+      "impact": {
+        "codewebBytes": 397,
+        "impactSize": 2,
+        "grepBytes": 25704,
+        "grepRounds": 2
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/utils.ts:evalValue",
+      "label": "evalValue",
+      "truthFiles": 2,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 551,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 1151
+      },
+      "impact": {
+        "codewebBytes": 727,
+        "impactSize": 7,
+        "grepBytes": 56863,
+        "grepRounds": 7
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/optimizer/index.ts:getDepsCacheDir",
+      "label": "getDepsCacheDir",
+      "truthFiles": 0,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 0,
+        "bytes": 573,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 0,
+        "bytes": 977
+      },
+      "impact": {
+        "codewebBytes": 1069,
+        "impactSize": 12,
+        "grepBytes": 60784,
+        "grepRounds": 4
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/server/middlewares/static.ts:respondWithAccessDenied",
+      "label": "respondWithAccessDenied",
+      "truthFiles": 2,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 737,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 1410
+      },
+      "impact": {
+        "codewebBytes": 1256,
+        "impactSize": 15,
+        "grepBytes": 51557,
+        "grepRounds": 7
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/plugins/clientInjections.ts:getHmrImplementation",
+      "label": "getHmrImplementation",
+      "truthFiles": 2,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 632,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 986
+      },
+      "impact": {
+        "codewebBytes": 1716,
+        "impactSize": 22,
+        "grepBytes": 66549,
+        "grepRounds": 8
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/utils.ts:combineSourcemaps",
+      "label": "combineSourcemaps",
+      "truthFiles": 5,
+      "codeweb": {
+        "recall": 1,
+        "precision": 0.8333333333333334,
+        "files": 6,
+        "bytes": 1020,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 0.8333333333333334,
+        "files": 6,
+        "bytes": 3072
+      },
+      "impact": {
+        "codewebBytes": 1573,
+        "impactSize": 57,
+        "grepBytes": 615296,
+        "grepRounds": 12
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/utils.ts:setupHmrWsOptionCompat",
+      "label": "setupHmrWsOptionCompat",
+      "truthFiles": 1,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 543,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 639
+      },
+      "impact": {
+        "codewebBytes": 1480,
+        "impactSize": 38,
+        "grepBytes": 257092,
+        "grepRounds": 8
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/server/hmr.ts:getShortName",
+      "label": "getShortName",
+      "truthFiles": 2,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 528,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 1194
+      },
+      "impact": {
+        "codewebBytes": 1600,
+        "impactSize": 21,
+        "grepBytes": 65958,
+        "grepRounds": 7
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/plugin.ts:perEnvironmentPlugin",
+      "label": "perEnvironmentPlugin",
+      "truthFiles": 6,
+      "codeweb": {
+        "recall": 0.8333333333333334,
+        "precision": 1,
+        "files": 5,
+        "bytes": 785,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 6,
+        "bytes": 2228
+      },
+      "impact": {
+        "codewebBytes": 616,
+        "impactSize": 5,
+        "grepBytes": 3870,
+        "grepRounds": 2
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/utils.ts:stripBase",
+      "label": "stripBase",
+      "truthFiles": 4,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 4,
+        "bytes": 834,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 4,
+        "bytes": 2004
+      },
+      "impact": {
+        "codewebBytes": 1533,
+        "impactSize": 44,
+        "grepBytes": 200410,
+        "grepRounds": 7
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/utils.ts:isInNodeModules",
+      "label": "isInNodeModules",
+      "truthFiles": 9,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 9,
+        "bytes": 1362,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 9,
+        "bytes": 4154
+      },
+      "impact": {
+        "codewebBytes": 1475,
+        "impactSize": 56,
+        "grepBytes": 411088,
+        "grepRounds": 9
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/plugins/html.ts:addToHTMLProxyCache",
+      "label": "addToHTMLProxyCache",
+      "truthFiles": 1,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 577,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 1173
+      },
+      "impact": {
+        "codewebBytes": 450,
+        "impactSize": 2,
+        "grepBytes": 26052,
+        "grepRounds": 2
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/optimizer/index.ts:isDepOptimizationDisabled",
+      "label": "isDepOptimizationDisabled",
+      "truthFiles": 4,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 4,
+        "bytes": 861,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 4,
+        "bytes": 1892
+      },
+      "impact": {
+        "codewebBytes": 1255,
+        "impactSize": 12,
+        "grepBytes": 23382,
+        "grepRounds": 3
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/server/middlewares/error.ts:buildErrorMessage",
+      "label": "buildErrorMessage",
+      "truthFiles": 4,
+      "codeweb": {
+        "recall": 0.75,
+        "precision": 1,
+        "files": 3,
+        "bytes": 826,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 4,
+        "bytes": 2094
+      },
+      "impact": {
+        "codewebBytes": 1596,
+        "impactSize": 33,
+        "grepBytes": 217634,
+        "grepRounds": 7
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/utils.ts:generateCodeFrame",
+      "label": "generateCodeFrame",
+      "truthFiles": 10,
+      "codeweb": {
+        "recall": 1,
+        "precision": 0.9090909090909091,
+        "files": 11,
+        "bytes": 2251,
+        "pages": 2
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 0.9090909090909091,
+        "files": 11,
+        "bytes": 9788
+      },
+      "impact": {
+        "codewebBytes": 1539,
+        "impactSize": 80,
+        "grepBytes": 401710,
+        "grepRounds": 12
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/ssr/ssrTransform.ts:ssrTransform",
+      "label": "ssrTransform",
+      "truthFiles": 3,
+      "codeweb": {
+        "recall": 0.6666666666666666,
+        "precision": 0.6666666666666666,
+        "files": 3,
+        "bytes": 691,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 0.375,
+        "files": 8,
+        "bytes": 4239
+      },
+      "impact": {
+        "codewebBytes": 1658,
+        "impactSize": 22,
+        "grepBytes": 76451,
+        "grepRounds": 6
+      }
+    },
+    {
+      "symbol": "packages/vite/src/module-runner/importMetaResolver.ts:createImportMetaResolver",
+      "label": "createImportMetaResolver",
+      "truthFiles": 2,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 691,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 2,
+        "bytes": 1162
+      },
+      "impact": {
+        "codewebBytes": 514,
+        "impactSize": 2,
+        "grepBytes": 27889,
+        "grepRounds": 2
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/server/environments/runnableEnvironment.ts:createRunnableDevEnvironment",
+      "label": "createRunnableDevEnvironment",
+      "truthFiles": 3,
+      "codeweb": {
+        "recall": 0.6666666666666666,
+        "precision": 0.6666666666666666,
+        "files": 3,
+        "bytes": 827,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 0.75,
+        "files": 4,
+        "bytes": 1577
+      },
+      "impact": {
+        "codewebBytes": 560,
+        "impactSize": 2,
+        "grepBytes": 4082,
+        "grepRounds": 2
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/utils.ts:removeImportQuery",
+      "label": "removeImportQuery",
+      "truthFiles": 4,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 4,
+        "bytes": 874,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 4,
+        "bytes": 2151
+      },
+      "impact": {
+        "codewebBytes": 1693,
+        "impactSize": 27,
+        "grepBytes": 134133,
+        "grepRounds": 7
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/build.ts:onRollupLog",
+      "label": "onRollupLog",
+      "truthFiles": 1,
+      "codeweb": {
+        "recall": 1,
+        "precision": 0.5,
+        "files": 2,
+        "bytes": 612,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 0.5,
+        "files": 2,
+        "bytes": 1147
+      },
+      "impact": {
+        "codewebBytes": 375,
+        "impactSize": 2,
+        "grepBytes": 2488,
+        "grepRounds": 2
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/shortcuts.ts:bindCLIShortcuts",
+      "label": "bindCLIShortcuts",
+      "truthFiles": 2,
+      "codeweb": {
+        "recall": 1,
+        "precision": 0.6666666666666666,
+        "files": 3,
+        "bytes": 854,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 0.5,
+        "files": 4,
+        "bytes": 3154
+      },
+      "impact": {
+        "codewebBytes": 623,
+        "impactSize": 6,
+        "grepBytes": 10590,
+        "grepRounds": 3
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/build.ts:createBuilder",
+      "label": "createBuilder",
+      "truthFiles": 2,
+      "codeweb": {
+        "recall": 0.5,
+        "precision": 0.3333333333333333,
+        "files": 3,
+        "bytes": 734,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 0.5,
+        "files": 4,
+        "bytes": 3374
+      },
+      "impact": {
+        "codewebBytes": 416,
+        "impactSize": 3,
+        "grepBytes": 108503,
+        "grepRounds": 3
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/plugins/asset.ts:urlToBuiltUrl",
+      "label": "urlToBuiltUrl",
+      "truthFiles": 1,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 533,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 712
+      },
+      "impact": {
+        "codewebBytes": 426,
+        "impactSize": 2,
+        "grepBytes": 26191,
+        "grepRounds": 2
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/config.ts:resolveConfig",
+      "label": "resolveConfig",
+      "truthFiles": 6,
+      "codeweb": {
+        "recall": 0.8333333333333334,
+        "precision": 0.3333333333333333,
+        "files": 15,
+        "bytes": 2529,
+        "pages": 2
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 0.35294117647058826,
+        "files": 17,
+        "bytes": 14058
+      },
+      "impact": {
+        "codewebBytes": 1108,
+        "impactSize": 16,
+        "grepBytes": 172735,
+        "grepRounds": 6
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/optimizer/index.ts:initDepsOptimizerMetadata",
+      "label": "initDepsOptimizerMetadata",
+      "truthFiles": 1,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 658,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 1,
+        "bytes": 1140
+      },
+      "impact": {
+        "codewebBytes": 608,
+        "impactSize": 4,
+        "grepBytes": 9912,
+        "grepRounds": 2
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/utils.ts:moduleListContains",
+      "label": "moduleListContains",
+      "truthFiles": 4,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 4,
+        "bytes": 860,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 4,
+        "bytes": 1562
+      },
+      "impact": {
+        "codewebBytes": 665,
+        "impactSize": 6,
+        "grepBytes": 112871,
+        "grepRounds": 3
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/server/pluginContainer.ts:BasicMinimalPluginContext",
+      "label": "BasicMinimalPluginContext",
+      "truthFiles": 6,
+      "codeweb": {
+        "recall": 1,
+        "precision": 1,
+        "files": 6,
+        "bytes": 891,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 1,
+        "files": 6,
+        "bytes": 2816
+      },
+      "impact": {
+        "codewebBytes": 1421,
+        "impactSize": 20,
+        "grepBytes": 178790,
+        "grepRounds": 6
+      }
+    },
+    {
+      "symbol": "packages/vite/src/node/build.ts:ChunkMetadataMap",
+      "label": "ChunkMetadataMap",
+      "truthFiles": 2,
+      "codeweb": {
+        "recall": 1,
+        "precision": 0.6666666666666666,
+        "files": 3,
+        "bytes": 707,
+        "pages": 1
+      },
+      "grep": {
+        "recall": 1,
+        "precision": 0.6666666666666666,
+        "files": 3,
+        "bytes": 2524
+      },
+      "impact": {
+        "codewebBytes": 1456,
+        "impactSize": 18,
+        "grepBytes": 179556,
+        "grepRounds": 5
+      }
+    }
+  ]
+}

@@ -3,7 +3,7 @@
   "tagline": "The living map of your codebase.",
   "repo": "https://github.com/GhostlyGawd/codeweb",
   "pagesBase": "https://ghostlygawd.github.io/codeweb/",
-  "elevator": "codeweb dissects a repository to its atomic parts — functions, classes, methods — wires them into a living call/import graph, tags each node's domain, and surfaces cross-domain overlap. It serves that one graph two ways: a self-contained interactive HTML map for humans, and 20 deterministic query tools over MCP for coding agents, so an agent can check what already exists and what an edit breaks before it writes a line.",
+  "elevator": "Every serious change starts with the same questions: who uses this? what breaks if I change it? does this already exist? is this dead? An agent answers them today by grepping and reading whole files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import graph once (~3s for 3,000 symbols), then answers those questions exactly, in milliseconds, for about a kilobyte each: 22 deterministic MCP query tools for your coding agent (no LLM in the loop), and a self-contained interactive map for you. Measured on vite with the TypeScript compiler as referee: 94% of compiler-verified dependents at a third of grep's context cost, and blast-radius answers at 1/115th the tokens of the recursive-grep loop. The byproduct is the map itself: duplication, dead code, hotspots, and tangled domains, made visible.",
   "philosophy": [
     "Deterministic — no LLM in the analysis loop; the same repo always yields the same graph.",
     "Zero runtime dependencies — the whole pipeline runs on an empty node_modules.",
@@ -265,6 +265,20 @@
     }
   ],
   "claims": [
+    {
+      "claim": "Dependents discovery vs grep (compiler-graded)",
+      "tag": "validated",
+      "metric": "recall 0.94 · precision 0.89 · 1/3 grep's context cost · 30 sampled vite symbols",
+      "sample": "TS LanguageService oracle, seed 42",
+      "source": "oracle-ab.json"
+    },
+    {
+      "claim": "Blast-radius context cost vs recursive grep",
+      "tag": "validated",
+      "metric": "~1KB/call vs ~119KB (115x), grep loop simulated generously (graph-assisted frontier)",
+      "sample": "30 vite symbols, mean impact 18 symbols",
+      "source": "oracle-ab.json"
+    },
     {
       "claim": "Byte-deterministic pipeline",
       "tag": "validated",

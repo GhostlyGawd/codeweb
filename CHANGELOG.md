@@ -20,6 +20,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
   (`obj.Method()`) stays precision-gated as in the JS regex tier — a tree-sitter tier
   for Java/C# is the next increment.
 
+### Research
+- **Oracle A/B** (`paper/experiments/oracle-ab.mjs`, results in
+  `paper/results/oracle-ab.json`): dependents-discovery graded by the TypeScript
+  compiler's own reference finder over 30 seeded vite symbols — codeweb recall 0.94 /
+  precision 0.89 at **1/3 of an idealized grep's context cost** (0.8KB vs 2.5KB per
+  task); blast-radius ("what transitively breaks") in one ~1KB call vs a recursive
+  grep loop's ~119KB (**115×**, simulated generously for grep). Mechanical and
+  reproducible — complements (does not replace) the frozen frontier-agent pilot,
+  whose run stays the evidence for agent-loop behavior (+0.27 recall, ~44% fewer
+  tokens). The 6/30 under-recalled symbols are the known dispatch/re-export gap.
+
 ## [0.3.0] - 2026-07-18
 
 The agent-efficiency release: outputs that can't corrupt, answers that fit a context

@@ -61,6 +61,18 @@
 <p>  restsharp/RestSharp (1,542 symbols, Allman style, 0.9s). Method-dispatch recall</p>
 <p>  (<code>obj.Method()</code>) stays precision-gated as in the JS regex tier — a tree-sitter tier</p>
 <p>  for Java/C# is the next increment.</p>
+<h3 class="cl-grp">Research</h3>
+<ul>
+<li><strong>Oracle A/B</strong> (<code>paper/experiments/oracle-ab.mjs</code>, results in</li>
+</ul>
+<p>  <code>paper/results/oracle-ab.json</code>): dependents-discovery graded by the TypeScript</p>
+<p>  compiler's own reference finder over 30 seeded vite symbols — codeweb recall 0.94 /</p>
+<p>  precision 0.89 at <strong>1/3 of an idealized grep's context cost</strong> (0.8KB vs 2.5KB per</p>
+<p>  task); blast-radius ("what transitively breaks") in one ~1KB call vs a recursive</p>
+<p>  grep loop's ~119KB (<strong>115×</strong>, simulated generously for grep). Mechanical and</p>
+<p>  reproducible — complements (does not replace) the frozen frontier-agent pilot,</p>
+<p>  whose run stays the evidence for agent-loop behavior (+0.27 recall, ~44% fewer</p>
+<p>  tokens). The 6/30 under-recalled symbols are the known dispatch/re-export gap.</p>
 <h2 class="cl-ver">[0.3.0] - 2026-07-18</h2>
 <p>The agent-efficiency release: outputs that can't corrupt, answers that fit a context</p>
 <p>window, and a map that tells you when it's stale. Driven by the measured product review</p>
