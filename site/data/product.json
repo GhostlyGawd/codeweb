@@ -15,7 +15,9 @@
     "TypeScript",
     "Python",
     "Rust",
-    "Go"
+    "Go",
+    "Java",
+    "C#"
   ],
   "modes": [
     {
@@ -336,7 +338,7 @@
     {
       "claim": "Five-language extraction parity",
       "tag": "validated",
-      "metric": "JS · TS · Python · Rust · Go",
+      "metric": "JS · TS · Python · Rust · Go (Java + C# shipped v-next, not yet in the parity corpus)",
       "sample": "per-language fixtures",
       "source": "auxiliary.json"
     },

@@ -10,7 +10,9 @@ const byIdLt = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 // dead-code workflow — one truth). Matches `*.test.*`, `*.spec.*`, `*_test.*`, or a path segment
 // `tests/` | `test/` | `__tests__/`. Forward-slashed relative paths.
 export const isTestFile = (file) =>
-  /(?:^|\/)(?:tests?|__tests__)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.)/.test(file || '');
+  /(?:^|\/)(?:tests?|__tests__)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.)/.test(file || '') ||
+  /(?:^|\/)src\/test\//.test(file || '') ||               // Maven/Gradle convention
+  /(?:Tests?|Spec)\.(?:java|cs)$/.test(file || '');       // FooTest.java / FooTests.cs / FooSpec.java
 
 // Code ROLE by path — product code vs the supporting cast (one truth: the extractor stamps it on
 // every node; normalizeGraph back-fills older graphs). Rankings and default report views scope to

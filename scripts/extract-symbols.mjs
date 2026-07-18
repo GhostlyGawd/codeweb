@@ -32,7 +32,10 @@ import { loadTsEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tier
 //     lines (multi-line templates/comments can no longer desync brace matching); class-field arrow
 //     methods discovered; bare-identifier arguments become `ref` edges (not fabricated `call`s);
 //     bare-name resolution is package-scoped (no more cross-package name-collision edges).
-const SCANNER_VERSION = 7;
+// v8: Java + C# discovery (class/interface/enum/record/struct + methods with owner-qualified ids,
+//     visibility-as-export, C# base-list inherit edges); pom.xml/build.gradle/.csproj join the
+//     package-boundary manifests.
+const SCANNER_VERSION = 8;
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -55,7 +58,7 @@ if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json
 const root = resolve(opts.path);
 if (!existsSync(root)) { console.error(`[extract] not found: ${root}`); process.exit(1); }
 
-const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go)$/;
+const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs)$/;
 const SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
 
 const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
@@ -193,10 +196,15 @@ const rel = (f) => relative(root, f).replace(/\\/g, '/');
 // precisely); a cross-package NAME COLLISION is exactly how `create-vite` template files ended up
 // "calling" vite's normalizePath. Single-package repos (or trees with no manifests) all map to ''
 // — behavior there is unchanged.
-const MANIFESTS = ['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml'];
+const MANIFESTS = ['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'pom.xml', 'build.gradle', 'build.gradle.kts'];
 const manifestMemo = new Map(); // dir -> boolean
 const hasManifest = (dir) => {
-  if (!manifestMemo.has(dir)) manifestMemo.set(dir, MANIFESTS.some((m) => existsSync(join(root, dir, m))));
+  if (!manifestMemo.has(dir)) {
+    let found = MANIFESTS.some((m) => existsSync(join(root, dir, m)));
+    // C# projects name their manifest <Project>.csproj — a fixed-name check can't see it
+    if (!found) { try { found = readdirSync(join(root, dir)).some((f) => f.endsWith('.csproj') || f.endsWith('.sln')); } catch { /* unreadable dir */ } }
+    manifestMemo.set(dir, found);
+  }
   return manifestMemo.get(dir);
 };
 const pkgMemo = new Map(); // file's dir -> package dir
@@ -268,6 +276,34 @@ function scanSymbols(file, text) {
       if ((m = methodRe.exec(ln))) syms.push({ name: m[2], line: i + 1, kind: 'method', exports: exp(m[2]), ...(recvType(m[1]) ? { owner: recvType(m[1]) } : {}) });
       else if ((m = funcRe.exec(ln))) syms.push({ name: m[1], line: i + 1, kind: 'function', exports: exp(m[1]) });
       else if ((m = typeRe.exec(ln))) syms.push({ name: m[1], line: i + 1, kind: 'class', exports: exp(m[1]) });
+    });
+  } else if (ext === '.java') {
+    // Java: class/interface/enum/record -> 'class' (public -> exported); a name(...)-{ line inside a
+    // type is a method/constructor. Owner qualification reuses the enclosing-class mechanism (every
+    // Java method is inside a type). Annotation lines (@Override) match nothing. Control-flow words
+    // are filtered by KEYWORDS; `throws` clauses are tolerated before the brace.
+    const TYPE = /^\s*(?:@[\w.$]+(?:\([^)]*\))?\s+)?(?:(?:public|protected|private|static|final|abstract|sealed|non-sealed|strictfp)\s+)*(class|interface|enum|record)\s+([A-Za-z_$][\w$]*)/;
+    const METHOD = /^\s+(?:(?:public|protected|private|static|final|abstract|synchronized|native|default|strictfp)\s+)*(?:<[^>]+>\s+)?(?:[\w$<>\[\],.?\s]+?\s+)?([A-Za-z_$][\w$]*)\s*\([^;{]*\)\s*(?:throws\s+[\w$,.\s]+)?\{/;
+    const CTRL = new Set(['if', 'for', 'while', 'switch', 'catch', 'try', 'do', 'synchronized', 'assert', 'return', 'throw', 'new', 'else']);
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = TYPE.exec(ln))) push(m[2], i, 'class', /\bpublic\b/.test(ln));
+      else if ((m = METHOD.exec(ln)) && !CTRL.has(m[1])) push(m[1], i, 'method', /\bpublic\b/.test(ln));
+    });
+  } else if (ext === '.cs') {
+    // C#: class/interface/struct/record/enum -> 'class' (public -> exported); methods like Java
+    // (expression-bodied `=> …;` members end via the brace-less semicolon rule). Properties
+    // (`int X { get; set; }`) are skipped — no param list, and they'd be reference noise.
+    const TYPE = /^\s*(?:\[[^\]]*\]\s*)?(?:(?:public|private|protected|internal|static|sealed|abstract|partial|readonly|ref)\s+)*(class|interface|struct|record|enum)\s+([A-Za-z_][\w]*)/;
+    // brace on the same line, `=> expr;`, or NOTHING after `)` — C#'s dominant Allman style puts
+    // the `{` on the next line (bodyEnd handles that; a call statement line ends `);` so it can't
+    // false-match the bare-`)` form).
+    const METHOD = /^\s+(?:(?:public|private|protected|internal|static|virtual|override|abstract|sealed|async|extern|unsafe|new|partial)\s+)+(?:[\w<>\[\],.?\s]+?\s+)?([A-Za-z_][\w]*)\s*\([^;{]*\)\s*(?:where\s+[^{]+)?(?:\{|=>|$)/;
+    const CTRL = new Set(['if', 'for', 'foreach', 'while', 'switch', 'catch', 'try', 'do', 'using', 'lock', 'fixed', 'return', 'throw', 'new', 'else']);
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = TYPE.exec(ln))) push(m[2], i, 'class', /\bpublic\b/.test(ln));
+      else if ((m = METHOD.exec(ln)) && !CTRL.has(m[1])) push(m[1], i, 'method', /\bpublic\b/.test(ln));
     });
   } else {
     const exported = (ln) => /\bexport\b/.test(ln);
@@ -441,12 +477,13 @@ for (const f of files) {
   const total = lines.length;
   const isPy = r.endsWith('.py');
   const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
+  const isBraceLang = isJsTs || /\.(java|cs)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
   // Body extents are measured on MASKED lines: stripSC alone is line-local, so a multi-line template
   // literal (or block comment) containing braces desynced the brace counter and bodies swallowed
   // whole neighboring functions (a 5-line helper recorded as 550 loc on vite — poisoning
   // context-pack size, complexity, and body-confirmed duplication). maskJs/maskPy carry string/
   // comment state ACROSS lines; ${} interpolations stay live so real code still counts.
-  const scanLines = (isPy ? maskPy(text) : isJsTs ? maskJs(text) : text).split(/\r?\n/);
+  const scanLines = (isPy ? maskPy(text) : isBraceLang ? maskJs(text) : text).split(/\r?\n/);
   const fileRole = roleOf(r);
   // When the tree-sitter engine is active it OWNS JS/TS method discovery (class-qualified ids) and the
   // dispatch edges; the regex scanner still owns classes, functions and const-arrow functions (which
@@ -811,6 +848,8 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
   const callRe = /([A-Za-z_$][\w$]*)\s*\(/g;
   const refRe = /[(,]\s*([A-Za-z_$][\w$]*)\s*(?=[,)])/g;
   const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g;
+  const csBaseRe = /\b(?:class|struct|record)\s+[A-Za-z_]\w*(?:<[^>]*>)?\s*:\s*([A-Za-z_][\w.]*)/g; // C# `class A : Base, IFace` -> Base
+  const isCs = r.endsWith('.cs');
   const instanceofRe = /\binstanceof\s+([A-Za-z_$][\w$]*)/g; // `x instanceof X` -> ref to class X
   const pyBasesRe = /^\s*class\s+[A-Za-z_]\w*\s*\(([^)]*)\)/;
   for (let i = 0; i < lines.length; i++) {
@@ -826,6 +865,10 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
     } else {
       extendsRe.lastIndex = 0; let xm;
       while ((xm = extendsRe.exec(ln))) addEdge(i, xm[1], 'inherit');
+      if (isCs) {
+        csBaseRe.lastIndex = 0;
+        while ((xm = csBaseRe.exec(ln))) { const base = xm[1].split('.').pop(); if (base) addEdge(i, base, 'inherit'); }
+      }
     }
     callRe.lastIndex = 0; let m;
     while ((m = callRe.exec(ln))) {
@@ -875,7 +918,7 @@ const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; /
 for (const f of edgeFiles) {
   const { text, ranges } = fileSyms.get(f);
   const r = rel(f);
-  const lines = (r.endsWith('.py') ? maskPy(text) : /\.(jsx?|mjs|cjs|tsx?)$/.test(r) ? maskJs(text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
+  const lines = (r.endsWith('.py') ? maskPy(text) : /\.(jsx?|mjs|cjs|tsx?|java|cs)$/.test(r) ? maskJs(text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
   const prev = reuseEdges && oldCache.files[r];
   let result;
@@ -945,7 +988,7 @@ for (const f of edgeFiles) {
 // body-reading, report header) read the target from here instead of re-hardcoding it.
 const rootFwd = root.replace(/\\/g, '/').replace(/\/+$/, '');
 const targetLabel = opts.target || rootFwd.split('/').slice(-2).join('/') || rootFwd;
-const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
+const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
 const languages = [...new Set(files.map(langOf))].sort();
 const fragment = {
   meta: {

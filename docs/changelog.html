@@ -49,7 +49,18 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
-<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>Java + C# on the deterministic fast path</strong> (extractor v8): class/interface/enum/</li>
+</ul>
+<p>  record/struct discovery with visibility-as-export, owner-qualified method ids</p>
+<p>  (constructors included), Allman-brace + expression-bodied members (C#), <code>extends</code> /</p>
+<p>  base-list inheritance edges, control-flow phantom guards, Maven/Gradle test-layout</p>
+<p>  and <code>*Test.java</code> / <code>*Tests.cs</code> role detection, and pom.xml / build.gradle / .csproj</p>
+<p>  package boundaries. Verified on square/javapoet (497 symbols, 0 phantoms, 0.7s) and</p>
+<p>  restsharp/RestSharp (1,542 symbols, Allman style, 0.9s). Method-dispatch recall</p>
+<p>  (<code>obj.Method()</code>) stays precision-gated as in the JS regex tier — a tree-sitter tier</p>
+<p>  for Java/C# is the next increment.</p>
 <h2 class="cl-ver">[0.3.0] - 2026-07-18</h2>
 <p>The agent-efficiency release: outputs that can't corrupt, answers that fit a context</p>
 <p>window, and a map that tells you when it's stale. Driven by the measured product review</p>

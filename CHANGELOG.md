@@ -9,7 +9,16 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Added
+- **Java + C# on the deterministic fast path** (extractor v8): class/interface/enum/
+  record/struct discovery with visibility-as-export, owner-qualified method ids
+  (constructors included), Allman-brace + expression-bodied members (C#), `extends` /
+  base-list inheritance edges, control-flow phantom guards, Maven/Gradle test-layout
+  and `*Test.java` / `*Tests.cs` role detection, and pom.xml / build.gradle / .csproj
+  package boundaries. Verified on square/javapoet (497 symbols, 0 phantoms, 0.7s) and
+  restsharp/RestSharp (1,542 symbols, Allman style, 0.9s). Method-dispatch recall
+  (`obj.Method()`) stays precision-gated as in the JS regex tier — a tree-sitter tier
+  for Java/C# is the next increment.
 
 ## [0.3.0] - 2026-07-18
 

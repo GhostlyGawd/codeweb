@@ -408,7 +408,7 @@ Built for agents, not just reachable by them:
 
 ## How it works
 
-For JavaScript, TypeScript, Python, Rust, and Go the default is a **deterministic Node pipeline** — one
+For JavaScript, TypeScript, Python, Rust, Go, Java, and C# the default is a **deterministic Node pipeline** — one
 command, no LLM in the loop, reproducible byte-for-byte. `scripts/run.mjs` chains five stages
 into a per-target workspace:
 
@@ -497,9 +497,10 @@ codeweb/
 
 ## Roadmap
 
-- **More first-class languages** — Java, C#, and others on the deterministic fast path. (JavaScript,
-  TypeScript, Python, **Rust**, and **Go** are native today; everything else routes through the agent
-  fallback.)
+- **More first-class languages** — beyond the seven native today (JavaScript, TypeScript, Python,
+  **Rust**, **Go**, **Java**, **C#**), the next tier (Ruby, PHP, Kotlin, Swift) still routes through
+  the agent fallback. Java/C# dynamic-dispatch recall (a tree-sitter tier like the JS/TS one) is the
+  next increment there.
 
 _Recently shipped: an **agent-intelligence suite** — refactoring **hotspots** (complexity × fan-in ×
 churn), a gated ROI-ranked optimization **campaign** planner, a foundations-first **reading-order**,
