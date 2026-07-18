@@ -21,6 +21,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeGraph, buildIndex } from './lib/graph-ops.mjs';
 import { runQuery } from './lib/query-core.mjs';
+import { findSymbols } from './lib/find-core.mjs';
 import { checkStaleness } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -44,6 +45,7 @@ const INSTRUCTIONS = [
   'Loop: BEFORE editing a symbol call codeweb_context (bounded edit window) or codeweb_impact (blast radius).',
   'AFTER editing call codeweb_refresh, then codeweb_diff (before vs after) to gate the edit.',
   'Before WRITING a new function call codeweb_find_similar (does this exist?) and codeweb_placement (where does it belong?).',
+  'No symbol name yet? codeweb_find turns a concept ("retry backoff") into ranked starting symbols.',
   '`graph` is optional — the server finds the nearest .codeweb/graph.json from cwd. No graph yet? codeweb_map builds one (~3s for 3k symbols).',
   'Responses are budgeted (top-N + more.remaining). Pass full:true for the unabridged list, or limit/offset to page.',
 ].join('\n');
@@ -96,7 +98,7 @@ const QUERY_KIND = { codeweb_callers: 'callers', codeweb_callees: 'callees', cod
 // structural tools (refresh preserves domains but drops overlaps, so overlap-consuming advisors
 // keep their input). Throttled per graph; CODEWEB_NO_AUTOREFRESH=1 disables; failure -> serve the
 // stale answer WITH its stale annotation (never a dead end).
-const AUTOREFRESH_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_context', 'codeweb_explain']);
+const AUTOREFRESH_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_context', 'codeweb_explain', 'codeweb_find']);
 const refreshAttempt = new Map(); // abs graph path -> last attempt ms
 function autoRefresh(absGraph) {
   if (process.env.CODEWEB_NO_AUTOREFRESH === '1') return;
@@ -141,6 +143,10 @@ const TOOLS = [
   { name: 'codeweb_explain', need: ['symbol'], opt: ['graph'], bin: scriptOf('explain.mjs'),
     argv: (a) => [a.symbol],
     description: '"Tell me about X before I touch it" in ONE ~1KB card: identity, role, signature, complexity, fan-in/out, tests, blast radius + domains, top-5 callers/callees, and any duplication/pattern findings it belongs to. Start here; drill down with impact/context/callers.' },
+  { name: 'codeweb_find', need: ['query'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 },
+    bin: scriptOf('find.mjs'),
+    argv: (a) => [a.query],
+    description: 'Concept search when you do NOT know the symbol name: free text ("retry handling") -> ranked symbols (identifier/file/domain token match, stemmed, weighted by exports/role/fan-in). Deterministic, no embeddings. Start here when orienting; feed the top id to codeweb_explain.' },
   { name: 'codeweb_context', need: ['symbol'], opt: ['graph', 'limit', 'window', 'full'], budget: { arg: 'limit', flag: '--limit', value: 12 },
     bin: scriptOf('context-pack.mjs'),
     argv: (a) => [a.symbol, ...(a.full ? ['--full-bodies'] : []), ...(a.window != null ? ['--window', String(a.window)] : [])],
@@ -186,6 +192,7 @@ const TOOLS = [
 const PROP = {
   graph: { type: 'string', description: 'Path to graph.json. OPTIONAL — defaults to CODEWEB_WS or the nearest .codeweb/graph.json above cwd' },
   symbol: { type: 'string', description: 'A node id (file:label) or a bare label' },
+  query: { type: 'string', description: 'Free-text concept ("retry backoff", "where is config parsed") — no symbol name needed' },
   before: { type: 'string', description: 'Path to the BEFORE graph.json snapshot' },
   after: { type: 'string', description: 'Path to the AFTER graph.json snapshot' },
   signature: { type: 'string', description: 'A candidate function signature to check for existing implementations' },
@@ -255,6 +262,30 @@ function handleToolCall(id, params) {
 
   if (graphPath && AUTOREFRESH_TOOLS.has(tool.name)) autoRefresh(resolve(graphPath));
 
+  // Fast path: concept search answers in-process from the cached graph (same ranking as the CLI
+  // via find-core; budget applied identically). Any surprise falls back to the spawned artifact.
+  if (tool.name === 'codeweb_find') {
+    try {
+      const { graph, index } = cachedGraph(resolve(graphPath));
+      const { qtoks, results } = findSymbols(graph, index, String(args.query || ''));
+      if (qtoks.length) {
+        const limit = args.limit != null ? Number(args.limit) : (args.full ? Infinity : tool.budget.value);
+        const offset = args.offset != null ? Math.max(0, Number(args.offset)) : 0;
+        const items = results.slice(offset, Number.isFinite(limit) ? offset + limit : undefined);
+        const domains = [...new Set(results.map((r) => r.domain))];
+        const payload = {
+          query: args.query, terms: qtoks,
+          summary: `"${args.query}": ${results.length} match(es) across ${domains.length} domain(s)${results.length ? ` — top: ${results[0].id}` : ''}`,
+          results: items, count: results.length, domains: domains.slice(0, 8),
+        };
+        const remaining = results.length - offset - items.length;
+        if (remaining > 0) payload.more = { remaining, nextOffset: offset + items.length };
+        const stale = checkStaleness(graph);
+        if (stale) { payload.stale = stale; payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`; }
+        return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
+      }
+    } catch { /* fall through to the spawned artifact */ }
+  }
   // Fast path: structural queries answer in-process from the cached graph (same payloads as the
   // CLI via query-core). Any surprise falls back to the spawned, tested artifact.
   const qkind = QUERY_KIND[tool.name];

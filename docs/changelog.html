@@ -82,6 +82,36 @@
 <p>  throttled, CODEWEB_NO_AUTOREFRESH=1 opts out) before structural queries, and</p>
 <p>  per-DIRECTORY mtime stamps make brand-new files trip the staleness check (per-file</p>
 <p>  stamps cannot see a file that didn't exist).</p>
+<h3 class="cl-grp">Added (the proof, the surfaces, the last query family)</h3>
+<ul>
+<li><strong><code>codeweb bench</code></strong> (<code>scripts/bench.mjs</code>, <code>npm run bench</code>): the oracle A/B packaged as a</li>
+</ul>
+<p>  one-command benchmark on YOUR repo — context cost per dependents task + blast-radius cost</p>
+<p>  always; recall/precision graded by the TypeScript LanguageService when <code>typescript</code> is</p>
+<p>  resolvable; ripgrep optional. The engine moved verbatim into <code>scripts/lib/bench-core.mjs</code></p>
+<p>  (the paper experiment is now a thin wrapper over it — reproduction against the committed</p>
+<p>  canonical run is byte-identical), so published numbers and user-generated numbers can</p>
+<p>  never measure different things.</p>
+<ul>
+<li><strong>The gate now posts its review</strong>: <code>ci-gate --md</code> renders the structural delta (blocking</li>
+</ul>
+<p>  regressions, new cycles/duplications, symbols that lost all callers, renames-not-churn)</p>
+<p>  as a budgeted digest and the <code>codeweb gate</code> workflow posts/updates it as a sticky PR</p>
+<p>  comment on pass AND fail — visible where reviewers already look, verdict unchanged.</p>
+<ul>
+<li><strong>Editor CodeLens</strong> (<code>editor/vscode-codeweb</code>): zero-dependency VS Code extension showing</li>
+</ul>
+<p>  <code>N callers · blast M</code> above every mapped symbol from the nearest <code>.codeweb/graph.json</code></p>
+<p>  (identical semantics to <code>codeweb_callers</code>/<code>codeweb_impact</code>), click-through to</p>
+<p>  <code>report.html#s=&lt;id&gt;</code>.</p>
+<ul>
+<li><strong><code>codeweb_find</code> — concept search</strong> (23rd MCP tool + <code>scripts/find.mjs</code>): free text</li>
+</ul>
+<p>  ("where is retry handled?") → ranked symbols, deterministically — camelCase/snake_case</p>
+<p>  token match with light stemming over identifiers/files/domains, weighted by exports,</p>
+<p>  role (tests only when asked for), and fan-in. Served in-process from the cached graph,</p>
+<p>  budgeted, staleness-annotated. Closes the last gap: every other query tool needs a name;</p>
+<p>  this one turns an idea into the right starting symbol.</p>
 <h3 class="cl-grp">Research</h3>
 <ul>
 <li><strong>Oracle A/B</strong> (<code>paper/experiments/oracle-ab.mjs</code>, results in</li>

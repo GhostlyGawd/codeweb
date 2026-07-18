@@ -3,10 +3,11 @@
 // where reviewers already look, budgeted like every other codeweb surface (hard caps + explicit
 // "+N more", never an unbounded dump).
 
+import { sign } from './cli.mjs';
+
 const MARKER = '<!-- codeweb-gate -->';
 
 const cap = (arr, n) => ({ head: arr.slice(0, n), more: Math.max(0, arr.length - n) });
-const sign = (n) => (n >= 0 ? `+${n}` : `${n}`);
 
 /**
  * payload = the `diff.mjs --json` object. Returns the full comment body (marker included, so the
