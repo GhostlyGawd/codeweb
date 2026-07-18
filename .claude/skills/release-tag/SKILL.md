@@ -51,15 +51,30 @@ pass, merge. The release commit must be the one carrying the version bump.
 
 ## 3. Tag the release commit
 
+**Path A — you can push tags** (local dev, tokens with full repo write):
+
 ```sh
 git fetch origin main
 git tag -a vX.Y.Z -m "codeweb vX.Y.Z" origin/main   # or the explicit release commit SHA
 git push origin vX.Y.Z
 ```
 
-Rules the workflow enforces: the tag must match `package.json` on the tagged commit
-(mismatch fails the run), and a hyphenated version (`v1.0.0-rc.1`) publishes as a
-prerelease automatically.
+The tag must point at a commit that CONTAINS `.github/workflows/release.yml` — tag-push
+runs use the workflow file at the tagged commit, not at main.
+
+**Path B — tag push denied** (remote agent sessions: push access is scoped to the
+designated branch, so `refs/tags/*` gets HTTP 403; retrying is pointless — it's policy,
+not network): dispatch the `release` workflow on `main` instead. It creates the tag
+server-side at the dispatched ref, then publishes **in the same run** (a
+GITHUB_TOKEN-pushed tag never re-triggers the tag-push path — GitHub's recursion guard).
+
+- UI: Actions → release → "Run workflow" on `main` (version input optional — defaults to
+  `package.json`).
+- GitHub MCP: `actions_run_trigger` with `workflow_file: release.yml`, `ref: main`.
+
+Rules the workflow enforces on both paths: the version must match `package.json` at the
+tagged/dispatched ref (mismatch fails the run), and a hyphenated version (`v1.0.0-rc.1`)
+publishes as a prerelease automatically.
 
 ## 4. Verify
 
@@ -82,8 +97,11 @@ re-prep/re-tag. Never move a tag that others may have fetched — cut a patch re
 
 ## Environment variants
 
-- **Remote / gh-less** (agent sessions, plain CI): the flow above is complete as-is —
-  publishing happens server-side in the workflow. This is why the workflow exists.
-- **Local with `gh`**: identical flow; `gh release view vX.Y.Z` is a convenient verify.
-  Creating the release manually with `gh release create` is unnecessary (the workflow
-  will detect it and skip) but harmless.
+- **Remote / gh-less, branch-scoped push** (managed agent sessions): use Path B
+  (workflow_dispatch). Everything else — prep, PR, verify — works unchanged. If script
+  execution is also blocked, use the manual file-edit equivalent in step 1.
+- **Remote / gh-less, full push access** (plain CI, deploy keys): Path A; publishing
+  still happens server-side in the workflow.
+- **Local with `gh`**: Path A; `gh release view vX.Y.Z` is a convenient verify. Creating
+  the release manually with `gh release create` is unnecessary (the workflow will detect
+  it and skip) but harmless.
