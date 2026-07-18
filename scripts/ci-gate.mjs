@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // codeweb CI gate — fail a PR when an edit makes the structure worse.
 //
-//   node scripts/ci-gate.mjs --base <ref> [--repo <path>] [--target <subdir>]
+//   node scripts/ci-gate.mjs --base <ref> [--repo <path>] [--target <subdir>] [--md <file>]
 //
 // Builds the BEFORE graph from a base ref (materialized in an ephemeral git worktree) and the AFTER
 // graph from the current working tree, then runs the diff regression gate. Exit 1 (listing the
@@ -9,29 +9,34 @@
 // an existing symbol lose all its callers; exit 0 otherwise; exit 2 on usage/IO error. Read-only
 // over the repo — the base worktree is removed afterwards. Reuses the canonical run.mjs pipeline and
 // the diff.mjs gate verbatim, so the gate's verdict matches `diff` exactly.
+//
+// --md writes the structural review as a PR-comment-ready markdown digest (lib/gate-md.mjs) —
+// best-effort: a digest failure never changes the gate's verdict.
 
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync, spawnSync } from 'node:child_process';
+import { gateComment } from './lib/gate-md.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 function parseArgs(argv) {
-  const a = { base: null, repo: '.', target: '.' };
+  const a = { base: null, repo: '.', target: '.', md: null };
   for (let i = 0; i < argv.length; i++) {
     const t = argv[i];
     if (t === '--base') a.base = argv[++i];
     else if (t === '--repo') a.repo = argv[++i];
     else if (t === '--target') a.target = argv[++i];
+    else if (t === '--md') a.md = argv[++i];
   }
   return a;
 }
 
 const opts = parseArgs(process.argv.slice(2));
 if (!opts.base) {
-  console.error('usage: ci-gate.mjs --base <ref> [--repo <path>] [--target <subdir>]');
+  console.error('usage: ci-gate.mjs --base <ref> [--repo <path>] [--target <subdir>] [--md <file>]');
   process.exit(2);
 }
 
@@ -63,6 +68,13 @@ try {
     code = 1;
   } else {
     code = d.status;
+  }
+  // PR-comment digest — a second diff over the already-built graphs (ms), rendered budgeted
+  if (opts.md) {
+    try {
+      const dj = spawnSync(node, [join(HERE, 'diff.mjs'), beforeGraph, afterGraph, '--json'], { encoding: 'utf8', maxBuffer: 1 << 26 });
+      writeFileSync(opts.md, gateComment(JSON.parse(dj.stdout)));
+    } catch (e) { console.error(`[codeweb] gate comment not written: ${(e && e.message) || e}`); }
   }
 } catch (e) {
   console.error(`[codeweb] gate error: ${(e && e.message) || e}`);

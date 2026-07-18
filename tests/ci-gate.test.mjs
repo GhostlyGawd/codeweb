@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runNode, script, tmpDir, cleanup, writeTree } from './helpers.mjs';
 
@@ -52,6 +53,22 @@ test('ci-gate passes (exit 0) when the working tree matches base', { skip: hasGi
   try {
     const r = runNode(script('ci-gate.mjs'), ['--base', base, '--repo', repo, '--target', 'src']);
     assert.equal(r.status, 0, `expected the gate to pass; stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+  } finally {
+    cleanup(repo);
+  }
+});
+
+test('ci-gate --md writes the PR-comment digest carrying the verdict', { skip: hasGit ? false : 'git not available' }, () => {
+  const { repo, base } = repoWithBase();
+  try {
+    writeTree(repo, { 'src/b.js': COMPUTE }); // duplication -> failing gate
+    const md = join(repo, 'gate.md');
+    const r = runNode(script('ci-gate.mjs'), ['--base', base, '--repo', repo, '--target', 'src', '--md', md]);
+    assert.equal(r.status, 1, 'verdict unchanged by the digest');
+    const body = readFileSync(md, 'utf8');
+    assert.match(body, /^<!-- codeweb-gate -->/, 'sticky-comment marker leads the body');
+    assert.match(body, /❌ \d+ regression type/, 'verdict in the headline');
+    assert.match(body, /New duplication findings/, 'names the regression class');
   } finally {
     cleanup(repo);
   }
