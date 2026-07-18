@@ -53,6 +53,27 @@ export function loadGraph(pathArg, { usage = null } = {}) {
 }
 
 /**
+ * Cached, best-effort source access for a graph's target (meta.root) — THE body reader
+ * (context-pack, find-similar, diff rename-matching all read node spans; the logic lives once).
+ * bodyOf(node) = the exact source lines [line, line+loc-1], or null when unreadable.
+ */
+export function sourceReader(root) {
+  const available = !!root && existsSync(root);
+  const cache = new Map();
+  const linesOf = (rel) => {
+    if (!available) return null;
+    if (!cache.has(rel)) { try { cache.set(rel, readFileSync(root + '/' + rel, 'utf8').split(/\r?\n/)); } catch { cache.set(rel, null); } }
+    return cache.get(rel);
+  };
+  const bodyOf = (n) => {
+    const lines = n && linesOf(n.file);
+    if (!lines) return null;
+    return lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n');
+  };
+  return { available, linesOf, bodyOf };
+}
+
+/**
  * Staleness check against the extractor's per-file stamps (meta.sources: {rel: {s,m}}). Returns
  * null when the graph matches disk (or has no stamps/root); else { count, files: [up to 8 rels] }.
  * stat-only — a few ms even on thousands of files. New files can't be detected without a walk

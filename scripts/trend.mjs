@@ -102,7 +102,7 @@ function renderTrend(rows, { json } = {}) {
 }
 
 // ---- snapshot sources ----
-const loadGraph = (p) => JSON.parse(readFileSync(resolve(p), 'utf8'));
+const loadSnapshot = (p) => JSON.parse(readFileSync(resolve(p), 'utf8'));
 
 function gitSnapshots(repo, last, focus) {
   const git = (args) => execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' });
@@ -117,7 +117,7 @@ function gitSnapshots(repo, last, focus) {
     try {
       git(['worktree', 'add', '--detach', '--force', wt, sha]);
       execFileSync(process.execPath, [join(HERE, 'run.mjs'), join(wt, focus), '--target', sha.slice(0, 7), '--out-dir', ws], { stdio: 'ignore' });
-      rows.push({ label, ...metrics(loadGraph(join(ws, 'graph.json'))) });
+      rows.push({ label, ...metrics(loadSnapshot(join(ws, 'graph.json'))) });
     } catch (e) {
       rows.push({ label, error: String((e && e.message) || e), confirmed: 0, candidates: 0, coupling: 0, nodes: 0, files: 0 });
     } finally {
@@ -135,7 +135,7 @@ if (opts.git) {
   rows = gitSnapshots(resolve(opts.git), opts.last, opts.focus);
 } else if (opts.graphs.length) {
   rows = opts.graphs.map((p, i) => {
-    const g = loadGraph(p);
+    const g = loadSnapshot(p);
     const label = (opts.labels && opts.labels[i]) || (g.meta && g.meta.target) || `snapshot ${i + 1}`;
     return { label, ...metrics(g) };
   });

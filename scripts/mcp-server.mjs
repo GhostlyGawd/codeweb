@@ -24,7 +24,7 @@ import { runQuery } from './lib/query-core.mjs';
 import { checkStaleness } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const S = (f) => join(HERE, f);
+const scriptOf = (f) => join(HERE, f);
 
 // serverInfo.version derives from package.json at startup — the ONE version truth — so the MCP
 // handshake can never drift from the shipped release again (it sat at 0.1.0 while the product was
@@ -94,7 +94,7 @@ const QUERY_KIND = { codeweb_callers: 'callers', codeweb_callees: 'callees', cod
 // need: required args (validated). opt: optional args (schema only). budget: {arg, flag, value} —
 // when the caller passes neither that arg nor full:true, `flag value` is injected (default top-N).
 // argv(a): CLI argv AFTER the graph path. bin defaults to query.mjs. input(a): child stdin.
-const QUERY = S('query.mjs');
+const QUERY = scriptOf('query.mjs');
 const TOOLS = [
   { name: 'codeweb_callers', need: ['symbol'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 20 },
     argv: (a) => ['--callers', a.symbol],
@@ -114,47 +114,47 @@ const TOOLS = [
   { name: 'codeweb_tests', need: ['symbol'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 20 },
     argv: (a) => ['--tests', a.symbol],
     description: 'The tests that exercise a symbol (test-edge in-neighbors). Run the right subset after editing a symbol.' },
-  { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: S('diff.mjs'), graphless: true,
+  { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: scriptOf('diff.mjs'), graphless: true,
     argv: (a) => [a.before, a.after],
     description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression (new cycle, new duplication, a symbol that lost all callers). Call AFTER an edit to gate it.' },
-  { name: 'codeweb_explain', need: ['symbol'], opt: ['graph'], bin: S('explain.mjs'),
+  { name: 'codeweb_explain', need: ['symbol'], opt: ['graph'], bin: scriptOf('explain.mjs'),
     argv: (a) => [a.symbol],
     description: '"Tell me about X before I touch it" in ONE ~1KB card: identity, role, signature, complexity, fan-in/out, tests, blast radius + domains, top-5 callers/callees, and any duplication/pattern findings it belongs to. Start here; drill down with impact/context/callers.' },
   { name: 'codeweb_context', need: ['symbol'], opt: ['graph', 'limit', 'window', 'full'], budget: { arg: 'limit', flag: '--limit', value: 12 },
-    bin: S('context-pack.mjs'),
+    bin: scriptOf('context-pack.mjs'),
     argv: (a) => [a.symbol, ...(a.full ? ['--full-bodies'] : []), ...(a.window != null ? ['--window', String(a.window)] : [])],
     description: 'Bounded edit window for a symbol in ONE call: its body, direct callers as CALL-SITE WINDOWS (±3 lines around each use — the lines that break if the contract changes), callees (location-only), and the impact set. Budgeted: 12 callers by default; full:true returns whole caller bodies (large).' },
-  { name: 'codeweb_refresh', need: [], opt: ['graph'], bin: S('refresh.mjs'), argv: () => [],
+  { name: 'codeweb_refresh', need: [], opt: ['graph'], bin: scriptOf('refresh.mjs'), argv: () => [],
     description: 'Re-extract the graph from disk (meta.root) so mid-task queries reflect your edits, not a stale snapshot. Incremental; preserves domains, drops stale overlaps. Call AFTER you edit source and BEFORE re-querying impact/callers/context.' },
-  { name: 'codeweb_find_similar', need: [], opt: ['graph', 'signature', 'body', 'structural'], bin: S('find-similar.mjs'),
+  { name: 'codeweb_find_similar', need: [], opt: ['graph', 'signature', 'body', 'structural'], bin: scriptOf('find-similar.mjs'),
     valid: (a) => (a.signature || a.body) ? null : 'pass `signature` (a candidate signature) or `body` (a code snippet)',
     argv: (a) => a.body ? ['--stdin', ...(a.structural ? ['--structural'] : [])] : ['--signature', a.signature, ...(a.structural ? ['--structural'] : [])],
     input: (a) => a.body || undefined,
     description: 'Before writing a function, ask "does something already do this?": ranks existing bodies by similarity to a candidate `signature` or `body` snippet. structural:true matches identifier-renamed (Type-2) clones. Call to AVOID re-implementing existing logic.' },
-  { name: 'codeweb_placement', need: ['calls'], opt: ['graph'], bin: S('placement.mjs'),
+  { name: 'codeweb_placement', need: ['calls'], opt: ['graph'], bin: scriptOf('placement.mjs'),
     argv: (a) => ['--calls', a.calls],
     description: 'Where a NEW symbol belongs: given the comma-separated ids/labels it will call, suggests the domain + file by callee gravity, and warns if it duplicates an existing symbol.' },
-  { name: 'codeweb_review', need: ['changed'], opt: ['graph', 'before', 'gate', 'limit', 'full'], bin: S('review.mjs'),
+  { name: 'codeweb_review', need: ['changed'], opt: ['graph', 'before', 'gate', 'limit', 'full'], bin: scriptOf('review.mjs'),
     argv: (a) => ['--changed', a.changed, ...(a.before ? ['--before', a.before] : []), ...(a.gate ? ['--gate'] : [])],
     description: 'Structural review of a change: changed files (comma-separated, optionally file:start-end) -> changed symbols, blast radius, domains, fan-in-ranked review order. With `before` (a prior graph.json) + gate:true it FAILS on a structural regression — the full review gate, agent-reachable.' },
-  { name: 'codeweb_fitness', need: ['rules'], opt: ['graph'], bin: S('fitness.mjs'),
+  { name: 'codeweb_fitness', need: ['rules'], opt: ['graph'], bin: scriptOf('fitness.mjs'),
     argv: (a) => ['--rules', a.rules],
     description: 'Check the graph against architectural fitness rules (codeweb.rules.json): forbidden-dependency, layering, no-cycles, max-fan-in, max-symbol-loc. Reports violations.' },
-  { name: 'codeweb_risk', need: [], opt: ['graph', 'changed', 'limit', 'full'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: S('risk.mjs'),
+  { name: 'codeweb_risk', need: [], opt: ['graph', 'changed', 'limit', 'full'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('risk.mjs'),
     argv: (a) => (a.changed ? ['--changed', a.changed] : []),
     description: 'Rank symbols by change-risk (fan-in, fan-out, loc, blast radius, churn); `changed` scopes to a comma-separated file list. Budgeted: top 15 by default.' },
-  { name: 'codeweb_break_cycles', need: [], opt: ['graph', 'limit', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 }, bin: S('break-cycles.mjs'), argv: () => [],
+  { name: 'codeweb_break_cycles', need: [], opt: ['graph', 'limit', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 }, bin: scriptOf('break-cycles.mjs'), argv: () => [],
     description: 'For each file dependency cycle, the cheapest dependency edge to sever — verified to actually break the cycle. Budgeted: top 10 cycles by default.' },
-  { name: 'codeweb_deadcode', need: [], opt: ['graph', 'limit', 'full'], budget: { arg: 'limit', flag: '--limit', value: 20 }, bin: S('deadcode.mjs'), argv: () => [],
+  { name: 'codeweb_deadcode', need: [], opt: ['graph', 'limit', 'full'], budget: { arg: 'limit', flag: '--limit', value: 20 }, bin: scriptOf('deadcode.mjs'), argv: () => [],
     description: 'Confidence-tiered dead-code: safe-to-delete vs review-first (test-guarded or entrypoint-like), each with its loc span. Budgeted: top 20 per tier by span (totals stay true; full:true for everything).' },
-  { name: 'codeweb_codemod', need: ['merge', 'into'], opt: ['graph'], bin: S('codemod.mjs'),
+  { name: 'codeweb_codemod', need: ['merge', 'into'], opt: ['graph'], bin: scriptOf('codemod.mjs'),
     argv: (a) => ['--merge', a.merge, '--into', a.into],
     description: 'Plan a consolidation merge (report-only): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, and the projected regression-gate verdict. Read-only — does NOT modify source.' },
-  { name: 'codeweb_hotspots', need: [], opt: ['graph', 'limit', 'full'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: S('hotspots.mjs'), argv: () => [],
+  { name: 'codeweb_hotspots', need: [], opt: ['graph', 'limit', 'full'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('hotspots.mjs'), argv: () => [],
     description: 'Rank symbols by refactoring priority (complexity x fan-in x churn): where to focus first. Budgeted: top 15 with raw components.' },
-  { name: 'codeweb_campaign', need: [], opt: ['graph', 'budget', 'full'], budget: { arg: 'budget', flag: '--budget', value: 25 }, bin: S('campaign.mjs'), argv: () => [],
+  { name: 'codeweb_campaign', need: [], opt: ['graph', 'budget', 'full'], budget: { arg: 'budget', flag: '--budget', value: 25 }, bin: scriptOf('campaign.mjs'), argv: () => [],
     description: 'One ordered, gated optimization worklist (dead-code deletes + verified cycle cuts + duplicate merges), pre-flighted so applying in order never introduces a cycle. Budgeted: top 25 ROI steps by default (`budget` N or full:true for the whole plan).' },
-  { name: 'codeweb_reading_order', need: [], opt: ['graph', 'scope', 'value', 'budget'], bin: S('reading-order.mjs'),
+  { name: 'codeweb_reading_order', need: [], opt: ['graph', 'scope', 'value', 'budget'], bin: scriptOf('reading-order.mjs'),
     budget: { arg: 'budget', flag: '--budget', value: 20 },
     argv: (a) => (a.scope && a.value ? ['--scope', a.scope, a.value] : []),
     description: 'A foundations-first reading path (depended-upon leaves before orchestrators) to understand a codebase or one scope fast. scope: domain|file|symbol + value narrows it; budget bounds the list (default 20).' },
@@ -197,7 +197,7 @@ function handleMap(id, args) {
   const target = resolve(args.target || process.cwd());
   if (!existsSync(target)) return errResult(id, `target not found: ${target}`);
   const out = resolve(args.out || join(target, '.codeweb'));
-  const r = spawnSync(process.execPath, [S('run.mjs'), target, '--out-dir', out], { encoding: 'utf8', maxBuffer: 1 << 28, timeout: 300_000 });
+  const r = spawnSync(process.execPath, [scriptOf('run.mjs'), target, '--out-dir', out], { encoding: 'utf8', maxBuffer: 1 << 28, timeout: 300_000 });
   if (r.status !== 0) {
     return errResult(id, `codeweb_map failed (exit ${r.status}): ${(r.stderr || '').trim().split('\n').slice(-3).join('\n')}`);
   }

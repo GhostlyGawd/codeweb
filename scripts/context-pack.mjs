@@ -17,7 +17,7 @@ import { resolve } from 'node:path';
 import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, impactOf } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--json]   (or set CODEWEB_WS)';
-import { die, emitJson, finish, capList, checkStaleness, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, checkStaleness, loadGraph, sourceReader } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, windowN = 3, fullBodies = false, limit = null; const pos = [];
@@ -44,20 +44,12 @@ const callerIds = callersOf(index, ids);
 const calleeIds = calleesOf(index, ids);
 const blast = impactOf(index, ids);
 
-const root = graph.meta?.root || null;
-const sourceAvailable = !!root && existsSync(root);
-const fileCache = new Map();
-const readLines = (rel) => {
-  if (!fileCache.has(rel)) { try { fileCache.set(rel, readFileSync(root + '/' + rel, 'utf8').split(/\r?\n/)); } catch { fileCache.set(rel, null); } }
-  return fileCache.get(rel);
-};
-// CP-BODY-FIDELITY: the exact source lines [line, line+loc-1] joined by \n, no trailing newline.
-const bodyOf = (n) => {
-  if (!sourceAvailable) return null;
-  const lines = readLines(n.file);
-  if (!lines) return null;
-  return lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n');
-};
+// CP-BODY-FIDELITY: sourceReader serves the exact source lines [line, line+loc-1] (one truth,
+// shared with find-similar + diff rename-matching).
+const reader = sourceReader(graph.meta?.root || null);
+const sourceAvailable = reader.available;
+const readLines = reader.linesOf;
+const bodyOf = reader.bodyOf;
 const view = (n, withBody) => {
   const o = { id: n.id, label: n.label, kind: n.kind, file: n.file, line: n.line, loc: n.loc, domain: n.domain, exports: n.exports, signature: n.signature ?? null };
   if (withBody) o.body = bodyOf(n);

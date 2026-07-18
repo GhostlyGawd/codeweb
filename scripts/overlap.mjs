@@ -18,6 +18,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { shingles, jaccard } from './lib/shingles.mjs'; // shared body-shingle primitives (one truth)
 import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
+import { sourceReader } from './lib/cli.mjs'; // shared body access (one truth)
 
 const WS = process.env.CODEWEB_WS || '.live';   // per-target workspace dir (orchestrator sets this)
 const GRAPH_PATH = `${WS}/graph.json`;
@@ -47,9 +48,8 @@ const cv = (xs) => { const m = xs.reduce((a, b) => a + b, 0) / xs.length; if (!m
 const intersectAll = (sets) => { if (sets.length < 2) return new Set(); let acc = new Set(sets[0]); for (const s of sets.slice(1)) acc = new Set([...acc].filter((x) => s.has(x))); return acc; };
 
 // ---- body access (read-only, by line range) ----
-const fileCache = new Map();
-const readLines = (rel) => { if (!fileCache.has(rel)) { try { fileCache.set(rel, readFileSync(SOURCE_ROOT + '/' + rel, 'utf8').split(/\r?\n/)); } catch { fileCache.set(rel, null); } } return fileCache.get(rel); };
-const bodyShingles = (n) => { const lines = readLines(n.file); if (!lines) return null; const s = shingles(lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n'), K); return s.size ? s : null; };
+const reader = sourceReader(SOURCE_ROOT);
+const bodyShingles = (n) => { const body = reader.bodyOf(n); if (body == null) return null; const s = shingles(body, K); return s.size ? s : null; };
 const bodyConfidence = (nodes) => {
   const sets = nodes.map(bodyShingles).filter(Boolean);
   if (sets.length < 2) return null;

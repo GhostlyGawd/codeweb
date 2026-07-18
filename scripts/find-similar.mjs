@@ -16,7 +16,7 @@ import { shingles, jaccard } from './lib/shingles.mjs';
 import { structuralShingles } from './lib/skeleton.mjs'; // F6: Type-2 (rename-invariant) similarity
 
 const USAGE = 'usage: find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--structural] [--json]';
-import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, sourceReader } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, body = null, stdin = false, signature = null, k = 10, structural = false; const pos = [];
@@ -53,16 +53,8 @@ try {
 const candidate = shg(candidateText);
 
 // score every non-test function/method body
-const fileCache = new Map();
-const readLines = (rel) => {
-  if (!fileCache.has(rel)) { try { fileCache.set(rel, readFileSync(root + '/' + rel, 'utf8').split(/\r?\n/)); } catch { fileCache.set(rel, null); } }
-  return fileCache.get(rel);
-};
-const bodyOf = (n) => {
-  const lines = readLines(n.file);
-  if (!lines) return null;
-  return lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n');
-};
+const reader = sourceReader(root);
+const bodyOf = reader.bodyOf;
 const tierOf = (s) => (s >= 0.6 ? 'high' : s >= 0.35 ? 'medium' : 'low'); // overlap.mjs bands
 
 const matches = [];
