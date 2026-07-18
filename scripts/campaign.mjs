@@ -46,7 +46,12 @@ const deadcode = advise('deadcode.mjs') || { safe: [] };
 const breakCycles = advise('break-cycles.mjs') || { cycles: [] };
 
 const plan = planCampaign(graph, { optimize, deadcode, breakCycles, budget });
-const payload = { target: graph.meta?.target || 'target', ...plan };
+const t0 = plan.totals;
+const payload = {
+  target: graph.meta?.target || 'target',
+  summary: `${t0.steps} step(s): ${t0.cuts} cut, ${t0.deletes} delete, ${t0.merges} merge — projected -${t0.locReclaimed} LOC, ${t0.cyclesBroken} cycle(s) broken (gate-green in order)`,
+  ...plan,
+};
 
 if (json) { emitJson(payload); } else {
 

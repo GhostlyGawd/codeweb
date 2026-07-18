@@ -14,13 +14,14 @@ import { normalizeGraph } from './lib/graph-ops.mjs';
 import { rankHotspots } from './lib/hotspots.mjs';
 
 const USAGE = 'usage: hotspots.mjs <graph.json> [--churn <map.json> | --git] [--json]';
-import { die, emitJson, finish } from './lib/cli.mjs';
+import { die, emitJson, finish, capList } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
-let json = false, churnPath = null, useGit = false; const pos = [];
+let json = false, churnPath = null, useGit = false, limit = null; const pos = [];
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--json') json = true;
+  else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
   else if (t === '--churn') churnPath = argv[++i];
   else if (t === '--git') useGit = true;
   else if (!t.startsWith('-')) pos.push(t);
@@ -42,7 +43,10 @@ else if (useGit) {
   if (r.status === 0) for (const f of r.stdout.split(/\r?\n/)) if (f.trim()) churn[f.trim()] = (churn[f.trim()] || 0) + 1;
 }
 
-const payload = { target: graph.meta?.target || 'target', ...rankHotspots(graph, { churn }) };
+const full = rankHotspots(graph, { churn });
+const capped = capList(full.ranked, limit);
+const payload = { target: graph.meta?.target || 'target', summary: `${full.count} symbol(s) ranked by complexity x fan-in x churn`, ...full, ranked: capped.items };
+if (capped.truncated) payload.more = { remaining: capped.remaining };
 
 if (json) { emitJson(payload); } else {
 

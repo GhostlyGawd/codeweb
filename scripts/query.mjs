@@ -20,16 +20,18 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, testersOf, importersOf, refsOf, dependentsOf, impactOf, fileCycles, orphans } from './lib/graph-ops.mjs';
 
-const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--json]`;
-import { die, emitJson, finish } from './lib/cli.mjs';
+const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--limit N] [--offset N] [--json]`;
+import { die, emitJson, finish, capList } from './lib/cli.mjs';
 
 function parseArgs(argv) {
-  const o = { graph: null, query: null, symbol: null, json: false, help: false, queries: 0 };
+  const o = { graph: null, query: null, symbol: null, json: false, help: false, queries: 0, limit: null, offset: 0 };
   const withVal = { '--callers': 'callers', '--callees': 'callees', '--tests': 'tests', '--dependents': 'dependents', '--impact': 'impact' };
   const noVal = { '--cycles': 'cycles', '--orphans': 'orphans' };
   for (let i = 0; i < argv.length; i++) {
     const t = argv[i];
     if (t === '--json') o.json = true;
+    else if (t === '--limit') o.limit = Math.max(0, parseInt(argv[++i], 10) || 0);
+    else if (t === '--offset') o.offset = Math.max(0, parseInt(argv[++i], 10) || 0);
     else if (t === '--help' || t === '-h') o.help = true;
     else if (t in withVal) {
       o.query = withVal[t]; o.queries++;
@@ -38,6 +40,17 @@ function parseArgs(argv) {
     else if (!t.startsWith('-') && o.graph === null) o.graph = t;
   }
   return o;
+}
+
+// Budgeted output: cap a payload's list field to --limit/--offset. `count` stays the TRUE total;
+// the capped list replaces the field; `more` describes the remainder (absent when nothing was cut) —
+// top-N + an explicit handle instead of an unbounded dump.
+function budget(payload, field) {
+  if (opts.limit == null && !opts.offset) return payload;
+  const c = capList(payload[field], opts.limit, opts.offset);
+  payload[field] = c.items;
+  if (c.remaining > 0) payload.more = { remaining: c.remaining, nextOffset: c.offset + c.items.length };
+  return payload;
 }
 
 const opts = parseArgs(process.argv.slice(2));
@@ -59,7 +72,7 @@ if (opts.query === 'callers' || opts.query === 'callees' || opts.query === 'test
   if (!matched.length) { payload = { query: opts.query, symbol: opts.symbol, found: false }; code = 1; }
   else {
     const results = opts.query === 'callers' ? callersOf(index, matched) : opts.query === 'callees' ? calleesOf(index, matched) : testersOf(index, matched);
-    payload = { query: opts.query, symbol: opts.symbol, matched, results, count: results.length };
+    payload = budget({ query: opts.query, symbol: opts.symbol, summary: `${results.length} ${opts.query === 'tests' ? 'test(s) exercise' : opts.query + ' of'} ${opts.symbol}`, matched, results, count: results.length }, 'results');
   }
 } else if (opts.query === 'dependents') {
   const matched = resolveSymbol(graph, opts.symbol);
@@ -68,7 +81,10 @@ if (opts.query === 'callers' || opts.query === 'callees' || opts.query === 'test
     const results = dependentsOf(index, matched);
     const inheritIn = [...new Set(matched.flatMap((id) => [...(index.inheritIn.get(id) || [])]))].sort();
     const byKind = { call: callersOf(index, matched), import: importersOf(index, matched), inherit: inheritIn, test: testersOf(index, matched), ref: refsOf(index, matched) };
-    payload = { query: 'dependents', symbol: opts.symbol, matched, results, byKind, count: results.length };
+    const kindCounts = Object.fromEntries(Object.entries(byKind).map(([k, v]) => [k, v.length]));
+    // under a budget, byKind collapses to counts (the full per-kind lists are the bulk of the payload)
+    payload = { query: 'dependents', symbol: opts.symbol, summary: `${results.length} dependent(s) of ${opts.symbol} (${Object.entries(kindCounts).map(([k, v]) => `${k} ${v}`).join(', ')})`, matched, results, byKind: opts.limit != null ? kindCounts : byKind, count: results.length };
+    budget(payload, 'results');
   }
 } else if (opts.query === 'impact') {
   const matched = resolveSymbol(graph, opts.symbol);
@@ -76,14 +92,19 @@ if (opts.query === 'callers' || opts.query === 'callees' || opts.query === 'test
   else {
     const results = impactOf(index, matched);
     const domains = [...new Set(results.map((id) => index.byId.get(id)?.domain || 'unassigned'))].sort();
-    payload = { query: 'impact', symbol: opts.symbol, matched, results, domains, count: results.length };
+    // under a budget, rank the surviving ids by fan-in (the callers most likely to matter first)
+    // instead of alphabetically — top-N must be the most RELEVANT N, not the first N by name.
+    const ranked = opts.limit != null
+      ? results.slice().sort((a, b) => (index.callIn.get(b)?.size || 0) - (index.callIn.get(a)?.size || 0) || (a < b ? -1 : 1))
+      : results;
+    payload = budget({ query: 'impact', symbol: opts.symbol, summary: `editing ${opts.symbol} touches ${results.length} function(s) across ${domains.length} domain(s)`, matched, results: ranked, domains, count: results.length }, 'results');
   }
 } else if (opts.query === 'cycles') {
   const cycles = fileCycles(graph);
-  payload = { query: 'cycles', cycles, count: cycles.length };
+  payload = budget({ query: 'cycles', summary: `${cycles.length} file-level dependency cycle(s)`, cycles, count: cycles.length }, 'cycles');
 } else if (opts.query === 'orphans') {
   const results = orphans(graph, index);
-  payload = { query: 'orphans', results, count: results.length };
+  payload = budget({ query: 'orphans', summary: `${results.length} orphan(s) — no callers and not exported`, results, count: results.length }, 'results');
 }
 
 if (opts.json) { emitJson(payload, code); } else {
@@ -109,5 +130,6 @@ if (p.query === 'callers' || p.query === 'callees' || p.query === 'tests') {
   console.log(`${p.count} orphan(s) — no callers and not exported:`);
   for (const o of p.results) console.log(`  ${o.id}  [${o.domain}]`);
 }
+if (p.more) console.log(`  … +${p.more.remaining} more (rerun with --offset ${p.more.nextOffset})`);
 finish(code);
 }

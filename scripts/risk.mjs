@@ -15,13 +15,14 @@ import { normalizeGraph, buildIndex, impactOf } from './lib/graph-ops.mjs';
 import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
 
 const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--churn <map.json> | --git] [--json]';
-import { die, emitJson, finish } from './lib/cli.mjs';
+import { die, emitJson, finish, capList } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
-let json = false, changed = null, churnPath = null, useGit = false; const pos = [];
+let json = false, changed = null, churnPath = null, useGit = false, limit = null; const pos = [];
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--json') json = true;
+  else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
   else if (t === '--changed') changed = argv[++i];
   else if (t === '--churn') churnPath = argv[++i];
   else if (t === '--git') useGit = true;
@@ -67,7 +68,9 @@ if (changed != null) {
   ranked = ranked.filter((r) => files.has(r.file));
 }
 
-const payload = { target: graph.meta?.target || 'target', weights: RISK_WEIGHTS, maxes, count: ranked.length, ranked };
+const capped = capList(ranked, limit);
+const payload = { target: graph.meta?.target || 'target', summary: `${ranked.length} symbol(s) ranked by change-risk${changed != null ? ' (changed only)' : ''}`, weights: RISK_WEIGHTS, maxes, count: ranked.length, ranked: capped.items };
+if (capped.truncated) payload.more = { remaining: capped.remaining };
 
 if (json) { emitJson(payload); } else {
 
