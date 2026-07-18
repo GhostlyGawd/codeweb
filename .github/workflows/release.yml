@@ -1,12 +1,23 @@
 name: release
 
 # Publishing path for environments without `gh` or a GitHub-release API tool (remote agent
-# sessions, bare CI): push an annotated `vX.Y.Z` tag and this workflow publishes the GitHub
-# Release server-side, with notes sliced from the matching CHANGELOG.md section. The full
-# runbook lives in .claude/skills/release-tag/SKILL.md.
+# sessions, bare CI). Two triggers, one job:
+#   - tag push `vX.Y.Z`  — for environments that CAN push tags: the tag is the publish button.
+#   - workflow_dispatch  — for environments that CANNOT (branch-scoped push policy denies
+#     refs/tags/* with 403): the run creates the tag server-side at the dispatched ref, then
+#     publishes. It must publish in the SAME run — a GITHUB_TOKEN-pushed tag never re-triggers
+#     the `on: push: tags` path (GitHub's recursion guard).
+# Notes are sliced from the matching CHANGELOG.md section. The full runbook lives in
+# .claude/skills/release-tag/SKILL.md.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (X.Y.Z). Empty = package.json version at the dispatched ref.'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -17,21 +28,47 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Resolve version
+        id: ver
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="${INPUT_VERSION#v}"
+            VERSION="${VERSION:-$(node -p "require('./package.json').version")}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       # The tag must point at a commit whose package.json agrees with it — the lock-step rule
       # check-consistency enforces everywhere else, applied to the tag itself. Catches tagging
-      # the wrong commit (e.g. main before the release PR merged).
-      - name: Verify tag matches package.json
+      # (or dispatching against) the wrong commit.
+      - name: Verify version matches package.json
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ steps.ver.outputs.version }}"
           PKG="$(node -p "require('./package.json').version")"
           if [ "$PKG" != "$VERSION" ]; then
-            echo "::error::tag ${GITHUB_REF_NAME} does not match package.json version ${PKG} — tag the release commit"
+            echo "::error::release version ${VERSION} does not match package.json version ${PKG} at this ref"
             exit 1
+          fi
+
+      - name: Create tag (dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          if git ls-remote --exit-code --tags origin "v$VERSION" >/dev/null 2>&1; then
+            echo "tag v$VERSION already exists on origin — reusing it"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "v$VERSION" -m "codeweb v$VERSION"
+            git push origin "v$VERSION"
           fi
 
       - name: Slice release notes from CHANGELOG.md
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ steps.ver.outputs.version }}"
           # Exact-prefix match on "## [X.Y.Z]" (index(), not regex — dots stay literal),
           # capture until the next "## [" heading.
           awk -v ver="$VERSION" '
@@ -49,13 +86,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "release $GITHUB_REF_NAME already exists — nothing to do"
+          TAG="v${{ steps.ver.outputs.version }}"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "release $TAG already exists — nothing to do"
             exit 0
           fi
-          case "${GITHUB_REF_NAME#v}" in *-*) PRE=--prerelease ;; *) PRE= ;; esac
-          gh release create "$GITHUB_REF_NAME" \
+          case "$TAG" in *-*) PRE=--prerelease ;; *) PRE= ;; esac
+          gh release create "$TAG" \
             --repo "$GITHUB_REPOSITORY" \
-            --title "codeweb $GITHUB_REF_NAME" \
+            --title "codeweb $TAG" \
             --notes-file /tmp/notes.md \
             --verify-tag $PRE
