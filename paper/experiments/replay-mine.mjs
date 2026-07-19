@@ -76,6 +76,17 @@ function defLineOf(srcDir, node) {
 // not a semantic breakage (this exact trap produced 2 invalid tasks in the v1 axios corpus).
 const normSig = (s) => s.replace(/"/g, "'").replace(/[()]/g, '').replace(/\s+/g, '').replace(/;+$/, '');
 
+// Distinctive-label guard: the follow-up evidence is a word-bounded mention of the symbol's
+// label in a later diff — meaningless when the label is a language keyword, because keywords
+// appear in diffs as SYNTAX (a vite candidate named `type` matched `import type { Hostname }`
+// lines in an unrelated hostname fix). Keywords across the corpus languages never qualify.
+const KEYWORD_LABELS = new Set([
+  'type', 'get', 'set', 'default', 'import', 'export', 'new', 'delete', 'in', 'of', 'for',
+  'if', 'else', 'do', 'this', 'super', 'constructor', 'static', 'public', 'private',
+  'protected', 'internal', 'class', 'function', 'return', 'async', 'await', 'yield', 'void',
+  'var', 'let', 'const', 'def', 'fn', 'func',
+]);
+
 const callerFilesOf = (frag, id, ownFile) => {
   const files = new Set();
   for (const e of frag.edges || []) {
@@ -88,7 +99,7 @@ const callerFilesOf = (frag, id, ownFile) => {
 
 const tasks = [];
 // the funnel is reported, never silent — a 0-task run must say WHERE candidates died
-const funnel = { signaturePairs: 0, symbolsInChangedFiles: 0, idPresentInBase: 0, signatureChanged: 0, enoughCallers: 0, hadMissedCallers: 0, hadFollowupFix: 0, defDiffComplete: 0 };
+const funnel = { signaturePairs: 0, symbolsInChangedFiles: 0, idPresentInBase: 0, distinctiveLabel: 0, signatureChanged: 0, enoughCallers: 0, hadMissedCallers: 0, hadFollowupFix: 0, defDiffComplete: 0 };
 let pairsTried = 0;
 for (let i = 0; i < commits.length - 1 && tasks.length < maxTasks && pairsTried < maxPairs; i++) {
   const C = commits[i];
@@ -114,6 +125,8 @@ for (let i = 0; i < commits.length - 1 && tasks.length < maxTasks && pairsTried 
       const b = bById.get(a.id);
       if (!b) continue;
       funnel.idPresentInBase++;
+      if (KEYWORD_LABELS.has(a.label)) continue;
+      funnel.distinctiveLabel++;
       const bp = normSig(JSON.stringify(b.signature?.params ?? null)), ap = normSig(JSON.stringify(a.signature?.params ?? null));
       let sigChanged = bp !== ap;
       if (!sigChanged) {

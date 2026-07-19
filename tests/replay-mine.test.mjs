@@ -9,6 +9,9 @@
 //     even when a later reformat touches callers and mentions the symbol (the prettier trap
 //     that produced 2 invalid tasks in the v1 axios corpus).
 // P5: a change whose file diff cannot be embedded verbatim (>16KB) is rejected, not truncated.
+// P6: a symbol whose label is a language keyword is rejected — its word-bounded follow-up
+//     "mention" matches syntax, not the symbol (a vite candidate named `type` matched
+//     `import type {...}` lines in an unrelated hostname fix).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -182,5 +185,30 @@ test('P5: a change too large to embed verbatim is rejected, never truncated into
     assert.equal(out.tasks.length, 0, `oversized diff -> no task (funnel: ${JSON.stringify(out.funnel)})`);
     assert.ok(out.funnel.hadFollowupFix >= 1, 'the candidate survived every semantic stage');
     assert.equal(out.funnel.defDiffComplete, 0, 'funnel names the exit stage: the diff could not be embedded verbatim');
+  } finally { cleanup(repo); }
+});
+
+test('P6: a keyword-labeled symbol is rejected — its "mention" evidence would match syntax', { skip: hasGit ? false : 'git not available' }, () => {
+  const { repo, g } = gitRepo();
+  try {
+    const kwCaller = (n) => `import { type } from './lib/hub.js';\nexport function use${n}() {\n  return type(1);\n}\n`;
+    writeTree(repo, {
+      'lib/hub.js': 'export function type(v) {\n  return v * 2;\n}\n',
+      'ca.js': kwCaller('A'), 'cb.js': kwCaller('B'),
+    });
+    g('add', '-A'); g('commit', '-q', '-m', 'base');
+
+    // a REAL signature change that misses both callers…
+    writeTree(repo, { 'lib/hub.js': 'export function type(v, mode) {\n  return mode ? v : v * 2;\n}\n' });
+    g('add', '-A'); g('commit', '-q', '-m', 'add mode param');
+
+    // …and a later commit touching a caller whose diff contains the word as SYNTAX-ish noise
+    writeTree(repo, { 'cb.js': `import { type } from './lib/hub.js';\n// content type handling\nexport function useB() {\n  return type(1, true);\n}\n` });
+    g('add', '-A'); g('commit', '-q', '-m', 'fix');
+
+    const out = mine(repo);
+    assert.equal(out.tasks.length, 0, `keyword label -> never a task (funnel: ${JSON.stringify(out.funnel)})`);
+    assert.ok(out.funnel.idPresentInBase >= 1, 'the symbol WAS compared across the pair');
+    assert.equal(out.funnel.distinctiveLabel, 0, 'funnel names the exit stage: the label cannot carry mention evidence');
   } finally { cleanup(repo); }
 });
