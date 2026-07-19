@@ -49,36 +49,56 @@ function findChromium() {
 }
 
 mkdirSync(resolve(outDir), { recursive: true });
+const VW = 1600, VH = 1000, PANEL = 340;
 const browser = await chromium.launch({ executablePath: findChromium() });
-const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: scale });
+const page = await browser.newPage({ viewport: { width: VW, height: VH }, deviceScaleFactor: scale });
 page.on('pageerror', (e) => { console.error('page error: ' + e.message); process.exitCode = 1; });
 await page.goto('file://' + resolve(report));
 await page.waitForTimeout(800);
-const shot = (name) => page.screenshot({ path: join(resolve(outDir), `${prefix}-${name}.png`) });
+// clip = crop to CONTENT (CSS px) — a README thumbnail of a full frame is unreadable; empty
+// canvas never ships. Clips are clamped to the viewport.
+const shot = (name, clip) => {
+  if (clip) {
+    const x = Math.max(0, Math.floor(clip.x)), y = Math.max(0, Math.floor(clip.y));
+    clip = { x, y, width: Math.min(VW - x, Math.ceil(clip.width)), height: Math.min(VH - y, Math.ceil(clip.height)) };
+  }
+  return page.screenshot({ path: join(resolve(outDir), `${prefix}-${name}.png`), ...(clip ? { clip } : {}) });
+};
 const tab = async (v) => { await page.click(`.tab[data-view="${v}"]`); await page.waitForTimeout(700); };
+const graphClip = async (pad) => {
+  const b = await page.evaluate(() => window.__codewebStage && window.__codewebStage.graphBBox && window.__codewebStage.graphBBox());
+  if (!b) return null;
+  // graph bbox + header row; always include the inspector column on the right
+  return { x: Math.max(0, b.x - pad), y: 0, width: VW - Math.max(0, b.x - pad), height: Math.min(VH, 48 + b.y + b.h + pad) };
+};
 
 // 1. findings — first paint, overview card populated by construction
 await shot('findings');
 
-// 2. graph — the areas overview, settled
+// 2. graph — the areas overview, settled, cropped to the drawn content
 await tab('graph');
 await page.waitForTimeout(3200);
 await page.click('#gFit');
 await page.waitForTimeout(400);
-await shot('graph');
+await shot('graph', await graphClip(40));
 
-// 3. blast — expand the top hotspot's area, select it, neighbors lit, inspector populated
-await page.evaluate(() => {
-  const hits = window.__codewebStage && window.__codewebStage.topHotspot();
-  return hits;
-});
+// 3. blast — top hotspot selected (zoomed), its area expanded, inspector populated
 const staged = await page.evaluate(() => window.__codewebStage ? window.__codewebStage.topHotspot() : null);
-if (staged) { await page.waitForTimeout(2600); await page.click('#gFit'); await page.waitForTimeout(400); await shot('blast'); }
+if (staged) { await page.waitForTimeout(2600); await shot('blast', await graphClip(24)); }
 else console.error('stage hook missing — blast shot skipped (old report build?)');
 
-// 4-5. treemap + matrix
+// 4. treemap — dense edge-to-edge, full frame
 await tab('treemap'); await shot('treemap');
-await tab('matrix'); await shot('matrix');
+
+// 5. matrix — cropped to the table + legend (it occupies a corner of the full frame)
+await tab('matrix');
+const mClip = await page.evaluate(() => {
+  const t = document.querySelector('table.m'); const l = document.querySelector('#view-matrix .legend');
+  if (!t) return null;
+  const tr = t.getBoundingClientRect(), lr = l ? l.getBoundingClientRect() : tr;
+  return { x: 0, y: 0, width: Math.max(tr.right, lr.right) + 24, height: Math.max(tr.bottom, lr.bottom) + 16 };
+});
+await shot('matrix', mClip);
 
 await browser.close();
 console.log(`[screenshot] ${staged ? 5 : 4} frame(s) -> ${resolve(outDir)}/${prefix}-*.png${staged ? ` (blast: ${staged})` : ''}`);
