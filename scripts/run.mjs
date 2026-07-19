@@ -52,6 +52,7 @@ const node = process.execPath;
 const S = (p) => join(ROOT, p);
 const run = (label, file, args, useEnv) => {
   console.error(`\n[run] ${label}`);
+  const t0 = Date.now();
   try {
     execFileSync(node, [file, ...args], { stdio: 'inherit', env: useEnv ? env : process.env, cwd: ROOT });
   } catch (e) {
@@ -60,6 +61,9 @@ const run = (label, file, args, useEnv) => {
     console.error(`\n[run] stage '${label}' failed${typeof e?.status === 'number' ? ` (exit ${e.status})` : ''} — aborting`);
     process.exit(1);
   }
+  // Per-stage wall-time, stderr only (Spec K): the scale bench parses these lines; artifacts
+  // never see a timestamp from here.
+  console.error(`[run] ${label} done in ${Date.now() - t0}ms`);
 };
 
 const targetArg = opts.target ? ['--target', opts.target] : [];

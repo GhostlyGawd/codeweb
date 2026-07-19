@@ -6,6 +6,27 @@ the fragment is **byte-identical**. Edit one file and cluster/overlap/optimize/r
 re-run from scratch — the full downstream cost on every re-map after an agent edit, and twice
 per CI-gate run. The one-file-edit number Spec K records is the cost this spec exists to cut.
 
+## Amendment (Spec K's measurement moved the target — read this first)
+The refreshed split at 16k symbols (bench/results/scale-typescript.json) says the downstream
+wall is NOT where this spec originally aimed. One-file-edit re-map = 73.3s: extract 8.2s
+(cache riding), cluster **0.6s**, overlap **1.2s**, **optimize 60.5s**, report 2.2s. Cluster +
+overlap — the stages the projection/group-cache design below targets — are ~2s of 73s.
+`optimize.mjs` is 83% of the edit path (36% of cold): each of 112 duplicate-logic candidates
+runs `applyEdit` (clones the entire 16k-node graph) + `fileCycles` (full file-graph SCC on the
+clone) + `impactOf` — O(candidates × graph) with allocation churn to match.
+
+So the execution order inverts, under the same byte-identity contract:
+- **O-1 (the win): optimize stops cloning the world.** Compute each candidate's simulated
+  merge as a DELTA — the set of file-level edges the merge would add — and answer "does this
+  create a new cycle?" by scoped reachability on the ONE shared file graph (a new cycle must
+  traverse an added edge), never by cloning the graph and re-running full SCC. Same tiers,
+  same ordering, byte-identical optimize.md/--json output, pinned by an equivalence property
+  test (delta result == clone-and-SCC result on randomized graphs + every fixture).
+- **O-2 (decide from the post-O-1 split):** the projection memos + overlap group cache below
+  are implemented ONLY if the re-measured edit path still says they pay (cluster+overlap ≥
+  ~15% of the remaining re-map). Otherwise this spec records the measured "not worth it" the
+  same way Spec B recorded the shards deletion.
+
 ## Design principle (the contract everything hangs on)
 Incremental output MUST be **byte-identical to the full recompute** — the determinism
 guarantee and the gate built on it are non-negotiable. So incrementality is only ever a
