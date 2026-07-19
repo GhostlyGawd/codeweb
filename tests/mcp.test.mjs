@@ -81,7 +81,7 @@ test('M1: initialize returns protocolVersion, an object tools capability, and se
 test('M2: tools/list exposes the full tool set with object schemas + correct required args', () => {
   const tools = rpc([INIT, { jsonrpc: '2.0', id: 2, method: 'tools/list' }]).byId.get(2).result.tools;
   assert.deepEqual(tools.map((t) => t.name).sort(),
-    ['codeweb_break_cycles', 'codeweb_callees', 'codeweb_callers', 'codeweb_campaign', 'codeweb_codemod',
+    ['codeweb_break_cycles', 'codeweb_brief', 'codeweb_callees', 'codeweb_callers', 'codeweb_campaign', 'codeweb_codemod',
       'codeweb_context', 'codeweb_cycles', 'codeweb_deadcode', 'codeweb_diff', 'codeweb_explain', 'codeweb_find',
       'codeweb_find_similar', 'codeweb_fitness', 'codeweb_hotspots', 'codeweb_impact', 'codeweb_map',
       'codeweb_orphans', 'codeweb_placement', 'codeweb_reading_order', 'codeweb_refresh', 'codeweb_review',

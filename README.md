@@ -15,7 +15,7 @@ Every serious change starts with the same questions: *who uses this? what breaks
 does this already exist? is this dead?* Today an agent answers them by grepping and reading whole
 files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import
 graph once (~3 s for 3,000 symbols), then answers those questions **exactly, in milliseconds, for
-about a kilobyte each** — as **23 deterministic MCP tools for your agent** (no LLM in the loop) and
+about a kilobyte each** — as **24 deterministic MCP tools for your agent** (no LLM in the loop) and
 a self-contained **interactive map for you**.
 
 Measured on [vite](https://github.com/vitejs/vite) (3,000+ symbols), graded by the TypeScript
@@ -399,8 +399,9 @@ above are also exposed over MCP (below).
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing all
-**23** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
-`codeweb_map` (build/rebuild the graph over MCP), `codeweb_find` (concept search — free text like
+**24** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
+`codeweb_map` (build/rebuild the graph over MCP), `codeweb_brief` (the day-one repo page —
+call it first), `codeweb_find` (concept search — free text like
 *"retry backoff"* ranked into starting symbols, no name needed), `codeweb_callers/callees/impact/
 cycles/orphans/diff`, the edit-loop tools `codeweb_context/refresh`, the intelligence tools
 `codeweb_hotspots/campaign/reading_order`, plus `codeweb_tests/find_similar/placement/review/

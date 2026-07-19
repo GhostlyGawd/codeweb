@@ -3,7 +3,7 @@
   "tagline": "The living map of your codebase.",
   "repo": "https://github.com/GhostlyGawd/codeweb",
   "pagesBase": "https://ghostlygawd.github.io/codeweb/",
-  "elevator": "Every serious change starts with the same questions: who uses this? what breaks if I change it? does this already exist? is this dead? An agent answers them today by grepping and reading whole files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import graph once (~3s for 3,000 symbols), then answers those questions exactly, in milliseconds, for about a kilobyte each: 23 deterministic MCP query tools for your coding agent (no LLM in the loop), and a self-contained interactive map for you. Measured on vite with the TypeScript compiler as referee: 100% of compiler-verified dependents — at better precision than grep and a third of its context cost, and blast-radius answers at 1/126th the tokens of the recursive-grep loop. The byproduct is the map itself: duplication, dead code, hotspots, and tangled domains, made visible.",
+  "elevator": "Every serious change starts with the same questions: who uses this? what breaks if I change it? does this already exist? is this dead? An agent answers them today by grepping and reading whole files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import graph once (~3s for 3,000 symbols), then answers those questions exactly, in milliseconds, for about a kilobyte each: 24 deterministic MCP query tools for your coding agent (no LLM in the loop), and a self-contained interactive map for you. Measured on vite with the TypeScript compiler as referee: 100% of compiler-verified dependents — at better precision than grep and a third of its context cost, and blast-radius answers at 1/126th the tokens of the recursive-grep loop. The byproduct is the map itself: duplication, dead code, hotspots, and tangled domains, made visible.",
   "philosophy": [
     "Deterministic — no LLM in the analysis loop; the same repo always yields the same graph.",
     "Zero runtime dependencies — the whole pipeline runs on an empty node_modules.",
@@ -60,6 +60,10 @@
         {
           "name": "codeweb_map",
           "desc": "Build (or rebuild) the graph for a repo — the deterministic pipeline over MCP, so a session never dead-ends on \"no graph found\"."
+        },
+        {
+          "name": "codeweb_brief",
+          "desc": "The day-one page (~2KB): areas, most depended-on symbols, entry points, test layout, known issues. Call first in a new session — orientation without exploration."
         },
         {
           "name": "codeweb_explain",

@@ -124,6 +124,11 @@ export const dependentsOf = (index, ids) => {
   return [...out].sort();
 };
 
+// Fan-in of one node: reverse call edges, optionally + reverse imports (the "how depended-on is
+// this?" number every ranking uses — one definition, so consumers can't drift).
+export const fanInOf = (index, id, withImports = false) =>
+  (index.callIn.get(id)?.size || 0) + (withImports ? (index.importIn.get(id)?.size || 0) : 0);
+
 // Transitive reverse-call closure (blast radius) from all seeds, excluding the seeds themselves.
 export function impactOf(index, seedIds) {
   const seeds = new Set(seedIds);

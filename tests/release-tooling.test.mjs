@@ -18,15 +18,15 @@ test('bumpVersion follows SemVer', () => {
   assert.throws(() => bumpVersion('0.2.0', 'nope'));
 });
 
-test('the real repo derives 23 MCP tools from the source', () => {
-  assert.equal(mcpToolCount(PLUGIN_ROOT), 23);
-  assert.equal(productToolCount(PLUGIN_ROOT), 23, 'product.json must list exactly the MCP tools');
+test('the real repo derives 24 MCP tools from the source', () => {
+  assert.equal(mcpToolCount(PLUGIN_ROOT), 24);
+  assert.equal(productToolCount(PLUGIN_ROOT), 24, 'product.json must list exactly the MCP tools');
 });
 
 test('the real repo is consistent (versions + tool count aligned)', () => {
   const r = checkConsistency(PLUGIN_ROOT);
   assert.equal(r.ok, true, `expected aligned, got: ${r.problems.join('; ')}`);
-  assert.equal(r.count, 23);
+  assert.equal(r.count, 24);
 });
 
 test('check-consistency CLI exits 0 on the aligned repo', () => {

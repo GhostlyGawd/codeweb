@@ -52,7 +52,7 @@
       <button class="te-station active" type="button" role="tab" aria-selected="true" data-te="0" style="--phase:var(--accent)">
         <span class="te-step">01</span>
         <span class="te-title">Structural queries</span>
-        <span class="te-badge">8</span>
+        <span class="te-badge">9</span>
       </button>
       <button class="te-station" type="button" role="tab" aria-selected="false" data-te="1" style="--phase:var(--teal)">
         <span class="te-step">02</span>
@@ -87,6 +87,7 @@
           <p class="te-blurb">The foundation — read the graph.</p>
           <div class="te-tools">
             <div class="te-tool"><span class="te-name">codeweb_map</span><span class="te-desc">Build (or rebuild) the graph for a repo — the deterministic pipeline over MCP, so a session never dead-ends on "no graph found".</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_brief</span><span class="te-desc">The day-one page (~2KB): areas, most depended-on symbols, entry points, test layout, known issues. Call first in a new session — orientation without exploration.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_explain</span><span class="te-desc">One ~1KB card: identity, contract, dependents, blast radius, findings — "tell me about X" in a single call.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_find</span><span class="te-desc">Concept search when you do not know the name: free text ("retry backoff") ranked over identifiers/files/domains — stemmed token match weighted by exports, role, and fan-in. Deterministic, no embeddings.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_callers</span><span class="te-desc">Direct callers of a symbol (call-edge in-neighbors).</span></div>

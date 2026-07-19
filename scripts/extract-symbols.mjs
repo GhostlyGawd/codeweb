@@ -37,7 +37,7 @@ import { loadTsEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tier
 //     package-boundary manifests.
 // v9: tree-sitter tier default-on when installed (dispatch recall); export-star re-export chains
 //     resolve (barrel files no longer swallow edges).
-const SCANNER_VERSION = 9;
+const SCANNER_VERSION = 10;
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -464,10 +464,17 @@ const dispatchByFile = new Map(); // file -> [{from,to}] dispatch edges (tree-si
 // v7 STALENESS STAMPS: per-file size+mtime recorded in meta.sources so query tools can cheaply
 // detect that the graph no longer matches disk ("aware" — an agent must know its map is stale).
 const sources = {};
+// v10 CONFIDENCE CALIBRATION: files using dynamic dispatch (computed member calls, getattr,
+// non-literal require, event emitters) hide call edges no static map can see. Record WHERE, so
+// answer-time tools can say "0 callers, but this repo routes calls dynamically in N file(s) —
+// absence of callers is weaker evidence" instead of sounding equally sure everywhere.
+const dynamicFiles = [];
+const DYNAMIC_RE = /\[[A-Za-z_$][\w$]*\]\s*\(|\bgetattr\s*\(|require\s*\(\s*[^'"`)\s]|\.emit\s*\(|globalThis\s*\[|window\s*\[/;
 for (const f of files) {
   let text; try { text = readFileSync(f, 'utf8'); } catch { continue; }
   const r = rel(f);
   try { const st = statSync(f); sources[r] = { s: st.size, m: Math.round(st.mtimeMs) }; } catch { /* stamp is best-effort */ }
+  if (DYNAMIC_RE.test(text)) dynamicFiles.push(r);
   let syms;
   if (opts.cache) {
     const h = sha1(text);
@@ -681,6 +688,50 @@ for (const [r, map] of reExportByFile) {
 }
 for (const [r, stars] of starReExportByFile) {
   for (const target of stars) reExportEdges.push([r + ':<module>', target + ':<module>']);
+}
+// v10 PUBLIC API: symbols reachable from a package entrypoint (package.json main/module/browser/
+// bin/exports, followed through re-export chains) have callers the graph CANNOT see — everyone who
+// installs the package. Stamp them `pub: true` so answers stop implying "0 in-repo callers" means
+// "safe to rename/delete". JS/TS manifests only (other ecosystems: conventional entries, later).
+{
+  const entryFiles = new Set();
+  const pkgDirs = new Set(['']);
+  for (const f of files) pkgDirs.add(pkgOf(rel(f)));
+  const addEntry = (dir, spec) => {
+    if (typeof spec !== 'string' || !spec || spec.endsWith('.d.ts') || spec.endsWith('.json')) return;
+    const base = (dir ? dir + '/' : '') + spec.replace(/^\.\//, '');
+    for (const cand of [base, base + '.js', base + '.mjs', base + '.cjs', base + '.ts', base.replace(/\/+$/, '') + '/index.js', base.replace(/\/+$/, '') + '/index.ts']) {
+      const norm = cand.replace(/\/{2,}/g, '/');
+      if (sources[norm]) { entryFiles.add(norm); return; }
+    }
+  };
+  const collectExports = (dir, v) => {
+    if (typeof v === 'string') addEntry(dir, v);
+    else if (v && typeof v === 'object') for (const k of Object.keys(v)) { if (k !== 'types') collectExports(dir, v[k]); }
+  };
+  for (const dir of pkgDirs) {
+    let pkg; try { pkg = JSON.parse(readFileSync(join(root, dir, 'package.json'), 'utf8')); } catch { continue; }
+    addEntry(dir, pkg.main); addEntry(dir, pkg.module); if (typeof pkg.browser === 'string') addEntry(dir, pkg.browser);
+    if (typeof pkg.bin === 'string') addEntry(dir, pkg.bin);
+    else if (pkg.bin && typeof pkg.bin === 'object') for (const v of Object.values(pkg.bin)) addEntry(dir, v);
+    collectExports(dir, pkg.exports);
+  }
+  if (entryFiles.size) {
+    const byIdMut = new Map(nodes.map((n) => [n.id, n]));
+    const reOut = new Map(); // fromModuleId -> [toIds]
+    for (const [a, b] of reExportEdges) { if (!reOut.has(a)) reOut.set(a, []); reOut.get(a).push(b); }
+    const seenFiles = new Set(), queue = [...entryFiles];
+    while (queue.length) {
+      const file = queue.shift();
+      if (seenFiles.has(file)) continue;
+      seenFiles.add(file);
+      for (const n of nodes) if (n.file === file && n.exports && n.kind !== 'module') n.pub = true;
+      for (const to of reOut.get(file + ':<module>') || []) {
+        if (to.endsWith(':<module>')) queue.push(to.slice(0, -':<module>'.length));
+        else { const n = byIdMut.get(to); if (n && n.exports) n.pub = true; }
+      }
+    }
+  }
 }
 // Resolve `targetRel`'s exported `name` to a real symbol node id, following renamed re-export chains
 // and `export *` forwards (first star target that resolves wins — source order, deterministic).
@@ -1038,6 +1089,8 @@ const fragment = {
     ...(tsEngine ? { complexityEngine: tsEngine.version } : {}),
     languages, symbols: nodes.length,
     sources, // per-file {s: size, m: mtimeMs} staleness stamps
+    // files with dynamic-dispatch patterns — the honest asterisk on every "0 callers" answer
+    ...(dynamicFiles.length ? { dynamic: { files: dynamicFiles.length, sample: dynamicFiles.slice(0, 3) } } : {}),
     // per-DIRECTORY mtime stamps: adding/deleting a file touches its directory, so NEW files (which
     // per-file stamps cannot see) still flip the staleness check.
     dirs: Object.fromEntries([...new Set(Object.keys(sources).map((r) => (r.includes('/') ? r.slice(0, r.lastIndexOf('/')) : '.')))].sort().map((d) => {
