@@ -1,0 +1,301 @@
+{
+  "design": "replay of mined historical caller-breakages; blind solve, coverage graded by the workflow from filesChanged ∩ missedByChange",
+  "tasks": [
+    "lib/core/buildFullPath.js:buildFullPath"
+  ],
+  "cells": [
+    {
+      "task": "lib/core/buildFullPath.js:buildFullPath",
+      "condition": "control",
+      "rep": 0,
+      "result": {
+        "taskSymbol": "buildFullPath",
+        "condition": "control",
+        "rep": 0,
+        "completed": true,
+        "filesChanged": [
+          "README.md",
+          "index.d.cts",
+          "index.d.ts",
+          "lib/adapters/http.js",
+          "lib/core/Axios.js",
+          "lib/core/buildFullPath.js",
+          "lib/helpers/resolveConfig.js",
+          "test/specs/core/buildFullPath.spec.js"
+        ],
+        "gate": {
+          "structuralRegressions": 0,
+          "newCycles": 0,
+          "newDuplication": 0,
+          "lostCallers": 0
+        },
+        "approachSummary": "Exported revision 4a3e26cf into a fresh history-free repo, ran the BEFORE graph, then applied the verbatim buildFullPath definition diff (new allowAbsoluteUrls param, `baseURL && isRelativeUrl || allowAbsoluteUrls == false` guard). Grepped all buildFullPath call sites and made each consistent: lib/adapters/http.js and Axios#getUri pass config.allowAbsoluteUrls; lib/helpers/resolveConfig.js (xhr/fetch adapters) passes newConfig.allowAbsoluteUrls; Axios#_request normalizes the option (request value > instance defaults > true) right after method defaulting. Surfaced the new public config option in index.d.ts/index.d.cts (AxiosRequestConfig.allowAbsoluteUrls?: boolean) and the README request-config docs; extended test/specs/core/buildFullPath.spec.js with allowAbsoluteUrls false/true cases. Left committed dist/ build artifacts untouched (generated at release). Verified with node --check plus a behavioral assert script (omitted arg is back-compatible because `undefined == false` is false). AFTER graph identical to BEFORE (411 nodes / 582 edges both sides); diff.mjs reported zero added/removed nodes and edges, no regressions, no new cycles/overlaps, ok:true.",
+        "ambientContextNoted": "Ambient context present but irrelevant to the task and not acted on: user email (saintwraith.biz@gmail.com), current date 2026-07-19, unrelated MCP servers (Era Context finance tools, GitHub) including one server needing OAuth, and a stale task-list reminder from the parent codeweb project."
+      },
+      "grading": {
+        "missedTotal": 2,
+        "missedCovered": 2,
+        "coveredFiles": [
+          "lib/adapters/http.js",
+          "lib/helpers/resolveConfig.js"
+        ]
+      }
+    },
+    {
+      "task": "lib/core/buildFullPath.js:buildFullPath",
+      "condition": "control",
+      "rep": 1,
+      "result": {
+        "taskSymbol": "buildFullPath",
+        "condition": "control",
+        "rep": 1,
+        "completed": true,
+        "filesChanged": [
+          "index.d.cts",
+          "index.d.ts",
+          "lib/adapters/http.js",
+          "lib/core/Axios.js",
+          "lib/core/buildFullPath.js",
+          "lib/helpers/resolveConfig.js",
+          "test/specs/core/buildFullPath.spec.js"
+        ],
+        "gate": {
+          "structuralRegressions": 0,
+          "newCycles": 0,
+          "newDuplication": 0,
+          "lostCallers": 0
+        },
+        "approachSummary": "Exported revision 4a3e26cf into a fresh history-free repo and ran the BEFORE graph. Applied the given definition diff verbatim to lib/core/buildFullPath.js (confirmed byte-exact: resulting git diff reproduces index b60927c..ba07b22). Located all callers via grep: three live source call sites (lib/adapters/http.js, Axios#getUri in lib/core/Axios.js, lib/helpers/resolveConfig.js used by xhr/fetch adapters) plus committed dist/ build artifacts (left untouched — generated at release and outside the scanned graph). Threaded config.allowAbsoluteUrls as the new third argument at all three call sites, added a normalization block in Axios#_request (per-request value takes priority, else instance defaults, else true), declared allowAbsoluteUrls?: boolean in AxiosRequestConfig in index.d.ts and index.d.cts, and added two spec cases (allowAbsoluteUrls false forces combineURLs even for absolute URLs; true preserves them). Sanity-checked 6 behavior cases in Node (all pass; 2-arg calls keep old behavior since undefined == false is false). AFTER graph identical in size (411 nodes/582 edges); diff.mjs reports ok=true with no regressions, no added/removed edges, no new cycles/duplication/orphans.",
+        "ambientContextNoted": "Ambient context present but irrelevant to the task (user email, date, finance MCP server, parent task-list reminders); ignored per instructions. No experiment harness or history beyond the base commit was consulted."
+      },
+      "grading": {
+        "missedTotal": 2,
+        "missedCovered": 2,
+        "coveredFiles": [
+          "lib/adapters/http.js",
+          "lib/helpers/resolveConfig.js"
+        ]
+      }
+    },
+    {
+      "task": "lib/core/buildFullPath.js:buildFullPath",
+      "condition": "control",
+      "rep": 2,
+      "result": {
+        "taskSymbol": "buildFullPath",
+        "condition": "control",
+        "rep": 2,
+        "completed": true,
+        "filesChanged": [
+          "README.md",
+          "index.d.cts",
+          "index.d.ts",
+          "lib/adapters/http.js",
+          "lib/core/Axios.js",
+          "lib/core/buildFullPath.js",
+          "lib/helpers/resolveConfig.js",
+          "test/specs/core/buildFullPath.spec.js"
+        ],
+        "gate": {
+          "structuralRegressions": 0,
+          "newCycles": 0,
+          "newDuplication": 0,
+          "lostCallers": 0
+        },
+        "approachSummary": "Exported base revision 4a3e26c into a history-free repo, ran the BEFORE graph, then applied the verbatim buildFullPath diff (new allowAbsoluteUrls param; combine when relative-with-baseURL or allowAbsoluteUrls == false). Grepped for all non-dist callers and threaded the option through every runtime call site: Axios.getUri, lib/helpers/resolveConfig.js (xhr/fetch adapters), and lib/adapters/http.js. Added default resolution in Axios._request (request config > instance defaults > true), declared allowAbsoluteUrls?: boolean in index.d.ts and index.d.cts, documented it in the README request-config section, and added two buildFullPath specs (true/false cases). Confirmed mergeConfig needs no change (unknown keys use the deep-merge fallback) and left dist/ build artifacts untouched. Verified via node assertions on the new behavior and node --check on all edited files. AFTER graph identical in structure: diff.mjs reports 0 edges added/removed, regressions [], cycles.added [], overlaps.added [], ok:true — all gate metrics 0.",
+        "ambientContextNoted": "Session carried unrelated ambient context: a user email (saintwraith.biz@gmail.com), Era Context finance MCP server instructions plus an unauthenticated MCP server notice, GitHub MCP tooling, skill listings, and a codeweb project task list in system reminders. None of it was relevant to the replay task; it was not acted on and no files outside the isolated work repo were touched."
+      },
+      "grading": {
+        "missedTotal": 2,
+        "missedCovered": 2,
+        "coveredFiles": [
+          "lib/adapters/http.js",
+          "lib/helpers/resolveConfig.js"
+        ]
+      }
+    },
+    {
+      "task": "lib/core/buildFullPath.js:buildFullPath",
+      "condition": "control",
+      "rep": 3,
+      "result": {
+        "taskSymbol": "buildFullPath",
+        "condition": "control",
+        "rep": 3,
+        "completed": true,
+        "filesChanged": [
+          "index.d.cts",
+          "index.d.ts",
+          "lib/adapters/http.js",
+          "lib/core/Axios.js",
+          "lib/core/buildFullPath.js",
+          "lib/helpers/resolveConfig.js",
+          "test/specs/core/buildFullPath.spec.js"
+        ],
+        "gate": {
+          "structuralRegressions": 0,
+          "newCycles": 0,
+          "newDuplication": 0,
+          "lostCallers": 0
+        },
+        "approachSummary": "Applied the verbatim definition diff to lib/core/buildFullPath.js (new allowAbsoluteUrls third param; combines even absolute URLs when it is false) — resulting git diff matches the given hunk exactly, including blob hashes b60927c..ba07b22. Grepped the tree for buildFullPath and updated every live caller to forward the new argument: lib/adapters/http.js (node adapter), lib/helpers/resolveConfig.js (xhr/fetch path, newConfig.allowAbsoluteUrls), and lib/core/Axios.js getUri. Plumbed the option end-to-end: Axios#_request now normalizes config.allowAbsoluteUrls (per-request value > instance defaults > true) so call sites always receive an explicit boolean; declared allowAbsoluteUrls?: boolean on AxiosRequestConfig in index.d.ts and index.d.cts; extended test/specs/core/buildFullPath.spec.js with allowAbsoluteUrls true/false cases. dist/ bundles are generated release artifacts and were intentionally left untouched. Runtime sanity check via node passed 6/6 cases including the legacy 2-arg call shape. Graph diff (cwb vs cwa): ok:true, regressions [], cycles.added [], overlaps.added [], edges added/removed 0, nodes added/removed 0.",
+        "ambientContextNoted": "Session carried unrelated ambient context (user email, finance/GitHub MCP servers, an unrelated codeweb task list, skill triggers); none of it was used — work stayed confined to the exported $work tree per the isolation rules."
+      },
+      "grading": {
+        "missedTotal": 2,
+        "missedCovered": 2,
+        "coveredFiles": [
+          "lib/adapters/http.js",
+          "lib/helpers/resolveConfig.js"
+        ]
+      }
+    },
+    {
+      "task": "lib/core/buildFullPath.js:buildFullPath",
+      "condition": "treatment",
+      "rep": 0,
+      "result": {
+        "taskSymbol": "buildFullPath",
+        "condition": "treatment",
+        "rep": 0,
+        "completed": true,
+        "filesChanged": [
+          "index.d.cts",
+          "index.d.ts",
+          "lib/adapters/http.js",
+          "lib/core/Axios.js",
+          "lib/core/buildFullPath.js",
+          "lib/helpers/resolveConfig.js",
+          "test/specs/core/buildFullPath.spec.js"
+        ],
+        "gate": {
+          "structuralRegressions": 0,
+          "newCycles": 0,
+          "newDuplication": 0,
+          "lostCallers": 0
+        },
+        "approachSummary": "Exported rev 4a3e26c into a history-free repo, built the BEFORE graph, read the brief+explain cards, then applied the verbatim definition diff to lib/core/buildFullPath.js (new third param allowAbsoluteUrls, isRelativeUrl extraction, `baseURL && isRelativeUrl || allowAbsoluteUrls == false` condition kept exactly as given, unparenthesized). Updated every caller the card named to pass the new argument: lib/core/Axios.js getUri (config.allowAbsoluteUrls), lib/adapters/http.js fullPath call, and lib/helpers/resolveConfig.js (newConfig.allowAbsoluteUrls; this feeds the xhr/fetch adapters). Added a normalization block in Axios.prototype._request so per-request allowAbsoluteUrls takes priority, then instance defaults, else true. Because the card flagged buildFullPath as public API, kept the export name/positional args stable and declared `allowAbsoluteUrls?: boolean` in AxiosRequestConfig in both index.d.ts and index.d.cts. Extended test/specs/core/buildFullPath.spec.js with two cases for the new param (absolute URL forced through combineURLs when false; passthrough when true) and verified old+new semantics directly with node (all 7 checks pass). dist/ build outputs intentionally untouched (generated). AFTER graph identical in shape (411 nodes/582 edges, 15 domains); diff.mjs reports ok:true with zero regressions, zero added cycles/overlaps, zero removed edges.",
+        "ambientContextNoted": "Explain card was directly useful: buildFullPath — 3 callers, 1 test, blast 4 across 2 domains; top callers named exactly lib/core/Axios.js:Axios.getUri, lib/adapters/http.js:<module>, lib/helpers/resolveConfig.js:<module>; test test/specs/core/buildFullPath.spec.js; \"callers rely on: args 2\"; ⚠ public API (reachable from a package entrypoint — package.json exports ./unsafe/core/buildFullPath.js), renames breaking. I updated all three named callers (the caller list saved a broad hunt and surfaced resolveConfig.js, the non-obvious xhr/fetch path), kept the exported name and existing arg positions stable per the public-API caveat (new param appended as optional, undefined preserves old behavior since `undefined == false` is false), and treated the spec as in-blast, extending it. Brief card gave repo shape (411 symbols/15 domains, load-bearing list) but nothing decision-changing beyond that."
+      },
+      "grading": {
+        "missedTotal": 2,
+        "missedCovered": 2,
+        "coveredFiles": [
+          "lib/adapters/http.js",
+          "lib/helpers/resolveConfig.js"
+        ]
+      }
+    },
+    {
+      "task": "lib/core/buildFullPath.js:buildFullPath",
+      "condition": "treatment",
+      "rep": 1,
+      "result": {
+        "taskSymbol": "buildFullPath",
+        "condition": "treatment",
+        "rep": 1,
+        "completed": true,
+        "filesChanged": [
+          "index.d.cts",
+          "index.d.ts",
+          "lib/adapters/http.js",
+          "lib/core/Axios.js",
+          "lib/core/buildFullPath.js",
+          "lib/helpers/resolveConfig.js",
+          "test/specs/core/buildFullPath.spec.js"
+        ],
+        "gate": {
+          "structuralRegressions": 0,
+          "newCycles": 0,
+          "newDuplication": 0,
+          "lostCallers": 0
+        },
+        "approachSummary": "Exported revision 4a3e26c to a history-free repo, built the BEFORE graph, and read the ambient brief + explain card. Applied the given definition diff verbatim to lib/core/buildFullPath.js (new optional third param allowAbsoluteUrls; combine when relative-with-baseURL OR allowAbsoluteUrls == false). Updated all three callers the card named to pass the flag: Axios.getUri (config.allowAbsoluteUrls), the http adapter (config.allowAbsoluteUrls), and resolveConfig for the xhr/fetch adapters (newConfig.allowAbsoluteUrls). Added defaulting logic in Axios._request (per-request config wins, else instance defaults, else true) so the flag always has a coherent source; declared allowAbsoluteUrls?: boolean on AxiosRequestConfig in index.d.ts and index.d.cts; extended the card-listed spec (test/specs/core/buildFullPath.spec.js) with true/false third-arg cases. Left dist/ prebuilt bundles untouched (generated artifacts, outside the graph). Verified with node --check plus a 5-case behavioral smoke test (all pass, including unchanged 2-arg behavior), then built the AFTER graph: identical 411 symbols / 582 edges, diff.mjs ok:true with zero regressions, zero added/removed edges, no new cycles/overlaps.",
+        "ambientContextNoted": "The explain card was directly useful: it identified buildFullPath (lib/core/buildFullPath.js:16, exported, args 2, cx 3) with 3 callers + 1 test, blast 4 across 2 domains, and named the exact caller set — lib/core/Axios.js:Axios.getUri, lib/adapters/http.js:<module>, lib/helpers/resolveConfig.js:<module> — plus tests at test/specs/core/buildFullPath.spec.js. It flagged \"callers rely on: args 2\" and a public-API caveat (reachable from a package entrypoint — package.json exports ./unsafe/core/buildFullPath.js — so renames are breaking; the added param is backward-compatible for external 2-arg callers). The caller list matched a full-tree grep (only dist/ build artifacts besides). Notably the card surfaced lib/helpers/resolveConfig.js, the xhr/fetch-path caller that the real upstream commit famously missed (later fixed as the allowAbsoluteUrls-not-passed bug), so all three call sites got the third argument here. The brief itself (domains, load-bearing symbols, known duplication in bin/) was background only."
+      },
+      "grading": {
+        "missedTotal": 2,
+        "missedCovered": 2,
+        "coveredFiles": [
+          "lib/adapters/http.js",
+          "lib/helpers/resolveConfig.js"
+        ]
+      }
+    },
+    {
+      "task": "lib/core/buildFullPath.js:buildFullPath",
+      "condition": "treatment",
+      "rep": 2,
+      "result": {
+        "taskSymbol": "buildFullPath",
+        "condition": "treatment",
+        "rep": 2,
+        "completed": true,
+        "filesChanged": [
+          "index.d.cts",
+          "index.d.ts",
+          "lib/adapters/http.js",
+          "lib/core/Axios.js",
+          "lib/core/buildFullPath.js",
+          "lib/helpers/resolveConfig.js"
+        ],
+        "gate": {
+          "structuralRegressions": 0,
+          "newCycles": 0,
+          "newDuplication": 0,
+          "lostCallers": 0
+        },
+        "approachSummary": "Exported axios @ 4a3e26c into a history-free work repo, built the BEFORE graph, then applied the verbatim buildFullPath diff (adds optional allowAbsoluteUrls third param; `baseURL && isRelativeUrl || allowAbsoluteUrls == false` forces combineURLs). Updated all three callers named by the explain card to pass the new argument: lib/core/Axios.js getUri (config.allowAbsoluteUrls), lib/adapters/http.js fullPath computation (config.allowAbsoluteUrls), and lib/helpers/resolveConfig.js (newConfig.allowAbsoluteUrls). Since the option flows via request config, added default resolution in Axios.js _request (per-request value wins, else this.defaults.allowAbsoluteUrls, else true) and declared allowAbsoluteUrls?: boolean in index.d.ts/index.d.cts because the card flagged buildFullPath as public API. Node smoke test confirmed the legacy 2-arg contract is byte-identical in behavior (existing test/specs/core/buildFullPath.spec.js calls remain valid) and the new arg behaves per the diff. AFTER graph + diff.mjs: ok:true, 0 regressions, 0 edges added/removed, 0 new cycles/duplication/orphans.",
+        "ambientContextNoted": "brief.mjs: 411 symbols/134 files/15 domains; buildFullPath listed as a key lib/helpers-area symbol; warned to check impact on load-bearing symbols before touching. explain.mjs card for buildFullPath: 3 callers, 1 test, blast 4 across 2 domains; \"callers rely on: args 2\"; top callers named exactly lib/core/Axios.js:Axios.getUri, lib/adapters/http.js:<module>, lib/helpers/resolveConfig.js:<module>; test test/specs/core/buildFullPath.spec.js; calls combineURLs + isAbsoluteURL; caveat: public API reachable from a package entrypoint (package.json exports ./unsafe/core/buildFullPath.js), so renames/signature breaks are dangerous. This drove the work: I updated every one of the three named callers, kept the new third parameter optional so the relied-upon 2-arg contract and the existing spec stay intact, and extended the public type definitions rather than renaming anything."
+      },
+      "grading": {
+        "missedTotal": 2,
+        "missedCovered": 2,
+        "coveredFiles": [
+          "lib/adapters/http.js",
+          "lib/helpers/resolveConfig.js"
+        ]
+      }
+    },
+    {
+      "task": "lib/core/buildFullPath.js:buildFullPath",
+      "condition": "treatment",
+      "rep": 3,
+      "result": {
+        "taskSymbol": "buildFullPath",
+        "condition": "treatment",
+        "rep": 3,
+        "completed": true,
+        "filesChanged": [
+          "index.d.cts",
+          "index.d.ts",
+          "lib/adapters/http.js",
+          "lib/core/Axios.js",
+          "lib/core/buildFullPath.js",
+          "lib/helpers/resolveConfig.js",
+          "test/specs/core/buildFullPath.spec.js"
+        ],
+        "gate": {
+          "structuralRegressions": 0,
+          "newCycles": 0,
+          "newDuplication": 0,
+          "lostCallers": 0
+        },
+        "approachSummary": "Applied the verbatim diff to lib/core/buildFullPath.js (adds allowAbsoluteUrls param; explicit false forces combineURLs even for absolute URLs). Then updated every caller the explain card named: Axios.getUri, the http adapter, and resolveConfig now pass config.allowAbsoluteUrls; Axios._request gained the defaulting block (request config > instance defaults > true) so the flag reaches all adapters. Added allowAbsoluteUrls?: boolean to AxiosRequestConfig in index.d.ts/index.d.cts and extended the buildFullPath spec with true/false cases (existing 2-arg specs stay valid since undefined == false is false). Left dist/ build artifacts untouched (not in the graph, regenerated at build). Verified via node runs (buildFullPath semantics, mergeConfig propagation, defaulting block), node --check on all edited files, and the codeweb diff gate: identical node/edge counts before/after, 0 regressions, exit 0. Full-library import smoke test was impossible because node_modules (form-data) is absent from the archived tree — environment limitation, worked around by testing dependency-free module chains directly.",
+        "ambientContextNoted": "Brief: repo shape (411 symbols/134 files/15 domains; load-bearing list AxiosError/forEach/etc — not directly relevant). Explain card was directly load-bearing: buildFullPath has 3 callers, 1 test, blast 4 across 2 domains, callers rely on args 2; named exactly lib/core/Axios.js:Axios.getUri, lib/adapters/http.js:<module>, lib/helpers/resolveConfig.js:<module> and test/specs/core/buildFullPath.spec.js — I updated all of them. Caveat noted: public API reachable from a package entrypoint (package.json exports ./unsafe/core/buildFullPath.js), so the change had to be additive (optional 3rd arg, no rename), which the given diff satisfies."
+      },
+      "grading": {
+        "missedTotal": 2,
+        "missedCovered": 2,
+        "coveredFiles": [
+          "lib/adapters/http.js",
+          "lib/helpers/resolveConfig.js"
+        ]
+      }
+    }
+  ],
+  "config": {
+    "reps": 4,
+    "smoke": false
+  }
+}
