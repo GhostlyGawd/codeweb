@@ -23,6 +23,7 @@ import { normalizeGraph, buildIndex } from './lib/graph-ops.mjs';
 import { runQuery } from './lib/query-core.mjs';
 import { findSymbols } from './lib/find-core.mjs';
 import { buildBrief } from './lib/brief-core.mjs';
+import { bump, attachActivity } from './lib/stats.mjs';
 import { checkStaleness } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -110,6 +111,7 @@ function autoRefresh(absGraph) {
     if (Date.now() - last < 15_000) return; // one attempt per 15s per graph
     refreshAttempt.set(absGraph, Date.now());
     spawnSync(process.execPath, [scriptOf('refresh.mjs'), absGraph], { encoding: 'utf8', timeout: 60_000, maxBuffer: 1 << 24 });
+    bump(absGraph, 'autoRefreshes');
     // the rewrite changed mtime/size — the next cachedGraph() reloads and serves fresh
   } catch { /* stale-but-annotated beats broken */ }
 }
@@ -264,6 +266,7 @@ function handleToolCall(id, params) {
     cliArgs.push(graphPath);
   }
 
+  if (graphPath) bump(resolve(graphPath), 'queriesServed'); // the receipt's denominator
   if (graphPath && AUTOREFRESH_TOOLS.has(tool.name)) autoRefresh(resolve(graphPath));
 
   // Fast path: the briefing assembles in-process from the cached graph (same object as the CLI
@@ -271,7 +274,7 @@ function handleToolCall(id, params) {
   if (tool.name === 'codeweb_brief') {
     try {
       const { graph, index } = cachedGraph(resolve(graphPath));
-      const payload = buildBrief(graph, index);
+      const payload = attachActivity(buildBrief(graph, index), resolve(graphPath));
       const stale = checkStaleness(graph);
       if (stale) payload.stale = stale;
       return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });

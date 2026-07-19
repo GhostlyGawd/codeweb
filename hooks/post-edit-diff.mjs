@@ -17,6 +17,7 @@ import { dirname, join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { structuralRegressions } from '../scripts/lib/graph-ops.mjs';
+import { bump } from '../scripts/lib/stats.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXTRACT = join(HERE, '..', 'scripts', 'extract-symbols.mjs');
@@ -70,6 +71,14 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
   try { raw = readFileSync(0, 'utf8'); } catch { /* no stdin */ }
   let out = null;
   try { out = check(raw); } catch { /* fail-open */ }
+  try {
+    const fp = JSON.parse(raw)?.tool_input?.file_path || JSON.parse(raw)?.tool_input?.filePath;
+    const t = fp && SRC_RE.test(fp) && findTarget(fp);
+    if (t) {
+      bump(t.baseline, 'postEditChecks');
+      if (out) bump(t.baseline, 'regressionsFlagged', out.newCycles.length + out.lostCallers.length);
+    }
+  } catch { /* receipt only */ }
   if (out) {
     const msg = format(out);
     process.stderr.write(msg + '\n');

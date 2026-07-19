@@ -9,7 +9,25 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Added
+- **The local outcome ledger** (`scripts/stats.mjs`, `npm run stats`): codeweb now counts what
+  it actually does during real work — session briefs injected, pre-edit cards delivered,
+  post-edit checks run, regressions flagged before landing, queries served, auto-refreshes —
+  written by the hooks and the MCP server beside the graph (`stats.json`). Strictly local
+  (never transmitted; counter names + integers only; `CODEWEB_NO_STATS=1` disables), fail-open
+  by construction. The brief carries a one-line receipt ("codeweb this month: …") — the value
+  made visible where it accrued.
+
+### Research
+- **Evidence program moves into the product** (`paper/STATUS.md`): the manuscript is frozen as
+  a reproducible artifact; claims live in the site's evidence ledger + these Research notes.
+- **Replay benchmark** (`paper/experiments/replay-mine.mjs` + `replay-ab.workflow.js`): mine
+  git history for commits that changed a depended-on signature and provably missed caller
+  files a later commit had to fix — each hit is a task with a built-in answer key (no invented
+  tasks, no floor effect). First verified mining run on axios (1,647 commits, funnel reported
+  at every stage): 2 ground-truth tasks, e.g. `forEach` — 9 caller files, 8 missed, fixed in a
+  follow-up. The replay workflow runs control vs ambient codeweb over the mined set, graded on
+  historical-miss coverage + the deterministic gate.
 
 ## [0.5.0] - 2026-07-19
 

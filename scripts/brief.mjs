@@ -9,14 +9,15 @@
 import { die, emitJson, emitText, loadGraph, checkStaleness } from './lib/cli.mjs';
 import { buildIndex } from './lib/graph-ops.mjs';
 import { buildBrief, renderBrief } from './lib/brief-core.mjs';
+import { attachActivity } from './lib/stats.mjs';
 
 const USAGE = 'usage: brief.mjs <graph.json> [--json]';
 const argv = process.argv.slice(2);
 let json = false; const pos = [];
 for (const t of argv) { if (t === '--json') json = true; else if (!t.startsWith('-')) pos.push(t); else die(USAGE, 2); }
 
-const { graph } = loadGraph(pos[0], { usage: USAGE });
-const brief = buildBrief(graph, buildIndex(graph));
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
+const brief = attachActivity(buildBrief(graph, buildIndex(graph)), abs);
 const stale = checkStaleness(graph);
 if (stale) brief.stale = stale;
 

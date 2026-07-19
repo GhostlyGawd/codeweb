@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { normalizeGraph, buildIndex } from '../scripts/lib/graph-ops.mjs';
 import { buildBrief, renderBrief } from '../scripts/lib/brief-core.mjs';
+import { bump, attachActivity } from '../scripts/lib/stats.mjs';
 
 function findGraph(startDir) {
   let dir = resolve(startDir);
@@ -30,7 +31,8 @@ export function preview(raw) {
   const graphPath = findGraph(cwd);
   if (!graphPath) return null;
   let graph; try { graph = normalizeGraph(JSON.parse(readFileSync(graphPath, 'utf8'))); } catch { return null; }
-  const text = renderBrief(buildBrief(graph, buildIndex(graph)));
+  const brief = attachActivity(buildBrief(graph, buildIndex(graph)), graphPath);
+  const text = renderBrief(brief);
   return `[codeweb] this repo is mapped (${graphPath}).\n${text}`;
 }
 
@@ -40,6 +42,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
   let msg = null;
   try { msg = preview(raw); } catch { /* fail-open */ }
   if (msg) {
+    try { const input = JSON.parse(raw); bump(findGraph(input?.cwd || process.cwd()), 'briefInjected'); } catch { /* receipt only */ }
     try {
       process.stdout.write(JSON.stringify({
         hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: msg },
