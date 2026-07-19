@@ -6,7 +6,7 @@
 [![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)
 [![deterministic engine](https://img.shields.io/badge/engine-deterministic-c6f24e?style=flat-square)](#how-it-works)
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
-[![version](https://img.shields.io/badge/version-0.7.1-c6f24e?style=flat-square)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.8.0-c6f24e?style=flat-square)](CHANGELOG.md)
 [![changelog](https://img.shields.io/badge/changelog-Keep_a_Changelog-ffb65c?style=flat-square)](CHANGELOG.md)
 
 **Your coding agent greps. codeweb knows.**
