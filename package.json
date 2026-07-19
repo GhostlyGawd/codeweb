@@ -1,12 +1,28 @@
 {
   "name": "codeweb",
   "version": "0.8.0",
-  "private": true,
   "type": "module",
-  "description": "codeweb deterministic engine + regression suite",
+  "description": "The living map of your codebase — deterministic call/import graph engine, 24 MCP tools for coding agents, and a self-contained interactive report.",
+  "keywords": ["mcp", "code-analysis", "call-graph", "dependency-graph", "claude-code", "agent-tools", "dead-code", "duplication"],
   "homepage": "https://github.com/GhostlyGawd/codeweb#readme",
   "repository": { "type": "git", "url": "https://github.com/GhostlyGawd/codeweb.git" },
   "license": "MIT",
+  "bin": {
+    "codeweb": "scripts/run.mjs",
+    "codeweb-mcp": "scripts/mcp-server.mjs"
+  },
+  "files": [
+    "scripts",
+    "hooks",
+    "skills",
+    "agents",
+    "commands",
+    ".claude-plugin",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": { "node": ">=20" },
+  "publishConfig": { "access": "public" },
   "scripts": {
     "test": "node --test \"tests/**/*.test.mjs\"",
     "build:site": "node site/build.mjs",
@@ -20,6 +36,7 @@
     "hotspots": "node scripts/hotspots.mjs",
     "campaign": "node scripts/campaign.mjs",
     "bench": "node scripts/bench.mjs",
+    "bench:all": "node bench/all.mjs",
     "stats": "node scripts/stats.mjs",
     "reading-order": "node scripts/reading-order.mjs",
     "annotate": "node scripts/annotate.mjs",

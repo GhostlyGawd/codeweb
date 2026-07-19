@@ -27,6 +27,36 @@ export function roleOf(file) {
   return 'product';
 }
 
+// Spec E: per-repo role OVERRIDES (codeweb.rules.json `roles: [{glob, role}]`) — heuristics can't
+// know a repo's private layout ("docs/ here is generated site output"). Compile the config into a
+// matcher; first matching glob wins; an unknown role THROWS (extraction fails loudly, exit 2).
+export const VALID_ROLES = new Set(['product', 'test', 'fixture', 'example', 'bench', 'generated', 'vendored']);
+
+function globToRegex(glob) {
+  let re = '';
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i];
+    if (c === '*') {
+      if (glob[i + 1] === '*') { re += glob[i + 2] === '/' ? '(?:.*/)?' : '.*'; i += glob[i + 2] === '/' ? 2 : 1; }
+      else re += '[^/]*';
+    } else if (c === '?') re += '[^/]';
+    else re += /[.+^${}()|[\]\\]/.test(c) ? '\\' + c : c;
+  }
+  return new RegExp('^' + re + '$');
+}
+
+/** Compile `roles` config into (relPath) => role|null. Throws on an invalid entry. */
+export function compileRoleOverrides(roles) {
+  if (!roles) return () => null;
+  if (!Array.isArray(roles)) throw new Error('codeweb.rules.json: `roles` must be an array of {glob, role}');
+  const compiled = roles.map((r, i) => {
+    if (!r || typeof r.glob !== 'string' || typeof r.role !== 'string') throw new Error(`codeweb.rules.json roles[${i}]: need {glob, role}`);
+    if (!VALID_ROLES.has(r.role)) throw new Error(`codeweb.rules.json roles[${i}] ("${r.glob}"): unknown role "${r.role}" (valid: ${[...VALID_ROLES].join('|')})`);
+    return { re: globToRegex(r.glob), role: r.role };
+  });
+  return (rel) => { for (const c of compiled) if (c.re.test(rel)) return c.role; return null; };
+}
+
 // Fill the same defaults build-report.mjs applies, so every consumer sees a well-formed graph.
 export function normalizeGraph(graph) {
   const g = graph || {};

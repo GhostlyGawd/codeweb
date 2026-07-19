@@ -134,7 +134,17 @@ rigorous enough to **find and fix two real bugs** the engine's own 286-test suit
 
 > **▶ Every number above is a receipt — see the [evidence ledger](https://ghostlygawd.github.io/codeweb/research.html).**
 > The benchmark harnesses and raw results live in [`bench/`](bench/); every number regenerates with
-> `node bench/run-all.mjs`. (The retired manuscript and pre-registration remain in git history, last at `v0.8.0`.)
+> `node bench/run-all.mjs`, and `npm run bench:all -- --gate` re-measures the standing budgets
+> **in CI on every PR** — a change that breaks a published number fails the build
+> ([`bench/budgets.json`](bench/budgets.json) is the promise ledger). (The retired manuscript and
+> pre-registration remain in git history, last at `v0.8.0`.)
+
+And the value codeweb delivers during real work is counted where it accrues — the strictly-local
+outcome ledger (`npm run stats`, surfaced in every session brief) prints a receipt shaped like:
+
+```
+codeweb this month: 41 pre-edit card(s) · 5 card-named caller(s) followed · 2 regression(s) flagged · 120 queries served
+```
 
 ## Two modes
 

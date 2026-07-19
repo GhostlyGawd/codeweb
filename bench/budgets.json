@@ -1,0 +1,6 @@
+{
+  "comment": "Spec C (docs/specs/bench-all-ci-gates.md): the promises CI holds bench:all --gate to. Changing a number here is changing a public promise — it belongs in a reviewed diff, never in drift.",
+  "sessionTokensMax": 20000,
+  "perToolBytesMax": 32768,
+  "warmRefreshFactorMax": 2.0
+}

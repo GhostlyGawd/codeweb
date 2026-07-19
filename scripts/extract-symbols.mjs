@@ -17,7 +17,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from '
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { relative, resolve, join, dirname, extname } from 'node:path';
-import { isTestFile, roleOf } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
+import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
 
@@ -58,6 +58,16 @@ for (let i = 0; i < argv.length; i++) {
 }
 if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--no-ctags]'); process.exit(1); }
 const root = resolve(opts.path);
+
+// Spec E: role overrides from the TARGET's own codeweb.rules.json (`roles: [{glob, role}]`) —
+// applied after path heuristics, first match wins, invalid config is a hard exit 2 (never a
+// silent skip). Absent file / absent section -> byte-identical behavior to before.
+let roleOverride = () => null;
+try {
+  const rulesPath = join(root, 'codeweb.rules.json');
+  if (existsSync(rulesPath)) roleOverride = compileRoleOverrides(JSON.parse(readFileSync(rulesPath, 'utf8')).roles);
+} catch (e) { console.error(`[extract] ${e.message}`); process.exit(2); }
+const roleFor = (rel) => roleOverride(rel) || roleOf(rel);
 if (!existsSync(root)) { console.error(`[extract] not found: ${root}`); process.exit(1); }
 
 const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs)$/;
@@ -509,7 +519,8 @@ for (const f of files) {
   const isPy = r.endsWith('.py');
   const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
   const isBraceLang = isJsTs || /\.(java|cs)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
-  const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp' : null;
+  const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp'
+    : r.endsWith('.py') ? 'python' : r.endsWith('.go') ? 'go' : r.endsWith('.rs') ? 'rust' : null;
   // Does the AST tier owe this file products (methods/dispatch/complexity)? Drives cache-hit
   // validity — a hit without them must re-scan — and the lazy engine load below (Spec A).
   const needsAst = opts.engine !== 'regex' && ((isJsTs && astProbe.ts) || (langKey && astProbe[langKey]));
@@ -536,7 +547,7 @@ for (const f of files) {
   // context-pack size, complexity, and body-confirmed duplication). maskJs/maskPy carry string/
   // comment state ACROSS lines; ${} interpolations stay live so real code still counts.
   const scanLines = (isPy ? maskPy(text) : isBraceLang ? maskJs(text) : text).split(/\r?\n/);
-  const fileRole = roleOf(r);
+  const fileRole = roleFor(r);
   // When the tree-sitter engine is active it OWNS JS/TS method discovery (class-qualified ids) and the
   // dispatch edges; the regex scanner still owns classes, functions and const-arrow functions (which
   // the parse-tree walk doesn't cover). extractJsTs returns null on any parse failure -> keep the regex
@@ -601,6 +612,9 @@ for (const f of files) {
         else if (engForFile) cx = fileCx[id] = engForFile.cyclomaticExact(body);
       }
       node.complexity = cx != null ? cx : cyclomatic(body, lang);
+      // Spec H: Type-3 statement fingerprints ride the same parse (>=6 statements only).
+      const t3 = tsResult && tsResult.t3ByLine && tsResult.t3ByLine[start];
+      if (t3) node.t3 = t3;
       node.maxDepth = nestingDepth(body, lang);
     }
     nodes.push(node);
@@ -626,13 +640,15 @@ for (const f of files) {
         signature: parseSignature(lines[start - 1] || '', m.label, false),
         complexity: m.complexity,
         maxDepth: nestingDepth(body, 'js'),
+        ...(tsResult.t3ByLine && tsResult.t3ByLine[start] ? { t3: tsResult.t3ByLine[start] } : {}),
       });
     }
     if (tsResult.dispatch.length) dispatchByFile.set(f, tsResult.dispatch);
   }
-  // Java/C#: AST dispatch tier (edges only — regex owns the nodes). this-calls resolve in-file
-  // now; typed-receiver intents wait for the global pass (the receiver's class may live anywhere).
-  // Products ride the scan cache exactly like the JS/TS tier's (Spec A).
+  // Java/C#/Python/Go/Rust: AST dispatch tier (edges only — regex owns the nodes). this/self/
+  // receiver calls resolve in-file now; typed-receiver intents wait for the global pass (the
+  // receiver's type may live anywhere). Products ride the scan cache exactly like the JS/TS
+  // tier's (Spec A); Spec F adds the three dedicated walkers.
   if (langKey && needsAst) {
     typedLangsSeen.add(langKey);
     let d = null;
@@ -1094,7 +1110,7 @@ for (const f of edgeFiles) {
   }
   if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; }
   if (result.hasModule && !nodeIdSet.has(r + ':<module>')) {
-    nodes.push({ id: r + ':<module>', label: '<module>', kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleOf(r) });
+    nodes.push({ id: r + ':<module>', label: '<module>', kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleFor(r) });
     nodeIdSet.add(r + ':<module>');
   }
   for (const e of result.edges) edges.push(e);
@@ -1112,7 +1128,7 @@ const edgeKeys = new Set(edges.map((e) => e.from + ' ' + e.to));
 // this module" signal (fileCycles/coupling unchanged — same file-pair) without polluting a symbol.
 const ensureModuleNode = (id) => {
   if (nodeIdSet.has(id)) return;
-  nodes.push({ id, label: '<module>', kind: 'module', file: idFile(id), line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleOf(idFile(id)) });
+  nodes.push({ id, label: '<module>', kind: 'module', file: idFile(id), line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleFor(idFile(id)) });
   nodeIdSet.add(id);
 };
 for (const [a, b] of [...importEdges, ...reExportEdges]) {
@@ -1209,7 +1225,7 @@ if (newCache && !astLoadFailed) { try { writeFileSync(resolve(opts.cache), JSON.
 // `ast: loaded` (initialized this run) / `ast: idle` (available, nothing needed a parse — the warm
 // path Spec A exists for) / `ast: off` (regex opt-out, unavailable, or load failure).
 const astAvailable = opts.engine !== 'regex' && (astProbe.ts || astProbe.java || astProbe.csharp);
-const typedLangs = ['java', 'csharp'].filter((k) => typedLangsSeen.has(k));
+const typedLangs = ['java', 'csharp', 'python', 'go', 'rust'].filter((k) => typedLangsSeen.has(k));
 const dispatchNote = astAvailable
   ? `; wired ${dispatchEdgeCount} dispatch edge(s)${dispatchDropped ? `, dropped ${dispatchDropped} (missing endpoint)` : ''}` +
     (typedLangs.length ? `; typed-dispatch (${typedLangs.join('+')}) ${typedWired} wired${typedDropped ? `, ${typedDropped} dropped (ambiguous/absent)` : ''}` : '')

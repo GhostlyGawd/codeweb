@@ -29,6 +29,16 @@ since the product review.
    into extraction/query as the mitigation; otherwise **delete it** and record the measured
    rationale in the scale results file. Either outcome closes the item.
 
+## Addendum (discovered by the scale test): overlap scale caps
+The first TypeScript-src run pinned the wall precisely: `overlap.mjs` at 100% CPU for >8
+minutes (killed) while every other stage finished in seconds. Two quadratic passes were the
+cause — all-pairs body confirmation inside huge same-name groups (thousands of `visitNode`/
+`emit` definitions) and twin seeding through hub labels with thousands of callers. Fix, per
+the no-silent-caps rule: same-name groups larger than **12** body-confirm on a deterministic
+12-node sample (sorted by id) and their findings SAY so; labels with more than **50** callers
+are excluded from twin seeding (a mega-hub shared callee is weak twin evidence anyway) and the
+md header counts them. Pinned by tests/overlap-caps.test.mjs (OC1/OC2).
+
 ## Tests (TDD — tests/stage-memo.test.mjs)
 - **S1 skip + identity (property):** run pipeline twice on a fixture; second run skips all four
   stages (banner) and every output file is byte-identical to a third `--full` run.

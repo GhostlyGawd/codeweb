@@ -58,12 +58,18 @@ test('L1: warm cached run never initializes the AST engine and is byte-identical
   } finally { cleanup(dir); }
 });
 
-test('L2: a target with no JS/TS files never loads the engine, even cold', { skip: hasEngine ? false : 'tree-sitter unavailable' }, () => {
+// (Spec F made Python/Go/Rust AST-dispatch languages, so a cold Python run now loads the tier
+// legitimately — the lazy contract for them is the same as JS/TS's: WARM runs stay idle.)
+test('L2: a warm cached run of a dispatch-tier language never re-initializes the engine', { skip: hasEngine ? false : 'tree-sitter unavailable' }, () => {
   const dir = tmpDir('codeweb-lazyast-');
   try {
-    writeTree(dir, { 'src/only.py': 'def solo():\n    return 1\n' });
-    const cold = extract(dir);
-    assert.match(cold.stderr, /ast: idle/, `no JS/TS work -> no init (stderr: ${cold.stderr})`);
+    writeTree(dir, { 'src/only.py': 'class Solo:\n    def a(self):\n        return self.b()\n    def b(self):\n        return 1\n' });
+    const cache = join(dir, 'cache.json');
+    const cold = extract(dir, ['--cache', cache]);
+    assert.match(cold.stderr, /ast: loaded/, `cold python run parses for dispatch (stderr: ${cold.stderr})`);
+    const warm = extract(dir, ['--cache', cache]);
+    assert.match(warm.stderr, /ast: idle/, `warm python run rides the cache (stderr: ${warm.stderr})`);
+    assert.ok(cold.bytes.equals(warm.bytes), 'byte-identical either way');
   } finally { cleanup(dir); }
 });
 

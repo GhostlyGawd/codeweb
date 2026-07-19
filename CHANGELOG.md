@@ -22,6 +22,60 @@ notes so validated results, papers, and new tools never get lost in commit histo
   (~+1.35 ms/symbol, axios + self) — paid once per changed file — and the warm path is
   engine-free, so default-on stands. Also fixes the bench's regex arm, which had silently
   benchmarked tree-sitter against itself ever since the tier went default-on.
+- **The pipeline memoizes its downstream stages (Spec B).** cluster/overlap/optimize/report
+  are pure functions of the extracted fragment (+ `CODEWEB_*` levers), so a re-run whose
+  fragment is byte-identical reuses their outputs — wall-time changes, never a byte
+  (property-tested modulo the `generatedAt` stamp). Extract itself now rides the scan cache
+  inside `run.mjs`, making a no-change re-map of codeweb **~0.4s end to end**. `--full`
+  forces a recompute.
+- **Overlap survives monorepo scale — with declared caps.** Mapping TypeScript's `src/`
+  exposed two quadratic passes (overlap sat at 100% CPU for 8+ minutes): all-pairs body
+  confirmation inside huge same-name groups, and twin seeding through hub labels with
+  thousands of callers. Same-name groups now body-confirm on a deterministic 12-node sample
+  (the finding's evidence says so) and >50-caller hub labels are excluded from twin seeding
+  (counted in the md header) — deterministic, reported, never silent.
+- **`npm run bench:all` — the standing benchmark suite behind every published number**
+  (Spec C): pipeline timings, a representative 12-call MCP session (bytes/≈tokens/validity),
+  per-tool response budgets, and the ts-engine gate, written to `bench/results/benchmarks.json`
+  (+ a site mirror). A new CI job runs it with `--gate`: budgets live in `bench/budgets.json`,
+  and breaking one fails the build. `check-consistency` now also audits that every evidence
+  source cited by the ledger and README exists — claims physically can't rot.
+- **Replay A/B gains cost-to-coverage (Spec D).** The workflow runs cells sequentially and
+  records each cell's true token cost from the harness's own `budget.spent()` deltas (never
+  solver self-report); the analyzer reports per-condition means and `costToFullCoverageTokens`
+  — the discriminator when both arms hit the coverage ceiling. Old cells without cost report
+  null and are counted, not fabricated. A five-repo mining sweep (express, lodash, fastify,
+  dayjs, commander — funnels committed) surviving the validity guards at zero confirms how
+  rare true breakage tasks are.
+- **Role overrides (Spec E).** `codeweb.rules.json` gains `roles: [{glob, role}]` — heuristics
+  can't know a repo's private layout, so the repo says it once and extraction honors it (first
+  match wins, invalid roles fail loudly, absent config is byte-identical to before). codeweb's
+  own config marks `docs/**` as `generated` (it's the built website), completing the
+  vite-playground precision lesson on our own map.
+- **Python, Go, and Rust join the dispatch tier (Spec F).** Three vendored pinned grammars +
+  dedicated tree walkers wire the calls regex precision-gates away: `self.m()`/`cls.m()`,
+  Go receiver methods, Rust `self.m()`, and typed-receiver calls (`p: Pipe`, `q Pipe`,
+  `p: &Pipe`) resolved globally under the one-owner rule — ambiguity drops and is counted,
+  never guessed. Nodes stay byte-identical between engines; products ride the scan cache.
+- **Caller-reliance contracts v2 (Spec G).** The explain card (and the ambient pre-edit card)
+  now also reports: callers that try/catch or `.catch()` the symbol ("thrown types are
+  contract"), callees that mutate a named parameter ("callers share that object"), and callers
+  that null-check the result ("keep null/undefined returns possible"). Same conservatism as
+  v1 — line-visible evidence or no claim.
+- **Type-3 (near-miss) clone detection (Spec H).** The AST tier fingerprints each function's
+  statements (identifier/literal-normalized, order-independent multiset); overlap pairs bodies
+  sharing ≥70% of them — reordered or lightly-edited copies the exact and Type-2 passes cannot
+  see. A distinct `near-miss-clone` finding kind, REVIEW-only by construction, bounded and
+  deterministic.
+- **The report closes the loop to the editor (Spec J).** The inspector shows `Open in editor`
+  (`vscode://file/...`) once the viewer supplies their project root — stored in localStorage,
+  client-side only, because the shipped report still never embeds the absolute source path
+  (the standing privacy invariant, now pinned by a second test).
+- **npm + VS Code distribution, prepared (Spec J).** The package is publish-ready (`codeweb` +
+  `codeweb-mcp` bins with shebangs, files whitelist, LICENSE, zero runtime deps — verified by
+  an `npm pack` test); the release workflow builds and attaches the `.vsix` to every GitHub
+  Release and carries npm/Marketplace publish steps that no-op until `NPM_TOKEN`/`VSCE_PAT`
+  are configured. Publishing stays a human decision; the prep is done.
 
 ### Changed
 - **The paper program is archived; the receipts stay.** `paper/` is retired from `main`:

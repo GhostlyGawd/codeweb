@@ -119,8 +119,16 @@ REPORT (honestly — do not fudge):
 phase('Solve')
 const cells = []
 for (const t of tasks) for (const cond of ['control', 'treatment']) for (let r = 0; r < cfg.reps; r++) cells.push({ task: t, cond, rep: r })
-const results = await parallel(cells.map((c) => () =>
-  agent(solvePrompt(c), { label: `${c.cond}:${c.task.label}#${c.rep}`, phase: 'Solve', schema: CELL, agentType: 'general-purpose' })))
+// SEQUENTIAL on purpose (Spec D, docs/specs/replay-corpus-v3.md): budget.spent() deltas around
+// each cell give exact per-cell token cost — the cost-to-coverage secondary metric that
+// discriminates even when both arms sit at the coverage ceiling. Parallel cells would interleave
+// spends and corrupt the attribution; wall-clock is the price of a clean number.
+const results = []
+for (const c of cells) {
+  const before = budget.spent()
+  const r = await agent(solvePrompt(c), { label: `${c.cond}:${c.task.label}#${c.rep}`, phase: 'Solve', schema: CELL, agentType: 'general-purpose' })
+  results.push(r ? { ...r, cost: { tokens: Math.max(0, budget.spent() - before) } } : r)
+}
 // grading — the fixed function the solver never saw: coverage of history's missed-caller files
 const cellsOut = results.map((r, i) => {
   const c = cells[i]

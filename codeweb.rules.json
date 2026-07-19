@@ -1,0 +1,6 @@
+{
+  "comment": "codeweb's own map config. roles: docs/ is the BUILT website (site/build.mjs output) — generated, not product (Spec E, docs/specs/role-overrides-self-campaign.md).",
+  "roles": [
+    { "glob": "docs/**", "role": "generated" }
+  ]
+}
