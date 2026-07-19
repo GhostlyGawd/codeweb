@@ -32,8 +32,31 @@ notes so validated results, papers, and new tools never get lost in commit histo
   exposed two quadratic passes (overlap sat at 100% CPU for 8+ minutes): all-pairs body
   confirmation inside huge same-name groups, and twin seeding through hub labels with
   thousands of callers. Same-name groups now body-confirm on a deterministic 12-node sample
-  (the finding's evidence says so) and >50-caller hub labels are excluded from twin seeding
-  (counted in the md header) — deterministic, reported, never silent.
+  (the finding's evidence says so), >50-caller hub labels are excluded from twin seeding, a
+  200k global pair budget seeds smallest groups first, and 400+-line bodies shingle their
+  first 400 lines — every cap counted in the md header. Deterministic, reported, never silent.
+- **Fixed: an input-dependent HANG in the shared tokenizer.** The string-literal regex in
+  `lib/shingles.mjs` (`(?:\\.|(?!\1).)*`) backtracked exponentially on unterminated-quote
+  content — one lone apostrophe in a big real-world body (TypeScript's testRunner fixtures)
+  pinned the whole overlap stage at 100% CPU for 15+ minutes. Replaced with a linear-time
+  matcher (each char consumed exactly one way) + a regression test; identical semantics.
+  Found by the Spec B scale test; this also protects `find_similar` and the edit-time
+  duplication check, which share the tokenizer.
+- **The scale verdict is committed** (`bench/results/scale-typescript.json`): TypeScript
+  `src/` — 16,286 symbols, 44,640 edges, 709 files including `checker.ts` — maps in **43s
+  cold, 4s memoized re-run**, queries answer in ~200ms on the 13.5MB graph, and the top
+  findings are real compiler duplication (`substituteExpression` ×9, drifted). On that
+  evidence `lib/shards.mjs` is **deleted**: monolithic graphs hold with 10× headroom, the
+  sharding layer had zero consumers, and git history keeps it if a 100k-symbol case ever
+  materializes.
+- **codeweb consolidated itself** (`bench/results/self-campaign.json`): the campaign's three
+  product-true merges are executed — `findTarget` (both hooks; the duplication had hidden
+  REAL drift, one hook's language list was seven languages stale), `load()` (diff/review →
+  the canonical `loadGraph`, with better errors), and `edgeKey` (break-cycles/diff →
+  graph-ops, NUL-separated collision-safe variant). Before/after gate: −22 nodes, −2
+  duplication findings, coupling −25, **zero structural regressions**. The 65 DELETE steps
+  are honestly skipped as false orphans (walker closures dispatched through function tables —
+  exactly the `--orphans` cross-check caveat, applied to ourselves).
 - **`npm run bench:all` — the standing benchmark suite behind every published number**
   (Spec C): pipeline timings, a representative 12-call MCP session (bytes/≈tokens/validity),
   per-tool response budgets, and the ts-engine gate, written to `bench/results/benchmarks.json`
@@ -67,6 +90,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
   sharing ≥70% of them — reordered or lightly-edited copies the exact and Type-2 passes cannot
   see. A distinct `near-miss-clone` finding kind, REVIEW-only by construction, bounded and
   deterministic.
+- **Ruby, PHP, Kotlin, and Swift on the deterministic fast path (Spec I)** — eleven native
+  languages. Discovery with owner-qualified methods (Ruby `def self.`, Kotlin extension
+  `fun Type.name`, Swift `extension` members), visibility-as-export per language's own rules,
+  comment/string masking, precision-gated calls, test-role detection (`spec/`, `_spec.rb`,
+  `*Test.php`, `*Tests.swift`), and package manifests (Gemfile, composer.json, Package.swift).
+  Verified on sinatra (1,173 symbols), monolog (1,622), okio (3,874, mixed Kotlin+Java),
+  and Alamofire (2,616) — zero keyword phantoms, deterministic.
 - **The report closes the loop to the editor (Spec J).** The inspector shows `Open in editor`
   (`vscode://file/...`) once the viewer supplies their project root — stored in localStorage,
   client-side only, because the shipped report still never embeds the absolute source path

@@ -83,7 +83,7 @@ Auto-detect: a URL or `owner/repo` ⇒ external; a path or `.` ⇒ internal. `--
 
 ### Fast path (default) — one-command deterministic engine
 
-For languages the bundled extractor handles (**JavaScript, TypeScript, Python, Rust, Go, Java, C#**), run the whole
+For languages the bundled extractor handles (**JavaScript, TypeScript, Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, Swift**), run the whole
 pipeline in a single command instead of dissecting by hand. It is faster, cheaper, and
 reproducible, and emits the same `graph.json` schema:
 

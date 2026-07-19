@@ -13,7 +13,12 @@ export const KW = new Set(['if', 'for', 'while', 'switch', 'catch', 'return', 'f
 export const tokenize = (src) => src
   .replace(/\/\/[^\n]*/g, ' ')
   .replace(/\/\*[\s\S]*?\*\//g, ' ')
-  .replace(/(['"`])(?:\\.|(?!\1).)*\1/g, ' STR ')
+  // Linear-time string matcher: each char is consumed exactly one way (an escape pair XOR a
+  // non-backslash non-quote), so there is no backtracking ambiguity. The previous
+  // `(?:\\.|(?!\1).)*` let the engine re-partition backslash runs and went EXPONENTIAL on
+  // unterminated-quote content — a lone apostrophe in a big real-world body hung the whole
+  // overlap stage (found by the TypeScript-src scale test).
+  .replace(/(['"`])(?:\\[\s\S]|(?!\1)[^\\])*\1/g, ' STR ')
   .toLowerCase()
   .match(/[a-z_$][\w$]*|[{}();=><!+\-*/%]/g)?.filter((t) => !KW.has(t)) || [];
 

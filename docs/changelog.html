@@ -80,8 +80,37 @@
 <p>  exposed two quadratic passes (overlap sat at 100% CPU for 8+ minutes): all-pairs body</p>
 <p>  confirmation inside huge same-name groups, and twin seeding through hub labels with</p>
 <p>  thousands of callers. Same-name groups now body-confirm on a deterministic 12-node sample</p>
-<p>  (the finding's evidence says so) and &gt;50-caller hub labels are excluded from twin seeding</p>
-<p>  (counted in the md header) — deterministic, reported, never silent.</p>
+<p>  (the finding's evidence says so), &gt;50-caller hub labels are excluded from twin seeding, a</p>
+<p>  200k global pair budget seeds smallest groups first, and 400+-line bodies shingle their</p>
+<p>  first 400 lines — every cap counted in the md header. Deterministic, reported, never silent.</p>
+<ul>
+<li><strong>Fixed: an input-dependent HANG in the shared tokenizer.</strong> The string-literal regex in</li>
+</ul>
+<p>  <code>lib/shingles.mjs</code> (<code>(?:\\.|(?!\1).)*</code>) backtracked exponentially on unterminated-quote</p>
+<p>  content — one lone apostrophe in a big real-world body (TypeScript's testRunner fixtures)</p>
+<p>  pinned the whole overlap stage at 100% CPU for 15+ minutes. Replaced with a linear-time</p>
+<p>  matcher (each char consumed exactly one way) + a regression test; identical semantics.</p>
+<p>  Found by the Spec B scale test; this also protects <code>find_similar</code> and the edit-time</p>
+<p>  duplication check, which share the tokenizer.</p>
+<ul>
+<li><strong>The scale verdict is committed</strong> (<code>bench/results/scale-typescript.json</code>): TypeScript</li>
+</ul>
+<p>  <code>src/</code> — 16,286 symbols, 44,640 edges, 709 files including <code>checker.ts</code> — maps in **43s</p>
+<p>  cold, 4s memoized re-run**, queries answer in ~200ms on the 13.5MB graph, and the top</p>
+<p>  findings are real compiler duplication (<code>substituteExpression</code> ×9, drifted). On that</p>
+<p>  evidence <code>lib/shards.mjs</code> is <strong>deleted</strong>: monolithic graphs hold with 10× headroom, the</p>
+<p>  sharding layer had zero consumers, and git history keeps it if a 100k-symbol case ever</p>
+<p>  materializes.</p>
+<ul>
+<li><strong>codeweb consolidated itself</strong> (<code>bench/results/self-campaign.json</code>): the campaign's three</li>
+</ul>
+<p>  product-true merges are executed — <code>findTarget</code> (both hooks; the duplication had hidden</p>
+<p>  REAL drift, one hook's language list was seven languages stale), <code>load()</code> (diff/review →</p>
+<p>  the canonical <code>loadGraph</code>, with better errors), and <code>edgeKey</code> (break-cycles/diff →</p>
+<p>  graph-ops, NUL-separated collision-safe variant). Before/after gate: −22 nodes, −2</p>
+<p>  duplication findings, coupling −25, <strong>zero structural regressions</strong>. The 65 DELETE steps</p>
+<p>  are honestly skipped as false orphans (walker closures dispatched through function tables —</p>
+<p>  exactly the <code>--orphans</code> cross-check caveat, applied to ourselves).</p>
 <ul>
 <li><strong><code>npm run bench:all</code> — the standing benchmark suite behind every published number</strong></li>
 </ul>
@@ -127,6 +156,15 @@
 <p>  sharing ≥70% of them — reordered or lightly-edited copies the exact and Type-2 passes cannot</p>
 <p>  see. A distinct <code>near-miss-clone</code> finding kind, REVIEW-only by construction, bounded and</p>
 <p>  deterministic.</p>
+<ul>
+<li><strong>Ruby, PHP, Kotlin, and Swift on the deterministic fast path (Spec I)</strong> — eleven native</li>
+</ul>
+<p>  languages. Discovery with owner-qualified methods (Ruby <code>def self.</code>, Kotlin extension</p>
+<p>  <code>fun Type.name</code>, Swift <code>extension</code> members), visibility-as-export per language's own rules,</p>
+<p>  comment/string masking, precision-gated calls, test-role detection (<code>spec/</code>, <code>_spec.rb</code>,</p>
+<p>  <code>*Test.php</code>, <code>*Tests.swift</code>), and package manifests (Gemfile, composer.json, Package.swift).</p>
+<p>  Verified on sinatra (1,173 symbols), monolog (1,622), okio (3,874, mixed Kotlin+Java),</p>
+<p>  and Alamofire (2,616) — zero keyword phantoms, deterministic.</p>
 <ul>
 <li><strong>The report closes the loop to the editor (Spec J).</strong> The inspector shows <code>Open in editor</code></li>
 </ul>

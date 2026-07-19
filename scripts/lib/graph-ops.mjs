@@ -9,10 +9,13 @@ const byIdLt = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 // Test-file predicate (shared by find-similar, the extractor's test-edge classification, and the
 // dead-code workflow — one truth). Matches `*.test.*`, `*.spec.*`, `*_test.*`, or a path segment
 // `tests/` | `test/` | `__tests__/`. Forward-slashed relative paths.
+// Canonical edge identity (from+to+kind) — was re-implemented in break-cycles/diff/shards (Spec E dogfood).
+export const edgeKey = (e) => [e.from, e.to, e.kind].join(String.fromCharCode(0)); // NUL-separated: ids can contain spaces
+
 export const isTestFile = (file) =>
-  /(?:^|\/)(?:tests?|__tests__)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.)/.test(file || '') ||
-  /(?:^|\/)src\/test\//.test(file || '') ||               // Maven/Gradle convention
-  /(?:Tests?|Spec)\.(?:java|cs)$/.test(file || '');       // FooTest.java / FooTests.cs / FooSpec.java
+  /(?:^|\/)(?:tests?|__tests__|spec)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.|_spec\.)/.test(file || '') ||
+  /(?:^|\/)src\/test\//.test(file || '') ||                       // Maven/Gradle convention
+  /(?:Tests?|Spec)\.(?:java|cs|php|swift|kt)$/.test(file || '');  // FooTest.java / FooTests.swift / FooTest.php …
 
 // Code ROLE by path — product code vs the supporting cast (one truth: the extractor stamps it on
 // every node; normalizeGraph back-fills older graphs). Rankings and default report views scope to

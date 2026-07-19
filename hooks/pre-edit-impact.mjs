@@ -21,19 +21,7 @@ let lastCardMeta = null;
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXPLAIN = join(HERE, '..', 'scripts', 'explain.mjs');
-const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs)$/;
-
-function findTarget(filePath) {
-  let dir = dirname(resolve(filePath));
-  for (let i = 0; i < 40; i++) {
-    const baseline = join(dir, '.codeweb', 'graph.json');
-    if (existsSync(baseline)) return { root: dir, baseline };
-    const parent = dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-  return null;
-}
+import { SRC_RE, findTarget } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a duplicated walk + a trailing language list)
 
 // Returns the one-line advisory for an edit payload, or null (not mapped / not source / no signal).
 export function preview(raw) {

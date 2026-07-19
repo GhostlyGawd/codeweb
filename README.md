@@ -445,7 +445,7 @@ Built for agents, not just reachable by them:
 
 ## How it works
 
-For JavaScript, TypeScript, Python, Rust, Go, Java, and C# the default is a **deterministic Node pipeline** — one
+For JavaScript, TypeScript, Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, and Swift the default is a **deterministic Node pipeline** — one
 command, no LLM in the loop, reproducible byte-for-byte. `scripts/run.mjs` chains five stages
 into a per-target workspace:
 
@@ -517,7 +517,6 @@ codeweb/
 │       ├── hotspots.mjs            # the complexity x fan-in x churn blend (shared with tests)
 │       ├── campaign.mjs            # the ordered/gated/ROI campaign planner (pure)
 │       ├── reading-order.mjs       # foundations-first DAG linearization
-│       ├── shards.mjs              # split/merge + answer-preserving sharded queries (monorepo scale)
 │       └── risk.mjs                # F7: the change-risk formula + weights (one truth)
 ├── agents/                          # fallback path (unparseable langs / --engine read)
 │   ├── codeweb-dissector.md         # atomic dissection (parallel, read-only)
@@ -534,10 +533,10 @@ codeweb/
 
 ## Roadmap
 
-- **More first-class languages** — beyond the seven native today (JavaScript, TypeScript, Python,
-  **Rust**, **Go**, **Java**, **C#**), the next tier (Ruby, PHP, Kotlin, Swift) still routes through
-  the agent fallback. Java/C# dynamic-dispatch recall (a tree-sitter tier like the JS/TS one) is the
-  next increment there.
+- **More first-class languages** — eleven native today (JavaScript, TypeScript, Python, **Rust**,
+  **Go**, **Java**, **C#**, **Ruby**, **PHP**, **Kotlin**, **Swift**); anything else routes through
+  the agent fallback. Dynamic-dispatch AST tiers now cover JS/TS, Java, C#, Python, Go, and Rust —
+  Ruby/PHP/Kotlin/Swift dispatch is the next increment there.
 
 _Recently shipped: an **agent-intelligence suite** — refactoring **hotspots** (complexity × fan-in ×
 churn), a gated ROI-ranked optimization **campaign** planner, a foundations-first **reading-order**,

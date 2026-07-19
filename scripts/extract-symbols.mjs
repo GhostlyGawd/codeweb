@@ -70,7 +70,7 @@ try {
 const roleFor = (rel) => roleOverride(rel) || roleOf(rel);
 if (!existsSync(root)) { console.error(`[extract] not found: ${root}`); process.exit(1); }
 
-const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs)$/;
+const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
 const SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
 
 const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
@@ -85,6 +85,15 @@ function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
 // bodyEnd/signature line offsets are unaffected. Single-line '...'/"..." strings are blanked first so
 // a `#` or `"""` inside them can't be mistaken for a comment/docstring delimiter. Best-effort, same
 // ethos as stripSC: escapes inside triple-strings aren't tracked, worst case is a slightly-off mask.
+// Ruby masking (Spec I): line-local — string contents first (so `"#{x}"` can't fake a comment),
+// then `#`-to-EOL. Length preservation is not required here (extents use scanLines separately).
+function maskRuby(text) {
+  return text.split(/\r?\n/).map((ln) => ln
+    .replace(/"(?:[^"\\]|\\.)*"/g, '""')
+    .replace(/'(?:[^'\\]|\\.)*'/g, "''")
+    .replace(/#.*$/, '')).join('\n');
+}
+
 function maskPy(text) {
   const lines = text.split(/\r?\n/);
   const out = [];
@@ -208,7 +217,7 @@ const rel = (f) => relative(root, f).replace(/\\/g, '/');
 // precisely); a cross-package NAME COLLISION is exactly how `create-vite` template files ended up
 // "calling" vite's normalizePath. Single-package repos (or trees with no manifests) all map to ''
 // — behavior there is unchanged.
-const MANIFESTS = ['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'pom.xml', 'build.gradle', 'build.gradle.kts'];
+const MANIFESTS = ['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'pom.xml', 'build.gradle', 'build.gradle.kts', 'Gemfile', 'composer.json', 'Package.swift'];
 const manifestMemo = new Map(); // dir -> boolean
 const hasManifest = (dir) => {
   if (!manifestMemo.has(dir)) {
@@ -316,6 +325,62 @@ function scanSymbols(file, text) {
       let m;
       if ((m = TYPE.exec(ln))) push(m[2], i, 'class', /\bpublic\b/.test(ln));
       else if ((m = METHOD.exec(ln)) && !CTRL.has(m[1])) push(m[1], i, 'method', /\bpublic\b/.test(ln));
+    });
+  } else if (ext === '.rb') {
+    // Ruby (Spec I): class/module + def (self. = class-level, same owner), everything public by
+    // default. Extents are indentation-based (idiomatic 2-space Ruby) — see isIndentLang below.
+    // Line-anchored patterns are comment-safe (`# def x` can't match ^\s*def).
+    const ownerRanges = [];
+    const ownerAt = (lineNo) => { let best = null; for (const o of ownerRanges) if (lineNo > o.start && lineNo < o.end && (!best || o.start > best.start)) best = o; return best?.name; };
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = /^(\s*)(?:class|module)\s+([A-Z]\w*)/.exec(ln))) {
+        const indent = m[1].length;
+        let end = lines.length;
+        for (let j = i + 1; j < lines.length; j++) {
+          if (/^\s*end\b/.test(lines[j]) && (lines[j].match(/^\s*/)[0].length <= indent)) { end = j + 1; break; }
+        }
+        ownerRanges.push({ name: m[2], start: i + 1, end, indent });
+        push(m[2], i, 'class', true);
+      } else if ((m = /^(\s*)def\s+(?:self\.)?([A-Za-z_]\w*[?!]?)/.exec(ln))) {
+        const owner = m[1].length ? ownerAt(i + 1) : undefined;
+        push(m[2], i, owner ? 'method' : 'function', true, owner);
+      }
+    });
+  } else if (ext === '.php') {
+    // PHP (Spec I): class/interface/trait + function members (visibility-as-export, public
+    // default); top-level functions. Owner qualification rides the enclosing-class ranges.
+    const TYPE = /^\s*(?:abstract\s+|final\s+)?(?:class|interface|trait)\s+([A-Za-z_]\w*)/;
+    const FN = /^(\s*)(?:(?:public|protected|private|static|final|abstract)\s+)*function\s+&?\s*([A-Za-z_]\w*)\s*\(/;
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = TYPE.exec(ln))) push(m[1], i, 'class', true);
+      else if ((m = FN.exec(ln))) push(m[2], i, m[1].length ? 'method' : 'function', !/\b(?:private|protected)\b/.test(ln));
+    });
+  } else if (ext === '.kt' || ext === '.kts') {
+    // Kotlin (Spec I): class/object/interface + fun members (public-by-default; private/internal
+    // -> not exported); expression-bodied `fun f() = …` extents collapse to one line via bodyEnd.
+    // `fun Type.name(` (extension function) owner-qualifies to the receiver type directly.
+    const TYPE = /^\s*(?:(?:public|private|internal|protected|open|final|abstract|sealed|data|inner|enum|annotation|value)\s+)*(?:class|object|interface)\s+([A-Za-z_]\w*)/;
+    const FUN = /^(\s*)(?:(?:public|private|internal|protected|open|override|final|abstract|suspend|inline|operator|infix|tailrec|external|actual|expect)\s+)*fun\s+(?:<[^>]+>\s+)?(?:([A-Za-z_][\w.]*)\.)?([A-Za-z_]\w*)\s*\(/;
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = TYPE.exec(ln))) push(m[1], i, 'class', !/\b(?:private|internal)\b/.test(ln));
+      else if ((m = FUN.exec(ln))) {
+        const recv = m[2] ? m[2].split('.').pop() : undefined;
+        push(m[3], i, m[1].length || recv ? 'method' : 'function', !/\b(?:private|internal)\b/.test(ln), recv);
+      }
+    });
+  } else if (ext === '.swift') {
+    // Swift (Spec I): class/struct/enum/protocol/actor/extension + func members. Default access
+    // is internal (module-scoped) -> only public/open count as exported. Extension members
+    // owner-qualify to the extended type via the extension's range.
+    const TYPE = /^\s*(?:(?:public|open|internal|fileprivate|private|final|indirect)\s+)*(?:class|struct|enum|protocol|extension|actor)\s+([A-Za-z_]\w*)/;
+    const FUNC = /^(\s*)(?:(?:public|open|internal|fileprivate|private|final|static|class|override|mutating|nonmutating|convenience|required|dynamic|@\w+(?:\([^)]*\))?)\s+)*func\s+([A-Za-z_]\w*)\s*[(<]/;
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = TYPE.exec(ln))) push(m[1], i, 'class', /\b(?:public|open)\b/.test(ln));
+      else if ((m = FUNC.exec(ln))) push(m[2], i, m[1].length ? 'method' : 'function', /\b(?:public|open)\b/.test(ln));
     });
   } else {
     const exported = (ln) => /\bexport\b/.test(ln);
@@ -518,7 +583,8 @@ for (const f of files) {
   if (DYNAMIC_RE.test(text)) dynamicFiles.push(r);
   const isPy = r.endsWith('.py');
   const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
-  const isBraceLang = isJsTs || /\.(java|cs)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
+  const isBraceLang = isJsTs || /\.(java|cs|php|kt|kts|swift)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
+  const isIndentLang = isPy || r.endsWith('.rb'); // extents by dedent (Python) / end-at-indent (Ruby)
   const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp'
     : r.endsWith('.py') ? 'python' : r.endsWith('.go') ? 'go' : r.endsWith('.rs') ? 'rust' : null;
   // Does the AST tier owe this file products (methods/dispatch/complexity)? Drives cache-hit
@@ -546,7 +612,7 @@ for (const f of files) {
   // whole neighboring functions (a 5-line helper recorded as 550 loc on vite — poisoning
   // context-pack size, complexity, and body-confirmed duplication). maskJs/maskPy carry string/
   // comment state ACROSS lines; ${} interpolations stay live so real code still counts.
-  const scanLines = (isPy ? maskPy(text) : isBraceLang ? maskJs(text) : text).split(/\r?\n/);
+  const scanLines = (isPy ? maskPy(text) : r.endsWith('.rb') ? maskRuby(text) : isBraceLang ? maskJs(text) : text).split(/\r?\n/);
   const fileRole = roleFor(r);
   // When the tree-sitter engine is active it OWNS JS/TS method discovery (class-qualified ids) and the
   // dispatch edges; the regex scanner still owns classes, functions and const-arrow functions (which
@@ -578,7 +644,7 @@ for (const f of files) {
     const start = s.line;
     // real body extent (brace match / dedent), NOT next-symbol-line — so the last symbol can't
     // run to EOF and absorb the trailing top-level code (the fabricated-edge bug).
-    const end = Math.min(bodyEnd(scanLines, start - 1, isPy) + 1, total);
+    const end = Math.min(bodyEnd(scanLines, start - 1, isIndentLang) + 1, total);
     const loc = Math.min(end - start + 1, 2000);
     // Owner-qualified id (`file:Type.method`, matching the tree-sitter tier's scheme). Rust/Go owners
     // come from the scan (impl/receiver); Python + JS/TS methods resolve to the ENCLOSING class range
@@ -1098,7 +1164,7 @@ const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; /
 for (const f of edgeFiles) {
   const { text, ranges } = fileSyms.get(f);
   const r = rel(f);
-  const lines = (r.endsWith('.py') ? maskPy(text) : /\.(jsx?|mjs|cjs|tsx?|java|cs)$/.test(r) ? maskJs(text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
+  const lines = (r.endsWith('.py') ? maskPy(text) : r.endsWith('.rb') ? maskRuby(text) : /\.(jsx?|mjs|cjs|tsx?|java|cs|php|kt|kts|swift)$/.test(r) ? maskJs(text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
   const prev = reuseEdges && oldCache.files[r];
   let result;
@@ -1198,7 +1264,7 @@ if (typedIntentsByFile.size) {
 // body-reading, report header) read the target from here instead of re-hardcoding it.
 const rootFwd = root.replace(/\\/g, '/').replace(/\/+$/, '');
 const targetLabel = opts.target || rootFwd.split('/').slice(-2).join('/') || rootFwd;
-const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
+const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
 const languages = [...new Set(files.map(langOf))].sort();
 const fragment = {
   meta: {

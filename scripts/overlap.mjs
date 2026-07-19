@@ -62,9 +62,20 @@ const reader = sourceReader(SOURCE_ROOT);
 // thousand-line bodies (TypeScript's checker.ts) that WAS the pipeline's wall. Pure caching,
 // zero semantics change.
 const _shingleMemo = new Map();
+// BODY_LINE_CAP (Spec B addendum): thousand-line bodies (TypeScript's checker.ts) yield 10k+
+// element shingle sets, and pairwise Jaccard over those made Signal A alone exceed 9 minutes on
+// a 28k-symbol graph. Bodies longer than the cap shingle their FIRST 400 lines — deterministic,
+// counted, and declared in the md header + affected findings' evidence. Never silent.
+const BODY_LINE_CAP = 400;
+let bodiesCapped = 0;
+const cappedIds = new Set();
 const bodyShingles = (n) => {
   if (_shingleMemo.has(n.id)) return _shingleMemo.get(n.id);
-  const body = reader.bodyOf(n);
+  let body = reader.bodyOf(n);
+  if (body != null && (n.loc || 0) > BODY_LINE_CAP) {
+    body = body.split('\n').slice(0, BODY_LINE_CAP).join('\n');
+    bodiesCapped++; cappedIds.add(n.id);
+  }
   const s = body == null ? null : shingles(body, K);
   const out = s && s.size ? s : null;
   _shingleMemo.set(n.id, out);
@@ -114,7 +125,9 @@ for (const n of defs) { if (!byLabel.has(n.label)) byLabel.set(n.label, []); byL
 const overlaps = [];
 const scaffoldCluster = [];
 
+let _labelsDone = 0;
 for (const [label, nodes] of byLabel) {
+  if (_T && ++_labelsDone % 2000 === 0) console.error(`[overlap-timing] signal-A progress: ${_labelsDone} labels, ${Math.round(performance.now() - _t)}ms`);
   const files = [...new Set(nodes.map((n) => n.file))];
   if (files.length < 2) continue;
   if (ENTRYPOINTS.has(label)) continue;
@@ -141,7 +154,10 @@ for (const [label, nodes] of byLabel) {
   }
 
   // authoritative: body confirmation; fallback: structural corroboration
+  if (_T) console.error(`[overlap-timing] entering group "${label}" x${nodes.length} (locs: ${nodes.slice(0, 5).map((n) => n.loc).join(',')})`);
+  const _bc0 = _T ? performance.now() : 0;
   const body = HAVE_SOURCE ? bodyConfidence(nodes) : null;
+  if (_T && performance.now() - _bc0 > 500) console.error(`[overlap-timing] slow group "${label}" x${nodes.length}: ${Math.round(performance.now() - _bc0)}ms`);
   let confidence, basis;
   if (body) {
     confidence = body.confidence;
@@ -151,6 +167,7 @@ for (const [label, nodes] of byLabel) {
         ? `body-refuted (avg ${(body.mean * 100).toFixed(0)}%) — same name, different logic; likely coincidental`
         : `body-confirmed (avg ${(body.mean * 100).toFixed(0)}%, min ${(body.min * 100).toFixed(0)}%)`;
     if (body.sampled) basis += `; body sampled ${body.sampled.used}/${body.sampled.of} (large group cap)`;
+    if (nodes.some((n) => cappedIds.has(n.id))) basis += `; long bodies shingled on their first ${BODY_LINE_CAP} lines`;
   } else {
     const callSets = nodes.map((n) => outLabels.get(n.id)).filter((s) => s && s.size);
     const shared = intersectAll(callSets);
@@ -346,7 +363,7 @@ const md = [
   `> **${findings.length} findings** · ${patternFindings.length} interface patterns · ${unverified.length} unverified · ${dismissed.length} dismissed (body-refuted) on **${graph.meta?.target || 'target'}**.`,
   `> ${HAVE_SOURCE ? 'Confidence is **body-confirmed** (token-shingle similarity of real function bodies).' : 'Source unavailable — confidence is structural (shared calls + LOC).'} Each finding is a checklist item.`,
   ...(nonProductSkipped ? ['', `> Scope: **product code** — ${nonProductSkipped} test/fixture/example/bench symbols excluded (set CODEWEB_ALL_ROLES=1 to include them).`] : []),
-  ...(hubLabelsSkipped || budgetLabelsSkipped ? ['', `> Scale caps: ${hubLabelsSkipped} hub label(s) (>${TWIN_HUB_CAP} callers) excluded from twin seeding${budgetLabelsSkipped ? `; ${budgetLabelsSkipped} label(s) past the ${TWIN_PAIR_BUDGET.toLocaleString('en-US')}-pair twin budget (smallest groups seeded first)` : ''}; same-name groups larger than ${GROUP_CAP} body-confirm on a ${GROUP_CAP}-node sample (marked in their evidence). Deterministic, never silent.`] : []),
+  ...(hubLabelsSkipped || budgetLabelsSkipped || bodiesCapped ? ['', `> Scale caps: ${hubLabelsSkipped} hub label(s) (>${TWIN_HUB_CAP} callers) excluded from twin seeding${budgetLabelsSkipped ? `; ${budgetLabelsSkipped} label(s) past the ${TWIN_PAIR_BUDGET.toLocaleString('en-US')}-pair twin budget (smallest groups seeded first)` : ''}${bodiesCapped ? `; ${bodiesCapped} long body/bodies shingled on their first ${BODY_LINE_CAP} lines` : ''}; same-name groups larger than ${GROUP_CAP} body-confirm on a ${GROUP_CAP}-node sample (marked in their evidence). Deterministic, never silent.`] : []),
   '', '## Findings', '', ...findings.map(fmt),
   ...(patternFindings.length ? ['## Interface patterns (not duplication)', '', '_Same-named implementations of a framework contract — nothing in-repo calls them. Do not merge._', '', ...patternFindings.map(fmt)] : []),
   '## Unverified candidates', '', '_Borderline body similarity (15–35%); confirm by reading before acting._', '', ...unverified.map(fmt),

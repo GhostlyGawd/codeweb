@@ -7,7 +7,7 @@
 // die() may still hard-exit.
 
 import { readFileSync, existsSync, statSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { resolve, dirname, join } from 'node:path';
 import { normalizeGraph } from './graph-ops.mjs';
 
 // A consumer like `| head -1` closes the pipe early; without a handler Node dies on EPIPE with a
@@ -57,6 +57,24 @@ export function loadGraph(pathArg, { usage = null } = {}) {
  * (context-pack, find-similar, diff rename-matching all read node spans; the logic lives once).
  * bodyOf(node) = the exact source lines [line, line+loc-1], or null when unreadable.
  */
+// One truth for "what counts as a mappable source file" — the extractor's SRC list, mirrored
+// here for the hooks (Spec E consolidation; the hooks previously trailed the extractor's list).
+export const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
+
+// Walk up from a file to the nearest mapped workspace (.codeweb/graph.json). Previously
+// duplicated verbatim in both hooks — codeweb's own campaign flagged it (Spec E dogfood).
+export function findTarget(filePath) {
+  let dir = dirname(resolve(filePath));
+  for (let i = 0; i < 40; i++) {
+    const baseline = join(dir, '.codeweb', 'graph.json');
+    if (existsSync(baseline)) return { root: dir, baseline };
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
+}
+
 export function sourceReader(root) {
   const available = !!root && existsSync(root);
   const cache = new Map();
