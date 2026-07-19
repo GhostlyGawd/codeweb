@@ -13,6 +13,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, relative } from 'node:path';
+import { bump } from '../scripts/lib/stats.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXPLAIN = join(HERE, '..', 'scripts', 'explain.mjs');
@@ -81,6 +82,11 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
   let msg = null;
   try { msg = preview(raw); } catch { /* fail-open */ }
   if (msg) {
+    try {
+      const fp = JSON.parse(raw)?.tool_input?.file_path || JSON.parse(raw)?.tool_input?.filePath;
+      const t = fp && findTarget(fp);
+      if (t) bump(t.baseline, 'cardsDelivered');
+    } catch { /* receipt only */ }
     try {
       process.stdout.write(JSON.stringify({
         hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'allow', additionalContext: msg },

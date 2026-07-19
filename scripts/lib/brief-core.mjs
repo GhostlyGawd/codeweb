@@ -78,6 +78,14 @@ export function renderBrief(b) {
   L.push(`tests: ${b.tests.symbols} test symbol(s)${b.tests.dirs.length ? ` under ${b.tests.dirs.join(', ')}` : ''}`);
   const f = b.findings;
   L.push(`known issues: ${f.duplications} duplication finding(s), ${f.cycles} file cycle(s), ${f.orphanCandidates} orphan candidate(s)`);
+  if (b.activity) {
+    const c = b.activity.counters;
+    const bits = [];
+    if (c.cardsDelivered) bits.push(`${c.cardsDelivered} pre-edit card(s)`);
+    if (c.regressionsFlagged) bits.push(`${c.regressionsFlagged} regression(s) flagged`);
+    if (c.queriesServed) bits.push(`${c.queriesServed} queries served`);
+    if (bits.length) L.push(`codeweb this month: ${bits.join(' · ')} (full receipt: scripts/stats.mjs)`);
+  }
   L.push('ask codeweb before guessing: codeweb_find "<concept>" → codeweb_explain <id> → codeweb_context <id>.');
   return L.join('\n');
 }
