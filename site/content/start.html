@@ -15,18 +15,17 @@
         <p class="muted">Restart Claude Code, then run <code>/codeweb</code> on any project.</p>
       </div>
       <div class="card">
-        <h3>Run the engine directly</h3>
-        <p>No plugin needed — just clone and run the deterministic pipeline.</p>
-<pre><code>git clone https://github.com/GhostlyGawd/codeweb.git
-node codeweb/scripts/run.mjs /path/to/project \
+        <h3>Run it from npm</h3>
+        <p>No plugin, no clone — one command maps any repo.</p>
+<pre><code>npx -y @ghostlygawd/codeweb /path/to/project \
   --out-dir /path/to/project/.codeweb</code></pre>
-        <p class="muted">Open <code>.codeweb/report.html</code> when it finishes.</p>
+        <p class="muted">Open <code>.codeweb/report.html</code> when it finishes. (Cloning the repo and running <code>scripts/run.mjs</code> works identically — zero dependencies either way.)</p>
       </div>
       <div class="card">
         <h3>Register the MCP server</h3>
-        <p>Expose all 20 tools to any MCP-capable agent.</p>
+        <p>Expose all 24 tools to any MCP-capable agent — Claude Code, Cursor, Windsurf, anything stdio.</p>
 <pre><code>claude mcp add codeweb -- \
-  node /path/to/codeweb/scripts/mcp-server.mjs</code></pre>
+  npx -y -p @ghostlygawd/codeweb codeweb-mcp</code></pre>
         <p class="muted">Zero-dependency stdio server (JSON-RPC 2.0).</p>
       </div>
     </div>

@@ -164,11 +164,18 @@ This is a self-contained Claude Code plugin — zero npm dependencies, just Node
 ```
 Then restart Claude Code so the `/codeweb` command, agents, and skill register.
 
-**Or run the engine directly — no plugin, no install:**
+**Or from npm — any repo, any MCP client, no clone:**
+```
+npx -y @ghostlygawd/codeweb /path/to/your/project --out-dir /path/to/your/project/.codeweb
+# then open /path/to/your/project/.codeweb/report.html
+claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp   # the 24 MCP tools, pluginless
+```
+Cursor, Windsurf, or any other MCP client: point it at the same `codeweb-mcp` command.
+
+**Or run the engine from a clone:**
 ```
 git clone https://github.com/GhostlyGawd/codeweb.git
 node codeweb/scripts/run.mjs /path/to/your/project --out-dir /path/to/your/project/.codeweb
-# then open /path/to/your/project/.codeweb/report.html
 ```
 
 Requires Node.js — the whole deterministic pipeline (extract → cluster → overlap → render) runs
@@ -418,10 +425,11 @@ cycles/orphans/diff`, the edit-loop tools `codeweb_context/refresh`, the intelli
 fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not exposed).
 
 **Installing the plugin registers the server automatically** (`.claude-plugin/plugin.json` carries
-the `mcpServers` entry). Standalone — without the plugin — register it yourself:
+the `mcpServers` entry). Standalone — without the plugin — register it from npm (or a clone):
 
 ```
-claude mcp add codeweb -- node /abs/path/to/codeweb/scripts/mcp-server.mjs
+claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
+claude mcp add codeweb -- node /abs/path/to/codeweb/scripts/mcp-server.mjs   # clone variant
 ```
 
 or in an `.mcp.json`:
