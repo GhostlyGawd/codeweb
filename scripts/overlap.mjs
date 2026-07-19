@@ -17,6 +17,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { shingles, jaccard } from './lib/shingles.mjs'; // shared body-shingle primitives (one truth)
+import { signature, bandKeys } from './lib/minhash.mjs'; // Spec N: LSH candidate generation at scale
 import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
 import { sourceReader } from './lib/cli.mjs'; // shared body access (one truth)
 
@@ -43,6 +44,15 @@ const TWIN_MIN_OUT = 4, TWIN_JACCARD = 0.5, LOC_CV_TIGHT = 0.4, K = 3;
 // sharing a mega-hub says nothing about twin-ness (the clusterer strips those hubs for the same
 // reason).
 const GROUP_CAP = 12, TWIN_HUB_CAP = 50, TWIN_PAIR_BUDGET = 200000;
+// Spec N (docs/specs/overlap-lsh.md): above LSH_MIN_NODES eligible nodes, twin/near-miss
+// CANDIDATE pairs come from MinHash/LSH bucket collisions instead of the capped enumerations —
+// near-linear, so the caps above stop being coverage ceilings and become true backstops. Exact
+// confirmation math is untouched either way. CODEWEB_LSH=1/0 forces the path; by default tiny
+// inputs keep the historical exact path bit-for-bit. Buckets larger than LSH_BUCKET_CAP are the
+// LSH analogue of a mega-hub (one shared pattern, weak pair evidence) — skipped and REPORTED;
+// a true pair has ~64 other bands to collide in.
+const LSH_MIN_NODES = 800, LSH_BUCKET_CAP = 64;
+const lshOn = (n) => (process.env.CODEWEB_LSH != null ? process.env.CODEWEB_LSH === '1' : n >= LSH_MIN_NODES);
 const SEV = { low: 1, medium: 2, high: 3 };
 const SEV_NAME = ['', 'low', 'medium', 'high'];
 const CONF = { refuted: 0, low: 1, medium: 2, high: 3 };
@@ -212,31 +222,58 @@ if (scaffoldCluster.length) {
 _mark('signal-A (same-name groups + body confirm)');
 // ---- Signal B: structural twins -----------------------------------------------------
 const cand = [...outLabels.entries()].filter(([, s]) => s.size >= TWIN_MIN_OUT);
-const inv = new Map();
-for (const [id, s] of cand) for (const t of s) { if (!inv.has(t)) inv.set(t, []); inv.get(t).push(id); }
 const seenPair = new Set();
 const flagged = new Set(overlaps.flatMap((o) => o.nodes));
 const twins = [];
-// Deterministic global budget on twin-pair enumeration: smallest caller-groups first (a shared
-// callee with 3 callers is strong twin evidence; one with 40 is weak), stop at the budget, and
-// report what was skipped. On monorepo-scale graphs the sum of even sub-cap groups is millions
-// of pairs — bounded here, never silently.
 let hubLabelsSkipped = 0, budgetLabelsSkipped = 0, pairBudget = TWIN_PAIR_BUDGET;
-const invEntries = [...inv.entries()].sort((a, b) => a[1].length - b[1].length || (a[0] < b[0] ? -1 : 1));
-for (const [, callers] of invEntries) {
-  if (callers.length > TWIN_HUB_CAP) { hubLabelsSkipped++; continue; } // quadratic + weak evidence — reported below
-  const groupPairs = (callers.length * (callers.length - 1)) / 2;
-  if (groupPairs > pairBudget) { budgetLabelsSkipped++; continue; }
-  pairBudget -= groupPairs;
-  for (let i = 0; i < callers.length; i++) for (let j = i + 1; j < callers.length; j++) {
-    const x = callers[i], y = callers[j], key = x < y ? x + '|' + y : y + '|' + x;
-    if (seenPair.has(key)) continue; seenPair.add(key);
-    const nx = byId.get(x), ny = byId.get(y);
-    if (!nx || !ny || nx.file === ny.file || nx.label === ny.label) continue;
-    if (flagged.has(x) && flagged.has(y)) continue;
-    const sim = jaccard(outLabels.get(x), outLabels.get(y));
-    if (sim < TWIN_JACCARD) continue;
-    twins.push({ nx, ny, sim, sh: [...outLabels.get(x)].filter((t) => outLabels.get(y).has(t)) });
+let twinLsh = null; // { buckets, skippedBuckets } when LSH generated the candidates (reported in the header)
+// One filter+confirm chain for BOTH candidate sources — LSH changes which pairs get examined,
+// never how a pair is judged.
+const considerPair = (x, y) => {
+  const key = x < y ? x + '|' + y : y + '|' + x;
+  if (seenPair.has(key)) return;
+  seenPair.add(key);
+  const nx = byId.get(x), ny = byId.get(y);
+  if (!nx || !ny || nx.file === ny.file || nx.label === ny.label) return;
+  if (flagged.has(x) && flagged.has(y)) return;
+  const sim = jaccard(outLabels.get(x), outLabels.get(y));
+  if (sim < TWIN_JACCARD) return;
+  twins.push({ nx, ny, sim, sh: [...outLabels.get(x)].filter((t) => outLabels.get(y).has(t)) });
+};
+if (lshOn(cand.length)) {
+  // Near-linear candidate generation (Spec N): 64×3 banding over 192-perm signatures of the
+  // callee-label sets — a pair at the 0.5 confirm threshold is proposed with P≈0.9998. Mega-hub
+  // co-callers share too little to collide, so no hub exclusion is needed on this path.
+  const buckets = new Map();
+  for (const [id, s] of cand) {
+    for (const bk of bandKeys(signature(s, 192), 64, 3)) {
+      if (!buckets.has(bk)) buckets.set(bk, []);
+      buckets.get(bk).push(id);
+    }
+  }
+  let skippedBuckets = 0;
+  for (const bk of [...buckets.keys()].sort()) {
+    const ids = buckets.get(bk);
+    if (ids.length < 2) continue;
+    if (ids.length > LSH_BUCKET_CAP) { skippedBuckets++; continue; }
+    ids.sort();
+    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) considerPair(ids[i], ids[j]);
+  }
+  twinLsh = { buckets: buckets.size, skippedBuckets };
+} else {
+  // Historical exact path (kept bit-for-bit for small inputs): inverted caller index under the
+  // declared caps. Deterministic global budget on twin-pair enumeration: smallest caller-groups
+  // first (a shared callee with 3 callers is strong twin evidence; one with 40 is weak), stop at
+  // the budget, and report what was skipped.
+  const inv = new Map();
+  for (const [id, s] of cand) for (const t of s) { if (!inv.has(t)) inv.set(t, []); inv.get(t).push(id); }
+  const invEntries = [...inv.entries()].sort((a, b) => a[1].length - b[1].length || (a[0] < b[0] ? -1 : 1));
+  for (const [, callers] of invEntries) {
+    if (callers.length > TWIN_HUB_CAP) { hubLabelsSkipped++; continue; } // quadratic + weak evidence — reported below
+    const groupPairs = (callers.length * (callers.length - 1)) / 2;
+    if (groupPairs > pairBudget) { budgetLabelsSkipped++; continue; }
+    pairBudget -= groupPairs;
+    for (let i = 0; i < callers.length; i++) for (let j = i + 1; j < callers.length; j++) considerPair(callers[i], callers[j]);
   }
 }
 twins.sort((a, b) => b.sim - a.sim);
@@ -246,7 +283,7 @@ twins.sort((a, b) => b.sim - a.sim);
 // other members into that finding's node list so nothing is silently dropped.
 const byLabelPair = new Map();
 for (const t of twins) {
-  const key = [t.nx.label, t.ny.label].sort().join(' ');
+  const key = [t.nx.label, t.ny.label].sort().join('\0');
   const cur = byLabelPair.get(key);
   if (!cur) byLabelPair.set(key, { ...t, extraNodes: [] });
   else cur.extraNodes.push(t.nx.id, t.ny.id);
@@ -296,6 +333,7 @@ _mark('signal-B (twin body confirm)');
 // out of optimize's READY tier). Bounded: hashes owned by >20 nodes seed nothing (boilerplate
 // statements are noise + quadratic dynamite), and pairs already flagged above are skipped.
 const T3_JACCARD = 0.7, T3_OWNER_CAP = 20;
+let t3Lsh = null; // { buckets, skippedBuckets } when LSH generated the near-miss candidates
 {
   const t3Nodes = defs.filter((n) => Array.isArray(n.t3) && n.t3.length >= 6 && (n.kind === 'function' || n.kind === 'method'));
   const countsOf = new Map(t3Nodes.map((n) => {
@@ -303,17 +341,58 @@ const T3_JACCARD = 0.7, T3_OWNER_CAP = 20;
     for (const h of n.t3) m.set(h, (m.get(h) || 0) + 1);
     return [n.id, m];
   }));
-  const owners = new Map(); // hash -> node ids
-  for (const n of t3Nodes) for (const h of new Set(n.t3)) { if (!owners.has(h)) owners.set(h, []); owners.get(h).push(n.id); }
   const nById = new Map(t3Nodes.map((n) => [n.id, n]));
+  // Exact shared-statement count between two fingerprint multisets (Σ min of counts). The LSH
+  // path uses this directly, with NO owner cap — restoring the undercount the capped
+  // accumulation pays when a shared hash is owned by >T3_OWNER_CAP nodes.
+  const sharedOf = (a, b) => {
+    const ca = countsOf.get(a), cb = countsOf.get(b);
+    const [small, big] = ca.size <= cb.size ? [ca, cb] : [cb, ca];
+    let shared = 0;
+    for (const [h, c] of small) { const d = big.get(h); if (d) shared += Math.min(c, d); }
+    return shared;
+  };
   const pairShared = new Map(); // "a|b" -> shared multiset count
-  for (const [h, ids] of owners) {
-    if (ids.length > T3_OWNER_CAP) continue;
-    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
-      const a = ids[i] < ids[j] ? ids[i] : ids[j], b = ids[i] < ids[j] ? ids[j] : ids[i];
-      const key = a + '|' + b;
-      const inc = Math.min(countsOf.get(a).get(h) || 0, countsOf.get(b).get(h) || 0);
-      pairShared.set(key, (pairShared.get(key) || 0) + inc);
+  if (lshOn(t3Nodes.length)) {
+    // Spec N: multiset Jaccard reduces exactly to set Jaccard under occurrence-expansion
+    // (`hash#k` for the k-th occurrence), so 32×4 banding at the 0.7 confirm threshold proposes
+    // true pairs with P≈0.9998 — then sharedOf computes the exact count for each candidate.
+    const buckets = new Map();
+    for (const n of t3Nodes) {
+      const items = [];
+      for (const [h, c] of countsOf.get(n.id)) for (let k = 1; k <= c; k++) items.push(h + '#' + k);
+      for (const bk of bandKeys(signature(items, 128), 32, 4)) {
+        if (!buckets.has(bk)) buckets.set(bk, []);
+        buckets.get(bk).push(n.id);
+      }
+    }
+    let skippedBuckets = 0;
+    for (const bk of [...buckets.keys()].sort()) {
+      const ids = buckets.get(bk);
+      if (ids.length < 2) continue;
+      if (ids.length > LSH_BUCKET_CAP) { skippedBuckets++; continue; }
+      ids.sort();
+      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+        const key = ids[i] + '|' + ids[j];
+        if (pairShared.has(key)) continue;
+        const shared = sharedOf(ids[i], ids[j]);
+        if (shared) pairShared.set(key, shared);
+      }
+    }
+    t3Lsh = { buckets: buckets.size, skippedBuckets };
+  } else {
+    // Historical exact path (kept bit-for-bit for small inputs): owners index under the declared
+    // owner cap.
+    const owners = new Map(); // hash -> node ids
+    for (const n of t3Nodes) for (const h of new Set(n.t3)) { if (!owners.has(h)) owners.set(h, []); owners.get(h).push(n.id); }
+    for (const [h, ids] of owners) {
+      if (ids.length > T3_OWNER_CAP) continue;
+      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+        const a = ids[i] < ids[j] ? ids[i] : ids[j], b = ids[i] < ids[j] ? ids[j] : ids[i];
+        const key = a + '|' + b;
+        const inc = Math.min(countsOf.get(a).get(h) || 0, countsOf.get(b).get(h) || 0);
+        pairShared.set(key, (pairShared.get(key) || 0) + inc);
+      }
     }
   }
   const flaggedT3 = new Set(overlaps.flatMap((o) => o.nodes));
@@ -364,6 +443,7 @@ const md = [
   `> ${HAVE_SOURCE ? 'Confidence is **body-confirmed** (token-shingle similarity of real function bodies).' : 'Source unavailable — confidence is structural (shared calls + LOC).'} Each finding is a checklist item.`,
   ...(nonProductSkipped ? ['', `> Scope: **product code** — ${nonProductSkipped} test/fixture/example/bench symbols excluded (set CODEWEB_ALL_ROLES=1 to include them).`] : []),
   ...(hubLabelsSkipped || budgetLabelsSkipped || bodiesCapped ? ['', `> Scale caps: ${hubLabelsSkipped} hub label(s) (>${TWIN_HUB_CAP} callers) excluded from twin seeding${budgetLabelsSkipped ? `; ${budgetLabelsSkipped} label(s) past the ${TWIN_PAIR_BUDGET.toLocaleString('en-US')}-pair twin budget (smallest groups seeded first)` : ''}${bodiesCapped ? `; ${bodiesCapped} long body/bodies shingled on their first ${BODY_LINE_CAP} lines` : ''}; same-name groups larger than ${GROUP_CAP} body-confirm on a ${GROUP_CAP}-node sample (marked in their evidence). Deterministic, never silent.`] : []),
+  ...(twinLsh || t3Lsh ? ['', `> Candidates: lsh (Spec N) — ${twinLsh ? `twins via 192-perm minhash, 64×3 bands, ${twinLsh.buckets.toLocaleString('en-US')} buckets${twinLsh.skippedBuckets ? `, ${twinLsh.skippedBuckets} bucket(s) past the ${LSH_BUCKET_CAP} cap` : ''}` : 'twins via exact enumeration'}${t3Lsh ? `; near-miss via 128-perm minhash, 32×4 bands, ${t3Lsh.buckets.toLocaleString('en-US')} buckets${t3Lsh.skippedBuckets ? `, ${t3Lsh.skippedBuckets} past cap` : ''}` : ''}. Exact confirmation unchanged — LSH only chooses which pairs get examined.`] : []),
   '', '## Findings', '', ...findings.map(fmt),
   ...(patternFindings.length ? ['## Interface patterns (not duplication)', '', '_Same-named implementations of a framework contract — nothing in-repo calls them. Do not merge._', '', ...patternFindings.map(fmt)] : []),
   '## Unverified candidates', '', '_Borderline body similarity (15–35%); confirm by reading before acting._', '', ...unverified.map(fmt),
