@@ -8,17 +8,30 @@ historically-missed caller files an agent updates, versus the same agent with no
 ## Protocol (frozen before solving)
 - Tasks: `paper/results/replay-tasks.json` (mined, see replay-corpus spec). No task edits
   after solving begins.
-- Arms: `control` (no tooling) vs `treatment` (ambient, REQUIRED steps). Same isolation
-  (repo copy at `baseSha`), same instruction, same grader.
-- Smoke first: 1 task × 2 arms × 1 rep — verifies cell integrity (metrics present, treatment's
-  `ambientContextNoted` non-empty) before spending on the full grid.
-- Full: all tasks × 2 arms × 2 reps.
+- Arms: `control` (no tooling) vs `treatment` (ambient, REQUIRED steps). Same isolation,
+  same instruction, same grader.
+- **Blind solve**: the solver never sees the answer key. Isolation is a **history-free
+  export** of `baseSha` (`git archive` → fresh single-commit repo), so the follow-up fix
+  that defines the key does not exist anywhere the solver can look; the prompt forbids
+  consulting the source clone, and the solver reports only `filesChanged` + the gate numbers.
+- Smoke first: 1 task × 2 arms × 1 rep — verifies cell integrity (grading computed, gate
+  numbers present, treatment's `ambientContextNoted` non-empty) before the full grid.
+- Full: all tasks × 2 arms × 2 reps (up to 4 reps when the corpus is ≤2 tasks — decided
+  before the run, never after seeing results).
 
 ## Metrics (graded by fixed functions, not judges)
-1. **Primary**: `missedCovered / missedTotal` — coverage of the historically-missed caller
-   files (the answer key from git history).
+1. **Primary**: `missedCovered / missedTotal` — computed by the workflow script as
+   `|filesChanged ∩ missedByChange|`, never self-reported by the solver.
 2. `structuralRegressions` (diff.mjs gate), completion rate.
 3. Validity: every completed treatment cell shows real ambient engagement.
+
+## Amendment (2026-07-19, v1 pilot discarded)
+The v1 smoke (isObject, 1×2×1) leaked three ways: the prompt pasted the `missedByChange`
+list into both arms' grading section; solvers self-reported coverage; and the `cp -r`
+isolation kept full git history, so both arms read the follow-up fix commit — the answer
+key's source. Both cells also ran on a task later found invalid (formatting artifact, see
+the corpus spec amendment). The pilot is preserved in `paper/results/replay-ab-pilot.json`
+and excluded from all analysis; the blind-solve protocol above replaces it.
 
 ## Analysis & reporting
 Per-condition means + per-task pairing; small-N reported as directional, never as

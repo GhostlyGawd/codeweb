@@ -9,7 +9,37 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Added
+- **Java and C# call wiring (tree-sitter dispatch tier).** The regex engine still finds every
+  symbol; for Java/C# files an optional AST pass now adds the call edges regex could never
+  claim safely: `this.helper()` calls inside a class, and `receiver.method()` calls where the
+  receiver's declared type names exactly one class in the repo (two classes with the same name
+  → the edge is dropped and counted in the banner, never guessed). Nodes are untouched —
+  identical between engines — so determinism holds. Grammars vendored from
+  `@vscode/tree-sitter-wasm@0.3.1` (`scripts/grammars/PROVENANCE.md` records the ABI trap that
+  rules out the older grammar package). Spec: `docs/specs/java-cs-tree-sitter.md`.
+- **The ledger now counts whether advice was FOLLOWED, not just delivered.** When a pre-edit
+  card names caller files and a later edit in the same session touches one of them (30-minute
+  window, once per file, the changed symbol's own file excluded), the ledger bumps
+  `cardCallersFollowed` and the session brief reports "N card-named caller(s) followed" —
+  the difference between "we showed advice" and "the advice changed what happened."
+  Spec: `docs/specs/card-correlation.md`.
+
+### Research
+- **The replay miner is tested and honest about its funnel.** `paper/experiments/replay-mine.mjs`
+  (mines real commits that changed a function's definition and — per the repo's own later
+  fixes — missed caller files) gained a TDD suite on synthetic git histories
+  (`tests/replay-mine.test.mjs`, P1–P5) and a stage-by-stage funnel report. The tests + a
+  hand-audit of the first frozen corpus exposed and fixed three miner bugs: a prefilter that
+  silently zeroed every Java/C# candidate, a raw def-line comparison that read a prettier
+  reformat as a "signature change" (which had produced 2 invalid tasks), and instructions
+  truncated mid-hunk at 4KB (now: complete-or-rejected). Spec: `docs/specs/replay-corpus.md`.
+- **The replay A/B protocol went blind before spending.** The v1 pilot leaked its own answer
+  key three ways (the grading list pasted into solver prompts, self-reported coverage, and
+  full-history isolation that let solvers read the historical fix commit). It is preserved —
+  discarded — in `paper/results/replay-ab-pilot.json`; the v2 harness solves in a
+  history-free export of the base revision and the workflow itself computes coverage as
+  `filesChanged ∩ missedByChange`. Spec amendments: `docs/specs/replay-run.md`.
 
 ## [0.7.1] - 2026-07-19
 

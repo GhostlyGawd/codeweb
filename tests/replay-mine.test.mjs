@@ -5,6 +5,10 @@
 // P1: a signature change that misses callers, fixed in a follow-up -> exactly that task.
 // P2: a well-executed change (all callers updated in-commit) -> no task, funnel says why.
 // P3: the fix lands outside --followup-window -> no task, funnel says why.
+// P4: a formatting-only "change" (quotes/spacing, same tokens) is NOT a signature change,
+//     even when a later reformat touches callers and mentions the symbol (the prettier trap
+//     that produced 2 invalid tasks in the v1 axios corpus).
+// P5: a change whose file diff cannot be embedded verbatim (>16KB) is rejected, not truncated.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -125,5 +129,58 @@ test('P3: a fix outside --followup-window mines nothing — and the funnel says 
     assert.equal(out.tasks.length, 0, `late fix is outside the window (funnel: ${JSON.stringify(out.funnel)})`);
     assert.ok(out.funnel.hadMissedCallers >= 1, 'the miss WAS detected');
     assert.equal(out.funnel.hadFollowupFix, 0, 'funnel names the exit stage');
+  } finally { cleanup(repo); }
+});
+
+test('P4: a formatting-only reformat is NOT a signature change — the prettier trap mines nothing', { skip: hasGit ? false : 'git not available' }, () => {
+  const { repo, g } = gitRepo();
+  try {
+    writeTree(repo, {
+      'lib/hub.js': "export function process(a, b) {\n  return kind(a) === 'x' ? a : b;\n}\nfunction kind(v) {\n  return typeof v;\n}\n",
+      'ca.js': CALLER('A'), 'cb.js': CALLER('B'),
+    });
+    g('add', '-A'); g('commit', '-q', '-m', 'base');
+
+    // the "change": pure reformat — def line spacing + body quote style; tokens identical
+    writeTree(repo, {
+      'lib/hub.js': 'export function process( a, b ) {\n  return kind(a) === "x" ? a : b;\n}\nfunction kind(v) {\n  return typeof v;\n}\n',
+    });
+    g('add', '-A'); g('commit', '-q', '-m', 'style: reformat');
+
+    // a later repo-wide-style reformat touches a caller AND mentions the symbol (word-bounded)
+    writeTree(repo, { 'cb.js': "import { process } from './lib/hub.js';\nexport function useB() {\n  return process(1,2);\n}\n" });
+    g('add', '-A'); g('commit', '-q', '-m', 'style: reformat callers');
+
+    const out = mine(repo);
+    assert.equal(out.tasks.length, 0, `a reformat is not a caller-breakage (funnel: ${JSON.stringify(out.funnel)})`);
+    assert.ok(out.funnel.idPresentInBase >= 1, 'the symbol WAS compared across the pair');
+    assert.equal(out.funnel.signatureChanged, 0, 'funnel names the exit stage: normalized def lines are equal');
+  } finally { cleanup(repo); }
+});
+
+test('P5: a change too large to embed verbatim is rejected, never truncated into the instruction', { skip: hasGit ? false : 'git not available' }, () => {
+  const { repo, g } = gitRepo();
+  try {
+    const filler = (tag) => Array.from({ length: 400 }, (_, i) => `export const pad_${tag}_${i} = '${'x'.repeat(24)}';`).join('\n');
+    writeTree(repo, {
+      'lib/hub.js': `export function process(a, b) {\n  return a + b;\n}\n${filler('v1')}\n`,
+      'ca.js': CALLER('A'), 'cb.js': CALLER('B'), 'cc.js': CALLER('C'),
+    });
+    g('add', '-A'); g('commit', '-q', '-m', 'base');
+
+    // real signature change + a rewrite of the same file so the file diff blows past 16KB
+    writeTree(repo, {
+      'lib/hub.js': `export function process(a, b, opts) {\n  return a + b + (opts ? 1 : 0);\n}\n${filler('v2')}\n`,
+      'ca.js': CALLER_FIXED('A'),
+    });
+    g('add', '-A'); g('commit', '-q', '-m', 'add opts param + rewrite');
+
+    writeTree(repo, { 'cb.js': CALLER_FIXED('B') });
+    g('add', '-A'); g('commit', '-q', '-m', 'fix caller');
+
+    const out = mine(repo);
+    assert.equal(out.tasks.length, 0, `oversized diff -> no task (funnel: ${JSON.stringify(out.funnel)})`);
+    assert.ok(out.funnel.hadFollowupFix >= 1, 'the candidate survived every semantic stage');
+    assert.equal(out.funnel.defDiffComplete, 0, 'funnel names the exit stage: the diff could not be embedded verbatim');
   } finally { cleanup(repo); }
 });

@@ -6,8 +6,13 @@
 //   control   — apply the change, no tooling.
 //   treatment — AMBIENT codeweb (brief + explain cards with reliance/caveats), mirroring hooks.
 //
-// Grading: (a) coverage of the historically-missed caller files (the ground truth), (b) the
-// deterministic diff.mjs gate. Launch (spends real tokens):
+// BLIND GRADING (v2 — the v1 pilot leaked): the solver NEVER sees the answer key. It works in a
+// history-free export of the base revision (git archive -> fresh single-commit repo, so the
+// follow-up fix that defines the key does not exist anywhere it can look), reports only the file
+// list it changed plus the deterministic diff.mjs gate numbers, and THIS SCRIPT computes
+// missedCovered = |filesChanged ∩ missedByChange| — a fixed function, per the spec.
+//
+// Launch (spends real tokens):
 //   Workflow({scriptPath: ".../replay-ab.workflow.js", args: {root: "<abs codeweb>", tasksFile: "<abs replay-tasks.json>", smoke: true}})
 // Persist the return to paper/results/replay-ab-raw.json; analyze coverage per condition.
 
@@ -16,7 +21,7 @@ export const meta = {
   description: 'Replay real historical caller-breakages: does ambient codeweb cover the callers history says were missed?',
   phases: [
     { title: 'Load', detail: 'read + validate the mined ground-truth task file (frozen input, no generation)' },
-    { title: 'Solve', detail: 'each (task x condition x rep) at the base revision in an isolated copy; graded on missed-caller coverage + the gate' },
+    { title: 'Solve', detail: 'each (task x condition x rep) blind in a history-free copy at the base revision; coverage graded by the script, not the agent' },
   ],
 }
 
@@ -39,23 +44,26 @@ const TASK = {
   },
 }
 const LOADED = { type: 'object', additionalProperties: false, required: ['tasks'], properties: { tasks: { type: 'array', items: TASK }, note: { type: 'string' } } }
+// The solver reports WHAT IT DID (files + deterministic gate numbers) — never coverage of a key
+// it must not know exists. additionalProperties stays false so a solver cannot smuggle one in.
 const CELL = {
   type: 'object', additionalProperties: false,
-  required: ['taskSymbol', 'condition', 'rep', 'completed', 'metrics', 'approachSummary'],
+  required: ['taskSymbol', 'condition', 'rep', 'completed', 'filesChanged', 'gate', 'approachSummary'],
   properties: {
     taskSymbol: { type: 'string' }, condition: { type: 'string', enum: ['control', 'treatment'] }, rep: { type: 'integer' },
     completed: { type: 'boolean' },
-    metrics: {
+    filesChanged: {
+      type: 'array', items: { type: 'string' },
+      description: 'repo-relative paths of every tracked file your edit changed (from git status --porcelain in the work repo)',
+    },
+    gate: {
       type: 'object', additionalProperties: false,
-      required: ['missedCovered', 'missedTotal', 'structuralRegressions', 'newCycles', 'newDuplication', 'lostCallers'],
+      required: ['structuralRegressions', 'newCycles', 'newDuplication', 'lostCallers'],
       properties: {
-        missedCovered: { type: 'integer', description: 'how many of the historically-missed caller files your edit updated' },
-        missedTotal: { type: 'integer' },
         structuralRegressions: { type: 'integer' }, newCycles: { type: 'integer' },
         newDuplication: { type: 'integer' }, lostCallers: { type: 'integer' },
       },
     },
-    filesChanged: { type: 'array', items: { type: 'string' } },
     ambientContextNoted: { type: 'string' },
     approachSummary: { type: 'string' },
   },
@@ -77,30 +85,35 @@ const solvePrompt = (cell) => {
 
 You are REPLAYING a real historical change. Condition: ${cell.cond.toUpperCase()}. Rep ${cell.rep}.
 
-ISOLATION: copy the repo and pin the base revision (never edit the original):
-  work=$(mktemp -d)/work ; cp -r "${t.repo}" "$work" ; git -C "$work" checkout --detach ${t.baseSha} ; git -C "$work" clean -fd
+ISOLATION — build a history-free work repo (an export of one revision, then a fresh git init):
+  base=$(mktemp -d) ; work="$base/work" ; mkdir -p "$work"
+  git -C "${t.repo}" archive ${t.baseSha} | tar -x -C "$work"
+  git -C "$work" init -q && git -C "$work" add -A && git -C "$work" -c user.email=replay@local -c user.name=replay commit -qm base
+HARD RULES: after the export, $work is the ONLY code you consult. Do not read "${t.repo}" or any
+other checkout again; do not use git history beyond the single "base" commit (none other exists in
+$work — that is the point); do not go looking for this experiment's harness, task, or result files.
+The instruction below is complete — everything you need is in it plus the work tree itself.
 
 TASK: ${t.instruction}
 
 STEPS:
-1. BEFORE graph:  node "${ROOT}/scripts/run.mjs" "$work" --out-dir "$work/.cwb"
+1. BEFORE graph:  node "${ROOT}/scripts/run.mjs" "$work" --out-dir "$base/cwb"
 ${treatment ? `2. AMBIENT CONTEXT (what codeweb's hooks inject automatically in real use — REQUIRED here):
-   a. node "${ROOT}/scripts/brief.mjs" "$work/.cwb/graph.json"
-   b. node "${ROOT}/scripts/explain.mjs" "$work/.cwb/graph.json" "${t.label}"
+   a. node "${ROOT}/scripts/brief.mjs" "$base/cwb/graph.json"
+   b. node "${ROOT}/scripts/explain.mjs" "$base/cwb/graph.json" "${t.label}"
    Read the card: blast radius, top callers, what callers RELY ON, any ⚠ caveat. Use it: update
    EVERY caller the card names to stay consistent with the changed signature.` : `2. (No special tooling.) Read the code as a competent developer would.`}
 3. Apply the definition change and update the codebase to stay consistent with it.
-4. AFTER graph:  node "${ROOT}/scripts/run.mjs" "$work" --out-dir "$work/.cwa"
+4. AFTER graph:  node "${ROOT}/scripts/run.mjs" "$work" --out-dir "$base/cwa"
 5. GRADE:
-   node "${ROOT}/scripts/diff.mjs" "$work/.cwb/graph.json" "$work/.cwa/graph.json" --json
+   node "${ROOT}/scripts/diff.mjs" "$base/cwb/graph.json" "$base/cwa/graph.json" --json
    And list the files you changed:  git -C "$work" status --porcelain
 
-REPORT (honestly; the answer key is fixed history — do not fudge):
-- metrics.missedTotal = ${t.missedByChange.length}; metrics.missedCovered = how many of these files
-  YOUR edit changed: ${JSON.stringify(t.missedByChange)}
-- metrics.structuralRegressions / newCycles / newDuplication / lostCallers from the diff
-- filesChanged (from git status), approachSummary${treatment ? ', ambientContextNoted (what the card told you; "nothing useful" is valid)' : ''}
-- completed: false (with what failed) if any step errored — do not invent metrics.`
+REPORT (honestly — do not fudge):
+- filesChanged: every tracked file path from git status (strip the status letters; paths only)
+- gate.structuralRegressions / newCycles / newDuplication / lostCallers from the diff.mjs output
+- approachSummary${treatment ? ', ambientContextNoted (what the card told you; "nothing useful" is valid)' : ''}
+- completed: false (with what failed) if any step errored — do not invent numbers.`
 }
 
 phase('Solve')
@@ -108,7 +121,15 @@ const cells = []
 for (const t of tasks) for (const cond of ['control', 'treatment']) for (let r = 0; r < cfg.reps; r++) cells.push({ task: t, cond, rep: r })
 const results = await parallel(cells.map((c) => () =>
   agent(solvePrompt(c), { label: `${c.cond}:${c.task.label}#${c.rep}`, phase: 'Solve', schema: CELL, agentType: 'general-purpose' })))
-const cellsOut = results.map((r, i) => (r ? { task: cells[i].task.symbol, condition: cells[i].cond, rep: cells[i].rep, result: r } : { task: cells[i].task.symbol, condition: cells[i].cond, rep: cells[i].rep, result: null, died: true }))
+// grading — the fixed function the solver never saw: coverage of history's missed-caller files
+const cellsOut = results.map((r, i) => {
+  const c = cells[i]
+  const base = { task: c.task.symbol, condition: c.cond, rep: c.rep, result: r }
+  if (!r) return { ...base, died: true }
+  const changed = new Set((r.filesChanged || []).map((p) => p.replace(/^\.\//, '').trim()).filter(Boolean))
+  const covered = c.task.missedByChange.filter((f) => changed.has(f))
+  return { ...base, grading: { missedTotal: c.task.missedByChange.length, missedCovered: covered.length, coveredFiles: covered } }
+})
 const done = cellsOut.filter((c) => c.result && c.result.completed).length
 log(`solved ${done}/${cells.length} cells completed`)
-return { design: 'replay of mined historical caller-breakages; ground truth = missedByChange coverage', tasks: tasks.map((t) => t.symbol), cells: cellsOut, config: cfg }
+return { design: 'replay of mined historical caller-breakages; blind solve, coverage graded by the workflow from filesChanged ∩ missedByChange', tasks: tasks.map((t) => t.symbol), cells: cellsOut, config: cfg }

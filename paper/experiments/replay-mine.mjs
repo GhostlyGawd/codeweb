@@ -62,14 +62,19 @@ function extractAt(sha) {
 }
 
 // The declaration LINE at a node's position — fragments don't reliably carry rich signatures, so
-// the definition text itself is the change detector (formatting-sensitive; downstream filters —
-// callers, missed files, follow-up fixes — do the real narrowing).
+// the definition text itself is the change detector.
 function defLineOf(srcDir, node) {
   try {
     const lines = readFileSync(join(srcDir, node.file), 'utf8').split(/\r?\n/);
     return (lines[node.line - 1] || '').trim();
   } catch { return null; }
 }
+
+// Formatting guard: def lines are compared AFTER normalizing quote style, arrow-param parens,
+// whitespace, and trailing semicolons. Without this, a prettier pass reads as a "signature
+// change" and the mined "missed callers" are just files a later repo-wide reformat touched —
+// not a semantic breakage (this exact trap produced 2 invalid tasks in the v1 axios corpus).
+const normSig = (s) => s.replace(/"/g, "'").replace(/[()]/g, '').replace(/\s+/g, '').replace(/;+$/, '');
 
 const callerFilesOf = (frag, id, ownFile) => {
   const files = new Set();
@@ -83,7 +88,7 @@ const callerFilesOf = (frag, id, ownFile) => {
 
 const tasks = [];
 // the funnel is reported, never silent — a 0-task run must say WHERE candidates died
-const funnel = { signaturePairs: 0, symbolsInChangedFiles: 0, idPresentInBase: 0, signatureChanged: 0, enoughCallers: 0, hadMissedCallers: 0, hadFollowupFix: 0 };
+const funnel = { signaturePairs: 0, symbolsInChangedFiles: 0, idPresentInBase: 0, signatureChanged: 0, enoughCallers: 0, hadMissedCallers: 0, hadFollowupFix: 0, defDiffComplete: 0 };
 let pairsTried = 0;
 for (let i = 0; i < commits.length - 1 && tasks.length < maxTasks && pairsTried < maxPairs; i++) {
   const C = commits[i];
@@ -109,11 +114,11 @@ for (let i = 0; i < commits.length - 1 && tasks.length < maxTasks && pairsTried 
       const b = bById.get(a.id);
       if (!b) continue;
       funnel.idPresentInBase++;
-      const bp = JSON.stringify(b.signature?.params ?? null), ap = JSON.stringify(a.signature?.params ?? null);
+      const bp = normSig(JSON.stringify(b.signature?.params ?? null)), ap = normSig(JSON.stringify(a.signature?.params ?? null));
       let sigChanged = bp !== ap;
       if (!sigChanged) {
         const bl = defLineOf(before.src, b), al = defLineOf(after.src, a);
-        sigChanged = bl != null && al != null && bl !== al && (bl.includes('(') || al.includes('('));
+        sigChanged = bl != null && al != null && normSig(bl) !== normSig(al) && (bl.includes('(') || al.includes('('));
       }
       if (!sigChanged) continue;
       funnel.signatureChanged++;
@@ -136,7 +141,11 @@ for (let i = 0; i < commits.length - 1 && tasks.length < maxTasks && pairsTried 
       }
       if (!fixedBy.length) continue;
       funnel.hadFollowupFix++;
-      const defDiff = (tryGit('show', '--format=', C, '--', a.file) || '').slice(0, 4096);
+      // the instruction promises the change VERBATIM — a truncated diff is not a replayable task
+      // (v1 cut at 4KB mid-hunk, which sent solver agents digging through history for the rest)
+      const defDiff = tryGit('show', '--format=', C, '--', a.file) || '';
+      if (defDiff.length > 16384) continue;
+      funnel.defDiffComplete++;
       tasks.push({
         repo, baseSha: P, changeSha: C, symbol: a.id, label: a.label, file: a.file,
         fanInAtBase: callers.size,
