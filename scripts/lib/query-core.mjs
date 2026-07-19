@@ -16,6 +16,17 @@ function budget(payload, field, limit, offset) {
   return payload;
 }
 
+// Confidence calibration for empty dependents/callers answers: "0 results" must not sound equally
+// sure for a public-API symbol (external callers invisible by construction), an exported one, or a
+// symbol in a repo that routes calls dynamically. Returns the caveat string or null.
+function zeroCallerCaveat(graph, index, matched) {
+  const nodes = matched.map((id) => index.byId.get(id)).filter(Boolean);
+  if (nodes.some((n) => n.pub)) return 'public API (reachable from a package entrypoint) — external callers likely';
+  if (nodes.some((n) => n.exports)) return 'exported — external use possible';
+  if (graph.meta?.dynamic) return `repo routes calls dynamically in ${graph.meta.dynamic.files} file(s) — absence of callers is weaker evidence`;
+  return null;
+}
+
 /**
  * Run one structural query. opts: { query, symbol, limit, offset }.
  * Returns { payload, code } — code 1 = symbol not found (payload carries found:false).
@@ -30,6 +41,10 @@ export function runQuery(graph, index, opts) {
     else {
       const results = query === 'callers' ? callersOf(index, matched) : query === 'callees' ? calleesOf(index, matched) : testersOf(index, matched);
       payload = budget({ query, symbol, summary: `${results.length} ${query === 'tests' ? 'test(s) exercise' : query + ' of'} ${symbol}`, matched, results, count: results.length }, 'results', limit, offset);
+      if (query === 'callers' && !results.length) {
+        const caveat = zeroCallerCaveat(graph, index, matched);
+        if (caveat) { payload.caveat = caveat; payload.summary += ` — ⚠ ${caveat}`; }
+      }
     }
   } else if (query === 'dependents') {
     const matched = resolveSymbol(graph, symbol);
@@ -42,6 +57,10 @@ export function runQuery(graph, index, opts) {
       // under a budget, byKind collapses to counts (the full per-kind lists are the bulk of the payload)
       payload = { query: 'dependents', symbol, summary: `${results.length} dependent(s) of ${symbol} (${Object.entries(kindCounts).map(([k, v]) => `${k} ${v}`).join(', ')})`, matched, results, byKind: limit != null ? kindCounts : byKind, count: results.length };
       budget(payload, 'results', limit, offset);
+      if (!results.length) {
+        const caveat = zeroCallerCaveat(graph, index, matched);
+        if (caveat) { payload.caveat = caveat; payload.summary += ` — ⚠ ${caveat}`; }
+      }
     }
   } else if (query === 'impact') {
     const matched = resolveSymbol(graph, symbol);

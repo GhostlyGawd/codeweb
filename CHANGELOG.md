@@ -9,7 +9,33 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Added (fewer mistakes per token)
+- **Day-one briefing** (`codeweb_brief`, 24th MCP tool + `scripts/brief.mjs` + a SessionStart
+  hook): one ~2KB page — areas with summaries, the most depended-on symbols, entry points
+  (heuristic), test layout, known issues — injected automatically when a session starts in a
+  mapped repo. Replaces the first 20-50k tokens of exploratory orientation with pre-computed
+  answers; served in-process from the cached graph.
+- **Caller-reliance contracts** (`lib/reliance.mjs`): the explain card (and therefore the
+  pre-edit hook, which embeds its summary) now reads the actual call sites and says what
+  callers depend on — destructured/member-accessed result fields ("callers use {timeout,
+  retries} — keep those"), awaited fraction, and the argument-count range in use. Targets the
+  most common breaking edit: changing a return shape a caller still destructures.
+  Conservative: only call-site-line patterns count; no sites → no claim.
+- **Confidence calibration** (extractor v10): symbols reachable from a package entrypoint
+  (package.json main/module/browser/bin/exports, followed through named + star re-export
+  chains) are stamped `pub` — "0 in-repo callers" on a public symbol now answers with
+  "⚠ public API — external callers likely; renames are breaking" instead of false confidence.
+  Files using dynamic dispatch (computed member calls, getattr, non-literal require, emitters)
+  are recorded in `meta.dynamic`, and empty callers/dependents answers cite them ("absence of
+  callers is weaker evidence"). Confident answers stay caveat-free — no noise.
+
+### Research
+- **H18-v2 prepped** (`paper/experiments/agent-ab2-ambient.workflow.js` + `agent-ab2.README.md`):
+  the agent A/B rerun as one funded command — v1's null was a floor effect (both arms ~0
+  regressions on easy tasks), so v2 pre-registers hard tasks (graph-verified fan-in ≥ 5 /
+  shape changes) and an AMBIENT treatment arm mirroring what the hooks now inject (brief +
+  explain cards with reliance/caveats — context delivered, not offered). The analyzer takes
+  raw/out paths so v1 results stay frozen.
 
 ## [0.4.0] - 2026-07-19
 

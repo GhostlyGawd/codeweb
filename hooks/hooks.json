@@ -1,6 +1,20 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-brief.mjs\"",
+            "timeout": 10
+          }
+        ],
+        "description": "codeweb: when the session starts in a .codeweb-mapped repo, inject the ~2KB day-one briefing (areas, load-bearing symbols, entry points, tests, known issues) so the agent starts oriented instead of exploring (fail-open; inert until /codeweb has mapped the repo)",
+        "id": "codeweb:session-brief"
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",

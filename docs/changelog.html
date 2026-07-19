@@ -49,7 +49,40 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
-<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h3 class="cl-grp">Added (fewer mistakes per token)</h3>
+<ul>
+<li><strong>Day-one briefing</strong> (<code>codeweb_brief</code>, 24th MCP tool + <code>scripts/brief.mjs</code> + a SessionStart</li>
+</ul>
+<p>  hook): one ~2KB page — areas with summaries, the most depended-on symbols, entry points</p>
+<p>  (heuristic), test layout, known issues — injected automatically when a session starts in a</p>
+<p>  mapped repo. Replaces the first 20-50k tokens of exploratory orientation with pre-computed</p>
+<p>  answers; served in-process from the cached graph.</p>
+<ul>
+<li><strong>Caller-reliance contracts</strong> (<code>lib/reliance.mjs</code>): the explain card (and therefore the</li>
+</ul>
+<p>  pre-edit hook, which embeds its summary) now reads the actual call sites and says what</p>
+<p>  callers depend on — destructured/member-accessed result fields ("callers use {timeout,</p>
+<p>  retries} — keep those"), awaited fraction, and the argument-count range in use. Targets the</p>
+<p>  most common breaking edit: changing a return shape a caller still destructures.</p>
+<p>  Conservative: only call-site-line patterns count; no sites → no claim.</p>
+<ul>
+<li><strong>Confidence calibration</strong> (extractor v10): symbols reachable from a package entrypoint</li>
+</ul>
+<p>  (package.json main/module/browser/bin/exports, followed through named + star re-export</p>
+<p>  chains) are stamped <code>pub</code> — "0 in-repo callers" on a public symbol now answers with</p>
+<p>  "⚠ public API — external callers likely; renames are breaking" instead of false confidence.</p>
+<p>  Files using dynamic dispatch (computed member calls, getattr, non-literal require, emitters)</p>
+<p>  are recorded in <code>meta.dynamic</code>, and empty callers/dependents answers cite them ("absence of</p>
+<p>  callers is weaker evidence"). Confident answers stay caveat-free — no noise.</p>
+<h3 class="cl-grp">Research</h3>
+<ul>
+<li><strong>H18-v2 prepped</strong> (<code>paper/experiments/agent-ab2-ambient.workflow.js</code> + <code>agent-ab2.README.md</code>):</li>
+</ul>
+<p>  the agent A/B rerun as one funded command — v1's null was a floor effect (both arms ~0</p>
+<p>  regressions on easy tasks), so v2 pre-registers hard tasks (graph-verified fan-in ≥ 5 /</p>
+<p>  shape changes) and an AMBIENT treatment arm mirroring what the hooks now inject (brief +</p>
+<p>  explain cards with reliance/caveats — context delivered, not offered). The analyzer takes</p>
+<p>  raw/out paths so v1 results stay frozen.</p>
 <h2 class="cl-ver">[0.4.0] - 2026-07-19</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>

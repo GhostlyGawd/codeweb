@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { normalizeGraph, buildIndex } from './lib/graph-ops.mjs';
 import { runQuery } from './lib/query-core.mjs';
 import { findSymbols } from './lib/find-core.mjs';
+import { buildBrief } from './lib/brief-core.mjs';
 import { checkStaleness } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -98,7 +99,7 @@ const QUERY_KIND = { codeweb_callers: 'callers', codeweb_callees: 'callees', cod
 // structural tools (refresh preserves domains but drops overlaps, so overlap-consuming advisors
 // keep their input). Throttled per graph; CODEWEB_NO_AUTOREFRESH=1 disables; failure -> serve the
 // stale answer WITH its stale annotation (never a dead end).
-const AUTOREFRESH_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_context', 'codeweb_explain', 'codeweb_find']);
+const AUTOREFRESH_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_context', 'codeweb_explain', 'codeweb_find', 'codeweb_brief']);
 const refreshAttempt = new Map(); // abs graph path -> last attempt ms
 function autoRefresh(absGraph) {
   if (process.env.CODEWEB_NO_AUTOREFRESH === '1') return;
@@ -143,6 +144,9 @@ const TOOLS = [
   { name: 'codeweb_explain', need: ['symbol'], opt: ['graph'], bin: scriptOf('explain.mjs'),
     argv: (a) => [a.symbol],
     description: '"Tell me about X before I touch it" in ONE ~1KB card: identity, role, signature, complexity, fan-in/out, tests, blast radius + domains, top-5 callers/callees, and any duplication/pattern findings it belongs to. Start here; drill down with impact/context/callers.' },
+  { name: 'codeweb_brief', need: [], opt: ['graph'], bin: scriptOf('brief.mjs'),
+    argv: () => [],
+    description: 'The day-one page for a mapped repo (~2KB): areas with summaries, the most depended-on symbols, entry points, test layout, and known issues (duplications/cycles/orphans). Call FIRST in a new session instead of exploring; then codeweb_find/explain to go deeper.' },
   { name: 'codeweb_find', need: ['query'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 },
     bin: scriptOf('find.mjs'),
     argv: (a) => [a.query],
@@ -262,6 +266,17 @@ function handleToolCall(id, params) {
 
   if (graphPath && AUTOREFRESH_TOOLS.has(tool.name)) autoRefresh(resolve(graphPath));
 
+  // Fast path: the briefing assembles in-process from the cached graph (same object as the CLI
+  // via brief-core). Any surprise falls back to the spawned artifact.
+  if (tool.name === 'codeweb_brief') {
+    try {
+      const { graph, index } = cachedGraph(resolve(graphPath));
+      const payload = buildBrief(graph, index);
+      const stale = checkStaleness(graph);
+      if (stale) payload.stale = stale;
+      return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
+    } catch { /* fall through to the spawned artifact */ }
+  }
   // Fast path: concept search answers in-process from the cached graph (same ranking as the CLI
   // via find-core; budget applied identically). Any surprise falls back to the spawned artifact.
   if (tool.name === 'codeweb_find') {
