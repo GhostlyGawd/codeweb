@@ -19,7 +19,7 @@ import { createHash } from 'node:crypto';
 import { relative, resolve, join, dirname, extname } from 'node:path';
 import { isTestFile, roleOf } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
-import { loadTsEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tier: exact cyclomatic (opt-in)
+import { loadTsEngine, loadLangEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
 
 // F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
 // v2: nodes carry complexity/maxDepth (F4) + the cache holds per-file edge lists + a symbol signature (F9).
@@ -445,6 +445,15 @@ if (opts.engine !== 'regex') {
     console.error('[extract] --engine tree-sitter requested but web-tree-sitter/grammar unavailable; falling back to regex F4');
   }
 }
+// Java/C# dispatch tier (docs/specs/java-cs-tree-sitter.md): regex keeps owning their NODES;
+// the AST contributes the dispatch edges regex precision-gates away. Loaded lazily on the first
+// file of each language; unavailable -> byte-identical regex output (the standing contract).
+const langEngines = {}; // 'java'|'csharp' -> engine|null
+async function langEngineFor(langKey) {
+  if (opts.engine === 'regex') return null;
+  if (langEngines[langKey] === undefined) langEngines[langKey] = await loadLangEngine(langKey);
+  return langEngines[langKey];
+}
 
 // F0: load the scan cache (keyed by content hash + engine mode + scanner version). A re-run reuses
 // cached symbol-discovery for byte-identical files and re-scans only changed ones — edge derivation
@@ -461,6 +470,7 @@ const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)
 const nodes = [];
 const fileSyms = new Map(); // file -> {text, ranges:[{id,name,start,end,kind}]}
 const dispatchByFile = new Map(); // file -> [{from,to}] dispatch edges (tree-sitter engine only)
+const typedIntentsByFile = new Map(); // rel -> [{from, recvType, method}] Java/C# typed-receiver calls, resolved globally after all nodes exist
 // v7 STALENESS STAMPS: per-file size+mtime recorded in meta.sources so query tools can cheaply
 // detect that the graph no longer matches disk ("aware" — an agent must know its map is stale).
 const sources = {};
@@ -572,6 +582,17 @@ for (const f of files) {
       });
     }
     if (tsResult.dispatch.length) dispatchByFile.set(f, tsResult.dispatch);
+  }
+  // Java/C#: AST dispatch tier (edges only — regex owns the nodes). this-calls resolve in-file
+  // now; typed-receiver intents wait for the global pass (the receiver's class may live anywhere).
+  const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp' : null;
+  if (langKey) {
+    const eng = await langEngineFor(langKey);
+    const d = eng && eng.extractDispatch(text, r);
+    if (d) {
+      if (d.thisCalls.length) dispatchByFile.set(f, (dispatchByFile.get(f) || []).concat(d.thisCalls));
+      if (d.typedIntents.length) typedIntentsByFile.set(r, d.typedIntents);
+    }
   }
   fileSyms.set(f, { text, ranges });
 }
@@ -1074,6 +1095,35 @@ for (const f of edgeFiles) {
   }
 }
 
+// Typed-receiver dispatch (Java/C#): resolve each {from, recvType, method} intent against the
+// WHOLE graph — the receiver's class must resolve to exactly ONE file, and the qualified method
+// must be a real node. Anything ambiguous or absent is dropped and counted, never guessed (the
+// same precision contract every dispatch tier honors).
+let typedWired = 0, typedDropped = 0;
+if (typedIntentsByFile.size) {
+  const classFiles = new Map(); // class name -> Set(rel files that define it, per owner-qualified ids)
+  for (const id of nodeIdSet) {
+    const m = /^(.+):([A-Za-z_$][\w$]*)\.[^.]+$/.exec(id);
+    if (!m) continue;
+    if (!classFiles.has(m[2])) classFiles.set(m[2], new Set());
+    classFiles.get(m[2]).add(m[1]);
+  }
+  for (const rel of [...typedIntentsByFile.keys()].sort()) {
+    for (const it of typedIntentsByFile.get(rel)) {
+      const files = classFiles.get(it.recvType);
+      if (!files || files.size !== 1) { typedDropped++; continue; } // unknown or ambiguous class -> never guess
+      const toId = [...files][0] + ':' + it.recvType + '.' + it.method;
+      if (!nodeIdSet.has(toId) || !nodeIdSet.has(it.from) || it.from === toId) { typedDropped++; continue; }
+      const kind = (isTestFile(idFile(it.from)) && !isTestFile(idFile(toId))) ? 'test' : 'call';
+      const key = it.from + '\t' + toId + '\t' + kind;
+      if (edgeTriKeys.has(key)) continue;
+      edgeTriKeys.add(key);
+      edges.push({ from: it.from, to: toId, kind, weight: 1 });
+      typedWired++;
+    }
+  }
+}
+
 // meta — the single source of truth for the target. `root` (absolute, forward-slashed) + each
 // node's relative `file` path reconstruct any source file, so downstream stages (overlap/confirm
 // body-reading, report header) read the target from here instead of re-hardcoding it.
@@ -1100,7 +1150,11 @@ const fragment = {
   nodes, edges,
 };
 if (newCache) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
-const dispatchNote = tsEngine ? `; wired ${dispatchEdgeCount} dispatch edge(s)${dispatchDropped ? `, dropped ${dispatchDropped} (missing endpoint)` : ''}` : '';
+const usedLangEngines = Object.keys(langEngines).filter((k) => langEngines[k]);
+const dispatchNote = (tsEngine || usedLangEngines.length)
+  ? `; wired ${dispatchEdgeCount} dispatch edge(s)${dispatchDropped ? `, dropped ${dispatchDropped} (missing endpoint)` : ''}` +
+    (usedLangEngines.length ? `; typed-dispatch (${usedLangEngines.join('+')}) ${typedWired} wired${typedDropped ? `, ${typedDropped} dropped (ambiguous/absent)` : ''}` : '')
+  : '';
 const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${tsEngine ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}`;
 if (opts.out) { writeFileSync(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
 else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }

@@ -7,6 +7,8 @@ the same input always yields the same graph. Recorded in `meta.engine` when the 
 | File | Language | Source package | Version | ABI |
 |------|----------|----------------|---------|-----|
 | `tree-sitter-typescript.wasm` | TypeScript / TSX-free TS | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
+| `tree-sitter-java.wasm` | Java (dispatch tier) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
+| `tree-sitter-c-sharp.wasm` | C# (dispatch tier) | `@vscode/tree-sitter-wasm` | 0.3.1 | 15 |
 
 ## Runtime
 

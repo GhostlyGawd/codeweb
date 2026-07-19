@@ -13,7 +13,11 @@ import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, relative } from 'node:path';
-import { bump } from '../scripts/lib/stats.mjs';
+import { bump, recordPendingCard } from '../scripts/lib/stats.mjs';
+
+// set by preview() when a card is embedded — the caller FILES the card warned about
+// (docs/specs/card-correlation.md: a later edit touching one = advice followed)
+let lastCardMeta = null;
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXPLAIN = join(HERE, '..', 'scripts', 'explain.mjs');
@@ -68,6 +72,10 @@ export function preview(raw) {
         msg += `\n  ${card.summary}`;
         if (card.topCallers?.length) msg += `\n  top callers: ${card.topCallers.slice(0, 4).join(', ')}`;
         if (card.tests?.length) msg += `\n  tests: ${card.tests.slice(0, 2).join(', ')}`;
+        const callerFiles = [...new Set((card.topCallers || [])
+          .map((id) => id.slice(0, id.lastIndexOf(':')))
+          .filter((f) => f && f !== rel))]; // the SUBJECT file never counts as "following the advice"
+        if (callerFiles.length) lastCardMeta = { baseline: t.baseline, symbol: topNode.id, files: callerFiles };
       }
     } catch { /* card is a bonus, never a blocker */ }
   }
@@ -86,6 +94,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
       const fp = JSON.parse(raw)?.tool_input?.file_path || JSON.parse(raw)?.tool_input?.filePath;
       const t = fp && findTarget(fp);
       if (t) bump(t.baseline, 'cardsDelivered');
+      if (lastCardMeta) recordPendingCard(lastCardMeta.baseline, lastCardMeta.symbol, lastCardMeta.files);
     } catch { /* receipt only */ }
     try {
       process.stdout.write(JSON.stringify({

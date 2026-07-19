@@ -43,7 +43,9 @@ const commits = git('log', '--no-merges', '--first-parent', `-n${maxCommits}`, '
 const posOf = new Map(commits.map((c, i) => [c, i])); // lower index = newer
 
 const filesOf = (sha) => (tryGit('show', '--name-only', '--format=', sha) || '').trim().split('\n').filter(Boolean);
-const SIGNISH = /^[+-].*(function\s|=>|\bdef\s|\bfn\s|\bfunc\s)/m;
+// signature-ish diff prefilter — must cover every corpus language, not just JS
+// (Java/C# declarations: modifier + name + paren, no `function` keyword)
+const SIGNISH = /^[+-].*(function\s|=>|\bdef\s|\bfn\s|\bfunc\s|\b(?:public|private|protected|internal|static)\b[^=;]*\()/m;
 
 function extractAt(sha) {
   const wt = mkdtempSync(join(tmpdir(), 'replay-wt-'));
