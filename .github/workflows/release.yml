@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write   # npm publish --provenance mints an OIDC attestation; without this the gated publish step fails
 
 jobs:
   publish:
