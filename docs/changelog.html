@@ -49,7 +49,150 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
-<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>Warm refreshes stop paying the AST tax (Spec A).</strong> The tree-sitter engine now initializes</li>
+</ul>
+<p>  lazily — a cheap availability probe decides cache namespaces and meta stamps up front, and</p>
+<p>  the WASM runtime loads only at the first file that actually needs a parse. AST products</p>
+<p>  (qualified methods, dispatch edges, exact per-node complexity) ride the scan cache, so a</p>
+<p>  warm cached extraction on codeweb itself dropped <strong>1.89s → 0.38s (5×)</strong> with byte-identical</p>
+<p>  fragments — felt directly by the MCP auto-refresh, the post-edit hook, and every staleness</p>
+<p>  check. The banner now reports the tier's state (<code>ast: loaded|idle|off</code>).</p>
+<ul>
+<li><strong>The AST performance gate finally has a committed verdict</strong></li>
+</ul>
+<p>  (<code>bench/results/ts-engine-bench.json</code>): cold extraction costs 3.6–4.3× regex</p>
+<p>  (~+1.35 ms/symbol, axios + self) — paid once per changed file — and the warm path is</p>
+<p>  engine-free, so default-on stands. Also fixes the bench's regex arm, which had silently</p>
+<p>  benchmarked tree-sitter against itself ever since the tier went default-on.</p>
+<ul>
+<li><strong>The pipeline memoizes its downstream stages (Spec B).</strong> cluster/overlap/optimize/report</li>
+</ul>
+<p>  are pure functions of the extracted fragment (+ <code>CODEWEB_*</code> levers), so a re-run whose</p>
+<p>  fragment is byte-identical reuses their outputs — wall-time changes, never a byte</p>
+<p>  (property-tested modulo the <code>generatedAt</code> stamp). Extract itself now rides the scan cache</p>
+<p>  inside <code>run.mjs</code>, making a no-change re-map of codeweb <strong>~0.4s end to end</strong>. <code>--full</code></p>
+<p>  forces a recompute.</p>
+<ul>
+<li><strong>Overlap survives monorepo scale — with declared caps.</strong> Mapping TypeScript's <code>src/</code></li>
+</ul>
+<p>  exposed two quadratic passes (overlap sat at 100% CPU for 8+ minutes): all-pairs body</p>
+<p>  confirmation inside huge same-name groups, and twin seeding through hub labels with</p>
+<p>  thousands of callers. Same-name groups now body-confirm on a deterministic 12-node sample</p>
+<p>  (the finding's evidence says so), &gt;50-caller hub labels are excluded from twin seeding, a</p>
+<p>  200k global pair budget seeds smallest groups first, and 400+-line bodies shingle their</p>
+<p>  first 400 lines — every cap counted in the md header. Deterministic, reported, never silent.</p>
+<ul>
+<li><strong>Fixed: an input-dependent HANG in the shared tokenizer.</strong> The string-literal regex in</li>
+</ul>
+<p>  <code>lib/shingles.mjs</code> (<code>(?:\\.|(?!\1).)*</code>) backtracked exponentially on unterminated-quote</p>
+<p>  content — one lone apostrophe in a big real-world body (TypeScript's testRunner fixtures)</p>
+<p>  pinned the whole overlap stage at 100% CPU for 15+ minutes. Replaced with a linear-time</p>
+<p>  matcher (each char consumed exactly one way) + a regression test; identical semantics.</p>
+<p>  Found by the Spec B scale test; this also protects <code>find_similar</code> and the edit-time</p>
+<p>  duplication check, which share the tokenizer.</p>
+<ul>
+<li><strong>The scale verdict is committed</strong> (<code>bench/results/scale-typescript.json</code>): TypeScript</li>
+</ul>
+<p>  <code>src/</code> — 16,286 symbols, 44,640 edges, 709 files including <code>checker.ts</code> — maps in **43s</p>
+<p>  cold, 4s memoized re-run**, queries answer in ~200ms on the 13.5MB graph, and the top</p>
+<p>  findings are real compiler duplication (<code>substituteExpression</code> ×9, drifted). On that</p>
+<p>  evidence <code>lib/shards.mjs</code> is <strong>deleted</strong>: monolithic graphs hold with 10× headroom, the</p>
+<p>  sharding layer had zero consumers, and git history keeps it if a 100k-symbol case ever</p>
+<p>  materializes.</p>
+<ul>
+<li><strong>codeweb consolidated itself</strong> (<code>bench/results/self-campaign.json</code>): the campaign's three</li>
+</ul>
+<p>  product-true merges are executed — <code>findTarget</code> (both hooks; the duplication had hidden</p>
+<p>  REAL drift, one hook's language list was seven languages stale), <code>load()</code> (diff/review →</p>
+<p>  the canonical <code>loadGraph</code>, with better errors), and <code>edgeKey</code> (break-cycles/diff →</p>
+<p>  graph-ops, NUL-separated collision-safe variant). Before/after gate: −22 nodes, −2</p>
+<p>  duplication findings, coupling −25, <strong>zero structural regressions</strong>. The 65 DELETE steps</p>
+<p>  are honestly skipped as false orphans (walker closures dispatched through function tables —</p>
+<p>  exactly the <code>--orphans</code> cross-check caveat, applied to ourselves).</p>
+<ul>
+<li><strong><code>npm run bench:all</code> — the standing benchmark suite behind every published number</strong></li>
+</ul>
+<p>  (Spec C): pipeline timings, a representative 12-call MCP session (bytes/≈tokens/validity),</p>
+<p>  per-tool response budgets, and the ts-engine gate, written to <code>bench/results/benchmarks.json</code></p>
+<p>  (+ a site mirror). A new CI job runs it with <code>--gate</code>: budgets live in <code>bench/budgets.json</code>,</p>
+<p>  and breaking one fails the build. <code>check-consistency</code> now also audits that every evidence</p>
+<p>  source cited by the ledger and README exists — claims physically can't rot.</p>
+<ul>
+<li><strong>Replay A/B gains cost-to-coverage (Spec D).</strong> The workflow runs cells sequentially and</li>
+</ul>
+<p>  records each cell's true token cost from the harness's own <code>budget.spent()</code> deltas (never</p>
+<p>  solver self-report); the analyzer reports per-condition means and <code>costToFullCoverageTokens</code></p>
+<p>  — the discriminator when both arms hit the coverage ceiling. Old cells without cost report</p>
+<p>  null and are counted, not fabricated. <strong>Corpus v3 is frozen</strong> after nine mining runs across</p>
+<p>  six repos (funnels committed as <code>bench/results/replay-mine-*.json</code>): the miner re-derived</p>
+<p>  the v2 task independently at a wider follow-up window (identical answer key — the instrument</p>
+<p>  reproduces its own ground truth), one new 4-caller candidate was rejected under</p>
+<p>  hand-verification (a feature-PR rewrite mentioning the symbol, not a caller fix), and the</p>
+<p>  corpus stays at one fully-verified task — honestly. True-breakage tasks are rare; that is</p>
+<p>  the finding.</p>
+<ul>
+<li><strong>Role overrides (Spec E).</strong> <code>codeweb.rules.json</code> gains <code>roles: [{glob, role}]</code> — heuristics</li>
+</ul>
+<p>  can't know a repo's private layout, so the repo says it once and extraction honors it (first</p>
+<p>  match wins, invalid roles fail loudly, absent config is byte-identical to before). codeweb's</p>
+<p>  own config marks <code>docs/**</code> as <code>generated</code> (it's the built website), completing the</p>
+<p>  vite-playground precision lesson on our own map.</p>
+<ul>
+<li><strong>Python, Go, and Rust join the dispatch tier (Spec F).</strong> Three vendored pinned grammars +</li>
+</ul>
+<p>  dedicated tree walkers wire the calls regex precision-gates away: <code>self.m()</code>/<code>cls.m()</code>,</p>
+<p>  Go receiver methods, Rust <code>self.m()</code>, and typed-receiver calls (<code>p: Pipe</code>, <code>q Pipe</code>,</p>
+<p>  <code>p: &amp;Pipe</code>) resolved globally under the one-owner rule — ambiguity drops and is counted,</p>
+<p>  never guessed. Nodes stay byte-identical between engines; products ride the scan cache.</p>
+<ul>
+<li><strong>Caller-reliance contracts v2 (Spec G).</strong> The explain card (and the ambient pre-edit card)</li>
+</ul>
+<p>  now also reports: callers that try/catch or <code>.catch()</code> the symbol ("thrown types are</p>
+<p>  contract"), callees that mutate a named parameter ("callers share that object"), and callers</p>
+<p>  that null-check the result ("keep null/undefined returns possible"). Same conservatism as</p>
+<p>  v1 — line-visible evidence or no claim.</p>
+<ul>
+<li><strong>Type-3 (near-miss) clone detection (Spec H).</strong> The AST tier fingerprints each function's</li>
+</ul>
+<p>  statements (identifier/literal-normalized, order-independent multiset); overlap pairs bodies</p>
+<p>  sharing ≥70% of them — reordered or lightly-edited copies the exact and Type-2 passes cannot</p>
+<p>  see. A distinct <code>near-miss-clone</code> finding kind, REVIEW-only by construction, bounded and</p>
+<p>  deterministic.</p>
+<ul>
+<li><strong>Ruby, PHP, Kotlin, and Swift on the deterministic fast path (Spec I)</strong> — eleven native</li>
+</ul>
+<p>  languages. Discovery with owner-qualified methods (Ruby <code>def self.</code>, Kotlin extension</p>
+<p>  <code>fun Type.name</code>, Swift <code>extension</code> members), visibility-as-export per language's own rules,</p>
+<p>  comment/string masking, precision-gated calls, test-role detection (<code>spec/</code>, <code>_spec.rb</code>,</p>
+<p>  <code>*Test.php</code>, <code>*Tests.swift</code>), and package manifests (Gemfile, composer.json, Package.swift).</p>
+<p>  Verified on sinatra (1,173 symbols), monolog (1,622), okio (3,874, mixed Kotlin+Java),</p>
+<p>  and Alamofire (2,616) — zero keyword phantoms, deterministic.</p>
+<ul>
+<li><strong>The report closes the loop to the editor (Spec J).</strong> The inspector shows <code>Open in editor</code></li>
+</ul>
+<p>  (<code>vscode://file/...</code>) once the viewer supplies their project root — stored in localStorage,</p>
+<p>  client-side only, because the shipped report still never embeds the absolute source path</p>
+<p>  (the standing privacy invariant, now pinned by a second test).</p>
+<ul>
+<li><strong>npm + VS Code distribution, prepared (Spec J).</strong> The package is publish-ready (<code>codeweb</code> +</li>
+</ul>
+<p>  <code>codeweb-mcp</code> bins with shebangs, files whitelist, LICENSE, zero runtime deps — verified by</p>
+<p>  an <code>npm pack</code> test); the release workflow builds and attaches the <code>.vsix</code> to every GitHub</p>
+<p>  Release and carries npm/Marketplace publish steps that no-op until <code>NPM_TOKEN</code>/<code>VSCE_PAT</code></p>
+<p>  are configured. Publishing stays a human decision; the prep is done.</p>
+<h3 class="cl-grp">Changed</h3>
+<ul>
+<li><strong>The paper program is archived; the receipts stay.</strong> <code>paper/</code> is retired from <code>main</code>:</li>
+</ul>
+<p>  the runnable instruments and every frozen result (nulls and the discarded pilot included)</p>
+<p>  now live in <strong><code>bench/</code></strong> as the product's benchmark suite (<code>bench/README.md</code>,</p>
+<p>  <code>node bench/run-all.mjs</code>), and the site's Paper page is gone — the evidence ledger on the</p>
+<p>  Research page (now including the 2026 blind replay A/B null) plus the CHANGELOG's Research</p>
+<p>  notes are the public record. The manuscript, pre-registration (H1–H18), and figure</p>
+<p>  apparatus remain in git history, last present at tag <code>v0.8.0</code>. README and ROADMAP</p>
+<p>  rewritten to point at receipts instead of the manuscript.</p>
 <h2 class="cl-ver">[0.8.0] - 2026-07-19</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>

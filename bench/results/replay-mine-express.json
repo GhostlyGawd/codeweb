@@ -1,0 +1,15 @@
+{
+  "repo": "express",
+  "funnel": {
+    "signaturePairs": 40,
+    "symbolsInChangedFiles": 105,
+    "idPresentInBase": 105,
+    "distinctiveLabel": 105,
+    "signatureChanged": 0,
+    "enoughCallers": 0,
+    "hadMissedCallers": 0,
+    "hadFollowupFix": 0,
+    "defDiffComplete": 0
+  },
+  "tasks": []
+}

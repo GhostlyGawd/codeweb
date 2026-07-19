@@ -9,6 +9,9 @@ the same input always yields the same graph. Recorded in `meta.engine` when the 
 | `tree-sitter-typescript.wasm` | TypeScript / TSX-free TS | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
 | `tree-sitter-java.wasm` | Java (dispatch tier) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
 | `tree-sitter-c-sharp.wasm` | C# (dispatch tier) | `@vscode/tree-sitter-wasm` | 0.3.1 | 15 |
+| `tree-sitter-python.wasm` | Python (dispatch tier, Spec F) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
+| `tree-sitter-go.wasm` | Go (dispatch tier, Spec F) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
+| `tree-sitter-rust.wasm` | Rust (dispatch tier, Spec F) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
 
 ## Runtime
 

@@ -1,0 +1,28 @@
+{
+  "repo": "axios-w15",
+  "funnel": {
+    "signaturePairs": 300,
+    "symbolsInChangedFiles": 3503,
+    "idPresentInBase": 3290,
+    "distinctiveLabel": 3165,
+    "signatureChanged": 45,
+    "enoughCallers": 3,
+    "hadMissedCallers": 3,
+    "hadFollowupFix": 2,
+    "defDiffComplete": 2
+  },
+  "tasks": [
+    {
+      "symbol": "lib/core/buildFullPath.js:buildFullPath",
+      "changeSha": "32c7bcc0f233285ba27dec73a4b1e81fb7a219b3",
+      "fanIn": 3,
+      "missed": 2
+    },
+    {
+      "symbol": "lib/core/Axios.js:Axios.request",
+      "changeSha": "123f354b920f154a209ea99f76b7b2ef3d9ebbab",
+      "fanIn": 4,
+      "missed": 4
+    }
+  ]
+}

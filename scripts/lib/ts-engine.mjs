@@ -103,6 +103,41 @@ const enclosingSymbol = (node) => {
 
 let _engine; // undefined = not tried, null = unavailable, object = ready (memoized)
 
+// Runtime + version discovery WITHOUT WASM instantiation — shared by the probe and the loader so
+// the version string stamped into meta from a probe can never diverge from a loaded engine's. The
+// package's exports map blocks the package.json subpath, so resolve the entry and walk up to it.
+function runtimeInfo() {
+  try {
+    let dir = dirname(createRequire(import.meta.url).resolve('web-tree-sitter'));
+    for (let i = 0; i < 5; i++) {
+      const pj = join(dir, 'package.json');
+      if (existsSync(pj)) { const p = JSON.parse(readFileSync(pj, 'utf8')); if (p.name === 'web-tree-sitter') return { present: true, version: p.version }; }
+      dir = dirname(dir);
+    }
+    return { present: true, version: 'unknown' }; // resolvable but package.json not found
+  } catch { return { present: false, version: null }; }
+}
+const tsVersionString = (rt) => `tree-sitter(web-tree-sitter@${rt}, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)`;
+
+/**
+ * Cheap availability probe (Spec A) — file existence + module resolution only, no Parser.init, no
+ * Language.load. Lets extraction decide cache namespaces, meta stamps, and banner text up front
+ * while the real (expensive) engine loads lazily on first need. Never throws.
+ */
+export function probeAst() {
+  const rt = runtimeInfo();
+  const ts = rt.present && existsSync(GRAMMAR);
+  return {
+    ts,
+    java: rt.present && existsSync(LANG_GRAMMARS.java),
+    csharp: rt.present && existsSync(LANG_GRAMMARS.csharp),
+    python: rt.present && existsSync(LANG_GRAMMARS.python),
+    go: rt.present && existsSync(LANG_GRAMMARS.go),
+    rust: rt.present && existsSync(LANG_GRAMMARS.rust),
+    tsVersion: ts ? tsVersionString(rt.version) : null,
+  };
+}
+
 // Lazily build the engine. Returns { cyclomaticExact, version } or null. Never throws.
 export async function loadTsEngine() {
   if (_engine !== undefined) return _engine;
@@ -114,18 +149,7 @@ export async function loadTsEngine() {
     const parser = new Parser();
     parser.setLanguage(await Language.load(readFileSync(GRAMMAR)));
 
-    // Record the runtime version (the grammar version below is the determinism-critical pin). The
-    // package's exports map blocks the package.json subpath, so resolve the entry and walk up to it.
-    let rt = 'unknown';
-    try {
-      let dir = dirname(createRequire(import.meta.url).resolve('web-tree-sitter'));
-      for (let i = 0; i < 5; i++) {
-        const pj = join(dir, 'package.json');
-        if (existsSync(pj)) { const p = JSON.parse(readFileSync(pj, 'utf8')); if (p.name === 'web-tree-sitter') { rt = p.version; break; } }
-        dir = dirname(dir);
-      }
-    } catch { /* version is cosmetic */ }
-    const version = `tree-sitter(web-tree-sitter@${rt}, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)`;
+    const version = tsVersionString(runtimeInfo().version);
 
     const cyclomaticExact = (src) => 1 + countDecisions(parser.parse(String(src || '')).rootNode);
 
@@ -134,6 +158,29 @@ export async function loadTsEngine() {
     // (`this.m()` and typed-receiver `x.m()`). One parse per file; ported from the proven precision
     // contract in spike/tree-sitter/extract-ts.mjs. Returns null on any failure so the caller falls
     // back to the regex scanner per-file. Classes/functions keep bare ids (regex still owns them).
+    // Spec H helpers: statement normalization + FNV-1a hash for Type-3 fingerprints.
+    const FN_LIKE = new Set(['function_declaration', 'generator_function_declaration', 'function_expression', 'arrow_function', 'method_definition']);
+    const JS_KW = new Set(['if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'return', 'break', 'continue', 'throw', 'try', 'catch', 'finally', 'new', 'delete', 'typeof', 'instanceof', 'in', 'of', 'void', 'yield', 'await', 'async', 'function', 'class', 'extends', 'super', 'this', 'const', 'let', 'var', 'null', 'undefined', 'true', 'false']);
+    // Built via RegExp so no quote character appears inside a regex LITERAL — the extractor's
+    // maskJs doesn't mask regex literals, and a bare quote there flips its string state and
+    // swallows the following lines (codeweb's own gate caught exactly that on this file).
+    const Q = String.fromCharCode(39), DQ = String.fromCharCode(34), BT = String.fromCharCode(96);
+    const strRe = (q) => new RegExp(q + '(?:[^' + q + '\\\\]|\\\\[^])*' + q, 'g');
+    const TPL_STR_RE = strRe(BT), SQ_STR_RE = strRe(Q), DQ_STR_RE = strRe(DQ);
+    const stmtHash = (text) => {
+      // one tokenizing pass: keywords keep identity (uppercased), identifiers -> I, numbers -> N,
+      // string/template contents -> S, whitespace dropped. Statement STRUCTURE survives; naming
+      // and literals do not — Type-2 normalization per statement, Type-3 via the multiset.
+      const t = String(text)
+        .replace(TPL_STR_RE, 'S').replace(SQ_STR_RE, 'S').replace(DQ_STR_RE, 'S')
+        .replace(/\b[A-Za-z_$][\w$]*\b/g, (m) => (JS_KW.has(m) ? m.toUpperCase() : 'I'))
+        .replace(/\b\d[\w.]*\b/g, 'N')
+        .replace(/\s+/g, '');
+      if (t.length < 3) return null; // bare punctuation carries no signal
+      let h = 0x811c9dc5;
+      for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+      return h.toString(16).padStart(8, '0');
+    };
     const extractJsTs = (text, relPath) => {
       try {
         const tree = parser.parse(String(text || ''));
@@ -170,6 +217,28 @@ export async function loadTsEngine() {
           methodsByClass.set(cname, set);
         });
 
+        // Spec H: statement fingerprints for Type-3 (near-miss) clone detection. Each statement's
+        // text is identifier/literal-normalized (keywords preserved) and FNV-hashed; a function's
+        // multiset of statement hashes survives reordering and small insertions — exactly what the
+        // shingle and skeleton passes cannot see. Attributed to the NEAREST enclosing function-like
+        // node, keyed by its start line (the extractor joins them onto nodes by line).
+        const t3ByLine = {};
+        walkTree(tree.rootNode, (n) => {
+          if (n.type !== 'statement_block') return;
+          let owner = n.parent; // nearest enclosing function-like owns this block's statements
+          while (owner && !FN_LIKE.has(owner.type)) owner = owner.parent;
+          if (!owner) return;
+          const line = owner.startPosition.row + 1;
+          const bucket = t3ByLine[line] || (t3ByLine[line] = []);
+          for (let i = 0; i < n.childCount; i++) {
+            const st = n.child(i);
+            if (!st.isNamed || FN_LIKE.has(st.type) || st.type === 'comment') continue;
+            const h = stmtHash(st.text);
+            if (h) bucket.push(h);
+          }
+        });
+        for (const k of Object.keys(t3ByLine)) { t3ByLine[k].sort(); if (t3ByLine[k].length < 6) delete t3ByLine[k]; }
+
         const dispatch = [];
         const seen = new Set();
         const addDispatch = (from, to) => {
@@ -203,7 +272,7 @@ export async function loadTsEngine() {
         // Canonical order so the merged graph is deterministic regardless of DFS direction.
         methods.sort((a, b) => a.line - b.line || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
         dispatch.sort((a, b) => (a.from < b.from ? -1 : a.from > b.from ? 1 : a.to < b.to ? -1 : a.to > b.to ? 1 : 0));
-        return { methods, dispatch };
+        return { methods, dispatch, t3ByLine };
       } catch {
         return null; // any parse/traversal failure -> regex fallback for this file
       }
@@ -227,26 +296,225 @@ export async function loadTsEngine() {
 const LANG_GRAMMARS = {
   java: join(HERE, '..', 'grammars', 'tree-sitter-java.wasm'),
   csharp: join(HERE, '..', 'grammars', 'tree-sitter-c-sharp.wasm'),
+  python: join(HERE, '..', 'grammars', 'tree-sitter-python.wasm'),
+  go: join(HERE, '..', 'grammars', 'tree-sitter-go.wasm'),
+  rust: join(HERE, '..', 'grammars', 'tree-sitter-rust.wasm'),
 };
 const LANG_SHAPES = {
   java: { classes: new Set(['class_declaration']), method: 'method_declaration', invoke: 'method_invocation', param: 'formal_parameter', typeNode: 'type_identifier', thisNode: 'this' },
   csharp: { classes: new Set(['class_declaration']), method: 'method_declaration', invoke: 'invocation_expression', param: 'parameter', typeNode: 'identifier', thisNode: 'this_expression' },
 };
 
+// Spec F: Python/Go/Rust dispatch walkers — the shape table fits the Java/C# family; these three
+// need dedicated tree shapes (probed empirically, pinned by tests). Same contract as the shape
+// path: regex owns nodes; the walker returns ONLY {thisCalls, typedIntents}, self/receiver calls
+// resolved in-file, typed intents resolved globally by extract-symbols under the one-owner rule.
+// Receivers/types accepted only as bare identifiers (precision over recall, as everywhere).
+const BARE_TYPE = /^[A-Za-z_][\w]*$/;
+const stripRustRef = (t) => t.replace(/^&\s*(?:mut\s+)?/, '').trim();
+const LANG_WALKERS = {
+  python: (parser) => (text, relPath) => {
+    try {
+      const tree = parser.parse(String(text || ''));
+      const r = String(relPath).replace(/\\/g, '/');
+      const name = (n) => n?.childForFieldName('name')?.text || null;
+      const up = (n, type) => { let c = n.parent; while (c && c.type !== type) c = c.parent; return c; };
+      const methodsByClass = new Map();
+      walkTree(tree.rootNode, (n) => {
+        if (n.type !== 'class_definition') return;
+        const cn = name(n); if (!cn) return;
+        const set = methodsByClass.get(cn) || new Set();
+        const body = n.childForFieldName('body');
+        if (body) for (let i = 0; i < body.childCount; i++) { const m = body.child(i); if (m.type === 'function_definition') { const mn = name(m); if (mn) set.add(mn); } }
+        methodsByClass.set(cn, set);
+      });
+      const typedParamsOf = (fn) => {
+        const map = new Map();
+        const params = fn?.childForFieldName('parameters');
+        if (!params) return map;
+        for (let i = 0; i < params.childCount; i++) {
+          const p = params.child(i);
+          if (p.type !== 'typed_parameter') continue;
+          const id = p.child(0), ty = p.childForFieldName('type');
+          if (id?.type === 'identifier' && ty && BARE_TYPE.test(ty.text)) map.set(id.text, ty.text);
+        }
+        return map;
+      };
+      const thisCalls = [], typedIntents = [], seen = new Set();
+      walkTree(tree.rootNode, (n) => {
+        if (n.type !== 'call') return;
+        const fn = n.childForFieldName('function');
+        if (!fn || fn.type !== 'attribute') return;
+        const obj = fn.childForFieldName('object'), prop = fn.childForFieldName('attribute')?.text;
+        if (!obj || obj.type !== 'identifier' || !prop) return;
+        const encl = up(n, 'function_definition'); if (!encl) return;
+        const enclCls = up(encl, 'class_definition');
+        const from = `${r}:${enclCls ? name(enclCls) + '.' : ''}${name(encl)}`;
+        if (obj.text === 'self' || obj.text === 'cls') {
+          const cls = enclCls && name(enclCls);
+          if (cls && methodsByClass.get(cls)?.has(prop)) {
+            const to = `${r}:${cls}.${prop}`;
+            const k = from + '\t' + to;
+            if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
+          }
+          return;
+        }
+        const t = typedParamsOf(encl).get(obj.text);
+        if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
+      });
+      thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
+      typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
+      return { thisCalls, typedIntents };
+    } catch { return null; }
+  },
+  go: (parser) => (text, relPath) => {
+    try {
+      const tree = parser.parse(String(text || ''));
+      const r = String(relPath).replace(/\\/g, '/');
+      const up = (n, types) => { let c = n.parent; while (c && !types.has(c.type)) c = c.parent; return c; };
+      const FN_TYPES = new Set(['method_declaration', 'function_declaration']);
+      const recvOf = (m) => { // -> {varName, typeName} | null, pointer stripped
+        const recv = m.childForFieldName('receiver');
+        if (!recv) return null;
+        for (let i = 0; i < recv.childCount; i++) {
+          const p = recv.child(i);
+          if (p.type !== 'parameter_declaration') continue;
+          const nm = p.childForFieldName('name')?.text;
+          let ty = p.childForFieldName('type');
+          if (ty?.type === 'pointer_type') ty = ty.child(1) || ty;
+          const tn = ty?.text?.replace(/^\*/, '');
+          if (nm && tn && BARE_TYPE.test(tn)) return { varName: nm, typeName: tn };
+        }
+        return null;
+      };
+      const methodsByType = new Map();
+      walkTree(tree.rootNode, (n) => {
+        if (n.type !== 'method_declaration') return;
+        const rec = recvOf(n), mn = n.childForFieldName('name')?.text;
+        if (!rec || !mn) return;
+        const set = methodsByType.get(rec.typeName) || new Set();
+        set.add(mn);
+        methodsByType.set(rec.typeName, set);
+      });
+      const typedParamsOf = (fn) => {
+        const map = new Map();
+        const params = fn?.childForFieldName('parameters');
+        if (!params) return map;
+        for (let i = 0; i < params.childCount; i++) {
+          const p = params.child(i);
+          if (p.type !== 'parameter_declaration') continue;
+          const nm = p.childForFieldName('name')?.text;
+          let ty = p.childForFieldName('type');
+          if (ty?.type === 'pointer_type') ty = ty.child(1) || ty;
+          const tn = ty?.text?.replace(/^\*/, '');
+          if (nm && tn && BARE_TYPE.test(tn)) map.set(nm, tn);
+        }
+        return map;
+      };
+      const thisCalls = [], typedIntents = [], seen = new Set();
+      walkTree(tree.rootNode, (n) => {
+        if (n.type !== 'call_expression') return;
+        const fn = n.childForFieldName('function');
+        if (!fn || fn.type !== 'selector_expression') return;
+        const obj = fn.childForFieldName('operand'), prop = fn.childForFieldName('field')?.text;
+        if (!obj || obj.type !== 'identifier' || !prop) return;
+        const encl = up(n, FN_TYPES); if (!encl) return;
+        const enclName = encl.childForFieldName('name')?.text; if (!enclName) return;
+        const enclRecv = encl.type === 'method_declaration' ? recvOf(encl) : null;
+        const from = `${r}:${enclRecv ? enclRecv.typeName + '.' : ''}${enclName}`;
+        if (enclRecv && obj.text === enclRecv.varName) {
+          if (methodsByType.get(enclRecv.typeName)?.has(prop)) {
+            const to = `${r}:${enclRecv.typeName}.${prop}`;
+            const k = from + '\t' + to;
+            if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
+          }
+          return;
+        }
+        const t = typedParamsOf(encl).get(obj.text);
+        if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
+      });
+      thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
+      typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
+      return { thisCalls, typedIntents };
+    } catch { return null; }
+  },
+  rust: (parser) => (text, relPath) => {
+    try {
+      const tree = parser.parse(String(text || ''));
+      const r = String(relPath).replace(/\\/g, '/');
+      const up = (n, type) => { let c = n.parent; while (c && c.type !== type) c = c.parent; return c; };
+      const implType = (imp) => { const t = imp.childForFieldName('type'); return t && BARE_TYPE.test(t.text) ? t.text : null; };
+      const methodsByType = new Map();
+      walkTree(tree.rootNode, (n) => {
+        if (n.type !== 'impl_item') return;
+        const tn = implType(n); if (!tn) return;
+        const set = methodsByType.get(tn) || new Set();
+        const body = n.childForFieldName('body');
+        if (body) for (let i = 0; i < body.childCount; i++) { const f = body.child(i); if (f.type === 'function_item') { const fn = f.childForFieldName('name')?.text; if (fn) set.add(fn); } }
+        methodsByType.set(tn, set);
+      });
+      const typedParamsOf = (fn) => {
+        const map = new Map();
+        const params = fn?.childForFieldName('parameters');
+        if (!params) return map;
+        for (let i = 0; i < params.childCount; i++) {
+          const p = params.child(i);
+          if (p.type !== 'parameter') continue;
+          const nm = p.childForFieldName('pattern')?.text;
+          const tn = p.childForFieldName('type') ? stripRustRef(p.childForFieldName('type').text) : null;
+          if (nm && tn && BARE_TYPE.test(nm) && BARE_TYPE.test(tn)) map.set(nm, tn);
+        }
+        return map;
+      };
+      const thisCalls = [], typedIntents = [], seen = new Set();
+      walkTree(tree.rootNode, (n) => {
+        if (n.type !== 'call_expression') return;
+        const fn = n.childForFieldName('function');
+        if (!fn || fn.type !== 'field_expression') return;
+        const obj = fn.childForFieldName('value'), prop = fn.childForFieldName('field')?.text;
+        if (!obj || !prop) return;
+        const encl = up(n, 'function_item'); if (!encl) return;
+        const enclImpl = up(encl, 'impl_item');
+        const implName = enclImpl && implType(enclImpl);
+        const from = `${r}:${implName ? implName + '.' : ''}${encl.childForFieldName('name')?.text}`;
+        if (obj.type === 'self' || obj.text === 'self') {
+          if (implName && methodsByType.get(implName)?.has(prop)) {
+            const to = `${r}:${implName}.${prop}`;
+            const k = from + '\t' + to;
+            if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
+          }
+          return;
+        }
+        if (obj.type !== 'identifier') return;
+        const t = typedParamsOf(encl).get(obj.text);
+        if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
+      });
+      thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
+      typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
+      return { thisCalls, typedIntents };
+    } catch { return null; }
+  },
+};
+
 const _langEngines = {}; // key -> undefined(not tried)/null(unavailable)/engine
 
-/** Lazily load the dispatch engine for 'java' | 'csharp'. Returns { extractDispatch } or null. */
+/** Lazily load the dispatch engine for 'java'|'csharp'|'python'|'go'|'rust'. Returns { extractDispatch } or null. */
 export async function loadLangEngine(key) {
   if (_langEngines[key] !== undefined) return _langEngines[key];
   try {
     const grammarPath = LANG_GRAMMARS[key];
     const shape = LANG_SHAPES[key];
-    if (!grammarPath || !shape || !existsSync(grammarPath)) { _langEngines[key] = null; return null; }
+    if (!grammarPath || (!shape && !LANG_WALKERS[key]) || !existsSync(grammarPath)) { _langEngines[key] = null; return null; }
     const ts = await import('web-tree-sitter');
     const { Parser, Language } = ts;
     await Parser.init();
     const parser = new Parser();
     parser.setLanguage(await Language.load(readFileSync(grammarPath)));
+
+    if (LANG_WALKERS[key]) { // Spec F: dedicated tree-shape walker (python/go/rust)
+      _langEngines[key] = { extractDispatch: LANG_WALKERS[key](parser) };
+      return _langEngines[key];
+    }
 
     const className = (n) => n.childForFieldName('name')?.text || null;
     const enclosing = (node, types) => { let c = node.parent; while (c && !types.has(c.type)) c = c.parent; return c; };

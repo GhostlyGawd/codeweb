@@ -21,20 +21,8 @@ import { bump, correlateEdit } from '../scripts/lib/stats.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXTRACT = join(HERE, '..', 'scripts', 'extract-symbols.mjs');
-const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py)$/;
+import { SRC_RE, findTarget } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a stale local copy missing five languages)
 
-// Walk up from the edited file to the nearest dir holding .codeweb/graph.json (a mapped target).
-function findTarget(filePath) {
-  let dir = dirname(resolve(filePath));
-  for (let i = 0; i < 40; i++) {
-    const baseline = join(dir, '.codeweb', 'graph.json');
-    if (existsSync(baseline)) return { root: dir, baseline };
-    const parent = dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-  return null;
-}
 
 // Returns { root, newCycles, lostCallers } when an edit introduces a structural regression, else null.
 export function check(raw) {

@@ -1,0 +1,41 @@
+{
+  "bench": "ts-engine performance gate (docs/backlog-ast-tree-sitter.md risk #3; spec: docs/specs/perf-lazy-ast.md)",
+  "question": "does the tree-sitter tier cost stay acceptable as the default?",
+  "method": "cold extraction, best of 3 subprocess runs per arm, --no-ctags; the regex arm opts out explicitly (--engine regex) — the previous no-flag arm silently benchmarked tree-sitter against itself once the tier went default-on in v9",
+  "results": {
+    "axios": {
+      "bench": "ts-engine (cold extraction, regex vs tree-sitter tier)",
+      "target": "bench/corpus/axios",
+      "reps": 3,
+      "symbols": 912,
+      "withComplexity": 714,
+      "regexMs": 327,
+      "treeSitterMs": 1190,
+      "overheadMs": 863,
+      "factor": 3.64,
+      "perSymbolMs": 1.347,
+      "engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)"
+    },
+    "self": {
+      "bench": "ts-engine (cold extraction, regex vs tree-sitter tier)",
+      "target": ".",
+      "reps": 3,
+      "symbols": 1065,
+      "withComplexity": 909,
+      "regexMs": 372,
+      "treeSitterMs": 1592,
+      "overheadMs": 1220,
+      "factor": 4.28,
+      "perSymbolMs": 1.366,
+      "engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)"
+    }
+  },
+  "warmPath": {
+    "note": "with Spec A (lazy init + AST products in the scan cache), a warm cached refresh never initializes the engine",
+    "measured": "codeweb self, 172 files: warm 0.38s (ast: idle, 0 rescans) vs 1.89s before Spec A; cold 2.13s unchanged; fragments byte-identical"
+  },
+  "decision": {
+    "defaultOn": true,
+    "rationale": "cold builds pay ~+1.35 ms/symbol ONCE per changed file for exact complexity + dispatch recall (the oracle A/B recall-1.00 input); every cached run — the MCP auto-refresh, the post-edit hook, staleness checks — is engine-free after Spec A. The cost sits where users wait least; --engine regex remains the opt-out."
+  }
+}

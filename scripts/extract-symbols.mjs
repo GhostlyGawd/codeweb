@@ -17,9 +17,9 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from '
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { relative, resolve, join, dirname, extname } from 'node:path';
-import { isTestFile, roleOf } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
+import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
-import { loadTsEngine, loadLangEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
+import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
 
 // F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
 // v2: nodes carry complexity/maxDepth (F4) + the cache holds per-file edge lists + a symbol signature (F9).
@@ -37,7 +37,7 @@ import { loadTsEngine, loadLangEngine } from './lib/ts-engine.mjs'; // optional 
 //     package-boundary manifests.
 // v9: tree-sitter tier default-on when installed (dispatch recall); export-star re-export chains
 //     resolve (barrel files no longer swallow edges).
-const SCANNER_VERSION = 10;
+const SCANNER_VERSION = 11; // v11: cache entries carry AST products (ast/cx) so warm runs skip the engine (Spec A)
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -58,9 +58,19 @@ for (let i = 0; i < argv.length; i++) {
 }
 if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--no-ctags]'); process.exit(1); }
 const root = resolve(opts.path);
+
+// Spec E: role overrides from the TARGET's own codeweb.rules.json (`roles: [{glob, role}]`) —
+// applied after path heuristics, first match wins, invalid config is a hard exit 2 (never a
+// silent skip). Absent file / absent section -> byte-identical behavior to before.
+let roleOverride = () => null;
+try {
+  const rulesPath = join(root, 'codeweb.rules.json');
+  if (existsSync(rulesPath)) roleOverride = compileRoleOverrides(JSON.parse(readFileSync(rulesPath, 'utf8')).roles);
+} catch (e) { console.error(`[extract] ${e.message}`); process.exit(2); }
+const roleFor = (rel) => roleOverride(rel) || roleOf(rel);
 if (!existsSync(root)) { console.error(`[extract] not found: ${root}`); process.exit(1); }
 
-const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs)$/;
+const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
 const SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
 
 const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
@@ -75,6 +85,19 @@ function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
 // bodyEnd/signature line offsets are unaffected. Single-line '...'/"..." strings are blanked first so
 // a `#` or `"""` inside them can't be mistaken for a comment/docstring delimiter. Best-effort, same
 // ethos as stripSC: escapes inside triple-strings aren't tracked, worst case is a slightly-off mask.
+// Ruby masking (Spec I): line-local — string contents first (so interpolation can't fake a
+// comment), then `#`-to-EOL. Regexes built via RegExp so no quote character sits inside a regex
+// LITERAL (maskJs doesn't mask those; a bare quote there desyncs its string state when codeweb
+// maps itself — its own gate caught this class on ts-engine.mjs).
+const RB_DQ = new RegExp('"(?:[^"\\\\]|\\\\[^])*"', 'g');
+const RB_SQ = new RegExp(String.fromCharCode(39) + '(?:[^' + String.fromCharCode(39) + '\\\\]|\\\\[^])*' + String.fromCharCode(39), 'g');
+function maskRuby(text) {
+  return text.split(/\r?\n/).map((ln) => ln
+    .replace(RB_DQ, '""')
+    .replace(RB_SQ, "''")
+    .replace(/#.*$/, '')).join('\n');
+}
+
 function maskPy(text) {
   const lines = text.split(/\r?\n/);
   const out = [];
@@ -198,7 +221,7 @@ const rel = (f) => relative(root, f).replace(/\\/g, '/');
 // precisely); a cross-package NAME COLLISION is exactly how `create-vite` template files ended up
 // "calling" vite's normalizePath. Single-package repos (or trees with no manifests) all map to ''
 // — behavior there is unchanged.
-const MANIFESTS = ['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'pom.xml', 'build.gradle', 'build.gradle.kts'];
+const MANIFESTS = ['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'pom.xml', 'build.gradle', 'build.gradle.kts', 'Gemfile', 'composer.json', 'Package.swift'];
 const manifestMemo = new Map(); // dir -> boolean
 const hasManifest = (dir) => {
   if (!manifestMemo.has(dir)) {
@@ -306,6 +329,62 @@ function scanSymbols(file, text) {
       let m;
       if ((m = TYPE.exec(ln))) push(m[2], i, 'class', /\bpublic\b/.test(ln));
       else if ((m = METHOD.exec(ln)) && !CTRL.has(m[1])) push(m[1], i, 'method', /\bpublic\b/.test(ln));
+    });
+  } else if (ext === '.rb') {
+    // Ruby (Spec I): class/module + def (self. = class-level, same owner), everything public by
+    // default. Extents are indentation-based (idiomatic 2-space Ruby) — see isIndentLang below.
+    // Line-anchored patterns are comment-safe (`# def x` can't match ^\s*def).
+    const ownerRanges = [];
+    const ownerAt = (lineNo) => { let best = null; for (const o of ownerRanges) if (lineNo > o.start && lineNo < o.end && (!best || o.start > best.start)) best = o; return best?.name; };
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = /^(\s*)(?:class|module)\s+([A-Z]\w*)/.exec(ln))) {
+        const indent = m[1].length;
+        let end = lines.length;
+        for (let j = i + 1; j < lines.length; j++) {
+          if (/^\s*end\b/.test(lines[j]) && (lines[j].match(/^\s*/)[0].length <= indent)) { end = j + 1; break; }
+        }
+        ownerRanges.push({ name: m[2], start: i + 1, end, indent });
+        push(m[2], i, 'class', true);
+      } else if ((m = /^(\s*)def\s+(?:self\.)?([A-Za-z_]\w*[?!]?)/.exec(ln))) {
+        const owner = m[1].length ? ownerAt(i + 1) : undefined;
+        push(m[2], i, owner ? 'method' : 'function', true, owner);
+      }
+    });
+  } else if (ext === '.php') {
+    // PHP (Spec I): class/interface/trait + function members (visibility-as-export, public
+    // default); top-level functions. Owner qualification rides the enclosing-class ranges.
+    const TYPE = /^\s*(?:abstract\s+|final\s+)?(?:class|interface|trait)\s+([A-Za-z_]\w*)/;
+    const FN = /^(\s*)(?:(?:public|protected|private|static|final|abstract)\s+)*function\s+&?\s*([A-Za-z_]\w*)\s*\(/;
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = TYPE.exec(ln))) push(m[1], i, 'class', true);
+      else if ((m = FN.exec(ln))) push(m[2], i, m[1].length ? 'method' : 'function', !/\b(?:private|protected)\b/.test(ln));
+    });
+  } else if (ext === '.kt' || ext === '.kts') {
+    // Kotlin (Spec I): class/object/interface + fun members (public-by-default; private/internal
+    // -> not exported); expression-bodied `fun f() = …` extents collapse to one line via bodyEnd.
+    // `fun Type.name(` (extension function) owner-qualifies to the receiver type directly.
+    const TYPE = /^\s*(?:(?:public|private|internal|protected|open|final|abstract|sealed|data|inner|enum|annotation|value)\s+)*(?:class|object|interface)\s+([A-Za-z_]\w*)/;
+    const FUN = /^(\s*)(?:(?:public|private|internal|protected|open|override|final|abstract|suspend|inline|operator|infix|tailrec|external|actual|expect)\s+)*fun\s+(?:<[^>]+>\s+)?(?:([A-Za-z_][\w.]*)\.)?([A-Za-z_]\w*)\s*\(/;
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = TYPE.exec(ln))) push(m[1], i, 'class', !/\b(?:private|internal)\b/.test(ln));
+      else if ((m = FUN.exec(ln))) {
+        const recv = m[2] ? m[2].split('.').pop() : undefined;
+        push(m[3], i, m[1].length || recv ? 'method' : 'function', !/\b(?:private|internal)\b/.test(ln), recv);
+      }
+    });
+  } else if (ext === '.swift') {
+    // Swift (Spec I): class/struct/enum/protocol/actor/extension + func members. Default access
+    // is internal (module-scoped) -> only public/open count as exported. Extension members
+    // owner-qualify to the extended type via the extension's range.
+    const TYPE = /^\s*(?:(?:public|open|internal|fileprivate|private|final|indirect)\s+)*(?:class|struct|enum|protocol|extension|actor)\s+([A-Za-z_]\w*)/;
+    const FUNC = /^(\s*)(?:(?:public|open|internal|fileprivate|private|final|static|class|override|mutating|nonmutating|convenience|required|dynamic|@\w+(?:\([^)]*\))?)\s+)*func\s+([A-Za-z_]\w*)\s*[(<]/;
+    lines.forEach((ln, i) => {
+      let m;
+      if ((m = TYPE.exec(ln))) push(m[1], i, 'class', /\b(?:public|open)\b/.test(ln));
+      else if ((m = FUNC.exec(ln))) push(m[2], i, m[1].length ? 'method' : 'function', /\b(?:public|open)\b/.test(ln));
     });
   } else {
     const exported = (ln) => /\bexport\b/.test(ln);
@@ -438,20 +517,40 @@ const files = listFiles();
 // back to the regex scanner (CI without npm install keeps working; meta.engine records which tier
 // ran, and the scan cache is namespaced per engine, so reproducibility holds per install state).
 // `--engine regex` / CODEWEB_ENGINE=regex force the old behavior.
-let tsEngine = null;
+// Spec A (docs/specs/perf-lazy-ast.md): PROBE availability up front (file existence + module
+// resolution — cheap), LOAD the WASM engines lazily at the first file that actually needs a
+// parse. A warm cached run — or any run whose AST products all come from the cache — never pays
+// the ~1.4s runtime+grammar init. Everything decided at startup (cache namespace, meta stamp,
+// banner engine name) derives from the probe, so fragments stay byte-identical either way.
+let astProbe = { ts: false, java: false, csharp: false, tsVersion: null };
 if (opts.engine !== 'regex') {
-  tsEngine = await loadTsEngine();
-  if (!tsEngine && (opts.engine === 'tree-sitter' || opts.engine === 'ts')) {
+  astProbe = probeAst();
+  if (!astProbe.ts && (opts.engine === 'tree-sitter' || opts.engine === 'ts')) {
     console.error('[extract] --engine tree-sitter requested but web-tree-sitter/grammar unavailable; falling back to regex F4');
   }
+}
+// Poison guard: if a probe said "available" but the real load later fails, complexity/dispatch
+// fell back to regex mid-run — a `+ts`-namespaced cache must never memoize that state.
+let astLoadFailed = false;
+let _tsEngineState; // undefined = not attempted, null = load failed, object = loaded
+async function tsEngineGet() {
+  if (!astProbe.ts) return null;
+  if (_tsEngineState === undefined) {
+    _tsEngineState = await loadTsEngine();
+    if (!_tsEngineState) { astLoadFailed = true; console.error('[extract] AST probe passed but the ts engine failed to load — scan cache disabled for this run'); }
+  }
+  return _tsEngineState;
 }
 // Java/C# dispatch tier (docs/specs/java-cs-tree-sitter.md): regex keeps owning their NODES;
 // the AST contributes the dispatch edges regex precision-gates away. Loaded lazily on the first
 // file of each language; unavailable -> byte-identical regex output (the standing contract).
 const langEngines = {}; // 'java'|'csharp' -> engine|null
 async function langEngineFor(langKey) {
-  if (opts.engine === 'regex') return null;
-  if (langEngines[langKey] === undefined) langEngines[langKey] = await loadLangEngine(langKey);
+  if (opts.engine === 'regex' || !astProbe[langKey]) return null;
+  if (langEngines[langKey] === undefined) {
+    langEngines[langKey] = await loadLangEngine(langKey);
+    if (!langEngines[langKey]) { astLoadFailed = true; console.error(`[extract] AST probe passed but the ${langKey} engine failed to load — scan cache disabled for this run`); }
+  }
   return langEngines[langKey];
 }
 
@@ -459,7 +558,7 @@ async function langEngineFor(langKey) {
 // cached symbol-discovery for byte-identical files and re-scans only changed ones — edge derivation
 // is still GLOBAL (see below), so the fragment is identical with or without the cache. tree-sitter is
 // its own engine namespace (`+ts`) so class-qualified syms can't be served to a regex run, or vice versa.
-const engineMode = (useCtags ? 'ctags' : 'regex') + (tsEngine ? '+ts' : '');
+const engineMode = (useCtags ? 'ctags' : 'regex') + (opts.engine !== 'regex' && astProbe.ts ? '+ts' : '');
 let oldCache = null;
 if (opts.cache) { try { const c = JSON.parse(readFileSync(opts.cache, 'utf8')); if (c && c.version === SCANNER_VERSION && c.engine === engineMode) oldCache = c; } catch { /* corrupt/absent -> cold */ } }
 const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, files: {} } : null;
@@ -470,6 +569,7 @@ const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)
 const nodes = [];
 const fileSyms = new Map(); // file -> {text, ranges:[{id,name,start,end,kind}]}
 const dispatchByFile = new Map(); // file -> [{from,to}] dispatch edges (tree-sitter engine only)
+const typedLangsSeen = new Set(); // 'java'|'csharp' actually processed by the AST tier this run (banner)
 const typedIntentsByFile = new Map(); // rel -> [{from, recvType, method}] Java/C# typed-receiver calls, resolved globally after all nodes exist
 // v7 STALENESS STAMPS: per-file size+mtime recorded in meta.sources so query tools can cheaply
 // detect that the graph no longer matches disk ("aware" — an agent must know its map is stale).
@@ -485,12 +585,25 @@ for (const f of files) {
   const r = rel(f);
   try { const st = statSync(f); sources[r] = { s: st.size, m: Math.round(st.mtimeMs) }; } catch { /* stamp is best-effort */ }
   if (DYNAMIC_RE.test(text)) dynamicFiles.push(r);
+  const isPy = r.endsWith('.py');
+  const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
+  const isBraceLang = isJsTs || /\.(java|cs|php|kt|kts|swift)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
+  const isIndentLang = isPy || r.endsWith('.rb'); // extents by dedent (Python) / end-at-indent (Ruby)
+  const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp'
+    : r.endsWith('.py') ? 'python' : r.endsWith('.go') ? 'go' : r.endsWith('.rs') ? 'rust' : null;
+  // Does the AST tier owe this file products (methods/dispatch/complexity)? Drives cache-hit
+  // validity — a hit without them must re-scan — and the lazy engine load below (Spec A).
+  const needsAst = opts.engine !== 'regex' && ((isJsTs && astProbe.ts) || (langKey && astProbe[langKey]));
   let syms;
+  let astHit = null; // the cache entry serving this file's AST products (fully-valid hit only)
   if (opts.cache) {
     const h = sha1(text);
     const hit = oldCache && oldCache.files[r];
-    syms = (hit && hit.hash === h) ? hit.syms : scanFile(f, text); // cache miss -> re-scan
+    const hitOk = hit && hit.hash === h && (!needsAst || (hit.ast && (!isJsTs || hit.cx)));
+    if (hitOk) { syms = hit.syms; if (needsAst) astHit = hit; }
+    else syms = scanFile(f, text); // cache miss -> re-scan
     newCache.files[r] = { hash: h, syms };                          // prune deleted files (only current)
+    if (astHit) { newCache.files[r].ast = astHit.ast; newCache.files[r].cx = astHit.cx; }
   } else {
     syms = scanFile(f, text);
   }
@@ -498,24 +611,33 @@ for (const f of files) {
   syms = syms.filter((s) => { const k = s.name + ':' + s.line; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a.line - b.line);
   const lines = text.split(/\r?\n/);
   const total = lines.length;
-  const isPy = r.endsWith('.py');
-  const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
-  const isBraceLang = isJsTs || /\.(java|cs)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
   // Body extents are measured on MASKED lines: stripSC alone is line-local, so a multi-line template
   // literal (or block comment) containing braces desynced the brace counter and bodies swallowed
   // whole neighboring functions (a 5-line helper recorded as 550 loc on vite — poisoning
   // context-pack size, complexity, and body-confirmed duplication). maskJs/maskPy carry string/
   // comment state ACROSS lines; ${} interpolations stay live so real code still counts.
-  const scanLines = (isPy ? maskPy(text) : isBraceLang ? maskJs(text) : text).split(/\r?\n/);
-  const fileRole = roleOf(r);
+  const scanLines = (isPy ? maskPy(text) : r.endsWith('.rb') ? maskRuby(text) : isBraceLang ? maskJs(text) : text).split(/\r?\n/);
+  const fileRole = roleFor(r);
   // When the tree-sitter engine is active it OWNS JS/TS method discovery (class-qualified ids) and the
   // dispatch edges; the regex scanner still owns classes, functions and const-arrow functions (which
   // the parse-tree walk doesn't cover). extractJsTs returns null on any parse failure -> keep the regex
   // methods (graceful per-file fallback). Build the qualified ids in ONE parser so dispatch from/to
   // always match an emitted node — never a second line-containment guess that could silently disagree.
   let tsResult = null;
-  if (tsEngine && isJsTs) {
-    tsResult = tsEngine.extractJsTs(text, r);
+  let fileCx = null;    // hit: {nodeId -> exact cx} lookup; miss: collector recorded into the cache entry
+  let engForFile = null;
+  if (isJsTs && needsAst) {
+    if (astHit) {
+      tsResult = astHit.ast.tsr; // includes the null-on-parse-failure state, memoized deterministically
+      fileCx = astHit.cx;
+    } else {
+      engForFile = await tsEngineGet(); // FIRST real need -> the one-time WASM init happens here
+      if (engForFile) {
+        tsResult = engForFile.extractJsTs(text, r);
+        fileCx = {};
+        if (newCache) { newCache.files[r].ast = { tsr: tsResult }; newCache.files[r].cx = fileCx; }
+      }
+    }
     // the parse tree owns method_definition nodes; class-FIELD arrows (`handleClick = () => {}`)
     // are only discovered by the regex scan (field: true), so they must survive the handoff.
     if (tsResult) syms = syms.filter((s) => s.kind !== 'method' || s.field);
@@ -526,7 +648,7 @@ for (const f of files) {
     const start = s.line;
     // real body extent (brace match / dedent), NOT next-symbol-line — so the last symbol can't
     // run to EOF and absorb the trailing top-level code (the fabricated-edge bug).
-    const end = Math.min(bodyEnd(scanLines, start - 1, isPy) + 1, total);
+    const end = Math.min(bodyEnd(scanLines, start - 1, isIndentLang) + 1, total);
     const loc = Math.min(end - start + 1, 2000);
     // Owner-qualified id (`file:Type.method`, matching the tree-sitter tier's scheme). Rust/Go owners
     // come from the scan (impl/receiver); Python + JS/TS methods resolve to the ENCLOSING class range
@@ -550,10 +672,19 @@ for (const f of files) {
       // Only function/method nodes carry these (a class/module has no single control-flow body).
       const body = lines.slice(start - 1, start - 1 + loc).join('\n');
       const lang = isPy ? 'py' : 'js';
-      // Exact McCabe via tree-sitter for JS/TS when the engine is active (TS grammar is a JS superset
+      // Exact McCabe via tree-sitter for JS/TS when the tier is active (TS grammar is a JS superset
       // for control-flow counting); otherwise the regex F4 approximation. maxDepth stays regex F4 —
       // exact nesting is a later increment. Rust/Go/Python always use regex (no TS grammar match).
-      node.complexity = (tsEngine && isJsTs) ? tsEngine.cyclomaticExact(body) : cyclomatic(body, lang);
+      // Exact values ride the scan cache (Spec A): a hit looks them up; a miss computes + records.
+      let cx = null;
+      if (isJsTs && fileCx) {
+        if (astHit) cx = Object.prototype.hasOwnProperty.call(fileCx, id) ? fileCx[id] : null;
+        else if (engForFile) cx = fileCx[id] = engForFile.cyclomaticExact(body);
+      }
+      node.complexity = cx != null ? cx : cyclomatic(body, lang);
+      // Spec H: Type-3 statement fingerprints ride the same parse (>=6 statements only).
+      const t3 = tsResult && tsResult.t3ByLine && tsResult.t3ByLine[start];
+      if (t3) node.t3 = t3;
       node.maxDepth = nestingDepth(body, lang);
     }
     nodes.push(node);
@@ -579,16 +710,24 @@ for (const f of files) {
         signature: parseSignature(lines[start - 1] || '', m.label, false),
         complexity: m.complexity,
         maxDepth: nestingDepth(body, 'js'),
+        ...(tsResult.t3ByLine && tsResult.t3ByLine[start] ? { t3: tsResult.t3ByLine[start] } : {}),
       });
     }
     if (tsResult.dispatch.length) dispatchByFile.set(f, tsResult.dispatch);
   }
-  // Java/C#: AST dispatch tier (edges only — regex owns the nodes). this-calls resolve in-file
-  // now; typed-receiver intents wait for the global pass (the receiver's class may live anywhere).
-  const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp' : null;
-  if (langKey) {
-    const eng = await langEngineFor(langKey);
-    const d = eng && eng.extractDispatch(text, r);
+  // Java/C#/Python/Go/Rust: AST dispatch tier (edges only — regex owns the nodes). this/self/
+  // receiver calls resolve in-file now; typed-receiver intents wait for the global pass (the
+  // receiver's type may live anywhere). Products ride the scan cache exactly like the JS/TS
+  // tier's (Spec A); Spec F adds the three dedicated walkers.
+  if (langKey && needsAst) {
+    typedLangsSeen.add(langKey);
+    let d = null;
+    if (astHit) d = astHit.ast.d;
+    else {
+      const eng = await langEngineFor(langKey);
+      d = (eng && eng.extractDispatch(text, r)) || null;
+      if (eng && newCache) newCache.files[r].ast = { d };
+    }
     if (d) {
       if (d.thisCalls.length) dispatchByFile.set(f, (dispatchByFile.get(f) || []).concat(d.thisCalls));
       if (d.typedIntents.length) typedIntentsByFile.set(r, d.typedIntents);
@@ -1029,7 +1168,7 @@ const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; /
 for (const f of edgeFiles) {
   const { text, ranges } = fileSyms.get(f);
   const r = rel(f);
-  const lines = (r.endsWith('.py') ? maskPy(text) : /\.(jsx?|mjs|cjs|tsx?|java|cs)$/.test(r) ? maskJs(text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
+  const lines = (r.endsWith('.py') ? maskPy(text) : r.endsWith('.rb') ? maskRuby(text) : /\.(jsx?|mjs|cjs|tsx?|java|cs|php|kt|kts|swift)$/.test(r) ? maskJs(text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
   const prev = reuseEdges && oldCache.files[r];
   let result;
@@ -1041,7 +1180,7 @@ for (const f of edgeFiles) {
   }
   if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; }
   if (result.hasModule && !nodeIdSet.has(r + ':<module>')) {
-    nodes.push({ id: r + ':<module>', label: '<module>', kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleOf(r) });
+    nodes.push({ id: r + ':<module>', label: '<module>', kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleFor(r) });
     nodeIdSet.add(r + ':<module>');
   }
   for (const e of result.edges) edges.push(e);
@@ -1059,7 +1198,7 @@ const edgeKeys = new Set(edges.map((e) => e.from + ' ' + e.to));
 // this module" signal (fileCycles/coupling unchanged — same file-pair) without polluting a symbol.
 const ensureModuleNode = (id) => {
   if (nodeIdSet.has(id)) return;
-  nodes.push({ id, label: '<module>', kind: 'module', file: idFile(id), line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleOf(idFile(id)) });
+  nodes.push({ id, label: '<module>', kind: 'module', file: idFile(id), line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleFor(idFile(id)) });
   nodeIdSet.add(id);
 };
 for (const [a, b] of [...importEdges, ...reExportEdges]) {
@@ -1129,14 +1268,16 @@ if (typedIntentsByFile.size) {
 // body-reading, report header) read the target from here instead of re-hardcoding it.
 const rootFwd = root.replace(/\\/g, '/').replace(/\/+$/, '');
 const targetLabel = opts.target || rootFwd.split('/').slice(-2).join('/') || rootFwd;
-const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
+const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
 const languages = [...new Set(files.map(langOf))].sort();
 const fragment = {
   meta: {
     root: rootFwd, target: targetLabel, engine: useCtags ? 'ctags' : 'regex',
-    // additive: only present when the opt-in tree-sitter tier actually computed complexity, so the
+    // additive: only present when the tree-sitter tier owns complexity for this run, so the
     // default (regex) output is byte-identical to before. Pins the grammar version for determinism.
-    ...(tsEngine ? { complexityEngine: tsEngine.version } : {}),
+    // Stamped from the PROBE (identical string to the loaded engine's — pinned by test L4) so a
+    // warm run that never initializes the engine emits the same meta as a cold one (Spec A).
+    ...(opts.engine !== 'regex' && astProbe.ts && !astLoadFailed ? { complexityEngine: astProbe.tsVersion } : {}),
     languages, symbols: nodes.length,
     sources, // per-file {s: size, m: mtimeMs} staleness stamps
     // files with dynamic-dispatch patterns — the honest asterisk on every "0 callers" answer
@@ -1149,12 +1290,18 @@ const fragment = {
   },
   nodes, edges,
 };
-if (newCache) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
-const usedLangEngines = Object.keys(langEngines).filter((k) => langEngines[k]);
-const dispatchNote = (tsEngine || usedLangEngines.length)
+if (newCache && !astLoadFailed) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
+// Dispatch note + banner report from the PROBE (what tier owns the run) plus the live load state:
+// `ast: loaded` (initialized this run) / `ast: idle` (available, nothing needed a parse — the warm
+// path Spec A exists for) / `ast: off` (regex opt-out, unavailable, or load failure).
+const astAvailable = opts.engine !== 'regex' && (astProbe.ts || astProbe.java || astProbe.csharp);
+const typedLangs = ['java', 'csharp', 'python', 'go', 'rust'].filter((k) => typedLangsSeen.has(k));
+const dispatchNote = astAvailable
   ? `; wired ${dispatchEdgeCount} dispatch edge(s)${dispatchDropped ? `, dropped ${dispatchDropped} (missing endpoint)` : ''}` +
-    (usedLangEngines.length ? `; typed-dispatch (${usedLangEngines.join('+')}) ${typedWired} wired${typedDropped ? `, ${typedDropped} dropped (ambiguous/absent)` : ''}` : '')
+    (typedLangs.length ? `; typed-dispatch (${typedLangs.join('+')}) ${typedWired} wired${typedDropped ? `, ${typedDropped} dropped (ambiguous/absent)` : ''}` : '')
   : '';
-const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${tsEngine ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}`;
+const anyAstLoaded = !!_tsEngineState || Object.values(langEngines).some(Boolean);
+const astState = anyAstLoaded ? 'loaded' : (!astAvailable || astLoadFailed) ? 'off' : 'idle';
+const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
 if (opts.out) { writeFileSync(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
 else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }

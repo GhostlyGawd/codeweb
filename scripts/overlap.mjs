@@ -35,6 +35,14 @@ const SCAFFOLD = new Set(['parseArgs', 'parseArgv', 'usage', 'showHelp', 'printU
 // confirmation (below) is the precision gate, so this can be loose. At 0.8 it never fired on
 // real targets (0/516 candidate pairs passed); 0.5 surfaces candidates for body confirmation.
 const TWIN_MIN_OUT = 4, TWIN_JACCARD = 0.5, LOC_CV_TIGHT = 0.4, K = 3;
+// Scale caps (Spec B addendum) — both pairwise passes are quadratic in group size, and monorepo-
+// scale repos (TypeScript: thousands of same-named visitors, hub labels with 1000s of callers)
+// turn them into minutes. Caps are deterministic and REPORTED (md header + finding evidence),
+// never silent: GROUP_CAP samples big same-name groups for body confirmation (sorted by id);
+// TWIN_HUB_CAP skips twin-seeding through labels more-called than any credible twin signal —
+// sharing a mega-hub says nothing about twin-ness (the clusterer strips those hubs for the same
+// reason).
+const GROUP_CAP = 12, TWIN_HUB_CAP = 50, TWIN_PAIR_BUDGET = 200000;
 const SEV = { low: 1, medium: 2, high: 3 };
 const SEV_NAME = ['', 'low', 'medium', 'high'];
 const CONF = { refuted: 0, low: 1, medium: 2, high: 3 };
@@ -49,17 +57,44 @@ const intersectAll = (sets) => { if (sets.length < 2) return new Set(); let acc 
 
 // ---- body access (read-only, by line range) ----
 const reader = sourceReader(SOURCE_ROOT);
-const bodyShingles = (n) => { const body = reader.bodyOf(n); if (body == null) return null; const s = shingles(body, K); return s.size ? s : null; };
+// Memoized by node id: Signal A shingles each node once, but Signal-B twin pairs used to
+// re-shingle the same hub-adjacent nodes dozens of times — on monorepo-scale graphs with
+// thousand-line bodies (TypeScript's checker.ts) that WAS the pipeline's wall. Pure caching,
+// zero semantics change.
+const _shingleMemo = new Map();
+// BODY_LINE_CAP (Spec B addendum): thousand-line bodies (TypeScript's checker.ts) yield 10k+
+// element shingle sets, and pairwise Jaccard over those made Signal A alone exceed 9 minutes on
+// a 28k-symbol graph. Bodies longer than the cap shingle their FIRST 400 lines — deterministic,
+// counted, and declared in the md header + affected findings' evidence. Never silent.
+const BODY_LINE_CAP = 400;
+let bodiesCapped = 0;
+const cappedIds = new Set();
+const bodyShingles = (n) => {
+  if (_shingleMemo.has(n.id)) return _shingleMemo.get(n.id);
+  let body = reader.bodyOf(n);
+  if (body != null && (n.loc || 0) > BODY_LINE_CAP) {
+    body = body.split('\n').slice(0, BODY_LINE_CAP).join('\n');
+    bodiesCapped++; cappedIds.add(n.id);
+  }
+  const s = body == null ? null : shingles(body, K);
+  const out = s && s.size ? s : null;
+  _shingleMemo.set(n.id, out);
+  return out;
+};
 const bodyConfidence = (nodes) => {
-  const sets = nodes.map(bodyShingles).filter(Boolean);
+  const sample = nodes.length > GROUP_CAP
+    ? nodes.slice().sort((a, b) => (a.id < b.id ? -1 : 1)).slice(0, GROUP_CAP)
+    : nodes;
+  const sets = sample.map(bodyShingles).filter(Boolean);
   if (sets.length < 2) return null;
+  const sampled = nodes.length > GROUP_CAP ? { used: sample.length, of: nodes.length } : null;
   const sims = [];
   for (let i = 0; i < sets.length; i++) for (let j = i + 1; j < sets.length; j++) sims.push(jaccard(sets[i], sets[j]));
   // reduce, not Math.min(...sims): a large same-name cluster makes sims O(n^2), and spreading it as
   // call args overflows the stack (express crashed here). reduce is identical in value, spread-free.
   const mean = sims.reduce((a, b) => a + b, 0) / sims.length, min = sims.reduce((a, b) => Math.min(a, b), Infinity);
   const confidence = mean >= 0.6 ? 'high' : mean >= 0.35 ? 'medium' : mean >= 0.15 ? 'low' : 'refuted';
-  return { mean, min, confidence, drifted: mean >= 0.35 && mean < 0.6 };
+  return { mean, min, confidence, drifted: mean >= 0.35 && mean < 0.6, sampled };
 };
 
 const isDecl = (file) => /\.d\.ts$/.test(file);
@@ -80,6 +115,9 @@ for (const e of graph.edges) { if (e.kind !== 'call') continue; callIn.set(e.to,
 const outLabels = new Map();
 for (const e of graph.edges) { if (e.kind !== 'call') continue; const to = byId.get(e.to); if (!to) continue; if (!outLabels.has(e.from)) outLabels.set(e.from, new Set()); outLabels.get(e.from).add(to.label); }
 
+const _T = process.env.CODEWEB_TIMING === '1'; let _t = performance.now();
+const _mark = (label) => { if (_T) console.error('[overlap-timing] ' + label + ': ' + Math.round(performance.now() - _t) + 'ms'); _t = performance.now(); };
+_mark('setup');
 // ---- Signal A: redefinition clusters ------------------------------------------------
 const byLabel = new Map();
 for (const n of defs) { if (!byLabel.has(n.label)) byLabel.set(n.label, []); byLabel.get(n.label).push(n); }
@@ -87,7 +125,9 @@ for (const n of defs) { if (!byLabel.has(n.label)) byLabel.set(n.label, []); byL
 const overlaps = [];
 const scaffoldCluster = [];
 
+let _labelsDone = 0;
 for (const [label, nodes] of byLabel) {
+  if (_T && ++_labelsDone % 2000 === 0) console.error(`[overlap-timing] signal-A progress: ${_labelsDone} labels, ${Math.round(performance.now() - _t)}ms`);
   const files = [...new Set(nodes.map((n) => n.file))];
   if (files.length < 2) continue;
   if (ENTRYPOINTS.has(label)) continue;
@@ -114,7 +154,10 @@ for (const [label, nodes] of byLabel) {
   }
 
   // authoritative: body confirmation; fallback: structural corroboration
+  if (_T) console.error(`[overlap-timing] entering group "${label}" x${nodes.length} (locs: ${nodes.slice(0, 5).map((n) => n.loc).join(',')})`);
+  const _bc0 = _T ? performance.now() : 0;
   const body = HAVE_SOURCE ? bodyConfidence(nodes) : null;
+  if (_T && performance.now() - _bc0 > 500) console.error(`[overlap-timing] slow group "${label}" x${nodes.length}: ${Math.round(performance.now() - _bc0)}ms`);
   let confidence, basis;
   if (body) {
     confidence = body.confidence;
@@ -123,6 +166,8 @@ for (const [label, nodes] of byLabel) {
       : body.confidence === 'refuted'
         ? `body-refuted (avg ${(body.mean * 100).toFixed(0)}%) — same name, different logic; likely coincidental`
         : `body-confirmed (avg ${(body.mean * 100).toFixed(0)}%, min ${(body.min * 100).toFixed(0)}%)`;
+    if (body.sampled) basis += `; body sampled ${body.sampled.used}/${body.sampled.of} (large group cap)`;
+    if (nodes.some((n) => cappedIds.has(n.id))) basis += `; long bodies shingled on their first ${BODY_LINE_CAP} lines`;
   } else {
     const callSets = nodes.map((n) => outLabels.get(n.id)).filter((s) => s && s.size);
     const shared = intersectAll(callSets);
@@ -164,6 +209,7 @@ if (scaffoldCluster.length) {
   });
 }
 
+_mark('signal-A (same-name groups + body confirm)');
 // ---- Signal B: structural twins -----------------------------------------------------
 const cand = [...outLabels.entries()].filter(([, s]) => s.size >= TWIN_MIN_OUT);
 const inv = new Map();
@@ -171,7 +217,17 @@ for (const [id, s] of cand) for (const t of s) { if (!inv.has(t)) inv.set(t, [])
 const seenPair = new Set();
 const flagged = new Set(overlaps.flatMap((o) => o.nodes));
 const twins = [];
-for (const callers of inv.values()) {
+// Deterministic global budget on twin-pair enumeration: smallest caller-groups first (a shared
+// callee with 3 callers is strong twin evidence; one with 40 is weak), stop at the budget, and
+// report what was skipped. On monorepo-scale graphs the sum of even sub-cap groups is millions
+// of pairs — bounded here, never silently.
+let hubLabelsSkipped = 0, budgetLabelsSkipped = 0, pairBudget = TWIN_PAIR_BUDGET;
+const invEntries = [...inv.entries()].sort((a, b) => a[1].length - b[1].length || (a[0] < b[0] ? -1 : 1));
+for (const [, callers] of invEntries) {
+  if (callers.length > TWIN_HUB_CAP) { hubLabelsSkipped++; continue; } // quadratic + weak evidence — reported below
+  const groupPairs = (callers.length * (callers.length - 1)) / 2;
+  if (groupPairs > pairBudget) { budgetLabelsSkipped++; continue; }
+  pairBudget -= groupPairs;
   for (let i = 0; i < callers.length; i++) for (let j = i + 1; j < callers.length; j++) {
     const x = callers[i], y = callers[j], key = x < y ? x + '|' + y : y + '|' + x;
     if (seenPair.has(key)) continue; seenPair.add(key);
@@ -196,6 +252,7 @@ for (const t of twins) {
   else cur.extraNodes.push(t.nx.id, t.ny.id);
 }
 const twinGroups = [...byLabelPair.values()];
+_mark('signal-B (twin enumeration)');
 // Body-confirm each twin like Signal A: a shared downstream-call shape is only suggestive —
 // confirm against the real bodies (token-shingle Jaccard). Body sim becomes the authoritative
 // confidence, so genuine parallel impls rank up, drifted copies are flagged, and pairs that
@@ -231,6 +288,61 @@ for (const t of twinGroups.slice(0, 16)) {
   });
 }
 
+_mark('signal-B (twin body confirm)');
+// ---- Signal C: Type-3 (near-miss) clones — Spec H -----------------------------------
+// Statement-fingerprint multisets (node.t3, emitted by the AST tier) pair bodies that share
+// >=70% of their normalized statements — reorderings and small insertions the shingle and
+// skeleton passes cannot see. REVIEW-only by construction (kind != duplicate-logic keeps them
+// out of optimize's READY tier). Bounded: hashes owned by >20 nodes seed nothing (boilerplate
+// statements are noise + quadratic dynamite), and pairs already flagged above are skipped.
+const T3_JACCARD = 0.7, T3_OWNER_CAP = 20;
+{
+  const t3Nodes = defs.filter((n) => Array.isArray(n.t3) && n.t3.length >= 6 && (n.kind === 'function' || n.kind === 'method'));
+  const countsOf = new Map(t3Nodes.map((n) => {
+    const m = new Map();
+    for (const h of n.t3) m.set(h, (m.get(h) || 0) + 1);
+    return [n.id, m];
+  }));
+  const owners = new Map(); // hash -> node ids
+  for (const n of t3Nodes) for (const h of new Set(n.t3)) { if (!owners.has(h)) owners.set(h, []); owners.get(h).push(n.id); }
+  const nById = new Map(t3Nodes.map((n) => [n.id, n]));
+  const pairShared = new Map(); // "a|b" -> shared multiset count
+  for (const [h, ids] of owners) {
+    if (ids.length > T3_OWNER_CAP) continue;
+    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+      const a = ids[i] < ids[j] ? ids[i] : ids[j], b = ids[i] < ids[j] ? ids[j] : ids[i];
+      const key = a + '|' + b;
+      const inc = Math.min(countsOf.get(a).get(h) || 0, countsOf.get(b).get(h) || 0);
+      pairShared.set(key, (pairShared.get(key) || 0) + inc);
+    }
+  }
+  const flaggedT3 = new Set(overlaps.flatMap((o) => o.nodes));
+  const t3Findings = [];
+  for (const [key, shared] of pairShared) {
+    const [aId, bId] = key.split('|');
+    const a = nById.get(aId), b = nById.get(bId);
+    if (a.label === b.label) continue; // same-name territory is Signal A's
+    if (flaggedT3.has(aId) && flaggedT3.has(bId)) continue;
+    const union = a.t3.length + b.t3.length - shared;
+    const sim = union ? shared / union : 0;
+    if (sim < T3_JACCARD) continue;
+    t3Findings.push({ a, b, shared, sim });
+  }
+  t3Findings.sort((x, y) => y.sim - x.sim || (x.a.id + x.b.id < y.a.id + y.b.id ? -1 : 1));
+  for (const f of t3Findings.slice(0, 24)) {
+    const domains = [...new Set([domainOf(f.a), domainOf(f.b)])];
+    overlaps.push({
+      kind: 'near-miss-clone', confidence: 'medium', drifted: false, bodySim: +f.sim.toFixed(3),
+      severity: 'medium', rank: Math.round(f.sim * 4),
+      title: `\`${f.a.label}\` and \`${f.b.label}\` are near-miss clones (${Math.round(f.sim * 100)}% shared statements)`,
+      domains, nodes: [f.a.id, f.b.id].sort(),
+      evidence: `${f.shared}/${f.a.t3.length + f.b.t3.length - f.shared} statement fingerprints shared (identifier/literal-normalized, order-independent) between ${f.a.id} (${f.a.t3.length} stmts) and ${f.b.id} (${f.b.t3.length} stmts) — reordered or lightly-edited copies the exact/Type-2 passes cannot see.`,
+      recommendation: `Read both bodies side by side (REVIEW — never auto-merge a near-miss): if the differences are accidental, reconcile deliberately and keep one; if intentional, a comment naming why prevents the next reader re-unifying them.`,
+    });
+  }
+}
+
+_mark('signal-C (near-miss)');
 // ---- rank, split, write -------------------------------------------------------------
 overlaps.sort((a, b) => SEV[b.severity] - SEV[a.severity] || CONF[b.confidence] - CONF[a.confidence] || b.rank - a.rank);
 overlaps.forEach((o, i) => { o.id = 'ov' + (i + 1); delete o.rank; });
@@ -251,6 +363,7 @@ const md = [
   `> **${findings.length} findings** · ${patternFindings.length} interface patterns · ${unverified.length} unverified · ${dismissed.length} dismissed (body-refuted) on **${graph.meta?.target || 'target'}**.`,
   `> ${HAVE_SOURCE ? 'Confidence is **body-confirmed** (token-shingle similarity of real function bodies).' : 'Source unavailable — confidence is structural (shared calls + LOC).'} Each finding is a checklist item.`,
   ...(nonProductSkipped ? ['', `> Scope: **product code** — ${nonProductSkipped} test/fixture/example/bench symbols excluded (set CODEWEB_ALL_ROLES=1 to include them).`] : []),
+  ...(hubLabelsSkipped || budgetLabelsSkipped || bodiesCapped ? ['', `> Scale caps: ${hubLabelsSkipped} hub label(s) (>${TWIN_HUB_CAP} callers) excluded from twin seeding${budgetLabelsSkipped ? `; ${budgetLabelsSkipped} label(s) past the ${TWIN_PAIR_BUDGET.toLocaleString('en-US')}-pair twin budget (smallest groups seeded first)` : ''}${bodiesCapped ? `; ${bodiesCapped} long body/bodies shingled on their first ${BODY_LINE_CAP} lines` : ''}; same-name groups larger than ${GROUP_CAP} body-confirm on a ${GROUP_CAP}-node sample (marked in their evidence). Deterministic, never silent.`] : []),
   '', '## Findings', '', ...findings.map(fmt),
   ...(patternFindings.length ? ['## Interface patterns (not duplication)', '', '_Same-named implementations of a framework contract — nothing in-repo calls them. Do not merge._', '', ...patternFindings.map(fmt)] : []),
   '## Unverified candidates', '', '_Borderline body similarity (15–35%); confirm by reading before acting._', '', ...unverified.map(fmt),

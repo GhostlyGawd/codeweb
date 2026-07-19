@@ -22,6 +22,22 @@ jobs:
       - name: Run tests
         run: npm test
 
+  # Spec C: the published numbers are promises, and promises are gates. bench:all measures the
+  # pipeline, a representative 12-call MCP session, and per-tool response budgets, then fails the
+  # build if any budget in bench/budgets.json is broken. (The corpus-dependent ts-engine bench
+  # reports itself skipped here — explicitly, never silently.)
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install (optional tree-sitter tier)
+        run: npm ci
+      - name: Benchmarks hold their budgets
+        run: npm run bench:all -- --gate
+
   consistency:
     runs-on: ubuntu-latest
     steps:

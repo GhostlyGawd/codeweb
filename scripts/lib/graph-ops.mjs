@@ -9,10 +9,13 @@ const byIdLt = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 // Test-file predicate (shared by find-similar, the extractor's test-edge classification, and the
 // dead-code workflow — one truth). Matches `*.test.*`, `*.spec.*`, `*_test.*`, or a path segment
 // `tests/` | `test/` | `__tests__/`. Forward-slashed relative paths.
+// Canonical edge identity (from+to+kind) — was re-implemented in break-cycles/diff/shards (Spec E dogfood).
+export const edgeKey = (e) => [e.from, e.to, e.kind].join(String.fromCharCode(0)); // NUL-separated: ids can contain spaces
+
 export const isTestFile = (file) =>
-  /(?:^|\/)(?:tests?|__tests__)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.)/.test(file || '') ||
-  /(?:^|\/)src\/test\//.test(file || '') ||               // Maven/Gradle convention
-  /(?:Tests?|Spec)\.(?:java|cs)$/.test(file || '');       // FooTest.java / FooTests.cs / FooSpec.java
+  /(?:^|\/)(?:tests?|__tests__|spec)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.|_spec\.)/.test(file || '') ||
+  /(?:^|\/)src\/test\//.test(file || '') ||                       // Maven/Gradle convention
+  /(?:Tests?|Spec)\.(?:java|cs|php|swift|kt)$/.test(file || '');  // FooTest.java / FooTests.swift / FooTest.php …
 
 // Code ROLE by path — product code vs the supporting cast (one truth: the extractor stamps it on
 // every node; normalizeGraph back-fills older graphs). Rankings and default report views scope to
@@ -25,6 +28,36 @@ export function roleOf(file) {
   if (/(^|\/)(benchmarks?|bench|perf)\//.test(f)) return 'bench';
   if (/\.(min|bundle)\.[cm]?js$/.test(f) || /(^|\/)(generated|__generated__)\//.test(f)) return 'generated';
   return 'product';
+}
+
+// Spec E: per-repo role OVERRIDES (codeweb.rules.json `roles: [{glob, role}]`) — heuristics can't
+// know a repo's private layout ("docs/ here is generated site output"). Compile the config into a
+// matcher; first matching glob wins; an unknown role THROWS (extraction fails loudly, exit 2).
+export const VALID_ROLES = new Set(['product', 'test', 'fixture', 'example', 'bench', 'generated', 'vendored']);
+
+function globToRegex(glob) {
+  let re = '';
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i];
+    if (c === '*') {
+      if (glob[i + 1] === '*') { re += glob[i + 2] === '/' ? '(?:.*/)?' : '.*'; i += glob[i + 2] === '/' ? 2 : 1; }
+      else re += '[^/]*';
+    } else if (c === '?') re += '[^/]';
+    else re += /[.+^${}()|[\]\\]/.test(c) ? '\\' + c : c;
+  }
+  return new RegExp('^' + re + '$');
+}
+
+/** Compile `roles` config into (relPath) => role|null. Throws on an invalid entry. */
+export function compileRoleOverrides(roles) {
+  if (!roles) return () => null;
+  if (!Array.isArray(roles)) throw new Error('codeweb.rules.json: `roles` must be an array of {glob, role}');
+  const compiled = roles.map((r, i) => {
+    if (!r || typeof r.glob !== 'string' || typeof r.role !== 'string') throw new Error(`codeweb.rules.json roles[${i}]: need {glob, role}`);
+    if (!VALID_ROLES.has(r.role)) throw new Error(`codeweb.rules.json roles[${i}] ("${r.glob}"): unknown role "${r.role}" (valid: ${[...VALID_ROLES].join('|')})`);
+    return { re: globToRegex(r.glob), role: r.role };
+  });
+  return (relPath) => { for (const c of compiled) if (c.re.test(relPath)) return c.role; return null; };
 }
 
 // Fill the same defaults build-report.mjs applies, so every consumer sees a well-formed graph.

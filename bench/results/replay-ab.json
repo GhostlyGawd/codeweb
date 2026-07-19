@@ -15,6 +15,7 @@
     "died": 0
   },
   "primaryMetric": "missedCovered/missedTotal — coverage of historically-missed caller files, computed by the workflow from filesChanged ∩ missedByChange (never self-reported)",
+  "secondaryMetric": "cost-to-coverage — tokens (harness budget.spent() deltas per cell) and tool calls spent reaching that coverage; discriminates between arms even when both sit at the coverage ceiling. Cells without recorded cost report null and are counted in cost.reported/of.",
   "perCondition": {
     "control": {
       "completed": 4,
@@ -23,7 +24,14 @@
       "meanCellCoverage": 1,
       "fullCoverageCells": 4,
       "structuralRegressions": 0,
-      "lostCallers": 0
+      "lostCallers": 0,
+      "cost": {
+        "reported": 0,
+        "of": 4,
+        "meanTokens": null,
+        "meanToolCalls": null,
+        "costToFullCoverageTokens": null
+      }
     },
     "treatment": {
       "completed": 4,
@@ -32,7 +40,14 @@
       "meanCellCoverage": 1,
       "fullCoverageCells": 4,
       "structuralRegressions": 0,
-      "lostCallers": 0
+      "lostCallers": 0,
+      "cost": {
+        "reported": 0,
+        "of": 4,
+        "meanTokens": null,
+        "meanToolCalls": null,
+        "costToFullCoverageTokens": null
+      }
     }
   },
   "perTask": [

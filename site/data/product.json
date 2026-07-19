@@ -17,7 +17,11 @@
     "Rust",
     "Go",
     "Java",
-    "C#"
+    "C#",
+    "Ruby",
+    "PHP",
+    "Kotlin",
+    "Swift"
   ],
   "modes": [
     {

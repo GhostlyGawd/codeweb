@@ -1,0 +1,15 @@
+{
+  "repo": "axios-deep",
+  "funnel": {
+    "signaturePairs": 300,
+    "symbolsInChangedFiles": 2488,
+    "idPresentInBase": 2326,
+    "distinctiveLabel": 2241,
+    "signatureChanged": 35,
+    "enoughCallers": 2,
+    "hadMissedCallers": 2,
+    "hadFollowupFix": 0,
+    "defDiffComplete": 0
+  },
+  "tasks": []
+}

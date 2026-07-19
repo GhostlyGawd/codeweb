@@ -22,7 +22,7 @@ import { normalizeGraph, reviewImpact, structuralRegressions } from './lib/graph
 import { incrementalOverlap } from './lib/dup-check.mjs'; // F3: duplication-delta in the edit gate
 
 const USAGE = 'usage: review.mjs <graph.json> (--changed <file[:s-e],...> | --range <gitref>) [--before <graph.json>] [--gate] [--json]';
-import { die, emitJson, finish } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, gate = false, changed = null, range = null, before = null; const pos = [];
@@ -38,12 +38,7 @@ for (let i = 0; i < argv.length; i++) {
 const graphPath = pos[0];
 if (!graphPath || (changed == null && range == null)) die(USAGE, 2);
 
-function load(p) {
-  const a = resolve(p);
-  if (!existsSync(a)) die(`graph not found: ${a}`, 2);
-  try { return normalizeGraph(JSON.parse(readFileSync(a, 'utf8'))); }
-  catch (e) { die(`invalid JSON in ${a}: ${e.message}`, 2); }
-}
+const load = (p) => loadGraph(p).graph; // Spec E: one truth with every other CLI (was a duplicated pre-loadGraph copy)
 const graph = load(graphPath);
 
 // build hunks from --changed (explicit) or --range (git)

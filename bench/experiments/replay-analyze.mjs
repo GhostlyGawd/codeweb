@@ -33,6 +33,20 @@ for (const cond of ['control', 'treatment']) {
     fullCoverageCells: cells.filter((c) => c.grading.missedCovered === c.grading.missedTotal).length,
     structuralRegressions: cells.reduce((a, c) => a + (c.result.gate?.structuralRegressions ?? 0), 0),
     lostCallers: cells.reduce((a, c) => a + (c.result.gate?.lostCallers ?? 0), 0),
+    // Spec D: cost-to-coverage — tokens come from the HARNESS's budget.spent() deltas around each
+    // cell (never solver self-report). Cells without recorded cost are excluded from means and
+    // counted in `reported/of`; nothing is fabricated for old raw sets.
+    cost: (() => {
+      const cc = cells.filter((c) => c.result.cost && Number.isFinite(c.result.cost.tokens));
+      const full = cc.filter((c) => frac(c) === 1);
+      const withCalls = cc.filter((c) => Number.isFinite(c.result.cost.toolCalls));
+      return {
+        reported: cc.length, of: cells.length,
+        meanTokens: cc.length ? Math.round(mean(cc.map((c) => c.result.cost.tokens))) : null,
+        meanToolCalls: withCalls.length ? +mean(withCalls.map((c) => c.result.cost.toolCalls)).toFixed(1) : null,
+        costToFullCoverageTokens: full.length ? Math.round(mean(full.map((c) => c.result.cost.tokens))) : null,
+      };
+    })(),
   };
 }
 
@@ -83,6 +97,7 @@ const out = {
   design: raw.design, config: raw.config, tasks: raw.tasks,
   completion: { cells: raw.cells.length, completed: done.length, died: raw.cells.filter((c) => c.died).length },
   primaryMetric: 'missedCovered/missedTotal — coverage of historically-missed caller files, computed by the workflow from filesChanged ∩ missedByChange (never self-reported)',
+  secondaryMetric: 'cost-to-coverage — tokens (harness budget.spent() deltas per cell) and tool calls spent reaching that coverage; discriminates between arms even when both sit at the coverage ceiling. Cells without recorded cost report null and are counted in cost.reported/of.',
   perCondition, perTask, treatmentValidity,
   verdict,
   interpretation: INTERPRETATIONS[verdict] || 'Unrecognized verdict — read the numbers directly.',

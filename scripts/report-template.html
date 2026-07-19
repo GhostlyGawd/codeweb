@@ -269,8 +269,33 @@
 
   // ---------- detail panel ----------
   var detail = document.getElementById('detail');
+  detail.addEventListener('click', function (ev) {
+    var a = ev.target.closest('[data-set-root]');
+    if (!a) return;
+    ev.preventDefault();
+    var v = prompt('Absolute project root for editor links (stored only in this browser):', editorRoot());
+    if (v == null) return;
+    try { localStorage.setItem('cwEditorRoot', v.trim().replace(/\/+$/, '')); } catch (e) { /* private mode */ }
+    if (lastNodeId) showNode(lastNodeId);
+  });
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // First paint is an OVERVIEW, not an empty panel — the 340px column always earns its width.
+  // Spec J: the report is where a human decides to act — close the loop with a real editor link.
+  // The shipped HTML never embeds the absolute source path (standing privacy invariant: reports
+  // are shareable), so the VIEWER supplies their project root once — stored in localStorage,
+  // client-side only — and every node gets a vscode://file/<root>/<file>:<line> link. Without a
+  // root: a copyable file:line plus the one-click affordance to set it. Nothing silently missing.
+  var lastNodeId = null;
+  function editorRoot() { try { return localStorage.getItem('cwEditorRoot') || ''; } catch (e) { return ''; } }
+  function editorLink(n) {
+    if (!n || !n.file) return '';
+    var line = n.line || 1, root = editorRoot();
+    if (root) {
+      var abs = root.replace(/\/+$/, '') + '/' + n.file;
+      return '<div class="kv"><a href="vscode://file/' + esc(abs) + ':' + line + '" style="color:var(--accent)">Open in editor</a> · <a href="#" data-set-root style="color:var(--muted)">root ✎</a></div>';
+    }
+    return '<div class="kv">editor: <code>' + esc(n.file + ':' + line) + '</code> · <a href="#" data-set-root style="color:var(--muted)">set root for editor links</a></div>';
+  }
   function detailEmpty() {
     var topDoms = domainNames.slice(0, 5).map(function (nm) {
       return '<div class="kv"><span class="chip" style="background:' + colorOf(nm) + '"></span> ' + esc(nm) + ' <span class="dim">· ' + domCount(nm) + ' symbols</span></div>';
@@ -294,12 +319,14 @@
   }
   function showNode(id) {
     var n = nodeById.get(id); if (!n) return;
+    lastNodeId = id;
     try { history.replaceState(null, '', '#s=' + encodeURIComponent(id)); } catch (e) { /* file:// quirk */ }
     var outs = outAdj.get(id) || [], ins = inAdj.get(id) || [];
     detail.innerHTML = '<h3>' + esc(n.label) + '</h3>' +
       '<div class="kv">' + esc(n.kind || '') + (n.role && n.role !== 'product' ? ' · ' + esc(n.role) : '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--hi)">duplicated</span>' : '') + '</div>' +
       '<div class="kv"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:' + colorOf(n.domain) + '"></span> ' + esc(n.domain) + '</div>' +
       (n.file ? '<div class="kv"><code>' + esc(n.file) + (n.line ? ':' + n.line : '') + '</code>' + (n.loc ? ' · ' + n.loc + ' loc' : '') + '</div>' : '') +
+      editorLink(n) +
       (n.summary ? '<div class="kv">' + esc(n.summary) + '</div>' : '') +
       '<div class="sec">used by (' + ins.length + ')</div><div class="lst" id="d_in"></div>' +
       '<div class="sec">calls (' + outs.length + ')</div><div class="lst" id="d_out"></div>';

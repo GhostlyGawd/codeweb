@@ -63,6 +63,20 @@ a candidate named `type` (a `ModuleNode` getter) whose "follow-up fix" matched o
 `import type {...}` syntax in an unrelated hostname fix — rejected by hand-verification and
 turned into the keyword-label guard in rule 1 (test P6).
 
+## Amendment (Spec D — the v3 growth sweep)
+Nine mining runs across six repos (express, fastify, commander, dayjs, lodash; axios at three
+configurations up to 300 pairs / follow-up window 15) — every funnel committed as
+`bench/results/replay-mine-*.json`. Findings: (a) the miner **re-derived the v2 task
+independently** at window 15 with an identical answer key — the instrument reproduces its own
+ground truth; (b) one new candidate (`Axios.request`, 4 callers / 4 missed) was **rejected
+under hand-verification** — its matched "follow-up" was the fetch-adapter feature PR
+wholesale-rewriting a caller (incidental mention), and `request` is a generic member name that
+contaminates caller attribution (the v2 `type` artifact class). No new stop-list: the
+hand-verification step is the designed catch. (c) `--max-pairs` defaulted to 40 and silently
+bounded every earlier sweep — raised per-run explicitly; funnels now state the pair budget.
+The corpus stays at ONE fully-verified task, honestly; growth continues repo by repo with
+funnels always committed.
+
 ## Done when
 Tests pass; any miner bug they expose is fixed; `bench/results/replay-tasks.json` holds the
 multi-repo corpus with funnels.

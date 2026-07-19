@@ -39,5 +39,13 @@ significance theater. Results → `bench/results/replay-ab.json` (+ raw cells), 
 Research note, and the site ledger IF the claim survives its own evidence rules. A null or
 a control win is reported plainly.
 
+## Amendment (Spec D — cost-to-coverage secondary metric)
+Cells now run SEQUENTIALLY and the workflow records `result.cost.tokens` from
+`budget.spent()` deltas around each cell — the harness's own accounting, never solver
+self-report (the same principle that bans self-reported coverage). The analyzer reports
+per-condition `cost` (means over cells that carried cost; missing cost → null, counted in
+`reported/of` — v2 cells predate this and stay null). `costToFullCoverageTokens` is the
+discriminator when both arms hit the coverage ceiling: same safety, at what price.
+
 ## Done when
 Smoke green → full run complete → analysis committed with the honest verdict.

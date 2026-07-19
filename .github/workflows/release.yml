@@ -97,3 +97,42 @@ jobs:
             --title "codeweb $TAG" \
             --notes-file /tmp/notes.md \
             --verify-tag $PRE
+
+      # Spec J: distributable artifacts ride every release.
+      # The .vsix always builds and attaches (no credentials needed); the npm and Marketplace
+      # publishes are PREPARED but gated — they no-op with a notice until the maintainer
+      # configures NPM_TOKEN / VSCE_PAT. Prep is shipped; publishing stays a human decision.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Package VS Code extension (.vsix) and attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ steps.ver.outputs.version }}"
+          cd editor/vscode-codeweb
+          npx --yes @vscode/vsce@latest package --no-dependencies --out "codeweb-lens.vsix"
+          gh release upload "$TAG" codeweb-lens.vsix --repo "$GITHUB_REPOSITORY" --clobber
+
+      - name: Publish to npm (gated on NPM_TOKEN)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::notice::NPM_TOKEN not configured — npm publish skipped (prep only)"
+            exit 0
+          fi
+          npm publish --provenance --access public
+
+      - name: Publish to VS Code Marketplace (gated on VSCE_PAT)
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          if [ -z "$VSCE_PAT" ]; then
+            echo "::notice::VSCE_PAT not configured — Marketplace publish skipped (prep only)"
+            exit 0
+          fi
+          cd editor/vscode-codeweb
+          npx --yes @vscode/vsce@latest publish --no-dependencies -p "$VSCE_PAT"

@@ -1,0 +1,37 @@
+{
+  "receipt": "self-campaign execution (Spec E, docs/specs/role-overrides-self-campaign.md)",
+  "planned": "campaign.mjs on the self-map: 70 steps (1 cut, 65 delete, 4 merge)",
+  "executed": [
+    {
+      "step": "merge findTarget (hooks/pre-edit-impact + hooks/post-edit-diff)",
+      "into": "scripts/lib/cli.mjs findTarget",
+      "note": "also fixed REAL drift the dup had hidden: post-edit's SRC_RE was stuck at 7 languages behind, pre-edit at 4 — one shared SRC_RE now"
+    },
+    {
+      "step": "merge load() (scripts/diff.mjs + scripts/review.mjs)",
+      "into": "cli.mjs loadGraph (the canonical loader)",
+      "note": "error messages IMPROVED (actionable build-it-first pointer)"
+    },
+    {
+      "step": "merge edgeKey (scripts/break-cycles.mjs + scripts/diff.mjs [+ deleted shards.mjs])",
+      "into": "graph-ops.mjs edgeKey (NUL-separated — the collision-safe variant wins)",
+      "note": "surfaced when the shards deletion shrank a 3-file dup group"
+    }
+  ],
+  "skipped": [
+    {
+      "steps": "65 DELETE steps",
+      "reason": "FALSE ORPHANS: walker closures invoked through the LANG_WALKERS function table and experiment harness internals — dynamic dispatch through function values that static call resolution correctly refuses to guess. Deleting them would break the product; the --orphans caveat (cross-check before deleting) applied to ourselves."
+    },
+    {
+      "steps": "merge enclosingSymbol (spike/tree-sitter)",
+      "reason": "the spike is a frozen, quarantined proof artifact — merging product code into it (or vice versa) would defeat the quarantine."
+    },
+    {
+      "steps": "merge edgeKey into shards.mjs group",
+      "reason": "superseded — shards.mjs deleted by the Spec B scale decision."
+    }
+  ],
+  "gate": "before/after structural diff: nodes +3 -22, overlaps +0 -2, cycles +0 -0, cross-domain coupling -25 — ok, no structural regressions",
+  "suite": "all affected suites green after each step"
+}

@@ -8,10 +8,17 @@
 //   engine computes complexity. Reports best-of-N wall time (subprocess) + per-symbol overhead.
 
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const target = process.argv[2] || 'bench/corpus/axios';
+const argvAll = process.argv.slice(2);
+let outPath = null;
+const positional = [];
+for (let i = 0; i < argvAll.length; i++) {
+  if (argvAll[i] === '--out') outPath = argvAll[++i];
+  else positional.push(argvAll[i]);
+}
+const target = positional[0] || 'bench/corpus/axios';
 if (!existsSync(target)) { console.error(`[bench] target not found: ${target}`); process.exit(1); }
 const EXTRACT = resolve('scripts/extract-symbols.mjs');
 const REPS = 3;
@@ -27,7 +34,9 @@ function timeRun(extra) {
 const best = (extra) => { let b = null; for (let i = 0; i < REPS; i++) { const r = timeRun(extra); if (!b || r.ms < b.ms) b = r; } return b; };
 
 console.log(`[bench] target: ${target}   (best of ${REPS} runs each, --no-ctags)`);
-const regex = best([]);
+// The tier is DEFAULT-ON since v9, so the regex arm must opt out explicitly — a no-flag arm
+// would silently benchmark tree-sitter against itself (the bug this line fixes).
+const regex = best(['--engine', 'regex']);
 const ts = best(['--engine', 'tree-sitter']);
 if (ts.engine === 'regex') { console.error('[bench] tree-sitter engine unavailable (optional dep not installed) — aborting'); process.exit(1); }
 
@@ -37,3 +46,14 @@ console.log(`[bench] symbols: ${regex.symbols} (${regex.withCx} with complexity)
 console.log(`[bench] regex F4:    ${regex.ms.toFixed(0).padStart(6)} ms`);
 console.log(`[bench] tree-sitter: ${ts.ms.toFixed(0).padStart(6)} ms   (${ts.engine})`);
 console.log(`[bench] overhead:    ${('+' + overhead.toFixed(0)).padStart(6)} ms   = ${(ts.ms / regex.ms).toFixed(2)}x   = +${perSym.toFixed(3)} ms/symbol`);
+if (outPath) {
+  const payload = {
+    bench: 'ts-engine (cold extraction, regex vs tree-sitter tier)', target, reps: REPS,
+    symbols: regex.symbols, withComplexity: regex.withCx,
+    regexMs: Math.round(regex.ms), treeSitterMs: Math.round(ts.ms),
+    overheadMs: Math.round(overhead), factor: +(ts.ms / regex.ms).toFixed(2),
+    perSymbolMs: +perSym.toFixed(3), engine: ts.engine,
+  };
+  writeFileSync(outPath, JSON.stringify(payload, null, 2) + '\n');
+  console.log(`[bench] wrote ${outPath}`);
+}

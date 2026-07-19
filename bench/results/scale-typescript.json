@@ -1,0 +1,34 @@
+{
+  "bench": "monorepo scale test (Spec B, docs/specs/perf-stage-memo-scale.md)",
+  "target": "microsoft/TypeScript src/ @ 637d5746b70257028fb95aad32ddec6b26ab0a14 (shallow clone)",
+  "graph": {
+    "symbols": 16286,
+    "edges": 44640,
+    "files": 709,
+    "domains": 21,
+    "overlaps": 815,
+    "dispatchEdgesWired": 1710,
+    "graphJsonBytes": 13568579
+  },
+  "pipeline": {
+    "coldFullMs": 43173,
+    "noChangeRerunMs": 4028,
+    "stagesReused": true
+  },
+  "queries": {
+    "impactMs": 214,
+    "callersMs": 194,
+    "cyclesMs": 215,
+    "orphansMs": 227,
+    "note": "per-call subprocess incl. graph parse; in-process MCP serves from cache"
+  },
+  "discoveredAndFixed": [
+    "catastrophic regex backtracking in shingles.tokenize on unterminated-quote content — an input-dependent HANG (overlap sat at 100% CPU >15 min on one 2-node group); replaced with a linear-time matcher + regression test",
+    "quadratic twin seeding through hub labels and unbounded same-name pairwise confirmation — bounded by declared caps (hub >50 callers, 200k pair budget, 12-node group samples, 400-line body shingles), all reported in overlap.md"
+  ],
+  "shardsDecision": {
+    "verdict": "DELETE lib/shards.mjs",
+    "rationale": "16k symbols load monolithically as a 13.5MB graph with ~200ms subprocess queries and a 4s memoized re-map; 10x this scale still fits memory comfortably. The answer-preserving sharding contract was never wired to any CLI/MCP surface and the measured need does not exist; git history preserves the implementation if a 100k+-symbol case ever materializes."
+  },
+  "findingsSpotCheck": "top findings are real compiler duplication (substituteExpression x9 drifted, transformConstructorBodyWorker x3 at 80% body) — 46 ready merges, ~1757 LOC, gate-green"
+}
