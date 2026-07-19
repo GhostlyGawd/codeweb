@@ -85,9 +85,9 @@ calls it and what it calls.
 <table>
 <tr>
 <td width="50%" valign="top">
-<img src="assets/screens/05-axios-treemap.png" alt="codeweb Treemap on axios: every file sized by lines of code and shaded green-to-red by duplication density">
-<br><b>Treemap</b> — every file sized by lines of code and shaded green→red by how duplicated it
-is. The red blocks are your consolidation targets, at a glance.
+<img src="assets/screens/05-axios-treemap.png" alt="codeweb Treemap on axios: every file sized by lines of code, duplication density carried by a slate-to-red lightness ramp">
+<br><b>Treemap</b> — every file sized by lines of code; the brighter red a block, the more of it
+is duplicated. The bright blocks are your consolidation targets, at a glance.
 </td>
 <td width="50%" valign="top">
 <img src="assets/screens/05-axios-matrix.png" alt="codeweb Matrix on axios: a heatmap of call coupling between domains">
