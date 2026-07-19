@@ -9,6 +9,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+_Nothing yet. Open work lands here before it ships in the next tagged release._
+
+## [0.5.0] - 2026-07-19
+
 ### Added (fewer mistakes per token)
 - **Day-one briefing** (`codeweb_brief`, 24th MCP tool + `scripts/brief.mjs` + a SessionStart
   hook): one ~2KB page — areas with summaries, the most depended-on symbols, entry points
@@ -242,7 +246,8 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.1.0...v0.2.0
