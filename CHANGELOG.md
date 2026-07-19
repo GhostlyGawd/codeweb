@@ -9,7 +9,14 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Fixed
+- **README screenshots crop to content.** The regenerated shots were uniform full-page
+  frames — squeezed into README boxes, the matrix rendered ~170px wide and the blast
+  shot's inspector was unreadable. `scripts/screenshot.mjs` now crops each frame to what
+  it shows: the graph to its drawn bounding box, the blast shot to the LIT selection
+  (tracked from the draw pass) + inspector at a tighter zoom, the matrix to its table +
+  legend. README display sizes and the stale corpus line ("274 symbols across 8
+  domains" → the real 334/11) synced; shots remain one-command regenerable.
 
 ## [0.7.0] - 2026-07-19
 

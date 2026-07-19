@@ -46,7 +46,9 @@ codebase does the same work twice, which neither you nor the agent can see from 
 
 One command runs the whole deterministic pipeline and drops an interactive map at
 `<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report**, codeweb
-pointed read-only at **[axios](https://github.com/axios/axios)** — 274 symbols across 8 domains. No mockups.
+pointed read-only at **[axios](https://github.com/axios/axios)** — 334 product symbols across 11
+areas (tests and tooling hidden by default). No mockups; regenerate them any time with
+`node scripts/screenshot.mjs`.
 
 > **▶ Read the full [axios case study](docs/case-study-axios.md):** on a library downloaded ~50M
 > times a week, codeweb body-confirmed **3 real duplications** (two byte-identical across files),
@@ -61,7 +63,7 @@ its **blast radius** lights up: every function transitively affected, and the do
 the `codeweb_impact` tool — the same answer an agent gets over MCP, before it writes a line.
 
 <div align="center">
-<img src="assets/screens/06-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — its area expanded in place, 58 users listed in the inspector, cross-area dependencies lit, neighboring areas highlighted" width="540">
+<img src="assets/screens/06-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — its area expanded in place, 58 users listed in the inspector, cross-area dependencies lit, neighboring areas highlighted" width="760">
 <br><sub>Selecting <code>AxiosError</code> in axios lights up its <b>58 users across the areas that depend on it</b> — try it yourself in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
 </div>
 

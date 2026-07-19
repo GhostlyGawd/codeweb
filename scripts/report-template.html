@@ -478,7 +478,7 @@
   // while the rest stay collapsed — the all-at-once hairball is structurally impossible unless
   // explicitly asked for ("Expand all"). Layout is deterministic (seeded spiral, no random), so
   // the same repo always draws the same map. Positions survive re-layout for continuity.
-  var gInit = false, expanded = new Set(), W = null, sim = null, selectedNode = null, searchTerm = '';
+  var gInit = false, expanded = new Set(), W = null, sim = null, selectedNode = null, searchTerm = '', lastLit = null;
   var lastPos = new Map(); // id -> {x,y} carried across layouts
   var cv = document.getElementById('cv'), ctx = cv.getContext('2d'), DPR = window.devicePixelRatio || 1, cam = { x: 0, y: 0, k: 1 };
   var UIFONT = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif'; // canvas needs a REAL stack (bare ui-sans-serif falls back to serif)
@@ -565,6 +565,7 @@
       (outAdj.get(selectedNode) || []).forEach(lightUp); (inAdj.get(selectedNode) || []).forEach(lightUp);
     }
     var lit = function (nd) { return !hl || hl.has(nd.id) || (nd.bubble && hlDom && hlDom.has(nd.domain)); };
+    lastLit = hl ? new Set(W.nodes.filter(lit).map(function (n) { return n.id; })) : null;
     // edges: quadratic curves, weight -> alpha/width; cross-area edges wear the tangle color
     W.edges.forEach(function (e) {
       var A = W.idx.get(e.from), B = W.idx.get(e.to); if (!A || !B) return;
@@ -663,8 +664,21 @@
       activate('graph'); gResize(); if (!gInit) { gInit = true; syncToggle(); gLayout(); }
       if (!expanded.has(top.domain)) { expanded.add(top.domain); gLayout(); syncToggle(); }
       var nd = W.idx.get(top.id);
-      if (nd) { selectedNode = top.id; centerOn(nd); showNode(top.id); gDraw(); }
+      if (nd) { selectedNode = top.id; cam.k = Math.max(cam.k, 1.2); centerOn(nd); showNode(top.id); gDraw(); }
       return top.id;
+    },
+    // screen-space bounding box of the drawn graph (CSS px) — lets the screenshot pipeline crop
+    // to content instead of shipping empty canvas
+    graphBBox: function () {
+      if (!W || !W.nodes.length) return null;
+      var a = 1e9, b = 1e9, c = -1e9, d = -1e9, counted = 0;
+      W.nodes.forEach(function (n) {
+        if (lastLit && !lastLit.has(n.id)) return; // with a selection/search, crop to what's LIT
+        counted++;
+        a = Math.min(a, X(n.x) - n.r); b = Math.min(b, Y(n.y) - n.r);
+        c = Math.max(c, X(n.x) + n.r + 130); d = Math.max(d, Y(n.y) + n.r); // +130: room for the widest label
+      });
+      return counted ? { x: a, y: b, w: c - a, h: d - b } : null;
     }
   };
 
