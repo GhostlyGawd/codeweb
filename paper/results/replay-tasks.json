@@ -1,131 +1,116 @@
 {
-  "frozenAt": "pre-solve",
-  "design": "docs/specs/replay-corpus.md + replay-run.md",
-  "note": "Task-count target met (3 ground-truth tasks, full 2,100-commit axios walk); multi-repo target MISSED honestly: Java/C# mining floors at enoughCallers even with the typed-dispatch tier, vite recent history too quiet. Single-repo, small-N: results are DIRECTIONAL only.",
+  "frozenAt": "pre-solve (v2, 2026-07-19)",
+  "design": "docs/specs/replay-corpus.md + replay-run.md (both amended 2026-07-19 — blind protocol, formatting/verbatim/keyword-label guards)",
+  "note": "v2 re-mine with the guarded miner: 1 ground-truth task survives (axios buildFullPath). The corpus target (>=3 tasks across >=2 repos) is missed again, now with guards on: most candidates die under scrutiny — the v1 isObject/forEach tasks were prettier artifacts (formatting guard kills them), the sole deep-vite candidate had a keyword label (type) with syntax-matching \"evidence\" (rejected by hand, now the P6 guard), and javapoet/RestSharp floor at caller-file density (and javapoet/vite clones were SHALLOW — 201 commits — which, not quiet history, explains their v1 emptiness; vite was deepened to 2,731 for v2). True mineable caller-breakages are rare; the one that survives is fully verified. Decided pre-solve: corpus <=2 tasks -> full grid runs 4 reps per arm (amended replay-run spec).",
+  "minerProvenance": "axios/vite/javapoet funnels mined at commit 0261024 (pre keyword-label guard — no candidate in them was keyword-labeled except the vite type task, recorded rejected below); RestSharp mined with the final guard (distinctiveLabel stage visible). Task content is identical under both.",
+  "handVerification": {
+    "axios buildFullPath": "ACCEPTED. Change 32c7bcc adds the allowAbsoluteUrls param. Both missed callers have semantic historical fixes verified by reading the diffs: fb8eec2 (#6810) passes it in lib/adapters/http.js; ec159e5 (#6814) passes it via lib/helpers/resolveConfig.js for xhr/fetch.",
+    "vite ModuleNode.type": "REJECTED. Follow-up 62b3e0d9 is an unrelated hostname/preview fix; it matches \\btype\\b only via import-type syntax lines. Root cause of admission: keyword label — now guarded (P6)."
+  },
   "funnels": {
-    "axios-deep": {
-      "signaturePairs": 350,
-      "symbolsInChangedFiles": 3869,
-      "idPresentInBase": 3627,
-      "signatureChanged": 78,
-      "enoughCallers": 14,
-      "hadMissedCallers": 13,
-      "hadFollowupFix": 3
+    "axios (w10, frozen source)": {
+      "config": {
+        "maxCommits": 2200,
+        "minCallers": 3,
+        "followupWindow": 10,
+        "maxTasks": 12,
+        "pairsTried": 400
+      },
+      "commitsScanned": 1647,
+      "funnel": {
+        "signaturePairs": 400,
+        "symbolsInChangedFiles": 4046,
+        "idPresentInBase": 3792,
+        "signatureChanged": 72,
+        "enoughCallers": 8,
+        "hadMissedCallers": 8,
+        "hadFollowupFix": 1,
+        "defDiffComplete": 1
+      }
     },
-    "javapoet": {
-      "signaturePairs": 37,
-      "symbolsInChangedFiles": 770,
-      "idPresentInBase": 586,
-      "signatureChanged": 3,
-      "enoughCallers": 0,
-      "hadMissedCallers": 0,
-      "hadFollowupFix": 0
+    "axios (w5, for comparison)": {
+      "config": {
+        "maxCommits": 2200,
+        "minCallers": 3,
+        "followupWindow": 5,
+        "maxTasks": 12,
+        "pairsTried": 400
+      },
+      "commitsScanned": 1647,
+      "funnel": {
+        "signaturePairs": 400,
+        "symbolsInChangedFiles": 4046,
+        "idPresentInBase": 3792,
+        "signatureChanged": 72,
+        "enoughCallers": 8,
+        "hadMissedCallers": 8,
+        "hadFollowupFix": 0,
+        "defDiffComplete": 0
+      }
+    },
+    "vite (deepened 2731)": {
+      "config": {
+        "maxCommits": 2500,
+        "minCallers": 3,
+        "followupWindow": 5,
+        "maxTasks": 12,
+        "pairsTried": 300
+      },
+      "commitsScanned": 2300,
+      "funnel": {
+        "signaturePairs": 300,
+        "symbolsInChangedFiles": 10102,
+        "idPresentInBase": 9892,
+        "signatureChanged": 77,
+        "enoughCallers": 2,
+        "hadMissedCallers": 2,
+        "hadFollowupFix": 1,
+        "defDiffComplete": 1
+      }
+    },
+    "javapoet (shallow 201)": {
+      "config": {
+        "maxCommits": 800,
+        "minCallers": 3,
+        "followupWindow": 5,
+        "maxTasks": 12,
+        "pairsTried": 37
+      },
+      "commitsScanned": 201,
+      "funnel": {
+        "signaturePairs": 37,
+        "symbolsInChangedFiles": 770,
+        "idPresentInBase": 586,
+        "signatureChanged": 3,
+        "enoughCallers": 0,
+        "hadMissedCallers": 0,
+        "hadFollowupFix": 0,
+        "defDiffComplete": 0
+      }
     },
     "restsharp": {
-      "signaturePairs": 40,
-      "symbolsInChangedFiles": 492,
-      "idPresentInBase": 431,
-      "signatureChanged": 15,
-      "enoughCallers": 0,
-      "hadMissedCallers": 0,
-      "hadFollowupFix": 0
-    },
-    "vite": {
-      "signaturePairs": 25,
-      "symbolsInChangedFiles": 1075,
-      "idPresentInBase": 1049,
-      "signatureChanged": 4,
-      "enoughCallers": 0,
-      "hadMissedCallers": 0,
-      "hadFollowupFix": 0
+      "config": {
+        "maxCommits": 800,
+        "minCallers": 3,
+        "followupWindow": 5,
+        "maxTasks": 12,
+        "pairsTried": 60
+      },
+      "commitsScanned": 800,
+      "funnel": {
+        "signaturePairs": 60,
+        "symbolsInChangedFiles": 914,
+        "idPresentInBase": 763,
+        "distinctiveLabel": 763,
+        "signatureChanged": 23,
+        "enoughCallers": 0,
+        "hadMissedCallers": 0,
+        "hadFollowupFix": 0,
+        "defDiffComplete": 0
+      }
     }
   },
   "tasks": [
-    {
-      "repo": "/tmp/claude-0/-home-user-codeweb/3bcef4c9-1d7b-5d4f-a5a6-d91627d96990/scratchpad/axios",
-      "baseSha": "04cf01969ed58f96920da032f340bfe4614aab90",
-      "changeSha": "28c721588c7a77e7503d0a434e016f852c597b57",
-      "symbol": "lib/utils.js:isObject",
-      "label": "isObject",
-      "file": "lib/utils.js",
-      "fanInAtBase": 5,
-      "callerFilesAtBase": [
-        "lib/adapters/http.js",
-        "lib/defaults/index.js",
-        "lib/helpers/formDataToJSON.js",
-        "lib/helpers/isAxiosError.js",
-        "lib/helpers/toFormData.js"
-      ],
-      "missedByChange": [
-        "lib/adapters/http.js",
-        "lib/defaults/index.js",
-        "lib/helpers/formDataToJSON.js",
-        "lib/helpers/isAxiosError.js",
-        "lib/helpers/toFormData.js"
-      ],
-      "fixedInFollowup": [
-        {
-          "sha": "ef3711d1b3a3c1eb4f11dc43e8db38e9c5342448",
-          "files": [
-            "lib/adapters/http.js",
-            "lib/defaults/index.js",
-            "lib/helpers/formDataToJSON.js",
-            "lib/helpers/isAxiosError.js",
-            "lib/helpers/toFormData.js"
-          ]
-        }
-      ],
-      "defDiff": "diff --git a/lib/utils.js b/lib/utils.js\nindex 245282e..b464a62 100644\n--- a/lib/utils.js\n+++ b/lib/utils.js\n@@ -1,24 +1,24 @@\n-'use strict';\n+\"use strict\";\n \n-import bind from './helpers/bind.js';\n+import bind from \"./helpers/bind.js\";\n \n // utils is a library of generic helper functions non-specific to axios\n \n-const {toString} = Object.prototype;\n-const {getPrototypeOf} = Object;\n-const {iterator, toStringTag} = Symbol;\n+const { toString } = Object.prototype;\n+const { getPrototypeOf } = Object;\n+const { iterator, toStringTag } = Symbol;\n \n-const kindOf = (cache => thing => {\n-    const str = toString.call(thing);\n-    return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());\n+const kindOf = ((cache) => (thing) => {\n+  const str = toString.call(thing);\n+  return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());\n })(Object.create(null));\n \n const kindOfTest = (type) => {\n   type = type.toLowerCase();\n-  return (thing) => kindOf(thing) === type\n-}\n+  return (thing) => kindOf(thing) === type;\n+};\n \n-const typeOfTest = type => thing => typeof thing === type;\n+const typeOfTest = (type) => (thing) => typeof thing === type;\n \n /**\n  * Determine if a value is a non-null object\n@@ -27,7 +27,7 @@ const typeOfTest = type => thing => typeof thing === type;\n  *\n  * @returns {boolean} True if value is an Array, otherwise false\n  */\n-const {isArray} = Array;\n+const { isArray } = Array;\n \n /**\n  * Determine if a value is undefined\n@@ -36,7 +36,7 @@ const {isArray} = Array;\n  *\n  * @returns {boolean} True if the value is undefined, otherwise false\n  */\n-const isUndefined = typeOfTest('undefined');\n+const isUndefined = typeOfTest(\"undefined\");\n \n /**\n  * Determine if a value is a Buffer\n@@ -46,8 +46,14 @@ const isUndefined = typeOfTest('undefined');\n  * @returns {boolean} True if value is a Buffer, otherwise false\n  */\n function isBuffer(val) {\n-  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)\n-    && isFunction(val.constructor.isBuffer) && val.constructor.isBuffer(val);\n+  return (\n+    val !== null &&\n+    !isUndefined(val) &&\n+    val.constructor !== null &&\n+    !isUndefined(val.constructor) &&\n+    isFunction(val.constructor.isBuffer) &&\n+    val.constructor.isBuffer(val)\n+  );\n }\n \n /**\n@@ -57,8 +63,7 @@ function isBuffer(val) {\n  *\n  * @returns {boolean} True if value is an ArrayBuffer, otherwise false\n  */\n-const isArrayBuffer = kindOfTest('ArrayBuffer');\n-\n+const isArrayBuffer = kindOfTest(\"ArrayBuffer\");\n \n /**\n  * Determine if a value is a view on an ArrayBuffer\n@@ -69,10 +74,10 @@ const isArrayBuffer = kindOfTest('ArrayBuffer');\n  */\n function isArrayBufferView(val) {\n   let result;\n-  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {\n+  if (typeof ArrayBuffer !== \"undefined\" && ArrayBuffer.isView) {\n     result = ArrayBuffer.isView(val);\n   } else {\n-    result = (val) && (val.buffer) && (isArrayBuffer(val.buffer));\n+    result = val && val.buffer && isArrayBuffer(val.buffer);\n   }\n   return result;\n }\n@@ -84,7 +89,7 @@ function isArrayBufferView(val) {\n  *\n  * @returns {boolean} True if value is a String, otherwise false\n  */\n-const isString = typeOfTest('string');\n+const isString = typeOfTest(\"string\");\n \n /**\n  * Determine if a value is a Function\n@@ -92,7 +97,7 @@ const isString = typeOfTest('string');\n  * @param {*} val The value to test\n  * @returns {boolean} True if value is a Function, otherwise false\n  */\n-const isFunction = typeOfTest('function');\n+const isFunction = typeOfTest(\"function\");\n \n /**\n  * Determine if a value is a Number\n@@ -101,7 +106,7 @@ const isFunction = typeOfTest('function');\n  *\n  * @returns {boolean} True if value is a Number, otherwise false\n  */\n-const isNumber = typeOfTest('number');\n+const isNumber = typeOfTest(\"number\");\n \n /**\n  * Determine if a value is an Object\n@@ -110,7 +115,7 @@ const isNumber = typeOfTest('number');\n  *\n  * @returns {boolean} True if value is an Object, otherwise false\n  */\n-const isObject = (thing) => thing !== null && typeof thing === 'object';\n+const isObject = (thing)",
-      "instruction": "At the base revision, apply exactly this change to isObject in lib/utils.js (the definition-side diff is given verbatim below), then update the codebase so it remains consistent with the change.\n\ndiff --git a/lib/utils.js b/lib/utils.js\nindex 245282e..b464a62 100644\n--- a/lib/utils.js\n+++ b/lib/utils.js\n@@ -1,24 +1,24 @@\n-'use strict';\n+\"use strict\";\n \n-import bind from './helpers/bind.js';\n+import bind from \"./helpers/bind.js\";\n \n // utils is a library of generic helper functions non-specific to axios\n \n-const {toString} = Object.prototype;\n-const {getPrototypeOf} = Object;\n-const {iterator, toStringTag} = Symbol;\n+const { toString } = Object.prototype;\n+const { getPrototypeOf } = Object;\n+const { iterator, toStringTag } = Symbol;\n \n-const kindOf = (cache => thing => {\n-    const str = toString.call(thing);\n-    return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());\n+const kindOf = ((cache) => (thing) => {\n+  const str = toString.call(thing);\n+  return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());\n })(Object.create(null));\n \n const kindOfTest = (type) => {\n   type = type.toLowerCase();\n-  return (thing) => kindOf(thing) === type\n-}\n+  return (thing) => kindOf(thing) === type;\n+};\n \n-const typeOfTest = type => thing => typeof thing === type;\n+const typeOfTest = (type) => (thing) => typeof thing === type;\n \n /**\n  * Determine if a value is a non-null object\n@@ -27,7 +27,7 @@ const typeOfTest = type => thing => typeof thing === type;\n  *\n  * @returns {boolean} True if value is an Array, otherwise false\n  */\n-const {isArray} = Array;\n+const { isArray } = Array;\n \n /**\n  * Determine if a value is undefined\n@@ -36,7 +36,7 @@ const {isArray} = Array;\n  *\n  * @returns {boolean} True if the value is undefined, otherwise false\n  */\n-const isUndefined = typeOfTest('undefined');\n+const isUndefined = typeOfTest(\"undefined\");\n \n /**\n  * Determine if a value is a Buffer\n@@ -46,8 +46,14 @@ const isUndefined = typeOfTest('undefined');\n  * @returns {boolean} True if value is a Buffer, otherwise false\n  */\n function isBuffer(val) {\n-  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)\n-    && isFunction(val.constructor.isBuffer) && val.constructor.isBuffer(val);\n+  return (\n+    val !== null &&\n+    !isUndefined(val) &&\n+    val.constructor !== null &&\n+    !isUndefined(val.constructor) &&\n+    isFunction(val.constructor.isBuffer) &&\n+    val.constructor.isBuffer(val)\n+  );\n }\n \n /**\n@@ -57,8 +63,7 @@ function isBuffer(val) {\n  *\n  * @returns {boolean} True if value is an ArrayBuffer, otherwise false\n  */\n-const isArrayBuffer = kindOfTest('ArrayBuffer');\n-\n+const isArrayBuffer = kindOfTest(\"ArrayBuffer\");\n \n /**\n  * Determine if a value is a view on an ArrayBuffer\n@@ -69,10 +74,10 @@ const isArrayBuffer = kindOfTest('ArrayBuffer');\n  */\n function isArrayBufferView(val) {\n   let result;\n-  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {\n+  if (typeof ArrayBuffer !== \"undefined\" && ArrayBuffer.isView) {\n     result = ArrayBuffer.isView(val);\n   } else {\n-    result = (val) && (val.buffer) && (isArrayBuffer(val.buffer));\n+    result = val && val.buffer && isArrayBuffer(val.buffer);\n   }\n   return result;\n }\n@@ -84,7 +89,7 @@ function isArrayBufferView(val) {\n  *\n  * @returns {boolean} True if value is a String, otherwise false\n  */\n-const isString = typeOfTest('string');\n+const isString = typeOfTest(\"string\");\n \n /**\n  * Determine if a value is a Function\n@@ -92,7 +97,7 @@ const isString = typeOfTest('string');\n  * @param {*} val The value to test\n  * @returns {boolean} True if value is a Function, otherwise false\n  */\n-const isFunction = typeOfTest('function');\n+const isFunction = typeOfTest(\"function\");\n \n /**\n  * Determine if a value is a Number\n@@ -101,7 +106,7 @@ const isFunction = typeOfTest('function');\n  *\n  * @returns {boolean} True if value is a Number, otherwise false\n  */\n-const isNumber = typeOfTest('number');\n+const isNumber = typeOfTest(\"number\");\n \n /**\n  * Determine if a value is an Object\n@@ -110,7 +115,7 @@ const isNumber = typeOfTest('number');\n  *\n  * @returns {boolean} True if value is an Object, otherwise false\n  */\n-const isObject = (thing) => thing !== null && typeof thing === 'object';\n+const isObject = (thing)",
-      "criterion": "every file that uses the changed signature compiles/behaves against the new shape; graded on (a) coverage of the historically-missed caller files and (b) zero structural regressions (diff.mjs gate)"
-    },
-    {
-      "repo": "/tmp/claude-0/-home-user-codeweb/3bcef4c9-1d7b-5d4f-a5a6-d91627d96990/scratchpad/axios",
-      "baseSha": "04cf01969ed58f96920da032f340bfe4614aab90",
-      "changeSha": "28c721588c7a77e7503d0a434e016f852c597b57",
-      "symbol": "lib/utils.js:forEach",
-      "label": "forEach",
-      "file": "lib/utils.js",
-      "fanInAtBase": 9,
-      "callerFilesAtBase": [
-        "lib/adapters/adapters.js",
-        "lib/adapters/http.js",
-        "lib/adapters/xhr.js",
-        "lib/core/Axios.js",
-        "lib/core/InterceptorManager.js",
-        "lib/core/mergeConfig.js",
-        "lib/core/transformData.js",
-        "lib/defaults/index.js",
-        "lib/helpers/toFormData.js"
-      ],
-      "missedByChange": [
-        "lib/adapters/adapters.js",
-        "lib/adapters/http.js",
-        "lib/adapters/xhr.js",
-        "lib/core/Axios.js",
-        "lib/core/InterceptorManager.js",
-        "lib/core/transformData.js",
-        "lib/defaults/index.js",
-        "lib/helpers/toFormData.js"
-      ],
-      "fixedInFollowup": [
-        {
-          "sha": "ef3711d1b3a3c1eb4f11dc43e8db38e9c5342448",
-          "files": [
-            "lib/adapters/adapters.js",
-            "lib/adapters/http.js",
-            "lib/adapters/xhr.js",
-            "lib/core/Axios.js",
-            "lib/core/InterceptorManager.js",
-            "lib/defaults/index.js",
-            "lib/helpers/toFormData.js"
-          ]
-        }
-      ],
-      "defDiff": "diff --git a/lib/utils.js b/lib/utils.js\nindex 245282e..b464a62 100644\n--- a/lib/utils.js\n+++ b/lib/utils.js\n@@ -1,24 +1,24 @@\n-'use strict';\n+\"use strict\";\n \n-import bind from './helpers/bind.js';\n+import bind from \"./helpers/bind.js\";\n \n // utils is a library of generic helper functions non-specific to axios\n \n-const {toString} = Object.prototype;\n-const {getPrototypeOf} = Object;\n-const {iterator, toStringTag} = Symbol;\n+const { toString } = Object.prototype;\n+const { getPrototypeOf } = Object;\n+const { iterator, toStringTag } = Symbol;\n \n-const kindOf = (cache => thing => {\n-    const str = toString.call(thing);\n-    return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());\n+const kindOf = ((cache) => (thing) => {\n+  const str = toString.call(thing);\n+  return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());\n })(Object.create(null));\n \n const kindOfTest = (type) => {\n   type = type.toLowerCase();\n-  return (thing) => kindOf(thing) === type\n-}\n+  return (thing) => kindOf(thing) === type;\n+};\n \n-const typeOfTest = type => thing => typeof thing === type;\n+const typeOfTest = (type) => (thing) => typeof thing === type;\n \n /**\n  * Determine if a value is a non-null object\n@@ -27,7 +27,7 @@ const typeOfTest = type => thing => typeof thing === type;\n  *\n  * @returns {boolean} True if value is an Array, otherwise false\n  */\n-const {isArray} = Array;\n+const { isArray } = Array;\n \n /**\n  * Determine if a value is undefined\n@@ -36,7 +36,7 @@ const {isArray} = Array;\n  *\n  * @returns {boolean} True if the value is undefined, otherwise false\n  */\n-const isUndefined = typeOfTest('undefined');\n+const isUndefined = typeOfTest(\"undefined\");\n \n /**\n  * Determine if a value is a Buffer\n@@ -46,8 +46,14 @@ const isUndefined = typeOfTest('undefined');\n  * @returns {boolean} True if value is a Buffer, otherwise false\n  */\n function isBuffer(val) {\n-  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)\n-    && isFunction(val.constructor.isBuffer) && val.constructor.isBuffer(val);\n+  return (\n+    val !== null &&\n+    !isUndefined(val) &&\n+    val.constructor !== null &&\n+    !isUndefined(val.constructor) &&\n+    isFunction(val.constructor.isBuffer) &&\n+    val.constructor.isBuffer(val)\n+  );\n }\n \n /**\n@@ -57,8 +63,7 @@ function isBuffer(val) {\n  *\n  * @returns {boolean} True if value is an ArrayBuffer, otherwise false\n  */\n-const isArrayBuffer = kindOfTest('ArrayBuffer');\n-\n+const isArrayBuffer = kindOfTest(\"ArrayBuffer\");\n \n /**\n  * Determine if a value is a view on an ArrayBuffer\n@@ -69,10 +74,10 @@ const isArrayBuffer = kindOfTest('ArrayBuffer');\n  */\n function isArrayBufferView(val) {\n   let result;\n-  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {\n+  if (typeof ArrayBuffer !== \"undefined\" && ArrayBuffer.isView) {\n     result = ArrayBuffer.isView(val);\n   } else {\n-    result = (val) && (val.buffer) && (isArrayBuffer(val.buffer));\n+    result = val && val.buffer && isArrayBuffer(val.buffer);\n   }\n   return result;\n }\n@@ -84,7 +89,7 @@ function isArrayBufferView(val) {\n  *\n  * @returns {boolean} True if value is a String, otherwise false\n  */\n-const isString = typeOfTest('string');\n+const isString = typeOfTest(\"string\");\n \n /**\n  * Determine if a value is a Function\n@@ -92,7 +97,7 @@ const isString = typeOfTest('string');\n  * @param {*} val The value to test\n  * @returns {boolean} True if value is a Function, otherwise false\n  */\n-const isFunction = typeOfTest('function');\n+const isFunction = typeOfTest(\"function\");\n \n /**\n  * Determine if a value is a Number\n@@ -101,7 +106,7 @@ const isFunction = typeOfTest('function');\n  *\n  * @returns {boolean} True if value is a Number, otherwise false\n  */\n-const isNumber = typeOfTest('number');\n+const isNumber = typeOfTest(\"number\");\n \n /**\n  * Determine if a value is an Object\n@@ -110,7 +115,7 @@ const isNumber = typeOfTest('number');\n  *\n  * @returns {boolean} True if value is an Object, otherwise false\n  */\n-const isObject = (thing) => thing !== null && typeof thing === 'object';\n+const isObject = (thing)",
-      "instruction": "At the base revision, apply exactly this change to forEach in lib/utils.js (the definition-side diff is given verbatim below), then update the codebase so it remains consistent with the change.\n\ndiff --git a/lib/utils.js b/lib/utils.js\nindex 245282e..b464a62 100644\n--- a/lib/utils.js\n+++ b/lib/utils.js\n@@ -1,24 +1,24 @@\n-'use strict';\n+\"use strict\";\n \n-import bind from './helpers/bind.js';\n+import bind from \"./helpers/bind.js\";\n \n // utils is a library of generic helper functions non-specific to axios\n \n-const {toString} = Object.prototype;\n-const {getPrototypeOf} = Object;\n-const {iterator, toStringTag} = Symbol;\n+const { toString } = Object.prototype;\n+const { getPrototypeOf } = Object;\n+const { iterator, toStringTag } = Symbol;\n \n-const kindOf = (cache => thing => {\n-    const str = toString.call(thing);\n-    return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());\n+const kindOf = ((cache) => (thing) => {\n+  const str = toString.call(thing);\n+  return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());\n })(Object.create(null));\n \n const kindOfTest = (type) => {\n   type = type.toLowerCase();\n-  return (thing) => kindOf(thing) === type\n-}\n+  return (thing) => kindOf(thing) === type;\n+};\n \n-const typeOfTest = type => thing => typeof thing === type;\n+const typeOfTest = (type) => (thing) => typeof thing === type;\n \n /**\n  * Determine if a value is a non-null object\n@@ -27,7 +27,7 @@ const typeOfTest = type => thing => typeof thing === type;\n  *\n  * @returns {boolean} True if value is an Array, otherwise false\n  */\n-const {isArray} = Array;\n+const { isArray } = Array;\n \n /**\n  * Determine if a value is undefined\n@@ -36,7 +36,7 @@ const {isArray} = Array;\n  *\n  * @returns {boolean} True if the value is undefined, otherwise false\n  */\n-const isUndefined = typeOfTest('undefined');\n+const isUndefined = typeOfTest(\"undefined\");\n \n /**\n  * Determine if a value is a Buffer\n@@ -46,8 +46,14 @@ const isUndefined = typeOfTest('undefined');\n  * @returns {boolean} True if value is a Buffer, otherwise false\n  */\n function isBuffer(val) {\n-  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)\n-    && isFunction(val.constructor.isBuffer) && val.constructor.isBuffer(val);\n+  return (\n+    val !== null &&\n+    !isUndefined(val) &&\n+    val.constructor !== null &&\n+    !isUndefined(val.constructor) &&\n+    isFunction(val.constructor.isBuffer) &&\n+    val.constructor.isBuffer(val)\n+  );\n }\n \n /**\n@@ -57,8 +63,7 @@ function isBuffer(val) {\n  *\n  * @returns {boolean} True if value is an ArrayBuffer, otherwise false\n  */\n-const isArrayBuffer = kindOfTest('ArrayBuffer');\n-\n+const isArrayBuffer = kindOfTest(\"ArrayBuffer\");\n \n /**\n  * Determine if a value is a view on an ArrayBuffer\n@@ -69,10 +74,10 @@ const isArrayBuffer = kindOfTest('ArrayBuffer');\n  */\n function isArrayBufferView(val) {\n   let result;\n-  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {\n+  if (typeof ArrayBuffer !== \"undefined\" && ArrayBuffer.isView) {\n     result = ArrayBuffer.isView(val);\n   } else {\n-    result = (val) && (val.buffer) && (isArrayBuffer(val.buffer));\n+    result = val && val.buffer && isArrayBuffer(val.buffer);\n   }\n   return result;\n }\n@@ -84,7 +89,7 @@ function isArrayBufferView(val) {\n  *\n  * @returns {boolean} True if value is a String, otherwise false\n  */\n-const isString = typeOfTest('string');\n+const isString = typeOfTest(\"string\");\n \n /**\n  * Determine if a value is a Function\n@@ -92,7 +97,7 @@ const isString = typeOfTest('string');\n  * @param {*} val The value to test\n  * @returns {boolean} True if value is a Function, otherwise false\n  */\n-const isFunction = typeOfTest('function');\n+const isFunction = typeOfTest(\"function\");\n \n /**\n  * Determine if a value is a Number\n@@ -101,7 +106,7 @@ const isFunction = typeOfTest('function');\n  *\n  * @returns {boolean} True if value is a Number, otherwise false\n  */\n-const isNumber = typeOfTest('number');\n+const isNumber = typeOfTest(\"number\");\n \n /**\n  * Determine if a value is an Object\n@@ -110,7 +115,7 @@ const isNumber = typeOfTest('number');\n  *\n  * @returns {boolean} True if value is an Object, otherwise false\n  */\n-const isObject = (thing) => thing !== null && typeof thing === 'object';\n+const isObject = (thing)",
-      "criterion": "every file that uses the changed signature compiles/behaves against the new shape; graded on (a) coverage of the historically-missed caller files and (b) zero structural regressions (diff.mjs gate)"
-    },
     {
       "repo": "/tmp/claude-0/-home-user-codeweb/3bcef4c9-1d7b-5d4f-a5a6-d91627d96990/scratchpad/axios",
       "baseSha": "4a3e26cf65bb040b7eb4577d5fd62199b0f3d017",
@@ -148,6 +133,12 @@
           "sha": "fb8eec214ce7744b5ca787f2c3b8339b2f54b00f",
           "files": [
             "lib/adapters/http.js"
+          ]
+        },
+        {
+          "sha": "ec159e507bdf08c04ba1a10fe7710094e9e50ec9",
+          "files": [
+            "lib/helpers/resolveConfig.js"
           ]
         }
       ],
