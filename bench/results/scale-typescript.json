@@ -32,6 +32,7 @@
       "note": "per-call subprocess incl. 13.5MB graph parse; in-process MCP serves from cache"
     }
   },
+  "reportAtScale": "bench/results/report-scale.json — 16k-symbol report GREEN in headless Chromium: graph interactive 217ms, layout settled 4.8s, search 22ms, heap 31MB, no errors (Spec L)",
   "theWall": {
     "verdict": "optimize.mjs — 36% of cold, 83% of the one-file-edit re-map",
     "mechanism": "112 duplicate-logic candidates each run applyEdit (clones the 16k-node graph) + fileCycles (full file-graph SCC on the clone) + impactOf — O(candidates x graph) with heavy allocation; ~260ms per candidate at this scale",

@@ -1,0 +1,61 @@
+{
+  "bench": "report at scale (Spec L, docs/specs/report-at-scale.md — runnable via bench/experiments/report-scale.mjs)",
+  "thresholds": {
+    "timeToGraphMs": 10000,
+    "searchMs": 300,
+    "crash": "none tolerated"
+  },
+  "verdict": "GREEN at 16k symbols with no fix needed — the graph view draws the domain overview first (21 areas, not 16k nodes), which is built-in level-of-detail; the full-symbol work happens per expanded domain",
+  "rows": [
+    {
+      "bench": "report at scale (Spec L, docs/specs/report-at-scale.md)",
+      "label": "fixture (3 symbols)",
+      "reportBytes": 51296,
+      "graph": {
+        "symbols": 3,
+        "edges": 3
+      },
+      "domContentLoadedMs": 26,
+      "loadMs": 57,
+      "timeToGraphMs": 157,
+      "layoutSettleMs": 173,
+      "layoutSettled": true,
+      "searchMs": 0.5,
+      "stagedBlastMs": 2449,
+      "heapUsedBytes": 10000000,
+      "pageErrors": [],
+      "chromiumVersion": "141.0.7390.37",
+      "verdict": {
+        "timeToGraphOk": true,
+        "searchOk": true,
+        "crashed": false,
+        "green": true
+      }
+    },
+    {
+      "bench": "report at scale (Spec L, docs/specs/report-at-scale.md)",
+      "label": "microsoft/TypeScript src (16k symbols)",
+      "reportBytes": 13641611,
+      "graph": {
+        "symbols": 16286,
+        "edges": 44640
+      },
+      "domContentLoadedMs": 1743,
+      "loadMs": 1750,
+      "timeToGraphMs": 217,
+      "layoutSettleMs": 4813,
+      "layoutSettled": true,
+      "searchMs": 21.8,
+      "stagedBlastMs": 7370,
+      "heapUsedBytes": 31200000,
+      "pageErrors": [],
+      "chromiumVersion": "141.0.7390.37",
+      "verdict": {
+        "timeToGraphOk": true,
+        "searchOk": true,
+        "crashed": false,
+        "green": true
+      }
+    }
+  ]
+}
