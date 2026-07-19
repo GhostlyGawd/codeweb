@@ -6,7 +6,7 @@
 [![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)
 [![deterministic engine](https://img.shields.io/badge/engine-deterministic-c6f24e?style=flat-square)](#how-it-works)
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
-[![version](https://img.shields.io/badge/version-0.6.0-c6f24e?style=flat-square)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.7.0-c6f24e?style=flat-square)](CHANGELOG.md)
 [![changelog](https://img.shields.io/badge/changelog-Keep_a_Changelog-ffb65c?style=flat-square)](CHANGELOG.md)
 
 **Your coding agent greps. codeweb knows.**
@@ -85,9 +85,9 @@ calls it and what it calls.
 <table>
 <tr>
 <td width="50%" valign="top">
-<img src="assets/screens/05-axios-treemap.png" alt="codeweb Treemap on axios: every file sized by lines of code and shaded green-to-red by duplication density">
-<br><b>Treemap</b> — every file sized by lines of code and shaded green→red by how duplicated it
-is. The red blocks are your consolidation targets, at a glance.
+<img src="assets/screens/05-axios-treemap.png" alt="codeweb Treemap on axios: every file sized by lines of code, duplication density carried by a slate-to-red lightness ramp">
+<br><b>Treemap</b> — every file sized by lines of code; the brighter red a block, the more of it
+is duplicated. The bright blocks are your consolidation targets, at a glance.
 </td>
 <td width="50%" valign="top">
 <img src="assets/screens/05-axios-matrix.png" alt="codeweb Matrix on axios: a heatmap of call coupling between domains">
