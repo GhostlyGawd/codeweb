@@ -56,6 +56,27 @@ const verdict = done.length < raw.cells.length / 2 ? 'insufficient-completions'
   : Math.abs(d) < 1e-9 ? (cov('treatment') >= 0.999 ? 'both-at-ceiling' : 'tie-directional')
   : d > 0 ? 'treatment-better-directional' : 'control-better-directional';
 
+const INTERPRETATIONS = {
+  'both-at-ceiling':
+    'Every completed cell in BOTH arms covered every historically-missed caller file and passed the ' +
+    'structural gate. The 2025 change this replays really did miss 2 of its 3 caller files (axios needed ' +
+    'two follow-up PRs); a capable agent replaying the same change under an explicit "keep the codebase ' +
+    'consistent" instruction misses none of them, with or without codeweb — on a 3-caller, single-package ' +
+    'task, grep alone saturates. What this run establishes: the instrument works end-to-end (blind solve, ' +
+    'leak-free isolation, fixed-function grading), the ambient loop cost nothing (0 regressions; the ' +
+    'card’s caller list matched ground truth exactly, and treatment agents reported it drove which ' +
+    'call sites they touched), and the effect of ambient context on THIS task shape is bounded near zero. ' +
+    'What it cannot say: anything about many-caller, cross-package changes (where grep does not saturate), ' +
+    'weaker base agents, or time/token cost to reach coverage — the corpus has one task because guarded ' +
+    'mining kills most candidates (see replay-tasks.json); growing it is the path to a discriminating run.',
+  'treatment-better-directional':
+    'Treatment covered more historically-missed caller files than control. Directional only at this N.',
+  'control-better-directional':
+    'Control covered more historically-missed caller files than treatment. Directional only at this N — report plainly.',
+  'tie-directional': 'Both arms covered the same fraction, below ceiling. Directional only at this N.',
+  'insufficient-completions': 'Too few cells completed to read anything. Fix the harness before interpreting.',
+};
+
 const out = {
   experiment: 'replay-ab (v2 blind protocol)',
   spec: 'docs/specs/replay-run.md',
@@ -64,6 +85,7 @@ const out = {
   primaryMetric: 'missedCovered/missedTotal — coverage of historically-missed caller files, computed by the workflow from filesChanged ∩ missedByChange (never self-reported)',
   perCondition, perTask, treatmentValidity,
   verdict,
+  interpretation: INTERPRETATIONS[verdict] || 'Unrecognized verdict — read the numbers directly.',
   framing: 'DIRECTIONAL ONLY: single-digit task count and reps — no significance claims, no intervals. The pooled ratio and per-task pairs are the whole story; read them plainly.',
   pilotNote: 'The v1 pilot (replay-ab-pilot.json) is EXCLUDED: it leaked its answer key and ran on a task later found invalid. This file analyzes only v2 blind-protocol cells.',
 };

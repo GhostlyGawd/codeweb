@@ -87,6 +87,20 @@
 <p>  discarded — in <code>paper/results/replay-ab-pilot.json</code>; the v2 harness solves in a</p>
 <p>  history-free export of the base revision and the workflow itself computes coverage as</p>
 <p>  <code>filesChanged ∩ missedByChange</code>. Spec amendments: <code>docs/specs/replay-run.md</code>.</p>
+<ul>
+<li><strong>Replay A/B result: both arms at ceiling (honest null).</strong> The v2 corpus froze at ONE</li>
+</ul>
+<p>  fully-verified task — axios <code>buildFullPath</code> gaining <code>allowAbsoluteUrls</code>, where the real 2025</p>
+<p>  change missed 2 of its 3 caller files and axios needed two follow-up PRs (#6810, #6814).</p>
+<p>  Blind-replayed 4× per arm: all 8 cells covered both missed files with 0 structural</p>
+<p>  regressions — with or without codeweb. On a 3-caller single-package change, a capable</p>
+<p>  agent's grep saturates; the historical miss does not reproduce, so ambient context is</p>
+<p>  bounded near zero <strong>on this task shape</strong>. The run proves the instrument (leak-free,</p>
+<p>  fixed-function grading, ambient engagement verified in every treatment cell — the card's</p>
+<p>  caller list matched ground truth exactly) and shows guarded mining makes true breakage</p>
+<p>  tasks RARE: 2 of 3 v1 tasks and the only new candidate died under scrutiny. Discriminating</p>
+<p>  between the arms needs many-caller cross-package tasks or cost-to-coverage metrics —</p>
+<p>  recorded as the corpus growth path. Full data: <code>paper/results/replay-ab{,-raw}.json</code>.</p>
 <h2 class="cl-ver">[0.7.1] - 2026-07-19</h2>
 <h3 class="cl-grp">Fixed</h3>
 <ul>

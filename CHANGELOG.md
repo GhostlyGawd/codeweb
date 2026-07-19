@@ -40,6 +40,18 @@ notes so validated results, papers, and new tools never get lost in commit histo
   discarded — in `paper/results/replay-ab-pilot.json`; the v2 harness solves in a
   history-free export of the base revision and the workflow itself computes coverage as
   `filesChanged ∩ missedByChange`. Spec amendments: `docs/specs/replay-run.md`.
+- **Replay A/B result: both arms at ceiling (honest null).** The v2 corpus froze at ONE
+  fully-verified task — axios `buildFullPath` gaining `allowAbsoluteUrls`, where the real 2025
+  change missed 2 of its 3 caller files and axios needed two follow-up PRs (#6810, #6814).
+  Blind-replayed 4× per arm: all 8 cells covered both missed files with 0 structural
+  regressions — with or without codeweb. On a 3-caller single-package change, a capable
+  agent's grep saturates; the historical miss does not reproduce, so ambient context is
+  bounded near zero **on this task shape**. The run proves the instrument (leak-free,
+  fixed-function grading, ambient engagement verified in every treatment cell — the card's
+  caller list matched ground truth exactly) and shows guarded mining makes true breakage
+  tasks RARE: 2 of 3 v1 tasks and the only new candidate died under scrutiny. Discriminating
+  between the arms needs many-caller cross-package tasks or cost-to-coverage metrics —
+  recorded as the corpus growth path. Full data: `paper/results/replay-ab{,-raw}.json`.
 
 ## [0.7.1] - 2026-07-19
 

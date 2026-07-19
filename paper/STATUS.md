@@ -14,9 +14,11 @@ sets, nulls reported plainly. Everything in `paper/` remains reproducible exactl
 - **The evidence ledger** on the site (`site/data/product.json`) — every public claim with its
   number, sample size, and source script. New results land there and in the CHANGELOG's
   Research notes, not in a manuscript.
-- **Two funded instruments, ready when wanted** (in evidence-strength order):
+- **Two funded instruments** (in evidence-strength order):
   1. `replay-ab` — replays MINED historical caller-breakages with a built-in answer key
-     (`replay-bench.README.md`). Preferred: no invented tasks, no floor effect.
+     (`replay-bench.README.md`). **Ran 2026-07-19 (v2 blind protocol): both arms at ceiling
+     on the single surviving task — honest null; instrument validated, corpus growth is the
+     path to a discriminating run (`paper/results/replay-ab.json`).**
   2. `agent-ab2` — the pre-registered field-study rerun (`agent-ab2.README.md`). Weakest
      instrument (model nondeterminism); reserve for an external-facing headline.
 
