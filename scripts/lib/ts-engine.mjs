@@ -103,6 +103,38 @@ const enclosingSymbol = (node) => {
 
 let _engine; // undefined = not tried, null = unavailable, object = ready (memoized)
 
+// Runtime + version discovery WITHOUT WASM instantiation — shared by the probe and the loader so
+// the version string stamped into meta from a probe can never diverge from a loaded engine's. The
+// package's exports map blocks the package.json subpath, so resolve the entry and walk up to it.
+function runtimeInfo() {
+  try {
+    let dir = dirname(createRequire(import.meta.url).resolve('web-tree-sitter'));
+    for (let i = 0; i < 5; i++) {
+      const pj = join(dir, 'package.json');
+      if (existsSync(pj)) { const p = JSON.parse(readFileSync(pj, 'utf8')); if (p.name === 'web-tree-sitter') return { present: true, version: p.version }; }
+      dir = dirname(dir);
+    }
+    return { present: true, version: 'unknown' }; // resolvable but package.json not found
+  } catch { return { present: false, version: null }; }
+}
+const tsVersionString = (rt) => `tree-sitter(web-tree-sitter@${rt}, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)`;
+
+/**
+ * Cheap availability probe (Spec A) — file existence + module resolution only, no Parser.init, no
+ * Language.load. Lets extraction decide cache namespaces, meta stamps, and banner text up front
+ * while the real (expensive) engine loads lazily on first need. Never throws.
+ */
+export function probeAst() {
+  const rt = runtimeInfo();
+  const ts = rt.present && existsSync(GRAMMAR);
+  return {
+    ts,
+    java: rt.present && existsSync(LANG_GRAMMARS.java),
+    csharp: rt.present && existsSync(LANG_GRAMMARS.csharp),
+    tsVersion: ts ? tsVersionString(rt.version) : null,
+  };
+}
+
 // Lazily build the engine. Returns { cyclomaticExact, version } or null. Never throws.
 export async function loadTsEngine() {
   if (_engine !== undefined) return _engine;
@@ -114,18 +146,7 @@ export async function loadTsEngine() {
     const parser = new Parser();
     parser.setLanguage(await Language.load(readFileSync(GRAMMAR)));
 
-    // Record the runtime version (the grammar version below is the determinism-critical pin). The
-    // package's exports map blocks the package.json subpath, so resolve the entry and walk up to it.
-    let rt = 'unknown';
-    try {
-      let dir = dirname(createRequire(import.meta.url).resolve('web-tree-sitter'));
-      for (let i = 0; i < 5; i++) {
-        const pj = join(dir, 'package.json');
-        if (existsSync(pj)) { const p = JSON.parse(readFileSync(pj, 'utf8')); if (p.name === 'web-tree-sitter') { rt = p.version; break; } }
-        dir = dirname(dir);
-      }
-    } catch { /* version is cosmetic */ }
-    const version = `tree-sitter(web-tree-sitter@${rt}, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)`;
+    const version = tsVersionString(runtimeInfo().version);
 
     const cyclomaticExact = (src) => 1 + countDecisions(parser.parse(String(src || '')).rootNode);
 

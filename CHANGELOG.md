@@ -9,6 +9,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+### Added
+- **Warm refreshes stop paying the AST tax (Spec A).** The tree-sitter engine now initializes
+  lazily — a cheap availability probe decides cache namespaces and meta stamps up front, and
+  the WASM runtime loads only at the first file that actually needs a parse. AST products
+  (qualified methods, dispatch edges, exact per-node complexity) ride the scan cache, so a
+  warm cached extraction on codeweb itself dropped **1.89s → 0.38s (5×)** with byte-identical
+  fragments — felt directly by the MCP auto-refresh, the post-edit hook, and every staleness
+  check. The banner now reports the tier's state (`ast: loaded|idle|off`).
+- **The AST performance gate finally has a committed verdict**
+  (`bench/results/ts-engine-bench.json`): cold extraction costs 3.6–4.3× regex
+  (~+1.35 ms/symbol, axios + self) — paid once per changed file — and the warm path is
+  engine-free, so default-on stands. Also fixes the bench's regex arm, which had silently
+  benchmarked tree-sitter against itself ever since the tier went default-on.
+
 ### Changed
 - **The paper program is archived; the receipts stay.** `paper/` is retired from `main`:
   the runnable instruments and every frozen result (nulls and the discarded pilot included)

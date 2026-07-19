@@ -19,7 +19,7 @@ import { createHash } from 'node:crypto';
 import { relative, resolve, join, dirname, extname } from 'node:path';
 import { isTestFile, roleOf } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
-import { loadTsEngine, loadLangEngine } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
+import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
 
 // F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
 // v2: nodes carry complexity/maxDepth (F4) + the cache holds per-file edge lists + a symbol signature (F9).
@@ -37,7 +37,7 @@ import { loadTsEngine, loadLangEngine } from './lib/ts-engine.mjs'; // optional 
 //     package-boundary manifests.
 // v9: tree-sitter tier default-on when installed (dispatch recall); export-star re-export chains
 //     resolve (barrel files no longer swallow edges).
-const SCANNER_VERSION = 10;
+const SCANNER_VERSION = 11; // v11: cache entries carry AST products (ast/cx) so warm runs skip the engine (Spec A)
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -438,20 +438,40 @@ const files = listFiles();
 // back to the regex scanner (CI without npm install keeps working; meta.engine records which tier
 // ran, and the scan cache is namespaced per engine, so reproducibility holds per install state).
 // `--engine regex` / CODEWEB_ENGINE=regex force the old behavior.
-let tsEngine = null;
+// Spec A (docs/specs/perf-lazy-ast.md): PROBE availability up front (file existence + module
+// resolution — cheap), LOAD the WASM engines lazily at the first file that actually needs a
+// parse. A warm cached run — or any run whose AST products all come from the cache — never pays
+// the ~1.4s runtime+grammar init. Everything decided at startup (cache namespace, meta stamp,
+// banner engine name) derives from the probe, so fragments stay byte-identical either way.
+let astProbe = { ts: false, java: false, csharp: false, tsVersion: null };
 if (opts.engine !== 'regex') {
-  tsEngine = await loadTsEngine();
-  if (!tsEngine && (opts.engine === 'tree-sitter' || opts.engine === 'ts')) {
+  astProbe = probeAst();
+  if (!astProbe.ts && (opts.engine === 'tree-sitter' || opts.engine === 'ts')) {
     console.error('[extract] --engine tree-sitter requested but web-tree-sitter/grammar unavailable; falling back to regex F4');
   }
+}
+// Poison guard: if a probe said "available" but the real load later fails, complexity/dispatch
+// fell back to regex mid-run — a `+ts`-namespaced cache must never memoize that state.
+let astLoadFailed = false;
+let _tsEngineState; // undefined = not attempted, null = load failed, object = loaded
+async function tsEngineGet() {
+  if (!astProbe.ts) return null;
+  if (_tsEngineState === undefined) {
+    _tsEngineState = await loadTsEngine();
+    if (!_tsEngineState) { astLoadFailed = true; console.error('[extract] AST probe passed but the ts engine failed to load — scan cache disabled for this run'); }
+  }
+  return _tsEngineState;
 }
 // Java/C# dispatch tier (docs/specs/java-cs-tree-sitter.md): regex keeps owning their NODES;
 // the AST contributes the dispatch edges regex precision-gates away. Loaded lazily on the first
 // file of each language; unavailable -> byte-identical regex output (the standing contract).
 const langEngines = {}; // 'java'|'csharp' -> engine|null
 async function langEngineFor(langKey) {
-  if (opts.engine === 'regex') return null;
-  if (langEngines[langKey] === undefined) langEngines[langKey] = await loadLangEngine(langKey);
+  if (opts.engine === 'regex' || !astProbe[langKey]) return null;
+  if (langEngines[langKey] === undefined) {
+    langEngines[langKey] = await loadLangEngine(langKey);
+    if (!langEngines[langKey]) { astLoadFailed = true; console.error(`[extract] AST probe passed but the ${langKey} engine failed to load — scan cache disabled for this run`); }
+  }
   return langEngines[langKey];
 }
 
@@ -459,7 +479,7 @@ async function langEngineFor(langKey) {
 // cached symbol-discovery for byte-identical files and re-scans only changed ones — edge derivation
 // is still GLOBAL (see below), so the fragment is identical with or without the cache. tree-sitter is
 // its own engine namespace (`+ts`) so class-qualified syms can't be served to a regex run, or vice versa.
-const engineMode = (useCtags ? 'ctags' : 'regex') + (tsEngine ? '+ts' : '');
+const engineMode = (useCtags ? 'ctags' : 'regex') + (opts.engine !== 'regex' && astProbe.ts ? '+ts' : '');
 let oldCache = null;
 if (opts.cache) { try { const c = JSON.parse(readFileSync(opts.cache, 'utf8')); if (c && c.version === SCANNER_VERSION && c.engine === engineMode) oldCache = c; } catch { /* corrupt/absent -> cold */ } }
 const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, files: {} } : null;
@@ -470,6 +490,7 @@ const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)
 const nodes = [];
 const fileSyms = new Map(); // file -> {text, ranges:[{id,name,start,end,kind}]}
 const dispatchByFile = new Map(); // file -> [{from,to}] dispatch edges (tree-sitter engine only)
+const typedLangsSeen = new Set(); // 'java'|'csharp' actually processed by the AST tier this run (banner)
 const typedIntentsByFile = new Map(); // rel -> [{from, recvType, method}] Java/C# typed-receiver calls, resolved globally after all nodes exist
 // v7 STALENESS STAMPS: per-file size+mtime recorded in meta.sources so query tools can cheaply
 // detect that the graph no longer matches disk ("aware" — an agent must know its map is stale).
@@ -485,12 +506,23 @@ for (const f of files) {
   const r = rel(f);
   try { const st = statSync(f); sources[r] = { s: st.size, m: Math.round(st.mtimeMs) }; } catch { /* stamp is best-effort */ }
   if (DYNAMIC_RE.test(text)) dynamicFiles.push(r);
+  const isPy = r.endsWith('.py');
+  const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
+  const isBraceLang = isJsTs || /\.(java|cs)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
+  const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp' : null;
+  // Does the AST tier owe this file products (methods/dispatch/complexity)? Drives cache-hit
+  // validity — a hit without them must re-scan — and the lazy engine load below (Spec A).
+  const needsAst = opts.engine !== 'regex' && ((isJsTs && astProbe.ts) || (langKey && astProbe[langKey]));
   let syms;
+  let astHit = null; // the cache entry serving this file's AST products (fully-valid hit only)
   if (opts.cache) {
     const h = sha1(text);
     const hit = oldCache && oldCache.files[r];
-    syms = (hit && hit.hash === h) ? hit.syms : scanFile(f, text); // cache miss -> re-scan
+    const hitOk = hit && hit.hash === h && (!needsAst || (hit.ast && (!isJsTs || hit.cx)));
+    if (hitOk) { syms = hit.syms; if (needsAst) astHit = hit; }
+    else syms = scanFile(f, text); // cache miss -> re-scan
     newCache.files[r] = { hash: h, syms };                          // prune deleted files (only current)
+    if (astHit) { newCache.files[r].ast = astHit.ast; newCache.files[r].cx = astHit.cx; }
   } else {
     syms = scanFile(f, text);
   }
@@ -498,9 +530,6 @@ for (const f of files) {
   syms = syms.filter((s) => { const k = s.name + ':' + s.line; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a.line - b.line);
   const lines = text.split(/\r?\n/);
   const total = lines.length;
-  const isPy = r.endsWith('.py');
-  const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
-  const isBraceLang = isJsTs || /\.(java|cs)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
   // Body extents are measured on MASKED lines: stripSC alone is line-local, so a multi-line template
   // literal (or block comment) containing braces desynced the brace counter and bodies swallowed
   // whole neighboring functions (a 5-line helper recorded as 550 loc on vite — poisoning
@@ -514,8 +543,20 @@ for (const f of files) {
   // methods (graceful per-file fallback). Build the qualified ids in ONE parser so dispatch from/to
   // always match an emitted node — never a second line-containment guess that could silently disagree.
   let tsResult = null;
-  if (tsEngine && isJsTs) {
-    tsResult = tsEngine.extractJsTs(text, r);
+  let fileCx = null;    // hit: {nodeId -> exact cx} lookup; miss: collector recorded into the cache entry
+  let engForFile = null;
+  if (isJsTs && needsAst) {
+    if (astHit) {
+      tsResult = astHit.ast.tsr; // includes the null-on-parse-failure state, memoized deterministically
+      fileCx = astHit.cx;
+    } else {
+      engForFile = await tsEngineGet(); // FIRST real need -> the one-time WASM init happens here
+      if (engForFile) {
+        tsResult = engForFile.extractJsTs(text, r);
+        fileCx = {};
+        if (newCache) { newCache.files[r].ast = { tsr: tsResult }; newCache.files[r].cx = fileCx; }
+      }
+    }
     // the parse tree owns method_definition nodes; class-FIELD arrows (`handleClick = () => {}`)
     // are only discovered by the regex scan (field: true), so they must survive the handoff.
     if (tsResult) syms = syms.filter((s) => s.kind !== 'method' || s.field);
@@ -550,10 +591,16 @@ for (const f of files) {
       // Only function/method nodes carry these (a class/module has no single control-flow body).
       const body = lines.slice(start - 1, start - 1 + loc).join('\n');
       const lang = isPy ? 'py' : 'js';
-      // Exact McCabe via tree-sitter for JS/TS when the engine is active (TS grammar is a JS superset
+      // Exact McCabe via tree-sitter for JS/TS when the tier is active (TS grammar is a JS superset
       // for control-flow counting); otherwise the regex F4 approximation. maxDepth stays regex F4 —
       // exact nesting is a later increment. Rust/Go/Python always use regex (no TS grammar match).
-      node.complexity = (tsEngine && isJsTs) ? tsEngine.cyclomaticExact(body) : cyclomatic(body, lang);
+      // Exact values ride the scan cache (Spec A): a hit looks them up; a miss computes + records.
+      let cx = null;
+      if (isJsTs && fileCx) {
+        if (astHit) cx = Object.prototype.hasOwnProperty.call(fileCx, id) ? fileCx[id] : null;
+        else if (engForFile) cx = fileCx[id] = engForFile.cyclomaticExact(body);
+      }
+      node.complexity = cx != null ? cx : cyclomatic(body, lang);
       node.maxDepth = nestingDepth(body, lang);
     }
     nodes.push(node);
@@ -585,10 +632,16 @@ for (const f of files) {
   }
   // Java/C#: AST dispatch tier (edges only — regex owns the nodes). this-calls resolve in-file
   // now; typed-receiver intents wait for the global pass (the receiver's class may live anywhere).
-  const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp' : null;
-  if (langKey) {
-    const eng = await langEngineFor(langKey);
-    const d = eng && eng.extractDispatch(text, r);
+  // Products ride the scan cache exactly like the JS/TS tier's (Spec A).
+  if (langKey && needsAst) {
+    typedLangsSeen.add(langKey);
+    let d = null;
+    if (astHit) d = astHit.ast.d;
+    else {
+      const eng = await langEngineFor(langKey);
+      d = (eng && eng.extractDispatch(text, r)) || null;
+      if (eng && newCache) newCache.files[r].ast = { d };
+    }
     if (d) {
       if (d.thisCalls.length) dispatchByFile.set(f, (dispatchByFile.get(f) || []).concat(d.thisCalls));
       if (d.typedIntents.length) typedIntentsByFile.set(r, d.typedIntents);
@@ -1134,9 +1187,11 @@ const languages = [...new Set(files.map(langOf))].sort();
 const fragment = {
   meta: {
     root: rootFwd, target: targetLabel, engine: useCtags ? 'ctags' : 'regex',
-    // additive: only present when the opt-in tree-sitter tier actually computed complexity, so the
+    // additive: only present when the tree-sitter tier owns complexity for this run, so the
     // default (regex) output is byte-identical to before. Pins the grammar version for determinism.
-    ...(tsEngine ? { complexityEngine: tsEngine.version } : {}),
+    // Stamped from the PROBE (identical string to the loaded engine's — pinned by test L4) so a
+    // warm run that never initializes the engine emits the same meta as a cold one (Spec A).
+    ...(opts.engine !== 'regex' && astProbe.ts && !astLoadFailed ? { complexityEngine: astProbe.tsVersion } : {}),
     languages, symbols: nodes.length,
     sources, // per-file {s: size, m: mtimeMs} staleness stamps
     // files with dynamic-dispatch patterns — the honest asterisk on every "0 callers" answer
@@ -1149,12 +1204,18 @@ const fragment = {
   },
   nodes, edges,
 };
-if (newCache) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
-const usedLangEngines = Object.keys(langEngines).filter((k) => langEngines[k]);
-const dispatchNote = (tsEngine || usedLangEngines.length)
+if (newCache && !astLoadFailed) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
+// Dispatch note + banner report from the PROBE (what tier owns the run) plus the live load state:
+// `ast: loaded` (initialized this run) / `ast: idle` (available, nothing needed a parse — the warm
+// path Spec A exists for) / `ast: off` (regex opt-out, unavailable, or load failure).
+const astAvailable = opts.engine !== 'regex' && (astProbe.ts || astProbe.java || astProbe.csharp);
+const typedLangs = ['java', 'csharp'].filter((k) => typedLangsSeen.has(k));
+const dispatchNote = astAvailable
   ? `; wired ${dispatchEdgeCount} dispatch edge(s)${dispatchDropped ? `, dropped ${dispatchDropped} (missing endpoint)` : ''}` +
-    (usedLangEngines.length ? `; typed-dispatch (${usedLangEngines.join('+')}) ${typedWired} wired${typedDropped ? `, ${typedDropped} dropped (ambiguous/absent)` : ''}` : '')
+    (typedLangs.length ? `; typed-dispatch (${typedLangs.join('+')}) ${typedWired} wired${typedDropped ? `, ${typedDropped} dropped (ambiguous/absent)` : ''}` : '')
   : '';
-const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${tsEngine ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}`;
+const anyAstLoaded = !!_tsEngineState || Object.values(langEngines).some(Boolean);
+const astState = anyAstLoaded ? 'loaded' : (!astAvailable || astLoadFailed) ? 'off' : 'idle';
+const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
 if (opts.out) { writeFileSync(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
 else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }
