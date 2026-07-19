@@ -1,4 +1,4 @@
-// Tests the EFFICIENCY instrument (paper/experiments/efficiency-pilot.usage.mjs) that adds the
+// Tests the EFFICIENCY instrument (bench/experiments/efficiency-pilot.usage.mjs) that adds the
 // previously-missing axis to the pilot: tokens + wall-clock + runtime tool-calls, each as the SAME
 // paired-delta (treatment - control) mean+/-SD the harness uses for recall/steps. The pure helpers
 // (parseLabel/stat/aggregateUsage) are unit-tested with hand-computed deltas; the CLI is run against
@@ -14,8 +14,8 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
-const USAGE = join(HERE, '..', 'paper', 'experiments', 'efficiency-pilot.usage.mjs')
-const { parseLabel, stat, aggregateUsage } = await import('../paper/experiments/efficiency-pilot.usage.mjs')
+const USAGE = join(HERE, '..', 'bench', 'experiments', 'efficiency-pilot.usage.mjs')
+const { parseLabel, stat, aggregateUsage } = await import('../bench/experiments/efficiency-pilot.usage.mjs')
 
 test('parseLabel maps control/treat labels to arm + task + rep (and rejects others)', () => {
   assert.deepEqual(parseLabel('control:axios-merge#3'), { arm: 'control', task: 'axios-merge', rep: 3 })

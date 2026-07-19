@@ -1,6 +1,6 @@
-// bench-core — the oracle-A/B engine, factored out of paper/experiments/oracle-ab.mjs so the
+// bench-core — the oracle-A/B engine, factored out of bench/experiments/oracle-ab.mjs so the
 // SAME arms/oracle/scoring serve two callers: the frozen paper experiment (canonical results in
-// paper/results/oracle-ab.json) and the product CLI `scripts/bench.mjs` ("run grep-vs-codeweb on
+// bench/results/oracle-ab.json) and the product CLI `scripts/bench.mjs` ("run grep-vs-codeweb on
 // YOUR repo, graded by YOUR compiler"). One truth — a divergence here would make the product
 // bench and the published numbers measure different things.
 //

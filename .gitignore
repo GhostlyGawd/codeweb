@@ -13,14 +13,14 @@ node_modules/
 .live/*.before
 *.before
 
-# Paper: evaluation corpus is cloned & pinned via paper/corpus.manifest.json (large, regenerable).
+# Bench: evaluation corpus is cloned & pinned via bench/corpus.manifest.json (large, regenerable).
 # Keep the clone script + manifest; ignore the cloned repos and any scratch run dirs.
-paper/corpus/*/
-paper/results/*.tmp
-# Reproduction run outputs from paper/run-all.mjs (_env.json, _summary.json, _reproduce.log) —
+bench/corpus/*/
+bench/results/*.tmp
+# Reproduction run outputs from bench/run-all.mjs (_env.json, _summary.json, _reproduce.log) —
 # regenerable; the committed result JSONs are the source of truth.
-paper/results/_*
-paper/**/.cw/
+bench/results/_*
+bench/**/.cw/
 
 # OS / editor noise
 .DS_Store

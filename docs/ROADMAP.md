@@ -20,7 +20,7 @@ This roadmap closes that gap in four phases, ordered by dependency and de-riskin
 
 ## Cross-cutting guardrails (anti-reward-hack; every phase obeys all six)
 
-These extend `paper/PRE-REGISTRATION.md` §0. A phase does not "pass" unless all hold:
+These extend the retired pre-registration's §0 rigor rules (git history @ v0.8.0). A phase does not "pass" unless all hold:
 
 1. **Pre-register** hypothesis + primary metric + pass threshold *before* the run.
 2. **Freeze the engine** (pin engine hash) across both arms — measure the tool, not engine drift.
@@ -28,7 +28,7 @@ These extend `paper/PRE-REGISTRATION.md` §0. A phase does not "pass" unless all
 4. **Clear a measured noise floor** — ≥8 reps, report S/N, judge on lower-CI not point estimate.
 5. **Agent-facing metric only** — the agent's *behavior* must move; static graph-accuracy that never
    touches agent performance does not count toward the north-star.
-6. **Nulls and negatives ship** — any language/task class that fails goes in the paper, not the bin.
+6. **Nulls and negatives ship** — any language/task class that fails ships in the CHANGELOG Research notes, not the bin.
 
 ---
 
@@ -43,10 +43,10 @@ multi-language harness produced here is reused by Phases 2–4.
 - **H20 (scales):** token-saving % does **not** decrease as repo/graph size grows (slope ≥ 0 within CI).
 - **Primary metric:** recall delta (engine-frozen, ≥8 reps) and total-token delta with S/N, vs grep.
 - **Pass:** recall-delta lower-CI > noise floor in ≥3/4 languages; token-saving slope ≥ 0 vs LOC.
-- **Requirements:** corpus already spans the languages (`paper/corpus.manifest.json`); reuse
+- **Requirements:** corpus already spans the languages (`bench/corpus.manifest.json`); reuse
   `efficiency-pilot.usage.mjs`. **Moderate** multi-agent spend.
 - **Falsifier:** recall delta crosses zero in ≥2 languages ⇒ "generalizes" is killed; scope the claim.
-- **Ships:** multi-language proof table in `paper/`; deterministic `ci-gate` product rides along.
+- **Ships:** multi-language proof table in `bench/`; deterministic `ci-gate` product rides along.
 
 ## Phase 2 — Productize the efficiency win as the **Context Compiler**
 
@@ -111,5 +111,4 @@ signal.
 
 ### Hypothesis ledger
 
-H19–H20 (Phase 1), H21 (Phase 2), H22 (Phase 3), H23–H24 (Phase 4). All registered in
-`paper/PRE-REGISTRATION.md` before their runs; H1–H18 are the prior study.
+H19–H20 (Phase 1), H21 (Phase 2), H22 (Phase 3), H23–H24 (Phase 4). New hypotheses register in their spec under `docs/specs/` before their runs (the retired pre-registration covering H1–H18 lives in git history @ v0.8.0); H1–H18 are the prior study.

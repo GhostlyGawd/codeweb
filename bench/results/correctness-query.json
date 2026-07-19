@@ -1,0 +1,221 @@
+{
+  "cluster": "C2-query-correctness",
+  "commit": "46cf41d31a1857b0db7829d7f9cabda162b9a931",
+  "seed": 12639938,
+  "cliSeed": 20759,
+  "T": 10000,
+  "cliN": 200,
+  "counts": {
+    "inProcessRandomGraphs": 10000,
+    "inProcessRealRepoGraphs": 6,
+    "inProcessPerSymbolComparisons": 119782,
+    "cliGraphComparisons": 206,
+    "cliPerSymbolComparisons": 672,
+    "cliCalls": 3566,
+    "cliErrors": 0,
+    "resolveDisagreements": 0
+  },
+  "oracle": {
+    "file": "bench/lib/oracles.mjs",
+    "independent": true,
+    "note": "from-scratch Kosaraju SCC + reverse-reachability BFS; does NOT import scripts/lib/graph-ops.mjs"
+  },
+  "realRepos": [
+    {
+      "name": "axios",
+      "extracted": true,
+      "nodes": 859,
+      "edges": 814,
+      "cyclesLib": 2,
+      "cyclesOracle": 2,
+      "newDisagreements": {
+        "H3": 0,
+        "H4": 0,
+        "ACALL": 0,
+        "ATESTS": 0,
+        "ACP": 0
+      }
+    },
+    {
+      "name": "express",
+      "extracted": true,
+      "nodes": 1882,
+      "edges": 296,
+      "cyclesLib": 2,
+      "cyclesOracle": 2,
+      "newDisagreements": {
+        "H3": 0,
+        "H4": 0,
+        "ACALL": 0,
+        "ATESTS": 0,
+        "ACP": 0
+      }
+    },
+    {
+      "name": "zod",
+      "extracted": true,
+      "nodes": 1408,
+      "edges": 838,
+      "cyclesLib": 3,
+      "cyclesOracle": 3,
+      "newDisagreements": {
+        "H3": 0,
+        "H4": 0,
+        "ACALL": 0,
+        "ATESTS": 0,
+        "ACP": 0
+      }
+    },
+    {
+      "name": "flask",
+      "extracted": true,
+      "nodes": 1656,
+      "edges": 607,
+      "cyclesLib": 2,
+      "cyclesOracle": 2,
+      "newDisagreements": {
+        "H3": 0,
+        "H4": 0,
+        "ACALL": 0,
+        "ATESTS": 0,
+        "ACP": 0
+      }
+    },
+    {
+      "name": "ripgrep",
+      "extracted": true,
+      "nodes": 3201,
+      "edges": 1752,
+      "cyclesLib": 1,
+      "cyclesOracle": 1,
+      "newDisagreements": {
+        "H3": 0,
+        "H4": 0,
+        "ACALL": 0,
+        "ATESTS": 0,
+        "ACP": 0
+      }
+    },
+    {
+      "name": "gorilla-mux",
+      "extracted": true,
+      "nodes": 261,
+      "edges": 280,
+      "cyclesLib": 1,
+      "cyclesOracle": 1,
+      "newDisagreements": {
+        "H3": 0,
+        "H4": 0,
+        "ACALL": 0,
+        "ATESTS": 0,
+        "ACP": 0
+      }
+    }
+  ],
+  "negativeControl": {
+    "cycleDisagrees": true,
+    "impactDisagrees": true,
+    "correctCycleAgrees": true,
+    "correctImpactAgrees": true,
+    "passes": true,
+    "note": "Feeds deliberately WRONG oracles (call-only cycles/impact) on an import+inherit graph; the harness MUST flag the disagreement, proving it can fail."
+  },
+  "perHypothesis": [
+    {
+      "id": "H3",
+      "metric": "file-level cycles == independent Kosaraju SCC (set-equality)",
+      "scope": "graph",
+      "value": 0,
+      "comparisons": 10212,
+      "ci": {
+        "ruleOfThreeUpper95": 0.00029377,
+        "note": "95% upper bound on true disagreement rate given 0 observed (Rule of Three: 3/n)"
+      },
+      "passed": true,
+      "criterion": "0 disagreements vs independent oracle (pre-registered)",
+      "breakdown": {
+        "inProcessRandom": 0,
+        "realRepos": 0,
+        "shippedCLI": 0
+      },
+      "sample": []
+    },
+    {
+      "id": "H4",
+      "metric": "impact == independent reverse-reachability BFS (call+inherit)",
+      "scope": "symbol",
+      "value": 0,
+      "comparisons": 120454,
+      "ci": {
+        "ruleOfThreeUpper95": 0.00002491,
+        "note": "95% upper bound on true disagreement rate given 0 observed (Rule of Three: 3/n)"
+      },
+      "passed": true,
+      "criterion": "0 disagreements vs independent oracle (pre-registered)",
+      "breakdown": {
+        "inProcessRandom": 0,
+        "realRepos": 0,
+        "shippedCLI": 0
+      },
+      "sample": []
+    },
+    {
+      "id": "A-CALL",
+      "metric": "callers/callees == independent raw call-edge neighbor sets",
+      "scope": "symbol",
+      "value": 0,
+      "comparisons": 120454,
+      "ci": {
+        "ruleOfThreeUpper95": 0.00002491,
+        "note": "95% upper bound on true disagreement rate given 0 observed (Rule of Three: 3/n)"
+      },
+      "passed": true,
+      "criterion": "0 disagreements vs independent oracle (pre-registered)",
+      "breakdown": {
+        "inProcessRandom": 0,
+        "realRepos": 0,
+        "shippedCLI": 0
+      },
+      "sample": []
+    },
+    {
+      "id": "A-TESTS",
+      "metric": "query --tests == independent test-edge in-neighbor scan",
+      "scope": "symbol",
+      "value": 0,
+      "comparisons": 120454,
+      "ci": {
+        "ruleOfThreeUpper95": 0.00002491,
+        "note": "95% upper bound on true disagreement rate given 0 observed (Rule of Three: 3/n)"
+      },
+      "passed": true,
+      "criterion": "0 disagreements vs independent oracle (pre-registered)",
+      "breakdown": {
+        "inProcessRandom": 0,
+        "realRepos": 0,
+        "shippedCLI": 0
+      },
+      "sample": []
+    },
+    {
+      "id": "A-CP",
+      "metric": "context-pack window == exact H4 impact set (no omissions)",
+      "scope": "symbol",
+      "value": 0,
+      "comparisons": 120454,
+      "ci": {
+        "ruleOfThreeUpper95": 0.00002491,
+        "note": "95% upper bound on true disagreement rate given 0 observed (Rule of Three: 3/n)"
+      },
+      "passed": true,
+      "criterion": "0 disagreements vs independent oracle (pre-registered)",
+      "breakdown": {
+        "inProcessRandom": 0,
+        "realRepos": 0,
+        "shippedCLI": 0
+      },
+      "sample": []
+    }
+  ],
+  "allPassed": true
+}

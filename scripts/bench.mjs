@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // codeweb bench — run the grep-vs-codeweb comparison on YOUR repo, graded by YOUR compiler.
 //
-// The published oracle A/B (paper/results/oracle-ab.json) is a paper artifact; this is the same
+// The published oracle A/B (bench/results/oracle-ab.json) is a paper artifact; this is the same
 // engine (scripts/lib/bench-core.mjs, shared verbatim) packaged as a product command, so anyone
 // can generate their own evidence — and a recall dip on a real repo is a bug report with a
 // built-in reproducer.
@@ -81,7 +81,7 @@ if (!rows.length) die(`oracle excluded all ${sample.length} sampled symbol(s) �
 
 const kb = (b) => `${Math.round(b / 1024 * 10) / 10}KB`;
 const result = {
-  design: 'grep-vs-codeweb on this repo, same engine as paper/results/oracle-ab.json: control=rg dump, treatment=codeweb --dependents (budgeted pages of 20); blast radius = one codeweb_impact call vs the graph-assisted recursive grep loop; grading (when available) = TS LanguageService references, file-level.',
+  design: 'grep-vs-codeweb on this repo, same engine as bench/results/oracle-ab.json: control=rg dump, treatment=codeweb --dependents (budgeted pages of 20); blast radius = one codeweb_impact call vs the graph-assisted recursive grep loop; grading (when available) = TS LanguageService references, file-level.',
   corpus: { root, scope: scope || '(whole repo)', sampled: sample.length, benched: rows.length, oracleExcluded, seed },
   oracle: oracle ? { available: true, gradedBy: 'typescript LanguageService' } : { available: false, reason: oracleReason },
   grepAvailable: hasRg,

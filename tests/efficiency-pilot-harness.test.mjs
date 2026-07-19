@@ -1,4 +1,4 @@
-// Tests the PURE control flow + aggregation of paper/experiments/efficiency-pilot.workflow.js that
+// Tests the PURE control flow + aggregation of bench/experiments/efficiency-pilot.workflow.js that
 // the engine-frozen-reps claim (lever #1) depends on, WITHOUT spawning real agents. The workflow
 // body is executed with stubbed runtime globals (agent/parallel/phase/log) so we can assert the
 // frozen-truth oracle-skip, the rep loop, and the mean +/- SD paired-delta headline.
@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
-const EXP = join(HERE, '..', 'paper', 'experiments')
+const EXP = join(HERE, '..', 'bench', 'experiments')
 const TRUTH = JSON.parse(readFileSync(join(EXP, 'efficiency-pilot.truth.json'), 'utf8'))
 const BODY = readFileSync(join(EXP, 'efficiency-pilot.workflow.js'), 'utf8').replace(/export const meta/, 'const meta')
 const TASKS_N = Object.keys(TRUTH.targets).length

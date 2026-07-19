@@ -36,7 +36,7 @@
       {
         "num": "32 / 33",
         "label": "pre-registered checks pass",
-        "src": "paper/results"
+        "src": "bench/results"
       },
       {
         "num": "~490k",
@@ -391,6 +391,13 @@
       "metric": "paired difference = 0 (floor effect, not a power result)",
       "sample": "8 paired tasks (H18)",
       "source": "agent-ab.json"
+    },
+    {
+      "claim": "Blind replay of a real historical caller-breakage (ambient loop A/B)",
+      "tag": "null",
+      "metric": "both arms 8/8 caller-file coverage, 0 structural regressions — ceiling on the one task that survived validity guards",
+      "sample": "1 mined axios task (allowAbsoluteUrls) x 2 arms x 4 reps, blind protocol, fixed-function grading",
+      "source": "replay-ab.json"
     }
   ],
   "dontClaim": [
