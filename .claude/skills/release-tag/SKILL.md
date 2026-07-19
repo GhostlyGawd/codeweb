@@ -12,6 +12,21 @@ including ones with no `gh` CLI and no GitHub-release API access (remote agent s
 
 Never commit to `main` directly; never push a tag until its release commit is ON `main`.
 
+## When to cut — don't wait to be asked
+
+Releasing is the DEFAULT next step after user-visible work merges to main, not something
+to note for later. The maintainer should never have to say "cut it."
+
+- Feature work merged, CI green, `[Unreleased]` carries user-visible value → cut a
+  **minor** the same day. An accumulating `[Unreleased]` section is a smell.
+- Fix-only `[Unreleased]` → **patch**.
+- A breaking CLI/tool contract → **major** (pre-1.0: minor, with a loud changelog note).
+- Docs/CI/site-only changes → don't tag; let them ride along with the next real release.
+- Unsure between two bumps? The changelog decides: any `### Added` entry = minor.
+
+After merging a feature PR, finish the job: prep → land → tag → verify, then report the
+release URL. Only hold off if the maintainer has said to batch, or main is red.
+
 ## 0. Preconditions
 
 - CI green on `main`; working tree clean.
