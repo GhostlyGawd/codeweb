@@ -36,6 +36,29 @@ notes so validated results, papers, and new tools never get lost in commit histo
   per-DIRECTORY mtime stamps make brand-new files trip the staleness check (per-file
   stamps cannot see a file that didn't exist).
 
+### Added (the proof, the surfaces, the last query family)
+- **`codeweb bench`** (`scripts/bench.mjs`, `npm run bench`): the oracle A/B packaged as a
+  one-command benchmark on YOUR repo — context cost per dependents task + blast-radius cost
+  always; recall/precision graded by the TypeScript LanguageService when `typescript` is
+  resolvable; ripgrep optional. The engine moved verbatim into `scripts/lib/bench-core.mjs`
+  (the paper experiment is now a thin wrapper over it — reproduction against the committed
+  canonical run is byte-identical), so published numbers and user-generated numbers can
+  never measure different things.
+- **The gate now posts its review**: `ci-gate --md` renders the structural delta (blocking
+  regressions, new cycles/duplications, symbols that lost all callers, renames-not-churn)
+  as a budgeted digest and the `codeweb gate` workflow posts/updates it as a sticky PR
+  comment on pass AND fail — visible where reviewers already look, verdict unchanged.
+- **Editor CodeLens** (`editor/vscode-codeweb`): zero-dependency VS Code extension showing
+  `N callers · blast M` above every mapped symbol from the nearest `.codeweb/graph.json`
+  (identical semantics to `codeweb_callers`/`codeweb_impact`), click-through to
+  `report.html#s=<id>`.
+- **`codeweb_find` — concept search** (23rd MCP tool + `scripts/find.mjs`): free text
+  ("where is retry handled?") → ranked symbols, deterministically — camelCase/snake_case
+  token match with light stemming over identifiers/files/domains, weighted by exports,
+  role (tests only when asked for), and fan-in. Served in-process from the cached graph,
+  budgeted, staleness-annotated. Closes the last gap: every other query tool needs a name;
+  this one turns an idea into the right starting symbol.
+
 ### Research
 - **Oracle A/B** (`paper/experiments/oracle-ab.mjs`, results in
   `paper/results/oracle-ab.json`): dependents-discovery graded by the TypeScript

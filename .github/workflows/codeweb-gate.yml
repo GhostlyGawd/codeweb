@@ -1,11 +1,17 @@
 name: codeweb gate
 
 # Dogfood: run codeweb's own structural regression gate on changes to the engine. Fails the PR on a
-# new dependency cycle, a new duplication finding, or a symbol that loses all its callers.
+# new dependency cycle, a new duplication finding, or a symbol that loses all its callers — and
+# posts the structural review (delta, renames, findings) as a sticky PR comment either way, so the
+# gate is visible where reviewers already look, not only when it blocks.
 on:
   pull_request:
     paths:
       - 'scripts/**'
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   gate:
@@ -18,4 +24,26 @@ jobs:
         with:
           node-version: '22'
       - name: codeweb regression gate (self)
-        run: node scripts/ci-gate.mjs --base "${{ github.event.pull_request.base.sha }}" --target scripts
+        id: gate
+        continue-on-error: true # verdict enforced after the comment posts
+        run: node scripts/ci-gate.mjs --base "${{ github.event.pull_request.base.sha }}" --target scripts --md "$RUNNER_TEMP/codeweb-gate.md"
+      - name: Post structural review comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let body;
+            try { body = fs.readFileSync(process.env.RUNNER_TEMP + '/codeweb-gate.md', 'utf8'); }
+            catch { core.info('no gate digest produced — skipping comment'); return; }
+            const marker = '<!-- codeweb-gate -->';
+            const { data: comments } = await github.rest.issues.listComments({
+              ...context.repo, issue_number: context.issue.number, per_page: 100,
+            });
+            const mine = comments.find((c) => c.body && c.body.includes(marker));
+            if (mine) await github.rest.issues.updateComment({ ...context.repo, comment_id: mine.id, body });
+            else await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+      - name: Enforce gate verdict
+        if: steps.gate.outcome != 'success'
+        run: |
+          echo "::error::codeweb gate reported structural regressions (see the PR comment / job log above)"
+          exit 1

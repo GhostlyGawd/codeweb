@@ -19,6 +19,7 @@
     "simulate-edit": "node scripts/simulate-edit.mjs",
     "hotspots": "node scripts/hotspots.mjs",
     "campaign": "node scripts/campaign.mjs",
+    "bench": "node scripts/bench.mjs",
     "reading-order": "node scripts/reading-order.mjs",
     "annotate": "node scripts/annotate.mjs",
     "bench:ts-engine": "node scripts/bench-ts-engine.mjs"

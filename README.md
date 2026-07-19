@@ -15,7 +15,7 @@ Every serious change starts with the same questions: *who uses this? what breaks
 does this already exist? is this dead?* Today an agent answers them by grepping and reading whole
 files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import
 graph once (~3 s for 3,000 symbols), then answers those questions **exactly, in milliseconds, for
-about a kilobyte each** — as **22 deterministic MCP tools for your agent** (no LLM in the loop) and
+about a kilobyte each** — as **23 deterministic MCP tools for your agent** (no LLM in the loop) and
 a self-contained **interactive map for you**.
 
 Measured on [vite](https://github.com/vitejs/vite) (3,000+ symbols), graded by the TypeScript
@@ -26,6 +26,10 @@ compiler as an independent referee ([`paper/results/oracle-ab.json`](paper/resul
 | *"Who depends on X?"* (30 symbols) | **100% of compiler-verified files, better precision than grep, 0.7 KB, one call** | 100% of files but 3× the tokens, as raw text lines the agent must still read |
 | *"What breaks if I change X?"* | **one ~1 KB answer** | no transitive operator: ~5 recursive rounds, **126× the tokens** |
 | *"Does this already exist? Is this dead? Did my edit break structure?"* | one call each (`find_similar` / `deadcode` / `diff` gate) | not answerable by search |
+
+Don't take vite's word for it — **run the same referee on your own repo**:
+`npm run bench -- <path>/.codeweb/graph.json` (context cost always; recall/precision graded by the
+TypeScript compiler wherever `typescript` resolves — same engine as the published results).
 
 In the paper's frontier-agent A/B, the same channel lifted caller-discovery recall **+0.27** with
 **~34% fewer tool calls and ~44% fewer tokens** than grep. And the byproduct is the part you can
@@ -161,6 +165,11 @@ Requires Node.js — the whole deterministic pipeline (extract → cluster → o
 on Node, no external dependencies. Static-analysis tools (universal-ctags, ripgrep, madge, etc.)
 are *optional* — they only sharpen the agent fallback path; the default engine reads the code
 directly.
+
+**In your editor:** [`editor/vscode-codeweb`](editor/vscode-codeweb/) is a zero-dependency VS Code
+extension that shows **`N callers · blast M`** CodeLens above every mapped symbol (served from the
+nearest `.codeweb/graph.json`, same numbers as `codeweb_callers`/`codeweb_impact`), with
+click-through into the interactive report.
 
 ## Use
 
@@ -390,9 +399,10 @@ above are also exposed over MCP (below).
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing all
-**22** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
-`codeweb_map` (build/rebuild the graph over MCP), `codeweb_callers/callees/impact/cycles/orphans/
-diff`, the edit-loop tools `codeweb_context/refresh`, the intelligence tools
+**23** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
+`codeweb_map` (build/rebuild the graph over MCP), `codeweb_find` (concept search — free text like
+*"retry backoff"* ranked into starting symbols, no name needed), `codeweb_callers/callees/impact/
+cycles/orphans/diff`, the edit-loop tools `codeweb_context/refresh`, the intelligence tools
 `codeweb_hotspots/campaign/reading_order`, plus `codeweb_tests/find_similar/placement/review/
 fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not exposed).
 

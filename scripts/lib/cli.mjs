@@ -101,6 +101,9 @@ export function checkStaleness(graph) {
   return stale.length ? { count: stale.length, files: stale.slice(0, 8) } : null;
 }
 
+/** Signed-delta formatter for renderers ("+3", "-2", "+0" — a delta always shows its direction). */
+export const sign = (n) => (n >= 0 ? `+${n}` : `${n}`);
+
 /**
  * Shared list-truncation for budgeted output: keep the first `limit` items and describe the rest,
  * so a tool can return top-N + an explicit remainder instead of an unbounded dump (no silent caps).

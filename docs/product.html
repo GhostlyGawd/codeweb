@@ -52,7 +52,7 @@
       <button class="te-station active" type="button" role="tab" aria-selected="true" data-te="0" style="--phase:var(--accent)">
         <span class="te-step">01</span>
         <span class="te-title">Structural queries</span>
-        <span class="te-badge">7</span>
+        <span class="te-badge">8</span>
       </button>
       <button class="te-station" type="button" role="tab" aria-selected="false" data-te="1" style="--phase:var(--teal)">
         <span class="te-step">02</span>
@@ -88,6 +88,7 @@
           <div class="te-tools">
             <div class="te-tool"><span class="te-name">codeweb_map</span><span class="te-desc">Build (or rebuild) the graph for a repo — the deterministic pipeline over MCP, so a session never dead-ends on "no graph found".</span></div>
             <div class="te-tool"><span class="te-name">codeweb_explain</span><span class="te-desc">One ~1KB card: identity, contract, dependents, blast radius, findings — "tell me about X" in a single call.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_find</span><span class="te-desc">Concept search when you do not know the name: free text ("retry backoff") ranked over identifiers/files/domains — stemmed token match weighted by exports, role, and fan-in. Deterministic, no embeddings.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_callers</span><span class="te-desc">Direct callers of a symbol (call-edge in-neighbors).</span></div>
             <div class="te-tool"><span class="te-name">codeweb_callees</span><span class="te-desc">The functions a symbol calls.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_impact</span><span class="te-desc">Blast radius: every function transitively affected by a change, plus domains touched. Call before editing.</span></div>
