@@ -146,5 +146,16 @@
       "instruction": "At the base revision, apply exactly this change to buildFullPath in lib/core/buildFullPath.js (the definition-side diff is given verbatim below), then update the codebase so it remains consistent with the change.\n\ndiff --git a/lib/core/buildFullPath.js b/lib/core/buildFullPath.js\nindex b60927c..ba07b22 100644\n--- a/lib/core/buildFullPath.js\n+++ b/lib/core/buildFullPath.js\n@@ -13,8 +13,9 @@ import combineURLs from '../helpers/combineURLs.js';\n  *\n  * @returns {string} The combined full path\n  */\n-export default function buildFullPath(baseURL, requestedURL) {\n-  if (baseURL && !isAbsoluteURL(requestedURL)) {\n+export default function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {\n+  let isRelativeUrl = !isAbsoluteURL(requestedURL);\n+  if (baseURL && isRelativeUrl || allowAbsoluteUrls == false) {\n     return combineURLs(baseURL, requestedURL);\n   }\n   return requestedURL;\n",
       "criterion": "every file that uses the changed signature compiles/behaves against the new shape; graded on (a) coverage of the historically-missed caller files and (b) zero structural regressions (diff.mjs gate)"
     }
-  ]
+  ],
+  "corpusVersion": "v3",
+  "v3Provenance": {
+    "grownFrom": "v2 (one verified task)",
+    "miningRuns": "nine runs across six repos (express, fastify, commander, dayjs, lodash, axios shallow+deep+wide-window) — every funnel committed as bench/results/replay-mine-*.json",
+    "reValidated": "buildFullPath re-mined independently at followup-window 15 with identical answer key — the instrument reproduces its own ground truth",
+    "rejectedUnderHandVerification": {
+      "candidate": "lib/core/Axios.js:Axios.request (4 caller files, 4 missed, window-15)",
+      "reason": "the matched follow-up (a3ff99b) is the fetch-adapter feature PR wholesale-rewriting xhr.js — an incidental word-bounded mention, not a semantic caller update for the async-request change; and *request* is a generic member name that contaminates caller attribution (the same artifact class as the v2 *type* rejection). Guards stay as-is: hand-verification is the designed catch for this class, not another stop-list."
+    },
+    "verdict": "guarded mining confirms true-breakage tasks are RARE; the corpus stays at one fully-verified task, honestly. Growth continues via more repos/windows — funnels are free and committed."
+  }
 }

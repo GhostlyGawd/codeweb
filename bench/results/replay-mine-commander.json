@@ -1,0 +1,15 @@
+{
+  "repo": "commander",
+  "funnel": {
+    "signaturePairs": 40,
+    "symbolsInChangedFiles": 2907,
+    "idPresentInBase": 2864,
+    "distinctiveLabel": 2787,
+    "signatureChanged": 3,
+    "enoughCallers": 1,
+    "hadMissedCallers": 1,
+    "hadFollowupFix": 0,
+    "defDiffComplete": 0
+  },
+  "tasks": []
+}

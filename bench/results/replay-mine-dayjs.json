@@ -1,0 +1,15 @@
+{
+  "repo": "dayjs",
+  "funnel": {
+    "signaturePairs": 29,
+    "symbolsInChangedFiles": 321,
+    "idPresentInBase": 299,
+    "distinctiveLabel": 287,
+    "signatureChanged": 4,
+    "enoughCallers": 0,
+    "hadMissedCallers": 0,
+    "hadFollowupFix": 0,
+    "defDiffComplete": 0
+  },
+  "tasks": []
+}

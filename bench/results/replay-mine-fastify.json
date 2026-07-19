@@ -1,0 +1,15 @@
+{
+  "repo": "fastify",
+  "funnel": {
+    "signaturePairs": 40,
+    "symbolsInChangedFiles": 808,
+    "idPresentInBase": 792,
+    "distinctiveLabel": 787,
+    "signatureChanged": 1,
+    "enoughCallers": 0,
+    "hadMissedCallers": 0,
+    "hadFollowupFix": 0,
+    "defDiffComplete": 0
+  },
+  "tasks": []
+}

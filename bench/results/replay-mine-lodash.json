@@ -1,0 +1,15 @@
+{
+  "repo": "lodash",
+  "funnel": {
+    "signaturePairs": 40,
+    "symbolsInChangedFiles": 16367,
+    "idPresentInBase": 16227,
+    "distinctiveLabel": 16161,
+    "signatureChanged": 3,
+    "enoughCallers": 0,
+    "hadMissedCallers": 0,
+    "hadFollowupFix": 0,
+    "defDiffComplete": 0
+  },
+  "tasks": []
+}

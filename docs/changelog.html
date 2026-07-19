@@ -125,9 +125,13 @@
 <p>  records each cell's true token cost from the harness's own <code>budget.spent()</code> deltas (never</p>
 <p>  solver self-report); the analyzer reports per-condition means and <code>costToFullCoverageTokens</code></p>
 <p>  — the discriminator when both arms hit the coverage ceiling. Old cells without cost report</p>
-<p>  null and are counted, not fabricated. A five-repo mining sweep (express, lodash, fastify,</p>
-<p>  dayjs, commander — funnels committed) surviving the validity guards at zero confirms how</p>
-<p>  rare true breakage tasks are.</p>
+<p>  null and are counted, not fabricated. <strong>Corpus v3 is frozen</strong> after nine mining runs across</p>
+<p>  six repos (funnels committed as <code>bench/results/replay-mine-*.json</code>): the miner re-derived</p>
+<p>  the v2 task independently at a wider follow-up window (identical answer key — the instrument</p>
+<p>  reproduces its own ground truth), one new 4-caller candidate was rejected under</p>
+<p>  hand-verification (a feature-PR rewrite mentioning the symbol, not a caller fix), and the</p>
+<p>  corpus stays at one fully-verified task — honestly. True-breakage tasks are rare; that is</p>
+<p>  the finding.</p>
 <ul>
 <li><strong>Role overrides (Spec E).</strong> <code>codeweb.rules.json</code> gains <code>roles: [{glob, role}]</code> — heuristics</li>
 </ul>

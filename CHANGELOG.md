@@ -67,9 +67,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
   records each cell's true token cost from the harness's own `budget.spent()` deltas (never
   solver self-report); the analyzer reports per-condition means and `costToFullCoverageTokens`
   — the discriminator when both arms hit the coverage ceiling. Old cells without cost report
-  null and are counted, not fabricated. A five-repo mining sweep (express, lodash, fastify,
-  dayjs, commander — funnels committed) surviving the validity guards at zero confirms how
-  rare true breakage tasks are.
+  null and are counted, not fabricated. **Corpus v3 is frozen** after nine mining runs across
+  six repos (funnels committed as `bench/results/replay-mine-*.json`): the miner re-derived
+  the v2 task independently at a wider follow-up window (identical answer key — the instrument
+  reproduces its own ground truth), one new 4-caller candidate was rejected under
+  hand-verification (a feature-PR rewrite mentioning the symbol, not a caller fix), and the
+  corpus stays at one fully-verified task — honestly. True-breakage tasks are rare; that is
+  the finding.
 - **Role overrides (Spec E).** `codeweb.rules.json` gains `roles: [{glob, role}]` — heuristics
   can't know a repo's private layout, so the repo says it once and extraction honors it (first
   match wins, invalid roles fail loudly, absent config is byte-identical to before). codeweb's
