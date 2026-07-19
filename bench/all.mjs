@@ -51,12 +51,18 @@ const warm = sh(S('run.mjs'), [opt.target, '--out-dir', ws]);
 const stagesReused = /stages reused/.test(warm.stderr);
 const regexBase = sh(S('extract-symbols.mjs'), [opt.target, '--engine', 'regex', '--out', join(ws, '.regex-base.json')]);
 const graph = JSON.parse(readFileSync(join(ws, 'graph.json'), 'utf8'));
+// The warm-vs-baseline factor is meaningful only when the baseline dwarfs process-startup
+// noise; on tiny fixture targets both terms are ~100ms of node spawns and the ratio is jitter
+// (a CI runner measured 2.17x on a two-file fixture). Below the floor it reports null with the
+// reason, and the gate skips it — explicitly, never silently.
+const BASELINE_FLOOR_MS = 300;
 const pipeline = {
   target: opt.target === ROOT ? 'codeweb (self)' : opt.target,
   symbols: graph.nodes.length, edges: graph.edges.length,
   coldMs: cold.ms, warmMs: warm.ms, stagesReused,
   regexExtractBaselineMs: regexBase.ms,
-  warmFactorVsRegexBaseline: +(warm.ms / Math.max(regexBase.ms, 1)).toFixed(2),
+  warmFactorVsRegexBaseline: regexBase.ms >= BASELINE_FLOOR_MS ? +(warm.ms / regexBase.ms).toFixed(2) : null,
+  ...(regexBase.ms >= BASELINE_FLOOR_MS ? {} : { warmFactorNote: `target too small to measure (baseline ${regexBase.ms}ms < ${BASELINE_FLOOR_MS}ms floor) — the factor gates only at repo scale` }),
 };
 
 // ---------------------------------------------------------------- session (12-call MCP drive)
@@ -127,7 +133,7 @@ if (opt.gate) {
   if (session.totalTokensApprox > budgets.sessionTokensMax) violations.push(`session: ${session.totalTokensApprox} tokens > sessionTokensMax ${budgets.sessionTokensMax}`);
   for (const [tool, bytes] of Object.entries(perTool)) if (bytes > budgets.perToolBytesMax) violations.push(`tool ${tool}: ${bytes}B > perToolBytesMax ${budgets.perToolBytesMax}`);
   if (!pipeline.stagesReused) violations.push('pipeline: no-change rerun did not reuse stages');
-  if (pipeline.warmFactorVsRegexBaseline > budgets.warmRefreshFactorMax) violations.push(`pipeline: warm rerun ${pipeline.warmFactorVsRegexBaseline}x regex baseline > ${budgets.warmRefreshFactorMax}x`);
+  if (pipeline.warmFactorVsRegexBaseline != null && pipeline.warmFactorVsRegexBaseline > budgets.warmRefreshFactorMax) violations.push(`pipeline: warm rerun ${pipeline.warmFactorVsRegexBaseline}x regex baseline > ${budgets.warmRefreshFactorMax}x`);
   if (violations.length) { console.error(`[bench:all] GATE FAILED:\n  - ${violations.join('\n  - ')}`); process.exit(1); }
   console.log('[bench:all] gate: all promises hold');
 }
