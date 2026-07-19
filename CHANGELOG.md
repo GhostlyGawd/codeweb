@@ -9,6 +9,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+_Nothing yet. Open work lands here before it ships in the next tagged release._
+
+## [0.7.0] - 2026-07-19
+
 ### Changed (the report finally looks like the product it is)
 - **A validated color system replaces generated hues.** Area colors were `hsl(i × 137.5°)` —
   unbounded spun hues; the treemap ramped green→red at full saturation (measured deutan
@@ -292,7 +296,8 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.3.0...v0.4.0

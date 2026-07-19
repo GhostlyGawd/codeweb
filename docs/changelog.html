@@ -50,6 +50,42 @@
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h2 class="cl-ver">[0.7.0] - 2026-07-19</h2>
+<h3 class="cl-grp">Changed (the report finally looks like the product it is)</h3>
+<ul>
+<li><strong>A validated color system replaces generated hues.</strong> Area colors were <code>hsl(i × 137.5°)</code> —</li>
+</ul>
+<p>  unbounded spun hues; the treemap ramped green→red at full saturation (measured deutan</p>
+<p>  ΔE 2.2 — invisible to red-green-deficient viewers). Now: a fixed-order 8-slot categorical</p>
+<p>  palette validated against the actual dark surface (worst adjacent ΔE 8.4 protan / 19.3</p>
+<p>  normal, all ≥3:1; 9th+ areas fold to neutral), a single-hue slate→red lightness ramp for</p>
+<p>  duplication density (with an on-canvas legend), reserved status colors for finding</p>
+<p>  severity, and the brand lime demoted to what it should be: UI accent (selection, focus),</p>
+<p>  never a data series.</p>
+<ul>
+<li><strong>The graph is drawn like a product.</strong> Focus + context replaces expand-everything: every</li>
+</ul>
+<p>  area starts as a bubble and clicking one expands ITS symbols in place — the all-at-once</p>
+<p>  hairball is impossible unless explicitly asked for. Curved weight-scaled edges; node fills</p>
+<p>  with darker same-hue rings; halo labels in the real UI font (the canvas font stack fell</p>
+<p>  back to a serif before); the tangle color only appears where it means something; search</p>
+<p>  reveals a hidden symbol's area instead of saying "no matches"; positions persist across</p>
+<p>  expansions; layout is seeded — the same repo always draws the same map.</p>
+<ul>
+<li><strong>Treemap/matrix polish</strong>: cell gaps + rounded corners, styled area headers with color</li>
+</ul>
+<p>  chips, readable in-cell numbers (they were dark-on-dark), chip legends instead of prose.</p>
+<ul>
+<li><strong>First paint earns its pixels</strong>: the inspector opens with the repo overview (largest</li>
+</ul>
+<p>  areas, findings counts, how-to-read) instead of "Pick an item"; engine jargon moved out</p>
+<p>  of the masthead into a tooltip; a logomark anchors the header.</p>
+<ul>
+<li><strong>Deterministic demo shots</strong> (<code>scripts/screenshot.mjs</code>): staged states (top hotspot</li>
+</ul>
+<p>  selected, its area expanded, inspector populated) at 2× retina with fixed framing — every</p>
+<p>  committed screenshot (<code>assets/screens/</code>) regenerates from the real report in one command.</p>
+<p>  The live demo (<code>docs/demo/</code>) rebuilt on the new template.</p>
 <h2 class="cl-ver">[0.6.0] - 2026-07-19</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
@@ -424,7 +460,7 @@
       </div>
     </div>
     <div class="footer-base">
-      <span>codeweb v0.6.0 · MIT · © 2026 rhenmcleod</span>
+      <span>codeweb v0.7.0 · MIT · © 2026 rhenmcleod</span>
       <span>Deterministic build · zero third-party requests on this page</span>
     </div>
   </div>
