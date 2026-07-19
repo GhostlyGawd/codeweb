@@ -61,8 +61,8 @@ its **blast radius** lights up: every function transitively affected, and the do
 the `codeweb_impact` tool — the same answer an agent gets over MCP, before it writes a line.
 
 <div align="center">
-<img src="assets/screens/06-blast-radius.png" alt="codeweb blast radius: clicking merge() in the axios graph lights up 56 transitively-affected functions across 5 domains in red, with a codeweb_impact readout that says 'editing merge() in utils.js touches 56 functions across 5 domains — review before you write'" width="540">
-<br><sub>Editing <code>merge()</code> in axios touches <b>56 functions across 5 domains</b> — try it yourself in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
+<img src="assets/screens/06-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — its area expanded in place, 58 users listed in the inspector, cross-area dependencies lit, neighboring areas highlighted" width="540">
+<br><sub>Selecting <code>AxiosError</code> in axios lights up its <b>58 users across the areas that depend on it</b> — try it yourself in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
 </div>
 
 ### Navigate the whole system

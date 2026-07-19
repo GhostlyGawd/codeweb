@@ -7,10 +7,18 @@
 <style>
   :root{
     /* Crafted Dark — warm ink + electric chartreuse; mirrors the site tokens + brand.json.
-       Red is reserved for risk / blast radius. No web fonts; system stacks only. */
+       The ACCENT is brand/UI only (selection, focus, links) — never a data series.
+       Data colors are the validated 8-slot categorical set (fixed order, CVD-checked against
+       this surface: worst adjacent ΔE 8.4 protan / 19.3 normal, all ≥3:1) + reserved status
+       colors for severity. No web fonts; system stacks only. */
     --bg:#100E14; --panel:#1A1820; --panel2:#232029; --line:#322E3A;
     --fg:#ECECEE; --muted:#9C99A6; --accent:#C6F24E; --accentFg:#0A090D;
-    --hi:#FF5D5D; --med:#FFB14E; --low:#E8C44E; --good:#5BD17A;
+    --ring:rgba(255,255,255,.10);
+    /* categorical slots (fixed order — assigned to areas by size rank, 9+ fold to neutral) */
+    --s1:#3987e5; --s2:#008300; --s3:#d55181; --s4:#c98500;
+    --s5:#199e70; --s6:#d95926; --s7:#9085e9; --s8:#e66767; --sX:#7d7a87;
+    /* status (reserved for severity — never a series) */
+    --stWarn:#fab219; --stSerious:#ec835a; --stCritical:#d03b3b; --stGood:#0ca30c;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
@@ -42,34 +50,46 @@
   .fhead{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
   .fhead h2{margin:0;font-size:15px}
   .fhead .sub{color:var(--muted);font-size:12px}
-  table.f{width:100%;border-collapse:collapse;font-size:13px}
+  table.f{width:100%;max-width:980px;border-collapse:collapse;font-size:13px}
   table.f td{padding:6px 8px;border-bottom:1px solid var(--line);cursor:pointer}
+  table.f td:first-child{width:44px}
   table.f tr:hover td{background:var(--panel2)}
-  .badge{display:inline-block;min-width:22px;text-align:center;padding:1px 7px;border-radius:11px;font-size:11px;font-weight:700;color:var(--accentFg)}
-  .b-hi{background:var(--hi)} .b-med{background:var(--med)} .b-low{background:var(--low)} .b-acc{background:var(--accent)} .b-good{background:var(--good)}
+  .badge{display:inline-block;min-width:22px;text-align:center;padding:1px 7px;border-radius:11px;font-size:11px;font-weight:700;color:var(--accentFg);font-variant-numeric:tabular-nums}
+  .b-hi{background:var(--stCritical);color:#fff} .b-med{background:var(--stSerious)} .b-low{background:var(--stWarn)}
+  .b-acc{background:var(--panel2);color:var(--fg);box-shadow:inset 0 0 0 1px var(--ring)}
   .mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
   .dim{color:var(--muted)}
   .pill{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 6px;margin-left:4px}
   /* matrix */
-  table.m{border-collapse:collapse;font-size:11px}
-  table.m th{padding:4px 6px;color:var(--muted);font-weight:600;text-align:left;white-space:nowrap}
-  table.m th.rot{height:96px;vertical-align:bottom;text-align:center}
+  table.m{border-collapse:separate;border-spacing:2px;font-size:11px}
+  table.m th{padding:4px 8px;color:var(--muted);font-weight:600;text-align:right;white-space:nowrap}
+  table.m th.rot{height:104px;vertical-align:bottom;text-align:center}
   table.m th.rot span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
-  table.m td{width:30px;height:30px;text-align:center;border:1px solid #100E14;cursor:pointer;color:#100E14;font-weight:600}
-  table.m td.diag{outline:1px solid var(--line)}
-  table.m td.zero{color:var(--line);background:var(--panel)!important;cursor:default}
-  .legend{color:var(--muted);font-size:12px;margin:10px 0}
+  table.m td{width:36px;height:36px;text-align:center;border-radius:4px;cursor:pointer;color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums;background:var(--panel)}
+  table.m td:hover{box-shadow:inset 0 0 0 2px var(--accent)}
+  table.m td.diag{box-shadow:inset 0 0 0 1px var(--ring)}
+  table.m td.zero{color:var(--line);background:var(--panel)!important;cursor:default;box-shadow:none}
+  .legend{color:var(--muted);font-size:12px;margin:12px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .chip{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;box-shadow:inset 0 0 0 1px var(--ring)}
   /* treemap */
-  #tm{position:absolute;inset:0}
-  .tmbox{position:absolute;overflow:hidden;border:1px solid #100E14;cursor:pointer;font-size:10px;color:#100E14}
-  .tmbox:hover{outline:2px solid #fff;z-index:5}
-  .tmlabel{position:absolute;top:1px;left:3px;right:2px;color:#ECECEE;font-size:10px;text-shadow:0 1px 2px #000;pointer-events:none;white-space:nowrap;overflow:hidden}
-  .tmdomlabel{position:absolute;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none}
+  #tm{position:absolute;inset:0;padding:6px}
+  .tmbox{position:absolute;overflow:hidden;border:2px solid var(--bg);border-radius:4px;cursor:pointer;font-size:10px}
+  .tmbox:hover{outline:2px solid var(--accent);z-index:5}
+  .tmdom{border:1px solid var(--line);border-radius:6px;background:var(--panel);cursor:default}
+  .tmlabel{position:absolute;top:1px;left:4px;right:3px;color:#ECECEE;font-size:10px;text-shadow:0 1px 2px rgba(0,0,0,.8);pointer-events:none;white-space:nowrap;overflow:hidden}
+  .tmdomlabel{position:absolute;font-size:11px;font-weight:600;color:var(--fg);pointer-events:none;white-space:nowrap;overflow:hidden;display:flex;align-items:center;gap:5px}
+  #tmLegend{position:absolute;right:14px;bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 10px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:7px;z-index:6}
+  #tmLegend .bar{width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,#292331,#e66767)}
   /* graph */
   #cv{display:block;background:radial-gradient(circle at 50% 38%,#16131d,#100E14);touch-action:none}
   #gsearch{position:absolute;top:10px;left:10px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:6px 9px;width:220px}
+  #gsearch:focus{outline:none;border-color:var(--accent)}
   #gctrl{position:absolute;top:10px;right:10px;display:flex;gap:6px}
   #gctrl button{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:12px}
+  #gctrl button:hover{border-color:var(--accent)}
+  #gLegend{position:absolute;left:12px;bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 10px;font-size:11px;color:var(--muted);z-index:6}
+  /* header brand */
+  #logo{width:20px;height:20px;flex:none;margin-right:2px}
   /* mobile: the desktop app layout (fixed 340px sidebar, viewport-locked) becomes a vertical stack */
   @media (max-width: 760px){
     html,body{height:auto;min-height:100%}
@@ -93,6 +113,7 @@
 </head>
 <body>
 <div id="top">
+  <svg id="logo" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#C6F24E" stroke-width="1.6"><path d="M6 8 L18 6 M6 8 L12 18 M18 6 L12 18" opacity=".55"/></g><circle cx="6" cy="8" r="3" fill="#C6F24E"/><circle cx="18" cy="6" r="2.4" fill="#9085e9"/><circle cx="12" cy="18" r="2.4" fill="#199e70"/></svg>
   <b>codeweb</b>
   <span class="meta" id="metaTarget"></span>
   <span class="meta" id="metaStats"></span>
@@ -109,12 +130,13 @@
   <div id="main">
     <div class="view on" id="view-findings"></div>
     <div class="view" id="view-matrix"></div>
-    <div class="view" id="view-treemap"><div id="tm"></div></div>
+    <div class="view" id="view-treemap"><div id="tm"></div><div id="tmLegend"><span>duplication</span><span class="bar"></span><span>0 → 100%</span></div></div>
     <div class="view" id="view-graph">
       <canvas id="cv" role="img" aria-label="Force-directed dependency graph"></canvas>
       <input id="gsearch" placeholder="search symbols… (Enter jumps)" autocomplete="off" aria-label="Search symbols; press Enter to jump to the next match, Escape to clear">
       <span id="gcount" class="meta" style="position:absolute;top:16px;left:245px" aria-live="polite"></span>
       <div id="gctrl"><button id="gFit">Fit</button><button id="gToggle"></button></div>
+      <div id="gLegend">● area — size = symbols, click to expand it · ○ symbol — size = loc · scroll zooms</div>
     </div>
   </div>
   <div id="detail" aria-live="polite"><div class="empty">Pick an item to inspect it.</div></div>
@@ -158,9 +180,17 @@
     outDeg.set(e.from, outDeg.get(e.from) + 1); inDeg.set(e.to, inDeg.get(e.to) + 1);
   });
 
+  // The validated categorical set (fixed order — the ORDER is the CVD-safety mechanism).
+  // Areas get slots by size rank; a 9th+ area folds to neutral (labels still carry identity).
   var domColor = {};
-  var DOMC = ['#C6F24E', '#A78BFA', '#4FD6C4', '#FFB14E', '#F778BA', '#5BD17A', '#7FA8FF', '#E8C44E'];
-  function colorOf(nm) { return domColor[nm] || '#9C99A6'; }
+  var DOMC = ['#3987e5', '#008300', '#d55181', '#c98500', '#199e70', '#d95926', '#9085e9', '#e66767'];
+  var NEUTRAL = '#7d7a87';
+  function colorOf(nm) { return domColor[nm] || NEUTRAL; }
+  // darker step of the same hue — node rings, treemap header chips
+  function shade(hex, f) {
+    var n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return 'rgb(' + Math.round(r * f) + ',' + Math.round(g * f) + ',' + Math.round(b * f) + ')';
+  }
   var domSummary = {}; G.domains.forEach(function (d) { domSummary[d.name] = d; });
 
   // ---------- active scope + derived metrics (recomputed when the role filter toggles) ----------
@@ -174,7 +204,7 @@
 
     domainNames = Array.from(new Set(AN.map(function (n) { return n.domain; })));
     domainNames = domainNames.filter(function (nm) { return domCount(nm) > 0; }).sort(function (a, b) { return domCount(b) - domCount(a); });
-    domainNames.forEach(function (nm, i) { if (!domColor[nm]) domColor[nm] = DOMC[i] || ('hsl(' + Math.round((i * 137.508) % 360) + ',55%,62%)'); });
+    domainNames.forEach(function (nm, i) { if (!domColor[nm]) domColor[nm] = DOMC[i] || NEUTRAL; });
 
     // duplicates: same symbol name defined in >=2 files — split off INTERFACE PATTERNS (many
     // same-named implementations that nothing in-repo calls: framework hooks/contracts like a
@@ -213,10 +243,9 @@
     var el = document.getElementById('metaStats');
     el.textContent = [
       AN.length + ' symbols' + (productOnly && nonProduct ? ' (+' + nonProduct + ' hidden)' : ''),
-      AE.length + ' edges', domainNames.length + ' areas', duplicates.length + ' dup-groups',
-      G.meta.engine ? 'engine: ' + G.meta.engine : ''
+      AE.length + ' edges', domainNames.length + ' areas', duplicates.length + ' dup-groups'
     ].filter(Boolean).join('  ·  ');
-    el.title = G.meta.engine ? 'engine: ' + G.meta.engine : '';
+    el.title = G.meta.engine ? 'extraction engine: ' + G.meta.engine : ''; // internals live in the tooltip, not the masthead
   }
   renderMeta();
   var roleBtn = document.getElementById('roleFilter');
@@ -241,7 +270,19 @@
   // ---------- detail panel ----------
   var detail = document.getElementById('detail');
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function detailEmpty() { detail.innerHTML = '<div class="empty">Pick an item to inspect it.</div>'; }
+  // First paint is an OVERVIEW, not an empty panel — the 340px column always earns its width.
+  function detailEmpty() {
+    var topDoms = domainNames.slice(0, 5).map(function (nm) {
+      return '<div class="kv"><span class="chip" style="background:' + colorOf(nm) + '"></span> ' + esc(nm) + ' <span class="dim">· ' + domCount(nm) + ' symbols</span></div>';
+    }).join('');
+    detail.innerHTML = '<h3>' + esc(G.meta.target || 'this repo') + '</h3>' +
+      '<div class="kv">' + AN.length + ' symbols · ' + AE.length + ' edges · ' + domainNames.length + ' areas</div>' +
+      '<div class="sec">largest areas</div>' + topDoms +
+      '<div class="sec">worth a look</div>' +
+      '<div class="kv">' + duplicates.length + ' duplication group(s) · ' + hotspots.length + ' hotspot(s) · ' + dead.length + ' dead-code candidate(s)</div>' +
+      '<div class="sec">how to read this</div>' +
+      '<div class="kv">Click any row, cell, or node to inspect it here. In the graph, click an area bubble to expand it; search + Enter jumps to a symbol. <code>#s=&lt;id&gt;</code> deep-links.</div>';
+  }
   function nodeRow(id) { var t = nodeById.get(id); return '<div data-node="' + esc(id) + '">' + esc(t ? (t.label || id) : id) + ' <span class="dim mono">' + esc(t ? t.file : '') + '</span></div>'; }
   function bindNodeRows(scope) {
     (scope || detail).querySelectorAll('[data-node]').forEach(function (el) {
@@ -339,14 +380,16 @@
         var val = M[i][j];
         if (val === 0) return '<td class="zero' + (i === j ? ' diag' : '') + '">·</td>';
         var t = Math.min(1, Math.log(val + 1) / Math.log(max + 1));
-        var bg = i === j ? 'rgba(63,185,80,' + (0.25 + t * 0.6) + ')' : 'rgba(88,166,255,' + (0.15 + t * 0.8) + ')';
+        var bg = i === j ? 'rgba(25,158,112,' + (0.28 + t * 0.55) + ')' : 'rgba(57,135,229,' + (0.2 + t * 0.72) + ')';
         return '<td class="' + (i === j ? 'diag' : '') + '" style="background:' + bg + '" data-a="' + i + '" data-b="' + j + '">' + val + '</td>';
       }).join('');
       return '<tr><th>' + esc(da) + '</th>' + cells + '</tr>';
     }).join('');
-    v.innerHTML = '<div class="fhead"><h2>Area coupling</h2><span class="sub">rows call columns · blue = cross-area dependency (tangling), green diagonal = internal cohesion</span></div>' +
+    v.innerHTML = '<div class="fhead"><h2>Area coupling</h2><span class="sub">rows call columns</span></div>' +
       '<table class="m"><tr>' + head + '</tr>' + rows + '</table>' +
-      '<div class="legend">Big off-diagonal numbers mean two areas are tightly entangled — candidates to merge or to put behind a clean interface. Click a cell to see its edges.</div>';
+      '<div class="legend"><span class="chip" style="background:rgba(57,135,229,.8)"></span> cross-area calls — tangling' +
+      '<span class="chip" style="background:rgba(25,158,112,.8)"></span> diagonal — internal cohesion' +
+      '<span>· big off-diagonal numbers = merge candidates or missing interface · click a cell for its edges</span></div>';
     v.querySelectorAll('td[data-a]').forEach(function (td) {
       td.onclick = function () { showCoupling(domainNames[+td.getAttribute('data-a')], domainNames[+td.getAttribute('data-b')]); };
     });
@@ -375,8 +418,12 @@
     if (w >= h) { bisect(a, x, y, w * frac, h, out); bisect(b, x + w * frac, y, w * (1 - frac), h, out); }
     else { bisect(a, x, y, w, h * frac, out); bisect(b, x, y + h * frac, w, h * (1 - frac), out); }
   }
+  // Sequential single-hue ramp (dark slate -> risk red), lightness monotonic — density is a
+  // MAGNITUDE, so lightness carries it (CVD-safe by construction; the old green->red pair
+  // measured deutan ΔE 2.2 — invisible to red-green-deficient viewers).
   function dupColor(density) {
-    var r = Math.round(63 + (248 - 63) * density), g = Math.round(185 + (81 - 185) * density), b = Math.round(80 + (73 - 80) * density);
+    var t = Math.max(0, Math.min(1, density));
+    var r = Math.round(41 + (230 - 41) * t), g = Math.round(35 + (103 - 35) * t), b = Math.round(49 + (103 - 49) * t);
     return 'rgb(' + r + ',' + g + ',' + b + ')';
   }
   function renderTreemap() {
@@ -390,9 +437,9 @@
     drects.forEach(function (dr) {
       var d = dr.ref;
       var border = document.createElement('div');
-      border.className = 'tmbox'; border.style.left = dr.x + 'px'; border.style.top = dr.y + 'px';
-      border.style.width = dr.w + 'px'; border.style.height = dr.h + 'px'; border.style.borderColor = colorOf(d.name);
-      border.style.borderWidth = '2px'; tm.appendChild(border);
+      border.className = 'tmbox tmdom'; border.style.left = dr.x + 'px'; border.style.top = dr.y + 'px';
+      border.style.width = dr.w + 'px'; border.style.height = dr.h + 'px';
+      tm.appendChild(border);
       var fmap = new Map();
       d.nodes.forEach(function (n) { if (!fmap.has(n.file)) fmap.set(n.file, []); fmap.get(n.file).push(n); });
       var files = Array.from(fmap.entries()).map(function (kv) {
@@ -400,7 +447,7 @@
         var dups = kv[1].filter(function (n) { return dupNodeIds.has(n.id); }).length;
         return { value: loc, file: kv[0], nodes: kv[1], density: kv[1].length ? dups / kv[1].length : 0 };
       }).sort(function (a, b) { return b.value - a.value; });
-      var pad = 14, frects = [];
+      var pad = 18, frects = [];
       bisect(files.map(function (f) { return { value: f.value, ref: f }; }), dr.x + 2, dr.y + pad, Math.max(1, dr.w - 4), Math.max(1, dr.h - pad - 2), frects);
       frects.forEach(function (fr) {
         var f = fr.ref, box = document.createElement('div');
@@ -412,8 +459,8 @@
         box.onclick = function () { showFile(f); };
         tm.appendChild(box);
       });
-      var dl = document.createElement('div'); dl.className = 'tmdomlabel'; dl.style.left = (dr.x + 4) + 'px'; dl.style.top = (dr.y + 1) + 'px';
-      dl.textContent = d.name + ' · ' + d.nodes.length; tm.appendChild(dl);
+      var dl = document.createElement('div'); dl.className = 'tmdomlabel'; dl.style.left = (dr.x + 6) + 'px'; dl.style.top = (dr.y + 2) + 'px'; dl.style.maxWidth = Math.max(20, dr.w - 10) + 'px';
+      dl.innerHTML = '<span class="chip" style="background:' + colorOf(d.name) + '"></span>' + esc(d.name) + ' <span class="dim">· ' + d.nodes.length + '</span>'; tm.appendChild(dl);
     });
   }
   function showFile(f) {
@@ -426,23 +473,50 @@
     bindNodeRows();
   }
 
-  // ---------- GRAPH (demoted) ----------
-  var gInit = false, gView = (G.nodes.length > 600 ? 'domain' : 'symbol'), W = null, sim = null, selectedNode = null, searchTerm = '';
+  // ---------- GRAPH ----------
+  // Focus + context: every area starts as a bubble; clicking one expands ITS symbols in place
+  // while the rest stay collapsed — the all-at-once hairball is structurally impossible unless
+  // explicitly asked for ("Expand all"). Layout is deterministic (seeded spiral, no random), so
+  // the same repo always draws the same map. Positions survive re-layout for continuity.
+  var gInit = false, expanded = new Set(), W = null, sim = null, selectedNode = null, searchTerm = '';
+  var lastPos = new Map(); // id -> {x,y} carried across layouts
   var cv = document.getElementById('cv'), ctx = cv.getContext('2d'), DPR = window.devicePixelRatio || 1, cam = { x: 0, y: 0, k: 1 };
+  var UIFONT = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif'; // canvas needs a REAL stack (bare ui-sans-serif falls back to serif)
+  function allExpanded() { return domainNames.every(function (d) { return expanded.has(d); }); }
   function gResize() { var r = cv.parentElement.getBoundingClientRect(); cv.width = r.width * DPR; cv.height = r.height * DPR; cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px'; }
+  function mapEnd(n) { return expanded.has(n.domain) ? n.id : 'd:' + n.domain; }
   function buildW() {
-    if (gView === 'domain') {
-      var dn = domainNames.map(function (nm) { var c = domCount(nm); return { id: 'd:' + nm, label: nm, domain: nm, r: Math.max(12, Math.min(60, 8 + Math.sqrt(c) * 5)) }; });
-      var agg = new Map();
-      AE.forEach(function (e) { var a = nodeById.get(e.from), b = nodeById.get(e.to); if (!a || !b || a.domain === b.domain) return; var k = a.domain < b.domain ? a.domain + '␟' + b.domain : b.domain + '␟' + a.domain; agg.set(k, (agg.get(k) || 0) + 1); });
-      var de = Array.from(agg.entries()).map(function (kv) { var p = kv[0].split('␟'); return { from: 'd:' + p[0], to: 'd:' + p[1], weight: kv[1] }; });
-      return { nodes: dn, edges: de, idx: new Map(dn.map(function (d) { return [d.id, d]; })) };
-    }
-    var wn = AN.map(function (n) { return { id: n.id, label: n.label, domain: n.domain, r: Math.max(3, Math.min(18, 3 + Math.sqrt(n.loc || 6))) }; });
-    var we = AE.map(function (e) { return { from: e.from, to: e.to, cross: nodeById.get(e.from).domain !== nodeById.get(e.to).domain }; });
+    var wn = [];
+    domainNames.forEach(function (nm) {
+      if (expanded.has(nm)) {
+        AN.forEach(function (n) { if (n.domain === nm) wn.push({ id: n.id, label: n.label, domain: nm, sym: true, r: Math.max(3.5, Math.min(16, 3 + Math.sqrt(n.loc || 6))) }); });
+      } else {
+        var c = domCount(nm);
+        wn.push({ id: 'd:' + nm, label: nm, domain: nm, bubble: true, count: c, r: Math.max(14, Math.min(56, 9 + Math.sqrt(c) * 4.6)) });
+      }
+    });
+    var agg = new Map();
+    AE.forEach(function (e) {
+      var a = nodeById.get(e.from), b = nodeById.get(e.to); if (!a || !b) return;
+      var f = mapEnd(a), t = mapEnd(b); if (f === t) return;
+      var k = f + '␟' + t;
+      var cur = agg.get(k); if (cur) cur.weight++; else agg.set(k, { from: f, to: t, weight: 1, cross: a.domain !== b.domain });
+    });
+    var we = Array.from(agg.values());
     return { nodes: wn, edges: we, idx: new Map(wn.map(function (n) { return [n.id, n]; })) };
   }
-  function gLayout() { W = buildW(); var n = W.nodes.length, R = Math.max(120, n * 8); W.nodes.forEach(function (nd, i) { var a = i * 2.39996, rad = R * Math.sqrt(i / Math.max(1, n)); nd.x = Math.cos(a) * rad; nd.y = Math.sin(a) * rad; nd.vx = 0; nd.vy = 0; }); sim = { alpha: 1, running: false }; gFit(); gStart(); }
+  function gLayout() {
+    if (W) W.nodes.forEach(function (nd) { lastPos.set(nd.id, { x: nd.x, y: nd.y }); });
+    W = buildW();
+    var n = W.nodes.length, R = Math.max(140, Math.sqrt(n) * 60);
+    W.nodes.forEach(function (nd, i) {
+      var prev = lastPos.get(nd.id) || lastPos.get('d:' + nd.domain); // new symbols hatch from their area's bubble
+      if (prev) { nd.x = prev.x + (nd.sym ? Math.cos(i * 2.39996) * 14 : 0); nd.y = prev.y + (nd.sym ? Math.sin(i * 2.39996) * 14 : 0); }
+      else { var a = i * 2.39996, rad = R * Math.sqrt(i / Math.max(1, n)); nd.x = Math.cos(a) * rad; nd.y = Math.sin(a) * rad; }
+      nd.vx = 0; nd.vy = 0;
+    });
+    sim = { alpha: 1, running: false }; gFit(); gStart();
+  }
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function gStart() {
     if (!sim) return;
@@ -455,31 +529,89 @@
   }
   function gTick() { if (!sim || !document.getElementById('view-graph').classList.contains('on')) { if (sim) sim.running = false; return; } gStep(); gDraw(); sim.alpha *= 0.985; if (sim.alpha > 0.02) requestAnimationFrame(gTick); else sim.running = false; }
   function gStep() {
-    var ns = W.nodes, es = W.edges, a = sim.alpha, repK = gView === 'domain' ? 4500 : 1200, L = gView === 'domain' ? 170 : 50, i, j;
+    var ns = W.nodes, es = W.edges, a = sim.alpha, i, j;
     for (i = 0; i < ns.length; i++) { ns[i].fx = 0; ns[i].fy = 0; }
-    for (i = 0; i < ns.length; i++) { var A = ns[i]; for (j = i + 1; j < ns.length; j++) { var B = ns[j], dx = A.x - B.x, dy = A.y - B.y, d2 = dx * dx + dy * dy || 0.01, d = Math.sqrt(d2), f = repK / d2; A.fx += dx / d * f; A.fy += dy / d * f; B.fx -= dx / d * f; B.fy -= dy / d * f; } }
-    for (i = 0; i < es.length; i++) { var e = es[i], P = W.idx.get(e.from), Q = W.idx.get(e.to); if (!P || !Q) continue; var ex = Q.x - P.x, ey = Q.y - P.y, ed = Math.sqrt(ex * ex + ey * ey) || 0.01, df = (ed - L) / ed * 0.03; P.fx += ex * df; P.fy += ey * df; Q.fx -= ex * df; Q.fy -= ey * df; }
+    for (i = 0; i < ns.length; i++) {
+      var A = ns[i];
+      for (j = i + 1; j < ns.length; j++) {
+        var B = ns[j], dx = A.x - B.x, dy = A.y - B.y, d2 = dx * dx + dy * dy || 0.01, d = Math.sqrt(d2);
+        var repK = 900 + (A.r + B.r) * 55; // bigger bodies push harder — bubbles keep their space
+        var f = repK / d2;
+        A.fx += dx / d * f; A.fy += dy / d * f; B.fx -= dx / d * f; B.fy -= dy / d * f;
+      }
+    }
+    for (i = 0; i < es.length; i++) {
+      var e = es[i], P = W.idx.get(e.from), Q = W.idx.get(e.to); if (!P || !Q) continue;
+      var L = P.bubble && Q.bubble ? 180 : (P.bubble || Q.bubble) ? 120 : 52;
+      var ex = Q.x - P.x, ey = Q.y - P.y, ed = Math.sqrt(ex * ex + ey * ey) || 0.01, df = (ed - L) / ed * 0.03;
+      P.fx += ex * df; P.fy += ey * df; Q.fx -= ex * df; Q.fy -= ey * df;
+    }
     for (i = 0; i < ns.length; i++) { var nd = ns[i]; nd.fx += -nd.x * 0.015; nd.fy += -nd.y * 0.015; nd.vx = (nd.vx + nd.fx * a) * 0.86; nd.vy = (nd.vy + nd.fy * a) * 0.86; nd.x += nd.vx; nd.y += nd.vy; }
   }
   function gFit() { var ns = W.nodes; if (!ns.length) return; var a = 1e9, b = 1e9, c = -1e9, d = -1e9; ns.forEach(function (n) { a = Math.min(a, n.x); b = Math.min(b, n.y); c = Math.max(c, n.x); d = Math.max(d, n.y); }); var w = cv.width / DPR, h = cv.height / DPR; cam.k = Math.max(0.05, Math.min((w - 70) / Math.max(1, c - a), (h - 70) / Math.max(1, d - b), 2.5)); cam.x = w / 2 - (a + c) / 2 * cam.k; cam.y = h / 2 - (b + d) / 2 * cam.k; }
   function X(x) { return x * cam.k + cam.x; } function Y(y) { return y * cam.k + cam.y; }
   function gDraw() {
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
-    var hl = null; if (searchTerm) { var t = searchTerm.toLowerCase(); hl = new Set(W.nodes.filter(function (n) { return n.label.toLowerCase().indexOf(t) >= 0; }).map(function (n) { return n.id; })); }
-    else if (selectedNode) { hl = new Set([selectedNode]); (outAdj.get(selectedNode) || []).forEach(function (x) { hl.add(x); }); (inAdj.get(selectedNode) || []).forEach(function (x) { hl.add(x); }); }
-    W.edges.forEach(function (e) { var A = W.idx.get(e.from), B = W.idx.get(e.to); if (!A || !B) return; var on = !hl || (hl.has(e.from) && hl.has(e.to)); ctx.strokeStyle = on ? (e.cross ? 'rgba(255,182,92,0.4)' : 'rgba(139,148,158,0.25)') : 'rgba(139,148,158,0.04)'; ctx.lineWidth = gView === 'domain' ? Math.max(0.6, Math.min(7, Math.log(e.weight + 1))) : 1; ctx.beginPath(); ctx.moveTo(X(A.x), Y(A.y)); ctx.lineTo(X(B.x), Y(B.y)); ctx.stroke(); });
-    W.nodes.forEach(function (nd) { var vis = !hl || hl.has(nd.id); ctx.globalAlpha = vis ? 1 : 0.12; ctx.beginPath(); ctx.arc(X(nd.x), Y(nd.y), nd.r, 0, 6.2832); ctx.fillStyle = colorOf(nd.domain); ctx.fill(); if (selectedNode === nd.id) { ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke(); } ctx.globalAlpha = 1; if ((gView === 'domain' || nd.r > 11 || (hl && hl.has(nd.id) && hl.size < 30)) && vis) { ctx.fillStyle = '#ECECEE'; ctx.font = (gView === 'domain' ? '12px ' : '10px ') + 'ui-sans-serif'; ctx.fillText(nd.label, X(nd.x) + nd.r + 3, Y(nd.y) + 3); } });
+    // highlight set: search matches, or the selected node + its neighbors (neighbors inside a
+    // collapsed bubble light the bubble — the connection is never invisible)
+    var hl = null, hlDom = null;
+    if (searchTerm) {
+      var t = searchTerm.toLowerCase();
+      hl = new Set(); hlDom = new Set();
+      AN.forEach(function (n) { if (n.label.toLowerCase().indexOf(t) >= 0) { hl.add(n.id); hlDom.add(n.domain); } });
+    } else if (selectedNode) {
+      hl = new Set([selectedNode]); hlDom = new Set();
+      var lightUp = function (id) { var n = nodeById.get(id); if (!n) return; hl.add(mapEnd(n)); hlDom.add(n.domain); };
+      (outAdj.get(selectedNode) || []).forEach(lightUp); (inAdj.get(selectedNode) || []).forEach(lightUp);
+    }
+    var lit = function (nd) { return !hl || hl.has(nd.id) || (nd.bubble && hlDom && hlDom.has(nd.domain)); };
+    // edges: quadratic curves, weight -> alpha/width; cross-area edges wear the tangle color
+    W.edges.forEach(function (e) {
+      var A = W.idx.get(e.from), B = W.idx.get(e.to); if (!A || !B) return;
+      var on = !hl || (lit(A) && lit(B));
+      var wgt = Math.min(1, Math.log(e.weight + 1) / 3.4);
+      // between two collapsed bubbles EVERY edge is cross-area — orange would be noise there;
+      // the tangle color only means something once symbols are on screen
+      var tangle = e.cross && !(A.bubble && B.bubble);
+      ctx.strokeStyle = !on ? 'rgba(125,122,135,0.05)'
+        : tangle ? 'rgba(236,131,90,' + (0.25 + wgt * 0.4) + ')'
+        : 'rgba(156,153,166,' + (0.14 + wgt * 0.34) + ')';
+      ctx.lineWidth = A.bubble && B.bubble ? Math.max(0.8, Math.min(6, Math.log(e.weight + 1) * 1.4)) : 1;
+      var x1 = X(A.x), y1 = Y(A.y), x2 = X(B.x), y2 = Y(B.y);
+      var mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo(mx - dy * 0.09, my + dx * 0.09, x2, y2); ctx.stroke();
+    });
+    // nodes: fill + darker ring of the same hue; selection wears the brand accent
+    W.nodes.forEach(function (nd) {
+      var vis = lit(nd);
+      var c = colorOf(nd.domain);
+      ctx.globalAlpha = vis ? 1 : 0.14;
+      ctx.beginPath(); ctx.arc(X(nd.x), Y(nd.y), nd.r, 0, 6.2832);
+      ctx.fillStyle = c; ctx.fill();
+      ctx.lineWidth = nd.bubble ? 2 : 1.4; ctx.strokeStyle = shade(c, 0.5); ctx.stroke();
+      if (selectedNode === nd.id) { ctx.lineWidth = 2.5; ctx.strokeStyle = '#C6F24E'; ctx.beginPath(); ctx.arc(X(nd.x), Y(nd.y), nd.r + 2.5, 0, 6.2832); ctx.stroke(); }
+      var showLabel = vis && (nd.bubble || nd.r > 7.5 || cam.k > 1.7 || (hl && hl.has(nd.id) && hl.size < 40));
+      if (showLabel) {
+        var lx = X(nd.x) + nd.r + 4, ly = Y(nd.y) + 3.5;
+        ctx.font = (nd.bubble ? '600 12px ' : '500 10.5px ') + UIFONT;
+        ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(16,14,20,0.85)'; ctx.lineJoin = 'round';
+        var txt = nd.bubble ? nd.label + ' · ' + nd.count : nd.label;
+        ctx.strokeText(txt, lx, ly);
+        ctx.fillStyle = nd.bubble ? '#ECECEE' : '#D9D7E0'; ctx.fillText(txt, lx, ly);
+      }
+      ctx.globalAlpha = 1;
+    });
   }
   function gPick(mx, my) { var best = null, bd = 1e9; W.nodes.forEach(function (nd) { var dx = X(nd.x) - mx, dy = Y(nd.y) - my, d = Math.sqrt(dx * dx + dy * dy); if (d < nd.r + 4 && d < bd) { bd = d; best = nd; } }); return best; }
   var gdrag = null, gmoved = false;
   cv.addEventListener('pointerdown', function (ev) { var r = cv.getBoundingClientRect(); gmoved = false; gdrag = { mx: ev.clientX - r.left, my: ev.clientY - r.top, cx: cam.x, cy: cam.y }; try { cv.setPointerCapture(ev.pointerId); } catch (e) {} });
   window.addEventListener('pointermove', function (ev) { if (!gdrag) return; var r = cv.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top; if (Math.abs(mx - gdrag.mx) + Math.abs(my - gdrag.my) > 3) gmoved = true; cam.x = gdrag.cx + (mx - gdrag.mx); cam.y = gdrag.cy + (my - gdrag.my); gDraw(); });
-  window.addEventListener('pointerup', function (ev) { if (gdrag && !gmoved && document.getElementById('view-graph').classList.contains('on')) { var r = cv.getBoundingClientRect(), nd = gPick(ev.clientX - r.left, ev.clientY - r.top); if (nd) { if (gView === 'domain') { gView = 'symbol'; gLayout(); } else { selectedNode = nd.id; showNode(nd.id); gDraw(); } } else { selectedNode = null; gDraw(); } } gdrag = null; });
+  window.addEventListener('pointerup', function (ev) { if (gdrag && !gmoved && document.getElementById('view-graph').classList.contains('on')) { var r = cv.getBoundingClientRect(), nd = gPick(ev.clientX - r.left, ev.clientY - r.top); if (nd) { if (nd.bubble) { expanded.add(nd.domain); gLayout(); syncToggle(); } else { selectedNode = nd.id; showNode(nd.id); gDraw(); } } else { selectedNode = null; gDraw(); } } gdrag = null; });
   cv.addEventListener('wheel', function (ev) { ev.preventDefault(); var r = cv.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top, f = ev.deltaY < 0 ? 1.12 : 0.89, nk = Math.max(0.05, Math.min(6, cam.k * f)); cam.x = mx - (mx - cam.x) * (nk / cam.k); cam.y = my - (my - cam.y) * (nk / cam.k); cam.k = nk; gDraw(); }, { passive: false });
   document.getElementById('gFit').onclick = function () { gFit(); gDraw(); };
   var gToggle = document.getElementById('gToggle');
-  function syncToggle() { gToggle.textContent = gView === 'domain' ? 'Expand symbols' : 'Collapse to areas'; }
-  gToggle.onclick = function () { gView = gView === 'domain' ? 'symbol' : 'domain'; selectedNode = null; gLayout(); syncToggle(); };
+  function syncToggle() { gToggle.textContent = allExpanded() ? 'Collapse to areas' : (expanded.size ? 'Collapse (' + expanded.size + ' open)' : 'Expand all symbols'); }
+  gToggle.onclick = function () { if (expanded.size) expanded = new Set(); else domainNames.forEach(function (d) { expanded.add(d); }); selectedNode = null; gLayout(); syncToggle(); };
   // Search NAVIGATES: live typing dims non-matches; Enter cycles matches (centering + selecting
   // each), Escape clears. The count chip narrates n/N for screen readers too.
   var gsearchEl = document.getElementById('gsearch'), gcountEl = document.getElementById('gcount');
@@ -498,9 +630,9 @@
     if (e.key === 'Escape') { gsearchEl.value = ''; searchTerm = ''; refreshHits(); selectedNode = null; gDraw(); return; }
     if (e.key !== 'Enter' || !searchHits.length) return;
     e.preventDefault();
-    if (gView === 'domain') { gView = 'symbol'; gLayout(); syncToggle(); }
     searchIx = (searchIx + 1) % searchHits.length;
     var hit = searchHits[searchIx];
+    if (!expanded.has(hit.domain)) { expanded.add(hit.domain); gLayout(); syncToggle(); } // reveal, don't refuse
     var nd = W.idx.get(hit.id);
     if (nd) { centerOn(nd); selectedNode = hit.id; showNode(hit.id); }
     gcountEl.textContent = (searchIx + 1) + '/' + searchHits.length + '  ' + hit.label;
@@ -523,6 +655,19 @@
   // boot
   renderFindings(); rendered.findings = true; detailEmpty();
 
+  // staging hook for scripts/screenshot.mjs — drives the report into a DEMONSTRATIVE state
+  // (top hotspot selected, its area expanded, neighbors lit). Not part of the UI.
+  window.__codewebStage = {
+    topHotspot: function () {
+      var top = hotspots[0]; if (!top) return null;
+      activate('graph'); gResize(); if (!gInit) { gInit = true; syncToggle(); gLayout(); }
+      if (!expanded.has(top.domain)) { expanded.add(top.domain); gLayout(); syncToggle(); }
+      var nd = W.idx.get(top.id);
+      if (nd) { selectedNode = top.id; centerOn(nd); showNode(top.id); gDraw(); }
+      return top.id;
+    }
+  };
+
   // deep link: #s=<node id> selects the symbol on load (shareable findings)
   (function () {
     var m = /^#s=(.+)$/.exec(location.hash || '');
@@ -530,10 +675,11 @@
     var id = decodeURIComponent(m[1]);
     if (!nodeById.has(id)) return;
     activate('graph');
-    // after the first layout pass, center + select the linked node
+    // after the first layout pass, expand JUST the target's area, then center + select
     setTimeout(function () {
+      var tn = nodeById.get(id);
+      if (tn && !expanded.has(tn.domain)) { expanded.add(tn.domain); gLayout(); syncToggle(); }
       var nd = W && W.idx.get(id);
-      if (gView === 'domain') { gView = 'symbol'; gLayout(); syncToggle(); nd = W.idx.get(id); }
       if (nd) { selectedNode = id; centerOn(nd); showNode(id); gDraw(); }
     }, REDUCED ? 50 : 900);
   })();

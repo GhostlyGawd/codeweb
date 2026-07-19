@@ -9,7 +9,31 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Changed (the report finally looks like the product it is)
+- **A validated color system replaces generated hues.** Area colors were `hsl(i × 137.5°)` —
+  unbounded spun hues; the treemap ramped green→red at full saturation (measured deutan
+  ΔE 2.2 — invisible to red-green-deficient viewers). Now: a fixed-order 8-slot categorical
+  palette validated against the actual dark surface (worst adjacent ΔE 8.4 protan / 19.3
+  normal, all ≥3:1; 9th+ areas fold to neutral), a single-hue slate→red lightness ramp for
+  duplication density (with an on-canvas legend), reserved status colors for finding
+  severity, and the brand lime demoted to what it should be: UI accent (selection, focus),
+  never a data series.
+- **The graph is drawn like a product.** Focus + context replaces expand-everything: every
+  area starts as a bubble and clicking one expands ITS symbols in place — the all-at-once
+  hairball is impossible unless explicitly asked for. Curved weight-scaled edges; node fills
+  with darker same-hue rings; halo labels in the real UI font (the canvas font stack fell
+  back to a serif before); the tangle color only appears where it means something; search
+  reveals a hidden symbol's area instead of saying "no matches"; positions persist across
+  expansions; layout is seeded — the same repo always draws the same map.
+- **Treemap/matrix polish**: cell gaps + rounded corners, styled area headers with color
+  chips, readable in-cell numbers (they were dark-on-dark), chip legends instead of prose.
+- **First paint earns its pixels**: the inspector opens with the repo overview (largest
+  areas, findings counts, how-to-read) instead of "Pick an item"; engine jargon moved out
+  of the masthead into a tooltip; a logomark anchors the header.
+- **Deterministic demo shots** (`scripts/screenshot.mjs`): staged states (top hotspot
+  selected, its area expanded, inspector populated) at 2× retina with fixed framing — every
+  committed screenshot (`assets/screens/`) regenerates from the real report in one command.
+  The live demo (`docs/demo/`) rebuilt on the new template.
 
 ## [0.6.0] - 2026-07-19
 
