@@ -9,6 +9,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+_Nothing yet. Open work lands here before it ships in the next tagged release._
+
+## [0.7.1] - 2026-07-19
+
 ### Fixed
 - **README screenshots crop to content.** The regenerated shots were uniform full-page
   frames — squeezed into README boxes, the matrix rendered ~170px wide and the blast
@@ -303,7 +307,8 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/GhostlyGawd/codeweb/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.4.0...v0.5.0
