@@ -30,15 +30,19 @@ export const meta = {
   ],
 }
 
-const ROOT = 'D:/GitHub Projects/ecc-test/codeweb'
-const GRAPHS = `${ROOT}/.codeweb/pilot` // pre-built graphs (steady-state: codeweb already set up)
-
 // The Workflow runtime may deliver `args` as a JSON STRING (not the parsed object). Normalize once
 // so args.truth / args.reps / args.tasks resolve regardless. (Skipping this silently runs the legacy
 // oracle path at reps=1 — the cause of a wasted run.)
 const ARGS = (typeof args === 'string')
   ? (() => { try { return JSON.parse(args) } catch { return {} } })()
   : (args || {})
+
+// Spec M (docs/specs/pilot-budgeted-rerun.md): the harness is portable (args.root/args.graphs) and
+// can put the treatment arm on the BUDGETED surface (args.budgeted) — the same default responses a
+// real agent gets over MCP. Defaults preserve the original run environment byte-for-byte.
+const ROOT = ARGS.root || 'D:/GitHub Projects/ecc-test/codeweb'
+const GRAPHS = ARGS.graphs || `${ROOT}/.codeweb/pilot` // pre-built graphs (steady-state: codeweb already set up)
+const BUDGETED = !!ARGS.budgeted
 
 // High-fan-out targets chosen from the actual graphs (incoming call/import degree). These are the
 // cases where a refactor must touch many sites and manual grep is most likely to miss one.
@@ -116,9 +120,13 @@ const treatmentPrompt = (t) => `${COMMON}
 
 TASK: find ALL caller symbols that reference **${t.symbol}** (${t.kind}) — defined in ${t.repo} at \`${t.file}\` — i.e. every function/method/module you would have to update if you changed it.
 
-CONDITION: TREATMENT. codeweb is already set up; the graph for ${t.repo} is at \`${graphOf(t)}\`. Use it — that is your advantage. The unified query returns EVERY dependent (call ∪ import ∪ inherit ∪ test) in ONE shot, with a byKind breakdown:
+CONDITION: TREATMENT. codeweb is already set up; the graph for ${t.repo} is at \`${graphOf(t)}\`. Use it — that is your advantage. ${BUDGETED
+    ? `The default surface is BUDGETED exactly as agents receive it over MCP — summary line + per-kind counts + the top-20 most relevant + \`more.remaining\`:
+  node ${ROOT}/scripts/query.mjs ${graphOf(t)} --dependents ${t.symbolId} --limit 20 --json
+Page with \`--offset 20\`, \`--offset 40\`, ... when completeness requires it, or drop the \`--limit\` for the full list if you judge that necessary — the same choice a real MCP agent has (\`full: true\`). Also available with the same budget flags: --callers (call-only, highest precision), --tests, --impact (transitive blast radius).`
+    : `The unified query returns EVERY dependent (call ∪ import ∪ inherit ∪ test) in ONE shot, with a byKind breakdown:
   node ${ROOT}/scripts/query.mjs ${graphOf(t)} --dependents ${t.symbolId} --json
-Also available: --callers (call-only, highest precision), --tests, --impact (transitive blast radius). Lean on the tool; triage/verify with the source as much as you judge necessary (e.g. a barrel-import dependent may be a file-level edge worth confirming).
+Also available: --callers (call-only, highest precision), --tests, --impact (transitive blast radius).`} Lean on the tool; triage/verify with the source as much as you judge necessary (e.g. a barrel-import dependent may be a file-level edge worth confirming).
 
 Report ${ID_FMT} (query --callers already returns this format). Log every action in \`commands\` (one verbatim entry each, in order), set stepCount accordingly, usedCodeweb=true. Return foundCallers, commands, stepCount, usedCodeweb, confidence.`
 
@@ -265,7 +273,7 @@ const hl = headline.pairedDeltaRecall
 log(`graded ${ok.length}/${TASKS.length * REPS} task-reps · paired delta recall ${hl.mean ?? 'n/a'}${hl.sd != null ? ` +/- ${hl.sd}` : ''} · paired delta steps ${headline.pairedDeltaSteps.mean ?? 'n/a'}${headline.pairedDeltaSteps.sd != null ? ` +/- ${headline.pairedDeltaSteps.sd}` : ''}`)
 
 return {
-  config: { tasks: TASKS.map((t) => t.id), repos: [...new Set(TASKS.map((t) => t.repo))], reps: REPS, frozenTruth: !!TRUTH, frontierBaseModel: true },
+  config: { tasks: TASKS.map((t) => t.id), repos: [...new Set(TASKS.map((t) => t.repo))], reps: REPS, frozenTruth: !!TRUTH, frontierBaseModel: true, root: ROOT, usedBudgeted: BUDGETED },
   headline, perTaskAgg, perRepMeanDelta, means, integrity,
   perRep: repResults,
 }
