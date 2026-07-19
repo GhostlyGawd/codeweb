@@ -9,7 +9,15 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Changed
+- **The paper program is archived; the receipts stay.** `paper/` is retired from `main`:
+  the runnable instruments and every frozen result (nulls and the discarded pilot included)
+  now live in **`bench/`** as the product's benchmark suite (`bench/README.md`,
+  `node bench/run-all.mjs`), and the site's Paper page is gone — the evidence ledger on the
+  Research page (now including the 2026 blind replay A/B null) plus the CHANGELOG's Research
+  notes are the public record. The manuscript, pre-registration (H1–H18), and figure
+  apparatus remain in git history, last present at tag `v0.8.0`. README and ROADMAP
+  rewritten to point at receipts instead of the manuscript.
 
 ## [0.8.0] - 2026-07-19
 

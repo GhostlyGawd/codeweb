@@ -6,7 +6,7 @@ explain card with reliance/caveats, required — mirroring the hooks) raise the 
 historically-missed caller files an agent updates, versus the same agent with no tooling?
 
 ## Protocol (frozen before solving)
-- Tasks: `paper/results/replay-tasks.json` (mined, see replay-corpus spec). No task edits
+- Tasks: `bench/results/replay-tasks.json` (mined, see replay-corpus spec). No task edits
   after solving begins.
 - Arms: `control` (no tooling) vs `treatment` (ambient, REQUIRED steps). Same isolation,
   same instruction, same grader.
@@ -30,12 +30,12 @@ The v1 smoke (isObject, 1×2×1) leaked three ways: the prompt pasted the `misse
 list into both arms' grading section; solvers self-reported coverage; and the `cp -r`
 isolation kept full git history, so both arms read the follow-up fix commit — the answer
 key's source. Both cells also ran on a task later found invalid (formatting artifact, see
-the corpus spec amendment). The pilot is preserved in `paper/results/replay-ab-pilot.json`
+the corpus spec amendment). The pilot is preserved in `bench/results/replay-ab-pilot.json`
 and excluded from all analysis; the blind-solve protocol above replaces it.
 
 ## Analysis & reporting
 Per-condition means + per-task pairing; small-N reported as directional, never as
-significance theater. Results → `paper/results/replay-ab.json` (+ raw cells), a CHANGELOG
+significance theater. Results → `bench/results/replay-ab.json` (+ raw cells), a CHANGELOG
 Research note, and the site ledger IF the claim survives its own evidence rules. A null or
 a control win is reported plainly.
 

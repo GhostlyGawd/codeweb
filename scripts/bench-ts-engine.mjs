@@ -3,7 +3,7 @@
 // target. This is the "performance gate" from docs/backlog-ast-tree-sitter.md (risk #3): does the
 // parse cost stay acceptable before the tier is ever considered for default-on?
 //
-// Usage: node scripts/bench-ts-engine.mjs [target-dir]   (default: paper/corpus/axios)
+// Usage: node scripts/bench-ts-engine.mjs [target-dir]   (default: bench/corpus/axios)
 //   --no-ctags is forced so symbol discovery is identical on both sides; the ONLY variable is which
 //   engine computes complexity. Reports best-of-N wall time (subprocess) + per-symbol overhead.
 
@@ -11,7 +11,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const target = process.argv[2] || 'paper/corpus/axios';
+const target = process.argv[2] || 'bench/corpus/axios';
 if (!existsSync(target)) { console.error(`[bench] target not found: ${target}`); process.exit(1); }
 const EXTRACT = resolve('scripts/extract-symbols.mjs');
 const REPS = 3;

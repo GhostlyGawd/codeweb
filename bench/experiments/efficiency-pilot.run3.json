@@ -1,0 +1,1016 @@
+{
+  "runDate": "2026-06-23",
+  "runId": "wf_72bd8f23-e34",
+  "engineCommits": [
+    "aee5619",
+    "73ea164",
+    "4c09a92",
+    "cb325f4"
+  ],
+  "config": {
+    "tasks": [
+      "axios-merge",
+      "axios-AxiosError",
+      "axios-AxiosHeaders",
+      "flask-render_template"
+    ],
+    "repos": [
+      "axios",
+      "flask"
+    ],
+    "frontierBaseModel": true
+  },
+  "means": {
+    "control": {
+      "recall": 0.79,
+      "precision": 0.74,
+      "steps": 21.75
+    },
+    "treatment": {
+      "recall": 0.66,
+      "precision": 0.58,
+      "steps": 17.5
+    }
+  },
+  "integrity": {
+    "controlUsedCodewebViolations": [],
+    "treatmentSkippedCodeweb": []
+  },
+  "perTask": [
+    {
+      "task": "axios-merge",
+      "repo": "axios",
+      "symbol": "merge",
+      "kind": "function",
+      "note": "core util, very common name -> grep-hostile (27 callers in-graph)",
+      "truthN": 4,
+      "oracle": {
+        "confirmedTruth": [
+          "lib/utils.js:merge",
+          "lib/core/mergeConfig.js:getMergedValue",
+          "lib/core/Axios.js:_request",
+          "lib/adapters/fetch.js:factory"
+        ],
+        "codewebN": 6,
+        "manualN": 4,
+        "codewebMissedReal": 1,
+        "manualMissedCodewebCaught": 1,
+        "codewebFalsePositives": 1,
+        "discrepancies": [
+          {
+            "site": "lib/core/Axios.js:_request",
+            "verdict": "agree-real",
+            "note": "Axios.js:150 `utils.merge(headers.common, headers[config.method])` is lexically inside the `_request` method (lines 82+, before next member). Real call to the default-export merge via the `utils` default object. Both sets agree."
+          },
+          {
+            "site": "lib/adapters/fetch.js:factory",
+            "verdict": "agree-real",
+            "note": "fetch.js:75 `utils.merge.call({skipUndefined:true}, {...}, env)` is inside the `factory` arrow (line 68). Real call. Manual found it; codeweb's --callers output OMITTED it (codeweb-missed-real relative to the raw --callers list), though --impact DID include fetch.js:factory. Net: REAL caller, present in confirmedTruth."
+          },
+          {
+            "site": "lib/core/mergeConfig.js:getMergedValue",
+            "verdict": "agree-real",
+            "note": "mergeConfig.js:39 `utils.merge.call({caseless}, target, source)` and :41 `utils.merge({}, source)` are both inside nested `function getMergedValue` (line 37). Innermost enclosing symbol = getMergedValue. Real. Both sets agree."
+          },
+          {
+            "site": "lib/core/mergeConfig.js:mergeConfig",
+            "verdict": "agree-real",
+            "note": "getMergedValue is nested inside the outer `export default function mergeConfig` (line 17), so mergeConfig is an enclosing (non-innermost) scope of the same two call sites. codeweb reports it via any-enclosing-scope attribution; it is a REAL transitive enclosure but a DUPLICATE of the getMergedValue site at innermost granularity. Not separately added to confirmedTruth to avoid double-counting one physical call; not a false positive."
+          },
+          {
+            "site": "lib/utils.js:merge",
+            "verdict": "codeweb-missed-real",
+            "note": "merge recurses on itself at utils.js:477 `merge(existing, val)` and :479 `merge({}, val)`. The innermost enclosing symbol is the inner `assignValue` closure; the enclosing named function is `merge` itself. This is a REAL self/recursive reference. codeweb labels the closure `assignValue` (see next) but does not list `merge` itself; I record the canonical enclosing function symbol `lib/utils.js:merge` in confirmedTruth."
+          },
+          {
+            "site": "lib/utils.js:assignValue",
+            "verdict": "manual-missed-codeweb-caught",
+            "note": "codeweb attributes the utils.js:477/479 recursive calls to the inner named arrow `const assignValue = (val, key) => {...}` (line 463), which is the true innermost enclosing symbol. This is CORRECT and more precise than my function-level attribution. Same physical recursive call site as lib/utils.js:merge above — one real reference, two valid enclosing-symbol labels (assignValue innermost, merge outer)."
+          },
+          {
+            "site": "lib/utils.js:<module>",
+            "verdict": "not-a-real-reference",
+            "note": "Module scope of utils.js references `merge` only at line 983 inside the default-export object literal (`merge,` shorthand). That is the DEFINITION/export of the symbol, not a call/dependency on it. Listing module-scope as a caller is an export-site artifact, not a genuine caller. Excluded from confirmedTruth."
+          },
+          {
+            "site": "lib/helpers/toFormData.js:<module>",
+            "verdict": "codeweb-false-positive",
+            "note": "Verified: toFormData.js contains ZERO occurrences of `merge` (grep -c = 0). It only does `import utils from '../utils.js'` and uses unrelated members (isPlainObject, isArray, etc.). It never reads utils.merge. codeweb's caller entry is a false positive — likely from coarse default-import edge attribution (any utils consumer counted as a caller of every utils member). Excluded from confirmedTruth."
+          }
+        ]
+      },
+      "control": {
+        "truthN": 4,
+        "foundN": 6,
+        "truePositives": 4,
+        "recall": 1,
+        "precision": 0.67,
+        "missed": [],
+        "extra": [
+          "tests/unit/utils/merge.test.js:module",
+          "tests/unit/prototypepollution.test.js:module"
+        ],
+        "steps": 14,
+        "usedCodeweb": false,
+        "commands": [
+          "cd axios && grep -n \"merge\" lib/utils.js",
+          "Read lib/utils.js offset=440 limit=60",
+          "Read lib/utils.js offset=960 limit=60",
+          "Grep \\bmerge\\b in lib/ output=content",
+          "Grep \\.merge\\b across repo (excl dist) output=content",
+          "Grep \\{...merge...\\} = \\w+ destructure in lib/",
+          "Grep import/require utils in lib/",
+          "Read lib/core/mergeConfig.js offset=20 limit=55",
+          "Read lib/core/Axios.js offset=130 limit=30",
+          "Read lib/adapters/fetch.js offset=60 limit=30",
+          "cd axios && awk enclosing-method scan lines 60-152 of lib/core/Axios.js",
+          "Read lib/core/mergeConfig.js offset=125 limit=25",
+          "cd axios && grep -rn merge repo-wide (excl dist/node_modules) filtered to .merge\\b|merge(",
+          "Read tests/unit/utils/merge.test.js offset=1 limit=90"
+        ]
+      },
+      "treatment": {
+        "truthN": 4,
+        "foundN": 6,
+        "truePositives": 2,
+        "recall": 0.5,
+        "precision": 0.33,
+        "missed": [
+          "lib/utils.js:merge",
+          "lib/adapters/fetch.js:factory"
+        ],
+        "extra": [
+          "lib/core/mergeconfig.js:mergeconfig",
+          "lib/utils.js:<module>",
+          "lib/utils.js:assignvalue",
+          "tests/unit/prototypepollution.test.js:<module>"
+        ],
+        "steps": 11,
+        "usedCodeweb": true,
+        "commands": [
+          "node \"D:/GitHub Projects/ecc-test/codeweb/scripts/query.mjs\" \"D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios/graph.json\" --dependents lib/utils.js:merge --json",
+          "node \"D:/GitHub Projects/ecc-test/codeweb/scripts/query.mjs\" \"D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios/graph.json\" --callers lib/utils.js:merge --json",
+          "grep -n \"merge\" \"D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios/repo/lib/utils.js\" 2>/dev/null || grep -rn \"function merge\" \"D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios/\"",
+          "ls \"D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios/\" 2>/dev/null; echo \"---REPO ROOT FROM GRAPH---\"; node -e \"const g=require('D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios/graph.json'); console.log(JSON.stringify(g.meta||g.root||Object.keys(g).filter(k=>k!=='nodes'&&k!=='edges'),null,2))\" 2>/dev/null | head -40",
+          "grep -n \"merge\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/utils.js\"",
+          "grep -n \"merge\\b\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/Axios.js\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/mergeConfig.js\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/helpers/toFormData.js\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/tests/unit/prototypePollution.test.js\"",
+          "Read D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/utils.js offset 460 limit 35",
+          "grep -n \"function assignValue\\|assignValue\\|merge(\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/utils.js\"; echo \"---toFormData---\"; grep -n \"merge\\|assignValue\\|require.*utils\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/helpers/toFormData.js\"",
+          "grep -n \"merge\\|Merge\\|require\\|import\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/helpers/toFormData.js\" | head -30",
+          "Read D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/utils.js offset 975 limit 20",
+          "grep -niE \"utils\\.(merge|extend)|\\bmerge\\b\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/helpers/toFormData.js\"; echo \"EXIT:$?\""
+        ]
+      }
+    },
+    {
+      "task": "axios-AxiosError",
+      "repo": "axios",
+      "symbol": "AxiosError",
+      "kind": "class",
+      "note": "distinctive name -> grep-friendlier (16 in-graph)",
+      "truthN": 42,
+      "oracle": {
+        "confirmedTruth": [
+          "lib/adapters/adapters.js:getAdapter",
+          "lib/adapters/fetch.js:factory",
+          "lib/adapters/fetch.js:maxBodyLengthError",
+          "lib/adapters/fetch.js:onChunkProgress",
+          "lib/adapters/http.js:createTimeoutError",
+          "lib/adapters/http.js:enforceMaxContentLength",
+          "lib/adapters/http.js:httpAdapter",
+          "lib/adapters/http.js:setProxy",
+          "lib/adapters/http.js:transform",
+          "lib/adapters/xhr.js:<module>",
+          "lib/axios.js:<module>",
+          "lib/cancel/CanceledError.js:CanceledError",
+          "lib/core/AxiosError.js:from",
+          "lib/core/buildFullPath.js:assertValidHttpProtocolURL",
+          "lib/core/settle.js:settle",
+          "lib/defaults/index.js:transformResponse",
+          "lib/helpers/composeSignals.js:composeSignals",
+          "lib/helpers/formDataToJSON.js:throwIfDepthExceeded",
+          "lib/helpers/fromDataURI.js:fromDataURI",
+          "lib/helpers/resolveConfig.js:resolveConfig",
+          "lib/helpers/toFormData.js:convertValue",
+          "lib/helpers/toFormData.js:throwIfMaxDepthExceeded",
+          "lib/helpers/validator.js:<module>",
+          "lib/helpers/validator.js:assertOptions",
+          "tests/browser/requests.browser.test.js:<module>",
+          "tests/browser/settle.browser.test.js:<module>",
+          "tests/browser/transform.browser.test.js:<module>",
+          "tests/unit/adapters/adapters.test.js:<module>",
+          "tests/unit/adapters/fetch.test.js:<module>",
+          "tests/unit/adapters/http.test.js:<module>",
+          "tests/unit/core/AxiosError.test.js:<module>",
+          "tests/unit/core/AxiosError.test.js:makeCircularCause",
+          "tests/unit/core/buildFullPath.test.js:<module>",
+          "tests/unit/core/dispatchRequest.test.js:<module>",
+          "tests/unit/core/settle.test.js:<module>",
+          "tests/unit/helpers/formDataToJSON.test.js:<module>",
+          "tests/unit/helpers/isAxiosError.test.js:<module>",
+          "tests/unit/helpers/resolveConfig.test.js:<module>",
+          "tests/unit/helpers/validator.test.js:<module>",
+          "tests/unit/prototypePollution.test.js:<module>",
+          "tests/unit/toFormData.test.js:<module>",
+          "tests/unit/transformResponse.test.js:<module>"
+        ],
+        "codewebN": 20,
+        "manualN": 43,
+        "codewebMissedReal": 20,
+        "manualMissedCodewebCaught": 1,
+        "codewebFalsePositives": 0,
+        "discrepancies": [
+          {
+            "site": "lib/adapters/adapters.js:getAdapter",
+            "verdict": "agree-real",
+            "note": "new AxiosError(...) + AxiosError.ERR_NOT_SUPPORT at L84/L108-110 inside getAdapter. Both sets agree."
+          },
+          {
+            "site": "lib/adapters/fetch.js:factory",
+            "verdict": "agree-real",
+            "note": "Folds the anonymous resolvers IIFE arrow (L150), the main async(config) adapter body (L298/391/446/529 new AxiosError; L556/586 instanceof; L592 new; L611 AxiosError.from) into the nearest named enclosing symbol factory. Real."
+          },
+          {
+            "site": "lib/adapters/fetch.js:maxBodyLengthError",
+            "verdict": "agree-real",
+            "note": "maxBodyLengthError arrow (L243-249) constructs new AxiosError. Real."
+          },
+          {
+            "site": "lib/adapters/fetch.js:onChunkProgress",
+            "verdict": "agree-real",
+            "note": "new AxiosError at L484 inside onChunkProgress arrow (L480). Real."
+          },
+          {
+            "site": "lib/adapters/http.js:createTimeoutError",
+            "verdict": "agree-real",
+            "note": "new AxiosError L608-610 inside createTimeoutError. Real."
+          },
+          {
+            "site": "lib/adapters/http.js:enforceMaxContentLength",
+            "verdict": "agree-real",
+            "note": "new AxiosError L1162 inside async generator enforceMaxContentLength (L1157). Real."
+          },
+          {
+            "site": "lib/adapters/http.js:httpAdapter",
+            "verdict": "agree-real",
+            "note": "Many sites in the httpAdapter request executor body: L682/707/731/792/805/878/913/930/1008/1020/1318. Real. (Note: refs in nested event-listener fn-expressions handleStreamData L1192, handlerStreamAborted L1207, handleStreamError L1220, handleStreamEnd L1235, handleRequestError L1259 are real too but codeweb has no node for them; nearest known enclosing symbol is httpAdapter, so they are subsumed and add no new caller.)"
+          },
+          {
+            "site": "lib/adapters/http.js:setProxy",
+            "verdict": "agree-real",
+            "note": "new AxiosError('Invalid proxy authorization', ...) L323 inside setProxy. Real."
+          },
+          {
+            "site": "lib/adapters/http.js:transform",
+            "verdict": "agree-real",
+            "note": "new AxiosError L1388 inside the inline stream.Transform transform(chunk,_enc,cb) method (L1384). codeweb extracted this as a distinct symbol. Real."
+          },
+          {
+            "site": "lib/adapters/xhr.js:<module>",
+            "verdict": "agree-real",
+            "note": "Default-exported anonymous adapter; new AxiosError sites live in nested named fn-exprs handleAbort(L111)/handleError(L124)/handleTimeout(L142) and the dispatchXhrRequest executor(L215). codeweb folds all to <module>. Real. (codeweb graph also has a spurious import-edge attributed to xhr.js:onloadend, but onloadend does not reference AxiosError; the file-level truth is fully captured by <module>.)"
+          },
+          {
+            "site": "lib/axios.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "axios.js L14 imports AxiosError and L60 assigns axios.AxiosError = AxiosError (module scope) -- a real re-export reference. codeweb --callers OMITS it (it is import-kind, not call-kind). codeweb's graph DOES contain the edge but mis-attributes it to lib/axios.js:createInstance; the actual reference is at module scope. --impact surfaces lib/axios.js:<module> and :createInstance."
+          },
+          {
+            "site": "lib/cancel/CanceledError.js:CanceledError",
+            "verdict": "codeweb-missed-real",
+            "note": "class CanceledError extends AxiosError (L5, inheritance) + super(...,AxiosError.ERR_CANCELED,...) (L16) inside constructor. A real dependency. codeweb --callers OMITS it (kind=inherit, filtered out); graph has the inherit-edge and --impact lists it."
+          },
+          {
+            "site": "lib/core/AxiosError.js:from",
+            "verdict": "agree-real",
+            "note": "static from() at L77 does new AxiosError(...). Self-referential real caller. Both sets agree."
+          },
+          {
+            "site": "lib/core/buildFullPath.js:assertValidHttpProtocolURL",
+            "verdict": "agree-real",
+            "note": "new AxiosError L24 inside assertValidHttpProtocolURL. Real. (buildFullPath only calls assertValidHttpProtocolURL, so it is NOT a direct AxiosError caller; --impact adds buildFullPath transitively, correctly excluded from --callers.)"
+          },
+          {
+            "site": "lib/core/settle.js:settle",
+            "verdict": "agree-real",
+            "note": "new AxiosError L19 inside settle. Real."
+          },
+          {
+            "site": "lib/defaults/index.js:transformResponse",
+            "verdict": "manual-missed-codeweb-caught",
+            "note": "AxiosError.from L133 is inside transformResponse (the second transform fn), NOT transformRequest. codeweb's graph edge mis-labels the enclosing symbol as transformRequest; the real enclosing symbol is transformResponse. The FILE is correctly identified by codeweb as a caller; only the symbol name is mis-attributed. Truth: transformResponse."
+          },
+          {
+            "site": "lib/helpers/composeSignals.js:composeSignals",
+            "verdict": "agree-real",
+            "note": "instanceof AxiosError L22 and new AxiosError L33, both lexically inside composeSignals. Real."
+          },
+          {
+            "site": "lib/helpers/formDataToJSON.js:throwIfDepthExceeded",
+            "verdict": "agree-real",
+            "note": "new AxiosError L11 inside throwIfDepthExceeded. Real. (codeweb graph also has an import-edge mis-attributed to formDataToJSON, which itself does not construct AxiosError; covered by throwIfDepthExceeded.)"
+          },
+          {
+            "site": "lib/helpers/fromDataURI.js:fromDataURI",
+            "verdict": "agree-real",
+            "note": "new AxiosError at L35/58/67 inside fromDataURI. Real."
+          },
+          {
+            "site": "lib/helpers/resolveConfig.js:resolveConfig",
+            "verdict": "codeweb-missed-real",
+            "note": "AxiosError.from L75 inside resolveConfig. codeweb --callers OMITS it (the edge is kind=import, filtered out, even though L75 is an actual call). --impact lists resolveConfig. A real caller missing from --callers output."
+          },
+          {
+            "site": "lib/helpers/toFormData.js:convertValue",
+            "verdict": "agree-real",
+            "note": "new AxiosError L142/152 inside convertValue. Real."
+          },
+          {
+            "site": "lib/helpers/toFormData.js:throwIfMaxDepthExceeded",
+            "verdict": "agree-real",
+            "note": "new AxiosError L160 inside throwIfMaxDepthExceeded. Real. (graph import-edge mis-attributed to toFormData is covered by these two call-callers.)"
+          },
+          {
+            "site": "lib/helpers/validator.js:<module>",
+            "verdict": "agree-real",
+            "note": "new AxiosError L42 inside the arrow returned by validators.transitional (a module-scope property assignment); codeweb maps to <module>. Real."
+          },
+          {
+            "site": "lib/helpers/validator.js:assertOptions",
+            "verdict": "agree-real",
+            "note": "new AxiosError L83/96/104 inside assertOptions. Real."
+          },
+          {
+            "site": "tests/unit/core/AxiosError.test.js:<module> and :makeCircularCause",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import from ../../../lib/core/AxiosError.js; dozens of new AxiosError / AxiosError.from / instanceof in it() bodies (module scope) plus AxiosError.from inside helper makeCircularCause. Real references to THIS symbol. codeweb --callers OMITS all test callers (kind=test, filtered out); graph has these edges and --impact would not surface them either since --impact is downstream-only."
+          },
+          {
+            "site": "tests/unit/adapters/http.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import; instanceof AxiosError + AxiosError.<CODE> across many it() blocks (module scope). Graph also has tests/unit/adapters/http.test.js:request edge. Real; codeweb --callers filters all test edges."
+          },
+          {
+            "site": "tests/unit/adapters/fetch.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import; instanceof AxiosError + AxiosError.ERR_INVALID_URL at module-scope it() blocks. Graph also has :makeUploadStream. Real; test edges filtered from --callers."
+          },
+          {
+            "site": "tests/unit/adapters/adapters.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import; instanceof AxiosError + AxiosError.ERR_NOT_SUPPORT at L38-39. Graph attributes to :adapter helper; real reference. --callers filters test edges."
+          },
+          {
+            "site": "tests/unit/core/settle.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import; toBeInstanceOf(AxiosError) + AxiosError.<CODE> across it() blocks. Graph also has :makeResponse. Real; filtered from --callers."
+          },
+          {
+            "site": "tests/unit/core/dispatchRequest.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import; instanceof AxiosError + new AxiosError + AxiosError.<CODE>. Graph also has :ReactNativeFormData. Real; filtered from --callers."
+          },
+          {
+            "site": "tests/unit/prototypePollution.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import; new AxiosError L1074/L1144. Graph also has :startEcho. Real; filtered from --callers."
+          },
+          {
+            "site": "tests/unit/toFormData.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import; many instanceof AxiosError + AxiosError.ERR_NOT_SUPPORT. Graph also has :createRNFormDataSpy. Real; filtered from --callers."
+          },
+          {
+            "site": "tests/unit/helpers/resolveConfig.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import; instanceof AxiosError + AxiosError.ERR_BAD_OPTION_VALUE L72-73. Graph attributes to :ReactNativeFormData. Real; filtered from --callers."
+          },
+          {
+            "site": "tests/browser/requests.browser.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import; toBeInstanceOf(AxiosError)+AxiosError.ERR_INVALID_URL L238-239. Graph also has :MockXMLHttpRequest. Real; filtered from --callers."
+          },
+          {
+            "site": "tests/browser/transform.browser.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import; AxiosError.ERR_BAD_RESPONSE L131. Graph attributes to :MockXMLHttpRequest. Real; filtered from --callers."
+          },
+          {
+            "site": "tests/unit/helpers/validator.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import + toBeInstanceOf(AxiosError) + AxiosError.ERR_BAD_OPTION(_VALUE). REAL, and codeweb's GRAPH has NO edge at all for this file (not just filtered from --callers) -- a true recall miss."
+          },
+          {
+            "site": "tests/unit/helpers/formDataToJSON.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import + toBeInstanceOf(AxiosError) + AxiosError.ERR_FORM_DATA_DEPTH_EXCEEDED. REAL; codeweb graph has NO edge for this file at all."
+          },
+          {
+            "site": "tests/unit/core/buildFullPath.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import + toBeInstanceOf(AxiosError) + AxiosError.ERR_INVALID_URL. REAL; codeweb graph has NO edge for this file at all."
+          },
+          {
+            "site": "tests/unit/transformResponse.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import + instanceof AxiosError + AxiosError.ERR_BAD_RESPONSE. REAL; codeweb graph has NO edge for this file at all."
+          },
+          {
+            "site": "tests/browser/settle.browser.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import + toBeInstanceOf(AxiosError) + AxiosError.ERR_BAD_RESPONSE. REAL; codeweb graph has NO edge for this file at all."
+          },
+          {
+            "site": "tests/unit/helpers/isAxiosError.test.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct default-import of AxiosError; uses new AxiosError(...) L7 and AxiosError.from(...) L11 (as args to isAxiosError). REAL reference to THIS class; codeweb graph has NO edge for this file at all."
+          },
+          {
+            "site": "index.js:<module>",
+            "verdict": "not-a-real-reference",
+            "note": "index.js L8/L30 destructures AxiosError from the runtime axios object and re-exports it -- this is axios.AxiosError (a property access on the default instance), NOT a static binding to lib/core/AxiosError.js:AxiosError. It re-exports the same class at runtime but is not a statically-resolvable reference to the target file symbol. Found by manual sweep; excluded from confirmedTruth as a value re-export across the public-API boundary rather than a direct symbol reference. (Borderline; documented.)"
+          },
+          {
+            "site": "index.d.ts: export class AxiosError / class CanceledError extends AxiosError / AxiosError: typeof AxiosError",
+            "verdict": "not-a-real-reference",
+            "note": "index.d.ts L509/534/551/738 are TypeScript ambient TYPE declarations of a same-named class -- a same-named different thing, not a reference to the JS runtime class. codeweb --impact lists index.d.ts:<module> as downstream type surface, but it is not a caller. Excluded."
+          },
+          {
+            "site": "tests/smoke/{esm,cjs,deno,bun}/** and tests/module/{esm,cjs}/**",
+            "verdict": "not-a-real-reference",
+            "note": "These import AxiosError from the 'axios' PACKAGE specifier (not the local file) and assert typeof AxiosError === 'function' / axios.AxiosError === AxiosError. They reference the class only at runtime through the external package's public surface, which is a different resolution root than lib/core/AxiosError.js. codeweb correctly has no local edge. Excluded from confirmedTruth as not a static reference to the target file symbol (real runtime references, but cross the package boundary)."
+          },
+          {
+            "site": "lib/core/dispatchRequest.js (onAdapterResolution)",
+            "verdict": "not-a-real-reference",
+            "note": "Only a code COMMENT mentions AxiosError (L53: '...any AxiosError it throws...'); dispatchRequest.js does not import or reference the class. codeweb --callers correctly omits it. (--impact lists dispatchRequest symbols transitively, which is impact semantics, not a direct reference.)"
+          },
+          {
+            "site": "lib/helpers/isAxiosError.js:isAxiosError",
+            "verdict": "not-a-real-reference",
+            "note": "isAxiosError() checks payload.isAxiosError === true (a duck-typed property), and does NOT import or reference the AxiosError class. Same-named property, different thing. Correctly excluded by both."
+          },
+          {
+            "site": "gulpfile.js",
+            "verdict": "not-a-real-reference",
+            "note": "Only axios.isAxiosError(err) (the helper) at L53; no reference to the AxiosError class. Not a real reference. (Appeared in a substring count but is the isAxiosError helper.)"
+          },
+          {
+            "site": "tests/unit/regression.test.js / tests/browser/instance.browser.test.js / tests/unit/api.test.js / tests/unit/adapters/errorDetails.test.js",
+            "verdict": "not-a-real-reference",
+            "note": "regression.test.js & instance.browser.test.js only compare against the STRING literal 'AxiosError' (error.name); api.test.js & errorDetails.test.js only use the isAxiosError helper. No class reference. Excluded."
+          }
+        ]
+      },
+      "control": {
+        "truthN": 42,
+        "foundN": 29,
+        "truePositives": 17,
+        "recall": 0.4,
+        "precision": 0.59,
+        "missed": [
+          "lib/adapters/fetch.js:maxbodylengtherror",
+          "lib/adapters/fetch.js:onchunkprogress",
+          "lib/adapters/http.js:transform",
+          "lib/adapters/xhr.js:<module>",
+          "lib/axios.js:<module>",
+          "lib/core/axioserror.js:from",
+          "lib/helpers/validator.js:<module>",
+          "tests/browser/requests.browser.test.js:<module>",
+          "tests/browser/settle.browser.test.js:<module>",
+          "tests/browser/transform.browser.test.js:<module>",
+          "tests/unit/adapters/adapters.test.js:<module>",
+          "tests/unit/adapters/fetch.test.js:<module>",
+          "tests/unit/adapters/http.test.js:<module>",
+          "tests/unit/core/axioserror.test.js:<module>",
+          "tests/unit/core/axioserror.test.js:makecircularcause",
+          "tests/unit/core/buildfullpath.test.js:<module>",
+          "tests/unit/core/dispatchrequest.test.js:<module>",
+          "tests/unit/core/settle.test.js:<module>",
+          "tests/unit/helpers/formdatatojson.test.js:<module>",
+          "tests/unit/helpers/isaxioserror.test.js:<module>",
+          "tests/unit/helpers/resolveconfig.test.js:<module>",
+          "tests/unit/helpers/validator.test.js:<module>",
+          "tests/unit/prototypepollution.test.js:<module>",
+          "tests/unit/toformdata.test.js:<module>",
+          "tests/unit/transformresponse.test.js:<module>"
+        ],
+        "extra": [
+          "lib/adapters/http.js:handlestreamdata",
+          "lib/adapters/http.js:handlerstreamaborted",
+          "lib/adapters/http.js:handlestreamerror",
+          "lib/adapters/http.js:handlestreamend",
+          "lib/adapters/http.js:handlerequesterror",
+          "lib/adapters/xhr.js:handleabort",
+          "lib/adapters/xhr.js:handleerror",
+          "lib/adapters/xhr.js:handletimeout",
+          "lib/adapters/xhr.js:dispatchxhrrequest",
+          "lib/axios.js:module",
+          "lib/helpers/composesignals.js:onabort",
+          "lib/helpers/validator.js:transitional"
+        ],
+        "steps": 32,
+        "usedCodeweb": false,
+        "commands": [
+          "Read lib/core/AxiosError.js",
+          "grep -rn \"AxiosError\" --include=\"*.js\" lib/ | grep -v \"lib/core/AxiosError.js\"",
+          "Read lib/adapters/adapters.js",
+          "Read lib/cancel/CanceledError.js",
+          "Read lib/core/buildFullPath.js",
+          "Read lib/core/settle.js",
+          "Read lib/helpers/composeSignals.js",
+          "Read lib/helpers/formDataToJSON.js",
+          "Read lib/helpers/fromDataURI.js",
+          "Read lib/helpers/resolveConfig.js",
+          "Read lib/helpers/validator.js",
+          "Read lib/axios.js",
+          "Read lib/adapters/xhr.js",
+          "Read lib/helpers/toFormData.js (offset 120, limit 60)",
+          "Read lib/defaults/index.js (offset 100, limit 50)",
+          "Read lib/helpers/toFormData.js (offset 100, limit 22)",
+          "Grep enclosing-symbol pattern in lib/adapters/http.js (content, -n)",
+          "Read lib/helpers/toFormData.js (offset 82, limit 18)",
+          "Read lib/adapters/http.js (offset 310, limit 20)",
+          "Grep enclosing-symbol pattern in lib/adapters/fetch.js (content, -n)",
+          "Read lib/adapters/fetch.js (offset 68, limit 92)",
+          "Read lib/adapters/fetch.js (offset 159, limit 90)",
+          "Read lib/adapters/fetch.js (offset 248, limit 120)",
+          "Grep AxiosError in lib/core/dispatchRequest.js (content, -n, -C2)",
+          "Grep nested-function pattern in lib/adapters/http.js (content, -n)",
+          "Read lib/adapters/http.js (offset 670, limit 45)",
+          "Read lib/adapters/http.js (offset 598, limit 18)",
+          "Read lib/adapters/http.js (offset 1140, limit 130)",
+          "Read lib/adapters/http.js (offset 724, limit 90)",
+          "Read lib/adapters/http.js (offset 860, limit 90)",
+          "Read lib/adapters/http.js (offset 995, limit 35)",
+          "Read lib/adapters/http.js (offset 1300, limit 100)"
+        ]
+      },
+      "treatment": {
+        "truthN": 42,
+        "foundN": 45,
+        "truePositives": 30,
+        "recall": 0.71,
+        "precision": 0.67,
+        "missed": [
+          "lib/axios.js:<module>",
+          "lib/defaults/index.js:transformresponse",
+          "tests/browser/settle.browser.test.js:<module>",
+          "tests/browser/transform.browser.test.js:<module>",
+          "tests/unit/adapters/adapters.test.js:<module>",
+          "tests/unit/core/buildfullpath.test.js:<module>",
+          "tests/unit/helpers/formdatatojson.test.js:<module>",
+          "tests/unit/helpers/isaxioserror.test.js:<module>",
+          "tests/unit/helpers/resolveconfig.test.js:<module>",
+          "tests/unit/helpers/validator.test.js:<module>",
+          "tests/unit/toformdata.test.js:<module>",
+          "tests/unit/transformresponse.test.js:<module>"
+        ],
+        "extra": [
+          "lib/adapters/xhr.js:onloadend",
+          "lib/axios.js:createinstance",
+          "lib/defaults/index.js:transformrequest",
+          "lib/helpers/formdatatojson.js:formdatatojson",
+          "lib/helpers/toformdata.js:toformdata",
+          "tests/browser/requests.browser.test.js:mockxmlhttprequest",
+          "tests/browser/transform.browser.test.js:mockxmlhttprequest",
+          "tests/unit/adapters/adapters.test.js:adapter",
+          "tests/unit/adapters/fetch.test.js:makeuploadstream",
+          "tests/unit/adapters/http.test.js:request",
+          "tests/unit/core/dispatchrequest.test.js:reactnativeformdata",
+          "tests/unit/core/settle.test.js:makeresponse",
+          "tests/unit/helpers/resolveconfig.test.js:reactnativeformdata",
+          "tests/unit/prototypepollution.test.js:startecho",
+          "tests/unit/toformdata.test.js:creaternformdataspy"
+        ],
+        "steps": 27,
+        "usedCodeweb": true,
+        "commands": [
+          "node \"D:/GitHub Projects/ecc-test/codeweb/scripts/query.mjs\" \"D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios/graph.json\" --dependents lib/core/AxiosError.js:AxiosError --json",
+          "Grep AxiosError in lib/cancel/CanceledError.js (-n, content) [path did not exist: .codeweb/pilot/axios/repo/...]",
+          "Grep AxiosError in lib/core/settle.js (-n, content) [path did not exist]",
+          "Grep AxiosError in lib/helpers/validator.js (-n, content) [path did not exist]",
+          "Grep AxiosError in lib/axios.js (-n, content) [path did not exist]",
+          "Grep AxiosError in lib/adapters/xhr.js (-n, content) [path did not exist]",
+          "Glob **/lib/core/AxiosError.js [ripgrep timed out]",
+          "node -e \"const g=require('D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios/graph.json'); console.log(JSON.stringify(g.meta||...))\" + ls .codeweb/pilot/axios/ (found root: bench/corpus/axios)",
+          "Grep AxiosError in bench/corpus/axios/lib/cancel/CanceledError.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/core/settle.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/axios.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/adapters/xhr.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/helpers/validator.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/helpers/resolveConfig.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib (files_with_matches) -> 18 files",
+          "Grep AxiosError in bench/corpus/axios/lib/core/AxiosError.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/helpers/isAxiosError.js (-n, content) -> substring-only, not a dependent",
+          "Grep AxiosError in bench/corpus/axios/lib/core/dispatchRequest.js (-n, content) -> comment-only, not a dependent",
+          "Grep AxiosError in bench/corpus/axios/lib/defaults/index.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/helpers/toFormData.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/adapters/adapters.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/core/buildFullPath.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/tests/unit/core/AxiosError.test.js (-n, content, head 12)",
+          "Grep AxiosError in bench/corpus/axios/tests/unit/core/settle.test.js (-n, content, head 6)",
+          "Grep AxiosError in bench/corpus/axios/lib/helpers/composeSignals.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/helpers/fromDataURI.js (-n, content)",
+          "Grep AxiosError in bench/corpus/axios/lib/helpers/formDataToJSON.js (-n, content)"
+        ]
+      }
+    },
+    {
+      "task": "axios-AxiosHeaders",
+      "repo": "axios",
+      "symbol": "AxiosHeaders",
+      "kind": "class",
+      "note": "class usage sites (11 in-graph)",
+      "truthN": 13,
+      "oracle": {
+        "confirmedTruth": [
+          "lib/core/Axios.js:_request",
+          "lib/adapters/http.js:httpAdapter",
+          "lib/adapters/xhr.js:dispatchXhrRequest",
+          "lib/adapters/xhr.js:onloadend",
+          "lib/adapters/fetch.js:factory",
+          "lib/core/transformData.js:transformData",
+          "lib/core/mergeConfig.js:headersToObject",
+          "lib/core/dispatchRequest.js:dispatchRequest",
+          "lib/core/dispatchRequest.js:onAdapterResolution",
+          "lib/core/dispatchRequest.js:onAdapterRejection",
+          "lib/core/AxiosError.js:redactConfig",
+          "lib/helpers/resolveConfig.js:resolveConfig",
+          "lib/axios.js:<module>"
+        ],
+        "codewebN": 2,
+        "manualN": 14,
+        "codewebMissedReal": 12,
+        "manualMissedCodewebCaught": 2,
+        "codewebFalsePositives": 0,
+        "discrepancies": [
+          {
+            "site": "lib/adapters/http.js:httpAdapter",
+            "verdict": "agree-real",
+            "note": "Both found it. codeweb modeled it as a CALL edge (the only one besides the module self-ref). Code: new AxiosHeaders() (724), AxiosHeaders.from(config.headers).normalize() (735), new AxiosHeaders(res.headers) (1146) — all inside httpAdapter (spans 518-1413). Genuine instantiation + static-call caller."
+          },
+          {
+            "site": "lib/core/AxiosHeaders.js:<module>",
+            "verdict": "manual-missed-codeweb-caught",
+            "note": "codeweb's --callers includes the file's own module scope as a 'caller' (the module-level AxiosHeaders.accessor([...]) call at 329, utils.reduceDescriptors(AxiosHeaders.prototype,...) at 339, utils.freezeMethods(AxiosHeaders) at 349, and the class declaration itself). I excluded it from confirmedTruth as a self-reference (the defining module configuring its own class), not an external caller — but it IS a real same-file reference, so this is a defensible inclusion. Borderline; kept out of confirmedTruth on the 'external dependents' reading."
+          },
+          {
+            "site": "lib/core/Axios.js:_request",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller --callers omitted. config.headers = AxiosHeaders.concat(contextHeaders, headers) at line 157 (inside _request, spans 82-233; class Axios spans 22-240). codeweb recorded an IMPORT edge attributed to Axios.js:Axios (the class), so call-only --callers/--impact miss it. The actual call site is the _request method."
+          },
+          {
+            "site": "lib/adapters/xhr.js:dispatchXhrRequest",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller --callers omitted. const requestHeaders = AxiosHeaders.from(_config.headers).normalize() at line 20, inside the named module-default Promise executor dispatchXhrRequest (17-227). codeweb created no node for this anonymous adapter fn and modeled the file's usage as an IMPORT edge attributed to xhr.js:onloadend, so --callers misses both sites."
+          },
+          {
+            "site": "lib/adapters/xhr.js:onloadend",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller --callers omitted (codeweb attributed the file's IMPORT edge here, but import edges are excluded from --callers/--impact). const responseHeaders = AxiosHeaders.from('getAllResponseHeaders' in request && request.getAllResponseHeaders()) at line 47, inside onloadend (42-77). Genuine static-call caller."
+          },
+          {
+            "site": "lib/adapters/fetch.js:factory",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller --callers omitted. AxiosHeaders.from(response.headers) at lines 439 and 543, inside the async (config) => {...} returned by factory (68-614). codeweb recorded an IMPORT edge from fetch.js:factory; call-only --callers misses it."
+          },
+          {
+            "site": "lib/core/transformData.js:transformData",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller --callers omitted. const headers = AxiosHeaders.from(context.headers) at line 18 inside transformData (the module default export, 15-28). Modeled as IMPORT edge; excluded from --callers."
+          },
+          {
+            "site": "lib/core/mergeConfig.js:headersToObject",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller --callers omitted. const headersToObject = (thing) => (thing instanceof AxiosHeaders ? { ...thing } : thing) at line 6 — a module-scope arrow used by mergeConfig's mergeMap.headers. instanceof is a genuine runtime dependency on the class. codeweb attributed the IMPORT edge to mergeConfig.js:mergeConfig (the consumer of headersToObject); the literal reference site is headersToObject."
+          },
+          {
+            "site": "lib/core/dispatchRequest.js:dispatchRequest",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller --callers omitted. config.headers = AxiosHeaders.from(config.headers) at line 37 inside dispatchRequest (34-89). codeweb recorded an IMPORT edge here; --callers excludes it."
+          },
+          {
+            "site": "lib/core/dispatchRequest.js:onAdapterResolution",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller neither --callers nor codeweb's import attribution captured at this granularity. response.headers = AxiosHeaders.from(response.headers) at line 62, inside the onAdapterResolution callback (49-65). codeweb folded all dispatchRequest.js usage onto the dispatchRequest import edge, so this nested-callback call site is not separately represented."
+          },
+          {
+            "site": "lib/core/dispatchRequest.js:onAdapterRejection",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller, same situation as onAdapterResolution. reason.response.headers = AxiosHeaders.from(reason.response.headers) at line 82, inside onAdapterRejection (66-87). Real static-call site not represented by codeweb's single import-edge attribution."
+          },
+          {
+            "site": "lib/core/AxiosError.js:redactConfig",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller --callers omitted AND codeweb misattributed. if (source instanceof AxiosHeaders) source = source.toJSON() at line 38, inside the nested visit arrow (33-70) of redactConfig (29-73). This is NOT in class AxiosError (75-170), but codeweb attributed the IMPORT edge to AxiosError.js:AxiosError (the class). Truth: redactConfig/visit. Both the call-only exclusion and the symbol attribution are off."
+          },
+          {
+            "site": "lib/helpers/resolveConfig.js:resolveConfig",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller --callers omitted. newConfig.headers = headers = AxiosHeaders.from(headers) at line 56 inside resolveConfig (39-117). Modeled as IMPORT edge; excluded from --callers. (resolveConfig is itself called by both xhr and fetch adapters, so this is a load-bearing dependency.)"
+          },
+          {
+            "site": "lib/axios.js:<module>",
+            "verdict": "codeweb-missed-real",
+            "note": "REAL caller --callers omitted. axios.AxiosHeaders = AxiosHeaders at line 78 (module scope) publicly re-exports the class onto the default instance — the canonical way consumers reach axios.AxiosHeaders. codeweb attributed the IMPORT edge to lib/axios.js:createInstance (extractor folds module-level imports onto the first function node); the assignment is actually at module scope. Real reference either way; excluded from --callers because it is an import-kind edge."
+          },
+          {
+            "site": "index.js:<module>",
+            "verdict": "manual-missed-codeweb-caught",
+            "note": "NOT a codeweb edge at all — index.js has ZERO outgoing edges in the graph. index.js destructures AxiosHeaders off the local `axios` object (line 18) and re-exports it (line 40). This is a transitive value re-export of the runtime class (public ESM entry surface). I list it in manualCallers as a real reference to the value, but EXCLUDE it from confirmedTruth: it references axios.AxiosHeaders (the already-wired property on the instance), not the class node directly, and codeweb correctly draws no edge to lib/core/AxiosHeaders.js from it. Documented as a known edge-of-scope re-export."
+          },
+          {
+            "site": "index.d.ts:<module> / index.d.cts:<module>",
+            "verdict": "not-a-real-reference",
+            "note": "TypeScript declaration files re-export the AxiosHeaders TYPE/class for the package's public type surface (export ... AxiosHeaders). These are type-level declarations consumed by tsc, not runtime callers of lib/core/AxiosHeaders.js. codeweb treats index.d.ts symbols as separate nodes with no edge to the runtime class. Correctly excluded from confirmedTruth by both methods."
+          },
+          {
+            "site": "tests/* (axiosHeaders.test.js, core/AxiosError.test.js, core/mergeConfig.test.js, prototypePollution.test.js, browser/headers|defaults|instance.browser.test.js, smoke/module import tests)",
+            "verdict": "not-a-real-reference",
+            "note": "Real references but classified as TEST edges by codeweb (8 test in-edges: axiosHeaders.test.js:<module>+HeaderBag, AxiosError.test.js:<module>+makeCircularCause, prototypePollution.test.js:<module>+startEcho, defaults.browser.test.js:<module>+MockXMLHttpRequest). Per query.mjs/graph-ops semantics, test edges are deliberately EXCLUDED from --callers (and from confirmedTruth as production callers). They would surface under --tests / --dependents. Excluded by design, not a miss."
+          },
+          {
+            "site": "docs/**/*.md (headers.md, header-methods.md, api-reference.md across en/zh/fr/es), README.md, CHANGELOG.md, THREATMODEL.md, AGENTS.md",
+            "verdict": "not-a-real-reference",
+            "note": "Prose/markdown mentions of AxiosHeaders in documentation. Not code references; no graph edges. Correctly excluded by both methods."
+          }
+        ]
+      },
+      "control": {
+        "truthN": 13,
+        "foundN": 14,
+        "truePositives": 11,
+        "recall": 0.85,
+        "precision": 0.79,
+        "missed": [
+          "lib/adapters/http.js:httpadapter",
+          "lib/axios.js:<module>"
+        ],
+        "extra": [
+          "lib/adapters/http.js:dispatchhttprequest",
+          "lib/axios.js:module",
+          "index.js:module"
+        ],
+        "steps": 26,
+        "usedCodeweb": false,
+        "commands": [
+          "cat \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/AxiosHeaders.js\" | head -50",
+          "grep -rn \"AxiosHeaders\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib\" --include=\"*.js\" -l",
+          "grep -rn \"AxiosHeaders\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib\" --include=\"*.js\"",
+          "sed -n '420,445p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/fetch.js\"",
+          "sed -n '530,545p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/fetch.js\"",
+          "grep -nE \"^(export default|const [a-zA-Z]+ = |async function|function |[a-zA-Z]+:|wrapAsync|export const)\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/fetch.js\" | sed -n '1,40p'",
+          "grep -nE \"wrapAsync|export default|=> \\{|^const [a-zA-Z]\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/fetch.js\" | sed -n '1,30p'",
+          "sed -n '715,740p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/http.js\"",
+          "sed -n '1140,1150p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/http.js\"",
+          "grep -nE \"^export default|^function |=> \\{|wrapAsync|^const [a-zA-Z]\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/http.js\" | grep -iE \"wrapAsync|export default|httpAdapter|function\" | head -20",
+          "sed -n '10,50p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/xhr.js\"",
+          "grep -nE \"^export default|function|=> \\{|wrapAsync\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/xhr.js\" | head -10",
+          "sed -n '70,82p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/axios.js\"",
+          "sed -n '145,160p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/Axios.js\"",
+          "grep -nE \"class |  [a-zA-Z]+\\(|request\\(|_request\\(\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/Axios.js\" | sed -n '1,20p'",
+          "sed -n '20,45p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/AxiosError.js\"",
+          "sed -n '30,40p;58,65p;78,85p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/dispatchRequest.js\"",
+          "grep -nE \"^function |^export default|=> \\{|onAdapterResolution|throwIfCancellationRequested\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/dispatchRequest.js\"",
+          "sed -n '1,20p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/mergeConfig.js\"",
+          "sed -n '44,90p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/dispatchRequest.js\"",
+          "sed -n '1,25p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/core/transformData.js\"",
+          "sed -n '48,58p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/helpers/resolveConfig.js\"; grep -nE \"^export default|^function |=> \\{\" \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/helpers/resolveConfig.js\" | head",
+          "awk 'NR>=68 && NR<=200 && /=>|function/' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/fetch.js\" | sed -n '1,5p'; sed -n '193,196p;610,620p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/lib/adapters/fetch.js\"",
+          "ls \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios\"; grep -rln \"AxiosHeaders\" ... (ripgrep -g flags, exit 2)",
+          "cd \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios\" && rg -n \"AxiosHeaders\" --glob '!dist/**' --glob '!test/**' --glob '!tests/**' --glob '!node_modules/**' --glob '!*.md' --glob '!*.d.ts' --glob '!*.d.cts' -g '*.js' | rg -v \"/lib/\"",
+          "sed -n '1,45p' \"D:/GitHub Projects/ecc-test/codeweb/bench/corpus/axios/index.js\""
+        ]
+      },
+      "treatment": {
+        "truthN": 13,
+        "foundN": 18,
+        "truePositives": 6,
+        "recall": 0.46,
+        "precision": 0.33,
+        "missed": [
+          "lib/core/axios.js:_request",
+          "lib/adapters/xhr.js:dispatchxhrrequest",
+          "lib/core/mergeconfig.js:headerstoobject",
+          "lib/core/dispatchrequest.js:onadapterresolution",
+          "lib/core/dispatchrequest.js:onadapterrejection",
+          "lib/core/axioserror.js:redactconfig",
+          "lib/axios.js:<module>"
+        ],
+        "extra": [
+          "lib/axios.js:createinstance",
+          "lib/core/axios.js:axios",
+          "lib/core/axioserror.js:axioserror",
+          "lib/core/mergeconfig.js:mergeconfig",
+          "tests/browser/defaults.browser.test.js:<module>",
+          "tests/browser/defaults.browser.test.js:mockxmlhttprequest",
+          "tests/unit/axiosheaders.test.js:<module>",
+          "tests/unit/axiosheaders.test.js:headerbag",
+          "tests/unit/core/axioserror.test.js:<module>",
+          "tests/unit/core/axioserror.test.js:makecircularcause",
+          "tests/unit/prototypepollution.test.js:<module>",
+          "tests/unit/prototypepollution.test.js:startecho"
+        ],
+        "steps": 16,
+        "usedCodeweb": true,
+        "commands": [
+          "node \"D:/GitHub Projects/ecc-test/codeweb/scripts/query.mjs\" \"D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios/graph.json\" --dependents lib/core/AxiosHeaders.js:AxiosHeaders --json",
+          "node \"D:/GitHub Projects/ecc-test/codeweb/scripts/query.mjs\" \"D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios/graph.json\" --callers lib/core/AxiosHeaders.js:AxiosHeaders --json",
+          "Grep AxiosHeaders in D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/axios (files_with_matches)",
+          "find \"D:/GitHub Projects/ecc-test/codeweb\" -path \"*lib/core/AxiosHeaders.js\" -not -path \"*/.codeweb/*\"; ls pilot dir",
+          "node -e 'print graph.json meta.root and top-level keys'",
+          "Grep AxiosHeaders in bench/corpus/axios/lib (files_with_matches)",
+          "Grep AxiosHeaders in bench/corpus/axios/test (files_with_matches) -> path does not exist",
+          "Grep AxiosHeaders in bench/corpus/axios/lib/helpers/parseHeaders.js (content, -n)",
+          "ls bench/corpus/axios/ ; find test files defaults.browser/axiosHeaders/prototypePollution",
+          "Grep AxiosHeaders in bench/corpus/axios/lib (content, -n, glob !**/AxiosHeaders.js)",
+          "Read bench/corpus/axios/lib/axios.js offset 30 limit 60",
+          "Read bench/corpus/axios/lib/core/AxiosError.js offset 24 limit 40",
+          "Grep AxiosHeaders in tests/unit/axiosHeaders.test.js (content, -n, head 8)",
+          "Grep AxiosHeaders in tests/unit/prototypePollution.test.js (content, -n, head 6)",
+          "Grep AxiosHeaders in tests/unit/core/AxiosError.test.js (content, -n, head 6)",
+          "Grep AxiosHeaders in tests/browser/defaults.browser.test.js (content, -n, head 6)"
+        ]
+      }
+    },
+    {
+      "task": "flask-render_template",
+      "repo": "flask",
+      "symbol": "render_template",
+      "kind": "function",
+      "note": "python cross-module (9 in-graph)",
+      "truthN": 19,
+      "oracle": {
+        "confirmedTruth": [
+          "src/flask/__init__.py:__init__",
+          "examples/celery/src/task_app/__init__.py:index",
+          "examples/javascript/js_example/views.py:index",
+          "examples/tutorial/flaskr/auth.py:register",
+          "examples/tutorial/flaskr/auth.py:login",
+          "examples/tutorial/flaskr/blog.py:index",
+          "examples/tutorial/flaskr/blog.py:create",
+          "examples/tutorial/flaskr/blog.py:update",
+          "tests/test_apps/blueprintapp/apps/admin/__init__.py:index",
+          "tests/test_apps/blueprintapp/apps/admin/__init__.py:index2",
+          "tests/test_apps/blueprintapp/apps/frontend/__init__.py:index",
+          "tests/test_apps/blueprintapp/apps/frontend/__init__.py:missing_template",
+          "tests/test_blueprints.py:test_templates_and_static",
+          "tests/test_blueprints.py:index",
+          "tests/test_templating.py:index",
+          "tests/test_templating.py:test_escaping_without_template_filename",
+          "tests/test_signals.py:index",
+          "tests/type_check/typing_route.py:return_template",
+          "tests/type_check/typing_route.py:dispatch_request"
+        ],
+        "codewebN": 7,
+        "manualN": 19,
+        "codewebMissedReal": 9,
+        "manualMissedCodewebCaught": 0,
+        "codewebFalsePositives": 0,
+        "discrepancies": [
+          {
+            "site": "src/flask/__init__.py:__init__ (line 34, `from .templating import render_template as render_template`)",
+            "verdict": "codeweb-missed-real",
+            "note": "Public re-export of the target at module scope. A real module-level reference (import) to the symbol. codeweb did not list it as a caller."
+          },
+          {
+            "site": "tests/test_blueprints.py:test_templates_and_static (lines 216, 220: flask.render_template(...))",
+            "verdict": "codeweb-missed-real",
+            "note": "Real calls to the target via the flask re-export, at test-function scope. codeweb indexed callers only under examples/ and omitted all tests/ callers."
+          },
+          {
+            "site": "tests/test_blueprints.py:index (nested index() in 9 test functions, lines 440-667)",
+            "verdict": "codeweb-missed-real",
+            "note": "Real flask.render_template(...) calls inside route-handler index() closures. Distinct sites collapse to one caller symbol <file>:index. codeweb missed all of them."
+          },
+          {
+            "site": "tests/test_templating.py:index (nested index() in ~13 test functions)",
+            "verdict": "codeweb-missed-real",
+            "note": "Real flask.render_template(...) calls in route-handler index() closures. Collapse to one <file>:index symbol. codeweb missed."
+          },
+          {
+            "site": "tests/test_templating.py:test_escaping_without_template_filename (line 115)",
+            "verdict": "codeweb-missed-real",
+            "note": "Direct flask.render_template('mail.txt', foo='<test>') assertion at test-function scope. Real call codeweb missed."
+          },
+          {
+            "site": "tests/test_signals.py:index (lines 7, 30)",
+            "verdict": "codeweb-missed-real",
+            "note": "Two nested index() route handlers call flask.render_template(...). Real; collapse to one <file>:index symbol. codeweb missed."
+          },
+          {
+            "site": "tests/test_apps/blueprintapp/apps/admin/__init__.py:index (15) and :index2 (20)",
+            "verdict": "codeweb-missed-real",
+            "note": "Blueprint view functions importing render_template from flask and calling it. Real callers under tests/ that codeweb omitted."
+          },
+          {
+            "site": "tests/test_apps/blueprintapp/apps/frontend/__init__.py:index (9) and :missing_template (14)",
+            "verdict": "codeweb-missed-real",
+            "note": "Blueprint view functions calling render_template. Real callers codeweb omitted."
+          },
+          {
+            "site": "tests/type_check/typing_route.py:return_template (88) and :dispatch_request (106)",
+            "verdict": "codeweb-missed-real",
+            "note": "Imports `from flask.templating import render_template` (directly from the defining module) and calls it in two enclosing symbols. Real callers codeweb omitted."
+          },
+          {
+            "site": "examples/celery/.../__init__.py:index; examples/javascript/.../views.py:index; examples/tutorial/flaskr/auth.py:{register,login}; examples/tutorial/flaskr/blog.py:{index,create,update}",
+            "verdict": "agree-real",
+            "note": "All 7 codeweb callers confirmed by reading: each imports render_template from flask and calls it inside the named enclosing function. Full agreement."
+          },
+          {
+            "site": "src/flask/helpers.py:make_response (lines 161, 166, 174)",
+            "verdict": "not-a-real-reference",
+            "note": "All three render_template(...) occurrences are inside the make_response docstring (illustrative `::` code blocks), not executed code. Not a caller."
+          },
+          {
+            "site": "src/flask/app.py:609 (`# The values passed to render_template take precedence.`)",
+            "verdict": "not-a-real-reference",
+            "note": "A code comment mentioning the name. Not a reference to the symbol."
+          },
+          {
+            "site": "src/flask/signals.py:9 (before_render_template = _signals.signal(...)) and __init__.py:27 / templating.py:13 / app.py uses of before_render_template",
+            "verdict": "not-a-real-reference",
+            "note": "before_render_template is a distinct Signal object, not the render_template function. Name only matches as a substring."
+          },
+          {
+            "site": "render_template_string call sites (tests/test_appctx.py:169, tests/test_json.py:213, and many *_string lines in test_templating.py/test_blueprints.py)",
+            "verdict": "not-a-real-reference",
+            "note": "render_template_string is a SEPARATE function defined at templating.py:151. Substring match only; not a reference to render_template. Excluded after word-boundary disambiguation."
+          },
+          {
+            "site": "src/flask/__init__.py:35 (render_template_string re-export), templating.py:151 def render_template_string",
+            "verdict": "not-a-real-reference",
+            "note": "Definition/re-export of the sibling function render_template_string, not the target."
+          }
+        ]
+      },
+      "control": {
+        "truthN": 19,
+        "foundN": 19,
+        "truePositives": 17,
+        "recall": 0.89,
+        "precision": 0.89,
+        "missed": [
+          "src/flask/__init__.py:__init__",
+          "tests/type_check/typing_route.py:dispatch_request"
+        ],
+        "extra": [
+          "tests/type_check/typing_route.py:rendertemplateview.dispatch_request",
+          "src/flask/__init__.py:module"
+        ],
+        "steps": 15,
+        "usedCodeweb": false,
+        "commands": [
+          "cd flask && grep -rn \"render_template\" --include=\"*.py\" src/",
+          "cd flask && sed -n '1,250p' src/flask/templating.py",
+          "cd flask && sed -n '150,180p' src/flask/helpers.py && sed -n '600,615p' src/flask/app.py",
+          "cd flask && grep -rn \"render_template\\b\" --include=\"*.py\" . | grep -v \"render_template_string|before_render_template\" | grep -vE \"src/flask/(templating|__init__|helpers|app)\\.py\"",
+          "cd flask && cat examples/celery/src/task_app/__init__.py && cat examples/javascript/js_example/views.py",
+          "cd flask && cat tests/test_apps/blueprintapp/apps/admin/__init__.py && cat tests/test_apps/blueprintapp/apps/frontend/__init__.py",
+          "cd flask && grep -nE \"^\\s*(def|class|async def) |render_template\\(\" examples/tutorial/flaskr/auth.py",
+          "cd flask && grep -nE \"^\\s*(def|class|async def) |render_template\\(\" examples/tutorial/flaskr/blog.py",
+          "cd flask && grep -nE \"^\\s*(def|class|async def) |render_template\\(\" tests/type_check/typing_route.py",
+          "cd flask && grep -nE \"^\\s*(def|class|async def) |render_template\\(\" tests/test_templating.py | sed -n '1,120p'",
+          "cd flask && grep -nE \"^\\s*(def|class|async def) |render_template\\(\" tests/test_blueprints.py | sed -n '1,160p'",
+          "cd flask && grep -nE \"^\\s*(def|class|async def) |render_template\\(\" tests/test_signals.py",
+          "cd flask && sed -n '113,116p' tests/test_templating.py && sed -n '429,441p' tests/test_templating.py && sed -n '75,99p' tests/test_templating.py",
+          "cd flask && grep -rn \"render_template\\b\" --include=\"*.py\" . | grep -vE \"render_template_string|before_render_template\" | grep -c \"render_template\" && grep -rln \"render_template\" --include=\"*.rst\" .",
+          "cd flask && grep -rnE \"import render_template|render_template as|as render_template\" --include=\"*.py\" . | grep -v \"_string\""
+        ]
+      },
+      "treatment": {
+        "truthN": 19,
+        "foundN": 18,
+        "truePositives": 18,
+        "recall": 0.95,
+        "precision": 1,
+        "missed": [
+          "src/flask/__init__.py:__init__"
+        ],
+        "extra": [],
+        "steps": 16,
+        "usedCodeweb": true,
+        "commands": [
+          "node D:/GitHub Projects/ecc-test/codeweb/scripts/query.mjs D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/flask/graph.json --dependents src/flask/templating.py:render_template --json",
+          "node D:/GitHub Projects/ecc-test/codeweb/scripts/query.mjs D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/flask/graph.json --callers src/flask/templating.py:render_template",
+          "node D:/GitHub Projects/ecc-test/codeweb/scripts/query.mjs D:/GitHub Projects/ecc-test/codeweb/.codeweb/pilot/flask/graph.json --tests src/flask/templating.py:render_template",
+          "node -e \"const g=require('.../graph.json'); console.log('root=',g.meta&&g.meta.root)\" (resolve corpus root)",
+          "Grep render_template\\b in .codeweb/pilot/flask (files_with_matches)",
+          "Grep 'render_template' in bench/corpus/flask glob=*.py (content, -n) -- full ground-truth sweep",
+          "node -e (inspect graph top keys; nodes=1625, edges=721)",
+          "Grep '^import flask|^from flask import' in tests/test_templating.py -> 'import flask'",
+          "node -e (list all 14 edges INTO render_template by kind; check test_templating/test_blueprints/test_signals node presence)",
+          "node -e (show test_templating.py:index node ids+lines; 16 nested index nodes collapse to one id)",
+          "Read tests/test_signals.py (lines 1-50): L7,L30 render_template inside nested index",
+          "Read tests/test_templating.py (full): mapped 14 non-string render_template calls to enclosing index / test_escaping_without_template_filename",
+          "Read tests/test_blueprints.py offset 205 (L216/L220 in test body) and offset 430 (nested index handlers)",
+          "node -e (map blueprint call lines 216..667 to enclosing graph symbol: test_templates_and_static + index)",
+          "node -e (grep render_template\\( across corpus, exclude _string/before_/def/import -> 44 real call lines)",
+          "Read tests/type_check/typing_route.py (full): confirmed only L88 return_template + L106 dispatch_request call it; hello_generator does NOT -> graph false positive"
+        ]
+      }
+    }
+  ]
+}

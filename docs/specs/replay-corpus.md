@@ -1,7 +1,7 @@
 # Spec: replay miner correctness + multi-repo corpus
 
 ## Problem
-`paper/experiments/replay-mine.mjs` produces the ground-truth tasks the replay A/B runs on,
+`bench/experiments/replay-mine.mjs` produces the ground-truth tasks the replay A/B runs on,
 but has **zero tests** — a miner bug would silently poison the benchmark. The corpus is also
 thin: 2 tasks, one repo (axios).
 
@@ -64,5 +64,5 @@ a candidate named `type` (a `ModuleNode` getter) whose "follow-up fix" matched o
 turned into the keyword-label guard in rule 1 (test P6).
 
 ## Done when
-Tests pass; any miner bug they expose is fixed; `paper/results/replay-tasks.json` holds the
+Tests pass; any miner bug they expose is fixed; `bench/results/replay-tasks.json` holds the
 multi-repo corpus with funnels.

@@ -210,7 +210,7 @@ const PAGES = [
   { slug: 'product', nav: 'product', title: 'Product — codeweb', ogTitle: 'codeweb — one graph, two interfaces', description: 'The 20 deterministic MCP tools, the Tier 0–3 feature map, five-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.' },
   { slug: 'research', nav: 'research', title: 'Research — codeweb', ogTitle: 'codeweb — the evidence', description: 'A pre-registered effectiveness study (32/33 checks), an efficiency pilot, and an honest claim ledger: what is validated, what is preliminary, and what is a null result.' },
   { slug: 'start', nav: 'start', title: 'Get started — codeweb', ogTitle: 'Get started with codeweb', description: 'Install codeweb as a Claude Code plugin, run the engine directly, or register the MCP server. A five-minute quickstart and the core concepts.' },
-  { slug: 'changelog', nav: 'changelog', title: 'Changelog — codeweb', ogTitle: 'codeweb changelog', description: 'Every release, capability, paper, and fix — kept in lock-step with the product under Keep a Changelog and Semantic Versioning.' },
+  { slug: 'changelog', nav: 'changelog', title: 'Changelog — codeweb', ogTitle: 'codeweb changelog', description: 'Every release, capability, benchmark, and fix — kept in lock-step with the product under Keep a Changelog and Semantic Versioning.' },
 ];
 
 function buildPage(page) {
@@ -257,23 +257,10 @@ function buildAssets() {
   if (existsSync(og)) copyFileSync(og, join(ASSETS, 'og.png'));
 }
 
-// ---------------------------------------------------------------- wrap demo + paper
-// Both are self-contained generated artifacts with their own CSS, so we inject inline-styled
+// ---------------------------------------------------------------- wrap demo
+// The demo is a self-contained generated artifact with its own CSS, so we inject inline-styled
 // navigation (no shared stylesheet, no class collisions), guarded by a marker so re-runs are idempotent.
 const MARKER = '<!--cw-nav-->';
-const A = (href, label, home) => `<a href="${href}" style="color:${home ? '#C6F24E' : '#9C99A6'};text-decoration:none">${label}</a>`;
-
-function injectPaperNav() {
-  const p = join(DOCS, 'paper', 'index.html');
-  if (!existsSync(p)) return false;
-  let html = read(p);
-  if (html.includes(MARKER)) return false;
-  const strip = `${MARKER}<nav style="position:sticky;top:0;z-index:9999;display:flex;gap:15px;align-items:center;height:38px;padding:0 16px;background:rgba(16,14,20,.94);border-bottom:1px solid #322E3A;font:600 13px/1 -apple-system,system-ui,'Segoe UI',sans-serif">`
-    + `${A('../index.html', '‹ codeweb', true)}${A('../product.html', 'Product')}${A('../research.html', 'Research')}${A('../demo/', 'Live demo')}<span style="flex:1"></span>${A('https://github.com/GhostlyGawd/codeweb', 'GitHub')}</nav>`;
-  html = html.replace(/(<body[^>]*>)/, `$1\n${strip}`);
-  writeFileSync(p, html);
-  return true;
-}
 
 function injectDemoNav() {
   const p = join(DOCS, 'demo', 'index.html');
@@ -283,8 +270,7 @@ function injectDemoNav() {
   // weave links into the report's existing 48px top bar — no layout disruption on the full-viewport app
   const wm = `${MARKER}<b><a href="../index.html" style="color:inherit;text-decoration:none">codeweb</a></b>`
     + `<a href="../index.html" style="color:#9C99A6;text-decoration:none;font-size:12px;margin-left:10px">Home</a>`
-    + `<a href="../research.html" style="color:#9C99A6;text-decoration:none;font-size:12px;margin-left:10px">Research</a>`
-    + `<a href="../paper/" style="color:#9C99A6;text-decoration:none;font-size:12px;margin-left:10px">Paper</a>`;
+    + `<a href="../research.html" style="color:#9C99A6;text-decoration:none;font-size:12px;margin-left:10px">Research</a>`;
   if (!html.includes('<b>codeweb</b>')) return false;
   html = html.replace('<b>codeweb</b>', wm);
   writeFileSync(p, html);
@@ -297,7 +283,7 @@ function main() {
   buildAssets();
   let n = 0;
   for (const p of PAGES) if (buildPage(p)) n++;
-  const wrapped = [injectPaperNav() && 'paper', injectDemoNav() && 'demo'].filter(Boolean);
+  const wrapped = [injectDemoNav() && 'demo'].filter(Boolean);
   process.stdout.write(`codeweb site: built ${n} page(s) + assets into docs/ (v${VERSION})\n`);
   if (wrapped.length) process.stdout.write(`  wrapped with shared nav: ${wrapped.join(', ')}\n`);
 }

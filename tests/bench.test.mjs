@@ -1,5 +1,5 @@
 // codeweb bench — the oracle A/B packaged as a product command. The engine itself is pinned by the
-// byte-identical reproduction of paper/results/oracle-ab.json; these tests pin the CLI contract:
+// byte-identical reproduction of bench/results/oracle-ab.json; these tests pin the CLI contract:
 // cost-only degradation without a compiler oracle, graded mode with one, and the text summary.
 
 import { test } from 'node:test';

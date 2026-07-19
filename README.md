@@ -19,7 +19,7 @@ about a kilobyte each** — as **24 deterministic MCP tools for your agent** (no
 a self-contained **interactive map for you**.
 
 Measured on [vite](https://github.com/vitejs/vite) (3,000+ symbols), graded by the TypeScript
-compiler as an independent referee ([`paper/results/oracle-ab.json`](paper/results/oracle-ab.json)):
+compiler as an independent referee ([`bench/results/oracle-ab.json`](bench/results/oracle-ab.json)):
 
 | The question | codeweb | grep |
 |---|---|---|
@@ -31,7 +31,7 @@ Don't take vite's word for it — **run the same referee on your own repo**:
 `npm run bench -- <path>/.codeweb/graph.json` (context cost always; recall/precision graded by the
 TypeScript compiler wherever `typescript` resolves — same engine as the published results).
 
-In the paper's frontier-agent A/B, the same channel lifted caller-discovery recall **+0.27** with
+In the frontier-agent A/B, the same channel lifted caller-discovery recall **+0.27** with
 **~34% fewer tool calls and ~44% fewer tokens** than grep. And the byproduct is the part you can
 see: the map also surfaces **duplication, dead code, hotspots, and tangled domains** — where your
 codebase does the same work twice, which neither you nor the agent can see from inside a file.
@@ -119,8 +119,6 @@ same rigor codeweb brings to code: independent oracles, a pinned cross-language 
 intervals, and adversarial review. **32 of 33 pre-registered checks pass** — and the testing was
 rigorous enough to **find and fix two real bugs** the engine's own 286-test suite had missed.
 
-<img src="paper/figures/fig-scorecard.svg" alt="Scorecard: 32 of 33 pre-registered checks pass across determinism, correctness, edit-safety, detection, performance, and feature coverage" width="100%">
-
 - **Correctness held against independent oracles** — **zero observed disagreements across >490,000
   comparisons** (cycles, impact, callers/callees, context-pack); 0 violations over 20,000 edit-safety trials.
 - **Detection is accurate** — exact-clone **F1 1.0** (vs 0.67 name-match), renamed-clone recall **1.0
@@ -134,9 +132,9 @@ rigorous enough to **find and fix two real bugs** the engine's own 286-test suit
   **~44% fewer tokens** than grep (all 8 engine-frozen reps positive); the harder edit-quality capstone
   stays an honest null.
 
-> **▶ Read the full study — [live on GitHub Pages](https://ghostlygawd.github.io/codeweb/paper/).**
-> Or dig into the [pre-registration](paper/PRE-REGISTRATION.md) and [raw results](paper/results/) — every
-> number regenerates with `node paper/run-all.mjs`.
+> **▶ Every number above is a receipt — see the [evidence ledger](https://ghostlygawd.github.io/codeweb/research.html).**
+> The benchmark harnesses and raw results live in [`bench/`](bench/); every number regenerates with
+> `node bench/run-all.mjs`. (The retired manuscript and pre-registration remain in git history, last at `v0.8.0`.)
 
 ## Two modes
 
@@ -542,7 +540,7 @@ regression gate + GitHub Action._
 
 codeweb follows [Semantic Versioning](https://semver.org/) and keeps a
 [Keep a Changelog](https://keepachangelog.com/)-formatted [`CHANGELOG.md`](CHANGELOG.md). Every new
-capability, paper, or fix is recorded there and shipped as a **tagged GitHub release** — product,
+capability, benchmark, or fix is recorded there and shipped as a **tagged GitHub release** — product,
 marketing, and research move as one front, never lost in commit history.
 
 One source of truth keeps it honest. The version lives in `package.json`; the MCP tool count lives in

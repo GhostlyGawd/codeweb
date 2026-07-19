@@ -19,7 +19,7 @@ import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, PLUGIN_ROOT } from './helpers.mjs';
 
-const MINER = join(PLUGIN_ROOT, 'paper', 'experiments', 'replay-mine.mjs');
+const MINER = join(PLUGIN_ROOT, 'bench', 'experiments', 'replay-mine.mjs');
 const hasGit = spawnSync('git', ['--version'], { encoding: 'utf8' }).status === 0;
 
 const CALLER = (n) => `import { process } from './lib/hub.js';\nexport function use${n}() {\n  return process(1, 2);\n}\n`;

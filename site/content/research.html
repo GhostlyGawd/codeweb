@@ -32,7 +32,7 @@
       <p class="lead">Tagged honestly: <span class="chip chip-validated">Validated</span> stands on pre-registered checks against oracles; <span class="chip chip-preliminary">Preliminary</span> is a fresh pilot signal; <span class="chip chip-null">Null</span> is a result that did not move — published anyway.</p>
     </div>
     {{claim_ledger}}
-    <p class="figcap" style="margin-top:var(--s-4)">Sources are files under <code>paper/results/</code> and <code>paper/experiments/</code> in the repository. <a href="https://github.com/GhostlyGawd/codeweb/tree/main/paper" rel="noopener">Browse the raw data →</a></p>
+    <p class="figcap" style="margin-top:var(--s-4)">Sources are files under <code>bench/results/</code> and <code>bench/experiments/</code> in the repository. <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">Browse the raw data →</a></p>
   </div>
 </section>
 
@@ -48,7 +48,7 @@
       <div class="callout callout-good">
         <h3>Why it's believable</h3>
         <p>The step reduction is oracle-independent — it doesn't depend on how the truth set is scored. The recall gain clears the measurement noise by ~6×, and the paired design cancels the shared oracle noise that swung the grep baseline run-to-run.</p>
-        <p class="muted" style="margin-bottom:0">Source: <code>paper/experiments/efficiency-pilot.reps8.json</code></p>
+        <p class="muted" style="margin-bottom:0">Source: <code>bench/experiments/efficiency-pilot.reps8.json</code></p>
       </div>
     </div>
   </div>
@@ -59,7 +59,12 @@
     <div class="callout callout-warn">
       <h3>The honest null: agent edit quality (H18)</h3>
       <p>We also tested whether agents produce <em>better edits</em> with codeweb on 8 paired tasks. The result was a clean zero — a bootstrap CI of [0, 0]. On clean, well-scoped tasks, a capable base model already avoids regressions, so there was no headroom to improve: a floor effect, not a power result. The thesis does not rest on this check, and we report it rather than bury it.</p>
-      <p class="muted" style="margin-bottom:0">Source: <code>paper/results/agent-ab.json</code> · paper §3.7</p>
+      <p class="muted" style="margin-bottom:0">Source: <code>bench/results/agent-ab.json</code></p>
+    </div>
+    <div class="callout callout-warn">
+      <h3>The honest null, part two: the blind replay A/B (2026)</h3>
+      <p>We mined git history for changes that <em>provably</em> broke callers (the repo itself needed follow-up fixes), then had agents replay them blind — no answer key, no history, coverage graded by a fixed function. On the single task that survived our own validity guards, both arms hit the ceiling: with or without codeweb, agents fixed every caller the original developer missed. The run validates the instrument and bounds the ambient effect near zero on small, well-scoped changes; discriminating between arms needs bigger, messier tasks. Published anyway.</p>
+      <p class="muted" style="margin-bottom:0">Source: <code>bench/results/replay-ab.json</code> · protocol: <code>docs/specs/replay-run.md</code></p>
     </div>
     <div class="callout">
       <h3>It found bugs its own test suite missed</h3>
@@ -77,8 +82,8 @@
     </div>
     <div class="callout honesty">{{dont_claim}}</div>
     <div class="btn-row" style="margin-top:var(--s-6)">
-      <a class="btn btn-primary" href="paper/">Read the full paper</a>
-      <a class="btn" href="https://github.com/GhostlyGawd/codeweb/tree/main/paper/results" rel="noopener">Inspect the raw results</a>
+      <a class="btn btn-primary" href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">Browse the benchmarks</a>
+      <a class="btn" href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Inspect the raw results</a>
     </div>
   </div>
 </section>
