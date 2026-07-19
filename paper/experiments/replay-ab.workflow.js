@@ -20,10 +20,12 @@ export const meta = {
   ],
 }
 
-const ROOT = args && args.root
-const TASKS_FILE = args && args.tasksFile
+let A = args
+if (typeof A === 'string') { try { A = JSON.parse(A) } catch { A = null } } // tolerate stringified args
+const ROOT = A && A.root
+const TASKS_FILE = A && A.tasksFile
 if (!ROOT || !TASKS_FILE) { log('args.root and args.tasksFile are required — aborting'); return { error: 'args.root and args.tasksFile required' } }
-const cfg = { reps: (args && args.reps) || 2, smoke: !!(args && args.smoke) }
+const cfg = { reps: (A && A.reps) || 2, smoke: !!(A && A.smoke) }
 
 const TASK = {
   type: 'object', additionalProperties: true,

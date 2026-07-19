@@ -8,7 +8,7 @@
 // concurrent writers are last-write-wins (counters may undercount under races — acceptable
 // for a receipt, documented here).
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 const statsPathOf = (graphPath) => join(dirname(graphPath), 'stats.json');
@@ -34,11 +34,46 @@ export function bump(graphPath, counter, n = 1) {
 const LABELS = [
   ['briefInjected', (v) => `${v} session brief(s)`],
   ['cardsDelivered', (v) => `${v} pre-edit card(s)`],
+  ['cardCallersFollowed', (v) => `${v} card-named caller(s) followed`],
   ['postEditChecks', (v) => `${v} post-edit check(s)`],
   ['regressionsFlagged', (v) => `${v} regression(s) flagged before landing`],
   ['queriesServed', (v) => `${v} quer${v === 1 ? 'y' : 'ies'} served`],
   ['autoRefreshes', (v) => `${v} auto-refresh(es)`],
 ];
+
+// ---- pending card (docs/specs/card-correlation.md) ---------------------------------------------
+// The pre-edit hook records which caller files the card WARNED about; when a later edit touches
+// one, the ledger records that the advice steered real work. One pending card at a time (a new
+// card replaces it), 30-minute expiry, each file counts once. Same rules as the ledger it feeds:
+// local-only, fail-open, CODEWEB_NO_STATS=1 disables.
+const PENDING_TTL_MS = 30 * 60 * 1000;
+const pendingPathOf = (graphPath) => join(dirname(graphPath), 'pending-card.json');
+
+/** Record the card's named caller files as the active pending set (replaces any previous). */
+export function recordPendingCard(graphPath, symbol, files) {
+  if (process.env.CODEWEB_NO_STATS === '1' || !graphPath || !files || !files.length) return;
+  try { writeFileSync(pendingPathOf(graphPath), JSON.stringify({ t: Date.now(), symbol, files })); }
+  catch { /* receipt only */ }
+}
+
+/**
+ * An edit landed on `editedRel` — if the pending card named it (and the card is fresh, and the
+ * edit is not the card's own subject file), count it once and consume it. Never throws.
+ */
+export function correlateEdit(graphPath, editedRel) {
+  if (process.env.CODEWEB_NO_STATS === '1' || !graphPath || !editedRel) return;
+  try {
+    const p = pendingPathOf(graphPath);
+    const card = JSON.parse(readFileSync(p, 'utf8'));
+    if (Date.now() - card.t > PENDING_TTL_MS) { try { unlinkSync(p); } catch {} return; }
+    const ix = (card.files || []).indexOf(editedRel);
+    if (ix === -1) return;
+    card.files.splice(ix, 1);
+    bump(graphPath, 'cardCallersFollowed');
+    if (card.files.length) writeFileSync(p, JSON.stringify(card));
+    else { try { unlinkSync(p); } catch {} }
+  } catch { /* no pending card / unreadable — fine */ }
+}
 
 /** One line for a month's counters, or null when the bucket is empty. */
 export function monthLine(counters) {

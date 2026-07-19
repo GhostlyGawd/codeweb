@@ -82,6 +82,7 @@ export function renderBrief(b) {
     const c = b.activity.counters;
     const bits = [];
     if (c.cardsDelivered) bits.push(`${c.cardsDelivered} pre-edit card(s)`);
+    if (c.cardCallersFollowed) bits.push(`${c.cardCallersFollowed} card-named caller(s) followed`);
     if (c.regressionsFlagged) bits.push(`${c.regressionsFlagged} regression(s) flagged`);
     if (c.queriesServed) bits.push(`${c.queriesServed} queries served`);
     if (bits.length) L.push(`codeweb this month: ${bits.join(' · ')} (full receipt: scripts/stats.mjs)`);

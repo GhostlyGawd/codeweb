@@ -216,5 +216,122 @@ export async function loadTsEngine() {
   return _engine;
 }
 
+// ---- Java / C# dispatch tier (docs/specs/java-cs-tree-sitter.md) -------------------------------
+// The regex tier owns Java/C# NODES (proven in the v8 expansion); this tier contributes only the
+// DISPATCH information regex deliberately drops: same-file `this.m()` calls resolved immediately,
+// and typed-receiver `helper.compute()` calls emitted as INTENTS {from, recvType, method} for the
+// extractor's global pass to resolve against the whole graph (unique class name -> edge; anything
+// ambiguous is dropped and counted — the same precision contract as the JS tier). Grammar absent
+// or web-tree-sitter missing -> null, and regex output stays byte-identical.
+
+const LANG_GRAMMARS = {
+  java: join(HERE, '..', 'grammars', 'tree-sitter-java.wasm'),
+  csharp: join(HERE, '..', 'grammars', 'tree-sitter-c-sharp.wasm'),
+};
+const LANG_SHAPES = {
+  java: { classes: new Set(['class_declaration']), method: 'method_declaration', invoke: 'method_invocation', param: 'formal_parameter', typeNode: 'type_identifier', thisNode: 'this' },
+  csharp: { classes: new Set(['class_declaration']), method: 'method_declaration', invoke: 'invocation_expression', param: 'parameter', typeNode: 'identifier', thisNode: 'this_expression' },
+};
+
+const _langEngines = {}; // key -> undefined(not tried)/null(unavailable)/engine
+
+/** Lazily load the dispatch engine for 'java' | 'csharp'. Returns { extractDispatch } or null. */
+export async function loadLangEngine(key) {
+  if (_langEngines[key] !== undefined) return _langEngines[key];
+  try {
+    const grammarPath = LANG_GRAMMARS[key];
+    const shape = LANG_SHAPES[key];
+    if (!grammarPath || !shape || !existsSync(grammarPath)) { _langEngines[key] = null; return null; }
+    const ts = await import('web-tree-sitter');
+    const { Parser, Language } = ts;
+    await Parser.init();
+    const parser = new Parser();
+    parser.setLanguage(await Language.load(readFileSync(grammarPath)));
+
+    const className = (n) => n.childForFieldName('name')?.text || null;
+    const enclosing = (node, types) => { let c = node.parent; while (c && !types.has(c.type)) c = c.parent; return c; };
+    const METHOD_SET = new Set([shape.method]);
+
+    const extractDispatch = (text, relPath) => {
+      try {
+        const tree = parser.parse(String(text || ''));
+        const r = String(relPath).replace(/\\/g, '/');
+        const qualId = (cls, m) => `${r}:${cls}.${m}`;
+        const methodsByClass = new Map(); // class -> Set(method names) in THIS file
+        walkTree(tree.rootNode, (n) => {
+          if (!shape.classes.has(n.type)) return;
+          const cname = className(n);
+          if (!cname) return;
+          const set = methodsByClass.get(cname) || new Set();
+          const body = n.childForFieldName('body');
+          if (body) for (let i = 0; i < body.childCount; i++) {
+            const m = body.child(i);
+            if (m.type === shape.method) { const mn = className(m); if (mn) set.add(mn); }
+          }
+          methodsByClass.set(cname, set);
+        });
+
+        // declared param types of the enclosing method: identifier -> class/type name
+        const paramTypesOf = (methodNode) => {
+          const map = new Map();
+          const params = methodNode?.childForFieldName('parameters');
+          if (!params) return map;
+          for (let i = 0; i < params.childCount; i++) {
+            const p = params.child(i);
+            if (p.type !== shape.param) continue;
+            const tNode = p.childForFieldName('type');
+            const nNode = p.childForFieldName('name');
+            if (tNode?.type === shape.typeNode && nNode) map.set(nNode.text, tNode.text);
+          }
+          return map;
+        };
+
+        const thisCalls = [], typedIntents = [];
+        const seen = new Set();
+        walkTree(tree.rootNode, (n) => {
+          if (n.type !== shape.invoke) return;
+          let obj, prop;
+          if (key === 'java') {
+            obj = n.childForFieldName('object');
+            prop = n.childForFieldName('name')?.text;
+          } else {
+            const fn = n.childForFieldName('function');
+            if (!fn || fn.type !== 'member_access_expression') return;
+            obj = fn.childForFieldName('expression');
+            prop = fn.childForFieldName('name')?.text;
+          }
+          if (!obj || !prop) return;
+          const mNode = enclosing(n, METHOD_SET);
+          const cNode = mNode && enclosing(mNode, shape.classes);
+          const mName = mNode && className(mNode), cName = cNode && className(cNode);
+          if (!mName || !cName) return;
+          const from = qualId(cName, mName);
+          if (obj.type === shape.thisNode) {
+            if (methodsByClass.get(cName)?.has(prop)) {
+              const to = qualId(cName, prop);
+              const k = from + '\t' + to;
+              if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
+            }
+            return;
+          }
+          if (obj.type === 'identifier') {
+            const t = paramTypesOf(mNode).get(obj.text);
+            if (t) {
+              const k = from + '\t' + t + '\t' + prop;
+              if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); }
+            }
+          }
+        });
+        thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
+        typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
+        return { thisCalls, typedIntents };
+      } catch { return null; } // per-file fallback: regex output stands alone
+    };
+
+    _langEngines[key] = { extractDispatch };
+  } catch { _langEngines[key] = null; }
+  return _langEngines[key];
+}
+
 // Test-only: reset the memoized engine so a test can re-exercise the load path.
-export function _resetForTest() { _engine = undefined; }
+export function _resetForTest() { _engine = undefined; for (const k of Object.keys(_langEngines)) delete _langEngines[k]; }

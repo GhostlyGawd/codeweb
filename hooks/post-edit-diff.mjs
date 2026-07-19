@@ -17,7 +17,7 @@ import { dirname, join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { structuralRegressions } from '../scripts/lib/graph-ops.mjs';
-import { bump } from '../scripts/lib/stats.mjs';
+import { bump, correlateEdit } from '../scripts/lib/stats.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXTRACT = join(HERE, '..', 'scripts', 'extract-symbols.mjs');
@@ -77,6 +77,9 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     if (t) {
       bump(t.baseline, 'postEditChecks');
       if (out) bump(t.baseline, 'regressionsFlagged', out.newCycles.length + out.lostCallers.length);
+      // advice-followed correlation: did this edit touch a caller file the last card warned about?
+      const rel = resolve(fp).slice(t.root.length + 1).replace(/\\/g, '/');
+      correlateEdit(t.baseline, rel);
     }
   } catch { /* receipt only */ }
   if (out) {
