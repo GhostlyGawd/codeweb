@@ -57,7 +57,7 @@ export function compileRoleOverrides(roles) {
     if (!VALID_ROLES.has(r.role)) throw new Error(`codeweb.rules.json roles[${i}] ("${r.glob}"): unknown role "${r.role}" (valid: ${[...VALID_ROLES].join('|')})`);
     return { re: globToRegex(r.glob), role: r.role };
   });
-  return (rel) => { for (const c of compiled) if (c.re.test(rel)) return c.role; return null; };
+  return (relPath) => { for (const c of compiled) if (c.re.test(relPath)) return c.role; return null; };
 }
 
 // Fill the same defaults build-report.mjs applies, so every consumer sees a well-formed graph.

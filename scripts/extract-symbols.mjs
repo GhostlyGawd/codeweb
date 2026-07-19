@@ -85,12 +85,16 @@ function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
 // bodyEnd/signature line offsets are unaffected. Single-line '...'/"..." strings are blanked first so
 // a `#` or `"""` inside them can't be mistaken for a comment/docstring delimiter. Best-effort, same
 // ethos as stripSC: escapes inside triple-strings aren't tracked, worst case is a slightly-off mask.
-// Ruby masking (Spec I): line-local — string contents first (so `"#{x}"` can't fake a comment),
-// then `#`-to-EOL. Length preservation is not required here (extents use scanLines separately).
+// Ruby masking (Spec I): line-local — string contents first (so interpolation can't fake a
+// comment), then `#`-to-EOL. Regexes built via RegExp so no quote character sits inside a regex
+// LITERAL (maskJs doesn't mask those; a bare quote there desyncs its string state when codeweb
+// maps itself — its own gate caught this class on ts-engine.mjs).
+const RB_DQ = new RegExp('"(?:[^"\\\\]|\\\\[^])*"', 'g');
+const RB_SQ = new RegExp(String.fromCharCode(39) + '(?:[^' + String.fromCharCode(39) + '\\\\]|\\\\[^])*' + String.fromCharCode(39), 'g');
 function maskRuby(text) {
   return text.split(/\r?\n/).map((ln) => ln
-    .replace(/"(?:[^"\\]|\\.)*"/g, '""')
-    .replace(/'(?:[^'\\]|\\.)*'/g, "''")
+    .replace(RB_DQ, '""')
+    .replace(RB_SQ, "''")
     .replace(/#.*$/, '')).join('\n');
 }
 

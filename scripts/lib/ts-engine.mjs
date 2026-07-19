@@ -161,12 +161,18 @@ export async function loadTsEngine() {
     // Spec H helpers: statement normalization + FNV-1a hash for Type-3 fingerprints.
     const FN_LIKE = new Set(['function_declaration', 'generator_function_declaration', 'function_expression', 'arrow_function', 'method_definition']);
     const JS_KW = new Set(['if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'return', 'break', 'continue', 'throw', 'try', 'catch', 'finally', 'new', 'delete', 'typeof', 'instanceof', 'in', 'of', 'void', 'yield', 'await', 'async', 'function', 'class', 'extends', 'super', 'this', 'const', 'let', 'var', 'null', 'undefined', 'true', 'false']);
+    // Built via RegExp so no quote character appears inside a regex LITERAL — the extractor's
+    // maskJs doesn't mask regex literals, and a bare quote there flips its string state and
+    // swallows the following lines (codeweb's own gate caught exactly that on this file).
+    const Q = String.fromCharCode(39), DQ = String.fromCharCode(34), BT = String.fromCharCode(96);
+    const strRe = (q) => new RegExp(q + '(?:[^' + q + '\\\\]|\\\\[^])*' + q, 'g');
+    const TPL_STR_RE = strRe(BT), SQ_STR_RE = strRe(Q), DQ_STR_RE = strRe(DQ);
     const stmtHash = (text) => {
       // one tokenizing pass: keywords keep identity (uppercased), identifiers -> I, numbers -> N,
       // string/template contents -> S, whitespace dropped. Statement STRUCTURE survives; naming
       // and literals do not — Type-2 normalization per statement, Type-3 via the multiset.
       const t = String(text)
-        .replace(/`(?:[^`\\]|\\.)*`/g, 'S').replace(/'(?:[^'\\]|\\.)*'/g, 'S').replace(/"(?:[^"\\]|\\.)*"/g, 'S')
+        .replace(TPL_STR_RE, 'S').replace(SQ_STR_RE, 'S').replace(DQ_STR_RE, 'S')
         .replace(/\b[A-Za-z_$][\w$]*\b/g, (m) => (JS_KW.has(m) ? m.toUpperCase() : 'I'))
         .replace(/\b\d[\w.]*\b/g, 'N')
         .replace(/\s+/g, '');
@@ -322,7 +328,7 @@ const LANG_WALKERS = {
         if (body) for (let i = 0; i < body.childCount; i++) { const m = body.child(i); if (m.type === 'function_definition') { const mn = name(m); if (mn) set.add(mn); } }
         methodsByClass.set(cn, set);
       });
-      const paramTypes = (fn) => {
+      const typedParamsOf = (fn) => {
         const map = new Map();
         const params = fn?.childForFieldName('parameters');
         if (!params) return map;
@@ -353,7 +359,7 @@ const LANG_WALKERS = {
           }
           return;
         }
-        const t = paramTypes(encl).get(obj.text);
+        const t = typedParamsOf(encl).get(obj.text);
         if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
       });
       thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
@@ -390,7 +396,7 @@ const LANG_WALKERS = {
         set.add(mn);
         methodsByType.set(rec.typeName, set);
       });
-      const paramTypes = (fn) => {
+      const typedParamsOf = (fn) => {
         const map = new Map();
         const params = fn?.childForFieldName('parameters');
         if (!params) return map;
@@ -424,7 +430,7 @@ const LANG_WALKERS = {
           }
           return;
         }
-        const t = paramTypes(encl).get(obj.text);
+        const t = typedParamsOf(encl).get(obj.text);
         if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
       });
       thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
@@ -447,7 +453,7 @@ const LANG_WALKERS = {
         if (body) for (let i = 0; i < body.childCount; i++) { const f = body.child(i); if (f.type === 'function_item') { const fn = f.childForFieldName('name')?.text; if (fn) set.add(fn); } }
         methodsByType.set(tn, set);
       });
-      const paramTypes = (fn) => {
+      const typedParamsOf = (fn) => {
         const map = new Map();
         const params = fn?.childForFieldName('parameters');
         if (!params) return map;
@@ -480,7 +486,7 @@ const LANG_WALKERS = {
           return;
         }
         if (obj.type !== 'identifier') return;
-        const t = paramTypes(encl).get(obj.text);
+        const t = typedParamsOf(encl).get(obj.text);
         if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
       });
       thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
