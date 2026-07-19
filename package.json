@@ -1,6 +1,6 @@
 {
   "name": "codeweb",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "type": "module",
   "description": "The living map of your codebase — deterministic call/import graph engine, 24 MCP tools for coding agents, and a self-contained interactive report.",
   "keywords": ["mcp", "code-analysis", "call-graph", "dependency-graph", "claude-code", "agent-tools", "dead-code", "duplication"],
