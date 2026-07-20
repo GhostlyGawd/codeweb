@@ -8,10 +8,12 @@
 // (defaults, dangling-edge removal, computed stats), injects it into report-template.html, and
 // writes a single self-contained HTML file. No network/CDN required.
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
+import { buildIndexLite, SIDECAR_NAME } from './lib/index-lite.mjs'; // Spec P: pre-edit hook fast path
+import { sourceReader } from './lib/cli.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -77,6 +79,15 @@ graph.meta.stats = {
 // become part of the machine-readable artifact (they previously lived only in report.html/md).
 // Minified, matching the upstream writers (cluster3.mjs / overlap.mjs).
 writeFileSync(graphPath, JSON.stringify(graph));
+
+// Spec P: the pre-edit hook's sidecar, stamped against the FINAL graph.json bytes just written
+// (mtime+size — the hook stats, never parses, to check freshness). Best-effort: a sidecar failure
+// must never fail the map.
+try {
+  const st = statSync(graphPath);
+  const lite = buildIndexLite(graph, { graphMtimeMs: st.mtimeMs, graphSize: st.size }, sourceReader(graph.meta?.root));
+  writeFileSync(join(dirname(graphPath), SIDECAR_NAME), JSON.stringify(lite));
+} catch { /* the hook falls back to the graph path */ }
 
 // --- render ---
 const templatePath = join(here, 'report-template.html');

@@ -9,7 +9,7 @@
 // FAIL-OPEN and cheap: any parse/read problem exits 0 silently; unmapped targets are a no-op; the
 // whole check is one JSON parse + an in-memory count (~50-100ms on a 3k-symbol graph).
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, relative } from 'node:path';
@@ -23,15 +23,29 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const EXPLAIN = join(HERE, '..', 'scripts', 'explain.mjs');
 import { SRC_RE, findTarget } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a duplicated walk + a trailing language list)
 
-// Returns the one-line advisory for an edit payload, or null (not mapped / not source / no signal).
-export function preview(raw) {
-  let input; try { input = JSON.parse(raw); } catch { return null; }
-  const fp = input?.tool_input?.file_path || input?.tool_input?.filePath;
-  if (!fp || !SRC_RE.test(fp)) return null;
-  const t = findTarget(fp);
-  if (!t) return null;
+// Spec P (docs/specs/fastpath-decision.md): two data sources, ONE format path. The sidecar
+// (index-lite.json, written at map time) serves in ~10ms; the graph path (13.5MB parse + explain
+// subprocess, ~350ms at 16k symbols) is the fallback whenever the sidecar is missing, stale
+// (mtime+size stamp vs a statSync — never a parse), or unreadable. Both produce the same fields,
+// built by the same underlying card assembler, so output is byte-identical either way.
+
+// Sidecar lookup: undefined = sidecar unusable (fall back); null = fresh sidecar says no-signal;
+// object = the file's entry.
+function sidecarEntry(t, rel) {
+  try {
+    const sidecarPath = join(dirname(t.baseline), 'index-lite.json');
+    if (!existsSync(sidecarPath)) return undefined;
+    const lite = JSON.parse(readFileSync(sidecarPath, 'utf8'));
+    const st = statSync(t.baseline);
+    if (!lite?.stamp || lite.stamp.graphMtimeMs !== st.mtimeMs || lite.stamp.graphSize !== st.size) return undefined;
+    return lite.files?.[rel] || null;
+  } catch { return undefined; }
+}
+
+// Graph-path lookup: the historical computation (full parse + explain subprocess), shaped like a
+// sidecar entry so preview() formats once.
+function graphEntry(t, rel) {
   let graph; try { graph = JSON.parse(readFileSync(t.baseline, 'utf8')); } catch { return null; }
-  const rel = relative(t.root, resolve(fp)).replace(/\\/g, '/');
   const nodes = (graph.nodes || []).filter((n) => n.file === rel && n.kind !== 'module');
   if (!nodes.length) return null;
   const inCount = new Map();
@@ -46,26 +60,46 @@ export function preview(raw) {
     if (!top || c > top.c) top = { label: n.label, c };
   }
   if (total === 0) return null; // nothing depends on this file — stay quiet
-  let msg = `[codeweb] editing ${rel}: ${nodes.length} symbol(s), ${total} in-repo dependent edge(s)` +
-    (top && top.c > 0 ? ` (most depended-on: ${top.label} ×${top.c})` : '') + '.';
-  // AMBIENT context: don't just point at the tools — inject the ~1KB explain card for the file's
-  // most-depended-on symbol, so the blast radius arrives without the agent having to ask. This is
-  // the attack on the edit-quality null: awareness with zero discipline required. Fail-open.
+  const entry = { symbols: nodes.length, total, top };
   if (top && top.c > 0) {
     try {
       const topNode = nodes.slice().sort((a, b) => (inCount.get(b.id) || 0) - (inCount.get(a.id) || 0))[0];
       const r = execFileSync(process.execPath, [EXPLAIN, t.baseline, topNode.id, '--json'], { encoding: 'utf8', timeout: 8000, maxBuffer: 1 << 22 });
       const card = JSON.parse(r).cards?.[0];
       if (card) {
-        msg += `\n  ${card.summary}`;
-        if (card.topCallers?.length) msg += `\n  top callers: ${card.topCallers.slice(0, 4).join(', ')}`;
-        if (card.tests?.length) msg += `\n  tests: ${card.tests.slice(0, 2).join(', ')}`;
+        entry.card = { summary: card.summary, topCallers: card.topCallers, tests: card.tests };
+        entry.topId = topNode.id;
         const callerFiles = [...new Set((card.topCallers || [])
           .map((id) => id.slice(0, id.lastIndexOf(':')))
           .filter((f) => f && f !== rel))]; // the SUBJECT file never counts as "following the advice"
-        if (callerFiles.length) lastCardMeta = { baseline: t.baseline, symbol: topNode.id, files: callerFiles };
+        if (callerFiles.length) entry.cardFiles = callerFiles;
       }
     } catch { /* card is a bonus, never a blocker */ }
+  }
+  return entry;
+}
+
+// Returns the one-line advisory for an edit payload, or null (not mapped / not source / no signal).
+export function preview(raw) {
+  let input; try { input = JSON.parse(raw); } catch { return null; }
+  const fp = input?.tool_input?.file_path || input?.tool_input?.filePath;
+  if (!fp || !SRC_RE.test(fp)) return null;
+  const t = findTarget(fp);
+  if (!t) return null;
+  const rel = relative(t.root, resolve(fp)).replace(/\\/g, '/');
+  const side = sidecarEntry(t, rel);
+  const entry = side === undefined ? graphEntry(t, rel) : side;
+  if (!entry) return null;
+  const { symbols, total, top, card, topId, cardFiles } = entry;
+  let msg = `[codeweb] editing ${rel}: ${symbols} symbol(s), ${total} in-repo dependent edge(s)` +
+    (top && top.c > 0 ? ` (most depended-on: ${top.label} ×${top.c})` : '') + '.';
+  // AMBIENT context: the ~1KB explain card for the file's most-depended-on symbol, so the blast
+  // radius arrives without the agent having to ask. Fail-open either path.
+  if (card) {
+    msg += `\n  ${card.summary}`;
+    if (card.topCallers?.length) msg += `\n  top callers: ${card.topCallers.slice(0, 4).join(', ')}`;
+    if (card.tests?.length) msg += `\n  tests: ${card.tests.slice(0, 2).join(', ')}`;
+    if (cardFiles?.length) lastCardMeta = { baseline: t.baseline, symbol: topId, files: cardFiles };
   }
   msg += `\n  → codeweb_context for a bounded edit window; codeweb_impact for the full blast radius.`;
   return msg;
