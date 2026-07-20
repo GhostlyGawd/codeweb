@@ -1,34 +1,56 @@
 {
-  "bench": "monorepo scale test (Spec B, docs/specs/perf-stage-memo-scale.md)",
+  "bench": "monorepo scale test (Spec K, docs/specs/bench-scale-runnable.md — runnable via bench/experiments/scale.mjs)",
   "target": "microsoft/TypeScript src/ @ 637d5746b70257028fb95aad32ddec6b26ab0a14 (shallow clone)",
+  "engine": { "version": "0.9.0" },
   "graph": {
     "symbols": 16286,
     "edges": 44640,
-    "files": 709,
+    "filesWithSymbols": 544,
     "domains": 21,
     "overlaps": 815,
-    "dispatchEdgesWired": 1710,
-    "graphJsonBytes": 13568579
+    "graphJsonBytes": 13568563,
+    "note": "nodes/edges/domains/overlaps byte-match the pre-refresh graph at the same pin — the engine's output on this corpus is unchanged since the 0.8.x measurement; earlier 'files: 709' counted scanned files, filesWithSymbols counts files that own nodes"
   },
   "pipeline": {
-    "coldFullMs": 43173,
-    "noChangeRerunMs": 4028,
-    "stagesReused": true
+    "cold": {
+      "totalMs": 79127,
+      "stagesMs": { "extract": 47412, "cluster": 712, "overlap": 1213, "optimize": 28826, "report": 805 }
+    },
+    "noChange": { "totalMs": 6898, "stagesReused": true },
+    "oneFileEdit": {
+      "totalMs": 73321,
+      "stagesMs": { "extract": 8211, "cluster": 575, "overlap": 1172, "optimize": 60484, "report": 2217 },
+      "editedFile": "compiler/binder.ts",
+      "editKind": "append-function",
+      "changedFragment": true,
+      "note": "the re-map-after-an-agent-edit cost Spec O exists to cut; optimize's 60.5s here vs 28.8s cold is allocation/GC churn on the same work, not different work"
+    },
+    "queries": {
+      "symbol": "services/services.ts:SymbolObject.name",
+      "fanIn": 694,
+      "impactMs": 337, "callersMs": 359, "cyclesMs": 382, "orphansMs": 363,
+      "note": "per-call subprocess incl. 13.5MB graph parse; in-process MCP serves from cache"
+    }
   },
-  "queries": {
-    "impactMs": 214,
-    "callersMs": 194,
-    "cyclesMs": 215,
-    "orphansMs": 227,
-    "note": "per-call subprocess incl. graph parse; in-process MCP serves from cache"
+  "reportAtScale": "bench/results/report-scale.json — 16k-symbol report GREEN in headless Chromium: graph interactive 217ms, layout settled 4.8s, search 22ms, heap 31MB, no errors (Spec L)",
+  "theWall": {
+    "verdict": "optimize.mjs — 36% of cold, 83% of the one-file-edit re-map",
+    "mechanism": "112 duplicate-logic candidates each run applyEdit (clones the 16k-node graph) + fileCycles (full file-graph SCC on the clone) + impactOf — O(candidates x graph) with heavy allocation; ~260ms per candidate at this scale",
+    "downstreamSplit": "cluster 0.7s + overlap 1.2s + report 0.8-2.2s — the caps landed in Spec B hold; overlap is no longer the wall",
+    "coldExtract": "47.4s — AST parse + Type-3 fingerprints + reliance v2 over 544 files; rides the scan cache thereafter (8.2s on the edit pass, 6.9s no-change)"
   },
-  "discoveredAndFixed": [
-    "catastrophic regex backtracking in shingles.tokenize on unterminated-quote content — an input-dependent HANG (overlap sat at 100% CPU >15 min on one 2-node group); replaced with a linear-time matcher + regression test",
-    "quadratic twin seeding through hub labels and unbounded same-name pairwise confirmation — bounded by declared caps (hub >50 callers, 200k pair budget, 12-node group samples, 400-line body shingles), all reported in overlap.md"
-  ],
-  "shardsDecision": {
-    "verdict": "DELETE lib/shards.mjs",
-    "rationale": "16k symbols load monolithically as a 13.5MB graph with ~200ms subprocess queries and a 4s memoized re-map; 10x this scale still fits memory comfortably. The answer-preserving sharding contract was never wired to any CLI/MCP surface and the measured need does not exist; git history preserves the implementation if a 100k+-symbol case ever materializes."
-  },
-  "findingsSpotCheck": "top findings are real compiler duplication (substituteExpression x9 drifted, transformConstructorBodyWorker x3 at 80% body) — 46 ready merges, ~1757 LOC, gate-green"
+  "previous": {
+    "note": "superseded figures, measured by hand on a DIFFERENT HOST at engine 0.8.x — cross-host totals are not comparable; kept for the receipt trail",
+    "pipeline": { "coldFullMs": 43173, "noChangeRerunMs": 4028, "stagesReused": true },
+    "queries": { "impactMs": 214, "callersMs": 194, "cyclesMs": 215, "orphansMs": 227 },
+    "discoveredAndFixed": [
+      "catastrophic regex backtracking in shingles.tokenize on unterminated-quote content — an input-dependent HANG (overlap sat at 100% CPU >15 min on one 2-node group); replaced with a linear-time matcher + regression test",
+      "quadratic twin seeding through hub labels and unbounded same-name pairwise confirmation — bounded by declared caps (hub >50 callers, 200k pair budget, 12-node group samples, 400-line body shingles), all reported in overlap.md"
+    ],
+    "shardsDecision": {
+      "verdict": "DELETE lib/shards.mjs",
+      "rationale": "16k symbols load monolithically as a 13.5MB graph with ~200ms subprocess queries and a 4s memoized re-map; 10x this scale still fits memory comfortably. The answer-preserving sharding contract was never wired to any CLI/MCP surface and the measured need does not exist; git history preserves the implementation if a 100k+-symbol case ever materializes."
+    },
+    "findingsSpotCheck": "top findings are real compiler duplication (substituteExpression x9 drifted, transformConstructorBodyWorker x3 at 80% body) — 46 ready merges, ~1757 LOC, gate-green"
+  }
 }

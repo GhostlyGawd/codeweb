@@ -5,9 +5,10 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { runNode, tmpDir, cleanup, writeTree, script } from './helpers.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const EXP = join(HERE, '..', 'bench', 'experiments')
@@ -27,7 +28,7 @@ async function runHarness({ args, cannedArm, oracle }) {
     const cond = m[1] === 'treat' ? 'treatment' : 'control'
     const taskId = m[2]
     const rep = Number(m[3] || 1)
-    armSpawns.push({ cond, taskId, rep })
+    armSpawns.push({ cond, taskId, rep, prompt })
     return Promise.resolve(cannedArm(cond, taskId, rep))
   }
   const parallel = (thunks) => Promise.all(thunks.map((th) => (typeof th === 'function' ? th() : th)))
@@ -93,6 +94,68 @@ test('args delivered as a JSON STRING is parsed (regression: must not silently f
   assert.equal(result.config.frozenTruth, true, 'string args must be parsed so frozen truth is used')
   assert.equal(result.config.reps, REPS, 'string args.reps must be honored')
   assert.equal(result.perRep.length, REPS)
+})
+
+test('M1: args.root repoints every prompt path — the harness is portable (Spec M)', async () => {
+  const root = '/home/user/codeweb'
+  const { result, armSpawns } = await runHarness({ args: { truth: TRUTH, reps: 1, root }, cannedArm })
+  for (const s of armSpawns) {
+    assert.ok(!s.prompt.includes('D:/GitHub Projects'), `no hardcoded Windows root in ${s.cond}:${s.taskId}`)
+    assert.ok(s.prompt.includes(root), `args.root reaches the ${s.cond} prompt`)
+  }
+  const treat = armSpawns.find((s) => s.cond === 'treatment')
+  assert.ok(treat.prompt.includes(`${root}/scripts/query.mjs`), 'treatment query command uses args.root')
+  assert.ok(treat.prompt.includes(`${root}/.codeweb/pilot`), 'graphs default hangs off args.root')
+  assert.equal(result.config.root, root, 'config records the root the run used')
+})
+
+test('M1b: defaults unchanged without args.root (backward compatible)', async () => {
+  const { armSpawns } = await runHarness({ args: { truth: TRUTH, reps: 1 }, cannedArm })
+  assert.ok(armSpawns.every((s) => s.prompt.includes('D:/GitHub Projects/ecc-test/codeweb')), 'legacy default root preserved')
+})
+
+test('M2: args.budgeted flips the treatment arm to MCP-parity budgeted consumption (Spec M)', async () => {
+  const { result, armSpawns } = await runHarness({ args: { truth: TRUTH, reps: 1, root: '/r', budgeted: true }, cannedArm })
+  const treats = armSpawns.filter((s) => s.cond === 'treatment')
+  for (const s of treats) {
+    assert.match(s.prompt, /--limit 20/, 'budgeted treatment instructs the MCP default limit')
+    assert.match(s.prompt, /--offset|full/i, 'the agent keeps the same completeness choice a real MCP agent has')
+  }
+  const controls = armSpawns.filter((s) => s.cond === 'control')
+  assert.ok(controls.every((s) => !s.prompt.includes('--limit 20')), 'control arm untouched')
+  assert.equal(result.config.usedBudgeted, true, 'config records the budgeted condition')
+
+  const plain = await runHarness({ args: { truth: TRUTH, reps: 1, root: '/r' }, cannedArm })
+  assert.ok(plain.armSpawns.filter((s) => s.cond === 'treatment').every((s) => !s.prompt.includes('--limit 20')),
+    'without args.budgeted the treatment prompt is the unbudgeted one')
+  assert.equal(plain.result.config.usedBudgeted, false)
+})
+
+test('M3: the graph pre-flight proves truth ids resolve — exit 2 when one does not (Spec M)', () => {
+  const dir = tmpDir('codeweb-preflight-')
+  try {
+    writeTree(dir, {
+      'mini/src/a.js': 'export function alpha(x) {\n  return x + 1;\n}\n',
+      'mini/src/b.js': "import { alpha } from './a.js';\nexport function gamma() {\n  return alpha(3);\n}\n",
+    })
+    const graphs = join(dir, 'graphs')
+    mkdirSync(join(graphs, 'mini'), { recursive: true })
+    const built = runNode(script('run.mjs'), [join(dir, 'mini/src'), '--out-dir', join(graphs, 'mini')])
+    assert.equal(built.status, 0, built.stderr)
+
+    const truthOk = join(dir, 'truth-ok.json')
+    writeFileSync(truthOk, JSON.stringify({ targets: { 'mini-alpha': { repo: 'mini', symbolId: 'a.js:alpha', truth: ['b.js:gamma'] } } }))
+    const ok = runNode(join(EXP, 'efficiency-pilot.preflight.mjs'), ['--graphs', graphs, '--truth', truthOk])
+    assert.equal(ok.status, 0, ok.stderr)
+    assert.match(ok.stdout, /mini-alpha/, 'per-target row printed')
+    assert.match(ok.stdout, /truth 1/, 'truth size in the row')
+
+    const truthBad = join(dir, 'truth-bad.json')
+    writeFileSync(truthBad, JSON.stringify({ targets: { 'mini-nope': { repo: 'mini', symbolId: 'a.js:doesNotExist', truth: ['b.js:gamma'] } } }))
+    const bad = runNode(join(EXP, 'efficiency-pilot.preflight.mjs'), ['--graphs', graphs, '--truth', truthBad])
+    assert.equal(bad.status, 2, 'unresolvable symbolId must fail the pre-flight')
+    assert.match(bad.stderr, /doesNotExist|unresolved/i, 'says which id failed')
+  } finally { cleanup(dir) }
 })
 
 test('without args.truth the per-run oracle IS spawned (backward compatible)', async () => {
