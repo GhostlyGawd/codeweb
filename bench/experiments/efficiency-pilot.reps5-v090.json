@@ -1,0 +1,361 @@
+{
+  "bench": "efficiency pilot — budgeted-surface re-run on v0.9.0 (Spec M, docs/specs/pilot-budgeted-rerun.md)",
+  "runDate": "2026-07-20",
+  "runId": "wf_c53dbfb9-077",
+  "engine": {
+    "version": "0.9.0",
+    "mainSha": "e92394d",
+    "graphs": "rebuilt at corpus pins (axios a209bfb, flask 36e4a82)"
+  },
+  "agentModel": "claude-fable-5",
+  "condition": "treatment on the BUDGETED surface (--limit 20 MCP parity, paging/full at agent judgement); control = grep-only; truth FROZEN (2026-06-23); oracle skipped; symbol-level grading",
+  "provenance": {
+    "interruption": "reps 4-5 initially failed on a session usage limit; resumed same runId after reset — 23 arms cached, 16 re-run fresh",
+    "lostArm": "control:flask-render_template#4 died on a spurious model-safeguards flag -> flask graded n=4 (all other tasks n=5); 39/40 arms completed",
+    "comparability": "NOT head-to-head with reps8 (engine c892f50, unbudgeted, model claude-opus-4-8[1m]): engine, budget condition, and agent model all changed"
+  },
+  "headline": {
+    "reps": 5,
+    "pairedDeltaRecall": {
+      "mean": 0.31,
+      "sd": 0.039,
+      "n": 5
+    },
+    "pairedDeltaPrecision": {
+      "mean": 0.234,
+      "sd": 0.08,
+      "n": 5
+    },
+    "pairedDeltaSteps": {
+      "mean": 0.9,
+      "sd": 3.715,
+      "n": 5
+    }
+  },
+  "means": {
+    "control": {
+      "recall": 0.44,
+      "precision": 0.46,
+      "steps": 16.37
+    },
+    "treatment": {
+      "recall": 0.74,
+      "precision": 0.7,
+      "steps": 17.37
+    }
+  },
+  "perTaskAgg": [
+    {
+      "task": "axios-merge",
+      "repo": "axios",
+      "symbol": "merge",
+      "kind": "function",
+      "truthN": 7,
+      "reps": 5,
+      "control": {
+        "recall": {
+          "mean": 0.488,
+          "sd": 0.217,
+          "n": 5
+        },
+        "precision": {
+          "mean": 0.488,
+          "sd": 0.217,
+          "n": 5
+        },
+        "steps": {
+          "mean": 11.6,
+          "sd": 2.074,
+          "n": 5
+        }
+      },
+      "treatment": {
+        "recall": {
+          "mean": 0.71,
+          "sd": 0,
+          "n": 5
+        },
+        "precision": {
+          "mean": 0.734,
+          "sd": 0.054,
+          "n": 5
+        },
+        "steps": {
+          "mean": 12.6,
+          "sd": 1.517,
+          "n": 5
+        }
+      },
+      "delta": {
+        "recall": {
+          "mean": 0.222,
+          "sd": 0.217,
+          "n": 5
+        },
+        "precision": {
+          "mean": 0.246,
+          "sd": 0.166,
+          "n": 5
+        },
+        "steps": {
+          "mean": 1,
+          "sd": 1.225,
+          "n": 5
+        }
+      }
+    },
+    {
+      "task": "axios-AxiosError",
+      "repo": "axios",
+      "symbol": "AxiosError",
+      "kind": "class",
+      "truthN": 58,
+      "reps": 5,
+      "control": {
+        "recall": {
+          "mean": 0.262,
+          "sd": 0.044,
+          "n": 5
+        },
+        "precision": {
+          "mean": 0.52,
+          "sd": 0.212,
+          "n": 5
+        },
+        "steps": {
+          "mean": 22,
+          "sd": 8.832,
+          "n": 5
+        }
+      },
+      "treatment": {
+        "recall": {
+          "mean": 0.74,
+          "sd": 0.014,
+          "n": 5
+        },
+        "precision": {
+          "mean": 0.822,
+          "sd": 0.088,
+          "n": 5
+        },
+        "steps": {
+          "mean": 22,
+          "sd": 6.403,
+          "n": 5
+        }
+      },
+      "delta": {
+        "recall": {
+          "mean": 0.478,
+          "sd": 0.035,
+          "n": 5
+        },
+        "precision": {
+          "mean": 0.302,
+          "sd": 0.166,
+          "n": 5
+        },
+        "steps": {
+          "mean": 0,
+          "sd": 9.247,
+          "n": 5
+        }
+      }
+    },
+    {
+      "task": "axios-AxiosHeaders",
+      "repo": "axios",
+      "symbol": "AxiosHeaders",
+      "kind": "class",
+      "truthN": 40,
+      "reps": 5,
+      "control": {
+        "recall": {
+          "mean": 0.21,
+          "sd": 0.055,
+          "n": 5
+        },
+        "precision": {
+          "mean": 0.284,
+          "sd": 0.058,
+          "n": 5
+        },
+        "steps": {
+          "mean": 19.8,
+          "sd": 2.683,
+          "n": 5
+        }
+      },
+      "treatment": {
+        "recall": {
+          "mean": 0.706,
+          "sd": 0.109,
+          "n": 5
+        },
+        "precision": {
+          "mean": 0.742,
+          "sd": 0.1,
+          "n": 5
+        },
+        "steps": {
+          "mean": 19.6,
+          "sd": 5.505,
+          "n": 5
+        }
+      },
+      "delta": {
+        "recall": {
+          "mean": 0.496,
+          "sd": 0.097,
+          "n": 5
+        },
+        "precision": {
+          "mean": 0.458,
+          "sd": 0.095,
+          "n": 5
+        },
+        "steps": {
+          "mean": -0.2,
+          "sd": 6.723,
+          "n": 5
+        }
+      }
+    },
+    {
+      "task": "flask-render_template",
+      "repo": "flask",
+      "symbol": "render_template",
+      "kind": "function",
+      "truthN": 26,
+      "reps": 4,
+      "control": {
+        "recall": {
+          "mean": 0.868,
+          "sd": 0.09,
+          "n": 4
+        },
+        "precision": {
+          "mean": 0.585,
+          "sd": 0.277,
+          "n": 4
+        },
+        "steps": {
+          "mean": 11,
+          "sd": 3.916,
+          "n": 4
+        }
+      },
+      "treatment": {
+        "recall": {
+          "mean": 0.838,
+          "sd": 0.055,
+          "n": 4
+        },
+        "precision": {
+          "mean": 0.455,
+          "sd": 0.03,
+          "n": 4
+        },
+        "steps": {
+          "mean": 14.75,
+          "sd": 2.363,
+          "n": 4
+        }
+      },
+      "delta": {
+        "recall": {
+          "mean": -0.03,
+          "sd": 0.112,
+          "n": 4
+        },
+        "precision": {
+          "mean": -0.13,
+          "sd": 0.287,
+          "n": 4
+        },
+        "steps": {
+          "mean": 3.75,
+          "sd": 5.123,
+          "n": 4
+        }
+      }
+    }
+  ],
+  "perRepMeanDelta": [
+    {
+      "rep": 1,
+      "tasksGraded": 4,
+      "deltaRecall": 0.28,
+      "deltaPrecision": 0.28,
+      "deltaSteps": 1.25,
+      "controlRecall": 0.46,
+      "treatmentRecall": 0.73
+    },
+    {
+      "rep": 2,
+      "tasksGraded": 4,
+      "deltaRecall": 0.31,
+      "deltaPrecision": 0.15,
+      "deltaSteps": 6.75,
+      "controlRecall": 0.42,
+      "treatmentRecall": 0.73
+    },
+    {
+      "rep": 3,
+      "tasksGraded": 4,
+      "deltaRecall": 0.32,
+      "deltaPrecision": 0.24,
+      "deltaSteps": -3.25,
+      "controlRecall": 0.41,
+      "treatmentRecall": 0.72
+    },
+    {
+      "rep": 4,
+      "tasksGraded": 3,
+      "deltaRecall": 0.27,
+      "deltaPrecision": 0.16,
+      "deltaSteps": -1,
+      "controlRecall": 0.44,
+      "treatmentRecall": 0.71
+    },
+    {
+      "rep": 5,
+      "tasksGraded": 4,
+      "deltaRecall": 0.37,
+      "deltaPrecision": 0.34,
+      "deltaSteps": 0.75,
+      "controlRecall": 0.45,
+      "treatmentRecall": 0.82
+    }
+  ],
+  "integrity": {
+    "controlUsedCodewebViolations": [],
+    "treatmentSkippedCodeweb": []
+  },
+  "config": {
+    "tasks": [
+      "axios-merge",
+      "axios-AxiosError",
+      "axios-AxiosHeaders",
+      "flask-render_template"
+    ],
+    "repos": [
+      "axios",
+      "flask"
+    ],
+    "reps": 5,
+    "frozenTruth": true,
+    "frontierBaseModel": true,
+    "root": "/home/user/codeweb",
+    "usedBudgeted": true
+  },
+  "reading": [
+    "recall paired delta +0.310 ± 0.039 (n=5, ALL reps positive, ~8x SD) — the budgeted surface costs NO recall; treatment 0.74 vs control 0.44 absolute",
+    "precision paired delta +0.234 ± 0.080 (all reps positive) — fewer false callers than grep, not more",
+    "steps paired delta +0.9 ± 3.7 — WASH (honest null): pagination spends the steps the unbudgeted flow spent on dump-reading",
+    "runtime usage (usage-v090.json, 39/39 joined): totalTokens -84k ± 381k, toolCalls +0.95 ± 3.6, output +320 ± 5.6k — ALL WASH on this model. The efficiency story on claude-fable-5 is: SAME spend, +0.31 recall / +0.23 precision. reps8 (older model/engine, unbudgeted) showed -44% tokens; the win moved from cost to completeness as the base agent got frugal",
+    "AxiosHeaders — historically the weak target — is now the largest win (dR +0.496 ± 0.097): ref edges + budgeted pagination surface the static/instanceof users",
+    "flask-render_template is an honest per-task LOSS (dR -0.03 ± 0.11, precision -0.13): the current flask graph serves only 7 dependents vs 26 truth (Python import-edge gap, named in next-levers); treatment still reached 0.84 recall by verifying with source"
+  ]
+}

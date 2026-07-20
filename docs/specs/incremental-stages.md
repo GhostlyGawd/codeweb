@@ -27,6 +27,26 @@ So the execution order inverts, under the same byte-identity contract:
   ~15% of the remaining re-map). Otherwise this spec records the measured "not worth it" the
   same way Spec B recorded the shards deletion.
 
+## Resolution (2026-07-20, measured post-O-1 — O-2 NOT implemented; explicit rule override)
+O-1 landed and delivered the spec's goal: one-file-edit re-map **73.3s → 6.7s (11×)**, cold
+79.1s → 32.0s (optimize 60.5s → 0.56s; equivalence property-tested, byte-identical payloads).
+The post-O-1 split: extract 4.2s (63%), overlap 1.27s, report 0.35s, cluster 0.27s, optimize
+0.56s.
+
+The letter of the pre-registered O-2 rule FIRES — cluster+overlap = 1.54s = 23% ≥ 15% — and we
+are overriding it openly rather than quietly satisfying it: the rule's premise was that this
+cost is memo-skippable stage work. Measurement says it is mostly content-dependent compute
+(LSH signatures over per-node sets + cluster's single global pass), where projection memos and
+group caches would save ≲1s absolute on a path extract dominates — machinery, test surface, and
+byte-identity risk priced against under a second. The Spec-B shards precedent applies: record
+the measured "not worth it", keep the design above for the day the numbers change.
+
+**Revisit triggers:** extract drops below ~2s (parallel parse or baseline-fragment reuse would
+invert the split); corpora ≥50k symbols; or the CI gate's two-pipeline cost becomes the
+bottleneck in real projects. The byte-identity property machinery this spec mandated exists
+where it matters: OD1/OD2 pin O-1's delta-vs-clone equivalence; Spec B's S1–S4 pin the stage
+memo. 
+
 ## Design principle (the contract everything hangs on)
 Incremental output MUST be **byte-identical to the full recompute** — the determinism
 guarantee and the gate built on it are non-negotiable. So incrementality is only ever a

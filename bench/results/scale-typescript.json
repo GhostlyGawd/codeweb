@@ -33,6 +33,19 @@
     }
   },
   "reportAtScale": "bench/results/report-scale.json — 16k-symbol report GREEN in headless Chromium: graph interactive 217ms, layout settled 4.8s, search 22ms, heap 31MB, no errors (Spec L)",
+  "postOptimization": {
+    "note": "same pin, same host, re-measured after Spec N (LSH overlap) + Spec O-1 (delta optimize) landed",
+    "pipeline": {
+      "cold": { "totalMs": 31968, "stagesMs": { "extract": 28724, "cluster": 284, "overlap": 1572, "optimize": 612, "report": 401 } },
+      "noChange": { "totalMs": 3779, "stagesReused": true },
+      "oneFileEdit": { "totalMs": 6734, "stagesMs": { "extract": 4218, "cluster": 267, "overlap": 1270, "optimize": 558, "report": 347 }, "vsPreOptimization": "73.3s -> 6.7s (11x)" }
+    },
+    "queries": { "impactMs": 168, "callersMs": 155, "cyclesMs": 177, "orphansMs": 192 },
+    "overlapLsh": "815 -> 837 findings (+22 the caps were hiding); zero hub exclusions, zero pair-budget skips, zero over-cap buckets (183,073 twin buckets, 136,086 near-miss buckets); overlap 1.2s capped -> 1.6s cold with full coverage",
+    "determinism": "two independent cold pipelines: overlap.md, graph.json, optimize.md, report.md all byte-identical (mod generatedAt)",
+    "hooks": { "preEditGraphPathMs": 350, "preEditSidecarMs": 52, "sidecarBytes": 212931, "postEditMs": 4200, "note": "Spec P sidecar; ~50ms of the sidecar path is node boot itself; post-edit is a full re-extract by design (see docs/decisions/fastpath-daemon.md)" },
+    "coldExtractVariance": "cold extract measured 28.7-47.4s across runs on this host (page-cache/CPU-frequency sensitive); parse-dominated either way — the remaining cold-build lever is extract-side"
+  },
   "theWall": {
     "verdict": "optimize.mjs — 36% of cold, 83% of the one-file-edit re-map",
     "mechanism": "112 duplicate-logic candidates each run applyEdit (clones the 16k-node graph) + fileCycles (full file-graph SCC on the clone) + impactOf — O(candidates x graph) with heavy allocation; ~260ms per candidate at this scale",

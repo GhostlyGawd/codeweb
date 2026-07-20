@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-07-19T19:25:06.568Z",
+  "ranAt": "2026-07-20T16:44:50.704Z",
   "node": "v22.22.2",
   "budgets": {
     "comment": "Spec C (docs/specs/bench-all-ci-gates.md): the promises CI holds bench:all --gate to. Changing a number here is changing a public promise — it belongs in a reviewed diff, never in drift.",
@@ -9,20 +9,20 @@
   },
   "pipeline": {
     "target": "codeweb (self)",
-    "symbols": 1087,
-    "edges": 3760,
-    "coldMs": 2694,
-    "warmMs": 423,
+    "symbols": 1143,
+    "edges": 3911,
+    "coldMs": 4099,
+    "warmMs": 774,
     "stagesReused": true,
-    "regexExtractBaselineMs": 413,
-    "warmFactorVsRegexBaseline": 1.02
+    "regexExtractBaselineMs": 715,
+    "warmFactorVsRegexBaseline": 1.08
   },
   "session": {
     "calls": [
       {
         "tool": "codeweb_brief",
-        "bytes": 2675,
-        "tokensApprox": 669,
+        "bytes": 2670,
+        "tokensApprox": 668,
         "ok": true
       },
       {
@@ -39,8 +39,8 @@
       },
       {
         "tool": "codeweb_context",
-        "bytes": 8643,
-        "tokensApprox": 2161,
+        "bytes": 8647,
+        "tokensApprox": 2162,
         "ok": true
       },
       {
@@ -57,8 +57,8 @@
       },
       {
         "tool": "codeweb_callers",
-        "bytes": 1134,
-        "tokensApprox": 284,
+        "bytes": 1140,
+        "tokensApprox": 285,
         "ok": true
       },
       {
@@ -75,8 +75,8 @@
       },
       {
         "tool": "codeweb_hotspots",
-        "bytes": 3290,
-        "tokensApprox": 823,
+        "bytes": 3288,
+        "tokensApprox": 822,
         "ok": true
       },
       {
@@ -87,27 +87,27 @@
       },
       {
         "tool": "codeweb_diff",
-        "bytes": 485,
-        "tokensApprox": 121,
+        "bytes": 487,
+        "tokensApprox": 122,
         "ok": true
       }
     ],
-    "totalBytes": 22928,
-    "totalTokensApprox": 5734,
+    "totalBytes": 22933,
+    "totalTokensApprox": 5735,
     "allValidJson": true
   },
   "toolBudgets": {
     "perToolMaxBytes": {
-      "codeweb_brief": 2675,
+      "codeweb_brief": 2670,
       "codeweb_find": 1258,
       "codeweb_explain": 1312,
-      "codeweb_context": 8643,
+      "codeweb_context": 8647,
       "codeweb_impact": 1347,
-      "codeweb_callers": 1134,
+      "codeweb_callers": 1140,
       "codeweb_cycles": 427,
-      "codeweb_hotspots": 3290,
+      "codeweb_hotspots": 3288,
       "codeweb_refresh": 292,
-      "codeweb_diff": 485
+      "codeweb_diff": 487
     },
     "budgetBytes": 32768
   },
@@ -117,11 +117,11 @@
     "reps": 3,
     "symbols": 912,
     "withComplexity": 714,
-    "regexMs": 334,
-    "treeSitterMs": 1458,
-    "overheadMs": 1124,
-    "factor": 4.37,
-    "perSymbolMs": 1.754,
+    "regexMs": 496,
+    "treeSitterMs": 2182,
+    "overheadMs": 1686,
+    "factor": 4.4,
+    "perSymbolMs": 2.63,
     "engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)"
   }
 }
