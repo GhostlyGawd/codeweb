@@ -1,0 +1,944 @@
+{
+  "source": {
+    "runId": "wf_c53dbfb9-077",
+    "note": "merged journal: run-1 arms (reps 1-3) + resume arms (reps 4-5); cached replays carry no usage and are excluded"
+  },
+  "note": "Runtime-measured efficiency for the engine-frozen reps run — the axis reps8.json omitted. Paired delta = treatment(codeweb) - control(grep); NEGATIVE = codeweb cheaper (win). Tokens/wallMs from per-agent transcripts; toolCalls from the journal. wallMs is concurrency-sensitive (agents ran under a shared cap) — tokens + toolCalls are the contention-free signals.",
+  "config": {
+    "tasks": [
+      "axios-merge",
+      "axios-AxiosError",
+      "axios-AxiosHeaders",
+      "flask-render_template"
+    ],
+    "repos": [
+      "axios",
+      "flask"
+    ],
+    "reps": 5,
+    "frozenTruth": true,
+    "frontierBaseModel": true,
+    "model": "claude-fable-5"
+  },
+  "headline": {
+    "reps": 5,
+    "pairedDeltaOutputTokens": {
+      "mean": 319.716,
+      "sd": 5591.027,
+      "n": 5
+    },
+    "pairedDeltaTotalTokens": {
+      "mean": -83715.734,
+      "sd": 381405.611,
+      "n": 5
+    },
+    "pairedDeltaToolCalls": {
+      "mean": 0.95,
+      "sd": 3.646,
+      "n": 5
+    },
+    "pairedDeltaWallMs": {
+      "mean": 12857.666,
+      "sd": 51213.704,
+      "n": 5
+    }
+  },
+  "interpretation": {
+    "outputTokens": {
+      "pairedDelta": 319.716,
+      "sd": 5591.027,
+      "signalToNoise": 0.06,
+      "direction": "codeweb costlier"
+    },
+    "totalTokens": {
+      "pairedDelta": -83715.734,
+      "sd": 381405.611,
+      "signalToNoise": 0.22,
+      "direction": "codeweb cheaper (win)"
+    },
+    "toolCalls": {
+      "pairedDelta": 0.95,
+      "sd": 3.646,
+      "signalToNoise": 0.26,
+      "direction": "codeweb costlier"
+    },
+    "wallMs": {
+      "pairedDelta": 12857.666,
+      "sd": 51213.704,
+      "signalToNoise": 0.25,
+      "direction": "codeweb costlier"
+    }
+  },
+  "stepCheck": {
+    "selfReportedStepDelta": {
+      "mean": -6.844,
+      "sd": 3.327,
+      "n": 8
+    },
+    "runtimeToolCallDelta": {
+      "mean": 0.95,
+      "sd": 3.646,
+      "n": 5
+    },
+    "note": "Self-reported stepCount (reps8.json) vs runtime-counted toolCalls (this run). Same sign + comparable magnitude => the self-reported step win is corroborated by the unbiased runtime count."
+  },
+  "perTaskAgg": [
+    {
+      "task": "axios-merge",
+      "repo": "axios",
+      "reps": 5,
+      "control": {
+        "outputTokens": {
+          "mean": 4104.4,
+          "sd": 3739.067,
+          "n": 5
+        },
+        "totalTokens": {
+          "mean": 1140960.2,
+          "sd": 383381.885,
+          "n": 5
+        },
+        "toolCalls": {
+          "mean": 12.6,
+          "sd": 2.074,
+          "n": 5
+        },
+        "wallMs": {
+          "mean": 231230.8,
+          "sd": 50994.457,
+          "n": 5
+        }
+      },
+      "treatment": {
+        "outputTokens": {
+          "mean": 3727,
+          "sd": 2602.247,
+          "n": 5
+        },
+        "totalTokens": {
+          "mean": 1181101.8,
+          "sd": 166170.37,
+          "n": 5
+        },
+        "toolCalls": {
+          "mean": 13.6,
+          "sd": 1.517,
+          "n": 5
+        },
+        "wallMs": {
+          "mean": 197589.2,
+          "sd": 52007.149,
+          "n": 5
+        }
+      },
+      "delta": {
+        "outputTokens": {
+          "mean": -377.4,
+          "sd": 2094.483,
+          "n": 5
+        },
+        "totalTokens": {
+          "mean": 40141.6,
+          "sd": 251420.935,
+          "n": 5
+        },
+        "toolCalls": {
+          "mean": 1,
+          "sd": 1.225,
+          "n": 5
+        },
+        "wallMs": {
+          "mean": -33641.6,
+          "sd": 65023.42,
+          "n": 5
+        }
+      }
+    },
+    {
+      "task": "axios-AxiosError",
+      "repo": "axios",
+      "reps": 5,
+      "control": {
+        "outputTokens": {
+          "mean": 14281.2,
+          "sd": 11196.229,
+          "n": 5
+        },
+        "totalTokens": {
+          "mean": 3321272.2,
+          "sd": 1304378.097,
+          "n": 5
+        },
+        "toolCalls": {
+          "mean": 23,
+          "sd": 8.832,
+          "n": 5
+        },
+        "wallMs": {
+          "mean": 431259.8,
+          "sd": 135394.738,
+          "n": 5
+        }
+      },
+      "treatment": {
+        "outputTokens": {
+          "mean": 15999,
+          "sd": 12843.218,
+          "n": 5
+        },
+        "totalTokens": {
+          "mean": 2601192.2,
+          "sd": 619005.476,
+          "n": 5
+        },
+        "toolCalls": {
+          "mean": 23,
+          "sd": 6.403,
+          "n": 5
+        },
+        "wallMs": {
+          "mean": 441685.4,
+          "sd": 140918.398,
+          "n": 5
+        }
+      },
+      "delta": {
+        "outputTokens": {
+          "mean": 1717.8,
+          "sd": 15289.814,
+          "n": 5
+        },
+        "totalTokens": {
+          "mean": -720080,
+          "sd": 1216216.296,
+          "n": 5
+        },
+        "toolCalls": {
+          "mean": 0,
+          "sd": 9.247,
+          "n": 5
+        },
+        "wallMs": {
+          "mean": 10425.6,
+          "sd": 206252.789,
+          "n": 5
+        }
+      }
+    },
+    {
+      "task": "axios-AxiosHeaders",
+      "repo": "axios",
+      "reps": 5,
+      "control": {
+        "outputTokens": {
+          "mean": 12426.4,
+          "sd": 10236.16,
+          "n": 5
+        },
+        "totalTokens": {
+          "mean": 2235210.6,
+          "sd": 799153.263,
+          "n": 5
+        },
+        "toolCalls": {
+          "mean": 20.8,
+          "sd": 2.683,
+          "n": 5
+        },
+        "wallMs": {
+          "mean": 430927.2,
+          "sd": 73783.596,
+          "n": 5
+        }
+      },
+      "treatment": {
+        "outputTokens": {
+          "mean": 14091.6,
+          "sd": 5470.936,
+          "n": 5
+        },
+        "totalTokens": {
+          "mean": 2336179.6,
+          "sd": 762566.47,
+          "n": 5
+        },
+        "toolCalls": {
+          "mean": 20.6,
+          "sd": 5.505,
+          "n": 5
+        },
+        "wallMs": {
+          "mean": 473111.4,
+          "sd": 81570.129,
+          "n": 5
+        }
+      },
+      "delta": {
+        "outputTokens": {
+          "mean": 1665.2,
+          "sd": 12258.707,
+          "n": 5
+        },
+        "totalTokens": {
+          "mean": 100969,
+          "sd": 1006706.982,
+          "n": 5
+        },
+        "toolCalls": {
+          "mean": -0.2,
+          "sd": 6.723,
+          "n": 5
+        },
+        "wallMs": {
+          "mean": 42184.2,
+          "sd": 132061.635,
+          "n": 5
+        }
+      }
+    },
+    {
+      "task": "flask-render_template",
+      "repo": "flask",
+      "reps": 4,
+      "control": {
+        "outputTokens": {
+          "mean": 8172,
+          "sd": 4960.524,
+          "n": 4
+        },
+        "totalTokens": {
+          "mean": 1028649.25,
+          "sd": 289684.519,
+          "n": 4
+        },
+        "toolCalls": {
+          "mean": 12,
+          "sd": 3.916,
+          "n": 4
+        },
+        "wallMs": {
+          "mean": 212054.5,
+          "sd": 29568.008,
+          "n": 4
+        }
+      },
+      "treatment": {
+        "outputTokens": {
+          "mean": 5611.4,
+          "sd": 2261.992,
+          "n": 5
+        },
+        "totalTokens": {
+          "mean": 1638166,
+          "sd": 527884.664,
+          "n": 5
+        },
+        "toolCalls": {
+          "mean": 17,
+          "sd": 2.915,
+          "n": 5
+        },
+        "wallMs": {
+          "mean": 314339,
+          "sd": 123098.362,
+          "n": 5
+        }
+      },
+      "delta": {
+        "outputTokens": {
+          "mean": -3481,
+          "sd": 4868.61,
+          "n": 4
+        },
+        "totalTokens": {
+          "mean": 386598,
+          "sd": 265988.312,
+          "n": 4
+        },
+        "toolCalls": {
+          "mean": 4,
+          "sd": 4.69,
+          "n": 4
+        },
+        "wallMs": {
+          "mean": 49217,
+          "sd": 61088.033,
+          "n": 4
+        }
+      }
+    }
+  ],
+  "perRepMeanDelta": [
+    {
+      "rep": 1,
+      "tasksGraded": 4,
+      "deltaOutputTokens": -7670.5,
+      "deltaTotalTokens": -639273.75,
+      "deltaToolCalls": 1.25,
+      "deltaWallMs": -35932.5
+    },
+    {
+      "rep": 2,
+      "tasksGraded": 4,
+      "deltaOutputTokens": -3222.5,
+      "deltaTotalTokens": 176938,
+      "deltaToolCalls": 6.75,
+      "deltaWallMs": 2071.25
+    },
+    {
+      "rep": 3,
+      "tasksGraded": 4,
+      "deltaOutputTokens": 2502.5,
+      "deltaTotalTokens": 219821.25,
+      "deltaToolCalls": -3,
+      "deltaWallMs": 69751.25
+    },
+    {
+      "rep": 4,
+      "tasksGraded": 3,
+      "deltaOutputTokens": 5290.33,
+      "deltaTotalTokens": -325859.67,
+      "deltaToolCalls": -1,
+      "deltaWallMs": -34555.67
+    },
+    {
+      "rep": 5,
+      "tasksGraded": 4,
+      "deltaOutputTokens": 4698.75,
+      "deltaTotalTokens": 149795.5,
+      "deltaToolCalls": 0.75,
+      "deltaWallMs": 62954
+    }
+  ],
+  "means": {
+    "control": {
+      "outputTokens": 9828.84,
+      "totalTokens": 1979042.74,
+      "toolCalls": 17.37,
+      "wallMs": 332384.58
+    },
+    "treatment": {
+      "outputTokens": 9857.25,
+      "totalTokens": 1939159.9,
+      "toolCalls": 18.55,
+      "wallMs": 356681.25
+    }
+  },
+  "perAgent": [
+    {
+      "arm": "control",
+      "task": "axios-merge",
+      "rep": 1,
+      "agentId": "a2fae1aa72278bf18",
+      "outputTokens": 5699,
+      "inputTokens": 30,
+      "cacheReadTokens": 623409,
+      "totalTokens": 990619,
+      "toolCalls": 10,
+      "wallMs": 193284,
+      "journalDurationMs": 193380
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-merge",
+      "rep": 1,
+      "agentId": "a32631096b13195c0",
+      "outputTokens": 2989,
+      "inputTokens": 50,
+      "cacheReadTokens": 853684,
+      "totalTokens": 996095,
+      "toolCalls": 12,
+      "wallMs": 185130,
+      "journalDurationMs": 185250
+    },
+    {
+      "arm": "control",
+      "task": "axios-AxiosError",
+      "rep": 1,
+      "agentId": "a37baf05f10a6a51f",
+      "outputTokens": 18459,
+      "inputTokens": 111,
+      "cacheReadTokens": 4339674,
+      "totalTokens": 4831220,
+      "toolCalls": 32,
+      "wallMs": 574672,
+      "journalDurationMs": 574694
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-AxiosError",
+      "rep": 1,
+      "agentId": "ad3184c39b2c2cc67",
+      "outputTokens": 7165,
+      "inputTokens": 112,
+      "cacheReadTokens": 2393968,
+      "totalTokens": 2684621,
+      "toolCalls": 31,
+      "wallMs": 482578,
+      "journalDurationMs": 482630
+    },
+    {
+      "arm": "control",
+      "task": "axios-AxiosHeaders",
+      "rep": 1,
+      "agentId": "a4d9067462a6fabfb",
+      "outputTokens": 21504,
+      "inputTokens": 82,
+      "cacheReadTokens": 2697474,
+      "totalTokens": 3150214,
+      "toolCalls": 23,
+      "wallMs": 501346,
+      "journalDurationMs": 501377
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-AxiosHeaders",
+      "rep": 1,
+      "agentId": "a3244e5892782911c",
+      "outputTokens": 12979,
+      "inputTokens": 90,
+      "cacheReadTokens": 2155681,
+      "totalTokens": 2366409,
+      "toolCalls": 21,
+      "wallMs": 429068,
+      "journalDurationMs": 429080
+    },
+    {
+      "arm": "control",
+      "task": "flask-render_template",
+      "rep": 1,
+      "agentId": "a07d963c7a92dbb98",
+      "outputTokens": 12893,
+      "inputTokens": 36,
+      "cacheReadTokens": 608730,
+      "totalTokens": 753327,
+      "toolCalls": 8,
+      "wallMs": 200762,
+      "journalDurationMs": 200770
+    },
+    {
+      "arm": "treatment",
+      "task": "flask-render_template",
+      "rep": 1,
+      "agentId": "a05e690c824199bf1",
+      "outputTokens": 4740,
+      "inputTokens": 60,
+      "cacheReadTokens": 1015227,
+      "totalTokens": 1121160,
+      "toolCalls": 14,
+      "wallMs": 229558,
+      "journalDurationMs": 229570
+    },
+    {
+      "arm": "control",
+      "task": "axios-merge",
+      "rep": 2,
+      "agentId": "af6debabec7d2239c",
+      "outputTokens": 6856,
+      "inputTokens": 71,
+      "cacheReadTokens": 1516710,
+      "totalTokens": 1654451,
+      "toolCalls": 14,
+      "wallMs": 319592,
+      "journalDurationMs": 319608
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-merge",
+      "rep": 2,
+      "agentId": "ae97183b41b75b24f",
+      "outputTokens": 6046,
+      "inputTokens": 65,
+      "cacheReadTokens": 1238444,
+      "totalTokens": 1347714,
+      "toolCalls": 13,
+      "wallMs": 199358,
+      "journalDurationMs": 199386
+    },
+    {
+      "arm": "control",
+      "task": "axios-AxiosError",
+      "rep": 2,
+      "agentId": "a5d2eedad5a29d0ad",
+      "outputTokens": 31591,
+      "inputTokens": 64,
+      "cacheReadTokens": 2096840,
+      "totalTokens": 2500833,
+      "toolCalls": 13,
+      "wallMs": 441637,
+      "journalDurationMs": 441659
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-AxiosError",
+      "rep": 2,
+      "agentId": "a4881c72948f4ab68",
+      "outputTokens": 20736,
+      "inputTokens": 122,
+      "cacheReadTokens": 2759474,
+      "totalTokens": 2930408,
+      "toolCalls": 28,
+      "wallMs": 344342,
+      "journalDurationMs": 344363
+    },
+    {
+      "arm": "control",
+      "task": "axios-AxiosHeaders",
+      "rep": 2,
+      "agentId": "a7beb587407127ead",
+      "outputTokens": 16486,
+      "inputTokens": 102,
+      "cacheReadTokens": 2825403,
+      "totalTokens": 3044526,
+      "toolCalls": 22,
+      "wallMs": 360912,
+      "journalDurationMs": 360919
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-AxiosHeaders",
+      "rep": 2,
+      "agentId": "a7850ee229ed2b6ba",
+      "outputTokens": 22212,
+      "inputTokens": 124,
+      "cacheReadTokens": 2668285,
+      "totalTokens": 2865667,
+      "toolCalls": 26,
+      "wallMs": 508185,
+      "journalDurationMs": 508356
+    },
+    {
+      "arm": "control",
+      "task": "flask-render_template",
+      "rep": 2,
+      "agentId": "a68a370eb8f80cab5",
+      "outputTokens": 12018,
+      "inputTokens": 40,
+      "cacheReadTokens": 681103,
+      "totalTokens": 805763,
+      "toolCalls": 10,
+      "wallMs": 200422,
+      "journalDurationMs": 200433
+    },
+    {
+      "arm": "treatment",
+      "task": "flask-render_template",
+      "rep": 2,
+      "agentId": "a2715ac0cca1639d5",
+      "outputTokens": 5067,
+      "inputTokens": 78,
+      "cacheReadTokens": 1419794,
+      "totalTokens": 1569536,
+      "toolCalls": 19,
+      "wallMs": 278963,
+      "journalDurationMs": 278994
+    },
+    {
+      "arm": "control",
+      "task": "axios-merge",
+      "rep": 3,
+      "agentId": "a0633447cbf5eaba4",
+      "outputTokens": 7788,
+      "inputTokens": 36,
+      "cacheReadTokens": 559524,
+      "totalTokens": 729455,
+      "toolCalls": 11,
+      "wallMs": 211553,
+      "journalDurationMs": 211581
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-merge",
+      "rep": 3,
+      "agentId": "afa766827af93c67b",
+      "outputTokens": 6485,
+      "inputTokens": 54,
+      "cacheReadTokens": 960438,
+      "totalTokens": 1061326,
+      "toolCalls": 13,
+      "wallMs": 158052,
+      "journalDurationMs": 158068
+    },
+    {
+      "arm": "control",
+      "task": "axios-AxiosError",
+      "rep": 3,
+      "agentId": "afd39daf49b02936b",
+      "outputTokens": 10627,
+      "inputTokens": 68,
+      "cacheReadTokens": 1814384,
+      "totalTokens": 2237486,
+      "toolCalls": 22,
+      "wallMs": 242817,
+      "journalDurationMs": 242837
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-AxiosError",
+      "rep": 3,
+      "agentId": "acbc326a947fe9696",
+      "outputTokens": 36558,
+      "inputTokens": 104,
+      "cacheReadTokens": 2585869,
+      "totalTokens": 2833242,
+      "toolCalls": 18,
+      "wallMs": 619396,
+      "journalDurationMs": 619417
+    },
+    {
+      "arm": "control",
+      "task": "axios-AxiosHeaders",
+      "rep": 3,
+      "agentId": "a5620c8a6e763141b",
+      "outputTokens": 21281,
+      "inputTokens": 70,
+      "cacheReadTokens": 1331083,
+      "totalTokens": 1757811,
+      "toolCalls": 23,
+      "wallMs": 398099,
+      "journalDurationMs": 398121
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-AxiosHeaders",
+      "rep": 3,
+      "agentId": "af22a34855977d9a3",
+      "outputTokens": 7504,
+      "inputTokens": 68,
+      "cacheReadTokens": 1283454,
+      "totalTokens": 1450079,
+      "toolCalls": 15,
+      "wallMs": 379541,
+      "journalDurationMs": 379586
+    },
+    {
+      "arm": "control",
+      "task": "flask-render_template",
+      "rep": 3,
+      "agentId": "a1d6f470065006fcd",
+      "outputTokens": 4037,
+      "inputTokens": 62,
+      "cacheReadTokens": 1070146,
+      "totalTokens": 1244853,
+      "toolCalls": 17,
+      "wallMs": 255899,
+      "journalDurationMs": 255917
+    },
+    {
+      "arm": "treatment",
+      "task": "flask-render_template",
+      "rep": 3,
+      "agentId": "a25965f534b1546e7",
+      "outputTokens": 3196,
+      "inputTokens": 76,
+      "cacheReadTokens": 1343051,
+      "totalTokens": 1504243,
+      "toolCalls": 15,
+      "wallMs": 230384,
+      "journalDurationMs": 230398
+    },
+    {
+      "arm": "control",
+      "task": "axios-merge",
+      "rep": 4,
+      "agentId": "a380df86c1511a76c",
+      "outputTokens": 108,
+      "inputTokens": 67,
+      "cacheReadTokens": 1214706,
+      "totalTokens": 1421210,
+      "toolCalls": 15,
+      "wallMs": 227997,
+      "journalDurationMs": 228222
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-merge",
+      "rep": 4,
+      "agentId": "abbbb9cfe6728e2ce",
+      "outputTokens": 118,
+      "inputTokens": 2930,
+      "cacheReadTokens": 1215281,
+      "totalTokens": 1361028,
+      "toolCalls": 16,
+      "wallMs": 285297,
+      "journalDurationMs": 285315
+    },
+    {
+      "arm": "control",
+      "task": "axios-AxiosError",
+      "rep": 4,
+      "agentId": "aaac17a21dd8b7fa7",
+      "outputTokens": 2918,
+      "inputTokens": 77,
+      "cacheReadTokens": 2144646,
+      "totalTokens": 2378186,
+      "toolCalls": 16,
+      "wallMs": 357644,
+      "journalDurationMs": 357682
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-AxiosError",
+      "rep": 4,
+      "agentId": "a3b1dd044abd7ee55",
+      "outputTokens": 8524,
+      "inputTokens": 73,
+      "cacheReadTokens": 1413532,
+      "totalTokens": 1518692,
+      "toolCalls": 16,
+      "wallMs": 259913,
+      "journalDurationMs": 259927
+    },
+    {
+      "arm": "control",
+      "task": "axios-AxiosHeaders",
+      "rep": 4,
+      "agentId": "a0a1065649e54c239",
+      "outputTokens": 1498,
+      "inputTokens": 66,
+      "cacheReadTokens": 1424524,
+      "totalTokens": 1780640,
+      "toolCalls": 19,
+      "wallMs": 518944,
+      "journalDurationMs": 518981
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-AxiosHeaders",
+      "rep": 4,
+      "agentId": "a0bc0851cc79f6f06",
+      "outputTokens": 11753,
+      "inputTokens": 76,
+      "cacheReadTokens": 1539334,
+      "totalTokens": 1722737,
+      "toolCalls": 15,
+      "wallMs": 455708,
+      "journalDurationMs": 455736
+    },
+    {
+      "arm": "treatment",
+      "task": "flask-render_template",
+      "rep": 4,
+      "agentId": "a4ca03eacbd253b8a",
+      "outputTokens": 9293,
+      "inputTokens": 110,
+      "cacheReadTokens": 2383431,
+      "totalTokens": 2529841,
+      "toolCalls": 21,
+      "wallMs": 526609,
+      "journalDurationMs": 527070
+    },
+    {
+      "arm": "control",
+      "task": "axios-merge",
+      "rep": 5,
+      "agentId": "a38a46b75527f9182",
+      "outputTokens": 71,
+      "inputTokens": 35,
+      "cacheReadTokens": 675958,
+      "totalTokens": 909066,
+      "toolCalls": 13,
+      "wallMs": 203728,
+      "journalDurationMs": 203739
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-merge",
+      "rep": 5,
+      "agentId": "a6871ec68957ff190",
+      "outputTokens": 2997,
+      "inputTokens": 66,
+      "cacheReadTokens": 1054882,
+      "totalTokens": 1139346,
+      "toolCalls": 14,
+      "wallMs": 160109,
+      "journalDurationMs": 160129
+    },
+    {
+      "arm": "control",
+      "task": "axios-AxiosError",
+      "rep": 5,
+      "agentId": "af0ea909386b56975",
+      "outputTokens": 7811,
+      "inputTokens": 124,
+      "cacheReadTokens": 4338784,
+      "totalTokens": 4658636,
+      "toolCalls": 32,
+      "wallMs": 539529,
+      "journalDurationMs": 539545
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-AxiosError",
+      "rep": 5,
+      "agentId": "aaebbf7104b1912e4",
+      "outputTokens": 7012,
+      "inputTokens": 104,
+      "cacheReadTokens": 2808571,
+      "totalTokens": 3038998,
+      "toolCalls": 22,
+      "wallMs": 502198,
+      "journalDurationMs": 502215
+    },
+    {
+      "arm": "control",
+      "task": "axios-AxiosHeaders",
+      "rep": 5,
+      "agentId": "a933102a47a69ded9",
+      "outputTokens": 1363,
+      "inputTokens": 66,
+      "cacheReadTokens": 1281759,
+      "totalTokens": 1442862,
+      "toolCalls": 17,
+      "wallMs": 375335,
+      "journalDurationMs": 375349
+    },
+    {
+      "arm": "treatment",
+      "task": "axios-AxiosHeaders",
+      "rep": 5,
+      "agentId": "ad5d4ecc006041a14",
+      "outputTokens": 16010,
+      "inputTokens": 110,
+      "cacheReadTokens": 2973007,
+      "totalTokens": 3276006,
+      "toolCalls": 26,
+      "wallMs": 593055,
+      "journalDurationMs": 593076
+    },
+    {
+      "arm": "control",
+      "task": "flask-render_template",
+      "rep": 5,
+      "agentId": "ab585b5fa3fbc467d",
+      "outputTokens": 3740,
+      "inputTokens": 60,
+      "cacheReadTokens": 1168578,
+      "totalTokens": 1310654,
+      "toolCalls": 13,
+      "wallMs": 191135,
+      "journalDurationMs": 191147
+    },
+    {
+      "arm": "treatment",
+      "task": "flask-render_template",
+      "rep": 5,
+      "agentId": "a8b690be48bcf3785",
+      "outputTokens": 5761,
+      "inputTokens": 76,
+      "cacheReadTokens": 1353842,
+      "totalTokens": 1466050,
+      "toolCalls": 16,
+      "wallMs": 306181,
+      "journalDurationMs": 306193
+    }
+  ],
+  "integrity": {
+    "agentsExpected": 39,
+    "agentsJoined": 39,
+    "missingTranscripts": [],
+    "unparsedLabels": [],
+    "allDone": true,
+    "model": "claude-fable-5"
+  }
+}

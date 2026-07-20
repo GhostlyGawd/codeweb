@@ -141,6 +141,35 @@ The freeze-truth blocker is CLEARED and the noise floor is measured. What landed
     wasted). Fixed in `c…`→ the harness now `JSON.parse`s string args (commit `b626015`) with a regression
     test. Re-launched clean. Lesson saved to memory `workflow-args-string`.
 
+## v0.9.0 budgeted re-run (2026-07-20, Spec M): the token-savings prediction FAILED; the win is now +0.31 recall at equal cost
+The product review's addendum said the budgeted re-run was "blocked on an agent harness this
+environment doesn't have." That was stale — the harness is THIS file. Spec M
+(`docs/specs/pilot-budgeted-rerun.md`) made it portable (`args.root`/`args.graphs`) and added
+`args.budgeted`, which puts the treatment arm on the MCP-parity surface (`--dependents --limit 20
+--json`: summary + byKind counts + top-20 + `more.remaining`, paging or dropping the limit at the
+agent's judgement). Pilot graphs rebuilt at the corpus pins; `efficiency-pilot.preflight.mjs`
+confirmed every frozen-truth id resolves before spend.
+
+5 engine-frozen reps, frozen truth, symbol-level, model `claude-fable-5` (run `wf_c53dbfb9-077`,
+39/40 arms — one flask control arm died on a spurious model-safeguard flag, so flask is n=4):
+
+| metric    | paired delta ± SD   | read                                                               |
+|-----------|---------------------|--------------------------------------------------------------------|
+| recall    | **+0.310 ± 0.039**  | all 5 reps positive (~8× SD); treatment 0.74 vs control 0.44 abs    |
+| precision | **+0.234 ± 0.080**  | all 5 reps positive — fewer false callers than grep, not more       |
+| steps     | +0.9 ± 3.7          | WASH — pagination spends what the unbudgeted flow spent dump-reading |
+
+Runtime usage (`efficiency-pilot.usage-v090.json`, 39/39 joined): totalTokens −84k ± 381k,
+toolCalls +0.95 ± 3.6, output +320 ± 5.6k — **all WASH on this model.** The −44% token win reps8
+measured (model `claude-opus-4-8[1m]`, unbudgeted) did NOT reproduce. Honest interpretation: as the
+base agent got frugal on its own, codeweb's advantage **moved from cost to completeness** — same
+spend, materially higher recall/precision. NOT head-to-head with reps8 (engine, budget condition,
+AND agent model all changed) — the trustworthy signal is the WITHIN-run paired delta, which is a
+robust recall/precision win either way. Per-task: AxiosHeaders flipped from historical weak spot to
+biggest win (ΔR +0.50); **flask-render_template is an honest LOSS** (ΔR −0.03) — the rebuilt flask
+graph serves only 7 dependents vs 26 truth, a Python import-edge regression (next lever). Artifacts:
+`efficiency-pilot.reps5-v090.json` + `efficiency-pilot.usage-v090.json`.
+
 ## Lever #3 (2026-06-23): TOKENS + WALL-CLOCK instrumented — the missing efficiency axis, measured POST-HOC on the reps8 run (no new spend)
 reps8 measured recall + steps, but steps were SELF-REPORTED and tokens/wall-clock were never captured.
 Instead of re-running (~5M tok), I recovered runtime efficiency from the reps8 run's OWN Workflow journal

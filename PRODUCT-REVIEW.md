@@ -155,7 +155,7 @@ Adopt one response contract for every tool:
 - `deadcode`/`orphans`/`campaign`: tier counts + top-N + cursor → 265KB → ~1.5KB.
 - Fix the 64KB flush bug (§1.2) so even `full: true` is correct.
 - Net for a representative 12-call session (context, impact ×2, callers ×3, cycles, deadcode, hotspots, review, refresh, diff): **~630KB raw (~157k tokens) today — of which ~65k tokens actually reach the model after client-side clipping mangles the two biggest responses — → ~14KB (~3.5k tokens)**, all of it valid JSON. That's the "decreasing token usage" promise made real.
-- The paper already has the harness to prove it: re-run the Theme-5b efficiency pilot against budgeted responses and publish tokens-per-task. (Current honest claim: "~44% fewer tokens than grep" — with budgets it should be >90% on the same tasks.)
+- ~~The paper already has the harness to prove it: re-run the Theme-5b efficiency pilot against budgeted responses and publish tokens-per-task. (Current honest claim: "~44% fewer tokens than grep" — with budgets it should be >90% on the same tasks.)~~ **Done — see the "Still open" resolution below. The >90% prediction was wrong: on a frugal base agent the budgeted surface is a token wash; the measured win is +0.31 recall at equal cost.**
 
 ### 4.2 Effective — zero-friction path from install to first answer
 
@@ -250,6 +250,18 @@ methodology as the review: every number below re-measured on the same vite check
 | MCP tools | 20 (subset of CLI power; version 0.1.0) | **22** (`codeweb_map`, `codeweb_explain`; body/structural/gate/scope exposed; version derived) | complete |
 | Test suite | 370 tests | **394 tests, 0 fail** (+24 pinning every fix above) | guarded |
 
-Still open (honestly): the efficiency-pilot re-run against budgeted responses needs an agent
-harness this environment doesn't have — the per-tool token measurements above are the input to it;
-language expansion (Java/C#/…) remains sequenced behind trust, as planned.
+~~Still open (honestly): the efficiency-pilot re-run against budgeted responses needs an agent
+harness this environment doesn't have~~ — **DONE (2026-07-20, Spec M, `bench/experiments/efficiency-pilot.reps5-v090.json`).**
+The harness was `efficiency-pilot.workflow.js` all along; it now runs the treatment arm on the
+budgeted MCP-parity surface (`--limit 20`, pagination at the agent's judgement). 5 engine-frozen
+reps on v0.9.0 vs the frozen truth: recall paired delta **+0.310 ± 0.039** (all 5 reps positive),
+precision **+0.234 ± 0.080** — the budgeted surface costs **no** recall or precision. But the
+prediction above ("with budgets it should be >90% fewer tokens") did **not** hold: on the current
+base agent (claude-fable-5), runtime tokens/tool-calls/steps are all a **wash** (totalTokens
+−84k ± 381k, toolCalls +0.95 ± 3.6). The efficiency win the older reps8 run measured (−44% tokens
+on claude-opus-4-8) **moved from cost to completeness** as the base agent got frugal on its own:
+same spend, materially higher recall/precision. The honest headline is now
+"+0.31 recall at equal cost," not a token-savings number. One per-task loss recorded openly
+(flask-render_template, −0.03 recall): the rebuilt flask graph serves 7 dependents vs 26 truth — a
+Python import-edge regression flagged for the next lever.
+Language expansion (Java/C#/Python/Go/Rust/Ruby/PHP/Kotlin/Swift) has since shipped, as planned.
