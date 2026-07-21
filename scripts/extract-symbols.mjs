@@ -15,9 +15,12 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { relative, resolve, join, dirname, extname } from 'node:path';
+import { relative, resolve, join, dirname } from 'node:path';
 import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
 import { atomicWrite, parseArgs } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
+import { SRC_RE } from './lib/common.mjs'; // finding 25: one truth for the mappable-source list (the copy here could drift)
+import { KEYWORDS, scanSymbols, bodyEnd, parseSignature, DYNAMIC_RE, langOf } from './lib/lang-rules.mjs'; // finding 25: pure per-language rules
+import { createImportResolver, defaultExportOf } from './lib/import-resolve.mjs'; // finding 25: cross-file name binding, one place
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { maskJs, maskPy, maskRuby } from './lib/masking.mjs'; // comment/string/regex-literal blanking (one truth, shared with codemod's rewrite gate)
 import { sha1 } from './lib/hash.mjs'; // one truth — codeweb's own gate flagged the duplicate on this branch
@@ -75,10 +78,8 @@ try {
 const roleFor = (rel) => roleOverride(rel) || roleOf(rel);
 if (!existsSync(root)) { console.error(`[extract] not found: ${root}`); process.exit(1); }
 
-const SRC = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
+const SRC = SRC_RE; // finding 25: the extractor and the hooks share ONE source-extension list
 const SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
-
-const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
 
 function tryExec(cmd, args) { try { return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 28 }); } catch { return null; } }
 function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
@@ -148,163 +149,6 @@ function maskedOnce(relPath, kind, text) {
   return v;
 }
 
-function scanSymbols(file, text) {
-  const ext = extname(file).toLowerCase();
-  const lines = (ext === '.py' ? maskedOnce(rel(file), 'py', text) : text).split(/\r?\n/); // hide def/class inside docstrings
-  const syms = [];
-  const push = (name, line, kind, exported, owner) => { if (name && !KEYWORDS.has(name)) syms.push({ name, line: line + 1, kind, exports: !!exported, ...(owner ? { owner } : {}) }); };
-  if (ext === '.py') {
-    lines.forEach((ln, i) => {
-      let m;
-      if ((m = /^\s*def\s+([A-Za-z_]\w*)/.exec(ln))) push(m[1], i, /^\S/.test(ln) ? 'function' : 'method', true);
-      else if ((m = /^\s*class\s+([A-Za-z_]\w*)/.exec(ln))) push(m[1], i, 'class', true);
-    });
-  } else if (ext === '.rs') {
-    // Rust: fn/struct/enum/trait. A `fn` indented inside an `impl`/`trait` block is a method; at
-    // column 0 it's a free function. `pub` (incl. `pub(crate)`) -> exported. The name after the
-    // keyword is always a real identifier (you can't write `fn fn`), so push directly rather than
-    // through the JS-keyword filter — that keeps idiomatic Rust names like `new`/`default`/`drop`.
-    // Owner: a prescan records `impl [Trait for] Type { … }` extents (column-0 `impl` to the first
-    // column-0 `}`, idiomatic rustfmt shape) so a method knows its impl type — two `fn new` across
-    // two impls in one file must not share an id.
-    const implRe = /^impl(?:\s*<[^>]*>)?\s+(?:.*?\bfor\s+)?([A-Za-z_]\w*)/;
-    const implRanges = [];
-    for (let i = 0; i < lines.length; i++) {
-      const im = implRe.exec(lines[i]);
-      if (!im) continue;
-      let end = lines.length - 1;
-      for (let j = i + 1; j < lines.length; j++) { if (/^\}/.test(lines[j])) { end = j; break; } }
-      implRanges.push({ type: im[1], start: i + 1, end: end + 1 });
-    }
-    const implOwner = (lineNo) => { let best = null; for (const r of implRanges) if (lineNo > r.start && lineNo <= r.end && (!best || r.start > best.start)) best = r; return best ? best.type : undefined; };
-    const DEF = /^(\s*)(pub(?:\([a-z]+\))?\s+)?(?:async\s+)?(?:unsafe\s+)?(?:const\s+)?(fn|struct|enum|trait)\s+([A-Za-z_]\w*)/;
-    lines.forEach((ln, i) => {
-      const m = DEF.exec(ln);
-      if (!m) return;
-      const indent = m[1].length, exported = !!m[2], key = m[3], name = m[4];
-      const kind = key === 'fn' ? (indent > 0 ? 'method' : 'function') : 'class';
-      const owner = kind === 'method' ? implOwner(i + 1) : undefined;
-      syms.push({ name, line: i + 1, kind, exports: exported, ...(owner ? { owner } : {}) });
-    });
-  } else if (ext === '.go') {
-    // Go: `func F(...)` is a function; `func (r R) M(...)` (a receiver in parens before the name)
-    // is a method; `type X struct|interface { … }` is a class. Visibility is by initial case — an
-    // uppercase first letter is exported. Names after func/type are real identifiers -> push direct.
-    // Owner: the receiver TYPE (last identifier in the receiver, `*`/generics stripped) qualifies the
-    // id — `func (a A) Do` and `func (b B) Do` in one file are different methods, not one.
-    const methodRe = /^\s*func\s+\(([^)]*)\)\s+([A-Za-z_]\w*)/;
-    const funcRe = /^\s*func\s+([A-Za-z_]\w*)/;
-    const typeRe = /^\s*type\s+([A-Za-z_]\w*)\s+(?:struct|interface)\b/;
-    const exp = (n) => /^[A-Z]/.test(n);
-    const recvType = (recv) => { const m2 = /([A-Za-z_]\w*)\s*$/.exec(recv.replace(/\[[^\]]*\]/g, '').replace(/\*/g, '').trim()); return m2 ? m2[1] : undefined; };
-    lines.forEach((ln, i) => {
-      let m;
-      if ((m = methodRe.exec(ln))) syms.push({ name: m[2], line: i + 1, kind: 'method', exports: exp(m[2]), ...(recvType(m[1]) ? { owner: recvType(m[1]) } : {}) });
-      else if ((m = funcRe.exec(ln))) syms.push({ name: m[1], line: i + 1, kind: 'function', exports: exp(m[1]) });
-      else if ((m = typeRe.exec(ln))) syms.push({ name: m[1], line: i + 1, kind: 'class', exports: exp(m[1]) });
-    });
-  } else if (ext === '.java') {
-    // Java: class/interface/enum/record -> 'class' (public -> exported); a name(...)-{ line inside a
-    // type is a method/constructor. Owner qualification reuses the enclosing-class mechanism (every
-    // Java method is inside a type). Annotation lines (@Override) match nothing. Control-flow words
-    // are filtered by KEYWORDS; `throws` clauses are tolerated before the brace.
-    const TYPE = /^\s*(?:@[\w.$]+(?:\([^)]*\))?\s+)?(?:(?:public|protected|private|static|final|abstract|sealed|non-sealed|strictfp)\s+)*(class|interface|enum|record)\s+([A-Za-z_$][\w$]*)/;
-    const METHOD = /^\s+(?:(?:public|protected|private|static|final|abstract|synchronized|native|default|strictfp)\s+)*(?:<[^>]+>\s+)?(?:[\w$<>\[\],.?\s]+?\s+)?([A-Za-z_$][\w$]*)\s*\([^;{]*\)\s*(?:throws\s+[\w$,.\s]+)?\{/;
-    const CTRL = new Set(['if', 'for', 'while', 'switch', 'catch', 'try', 'do', 'synchronized', 'assert', 'return', 'throw', 'new', 'else']);
-    lines.forEach((ln, i) => {
-      let m;
-      if ((m = TYPE.exec(ln))) push(m[2], i, 'class', /\bpublic\b/.test(ln));
-      else if ((m = METHOD.exec(ln)) && !CTRL.has(m[1])) push(m[1], i, 'method', /\bpublic\b/.test(ln));
-    });
-  } else if (ext === '.cs') {
-    // C#: class/interface/struct/record/enum -> 'class' (public -> exported); methods like Java
-    // (expression-bodied `=> …;` members end via the brace-less semicolon rule). Properties
-    // (`int X { get; set; }`) are skipped — no param list, and they'd be reference noise.
-    const TYPE = /^\s*(?:\[[^\]]*\]\s*)?(?:(?:public|private|protected|internal|static|sealed|abstract|partial|readonly|ref)\s+)*(class|interface|struct|record|enum)\s+([A-Za-z_][\w]*)/;
-    // brace on the same line, `=> expr;`, or NOTHING after `)` — C#'s dominant Allman style puts
-    // the `{` on the next line (bodyEnd handles that; a call statement line ends `);` so it can't
-    // false-match the bare-`)` form).
-    const METHOD = /^\s+(?:(?:public|private|protected|internal|static|virtual|override|abstract|sealed|async|extern|unsafe|new|partial)\s+)+(?:[\w<>\[\],.?\s]+?\s+)?([A-Za-z_][\w]*)\s*\([^;{]*\)\s*(?:where\s+[^{]+)?(?:\{|=>|$)/;
-    const CTRL = new Set(['if', 'for', 'foreach', 'while', 'switch', 'catch', 'try', 'do', 'using', 'lock', 'fixed', 'return', 'throw', 'new', 'else']);
-    lines.forEach((ln, i) => {
-      let m;
-      if ((m = TYPE.exec(ln))) push(m[2], i, 'class', /\bpublic\b/.test(ln));
-      else if ((m = METHOD.exec(ln)) && !CTRL.has(m[1])) push(m[1], i, 'method', /\bpublic\b/.test(ln));
-    });
-  } else if (ext === '.rb') {
-    // Ruby (Spec I): class/module + def (self. = class-level, same owner), everything public by
-    // default. Extents are indentation-based (idiomatic 2-space Ruby) — see isIndentLang below.
-    // Line-anchored patterns are comment-safe (`# def x` can't match ^\s*def).
-    const ownerRanges = [];
-    const ownerAt = (lineNo) => { let best = null; for (const o of ownerRanges) if (lineNo > o.start && lineNo < o.end && (!best || o.start > best.start)) best = o; return best?.name; };
-    lines.forEach((ln, i) => {
-      let m;
-      if ((m = /^(\s*)(?:class|module)\s+([A-Z]\w*)/.exec(ln))) {
-        const indent = m[1].length;
-        let end = lines.length;
-        for (let j = i + 1; j < lines.length; j++) {
-          if (/^\s*end\b/.test(lines[j]) && (lines[j].match(/^\s*/)[0].length <= indent)) { end = j + 1; break; }
-        }
-        ownerRanges.push({ name: m[2], start: i + 1, end, indent });
-        push(m[2], i, 'class', true);
-      } else if ((m = /^(\s*)def\s+(?:self\.)?([A-Za-z_]\w*[?!]?)/.exec(ln))) {
-        const owner = m[1].length ? ownerAt(i + 1) : undefined;
-        push(m[2], i, owner ? 'method' : 'function', true, owner);
-      }
-    });
-  } else if (ext === '.php') {
-    // PHP (Spec I): class/interface/trait + function members (visibility-as-export, public
-    // default); top-level functions. Owner qualification rides the enclosing-class ranges.
-    const TYPE = /^\s*(?:abstract\s+|final\s+)?(?:class|interface|trait)\s+([A-Za-z_]\w*)/;
-    const FN = /^(\s*)(?:(?:public|protected|private|static|final|abstract)\s+)*function\s+&?\s*([A-Za-z_]\w*)\s*\(/;
-    lines.forEach((ln, i) => {
-      let m;
-      if ((m = TYPE.exec(ln))) push(m[1], i, 'class', true);
-      else if ((m = FN.exec(ln))) push(m[2], i, m[1].length ? 'method' : 'function', !/\b(?:private|protected)\b/.test(ln));
-    });
-  } else if (ext === '.kt' || ext === '.kts') {
-    // Kotlin (Spec I): class/object/interface + fun members (public-by-default; private/internal
-    // -> not exported); expression-bodied `fun f() = …` extents collapse to one line via bodyEnd.
-    // `fun Type.name(` (extension function) owner-qualifies to the receiver type directly.
-    const TYPE = /^\s*(?:(?:public|private|internal|protected|open|final|abstract|sealed|data|inner|enum|annotation|value)\s+)*(?:class|object|interface)\s+([A-Za-z_]\w*)/;
-    const FUN = /^(\s*)(?:(?:public|private|internal|protected|open|override|final|abstract|suspend|inline|operator|infix|tailrec|external|actual|expect)\s+)*fun\s+(?:<[^>]+>\s+)?(?:([A-Za-z_][\w.]*)\.)?([A-Za-z_]\w*)\s*\(/;
-    lines.forEach((ln, i) => {
-      let m;
-      if ((m = TYPE.exec(ln))) push(m[1], i, 'class', !/\b(?:private|internal)\b/.test(ln));
-      else if ((m = FUN.exec(ln))) {
-        const recv = m[2] ? m[2].split('.').pop() : undefined;
-        push(m[3], i, m[1].length || recv ? 'method' : 'function', !/\b(?:private|internal)\b/.test(ln), recv);
-      }
-    });
-  } else if (ext === '.swift') {
-    // Swift (Spec I): class/struct/enum/protocol/actor/extension + func members. Default access
-    // is internal (module-scoped) -> only public/open count as exported. Extension members
-    // owner-qualify to the extended type via the extension's range.
-    const TYPE = /^\s*(?:(?:public|open|internal|fileprivate|private|final|indirect)\s+)*(?:class|struct|enum|protocol|extension|actor)\s+([A-Za-z_]\w*)/;
-    const FUNC = /^(\s*)(?:(?:public|open|internal|fileprivate|private|final|static|class|override|mutating|nonmutating|convenience|required|dynamic|@\w+(?:\([^)]*\))?)\s+)*func\s+([A-Za-z_]\w*)\s*[(<]/;
-    lines.forEach((ln, i) => {
-      let m;
-      if ((m = TYPE.exec(ln))) push(m[1], i, 'class', /\b(?:public|open)\b/.test(ln));
-      else if ((m = FUNC.exec(ln))) push(m[2], i, m[1].length ? 'method' : 'function', /\b(?:public|open)\b/.test(ln));
-    });
-  } else {
-    const exported = (ln) => /\bexport\b/.test(ln);
-    lines.forEach((ln, i) => {
-      let m;
-      if ((m = /^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s*\*?\s*([A-Za-z_$][\w$]*)/.exec(ln))) push(m[1], i, 'function', exported(ln));
-      else if ((m = /^\s*(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\*?\s*\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/.exec(ln))) push(m[1], i, 'function', exported(ln));
-      else if ((m = /^\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)/.exec(ln))) push(m[1], i, 'class', exported(ln));
-      else if ((m = /^\s{2,}(?:public|private|protected|static|readonly|async|get|set|\*)?\s*([A-Za-z_$][\w$]*)\s*\([^;=]*\)\s*\{/.exec(ln))) push(m[1], i, 'method', false);
-      // class-field arrow methods (`handleClick = () => {` / `run = async (x) => …`) — the standard
-      // React/TS pattern the method regex (name + paren) can't see. Marked `field`: the node is only
-      // kept when an ENCLOSING CLASS confirms it (a bare local `cb = () => {}` reassignment inside a
-      // function must not become a phantom method).
-      else if ((m = /^\s{2,}(?:public\s+|private\s+|protected\s+|readonly\s+|static\s+)*([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>/.exec(ln))) { if (m[1] && !KEYWORDS.has(m[1])) syms.push({ name: m[1], line: i + 1, kind: 'method', exports: false, field: true }); }
-    });
-  }
-  return syms;
-}
-
 // ctags accelerator: returns array of {name,line,kind} or null
 const parseCtagsLines = (out, bucketByPath) => {
   const syms = bucketByPath ? null : [];
@@ -346,125 +190,6 @@ function ctagsSymbols(file) {
   if (out == null) return null;
   const syms = parseCtagsLines(out, null);
   return syms.length ? syms : null;
-}
-
-// ---- function body extent -----------------------------------------------------------------
-// Real end-of-body so a symbol's range never runs to EOF and absorbs the trailing top-level code
-// (the root cause of fabricated call edges — e.g. query.mjs:parseArgs credited with 9 calls it
-// never makes). Brace-matched for JS/TS; dedent for Python. Strings + line/inline-block comments
-// are stripped before brace counting — best-effort: multi-line strings and template `${}` are not
-// state-tracked, so the worst case is a slightly-off end, never a run-to-EOF. startIdx is 0-based;
-// returns the 0-based inclusive last line of the body.
-const stripSC = (line) => line
-  .replace(/\/\/.*$/, '')                        // line comment
-  .replace(/\/\*.*?\*\//g, ' ')                  // single-line block comment
-  .replace(/(['"`])(?:\\.|(?!\1).)*?\1/g, ' ')   // same-line string / template literal
-  .replace(/\[(?:\\.|[^\]\n])*\]/g, ' ')         // regex char classes — strip stray [{] / [^}]
-  .replace(/\\./g, ' ');                         // escaped chars — \{ \} in regex literals (e.g. /\s*\{/)
-function bodyEnd(lines, startIdx, isPy) {
-  if (isPy) {
-    const indent = (s) => s.length - s.replace(/^\s+/, '').length;
-    const base = indent(lines[startIdx] || '');
-    let end = startIdx;
-    for (let i = startIdx + 1; i < lines.length; i++) {
-      if (lines[i].trim() === '') continue;        // blank lines don't end a body
-      if (indent(lines[i]) <= base) break;         // dedent to <= the def -> body ended above
-      end = i;
-    }
-    return end;
-  }
-  // Brace count gated on paren depth 0: a `{`/`}` inside a parameter list — destructuring
-  // (`function f({ a, b }) {`) or an object-literal default (`f(o = { x: 1 }) {`) — must NOT be
-  // read as the body brace, or the body would end at the signature line (the destructuring `{ }`
-  // balances to zero before the real body opens), mis-attributing every body call to <module>. The
-  // structural body braces are always at paren depth 0; object-literal call args inside the body sit
-  // at paren depth >= 1 and are balanced, so skipping them is strictly safe.
-  let depth = 0, started = false, paren = 0;
-  for (let i = startIdx; i < lines.length; i++) {
-    const s = stripSC(lines[i]);
-    for (let c = 0; c < s.length; c++) {
-      const ch = s[c];
-      if (ch === '(') paren++;
-      else if (ch === ')') { if (paren > 0) paren--; }
-      else if (paren === 0) {
-        if (ch === '{') { depth++; started = true; }
-        else if (ch === '}') { depth--; if (started && depth <= 0) return i; }
-      }
-    }
-    if (!started && /;\s*$/.test(s)) return i;     // brace-less body (arrow/expr) ending in ';'
-  }
-  return lines.length - 1;
-}
-
-// ---- F3: single-line signature extraction ------------------------------------------------
-// Returns {params, returns, raw} from a function/method DECLARATION line, or null when the param
-// list isn't fully on that line (multi-line / paren-less arrow) — never a guess (best-effort, the
-// same ethos as bodyEnd). The extractor is line-oriented, so multi-line params are intentionally null.
-const splitTopLevelParams = (s) => {
-  // Track only unambiguous bracket pairs. `<`/`>` are NOT tracked — they double as comparison
-  // operators in default values (`a = x > 0, b`), and treating them as brackets would mis-balance
-  // depth and drop trailing params. TS generics (`a: Map<string, number>`) still split correctly:
-  // the inner comma yields a non-identifier fragment that paramName() discards.
-  const out = []; let depth = 0, cur = '';
-  for (const ch of s) {
-    if ('([{'.includes(ch)) depth++;
-    else if (')]}'.includes(ch)) depth--;
-    if (ch === ',' && depth === 0) { out.push(cur); cur = ''; } else cur += ch;
-  }
-  if (cur.trim() || out.length) out.push(cur);
-  return out;
-};
-const paramName = (entry) => {
-  let e = entry.trim();
-  if (!e) return null;
-  e = e.replace(/^(\*\*?|\.\.\.)/, '').split('=')[0].split(':')[0].trim().split(/\s+/)[0]; // *args/**kw/...rest, default, annotation; trailing-token = Go `a int` -> `a`
-  return /^[A-Za-z_$][\w$]*$/.test(e) ? e : null;                          // destructuring/other -> dropped
-};
-function parseSignature(line, name, isPy) {
-  // Find the param-list open-paren for BOTH `name(...)` (declaration) and `name = [async]
-  // [function [g]] (...)` (arrow / function-expression assignment) — so `const f = (a, b) => …`
-  // parses, not just `function f(a, b)`. finding 11: this used to compile a fresh RegExp from the
-  // (mostly unique) symbol name per node — 27% of a regex-path extract in profile. The indexOf
-  // scan below performs the identical match (same boundaries, same optional groups, first
-  // completing occurrence wins) with zero regex construction.
-  const n = line.length;
-  const isWs = (c) => c === ' ' || c === '\t' || c === '\f' || c === '\v' || c === ' ';
-  const isWord = (c) => c === '$' || c === '_' || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-  let open = -1;
-  for (let from = 0; from < n && open === -1;) {
-    const at = line.indexOf(name, from);
-    if (at === -1) break;
-    from = at + 1;
-    if (at > 0 && isWord(line[at - 1])) continue;               // left boundary: ^ or [^\w$]
-    let i = at + name.length;
-    while (i < n && isWs(line[i])) i++;
-    if (line[i] === '=') {                                       // `= [async] [function[*] [id]]` form
-      i++;
-      while (i < n && isWs(line[i])) i++;
-      if (line.startsWith('async', i) && isWs(line[i + 5] || '')) { // async requires trailing ws (as `async\s+` did)
-        i += 5;
-        while (i < n && isWs(line[i])) i++;
-      }
-      if (line.startsWith('function', i)) {
-        i += 8;
-        while (i < n && isWs(line[i])) i++;
-        if (line[i] === '*') { i++; while (i < n && isWs(line[i])) i++; }
-        while (i < n && isWord(line[i])) i++;                    // optional fn-expression name
-        while (i < n && isWs(line[i])) i++;
-      }
-    }
-    if (line[i] === '(') open = i;
-  }
-  if (open === -1) return null;              // no param paren attributable to `name` on this line
-  let depth = 0, close = -1;
-  for (let i = open; i < line.length; i++) { const ch = line[i]; if (ch === '(') depth++; else if (ch === ')') { depth--; if (depth === 0) { close = i; break; } } }
-  if (close === -1) return null;             // params spill onto the next line -> null
-  const raw = line.slice(open + 1, close);
-  const params = splitTopLevelParams(raw).map(paramName).filter((x) => x != null);
-  let returns = null;
-  if (isPy) { const r = /->\s*([^:]+):/.exec(line.slice(close)); if (r) returns = r[1].trim(); }
-  else { const r = /^\s*:\s*([^={]+?)\s*(?:=>|\{|$)/.exec(line.slice(close + 1)); if (r) returns = r[1].trim(); }
-  return { params, returns, raw };
 }
 
 const useCtags = opts.ctags && toolExists('ctags');
@@ -552,7 +277,7 @@ const stampTier = !!(oldCache && !opts.full && process.env.CODEWEB_VERIFY_FRESHN
 // replayed, or any signature moved.
 let cacheDirty = !oldCache;
 let scanCount = 0;
-const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)) || scanSymbols(f, text); };
+const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)) || scanSymbols(f, text, (kind) => maskedOnce(rel(f), kind, text)); };
 
 // ---- build nodes per file, with line ranges ----
 const nodes = [];
@@ -568,7 +293,6 @@ const sources = {};
 // answer-time tools can say "0 callers, but this repo routes calls dynamically in N file(s) —
 // absence of callers is weaker evidence" instead of sounding equally sure everywhere.
 const dynamicFiles = [];
-const DYNAMIC_RE = /\[[A-Za-z_$][\w$]*\]\s*\(|\bgetattr\s*\(|require\s*\(\s*[^'"`)\s]|\.emit\s*\(|globalThis\s*\[|window\s*\[/;
 for (const f of files) {
   const r = rel(f);
   const isPy = r.endsWith('.py');
@@ -810,69 +534,16 @@ for (const n of nodes) { if (!byName.has(n.label)) byName.set(n.label, []); byNa
 // ---- resolve imports: aliases (for accurate cross-file calls) + import edges ----
 const relSet = new Set(files.map(rel));
 const absByRel = new Map(files.map((f2) => [rel(f2), f2])); // Spec Q2: re-export resolution reads target modules
-// Spec Q4: a Python from-import is module-level code — the SITE (<module>) owns its import edge;
-// the node is created on demand by ensureModuleNode when the edges are appended.
-const pyImportOrigin = (r2) => r2 + ':<module>';
 const nodeIdSet = new Set(nodes.map((n) => n.id));
 const kindById = new Map(nodes.map((n) => [n.id, n.kind])); // for class-usage ref edges
 const anchorByFile = new Map(); // rel -> {id, loc} most-substantial symbol of the file
 for (const n of nodes) { const cur = anchorByFile.get(n.file); if (!cur || (n.loc || 0) > cur.loc) anchorByFile.set(n.file, { id: n.id, loc: n.loc || 0 }); }
 const anchorId = (r) => { const a = anchorByFile.get(r); return a ? a.id : null; };
-function resolveImport(fromAbs, spec) {
-  if (!/^[.]/.test(spec)) return null; // local relative imports only
-  let r = rel(resolve(dirname(fromAbs), spec)).replace(/\\/g, '/');
-  const cands = [r, r + '.js', r + '.mjs', r + '.cjs', r + '.ts', r + '.tsx', r + '.jsx', r + '/index.js', r + '/index.ts', r + '/index.mjs'];
-  for (const c of cands) if (relSet.has(c)) return c;
-  return null;
-}
-// Resolve a Python module spec to a repo-relative file (`x.py` or a package's `x/__init__.py`).
-//   level > 0 -> RELATIVE: climb `level` package dirs from the importing file, then append the dotted
-//               path. Anchored to the file's real location, so it can't collide with stdlib.
-//   level = 0 -> ABSOLUTE: suffix-match the dotted path against known files (sys.path roots unknown).
-//               Require >=2 segments so `import json`/`import os` can't grab a local single-name package
-//               (e.g. flask's own src/flask/json); the shortest match wins (deterministic).
-const pyFile = (stem) => { if (!stem) return null; for (const c of [stem + '.py', stem + '/__init__.py']) if (relSet.has(c)) return c; return null; };
-function resolvePyModule(fromAbs, level, dotted) {
-  const parts = dotted ? dotted.split('.').filter(Boolean) : [];
-  if (level > 0) {
-    let baseAbs = dirname(fromAbs);
-    for (let i = 1; i < level; i++) baseAbs = dirname(baseAbs);
-    const baseRel = rel(baseAbs).replace(/\\/g, '/');
-    return pyFile([baseRel, ...parts].filter(Boolean).join('/'));
-  }
-  // Spec Q1: a SINGLE-segment absolute import resolves only when it names the repo's OWN
-  // top-level package — rooted at '' or 'src/' exactly (src-layout), never by suffix. That keeps
-  // `import json`/`import os` from grabbing a NESTED in-repo package (flask's src/flask/json)
-  // while `from flask import render_template` inside flask's repo finally resolves.
-  if (parts.length === 1) {
-    for (const c of [parts[0] + '/__init__.py', 'src/' + parts[0] + '/__init__.py', parts[0] + '.py', 'src/' + parts[0] + '.py']) {
-      if (relSet.has(c)) return c;
-    }
-    return null;
-  }
-  if (parts.length < 2) return null;
-  const tail = parts.join('/');
-  let best = null;
-  for (const rp of relSet) {
-    const hit = rp === tail + '.py' || rp.endsWith('/' + tail + '.py') || rp === tail + '/__init__.py' || rp.endsWith('/' + tail + '/__init__.py');
-    if (hit && (!best || rp.length < best.length || (rp.length === best.length && rp < best))) best = rp;
-  }
-  return best;
-}
-// A file's DEFAULT EXPORT, when it is a single named symbol defined in that file (`export default
-// class X` / `export default function X` / `export default X;` / `export { X as default }` /
-// `module.exports = X`). Returns its node id, else null (an object/array/expression default — e.g.
-// `export default { merge, ... }` — has no single owning symbol, so a default import of it is a
-// MODULE dependency). Lets a default import attribute its coarse edge to the real exported symbol
-// (AxiosError) instead of an arbitrary anchor, while object-default barrels (utils) fall back to <module>.
-function defaultExportOf(r, text, names) {
-  let m;
-  if ((m = /export\s+default\s+(?:abstract\s+)?(?:async\s+)?(?:class|function\s*\*?)\s+([A-Za-z_$][\w$]*)/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
-  if ((m = /export\s*\{[^}]*?\b([A-Za-z_$][\w$]*)\s+as\s+default\b/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
-  if ((m = /export\s+default\s+([A-Za-z_$][\w$]*)\s*;/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
-  if ((m = /module\.exports\s*=\s*([A-Za-z_$][\w$]*)\s*;/.exec(text)) && names.has(m[1])) return r + ':' + m[1];
-  return null;
-}
+// finding 25: cross-file name binding — relative/Python module resolution, re-export chains,
+// member tables, and import binding — is lib/import-resolve.mjs's factory; the extractor
+// injects its context and keeps only cache replay/record around the calls.
+const resolver = createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, maskedOnce, nodeIdSet, nodes });
+const { resolveReExport, resolveFileMember, reExportByFile, starReExportByFile } = resolver;
 const defaultExportByFile = new Map(); // rel -> node id of the single-symbol default export (if any)
 for (const [fabs, recd] of fileSyms) {
   const rr = rel(fabs);
@@ -887,18 +558,6 @@ for (const [fabs, recd] of fileSyms) {
   }
   if (ds && nodeIdSet.has(ds)) defaultExportByFile.set(rr, ds);
 }
-// ---- JS/TS re-export resolution (precision-safe, file-anchored) ---------------------------------
-// `export { x as y } from './impl'` re-exports impl's `x` under the public name `y` WITHOUT defining a
-// symbol in the barrel — so a downstream `import { y } from './barrel'` has no `barrel:y` node to bind
-// to, and the call to `y()` was silently dropped (the name-changing-indirection gap: the one case grep
-// also can't follow by the original name). Build, per file, a table of exported-name -> {target, orig}
-// and resolve it TRANSITIVELY (a re-export of a re-export) so an import of a renamed re-export binds to
-// the real underlying symbol. v9: `export * from './m'` chains resolve too — a barrel that star-forwards
-// a module no longer swallows the edge (one of the two measured recall gaps in the oracle A/B).
-const esReExportRe = /export\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g;
-const esStarReExportRe = /export\s*\*\s*from\s*['"]([^'"]+)['"]/g; // plain form only (`export * as ns` binds a namespace, not names)
-const reExportByFile = new Map();     // rel file -> Map(exportedName -> { target: rel file, orig })
-const starReExportByFile = new Map(); // rel file -> [target rel files, in source order]
 // finding 10: the raw re-export tables resolve specifiers against the FILE SET only, so a
 // stamp-hit record's cached table is valid while the file list is unchanged (fileSig).
 const rexReuse = stampTier && oldCache.fileSig === fileSig;
@@ -908,30 +567,10 @@ for (const f of files) {
   if (!/\.(jsx?|mjs|cjs|tsx?)$/.test(r)) continue; // JS/TS only
   const entry = newCache && newCache.files[r];
   if (rexReuse && fsRec.text == null && entry && entry.rex) {
-    if (entry.rex.map.length) reExportByFile.set(r, new Map(entry.rex.map.map(([exp2, target, orig]) => [exp2, { target, orig }])));
-    if (entry.rex.stars.length) starReExportByFile.set(r, entry.rex.stars);
+    resolver.loadJsReExports(r, entry.rex.map, entry.rex.stars);
     continue;
   }
-  const rexText = textOf(f, fsRec);
-  const map = new Map();
-  let m;
-  esReExportRe.lastIndex = 0;
-  while ((m = esReExportRe.exec(rexText))) {
-    const target = resolveImport(f, m[2]); if (!target) continue;
-    for (const part of m[1].split(',')) {
-      const seg = part.trim().split(/\s+as\s+/);
-      const orig = (seg[0] || '').trim(), exported = (seg[seg.length - 1] || '').trim();
-      if (orig && orig !== 'default') map.set(exported, { target, orig });
-    }
-  }
-  if (map.size) reExportByFile.set(r, map);
-  const stars = [];
-  esStarReExportRe.lastIndex = 0;
-  while ((m = esStarReExportRe.exec(rexText))) {
-    const target = resolveImport(f, m[1]);
-    if (target) stars.push(target);
-  }
-  if (stars.length) starReExportByFile.set(r, stars);
+  const { map, stars } = resolver.scanJsReExports(f, r, textOf(f, fsRec));
   if (entry) { entry.rex = { map: [...map].map(([exp2, v]) => [exp2, v.target, v.orig]), stars }; cacheDirty = true; }
 }
 // v9: a BARREL IS A DEPENDENT. `export { X } from './impl'` means the barrel file must change when
@@ -993,92 +632,6 @@ for (const [r, stars] of starReExportByFile) {
     }
   }
 }
-// Resolve `targetRel`'s exported `name` to a real symbol node id, following renamed re-export chains
-// and `export *` forwards (first star target that resolves wins — source order, deterministic).
-// Returns the node id or null (unknown name / dead-ends at a non-symbol). Cycle-guarded.
-function resolveReExport(targetRel, name, seen) {
-  const key = targetRel + ':' + name;
-  if (nodeIdSet.has(key)) return key;          // a real symbol in the target file
-  seen = seen || new Set();
-  if (seen.has(key)) return null;              // re-export cycle -> give up (no phantom edge)
-  seen.add(key);
-  const reMap = reExportByFile.get(targetRel);
-  const hop = reMap && reMap.get(name);
-  if (hop) { const hit = resolveReExport(hop.target, hop.orig, seen); if (hit) return hit; }
-  for (const star of starReExportByFile.get(targetRel) || []) {
-    const hit = resolveReExport(star, name, seen);
-    if (hit) return hit;
-  }
-  return null;
-}
-
-// v6: methods carry owner-qualified ids (`file:Type.method`), so a member access resolved by FILE +
-// NAME (`X.from()` where X is an import alias of `file`) can no longer assume `file:name` exists.
-// This map answers "the one member called `name` in `file`" — exactly one match resolves; several
-// same-named methods across owners is ambiguous and stays dropped (precision over recall).
-const AMBIGUOUS_MEMBER = Symbol('ambiguous');
-const memberByFile = new Map(); // `${file}:${label}` -> qualified id | AMBIGUOUS_MEMBER
-for (const n of nodes) {
-  const key = n.file + ':' + n.label;
-  if (key === n.id) continue; // top-level symbol — nodeIdSet already resolves it
-  memberByFile.set(key, memberByFile.has(key) ? AMBIGUOUS_MEMBER : n.id);
-}
-// `file:name` if it exists as a node id, else the unique qualified member, else null.
-// Spec Q2: resolve name N in Python module M through M's own `from X import N` re-exports
-// (flask's `from .templating import render_template as render_template`). Bounded depth,
-// masked text (a docstring can't fabricate a re-export), deterministic first-match.
-// finding 8: this used to re-mask the module and re-scan its from-imports on EVERY invocation —
-// once per unresolved pkg.member call site and per imported name (70% of a Python-corpus
-// extract). Two memos make it a table lookup with byte-identical results: the per-module
-// re-export table (local name -> {srcMod, orig}, first valid binding wins — the old scan order),
-// and the (module, name) -> id|null result. Null results are cached only from depth-0 calls, so a
-// depth-budget-truncated null can never mask a resolvable chain.
-const pyReExportTables = new Map(); // moduleRel -> Map(local -> {srcMod, orig}) | null
-const pyReExportTableOf = (moduleRel) => {
-  if (pyReExportTables.has(moduleRel)) return pyReExportTables.get(moduleRel);
-  const modAbs = absByRel.get(moduleRel);
-  const rec = modAbs && fileSyms.get(modAbs);
-  let table = null;
-  if (rec) {
-    table = new Map();
-    const re = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
-    const masked = maskedOnce(moduleRel, 'py', textOf(modAbs, rec));
-    let mm;
-    while ((mm = re.exec(masked))) {
-      for (const part of mm[3].replace(/[()]/g, '').split(',')) {
-        const seg = part.trim().split(/\s+as\s+/);
-        const orig = (seg[0] || '').trim(), local = (seg[seg.length - 1] || '').trim();
-        if (!orig || orig === '*' || !local || table.has(local)) continue;
-        const srcMod = resolvePyModule(modAbs, mm[1].length, mm[2]);
-        if (srcMod && srcMod !== moduleRel) table.set(local, { srcMod, orig });
-      }
-    }
-  }
-  pyReExportTables.set(moduleRel, table);
-  return table;
-};
-const pyReExportMemo = new Map(); // `${moduleRel}\x00${name}` -> id | null
-const pyReExportResolve = (moduleRel, name, depth = 0) => {
-  if (depth > 3) return null;
-  const direct = moduleRel + ':' + name;
-  if (nodeIdSet.has(direct)) return direct;
-  const memoKey = moduleRel + '\x00' + name;
-  if (pyReExportMemo.has(memoKey)) return pyReExportMemo.get(memoKey);
-  const hit = pyReExportTableOf(moduleRel)?.get(name);
-  const out = hit ? pyReExportResolve(hit.srcMod, hit.orig, depth + 1) : null;
-  if (out != null || depth === 0) pyReExportMemo.set(memoKey, out);
-  return out;
-};
-const resolveFileMember = (fileRel, name) => {
-  const exact = fileRel + ':' + name;
-  if (nodeIdSet.has(exact)) return exact;
-  const m = memberByFile.get(exact);
-  if (m && m !== AMBIGUOUS_MEMBER) return m;
-  // Spec Q2 (member path): `flask.render_template(...)` through `import flask` — the member is a
-  // re-export in the package __init__; follow it exactly like the from-import path does.
-  if (fileRel.endsWith('.py')) { const viaReExport = pyReExportResolve(fileRel, name); if (viaReExport) return viaReExport; }
-  return null;
-};
 
 // F9: global symbol signature — a hash of the discovered symbol-node id set (module nodes are derived,
 // so excluded). A file's edges depend ONLY on its own text + global symbol resolution (byName/alias),
@@ -1100,15 +653,6 @@ const importEdges = [];
 const bindSig = sha1(symbolSig + '\0' + fileSig);
 const bindReuse = stampTier && oldCache.bindSig === bindSig;
 if (oldCache && (oldCache.bindSig !== bindSig || oldCache.symbolSig !== symbolSig || oldCache.fileSig !== fileSig)) cacheDirty = true;
-const reqNamed = /(?:const|let|var)\s*\{([^}]*)\}\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
-const reqDefault = /(?:const|let|var)\s+([\w$]+)\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
-const esNamed = /import\s+(?:[\w$]+\s*,\s*)?\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g;
-const esStar = /import\s+\*\s+as\s+([\w$]+)\s+from\s*['"]([^'"]+)['"]/g;
-const esDefault = /import\s+([\w$]+)\s*(?:,\s*\{[^}]*\})?\s+from\s*['"]([^'"]+)['"]/g;
-const esSide = /import\s+['"]([^'"]+)['"]/g;
-// Python (line-oriented, `m` flag): `from [.]*MODULE import NAMES` and `import MODULE [as A][, ...]`.
-const pyFrom = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
-const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]*(?:\s+as\s+\w+)?)*)/gm;
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
   const r = rel(f), isPy = r.endsWith('.py');
@@ -1121,95 +665,14 @@ for (const f of files) {
     for (const pair of b.ie) importEdges.push(pair);
     continue;
   }
-  const importEdgesStart = importEdges.length;
-  const text = textOf(f, fsRec), aId = anchorId(r), amap = new Map(), nsmap = new Map(), classmap = new Map();
-  let m;
-  const addNamed = (namesStr, spec) => {
-    const target = resolveImport(f, spec); if (!target) return;
-    for (const part of namesStr.split(',')) {
-      const seg = part.trim().split(/\s+as\s+/);
-      const orig = seg[0].trim(), local = seg[seg.length - 1].trim();
-      if (!orig) continue;
-      const symId = target + ':' + orig;
-      // Direct symbol in the target, else follow a renamed re-export chain (`export {orig as …} from`).
-      const resolved = nodeIdSet.has(symId) ? symId : resolveReExport(target, orig);
-      if (resolved) { amap.set(local, resolved); if (aId && aId !== resolved) importEdges.push([aId, resolved]); }
-    }
-  };
-  // Python `from [.]*MOD import a, b as c`: each name is EITHER a submodule of MOD (-> module object,
-  // member-access binding) OR a symbol defined in MOD's file (-> precise alias, like addNamed). The
-  // coarse "imports this module" edge lands on the target's <module> node.
-  const addPyFrom = (level, dotted, namesStr) => {
-    const pkgFile = resolvePyModule(f, level, dotted);
-    for (const part of namesStr.replace(/[()]/g, '').split(',')) {
-      const seg = part.trim().split(/\s+as\s+/);
-      const orig = (seg[0] || '').trim(), local = (seg[seg.length - 1] || '').trim();
-      if (!orig || orig === '*') continue;
-      const sub = resolvePyModule(f, level, dotted ? dotted + '.' + orig : orig);
-      if (sub && sub !== pkgFile) { nsmap.set(local, sub); if (aId) importEdges.push([aId, sub + ':<module>']); continue; }
-      if (pkgFile) {
-        const symId = pkgFile + ':' + orig;
-        const resolvedSym = nodeIdSet.has(symId) ? symId : pyReExportResolve(pkgFile, orig); // Spec Q2
-        if (resolvedSym) {
-          amap.set(local, resolvedSym); // Spec Q3: an explicit import binds bare calls, boundary or not
-          const origin = pyImportOrigin(r); // Spec Q4: the SITE (module scope) owns the import edge
-          if (origin && origin !== resolvedSym) importEdges.push([origin, resolvedSym]);
-        }
-      }
-    }
-  };
-  // Python `import a.b [as c], d`: bind a usable local name -> module object for member access. A
-  // dotted path with no alias binds Python's FIRST segment (`a` of `a.b.c`), which member-resolution
-  // can't key on, so it gets only the coarse module edge — no false member binding.
-  const addPyImports = (namesStr) => {
-    for (const part of namesStr.split(',')) {
-      const seg = part.trim().split(/\s+as\s+/);
-      const dotted = (seg[0] || '').trim(); if (!dotted) continue;
-      const alias = seg.length > 1 ? seg[1].trim() : null;
-      const t = resolvePyModule(f, 0, dotted); if (!t) continue;
-      const local = alias || (dotted.includes('.') ? null : dotted);
-      if (local) nsmap.set(local, t);
-      if (aId) importEdges.push([aId, t + ':<module>']);
-    }
-  };
-  // Namespace (`import * as X`) / default (`import X from` / `const X = require`): X is the imported
-  // MODULE OBJECT. Record X -> target file so `X.member(...)` resolves to target:member in
-  // deriveFileEdges; for a default import also alias X -> the target's default export (≈ anchor) so
-  // `new X()` / `X()` resolve. The COARSE "imports this module" edge lands on the target's <module>
-  // node (created on demand below), NOT on its anchor symbol — member-access now produces the precise
-  // per-symbol edges, so attributing the coarse edge to one symbol only pollutes its dependents.
-  const addModuleBinding = (local, spec, isDefault) => {
-    const t = resolveImport(f, spec); if (!t) return;
-    if (local) nsmap.set(local, t);
-    // A default import binds the target's default export: attribute to its single owning symbol when
-    // there is one (class/fn AxiosError), else the module object (object-default barrel -> <module>).
-    // A namespace import (`import * as X`) is always the module object.
-    // Alias the default import ONLY to a detected single-symbol default (class/fn/identifier). NO anchor
-    // fallback: for an object-literal or anonymous default the anchor is a DIFFERENT symbol, so aliasing
-    // to it made a bare `utils` reference fabricate a call to utils.js's largest symbol (e.g. merge).
-    const defSym = isDefault ? defaultExportByFile.get(t) : null;
-    if (isDefault && local && defSym && !amap.has(local) && aId !== defSym) amap.set(local, defSym);
-    if (isDefault && local && defSym && kindById.get(defSym) === 'class') classmap.set(local, defSym); // X.static()/instanceof X -> ref to class
-    const edgeTarget = defSym || (t + ':<module>');
-    if (aId && aId !== edgeTarget) importEdges.push([aId, edgeTarget]);
-  };
-  const addSide = (spec) => { const t = resolveImport(f, spec); if (!t) return; if (aId) importEdges.push([aId, t + ':<module>']); };
-  if (isPy) {
-    const pyText = maskedOnce(rel(f), 'py', text); // don't bind imports that live in a docstring/comment
-    while ((m = pyFrom.exec(pyText))) addPyFrom(m[1].length, m[2], m[3]);
-    while ((m = pyImport.exec(pyText))) addPyImports(m[1]);
-  } else {
-    while ((m = reqNamed.exec(text))) addNamed(m[1], m[2]);
-    while ((m = esNamed.exec(text))) addNamed(m[1], m[2]);
-    while ((m = reqDefault.exec(text))) addModuleBinding(m[1], m[2], true);
-    while ((m = esStar.exec(text))) addModuleBinding(m[1], m[2], false);
-    while ((m = esDefault.exec(text))) addModuleBinding(m[1], m[2], true);
-    while ((m = esSide.exec(text))) addSide(m[1]);
-  }
+  const { amap, nsmap, classmap, edges: bindEdges } = resolver.bindFileImports({
+    fAbs: f, r, isPy, text: textOf(f, fsRec), aId: anchorId(r), defaultExportByFile, kindById,
+  });
+  for (const pair of bindEdges) importEdges.push(pair);
   if (amap.size) aliasByFile.set(f, amap);
   if (nsmap.size) nsAliasByFile.set(f, nsmap);
   if (classmap.size) classAliasByFile.set(f, classmap);
-  if (bindEntry) { bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], ie: importEdges.slice(importEdgesStart) }; cacheDirty = true; }
+  if (bindEntry) { bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], ie: bindEdges }; cacheDirty = true; }
 }
 
 // ---- derive call edges (F9: incremental, per-file, cacheable) ------------------------------
@@ -1449,7 +912,6 @@ if (typedIntentsByFile.size) {
 // body-reading, report header) read the target from here instead of re-hardcoding it.
 const rootFwd = root.replace(/\\/g, '/').replace(/\/+$/, '');
 const targetLabel = opts.target || rootFwd.split('/').slice(-2).join('/') || rootFwd;
-const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
 const languages = [...new Set(files.map(langOf))].sort();
 const fragment = {
   meta: {

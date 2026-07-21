@@ -511,6 +511,24 @@
 <p>  scanned, the supported extensions, and "is this the right directory?" — and <code>run.mjs</code> aborts</p>
 <p>  before writing artifacts. <code>--allow-empty</code> (both CLIs) keeps intentionally-sparse targets</p>
 <p>  workable. (IMPROVEMENTS.md #1)</p>
+<h3 class="cl-grp">Changed</h3>
+<ul>
+<li><strong>One flag loop.</strong> 25 scripts carried the identical hand-rolled <code>for (…argv…)</code> parse with three</li>
+</ul>
+<p>  drifting policies — <code>run.mjs</code> rejected unknown flags (the documented #5 convention) while</p>
+<p>  <code>trend</code>/<code>build-report</code>/<code>extract-symbols</code> still swallowed them as positional paths (the exact bug</p>
+<p>  class #5 fixed: <code>--help</code> becoming the target path), and several CLIs answered no <code>--help</code> at all</p>
+<p>  (ci-gate, screenshot, extract-symbols). <code>lib/cli.mjs</code> now owns THE loop — declarative</p>
+<p>  <code>parseArgs(argv, spec)</code> with one policy: unknown flag → exit 2 with usage, <code>--help</code>/<code>-h</code> → usage</p>
+<p>  and exit 0, typed values (<code>bool</code>/<code>string</code>/<code>number</code>/<code>float</code>/<code>pair</code>) with missing/non-numeric</p>
+<p>  values rejected by name. All 25 scripts migrated to ~10-line specs (hand-written usage strings</p>
+<p>  kept — they're part of tested contracts); <code>build-report</code> also drops its near-verbatim copy of</p>
+<p>  the graph-load error handling and rides <code>loadGraph</code> like every other tool. The pure helpers</p>
+<p>  (<code>SRC_RE</code>, <code>SCAN_CACHE_NAME</code>, <code>sign</code>, <code>capList</code>) moved to side-effect-free <code>lib/common.mjs</code></p>
+<p>  (re-exported from cli.mjs) so stage scripts can import constants without cli.mjs's module-level</p>
+<p>  EPIPE handler. Dogfood: this was codeweb's only HIGH-confidence self-finding, now zero</p>
+<p>  hand-rolled loops remain (<code>grep</code> proof: the one flag loop left is parseArgs itself).</p>
+<p>  (perf-quality finding 24)</p>
 <h2 class="cl-ver">[0.9.0] - 2026-07-19</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>

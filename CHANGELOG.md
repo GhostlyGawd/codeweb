@@ -387,6 +387,23 @@ notes so validated results, papers, and new tools never get lost in commit histo
   workable. (IMPROVEMENTS.md #1)
 
 ### Changed
+- **The extractor is decomposed — and testable in-process.** `extract-symbols.mjs` was a
+  1,500-line script/module hybrid: per-language scan rules, body extents, signatures, import/
+  re-export/member resolution, and the caches all interleaved, with `byName`/`files` as module
+  globals — so every extractor test shelled out (253 `runNode(` spawn sites across the suite).
+  Two pure modules now hold the substance: `lib/lang-rules.mjs` (the 11-language regex symbol
+  scan, `bodyEnd` brace/dedent extents, `parseSignature`, KEYWORDS/DYNAMIC_RE/langOf — functions
+  of their arguments, no IO) and `lib/import-resolve.mjs` (`createImportResolver(ctx)` — relative
+  and Python module resolution, JS/TS re-export chains incl. `export *`, Python from-import
+  re-export tables, unique-member lookup, and per-file import binding, all over injected context
+  with no module-global state). The orchestrator keeps enumeration, caching (stamp/hash/bind/rex
+  replay), engines, and edge derivation — 968 lines, down from 1,506 — and the extractor's own
+  `SRC` extension list is now the shared `SRC_RE` from `lib/common.mjs` (the hand-mirrored copy
+  the file itself warned could drift). Bodies moved verbatim; proof: fragments byte-identical
+  old-vs-new on four corpora × both engine tiers × cold/warm/replayed-cache paths, including an
+  old-engine scan cache replayed by the new engine, plus a same-tree self-map A/B. The first
+  in-process extractor tests land with it (`tests/lang-rules.test.mjs`: 10 cases, 137ms, zero
+  spawns — the seam #30's spawn-collapse needs). (perf-quality finding 25)
 - **One flag loop.** 25 scripts carried the identical hand-rolled `for (…argv…)` parse with three
   drifting policies — `run.mjs` rejected unknown flags (the documented #5 convention) while
   `trend`/`build-report`/`extract-symbols` still swallowed them as positional paths (the exact bug
