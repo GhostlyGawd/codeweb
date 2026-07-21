@@ -43,6 +43,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
   memo refuses to reuse outputs whose graph.json no longer parses (pre-fix, a corrupt workspace
   got "stages reused (fragment unchanged)" forever — the natural recovery path preserved the
   corruption). `tests/atomic-writes.test.mjs` pins both. (perf-quality finding 3)
+- **Freshness stamps can no longer be false-fresh.** The extractor stats each file BEFORE reading
+  and re-stats after (re-reading on mismatch; a file that won't hold still gets a never-fresh
+  stamp) — pre-fix a file modified between read and stat carried a fresh stamp over stale bytes,
+  permanently. Stamps now carry the content sha1 (`meta.sources: {s,m,h}`), and `checkStaleness`
+  gained a verify tier — `CODEWEB_VERIFY_FRESHNESS=1` (or `{verify:true}`) sha1-compares content
+  where stats match, catching the reproduced mtime-preserving bypass (`rsync -a`, `tar -x`,
+  `git-restore-mtime`, `SOURCE_DATE_EPOCH` builds) across every consumer: MCP auto-refresh, query
+  stale-annotations, hooks. Stat-only stays the default fast path. (perf-quality finding 4)
+- **Byte-determinism, delivered.** `generatedAt` was the sole byte-difference between two
+  identical runs; the report embed also carried per-file/dir mtime stamps its template never
+  reads. report.html now strips `generatedAt`/`sources`/`dirs` alongside `root` (byte-identical
+  across runs and across fresh checkouts, no pinning needed), and graph.json honors
+  `SOURCE_DATE_EPOCH` so CI can byte-compare complete workspaces. graph.json keeps all three
+  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release

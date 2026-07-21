@@ -68,7 +68,11 @@ if (graph.domains.length === 0) {
   graph.domains = Object.entries(counts).map(([name, nodes]) => ({ name, nodes, summary: '' }));
 }
 
-graph.meta.generatedAt = new Date().toISOString();
+// finding 5: this timestamp was the SOLE byte-difference between two identical runs. Honor
+// SOURCE_DATE_EPOCH (the reproducible-builds convention) so CI can pin it and byte-compare
+// graph.json across runs; without it, wall-clock as before.
+const sde = Number(process.env.SOURCE_DATE_EPOCH);
+graph.meta.generatedAt = Number.isFinite(sde) ? new Date(sde * 1000).toISOString() : new Date().toISOString();
 graph.meta.stats = {
   files: new Set(graph.nodes.map((n) => n.file).filter(Boolean)).size,
   nodes: graph.nodes.length,
@@ -106,6 +110,13 @@ const template = readFileSync(templatePath, 'utf8');
 // never meta.root. Strip it from the embedded copy without mutating the on-disk graph.
 const embed = { ...graph, meta: { ...graph.meta } };
 delete embed.meta.root;
+// finding 5: generatedAt and the per-file/dir mtime stamps are dead weight the template never
+// reads — and they made report.html differ across byte-identical inputs and fresh checkouts.
+// Stripping them makes the shared artifact byte-deterministic for free. graph.json keeps all
+// three (brief-core reads generatedAt; the staleness check reads sources/dirs).
+delete embed.meta.generatedAt;
+delete embed.meta.sources;
+delete embed.meta.dirs;
 
 // Escape "<" so the JSON can live inside a <script type="application/json"> tag without ever
 // forming "</script>". Inside JSON, "<" only appears within string values, where < is a
