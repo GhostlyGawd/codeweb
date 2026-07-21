@@ -23,6 +23,19 @@ notes so validated results, papers, and new tools never get lost in commit histo
   deleted (ts-engine.mjs string regexes, Ruby mask regexes) and now serves as a live self-test;
   `tests/maskjs-regex-literals.test.mjs` pins the two reproduced corruptions plus a self-map
   regression on complexity.mjs. (perf-quality finding 1)
+- **`codemod --write` can no longer corrupt source while reporting success.** Three reproduced
+  failure modes closed: (a) an unresolvable/ambiguous `--into` is a hard exit 2 instead of being
+  used verbatim (pre-fix, `canonLabel` became `undefined`, BOTH definitions were deleted, and loser
+  tokens — including a string literal — were rewritten to the literal text `undefined`, with exit 0
+  and `applied: true`); (b) token rewrites are now gated on the column-preserving mask — comment
+  mentions are left as stale prose and counted, and a label inside a string/regex literal refuses
+  the whole write (a name in a value can be load-bearing); (c) imports that named a loser are
+  repointed at the canonical's file (pre-fix `import { canon } from './loser.mjs'` survived —
+  valid-looking, broken at runtime, invisible to the structural gate), importers-without-calls are
+  now part of the rewrite set, and the post-write gate additionally asserts the canonical itself
+  survived re-extraction. The maskers moved to `scripts/lib/masking.mjs` (importable — the start of
+  finding 25's decomposition) with a `keepValues` mode for the live/value/comment classification.
+  (perf-quality finding 2)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
