@@ -140,6 +140,20 @@
 <p>  the receipt line, and CLI queries (<code>query</code>/<code>explain</code>/<code>context-pack</code>) now count toward</p>
 <p>  <code>queriesServed</code> — the denominator stops undercounting non-MCP use. (IMPROVEMENTS.md #10)</p>
 <ul>
+<li><strong>The agent loop closes over MCP — 27 tools — and codeweb_map reports progress.</strong> Three</li>
+</ul>
+<p>  capabilities that existed only as CLIs join the MCP surface: <strong><code>codeweb_simulate</code></strong> (the</p>
+<p>  regression gate's verdict for a hypothetical delete/merge/move — pre-flight a refactor for the</p>
+<p>  cost of one call), <strong><code>codeweb_annotate</code></strong> (false-positive suppression memory, written beside</p>
+<p>  the graph, never to source), and <strong><code>codeweb_stats</code></strong> (the local value receipt). <code>codeweb_map</code></p>
+<p>  is now async and, when the client sends a <code>progressToken</code>, emits <code>notifications/progress</code> per</p>
+<p>  pipeline stage — a big first map is no longer a silent black box (in-flight work drains before</p>
+<p>  the server exits). The MCP/CLI <strong>parity receipt is re-measured at the full surface</strong></p>
+<p>  (<code>bench/results/auxiliary.json</code>): 26/26 parity pairs + JSON-RPC conformance at 27 listed tools,</p>
+<p>  11/11 auxiliary checks green — the old receipt covered the 20-tool era and its harness had the</p>
+<p>  count hardcoded (now derived). The handshake instructions teach the new loop steps.</p>
+<p>  (IMPROVEMENTS.md #11)</p>
+<ul>
 <li><strong>The CLI grew a front door.</strong> Every CLI answers <code>--help</code>/<code>-h</code> (exit 0) — including the</li>
 </ul>
 <p>  <code>codeweb</code> bin, where <code>--help</code> previously errored with <code>target not found: --help</code>; <code>run.mjs</code></p>
@@ -151,6 +165,21 @@
 <p>  inside a mapped repo. Exit codes on the first-touch scripts (<code>run</code>, <code>extract-symbols</code>,</p>
 <p>  <code>build-report</code>) now follow the documented 0/1/2 convention. (IMPROVEMENTS.md #5)</p>
 <h3 class="cl-grp">Fixed</h3>
+<ul>
+<li><strong>Spec Q closed: the flask Python import-edge regression was real, and it's fixed.</strong> The</li>
+</ul>
+<p>  spec's bisect contract was executed first: the reps8-era engine (<code>c892f50</code>) resolved 14</p>
+<p>  <code>render_template</code> dependents, v0.9.0 resolved 7 — the package-boundary precision rule had also</p>
+<p>  killed calls backed by an explicit <code>from flask import render_template</code>. Three Python</p>
+<p>  resolution gaps fixed (each pinned by <code>tests/python-src-layout.test.mjs</code>): single-segment</p>
+<p>  absolute imports now resolve the repo's OWN top-level package (rooted, src-layout aware —</p>
+<p>  <code>import json</code> still can't grab a nested in-repo package); <code>__init__.py</code> re-exports are</p>
+<p>  followed (bounded chain) on both the from-import and the <code>pkg.member()</code> paths; an explicit</p>
+<p>  import binds bare calls across package boundaries (the import is evidence — unimported bare</p>
+<p>  names still respect the boundary); module-level import sites attribute to <code>&lt;module&gt;</code> (site</p>
+<p>  granularity). Flask pre-flight: <strong>7 → 48 dependents, 26/26 truth sites</strong> under id</p>
+<p>  normalization. <code>SCANNER_VERSION</code> 11→12 (cached edges invalidate); the research-page caveat now</p>
+<p>  records the closure. (IMPROVEMENTS.md #12)</p>
 <ul>
 <li><strong>The VS Code lens is truthful again — and covers all 11 languages.</strong> The extension README</li>
 </ul>

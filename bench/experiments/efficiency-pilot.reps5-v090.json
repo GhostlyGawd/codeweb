@@ -1,5 +1,5 @@
 {
-  "bench": "efficiency pilot — budgeted-surface re-run on v0.9.0 (Spec M, docs/specs/pilot-budgeted-rerun.md)",
+  "bench": "efficiency pilot \u2014 budgeted-surface re-run on v0.9.0 (Spec M, docs/specs/pilot-budgeted-rerun.md)",
   "runDate": "2026-07-20",
   "runId": "wf_c53dbfb9-077",
   "engine": {
@@ -10,7 +10,7 @@
   "agentModel": "claude-fable-5",
   "condition": "treatment on the BUDGETED surface (--limit 20 MCP parity, paging/full at agent judgement); control = grep-only; truth FROZEN (2026-06-23); oracle skipped; symbol-level grading",
   "provenance": {
-    "interruption": "reps 4-5 initially failed on a session usage limit; resumed same runId after reset — 23 arms cached, 16 re-run fresh",
+    "interruption": "reps 4-5 initially failed on a session usage limit; resumed same runId after reset \u2014 23 arms cached, 16 re-run fresh",
     "lostArm": "control:flask-render_template#4 died on a spurious model-safeguards flag -> flask graded n=4 (all other tasks n=5); 39/40 arms completed",
     "comparability": "NOT head-to-head with reps8 (engine c892f50, unbudgeted, model claude-opus-4-8[1m]): engine, budget condition, and agent model all changed"
   },
@@ -351,11 +351,12 @@
     "usedBudgeted": true
   },
   "reading": [
-    "recall paired delta +0.310 ± 0.039 (n=5, ALL reps positive, ~8x SD) — the budgeted surface costs NO recall; treatment 0.74 vs control 0.44 absolute",
-    "precision paired delta +0.234 ± 0.080 (all reps positive) — fewer false callers than grep, not more",
-    "steps paired delta +0.9 ± 3.7 — WASH (honest null): pagination spends the steps the unbudgeted flow spent on dump-reading",
-    "runtime usage (usage-v090.json, 39/39 joined): totalTokens -84k ± 381k, toolCalls +0.95 ± 3.6, output +320 ± 5.6k — ALL WASH on this model. The efficiency story on claude-fable-5 is: SAME spend, +0.31 recall / +0.23 precision. reps8 (older model/engine, unbudgeted) showed -44% tokens; the win moved from cost to completeness as the base agent got frugal",
-    "AxiosHeaders — historically the weak target — is now the largest win (dR +0.496 ± 0.097): ref edges + budgeted pagination surface the static/instanceof users",
-    "flask-render_template is an honest per-task LOSS (dR -0.03 ± 0.11, precision -0.13): the current flask graph serves only 7 dependents vs 26 truth (Python import-edge gap, named in next-levers); treatment still reached 0.84 recall by verifying with source"
-  ]
+    "recall paired delta +0.310 \u00b1 0.039 (n=5, ALL reps positive, ~8x SD) \u2014 the budgeted surface costs NO recall; treatment 0.74 vs control 0.44 absolute",
+    "precision paired delta +0.234 \u00b1 0.080 (all reps positive) \u2014 fewer false callers than grep, not more",
+    "steps paired delta +0.9 \u00b1 3.7 \u2014 WASH (honest null): pagination spends the steps the unbudgeted flow spent on dump-reading",
+    "runtime usage (usage-v090.json, 39/39 joined): totalTokens -84k \u00b1 381k, toolCalls +0.95 \u00b1 3.6, output +320 \u00b1 5.6k \u2014 ALL WASH on this model. The efficiency story on claude-fable-5 is: SAME spend, +0.31 recall / +0.23 precision. reps8 (older model/engine, unbudgeted) showed -44% tokens; the win moved from cost to completeness as the base agent got frugal",
+    "AxiosHeaders \u2014 historically the weak target \u2014 is now the largest win (dR +0.496 \u00b1 0.097): ref edges + budgeted pagination surface the static/instanceof users",
+    "flask-render_template is an honest per-task LOSS (dR -0.03 \u00b1 0.11, precision -0.13): the current flask graph serves only 7 dependents vs 26 truth (Python import-edge gap, named in next-levers); treatment still reached 0.84 recall by verifying with source"
+  ],
+  "specQResolution": "2026-07-21: the flask-render_template loss was bisected to a REAL v0.9.0 import-edge regression (c892f50: 14 deps, v0.9.0: 7) and fixed \u2014 Python src-layout absolute imports + __init__ re-export following (from-import and member paths). Pre-flight now 48 dependents, 26/26 truth sites under id normalization. See docs/specs/flask-python-import-edges.md. Measurements above are the v0.9.0 run, unchanged."
 }

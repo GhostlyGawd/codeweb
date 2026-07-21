@@ -99,6 +99,19 @@ notes so validated results, papers, and new tools never get lost in commit histo
   `build-report`) now follow the documented 0/1/2 convention. (IMPROVEMENTS.md #5)
 
 ### Fixed
+- **Spec Q closed: the flask Python import-edge regression was real, and it's fixed.** The
+  spec's bisect contract was executed first: the reps8-era engine (`c892f50`) resolved 14
+  `render_template` dependents, v0.9.0 resolved 7 — the package-boundary precision rule had also
+  killed calls backed by an explicit `from flask import render_template`. Three Python
+  resolution gaps fixed (each pinned by `tests/python-src-layout.test.mjs`): single-segment
+  absolute imports now resolve the repo's OWN top-level package (rooted, src-layout aware —
+  `import json` still can't grab a nested in-repo package); `__init__.py` re-exports are
+  followed (bounded chain) on both the from-import and the `pkg.member()` paths; an explicit
+  import binds bare calls across package boundaries (the import is evidence — unimported bare
+  names still respect the boundary); module-level import sites attribute to `<module>` (site
+  granularity). Flask pre-flight: **7 → 48 dependents, 26/26 truth sites** under id
+  normalization. `SCANNER_VERSION` 11→12 (cached edges invalidate); the research-page caveat now
+  records the closure. (IMPROVEMENTS.md #12)
 - **The VS Code lens is truthful again — and covers all 11 languages.** The extension README
   promised "the lens re-reads the graph on change," but no watcher or change-event existed:
   lenses showed stale numbers until a file was reopened. A `FileSystemWatcher` on

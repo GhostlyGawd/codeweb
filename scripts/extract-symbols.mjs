@@ -37,7 +37,7 @@ import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; //
 //     package-boundary manifests.
 // v9: tree-sitter tier default-on when installed (dispatch recall); export-star re-export chains
 //     resolve (barrel files no longer swallow edges).
-const SCANNER_VERSION = 11; // v11: cache entries carry AST products (ast/cx) so warm runs skip the engine (Spec A)
+const SCANNER_VERSION = 12; // v12: Spec Q — Python src-layout absolute imports, __init__ re-export following (from-import + member paths), <module>-site import origins; cached edges from v11 are stale
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -755,6 +755,10 @@ for (const n of nodes) { if (!byName.has(n.label)) byName.set(n.label, []); byNa
 
 // ---- resolve imports: aliases (for accurate cross-file calls) + import edges ----
 const relSet = new Set(files.map(rel));
+const absByRel = new Map(files.map((f2) => [rel(f2), f2])); // Spec Q2: re-export resolution reads target modules
+// Spec Q4: a Python from-import is module-level code — the SITE (<module>) owns its import edge;
+// the node is created on demand by ensureModuleNode when the edges are appended.
+const pyImportOrigin = (r2) => r2 + ':<module>';
 const nodeIdSet = new Set(nodes.map((n) => n.id));
 const kindById = new Map(nodes.map((n) => [n.id, n.kind])); // for class-usage ref edges
 const anchorByFile = new Map(); // rel -> {id, loc} most-substantial symbol of the file
@@ -781,6 +785,16 @@ function resolvePyModule(fromAbs, level, dotted) {
     for (let i = 1; i < level; i++) baseAbs = dirname(baseAbs);
     const baseRel = rel(baseAbs).replace(/\\/g, '/');
     return pyFile([baseRel, ...parts].filter(Boolean).join('/'));
+  }
+  // Spec Q1: a SINGLE-segment absolute import resolves only when it names the repo's OWN
+  // top-level package — rooted at '' or 'src/' exactly (src-layout), never by suffix. That keeps
+  // `import json`/`import os` from grabbing a NESTED in-repo package (flask's src/flask/json)
+  // while `from flask import render_template` inside flask's repo finally resolves.
+  if (parts.length === 1) {
+    for (const c of [parts[0] + '/__init__.py', 'src/' + parts[0] + '/__init__.py', parts[0] + '.py', 'src/' + parts[0] + '.py']) {
+      if (relSet.has(c)) return c;
+    }
+    return null;
   }
   if (parts.length < 2) return null;
   const tail = parts.join('/');
@@ -937,11 +951,39 @@ for (const n of nodes) {
   memberByFile.set(key, memberByFile.has(key) ? AMBIGUOUS_MEMBER : n.id);
 }
 // `file:name` if it exists as a node id, else the unique qualified member, else null.
+// Spec Q2: resolve name N in Python module M through M's own `from X import N` re-exports
+// (flask's `from .templating import render_template as render_template`). Bounded depth,
+// masked text (a docstring can't fabricate a re-export), deterministic first-match.
+const pyReExportResolve = (moduleRel, name, depth = 0) => {
+  if (depth > 3) return null;
+  const direct = moduleRel + ':' + name;
+  if (nodeIdSet.has(direct)) return direct;
+  const modAbs = absByRel.get(moduleRel);
+  const rec = modAbs && fileSyms.get(modAbs);
+  if (!rec) return null;
+  const re = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
+  let mm;
+  const masked = maskPy(rec.text);
+  while ((mm = re.exec(masked))) {
+    for (const part of mm[3].replace(/[()]/g, '').split(',')) {
+      const seg = part.trim().split(/\s+as\s+/);
+      const orig = (seg[0] || '').trim(), local = (seg[seg.length - 1] || '').trim();
+      if (local !== name || !orig || orig === '*') continue;
+      const srcMod = resolvePyModule(modAbs, mm[1].length, mm[2]);
+      if (srcMod && srcMod !== moduleRel) return pyReExportResolve(srcMod, orig, depth + 1);
+    }
+  }
+  return null;
+};
 const resolveFileMember = (fileRel, name) => {
   const exact = fileRel + ':' + name;
   if (nodeIdSet.has(exact)) return exact;
   const m = memberByFile.get(exact);
-  return m && m !== AMBIGUOUS_MEMBER ? m : null;
+  if (m && m !== AMBIGUOUS_MEMBER) return m;
+  // Spec Q2 (member path): `flask.render_template(...)` through `import flask` — the member is a
+  // re-export in the package __init__; follow it exactly like the from-import path does.
+  if (fileRel.endsWith('.py')) { const viaReExport = pyReExportResolve(fileRel, name); if (viaReExport) return viaReExport; }
+  return null;
 };
 
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
@@ -985,7 +1027,15 @@ for (const f of files) {
       if (!orig || orig === '*') continue;
       const sub = resolvePyModule(f, level, dotted ? dotted + '.' + orig : orig);
       if (sub && sub !== pkgFile) { nsmap.set(local, sub); if (aId) importEdges.push([aId, sub + ':<module>']); continue; }
-      if (pkgFile) { const symId = pkgFile + ':' + orig; if (nodeIdSet.has(symId)) { amap.set(local, symId); if (aId && aId !== symId) importEdges.push([aId, symId]); } }
+      if (pkgFile) {
+        const symId = pkgFile + ':' + orig;
+        const resolvedSym = nodeIdSet.has(symId) ? symId : pyReExportResolve(pkgFile, orig); // Spec Q2
+        if (resolvedSym) {
+          amap.set(local, resolvedSym); // Spec Q3: an explicit import binds bare calls, boundary or not
+          const origin = pyImportOrigin(r); // Spec Q4: the SITE (module scope) owns the import edge
+          if (origin && origin !== resolvedSym) importEdges.push([origin, resolvedSym]);
+        }
+      }
     }
   };
   // Python `import a.b [as c], d`: bind a usable local name -> module object for member access. A

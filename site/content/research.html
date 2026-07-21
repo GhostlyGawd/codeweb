@@ -53,7 +53,7 @@
     </div>
     <div class="callout" style="margin-top:1.5rem">
       <h3>Re-run on the budgeted surface (v0.9.0, 5 reps)</h3>
-      <p>We re-ran the pilot with the treatment agent consuming the <strong>budgeted</strong> responses agents actually get over MCP (top-20 + a cursor, not the full dump). Recall held at <strong>+0.310 ± 0.039</strong> (all 5 reps positive) and precision at <strong>+0.234 ± 0.080</strong> — the budget costs no accuracy. The token savings the earlier run showed did <em>not</em> reappear: on a base agent that is already frugal, runtime tokens and tool-calls are a wash. The honest read is <strong>+0.31 recall at equal cost</strong> — the advantage moved from spend to completeness. One target regressed (flask, a Python import-edge gap we've flagged), reported in the source.</p>
+      <p>We re-ran the pilot with the treatment agent consuming the <strong>budgeted</strong> responses agents actually get over MCP (top-20 + a cursor, not the full dump). Recall held at <strong>+0.310 ± 0.039</strong> (all 5 reps positive) and precision at <strong>+0.234 ± 0.080</strong> — the budget costs no accuracy. The token savings the earlier run showed did <em>not</em> reappear: on a base agent that is already frugal, runtime tokens and tool-calls are a wash. The honest read is <strong>+0.31 recall at equal cost</strong> — the advantage moved from spend to completeness. One target regressed (flask, a Python import-edge gap) — since bisected to a real extractor regression and fixed (Spec Q, closed): the same pre-flight now finds every truth site.</p>
       <p class="muted" style="margin-bottom:0">Source: <code>bench/experiments/efficiency-pilot.reps5-v090.json</code> · <code>efficiency-pilot.usage-v090.json</code></p>
     </div>
   </div>
