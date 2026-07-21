@@ -81,7 +81,11 @@ test('ambient loop: the pre-edit hook injects the explain card, not just a point
   } finally { cleanup(dir); }
 });
 
-test('ambient loop: MCP auto-refreshes a stale graph before answering structural queries', () => {
+test('ambient loop: MCP auto-refresh heals a stale graph in the BACKGROUND (finding 19)', () => {
+  // Contract change with the async server: a query on a stale graph answers IMMEDIATELY with the
+  // stale-but-ANNOTATED result (no head-of-line stall) while the refresh runs in the background;
+  // the server drains in-flight work before exiting, so by the time drive 1 returns the healed
+  // graph is on disk and the NEXT drive serves the fresh answer with no explicit refresh call.
   const { dir, graph } = buildMapped({
     'a.js': 'export function alpha() {\n  return beta();\n}\n',
     'b.js': 'export function beta() {\n  return 1;\n}\n',
@@ -89,14 +93,21 @@ test('ambient loop: MCP auto-refreshes a stale graph before answering structural
   try {
     // a NEW caller lands on disk after the map was built
     writeFileSync(join(dir, 'c.js'), 'import { beta } from "./b.js";\nexport function gamma() {\n  return beta();\n}\n');
-    const input = [
-      { jsonrpc: '2.0', id: 1, method: 'initialize', params: {} },
-      { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'codeweb_callers', arguments: { graph, symbol: 'beta' } } },
-    ].map((m) => JSON.stringify(m)).join('\n') + '\n';
-    const r = spawnSync(process.execPath, [script('mcp-server.mjs')], { encoding: 'utf8', input, maxBuffer: 1 << 26 });
-    const res = r.stdout.split('\n').filter(Boolean).map((l) => JSON.parse(l)).find((m) => m.id === 2);
-    const payload = JSON.parse(res.result.content[0].text);
-    assert.ok(payload.results.includes('c.js:gamma'), `the just-written caller is served without an explicit refresh (got ${JSON.stringify(payload.results)})`);
-    assert.equal(payload.stale, undefined, 'the answer is fresh, not stale-annotated');
+    const drive = () => {
+      const input = [
+        { jsonrpc: '2.0', id: 1, method: 'initialize', params: {} },
+        { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'codeweb_callers', arguments: { graph, symbol: 'beta' } } },
+      ].map((m) => JSON.stringify(m)).join('\n') + '\n';
+      const r = spawnSync(process.execPath, [script('mcp-server.mjs')], { encoding: 'utf8', input, maxBuffer: 1 << 26 });
+      const res = r.stdout.split('\n').filter(Boolean).map((l) => JSON.parse(l)).find((m) => m.id === 2);
+      return JSON.parse(res.result.content[0].text);
+    };
+    const first = drive();
+    assert.ok(first.stale, 'the immediate answer is stale-but-ANNOTATED (never silently wrong)');
+    assert.ok(!first.results.includes('c.js:gamma'), 'the stale answer predates the new caller');
+    // drive 1's server drained its background refresh before exiting -> the graph on disk healed
+    const second = drive();
+    assert.ok(second.results.includes('c.js:gamma'), `the healed graph serves the new caller with no explicit refresh (got ${JSON.stringify(second.results)})`);
+    assert.equal(second.stale, undefined, 'and the second answer is fresh, unannotated');
   } finally { cleanup(dir); }
 });

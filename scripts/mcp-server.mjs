@@ -103,17 +103,28 @@ const QUERY_KIND = { codeweb_callers: 'callers', codeweb_callees: 'callees', cod
 // stale answer WITH its stale annotation (never a dead end).
 const AUTOREFRESH_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_context', 'codeweb_explain', 'codeweb_find', 'codeweb_brief']);
 const refreshAttempt = new Map(); // abs graph path -> last attempt ms
+const refreshInFlight = new Set();
 function autoRefresh(absGraph) {
   if (process.env.CODEWEB_NO_AUTOREFRESH === '1') return;
   try {
     const { graph } = cachedGraph(absGraph);
     if (!checkStaleness(graph)) return;
     const last = refreshAttempt.get(absGraph) || 0;
-    if (Date.now() - last < 15_000) return; // one attempt per 15s per graph
+    if (Date.now() - last < 15_000 || refreshInFlight.has(absGraph)) return; // one attempt per 15s per graph
     refreshAttempt.set(absGraph, Date.now());
-    spawnSync(process.execPath, [scriptOf('refresh.mjs'), absGraph], { encoding: 'utf8', timeout: 60_000, maxBuffer: 1 << 24 });
-    bump(absGraph, 'autoRefreshes');
-    // the rewrite changed mtime/size — the next cachedGraph() reloads and serves fresh
+    refreshInFlight.add(absGraph);
+    // finding 19: fire-and-forget — the CURRENT call serves its stale-but-ANNOTATED answer
+    // immediately (the standing philosophy: stale-but-annotated beats broken) instead of stalling
+    // this call AND every queued request behind an inline synchronous refresh (807ms measured on
+    // a one-file touch; a 4–28s stall at the 16k benchmark). The refresh writes atomically, so
+    // the next cachedGraph() reloads and serves fresh.
+    pendingAsync++;
+    let settled = false;
+    const child = spawn(process.execPath, [scriptOf('refresh.mjs'), absGraph], { stdio: 'ignore' });
+    const timer = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, 60_000);
+    const done = (ok) => { if (settled) return; settled = true; clearTimeout(timer); refreshInFlight.delete(absGraph); if (ok) { try { bump(absGraph, 'autoRefreshes'); } catch { /* receipt only */ } } asyncDone(); };
+    child.on('error', () => done(false));
+    child.on('close', (code) => done(code === 0));
   } catch { /* stale-but-annotated beats broken */ }
 }
 
@@ -261,6 +272,7 @@ const MAP_STAGES = ['extract', 'cluster', 'overlap', 'optimize', 'report'];
 let pendingAsync = 0;
 let stdinClosed = false;
 const asyncDone = () => { pendingAsync--; if (stdinClosed && pendingAsync <= 0) process.exit(0); };
+const spawnQueues = new Map(); // finding 19: workspace key -> tail promise (per-graph child serialization)
 function handleMap(id, args, meta) {
   const target = resolve(args.target || process.cwd());
   if (!existsSync(target)) return errResult(id, `target not found: ${target}`);
@@ -390,15 +402,39 @@ function handleToolCall(id, params) {
     if (args.offset != null && (tool.opt || []).includes('offset')) cliArgs.push('--offset', String(args.offset));
   }
   const bin = tool.bin || QUERY;
-  const r = spawnSync(process.execPath, [bin, ...cliArgs, '--json'], { encoding: 'utf8', maxBuffer: 1 << 28, timeout: SPAWN_TIMEOUT_MS, input: tool.input ? tool.input(args) : undefined });
-  if (r.error && r.error.code === 'ETIMEDOUT') return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
-  if (r.status === 2 || r.error) {
-    const text = (r.stderr || (r.error && r.error.message) || 'query failed').trim();
-    // the CLIs' graph-not-found message gains the MCP-native next step
-    return errResult(id, /graph not found/.test(text) ? `${text}\n${NO_GRAPH}` : text);
-  }
-  // exit 0 (results) or 1 (found:false / gate-fail) both emit valid JSON on stdout — pass through.
-  return reply(id, { content: [{ type: 'text', text: (r.stdout || '').trim() }] });
+  // finding 19: children are ASYNC — the handleMap pattern, generalized to every spawned tool.
+  // spawnSync blocked the readline loop, so ONE slow advisor head-of-line-blocked every queued
+  // request (a 2.5ms structural query measured at 527.6ms behind a concurrent campaign; a wedged
+  // child could freeze the whole server for 120s). Fast-path tools answer in-process ABOVE and
+  // never wait; spawned children serialize PER WORKSPACE so stateful sequences on one graph
+  // (annotate then list; refresh then diff) keep their order while other workspaces run
+  // concurrently. JSON-RPC replies may land out of order — the protocol (and every driver in
+  // this repo) correlates by id; pendingAsync keeps stdin-close from killing in-flight work.
+  const queueKey = graphPath ? resolve(graphPath) : '(graphless)';
+  pendingAsync++;
+  const prev = spawnQueues.get(queueKey) || Promise.resolve();
+  const job = prev.then(() => new Promise((release) => {
+    let settled = false;
+    const child = spawn(process.execPath, [bin, ...cliArgs, '--json'], { stdio: [tool.input ? 'pipe' : 'ignore', 'pipe', 'pipe'] });
+    let out = '', errBuf = '', timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, SPAWN_TIMEOUT_MS);
+    const settle = (fn) => { if (settled) return; settled = true; clearTimeout(timer); fn(); release(); asyncDone(); };
+    child.stdout.on('data', (d) => { out += d; });
+    child.stderr.on('data', (d) => { errBuf += d; if (errBuf.length > 65536) errBuf = errBuf.slice(-32768); });
+    if (tool.input) child.stdin.end(tool.input(args) || '');
+    child.on('error', (e) => settle(() => errResult(id, (e && e.message) || 'spawn failed')));
+    child.on('close', (code) => settle(() => {
+      if (timedOut) return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
+      if (code === 2 || code == null) {
+        const text = (errBuf || 'query failed').trim() || 'query failed';
+        // the CLIs' graph-not-found message gains the MCP-native next step
+        return errResult(id, /graph not found/.test(text) ? `${text}\n${NO_GRAPH}` : text);
+      }
+      // exit 0 (results) or 1 (found:false / gate-fail) both emit valid JSON on stdout — pass through.
+      reply(id, { content: [{ type: 'text', text: (out || '').trim() }] });
+    }));
+  }));
+  spawnQueues.set(queueKey, job);
 }
 
 function handle(line) {
