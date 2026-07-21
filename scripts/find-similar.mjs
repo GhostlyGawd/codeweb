@@ -12,7 +12,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { normalizeGraph, isTestFile } from './lib/graph-ops.mjs';
-import { shingles, jaccard } from './lib/shingles.mjs';
+import { shingles, jaccard, K, BANDS } from './lib/shingles.mjs'; // THE size + bands (finding 27)
 import { structuralShingles } from './lib/skeleton.mjs'; // F6: Type-2 (rename-invariant) similarity
 import { loadSimilarIndex } from './lib/similar-index.mjs'; // finding 16: map-time shingle sets — zero source reads on the hot path
 
@@ -34,7 +34,7 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
 const { json, body, stdin, signature, structural } = opts, k = Math.max(1, opts.k);
 // F6: --structural ranks by skeleton (identifier-normalized) shingles, so a clone with all variables
 // renamed scores ~1 even when its lexical (token) similarity is lower. Lexical is the default.
-const shg = structural ? (s) => structuralShingles(s, 3) : (s) => shingles(s, 3);
+const shg = structural ? (s) => structuralShingles(s, K) : (s) => shingles(s, K);
 // exactly one candidate source
 const sources = [body != null, stdin, signature != null].filter(Boolean).length;
 if (sources !== 1) die(USAGE, 2);
@@ -61,7 +61,7 @@ const candidate = shg(candidateText);
 // sidecar or --structural -> the live path, unchanged.
 const reader = sourceReader(root);
 const bodyOf = reader.bodyOf;
-const tierOf = (s) => (s >= 0.6 ? 'high' : s >= 0.35 ? 'medium' : 'low'); // overlap.mjs bands
+const tierOf = (s) => (s >= BANDS.high ? 'high' : s >= BANDS.medium ? 'medium' : 'low'); // THE bands (lib/shingles.mjs)
 const simIndex = structural ? null : loadSimilarIndex(abs);
 
 const matches = [];
@@ -74,7 +74,7 @@ for (const n of graph.nodes) {
   const rec = simIndex && simIndex.nodes[n.id];
   if (rec) {
     if (!candidate.size || !rec.n) continue;
-    if (Math.min(candidate.size, rec.n) / Math.max(candidate.size, rec.n) < 0.15) continue; // exact bound
+    if (Math.min(candidate.size, rec.n) / Math.max(candidate.size, rec.n) < BANDS.low) continue; // exact bound
     let inter = 0;
     for (const s of rec.sh) if (candidate.has(s)) inter++;
     sim = inter / (candidate.size + rec.n - inter);
@@ -83,7 +83,7 @@ for (const n of graph.nodes) {
     if (src == null) continue;
     sim = jaccard(candidate, shg(src));
   }
-  if (sim < 0.15) continue; // exclude below the low band
+  if (sim < BANDS.low) continue; // exclude below the low band
   matches.push({ id: n.id, label: n.label, file: n.file, line: n.line, domain: n.domain, sim: +sim.toFixed(6), tier: tierOf(sim) });
 }
 matches.sort((a, b) => b.sim - a.sim || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));

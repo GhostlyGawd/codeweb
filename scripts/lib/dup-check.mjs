@@ -7,9 +7,9 @@
 
 import { readFileSync } from 'node:fs';
 import { isTestFile } from './graph-ops.mjs';
-import { shingles, jaccard } from './shingles.mjs';
+import { shingles, jaccard, K, BANDS } from './shingles.mjs'; // THE size + bands (finding 27)
 
-const HIGH = 0.6, K = 3;
+const HIGH = BANDS.high;
 // finding 15: overlap.mjs's Spec-B body cap, mirrored — thousand-line bodies yielded 10k-element
 // shingle sets here while overlap confirmed the same pair on its first 400 lines (two answers for
 // one question, and the uncapped one is the slow one).

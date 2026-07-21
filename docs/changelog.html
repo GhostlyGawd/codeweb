@@ -513,6 +513,22 @@
 <p>  workable. (IMPROVEMENTS.md #1)</p>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li><strong>One dispatch skeleton, seven language tables.</strong> <code>ts-engine.mjs</code> repeated its per-language</li>
+</ul>
+<p>  dispatch walker seven times (Java/C# via a shape closure; Ruby/PHP/Python/Go/Rust as five</p>
+<p>  hand-copied closures), with <code>up()</code> defined five times in two drifted signatures,</p>
+<p>  <code>typedParamsOf</code> four times plus a renamed <code>paramTypesOf</code>, and the owner-index + dedupe + sort</p>
+<p>  epilogue cloned per language — the same-name copies were also why deadcode showed @-suffixed</p>
+<p>  orphan ids for this file. Now <code>makeDispatchWalker(parser, table)</code> owns THE skeleton (ancestor</p>
+<p>  climb <code>upTo</code>, <code>typedParamsFrom</code>, seen-key dedupe, sorted <code>{thisCalls, typedIntents}</code> return,</p>
+<p>  try/finally <code>tree.delete()</code>), and each language declares only its genuine tree shape:</p>
+<p>  <code>collectOwners</code> / <code>callSite</code> / <code>enclosingOf</code> / <code>isSelf</code> / <code>identName</code> / <code>typedParams</code> —</p>
+<p>  ~25 declarative lines per language, 762→735 total with seven walkers collapsed to one.</p>
+<p>  Verified byte-identical on a purpose-built 7-language dispatch corpus (this-calls AND typed</p>
+<p>  intents wired in every language, incl. Go receiver-variable "self", Rust <code>&amp;</code>-ref stripping,</p>
+<p>  PHP nullable-type params) plus pycorp and corpus7; language/AST suites and the full 582-test</p>
+<p>  run green. (perf-quality finding 26)</p>
+<ul>
 <li><strong>The extractor is decomposed — and testable in-process.</strong> <code>extract-symbols.mjs</code> was a</li>
 </ul>
 <p>  1,500-line script/module hybrid: per-language scan rules, body extents, signatures, import/</p>

@@ -16,7 +16,7 @@
 //   0.15-0.35 low · <0.15 refuted (dismissed as coincidental).  Precision over recall.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { shingles, jaccard } from './lib/shingles.mjs'; // shared body-shingle primitives (one truth)
+import { shingles, jaccard, K, BANDS } from './lib/shingles.mjs'; // shared body-shingle primitives + THE thresholds (one truth, finding 27)
 import { signature, bandKeys } from './lib/minhash.mjs'; // Spec N: LSH candidate generation at scale
 import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
 import { sourceReader, atomicWrite } from './lib/cli.mjs'; // shared body access + rename-atomic artifact writes (one truth)
@@ -35,7 +35,7 @@ const SCAFFOLD = new Set(['parseArgs', 'parseArgv', 'usage', 'showHelp', 'printU
 // TWIN_JACCARD is a cheap RECALL pre-filter on shared downstream-call names; body-shingle
 // confirmation (below) is the precision gate, so this can be loose. At 0.8 it never fired on
 // real targets (0/516 candidate pairs passed); 0.5 surfaces candidates for body confirmation.
-const TWIN_MIN_OUT = 4, TWIN_JACCARD = 0.5, LOC_CV_TIGHT = 0.4, K = 3;
+const TWIN_MIN_OUT = 4, TWIN_JACCARD = 0.5, LOC_CV_TIGHT = 0.4;
 // Scale caps (Spec B addendum) — both pairwise passes are quadratic in group size, and monorepo-
 // scale repos (TypeScript: thousands of same-named visitors, hub labels with 1000s of callers)
 // turn them into minutes. Caps are deterministic and REPORTED (md header + finding evidence),
@@ -103,8 +103,8 @@ const bodyConfidence = (nodes) => {
   // reduce, not Math.min(...sims): a large same-name cluster makes sims O(n^2), and spreading it as
   // call args overflows the stack (express crashed here). reduce is identical in value, spread-free.
   const mean = sims.reduce((a, b) => a + b, 0) / sims.length, min = sims.reduce((a, b) => Math.min(a, b), Infinity);
-  const confidence = mean >= 0.6 ? 'high' : mean >= 0.35 ? 'medium' : mean >= 0.15 ? 'low' : 'refuted';
-  return { mean, min, confidence, drifted: mean >= 0.35 && mean < 0.6, sampled };
+  const confidence = mean >= BANDS.high ? 'high' : mean >= BANDS.medium ? 'medium' : mean >= BANDS.low ? 'low' : 'refuted';
+  return { mean, min, confidence, drifted: mean >= BANDS.medium && mean < BANDS.high, sampled };
 };
 
 const isDecl = (file) => /\.d\.ts$/.test(file);

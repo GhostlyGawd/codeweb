@@ -9,10 +9,10 @@
 // Exit: 0 ok, 2 usage/IO.
 
 import { readFileSync, existsSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
 import { normalizeGraph, buildIndex, allBlastCounts, productScope, scopeNote } from './lib/graph-ops.mjs';
 import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
+import { churnFromGit } from './lib/churn.mjs'; // finding 27: ONE bounded, HEAD-cached git-churn parser (shared with hotspots)
 
 const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--churn <map.json> | --git] [--all] [--json]';
 import { die, emitJson, finish, capList, loadGraph, parseArgs } from './lib/cli.mjs';
@@ -35,11 +35,7 @@ const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 // churn map: file -> commit count
 let churn = {};
 if (churnPath) { try { churn = JSON.parse(readFileSync(resolve(churnPath), 'utf8')); } catch (e) { die(`invalid churn JSON: ${e.message}`, 2); } }
-else if (useGit) {
-  const root = graph.meta?.root;
-  const r = spawnSync('git', ['-C', root || '.', 'log', '--format=', '--name-only'], { encoding: 'utf8', maxBuffer: 1 << 28 });
-  if (r.status === 0) for (const f of r.stdout.split(/\r?\n/)) if (f.trim()) churn[f.trim()] = (churn[f.trim()] || 0) + 1;
-}
+else if (useGit) churn = churnFromGit(graph.meta?.root, { cacheDir: dirname(abs) }); // finding 27: bounded window + HEAD-keyed cache beside the graph
 
 const index = buildIndex(graph);
 // #6: rank product code by default — triage lists led by test scaffolding are unactionable.

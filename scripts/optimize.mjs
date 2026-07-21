@@ -26,8 +26,9 @@ import { resolve } from 'node:path';
 import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit, chooseCanonical, createMergeSimulator } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: optimize.mjs <graph.json> [--json] [--out <optimize.md>]   (or set CODEWEB_WS)';
-const READY_BODYSIM = 0.6; // body-confirmed "high" floor — must match overlap.mjs's confidence band
+import { BANDS } from './lib/shingles.mjs';
 import { die, emitJson, finish, loadGraph, atomicWrite, parseArgs } from './lib/cli.mjs';
+const READY_BODYSIM = BANDS.high; // body-confirmed "high" floor — THE band (lib/shingles.mjs, finding 27)
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
 const { opts, pos } = parseArgs(process.argv.slice(2), {

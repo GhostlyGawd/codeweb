@@ -11,10 +11,10 @@
 import { readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { isTestFile } from './graph-ops.mjs';
-import { shingles } from './shingles.mjs';
+import { shingles, K } from './shingles.mjs';
 
 export const SIMILAR_SIDECAR = 'similar-index.json';
-export const SIMILAR_K = 3; // must match find-similar's default (lib/shingles.mjs's one truth)
+export const SIMILAR_K = K; // THE shingle size (lib/shingles.mjs, finding 27)
 
 /** Build the sidecar object: exact shingle sets for every non-test function/method body. */
 export function buildSimilarIndex(graph, stamp, reader) {

@@ -387,6 +387,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
   workable. (IMPROVEMENTS.md #1)
 
 ### Changed
+- **THE similarity thresholds live once — and churn is bounded and cached.** The 0.6
+  high-confidence floor (with the 0.35/0.15 bands) was independently hardcoded in four files and
+  the K=3 shingle size in five, each copy documenting the coupling in a "must match overlap.mjs"
+  comment instead of importing it. `lib/shingles.mjs` now exports `BANDS`/`K`; overlap's
+  confidence tiers, optimize's READY floor, find-similar's tiers + low-band cutoff, dup-check's
+  HIGH gate, similar-index's SIMILAR_K, and skeleton's default all import them (values unchanged
+  — pipeline outputs byte-identical). Same disease, different organ: the full-history `git log`
+  churn parser was byte-near-identical in risk.mjs and hotspots.mjs, unbounded (whole history
+  per advisory run) and uncached (campaign ran it twice back-to-back). `lib/churn.mjs` now owns
+  it: windowed to the last 5,000 commits (deterministic per HEAD, unlike a `--since` that drifts
+  with the clock) and cached beside the graph keyed by `rev-parse HEAD` + window — on this repo,
+  hotspots `--git` after risk `--git` serves from the cache in ~97ms with zero git spawns.
+  `tests/churn.test.mjs` pins counts, the poison-proved cache hit, HEAD invalidation, the window
+  bound, and the not-a-repo `{}` degradation. (perf-quality finding 27)
 - **One dispatch skeleton, seven language tables.** `ts-engine.mjs` repeated its per-language
   dispatch walker seven times (Java/C# via a shape closure; Ruby/PHP/Python/Go/Rust as five
   hand-copied closures), with `up()` defined five times in two drifted signatures,
