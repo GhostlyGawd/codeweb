@@ -24,24 +24,21 @@ byte-identity of `report.html` (tests/build-report.test.mjs:55) stays green.
   chromium-1194 + headless-shell, but the `playwright` package is NOT resolvable (report-scale
   tests currently SKIP), and we run as root — bare `chromium.launch()` fails with "Running as
   root without --no-sandbox" (reproduced). T-37.5's preflight gates EVERY Playwright step + T-35.6.
-- WS-F (before G) collapses build-report.mjs:77-89 into one lib call — the embed block shifts UP.
-  #36 anchors by content (`const embed = { ...graph … }` under `--- render ---`), not line number;
-  disjointness is by block and survives the shift.
+- WS-F (before G) collapses build-report.mjs:77-89 into one lib call — the embed block shifts UP;
+  #36 anchors by content (`const embed = { ...graph … }` under `--- render ---`), not line number
+  — disjointness is by block and survives the shift.
 - The fixed BFS shape to mirror for #38: `scripts/lib/graph-ops.mjs:232-244 impactCountOf`
-  (indexed `for (i=0; i<queue.length; i++)` pointer queue; iterate the `callIn`/`inheritIn` Sets
-  directly; no per-visit `[...a, ...b]` merge). lens-core must stay dependency-free (its header
-  contract) — copy the shape, do not import.
+  (indexed pointer queue; iterate the `callIn`/`inheritIn` Sets directly; no per-visit spread
+  merge). lens-core must stay dependency-free (its header contract) — copy the shape, no import.
 - `bench/results/report-scale.json` is stale exactly as #35 says: no `expandAll` row, verdict
   still "GREEN at 16k … no fix needed". `tests/report-scale-bench.test.mjs:52-54` pins the
   `simMsPerFrame` field name + `verdict.expandAllOk` — T-35.6 updates the pins in-commit.
-- `bench/results/scale-typescript.json` has NO in-repo writer under that name; it is produced by
-  `node bench/experiments/scale.mjs --repo <TypeScript checkout> --out …`. The 16.8k report run
-  below uses the synthetic loaded corpus and does NOT regenerate it → it stays WS-E #42's item.
-  If a TS checkout is available during T-35.6, run scale.mjs too and commit both; else say so in
-  evidence so #42's note stays honest.
+- `bench/results/scale-typescript.json` has NO in-repo writer under that name; it comes from
+  `node bench/experiments/scale.mjs --repo <TS checkout> --out …`. The 16.8k run below uses the
+  synthetic loaded corpus and does NOT regenerate it → stays WS-E #42's item. If a TS checkout is
+  available during T-35.6, run scale.mjs too and commit both; else say so in evidence.
 - Template-inline functions are node-testable via the brace-balancing `extractFn` pattern in
-  `tests/treemap-bisect.test.mjs` — use it for every sim/draw helper below ("what ships is
-  what's tested").
+  `tests/treemap-bisect.test.mjs` — use it for every sim/draw helper ("what ships is tested").
 
 ## #36 — strip the unread embed (High/S) — files: scripts/build-report.mjs, scripts/report-template.html, tests/build-report.test.mjs
 
@@ -73,21 +70,21 @@ byte-identity of `report.html` (tests/build-report.test.mjs:55) stays green.
   memo entries whose ids are provably unaffected. **Invalidation key**: diff old vs new
   `callIn`/`inheritIn` maps into an edge delta (added+removed `from→to` per kind, plus edges of
   added/removed nodes); seeds = the `to` endpoints of every delta edge; invalid set =
-  forward-closure of seeds over the NEW graph's call+inherit forward adjacency (`from→to`
-  direction). Carry `memo[id]` iff id ∉ invalid and id still exists. Soundness note for the code
-  comment: a delta edge (A→B) changes `blast(Y)` only for Y ∈ forward-closure(B); the path suffix
-  past the LAST delta edge always exists in the new graph, so new-graph closure suffices.
+  forward-closure of seeds over the NEW graph's call+inherit `from→to` adjacency. Carry
+  `memo[id]` iff id ∉ invalid and id still exists. Soundness note for the code comment: a delta
+  edge (A→B) changes `blast(Y)` only for Y ∈ forward-closure(B); the path suffix past the LAST
+  delta edge contains no delta edges, so it exists in the new graph — new-graph closure suffices.
   `extension.js:48 refresh()` stops clearing `graphCache`; `loadIndex` passes the previous index
   when mtime/size changed. TDD: property test — for randomized graph pairs (mutate 1–5 edges AND
   add/remove nodes with their edges), memo-carried results === cold-rebuild results for every id;
   plus a counting test proving untouched-subgraph ids did NOT recompute (seeded memo sentinel).
 - **T-38.3** `package.json` activationEvents: `["workspaceContains:**/.codeweb/graph.json",
-  "onCommand:codeweb.refreshLenses", "onCommand:codeweb.openReport"]` (engine ^1.85 auto-derives
-  onCommand from contributes; keep them explicit as the fallback the finding asks for — commands
-  still work in never-mapped workspaces). Test: shape assertion in vscode-lens.test.mjs — no
-  `onStartupFinished`, workspaceContains present. Accepted regression, document in the README: a
-  workspace mapped for the FIRST time after opening won't activate (workspaceContains evaluates
-  at open; the watcher never registered) until a codeweb command or window reload.
+  "onCommand:codeweb.refreshLenses", "onCommand:codeweb.openReport"]` (^1.85 auto-derives
+  onCommand; keep explicit as the finding's fallback — palette works in never-mapped workspaces).
+  Test: shape assertion in vscode-lens.test.mjs — no `onStartupFinished`, workspaceContains
+  present. Accepted regression, document in the README: a workspace mapped for the FIRST time
+  after opening won't activate (workspaceContains evaluates at open; the watcher never
+  registered) until a codeweb command or window reload.
 
 ## #37 — draw loop (High/M) — files: scripts/report-template.html, tests/report-draw.test.mjs (new), tests/report-scale-bench.test.mjs
 
