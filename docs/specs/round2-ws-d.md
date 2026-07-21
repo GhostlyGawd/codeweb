@@ -33,9 +33,8 @@ Files: new `tests/maskjs-identity.test.mjs`. Embed the current `maskJs` verbatim
 `maskJs(text) === reference(text)`, both `keepValues` modes, over (a) **every mask-eligible repo file** (`SRC_RE`
 js-family — the audit's 874-file check, as a test) and (b) a `writeLoadedCorpus` tree. Lands green pre-patch, then gates
 T-20.1/T-20.2; `maskjs-regex-literals.test.mjs` stays untouched and green.
-**Criteria**: ≥ 1.4× MB/s on the 800-file corpus, zero byte diffs (audit: charCode alone 1.50–1.56×; span-copy est.
-3–5×). Byte-identity ⇒ NO `SCANNER_VERSION` bump for #20 — the oracle is the proof; T-19.1's ladder rule owns any
-future non-identical mask change. · hardened
+**Criteria**: ≥ 1.4× MB/s on the 800-file corpus, zero byte diffs (audit: charCode 1.50–1.56×; span-copy est. 3–5×).
+Byte-identity ⇒ NO version bump for #20 (the oracle is the proof); T-19.1's ladder owns non-identical changes. · hardened
 
 ## #21 — enclosing() quadratic scan (extract-symbols.mjs:689, :422)
 
@@ -69,9 +68,9 @@ old loop, embedded in the test); same for the class-owner stack vs the :422 refe
 
 ### T-19.1 edge-tuple interning + drop `syms` — SCANNER_VERSION ladder · hardened
 Files: `scripts/extract-symbols.mjs`. Cache format change ⇒ bump `SCANNER_VERSION` (:45, read-gated :266). **One
-ladder, not two**: ws-c.md's planned `rev: 'ws-c-1'` rests on a false premise — the cache IS version-stamped today.
-Orchestrator: WS-C bumps 13→14 *instead of* adding `rev` (amend round2-ws-c.md); D bumps whatever C landed +1 (14→15).
-Standing rule: any cache-format OR masking/derivation-semantics change bumps this one constant (v13 precedent).
+ladder, not two** — ws-c.md's `rev: 'ws-c-1'` rested on a false premise (the cache IS version-stamped); reconciled
+across specs (4e76c39): **B takes 13→14, C 14→15, D takes 15→16 here**, no `rev` field anywhere. Standing rule: any
+cache-format OR masking/derivation-semantics change bumps this one constant, monotonic by build order (v13 precedent).
 - **Interning schema**: per cache-file entry, replace `edges: [{from,to,kind,weight}]` with `ids: [...]` (distinct
   endpoint ids, first-use order) + `edges: [[fromIdx, toIdx, kindIdx]]`, `kindIdx` into const `EDGE_KINDS =
   ['call','ref','inherit','test']` (the closed set the derive emits). Encode at record (:825); replay (:816-817)
@@ -80,8 +79,8 @@ Standing rule: any cache-format OR masking/derivation-semantics change bumps thi
   conjuncts. The content-hash-hit path (:360-367) replays the FULL stamp-tier product set — nodes/ranges/dyn/ast
   dispatch/typed intents, entry carried forward as at :331 — with text read and a refreshed stamp, **iff
   `oldCache.rulesSig === rulesSig`** (roles baked into cached nodes) and :312's ast/cx conjuncts hold — else `scanFile`. · hardened
-- **Migration**: `:266` discards any version mismatch — a v13/v14 cache means one cold rebuild, never a crash. Test:
-  plant an old-shape cache; extract exits 0, cold banner (`scanned N/N`), output byte-equal to no-cache, cache at new version.
+- **Migration**: `:266` discards any version mismatch — any older cache means one cold rebuild, never a crash. Test:
+  plant an old-shape cache; extract exits 0, cold banner (`scanned N/N`), output byte-equal to no-cache, cache at v16.
 **Criteria**: cache ≥ 40 % smaller @16.8k (18.8 → ≤ ~11 MB), shrinking the parse + rewrite terms.
 
 ### T-19.2 fragment sha1 skip-write + compact fragment · hardened
@@ -94,8 +93,7 @@ holds), banner gains `(unchanged)`. Stdout path unchanged.
 
 ### T-19.3 per-output content hashes in `.stages.json` (run.mjs corruption belt) · hardened
 Files: `scripts/run.mjs`, `tests/stage-memo.test.mjs`. Memo record → `{key, at, outputs: {<name>: {s: byteLen, h:
-sha1}}}` for all five `STAGE_OUTPUTS`, hashed from each output's bytes right after the stage run (post-rename, bytes
-final), before the memo write.
+sha1}}}` for all five `STAGE_OUTPUTS`, hashed from each output's bytes post-rename (bytes final), before the memo write.
 - **Staleness/corruption matrix (complete · hardened)** — reuse requires `prevKey === memoKey` AND per output exists +
   size + sha1 (size first; truncation never hashes); any miss → recompute all (all-or-nothing, as today). Cells: memo
   absent/corrupt/old-shape (no `outputs`) → recompute, one run upgrades; output missing → exists; truncated → size;
@@ -118,9 +116,9 @@ IE-EQUIVALENCE gains a **fragment byte-equality** assertion — warm vs cold `--
 
 `:645` symbolSig (node-id set + pkg boundaries) gates `reuseEdges` (:809) and `bindSig` (:653-655): one added export
 flips both → 800/800 re-derive + full re-read. Replace with per-file re-derive on the *name delta*, provably
-byte-identical. **Dirty domain (· hardened)**: labels = `byName`'s keys = `n.label` (bare method names — :531-532);
-old map rebuilt from `oldCache.files[*].nodes`, new from live nodes, both at the :645 point — module nodes are not yet
-pushed on either side and cached entry nodes never contain them: the two domains match by construction.
+byte-identical. **Dirty domain (· hardened)**: labels = `byName`'s keys = `n.label` (bare method names, :531-532); old
+map rebuilt from `oldCache.files[*].nodes`, new from live nodes, both at the :645 point (module nodes not yet pushed
+on either side; cached entry nodes never contain them — the domains match by construction).
 
 ### T-17.1 candidate collection + cache fields · hardened
 Files: `scripts/extract-symbols.mjs`. Collect the file's **candidate set**: every `name` reaching `addEdge`, recorded
@@ -178,8 +176,8 @@ assertion **verbatim**; (2) the default-env leg replaces it with strictly strong
 the edited file plus candidate-intersecting files while a crafted disjoint file does NOT re-edge (`edged < total`),
 byte-equal to cold. Nothing is deleted; one assertion moves under the env that pins its semantics, scenario intact.
 Plus a bind-coupling witness the corpus can't give: `rensym` of an IMPORTED name (BASE's `a1`) must re-edge `c.js`.
-**CI criterion: IE-EQUIVALENCE runs at the full 40 trials** — WS-A's #6 split may parallelize, but trial
-count/semantics are pinned this round; #17's risk budget is spent here.
+**CI criterion: IE-EQUIVALENCE runs at the full 40 trials** — WS-A's #6 split may parallelize, but trial count and
+semantics are pinned this round; #17's risk budget is spent here.
 
 ### T-17.5 bench evidence · hardened
 @16.8k (min-of-3 ratios per header): noop, body-edit, **add-one-unique-function** (gate ≤ ~1.3× same-session noop; the
@@ -228,5 +226,5 @@ Add-one-function warm extract @16.8k ≤ ~1.3× noop (byte-identity via IE-EQUIV
 incl. `rex`/`pkg`); hook no-change < 1.5 s @16k-class; mask ≥ 1.4× byte-identical over repo + corpus; #21 big-file
 ≥ 2× with identical fragment — all min-of-3 ratios on `writeLoadedCorpus` trees, commands + shas in `round2-evidence.md`.
 Risks: #17 carries the kill-switch (`CODEWEB_NAME_DELTA=0`) and lands as its own commit for clean revert; the version
-ladder (C 13→14, D 14→15) cold-rebuilds stale caches by construction; #18a is fail-open at every new seam, both write
+ladder (B=14, C=15, D=16) cold-rebuilds stale caches by construction; #18a is fail-open at every new seam, both write
 points try/catch.
