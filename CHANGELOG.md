@@ -111,6 +111,14 @@ notes so validated results, papers, and new tools never get lost in commit histo
   has receiver evidence). Kotlin/Swift stay regex-only with the blocker recorded in
   `PROVENANCE.md`: no trusted wasm exists at our pinned ABI (upstream ships C sources and native
   prebuilds only) — revisit when `@vscode/tree-sitter-wasm` grows them. (IMPROVEMENTS.md #14)
+- **The gate is a reviewer for adopters, not just a red ✗.** codeweb's own PRs already got the
+  sticky structural-review comment (delta, renames, findings); the reusable composite action
+  third parties consume ran the gate silently. The action now takes `comment: true` and posts
+  (and updates in place) the same digest via the calling workflow's `GITHUB_TOKEN` — the comment
+  lands **before** the verdict can fail the job, fork PRs with read-only tokens degrade
+  gracefully to the check verdict, and `docs/ci-gate.md` documents the
+  `pull-requests: write` requirement. Reviewers who never installed codeweb now see the blast
+  radius of every gated PR where they already look. (IMPROVEMENTS.md #15)
 - **The CLI grew a front door.** Every CLI answers `--help`/`-h` (exit 0) — including the
   `codeweb` bin, where `--help` previously errored with `target not found: --help`; `run.mjs`
   documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map
