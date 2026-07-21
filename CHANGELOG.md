@@ -9,6 +9,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+### Added
+- **A symbol miss is never a dead end.** Every `found:false` answer (query/dependents/impact
+  over CLI and MCP, `explain`, `context-pack`) now carries a hint pointing at `codeweb_find`
+  concept search plus up to 3 deterministic near-match ids (case-fix, prefix, substring,
+  shared-name-token tiers) — the most frequent agent mistake now teaches the recovery path
+  instead of sending the agent back to grep. (IMPROVEMENTS.md #2)
+
 ### Fixed
 - **An empty scan no longer masquerades as a successful map.** Pointing codeweb at an empty
   directory, an unsupported-language tree, or a typo'd path used to print a green `[run] done`

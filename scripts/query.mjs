@@ -67,7 +67,11 @@ if (staleInfo && payload && payload.found !== false) {
 
 if (opts.json) { emitJson(payload, code); } else {
 
-if (payload.found === false) die(`symbol not found: ${opts.symbol}`, 1);
+if (payload.found === false) {
+  // #2: surface the payload's near-matches + next step on the text transport too.
+  const near = payload.suggestions?.length ? ` — near matches: ${payload.suggestions.join(', ')}` : '';
+  die(`symbol not found: ${opts.symbol}${near} (concept search: find.mjs "<free text>")`, 1);
+}
 const p = payload;
 if (p.query === 'callers' || p.query === 'callees' || p.query === 'tests') {
   const extra = p.matched.length > 1 ? ` (${p.matched.length} matches: ${p.matched.join(', ')})` : '';

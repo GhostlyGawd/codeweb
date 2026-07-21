@@ -123,6 +123,33 @@ export function resolveSymbol(graph, sym) {
   return graph.nodes.filter((n) => n.label === sym).map((n) => n.id).sort();
 }
 
+// #2 (IMPROVEMENTS.md): when resolveSymbol misses, offer the nearest labels instead of a dead
+// end. Deterministic and cheap (one pass over nodes, miss path only). Matching is tiered —
+// case-insensitive equality, then prefix, then substring, then shared name-tokens — so a typo'd
+// case ("normalizepath") or a partial name ("create") still lands. Returns up to `cap` full ids.
+const nameTokens = (s) => s.split(/[^a-zA-Z0-9]+|(?<=[a-z0-9])(?=[A-Z])/).filter((t) => t.length >= 3).map((t) => t.toLowerCase());
+export function suggestSymbols(graph, sym, cap = 3) {
+  // For `file:label` queries the label part carries the intent; match against it. Tokenize the
+  // ORIGINAL casing (camelCase boundaries are the token signal), lowercase only for comparisons.
+  const wantedRaw = sym.includes(':') ? sym.slice(sym.lastIndexOf(':') + 1) : sym;
+  const wanted = wantedRaw.toLowerCase();
+  if (!wanted) return [];
+  const wantedTokens = new Set(nameTokens(wantedRaw));
+  const scored = [];
+  for (const n of graph.nodes) {
+    if (!n.label || n.label === '<module>') continue;
+    const label = n.label.toLowerCase();
+    let score = 0;
+    if (label === wanted) score = 4;
+    else if (wanted.length >= 3 && (label.startsWith(wanted) || wanted.startsWith(label))) score = 3;
+    else if (wanted.length >= 3 && (label.includes(wanted) || wanted.includes(label))) score = 2;
+    else if (wantedTokens.size && nameTokens(n.label).some((t) => wantedTokens.has(t))) score = 1;
+    if (score) scored.push({ score, label: n.label, id: n.id });
+  }
+  scored.sort((a, b) => b.score - a.score || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0) || (a.id < b.id ? -1 : 1));
+  return scored.slice(0, cap).map((s) => s.id);
+}
+
 const unionSorted = (ids, adj) => {
   const out = new Set();
   for (const id of ids) for (const x of (adj.get(id) || [])) out.add(x);

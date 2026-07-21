@@ -14,7 +14,7 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, impactOf } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols, callersOf, calleesOf, impactOf } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--json]   (or set CODEWEB_WS)';
 import { die, emitJson, finish, capList, checkStaleness, loadGraph, sourceReader } from './lib/cli.mjs';
@@ -37,7 +37,10 @@ else die(USAGE, 2);
 const { graph, abs } = loadGraph(graphPath, { usage: USAGE });
 
 const ids = resolveSymbol(graph, symbol);
-if (!ids.length) die(`symbol not found: ${symbol}`, 1);
+if (!ids.length) {
+  const suggestions = suggestSymbols(graph, symbol); // #2: offer the nearest labels, not a dead end
+  die(`symbol not found: ${symbol}${suggestions.length ? ` — near matches: ${suggestions.join(', ')}` : ''} (concept search: find.mjs "<free text>")`, 1);
+}
 
 const index = buildIndex(graph);
 const callerIds = callersOf(index, ids);
