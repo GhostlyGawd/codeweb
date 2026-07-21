@@ -165,3 +165,37 @@ test('usage: no --body/--stdin/--signature → exit 2', () => {
     assert.equal(runNode(FS, [join(dir, 'graph.json'), '--json']).status, 2);
   } finally { cleanup(dir); }
 });
+
+// Perf-quality finding 16 — the map-time sidecar path must be byte-identical to the live path.
+// build-report writes similar-index.json beside the graph; find-similar serves from it (payload
+// says index:"sidecar"), and deleting or staling it falls back to live with identical matches.
+test('FS-SIDECAR: sidecar path == live path byte-for-byte; stale sidecar falls back', async () => {
+  const { rmSync, utimesSync, statSync } = await import('node:fs');
+  const rng = prng(0xF16);
+  const { dir, bodies, graphPath } = makeFixture(rng, 24);
+  try {
+    const candFile = join(dir, 'cand.txt');
+    writeFileSync(candFile, bodies[3] + ' ' + bodies[7]);
+    // no sidecar yet -> live
+    const live = JSON.parse(runNode(FS, [graphPath, '--body', candFile, '--json']).stdout);
+    assert.equal(live.index, 'live');
+    // build-report writes the sidecar
+    const br = runNode(script('build-report.mjs'), [graphPath, '--no-md']);
+    assert.equal(br.status, 0, br.stderr);
+    const withSidecar = JSON.parse(runNode(FS, [graphPath, '--body', candFile, '--json']).stdout);
+    assert.equal(withSidecar.index, 'sidecar', 'sidecar detected and used');
+    assert.deepEqual(withSidecar.matches, live.matches, 'matches byte-identical across paths');
+    assert.equal(withSidecar.scanned, live.scanned, 'scanned identical');
+    // stale sidecar (graph touched) -> live fallback, same answers
+    const st = statSync(graphPath);
+    utimesSync(graphPath, new Date(st.atimeMs + 2000), new Date(st.mtimeMs + 2000));
+    const stale = JSON.parse(runNode(FS, [graphPath, '--body', candFile, '--json']).stdout);
+    assert.equal(stale.index, 'live', 'stamp mismatch falls back to live');
+    assert.deepEqual(stale.matches, live.matches);
+    // removed sidecar -> live
+    rmSync(join(dir, 'similar-index.json'), { force: true });
+    const gone = JSON.parse(runNode(FS, [graphPath, '--body', candFile, '--json']).stdout);
+    assert.equal(gone.index, 'live');
+    assert.deepEqual(gone.matches, live.matches);
+  } finally { cleanup(dir); }
+});

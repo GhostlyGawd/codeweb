@@ -1,6 +1,8 @@
 {
-  "comment": "codeweb's own map config. roles: docs/ is the BUILT website (site/build.mjs output) — generated, not product (Spec E, docs/specs/role-overrides-self-campaign.md).",
+  "comment": "codeweb's own map config. roles: docs/ is the BUILT website (site/build.mjs output) — generated, not product (Spec E, docs/specs/role-overrides-self-campaign.md). spike/** and .live/** are prototype/workspace trees (finding 28): both are deleted today, but the overrides stand so a future spike or a stray workspace can never pollute the self-metrics again.",
   "roles": [
-    { "glob": "docs/**", "role": "generated" }
+    { "glob": "docs/**", "role": "generated" },
+    { "glob": "spike/**", "role": "example" },
+    { "glob": ".live/**", "role": "generated" }
   ]
 }

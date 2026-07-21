@@ -18,21 +18,21 @@ import { resolve } from 'node:path';
 import { normalizeGraph, resolveSymbol, applyEdit, structuralRegressions } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: simulate-edit.mjs <graph.json> (--delete <sym> | --merge <s1,s2,..> [--into <id>] | --move <sym> --to <file>) [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, del = null, merge = null, into = null, move = null, to = null; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--delete') del = argv[++i];
-  else if (t === '--merge') merge = argv[++i];
-  else if (t === '--into') into = argv[++i];
-  else if (t === '--move') move = argv[++i];
-  else if (t === '--to') to = argv[++i];
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    delete: { type: 'string', default: null },
+    merge: { type: 'string', default: null },
+    into: { type: 'string', default: null },
+    move: { type: 'string', default: null },
+    to: { type: 'string', default: null },
+  },
+});
+const { json, merge, into, move, to } = opts, del = opts.delete;
 if ([del, merge, move].filter((x) => x != null).length !== 1) die(USAGE, 2);
 if (move != null && to == null) die('move requires --to <file>', 2);
 

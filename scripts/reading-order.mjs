@@ -11,18 +11,19 @@ import { normalizeGraph } from './lib/graph-ops.mjs';
 import { readingOrder } from './lib/reading-order.mjs';
 
 const USAGE = 'usage: reading-order.mjs <graph.json> [--scope domain|file|symbol <value>] [--budget N] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, budget = 40, scopeKind = 'all', scopeValue = null; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--budget') budget = Math.max(1, parseInt(argv[++i], 10) || 40);
-  else if (t === '--scope') { scopeKind = argv[++i]; scopeValue = argv[++i]; }
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs); --scope is the one two-token flag ('pair').
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    budget: { type: 'number', default: 40 },
+    scope: { type: 'pair', default: null },
+  },
+});
+const { json } = opts, budget = Math.max(1, opts.budget);
+const scopeKind = opts.scope ? opts.scope[0] : 'all', scopeValue = opts.scope ? opts.scope[1] : null;
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const scope = { kind: scopeKind, value: scopeValue };

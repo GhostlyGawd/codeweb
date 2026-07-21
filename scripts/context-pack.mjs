@@ -12,26 +12,24 @@
 // Usage: node context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--json]
 // Exit: 0 ok, 1 symbol not found, 2 usage/IO.
 
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols, callersOf, calleesOf, impactOf } from './lib/graph-ops.mjs';
-import { coverageNote } from './lib/coverage.mjs'; // #13
+import { buildIndex, resolveSymbol, suggestSymbols } from './lib/graph-ops.mjs';
+import { buildContextPack } from './lib/context-core.mjs'; // finding 20: one payload assembler, two transports (CLI + MCP fast path)
 
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--json]   (or set CODEWEB_WS)';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, capList, checkStaleness, loadGraph, sourceReader } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, sourceReader, parseArgs } from './lib/cli.mjs';
 import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
 
-const argv = process.argv.slice(2);
-let json = false, windowN = 3, fullBodies = false, limit = null; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--window') windowN = Math.max(0, parseInt(argv[++i], 10) || 3);
-  else if (t === '--full-bodies') fullBodies = true;
-  else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    window: { type: 'number', default: 3 },
+    'full-bodies': { type: 'bool', default: false },
+    limit: { type: 'number', default: null },
+  },
+});
+const { json, limit } = opts, windowN = Math.max(0, opts.window), fullBodies = opts['full-bodies'];
 let graphPath, symbol;
 if (pos.length >= 2) { graphPath = pos[0]; symbol = pos[1]; }
 else if (pos.length === 1) { graphPath = null; symbol = pos[0]; } // #5: loadGraph discovers (env or nearest .codeweb)
@@ -42,76 +40,23 @@ const { graph, abs } = loadGraph(graphPath, { usage: USAGE });
 const ids = resolveSymbol(graph, symbol);
 if (!ids.length) {
   const suggestions = suggestSymbols(graph, symbol); // #2: offer the nearest labels, not a dead end
-  die(`symbol not found: ${symbol}${suggestions.length ? ` — near matches: ${suggestions.join(', ')}` : ''} (concept search: find.mjs "<free text>")`, 1);
-}
+  if (json) {
+    // finding 20: --json now emits the same found:false contract explain.mjs adopted in #2 — the
+    // old stderr die() left MCP parity replying an EMPTY string on a miss.
+    const payload = { symbol, found: false, hint: `no symbol matches "${symbol}" — try codeweb_find "<free text>" (concept search, no name needed)${suggestions.length ? ' or a near-match below' : ''}` };
+    if (suggestions.length) payload.suggestions = suggestions;
+    emitJson(payload, 1);
+  } else {
+    die(`symbol not found: ${symbol}${suggestions.length ? ` — near matches: ${suggestions.join(', ')}` : ''} (concept search: find.mjs "<free text>")`, 1);
+  }
+} else {
 
 bump(abs, 'queriesServed');
 const index = buildIndex(graph);
-const callerIds = callersOf(index, ids);
-const calleeIds = calleesOf(index, ids);
-const blast = impactOf(index, ids);
-
-// CP-BODY-FIDELITY: sourceReader serves the exact source lines [line, line+loc-1] (one truth,
-// shared with find-similar + diff rename-matching).
-const reader = sourceReader(graph.meta?.root || null);
-const sourceAvailable = reader.available;
-const readLines = reader.linesOf;
-const bodyOf = reader.bodyOf;
-const view = (n, withBody) => {
-  const o = { id: n.id, label: n.label, kind: n.kind, file: n.file, line: n.line, loc: n.loc, domain: n.domain, exports: n.exports, signature: n.signature ?? null };
-  if (withBody) o.body = bodyOf(n);
-  return o;
-};
-// CALL-SITE WINDOWS: inside the caller's recorded span, every line that references the target label,
-// each with ±windowN lines of context. Windows overlapping-adjacent are merged. This is the part of
-// the caller an agent actually needs to update; the full body stays one --full-bodies away.
-const targetLabels = [...new Set(ids.map((id) => index.byId.get(id)?.label).filter(Boolean))];
-const labelRe = targetLabels.length ? new RegExp(`\\b(${targetLabels.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`) : null;
-const windowsOf = (n) => {
-  if (!sourceAvailable || !labelRe) return [];
-  const lines = readLines(n.file);
-  if (!lines) return [];
-  const start = n.line, end = Math.min(n.line + (n.loc || 1) - 1, lines.length);
-  const hits = [];
-  for (let ln = start; ln <= end; ln++) if (labelRe.test(lines[ln - 1] || '')) hits.push(ln);
-  const windows = [];
-  for (const h of hits.slice(0, 8)) { // a caller with >8 call sites: the first 8 windows tell the story
-    const s = Math.max(start, h - windowN), e = Math.min(end, h + windowN);
-    const last = windows[windows.length - 1];
-    if (last && s <= last.endLine + 1) { last.endLine = e; last.callLines.push(h); }
-    else windows.push({ startLine: s, endLine: e, callLines: [h] });
-  }
-  for (const w of windows) w.text = lines.slice(w.startLine - 1, w.endLine).join('\n');
-  return windows;
-};
-const callerView = (id) => {
-  const n = byId.get(id);
-  const o = view(n, fullBodies);
-  if (!fullBodies) o.windows = windowsOf(n);
-  return o;
-};
-const byId = index.byId;
-const cappedCallers = capList(callerIds, limit);
-const cappedCallees = capList(calleeIds, limit);
-const cappedBlast = capList(blast, limit != null ? Math.max(limit, 25) : null);
-const payload = {
-  symbol, matched: ids, sourceAvailable,
-  summary: `${symbol}: ${callerIds.length} caller(s), ${calleeIds.length} callee(s), blast radius ${blast.length}`,
-  mode: fullBodies ? 'full-bodies' : `call-site windows (±${windowN} lines)`,
-  target: ids.map((id) => view(byId.get(id), true)),
-  callers: cappedCallers.items.map(callerView),               // call sites that may need updating
-  callees: cappedCallees.items.map((id) => view(byId.get(id), false)),  // dependencies: location-only (bounded)
-  blastRadius: { count: blast.length, ids: cappedBlast.items }, // transitive impact: ids only
-};
-if (cappedCallers.truncated) payload.moreCallers = { remaining: cappedCallers.remaining };
-const staleInfo = checkStaleness(graph);
-if (staleInfo) { payload.stale = staleInfo; payload.summary += ` — graph is stale for ${staleInfo.count}+ file(s); run codeweb_refresh`; }
-// #13: an edit window on an unmeasured symbol should SAY the blast radius is unguarded.
-if (graph.meta?.coverage) {
-  const uncoveredTargets = ids.filter((id) => index.byId.get(id)?.covered === false);
-  if (uncoveredTargets.length) { payload.coverage = uncoveredTargets.map((id) => `${id}: ${coverageNote(graph, index.byId.get(id))}`); payload.summary += ' — ⚠ target NOT covered by the recorded test run'; }
-}
-if (cappedCallees.truncated) payload.moreCallees = { remaining: cappedCallees.remaining };
+// finding 20: the whole payload assembles in lib/context-core.mjs — the same code the MCP fast
+// path serves, so the two transports cannot drift (byte-identical JSON, field order included).
+const payload = buildContextPack(graph, index, sourceReader(graph.meta?.root || null), ids, { symbol, windowN, fullBodies, limit });
+const sourceAvailable = payload.sourceAvailable;
 
 if (json) { emitJson(payload); } else {
 
@@ -127,4 +72,5 @@ console.log(`callees (${payload.callees.length}) — dependencies:`);
 for (const c of payload.callees) console.log(`  ${c.id}`);
 console.log(`blast radius: ${payload.blastRadius.count} transitive caller(s)`);
 finish();
+}
 }

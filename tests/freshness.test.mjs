@@ -105,6 +105,69 @@ test('SC3: refresh updates nodes+edges, re-attaches domain by id, drops overlaps
   } finally { cleanup(dir); }
 });
 
+// Perf-quality finding 10 — the STAMP TIER. A no-change warm run stats every file and reads NONE
+// of them (scanned 0), serving all per-file products from the cache; the fragment is identical to
+// the cold one. The tier trusts mtime+size (the same stamps checkStaleness trusts), so an
+// mtime-preserving content change is served stale — the DOCUMENTED trade — and
+// CODEWEB_VERIFY_FRESHNESS=1 disables the tier, forcing the read+hash path that picks the
+// change up. --full disables it too.
+test('F10-STAMP: no-change warm scans zero files; CODEWEB_VERIFY_FRESHNESS=1 restores the hash path', async () => {
+  const { utimesSync, statSync } = await import('node:fs');
+  const dir = tmpDir('cw-fresh-st-');
+  const cache = join(dir, 'cache.json');
+  try {
+    writeTree(dir, TREE);
+    const cold = extract(dir, ['--cache', cache]);
+    assert.equal(cold.scanned, 3, 'cold scans all 3');
+    const warm = extract(dir, ['--cache', cache]);
+    assert.equal(warm.scanned, 0, 'no-change warm reads nothing (stamp tier)');
+    assert.deepEqual(sortNodes(warm.frag), sortNodes(cold.frag), 'stamp-tier nodes == cold nodes');
+    assert.deepEqual(sortEdges(warm.frag), sortEdges(cold.frag), 'stamp-tier edges == cold edges');
+    // mtime-preserving content change: the stamp tier is documentedly blind to it...
+    const p = join(dir, 'c.js');
+    const st = statSync(p);
+    writeFileSync(p, 'export function cOne() { return 9; }'); // same length as `return 3`
+    utimesSync(p, st.atime, st.mtime);
+    const stale = extract(dir, ['--cache', cache]);
+    assert.equal(stale.scanned, 0, 'stamp tier trusts mtime+size (the documented trade)');
+    // ...and the escape hatch reads+hashes and picks it up.
+    const verified = runNode(EXTRACT, [dir, '--cache', cache], { env: { CODEWEB_VERIFY_FRESHNESS: '1' } });
+    assert.equal(verified.status, 0, verified.stderr);
+    assert.equal(scannedCount(verified.stderr), 1, 'verify mode re-hashes and re-scans the changed file');
+  } finally { cleanup(dir); }
+});
+
+// Perf-quality finding 4 — stamps carry a content hash, and the verify tier catches
+// mtime-preserving content changes (rsync -a / tar -x / git-restore-mtime workflows) that the
+// stat-only fast path is blind to. Reproduced pre-fix: same-length edit + utimesSync restore ->
+// checkStaleness returned null over a graph whose edges no longer matched the source.
+test('F4-VERIFY: mtime-preserving content change is invisible to stat-only, caught by verify tier', async () => {
+  const { checkStaleness } = await import('../scripts/lib/cli.mjs');
+  const { utimesSync, statSync } = await import('node:fs');
+  const dir = tmpDir('cw-fresh-v-');
+  try {
+    writeTree(dir, TREE);
+    const { frag } = extract(dir);
+    // every stamp carries {s, m, h}
+    for (const [rel, st] of Object.entries(frag.meta.sources)) {
+      assert.match(st.h ?? '', /^[0-9a-f]{40}$/, `${rel} stamp carries a sha1`);
+    }
+    assert.equal(checkStaleness(frag), null, 'fresh graph reads fresh');
+    // same-length content change, mtime restored — the bypass
+    const p = join(dir, 'c.js');
+    const st = statSync(p);
+    const orig = readFileSync(p, 'utf8');
+    const swapped = orig.replace('return 3', 'return 4'); // same byte length
+    assert.equal(swapped.length, orig.length, 'fixture edit must preserve length');
+    writeFileSync(p, swapped);
+    utimesSync(p, st.atime, st.mtime);
+    assert.equal(checkStaleness(frag), null, 'stat-only fast path is (documentedly) blind to this');
+    const v = checkStaleness(frag, { verify: true });
+    assert.ok(v && v.files.some((f) => f.startsWith('c.js')), 'verify tier flags the content change');
+    assert.match(v.files.find((f) => f.startsWith('c.js')), /content changed/, 'reason names the failure');
+  } finally { cleanup(dir); }
+});
+
 // SC3: refresh with no meta.root → exit 2 with a reason.
 test('SC3: refresh with missing meta.root → exit 2', () => {
   const dir = tmpDir('cw-fresh-nr-');

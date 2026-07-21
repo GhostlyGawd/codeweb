@@ -9,6 +9,219 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+### Fixed
+- **The JS masker now lexes regex literals.** `maskJs` tracked strings/templates/comments but not
+  regex literals, so a quote inside the ubiquitous escaping-helper pattern (`replace(/…/g)` with a
+  quote in the regex) desynced its string state — bodies ran to EOF, absorbing neighbors and
+  fabricating call edges from the absorbed code — and a backtick inside a regex flipped template
+  state (an odd count blanked the rest of the file: codeweb's own `lib/complexity.mjs` extracted
+  as 5 nodes / 0 edges, and 13 of 25 deadcode "safe" items on the self-map were false positives).
+  Regex literals are now recognized with the standard prev-significant-token heuristic (escape-
+  and char-class-aware; division and JSX close tags unaffected) and their interiors blanked like
+  strings — including inside `${}` interpolations, where a `{2}` quantifier corrupted brace
+  matching. The `String.fromCharCode` authoring convention that worked around the blind spot is
+  deleted (ts-engine.mjs string regexes, Ruby mask regexes) and now serves as a live self-test;
+  `tests/maskjs-regex-literals.test.mjs` pins the two reproduced corruptions plus a self-map
+  regression on complexity.mjs. (perf-quality finding 1)
+- **`codemod --write` can no longer corrupt source while reporting success.** Three reproduced
+  failure modes closed: (a) an unresolvable/ambiguous `--into` is a hard exit 2 instead of being
+  used verbatim (pre-fix, `canonLabel` became `undefined`, BOTH definitions were deleted, and loser
+  tokens — including a string literal — were rewritten to the literal text `undefined`, with exit 0
+  and `applied: true`); (b) token rewrites are now gated on the column-preserving mask — comment
+  mentions are left as stale prose and counted, and a label inside a string/regex literal refuses
+  the whole write (a name in a value can be load-bearing); (c) imports that named a loser are
+  repointed at the canonical's file (pre-fix `import { canon } from './loser.mjs'` survived —
+  valid-looking, broken at runtime, invisible to the structural gate), importers-without-calls are
+  now part of the rewrite set, and the post-write gate additionally asserts the canonical itself
+  survived re-extraction. The maskers moved to `scripts/lib/masking.mjs` (importable — the start of
+  finding 25's decomposition) with a `keepValues` mode for the live/value/comment classification.
+  (perf-quality finding 2)
+- **Workspace artifacts are crash-safe, and the stage memo validates before reusing.** Every
+  graph/fragment/sidecar/report writer now goes through `atomicWrite` (same-dir temp + rename —
+  readers see old bytes or new bytes, never a truncated half-write; the reproduced kill window was
+  the MCP server SIGTERM-ing its refresh child at 60s mid-`writeFileSync`), and `run.mjs`'s stage
+  memo refuses to reuse outputs whose graph.json no longer parses (pre-fix, a corrupt workspace
+  got "stages reused (fragment unchanged)" forever — the natural recovery path preserved the
+  corruption). `tests/atomic-writes.test.mjs` pins both. (perf-quality finding 3)
+- **Freshness stamps can no longer be false-fresh.** The extractor stats each file BEFORE reading
+  and re-stats after (re-reading on mismatch; a file that won't hold still gets a never-fresh
+  stamp) — pre-fix a file modified between read and stat carried a fresh stamp over stale bytes,
+  permanently. Stamps now carry the content sha1 (`meta.sources: {s,m,h}`), and `checkStaleness`
+  gained a verify tier — `CODEWEB_VERIFY_FRESHNESS=1` (or `{verify:true}`) sha1-compares content
+  where stats match, catching the reproduced mtime-preserving bypass (`rsync -a`, `tar -x`,
+  `git-restore-mtime`, `SOURCE_DATE_EPOCH` builds) across every consumer: MCP auto-refresh, query
+  stale-annotations, hooks. Stat-only stays the default fast path. (perf-quality finding 4)
+- **Byte-determinism, delivered.** `generatedAt` was the sole byte-difference between two
+  identical runs; the report embed also carried per-file/dir mtime stamps its template never
+  reads. report.html now strips `generatedAt`/`sources`/`dirs` alongside `root` (byte-identical
+  across runs and across fresh checkouts, no pinning needed), and graph.json honors
+  `SOURCE_DATE_EPOCH` so CI can byte-compare complete workspaces. graph.json keeps all three
+  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
+
+### Performance
+- **Tree-sitter parse trees are freed.** web-tree-sitter has no FinalizationRegistry, and none of
+  the engine's 8 parse sites called `tree.delete()` — every cold/changed-file extract on a default
+  install leaked WASM pages for the process lifetime (measured: 1,312MB vs 217MB peak RSS on an
+  11MB corpus; large-file repos risked OOM). All sites now free in `try/finally`; output is
+  byte-identical and ~9% faster from reduced GC pressure. A static tripwire test pins parse-site
+  count == delete-site count so a new parse can't quietly reintroduce the leak. (perf-quality
+  finding 6)
+- **The JS/TS AST tier extracts in ONE cursor traversal.** `extractJsTs` walked the full tree
+  three times (methods, Type-3 fingerprints, dispatch) via per-child JS↔WASM crossings — profiled
+  at 62% of AST extract self-time — and `cyclomaticExact` re-parsed every regex-owned body slice
+  from scratch for exact complexity (28%). One TreeCursor pass now collects everything: ancestor
+  stacks replace upward parent-walks, dispatch candidates resolve after the walk against the
+  complete method tables, and decisions are tallied per start row so a symbol's exact complexity
+  is `1 + sum(extent rows)` — the identical decision set the slice re-parse counted, with zero
+  re-parses. Verified output-identical on a full corpus (393 nodes, 983 edges, every node field
+  equal); ~1.5x wall on a small corpus where WASM init dominates, larger on big ones. `atomicWrite`
+  also learned to write through non-regular files instead of renaming over them. (perf-quality
+  finding 7)
+- **Python re-export resolution is a table lookup, and every file is masked once.**
+  `pyReExportResolve` re-masked the whole module and re-scanned its from-imports on EVERY
+  invocation — once per unresolved `pkg.member(...)` call site and per imported name, measured at
+  70% of a Python-corpus extract — and `maskPy`/`maskJs` ran up to 4x/2x per file across the
+  symbol/extent/import/edge scans. Each module's re-export table and each `(module, name)`
+  resolution are now memoized (first-valid-binding-wins preserves the old scan order; nulls cache
+  only from depth-0 calls so a depth-truncated null can't mask a resolvable chain), and a shared
+  per-file mask cache serves all five scan sites. Byte-identical fragments on a 261-file
+  re-export corpus (1,460 edges, zero field diffs). (perf-quality finding 8)
+- **Blast radius de-quadratic'd — `risk` is 31x faster at 20k nodes.** `impactOf` dequeued with
+  `shift()` (O(frontier) per pop) and materialized+sorted closures its biggest caller threw away;
+  `risk` then ran it once per node — measured 19.8s at 20k nodes/60k edges, scaling ~quadratically.
+  Now: index-pointer BFS in `impactOf` (and the extractor's pub-API walk), a count-only
+  `impactCountOf`, and `allBlastCounts` — Tarjan-condense the dependents graph, then propagate 64
+  source-components per pass with word masks (O(V·E/64) time, O(V) memory, dangling edge sources
+  participate exactly as in the BFS). risk: 19,784ms → 630ms with byte-identical payloads
+  (blast sums equal); a property test pins all three implementations to each other on random
+  graphs. (perf-quality finding 9)
+- **The STAMP TIER: a no-change warm extract reads zero files.** Even on 100% cache hits, warm
+  extraction re-read, re-hashed, re-split and re-masked every byte (the cache recovered ~15%; at
+  16k symbols a no-change re-map spent ~3.7s on pure re-verification — the floor under the
+  post-edit hook and MCP auto-refresh). The scan cache now stores every per-file product — nodes
+  with extents/signatures/complexity, ranges, dynamic flag, raw re-export table, import bindings —
+  and an mtime+size stamp: a matching stamp reuses all of it with ONE stat and NO read (measured:
+  760ms cold → ~125ms warm on a 63-file corpus, banner `scanned 0/63 … ast: idle`). Correctness
+  gates: role-override changes invalidate the tier (rulesSig); re-export tables gate on the file
+  list (fileSig); bindings gate on symbol set + file list (bindSig) and lazily re-read exactly the
+  files a landscape change invalidates. The tier trusts the same stamps `checkStaleness` trusts;
+  `CODEWEB_VERIFY_FRESHNESS=1` or `--full` forces the read+hash path. Verified byte-identical
+  against the no-cache oracle and the 40-trial incremental-equivalence property suite.
+  (perf-quality finding 10)
+- **`parseSignature` compiles zero regexes.** It built a fresh `RegExp` from the (mostly unique)
+  symbol name for every function/method node — 717ms self / 27% of a 2.9s regex-path extract in
+  profile; V8's regex cache never helps unique sources (micro: 8,400 unique-name constructions =
+  527ms vs 1.6ms for the scan floor). Replaced with an `indexOf` scan performing the identical
+  match — same left boundary, same optional `= [async] [function[*] [id]]` group semantics
+  (async still requires trailing whitespace, exactly as `async\s+` did), first completing
+  occurrence wins. Zero fragment diffs on the A/B corpus. (perf-quality finding 11)
+- **ctags runs once per cold extract, not once per file.** The ctags engine spawned one
+  `execFileSync` per file inside the main loop (≥0.9s of pure spawn floor per 600 files measured
+  with a no-op shim; ~10x with real ctags option parsing — minutes of process churn at repo
+  scale). Cold runs now tag the whole list through ONE process (`-L -`, list on stdin, bucketed by
+  the JSON `path` field); warm runs keep the per-file spawn (misses are few, and one small spawn
+  beats re-tagging the repo); an untouched warm run spawns nothing (stamp tier). Same graceful
+  ladder on failure: batch → per-file → regex scanner. Shim-verified: exactly one batch on cold,
+  zero on no-change warm, exactly one per-file on a one-file edit. (perf-quality finding 12)
+- **The bench gate now guards every stage and every advisor, under real load.** The only timing
+  gate used to measure the stage-REUSE path (which skips overlap/optimize entirely) — a 10x
+  regression in any post-graph stage passed CI, which is exactly how the quadratic risk loop
+  shipped. Now: (a) per-stage wall times parse from `run.mjs`'s own stderr and each gates as a
+  factor of the regex-extract baseline (budgets note observed values so headroom stays honest);
+  (b) a pinned deterministic loaded corpus (`bench/lib/loaded-corpus.mjs`: every function a twin
+  candidate, 15 planted same-name clusters, ~1,260 candidates so LSH engages on its own — the old
+  synthetic corpus produced 0 candidates and timed an idle engine) with gates that the planted
+  clusters are FOUND and the LSH banner fired; (c) risk/deadcode/hotspots/campaign each timed and
+  factor-gated, and a crashed advisor is itself a violation (observed: risk 0.18x — the
+  pre-finding-9 loop would have measured ~20x and failed on arrival). The report expand-all bench
+  row (d) lands with the finding-21 layout rewrite it measures. (perf-quality finding 13)
+- **campaign's merge chain stopped cloning the graph per candidate.** The cumulative pre-flight
+  ran `applyEdit` (a whole-graph `structuredClone`) plus full file-SCC for every ready merge —
+  289ms/candidate at 20k nodes, the exact pattern optimize's Spec O-1 had already replaced. The
+  pair-witness delta simulator now lives in graph-ops (`createMergeSimulator`, one truth) with
+  chaining commits (`commit`/`commitDelete`) so deletes and accepted merges advance the same
+  table; optimize rides it too (its `CODEWEB_OPT_SIM=clone` escape and equivalence tests intact).
+  Measured: 100 candidates at 20k nodes/60k edges = 20,757ms → 729ms (28.5x) with identical
+  accept decisions; a 120-case property oracle replays the historical clone chain verbatim and
+  requires step-for-step plan equality. (perf-quality finding 14)
+- **The edit/PR duplication gate prefilters by set size and caps bodies like overlap does.**
+  `incrementalOverlap` ran full Jaccard intersections for every changed×pool pair (the dominant
+  gate term on big PRs) and shingled thousand-line bodies in full while overlap confirmed the
+  same pair on its first 400 lines. Now: an exact size-ratio early-exit (`J ≤ min/max` — measured
+  78% of 37,350 self-map pairs skipped, with 5e-7 slack so knife-edge pairs that round to the bar
+  survive) plus overlap's `BODY_LINE_CAP`. A 40-case property test pins prefiltered results to a
+  filterless oracle. (perf-quality finding 15)
+- **`find_similar` stops re-shingling the repo on every call.** The MCP server prescribes it
+  before every new function an agent writes, and each call re-read and re-shingled every non-test
+  body from disk. The report stage now persists each candidate's exact K=3 shingle SET (sorted,
+  deterministic — sets, not sketches, so there is no probabilistic cut) in a stamped
+  `similar-index.json` beside the graph; find-similar serves from it with zero source reads plus
+  an exact size-ratio precut, and reuses the scoring pass for `scanned`. Stale/absent sidecar or
+  `--structural` falls back to the live path; a regression test pins byte-identical matches
+  across sidecar, live, stale-fallback, and removed-sidecar paths. (perf-quality finding 16)
+- **One scan cache per workspace — the first hook fire after a map is no longer cold.** run.mjs,
+  the post-edit hook, and refresh each used a DIFFERENT cache filename for the same workspace
+  (`.scan-cache.json` / `scan-cache.json` / `extract-cache.json`), so the first post-edit hook
+  after every map ran a cold full re-scan (28.7s at 16k symbols against the hook's 30s timeout)
+  and the first MCP auto-refresh was cold too. All three now share `SCAN_CACHE_NAME` from
+  lib/cli.mjs — and the hook dropped its lone `--no-ctags`, which on ctags machines both thrashed
+  the engine-namespaced cache AND diffed a regex fragment against a ctags baseline (phantom
+  regressions). With finding 10, a no-change hook/refresh now scans zero files. (perf-quality
+  finding 17)
+- **The post-edit hook's fast-path floor, specified and landed** (`docs/specs/hook-fastpath-floor.md`
+  — the "baseline-fragment reuse" spec `fastpath-daemon.md` called for, in its landed form: the
+  reuse rides the stamp tier's per-file products, serving every extract consumer). The hook's
+  fragment now streams back on stdout — the pid-named temp file (~1.2MB, never unlinked, leaked
+  per edit forever) is gone entirely, along with a full serialize+write+read cycle — and the
+  extractor skips its multi-MB cache write-back when no entry changed (`cacheDirty`). Measured at
+  8,804 nodes/52k edges: hook end-to-end ~800ms warm (was ~4s-class; full re-extract alone was
+  3,350ms), decomposed in the spec with revisit triggers pointing at finding 25's in-process
+  extraction. (perf-quality finding 18)
+- **The MCP server no longer head-of-line-blocks, and stale graphs heal in the background.**
+  Every non-fast-path tool ran through `spawnSync` on the readline loop — a 2.5ms structural
+  query measured at 527.6ms behind a concurrent campaign, and a stale graph stalled the current
+  call behind an inline synchronous refresh (up to 4–28s at the 16k benchmark; 120s behind a
+  wedged child). Children now spawn async (the `handleMap` pattern generalized), serialized per
+  workspace so stateful sequences keep their order while fast paths and other workspaces never
+  wait; auto-refresh is fire-and-forget, serving the stale-but-ANNOTATED answer immediately —
+  and because the server drains in-flight work before exit, the next call is fresh. Measured:
+  callers behind a concurrent campaign 527.6ms → 2.4ms. (perf-quality finding 19)
+- **The tools the server prescribes per edit answer in-process.** `codeweb_explain` and
+  `codeweb_context` — the INSTRUCTIONS' before-every-edit calls — took the spawn path (node boot
+  + a fresh multi-MB graph parse per call, ~256ms measured back-to-back) while structural queries
+  answered from the cache in ~3–13ms. context-pack's payload assembly moved to
+  `lib/context-core.mjs` (one truth, two transports — byte-identical JSON, field order included);
+  explain rides `buildCards` as the sidecar already did; and context-pack's `--json` miss now
+  emits the same `found:false` + suggestions contract explain adopted in #2 (the old stderr
+  `die()` made MCP reply an empty string). Measured, even while a campaign runs: explain 9.3ms,
+  context 12.3ms. (perf-quality finding 20)
+- **The report's graph sim is grid-based, frame-budgeted, and freeze-free.** `gStep` computed
+  all-pairs repulsion per animation frame — 1,174ms/frame measured at 16.3k nodes (×~259 anneal
+  frames ≈ 5 minutes of sim CPU for one "Expand all" click), and the `prefers-reduced-motion`
+  branch ran the whole anneal in ONE synchronous task (a hard freeze, not jank). Now: a uniform
+  spatial grid (only 3×3-neighborhood pairs interact — deterministic, 11.5x on the dense
+  micro-bench and far more on real spread-out layouts), a wall-clock frame budget (8ms of sim per
+  frame — small graphs settle in a blink, huge ones stay responsive), and the reduced-motion
+  settle chunked into ≤12ms slices with a single final draw. Spec L's harness gained the
+  expand-all row (finding 13(d)): `simMsPerFrame` recorded and judged in the verdict, so the
+  cliff that sat one click past the old green can never regress unmeasured. (perf-quality
+  finding 21)
+- **Temp hygiene: nothing leaks into the OS tmpdir.** The post-edit hook's per-edit ~1.2MB leak
+  died with finding 18 (no temp file exists at all); the two test files that leaked
+  (`stdout-flush`'s three `codeweb-flush-*` dirs, `efficiency-pilot-usage`'s `cw-usage-*` dir)
+  now clean up in `finally`; and a tripwire in `post-edit-diff.test.mjs` runs the hook end-to-end
+  and asserts no `codeweb-hook-*.json` appears — the leak signature can't return silently.
+  (perf-quality finding 22)
+- **SessionStart serves a pre-rendered brief; MCP sweeps staleness once per burst.** The
+  session-brief hook re-parsed and re-indexed the whole graph every session start (97–100ms on
+  this repo, 310–328ms at 17k nodes) for a payload that is a pure function of the graph — the
+  report stage now pre-renders `brief.json` (Spec P stamp pattern) and the hook serves it at the
+  boot floor, byte-identical output pinned across sidecar/parse/stale-fallback paths. The MCP
+  server also stat-swept every `meta.sources` entry TWICE per fast-path request (auto-refresh
+  check + payload annotation — 2×12–17ms at 5k files against 3–13ms answers); one memoized
+  verdict per (graph identity, 1s TTL) now serves both, threaded through context-core so the CLI
+  path is untouched. (perf-quality finding 23)
+
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
   script would have refused to roll an "empty" release over real work):
@@ -172,6 +385,82 @@ notes so validated results, papers, and new tools never get lost in commit histo
   scanned, the supported extensions, and "is this the right directory?" — and `run.mjs` aborts
   before writing artifacts. `--allow-empty` (both CLIs) keeps intentionally-sparse targets
   workable. (IMPROVEMENTS.md #1)
+
+### Removed
+- **spike/ and .live/ are out of the tree — the self-map stops counting prototypes.**
+  `spike/tree-sitter/` was a graduated prototype (the engine shipped as `lib/ts-engine.mjs` in
+  PR #17) still tracked with its own package.json and drifted copies of production functions;
+  `.live/` tracked five dev scripts nothing referenced, every one superseded by shipped code
+  (confirm.mjs → overlap's body confirmation, rust-dissect.mjs → the native Rust tier,
+  cli-sketch/ → finding 24's `parseArgs`, measure.mjs → cluster3). Both deleted — git history
+  keeps them; prose references now say so. `.live/` is fully gitignored (it stays run.mjs's
+  default workspace target, generated artifacts only), and `codeweb.rules.json` gains standing
+  `spike/** → example` and `.live/** → generated` role overrides so a future prototype tree can
+  never pollute the self-metrics again. Self-map effect: 13 → 12 domains (spike/tree-sitter
+  gone), 33 → 28 self-overlap findings (all five spike-only findings gone), 1,240 → 1,215 nodes.
+  (perf-quality finding 28)
+
+### Changed
+- **THE similarity thresholds live once — and churn is bounded and cached.** The 0.6
+  high-confidence floor (with the 0.35/0.15 bands) was independently hardcoded in four files and
+  the K=3 shingle size in five, each copy documenting the coupling in a "must match overlap.mjs"
+  comment instead of importing it. `lib/shingles.mjs` now exports `BANDS`/`K`; overlap's
+  confidence tiers, optimize's READY floor, find-similar's tiers + low-band cutoff, dup-check's
+  HIGH gate, similar-index's SIMILAR_K, and skeleton's default all import them (values unchanged
+  — pipeline outputs byte-identical). Same disease, different organ: the full-history `git log`
+  churn parser was byte-near-identical in risk.mjs and hotspots.mjs, unbounded (whole history
+  per advisory run) and uncached (campaign ran it twice back-to-back). `lib/churn.mjs` now owns
+  it: windowed to the last 5,000 commits (deterministic per HEAD, unlike a `--since` that drifts
+  with the clock) and cached beside the graph keyed by `rev-parse HEAD` + window — on this repo,
+  hotspots `--git` after risk `--git` serves from the cache in ~97ms with zero git spawns.
+  `tests/churn.test.mjs` pins counts, the poison-proved cache hit, HEAD invalidation, the window
+  bound, and the not-a-repo `{}` degradation. (perf-quality finding 27)
+- **One dispatch skeleton, seven language tables.** `ts-engine.mjs` repeated its per-language
+  dispatch walker seven times (Java/C# via a shape closure; Ruby/PHP/Python/Go/Rust as five
+  hand-copied closures), with `up()` defined five times in two drifted signatures,
+  `typedParamsOf` four times plus a renamed `paramTypesOf`, and the owner-index + dedupe + sort
+  epilogue cloned per language — the same-name copies were also why deadcode showed @-suffixed
+  orphan ids for this file. Now `makeDispatchWalker(parser, table)` owns THE skeleton (ancestor
+  climb `upTo`, `typedParamsFrom`, seen-key dedupe, sorted `{thisCalls, typedIntents}` return,
+  try/finally `tree.delete()`), and each language declares only its genuine tree shape:
+  `collectOwners` / `callSite` / `enclosingOf` / `isSelf` / `identName` / `typedParams` —
+  ~25 declarative lines per language, 762→735 total with seven walkers collapsed to one.
+  Verified byte-identical on a purpose-built 7-language dispatch corpus (this-calls AND typed
+  intents wired in every language, incl. Go receiver-variable "self", Rust `&`-ref stripping,
+  PHP nullable-type params) plus pycorp and corpus7; language/AST suites and the full 582-test
+  run green. (perf-quality finding 26)
+- **The extractor is decomposed — and testable in-process.** `extract-symbols.mjs` was a
+  1,500-line script/module hybrid: per-language scan rules, body extents, signatures, import/
+  re-export/member resolution, and the caches all interleaved, with `byName`/`files` as module
+  globals — so every extractor test shelled out (253 `runNode(` spawn sites across the suite).
+  Two pure modules now hold the substance: `lib/lang-rules.mjs` (the 11-language regex symbol
+  scan, `bodyEnd` brace/dedent extents, `parseSignature`, KEYWORDS/DYNAMIC_RE/langOf — functions
+  of their arguments, no IO) and `lib/import-resolve.mjs` (`createImportResolver(ctx)` — relative
+  and Python module resolution, JS/TS re-export chains incl. `export *`, Python from-import
+  re-export tables, unique-member lookup, and per-file import binding, all over injected context
+  with no module-global state). The orchestrator keeps enumeration, caching (stamp/hash/bind/rex
+  replay), engines, and edge derivation — 968 lines, down from 1,506 — and the extractor's own
+  `SRC` extension list is now the shared `SRC_RE` from `lib/common.mjs` (the hand-mirrored copy
+  the file itself warned could drift). Bodies moved verbatim; proof: fragments byte-identical
+  old-vs-new on four corpora × both engine tiers × cold/warm/replayed-cache paths, including an
+  old-engine scan cache replayed by the new engine, plus a same-tree self-map A/B. The first
+  in-process extractor tests land with it (`tests/lang-rules.test.mjs`: 10 cases, 137ms, zero
+  spawns — the seam #30's spawn-collapse needs). (perf-quality finding 25)
+- **One flag loop.** 25 scripts carried the identical hand-rolled `for (…argv…)` parse with three
+  drifting policies — `run.mjs` rejected unknown flags (the documented #5 convention) while
+  `trend`/`build-report`/`extract-symbols` still swallowed them as positional paths (the exact bug
+  class #5 fixed: `--help` becoming the target path), and several CLIs answered no `--help` at all
+  (ci-gate, screenshot, extract-symbols). `lib/cli.mjs` now owns THE loop — declarative
+  `parseArgs(argv, spec)` with one policy: unknown flag → exit 2 with usage, `--help`/`-h` → usage
+  and exit 0, typed values (`bool`/`string`/`number`/`float`/`pair`) with missing/non-numeric
+  values rejected by name. All 25 scripts migrated to ~10-line specs (hand-written usage strings
+  kept — they're part of tested contracts); `build-report` also drops its near-verbatim copy of
+  the graph-load error handling and rides `loadGraph` like every other tool. The pure helpers
+  (`SRC_RE`, `SCAN_CACHE_NAME`, `sign`, `capList`) moved to side-effect-free `lib/common.mjs`
+  (re-exported from cli.mjs) so stage scripts can import constants without cli.mjs's module-level
+  EPIPE handler. Dogfood: this was codeweb's only HIGH-confidence self-finding, now zero
+  hand-rolled loops remain (`grep` proof: the one flag loop left is parseArgs itself).
+  (perf-quality finding 24)
 
 ## [0.9.0] - 2026-07-19
 

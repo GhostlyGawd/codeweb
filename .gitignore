@@ -4,13 +4,10 @@ node_modules/
 # Orchestrator output workspace (per-target runs; regenerable via scripts/run.mjs)
 .codeweb/
 
-# Canonical dev workspace: keep the hand-written dev tools (.live/*.mjs, .live/cli-sketch/),
-# ignore the generated analysis artifacts (large, regenerable, and they drift over time).
-.live/runs/
-.live/*.json
-.live/*.html
-.live/*.md
-.live/*.before
+# Default run.mjs workspace target (.live/<slug>): generated analysis artifacts only —
+# regenerable, never tracked. The hand-written dev tools that used to live here were graduated
+# prototypes and were removed in the perf-quality round (finding 28; git history keeps them).
+.live/
 *.before
 
 # Bench: evaluation corpus is cloned & pinned via bench/corpus.manifest.json (large, regenerable).

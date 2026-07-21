@@ -8,6 +8,8 @@
 // normalization, but operator + keyword SENSITIVITY (`+`≠`*`, `&&`≠`||`, `if`≠`while`) so it does not
 // over-collapse and call genuinely different logic a clone. Reuses jaccard from lib/shingles.mjs.
 
+import { K } from './shingles.mjs'; // THE shingle size (finding 27)
+
 const JS_KW = new Set(['if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'function', 'class', 'new', 'typeof', 'instanceof', 'const', 'let', 'var', 'of', 'in', 'try', 'catch', 'finally', 'throw', 'await', 'async', 'yield', 'extends', 'super', 'this', 'null', 'true', 'false', 'void', 'delete', 'import', 'export', 'from', 'static', 'get', 'set']);
 const PY_KW = new Set(['if', 'elif', 'else', 'for', 'while', 'def', 'class', 'return', 'try', 'except', 'finally', 'raise', 'with', 'as', 'import', 'from', 'and', 'or', 'not', 'in', 'is', 'lambda', 'pass', 'yield', 'await', 'async', 'None', 'True', 'False', 'global', 'nonlocal', 'del', 'assert']);
 
@@ -33,7 +35,7 @@ export function skeletonTokens(src, lang = 'js') {
 
 export const skeleton = (src, lang = 'js') => skeletonTokens(src, lang).join(' ');
 
-export const structuralShingles = (src, k = 3, lang = 'js') => {
+export const structuralShingles = (src, k = K, lang = 'js') => {
   const t = skeletonTokens(src, lang);
   const set = new Set();
   for (let i = 0; i + k <= t.length; i++) set.add(t.slice(i, i + k).join(' '));

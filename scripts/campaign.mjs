@@ -16,19 +16,19 @@ import { planCampaign } from './lib/campaign.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: campaign.mjs <graph.json> [--json] [--budget N] [--git]   (or set CODEWEB_WS)';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, budget = Infinity, git = false, all = false; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--budget') budget = Math.max(0, parseInt(argv[++i], 10) || 0);
-  else if (t === '--git') git = true;
-  else if (t === '--all') all = true; // #6: advisors include non-product roles
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    budget: { type: 'number', default: Infinity },
+    git: { type: 'bool', default: false },
+    all: { type: 'bool', default: false }, // #6: advisors include non-product roles
+  },
+});
+const { json, git, all } = opts, budget = Math.max(0, opts.budget);
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 // run each advisor as its tested artifact (--json); a failed advisor degrades to empty (the campaign

@@ -13,19 +13,20 @@ import { resolve } from 'node:path';
 import { addSuppression, loadAnnotations } from './lib/annotations.mjs';
 
 const USAGE = 'usage: annotate.mjs (--suppress <fingerprint> [--note "..."] | --list) [--dir <.codeweb>] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish } from './lib/cli.mjs';
+import { die, emitJson, finish, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, list = false, fp = null, note = '', dir = '.codeweb';
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--list') list = true;
-  else if (t === '--suppress') fp = argv[++i];
-  else if (t === '--note') note = argv[++i];
-  else if (t === '--dir') dir = argv[++i];
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    list: { type: 'bool', default: false },
+    suppress: { type: 'string', default: null },
+    note: { type: 'string', default: '' },
+    dir: { type: 'string', default: '.codeweb' },
+  },
+});
+const { json, list, note, dir } = opts, fp = opts.suppress;
 const annDir = resolve(dir);
 
 if (list) {

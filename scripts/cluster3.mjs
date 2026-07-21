@@ -14,7 +14,8 @@
 // nodes (mostly hooks/* calling lib utils) pulled out of their home dir when de-hub is removed.
 // Keeping it makes domain assignment track directory structure, so it stays.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
+import { atomicWrite } from './lib/cli.mjs'; // finding 3: graph writes are rename-atomic
 
 const WS = process.env.CODEWEB_WS || '.live';   // per-target workspace dir (orchestrator sets this)
 const FRAG = `${WS}/fragment.json`;
@@ -100,7 +101,7 @@ const graph = {
   meta: { ...fragMeta, mode: 'internal', depth: 'symbol', engine: `${fragMeta.engine || 'regex'} + de-hubbed dir-seeded call-cohesion clustering` },
   nodes, edges, domains, overlaps: [],
 };
-writeFileSync(GRAPH, JSON.stringify(graph));
+atomicWrite(GRAPH, JSON.stringify(graph));
 
 // stats
 const isolated = adj.filter((a) => a.length === 0).length;

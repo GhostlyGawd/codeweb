@@ -16,10 +16,10 @@
 //   0.15-0.35 low · <0.15 refuted (dismissed as coincidental).  Precision over recall.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { shingles, jaccard } from './lib/shingles.mjs'; // shared body-shingle primitives (one truth)
+import { shingles, jaccard, K, BANDS } from './lib/shingles.mjs'; // shared body-shingle primitives + THE thresholds (one truth, finding 27)
 import { signature, bandKeys } from './lib/minhash.mjs'; // Spec N: LSH candidate generation at scale
 import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
-import { sourceReader } from './lib/cli.mjs'; // shared body access (one truth)
+import { sourceReader, atomicWrite } from './lib/cli.mjs'; // shared body access + rename-atomic artifact writes (one truth)
 
 const WS = process.env.CODEWEB_WS || '.live';   // per-target workspace dir (orchestrator sets this)
 const GRAPH_PATH = `${WS}/graph.json`;
@@ -35,7 +35,7 @@ const SCAFFOLD = new Set(['parseArgs', 'parseArgv', 'usage', 'showHelp', 'printU
 // TWIN_JACCARD is a cheap RECALL pre-filter on shared downstream-call names; body-shingle
 // confirmation (below) is the precision gate, so this can be loose. At 0.8 it never fired on
 // real targets (0/516 candidate pairs passed); 0.5 surfaces candidates for body confirmation.
-const TWIN_MIN_OUT = 4, TWIN_JACCARD = 0.5, LOC_CV_TIGHT = 0.4, K = 3;
+const TWIN_MIN_OUT = 4, TWIN_JACCARD = 0.5, LOC_CV_TIGHT = 0.4;
 // Scale caps (Spec B addendum) — both pairwise passes are quadratic in group size, and monorepo-
 // scale repos (TypeScript: thousands of same-named visitors, hub labels with 1000s of callers)
 // turn them into minutes. Caps are deterministic and REPORTED (md header + finding evidence),
@@ -103,8 +103,8 @@ const bodyConfidence = (nodes) => {
   // reduce, not Math.min(...sims): a large same-name cluster makes sims O(n^2), and spreading it as
   // call args overflows the stack (express crashed here). reduce is identical in value, spread-free.
   const mean = sims.reduce((a, b) => a + b, 0) / sims.length, min = sims.reduce((a, b) => Math.min(a, b), Infinity);
-  const confidence = mean >= 0.6 ? 'high' : mean >= 0.35 ? 'medium' : mean >= 0.15 ? 'low' : 'refuted';
-  return { mean, min, confidence, drifted: mean >= 0.35 && mean < 0.6, sampled };
+  const confidence = mean >= BANDS.high ? 'high' : mean >= BANDS.medium ? 'medium' : mean >= BANDS.low ? 'low' : 'refuted';
+  return { mean, min, confidence, drifted: mean >= BANDS.medium && mean < BANDS.high, sampled };
 };
 
 const isDecl = (file) => /\.d\.ts$/.test(file);
@@ -244,6 +244,7 @@ if (lshOn(cand.length)) {
   // Near-linear candidate generation (Spec N): 64×3 banding over 192-perm signatures of the
   // callee-label sets — a pair at the 0.5 confirm threshold is proposed with P≈0.9998. Mega-hub
   // co-callers share too little to collide, so no hub exclusion is needed on this path.
+  console.error(`[overlap] LSH path engaged: ${cand.length} twin candidate(s)`); // finding 13: the bench asserts this fires at scale
   const buckets = new Map();
   for (const [id, s] of cand) {
     for (const bk of bandKeys(signature(s, 192), 64, 3)) {
@@ -426,7 +427,7 @@ _mark('signal-C (near-miss)');
 overlaps.sort((a, b) => SEV[b.severity] - SEV[a.severity] || CONF[b.confidence] - CONF[a.confidence] || b.rank - a.rank);
 overlaps.forEach((o, i) => { o.id = 'ov' + (i + 1); delete o.rank; });
 graph.overlaps = overlaps;
-writeFileSync(GRAPH_PATH, JSON.stringify(graph));
+atomicWrite(GRAPH_PATH, JSON.stringify(graph));
 
 const patternFindings = overlaps.filter((o) => o.kind === 'interface-pattern');
 const findings = overlaps.filter((o) => o.kind !== 'interface-pattern' && (o.confidence === 'high' || o.confidence === 'medium'));
@@ -450,7 +451,7 @@ const md = [
   '## Dismissed (body-refuted)', '', '_Same name, <15% body similarity — different logic, not duplication. Listed for transparency (no silent truncation)._', '',
   ...dismissed.map((o) => `- ${o.id} \`${o.title.replace(/`/g, '')}\` — body ${(o.bodySim * 100).toFixed(0)}%`),
 ].join('\n');
-writeFileSync(OVERLAP_MD, md);
+atomicWrite(OVERLAP_MD, md);
 
 // ---- console summary ----------------------------------------------------------------
 const drifted = findings.filter((o) => o.drifted).length;

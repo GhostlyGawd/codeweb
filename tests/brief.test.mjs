@@ -80,3 +80,31 @@ test('brief over MCP: 24th tool, served in-process, staleness-annotated shape', 
     assert.ok(payload.loadBearing.some((s) => s.label === 'hub'), 'same content as the CLI');
   } finally { cleanup(dir); }
 });
+
+// Perf-quality finding 23 — the SessionStart hook serves the map-time pre-rendered brief.json at
+// the boot floor; removing or staling it falls back to the parse path with IDENTICAL output.
+test('BR-SIDECAR: hook output identical with, without, and with a stale brief.json', async () => {
+  const { rmSync, existsSync, writeFileSync: wf, readFileSync: rf } = await import('node:fs');
+  const { preview } = await import('../hooks/session-brief.mjs');
+  const src = tmpDir('cw-brief-sc-');
+  try {
+    writeTree(src, {
+      'a.mjs': 'export function one() { return two(); }\nexport function two() { return 1; }\n',
+    });
+    const ws = join(src, '.codeweb');
+    const map = runNode(script('run.mjs'), [src, '--target', 'brief-sc', '--out-dir', ws]);
+    assert.equal(map.status, 0, map.stderr);
+    assert.ok(existsSync(join(ws, 'brief.json')), 'map pre-rendered the brief sidecar');
+    const payload = JSON.stringify({ cwd: src });
+    const withSidecar = preview(payload);
+    assert.ok(withSidecar && /mapped/.test(withSidecar), 'sidecar-served brief produced');
+    const sidecarBytes = rf(join(ws, 'brief.json'), 'utf8');
+    rmSync(join(ws, 'brief.json'));
+    const withoutSidecar = preview(payload);
+    assert.equal(withSidecar, withoutSidecar, 'sidecar path == parse path, byte for byte');
+    // a STALE sidecar (stamp mismatch) must be ignored, not served
+    wf(join(ws, 'brief.json'), sidecarBytes.replace(/"graphSize":\d+/, '"graphSize":1'));
+    const stale = preview(payload);
+    assert.equal(stale, withoutSidecar, 'stamp mismatch falls back to the parse path');
+  } finally { cleanup(src); }
+});

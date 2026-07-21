@@ -15,13 +15,12 @@ import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
 import { structuralRegressions } from '../scripts/lib/graph-ops.mjs';
 import { bump, correlateEdit } from '../scripts/lib/stats.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXTRACT = join(HERE, '..', 'scripts', 'extract-symbols.mjs');
-import { SRC_RE, findTarget } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a stale local copy missing five languages)
+import { SRC_RE, SCAN_CACHE_NAME, findTarget } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a stale local copy missing five languages)
 
 
 // Returns { root, newCycles, lostCallers } when an edit introduces a structural regression, else null.
@@ -32,14 +31,21 @@ export function check(raw) {
   const t = findTarget(fp);
   if (!t) return null;
   let baseline; try { baseline = JSON.parse(readFileSync(t.baseline, 'utf8')); } catch { return null; }
-  const tmpOut = join(tmpdir(), `codeweb-hook-${process.pid}.json`);
+  let after;
   try {
-    // Incremental: the per-file scan cache lives beside the graph, so an edit re-scans only the
-    // changed file(s) instead of the whole target on every keystroke-batch.
-    const cache = join(dirname(t.baseline), 'scan-cache.json');
-    execFileSync(process.execPath, [EXTRACT, t.root, '--no-ctags', '--cache', cache, '--out', tmpOut], { stdio: 'ignore' });
+    // Incremental: THE per-file scan cache (finding 17: one shared name — the hook used its own
+    // `scan-cache.json` and always ran cold after a map; it also passed --no-ctags, flipping the
+    // cache's engine namespace on ctags machines AND diffing a regex fragment against a
+    // ctags-engine baseline, which could fabricate phantom regressions). Same name, same engine
+    // flags as run.mjs -> the hook rides the map-time warm cache and the stamp tier: a one-file
+    // edit costs one stat sweep + one file scan (docs/specs/hook-fastpath-floor.md).
+    // finding 18/22: the fragment streams back on STDOUT — the old per-invocation temp file
+    // (~1.2MB, pid-named, never unlinked) leaked into the OS tmpdir on every single edit forever,
+    // and cost an extra serialize+write+read of the whole fragment besides.
+    const cache = join(dirname(t.baseline), SCAN_CACHE_NAME);
+    after = JSON.parse(execFileSync(process.execPath, [EXTRACT, t.root, '--cache', cache],
+      { encoding: 'utf8', maxBuffer: 1 << 28, stdio: ['ignore', 'pipe', 'ignore'] }));
   } catch { return null; }
-  let after; try { after = JSON.parse(readFileSync(tmpOut, 'utf8')); } catch { return null; }
   const reg = structuralRegressions(baseline, after);
   if (!reg.newCycles.length && !reg.lostCallers.length) return null;
   return { root: t.root, ...reg };

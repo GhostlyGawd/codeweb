@@ -22,8 +22,16 @@ export const tokenize = (src) => src
   .toLowerCase()
   .match(/[a-z_$][\w$]*|[{}();=><!+\-*/%]/g)?.filter((t) => !KW.has(t)) || [];
 
-// K-gram shingle set of the tokenized source (default K=3 — must match overlap.mjs's K).
-export const shingles = (src, k = 3) => {
+// THE shingle size and confidence bands (finding 27). Four files hardcoded 0.6 (and the
+// 0.35/0.15 bands) with "must match overlap.mjs" comments — each copy documented the coupling
+// in prose instead of importing it. Consumers: overlap.mjs (confidence tiers), optimize.mjs
+// (READY floor), find-similar.mjs (tiers + low-band cutoff), lib/dup-check.mjs (HIGH gate),
+// lib/similar-index.mjs + lib/skeleton.mjs (K).
+export const K = 3;
+export const BANDS = { high: 0.6, medium: 0.35, low: 0.15 }; // body-similarity mean: >=high confirmed · >=medium DRIFTED · >=low weak · below refuted
+
+// K-gram shingle set of the tokenized source (default: THE K above).
+export const shingles = (src, k = K) => {
   const t = tokenize(src);
   const s = new Set();
   for (let i = 0; i + k <= t.length; i++) s.add(t.slice(i, i + k).join(' '));

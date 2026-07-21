@@ -215,3 +215,38 @@ test('CMP-DELETE-ROI: delete steps rank and project by the deadcode `loc` field'
   const legacy = planCampaign(g, { deadcode: { safe: [{ id: 'a.js:big', locSaved: 7 }] } });
   assert.equal(legacy.steps[0].roi, 7);
 });
+
+// Perf-quality finding 14 — the merge chain rides graph-ops' createMergeSimulator (pair-witness
+// deltas + commits) instead of a whole-graph structuredClone + full SCC per candidate. Oracle:
+// replay the HISTORICAL clone chain verbatim (batched deletes -> per-candidate applyEdit +
+// fileCycles + containment) and require the emitted plan to be IDENTICAL, step for step, across
+// random graphs and advisor inputs.
+test('CMP-DELTA-EQUIV: simulator-chained plan == historical clone-chain plan (120 cases)', () => {
+  const rng = prng(0xCA47A6);
+  for (let i = 0; i < 120; i++) {
+    const g = normalizeGraph(randomGraph(rng));
+    const advisors = synthAdvisors(g, rng);
+    const plan = planCampaign(g, advisors);
+
+    // historical oracle (the pre-finding-14 loop, replicated verbatim)
+    const g0 = normalizeGraph(structuredClone(g));
+    const baseSets = fileCycles(g0).map((c) => new Set(c));
+    const couples = (cycles) => cycles.some((c) => !baseSets.some((bc) => c.every((f) => bc.has(f))));
+    const idx0 = buildIndex(g0);
+    const delIds = (advisors.deadcode.safe || []).map((o) => o.id);
+    let cur = delIds.length ? applyEdit(g0, { kind: 'delete', ids: delIds }) : g0;
+    const cands = (advisors.optimize.opportunities || [])
+      .filter((o) => o.tier === 'ready' && o.kind === 'duplicate-logic' && Array.isArray(o.nodes) && o.nodes.length >= 2)
+      .map((o) => ({ o, canonical: o.canonical || chooseCanonical(idx0, o.nodes), loc: o.locSaved || 0 }))
+      .sort((a, b) => b.loc - a.loc || (a.o.id < b.o.id ? -1 : a.o.id > b.o.id ? 1 : 0));
+    const oracleMerges = [];
+    for (const m of cands) {
+      const sim = applyEdit(cur, { kind: 'merge', ids: m.o.nodes, into: m.canonical });
+      if (couples(fileCycles(sim))) continue;
+      oracleMerges.push(`merge:${m.canonical}`);
+      cur = sim;
+    }
+
+    assert.deepEqual(plan.steps.filter((s) => s.type === 'merge').map((s) => s.id), oracleMerges, `case ${i}`);
+  }
+});

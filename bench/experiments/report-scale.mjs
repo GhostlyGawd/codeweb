@@ -138,6 +138,11 @@ async function main() {
     stagedBlastMs = s.ms;
   }
 
+  // finding 13(d)/21: the expand-all row — EVERY symbol on canvas, per-frame sim cost. This is
+  // the cliff that sat one click past the old green verdict (all-pairs: 1,278ms/frame at 16.3k
+  // nodes ≈ 5.5 min of sim CPU per click; the grid layout must keep it inside a frame budget).
+  const expandAll = await page.evaluate(() => (window.__codewebStage && window.__codewebStage.expandAll ? window.__codewebStage.expandAll(10) : null));
+
   const heapUsedBytes = await page.evaluate(() => (performance.memory && performance.memory.usedJSHeapSize) || null);
   const chromiumVersion = browser.version();
   await browser.close();
@@ -146,8 +151,9 @@ async function main() {
   const verdict = {
     timeToGraphOk: timeToGraphMs <= 10000,
     searchOk: searchMs <= 300,
+    expandAllOk: !expandAll || expandAll.simMsPerFrame <= 16, // one 60fps frame of sim work
     crashed: pageErrors.length > 0,
-    green: timeToGraphMs <= 10000 && searchMs <= 300 && pageErrors.length === 0,
+    green: timeToGraphMs <= 10000 && searchMs <= 300 && (!expandAll || expandAll.simMsPerFrame <= 16) && pageErrors.length === 0,
   };
 
   const row = {
@@ -162,6 +168,7 @@ async function main() {
     layoutSettled: lay.settled,
     searchMs,
     stagedBlastMs,
+    expandAll,
     heapUsedBytes,
     pageErrors,
     chromiumVersion,

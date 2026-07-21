@@ -22,20 +22,20 @@ import { normalizeGraph, reviewImpact, structuralRegressions } from './lib/graph
 import { incrementalOverlap } from './lib/dup-check.mjs'; // F3: duplication-delta in the edit gate
 
 const USAGE = 'usage: review.mjs <graph.json> (--changed <file[:s-e],...> | --range <gitref>) [--before <graph.json>] [--gate] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, gate = false, changed = null, range = null, before = null; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--gate') gate = true;
-  else if (t === '--changed') changed = argv[++i];
-  else if (t === '--range') range = argv[++i];
-  else if (t === '--before') before = argv[++i];
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    gate: { type: 'bool', default: false },
+    changed: { type: 'string', default: null },
+    range: { type: 'string', default: null },
+    before: { type: 'string', default: null },
+  },
+});
+const { json, gate, changed, range, before } = opts;
 const graphPath = pos[0];
 if (!graphPath || (changed == null && range == null)) die(USAGE, 2);
 

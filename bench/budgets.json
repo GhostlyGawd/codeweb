@@ -1,6 +1,23 @@
 {
-  "comment": "Spec C (docs/specs/bench-all-ci-gates.md): the promises CI holds bench:all --gate to. Changing a number here is changing a public promise — it belongs in a reviewed diff, never in drift.",
+  "comment": "Spec C (docs/specs/bench-all-ci-gates.md): the promises CI holds bench:all --gate to. Changing a number here is changing a public promise — it belongs in a reviewed diff, never in drift. Factors are vs the regex-extract baseline on the same runner (portable across machine speeds); observed self-map values at set-time are noted so headroom stays honest.",
   "sessionTokensMax": 20000,
   "perToolBytesMax": 32768,
-  "warmRefreshFactorMax": 2.0
+  "warmRefreshFactorMax": 2.0,
+  "stageFactorVsRegexBaselineMax": {
+    "comment": "finding 13(a) — observed at set-time: extract 3.19 (cold, incl. WASM init), cluster 0.25, overlap 0.24, optimize 0.25, report 0.40",
+    "extract": 10,
+    "cluster": 1.2,
+    "overlap": 1.2,
+    "optimize": 1.2,
+    "report": 2
+  },
+  "advisorFactorVsRegexBaselineMax": {
+    "comment": "finding 13(c) — observed at set-time: risk 0.18, deadcode 0.15, hotspots 0.17, campaign 0.89. The quadratic risk loop this round fixed would have measured ~20x.",
+    "risk": 1,
+    "deadcode": 1,
+    "hotspots": 1,
+    "campaign": 3
+  },
+  "loadedOverlapFindingsMin": 15,
+  "loadedLshRequired": true
 }

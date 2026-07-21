@@ -9,48 +9,47 @@
 // Exit: 0 ok, 2 usage/IO.
 
 import { readFileSync, existsSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
-import { normalizeGraph, buildIndex, impactOf, productScope, scopeNote } from './lib/graph-ops.mjs';
+import { resolve, dirname } from 'node:path';
+import { normalizeGraph, buildIndex, allBlastCounts, productScope, scopeNote } from './lib/graph-ops.mjs';
 import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
+import { churnFromGit } from './lib/churn.mjs'; // finding 27: ONE bounded, HEAD-cached git-churn parser (shared with hotspots)
 
 const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--churn <map.json> | --git] [--all] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, loadGraph, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, changed = null, churnPath = null, useGit = false, limit = null, all = false; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
-  else if (t === '--changed') changed = argv[++i];
-  else if (t === '--churn') churnPath = argv[++i];
-  else if (t === '--git') useGit = true;
-  else if (t === '--all') all = true; // #6: include non-product roles
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    limit: { type: 'number', default: null },
+    changed: { type: 'string', default: null },
+    churn: { type: 'string', default: null },
+    git: { type: 'bool', default: false },
+    all: { type: 'bool', default: false }, // #6: include non-product roles
+  },
+});
+const { json, limit, changed, all } = opts, churnPath = opts.churn, useGit = opts.git;
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 // churn map: file -> commit count
 let churn = {};
 if (churnPath) { try { churn = JSON.parse(readFileSync(resolve(churnPath), 'utf8')); } catch (e) { die(`invalid churn JSON: ${e.message}`, 2); } }
-else if (useGit) {
-  const root = graph.meta?.root;
-  const r = spawnSync('git', ['-C', root || '.', 'log', '--format=', '--name-only'], { encoding: 'utf8', maxBuffer: 1 << 28 });
-  if (r.status === 0) for (const f of r.stdout.split(/\r?\n/)) if (f.trim()) churn[f.trim()] = (churn[f.trim()] || 0) + 1;
-}
+else if (useGit) churn = churnFromGit(graph.meta?.root, { cacheDir: dirname(abs) }); // finding 27: bounded window + HEAD-keyed cache beside the graph
 
 const index = buildIndex(graph);
 // #6: rank product code by default — triage lists led by test scaffolding are unactionable.
 const riskScope = productScope(graph.nodes, all);
+// finding 9: ALL blast radii in one SCC pass — the previous impactOf-per-node loop was
+// ~quadratic (measured 82.2s at 15k nodes; identical sums now in well under a second).
+const blastByNode = allBlastCounts(index);
 // components per node (raw structural metrics + churn-by-file)
 const comp = riskScope.kept.map((n) => ({
   id: n.id, file: n.file, domain: n.domain,
   fanIn: index.callIn.get(n.id)?.size || 0,
   fanOut: index.callOut.get(n.id)?.size || 0,
   loc: n.loc || 0,
-  blast: impactOf(index, [n.id]).length,
+  blast: blastByNode.get(n.id) ?? 0,
   churn: churn[n.file] || 0,
 }));
 // graph-max per component (normalization denominator)

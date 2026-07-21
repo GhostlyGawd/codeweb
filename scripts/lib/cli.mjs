@@ -6,9 +6,13 @@
 // documented Node way to guarantee a full flush. stderr messages are small (< pipe buffer), so
 // die() may still hard-exit.
 
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, writeFileSync, renameSync, rmSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { normalizeGraph } from './graph-ops.mjs';
+import { sha1 } from './hash.mjs';
+// finding 24: the pure helpers live in lib/common.mjs (no EPIPE side effect); re-exported
+// here so every existing importer keeps working unchanged.
+export { SRC_RE, SCAN_CACHE_NAME, sign, capList } from './common.mjs';
 
 // A consumer like `| head -1` closes the pipe early; without a handler Node dies on EPIPE with a
 // stack trace. Treat it as a normal end-of-output.
@@ -20,9 +24,71 @@ export function die(msg, code = 2) {
   process.exit(code);
 }
 
+/**
+ * THE flag loop (finding 24). Twenty-five scripts hand-rolled `for (let i = 0; i < argv.length…)`
+ * with three different unknown-flag policies — run.mjs rejected unknown flags (the documented #5
+ * convention, adopted after `--help` silently became a target path), while trend/build-report
+ * still swallowed them as positionals. One loop, one policy:
+ *   - unknown flag  -> die(2) with the usage (never a silent positional),
+ *   - --help / -h   -> print usage, exit 0 (every CLI answers --help, including the 11 that didn't),
+ *   - value flags   -> next token; a missing or (for numbers) non-numeric value dies with the flag named.
+ * spec: { usage, flags: { name: { type: 'bool'|'string'|'number'|'float'|'pair', default? } } }.
+ * 'pair' consumes TWO tokens (reading-order's `--scope <kind> <value>`) -> [v1, v2].
+ * Returns { opts, pos } — opts keyed by the flag name (sans dashes), pos = positional tokens.
+ */
+export function parseArgs(argv, spec) {
+  const flags = spec.flags || {};
+  const opts = {};
+  for (const [k, f] of Object.entries(flags)) if (f.default !== undefined) opts[k] = f.default;
+  const pos = [];
+  for (let i = 0; i < argv.length; i++) {
+    const t = argv[i];
+    if (t === '--help' || t === '-h') { console.log(spec.usage); process.exit(0); }
+    if (t.startsWith('-') && t !== '-') {
+      const name = t.replace(/^--?/, '');
+      const f = flags[name];
+      if (!f) die(`unknown flag: ${t}\n${spec.usage}`, 2);
+      if (f.type === 'bool') { opts[name] = true; continue; }
+      const v = argv[++i];
+      if (v === undefined) die(`flag ${t} needs a value\n${spec.usage}`, 2);
+      if (f.type === 'number' || f.type === 'float') {
+        const n = f.type === 'float' ? parseFloat(v) : parseInt(v, 10);
+        if (Number.isNaN(n)) die(`flag ${t} needs a number (got "${v}")\n${spec.usage}`, 2);
+        opts[name] = n;
+      } else if (f.type === 'pair') {
+        const v2 = argv[++i];
+        if (v2 === undefined) die(`flag ${t} needs two values\n${spec.usage}`, 2);
+        opts[name] = [v, v2];
+      } else opts[name] = v;
+    } else pos.push(t);
+  }
+  return { opts, pos };
+}
+
 /** Set the exit code WITHOUT killing pending stdout writes. Callers must fall off the end. */
 export function finish(code = 0) {
   process.exitCode = code;
+}
+
+/**
+ * Crash-safe artifact write: serialize to a same-directory temp file, then rename over the target.
+ * rename(2) is atomic on POSIX (and effectively so on NTFS), so a concurrent reader sees the OLD
+ * bytes or the NEW bytes — never a truncated half-write. Motivated by a reproduced corruption
+ * (perf-quality finding 3): the MCP server SIGTERMs its refresh child at 60s, and an in-place
+ * writeFileSync of a multi-MB graph.json killed mid-write left a workspace every query tool died
+ * on — which the stage memo then preserved. Every graph/fragment/sidecar writer goes through here.
+ * The temp name is pid-suffixed (concurrent writers can't collide); on rename failure the temp is
+ * removed and the error rethrown.
+ */
+export function atomicWrite(path, data) {
+  // A rename REPLACES the target inode — correct for regular files, destructive for special ones
+  // (renaming over /dev/null would swap the device node for a regular file). Anything that isn't
+  // a regular file gets a plain write-through instead.
+  try { if (!statSync(path).isFile()) { writeFileSync(path, data); return; } } catch { /* absent -> atomic path */ }
+  const tmp = `${path}.${process.pid}.tmp`;
+  writeFileSync(tmp, data);
+  try { renameSync(tmp, path); }
+  catch (e) { try { rmSync(tmp, { force: true }); } catch { /* best-effort */ } throw e; }
 }
 
 /** Write a JSON payload (any size) to stdout, flush-safe. Ends the turn via finish(code). */
@@ -66,9 +132,7 @@ export function loadGraph(pathArg, { usage = null } = {}) {
  * (context-pack, find-similar, diff rename-matching all read node spans; the logic lives once).
  * bodyOf(node) = the exact source lines [line, line+loc-1], or null when unreadable.
  */
-// One truth for "what counts as a mappable source file" — the extractor's SRC list, mirrored
-// here for the hooks (Spec E consolidation; the hooks previously trailed the extractor's list).
-export const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
+
 
 // #6 (IMPROVEMENTS.md): manifest-declared entrypoints — files a HOST invokes without a code edge.
 // deadcode's "safe to delete" tier listed the VS Code extension's activate/deactivate (package.json
@@ -130,10 +194,13 @@ export function findTarget(filePath) {
 export function sourceReader(root) {
   const available = !!root && existsSync(root);
   const cache = new Map();
-  const linesOf = (rel) => {
+  // (Parameter deliberately NOT named `rel`: a bare identifier that uniquely matches a global
+  // symbol elsewhere wires a false ref edge — the gate caught `rel` here closing a cycle with
+  // the extractor the moment cli.mjs gained an importer there. Same lesson as graph-ops' score/cap.)
+  const linesOf = (relPath) => {
     if (!available) return null;
-    if (!cache.has(rel)) { try { cache.set(rel, readFileSync(root + '/' + rel, 'utf8').split(/\r?\n/)); } catch { cache.set(rel, null); } }
-    return cache.get(rel);
+    if (!cache.has(relPath)) { try { cache.set(relPath, readFileSync(root + '/' + relPath, 'utf8').split(/\r?\n/)); } catch { cache.set(relPath, null); } }
+    return cache.get(relPath);
   };
   const bodyOf = (n) => {
     const lines = n && linesOf(n.file);
@@ -144,12 +211,18 @@ export function sourceReader(root) {
 }
 
 /**
- * Staleness check against the extractor's per-file stamps (meta.sources: {rel: {s,m}}). Returns
+ * Staleness check against the extractor's per-file stamps (meta.sources: {rel: {s,m,h}}). Returns
  * null when the graph matches disk (or has no stamps/root); else { count, files: [up to 8 rels] }.
- * stat-only — a few ms even on thousands of files. New files can't be detected without a walk
- * (documented); changed + deleted are.
+ * stat-only by default — a few ms even on thousands of files. New files can't be detected without
+ * a walk (documented); changed + deleted are.
+ *
+ * verify tier (finding 4): mtime+size stamps are bypassed by mtime-preserving content changes
+ * (rsync -a, tar -x, git-restore-mtime, SOURCE_DATE_EPOCH builds) — the graph reads fresh while
+ * its edges describe old bytes. Pass {verify:true} — or set CODEWEB_VERIFY_FRESHNESS=1 once for
+ * those workflows — to additionally sha1-compare content where the stat matches (reads every
+ * stamped file; keep it opt-in).
  */
-export function checkStaleness(graph) {
+export function checkStaleness(graph, { verify = process.env.CODEWEB_VERIFY_FRESHNESS === '1' } = {}) {
   const root = graph?.meta?.root, sources = graph?.meta?.sources;
   if (!root || !sources || !existsSync(root)) return null;
   const stale = [];
@@ -157,6 +230,7 @@ export function checkStaleness(graph) {
     try {
       const cur = statSync(root + '/' + relPath);
       if (cur.size !== st.s || Math.round(cur.mtimeMs) !== st.m) stale.push(relPath);
+      else if (verify && st.h && sha1(readFileSync(root + '/' + relPath, 'utf8')) !== st.h) stale.push(relPath + ' (content changed, stamp preserved)'); // utf8 decode matches the extractor's hashing exactly
     } catch { stale.push(relPath + ' (deleted)'); }
     if (stale.length >= 64) break; // enough to know it's stale; don't stat forever
   }
@@ -171,22 +245,3 @@ export function checkStaleness(graph) {
   return stale.length ? { count: stale.length, files: stale.slice(0, 8) } : null;
 }
 
-/** Signed-delta formatter for renderers ("+3", "-2", "+0" — a delta always shows its direction). */
-export const sign = (n) => (n >= 0 ? `+${n}` : `${n}`);
-
-/**
- * Shared list-truncation for budgeted output: keep the first `limit` items and describe the rest,
- * so a tool can return top-N + an explicit remainder instead of an unbounded dump (no silent caps).
- * limit == null / Infinity -> untouched.
- */
-export function capList(items, limit, offset = 0) {
-  const all = Array.isArray(items) ? items : [];
-  const off = Number.isFinite(offset) && offset > 0 ? Math.floor(offset) : 0;
-  if (limit == null || !Number.isFinite(limit)) {
-    return { items: off ? all.slice(off) : all, total: all.length, offset: off, truncated: false, remaining: 0 };
-  }
-  const lim = Math.max(0, Math.floor(limit));
-  const slice = all.slice(off, off + lim);
-  const remaining = Math.max(0, all.length - (off + slice.length));
-  return { items: slice, total: all.length, offset: off, truncated: remaining > 0, remaining };
-}

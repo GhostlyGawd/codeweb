@@ -12,26 +12,27 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { resolve, dirname, join } from 'node:path';
+import { resolve, dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalizeGraph, buildIndex, callersOf, impactOf, applyEdit, structuralRegressions, chooseCanonical, resolveSymbol } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, callersOf, importersOf, impactOf, applyEdit, structuralRegressions, chooseCanonical, resolveSymbol } from './lib/graph-ops.mjs';
+import { maskAligned } from './lib/masking.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, doWrite = false, opp = null, merge = null, into = null; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--write') doWrite = true;
-  else if (t === '--opportunity') opp = argv[++i];
-  else if (t === '--merge') merge = argv[++i];
-  else if (t === '--into') into = argv[++i];
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    write: { type: 'bool', default: false },
+    opportunity: { type: 'string', default: null },
+    merge: { type: 'string', default: null },
+    into: { type: 'string', default: null },
+  },
+});
+const { json, merge, into } = opts, doWrite = opts.write, opp = opts.opportunity;
 const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath || (opp == null && merge == null)) die(USAGE, 2);
 
@@ -50,7 +51,15 @@ if (opp != null) {
 } else {
   ids = [...new Set(merge.split(',').flatMap((s) => resolveSymbol(graph, s.trim())))];
   if (ids.length < 2) die(`--merge needs >=2 resolved symbols (got ${ids.length})`, ids.length ? 2 : 1);
-  canonical = into != null ? (resolveSymbol(graph, into)[0] || into) : chooseCanonical(index, ids);
+  if (into != null) {
+    // an unresolvable --into must be a hard exit, never used verbatim: a raw string here has no
+    // node/label, so canonLabel would be undefined and --write would delete EVERY definition and
+    // rewrite loser tokens to the literal text "undefined" (reproduced in the perf-quality review).
+    const cands = resolveSymbol(graph, into);
+    if (cands.length === 0) die(`--into does not resolve to any node: ${into} — pass a node id or unique label`, 2);
+    if (cands.length > 1) die(`--into is ambiguous (${cands.length} nodes): ${cands.join(', ')} — pass a full id`, 2);
+    canonical = cands[0];
+  } else canonical = chooseCanonical(index, ids);
 }
 const losers = ids.filter((id) => id !== canonical);
 const byId = index.byId;
@@ -61,7 +70,10 @@ const sr = structuralRegressions(graph, after);
 const projectedGate = { newCycles: sr.newCycles, lostCallers: sr.lostCallers, ok: sr.newCycles.length === 0 && sr.lostCallers.length === 0 };
 
 const deletions = losers.map((id) => { const n = byId.get(id); return { id, file: n.file, range: [n.line, n.line + (n.loc || 1) - 1] }; });
-const rewrites = callersOf(index, losers).map((cid) => { const n = byId.get(cid); return { callerId: cid, file: n?.file ?? null, line: n?.line ?? null }; });
+// callers AND importers: a file that only imports a loser still holds a specifier that must be
+// rewritten/repointed, or it ships a valid-looking import of a deleted definition.
+const rewrites = [...new Set([...callersOf(index, losers), ...importersOf(index, losers)])].sort()
+  .map((cid) => { const n = byId.get(cid); return { callerId: cid, file: n?.file ?? null, line: n?.line ?? null }; });
 const locReclaimed = losers.reduce((s, id) => s + (byId.get(id)?.loc || 0), 0);
 const canonLabel = byId.get(canonical)?.label;
 const plan = { canonical, canonicalLabel: canonLabel, losers, deletions, rewrites, blastRadius: impactOf(index, ids).length, locReclaimed, projectedGate };
@@ -95,24 +107,78 @@ if (doWrite) {
           for (const [s, e] of ranges.slice().sort((a, b) => b[0] - a[0])) lines.splice(s - 1, e - s + 1);
           writeFileSync(p, lines.join(eol));
         }
-        // 2) rewrite each rename-loser's label token -> canonical label, across every touched file
+        // 2) rewrite each rename-loser's label token -> canonical label — but only at positions that
+        //    are LIVE CODE under the mask: an occurrence inside a comment is left alone (stale prose
+        //    is harmless — it is counted and reported), and an occurrence inside a string/template/
+        //    regex literal REFUSES the whole write, because a name that appears in a value can be
+        //    load-bearing (dynamic dispatch, lookup keys, log greps) and rewriting OR orphaning it
+        //    silently changes behavior. Both masks are column-preserving, so mask indexes address
+        //    the raw text directly. Languages without an aligned mask (Ruby) keep the raw rewrite.
         const renameLabels = [...new Set(renameLosers.map((id) => byId.get(id).label))];
+        let commentMentions = 0;
         for (const f of touched) {
           const p = join(root, f); if (!existsSync(p)) continue;
           let txt = readFileSync(p, 'utf8');
-          for (const lab of renameLabels) txt = txt.replace(new RegExp(`\\b${lab.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g'), canonLabel);
+          for (const lab of renameLabels) {
+            const re = new RegExp(`\\b${lab.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'g');
+            const live = maskAligned(f, txt);
+            if (live == null) { txt = txt.replace(re, canonLabel); continue; } // no aligned mask for this language
+            const values = maskAligned(f, txt, { keepValues: true });
+            let out = '', last = 0, m;
+            while ((m = re.exec(txt)) !== null) {
+              if (live.slice(m.index, m.index + lab.length) === lab) {        // live code -> rewrite
+                out += txt.slice(last, m.index) + canonLabel; last = m.index + lab.length;
+              } else if (values.slice(m.index, m.index + lab.length) === lab) { // inside a string/regex value
+                throw Object.assign(new Error(`"${lab}" appears inside a string/regex literal in ${f} — rewriting it could change behavior; apply by hand`), { refuse: true });
+              } else commentMentions++;                                        // inside a comment -> leave stale prose
+            }
+            txt = out + txt.slice(last);
+          }
           writeFileSync(p, txt);
         }
-        // 3) re-extract + gate; revert on regression
+        // 2.5) an import that named a loser now names the canonical — but its module specifier may
+        //      still point at the file the definition was just deleted FROM: `import { canon } from
+        //      './loser.mjs'` is valid-looking, broken at runtime, and invisible to the structural
+        //      gate (bare-name package resolution still finds the survivor elsewhere). Repoint any
+        //      relative specifier that resolves to a deletion file (and not to the canonical's own
+        //      file) at the canonical's file; refuse when the canonical lives in the importing file
+        //      itself — that import must be deleted by hand, not repointed.
+        const canonFile = byId.get(canonical)?.file;
+        const deletionFiles = new Set(deletions.map((d) => d.file));
+        const canonRe = new RegExp(`\\b${canonLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
+        const specRe = /\bfrom\s+(['"])([^'"]+)\1/;
+        for (const f of touched) {
+          if (!/\.(jsx?|mjs|cjs|tsx?)$/.test(f)) continue;
+          const p = join(root, f); if (!existsSync(p)) continue;
+          const raw = readFileSync(p, 'utf8');
+          const eol = raw.includes('\r\n') ? '\r\n' : '\n';
+          let changed = false;
+          const lines = raw.split(/\r?\n/).map((ln) => {
+            if (!/^\s*(?:import|export)\b/.test(ln) || !canonRe.test(ln)) return ln;
+            const sm = specRe.exec(ln);
+            if (!sm || !sm[2].startsWith('.')) return ln;                      // bare/package specifier: not ours
+            const target = posix.normalize(posix.join(posix.dirname(f), sm[2]));
+            if (!deletionFiles.has(target) || target === canonFile) return ln;
+            if (canonFile === f) throw Object.assign(new Error(`${f} imports ${canonLabel} from ${sm[2]}, but the canonical now lives in ${f} itself — delete that import by hand`), { refuse: true });
+            let spec = posix.relative(posix.dirname(f), canonFile);
+            if (!spec.startsWith('.')) spec = './' + spec;
+            changed = true;
+            return ln.replace(specRe, `from ${sm[1]}${spec}${sm[1]}`);
+          });
+          if (changed) writeFileSync(p, lines.join(eol));
+        }
+        // 3) re-extract + gate; revert on regression. The gate treats a fully-deleted node as a
+        //    non-regression by design, so additionally assert the canonical itself survived.
         const r = spawnSync(process.execPath, [join(HERE, 'extract-symbols.mjs'), root], { encoding: 'utf8', maxBuffer: 1 << 28 });
         if (r.status !== 0) { restore(); writeResult = { applied: false, reason: `re-extraction failed; reverted` }; code = 1; }
         else {
           const fresh = normalizeGraph(JSON.parse(r.stdout));
           const post = structuralRegressions(graph, fresh);
-          if (post.newCycles.length || post.lostCallers.length) { restore(); writeResult = { applied: false, reason: 'post-edit gate regressed; reverted', post }; code = 1; }
-          else writeResult = { applied: true, filesTouched: touched, reExtractGate: { newCycles: post.newCycles, lostCallers: post.lostCallers, ok: true } };
+          if (!fresh.nodes.some((n) => n.id === canonical)) { restore(); writeResult = { applied: false, reason: `canonical ${canonical} missing after re-extract; reverted` }; code = 1; }
+          else if (post.newCycles.length || post.lostCallers.length) { restore(); writeResult = { applied: false, reason: 'post-edit gate regressed; reverted', post }; code = 1; }
+          else writeResult = { applied: true, filesTouched: touched, commentMentions, reExtractGate: { newCycles: post.newCycles, lostCallers: post.lostCallers, ok: true } };
         }
-      } catch (e) { restore(); writeResult = { applied: false, reason: `error during write; reverted: ${e.message}` }; code = 1; }
+      } catch (e) { restore(); writeResult = { applied: false, reason: e.refuse ? e.message : `error during write; reverted: ${e.message}` }; code = e.refuse ? 2 : 1; }
     }
   }
 }

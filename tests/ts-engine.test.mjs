@@ -7,6 +7,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { script } from './helpers.mjs';
 import { loadTsEngine } from '../scripts/lib/ts-engine.mjs';
 import { cyclomatic } from '../scripts/lib/complexity.mjs';
 
@@ -130,4 +132,16 @@ test('extractJsTs: deterministic across runs', { skip: skipG }, () => {
 test('extractJsTs: garbage input never throws (graceful per-file fallback signal)', { skip: skipG }, () => {
   const g = engine.extractJsTs('}{ not valid (((', 'x.ts');
   assert.ok(g === null || (Array.isArray(g.methods) && Array.isArray(g.dispatch)));
+});
+
+// Perf-quality finding 6 — web-tree-sitter trees must be freed (no FinalizationRegistry): an
+// undeleted tree leaks WASM pages for the process lifetime (measured 1,312MB vs 217MB peak RSS on
+// an 11MB corpus). Static tripwire: every parser.parse( site in the engine must have a matching
+// tree.delete() (try/finally), so a new parse site can't quietly reintroduce the leak.
+test('L-MEM: every parser.parse site in ts-engine.mjs frees its tree', () => {
+  const src = readFileSync(script('lib/ts-engine.mjs'), 'utf8');
+  const parses = (src.match(/parser\.parse\(/g) || []).length;
+  const deletes = (src.match(/tree\.delete\(\)/g) || []).length;
+  assert.ok(parses >= 1, 'sanity: engine still parses');
+  assert.ok(deletes >= parses, `${parses} parse sites but only ${deletes} tree.delete() calls`);
 });

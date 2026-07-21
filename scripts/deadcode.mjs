@@ -23,20 +23,20 @@ const ENTRYPOINTS = new Set(['main', 'default', 'index', 'setup', 'teardown', 'i
 // The effectiveness study flips this on to prove the H13 fix is load-bearing (safe-tier precision drops).
 const DEADCODE_LEGACY = process.env.CODEWEB_DEADCODE_LEGACY === '1';
 const USAGE = 'usage: deadcode.mjs <graph.json> [--all] [--json]   (or set CODEWEB_WS)';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, capList, loadGraph, manifestEntryFiles } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, loadGraph, manifestEntryFiles, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, showSuppressed = false, annDir = null, limit = null, all = false; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--show-suppressed') showSuppressed = true;
-  else if (t === '--annotations') annDir = argv[++i];
-  else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
-  else if (t === '--all') all = true; // #6: include non-product roles
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    'show-suppressed': { type: 'bool', default: false },
+    annotations: { type: 'string', default: null },
+    limit: { type: 'number', default: null },
+    all: { type: 'bool', default: false }, // #6: include non-product roles
+  },
+});
+const { json, limit, all } = opts, showSuppressed = opts['show-suppressed'], annDir = opts.annotations;
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const index = buildIndex(graph);

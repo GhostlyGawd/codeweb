@@ -7,7 +7,7 @@
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
@@ -84,6 +84,7 @@ function writeTranscript(dir, agentId, { output, input, cacheRead, wallMs }) {
 
 test('CLI joins a Workflow journal to transcripts and writes a paired-delta usage.json', () => {
   const root = mkdtempSync(join(tmpdir(), 'cw-usage-'))
+  try {
   const tdir = join(root, 'transcripts')
   mkdirSync(tdir)
   const out = join(root, 'usage.json')
@@ -114,4 +115,5 @@ test('CLI joins a Workflow journal to transcripts and writes a paired-delta usag
   assert.equal(res.integrity.unparsedLabels.length, 0)
   assert.equal(res.source.model, 'claude-opus-4-8[1m]')
   assert.equal(res.perAgent.length, 8, 'auditable per-agent rows are emitted')
+  } finally { rmSync(root, { recursive: true, force: true }) } // finding 22: no tmp leaks
 })

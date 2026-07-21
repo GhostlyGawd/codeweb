@@ -19,22 +19,24 @@
 
 import { writeFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { die, emitJson, emitText, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, emitText, loadGraph, parseArgs } from './lib/cli.mjs';
 import { buildIndex } from './lib/graph-ops.mjs';
 import { loadTypescript, rgAvailable, sampleSymbols, makeTsOracle, codewebArm, grepArm, score, impactCost, mean, aggArm, aggImpact } from './lib/bench-core.mjs';
 
-const argv = process.argv.slice(2);
 const USAGE = 'usage: bench.mjs <graph.json> [--scope <rel>] [--n 30] [--seed 42] [--json] [--out <file>]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-let n = 30, seed = 42, scopeArg = '', outPath = null, asJson = false; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  if (argv[i] === '--n') n = Math.max(1, parseInt(argv[++i], 10) || 30);
-  else if (argv[i] === '--seed') seed = parseInt(argv[++i], 10) || 42;
-  else if (argv[i] === '--scope') scopeArg = String(argv[++i] || '').replace(/^\/+|\/+$/g, '');
-  else if (argv[i] === '--out') outPath = argv[++i];
-  else if (argv[i] === '--json') asJson = true;
-  else if (!argv[i].startsWith('-')) pos.push(argv[i]);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    n: { type: 'number', default: 30 },
+    seed: { type: 'number', default: 42 },
+    scope: { type: 'string', default: '' },
+    out: { type: 'string', default: null },
+    json: { type: 'bool', default: false },
+  },
+});
+const n = Math.max(1, opts.n), seed = opts.seed, outPath = opts.out, asJson = opts.json;
+const scopeArg = opts.scope.replace(/^\/+|\/+$/g, '');
 const { graph } = loadGraph(pos[0], { usage: USAGE });
 const index = buildIndex(graph);
 const root = graph.meta?.root;

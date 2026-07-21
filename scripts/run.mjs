@@ -12,7 +12,8 @@
 // Read-only over the target; never executes target code.
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, existsSync, readFileSync } from 'node:fs';
+import { atomicWrite, SCAN_CACHE_NAME, parseArgs } from './lib/cli.mjs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -31,23 +32,20 @@ const USAGE = `usage: run.mjs <SRC> [--target <label>] [--out-dir <dir>] [--open
   --full           recompute every stage (skip the fragment memo + edge cache)
   --allow-empty    permit a target with no supported source (writes an empty map)
   --coverage <p>   annotate the graph with a coverage report (lcov or c8 JSON) after mapping`;
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-
-const argv = process.argv.slice(2);
-const opts = { src: null, target: null, outDir: null, open: false, full: false, allowEmpty: false, coverage: null };
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--target') opts.target = argv[++i];
-  else if (t === '--out-dir') opts.outDir = argv[++i];
-  else if (t === '--open') opts.open = true;
-  else if (t === '--full') opts.full = true;
-  else if (t === '--allow-empty') opts.allowEmpty = true; // forwarded to extract: skip the empty-map guard
-  else if (t === '--coverage') opts.coverage = argv[++i]; // #13: measured-execution annotation after the map
-  // #5: an unrecognized flag used to silently become the TARGET PATH (so `--help` errored with
-  // "target not found: --help") — reject it with usage instead, per the 0/1/2 exit convention.
-  else if (t.startsWith('-')) { console.error(`[run] unknown flag: ${t}\n${USAGE}`); process.exit(2); }
-  else if (!opts.src) opts.src = t;
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs). This file pioneered the unknown-flag
+// rejection (#5: `--help` once became the target path); the shared loop carries that policy now.
+const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    target: { type: 'string', default: null },
+    'out-dir': { type: 'string', default: null },
+    open: { type: 'bool', default: false },
+    full: { type: 'bool', default: false },
+    'allow-empty': { type: 'bool', default: false }, // forwarded to extract: skip the empty-map guard
+    coverage: { type: 'string', default: null },     // #13: measured-execution annotation after the map
+  },
+});
+const opts = { src: pos[0] ?? null, target: flags.target, outDir: flags['out-dir'], open: flags.open, full: flags.full, allowEmpty: flags['allow-empty'], coverage: flags.coverage };
 if (!opts.src) { console.error(USAGE); process.exit(2); }
 // Resolve the target against the CALLER's cwd (not the plugin root the stages run in) — a relative
 // <SRC> must mean the same thing as a relative --out-dir. Fail here with one clean line, not a
@@ -84,7 +82,7 @@ const run = (label, file, args, useEnv) => {
 const targetArg = opts.target ? ['--target', opts.target] : [];
 // Extract always runs — it is the change detector — and rides the scan cache (Spec A), so a
 // no-change re-run costs ~the regex baseline instead of a full parse.
-run('extract', S('scripts/extract-symbols.mjs'), [opts.src, ...targetArg, ...(opts.allowEmpty ? ['--allow-empty'] : []), '--cache', join(ws, '.scan-cache.json'), '--out', join(ws, 'fragment.json')], false);
+run('extract', S('scripts/extract-symbols.mjs'), [opts.src, ...targetArg, ...(opts.allowEmpty ? ['--allow-empty'] : []), '--cache', join(ws, SCAN_CACHE_NAME), '--out', join(ws, 'fragment.json')], false);
 
 // Spec B (docs/specs/perf-stage-memo-scale.md): the four downstream stages are pure functions of
 // (fragment bytes, CODEWEB_* levers, pipeline version). When that key matches the previous run and
@@ -99,7 +97,13 @@ const memoKey = createHash('sha1')
 const memoPath = join(ws, '.stages.json');
 let prevKey = null;
 try { prevKey = JSON.parse(readFileSync(memoPath, 'utf8')).key; } catch { /* absent/corrupt -> compute */ }
-const reusable = !opts.full && prevKey === memoKey && STAGE_OUTPUTS.every((f) => existsSync(join(ws, f)));
+// Reuse requires the outputs to not just EXIST but be READABLE (finding 3): a writer killed
+// mid-write used to leave a truncated graph.json that this memo then preserved forever — every
+// re-map said "stages reused" over corruption. Parsing the graph costs ~tens of ms, far below the
+// recompute it guards; artifact writes are rename-atomic now, so this is the belt to that brace.
+const graphParses = (p) => { try { JSON.parse(readFileSync(p, 'utf8')); return true; } catch { return false; } };
+const reusable = !opts.full && prevKey === memoKey && STAGE_OUTPUTS.every((f) => existsSync(join(ws, f)))
+  && graphParses(join(ws, 'graph.json'));
 
 if (reusable) {
   console.error('\n[run] stages reused (fragment unchanged) — skipping downstream recompute; --full forces');
@@ -108,7 +112,7 @@ if (reusable) {
   run('overlap', S('scripts/overlap.mjs'), [], true);
   run('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--out', join(ws, 'optimize.md')], false);
   run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json'), ...(opts.open ? ['--open'] : [])], false);
-  try { writeFileSync(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString() }) + '\n'); } catch { /* memo is best-effort */ }
+  try { atomicWrite(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString() }) + '\n'); } catch { /* memo is best-effort */ }
 }
 
 if (opts.coverage) run('coverage', S('scripts/coverage.mjs'), [join(ws, 'graph.json'), resolve(opts.coverage)], false); // #13

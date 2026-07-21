@@ -8,7 +8,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runNode, script } from './helpers.mjs';
-import { writeFileSync, mkdtempSync } from 'node:fs';
+import { writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -31,6 +31,7 @@ const PIPE_BUF = 65536;
 
 test('query --orphans --json: >64KB piped output arrives complete and parses', () => {
   const dir = mkdtempSync(join(tmpdir(), 'codeweb-flush-'));
+  try {
   const g = join(dir, 'graph.json');
   writeFileSync(g, JSON.stringify(bigGraph()));
   const r = runNode(script('query.mjs'), [g, '--orphans', '--json']);
@@ -38,10 +39,12 @@ test('query --orphans --json: >64KB piped output arrives complete and parses', (
   assert.ok(r.stdout.length > PIPE_BUF, `payload must exceed the pipe buffer to prove the flush (got ${r.stdout.length})`);
   const payload = JSON.parse(r.stdout); // throws on truncation
   assert.equal(payload.count, 3000);
+  } finally { rmSync(dir, { recursive: true, force: true }); } // finding 22: no tmp leaks
 });
 
 test('deadcode --json: >64KB piped output arrives complete and parses', () => {
   const dir = mkdtempSync(join(tmpdir(), 'codeweb-flush-'));
+  try {
   const g = join(dir, 'graph.json');
   writeFileSync(g, JSON.stringify(bigGraph()));
   const r = runNode(script('deadcode.mjs'), [g, '--json']);
@@ -50,14 +53,17 @@ test('deadcode --json: >64KB piped output arrives complete and parses', () => {
   const payload = JSON.parse(r.stdout);
   assert.equal(payload.totals.orphans, 3000);
   assert.ok(payload.safe.every((o) => typeof o.loc === 'number'), 'deadcode items carry loc (campaign delete-ROI input)');
+  } finally { rmSync(dir, { recursive: true, force: true }); } // finding 22: no tmp leaks
 });
 
 test('deadcode text mode: >64KB piped output arrives complete', () => {
   const dir = mkdtempSync(join(tmpdir(), 'codeweb-flush-'));
+  try {
   const g = join(dir, 'graph.json');
   writeFileSync(g, JSON.stringify(bigGraph()));
   const r = runNode(script('deadcode.mjs'), [g]);
   assert.equal(r.status, 0, r.stderr);
   assert.ok(r.stdout.length > PIPE_BUF, `text payload must exceed the pipe buffer (got ${r.stdout.length})`);
   assert.match(r.stdout, /note: extraction drops ambiguous call edges/, 'the final line survived the flush');
+  } finally { rmSync(dir, { recursive: true, force: true }); } // finding 22: no tmp leaks
 });

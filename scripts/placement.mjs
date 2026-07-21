@@ -16,19 +16,19 @@ import { normalizeGraph, buildIndex, resolveSymbol } from './lib/graph-ops.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: placement.mjs <graph.json> --calls <id|label,...> [--name <label>] [--body <file>] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, calls = null, name = null, body = null; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--calls') calls = argv[++i];
-  else if (t === '--name') name = argv[++i];
-  else if (t === '--body') body = argv[++i];
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    calls: { type: 'string', default: null },
+    name: { type: 'string', default: null },
+    body: { type: 'string', default: null },
+  },
+});
+const { json, calls, name, body } = opts;
 const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath || calls == null) die(USAGE, 2);
 

@@ -102,6 +102,130 @@ test('CM-WRITE-REVERSIBLE: a predicted-regression --write leaves source byte-ide
   } finally { cleanup(dir); }
 });
 
+// CM-INTO-RESOLVES (perf-quality finding 2a): an unresolvable or ambiguous --into is a hard exit 2
+// BEFORE any write — pre-fix it was used verbatim, canonLabel became undefined, and --write deleted
+// BOTH definitions while rewriting loser tokens to the literal text "undefined" (exit 0, applied).
+test('CM-INTO-RESOLVES: unresolvable/ambiguous --into exits 2 and touches nothing, even with --write', () => {
+  const dir = tmpDir('cw-cm-into-');
+  try {
+    writeTree(dir, { 'fa.js': 'export function keep() { return 1; }\nexport function dup() { return 1; }' });
+    const g = {
+      meta: { root: dir.replace(/\\/g, '/') }, domains: [], overlaps: [],
+      nodes: [
+        { id: 'fa.js:keep', label: 'keep', kind: 'function', file: 'fa.js', line: 1, loc: 1, exports: true, domain: 'd' },
+        { id: 'fa.js:dup', label: 'dup', kind: 'function', file: 'fa.js', line: 2, loc: 1, exports: true, domain: 'd' },
+      ],
+      edges: [],
+    };
+    const graphPath = join(dir, 'graph.json'); writeFileSync(graphPath, JSON.stringify(g));
+    const before = sha(readFileSync(join(dir, 'fa.js'), 'utf8'));
+    // root-prefixed spelling of a real id — the reproduced corruption input
+    const r = runNode(CODEMOD, [graphPath, '--merge', 'fa.js:keep,fa.js:dup', '--into', 'src/fa.js:keep', '--write']);
+    assert.equal(r.status, 2, 'unresolvable --into must exit 2');
+    assert.match(r.stderr, /--into does not resolve/);
+    assert.equal(sha(readFileSync(join(dir, 'fa.js'), 'utf8')), before, 'source untouched');
+  } finally { cleanup(dir); }
+});
+
+// CM-WRITE-STRING-GUARD (finding 2b): a loser label inside a string literal refuses the write —
+// a name in a value can be load-bearing (dynamic dispatch, lookup keys); pre-fix the raw \b-token
+// replace rewrote string contents silently.
+test('CM-WRITE-STRING-GUARD: a loser label inside a string refuses --write and reverts byte-identically', () => {
+  const dir = tmpDir('cw-cm-str-');
+  try {
+    writeTree(dir, {
+      'sa.mjs':
+        'export function fmtA(x) { return x; }\n' +
+        'export function fmtB(x) { return x; }\n' +
+        'export function log(x) { return "fmtA done" + fmtA(x); }\n',
+    });
+    const g = {
+      meta: { root: dir.replace(/\\/g, '/') }, domains: [], overlaps: [],
+      nodes: [
+        { id: 'sa.mjs:fmtA', label: 'fmtA', kind: 'function', file: 'sa.mjs', line: 1, loc: 1, exports: true, domain: 'd' },
+        { id: 'sa.mjs:fmtB', label: 'fmtB', kind: 'function', file: 'sa.mjs', line: 2, loc: 1, exports: true, domain: 'd' },
+        { id: 'sa.mjs:log', label: 'log', kind: 'function', file: 'sa.mjs', line: 3, loc: 1, exports: true, domain: 'd' },
+      ],
+      edges: [{ from: 'sa.mjs:log', to: 'sa.mjs:fmtA', kind: 'call' }],
+    };
+    const graphPath = join(dir, 'graph.json'); writeFileSync(graphPath, JSON.stringify(g));
+    const before = sha(readFileSync(join(dir, 'sa.mjs'), 'utf8'));
+    const r = runNode(CODEMOD, [graphPath, '--merge', 'sa.mjs:fmtA,sa.mjs:fmtB', '--into', 'sa.mjs:fmtB', '--write', '--json']);
+    assert.equal(r.status, 2, `string-guard --write must exit 2:\n${r.stdout}\n${r.stderr}`);
+    const out = JSON.parse(r.stdout);
+    assert.equal(out.write.applied, false);
+    assert.match(out.write.reason, /string\/regex literal/);
+    assert.equal(sha(readFileSync(join(dir, 'sa.mjs'), 'utf8')), before, 'source reverted byte-identically');
+  } finally { cleanup(dir); }
+});
+
+// CM-WRITE-COMMENT-OK (finding 2b): a loser label inside a comment does NOT block the write; the
+// stale prose is left alone and counted in the result.
+test('CM-WRITE-COMMENT-OK: a comment mention is skipped (and counted), live code is rewritten', () => {
+  const dir = tmpDir('cw-cm-cmt-');
+  try {
+    writeTree(dir, {
+      'ca.mjs':
+        'export function oldF(x) { return x; }\n' +
+        'export function newF(x) { return x; }\n' +
+        '// oldF is deprecated\n' +
+        'export function use2(x) { return oldF(x); }\n',
+    });
+    const g = {
+      meta: { root: dir.replace(/\\/g, '/') }, domains: [], overlaps: [],
+      nodes: [
+        { id: 'ca.mjs:oldF', label: 'oldF', kind: 'function', file: 'ca.mjs', line: 1, loc: 1, exports: true, domain: 'd' },
+        { id: 'ca.mjs:newF', label: 'newF', kind: 'function', file: 'ca.mjs', line: 2, loc: 1, exports: true, domain: 'd' },
+        { id: 'ca.mjs:use2', label: 'use2', kind: 'function', file: 'ca.mjs', line: 4, loc: 1, exports: true, domain: 'd' },
+      ],
+      edges: [{ from: 'ca.mjs:use2', to: 'ca.mjs:oldF', kind: 'call' }],
+    };
+    const graphPath = join(dir, 'graph.json'); writeFileSync(graphPath, JSON.stringify(g));
+    const r = runNode(CODEMOD, [graphPath, '--merge', 'ca.mjs:oldF,ca.mjs:newF', '--into', 'ca.mjs:newF', '--write', '--json']);
+    assert.equal(r.status, 0, `comment-mention --write should succeed:\n${r.stdout}\n${r.stderr}`);
+    const out = JSON.parse(r.stdout);
+    assert.equal(out.write.applied, true);
+    assert.ok(out.write.commentMentions >= 1, 'the comment mention is counted');
+    const src = readFileSync(join(dir, 'ca.mjs'), 'utf8');
+    assert.ok(src.includes('// oldF is deprecated'), 'comment text left alone');
+    assert.ok(/return newF\(x\)/.test(src), 'live call rewritten');
+    assert.ok(!/function oldF\b/.test(src), 'loser definition removed');
+  } finally { cleanup(dir); }
+});
+
+// CM-IMPORT-REPOINT (finding 2c): after a cross-file merge, an import that named the loser is
+// repointed at the canonical's file — pre-fix `import { canon } from './loser.mjs'` survived
+// (valid-looking, broken at runtime, invisible to the structural gate).
+test('CM-IMPORT-REPOINT: a consumer importing the loser ends up importing the canonical from its real file', () => {
+  const dir = tmpDir('cw-cm-imp-');
+  try {
+    writeTree(dir, {
+      'dup1.mjs': 'export function fmtMoney(x) { return x; }\n',
+      'dup2.mjs': 'export function formatMoney(x) { return x; }\n',
+      'use.mjs': "import { fmtMoney } from './dup1.mjs';\nexport function total(x) { return fmtMoney(x); }\n",
+    });
+    const g = {
+      meta: { root: dir.replace(/\\/g, '/') }, domains: [], overlaps: [],
+      nodes: [
+        { id: 'dup1.mjs:fmtMoney', label: 'fmtMoney', kind: 'function', file: 'dup1.mjs', line: 1, loc: 1, exports: true, domain: 'd' },
+        { id: 'dup2.mjs:formatMoney', label: 'formatMoney', kind: 'function', file: 'dup2.mjs', line: 1, loc: 1, exports: true, domain: 'd' },
+        { id: 'use.mjs:total', label: 'total', kind: 'function', file: 'use.mjs', line: 2, loc: 1, exports: true, domain: 'd' },
+      ],
+      edges: [{ from: 'use.mjs:total', to: 'dup1.mjs:fmtMoney', kind: 'call' }],
+    };
+    const graphPath = join(dir, 'graph.json'); writeFileSync(graphPath, JSON.stringify(g));
+    const r = runNode(CODEMOD, [graphPath, '--merge', 'dup1.mjs:fmtMoney,dup2.mjs:formatMoney', '--into', 'dup2.mjs:formatMoney', '--write', '--json']);
+    assert.equal(r.status, 0, `cross-file --write should succeed:\n${r.stdout}\n${r.stderr}`);
+    const out = JSON.parse(r.stdout);
+    assert.equal(out.write.applied, true);
+    const use = readFileSync(join(dir, 'use.mjs'), 'utf8');
+    assert.match(use, /import \{ formatMoney \} from '\.\/dup2\.mjs'/, 'import repointed to the canonical file');
+    assert.match(use, /return formatMoney\(x\)/, 'call site rewritten');
+    assert.ok(!/fmtMoney/.test(use), 'no loser tokens remain in the consumer');
+    assert.ok(!/function fmtMoney/.test(readFileSync(join(dir, 'dup1.mjs'), 'utf8')), 'loser definition removed');
+  } finally { cleanup(dir); }
+});
+
 // CM-WRITE-SUCCESS: a safe same-file merge applies — loser removed, caller rewired, gate passes.
 test('CM-WRITE-SUCCESS: a safe same-file merge applies and the loser definition is gone', () => {
   const dir = tmpDir('cw-cm-ok-');

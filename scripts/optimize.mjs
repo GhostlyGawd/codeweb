@@ -23,22 +23,20 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit, chooseCanonical } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit, chooseCanonical, createMergeSimulator } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: optimize.mjs <graph.json> [--json] [--out <optimize.md>]   (or set CODEWEB_WS)';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-const READY_BODYSIM = 0.6; // body-confirmed "high" floor — must match overlap.mjs's confidence band
-import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
+import { BANDS } from './lib/shingles.mjs';
+import { die, emitJson, finish, loadGraph, atomicWrite, parseArgs } from './lib/cli.mjs';
+const READY_BODYSIM = BANDS.high; // body-confirmed "high" floor — THE band (lib/shingles.mjs, finding 27)
 
-const argv = process.argv.slice(2);
-let json = false, outMd = null; const paths = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--out') outMd = argv[++i];
-  else if (!t.startsWith('-')) paths.push(t);
-}
-const graphPath = paths[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: { json: { type: 'bool', default: false }, out: { type: 'string', default: null } },
+});
+const { json } = opts, outMd = opts.out;
+const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath) die(USAGE, 2);
 
 const { graph, abs } = loadGraph(graphPath, { usage: USAGE });
@@ -50,65 +48,13 @@ const beforeCycles = new Set(fileCycles(graph).map(cycKey));
 // ---- merge simulation (Spec O-1, docs/specs/incremental-stages.md amendment) ------------------
 // The historical path cloned the entire graph per candidate (applyEdit) and re-ran full file-SCC
 // on the clone (fileCycles) — O(candidates × graph): 28.8s cold / 60.5s on the edit re-map at 16k
-// symbols, 83% of the downstream cost. The delta path computes the merged FILE-graph directly:
-// a merge only changes file-pairs witnessed by loser-incident edges (some witnesses redirect to
-// the canonical's file, possibly emptying a pair; redirected pairs get added), so we adjust a
-// prebuilt pair-witness table and hand the resulting adjacency to the SAME fileCycles as a
-// pseudo-graph (one node per file) — same SCC code, same ordering, byte-identical verdicts,
-// no clone. CODEWEB_OPT_SIM=clone forces the historical path (the equivalence tests run both).
+// symbols, 83% of the downstream cost. The delta path adjusts a pair-witness table instead —
+// byte-identical verdicts, no clone. finding 14: the table now lives in graph-ops'
+// createMergeSimulator (one truth, shared with campaign's cumulative chain).
+// CODEWEB_OPT_SIM=clone forces the historical path (the equivalence tests run both).
 const SIM_MODE = process.env.CODEWEB_OPT_SIM === 'clone' ? 'clone' : 'delta';
-const CYCLE_KINDS = new Set(['call', 'import', 'inherit', 'ref']);
-const PAIR_SEP = '\0';
-const fileOfId = new Map(graph.nodes.map((n) => [n.id, n.file]));
-const pairKey = (f, t) => f + PAIR_SEP + t;
-const pairCount = new Map(); // file-pair -> number of witnessing edges
-const incident = new Map();  // node id -> cycle-kind edges touching it
-if (SIM_MODE === 'delta') {
-  for (const e of graph.edges) {
-    if (!CYCLE_KINDS.has(e.kind)) continue;
-    if (!incident.has(e.from)) incident.set(e.from, []);
-    incident.get(e.from).push(e);
-    if (e.to !== e.from) {
-      if (!incident.has(e.to)) incident.set(e.to, []);
-      incident.get(e.to).push(e);
-    }
-    const f = fileOfId.get(e.from), t = fileOfId.get(e.to);
-    if (!f || !t || f === t) continue;
-    pairCount.set(pairKey(f, t), (pairCount.get(pairKey(f, t)) || 0) + 1);
-  }
-}
-
-function deltaNewCycles(ids, into) {
-  const losers = new Set(ids.filter((x) => x !== into));
-  const mapId = (id) => (losers.has(id) ? into : id);
-  const touched = new Set();
-  for (const id of losers) for (const e of incident.get(id) || []) touched.add(e);
-  const removed = new Map(); // pair -> witnesses redirected away
-  const added = new Set();
-  for (const e of touched) {
-    const f = fileOfId.get(e.from), t = fileOfId.get(e.to);
-    if (f && t && f !== t) removed.set(pairKey(f, t), (removed.get(pairKey(f, t)) || 0) + 1);
-    const from2 = mapId(e.from), to2 = mapId(e.to);
-    if (from2 === to2) continue; // self-loop after redirect — applyEdit drops these
-    const f2 = fileOfId.get(from2), t2 = fileOfId.get(to2);
-    if (!f2 || !t2 || f2 === t2) continue;
-    added.add(pairKey(f2, t2));
-  }
-  const after = new Set();
-  for (const [key, c] of pairCount) if ((removed.get(key) || 0) < c) after.add(key);
-  for (const key of added) after.add(key);
-  // pseudo-graph: one node per file, one call edge per surviving pair — fileCycles sees exactly
-  // the adjacency the merged full graph would produce, through the same code path.
-  const files = new Set();
-  const edges = [];
-  for (const key of after) {
-    const [f, t] = key.split(PAIR_SEP);
-    files.add(f); files.add(t);
-    edges.push({ from: f, to: t, kind: 'call' });
-  }
-  const pseudo = { nodes: [...files].map((f) => ({ id: f, file: f })), edges };
-  return fileCycles(pseudo).filter((c) => !beforeCycles.has(cycKey(c)));
-}
+const mergeSim = SIM_MODE === 'delta' ? createMergeSimulator(graph) : null;
+const deltaNewCycles = (ids, into) => mergeSim.simulate(ids, into).cycles.filter((c) => !beforeCycles.has(cycKey(c)));
 
 // chooseCanonical now lives in ./lib/graph-ops.mjs (shared with codemod.mjs — one truth).
 
@@ -198,7 +144,7 @@ if (outMd) {
     section('Blocked — the gate would reject a naive merge', 'The simulated merge introduces a new file-level dependency cycle. Host the canonical in a neutral module first, then route both sides there.', 'blocked'),
     section('Review — needs human or agent judgement', 'Drifted copies, merely-structural confidence, or non-duplicate-logic findings. Read before acting.', 'review'),
   ].join('\n');
-  writeFileSync(resolve(outMd), md);
+  atomicWrite(resolve(outMd), md);
 }
 
 if (json) { emitJson(payload); } else {

@@ -7,9 +7,18 @@
 
 import { readFileSync } from 'node:fs';
 import { isTestFile } from './graph-ops.mjs';
-import { shingles, jaccard } from './shingles.mjs';
+import { shingles, jaccard, K, BANDS } from './shingles.mjs'; // THE size + bands (finding 27)
 
-const HIGH = 0.6, K = 3;
+const HIGH = BANDS.high;
+// finding 15: overlap.mjs's Spec-B body cap, mirrored — thousand-line bodies yielded 10k-element
+// shingle sets here while overlap confirmed the same pair on its first 400 lines (two answers for
+// one question, and the uncapped one is the slow one).
+const BODY_LINE_CAP = 400;
+// finding 15: exact size-ratio bound — J(A,B) = |∩|/|∪| ≤ min/max, so a pair whose set sizes
+// can't reach the bar skips the intersection entirely (measured: 78% of 37,350 pairs skipped on
+// the self-map, byte-identical output). The 5e-7 slack keeps knife-edge pairs that round6 would
+// lift to exactly 0.6 — the reported set cannot change.
+const RATIO_FLOOR = HIGH - 5e-7;
 const round6 = (x) => +x.toFixed(6);
 const isFn = (n) => n && (n.kind === 'function' || n.kind === 'method');
 
@@ -24,7 +33,7 @@ export function incrementalOverlap(graph, changedIds, { root = null, bodyOf = nu
     if (bodyOf) return bodyOf(n);
     if (!root) return null;
     const lines = readLines(n.file);
-    return lines ? lines.slice(n.line - 1, n.line - 1 + (n.loc || 1)).join('\n') : null;
+    return lines ? lines.slice(n.line - 1, n.line - 1 + Math.min(n.loc || 1, BODY_LINE_CAP)).join('\n') : null;
   };
   const shOf = new Map();
   const shingleOf = (n) => { if (!shOf.has(n.id)) { const b = getBody(n); shOf.set(n.id, b ? shingles(b, K) : null); } return shOf.get(n.id); };
@@ -41,6 +50,7 @@ export function incrementalOverlap(graph, changedIds, { root = null, bodyOf = nu
       if (other.id === id) continue;                          // never report a symbol as duplicating itself
       const osh = shingleOf(other);
       if (!osh || !osh.size) continue;
+      if (Math.min(cand.size, osh.size) / Math.max(cand.size, osh.size) < RATIO_FLOOR) continue; // exact bound: J can't reach the bar
       const sim = round6(jaccard(cand, osh));
       if (sim < HIGH) continue;                                // precision over recall: only the confirmed bar
       if (!best || sim > best.sim || (sim === best.sim && other.id < best.dupOf)) best = { dupOf: other.id, sim };

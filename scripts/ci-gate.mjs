@@ -19,26 +19,23 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { gateComment } from './lib/gate-md.mjs';
+import { die, parseArgs } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+const USAGE = 'usage: ci-gate.mjs --base <ref> [--repo <path>] [--target <subdir>] [--md <file>]';
 
-function parseArgs(argv) {
-  const a = { base: null, repo: '.', target: '.', md: null };
-  for (let i = 0; i < argv.length; i++) {
-    const t = argv[i];
-    if (t === '--base') a.base = argv[++i];
-    else if (t === '--repo') a.repo = argv[++i];
-    else if (t === '--target') a.target = argv[++i];
-    else if (t === '--md') a.md = argv[++i];
-  }
-  return a;
-}
-
-const opts = parseArgs(process.argv.slice(2));
-if (!opts.base) {
-  console.error('usage: ci-gate.mjs --base <ref> [--repo <path>] [--target <subdir>] [--md <file>]');
-  process.exit(2);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — unknown flags were silently ignored here,
+// and this was one of the CLIs answering no --help; one policy now.
+const { opts } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    base: { type: 'string', default: null },
+    repo: { type: 'string', default: '.' },
+    target: { type: 'string', default: '.' },
+    md: { type: 'string', default: null },
+  },
+});
+if (!opts.base) die(USAGE, 2);
 
 const repo = resolve(opts.repo);
 const node = process.execPath;

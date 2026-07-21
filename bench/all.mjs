@@ -56,14 +56,41 @@ const graph = JSON.parse(readFileSync(join(ws, 'graph.json'), 'utf8'));
 // (a CI runner measured 2.17x on a two-file fixture). Below the floor it reports null with the
 // reason, and the gate skips it — explicitly, never silently.
 const BASELINE_FLOOR_MS = 300;
+// finding 13(a): per-stage wall times from run.mjs's own `[run] <stage> done in Xms` stderr lines,
+// each gated as a factor of the regex-extract baseline. The previous only-timing-gate measured the
+// stage-REUSE path (which skips overlap/optimize entirely) — a 10x regression in any post-graph
+// stage passed every gate; the quadratic risk loop shipped exactly that way.
+const stageTimesOf = (stderr) => {
+  const out = {};
+  for (const m of String(stderr).matchAll(/\[run\] (\w[\w-]*) done in (\d+)ms/g)) out[m[1]] = Number(m[2]);
+  return out;
+};
+const coldStages = stageTimesOf(cold.stderr);
+const measurable = regexBase.ms >= BASELINE_FLOOR_MS;
+const factorOf = (ms) => (measurable && ms != null ? +(ms / regexBase.ms).toFixed(2) : null);
 const pipeline = {
   target: opt.target === ROOT ? 'codeweb (self)' : opt.target,
   symbols: graph.nodes.length, edges: graph.edges.length,
   coldMs: cold.ms, warmMs: warm.ms, stagesReused,
   regexExtractBaselineMs: regexBase.ms,
-  warmFactorVsRegexBaseline: regexBase.ms >= BASELINE_FLOOR_MS ? +(warm.ms / regexBase.ms).toFixed(2) : null,
-  ...(regexBase.ms >= BASELINE_FLOOR_MS ? {} : { warmFactorNote: `target too small to measure (baseline ${regexBase.ms}ms < ${BASELINE_FLOOR_MS}ms floor) — the factor gates only at repo scale` }),
+  stageMs: coldStages,
+  stageFactorsVsRegexBaseline: Object.fromEntries(Object.entries(coldStages).map(([k, v]) => [k, factorOf(v)])),
+  warmFactorVsRegexBaseline: measurable ? +(warm.ms / regexBase.ms).toFixed(2) : null,
+  ...(measurable ? {} : { warmFactorNote: `target too small to measure (baseline ${regexBase.ms}ms < ${BASELINE_FLOOR_MS}ms floor) — the factor gates only at repo scale` }),
 };
+
+// ---------------------------------------------------------------- advisors (finding 13(c))
+// risk / deadcode / hotspots / campaign ran in NO timed harness — gate them as baseline factors.
+const gpath = join(ws, 'graph.json');
+const advisorRuns = {
+  risk: sh(S('risk.mjs'), [gpath, '--json']),
+  deadcode: sh(S('deadcode.mjs'), [gpath, '--json']),
+  hotspots: sh(S('hotspots.mjs'), [gpath, '--json']),
+  campaign: sh(S('campaign.mjs'), [gpath, '--json']),
+};
+const advisors = Object.fromEntries(Object.entries(advisorRuns).map(([k, r]) => [k, {
+  ms: r.ms, ok: r.status === 0, factorVsRegexBaseline: r.status === 0 ? factorOf(r.ms) : null,
+}]));
 
 // ---------------------------------------------------------------- session (12-call MCP drive)
 const fanIn = new Map();
@@ -119,8 +146,33 @@ if (existsSync(opt.corpus)) {
   tsEngine = { skipped: `corpus absent at ${opt.corpus} — run bench/corpus/clone-corpus.sh` };
 }
 
+// ---------------------------------------------------------------- loaded corpus (finding 13(b))
+// The synthetic corpus that actually TRIGGERS the machinery: every function is a twin candidate
+// (LSH engages on its own past 800), and 15 planted same-name clusters must be found. The old
+// harness corpus produced 0 candidates / 0 groups — an idle pipeline timed as if it were load.
+const { writeLoadedCorpus } = await import(join(ROOT, 'bench', 'lib', 'loaded-corpus.mjs'));
+const loadedSrc = join(ws, 'loaded-src');
+const loadedWs = join(ws, 'loaded-ws');
+rmSync(loadedSrc, { recursive: true, force: true }); rmSync(loadedWs, { recursive: true, force: true });
+const planted = writeLoadedCorpus(loadedSrc);
+const loadedRun = sh(S('run.mjs'), [loadedSrc, '--target', 'bench-loaded', '--out-dir', loadedWs]);
+let loaded;
+if (loadedRun.status !== 0) loaded = { ok: false, error: `run failed (exit ${loadedRun.status})` };
+else {
+  const lg = JSON.parse(readFileSync(join(loadedWs, 'graph.json'), 'utf8'));
+  loaded = {
+    ok: true,
+    files: planted.files, fns: planted.fns, plantedClusters: planted.plantedClusters,
+    symbols: lg.nodes.length, edges: lg.edges.length,
+    overlapFindings: (lg.overlaps || []).length,
+    lshEngaged: /\[overlap\] LSH path engaged/.test(loadedRun.stderr),
+    stageMs: stageTimesOf(loadedRun.stderr),
+    mapMs: loadedRun.ms,
+  };
+}
+
 // ---------------------------------------------------------------- write + gate
-const payload = { ranAt: new Date().toISOString(), node: process.version, budgets, pipeline, session, toolBudgets, tsEngine };
+const payload = { ranAt: new Date().toISOString(), node: process.version, budgets, pipeline, session, toolBudgets, advisors, loaded, tsEngine };
 const json = JSON.stringify(payload, null, 2) + '\n';
 mkdirSync(dirname(opt.out), { recursive: true }); writeFileSync(opt.out, json);
 mkdirSync(dirname(opt.site), { recursive: true }); writeFileSync(opt.site, json);
@@ -134,6 +186,25 @@ if (opt.gate) {
   for (const [tool, bytes] of Object.entries(perTool)) if (bytes > budgets.perToolBytesMax) violations.push(`tool ${tool}: ${bytes}B > perToolBytesMax ${budgets.perToolBytesMax}`);
   if (!pipeline.stagesReused) violations.push('pipeline: no-change rerun did not reuse stages');
   if (pipeline.warmFactorVsRegexBaseline != null && pipeline.warmFactorVsRegexBaseline > budgets.warmRefreshFactorMax) violations.push(`pipeline: warm rerun ${pipeline.warmFactorVsRegexBaseline}x regex baseline > ${budgets.warmRefreshFactorMax}x`);
+  // finding 13(a): every post-graph stage holds a factor-of-baseline promise (skipped, with the
+  // note, below the measurement floor — same rule as warmFactor).
+  for (const [stage, factor] of Object.entries(pipeline.stageFactorsVsRegexBaseline || {})) {
+    const max = budgets.stageFactorVsRegexBaselineMax?.[stage];
+    if (max != null && factor != null && factor > max) violations.push(`stage ${stage}: ${factor}x regex baseline > ${max}x`);
+  }
+  // finding 13(c): advisors hold factors too — and a crashed advisor is itself a violation.
+  for (const [name, a] of Object.entries(advisors)) {
+    if (!a.ok) { violations.push(`advisor ${name}: exited non-zero`); continue; }
+    const max = budgets.advisorFactorVsRegexBaselineMax?.[name];
+    if (max != null && a.factorVsRegexBaseline != null && a.factorVsRegexBaseline > max) violations.push(`advisor ${name}: ${a.factorVsRegexBaseline}x regex baseline > ${max}x`);
+  }
+  // finding 13(b): the loaded corpus must actually exercise the machinery — planted clusters
+  // found, LSH engaged at scale. If this fails, the timing numbers above measured an idle engine.
+  if (!loaded.ok) violations.push(`loaded corpus: ${loaded.error}`);
+  else {
+    if (budgets.loadedOverlapFindingsMin != null && loaded.overlapFindings < budgets.loadedOverlapFindingsMin) violations.push(`loaded corpus: ${loaded.overlapFindings} overlap findings < loadedOverlapFindingsMin ${budgets.loadedOverlapFindingsMin}`);
+    if (budgets.loadedLshRequired && !loaded.lshEngaged) violations.push('loaded corpus: LSH path did not engage (banner absent)');
+  }
   if (violations.length) { console.error(`[bench:all] GATE FAILED:\n  - ${violations.join('\n  - ')}`); process.exit(1); }
   console.log('[bench:all] gate: all promises hold');
 }

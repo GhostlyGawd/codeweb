@@ -25,21 +25,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const SPARK = '▁▂▃▄▅▆▇█';
 
 const USAGE = 'usage: trend.mjs (--git <repo> [--last N] [--focus <subdir>] | <a.json> <b.json> ... [--labels a,b,...]) [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-
-function parseArgs(argv) {
-  const a = { graphs: [], git: null, last: 10, focus: '.', json: false, labels: null };
-  for (let i = 0; i < argv.length; i++) {
-    const t = argv[i];
-    if (t === '--git') a.git = argv[++i];
-    else if (t === '--last') a.last = Math.max(1, parseInt(argv[++i], 10) || 10);
-    else if (t === '--focus') a.focus = argv[++i];
-    else if (t === '--labels') a.labels = (argv[++i] || '').split(',');
-    else if (t === '--json') a.json = true;
-    else a.graphs.push(t);
-  }
-  return a;
-}
+import { parseArgs } from './lib/cli.mjs';
 
 // ---- pure metrics ----
 function metrics(g) {
@@ -132,7 +118,19 @@ function gitSnapshots(repo, last, focus) {
 }
 
 // ---- main ----
-const opts = parseArgs(process.argv.slice(2));
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — the local copy treated unknown flags as
+// graph paths (the exact bug class run.mjs's #5 fix closed); one policy now.
+const { opts: f, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    git: { type: 'string', default: null },
+    last: { type: 'number', default: 10 },
+    focus: { type: 'string', default: '.' },
+    labels: { type: 'string', default: null },
+    json: { type: 'bool', default: false },
+  },
+});
+const opts = { graphs: pos, git: f.git, last: Math.max(1, f.last), focus: f.focus, json: f.json, labels: f.labels != null ? f.labels.split(',') : null };
 let rows = [];
 if (opts.git) {
   rows = gitSnapshots(resolve(opts.git), opts.last, opts.focus);
@@ -143,7 +141,7 @@ if (opts.git) {
     return { label, ...metrics(g) };
   });
 } else {
-  console.error('usage: trend.mjs <graph.json...> [--labels a,b] [--json]  |  trend.mjs --git <repo> [--last N] [--focus <sub>] [--json]');
+  console.error(USAGE);
   process.exit(2);
 }
 if (!rows.length) { console.error('[codeweb] no snapshots to chart'); process.exit(1); }

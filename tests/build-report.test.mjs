@@ -46,6 +46,50 @@ test('build-report does not embed the absolute local path (meta.root) in report.
   }
 });
 
+// Perf-quality finding 5 — byte-determinism. generatedAt was the sole difference between two
+// identical runs, and the embed carried per-file mtime stamps the template never reads (so the
+// "shareable" artifact differed across fresh checkouts of the same code). Two runs with
+// SOURCE_DATE_EPOCH pinned must now be byte-identical in BOTH artifacts, and report.html must be
+// byte-identical even without pinning; the embed carries none of generatedAt/sources/dirs while
+// graph.json keeps all three (brief reads generatedAt, the staleness check reads sources/dirs).
+test('two identical runs produce byte-identical report.html and (with SOURCE_DATE_EPOCH) graph.json', () => {
+  const dir = tmpDir('codeweb-det-');
+  try {
+    const graph = {
+      meta: {
+        root: dir, target: 'det-x', engine: 'regex', languages: ['javascript'], symbols: 1,
+        sources: { 'a.js': { s: 10, m: 123456789, h: 'f'.repeat(40) } },
+        dirs: { '.': 123456789 },
+      },
+      nodes: [{ id: 'a.js:foo', label: 'foo', kind: 'function', file: 'a.js', line: 1, loc: 3, domain: 'core' }],
+      edges: [],
+      domains: [{ name: 'core', nodes: 1, summary: '' }],
+      overlaps: [],
+    };
+    const graphPath = join(dir, 'graph.json');
+    const env = { SOURCE_DATE_EPOCH: '1753056000' };
+    writeFileSync(graphPath, JSON.stringify(graph));
+    assert.equal(runNode(script('build-report.mjs'), [graphPath, '--no-md'], { env }).status, 0);
+    const html1 = readFileSync(join(dir, 'report.html'), 'utf8');
+    const graph1 = readFileSync(graphPath, 'utf8');
+    writeFileSync(graphPath, JSON.stringify(graph)); // reset to the identical input
+    assert.equal(runNode(script('build-report.mjs'), [graphPath, '--no-md'], { env }).status, 0);
+    assert.equal(readFileSync(join(dir, 'report.html'), 'utf8'), html1, 'report.html byte-identical');
+    assert.equal(readFileSync(graphPath, 'utf8'), graph1, 'graph.json byte-identical under SOURCE_DATE_EPOCH');
+    assert.equal(readJSON(graphPath).meta.generatedAt, '2025-07-21T00:00:00.000Z', 'generatedAt pinned by SOURCE_DATE_EPOCH');
+    // the embed strips the nondeterministic/private fields; graph.json keeps them
+    assert.ok(!html1.includes('generatedAt') && !html1.includes('123456789'), 'no timestamp/stamp bytes in the embed');
+    const disk = readJSON(graphPath);
+    assert.ok(disk.meta.sources && disk.meta.dirs && disk.meta.generatedAt, 'graph.json keeps stamps + generatedAt');
+    // and WITHOUT the epoch pin, report.html is still byte-identical (only graph.json's timestamp moves)
+    writeFileSync(graphPath, JSON.stringify(graph));
+    assert.equal(runNode(script('build-report.mjs'), [graphPath, '--no-md']).status, 0);
+    assert.equal(readFileSync(join(dir, 'report.html'), 'utf8'), html1, 'report.html byte-identical without pinning too');
+  } finally {
+    cleanup(dir);
+  }
+});
+
 // #8 (IMPROVEMENTS.md): the report renders the PIPELINE's findings (G.overlaps), carries share
 // metadata (og:*), and ships the whole-view hash machinery — while the privacy invariant holds
 // (only the target LABEL and counts are embedded, never meta.root).

@@ -48,6 +48,10 @@ test('L1: harness emits the full measurement schema on a fixture report', { skip
       assert.ok(Number.isFinite(j[k]) && j[k] >= 0, `${k} measured (${j[k]})`);
     }
     assert.ok(j.heapUsedBytes === null || j.heapUsedBytes > 0, 'heap recorded when the browser exposes it');
+    // finding 13(d)/21: the expand-all row exists and stays inside the per-frame budget
+    assert.ok(j.expandAll && Number.isFinite(j.expandAll.simMsPerFrame), `expand-all measured (${JSON.stringify(j.expandAll)})`);
+    assert.ok(j.expandAll.nodes > 0, 'expand-all actually put symbols on canvas');
+    assert.equal(typeof j.verdict.expandAllOk, 'boolean', 'the verdict judges expand-all too');
     assert.ok(j.chromiumVersion, 'environment noted');
   } finally { cleanup(dir); }
 });

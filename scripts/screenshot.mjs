@@ -15,17 +15,20 @@ import { resolve, join } from 'node:path';
 import { mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
+import { die, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let report = null, outDir = 'shots', prefix = 'shot', scale = 2;
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--out') outDir = argv[++i];
-  else if (t === '--prefix') prefix = argv[++i];
-  else if (t === '--scale') scale = parseFloat(argv[++i]) || 2;
-  else if (!t.startsWith('-')) report = t;
-}
-if (!report) { console.error('usage: screenshot.mjs <report.html> --out <dir> [--prefix p] [--scale 2]'); process.exit(2); }
+const USAGE = 'usage: screenshot.mjs <report.html> --out <dir> [--prefix p] [--scale 2]';
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one of the CLIs that answered no --help.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    out: { type: 'string', default: 'shots' },
+    prefix: { type: 'string', default: 'shot' },
+    scale: { type: 'float', default: 2 },
+  },
+});
+const report = pos[0] ?? null, outDir = opts.out, prefix = opts.prefix, scale = opts.scale || 2;
+if (!report) die(USAGE, 2);
 
 // dev-only dependency, resolved from the CALLER'S cwd (the engine itself stays zero-dep)
 let chromium;

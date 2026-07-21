@@ -91,3 +91,21 @@ test('hook flags a NEW cycle introduced by an edit (vs the baseline)', () => {
   assert.equal(res.status, 0, 'fail-open exit 0 even when warning');
   assert.match(res.stderr || '', /cycle/i, 'warns about the new dependency cycle');
 });
+
+// Perf-quality finding 22 — the hook must write NO temp files. Pre-fix it left a pid-named
+// ~1.2MB codeweb-hook-<pid>.json FILE in os.tmpdir() on EVERY edit, forever (the fragment now
+// streams back on stdout). Tripwire: running the hook end-to-end adds no such file. (The suite's
+// own fixture DIRS are mkdtemp'd codeweb-hook-* too — the leak signature is specifically the
+// .json FILES, so the check filters to those.)
+test('the hook leaves no codeweb-hook-*.json temp files behind', async () => {
+  const { readdirSync, statSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const hookTempFiles = () => readdirSync(tmpdir())
+    .filter((f) => /^codeweb-hook-.*\.json$/.test(f))
+    .filter((f) => { try { return statSync(join(tmpdir(), f)).isFile(); } catch { return false; } })
+    .sort();
+  const beforeFiles = hookTempFiles();
+  const r = runHook(join(SRC, 'a.mjs'));
+  assert.equal(r.status, 0, r.stderr);
+  assert.deepEqual(hookTempFiles(), beforeFiles, 'no new codeweb-hook-*.json entries in the OS tmpdir');
+});
