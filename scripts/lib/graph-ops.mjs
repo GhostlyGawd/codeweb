@@ -161,8 +161,8 @@ export function suggestSymbols(graph, sym, maxSuggestions = 3) {
     const label = n.label.toLowerCase();
     let tier = 0;
     if (label === wanted) tier = 4;
-    else if (wanted.length >= 3 && (label.startsWith(wanted) || wanted.startsWith(label))) tier = 3;
-    else if (wanted.length >= 3 && (label.includes(wanted) || wanted.includes(label))) tier = 2;
+    else if (wanted.length >= 3 && label.length >= 3 && (label.startsWith(wanted) || wanted.startsWith(label))) tier = 3;
+    else if (wanted.length >= 3 && label.length >= 3 && (label.includes(wanted) || wanted.includes(label))) tier = 2;
     else if (wantedTokens.size && nameTokens(n.label).some((t) => wantedTokens.has(t))) tier = 1;
     if (tier) suggestScored.push({ tier, label: n.label, id: n.id });
   }

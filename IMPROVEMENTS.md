@@ -1,5 +1,19 @@
 # codeweb — Product Improvement Discovery
 
+> **Implementation addendum (2026-07-21):** all 15 findings below were built, in order, on this
+> branch — one commit per item, each with tests and a changelog entry. Verification at the end of
+> the run: **552 tests, 0 fail** with the AST tier; **0 fail** on the zero-dependency path (43
+> clean skips); `npm run bench:all -- --gate` — all published budgets hold (session 4,757 tokens
+> of the 20k budget); `check-consistency` green at **27 tools**; codeweb's own PR gate green with
+> rename tracking. Dogfood receipts on a fresh self-map: hotspots/risk/deadcode/campaign are
+> product-scoped with counted exclusions (588 non-product symbols excluded, top-10 all real
+> product code); deadcode's safe tier no longer lists the VS Code extension's entrypoints; the
+> report renders the pipeline's findings with shareable `#tab=…` links, light/print themes, and
+> keyboard reach; flask's `render_template` resolves 26/26 truth sites (was 7); Ruby/PHP have
+> dispatch edges; the reusable CI action posts the structural review. One scope note: item #14
+> shipped Ruby+PHP; **Kotlin/Swift are a recorded blocker** (no trusted wasm at the pinned ABI —
+> `scripts/grammars/PROVENANCE.md`), revisited when a trusted grammar exists.
+
 **Date:** 2026-07-20 · **Scope:** every product surface — engine, CLI, MCP, hooks, report.html, VS Code extension, website/docs, CI action — through 12 lenses (UI, UX, onboarding, friendliness, helpfulness, feedback, retention, engagement, community, synergies, debt, reach).
 
 **Method:** read-only discovery. Five parallel deep audits (report UI · CLI/MCP · plugin/hooks/skills · site/docs/.github · editor/tests/bench) plus dogfood runs: full pipeline on codeweb itself (1,168 nodes, 12 domains, 2s), `hotspots`/`deadcode`/`campaign`/`brief`/`find`/`explain` on the self-map, the full test suite (499 tests), npm-registry and VS Code Marketplace reachability checks, and GitHub issue/PR review. Every claim below carries `path:line` evidence from this working tree.

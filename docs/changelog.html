@@ -181,6 +181,16 @@
 <p>  <code>PROVENANCE.md</code>: no trusted wasm exists at our pinned ABI (upstream ships C sources and native</p>
 <p>  prebuilds only) — revisit when <code>@vscode/tree-sitter-wasm</code> grows them. (IMPROVEMENTS.md #14)</p>
 <ul>
+<li><strong>The gate is a reviewer for adopters, not just a red ✗.</strong> codeweb's own PRs already got the</li>
+</ul>
+<p>  sticky structural-review comment (delta, renames, findings); the reusable composite action</p>
+<p>  third parties consume ran the gate silently. The action now takes <code>comment: true</code> and posts</p>
+<p>  (and updates in place) the same digest via the calling workflow's <code>GITHUB_TOKEN</code> — the comment</p>
+<p>  lands <strong>before</strong> the verdict can fail the job, fork PRs with read-only tokens degrade</p>
+<p>  gracefully to the check verdict, and <code>docs/ci-gate.md</code> documents the</p>
+<p>  <code>pull-requests: write</code> requirement. Reviewers who never installed codeweb now see the blast</p>
+<p>  radius of every gated PR where they already look. (IMPROVEMENTS.md #15)</p>
+<ul>
 <li><strong>The CLI grew a front door.</strong> Every CLI answers <code>--help</code>/<code>-h</code> (exit 0) — including the</li>
 </ul>
 <p>  <code>codeweb</code> bin, where <code>--help</code> previously errored with <code>target not found: --help</code>; <code>run.mjs</code></p>

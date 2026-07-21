@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-07-20T16:44:50.704Z",
+  "ranAt": "2026-07-21T05:43:01.510Z",
   "node": "v22.22.2",
   "budgets": {
     "comment": "Spec C (docs/specs/bench-all-ci-gates.md): the promises CI holds bench:all --gate to. Changing a number here is changing a public promise — it belongs in a reviewed diff, never in drift.",
@@ -9,50 +9,56 @@
   },
   "pipeline": {
     "target": "codeweb (self)",
-    "symbols": 1143,
-    "edges": 3911,
-    "coldMs": 4099,
-    "warmMs": 774,
+    "symbols": 1191,
+    "edges": 4110,
+    "coldMs": 3405,
+    "warmMs": 512,
     "stagesReused": true,
-    "regexExtractBaselineMs": 715,
-    "warmFactorVsRegexBaseline": 1.08
+    "regexExtractBaselineMs": 501,
+    "warmFactorVsRegexBaseline": 1.02
   },
   "session": {
     "calls": [
       {
         "tool": "codeweb_brief",
-        "bytes": 2670,
-        "tokensApprox": 668,
+        "bytes": 2649,
+        "tokensApprox": 662,
         "ok": true
       },
       {
         "tool": "codeweb_find",
-        "bytes": 1258,
-        "tokensApprox": 315,
+        "bytes": 1562,
+        "tokensApprox": 391,
         "ok": true
       },
       {
         "tool": "codeweb_explain",
-        "bytes": 1312,
-        "tokensApprox": 328,
+        "bytes": 1074,
+        "tokensApprox": 269,
         "ok": true
       },
       {
         "tool": "codeweb_context",
-        "bytes": 8647,
-        "tokensApprox": 2162,
+        "bytes": 4499,
+        "tokensApprox": 1125,
         "ok": true
       },
       {
         "tool": "codeweb_impact",
-        "bytes": 1347,
-        "tokensApprox": 337,
+        "bytes": 1080,
+        "tokensApprox": 270,
         "ok": true
       },
       {
         "tool": "codeweb_impact",
-        "bytes": 1076,
-        "tokensApprox": 269,
+        "bytes": 1337,
+        "tokensApprox": 334,
+        "ok": true
+      },
+      {
+        "tool": "codeweb_callers",
+        "bytes": 993,
+        "tokensApprox": 248,
         "ok": true
       },
       {
@@ -62,21 +68,15 @@
         "ok": true
       },
       {
-        "tool": "codeweb_callers",
-        "bytes": 989,
-        "tokensApprox": 247,
-        "ok": true
-      },
-      {
         "tool": "codeweb_cycles",
-        "bytes": 427,
-        "tokensApprox": 107,
+        "bytes": 483,
+        "tokensApprox": 121,
         "ok": true
       },
       {
         "tool": "codeweb_hotspots",
-        "bytes": 3288,
-        "tokensApprox": 822,
+        "bytes": 3426,
+        "tokensApprox": 857,
         "ok": true
       },
       {
@@ -92,36 +92,26 @@
         "ok": true
       }
     ],
-    "totalBytes": 22933,
-    "totalTokensApprox": 5735,
+    "totalBytes": 19022,
+    "totalTokensApprox": 4757,
     "allValidJson": true
   },
   "toolBudgets": {
     "perToolMaxBytes": {
-      "codeweb_brief": 2670,
-      "codeweb_find": 1258,
-      "codeweb_explain": 1312,
-      "codeweb_context": 8647,
-      "codeweb_impact": 1347,
+      "codeweb_brief": 2649,
+      "codeweb_find": 1562,
+      "codeweb_explain": 1074,
+      "codeweb_context": 4499,
+      "codeweb_impact": 1337,
       "codeweb_callers": 1140,
-      "codeweb_cycles": 427,
-      "codeweb_hotspots": 3288,
+      "codeweb_cycles": 483,
+      "codeweb_hotspots": 3426,
       "codeweb_refresh": 292,
       "codeweb_diff": 487
     },
     "budgetBytes": 32768
   },
   "tsEngine": {
-    "bench": "ts-engine (cold extraction, regex vs tree-sitter tier)",
-    "target": "/home/user/codeweb/bench/corpus/axios",
-    "reps": 3,
-    "symbols": 912,
-    "withComplexity": 714,
-    "regexMs": 496,
-    "treeSitterMs": 2182,
-    "overheadMs": 1686,
-    "factor": 4.4,
-    "perSymbolMs": 2.63,
-    "engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)"
+    "skipped": "corpus absent at /home/user/codeweb/bench/corpus/axios — run bench/corpus/clone-corpus.sh"
   }
 }
