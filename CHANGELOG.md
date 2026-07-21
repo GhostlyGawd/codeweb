@@ -168,6 +168,15 @@ notes so validated results, papers, and new tools never get lost in commit histo
   the engine-namespaced cache AND diffed a regex fragment against a ctags baseline (phantom
   regressions). With finding 10, a no-change hook/refresh now scans zero files. (perf-quality
   finding 17)
+- **The post-edit hook's fast-path floor, specified and landed** (`docs/specs/hook-fastpath-floor.md`
+  — the "baseline-fragment reuse" spec `fastpath-daemon.md` called for, in its landed form: the
+  reuse rides the stamp tier's per-file products, serving every extract consumer). The hook's
+  fragment now streams back on stdout — the pid-named temp file (~1.2MB, never unlinked, leaked
+  per edit forever) is gone entirely, along with a full serialize+write+read cycle — and the
+  extractor skips its multi-MB cache write-back when no entry changed (`cacheDirty`). Measured at
+  8,804 nodes/52k edges: hook end-to-end ~800ms warm (was ~4s-class; full re-extract alone was
+  3,350ms), decomposed in the spec with revisit triggers pointing at finding 25's in-process
+  extraction. (perf-quality finding 18)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release

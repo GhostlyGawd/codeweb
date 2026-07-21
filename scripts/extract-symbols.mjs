@@ -543,6 +543,11 @@ const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, ru
 // the same stamps checkStaleness trusts; CODEWEB_VERIFY_FRESHNESS=1 or --full forces the
 // read+hash path, and a stamp mismatch (or missing product) falls back to it per file.
 const stampTier = !!(oldCache && !opts.full && process.env.CODEWEB_VERIFY_FRESHNESS !== '1' && oldCache.rulesSig === rulesSig);
+// finding 18: skip the cache write-back when NOTHING changed — a no-change hook/refresh run
+// carried every entry verbatim, then re-stringified and re-wrote the multi-MB cache anyway.
+// Dirty when any file took the read path, any per-file product was (re)computed rather than
+// replayed, or any signature moved.
+let cacheDirty = !oldCache;
 let scanCount = 0;
 const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)) || scanSymbols(f, text); };
 
@@ -616,6 +621,7 @@ for (const f of files) {
     st = null; // changed while reading — retry
   }
   if (text == null) continue;
+  cacheDirty = true; // this file took the read path — the cache entry is (re)built
   const contentHash = sha1(text); // stamped into meta.sources (verify tier) and keys the scan cache
   sources[r] = st
     ? { s: st.size, m: Math.round(st.mtimeMs), h: contentHash }
@@ -874,7 +880,7 @@ for (const [fabs, recd] of fileSyms) {
   if (recd.text == null && entry && 'def' in entry) ds = entry.def;
   else {
     ds = defaultExportOf(rr, textOf(fabs, recd), new Set(recd.ranges.map((rg) => rg.name))) ?? null;
-    if (entry) entry.def = ds;
+    if (entry) { entry.def = ds; cacheDirty = true; }
   }
   if (ds && nodeIdSet.has(ds)) defaultExportByFile.set(rr, ds);
 }
@@ -923,7 +929,7 @@ for (const f of files) {
     if (target) stars.push(target);
   }
   if (stars.length) starReExportByFile.set(r, stars);
-  if (entry) entry.rex = { map: [...map].map(([exp2, v]) => [exp2, v.target, v.orig]), stars };
+  if (entry) { entry.rex = { map: [...map].map(([exp2, v]) => [exp2, v.target, v.orig]), stars }; cacheDirty = true; }
 }
 // v9: a BARREL IS A DEPENDENT. `export { X } from './impl'` means the barrel file must change when
 // X is renamed — the compiler counts that export specifier as a reference, and so must we (it was a
@@ -1090,6 +1096,7 @@ const importEdges = [];
 // both the symbol set and the file list stand still — the same rule the F9 edge cache lives by.
 const bindSig = sha1(symbolSig + '\0' + fileSig);
 const bindReuse = stampTier && oldCache.bindSig === bindSig;
+if (oldCache && (oldCache.bindSig !== bindSig || oldCache.symbolSig !== symbolSig || oldCache.fileSig !== fileSig)) cacheDirty = true;
 const reqNamed = /(?:const|let|var)\s*\{([^}]*)\}\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
 const reqDefault = /(?:const|let|var)\s+([\w$]+)\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
 const esNamed = /import\s+(?:[\w$]+\s*,\s*)?\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g;
@@ -1199,7 +1206,7 @@ for (const f of files) {
   if (amap.size) aliasByFile.set(f, amap);
   if (nsmap.size) nsAliasByFile.set(f, nsmap);
   if (classmap.size) classAliasByFile.set(f, classmap);
-  if (bindEntry) bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], ie: importEdges.slice(importEdgesStart) };
+  if (bindEntry) { bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], ie: importEdges.slice(importEdgesStart) }; cacheDirty = true; }
 }
 
 // ---- derive call edges (F9: incremental, per-file, cacheable) ------------------------------
@@ -1469,7 +1476,7 @@ if (nodes.length === 0 && !opts.allowEmpty) {
   console.error('[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
   process.exit(1);
 }
-if (newCache && !astLoadFailed) {
+if (newCache && !astLoadFailed && cacheDirty) {
   try {
     // finding 10: cached nodes must not carry run-GLOBAL fields — `pub` is recomputed from the
     // package-entry walk every run, and a stale cached true could never be cleared. Copies only
