@@ -13,6 +13,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { buildIndexLite, SIDECAR_NAME } from './lib/index-lite.mjs'; // Spec P: pre-edit hook fast path
+import { buildSimilarIndex, SIMILAR_SIDECAR } from './lib/similar-index.mjs'; // finding 16: find-similar's map-time shingle sets
 import { sourceReader, atomicWrite } from './lib/cli.mjs';
 
 const USAGE = 'usage: build-report.mjs [path/to/graph.json] [--out report.html] [--no-md] [--open]';
@@ -92,9 +93,14 @@ atomicWrite(graphPath, JSON.stringify(graph));
 // must never fail the map.
 try {
   const st = statSync(graphPath);
-  const lite = buildIndexLite(graph, { graphMtimeMs: st.mtimeMs, graphSize: st.size }, sourceReader(graph.meta?.root));
+  const reader = sourceReader(graph.meta?.root);
+  const stamp = { graphMtimeMs: st.mtimeMs, graphSize: st.size };
+  const lite = buildIndexLite(graph, stamp, reader);
   atomicWrite(join(dirname(graphPath), SIDECAR_NAME), JSON.stringify(lite)); // hooks stat+read this concurrently
-} catch { /* the hook falls back to the graph path */ }
+  // finding 16: find-similar's exact shingle sets, persisted once at map time so the prescribed
+  // before-every-write check stops re-reading and re-shingling the whole repo per call.
+  atomicWrite(join(dirname(graphPath), SIMILAR_SIDECAR), JSON.stringify(buildSimilarIndex(graph, stamp, reader)));
+} catch { /* the consumers fall back to their live paths */ }
 
 // --- render ---
 const templatePath = join(here, 'report-template.html');

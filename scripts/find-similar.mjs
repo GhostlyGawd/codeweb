@@ -14,6 +14,7 @@ import { resolve } from 'node:path';
 import { normalizeGraph, isTestFile } from './lib/graph-ops.mjs';
 import { shingles, jaccard } from './lib/shingles.mjs';
 import { structuralShingles } from './lib/skeleton.mjs'; // F6: Type-2 (rename-invariant) similarity
+import { loadSimilarIndex } from './lib/similar-index.mjs'; // finding 16: map-time shingle sets — zero source reads on the hot path
 
 const USAGE = 'usage: find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--structural] [--json]';
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
@@ -53,18 +54,35 @@ try {
 
 const candidate = shg(candidateText);
 
-// score every non-test function/method body
+// score every non-test function/method body. finding 16: the lexical path serves from the
+// map-time sidecar (exact shingle SETS — results byte-identical to the live path) with an exact
+// size-ratio precut (J <= min/max, so a pair that cannot reach the 0.15 floor skips the
+// intersection); every call previously re-read and re-shingled the whole repo. Stale/absent
+// sidecar or --structural -> the live path, unchanged.
 const reader = sourceReader(root);
 const bodyOf = reader.bodyOf;
 const tierOf = (s) => (s >= 0.6 ? 'high' : s >= 0.35 ? 'medium' : 'low'); // overlap.mjs bands
+const simIndex = structural ? null : loadSimilarIndex(abs);
 
 const matches = [];
+let scanned = 0;
 for (const n of graph.nodes) {
   if (n.kind !== 'function' && n.kind !== 'method') continue;
   if (isTestFile(n.file)) continue;
-  const src = bodyOf(n);
-  if (src == null) continue;
-  const sim = jaccard(candidate, shg(src));
+  scanned++; // reuse this pass for the payload count (was a second full filter over nodes)
+  let sim;
+  const rec = simIndex && simIndex.nodes[n.id];
+  if (rec) {
+    if (!candidate.size || !rec.n) continue;
+    if (Math.min(candidate.size, rec.n) / Math.max(candidate.size, rec.n) < 0.15) continue; // exact bound
+    let inter = 0;
+    for (const s of rec.sh) if (candidate.has(s)) inter++;
+    sim = inter / (candidate.size + rec.n - inter);
+  } else {
+    const src = bodyOf(n);
+    if (src == null) continue;
+    sim = jaccard(candidate, shg(src));
+  }
   if (sim < 0.15) continue; // exclude below the low band
   matches.push({ id: n.id, label: n.label, file: n.file, line: n.line, domain: n.domain, sim: +sim.toFixed(6), tier: tierOf(sim) });
 }
@@ -73,7 +91,8 @@ const top = matches.slice(0, k);
 
 const payload = {
   candidate: { source: body != null ? 'body' : stdin ? 'stdin' : 'signature', shingles: candidate.size, mode: structural ? 'structural' : 'lexical' },
-  matches: top, count: top.length, scanned: graph.nodes.filter((n) => (n.kind === 'function' || n.kind === 'method') && !isTestFile(n.file)).length,
+  index: simIndex ? 'sidecar' : 'live',
+  matches: top, count: top.length, scanned,
 };
 
 if (json) { emitJson(payload); } else {

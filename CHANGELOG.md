@@ -151,6 +151,14 @@ notes so validated results, papers, and new tools never get lost in commit histo
   78% of 37,350 self-map pairs skipped, with 5e-7 slack so knife-edge pairs that round to the bar
   survive) plus overlap's `BODY_LINE_CAP`. A 40-case property test pins prefiltered results to a
   filterless oracle. (perf-quality finding 15)
+- **`find_similar` stops re-shingling the repo on every call.** The MCP server prescribes it
+  before every new function an agent writes, and each call re-read and re-shingled every non-test
+  body from disk. The report stage now persists each candidate's exact K=3 shingle SET (sorted,
+  deterministic — sets, not sketches, so there is no probabilistic cut) in a stamped
+  `similar-index.json` beside the graph; find-similar serves from it with zero source reads plus
+  an exact size-ratio precut, and reuses the scoring pass for `scanned`. Stale/absent sidecar or
+  `--structural` falls back to the live path; a regression test pins byte-identical matches
+  across sidecar, live, stale-fallback, and removed-sidecar paths. (perf-quality finding 16)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
