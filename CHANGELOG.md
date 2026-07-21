@@ -177,6 +177,24 @@ notes so validated results, papers, and new tools never get lost in commit histo
   8,804 nodes/52k edges: hook end-to-end ~800ms warm (was ~4s-class; full re-extract alone was
   3,350ms), decomposed in the spec with revisit triggers pointing at finding 25's in-process
   extraction. (perf-quality finding 18)
+- **The MCP server no longer head-of-line-blocks, and stale graphs heal in the background.**
+  Every non-fast-path tool ran through `spawnSync` on the readline loop — a 2.5ms structural
+  query measured at 527.6ms behind a concurrent campaign, and a stale graph stalled the current
+  call behind an inline synchronous refresh (up to 4–28s at the 16k benchmark; 120s behind a
+  wedged child). Children now spawn async (the `handleMap` pattern generalized), serialized per
+  workspace so stateful sequences keep their order while fast paths and other workspaces never
+  wait; auto-refresh is fire-and-forget, serving the stale-but-ANNOTATED answer immediately —
+  and because the server drains in-flight work before exit, the next call is fresh. Measured:
+  callers behind a concurrent campaign 527.6ms → 2.4ms. (perf-quality finding 19)
+- **The tools the server prescribes per edit answer in-process.** `codeweb_explain` and
+  `codeweb_context` — the INSTRUCTIONS' before-every-edit calls — took the spawn path (node boot
+  + a fresh multi-MB graph parse per call, ~256ms measured back-to-back) while structural queries
+  answered from the cache in ~3–13ms. context-pack's payload assembly moved to
+  `lib/context-core.mjs` (one truth, two transports — byte-identical JSON, field order included);
+  explain rides `buildCards` as the sidecar already did; and context-pack's `--json` miss now
+  emits the same `found:false` + suggestions contract explain adopted in #2 (the old stderr
+  `die()` made MCP reply an empty string). Measured, even while a campaign runs: explain 9.3ms,
+  context 12.3ms. (perf-quality finding 20)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release

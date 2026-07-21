@@ -19,12 +19,14 @@ import { spawnSync, spawn } from 'node:child_process';
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalizeGraph, buildIndex } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols } from './lib/graph-ops.mjs';
 import { runQuery } from './lib/query-core.mjs';
 import { findSymbols } from './lib/find-core.mjs';
 import { buildBrief } from './lib/brief-core.mjs';
+import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's card assembler, in-process
+import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
 import { bump, attachActivity } from './lib/stats.mjs';
-import { checkStaleness } from './lib/cli.mjs';
+import { checkStaleness, sourceReader } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const scriptOf = (f) => join(HERE, f);
@@ -372,6 +374,46 @@ function handleToolCall(id, params) {
         if (stale) { payload.stale = stale; payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`; }
         return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
       }
+    } catch { /* fall through to the spawned artifact */ }
+  }
+  // Fast path (finding 20): explain — the tool the INSTRUCTIONS prescribe before every symbol
+  // edit — assembles in-process from the cached graph via the same buildCards the CLI and the
+  // pre-edit sidecar use (~256ms spawn+reparse -> cache-warm milliseconds). Payload identical to
+  // explain.mjs --json, including the found:false + suggestions contract.
+  if (tool.name === 'codeweb_explain') {
+    try {
+      const { graph, index } = cachedGraph(resolve(graphPath));
+      const ids = resolveSymbol(graph, args.symbol);
+      if (!ids.length) {
+        const suggestions = suggestSymbols(graph, args.symbol);
+        const payload = { symbol: args.symbol, found: false, hint: `no symbol matches "${args.symbol}" — try codeweb_find "<free text>" (concept search, no name needed)${suggestions.length ? ' or a near-match below' : ''}` };
+        if (suggestions.length) payload.suggestions = suggestions;
+        return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
+      }
+      const cards = buildCards(graph, index, sourceReader(graph.meta && graph.meta.root), ids);
+      const payload = { symbol: args.symbol, matched: ids, cards, summary: cards.map((c) => c.summary).join(' | ') };
+      const stale = checkStaleness(graph);
+      if (stale) { payload.stale = stale; payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`; }
+      return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
+    } catch { /* fall through to the spawned artifact */ }
+  }
+  // Fast path (finding 20): context-pack — the other prescribed-per-edit tool — assembles
+  // in-process via lib/context-core.mjs (the CLI's own assembler; byte-identical JSON). The
+  // spawned path parsed the multi-MB graph fresh on every call.
+  if (tool.name === 'codeweb_context') {
+    try {
+      const { graph, index } = cachedGraph(resolve(graphPath));
+      const ids = resolveSymbol(graph, args.symbol);
+      if (!ids.length) {
+        const suggestions = suggestSymbols(graph, args.symbol);
+        const payload = { symbol: args.symbol, found: false, hint: `no symbol matches "${args.symbol}" — try codeweb_find "<free text>" (concept search, no name needed)${suggestions.length ? ' or a near-match below' : ''}` };
+        if (suggestions.length) payload.suggestions = suggestions;
+        return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
+      }
+      const limit = args.limit != null ? Number(args.limit) : (args.full ? null : tool.budget.value);
+      const windowN = args.window != null ? Math.max(0, parseInt(String(args.window), 10) || 3) : 3;
+      const payload = buildContextPack(graph, index, sourceReader(graph.meta?.root || null), ids, { symbol: args.symbol, windowN, fullBodies: !!args.full, limit });
+      return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
     } catch { /* fall through to the spawned artifact */ }
   }
   // Fast path: structural queries answer in-process from the cached graph (same payloads as the
