@@ -595,7 +595,18 @@ for (const f of files) {
       let cx = null;
       if (isJsTs && fileCx) {
         if (astHit) cx = Object.prototype.hasOwnProperty.call(fileCx, id) ? fileCx[id] : null;
-        else if (engForFile) cx = fileCx[id] = engForFile.cyclomaticExact(body);
+        else if (engForFile) {
+          // finding 7: exact complexity = 1 + decision nodes starting within the symbol's extent
+          // rows, summed from the whole-file parse's per-row tally — the identical decision set
+          // the old per-body slice re-parse counted, without a re-parse per symbol. The re-parse
+          // survives only as the whole-file-parse-failed fallback.
+          const dr = tsResult && tsResult.decisionRows;
+          if (dr) {
+            let d = 0;
+            for (let row = start, stop = start + loc - 1; row <= stop; row++) d += dr[row] || 0;
+            cx = fileCx[id] = 1 + d;
+          } else cx = fileCx[id] = engForFile.cyclomaticExact(body);
+        }
       }
       node.complexity = cx != null ? cx : cyclomatic(body, lang);
       // Spec H: Type-3 statement fingerprints ride the same parse (>=6 statements only).

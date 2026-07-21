@@ -39,6 +39,10 @@ export function finish(code = 0) {
  * removed and the error rethrown.
  */
 export function atomicWrite(path, data) {
+  // A rename REPLACES the target inode — correct for regular files, destructive for special ones
+  // (renaming over /dev/null would swap the device node for a regular file). Anything that isn't
+  // a regular file gets a plain write-through instead.
+  try { if (!statSync(path).isFile()) { writeFileSync(path, data); return; } } catch { /* absent -> atomic path */ }
   const tmp = `${path}.${process.pid}.tmp`;
   writeFileSync(tmp, data);
   try { renameSync(tmp, path); }

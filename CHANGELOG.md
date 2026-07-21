@@ -66,6 +66,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
   byte-identical and ~9% faster from reduced GC pressure. A static tripwire test pins parse-site
   count == delete-site count so a new parse can't quietly reintroduce the leak. (perf-quality
   finding 6)
+- **The JS/TS AST tier extracts in ONE cursor traversal.** `extractJsTs` walked the full tree
+  three times (methods, Type-3 fingerprints, dispatch) via per-child JS↔WASM crossings — profiled
+  at 62% of AST extract self-time — and `cyclomaticExact` re-parsed every regex-owned body slice
+  from scratch for exact complexity (28%). One TreeCursor pass now collects everything: ancestor
+  stacks replace upward parent-walks, dispatch candidates resolve after the walk against the
+  complete method tables, and decisions are tallied per start row so a symbol's exact complexity
+  is `1 + sum(extent rows)` — the identical decision set the slice re-parse counted, with zero
+  re-parses. Verified output-identical on a full corpus (393 nodes, 983 edges, every node field
+  equal); ~1.5x wall on a small corpus where WASM init dominates, larger on big ones. `atomicWrite`
+  also learned to write through non-regular files instead of renaming over them. (perf-quality
+  finding 7)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release

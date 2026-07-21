@@ -51,8 +51,6 @@ const countDecisions = (root) => {
   }
   return d;
 };
-const complexityOf = (bodyNode) => (bodyNode ? 1 + countDecisions(bodyNode) : 1);
-
 // Visit every node once (iterative DFS). Named walkTree (not `walk`) so codeweb's own regex extractor
 // can't confuse it with extract-symbols.mjs's directory `walk` — a generic name collides into a
 // spurious duplication finding / dep cycle when the engine dogfoods itself.
@@ -81,24 +79,6 @@ const paramTypes = (fnNode) => {
     if (pat?.type === 'identifier' && typeId?.type === 'type_identifier') map.set(pat.text, typeId.text);
   }
   return map;
-};
-
-// Nearest enclosing NAMED symbol of a node: a method_definition (with its class) or a
-// function_declaration. Returns {name, classNode|null, fnNode} or null (top level / anonymous arrow).
-const enclosingSymbol = (node) => {
-  let cur = node.parent;
-  while (cur) {
-    if (cur.type === 'method_definition') {
-      let c = cur.parent;
-      while (c && c.type !== 'class_declaration') c = c.parent;
-      return { name: cur.childForFieldName('name')?.text, classNode: c || null, fnNode: cur };
-    }
-    if (cur.type === 'function_declaration') {
-      return { name: cur.childForFieldName('name')?.text, classNode: null, fnNode: cur };
-    }
-    cur = cur.parent;
-  }
-  return null;
 };
 
 let _engine; // undefined = not tried, null = unavailable, object = ready (memoized)
@@ -186,6 +166,15 @@ export async function loadTsEngine() {
       for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
       return h.toString(16).padStart(8, '0');
     };
+    // finding 7: ONE cursor traversal replaces the previous three full-tree walks (methods, t3
+    // fingerprints, dispatch) AND the per-symbol body re-parse for exact complexity. The old
+    // walkTree pattern crossed the JS<->WASM boundary once per child per walk (profiled at 62% of
+    // AST extract self-time), and cyclomaticExact re-parsed every regex-owned body from scratch
+    // (28%). The cursor visits each node once with cheap nodeType/nodeId reads; ancestor STACKS
+    // replace upward parent-walks; decision counts accumulate on every open function frame, so
+    // exact complexity becomes a by-start-row lookup (cxByLine) instead of a re-parse. Dispatch
+    // candidates are collected during the walk and resolved AFTER it — methodsByClass must be
+    // complete before resolution, which the old three-walk ordering guaranteed implicitly.
     const extractJsTs = (text, relPath) => {
       let tree = null;
       try {
@@ -195,90 +184,147 @@ export async function loadTsEngine() {
         const methods = [];
         const methodIds = new Set();
         const methodsByClass = new Map(); // className -> Set(methodName)
+        const t3ByLine = {};              // Spec H statement fingerprints, keyed by owner fn start row
+        const decisionRows = {};          // row -> McCabe decision-node count. A regex symbol's exact
+                                          // complexity = 1 + sum over its extent rows — the same set the
+                                          // old per-body slice re-parse counted, without the re-parse.
+        const pendingCalls = [];          // {from, cls, prop} — this-calls + typed-receiver calls, resolved post-walk
+        const classStack = [];            // {name, id, bodyId} — nearest enclosing class = top
+        const fnStack = [];               // FN_LIKE frames: {id, row, body, bodyId, inBody, type, methodRec?}
+        const ownerStack = [];            // dispatch attribution (method_definition/function_declaration only): {name, className, node, params}
+        const parentTypes = [];           // ancestor node types (top = current node's parent)
+        const parentIds = [];             // ancestor node ids (parallel to parentTypes)
 
-        walkTree(tree.rootNode, (n) => {
-          if (n.type !== 'class_declaration') return;
-          const cname = n.childForFieldName('name')?.text;
-          if (!cname) return;
-          const set = methodsByClass.get(cname) || new Set();
-          const body = n.childForFieldName('body');
-          if (body) {
-            for (let i = 0; i < body.childCount; i++) {
-              const m = body.child(i);
-              if (m.type !== 'method_definition') continue;
-              const mname = m.childForFieldName('name')?.text;
-              if (!mname) continue;
-              set.add(mname);
-              const mid = mkId(`${cname}.${mname}`);
-              if (methodIds.has(mid)) continue; // overloads collapse to one node
-              methodIds.add(mid);
-              methods.push({
-                id: mid, label: mname,
-                line: m.startPosition.row + 1,
-                endLine: m.endPosition.row + 1,
-                complexity: complexityOf(m.childForFieldName('body')),
-              });
+        const enter = () => {
+          const type = cursor.nodeType;
+          const parentType = parentTypes.length ? parentTypes[parentTypes.length - 1] : null;
+          const topFn = fnStack.length ? fnStack[fnStack.length - 1] : null;
+          if (topFn && topFn.bodyId === cursor.nodeId) topFn.inBody = true; // entering the method's own body block
+
+          // McCabe decisions: tallied per START ROW (regex symbols sum their extent rows — the same
+          // decision set the old slice re-parse saw), and onto every open method frame whose body
+          // block is active (method complexity = its block's descendants, the old complexityOf
+          // contract — nested functions included).
+          {
+            let dec = DECISION_TYPES.has(type);
+            if (!dec && type === 'binary_expression') {
+              const op = cursor.currentNode.childForFieldName('operator');
+              dec = !!op && DECISION_OPS.has(op.text);
+            }
+            if (dec) {
+              const row = cursor.startPosition.row + 1;
+              decisionRows[row] = (decisionRows[row] || 0) + 1;
+              for (const fr of fnStack) if (fr.inBody) fr.body++;
             }
           }
-          methodsByClass.set(cname, set);
-        });
 
-        // Spec H: statement fingerprints for Type-3 (near-miss) clone detection. Each statement's
-        // text is identifier/literal-normalized (keywords preserved) and FNV-hashed; a function's
-        // multiset of statement hashes survives reordering and small insertions — exactly what the
-        // shingle and skeleton passes cannot see. Attributed to the NEAREST enclosing function-like
-        // node, keyed by its start line (the extractor joins them onto nodes by line).
-        const t3ByLine = {};
-        walkTree(tree.rootNode, (n) => {
-          if (n.type !== 'statement_block') return;
-          let owner = n.parent; // nearest enclosing function-like owns this block's statements
-          while (owner && !FN_LIKE.has(owner.type)) owner = owner.parent;
-          if (!owner) return;
-          const line = owner.startPosition.row + 1;
-          const bucket = t3ByLine[line] || (t3ByLine[line] = []);
-          for (let i = 0; i < n.childCount; i++) {
-            const st = n.child(i);
-            if (!st.isNamed || FN_LIKE.has(st.type) || st.type === 'comment') continue;
-            const h = stmtHash(st.text);
-            if (h) bucket.push(h);
+          if (type === 'class_declaration') {
+            const node = cursor.currentNode;
+            classStack.push({
+              name: node.childForFieldName('name')?.text || null,
+              id: cursor.nodeId,
+              bodyId: node.childForFieldName('body')?.id ?? -1,
+            });
+            const top = classStack[classStack.length - 1];
+            if (top.name && !methodsByClass.has(top.name)) methodsByClass.set(top.name, new Set());
+          } else if (FN_LIKE.has(type)) {
+            const frame = { id: cursor.nodeId, row: cursor.startPosition.row + 1, body: 0, bodyId: -1, inBody: false, type };
+            if (type === 'method_definition') {
+              const node = cursor.currentNode;
+              const cls = classStack.length ? classStack[classStack.length - 1] : null;
+              const mname = node.childForFieldName('name')?.text || null;
+              frame.bodyId = node.childForFieldName('body')?.id ?? -1;
+              // a METHOD NODE is emitted only for direct class-body children (object-literal
+              // methods etc. still attribute dispatch, but are not class methods)
+              if (cls?.name && mname && parentIds.length && parentIds[parentIds.length - 1] === cls.bodyId) {
+                methodsByClass.get(cls.name)?.add(mname);
+                const mid = mkId(`${cls.name}.${mname}`);
+                if (!methodIds.has(mid)) { // overloads collapse to one node
+                  methodIds.add(mid);
+                  frame.methodRec = { id: mid, label: mname, line: frame.row, endLine: node.endPosition.row + 1, complexity: 1 };
+                  methods.push(frame.methodRec);
+                }
+              }
+              ownerStack.push({ name: mname, className: cls?.name || null, node, params: null });
+            } else if (type === 'function_declaration') {
+              const node = cursor.currentNode;
+              ownerStack.push({ name: node.childForFieldName('name')?.text || null, className: null, node, params: null });
+            }
+            fnStack.push(frame);
+          } else if (type === 'call_expression') {
+            const node = cursor.currentNode;
+            const fn = node.childForFieldName('function');
+            if (fn && fn.type === 'member_expression') { // plain identifier calls = regex's job
+              const obj = fn.childForFieldName('object');
+              const prop = fn.childForFieldName('property')?.text;
+              const own = ownerStack.length ? ownerStack[ownerStack.length - 1] : null;
+              if (obj && prop && own && own.name) {
+                const from = mkId(own.className ? `${own.className}.${own.name}` : own.name);
+                if (obj.type === 'this' && own.className) {
+                  pendingCalls.push({ from, cls: own.className, prop });
+                } else if (obj.type === 'identifier') {
+                  if (own.params == null) own.params = paramTypes(own.node); // one field-walk per owner, not per call
+                  const t = own.params.get(obj.text);
+                  if (t) pendingCalls.push({ from, cls: t, prop });
+                }
+              }
+            }
           }
-        });
+
+          // Spec H: a statement that is a DIRECT child of a statement_block inside a function-like
+          // node contributes its normalized hash to that function's Type-3 multiset.
+          if (parentType === 'statement_block' && fnStack.length && cursor.nodeIsNamed && !FN_LIKE.has(type) && type !== 'comment') {
+            const row = fnStack[fnStack.length - 1].row;
+            const h = stmtHash(cursor.nodeText);
+            if (h) (t3ByLine[row] || (t3ByLine[row] = [])).push(h);
+          }
+        };
+
+        const exitNode = (id) => {
+          const topFn = fnStack.length ? fnStack[fnStack.length - 1] : null;
+          if (topFn && topFn.id === id) {
+            const fr = fnStack.pop();
+            if (fr.methodRec) fr.methodRec.complexity = 1 + fr.body;    // method complexity = its body block only (old complexityOf contract)
+            if (fr.type === 'method_definition' || fr.type === 'function_declaration') ownerStack.pop();
+          } else if (topFn && topFn.bodyId === id) topFn.inBody = false;
+          if (classStack.length && classStack[classStack.length - 1].id === id) classStack.pop();
+        };
+
+        const cursor = tree.walk();
+        try {
+          let done = false;
+          while (!done) {
+            enter();
+            parentTypes.push(cursor.nodeType); parentIds.push(cursor.nodeId);
+            if (cursor.gotoFirstChild()) continue;
+            parentTypes.pop(); exitNode(parentIds.pop());
+            for (;;) {
+              if (cursor.gotoNextSibling()) break;
+              if (!cursor.gotoParent()) { done = true; break; }
+              parentTypes.pop(); exitNode(parentIds.pop());
+            }
+          }
+        } finally { cursor.delete(); }
+
         for (const k of Object.keys(t3ByLine)) { t3ByLine[k].sort(); if (t3ByLine[k].length < 6) delete t3ByLine[k]; }
 
+        // Resolve dispatch candidates against the now-complete method tables.
         const dispatch = [];
         const seen = new Set();
-        const addDispatch = (from, to) => {
-          if (from === to || !methodIds.has(to)) return; // only wire to an emitted method (precision)
-          const k = from + '\t' + to;
-          if (seen.has(k)) return;
+        for (const c of pendingCalls) {
+          if (!methodsByClass.get(c.cls)?.has(c.prop)) continue;
+          const to = mkId(`${c.cls}.${c.prop}`);
+          if (c.from === to || !methodIds.has(to)) continue; // only wire to an emitted method (precision)
+          const k = c.from + '\t' + to;
+          if (seen.has(k)) continue;
           seen.add(k);
-          dispatch.push({ from, to });
-        };
-        walkTree(tree.rootNode, (n) => {
-          if (n.type !== 'call_expression') return;
-          const fn = n.childForFieldName('function');
-          if (!fn || fn.type !== 'member_expression') return; // plain identifier calls = regex's job
-          const obj = fn.childForFieldName('object');
-          const prop = fn.childForFieldName('property')?.text;
-          if (!obj || !prop) return;
-          const owner = enclosingSymbol(n);
-          if (!owner?.name) return;
-          const ownerClass = owner.classNode?.childForFieldName('name')?.text;
-          const from = mkId(ownerClass ? `${ownerClass}.${owner.name}` : owner.name);
-          if (obj.type === 'this' && ownerClass) {
-            if (methodsByClass.get(ownerClass)?.has(prop)) addDispatch(from, mkId(`${ownerClass}.${prop}`));
-            return;
-          }
-          if (obj.type === 'identifier') {
-            const t = paramTypes(owner.fnNode).get(obj.text);
-            if (t && methodsByClass.get(t)?.has(prop)) addDispatch(from, mkId(`${t}.${prop}`));
-          }
-        });
+          dispatch.push({ from: c.from, to });
+        }
 
         // Canonical order so the merged graph is deterministic regardless of DFS direction.
         methods.sort((a, b) => a.line - b.line || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
         dispatch.sort((a, b) => (a.from < b.from ? -1 : a.from > b.from ? 1 : a.to < b.to ? -1 : a.to > b.to ? 1 : 0));
-        return { methods, dispatch, t3ByLine };
+        return { methods, dispatch, t3ByLine, decisionRows };
       } catch {
         return null; // any parse/traversal failure -> regex fallback for this file
       } finally { if (tree) tree.delete(); } // finding 6: free the WASM tree either way
