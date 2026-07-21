@@ -3,13 +3,14 @@
 Parent: `docs/specs/round2-plan.md` (Theme C). Build order: **#20 → #21 → #19 → #17 → #18a** —
 smallest/verified first; #19's cache format lands before #17 so name-delta fields ride one format.
 **#18b (in-process extraction) is deferred to WS-H** (needs #40): only the sidecar half ships here.
-
 Shared files: `extract-symbols.mjs` is also edited by WS-B/C (before D — start from their landed
 truth) and WS-H (after D — keep new logic in cohesive functions so #40 can move them whole);
 `lib/masking.mjs` is shared with WS-B (#8/#13/#14/#15): rebase #20 on B-final masking.
-
 Bench corpus for all numbers: `bench/lib/loaded-corpus.mjs` — `writeLoadedCorpus(dir, {files:
-800})` = 16.8k syms/800 files (the findings' benchmark), `{files: 1400}` = 29.4k.
+800})` = 16.8k syms/800 files, `{files: 1400}` = 29.4k. **Bench discipline (· hardened): every
+perf gate is a RATIO of min-of-3 runs, one session, one box (4-core CI class); absolute ms are
+recorded as evidence, never the gate — sole absolute is the hook's < 1.5 s, which is
+`hook-fastpath-floor.md`'s own threshold (measured min-of-3).**
 
 ## #20 — maskJs throughput (masking.mjs:80-165)
 
@@ -41,7 +42,8 @@ reference oracle; assert `maskJs(text) === reference(text)`, both `keepValues` m
 (b) a `writeLoadedCorpus` tree. Lands green pre-patch, then gates T-20.1/T-20.2;
 `maskjs-regex-literals.test.mjs` stays untouched and green.
 **Criteria**: ≥ 1.4× MB/s on the 800-file corpus, zero byte diffs (audit: charCode alone
-1.50–1.56×; span-copy est. 3–5×). Bench command recorded.
+1.50–1.56×; span-copy est. 3–5×). Byte-identity means NO `SCANNER_VERSION` bump for #20 —
+the oracle is the proof; see T-19.1's ladder rule for any future non-identical mask change.
 
 ## #21 — enclosing() quadratic scan (extract-symbols.mjs:689, :422)
 
@@ -73,44 +75,58 @@ Files: new `tests/enclosing-index.test.mjs`, bench row.
   the test); same for the class-owner stack vs the :422 reference scan.
 - **Fixture**: big-file — `writeLoadedCorpus(dir, {files: 1, fnsPerFile: 8000})` (the finding's
   shape). Extract before/after the patch: **byte-identical `fragment.json`**; IE suite green.
-**Criteria**: big-file extract ≥ 2× faster (finding: 1,446 → ~579 ms class); 800-file corpus ±5 %.
+**Criteria**: big-file extract ≥ 2× (min-of-3; finding: 1,446 → ~579 ms class); 800-file ±5 %.
 
 ## #19 — warm no-change floor (cache size, fragment write, run.mjs belt)
 
-### T-19.1 edge-tuple interning + drop `syms` — SCANNER_VERSION 14
-Files: `scripts/extract-symbols.mjs`. Cache format change, so bump `SCANNER_VERSION` 13 → 14.
+### T-19.1 edge-tuple interning + drop `syms` — SCANNER_VERSION ladder · hardened
+Files: `scripts/extract-symbols.mjs`. Cache format change ⇒ bump `SCANNER_VERSION` (:45, read-
+gated at :266). **One ladder, not two**: ws-c.md's planned `rev: 'ws-c-1'` field rests on a false
+premise — the cache IS version-stamped today. Orchestrator: WS-C bumps 13→14 *instead of* adding
+`rev` (amend round2-ws-c.md); D bumps whatever C landed +1 (14→15). Rule for all rounds: any
+change to cache format OR to masking/derivation semantics bumps this one constant (v13 precedent).
 - **Interning schema**: per cache-file entry, replace `edges: [{from,to,kind,weight}]` with
   `ids: [...]` (distinct endpoint ids, first-use order) + `edges: [[fromIdx, toIdx, kindIdx]]`,
   `kindIdx` into const `EDGE_KINDS = ['call','ref','inherit','test']` (the closed set the derive
   emits). Encode at record (:825); replay (:816-817) decodes fresh `{from,to,kind,weight:1}` objects.
-- **Drop `syms`** (symbols stored 3×: syms+nodes+ranges): remove `syms` from entries and the stamp
-  gate (:311). The content-hash-hit path (:360-367) replays cached `nodes`/`ranges` directly (the
-  stamp tier's replay, with text already read and a refreshed stamp) **iff `oldCache.rulesSig ===
-  rulesSig`** (roles are baked into cached nodes; today's path rebuilds them) — else `scanFile`.
-- **Migration**: `:266` discards any cache with `version !== SCANNER_VERSION` — a v13 cache means
-  one cold rebuild, never a crash (hook/refresh/run share that reader). Test: plant a v13-shaped
-  cache; extract exits 0, cold banner (`scanned N/N`), output byte-equal to no-cache, cache now v14.
-**Criteria**: cache ≥ 40 % smaller @16.8k (18.8 → ≤ ~11 MB), shrinking the (a) parse + (c) rewrite terms.
+- **Drop `syms`** (symbols stored 3×: syms+nodes+ranges): remove `syms` from entries and from the
+  :311 stamp-gate conjuncts. The content-hash-hit path (:360-367) replays the FULL stamp-tier
+  product set — nodes/ranges/dyn/ast dispatch/typed intents, entry carried forward as at :331 —
+  with text already read and a refreshed stamp, **iff `oldCache.rulesSig === rulesSig`** (roles
+  are baked into cached nodes) and the :312 ast/cx validity conjuncts hold — else `scanFile`. · hardened
+- **Migration**: `:266` discards any version mismatch — a v13/v14 cache means one cold rebuild,
+  never a crash. Test: plant an old-shape cache; extract exits 0, cold banner (`scanned N/N`),
+  output byte-equal to no-cache, cache now at the new version.
+**Criteria**: cache ≥ 40 % smaller @16.8k (18.8 → ≤ ~11 MB), shrinking the parse + rewrite terms.
 
-### T-19.2 fragment sha1 skip-write + compact fragment
+### T-19.2 fragment sha1 skip-write + compact fragment · hardened
 Files: `scripts/extract-symbols.mjs` (:967). `--out` writes `JSON.stringify(fragment)` — compact,
-folding the tracked pretty-print note (22.7 → 13.5 MB; machine-only consumers, all `JSON.parse`).
-Before writing: if the out-file exists and its size equals the new string's byte length, compare
-sha1 of old bytes vs new — identical → skip the write (⇔ identical bytes, so the determinism
-invariant holds), banner gains `(unchanged)`. Stdout path (:968) unchanged.
+folding the tracked pretty-print note (22.7 → 13.5 MB). Consumer audit (· hardened): all fragment
+readers `JSON.parse`; the hook already receives compact stdout (:968, unchanged); run.mjs memoKey
+hashes raw bytes → exactly one stage recompute on the first post-upgrade run, then stable; no test
+or receipt pins pretty bytes, and IE's `edged N/M` regex tolerates a banner tail. Skip-write:
+out-file exists ∧ sizes equal ∧ sha1 old bytes === sha1 new → skip (⇔ identical bytes, so the
+determinism invariant holds), banner gains `(unchanged)`. Stdout path unchanged.
 
-### T-19.3 per-output content hashes in `.stages.json` (run.mjs corruption belt)
-Files: `scripts/run.mjs`, `tests/stage-memo.test.mjs`. Extend the memo record to
-`{key, at, outputs: {<name>: {s: byteLen, h: sha1}}}` for all five `STAGE_OUTPUTS`.
-- **Hash source**: run.mjs hashes each output's bytes right after the stage run (post-rename, so
-  bytes are final), before the memo write.
-- **Staleness semantics**: reuse requires `prevKey === memoKey` AND per output: exists + size +
-  sha1 match (size gate first — truncation fails without hashing). Any mismatch → recompute all
-  stages (all-or-nothing, as today). This *replaces* `graphParses()`'s 167 ms full JSON.parse and
-  is stronger (catches valid-JSON tampering). Old-shape `.stages.json` (no `outputs`) → not
-  reusable; one recompute upgrades it. `memoKey`'s fragment read+hash (:94-96) stays (a read, not a parse).
-**Criteria** (with T-19.2): warm no-change `run.mjs` 1,190 → ≤ ~1,000 ms @16.8k; S1–S3 green, new
-S4: a byte-tampered-but-parseable graph.json forces recompute.
+### T-19.3 per-output content hashes in `.stages.json` (run.mjs corruption belt) · hardened
+Files: `scripts/run.mjs`, `tests/stage-memo.test.mjs`. Memo record → `{key, at, outputs: {<name>:
+{s: byteLen, h: sha1}}}` for all five `STAGE_OUTPUTS`, hashed from each output's bytes right after
+the stage run (post-rename, bytes final), before the memo write.
+- **Staleness/corruption matrix (complete · hardened)** — reuse requires `prevKey === memoKey` AND
+  per output exists + size + sha1 (size gate first; truncation never hashes); any miss → recompute
+  all (all-or-nothing, as today). Cells: memo absent/corrupt/old-shape (no `outputs`) → recompute,
+  one run upgrades; output missing → exists gate; truncated → size; tampered — parseable or NOT —
+  → sha (this replaces `graphParses()`'s 167 ms parse AND extends cover: the old belt guarded only
+  graph.json, the other four outputs had none); crash between an output rename and the memo write
+  → key/hash mismatch → recompute.
+- **`SOURCE_DATE_EPOCH` (· hardened)**: append it (when set) to the lever string (:91-93) — else a
+  changed epoch reuses old-epoch bytes and the new hashes would fossilize that; `generatedAt`
+  rides the hashed bytes, so reuse-serves-recorded-bytes stays exactly today's semantics.
+- `memoKey`'s fragment read+hash (:94-96) stays (a read, not a parse); the 5-output read-back must
+  cost less than the parse it replaces — the bench row records both numbers.
+**Criteria** (with T-19.2): warm no-change `run.mjs` 1,190 → ≤ ~1,000 ms @16.8k; S1–S4 green and
+untouched (**S4 = lever change ALREADY EXISTS**, stage-memo.test.mjs:82 — the tamper case lands as
+**S5**: byte-tampered-but-parseable graph.json forces recompute; S6: tampered report.md ditto).
 
 ### #19 proof — IE property harness
 `tests/incremental-edges.test.mjs` must pass unchanged *before* #17 lands (same assertions, new
@@ -122,99 +138,137 @@ diagnostics). This assertion is the shared oracle #17 reuses.
 
 `:645` symbolSig (node-id set + pkg boundaries) gates `reuseEdges` (:809) and `bindSig` (:653-655):
 one added export flips both → 800/800 re-derive + full re-read. Replace the wholesale flip with
-per-file re-derive on the *name delta*, provably byte-identical.
+per-file re-derive on the *name delta*, provably byte-identical. **Dirty domain (· hardened)**:
+labels = `byName`'s keys = `n.label` (bare method names — :531-532); old map rebuilt from
+`oldCache.files[*].nodes`, new from live nodes, both at the :645 point — module nodes are not yet
+pushed on either side and cached entry nodes never contain them, so the two domains match.
 
-### T-17.1 candidate collection + cache fields
-Files: `scripts/extract-symbols.mjs`. In `deriveFileEdges`, collect the file's **candidate
-identifier set** — every `name` passed to `addEdge` (all five regexes' captures), recorded
-*before* the `byName.has(name)` gate (pre-byName-filter), excluding only `KEYWORDS` — return it,
-and store it per entry as sorted `cand: [...]` (finding: 30–200 names/file). Cache top gains
-`pkgSig` = sha1 of the sorted `pkgBoundaries` list (symbolSig mixes it in; the delta needs it
-alone). **Storage cost**: ~800 files × ~80 names × ~12 B ≈ 0.5–2 MB JSON (+5–10 % on the post-#19
-cache; net vs today still ≥ 35 % smaller). No stored label table — the old run's
+### T-17.1 candidate collection + cache fields · hardened
+Files: `scripts/extract-symbols.mjs`. Collect the file's **candidate set**: every `name` reaching
+`addEdge`, recorded INSIDE it after the `KEYWORDS` return and *before* the `aliased`/`byName` gate
+(:696-698) — alias locals and decl-line self-captures included; qualified-name regexes contribute
+exactly what addEdge receives (csBase/pyBases pass the split tail). Collected from the SAME masked
+lines the edges derive from, so cand and edges cannot skew across mask versions (#20's oracle +
+T-19.1's ladder cover mask evolution). Store per entry as sorted `cand: [...]` (30–200 names);
+cache top gains `pkgSig` = sha1 of the sorted `pkgBoundaries` list. Storage ≈ 0.5–2 MB (+5–10 % on
+the post-#19 cache; net vs today still ≥ 35 % smaller). No stored label table — the old run's
 label→sorted-def-id map is rebuilt from `oldCache.files[*].nodes`, zero extra bytes.
 
-### T-17.2 delta computation + re-derive rule + kill-switch
-Files: `scripts/extract-symbols.mjs`. When `symbolSig` matches → today's path untouched. When it
-differs and the delta path is eligible: build old/new `label → sorted def-id list` maps; **dirty
-labels** = labels whose lists differ (added/removed label; a rename dirties both old and new; an id
-change from file-move/owner-rename/`@line` shift also differs the list). **Re-derive rule**: file
-F's cached edges replay iff F's content hash is unchanged AND `cand(F) ∩ dirty = ∅`; else derive.
-This covers every byName use: the `has()` gate, the pkg-scoped unique fallback, and **ambiguity
+### T-17.2 delta computation + re-derive rule + kill-switch · hardened
+Files: `scripts/extract-symbols.mjs`. `symbolSig` match → today's path untouched. Else, when the
+delta path is eligible: **dirty labels** = labels whose sorted def-id lists differ (added/removed
+label; a rename dirties BOTH old and new — bidirectional by construction; an owner-rename/`@line`
+shift/file-move id change also differs the list). **Re-derive rule — three conjuncts, the third is
+the hardening**: F's cached edges replay iff F's content hash is unchanged AND `cand(F) ∩ dirty =
+∅` AND **F's bind replayed this run (T-17.3's rule held)**. The pair alone is unsound — two
+counterexamples: (i) `import { foo as bar }`: cand holds `bar`, dirty holds `foo` — a moved or
+deleted `foo` would replay a stale embedded id; (ii) member calls `u.merge()` never reach addEdge
+(:767-789 `continue`), so `merge` added to the aliased target file never intersects. The bind loop
+precedes the edge loop (flag available); no-import files hold vacuously (empty deps/cand). The
+rule covers every byName use: the `has()` gate, the pkg-scoped unique fallback, and **ambiguity
 transitions** (0→1, 1→2 unique→ambiguous, 2→1, 1→1′ retarget) — each is a def-list change on that
 label, so intersecting files re-derive, including files that only *gain* an `ambiguous++`.
-**Transitions that keep the wholesale flip** (delta ineligible): (a) **pkg-boundary changes**
-(`pkgSig` moved — `pkgOf` repartitions `inPkg` for *unchanged* def lists, invisible to any label
-delta); (b) `fileSig` changed (file add/delete — specifier + `<module>` landscape); (c) old cache
-lacks `cand` (migration — additive fields, no version bump); (d) `--full`/`CODEWEB_VERIFY_FRESHNESS`;
-(e) **kill-switch `CODEWEB_NAME_DELTA=0`** — forces the wholesale flip for edges *and* binds
-(rollback lever; both paths emit identical bytes, only wall-time moves).
+**Wholesale-flip transitions (delta ineligible)**: (a) **pkg-boundary changes** (`pkgSig` moved —
+`pkgOf` repartitions `inPkg` with zero label delta); (b) `fileSig` changed (add/delete —
+specifier + `<module>` landscape); (c) old cache lacks `cand`/bind fields (migration — additive,
+no extra bump); (d) `--full`/`CODEWEB_VERIFY_FRESHNESS`; (e) **· hardened: any CHANGED file whose
+JS re-export table (cached `entry.rex`) or Py from-import table (recomputed from old+new masked
+text, changed files only) differs** — forwarding flips (`export { shared } from './util2.js'`)
+retarget OTHER files' chains with zero label delta, and Py chains are also walked at EDGE time via
+`resolveFileMember`, invisible to deep consumers' cand and bindDeps; (f) **kill-switch
+`CODEWEB_NAME_DELTA=0`** — wholesale flip for edges *and* binds (rollback lever; both paths emit
+identical bytes, only wall-time moves).
 
-### T-17.3 the bindSig analogue
-Files: `scripts/extract-symbols.mjs`, `scripts/lib/import-resolve.mjs`. Cached binds embed resolved
-ids, gated today by global `bindSig` (:653). Per-file rule — replay F's `bind` iff: stamp/hash
-unchanged, `fileSig` + `pkgSig` unchanged, `bindCand(F) ∩ dirty = ∅`, and every rel path in
-`bindDeps(F)` has an unchanged content hash. `bindCand` = original imported names; `bindDeps` =
-target modules consulted during `bindFileImports` *including re-export hops* (the resolver records
-and returns them — default-export/member/kind lookups are all functions of those files' text); both
-stored on the bind entry. Ineligible/intersecting → re-bind that file only (lazy `textOf` read).
+### T-17.3 the bindSig analogue — resolver API change owned here · hardened
+Files: `scripts/extract-symbols.mjs`, `scripts/lib/import-resolve.mjs`. Cached binds embed
+resolved ids (:653). Per-file rule — replay F's `bind` iff: stamp/hash unchanged, `fileSig` +
+`pkgSig` unchanged, `bindCand(F) ∩ dirty = ∅`, and every rel path in `bindDeps(F)` has an
+unchanged content hash. **`bindFileImports` returns `{amap, nsmap, classmap, edges}` today
+(import-resolve.mjs:224-310) — no deps are recorded; this task ADDS the API**: thread a `deps` Set
+through resolveImport / resolveReExport / the py re-export walk and return it — every RESOLVED
+target file (named/ns/default/class/side; ns targets included even though bind only existence-
+checks them, because `deriveFileEdges` later resolves members against their live symbol tables),
+plus every file VISITED by `resolveReExport` (its cycle-guard `seen` walk, dead ends included) and
+by `pyReExportResolve`/`pyReExportTableOf`. `bindCand` = original imported names. Both stored on
+the bind entry. Ineligible/intersecting → re-bind that file only (lazy `textOf` read).
 
-### T-17.4 property proof (test-first; the workstream's gate)
-Files: `tests/incremental-edges.test.mjs`. The generator emits `body`/`addsym`/`addfile`/`delfile`
-— it does **not** emit remove- or rename-symbol: extend ops with **`delsym`** (strip one
-previously-added function block), **`rensym`** (rename a def — including a colliding rename onto
-an existing name, forcing the 1→2 ambiguity transition), and **`pkg`** (add/remove a nested
-`package.json`, forcing the wholesale-flip path). Land the extended generator FIRST (green under
-wholesale semantics), then the delta under it. IE-EQUIVALENCE asserts sorted node/edge equality
-AND warm-vs-cold fragment byte-equality (per #19) at every step. IE-INCREMENTALITY's `edged ==
-total` assertion (:80) encodes the old fallback contract — **replace it with a stricter pair**
-(not a weakening): add-one-function re-edges only the edited file + candidate-intersecting files
-(`edged < total` on a crafted tree where a disjoint file must NOT re-edge) with byte-equality to
-cold; plus a `CODEWEB_NAME_DELTA=0` case asserting `edged == total` (kill-switch → wholesale).
+### T-17.4 property proof (test-first; the workstream's gate) · hardened
+Files: `tests/incremental-edges.test.mjs`. Extend generator ops (`body`/`addsym`/`addfile`/
+`delfile` today) with **`delsym`** (strip one added function), **`rensym`** (rename a def —
+including a colliding rename onto an existing name, forcing 1→2), **`pkg`** (add/remove a nested
+`package.json` → pkgSig wholesale), and **`rex`** (add/flip an `export { x } from` barrel — proves
+ineligibility (e)). Land the extended generator FIRST (green under wholesale semantics), then the
+delta under it. `addfile`/`delfile` flip fileSig, so those steps stay wholesale by design; only
+addsym/delsym/rensym-class steps may show `edged < total`. IE-EQUIVALENCE asserts sorted node/edge
+equality AND warm-vs-cold fragment byte-equality (per #19) at every step.
+**IE-INCREMENTALITY adjudication (:80 `edged == total`; the plan forbids weakening)**: that
+assertion pins the wholesale MECHANISM, not the user-visible guarantee. Verdict — replacement is
+accepted ONLY as this strict superset: (1) a `CODEWEB_NAME_DELTA=0` leg re-runs the SAME scenario
+(BASE tree, the same add-`a3` step) keeping the :80 assertion **verbatim**; (2) the default-env
+leg replaces it with strictly stronger checks — add-one-function re-edges the edited file plus
+candidate-intersecting files while a crafted disjoint file does NOT re-edge (`edged < total`),
+byte-equal to cold. Nothing is deleted; one assertion moves under the env that pins its
+semantics, scenario intact. Plus a bind-coupling witness: `rensym` of an IMPORTED name (BASE's
+`a1`) must re-edge `c.js`.
 **CI criterion: IE-EQUIVALENCE runs at the full 40 trials** — WS-A's #6 split may parallelize,
 but trial count/semantics are pinned this round; #17's risk budget is spent here.
 
-### T-17.5 bench evidence
-@16.8k: noop, body-edit, **add-one-function** (target ≤ ~1.3× noop: ≤ ~950 ms vs 1,698 today),
-delete, rename; @29.4k add-one-function (vs 3,217 ms); hook end-to-end add-one-function (vs
-2,534 ms). Commands + `edged N/M` banners recorded in evidence.
+### T-17.5 bench evidence · hardened
+@16.8k (min-of-3 ratios per header): noop, body-edit, **add-one-unique-function** (gate ≤ ~1.3×
+same-session noop; the ~950 ms absolute is recorded, not gated), **add-colliding-function**
+(`anchor0` — honesty row: mass cand intersection, near-wholesale expected, recorded, no gate),
+delete, rename; @29.4k add-one-function; hook end-to-end add-one-function. Caveat (· hardened):
+`loaded-corpus` emits NO import statements — bindDeps is empty everywhere, so the bench exercises
+only the bare-name path; bind-coupling correctness evidence is IE's (T-17.4). Commands + `edged
+N/M` banners recorded in evidence.
 
 ## #18a — baseline sidecar for the post-edit hook (#18b → WS-H)
 
-### T-18.1 summary split + sidecar lib
+### T-18.1 summary split + sidecar lib · hardened
 Files: `scripts/lib/graph-ops.mjs`, new `scripts/lib/hook-baseline.mjs`. Split
 `structuralRegressions` (:440-452) into `baselineSummary(graph)` → `{cycles: [cycleKey...],
-callIn: {id: count}}` (only ids with ≥ 1 caller — what :448 consults) and
-`regressionsAgainstSummary(summary, after)`; `structuralRegressions(b, a)` becomes their
-composition (one truth, existing tests untouched). Sidecar **`hook-baseline.json`** beside
-`graph.json` (the `brief.json` convention): `{version: 1, graph: {s, m, h}, cycles, callIn}` —
-size, rounded mtimeMs, sha1 of the summarized graph.json bytes (stamp checked first, hash only on
-stamp mismatch). Atomic write.
+callIn: {id: count}}` (only ids with ≥ 1 caller — what :448 consults; computed on the
+`normalizeGraph`'d graph so cycle keys match the composition) and `regressionsAgainstSummary(
+summary, after)`; `structuralRegressions(b, a)` becomes their composition (one truth, existing
+tests untouched). Sidecar **`hook-baseline.json`** beside `graph.json`: `{version: 1, graph:
+{s, m, h}, cycles, callIn}` — size, rounded mtimeMs, sha1 of the summarized graph.json bytes;
+stamp checked first, sha1 only on stamp mismatch (an identical-bytes rewrite re-validates via
+`h`). Atomic write.
 
-### T-18.2 write points — map + refresh
-Files: `scripts/run.mjs` (after the stage run, and on the reuse path when the sidecar is
-missing/stale — one graph parse at map time, amortized) and `scripts/refresh.mjs` (after the
-updated graph's `atomicWrite` :63 — graph already in memory, the summary is free). WS-F #25
+### T-18.2 write points — map + refresh · hardened
+Files: `scripts/run.mjs` (after the stage run; on the reuse path only when the sidecar is
+missing/stale — one graph parse, amortized) and `scripts/refresh.mjs` (after :63's `atomicWrite`:
+`h`/`s` from the in-memory JSON string just written — free — `m` from a post-rename stat). Both
+writes are best-effort try/catch — a sidecar failure must never fail a map/refresh. WS-F #25
 coordinates here: land D's write first, F rebases.
 
-### T-18.3 hook consumption + fallback
-Files: `hooks/post-edit-diff.mjs`. In `check()`: load `hook-baseline.json`; if version + stamp/hash
-match the baseline file → `regressionsAgainstSummary(sidecar, after)` — **no baseline `JSON.parse`,
-no before-side normalizeGraph/fileCycles/buildIndex** (the ~151 + ~173 ms terms). Missing/stale/
-corrupt sidecar → today's path exactly (parse + `structuralRegressions`); fail-open untouched.
-BDD scenarios (`tests/post-edit-diff.test.mjs` / `hook-sidecar.test.mjs`): given map → sidecar
-exists + stamp-matches; given valid sidecar → verdict equals the legacy path's on the same payload;
-given a sidecar with one baseline cycle key removed → that cycle reported as new (proves the
-sidecar, not the graph, was consumed); given stale/corrupt sidecar → correct fallback verdict;
-given sidecar and graph both corrupt → silent exit 0.
+### T-18.3 hook consumption + fallback — full seam matrix · hardened
+Files: `hooks/post-edit-diff.mjs`. In `check()`: load sidecar; version + stamp/hash match →
+`regressionsAgainstSummary(sidecar, after)` — no baseline `JSON.parse`, no before-side
+normalizeGraph/fileCycles/buildIndex (~151 + ~173 ms). Seam matrix: graph.json MISSING →
+`findTarget` (cli.mjs:182) already returns null — hook inert before any sidecar read (no new
+seam); sidecar missing/stale/corrupt × graph valid → today's path exactly (share the bytes read
+for the hash check with the fallback parse — one read); sidecar valid × graph tampered under a
+matching stamp → sidecar consumed — CORRECT: it snapshots map-time truth where today's path would
+parse the tampered baseline; sidecar valid × graph corrupt with stamp mismatch → fallback → parse
+fails → null; **sidecar and graph both corrupt → silent exit 0 — right for the contract**:
+hooks.json registers an advisory PostToolUse hook that always exits 0 and emits
+`additionalContext` only on a finding (:79-88); silence IS today's fail-open. Stats bumps
+(:72-76) live outside `check()` — keep them firing on every path. BDD scenarios
+(`tests/post-edit-diff.test.mjs` / `hook-sidecar.test.mjs`): given map → sidecar exists +
+stamp-matches; given valid sidecar → verdict equals the legacy path's on the same payload; given
+a sidecar with one baseline cycle key removed → that cycle reported as new (proves the sidecar,
+not the graph, was consumed); given stale/corrupt sidecar → correct fallback verdict; given both
+corrupt → silent exit 0.
 **Criteria**: hook no-change fire < 1.5 s at the 16k class (from 1,624 ms; the sidecar removes
 ~325 ms — the residual is #18b/WS-H; add that pointer to `hook-fastpath-floor.md`'s revisit triggers).
 
 ## Workstream exit bar (plan WS-D)
 
 Add-one-function warm extract @16.8k ≤ ~1.3× noop (byte-identity via IE-EQUIVALENCE, full 40
-trials, extended ops); hook no-change < 1.5 s @16k-class; mask ≥ 1.4× byte-identical over repo +
-corpus; #21 big-file ≥ 2× with identical fragment — all measured on `writeLoadedCorpus` trees,
-commands + shas in `round2-evidence.md`. Risks: #17 carries the kill-switch (`CODEWEB_NAME_DELTA=0`)
-and lands as its own commit for clean revert; #19's version bump cold-rebuilds v13 caches by
-construction; #18a is fail-open at every new seam.
+trials, extended ops incl. `rex`/`pkg`); hook no-change < 1.5 s @16k-class; mask ≥ 1.4×
+byte-identical over repo + corpus; #21 big-file ≥ 2× with identical fragment — all min-of-3
+ratios on `writeLoadedCorpus` trees, commands + shas in `round2-evidence.md`. Risks: #17 carries
+the kill-switch (`CODEWEB_NAME_DELTA=0`) and lands as its own commit for clean revert; the
+version ladder (C 13→14, D 14→15) cold-rebuilds stale caches by construction; #18a is fail-open
+at every new seam, with both write points try/catch.

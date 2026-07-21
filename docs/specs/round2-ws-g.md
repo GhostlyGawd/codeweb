@@ -1,11 +1,10 @@
 # Round-2 WS-G — report & editor (#36, #38, #37, #35) · hardened
 
-Findings: IMPROVEMENTS.md Theme F. Build order **#36 → #38 → #37 → #35**: #36 and #38 are isolated
-big wins (embed strip; lens BFS); #37 makes the draw loop cheap so #35's sim work is measurable
-without draw noise; #35 last because it carries genuine research risk plus the receipt re-run.
-Shared files with A–F: **none except `bench/results/`** — coordinate any `bench/results/*` commit
-with WS-E (#42 also refreshes receipts there). Standing invariant for every task: rebuild-twice
-byte-identity of `report.html` (tests/build-report.test.mjs:55) stays green.
+Findings: IMPROVEMENTS.md Theme F. Build order **#36 → #38 → #37 → #35**: #36/#38 are isolated big
+wins (embed strip; lens BFS); #37 makes the draw loop cheap so #35's sim work is measurable without
+draw noise; #35 last (research risk + receipt re-run). Shared files with A–F: **none except
+`bench/results/`** — coordinate `bench/results/*` commits with WS-E (#42 refreshes receipts there).
+Standing invariant: rebuild-twice byte-identity of `report.html` (build-report.test.mjs:55) green.
 
 ## Ground truth (verified by grep/read at spec time — re-verify before building)
 
@@ -63,9 +62,9 @@ byte-identity of `report.html` (tests/build-report.test.mjs:55) stays green.
   queue, direct Set iteration, no spread merge. TDD: existing semantics tests must pass unchanged
   (same numbers — callers/blast parity with MCP is the contract); add a factor-based budget test
   (CI-noise-safe): on a synthetic 20k-node deep-chain graph, full-file lens pass ≤ K× a single
-  linear index build (pick K empirically ≈3–5, assert factor not absolute ms). Add
-  `bench/experiments/lens-bench.mjs` (dev-side, ~40 lines): load a graph.json, time
-  `lensesForFile` for the worst file cold + warm, print ms — the <40 ms evidence tool.
+  linear index build (pick K empirically ≈3–5, assert factor not absolute ms). Add dev-side
+  `bench/experiments/lens-bench.mjs` (~40 lines): load a graph.json, time `lensesForFile` for
+  the worst file cold + warm, print ms — the <40 ms evidence tool.
 - **T-38.2** `blastMemo` persistence across refreshes. `buildLensIndex(graph, prevIndex)` carries
   memo entries whose ids are provably unaffected. **Invalidation key**: diff old vs new
   `callIn`/`inheritIn` maps into an edge delta (added+removed `from→to` per kind, plus edges of
@@ -112,13 +111,12 @@ byte-identity of `report.html` (tests/build-report.test.mjs:55) stays green.
   `edgeBucketKey(e, A, B, on)` as a pure fn.
 - **T-37.4** Reuse `refreshHits`: have `refreshHits()` (template:824) also store `hitIds:Set` +
   `hitDomains:Set`; `gDraw`'s search branch (:760-763) uses them instead of re-scanning AN per
-  frame. Re-run `refreshHits()` where the active set changes (role-filter toggle path calling
-  computeDerived). Test: extractFn-pin that gDraw's source no longer contains the
-  `AN.forEach`+`toLowerCase` rescMatch in the search branch (source-level guard), plus a behavior
-  test that hit sets equal the old computation on a fixture.
+  frame. Re-run `refreshHits()` where the active set changes — the role-toggle path calling
+  computeDerived (the boot `roles=all` deep link reuses `roleBtn.onclick`, so it's covered; AN
+  changes nowhere else). Test: extractFn source-guard — gDraw no longer contains the
+  `AN.forEach`+`toLowerCase` rescan — plus hit sets equal the old computation on a fixture.
 - **T-37.5** Draw instrumentation + Playwright verification. Add `__codewebStage.drawOnce()`
-  returning ms for one full `gDraw` at current camera (fitted). Playwright
-  (PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers, Chromium preinstalled): real click path — open
+  returning ms for one full `gDraw` at current camera (fitted). Playwright real click path — open
   report, click graph tab, click `#gToggle` (Expand all), type in `#gsearch`, wheel-zoom, assert
   no pageerror and `drawOnce()` at fit < 100 ms at 16.8k (evidence, not CI — CI runs the fixture
   scale via report-scale-bench.test.mjs, which gains a drawOnce schema pin). Preflight (required
@@ -130,20 +128,18 @@ byte-identity of `report.html` (tests/build-report.test.mjs:55) stays green.
 ## #35 — expand-all sim (High/M, research risk) — files: scripts/report-template.html, bench/experiments/report-sim-lab.mjs (new), bench/experiments/report-scale.mjs, bench/results/report-scale.json, tests/report-sim.test.mjs (new), tests/report-scale-bench.test.mjs
 
 Order inside #35 is load-bearing. The audit's adversarial result: **velocity clamp + spiral hatch
-ALONE measured 542 ms/step — worse than the 205 ms baseline** — because the ±185k px explosion was
-accidentally load-bearing: it was the only mechanism spreading nodes apart, and with only 3×3
-near-field forces a compact spiral seed keeps everything inside CUT forever (density self-adapts
-to any CUT). Therefore the far-field monopole (the new spreader) lands FIRST and is proven in the
-lab before any seeding change; the spiral may never ship without it.
+ALONE measured 542 ms/step — worse than the 205 ms baseline** — the ±185k px explosion was
+accidentally load-bearing (the only spreading mechanism; with 3×3-only near-field forces a compact
+spiral seed keeps everything inside CUT forever — density self-adapts to any CUT). So the
+far-field monopole lands FIRST, proven in the lab; the spiral may never ship without it.
 
 - **T-35.1** Node-runnable sim lab (TDD instrument, before any physics change). Extract `gStep`
-  (and later the chunker) via the extractFn pattern into `bench/experiments/report-sim-lab.mjs`:
-  builds a synthetic expanded W at any scale (`--domains 20 --per-domain 840` ≈ 16.8k, edges
-  sampled with the loaded-corpus LCG — seeded, no Math.random), runs to settle, reports
-  `settledMsPerStep` (mean of last 10 logical steps), `maxSingleTaskMs`, step count, spread stats
-  (cell-occupancy p95). First run reproduces the finding's ~205 ms/step baseline (record it).
-  tests/report-sim.test.mjs pins: extraction works; small-scale settle terminates; determinism —
-  two runs, bitwise-equal final positions.
+  (and later the chunker) via extractFn into `bench/experiments/report-sim-lab.mjs`: builds a
+  synthetic expanded W at any scale (`--domains 20 --per-domain 840` ≈ 16.8k, edges sampled with
+  the loaded-corpus LCG — seeded, no Math.random), runs to settle, reports `settledMsPerStep`
+  (mean of last 10 logical steps), `maxSingleTaskMs`, step count, cell-occupancy p95. First run
+  reproduces the finding's ~205 ms/step baseline (record it). tests/report-sim.test.mjs pins:
+  extraction works; small-scale settle terminates; determinism — bitwise-equal positions ×2 runs.
 - **T-35.2** Far-field monopole (Barnes-Hut-lite) in `gStep`. After the grid build (:722-727):
   per cell accumulate mass `m_c = Σ(900/2 + r_i·55)` (mirrors repK's terms) and centroid; per node,
   loop all cells EXCLUDING its 3×3 neighborhood, add `f = K_FAR·m_c/max(d²,CUT²)` along
