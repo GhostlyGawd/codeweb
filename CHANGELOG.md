@@ -462,6 +462,16 @@ notes so validated results, papers, and new tools never get lost in commit histo
   hand-rolled loops remain (`grep` proof: the one flag loop left is parseArgs itself).
   (perf-quality finding 24)
 
+### Fixed
+- **Releases are gated.** Tag-push and workflow-dispatch publishing both flow through a `test` job
+  first — `publish` now `needs:` the full suite plus the consistency check, so a failing suite
+  blocks the release instead of shipping past it. Dispatched refs must be ancestors of `origin/main`
+  (checked before the tag is created; a stray branch can no longer become a tagged release), and
+  `@vscode/vsce` is exact-pinned to 3.9.2 at both call sites instead of executing whatever npm
+  serves as `@latest` that day. `tests/workflows.test.mjs` pins the gates as text invariants — the
+  round-1 regression class was gates silently dropped from these files. (perf-quality round 2,
+  finding #2)
+
 ## [0.9.0] - 2026-07-19
 
 ### Added
