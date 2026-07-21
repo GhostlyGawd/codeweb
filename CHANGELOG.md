@@ -69,6 +69,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
   mobile search-count no longer collides with the input; the editor-root picker is an inline
   form instead of a blocking `prompt()`; and the whole-panel `aria-live` (which re-read the
   entire inspector on every click) became a scoped one-line announcer. (IMPROVEMENTS.md #9)
+- **The value receipt is felt, not buried.** The session brief's activity line used to render
+  only the current calendar month's bucket and vanish when it was empty — every new user and
+  every 1st-of-the-month saw silence. It now leads with **lifetime totals** ("codeweb here since
+  2026-06: …", current month in parentheses), the brief warns when the map is a week old
+  ("built N day(s) ago — refresh with codeweb_refresh"), a successful `run.mjs` map ends with
+  the receipt line, and CLI queries (`query`/`explain`/`context-pack`) now count toward
+  `queriesServed` — the denominator stops undercounting non-MCP use. (IMPROVEMENTS.md #10)
 - **The CLI grew a front door.** Every CLI answers `--help`/`-h` (exit 0) — including the
   `codeweb` bin, where `--help` previously errored with `target not found: --help`; `run.mjs`
   documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map

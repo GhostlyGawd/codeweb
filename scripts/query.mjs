@@ -22,6 +22,7 @@ import { runQuery } from './lib/query-core.mjs'; // payload assembly lives once 
 const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--limit N] [--offset N] [--json]`;
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, capList, checkStaleness, loadGraph } from './lib/cli.mjs';
+import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
 
 function parseArgs(argv) {
   const o = { graph: null, query: null, symbol: null, json: false, help: false, queries: 0, limit: null, offset: 0 };
@@ -48,10 +49,11 @@ if (opts.help || opts.queries !== 1 || (needsSymbol && !opts.symbol)) die(USAGE,
 
 // #5: one loader (arg -> CODEWEB_WS -> nearest .codeweb above cwd), one error message, one
 // normalization — the hand-rolled copy this replaced was the dogfood finding, applied here.
-const { graph } = loadGraph(opts.graph, { usage: USAGE });
+const { graph, abs } = loadGraph(opts.graph, { usage: USAGE });
 const index = buildIndex(graph);
 
 const { payload, code } = runQuery(graph, index, { query: opts.query, symbol: opts.symbol, limit: opts.limit, offset: opts.offset });
+if (payload && payload.found !== false) bump(abs, 'queriesServed');
 
 // awareness: annotate (never block) when the graph no longer matches disk
 const staleInfo = checkStaleness(graph);

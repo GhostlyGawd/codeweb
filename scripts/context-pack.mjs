@@ -19,6 +19,7 @@ import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols, callersOf, c
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--json]   (or set CODEWEB_WS)';
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, capList, checkStaleness, loadGraph, sourceReader } from './lib/cli.mjs';
+import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
 
 const argv = process.argv.slice(2);
 let json = false, windowN = 3, fullBodies = false, limit = null; const pos = [];
@@ -43,6 +44,7 @@ if (!ids.length) {
   die(`symbol not found: ${symbol}${suggestions.length ? ` — near matches: ${suggestions.join(', ')}` : ''} (concept search: find.mjs "<free text>")`, 1);
 }
 
+bump(abs, 'queriesServed');
 const index = buildIndex(graph);
 const callerIds = callersOf(index, ids);
 const calleeIds = calleesOf(index, ids);

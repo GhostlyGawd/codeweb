@@ -113,3 +113,9 @@ console.error(`\n[run] done -> ${ws}`);
 console.error(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);
 // #5: the map's whole point is to be LOOKED AT — say so (auto-open stays opt-in via --open).
 if (!opts.open) console.error(`[run]   open ${join(ws, 'report.html')} in your browser (or re-run with --open)`);
+// #10: the value receipt shows up where the user already is — one line, only when non-empty.
+try {
+  const { readStats, lifetimeTotals, monthLine } = await import('./lib/stats.mjs');
+  const receipt = monthLine(lifetimeTotals(readStats(join(ws, 'graph.json'))));
+  if (receipt) console.error(`[run]   codeweb here so far: ${receipt} (full receipt: scripts/stats.mjs)`);
+} catch { /* receipt must never break the pipeline */ }

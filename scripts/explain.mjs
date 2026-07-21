@@ -15,6 +15,7 @@ import { buildCards } from './lib/explain-core.mjs'; // Spec P: one truth for ca
 const USAGE = 'usage: explain.mjs <graph.json> <symbol> [--json]   (or set CODEWEB_WS)';
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, loadGraph, checkStaleness, sourceReader } from './lib/cli.mjs';
+import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
 
 const argv = process.argv.slice(2);
 let json = false; const pos = [];
@@ -23,7 +24,7 @@ let graphArg = null, symbol = null;
 if (pos.length >= 2) { graphArg = pos[0]; symbol = pos[1]; }
 else if (pos.length === 1) { symbol = pos[0]; }
 if (!symbol) die(USAGE, 2);
-const { graph } = loadGraph(graphArg, { usage: USAGE });
+const { graph, abs } = loadGraph(graphArg, { usage: USAGE });
 
 const ids = resolveSymbol(graph, symbol);
 if (!ids.length) {
@@ -38,6 +39,7 @@ if (!ids.length) {
   }
 }
 else {
+  bump(abs, 'queriesServed');
   const index = buildIndex(graph);
   const reader = sourceReader(graph.meta && graph.meta.root);
   const cards = buildCards(graph, index, reader, ids);
