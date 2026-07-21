@@ -7,11 +7,9 @@
 // die() may still hard-exit.
 
 import { readFileSync, existsSync, statSync, writeFileSync, renameSync, rmSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { resolve, dirname, join } from 'node:path';
 import { normalizeGraph } from './graph-ops.mjs';
-
-const sha1 = (s) => createHash('sha1').update(s).digest('hex');
+import { sha1 } from './hash.mjs';
 
 // A consumer like `| head -1` closes the pipe early; without a handler Node dies on EPIPE with a
 // stack trace. Treat it as a normal end-of-output.
