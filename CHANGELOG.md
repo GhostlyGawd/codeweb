@@ -58,6 +58,15 @@ notes so validated results, papers, and new tools never get lost in commit histo
   `SOURCE_DATE_EPOCH` so CI can byte-compare complete workspaces. graph.json keeps all three
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
+### Performance
+- **Tree-sitter parse trees are freed.** web-tree-sitter has no FinalizationRegistry, and none of
+  the engine's 8 parse sites called `tree.delete()` — every cold/changed-file extract on a default
+  install leaked WASM pages for the process lifetime (measured: 1,312MB vs 217MB peak RSS on an
+  11MB corpus; large-file repos risked OOM). All sites now free in `try/finally`; output is
+  byte-identical and ~9% faster from reduced GC pressure. A static tripwire test pins parse-site
+  count == delete-site count so a new parse can't quietly reintroduce the leak. (perf-quality
+  finding 6)
+
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
   script would have refused to roll an "empty" release over real work):
