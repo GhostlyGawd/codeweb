@@ -195,6 +195,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
   emits the same `found:false` + suggestions contract explain adopted in #2 (the old stderr
   `die()` made MCP reply an empty string). Measured, even while a campaign runs: explain 9.3ms,
   context 12.3ms. (perf-quality finding 20)
+- **The report's graph sim is grid-based, frame-budgeted, and freeze-free.** `gStep` computed
+  all-pairs repulsion per animation frame — 1,174ms/frame measured at 16.3k nodes (×~259 anneal
+  frames ≈ 5 minutes of sim CPU for one "Expand all" click), and the `prefers-reduced-motion`
+  branch ran the whole anneal in ONE synchronous task (a hard freeze, not jank). Now: a uniform
+  spatial grid (only 3×3-neighborhood pairs interact — deterministic, 11.5x on the dense
+  micro-bench and far more on real spread-out layouts), a wall-clock frame budget (8ms of sim per
+  frame — small graphs settle in a blink, huge ones stay responsive), and the reduced-motion
+  settle chunked into ≤12ms slices with a single final draw. Spec L's harness gained the
+  expand-all row (finding 13(d)): `simMsPerFrame` recorded and judged in the verdict, so the
+  cliff that sat one click past the old green can never regress unmeasured. (perf-quality
+  finding 21)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release

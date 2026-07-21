@@ -682,26 +682,64 @@
     sim = { alpha: 1, running: false }; gFit(); gStart();
   }
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reducedSeq = 0;
+  var FRAME_BUDGET_MS = 8; // finding 21: sim work per frame is wall-clock-budgeted, never count-based
   function gStart() {
     if (!sim) return;
-    if (REDUCED) { // settle synchronously — no animation for motion-sensitive users
-      sim.alpha = 1;
-      for (var it = 0; it < 260 && sim.alpha > 0.02; it++) { gStep(); sim.alpha *= 0.985; }
-      gFit(); gDraw(); sim.running = false; return;
+    if (REDUCED) { // settle WITHOUT animation — motion-sensitive users still get one final layout,
+      // now computed in ≤12ms slices (the old single synchronous task blocked the main thread for
+      // the entire 260-step anneal — a hard multi-minute freeze at 16k nodes, not jank).
+      sim.alpha = 1; sim.running = true;
+      var seq = ++reducedSeq;
+      var slice = function () {
+        if (!sim || seq !== reducedSeq) return; // a newer layout superseded this settle
+        var t0 = performance.now();
+        while (sim.alpha > 0.02 && performance.now() - t0 < 12) { gStep(); sim.alpha *= 0.985; }
+        if (sim.alpha > 0.02) { setTimeout(slice, 0); return; }
+        gFit(); gDraw(); sim.running = false; // ONE draw at the end — no motion
+      };
+      slice(); return;
     }
     sim.alpha = Math.max(sim.alpha, 0.7); if (!sim.running) { sim.running = true; requestAnimationFrame(gTick); }
   }
-  function gTick() { if (!sim || !document.getElementById('view-graph').classList.contains('on')) { if (sim) sim.running = false; return; } gStep(); gDraw(); sim.alpha *= 0.985; if (sim.alpha > 0.02) requestAnimationFrame(gTick); else sim.running = false; }
+  function gTick() {
+    if (!sim || !document.getElementById('view-graph').classList.contains('on')) { if (sim) sim.running = false; return; }
+    // as many sim steps as fit the frame budget (small graphs settle in a blink; huge graphs do
+    // at least one step and stay responsive), then one draw
+    var t0 = performance.now();
+    do { gStep(); sim.alpha *= 0.985; } while (sim.alpha > 0.02 && performance.now() - t0 < FRAME_BUDGET_MS);
+    gDraw();
+    if (sim.alpha > 0.02) requestAnimationFrame(gTick); else sim.running = false;
+  }
   function gStep() {
     var ns = W.nodes, es = W.edges, a = sim.alpha, i, j;
     for (i = 0; i < ns.length; i++) { ns[i].fx = 0; ns[i].fy = 0; }
+    // Repulsion via a uniform grid (finding 21): the all-pairs loop was O(n²) PER FRAME —
+    // measured 1,278ms/frame at 16.3k nodes, ≈5.5 minutes of sim CPU for one "Expand all"
+    // click. Beyond CUT the inverse-square force is sub-percent of the spring forces, so only
+    // pairs within the 3×3 cell neighborhood interact. Deterministic: cells keyed by floored
+    // coords, pairs visited in node-array order — same input, same layout.
+    var CUT = 220, CUT2 = CUT * CUT, grid = new Map(), gx, gy, cx, cy, cell;
+    for (i = 0; i < ns.length; i++) {
+      gx = Math.floor(ns[i].x / CUT); gy = Math.floor(ns[i].y / CUT);
+      cell = grid.get(gx + ':' + gy); if (!cell) grid.set(gx + ':' + gy, cell = []);
+      cell.push(i);
+    }
     for (i = 0; i < ns.length; i++) {
       var A = ns[i];
-      for (j = i + 1; j < ns.length; j++) {
-        var B = ns[j], dx = A.x - B.x, dy = A.y - B.y, d2 = dx * dx + dy * dy || 0.01, d = Math.sqrt(d2);
-        var repK = 900 + (A.r + B.r) * 55; // bigger bodies push harder — bubbles keep their space
-        var f = repK / d2;
-        A.fx += dx / d * f; A.fy += dy / d * f; B.fx -= dx / d * f; B.fy -= dy / d * f;
+      gx = Math.floor(A.x / CUT); gy = Math.floor(A.y / CUT);
+      for (cx = gx - 1; cx <= gx + 1; cx++) for (cy = gy - 1; cy <= gy + 1; cy++) {
+        cell = grid.get(cx + ':' + cy); if (!cell) continue;
+        for (var ci = 0; ci < cell.length; ci++) {
+          j = cell[ci]; if (j <= i) continue; // each pair once
+          var B = ns[j], dx = A.x - B.x, dy = A.y - B.y, d2 = dx * dx + dy * dy;
+          if (d2 > CUT2) continue;
+          d2 = d2 || 0.01;
+          var d = Math.sqrt(d2);
+          var repK = 900 + (A.r + B.r) * 55; // bigger bodies push harder — bubbles keep their space
+          var f = repK / d2;
+          A.fx += dx / d * f; A.fy += dy / d * f; B.fx -= dx / d * f; B.fy -= dy / d * f;
+        }
       }
     }
     for (i = 0; i < es.length; i++) {
@@ -844,6 +882,20 @@
       var nd = W.idx.get(top.id);
       if (nd) { selectedNode = top.id; cam.k = Math.max(cam.k, 1.2); centerOn(nd); showNode(top.id); gDraw(); }
       return top.id;
+    },
+    // finding 13(d)/21: the expand-all cliff, measurable — every symbol on canvas, N timed sim
+    // frames. simMsPerFrame is the number that was 1,278ms at 16.3k nodes under the all-pairs
+    // loop and must stay flat under the grid.
+    expandAll: function (frames) {
+      frames = frames || 10;
+      activate('graph'); gResize(); if (!gInit) { gInit = true; syncToggle(); gLayout(); }
+      domainNames.forEach(function (d) { expanded.add(d); });
+      gLayout(); syncToggle();
+      var t0 = performance.now();
+      for (var i = 0; i < frames; i++) gStep();
+      var ms = (performance.now() - t0) / frames;
+      gDraw();
+      return { nodes: W.nodes.length, edges: W.edges.length, simMsPerFrame: Math.round(ms * 100) / 100 };
     },
     // screen-space bounding box of the drawn graph (CSS px) — lets the screenshot pipeline crop
     // to content instead of shipping empty canvas
