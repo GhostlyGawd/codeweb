@@ -19,6 +19,37 @@
     --s5:#199e70; --s6:#d95926; --s7:#9085e9; --s8:#e66767; --sX:#7d7a87;
     /* status (reserved for severity — never a series) */
     --stWarn:#fab219; --stSerious:#ec835a; --stCritical:#d03b3b; --stGood:#0ca30c;
+    /* canvas-side theme reads these (labels + halo) so the graph follows the theme too (#9) */
+    --cvLabel:#ECECEE; --cvLabelDim:#D9D7E0; --cvHalo:rgba(16,14,20,0.85);
+  }
+  /* #9: light theme — explicit choice via data-theme, else follows the OS preference. */
+  :root[data-theme="light"]{
+    --bg:#F6F5F1; --panel:#FFFFFF; --panel2:#ECEAE4; --line:#D8D4CB;
+    --fg:#211F27; --muted:#6E6A78; --accentFg:#1A2005;
+    --ring:rgba(0,0,0,.14);
+    --cvLabel:#211F27; --cvLabelDim:#4A4754; --cvHalo:rgba(246,245,241,0.85);
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme]){
+      --bg:#F6F5F1; --panel:#FFFFFF; --panel2:#ECEAE4; --line:#D8D4CB;
+      --fg:#211F27; --muted:#6E6A78; --accentFg:#1A2005;
+      --ring:rgba(0,0,0,.14);
+      --cvLabel:#211F27; --cvLabelDim:#4A4754; --cvHalo:rgba(246,245,241,0.85);
+    }
+  }
+  /* #9: keyboard parity — every hover affordance has a :focus-visible twin. */
+  .tab:focus-visible,#gctrl button:focus-visible,#roleFilter:focus-visible,#copyLink:focus-visible,#themeToggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  table.f tr:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
+  #detail .lst div:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
+  table.m td:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .tmbox:focus-visible{outline:2px solid var(--accent);z-index:5}
+  .visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  @media print{
+    :root{--bg:#fff; --panel:#fff; --panel2:#f2f2f2; --line:#ccc; --fg:#000; --muted:#444; --ring:rgba(0,0,0,.2)}
+    #top .tab,#gsearch,#gctrl,#gcount,#copyLink,#roleFilter,#themeToggle{display:none !important}
+    #top{border-bottom:1px solid #000}
+    #wrap{display:block;height:auto} #main{height:auto} #detail{border-left:none;width:auto;max-height:none}
+    .view{position:static} table.f td{border-bottom:1px solid #ddd}
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
@@ -83,7 +114,7 @@
   /* graph */
   #cv{display:block;background:radial-gradient(circle at 50% 38%,#16131d,#100E14);touch-action:none}
   #gsearch{position:absolute;top:10px;left:10px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:6px 9px;width:220px}
-  #gsearch:focus{outline:none;border-color:var(--accent)}
+  #gsearch:focus-visible{outline:2px solid var(--accent);border-color:var(--accent)}
   #gctrl{position:absolute;top:10px;right:10px;display:flex;gap:6px}
   #gctrl button{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:12px}
   #gctrl button:hover{border-color:var(--accent)}
@@ -120,19 +151,20 @@
   <span class="spacer"></span>
   <button id="roleFilter" title="Hide tests, fixtures, examples and generated code from every view" aria-pressed="true" hidden></button>
   <button id="copyLink" class="tab" title="Copy a link to this exact view (tab · filter · selection)">copy link</button>
+  <button id="themeToggle" class="tab" title="Theme: follows your OS by default — click to cycle auto → light → dark"></button>
   <div role="tablist" aria-label="Report views" style="display:contents">
-  <button class="tab on" role="tab" aria-selected="true" data-view="findings">Findings</button>
-  <button class="tab" role="tab" aria-selected="false" data-view="matrix">Matrix</button>
-  <button class="tab" role="tab" aria-selected="false" data-view="treemap">Treemap</button>
-  <button class="tab" role="tab" aria-selected="false" data-view="graph">Graph</button>
+  <button class="tab on" role="tab" id="tab-findings" aria-controls="view-findings" aria-selected="true" data-view="findings">Findings</button>
+  <button class="tab" role="tab" id="tab-matrix" aria-controls="view-matrix" aria-selected="false" data-view="matrix">Matrix</button>
+  <button class="tab" role="tab" id="tab-treemap" aria-controls="view-treemap" aria-selected="false" data-view="treemap">Treemap</button>
+  <button class="tab" role="tab" id="tab-graph" aria-controls="view-graph" aria-selected="false" data-view="graph">Graph</button>
   </div>
 </div>
 <div id="wrap">
   <div id="main">
-    <div class="view on" id="view-findings"></div>
-    <div class="view" id="view-matrix"></div>
-    <div class="view" id="view-treemap"><div id="tm"></div><div id="tmLegend"><span>duplication</span><span class="bar"></span><span>0 → 100%</span></div></div>
-    <div class="view" id="view-graph">
+    <div class="view on" id="view-findings" role="tabpanel" aria-labelledby="tab-findings"></div>
+    <div class="view" id="view-matrix" role="tabpanel" aria-labelledby="tab-matrix"></div>
+    <div class="view" id="view-treemap" role="tabpanel" aria-labelledby="tab-treemap"><div id="tm"></div><div id="tmLegend"><span>duplication</span><span class="bar"></span><span>0 → 100%</span></div></div>
+    <div class="view" id="view-graph" role="tabpanel" aria-labelledby="tab-graph">
       <canvas id="cv" role="img" aria-label="Force-directed dependency graph"></canvas>
       <input id="gsearch" placeholder="search symbols… (Enter jumps)" autocomplete="off" aria-label="Search symbols; press Enter to jump to the next match, Escape to clear">
       <span id="gcount" class="meta" style="position:absolute;top:16px;left:245px" aria-live="polite"></span>
@@ -140,7 +172,8 @@
       <div id="gLegend">● area — size = symbols, click to expand it · ○ symbol — size = loc · scroll zooms</div>
     </div>
   </div>
-  <div id="detail" aria-live="polite"><div class="empty">Pick an item to inspect it.</div></div>
+  <div id="detail"><div class="empty">Pick an item to inspect it.</div></div>
+<span id="live" class="visually-hidden" aria-live="polite"></span>
 </div>
 
 <script id="graph-data" type="application/json">__GRAPH_DATA__</script>
@@ -264,6 +297,29 @@
     else window.prompt('Copy this link:', url);
   };
 
+  // #9: theme — explicit choice persists; 'auto' follows the OS. Canvas surfaces re-read their
+  // colors from the computed tokens on the next draw, so the graph flips with the page.
+  var themeBtn = document.getElementById('themeToggle');
+  function applyTheme(mode) {
+    if (mode === 'light' || mode === 'dark') document.documentElement.setAttribute('data-theme', mode);
+    else document.documentElement.removeAttribute('data-theme');
+    if (themeBtn) themeBtn.textContent = mode === 'light' ? 'light ☀' : mode === 'dark' ? 'dark ☾' : 'auto ◐';
+    if (typeof gInit !== 'undefined' && gInit) setTimeout(function () { gDraw(); }, 0);
+  }
+  var themeMode = null;
+  try { themeMode = localStorage.getItem('cwTheme'); } catch (e) { /* private mode */ }
+  applyTheme(themeMode);
+  if (themeBtn) themeBtn.onclick = function () {
+    themeMode = themeMode === 'light' ? 'dark' : themeMode === 'dark' ? null : 'light';
+    try { themeMode ? localStorage.setItem('cwTheme', themeMode) : localStorage.removeItem('cwTheme'); } catch (e) { /* private mode */ }
+    applyTheme(themeMode);
+    if (document.getElementById('view-treemap').classList.contains('on')) renderTreemap();
+  };
+  function cvColors() {
+    var cs = getComputedStyle(document.documentElement);
+    return { label: cs.getPropertyValue('--cvLabel').trim() || '#ECECEE', dim: cs.getPropertyValue('--cvLabelDim').trim() || '#D9D7E0', halo: cs.getPropertyValue('--cvHalo').trim() || 'rgba(16,14,20,0.85)' };
+  }
+
   // ---------- meta bar + role filter ----------
   function renderMeta() {
     document.getElementById('metaTarget').textContent = (G.meta.target || '') + (G.meta.mode ? ' · ' + G.meta.mode : '');
@@ -297,14 +353,28 @@
 
   // ---------- detail panel ----------
   var detail = document.getElementById('detail');
+  // #9: setting the editor root is an inline form, not a blocking prompt() — same storage.
   detail.addEventListener('click', function (ev) {
+    var save = ev.target.closest('[data-root-save]');
+    if (save) {
+      ev.preventDefault();
+      var inp = document.getElementById('rootInput');
+      if (inp) {
+        try { localStorage.setItem('cwEditorRoot', inp.value.trim().replace(/\/+$/, '')); } catch (e) { /* private mode */ }
+        if (lastNodeId) showNode(lastNodeId);
+      }
+      return;
+    }
     var a = ev.target.closest('[data-set-root]');
     if (!a) return;
     ev.preventDefault();
-    var v = prompt('Absolute project root for editor links (stored only in this browser):', editorRoot());
-    if (v == null) return;
-    try { localStorage.setItem('cwEditorRoot', v.trim().replace(/\/+$/, '')); } catch (e) { /* private mode */ }
-    if (lastNodeId) showNode(lastNodeId);
+    var slot = document.getElementById('rootForm');
+    if (!slot) return;
+    slot.innerHTML = '<input id="rootInput" type="text" placeholder="/absolute/path/to/project" value="' + esc(editorRoot()) + '" style="width:100%;margin:4px 0;padding:4px 6px;background:var(--panel2);border:1px solid var(--line);border-radius:4px;color:var(--fg)" aria-label="Absolute project root for editor links">' +
+      '<button class="tab" data-root-save>save</button> <span class="dim">stored only in this browser</span>';
+    var inp = document.getElementById('rootInput');
+    inp.focus();
+    inp.onkeydown = function (kev) { if (kev.key === 'Enter') { kev.preventDefault(); slot.querySelector('[data-root-save]').click(); } };
   });
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   // First paint is an OVERVIEW, not an empty panel — the 340px column always earns its width.
@@ -320,9 +390,9 @@
     var line = n.line || 1, root = editorRoot();
     if (root) {
       var abs = root.replace(/\/+$/, '') + '/' + n.file;
-      return '<div class="kv"><a href="vscode://file/' + esc(abs) + ':' + line + '" style="color:var(--accent)">Open in editor</a> · <a href="#" data-set-root style="color:var(--muted)">root ✎</a></div>';
+      return '<div class="kv"><a href="vscode://file/' + esc(abs) + ':' + line + '" style="color:var(--accent)">Open in editor</a> · <a href="#" data-set-root style="color:var(--muted)">root ✎</a><span id="rootForm"></span></div>';
     }
-    return '<div class="kv">editor: <code>' + esc(n.file + ':' + line) + '</code> · <a href="#" data-set-root style="color:var(--muted)">set root for editor links</a></div>';
+    return '<div class="kv">editor: <code>' + esc(n.file + ':' + line) + '</code> · <a href="#" data-set-root style="color:var(--muted)">set root for editor links</a><span id="rootForm"></span></div>';
   }
   function detailEmpty() {
     var topDoms = domainNames.slice(0, 5).map(function (nm) {
@@ -345,13 +415,16 @@
       el.onkeydown = function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } };
     });
   }
+  var liveEl = document.getElementById('live');
+  function announce(msg) { if (liveEl) liveEl.textContent = msg; }
   function showNode(id) {
     var n = nodeById.get(id); if (!n) return;
     lastNodeId = id;
     hashState.s = id; writeHash();
+    announce('Inspecting ' + n.label + ', ' + (n.kind || 'symbol'));
     var outs = outAdj.get(id) || [], ins = inAdj.get(id) || [];
     detail.innerHTML = '<h3>' + esc(n.label) + '</h3>' +
-      '<div class="kv">' + esc(n.kind || '') + (n.role && n.role !== 'product' ? ' · ' + esc(n.role) : '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--hi)">duplicated</span>' : '') + '</div>' +
+      '<div class="kv">' + esc(n.kind || '') + (n.role && n.role !== 'product' ? ' · ' + esc(n.role) : '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--stCritical)">duplicated</span>' : '') + '</div>' +
       '<div class="kv"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:' + colorOf(n.domain) + '"></span> ' + esc(n.domain) + '</div>' +
       (n.file ? '<div class="kv"><code>' + esc(n.file) + (n.line ? ':' + n.line : '') + '</code>' + (n.loc ? ' · ' + n.loc + ' loc' : '') + '</div>' : '') +
       editorLink(n) +
@@ -363,6 +436,7 @@
     bindNodeRows();
   }
   function showDup(d) {
+    announce('Inspecting duplication group ' + d.name);
     detail.innerHTML = '<h3>' + esc(d.name) + '()</h3>' +
       '<div class="kv">defined in <b>' + d.files + ' files</b> · ' + d.domains.length + ' area(s)</div>' +
       '<div class="kv">' + esc(d.domains.join(', ')) + '</div>' +
@@ -383,6 +457,7 @@
     });
   var ovDismissed = G.overlaps.length - ovLive.length;
   function showOverlap(o) {
+    announce('Inspecting finding: ' + o.title);
     detail.innerHTML = '<h3>' + esc(o.title) + '</h3>' +
       '<div class="kv"><span class="badge b-' + (confClass[o.confidence] || 'low') + '">' + esc(o.confidence) + '</span> · ' + esc(o.kind) + (o.drifted ? ' · drifted copies' : '') + (o.bodySim != null ? ' · body ' + Math.round(o.bodySim * 100) + '%' : '') + '</div>' +
       (o.evidence ? '<div class="kv">' + esc(o.evidence) + '</div>' : '') +
@@ -475,6 +550,8 @@
       '<span>· big off-diagonal numbers = merge candidates or missing interface · click a cell for its edges</span></div>';
     v.querySelectorAll('td[data-a]').forEach(function (td) {
       td.onclick = function () { showCoupling(domainNames[+td.getAttribute('data-a')], domainNames[+td.getAttribute('data-b')]); };
+      td.setAttribute('tabindex', '0'); // #9: keyboard reach for coupling cells
+      td.onkeydown = function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); td.onclick(); } };
     });
   }
   function showCoupling(a, b) {
@@ -540,6 +617,10 @@
         box.title = f.file + '  (' + f.value + ' loc, ' + Math.round(f.density * 100) + '% duplicated)';
         if (fr.w > 46 && fr.h > 14) { var lab = document.createElement('div'); lab.className = 'tmlabel'; lab.textContent = f.file.split('/').pop(); box.appendChild(lab); }
         box.onclick = function () { showFile(f); };
+        box.setAttribute('tabindex', '0'); // #9: keyboard reach for file blocks
+        box.setAttribute('role', 'button');
+        box.setAttribute('aria-label', f.file + ', ' + f.value + ' lines, ' + Math.round(f.density * 100) + '% duplicated');
+        box.onkeydown = function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); showFile(f); } };
         tm.appendChild(box);
       });
       var dl = document.createElement('div'); dl.className = 'tmdomlabel'; dl.style.left = (dr.x + 6) + 'px'; dl.style.top = (dr.y + 2) + 'px'; dl.style.maxWidth = Math.max(20, dr.w - 10) + 'px';
@@ -678,10 +759,11 @@
       if (showLabel) {
         var lx = X(nd.x) + nd.r + 4, ly = Y(nd.y) + 3.5;
         ctx.font = (nd.bubble ? '600 12px ' : '500 10.5px ') + UIFONT;
-        ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(16,14,20,0.85)'; ctx.lineJoin = 'round';
+        var thc = cvColors();
+        ctx.lineWidth = 3; ctx.strokeStyle = thc.halo; ctx.lineJoin = 'round';
         var txt = nd.bubble ? nd.label + ' · ' + nd.count : nd.label;
         ctx.strokeText(txt, lx, ly);
-        ctx.fillStyle = nd.bubble ? '#ECECEE' : '#D9D7E0'; ctx.fillText(txt, lx, ly);
+        ctx.fillStyle = nd.bubble ? thc.label : thc.dim; ctx.fillText(txt, lx, ly);
       }
       ctx.globalAlpha = 1;
     });
@@ -731,11 +813,23 @@
     document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('on', v.id === 'view-' + view); });
     if (view === 'findings' && !rendered.findings) { renderFindings(); rendered.findings = true; }
     if (view === 'matrix' && !rendered.matrix) { renderMatrix(); rendered.matrix = true; }
-    if (view === 'treemap') { renderTreemap(); }
+    if (view === 'treemap' && !rendered.treemap) { renderTreemap(); rendered.treemap = true; } // #9: cached like its siblings
     if (view === 'graph') { gResize(); if (!gInit) { gInit = true; syncToggle(); gLayout(); } else gDraw(); }
   }
   document.querySelectorAll('.tab[role="tab"]').forEach(function (t) { t.onclick = function () { activate(t.getAttribute('data-view')); }; });
-  window.addEventListener('resize', function () { if (document.getElementById('view-treemap').classList.contains('on')) renderTreemap(); if (document.getElementById('view-graph').classList.contains('on')) { gResize(); gDraw(); } });
+  // #9: roving arrow keys on the tablist (ArrowLeft/Right move + activate)
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab[role="tab"]'));
+    tabs.forEach(function (t, i) {
+      t.onkeydown = function (ev) {
+        if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+        ev.preventDefault();
+        var nxt = tabs[(i + (ev.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+        nxt.focus(); nxt.click();
+      };
+    });
+  })();
+  window.addEventListener('resize', function () { rendered.treemap = false; if (document.getElementById('view-treemap').classList.contains('on')) { renderTreemap(); rendered.treemap = true; } if (document.getElementById('view-graph').classList.contains('on')) { gResize(); gDraw(); } });
 
   // boot
   renderFindings(); rendered.findings = true; detailEmpty();

@@ -58,6 +58,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
   **copy link** button in the header; hosted reports carry `og:title`/`og:description` built
   from the target label and counts only (the meta.root privacy invariant holds, re-pinned by
   test). (IMPROVEMENTS.md #8)
+- **The report meets people where they are: light mode, print, full keyboard reach.** A light
+  theme follows the OS preference (`prefers-color-scheme`) with an explicit auto → light → dark
+  toggle (persisted; the canvas graph re-reads its label/halo colors from the theme tokens); a
+  print stylesheet makes the report paper-able; every hover affordance gained a
+  `:focus-visible` twin; matrix cells and treemap blocks are keyboard-reachable
+  (tabindex + Enter/Space + `aria-label`); the tablist has real `tabpanel`/`aria-controls`
+  wiring and roving arrow keys. Also: the undefined `--hi` token (the "duplicated" tag silently
+  lost its color) now uses `--stCritical`; the treemap caches its render like sibling tabs; the
+  mobile search-count no longer collides with the input; the editor-root picker is an inline
+  form instead of a blocking `prompt()`; and the whole-panel `aria-live` (which re-read the
+  entire inspector on every click) became a scoped one-line announcer. (IMPROVEMENTS.md #9)
 - **The CLI grew a front door.** Every CLI answers `--help`/`-h` (exit 0) — including the
   `codeweb` bin, where `--help` previously errored with `target not found: --help`; `run.mjs`
   documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map

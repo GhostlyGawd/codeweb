@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { runNode, script, tmpDir, cleanup, readJSON } from './helpers.mjs';
+import { runNode, script, tmpDir, cleanup, readJSON, PLUGIN_ROOT as PLUGIN_ROOT2 } from './helpers.mjs';
 
 // The shipped report.html is self-contained and shareable (a teammate, a blog post, GitHub Pages),
 // so it must never embed the absolute LOCAL source path. meta.root is a private disk pointer the
@@ -79,4 +79,21 @@ test('report carries og metadata, the pipeline-findings renderer, and the sharea
       assert.ok(html.includes(marker), `hash/share machinery present: ${marker}`);
     }
   } finally { cleanup(dir); }
+});
+
+// #9 (IMPROVEMENTS.md): inclusivity + polish — light/print themes, keyboard parity, scoped
+// live region, defined tokens only, no blocking prompt for the editor root.
+test('report ships light+print themes, focus-visible parity, ARIA tab wiring, and no blocking prompt', () => {
+  const html = readFileSync(join(PLUGIN_ROOT2, 'scripts', 'report-template.html'), 'utf8');
+  assert.ok(html.includes('prefers-color-scheme: light'), 'OS light preference honored');
+  assert.ok(html.includes('[data-theme="light"]'), 'explicit light theme exists');
+  assert.ok(html.includes('id="themeToggle"'), 'theme toggle in the header');
+  assert.ok(html.includes('@media print'), 'print stylesheet exists');
+  assert.ok(html.includes(':focus-visible'), 'keyboard focus styles exist');
+  assert.ok(html.includes('role="tabpanel"'), 'panels carry tabpanel roles');
+  assert.ok(html.includes('aria-controls="view-findings"'), 'tabs point at their panels');
+  assert.ok(!html.includes('var(--hi)'), 'no undefined CSS tokens');
+  assert.ok(!html.includes('var v = prompt('), 'editor root uses the inline form, not prompt()');
+  assert.ok(html.includes('id="live"'), 'dedicated live region replaces whole-panel aria-live');
+  assert.ok(!/id="detail" aria-live/.test(html), 'detail panel no longer over-announces');
 });
