@@ -34,10 +34,15 @@ test('B1+B4: sections present, session valid, mirror byte-identical, corpus skip
     const { r, out, site } = runAll(dir);
     assert.equal(r.status, 0, r.stderr);
     const b = readJSON(out);
-    for (const k of ['pipeline', 'session', 'toolBudgets', 'tsEngine', 'budgets', 'ranAt']) assert.ok(b[k], `section ${k} present`);
+    for (const k of ['pipeline', 'session', 'toolBudgets', 'advisors', 'loaded', 'tsEngine', 'budgets', 'ranAt']) assert.ok(b[k], `section ${k} present`);
     assert.equal(b.session.allValidJson, true, 'every MCP response parsed and succeeded');
     assert.equal(b.session.calls.length, 12, 'the representative session is 12 calls');
     assert.equal(b.pipeline.stagesReused, true, 'the no-change rerun reused stages');
+    assert.ok(b.pipeline.stageMs && b.pipeline.stageMs.extract >= 0, 'per-stage times parsed from run.mjs stderr (finding 13a)');
+    for (const [name, a] of Object.entries(b.advisors)) assert.equal(a.ok, true, `advisor ${name} ran clean (finding 13c)`);
+    assert.equal(b.loaded.ok, true, 'loaded corpus mapped');
+    assert.ok(b.loaded.overlapFindings >= 15, `loaded corpus triggers the machinery (${b.loaded.overlapFindings} findings; 15 clusters planted) (finding 13b)`);
+    assert.equal(b.loaded.lshEngaged, true, 'the LSH path engages on its own at loaded-corpus scale');
     assert.equal(readFileSync(out, 'utf8'), readFileSync(site, 'utf8'), 'site mirror is byte-identical');
     assert.match(b.tsEngine.skipped || '', /corpus absent/, 'B4: skip carries its reason');
   } finally { cleanup(dir); }
@@ -48,10 +53,11 @@ test('B2: a lowered budget fails the gate by name; real budgets pass', () => {
   try {
     writeTree(dir, FIXTURE);
     const tight = join(dir, 'tight.json');
-    writeFileSync(tight, JSON.stringify({ sessionTokensMax: 20000, perToolBytesMax: 10, warmRefreshFactorMax: 2.0 }));
+    writeFileSync(tight, JSON.stringify({ sessionTokensMax: 20000, perToolBytesMax: 10, warmRefreshFactorMax: 2.0, loadedOverlapFindingsMin: 99999 }));
     const bad = runAll(dir, ['--budgets', tight, '--gate']);
     assert.equal(bad.r.status, 1, 'gate fails');
     assert.match(bad.r.stderr, /perToolBytesMax/, 'violation named');
+    assert.match(bad.r.stderr, /loadedOverlapFindingsMin/, 'loaded-corpus violation named too (finding 13b)');
     const good = runAll(dir, ['--gate']);
     assert.equal(good.r.status, 0, `real budgets hold (${good.r.stderr})`);
   } finally { cleanup(dir); }

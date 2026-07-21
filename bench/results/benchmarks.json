@@ -1,28 +1,59 @@
 {
-  "ranAt": "2026-07-21T05:43:01.510Z",
+  "ranAt": "2026-07-21T15:27:47.666Z",
   "node": "v22.22.2",
   "budgets": {
-    "comment": "Spec C (docs/specs/bench-all-ci-gates.md): the promises CI holds bench:all --gate to. Changing a number here is changing a public promise — it belongs in a reviewed diff, never in drift.",
+    "comment": "Spec C (docs/specs/bench-all-ci-gates.md): the promises CI holds bench:all --gate to. Changing a number here is changing a public promise — it belongs in a reviewed diff, never in drift. Factors are vs the regex-extract baseline on the same runner (portable across machine speeds); observed self-map values at set-time are noted so headroom stays honest.",
     "sessionTokensMax": 20000,
     "perToolBytesMax": 32768,
-    "warmRefreshFactorMax": 2
+    "warmRefreshFactorMax": 2,
+    "stageFactorVsRegexBaselineMax": {
+      "comment": "finding 13(a) — observed at set-time: extract 3.19 (cold, incl. WASM init), cluster 0.25, overlap 0.24, optimize 0.25, report 0.40",
+      "extract": 10,
+      "cluster": 1.2,
+      "overlap": 1.2,
+      "optimize": 1.2,
+      "report": 2
+    },
+    "advisorFactorVsRegexBaselineMax": {
+      "comment": "finding 13(c) — observed at set-time: risk 0.18, deadcode 0.15, hotspots 0.17, campaign 0.89. The quadratic risk loop this round fixed would have measured ~20x.",
+      "risk": 1,
+      "deadcode": 1,
+      "hotspots": 1,
+      "campaign": 3
+    },
+    "loadedOverlapFindingsMin": 15,
+    "loadedLshRequired": true
   },
   "pipeline": {
     "target": "codeweb (self)",
-    "symbols": 1191,
-    "edges": 4110,
-    "coldMs": 3405,
-    "warmMs": 512,
+    "symbols": 1221,
+    "edges": 4276,
+    "coldMs": 2577,
+    "warmMs": 316,
     "stagesReused": true,
-    "regexExtractBaselineMs": 501,
-    "warmFactorVsRegexBaseline": 1.02
+    "regexExtractBaselineMs": 624,
+    "stageMs": {
+      "extract": 1831,
+      "cluster": 119,
+      "overlap": 141,
+      "optimize": 141,
+      "report": 250
+    },
+    "stageFactorsVsRegexBaseline": {
+      "extract": 2.93,
+      "cluster": 0.19,
+      "overlap": 0.23,
+      "optimize": 0.23,
+      "report": 0.4
+    },
+    "warmFactorVsRegexBaseline": 0.51
   },
   "session": {
     "calls": [
       {
         "tool": "codeweb_brief",
-        "bytes": 2649,
-        "tokensApprox": 662,
+        "bytes": 2636,
+        "tokensApprox": 659,
         "ok": true
       },
       {
@@ -39,14 +70,14 @@
       },
       {
         "tool": "codeweb_context",
-        "bytes": 4499,
-        "tokensApprox": 1125,
+        "bytes": 4533,
+        "tokensApprox": 1133,
         "ok": true
       },
       {
         "tool": "codeweb_impact",
-        "bytes": 1080,
-        "tokensApprox": 270,
+        "bytes": 1082,
+        "tokensApprox": 271,
         "ok": true
       },
       {
@@ -57,8 +88,8 @@
       },
       {
         "tool": "codeweb_callers",
-        "bytes": 993,
-        "tokensApprox": 248,
+        "bytes": 995,
+        "tokensApprox": 249,
         "ok": true
       },
       {
@@ -75,14 +106,14 @@
       },
       {
         "tool": "codeweb_hotspots",
-        "bytes": 3426,
-        "tokensApprox": 857,
+        "bytes": 3471,
+        "tokensApprox": 868,
         "ok": true
       },
       {
         "tool": "codeweb_refresh",
-        "bytes": 292,
-        "tokensApprox": 73,
+        "bytes": 353,
+        "tokensApprox": 88,
         "ok": true
       },
       {
@@ -92,24 +123,64 @@
         "ok": true
       }
     ],
-    "totalBytes": 19022,
-    "totalTokensApprox": 4757,
+    "totalBytes": 19153,
+    "totalTokensApprox": 4790,
     "allValidJson": true
   },
   "toolBudgets": {
     "perToolMaxBytes": {
-      "codeweb_brief": 2649,
+      "codeweb_brief": 2636,
       "codeweb_find": 1562,
       "codeweb_explain": 1074,
-      "codeweb_context": 4499,
+      "codeweb_context": 4533,
       "codeweb_impact": 1337,
       "codeweb_callers": 1140,
       "codeweb_cycles": 483,
-      "codeweb_hotspots": 3426,
-      "codeweb_refresh": 292,
+      "codeweb_hotspots": 3471,
+      "codeweb_refresh": 353,
       "codeweb_diff": 487
     },
     "budgetBytes": 32768
+  },
+  "advisors": {
+    "risk": {
+      "ms": 108,
+      "ok": true,
+      "factorVsRegexBaseline": 0.17
+    },
+    "deadcode": {
+      "ms": 96,
+      "ok": true,
+      "factorVsRegexBaseline": 0.15
+    },
+    "hotspots": {
+      "ms": 98,
+      "ok": true,
+      "factorVsRegexBaseline": 0.16
+    },
+    "campaign": {
+      "ms": 513,
+      "ok": true,
+      "factorVsRegexBaseline": 0.82
+    }
+  },
+  "loaded": {
+    "ok": true,
+    "files": 60,
+    "fns": 1260,
+    "plantedClusters": 15,
+    "symbols": 1324,
+    "edges": 7864,
+    "overlapFindings": 31,
+    "lshEngaged": true,
+    "stageMs": {
+      "extract": 687,
+      "cluster": 113,
+      "overlap": 573,
+      "optimize": 120,
+      "report": 280
+    },
+    "mapMs": 1862
   },
   "tsEngine": {
     "skipped": "corpus absent at /home/user/codeweb/bench/corpus/axios — run bench/corpus/clone-corpus.sh"

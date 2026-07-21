@@ -123,6 +123,18 @@ notes so validated results, papers, and new tools never get lost in commit histo
   beats re-tagging the repo); an untouched warm run spawns nothing (stamp tier). Same graceful
   ladder on failure: batch → per-file → regex scanner. Shim-verified: exactly one batch on cold,
   zero on no-change warm, exactly one per-file on a one-file edit. (perf-quality finding 12)
+- **The bench gate now guards every stage and every advisor, under real load.** The only timing
+  gate used to measure the stage-REUSE path (which skips overlap/optimize entirely) — a 10x
+  regression in any post-graph stage passed CI, which is exactly how the quadratic risk loop
+  shipped. Now: (a) per-stage wall times parse from `run.mjs`'s own stderr and each gates as a
+  factor of the regex-extract baseline (budgets note observed values so headroom stays honest);
+  (b) a pinned deterministic loaded corpus (`bench/lib/loaded-corpus.mjs`: every function a twin
+  candidate, 15 planted same-name clusters, ~1,260 candidates so LSH engages on its own — the old
+  synthetic corpus produced 0 candidates and timed an idle engine) with gates that the planted
+  clusters are FOUND and the LSH banner fired; (c) risk/deadcode/hotspots/campaign each timed and
+  factor-gated, and a crashed advisor is itself a violation (observed: risk 0.18x — the
+  pre-finding-9 loop would have measured ~20x and failed on arrival). The report expand-all bench
+  row (d) lands with the finding-21 layout rewrite it measures. (perf-quality finding 13)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release

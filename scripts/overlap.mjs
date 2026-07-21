@@ -244,6 +244,7 @@ if (lshOn(cand.length)) {
   // Near-linear candidate generation (Spec N): 64×3 banding over 192-perm signatures of the
   // callee-label sets — a pair at the 0.5 confirm threshold is proposed with P≈0.9998. Mega-hub
   // co-callers share too little to collide, so no hub exclusion is needed on this path.
+  console.error(`[overlap] LSH path engaged: ${cand.length} twin candidate(s)`); // finding 13: the bench asserts this fires at scale
   const buckets = new Map();
   for (const [id, s] of cand) {
     for (const bk of bandKeys(signature(s, 192), 64, 3)) {
