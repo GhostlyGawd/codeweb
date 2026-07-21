@@ -157,15 +157,14 @@ to deep consumers' cand and bindDeps; (f) **kill-switch `CODEWEB_NAME_DELTA=0`**
 
 ### T-17.3 the bindSig analogue — resolver API change owned here · hardened
 Files: `scripts/extract-symbols.mjs`, `scripts/lib/import-resolve.mjs`. Cached binds embed resolved ids (:653).
-Per-file rule — replay F's `bind` iff: stamp/hash unchanged, `fileSig` + `pkgSig` unchanged, `bindCand(F) ∩ dirty =
-∅`, and every rel path in `bindDeps(F)` has an unchanged content hash. **`bindFileImports` returns `{amap, nsmap,
-classmap, edges}` today (import-resolve.mjs:224-310) — no deps are recorded; this task ADDS that API**: thread a
-`deps` Set through resolveImport / resolveReExport / the py re-export walk and return it — every RESOLVED target file
-(named/ns/default/class/side; ns targets included even though bind only existence-checks them, because
-`deriveFileEdges` later resolves members against their live symbol tables), plus every file VISITED by
-`resolveReExport` (its cycle-guard `seen` walk, dead ends included) and by `pyReExportResolve`/`pyReExportTableOf`.
-`bindCand` = original imported names. Both stored on the bind entry. Ineligible/intersecting → re-bind that file only
-(lazy `textOf` read).
+Per-file rule — replay F's `bind` iff: stamp/hash unchanged, `fileSig` + `pkgSig` unchanged, `bindCand(F) ∩ dirty = ∅`,
+and every rel path in `bindDeps(F)` has an unchanged content hash. **`bindFileImports` returns `{amap, nsmap, classmap,
+edges}` today (import-resolve.mjs:224-310) — no deps are recorded; this task ADDS that API**: thread a `deps` Set
+through resolveImport / resolveReExport / the py re-export walk and return it — every RESOLVED target file
+(named/ns/default/class/side; ns targets included even though bind only existence-checks them, because `deriveFileEdges`
+later resolves members against their live symbol tables), plus every file VISITED by `resolveReExport` (its cycle-guard
+`seen` walk, dead ends included) and by `pyReExportResolve`/`pyReExportTableOf`. `bindCand` = original imported names.
+Both stored on the bind entry. Ineligible/intersecting → re-bind that file only (lazy `textOf` read).
 
 ### T-17.4 property proof (test-first; the workstream's gate) · hardened
 Files: `tests/incremental-edges.test.mjs`. Extend generator ops (`body`/`addsym`/`addfile`/`delfile` today) with
@@ -187,11 +186,10 @@ count/semantics are pinned this round; #17's risk budget is spent here.
 
 ### T-17.5 bench evidence · hardened
 @16.8k (min-of-3 ratios per header): noop, body-edit, **add-one-unique-function** (gate ≤ ~1.3× same-session noop; the
-~950 ms absolute is recorded, not gated), **add-colliding-function** (`anchor0` — honesty row: mass cand intersection,
-near-wholesale expected, recorded, no gate), delete, rename; @29.4k add-one-function; hook end-to-end
-add-one-function. Caveat (· hardened): `loaded-corpus` emits NO import statements — bindDeps is empty everywhere, so
-the bench exercises only the bare-name path; bind-coupling correctness evidence is IE's (T-17.4). Commands + `edged
-N/M` banners recorded in evidence.
+~950 ms absolute recorded, not gated), **add-colliding-function** (`anchor0` — honesty row: mass cand intersection,
+near-wholesale expected, recorded, no gate), delete, rename; @29.4k add-one-function; hook end-to-end add-one-function.
+Caveat (· hardened): `loaded-corpus` emits NO import statements — bindDeps is empty everywhere, so the bench exercises
+only the bare-name path; bind-coupling correctness evidence is IE's (T-17.4). Commands + `edged N/M` banners in evidence.
 
 ## #18a — baseline sidecar for the post-edit hook (#18b → WS-H)
 
