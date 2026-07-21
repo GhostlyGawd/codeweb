@@ -71,3 +71,10 @@ test('ci.yml: a no-optional-deps job exercises the regex fallback for real', () 
 test('codeweb-gate.yml: the structural self-gate installs deps (AST-aware, not regex-blind)', () => {
   assert.match(gate, /npm ci/);
 });
+
+// ---- finding #5: the committed site must equal a fresh build --------------------------------
+
+test('ci.yml: committed docs/ is gated fresh after the site build', () => {
+  assert.match(ci, /git diff --exit-code -- docs/);
+  assert.match(ci, /git status --porcelain -- docs/, 'untracked new outputs must fail the gate too');
+});

@@ -511,6 +511,21 @@
 <p>  scanned, the supported extensions, and "is this the right directory?" — and <code>run.mjs</code> aborts</p>
 <p>  before writing artifacts. <code>--allow-empty</code> (both CLIs) keeps intentionally-sparse targets</p>
 <p>  workable. (IMPROVEMENTS.md #1)</p>
+<h3 class="cl-grp">Removed</h3>
+<ul>
+<li><strong>spike/ and .live/ are out of the tree — the self-map stops counting prototypes.</strong></li>
+</ul>
+<p>  <code>spike/tree-sitter/</code> was a graduated prototype (the engine shipped as <code>lib/ts-engine.mjs</code> in</p>
+<p>  PR #17) still tracked with its own package.json and drifted copies of production functions;</p>
+<p>  <code>.live/</code> tracked five dev scripts nothing referenced, every one superseded by shipped code</p>
+<p>  (confirm.mjs → overlap's body confirmation, rust-dissect.mjs → the native Rust tier,</p>
+<p>  cli-sketch/ → finding 24's <code>parseArgs</code>, measure.mjs → cluster3). Both deleted — git history</p>
+<p>  keeps them; prose references now say so. <code>.live/</code> is fully gitignored (it stays run.mjs's</p>
+<p>  default workspace target, generated artifacts only), and <code>codeweb.rules.json</code> gains standing</p>
+<p>  <code>spike/<strong> → example</code> and <code>.live/</strong> → generated</code> role overrides so a future prototype tree can</p>
+<p>  never pollute the self-metrics again. Self-map effect: 13 → 12 domains (spike/tree-sitter</p>
+<p>  gone), 33 → 28 self-overlap findings (all five spike-only findings gone), 1,240 → 1,215 nodes.</p>
+<p>  (perf-quality finding 28)</p>
 <h3 class="cl-grp">Changed</h3>
 <ul>
 <li><strong>THE similarity thresholds live once — and churn is bounded and cached.</strong> The 0.6</li>
@@ -580,6 +595,51 @@
 <p>  EPIPE handler. Dogfood: this was codeweb's only HIGH-confidence self-finding, now zero</p>
 <p>  hand-rolled loops remain (<code>grep</code> proof: the one flag loop left is parseArgs itself).</p>
 <p>  (perf-quality finding 24)</p>
+<h3 class="cl-grp">Fixed</h3>
+<ul>
+<li><strong>Releases are gated.</strong> Tag-push and workflow-dispatch publishing both flow through a <code>test</code> job</li>
+</ul>
+<p>  first — <code>publish</code> now <code>needs:</code> the full suite plus the consistency check, so a failing suite</p>
+<p>  blocks the release instead of shipping past it. Dispatched refs must be ancestors of <code>origin/main</code></p>
+<p>  (checked before the tag is created; a stray branch can no longer become a tagged release), and</p>
+<p>  <code>@vscode/vsce</code> is exact-pinned to 3.9.2 at both call sites instead of executing whatever npm</p>
+<p>  serves as <code>@latest</code> that day. <code>tests/workflows.test.mjs</code> pins the gates as text invariants — the</p>
+<p>  round-1 regression class was gates silently dropped from these files. (perf-quality round 2,</p>
+<p>  finding #2)</p>
+<h3 class="cl-grp">Changed</h3>
+<ul>
+<li><strong>CI got breadth, and the AST tier can no longer silently un-test itself.</strong> The test job runs an</li>
+</ul>
+<p>  os x node matrix (ubuntu/windows x Node 22/24, npm cache on every setup-node block); after</p>
+<p>  <code>npm ci</code> a probe (<code>node -e "await import('web-tree-sitter')"</code>) fails the job when the</p>
+<p>  optionalDependency install hiccuped, and the TAP skip count is bounded (ceiling 6 — the tier-wide</p>
+<p>  failure mode adds ~38 skips and trips it hard). A new <code>test-no-ast</code> job installs with</p>
+<p>  <code>--omit=optional</code> and proves the regex fallback green stand-alone, asserting the</p>
+<p>  fallback-equivalence test ran UN-skipped (it inverse-skips wherever the engine is installed —</p>
+<p>  i.e. always in the matrix job). <code>codeweb-gate.yml</code> now runs <code>npm ci</code>, so the structural self-gate</p>
+<p>  analyzes PRs with the same engine tier the product ships instead of regex-blind. <code>engines</code> says</p>
+<p>  <code>&gt;=22</code> honestly — Node 20's <code>npm test</code> glob is broken and the matrix never tested it.</p>
+<p>  (perf-quality round 2, finding #3)</p>
+<h3 class="cl-grp">Fixed</h3>
+<ul>
+<li><strong>The consistency gate scans package.json — and the npm listing stops lying.</strong> The description</li>
+</ul>
+<p>  said "24 MCP tools" while 27 shipped, and <code>check-consistency</code> printed OK over it because</p>
+<p>  package.json was in neither the prose scans nor the sync targets. The gate now scans the</p>
+<p>  description (description-only — keywords/scripts can't false-positive), version-sync repairs the</p>
+<p>  count at every roll, the live drift is corrected to 27, and the drifted-fixture round-trip in</p>
+<p>  <code>tests/release-tooling.test.mjs</code> pins the class. Mid-change, the scan alone turned the real-repo</p>
+<p>  consistency tests red on the live drift — the gate catching, in-repo, exactly what it was built</p>
+<p>  for. (perf-quality round 2, finding #4)</p>
+<ul>
+<li><strong><code>npm test</code> no longer rewrites tracked docs/ — and the published site can't go stale again.</strong></li>
+</ul>
+<p>  <code>site/build.mjs</code> gained <code>--out &lt;dir&gt;</code> (the shared parseArgs loop; unknown flags die), the whole</p>
+<p>  site-build suite builds into a temp dir, CI asserts docs/ is byte-fresh after the build</p>
+<p>  (<code>git diff --exit-code -- docs</code> plus an untracked-outputs check), and the stale committed</p>
+<p>  <code>docs/changelog.html</code> — the published Pages changelog was missing the round-1 "Removed" section</p>
+<p>  at HEAD — is rebuilt and committed. Argv-less callers (release.mjs, <code>npm run build:site</code>, CI)</p>
+<p>  keep the docs/ default. (perf-quality round 2, finding #5)</p>
 <h2 class="cl-ver">[0.9.0] - 2026-07-19</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>

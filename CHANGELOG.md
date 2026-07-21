@@ -494,6 +494,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
   `tests/release-tooling.test.mjs` pins the class. Mid-change, the scan alone turned the real-repo
   consistency tests red on the live drift — the gate catching, in-repo, exactly what it was built
   for. (perf-quality round 2, finding #4)
+- **`npm test` no longer rewrites tracked docs/ — and the published site can't go stale again.**
+  `site/build.mjs` gained `--out <dir>` (the shared parseArgs loop; unknown flags die), the whole
+  site-build suite builds into a temp dir, CI asserts docs/ is byte-fresh after the build
+  (`git diff --exit-code -- docs` plus an untracked-outputs check), and the stale committed
+  `docs/changelog.html` — the published Pages changelog was missing the round-1 "Removed" section
+  at HEAD — is rebuilt and committed. Argv-less callers (release.mjs, `npm run build:site`, CI)
+  keep the docs/ default. (perf-quality round 2, finding #5)
 
 ## [0.9.0] - 2026-07-19
 

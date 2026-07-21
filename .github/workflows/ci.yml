@@ -118,3 +118,9 @@ jobs:
       # The website is a zero-dependency, deterministic build — it must build cleanly.
       - name: Build site
         run: node site/build.mjs
+      # Round 2 finding #5: the committed docs/ (GitHub Pages) must equal a fresh build — the
+      # shipped changelog page was stale at HEAD for a whole finding. The second clause catches
+      # untracked NEW outputs. Known annual rot: the footer year comes from build time, so a
+      # January rebuild-and-commit is expected.
+      - name: Committed site is fresh
+        run: git diff --exit-code -- docs && test -z "$(git status --porcelain -- docs)"

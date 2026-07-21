@@ -8,16 +8,24 @@
  * stylesheet, fills the templates, and writes the static site into docs/.
  *
  * Output is deterministic: same inputs -> byte-identical docs/ (see tests/site-build.test.mjs).
- * Run:  node site/build.mjs   (or: npm run build:site)
+ * Run:  node site/build.mjs [--out <dir>]   (or: npm run build:site)
  */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, copyFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mcpToolCount } from '../scripts/release-utils.mjs';
+import { parseArgs } from '../scripts/lib/cli.mjs';
 
 const SITE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(SITE, '..');
-const DOCS = join(ROOT, 'docs');
+// Round 2, finding #5: `--out <dir>` redirects the whole build — tests build into temp dirs so
+// `npm test` never rewrites tracked docs/ again. Argv-less callers (release.mjs, npm run
+// build:site, ci.yml "Build site") stay on the committed docs/ default, gated fresh by CI.
+const { opts: flags } = parseArgs(process.argv.slice(2), {
+  usage: 'usage: build.mjs [--out <dir>]',
+  flags: { out: { type: 'string', default: null } },
+});
+const DOCS = flags.out ? resolve(flags.out) : join(ROOT, 'docs');
 const ASSETS = join(DOCS, 'assets');
 
 const read = (p) => readFileSync(p, 'utf8');
@@ -295,7 +303,7 @@ function main() {
   let n = 0;
   for (const p of PAGES) if (buildPage(p)) n++;
   const wrapped = [injectDemoNav() && 'demo'].filter(Boolean);
-  process.stdout.write(`codeweb site: built ${n} page(s) + assets into docs/ (v${VERSION})\n`);
+  process.stdout.write(`codeweb site: built ${n} page(s) + assets into ${DOCS} (v${VERSION})\n`);
   if (wrapped.length) process.stdout.write(`  wrapped with shared nav: ${wrapped.join(', ')}\n`);
 }
 main();
