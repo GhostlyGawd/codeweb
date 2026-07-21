@@ -13,7 +13,7 @@ import { capList, checkStaleness } from './cli.mjs';
  * Assemble the full context-pack payload for resolved ids. Caller resolves the symbol first
  * (found:false stays transport-specific). `reader` is a cli.mjs sourceReader for graph.meta.root.
  */
-export function buildContextPack(graph, index, reader, ids, { symbol, windowN = 3, fullBodies = false, limit = null } = {}) {
+export function buildContextPack(graph, index, reader, ids, { symbol, windowN = 3, fullBodies = false, limit = null, staleInfo } = {}) {
   const callerIds = callersOf(index, ids);
   const calleeIds = calleesOf(index, ids);
   const blast = impactOf(index, ids);
@@ -69,7 +69,9 @@ export function buildContextPack(graph, index, reader, ids, { symbol, windowN = 
     blastRadius: { count: blast.length, ids: cappedBlast.items }, // transitive impact: ids only
   };
   if (cappedCallers.truncated) payload.moreCallers = { remaining: cappedCallers.remaining };
-  const staleInfo = checkStaleness(graph);
+  // finding 23: a caller that already swept staleness (the MCP server's per-burst memo) threads
+  // the verdict in; the CLI leaves it undefined and computes here. Same function, same verdict.
+  if (staleInfo === undefined) staleInfo = checkStaleness(graph);
   if (staleInfo) { payload.stale = staleInfo; payload.summary += ` — graph is stale for ${staleInfo.count}+ file(s); run codeweb_refresh`; }
   // #13: an edit window on an unmeasured symbol should SAY the blast radius is unguarded.
   if (graph.meta?.coverage) {

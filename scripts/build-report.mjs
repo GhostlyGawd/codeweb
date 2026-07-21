@@ -14,6 +14,9 @@ import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { buildIndexLite, SIDECAR_NAME } from './lib/index-lite.mjs'; // Spec P: pre-edit hook fast path
 import { buildSimilarIndex, SIMILAR_SIDECAR } from './lib/similar-index.mjs'; // finding 16: find-similar's map-time shingle sets
+import { BRIEF_SIDECAR } from './lib/brief-sidecar.mjs'; // finding 23: session-brief's pre-rendered payload
+import { buildBrief } from './lib/brief-core.mjs';
+import { buildIndex } from './lib/graph-ops.mjs';
 import { sourceReader, atomicWrite } from './lib/cli.mjs';
 
 const USAGE = 'usage: build-report.mjs [path/to/graph.json] [--out report.html] [--no-md] [--open]';
@@ -100,6 +103,9 @@ try {
   // finding 16: find-similar's exact shingle sets, persisted once at map time so the prescribed
   // before-every-write check stops re-reading and re-shingling the whole repo per call.
   atomicWrite(join(dirname(graphPath), SIMILAR_SIDECAR), JSON.stringify(buildSimilarIndex(graph, stamp, reader)));
+  // finding 23: the SessionStart brief, pre-rendered — the hook serves it at the boot floor
+  // instead of re-parsing + re-indexing the whole graph per session start.
+  atomicWrite(join(dirname(graphPath), BRIEF_SIDECAR), JSON.stringify({ version: 1, stamp, brief: buildBrief(graph, buildIndex(graph)) }));
 } catch { /* the consumers fall back to their live paths */ }
 
 // --- render ---

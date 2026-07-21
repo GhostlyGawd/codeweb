@@ -97,6 +97,19 @@ function cachedGraph(absPath) {
 }
 const QUERY_KIND = { codeweb_callers: 'callers', codeweb_callees: 'callees', codeweb_tests: 'tests', codeweb_impact: 'impact', codeweb_cycles: 'cycles', codeweb_orphans: 'orphans' };
 
+// finding 23: ONE staleness verdict per request burst. autoRefresh stat-swept every meta.sources
+// entry and the payload's stale annotation swept them all AGAIN — 2 x 12-17ms at 5k files against
+// answers that take 3-13ms. Memoized per (path, graph identity) with a 1s TTL: one sweep per
+// burst, and a refreshed graph (new mtime/size) re-checks immediately.
+const staleCache = new Map(); // abs -> { atMs, m, s, verdict }
+function staleOnce(absPath, entry) {
+  const hit = staleCache.get(absPath);
+  if (hit && hit.m === entry.m && hit.s === entry.s && Date.now() - hit.atMs < 1000) return hit.verdict;
+  const verdict = checkStaleness(entry.graph);
+  staleCache.set(absPath, { atMs: Date.now(), m: entry.m, s: entry.s, verdict });
+  return verdict;
+}
+
 // ---- self-healing freshness -------------------------------------------------------------------
 // Structural queries answered from a stale map are the trap an agent can't see; annotating helped,
 // but the ambient fix is to REFRESH inline (incremental, ~1s) before answering. Scoped to the
@@ -109,8 +122,8 @@ const refreshInFlight = new Set();
 function autoRefresh(absGraph) {
   if (process.env.CODEWEB_NO_AUTOREFRESH === '1') return;
   try {
-    const { graph } = cachedGraph(absGraph);
-    if (!checkStaleness(graph)) return;
+    const entry = cachedGraph(absGraph);
+    if (!staleOnce(absGraph, entry)) return;
     const last = refreshAttempt.get(absGraph) || 0;
     if (Date.now() - last < 15_000 || refreshInFlight.has(absGraph)) return; // one attempt per 15s per graph
     refreshAttempt.set(absGraph, Date.now());
@@ -345,9 +358,10 @@ function handleToolCall(id, params) {
   // via brief-core). Any surprise falls back to the spawned artifact.
   if (tool.name === 'codeweb_brief') {
     try {
-      const { graph, index } = cachedGraph(resolve(graphPath));
+      const entry = cachedGraph(resolve(graphPath));
+      const { graph, index } = entry;
       const payload = attachActivity(buildBrief(graph, index), resolve(graphPath));
-      const stale = checkStaleness(graph);
+      const stale = staleOnce(resolve(graphPath), entry);
       if (stale) payload.stale = stale;
       return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
     } catch { /* fall through to the spawned artifact */ }
@@ -356,7 +370,8 @@ function handleToolCall(id, params) {
   // via find-core; budget applied identically). Any surprise falls back to the spawned artifact.
   if (tool.name === 'codeweb_find') {
     try {
-      const { graph, index } = cachedGraph(resolve(graphPath));
+      const entry = cachedGraph(resolve(graphPath));
+      const { graph, index } = entry;
       const { qtoks, results } = findSymbols(graph, index, String(args.query || ''));
       if (qtoks.length) {
         const limit = args.limit != null ? Number(args.limit) : (args.full ? Infinity : tool.budget.value);
@@ -370,7 +385,7 @@ function handleToolCall(id, params) {
         };
         const remaining = results.length - offset - items.length;
         if (remaining > 0) payload.more = { remaining, nextOffset: offset + items.length };
-        const stale = checkStaleness(graph);
+        const stale = staleOnce(resolve(graphPath), entry);
         if (stale) { payload.stale = stale; payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`; }
         return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
       }
@@ -382,7 +397,8 @@ function handleToolCall(id, params) {
   // explain.mjs --json, including the found:false + suggestions contract.
   if (tool.name === 'codeweb_explain') {
     try {
-      const { graph, index } = cachedGraph(resolve(graphPath));
+      const entry = cachedGraph(resolve(graphPath));
+      const { graph, index } = entry;
       const ids = resolveSymbol(graph, args.symbol);
       if (!ids.length) {
         const suggestions = suggestSymbols(graph, args.symbol);
@@ -392,7 +408,7 @@ function handleToolCall(id, params) {
       }
       const cards = buildCards(graph, index, sourceReader(graph.meta && graph.meta.root), ids);
       const payload = { symbol: args.symbol, matched: ids, cards, summary: cards.map((c) => c.summary).join(' | ') };
-      const stale = checkStaleness(graph);
+      const stale = staleOnce(resolve(graphPath), entry);
       if (stale) { payload.stale = stale; payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`; }
       return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
     } catch { /* fall through to the spawned artifact */ }
@@ -402,7 +418,8 @@ function handleToolCall(id, params) {
   // spawned path parsed the multi-MB graph fresh on every call.
   if (tool.name === 'codeweb_context') {
     try {
-      const { graph, index } = cachedGraph(resolve(graphPath));
+      const entry = cachedGraph(resolve(graphPath));
+      const { graph, index } = entry;
       const ids = resolveSymbol(graph, args.symbol);
       if (!ids.length) {
         const suggestions = suggestSymbols(graph, args.symbol);
@@ -412,7 +429,7 @@ function handleToolCall(id, params) {
       }
       const limit = args.limit != null ? Number(args.limit) : (args.full ? null : tool.budget.value);
       const windowN = args.window != null ? Math.max(0, parseInt(String(args.window), 10) || 3) : 3;
-      const payload = buildContextPack(graph, index, sourceReader(graph.meta?.root || null), ids, { symbol: args.symbol, windowN, fullBodies: !!args.full, limit });
+      const payload = buildContextPack(graph, index, sourceReader(graph.meta?.root || null), ids, { symbol: args.symbol, windowN, fullBodies: !!args.full, limit, staleInfo: staleOnce(resolve(graphPath), entry) });
       return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
     } catch { /* fall through to the spawned artifact */ }
   }
@@ -421,12 +438,13 @@ function handleToolCall(id, params) {
   const qkind = QUERY_KIND[tool.name];
   if (qkind) {
     try {
-      const { graph, index } = cachedGraph(resolve(graphPath));
+      const entry = cachedGraph(resolve(graphPath));
+      const { graph, index } = entry;
       const limit = args.limit != null ? Number(args.limit) : (args.full ? null : tool.budget.value);
       const offset = args.offset != null ? Number(args.offset) : 0;
       const { payload, code } = runQuery(graph, index, { query: qkind, symbol: args.symbol, limit, offset });
       if (code === 0 || payload) {
-        const stale = payload.found === false ? null : checkStaleness(graph);
+        const stale = payload.found === false ? null : staleOnce(resolve(graphPath), entry);
         if (stale) {
           payload.stale = stale;
           if (payload.summary) payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`;

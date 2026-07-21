@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { normalizeGraph, buildIndex } from '../scripts/lib/graph-ops.mjs';
 import { buildBrief, renderBrief } from '../scripts/lib/brief-core.mjs';
+import { loadBriefSidecar } from '../scripts/lib/brief-sidecar.mjs'; // finding 23: serve the map-time render at the boot floor
 import { bump, attachActivity } from '../scripts/lib/stats.mjs';
 
 function findGraph(startDir) {
@@ -30,8 +31,15 @@ export function preview(raw) {
   const cwd = input?.cwd || process.cwd();
   const graphPath = findGraph(cwd);
   if (!graphPath) return null;
-  let graph; try { graph = normalizeGraph(JSON.parse(readFileSync(graphPath, 'utf8'))); } catch { return null; }
-  const brief = attachActivity(buildBrief(graph, buildIndex(graph)), graphPath);
+  // finding 23: the brief is a pure function of the graph — the report stage pre-rendered it, so
+  // the common path is stat + one small read instead of parse + index of the whole graph (97ms on
+  // this repo, 310-328ms at 17k nodes). Stamp mismatch (graph rebuilt since) -> the parse path.
+  let payload = loadBriefSidecar(graphPath);
+  if (!payload) {
+    let graph; try { graph = normalizeGraph(JSON.parse(readFileSync(graphPath, 'utf8'))); } catch { return null; }
+    payload = buildBrief(graph, buildIndex(graph));
+  }
+  const brief = attachActivity(payload, graphPath);
   const text = renderBrief(brief);
   return `[codeweb] this repo is mapped (${graphPath}).\n${text}`;
 }

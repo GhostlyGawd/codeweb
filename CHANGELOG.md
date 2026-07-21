@@ -212,6 +212,15 @@ notes so validated results, papers, and new tools never get lost in commit histo
   now clean up in `finally`; and a tripwire in `post-edit-diff.test.mjs` runs the hook end-to-end
   and asserts no `codeweb-hook-*.json` appears — the leak signature can't return silently.
   (perf-quality finding 22)
+- **SessionStart serves a pre-rendered brief; MCP sweeps staleness once per burst.** The
+  session-brief hook re-parsed and re-indexed the whole graph every session start (97–100ms on
+  this repo, 310–328ms at 17k nodes) for a payload that is a pure function of the graph — the
+  report stage now pre-renders `brief.json` (Spec P stamp pattern) and the hook serves it at the
+  boot floor, byte-identical output pinned across sidecar/parse/stale-fallback paths. The MCP
+  server also stat-swept every `meta.sources` entry TWICE per fast-path request (auto-refresh
+  check + payload annotation — 2×12–17ms at 5k files against 3–13ms answers); one memoized
+  verdict per (graph identity, 1s TTL) now serves both, threaded through context-core so the CLI
+  path is untouched. (perf-quality finding 23)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
