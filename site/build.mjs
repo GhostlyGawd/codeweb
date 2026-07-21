@@ -169,7 +169,10 @@ function changelogToHtml(md) {
   const inline = (s) => esc(s)
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" rel="noopener">$1</a>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    // Changelog text is inserted into a page that still passes the {{placeholder}} fill — a
+    // literal "{{" in an entry would read as an unfilled token and fail the build (it did once).
+    .replace(/\{\{/g, '&#123;&#123;');
   for (const ln of lines) {
     if (/^##\s+/.test(ln)) { started = true; closeList(); out.push(`<h2 class="cl-ver">${inline(ln.replace(/^##\s+/, ''))}</h2>`); continue; }
     if (!started) continue;

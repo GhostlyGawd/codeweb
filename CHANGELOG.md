@@ -44,7 +44,8 @@ notes so validated results, papers, and new tools never get lost in commit histo
   claimed "nothing wired" about a tier that shipped two releases ago. All fixed at the source —
   site prose now derives counts (`{{toolCount}}`/`{{langCount}}`), and `check-consistency` gained
   **prose scans** (digit and word forms) plus a claim-ledger "N / N tools" check, so this class of
-  rot now fails the build. The 2026-07-18 product review is archived to
+  rot now fails the build. Site prose counts are template-derived (toolCount/langCount
+  placeholders filled at build time). The 2026-07-18 product review is archived to
   `docs/product-review-2026-07-18.md` with a historical header. (IMPROVEMENTS.md #3)
 - **`npm test` is green again on a fresh zero-dependency clone.** The Spec-N LSH suite's N6 case
   asserts a Type-3 (AST-tier-only) finding but was missing the `tree-sitter unavailable` skip

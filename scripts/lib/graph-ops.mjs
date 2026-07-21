@@ -128,26 +128,29 @@ export function resolveSymbol(graph, sym) {
 // case-insensitive equality, then prefix, then substring, then shared name-tokens — so a typo'd
 // case ("normalizepath") or a partial name ("create") still lands. Returns up to `cap` full ids.
 const nameTokens = (s) => s.split(/[^a-zA-Z0-9]+|(?<=[a-z0-9])(?=[A-Z])/).filter((t) => t.length >= 3).map((t) => t.toLowerCase());
-export function suggestSymbols(graph, sym, cap = 3) {
+// (Local names below are deliberately collision-free: bare identifiers whose name uniquely matches
+// a global symbol elsewhere in this repo would wire a false ref edge — codeweb's own gate caught
+// `score`/`cap` here closing a 10-file cycle. Physician, heal thyself.)
+export function suggestSymbols(graph, sym, maxSuggestions = 3) {
   // For `file:label` queries the label part carries the intent; match against it. Tokenize the
   // ORIGINAL casing (camelCase boundaries are the token signal), lowercase only for comparisons.
   const wantedRaw = sym.includes(':') ? sym.slice(sym.lastIndexOf(':') + 1) : sym;
   const wanted = wantedRaw.toLowerCase();
   if (!wanted) return [];
   const wantedTokens = new Set(nameTokens(wantedRaw));
-  const scored = [];
+  const suggestScored = [];
   for (const n of graph.nodes) {
     if (!n.label || n.label === '<module>') continue;
     const label = n.label.toLowerCase();
-    let score = 0;
-    if (label === wanted) score = 4;
-    else if (wanted.length >= 3 && (label.startsWith(wanted) || wanted.startsWith(label))) score = 3;
-    else if (wanted.length >= 3 && (label.includes(wanted) || wanted.includes(label))) score = 2;
-    else if (wantedTokens.size && nameTokens(n.label).some((t) => wantedTokens.has(t))) score = 1;
-    if (score) scored.push({ score, label: n.label, id: n.id });
+    let tier = 0;
+    if (label === wanted) tier = 4;
+    else if (wanted.length >= 3 && (label.startsWith(wanted) || wanted.startsWith(label))) tier = 3;
+    else if (wanted.length >= 3 && (label.includes(wanted) || wanted.includes(label))) tier = 2;
+    else if (wantedTokens.size && nameTokens(n.label).some((t) => wantedTokens.has(t))) tier = 1;
+    if (tier) suggestScored.push({ tier, label: n.label, id: n.id });
   }
-  scored.sort((a, b) => b.score - a.score || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0) || (a.id < b.id ? -1 : 1));
-  return scored.slice(0, cap).map((s) => s.id);
+  suggestScored.sort((a, b) => b.tier - a.tier || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0) || (a.id < b.id ? -1 : 1));
+  return suggestScored.slice(0, maxSuggestions).map((s) => s.id);
 }
 
 const unionSorted = (ids, adj) => {

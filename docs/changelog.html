@@ -92,6 +92,26 @@
 <p>  instead of sending the agent back to grep. (IMPROVEMENTS.md #2)</p>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
+<li><strong>The public prose can no longer understate the product — and what it said is fixed.</strong> The</li>
+</ul>
+<p>  homepage, product page, start page, and og-descriptions said "20 tools" (24 ship); the /codeweb</p>
+<p>  command steered agents off the fast path for 8 of the 11 native languages; the engine-detection</p>
+<p>  reference said five; README's axios headline carried pre-regeneration numbers (334/11 vs the</p>
+<p>  real 274/8); the site still promised the deleted sharding layer; the tree-sitter backlog doc</p>
+<p>  claimed "nothing wired" about a tier that shipped two releases ago. All fixed at the source —</p>
+<p>  site prose now derives counts (<code>&#123;&#123;toolCount}}</code>/<code>&#123;&#123;langCount}}</code>), and <code>check-consistency</code> gained</p>
+<p>  <strong>prose scans</strong> (digit and word forms) plus a claim-ledger "N / N tools" check, so this class of</p>
+<p>  rot now fails the build. Site prose counts are template-derived (toolCount/langCount</p>
+<p>  placeholders filled at build time). The 2026-07-18 product review is archived to</p>
+<p>  <code>docs/product-review-2026-07-18.md</code> with a historical header. (IMPROVEMENTS.md #3)</p>
+<ul>
+<li><strong><code>npm test</code> is green again on a fresh zero-dependency clone.</strong> The Spec-N LSH suite's N6 case</li>
+</ul>
+<p>  asserts a Type-3 (AST-tier-only) finding but was missing the <code>tree-sitter unavailable</code> skip</p>
+<p>  guard every other AST test carries — so the suite failed 1 test exactly on the "just Node"</p>
+<p>  install path the README celebrates (CI never saw it because CI installs the optional</p>
+<p>  dependency). Verified both ways: runs with the engine, skips without. (IMPROVEMENTS.md #4)</p>
+<ul>
 <li><strong>An empty scan no longer masquerades as a successful map.</strong> Pointing codeweb at an empty</li>
 </ul>
 <p>  directory, an unsupported-language tree, or a typo'd path used to print a green <code>[run] done</code></p>
