@@ -70,6 +70,49 @@ export function loadGraph(pathArg, { usage = null } = {}) {
 // here for the hooks (Spec E consolidation; the hooks previously trailed the extractor's list).
 export const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
 
+// #6 (IMPROVEMENTS.md): manifest-declared entrypoints — files a HOST invokes without a code edge.
+// deadcode's "safe to delete" tier listed the VS Code extension's activate/deactivate (package.json
+// `main`) and hook scripts (hooks.json commands) on codeweb's own map; anything a manifest names is
+// review-tier, never safe. Sources: every package.json beside mapped files (main/bin/exports),
+// hooks/hooks.json, .claude-plugin/plugin.json (path-ish tokens). Fail-open: unreadable/absent
+// manifests contribute nothing. Returns Map<relFile, manifestRelPath>.
+export function manifestEntryFiles(root, relFiles) {
+  const entries = new Map();
+  if (!root || !existsSync(root)) return entries;
+  const relSet = new Set(relFiles);
+  const claim = (p, manifest, baseDir) => {
+    if (typeof p !== 'string' || !p) return;
+    const clean = p.replace(/^\.\//, '').replace(/\$\{[A-Z_]+\}\//g, '');
+    for (const cand of [clean, baseDir ? `${baseDir}/${clean}` : null]) {
+      if (cand && relSet.has(cand) && !entries.has(cand)) entries.set(cand, manifest);
+    }
+  };
+  const dirs = new Set(['']);
+  for (const f of relFiles) { let d = f; while (d.includes('/')) { d = d.slice(0, d.lastIndexOf('/')); dirs.add(d); } }
+  for (const d of dirs) {
+    const pjPath = join(root, d, 'package.json');
+    if (!existsSync(pjPath)) continue;
+    const manifest = d ? `${d}/package.json` : 'package.json';
+    try {
+      const pj = JSON.parse(readFileSync(pjPath, 'utf8'));
+      claim(pj.main, manifest, d);
+      const binVals = typeof pj.bin === 'string' ? [pj.bin] : Object.values(pj.bin || {});
+      for (const v of binVals) claim(v, manifest, d);
+      const flatExports = (x) => (typeof x === 'string' ? [x] : x && typeof x === 'object' ? Object.values(x).flatMap(flatExports) : []);
+      for (const v of flatExports(pj.exports)) claim(v, manifest, d);
+    } catch { /* fail-open */ }
+  }
+  // Plugin surfaces reference scripts by path inside command strings — extract path-ish tokens.
+  for (const manifest of ['hooks/hooks.json', '.claude-plugin/plugin.json']) {
+    const p = join(root, manifest);
+    if (!existsSync(p)) continue;
+    try {
+      for (const m of readFileSync(p, 'utf8').matchAll(/[\w@${}./-]+\.(?:mjs|cjs|js)/g)) claim(m[0], manifest, null);
+    } catch { /* fail-open */ }
+  }
+  return entries;
+}
+
 // Walk up from a file to the nearest mapped workspace (.codeweb/graph.json). Previously
 // duplicated verbatim in both hooks — codeweb's own campaign flagged it (Spec E dogfood).
 export function findTarget(filePath) {

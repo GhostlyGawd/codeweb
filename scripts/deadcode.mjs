@@ -12,7 +12,7 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
-import { normalizeGraph, buildIndex, orphans, isTestFile } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, orphans, isTestFile, productScope, scopeNote } from './lib/graph-ops.mjs';
 import { fingerprint, loadAnnotations } from './lib/annotations.mjs'; // F7: false-positive suppression memory
 
 // Entrypoint-like names that may be invoked by a framework / CLI / test runner rather than via a
@@ -22,18 +22,19 @@ const ENTRYPOINTS = new Set(['main', 'default', 'index', 'setup', 'teardown', 'i
 // a function DEFINED IN a test file falls through to `safe`. Defaults OFF (shipped: test-file -> review).
 // The effectiveness study flips this on to prove the H13 fix is load-bearing (safe-tier precision drops).
 const DEADCODE_LEGACY = process.env.CODEWEB_DEADCODE_LEGACY === '1';
-const USAGE = 'usage: deadcode.mjs <graph.json> [--json]   (or set CODEWEB_WS)';
+const USAGE = 'usage: deadcode.mjs <graph.json> [--all] [--json]   (or set CODEWEB_WS)';
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, loadGraph, manifestEntryFiles } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
-let json = false, showSuppressed = false, annDir = null, limit = null; const pos = [];
+let json = false, showSuppressed = false, annDir = null, limit = null, all = false; const pos = [];
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--json') json = true;
   else if (t === '--show-suppressed') showSuppressed = true;
   else if (t === '--annotations') annDir = argv[++i];
   else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
+  else if (t === '--all') all = true; // #6: include non-product roles
   else if (!t.startsWith('-')) pos.push(t);
 }
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
@@ -41,17 +42,45 @@ const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 const index = buildIndex(graph);
 const CAVEAT = 'extraction drops ambiguous call edges (precision over recall), so a genuinely-called symbol can surface here — cross-check before deleting';
 
+// #6a: product scope by default — bench/fixture/generated orphans are their own cleanup problem,
+// not a delete list to hand an agent. Counted, --all restores the everything view.
+const allOrphans = orphans(graph, index);
+const deadScope = productScope(allOrphans.map((o) => ({ ...o, ...index.byId.get(o.id) })), all);
+
+// #6b: manifest-declared entrypoint files — a host (npm bin/main/exports, Claude hooks, plugin
+// mcpServers) invokes these without a code edge; nothing in them is ever "safe to delete".
+const manifestEntries = manifestEntryFiles(graph.meta?.root, [...new Set(graph.nodes.map((n) => n.file).filter(Boolean))]);
+
+// #6c: closure-scoped orphans — a function DEFINED INSIDE a reachable parent's span is reachable
+// via the closure even with zero direct edges (cli.mjs's sourceReader().bodyOf was listed "safe").
+const nodesByFile = new Map();
+for (const n of graph.nodes) { if (!nodesByFile.has(n.file)) nodesByFile.set(n.file, []); nodesByFile.get(n.file).push(n); }
+function closureParent(node) {
+  if (!node?.line) return null;
+  for (const p of nodesByFile.get(node.file) || []) {
+    if (p.id === node.id || !p.loc || !p.line || p.line >= node.line) continue;
+    if (node.line + (node.loc || 1) - 1 <= p.line + p.loc - 1) {
+      if (p.exports || index.hasIncoming?.has?.(p.id) || (index.callIn.get(p.id)?.size || 0) > 0) return p;
+    }
+  }
+  return null;
+}
+
 const safe = [], review = [];
-for (const o of orphans(graph, index)) {           // orphans = no call|import|inherit incoming, not exported
+for (const o of deadScope.kept) {                  // orphans = no call|import|inherit incoming, not exported
   const node = index.byId.get(o.id);
   const label = node?.label || o.id;
   const testers = index.testIn.get(o.id)?.size || 0;
   const file = node?.file || o.file;
   const loc = node?.loc || 0; // deleting this orphan reclaims its span — campaign's delete-ROI signal
-  if (testers > 0) review.push({ ...o, loc, reason: `referenced only by ${testers} test(s) — the test may be its only user; remove the test too, or it is genuinely used` });
-  else if (!DEADCODE_LEGACY && isTestFile(file)) review.push({ ...o, loc, reason: `defined in a test file '${file}' — a test runner may invoke it (helper, mock, or case registration) without a code edge, so deleting it can break tests` });
-  else if (ENTRYPOINTS.has(label)) review.push({ ...o, loc, reason: `entrypoint-like name '${label}' — may be invoked by a framework/CLI/test runner, not via a code edge` });
-  else safe.push({ ...o, loc, reason: 'no production caller, not exported, no test edge, not in a test file — high-confidence dead' }); // the shared caveat lives once in payload.note
+  const manifest = manifestEntries.get(file);
+  const parent = closureParent(node);
+  if (testers > 0) review.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: `referenced only by ${testers} test(s) — the test may be its only user; remove the test too, or it is genuinely used` });
+  else if (!DEADCODE_LEGACY && isTestFile(file)) review.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: `defined in a test file '${file}' — a test runner may invoke it (helper, mock, or case registration) without a code edge, so deleting it can break tests` });
+  else if (manifest) review.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: `'${file}' is a declared entrypoint of ${manifest} — the host invokes it without a code edge (activate/bin/hook), so it is never safe-tier` });
+  else if (parent) review.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: `defined inside ${parent.label || parent.id}'s span — reachable through the closure even with no direct edge` });
+  else if (ENTRYPOINTS.has(label)) review.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: `entrypoint-like name '${label}' — may be invoked by a framework/CLI/test runner, not via a code edge` });
+  else safe.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: 'no production caller, not exported, no test edge, not in a test file — high-confidence dead' }); // the shared caveat lives once in payload.note
 }
 
 // F7: every finding carries a stable fingerprint (kind 'orphan' + its id). A '.codeweb/annotations.json'
@@ -74,6 +103,7 @@ const payload = {
   target: graph.meta?.target || 'target',
   summary: `${visibleSafe.length + review.length} orphan(s): ${visibleSafe.length} safe to delete, ${review.length} need review${suppressed.length ? `, ${suppressed.length} suppressed` : ''}`,
   totals: { orphans: visibleSafe.length + review.length, safe: visibleSafe.length, review: review.length, suppressed: suppressed.length },
+  excluded: deadScope.excluded, excludedByRole: deadScope.excludedByRole, // #6: counted, never silent
   note: CAVEAT,
   safe: capSafe.items, review: capReview.items, suppressed,
 };
@@ -84,6 +114,7 @@ if (json) { emitJson(payload); } else {
 
 const t = payload.totals;
 console.log(`codeweb deadcode: ${payload.target} — ${t.orphans} orphan(s): ${t.safe} safe, ${t.review} review${t.suppressed ? `, ${t.suppressed} suppressed` : ''}`);
+if (deadScope.excluded) console.log(`  scope: product — ${scopeNote(deadScope)}`); // #6: counted, never silent
 console.log(`\nsafe to delete (no caller, not exported, no test):`);
 for (const o of payload.safe) console.log(`  ${o.id}  [${o.domain}]  (${o.loc} loc)`);
 if (payload.moreSafe) console.log(`  … +${payload.moreSafe.remaining} more`);

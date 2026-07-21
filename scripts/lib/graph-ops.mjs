@@ -30,6 +30,23 @@ export function roleOf(file) {
   return 'product';
 }
 
+// #6 (IMPROVEMENTS.md): one role accessor + one product-scope filter for every RANKED surface.
+// The vite-playground lesson (rankings drowned by fixtures) was applied to overlap only; hotspots,
+// risk, deadcode, and campaign ranked test helpers and generated bundles first on codeweb's own
+// map. Scope defaults to product with a COUNTED exclusion (never silent), --all restores.
+export const roleOfNode = (n) => n.role || roleOf(n.file || '');
+export function productScope(nodes, includeAll = false) {
+  if (includeAll) return { kept: nodes, excluded: 0, excludedByRole: {} };
+  const kept = [], excludedByRole = {};
+  for (const n of nodes) {
+    const r = roleOfNode(n);
+    if (r === 'product') kept.push(n);
+    else excludedByRole[r] = (excludedByRole[r] || 0) + 1;
+  }
+  return { kept, excluded: nodes.length - kept.length, excludedByRole };
+}
+export const scopeNote = (s) => (s.excluded ? `excluded ${s.excluded} non-product symbol(s) (${Object.entries(s.excludedByRole).sort().map(([r, c]) => `${r} ${c}`).join(', ')}) — --all includes them` : null);
+
 // Spec E: per-repo role OVERRIDES (codeweb.rules.json `roles: [{glob, role}]`) — heuristics can't
 // know a repo's private layout ("docs/ here is generated site output"). Compile the config into a
 // matcher; first matching glob wins; an unknown role THROWS (extraction fails loudly, exit 2).

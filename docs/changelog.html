@@ -92,6 +92,20 @@
 <p>  instead of sending the agent back to grep. (IMPROVEMENTS.md #2)</p>
 <h3 class="cl-grp">Added</h3>
 <ul>
+<li><strong>Every ranked surface now honors the role model — and deadcode knows what a host invokes.</strong></li>
+</ul>
+<p>  The vite-playground precision lesson (rankings drowned by non-product code) was applied to</p>
+<p>  overlap only; hotspots, risk, deadcode, and campaign still ranked test helpers, bench scaffolding,</p>
+<p>  and the generated site bundle first on codeweb's own map. All four now default to **product</p>
+<p>  scope** with a counted exclusion line (<code>--all</code> / MCP <code>all:true</code> restores the everything view).</p>
+<p>  <code>deadcode</code> additionally learns <strong>manifest-declared entrypoints</strong> — files named by any</p>
+<p>  <code>package.json</code> <code>main</code>/<code>bin</code>/<code>exports</code>, <code>hooks/hooks.json</code>, or <code>.claude-plugin/plugin.json</code> are</p>
+<p>  review-tier, never "safe to delete" (the safe tier used to list the VS Code extension's</p>
+<p>  <code>activate</code>/<code>deactivate</code>) — and demotes <strong>closure-scoped</strong> functions (defined inside a reachable</p>
+<p>  parent's span) to review. Dogfood receipts on the self-map: hotspots' top-10 went from five test</p>
+<p>  helpers + the generated site bundle to all product code; campaign's plan dropped from 55 steps</p>
+<p>  (-730 claimed LOC, mostly false orphans) to 26 grounded ones. (IMPROVEMENTS.md #6)</p>
+<ul>
 <li><strong>The CLI grew a front door.</strong> Every CLI answers <code>--help</code>/<code>-h</code> (exit 0) — including the</li>
 </ul>
 <p>  <code>codeweb</code> bin, where <code>--help</code> previously errored with <code>target not found: --help</code>; <code>run.mjs</code></p>

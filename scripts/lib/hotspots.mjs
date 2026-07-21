@@ -6,7 +6,7 @@
 // non-negative and sum to 1, so score ∈ [0,1] and is monotonic non-decreasing in each component for
 // fixed maxes (HOT-DOMINANCE).
 
-import { buildIndex } from './graph-ops.mjs';
+import { buildIndex, productScope } from './graph-ops.mjs';
 
 export const HOTSPOT_WEIGHTS = { complexity: 0.5, fanIn: 0.3, churn: 0.2 };
 
@@ -20,15 +20,17 @@ export function hotspotScore(components, maxes) {
 }
 
 // Rank function/method nodes (the ones carrying complexity) by hotspot score. churn: { <relpath>: count }.
-export function rankHotspots(graph, { churn = {} } = {}) {
+// #6: product scope by default — a hotspot list led by test helpers is advice nobody can act on;
+// allRoles restores the everything view, and the exclusion is always counted, never silent.
+export function rankHotspots(graph, { churn = {}, allRoles = false } = {}) {
   const index = buildIndex(graph);
-  const comps = graph.nodes
-    .filter((n) => n.kind === 'function' || n.kind === 'method')
+  const scope = productScope(graph.nodes.filter((n) => n.kind === 'function' || n.kind === 'method'), allRoles);
+  const comps = scope.kept
     .map((n) => ({ id: n.id, file: n.file, domain: n.domain, complexity: n.complexity || 0, fanIn: index.callIn.get(n.id)?.size || 0, churn: churn[n.file] || 0 }));
   const maxes = { complexity: 0, fanIn: 0, churn: 0 };
   for (const c of comps) for (const k of Object.keys(maxes)) maxes[k] = Math.max(maxes[k], c[k]);
   const ranked = comps
     .map((c) => ({ id: c.id, file: c.file, domain: c.domain, score: hotspotScore(c, maxes), components: { complexity: c.complexity, fanIn: c.fanIn, churn: c.churn } }))
     .sort((a, b) => b.score - a.score || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-  return { weights: HOTSPOT_WEIGHTS, maxes, count: ranked.length, ranked };
+  return { weights: HOTSPOT_WEIGHTS, maxes, count: ranked.length, ranked, excluded: scope.excluded, excludedByRole: scope.excludedByRole };
 }

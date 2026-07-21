@@ -36,6 +36,18 @@ notes so validated results, papers, and new tools never get lost in commit histo
   instead of sending the agent back to grep. (IMPROVEMENTS.md #2)
 
 ### Added
+- **Every ranked surface now honors the role model — and deadcode knows what a host invokes.**
+  The vite-playground precision lesson (rankings drowned by non-product code) was applied to
+  overlap only; hotspots, risk, deadcode, and campaign still ranked test helpers, bench scaffolding,
+  and the generated site bundle first on codeweb's own map. All four now default to **product
+  scope** with a counted exclusion line (`--all` / MCP `all:true` restores the everything view).
+  `deadcode` additionally learns **manifest-declared entrypoints** — files named by any
+  `package.json` `main`/`bin`/`exports`, `hooks/hooks.json`, or `.claude-plugin/plugin.json` are
+  review-tier, never "safe to delete" (the safe tier used to list the VS Code extension's
+  `activate`/`deactivate`) — and demotes **closure-scoped** functions (defined inside a reachable
+  parent's span) to review. Dogfood receipts on the self-map: hotspots' top-10 went from five test
+  helpers + the generated site bundle to all product code; campaign's plan dropped from 55 steps
+  (-730 claimed LOC, mostly false orphans) to 26 grounded ones. (IMPROVEMENTS.md #6)
 - **The CLI grew a front door.** Every CLI answers `--help`/`-h` (exit 0) — including the
   `codeweb` bin, where `--help` previously errored with `target not found: --help`; `run.mjs`
   documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map
