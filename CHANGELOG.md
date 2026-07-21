@@ -86,6 +86,15 @@ notes so validated results, papers, and new tools never get lost in commit histo
   only from depth-0 calls so a depth-truncated null can't mask a resolvable chain), and a shared
   per-file mask cache serves all five scan sites. Byte-identical fragments on a 261-file
   re-export corpus (1,460 edges, zero field diffs). (perf-quality finding 8)
+- **Blast radius de-quadratic'd — `risk` is 31x faster at 20k nodes.** `impactOf` dequeued with
+  `shift()` (O(frontier) per pop) and materialized+sorted closures its biggest caller threw away;
+  `risk` then ran it once per node — measured 19.8s at 20k nodes/60k edges, scaling ~quadratically.
+  Now: index-pointer BFS in `impactOf` (and the extractor's pub-API walk), a count-only
+  `impactCountOf`, and `allBlastCounts` — Tarjan-condense the dependents graph, then propagate 64
+  source-components per pass with word masks (O(V·E/64) time, O(V) memory, dangling edge sources
+  participate exactly as in the BFS). risk: 19,784ms → 630ms with byte-identical payloads
+  (blast sums equal); a property test pins all three implementations to each other on random
+  graphs. (perf-quality finding 9)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release

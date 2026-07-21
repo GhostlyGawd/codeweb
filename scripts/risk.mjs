@@ -11,7 +11,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
-import { normalizeGraph, buildIndex, impactOf, productScope, scopeNote } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, allBlastCounts, productScope, scopeNote } from './lib/graph-ops.mjs';
 import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
 
 const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--churn <map.json> | --git] [--all] [--json]';
@@ -44,13 +44,16 @@ else if (useGit) {
 const index = buildIndex(graph);
 // #6: rank product code by default — triage lists led by test scaffolding are unactionable.
 const riskScope = productScope(graph.nodes, all);
+// finding 9: ALL blast radii in one SCC pass — the previous impactOf-per-node loop was
+// ~quadratic (measured 82.2s at 15k nodes; identical sums now in well under a second).
+const blastByNode = allBlastCounts(index);
 // components per node (raw structural metrics + churn-by-file)
 const comp = riskScope.kept.map((n) => ({
   id: n.id, file: n.file, domain: n.domain,
   fanIn: index.callIn.get(n.id)?.size || 0,
   fanOut: index.callOut.get(n.id)?.size || 0,
   loc: n.loc || 0,
-  blast: impactOf(index, [n.id]).length,
+  blast: blastByNode.get(n.id) ?? 0,
   churn: churn[n.file] || 0,
 }));
 // graph-max per component (normalization denominator)

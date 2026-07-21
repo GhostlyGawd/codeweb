@@ -835,8 +835,8 @@ for (const [r, stars] of starReExportByFile) {
     const reOut = new Map(); // fromModuleId -> [toIds]
     for (const [a, b] of reExportEdges) { if (!reOut.has(a)) reOut.set(a, []); reOut.get(a).push(b); }
     const seenFiles = new Set(), queue = [...entryFiles];
-    while (queue.length) {
-      const file = queue.shift();
+    for (let qi = 0; qi < queue.length; qi++) { // index-pointer, not shift(): O(frontier) pops go quadratic (finding 9)
+      const file = queue[qi];
       if (seenFiles.has(file)) continue;
       seenFiles.add(file);
       for (const n of nodes) if (n.file === file && n.exports && n.kind !== 'module') n.pub = true;

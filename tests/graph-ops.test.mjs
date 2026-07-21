@@ -7,8 +7,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, impactOf, fileCycles, orphans,
-  structuralRegressions,
+  normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, impactOf, impactCountOf,
+  allBlastCounts, fileCycles, orphans, structuralRegressions,
 } from '../scripts/lib/graph-ops.mjs';
 import { prng, randomGraph, randomOp, naiveApply } from './_proptest.mjs';
 
@@ -131,5 +131,32 @@ test('structuralRegressions (property): lostCallers ⊆ surviving before-nodes, 
       assert.ok(beforeIds.has(id) && afterIds.has(id), `lostCaller ${id} must exist before AND after (case ${i})`);
     }
     for (const c of newCycles) assert.ok(!beforeCyc.has(cycKey(c)), `newCycle ${cycKey(c)} was already present before (case ${i})`);
+  }
+});
+
+// Perf-quality finding 9 — three blast-radius implementations, one truth. impactOf got an
+// index-pointer queue (shift() was O(frontier) per pop), impactCountOf skips the materialize/
+// sort, and allBlastCounts computes every node's count in one SCC + 64-wide bit-parallel pass
+// (risk's per-node BFS loop was ~quadratic: 82.2s at 15k nodes). Random graphs — including
+// cycles, inherit edges, and dangling edge sources — must agree exactly across all three.
+test('finding 9: allBlastCounts / impactCountOf agree with per-node impactOf on random graphs', () => {
+  const rng = prng(0xB1A57);
+  for (let c = 0; c < 25; c++) {
+    const n = 3 + Math.floor(rng() * 38);
+    const nodes = Array.from({ length: n }, (_, i) => ({ id: `f${i % 5}.js:s${i}`, label: `s${i}`, kind: 'function', file: `f${i % 5}.js`, line: i + 1, loc: 1, exports: true, domain: 'd' }));
+    const ids = nodes.map((x) => x.id);
+    const edges = [];
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      if (i !== j && rng() < 0.12) edges.push({ from: ids[i], to: ids[j], kind: rng() < 0.85 ? 'call' : 'inherit' });
+    }
+    if (rng() < 0.5) edges.push({ from: 'ghost.js:phantom', to: ids[0], kind: 'call' }); // dangling from participates in BFS
+    const g = normalizeGraph({ meta: {}, nodes, edges, domains: [], overlaps: [] });
+    const index = buildIndex(g);
+    const all = allBlastCounts(index);
+    for (const id of ids) {
+      const oracle = impactOf(index, [id]).length;
+      assert.equal(all.get(id), oracle, `case ${c}: allBlastCounts(${id})`);
+      assert.equal(impactCountOf(index, [id]), oracle, `case ${c}: impactCountOf(${id})`);
+    }
   }
 });
