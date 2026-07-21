@@ -96,8 +96,8 @@ Standing invariant: rebuild-twice byte-identity of `report.html` (build-report.t
   `LABEL_CAP = 300`, priority order (deterministic): bubbles > selectedNode + its lit neighbors >
   search hits (when `hl.size < 40`) > screen radius desc, tie-break by id. Flicker-free: rank
   depends only on (r, cam.k, hl, selection), never positions — stable across anneal frames at
-  fixed camera. Extract pure `labelPick(nodes, cam, hl, cap)`; extractFn-pin in node: cap,
-  priority order, position-independence, same input → same output array.
+  fixed camera. Extract pure `labelPick(nodes, cam, hl, cap)`; pin in node: cap, priority order,
+  position-independence, determinism.
 - **T-37.3** Edge batching by EXACT style bucket — no quantization. W.edges weights are integers
   (buildW counts them), and alpha/width (:775-782) are pure functions of (state, bubble-pair,
   weight), saturating by w=29 (alpha) resp. w=72 (width). Bucket key = `state|pair|min(weight,72)`
