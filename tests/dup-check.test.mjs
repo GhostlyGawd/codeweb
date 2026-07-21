@@ -178,3 +178,50 @@ test('DUP-GATE-THRESHOLD: a ~50%-similar edit is below the high bar -> not flagg
     assert.equal(r.status, 0, 'gate stays green below the high bar');
   } finally { cleanup(dir); }
 });
+
+// Perf-quality finding 15 — the exact size-ratio prefilter must never change the reported set.
+// Property: over random body pools, incrementalOverlap's results equal a filterless oracle
+// (plain jaccard over every pair at the same bar).
+test('DC-PREFILTER-EXACT: prefiltered results == filterless oracle on random pools (40 cases)', async () => {
+  const { prng, int } = await import('./_proptest.mjs');
+  const { shingles, jaccard } = await import('../scripts/lib/shingles.mjs');
+  const rng = prng(0xD09C43);
+  const round6 = (x) => +x.toFixed(6);
+  for (let c = 0; c < 40; c++) {
+    const nFns = int(rng, 4, 14);
+    const bodies = new Map();
+    const nodes = [];
+    for (let i = 0; i < nFns; i++) {
+      const id = `f${i % 3}.js:fn${i}`;
+      // random-ish bodies with deliberate near-duplicates every third symbol
+      const base = i % 3 === 0 && i > 0 ? bodies.get(`f${(i - 3) % 3}.js:fn${i - 3}`) : null;
+      const lines = base ? base.split('\n') : Array.from({ length: int(rng, 3, 9) }, (_, k) => `const v${k} = a${int(rng, 0, 5)}(x) + ${int(rng, 0, 99)};`);
+      if (base && rng() < 0.7) lines[0] = `const v0 = mutated${i}(x);`;
+      bodies.set(id, lines.join('\n'));
+      nodes.push({ id, label: `fn${i}`, kind: 'function', file: `f${i % 3}.js`, line: 1, loc: lines.length, exports: true, domain: 'd' });
+    }
+    const graph = { meta: {}, nodes, edges: [], domains: [], overlaps: [] };
+    const changed = nodes.filter((_, i) => i % 2 === 0).map((n) => n.id);
+    const got = incrementalOverlap(graph, changed, { bodyOf: (n) => bodies.get(n.id) });
+    // filterless oracle at the same bar
+    const HIGH = 0.6;
+    const sh = new Map(nodes.map((n) => [n.id, shingles(bodies.get(n.id), 3)]));
+    const want = [];
+    for (const id of changed) {
+      const cand = sh.get(id);
+      if (!cand || !cand.size) continue;
+      let best = null;
+      for (const other of nodes) {
+        if (other.id === id) continue;
+        const osh = sh.get(other.id);
+        if (!osh || !osh.size) continue;
+        const sim = round6(jaccard(cand, osh));
+        if (sim < HIGH) continue;
+        if (!best || sim > best.sim || (sim === best.sim && other.id < best.dupOf)) best = { dupOf: other.id, sim };
+      }
+      if (best) want.push({ id, dupOf: best.dupOf, sim: best.sim });
+    }
+    want.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    assert.deepEqual(got, want, `case ${c}`);
+  }
+});

@@ -144,6 +144,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
   Measured: 100 candidates at 20k nodes/60k edges = 20,757ms → 729ms (28.5x) with identical
   accept decisions; a 120-case property oracle replays the historical clone chain verbatim and
   requires step-for-step plan equality. (perf-quality finding 14)
+- **The edit/PR duplication gate prefilters by set size and caps bodies like overlap does.**
+  `incrementalOverlap` ran full Jaccard intersections for every changed×pool pair (the dominant
+  gate term on big PRs) and shingled thousand-line bodies in full while overlap confirmed the
+  same pair on its first 400 lines. Now: an exact size-ratio early-exit (`J ≤ min/max` — measured
+  78% of 37,350 self-map pairs skipped, with 5e-7 slack so knife-edge pairs that round to the bar
+  survive) plus overlap's `BODY_LINE_CAP`. A 40-case property test pins prefiltered results to a
+  filterless oracle. (perf-quality finding 15)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
