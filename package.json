@@ -2,7 +2,7 @@
   "name": "@ghostlygawd/codeweb",
   "version": "0.9.0",
   "type": "module",
-  "description": "The living map of your codebase — deterministic call/import graph engine, 24 MCP tools for coding agents, and a self-contained interactive report.",
+  "description": "The living map of your codebase \u2014 deterministic call/import graph engine, 24 MCP tools for coding agents, and a self-contained interactive report.",
   "keywords": [
     "mcp",
     "code-analysis",
@@ -56,7 +56,8 @@
     "stats": "node scripts/stats.mjs",
     "reading-order": "node scripts/reading-order.mjs",
     "annotate": "node scripts/annotate.mjs",
-    "bench:ts-engine": "node scripts/bench-ts-engine.mjs"
+    "bench:ts-engine": "node scripts/bench-ts-engine.mjs",
+    "coverage": "node scripts/coverage.mjs"
   },
   "optionalDependencies": {
     "web-tree-sitter": "0.26.9"

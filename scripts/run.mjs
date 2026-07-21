@@ -29,11 +29,12 @@ const USAGE = `usage: run.mjs <SRC> [--target <label>] [--out-dir <dir>] [--open
   --out-dir <dir>  where the artifacts go (default: .live/<slug> under the plugin root)
   --open           open report.html when the map is built
   --full           recompute every stage (skip the fragment memo + edge cache)
-  --allow-empty    permit a target with no supported source (writes an empty map)`;
+  --allow-empty    permit a target with no supported source (writes an empty map)
+  --coverage <p>   annotate the graph with a coverage report (lcov or c8 JSON) after mapping`;
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 
 const argv = process.argv.slice(2);
-const opts = { src: null, target: null, outDir: null, open: false, full: false, allowEmpty: false };
+const opts = { src: null, target: null, outDir: null, open: false, full: false, allowEmpty: false, coverage: null };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--target') opts.target = argv[++i];
@@ -41,6 +42,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--open') opts.open = true;
   else if (t === '--full') opts.full = true;
   else if (t === '--allow-empty') opts.allowEmpty = true; // forwarded to extract: skip the empty-map guard
+  else if (t === '--coverage') opts.coverage = argv[++i]; // #13: measured-execution annotation after the map
   // #5: an unrecognized flag used to silently become the TARGET PATH (so `--help` errored with
   // "target not found: --help") — reject it with usage instead, per the 0/1/2 exit convention.
   else if (t.startsWith('-')) { console.error(`[run] unknown flag: ${t}\n${USAGE}`); process.exit(2); }
@@ -108,6 +110,8 @@ if (reusable) {
   run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json'), ...(opts.open ? ['--open'] : [])], false);
   try { writeFileSync(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString() }) + '\n'); } catch { /* memo is best-effort */ }
 }
+
+if (opts.coverage) run('coverage', S('scripts/coverage.mjs'), [join(ws, 'graph.json'), resolve(opts.coverage)], false); // #13
 
 console.error(`\n[run] done -> ${ws}`);
 console.error(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);

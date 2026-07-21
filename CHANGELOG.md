@@ -88,6 +88,18 @@ notes so validated results, papers, and new tools never get lost in commit histo
   11/11 auxiliary checks green — the old receipt covered the 20-tool era and its harness had the
   count hardcoded (now derived). The handshake instructions teach the new loop steps.
   (IMPROVEMENTS.md #11)
+- **Coverage→symbol mapping — "is this symbol actually tested?" is now a measured fact.**
+  (ROADMAP Phase 4's named-missing mechanism.) `scripts/coverage.mjs` (`npm run coverage`)
+  ingests a coverage report — lcov text (Node's own
+  `--test --experimental-test-coverage --test-reporter=lcov` output works directly) or a
+  c8/istanbul JSON — and stamps every instrumented symbol with `covered`/`hits` (declaration-line
+  hits don't count as body execution; unknown ≠ uncovered; ambiguous path suffixes dropped).
+  `explain`, `query --tests`, and `context-pack` answers then carry the facts — loudest one:
+  `⚠ NOT covered by the recorded test run` on the edit window of an unguarded symbol.
+  Optional + explicit like `--churn` (absent input leaves graphs byte-identical);
+  `run.mjs --coverage <report>` annotates right after mapping; `codeweb_refresh` drops stale
+  annotations and says how to restore them. Pinned end-to-end by `tests/coverage.test.mjs`,
+  including a real Node-runner dogfood. (IMPROVEMENTS.md #13)
 - **The CLI grew a front door.** Every CLI answers `--help`/`-h` (exit 0) — including the
   `codeweb` bin, where `--help` previously errored with `target not found: --help`; `run.mjs`
   documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map

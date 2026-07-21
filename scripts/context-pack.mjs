@@ -15,6 +15,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols, callersOf, calleesOf, impactOf } from './lib/graph-ops.mjs';
+import { coverageNote } from './lib/coverage.mjs'; // #13
 
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--json]   (or set CODEWEB_WS)';
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
@@ -105,6 +106,11 @@ const payload = {
 if (cappedCallers.truncated) payload.moreCallers = { remaining: cappedCallers.remaining };
 const staleInfo = checkStaleness(graph);
 if (staleInfo) { payload.stale = staleInfo; payload.summary += ` — graph is stale for ${staleInfo.count}+ file(s); run codeweb_refresh`; }
+// #13: an edit window on an unmeasured symbol should SAY the blast radius is unguarded.
+if (graph.meta?.coverage) {
+  const uncoveredTargets = ids.filter((id) => index.byId.get(id)?.covered === false);
+  if (uncoveredTargets.length) { payload.coverage = uncoveredTargets.map((id) => `${id}: ${coverageNote(graph, index.byId.get(id))}`); payload.summary += ' — ⚠ target NOT covered by the recorded test run'; }
+}
 if (cappedCallees.truncated) payload.moreCallees = { remaining: cappedCallees.remaining };
 
 if (json) { emitJson(payload); } else {

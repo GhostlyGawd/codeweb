@@ -59,6 +59,10 @@ const updated = {
   domains: graph.domains || [],   // domain summaries preserved (node assignments re-attached above)
   overlaps: [],                   // stale after an edit — recompute via the full pipeline when needed
 };
+// #13: node spans just moved — recorded coverage no longer maps; drop it honestly (a stale
+// covered flag is worse than none) and say how to get it back.
+const hadCoverage = !!updated.meta.coverage;
+if (hadCoverage) delete updated.meta.coverage;
 writeFileSync(abs, JSON.stringify(updated));
 
 const payload = {
@@ -66,6 +70,7 @@ const payload = {
   before, after: { nodes: updated.nodes.length, edges: updated.edges.length },
   domainsReattached: reattached, scanned: /scanned (\d+)/.exec(r.stderr)?.[1] ?? null,
 };
+if (hadCoverage) payload.note = 'coverage annotations dropped (spans changed) — re-run scripts/coverage.mjs with a fresh report';
 if (json) { emitJson(payload); } else {
 console.log(`codeweb refresh: ${root}`);
 console.log(`  nodes ${before.nodes} -> ${updated.nodes.length}   edges ${before.edges} -> ${updated.edges.length}   domains re-attached ${reattached}`);

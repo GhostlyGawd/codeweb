@@ -4,6 +4,7 @@
 // Pure over (graph, index): no I/O, no process, no exit codes — callers own those.
 
 import { buildIndex, resolveSymbol, suggestSymbols, callersOf, calleesOf, testersOf, importersOf, refsOf, dependentsOf, impactOf, fileCycles, orphans } from './graph-ops.mjs';
+import { coverageNote } from './coverage.mjs'; // #13: measured coverage on the tests answer
 import { capList } from './cli.mjs';
 
 // #2: a miss is never a dead end — every found:false payload names the next step (concept
@@ -53,6 +54,14 @@ export function runQuery(graph, index, opts) {
     else {
       const results = query === 'callers' ? callersOf(index, matched) : query === 'callees' ? calleesOf(index, matched) : testersOf(index, matched);
       payload = budget({ query, symbol, summary: `${results.length} ${query === 'tests' ? 'test(s) exercise' : query + ' of'} ${symbol}`, matched, results, count: results.length }, 'results', limit, offset);
+      if (query === 'tests' && graph.meta?.coverage) {
+        // #13: the heuristic list gets a MEASURED companion — per matched symbol, did any
+        // recorded run actually execute it? "0 tests + not covered" is the loudest warning.
+        const notes = matched.map((id) => `${id}: ${coverageNote(graph, index.byId.get(id))}`);
+        payload.coverage = notes;
+        const uncovered = matched.filter((id) => index.byId.get(id)?.covered === false);
+        if (uncovered.length) payload.summary += ` — ⚠ ${uncovered.length} of ${matched.length} matched symbol(s) NOT covered by the recorded run`;
+      }
       if (query === 'callers' && !results.length) {
         const caveat = zeroCallerCaveat(graph, index, matched);
         if (caveat) { payload.caveat = caveat; payload.summary += ` — ⚠ ${caveat}`; }

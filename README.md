@@ -369,6 +369,22 @@ codeweb reading-order: 6 symbol(s) — read top-down (foundations first):
 Scope it with `--scope domain|file|symbol <value>`; cycles degrade gracefully (members ordered by
 fan-in, never a crash). Deterministic and read-only; also the `codeweb_reading_order` MCP tool.
 
+## Measured coverage — "is this symbol actually tested?" (`coverage.mjs`)
+
+`codeweb_tests` answers from test-kind call edges (a heuristic). Feed codeweb a real coverage
+report and the answers become **measured**:
+
+```
+node --test --experimental-test-coverage --test-reporter=lcov > lcov.info   # Node's own runner
+node scripts/coverage.mjs .codeweb/graph.json lcov.info                      # or a c8/istanbul JSON
+```
+
+Every instrumented symbol gets `covered`/`hits` facts, and `explain`, `--tests`, and
+`context-pack` answers say `covered by the recorded run (peak N hits)` or — the loud one —
+`⚠ NOT covered by the recorded test run` before an agent edits an unguarded symbol. Optional and
+explicit (absent input leaves graphs byte-identical); `codeweb_refresh` drops stale annotations
+and says how to restore them.
+
 ## Agent tools — context & pre-flight (`context-pack`, `simulate-edit`)
 
 Two read-only tools that move work off the LLM and into the graph (full spec:
