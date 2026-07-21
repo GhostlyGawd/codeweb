@@ -35,3 +35,39 @@ test('release.yml: vsce is exact-pinned at both call sites, never @latest', () =
   assert.equal((release.match(/@vscode\/vsce@3\.9\.2/g) || []).length, 2, 'both npx call sites carry the exact pin');
   assert.ok(!release.includes('vsce@latest'), 'no call site may float on @latest');
 });
+
+// ---- finding #3: CI breadth (matrix), AST tier can't silently un-test itself, gate sees deps ---
+
+test('ci.yml: the test job runs an os x node matrix', () => {
+  assert.match(ci, /strategy:/);
+  assert.match(ci, /matrix:/);
+});
+
+// Count-free on purpose: EVERY setup-node block, in every workflow, present and future, must
+// enable the npm cache — a new block without it fails here without touching a count.
+test('every actions/setup-node block across all three workflows enables the npm cache', () => {
+  for (const [name, text] of [['release.yml', release], ['ci.yml', ci], ['codeweb-gate.yml', gate]]) {
+    const blocks = text.split(/uses:\s*actions\/setup-node@v4/).slice(1);
+    assert.ok(blocks.length > 0, `${name} has at least one setup-node block`);
+    blocks.forEach((b, i) => {
+      const head = b.split(/\n\s*- /)[0]; // the `with:` block, up to the next step
+      assert.ok(/cache:\s*'npm'/.test(head), `${name}: setup-node block ${i + 1} missing cache: 'npm'`);
+    });
+  }
+});
+
+test('ci.yml: post-install AST probe + skip ceiling — an install hiccup cannot green-skip the AST tier', () => {
+  assert.match(ci, /web-tree-sitter/, 'the import probe must name the engine');
+  assert.match(ci, /# skipped/, 'the TAP skip summary must be parsed and bounded');
+});
+
+test('ci.yml: a no-optional-deps job exercises the regex fallback for real', () => {
+  assert.match(ci, /--omit=optional/, 'the job must install without the optional AST tier');
+  assert.match(ci, /tee "\$RUNNER_TEMP\/test\.log"/, 'the test log must actually be captured (the grep needs it)');
+  assert.match(ci, /graceful fallback/, 'the fallback-equivalence test must be asserted to have run');
+  assert.match(ci, /# SKIP/, 'the grep must exclude skipped-but-printed TAP lines');
+});
+
+test('codeweb-gate.yml: the structural self-gate installs deps (AST-aware, not regex-blind)', () => {
+  assert.match(gate, /npm ci/);
+});

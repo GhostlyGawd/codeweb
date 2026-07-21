@@ -7,20 +7,83 @@ on:
 
 jobs:
   test:
+    # Round 2 finding #3: os x node breadth. The windows cell's value is path semantics (the D:/
+    # golden tests still key on CODEWEB_GOLDEN_TARGET presence, not the OS); one Node line is
+    # enough there.
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ['22', '24']
+        exclude:
+          - os: windows-latest
+            node: '24'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+      # codeweb's core has ZERO required deps; web-tree-sitter is an optionalDependency (the opt-in
+      # exact-complexity tier). Install it so the tree-sitter tests actually run in CI instead of
+      # taking their graceful no-engine skip — otherwise the tier ships untested.
+      - name: Install (optional tree-sitter tier)
+        run: npm ci
+      # Round 2 finding #3: an optionalDependency install hiccup must FAIL this job, not silently
+      # green-skip the whole AST tier.
+      - name: AST engine actually installed
+        shell: bash
+        run: node -e "await import('web-tree-sitter')"
+      # `node --test "tests/**/*.test.mjs"` needs Node 22 to expand the glob (Node 20 did not).
+      # Skip ceiling 6 = today's true environment skips, 5 (3 golden-target, 1 bench TS_MODULE,
+      # 1 inverse fallback), + 1 headroom; the tier-wide failure mode adds ~38 and trips it hard.
+      - name: Run tests (skip ceiling 6)
+        shell: bash
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee "$RUNNER_TEMP/test.log"
+          S=$(awk '/^# skipped/{n=$3} END{print n+0}' "$RUNNER_TEMP/test.log")
+          [ "$S" -le 6 ] || { echo "::error::$S skips (ceiling 6)"; exit 1; }
+
+  # Round 2 finding #3: the regex fallback, exercised for real. The fallback-equivalence test
+  # (tests/extract-engine.test.mjs) inverse-skips whenever the engine is installed — i.e. always in
+  # the matrix job above — so this job runs the suite WITHOUT the optional AST tier and proves the
+  # regex tier green stand-alone (the shipped claim "CI without npm install keeps working").
+  test-no-ast:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      # codeweb's core has ZERO required deps; web-tree-sitter is an optionalDependency (the opt-in
-      # exact-complexity tier). Install it so the tree-sitter tests actually run in CI instead of
-      # taking their graceful no-engine skip — otherwise the tier ships untested.
-      - name: Install (optional tree-sitter tier)
-        run: npm ci
-      # `node --test "tests/**/*.test.mjs"` needs Node 22 to expand the glob (Node 20 did not).
-      - name: Run tests
-        run: npm test
+          cache: 'npm'
+      - name: Install WITHOUT the optional AST tier
+        run: npm ci --omit=optional
+      - name: Premise — the engine must be absent here
+        shell: bash
+        run: |
+          if node -e "await import('web-tree-sitter')" 2>/dev/null; then echo "::error::engine present in omit-optional job"; exit 1; fi
+      - name: Run tests (engine absent)
+        shell: bash
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee "$RUNNER_TEMP/test.log"
+      # node --test TAP prints a skipped test as `ok … # SKIP <reason>` — without the exclusion
+      # this grep would pass even when the test skipped.
+      - name: Fallback-equivalence ran UN-skipped
+        shell: bash
+        run: |
+          grep -E "^ok [0-9]+ - graceful fallback" "$RUNNER_TEMP/test.log" | grep -v "# SKIP" | grep -q .
+      # Runaway bound, deliberately loose — NOT the matrix job's ceiling 6: this job's ~38 AST
+      # skips are the point (43 measured engine-absent, 2026-07-21), and engine-guarded tests grow
+      # round over round. The sharp assertions are the premise probe + the functional grep above;
+      # 60 only catches a whole new tier silently skipping. Bump it deliberately as guarded tests
+      # grow.
+      - name: Runaway skip bound (60)
+        shell: bash
+        run: |
+          S=$(awk '/^# skipped/{n=$3} END{print n+0}' "$RUNNER_TEMP/test.log")
+          [ "$S" -le 60 ] || { echo "::error::$S skips (bound 60)"; exit 1; }
 
   # Spec C: the published numbers are promises, and promises are gates. bench:all measures the
   # pipeline, a representative 12-call MCP session, and per-tool response budgets, then fails the
@@ -33,6 +96,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
       - name: Install (optional tree-sitter tier)
         run: npm ci
       - name: Benchmarks hold their budgets
@@ -45,6 +109,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
       # Public-comms lock-step: every version string agrees with package.json and the documented
       # MCP tool count equals the real TOOLS table in scripts/mcp-server.mjs. codeweb's own
       # "fail on regression" gate, applied to its marketing.

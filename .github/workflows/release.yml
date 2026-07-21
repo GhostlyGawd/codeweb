@@ -139,6 +139,7 @@ jobs:
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
 
       - name: Package VS Code extension (.vsix) and attach to the release
         env:

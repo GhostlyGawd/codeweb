@@ -23,6 +23,13 @@ test('the real repo derives 27 MCP tools from the source', () => {
   assert.equal(productToolCount(PLUGIN_ROOT), 27, 'product.json must list exactly the MCP tools');
 });
 
+// Round 2, finding #3: engines must claim only what CI actually tests. Node 20's `npm test` glob
+// is broken (ci.yml documents it) and the 22/24 matrix never tests 20 — so stop claiming it.
+test('engines.node claims exactly the tested floor (>=22)', () => {
+  const pkg = JSON.parse(readFileSync(join(PLUGIN_ROOT, 'package.json'), 'utf8'));
+  assert.equal(pkg.engines.node, '>=22');
+});
+
 test('the real repo is consistent (versions + tool count aligned)', () => {
   const r = checkConsistency(PLUGIN_ROOT);
   assert.equal(r.ok, true, `expected aligned, got: ${r.problems.join('; ')}`);

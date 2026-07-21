@@ -472,6 +472,19 @@ notes so validated results, papers, and new tools never get lost in commit histo
   round-1 regression class was gates silently dropped from these files. (perf-quality round 2,
   finding #2)
 
+### Changed
+- **CI got breadth, and the AST tier can no longer silently un-test itself.** The test job runs an
+  os x node matrix (ubuntu/windows x Node 22/24, npm cache on every setup-node block); after
+  `npm ci` a probe (`node -e "await import('web-tree-sitter')"`) fails the job when the
+  optionalDependency install hiccuped, and the TAP skip count is bounded (ceiling 6 — the tier-wide
+  failure mode adds ~38 skips and trips it hard). A new `test-no-ast` job installs with
+  `--omit=optional` and proves the regex fallback green stand-alone, asserting the
+  fallback-equivalence test ran UN-skipped (it inverse-skips wherever the engine is installed —
+  i.e. always in the matrix job). `codeweb-gate.yml` now runs `npm ci`, so the structural self-gate
+  analyzes PRs with the same engine tier the product ships instead of regex-blind. `engines` says
+  `>=22` honestly — Node 20's `npm test` glob is broken and the matrix never tested it.
+  (perf-quality round 2, finding #3)
+
 ## [0.9.0] - 2026-07-19
 
 ### Added

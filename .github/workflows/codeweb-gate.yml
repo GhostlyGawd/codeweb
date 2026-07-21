@@ -23,6 +23,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+      # Round 2 finding #3: without deps the self-gate analyzed every PR regex-only — blind to
+      # AST-dispatch regressions in scripts/**, the exact class it exists to catch.
+      - name: Install (optional tree-sitter tier)
+        run: npm ci
       - name: codeweb regression gate (self)
         id: gate
         continue-on-error: true # verdict enforced after the comment posts
