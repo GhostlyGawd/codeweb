@@ -620,6 +620,16 @@
 <p>  analyzes PRs with the same engine tier the product ships instead of regex-blind. <code>engines</code> says</p>
 <p>  <code>&gt;=22</code> honestly — Node 20's <code>npm test</code> glob is broken and the matrix never tested it.</p>
 <p>  (perf-quality round 2, finding #3)</p>
+<ul>
+<li><strong>The suite's 60-second floor is gone.</strong> IE-EQUIVALENCE ran its 40 property trials sequentially</li>
+</ul>
+<p>  in one <code>test()</code> (59.8 s solo — nothing else exceeded 13.3 s); the trials now run as concurrent</p>
+<p>  subtests (cap 4) over the new async spawn helper <code>runNodeAsync</code>, with the depth env-gated as</p>
+<p>  <code>CODEWEB_IE_TRIALS</code> (40 in CI — unchanged depth — / 10 local; a typo'd value throws instead of</p>
+<p>  passing vacuously). Per-trial seeds make trials independent and concurrency-safe: fixture bytes</p>
+<p>  differ from the serial version, the semantics class (random 2–6-step mutation sequences, warm ≡</p>
+<p>  cold assert per step) does not. 40 trials: 58.0 s → 15.3 s; full suite ~93 s → ~55 s class.</p>
+<p>  (perf-quality round 2, finding #6)</p>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
 <li><strong>The consistency gate scans package.json — and the npm listing stops lying.</strong> The description</li>

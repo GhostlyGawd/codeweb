@@ -484,6 +484,14 @@ notes so validated results, papers, and new tools never get lost in commit histo
   analyzes PRs with the same engine tier the product ships instead of regex-blind. `engines` says
   `>=22` honestly — Node 20's `npm test` glob is broken and the matrix never tested it.
   (perf-quality round 2, finding #3)
+- **The suite's 60-second floor is gone.** IE-EQUIVALENCE ran its 40 property trials sequentially
+  in one `test()` (59.8 s solo — nothing else exceeded 13.3 s); the trials now run as concurrent
+  subtests (cap 4) over the new async spawn helper `runNodeAsync`, with the depth env-gated as
+  `CODEWEB_IE_TRIALS` (40 in CI — unchanged depth — / 10 local; a typo'd value throws instead of
+  passing vacuously). Per-trial seeds make trials independent and concurrency-safe: fixture bytes
+  differ from the serial version, the semantics class (random 2–6-step mutation sequences, warm ≡
+  cold assert per step) does not. 40 trials: 58.0 s → 15.3 s; full suite ~93 s → ~55 s class.
+  (perf-quality round 2, finding #6)
 
 ### Fixed
 - **The consistency gate scans package.json — and the npm listing stops lying.** The description

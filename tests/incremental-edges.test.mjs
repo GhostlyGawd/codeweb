@@ -14,7 +14,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runNode, script, tmpDir, cleanup, writeTree, readJSON } from './helpers.mjs';
+import { runNode, runNodeAsync, script, tmpDir, cleanup, writeTree, readJSON } from './helpers.mjs';
 import { writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { prng, int, pick } from './_proptest.mjs';
@@ -31,6 +31,16 @@ function extract(root, out, cache, extra = []) {
 }
 // cold full extract of the current tree, reusing nothing
 const coldFull = (dir, root, tag) => extract(root, join(dir, `cold${tag}.json`), join(dir, `coldc${tag}.json`), ['--full']).graph;
+
+// Async twins for IE-EQUIVALENCE's concurrent subtests (round 2, finding #6) — the three other IE
+// tests stay sync/top-level.
+async function extractAsync(root, out, cache, extra = []) {
+  const r = await runNodeAsync(EXTRACT, [root, '--out', out, '--cache', cache, '--no-ctags', ...extra]);
+  assert.equal(r.status, 0, `extract failed: ${r.stderr}`);
+  return { graph: readJSON(out), stderr: r.stderr };
+}
+const coldFullAsync = async (dir, root, tag) =>
+  (await extractAsync(root, join(dir, `cold${tag}.json`), join(dir, `coldc${tag}.json`), ['--full'])).graph;
 
 const BASE = {
   'a.js': 'export function a1(x) { return b1(x) + 1; }\nexport function a2() { return 2; }\n',
@@ -95,15 +105,25 @@ test('IE-DANGLING: deleting a file that another file imports leaves no dangling 
   } finally { cleanup(dir); }
 });
 
-test('IE-EQUIVALENCE: warm incremental == cold full, for random mutation sequences', () => {
-  const rng = prng(2025);
-  for (let trial = 0; trial < 40; trial++) {
+// Round 2, finding #6: the trials run as CONCURRENT subtests (cap 4) with async child spawns —
+// the one test was 60 s of the suite's ~93 s floor. Trial count: CODEWEB_IE_TRIALS, else 40 in CI
+// (unchanged CI depth) / 10 local. Per-trial seeds (2025 + trial) replace the one shared PRNG
+// stream, so fixture BYTES differ from the serial version; the semantics class — random 2–6-step
+// mutation sequences with a warm ≡ cold assert per step — is unchanged. Trials are independent,
+// deterministic per index, and concurrency-safe; a diverging step still fails its own named
+// `trial N` subtest with the step/op message.
+const TRIALS = Number(process.env.CODEWEB_IE_TRIALS || (process.env.CI ? 40 : 10));
+if (!Number.isInteger(TRIALS) || TRIALS < 1) throw new Error('CODEWEB_IE_TRIALS must be a positive integer');
+
+test('IE-EQUIVALENCE: warm incremental == cold full, for random mutation sequences', { concurrency: 4 }, async (t) => {
+  await Promise.all([...Array(TRIALS).keys()].map((trial) => t.test(`trial ${trial}`, async () => {
+    const rng = prng(2025 + trial);
     const dir = tmpDir('codeweb-ie-'); const root = join(dir, 'src');
     const tree = { ...BASE };
     writeTree(root, tree);
     const cache = join(dir, 'cache.json');
     try {
-      extract(root, join(dir, 'warm.json'), cache); // initial warm
+      await extractAsync(root, join(dir, 'warm.json'), cache); // initial warm
       const steps = int(rng, 2, 6);
       for (let s = 0; s < steps; s++) {
         const op = pick(rng, ['body', 'addsym', 'addfile', 'delfile', 'delfile']);
@@ -121,11 +141,11 @@ test('IE-EQUIVALENCE: warm incremental == cold full, for random mutation sequenc
           delete tree[f]; try { rmSync(join(root, f)); } catch { /* already gone */ }
         }
         writeTree(root, tree); // re-stage survivors; deleted files already removed from disk
-        const warm = extract(root, join(dir, `warm${s}.json`), cache).graph;
-        const cold = coldFull(dir, root, `${trial}_${s}`);
+        const warm = (await extractAsync(root, join(dir, `warm${s}.json`), cache)).graph;
+        const cold = await coldFullAsync(dir, root, `${trial}_${s}`);
         assert.deepEqual(sortedNodes(warm), sortedNodes(cold), `trial ${trial} step ${s} (${op}): nodes diverge`);
         assert.deepEqual(sortedEdges(warm), sortedEdges(cold), `trial ${trial} step ${s} (${op}): edges diverge`);
       }
     } finally { cleanup(dir); }
-  }
+  })));
 });
