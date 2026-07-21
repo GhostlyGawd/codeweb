@@ -26,19 +26,16 @@ import { resolve } from 'node:path';
 import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit, chooseCanonical, createMergeSimulator } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: optimize.mjs <graph.json> [--json] [--out <optimize.md>]   (or set CODEWEB_WS)';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 const READY_BODYSIM = 0.6; // body-confirmed "high" floor — must match overlap.mjs's confidence band
-import { die, emitJson, finish, loadGraph, atomicWrite } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, atomicWrite, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, outMd = null; const paths = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--out') outMd = argv[++i];
-  else if (!t.startsWith('-')) paths.push(t);
-}
-const graphPath = paths[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: { json: { type: 'bool', default: false }, out: { type: 'string', default: null } },
+});
+const { json } = opts, outMd = opts.out;
+const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath) die(USAGE, 2);
 
 const { graph, abs } = loadGraph(graphPath, { usage: USAGE });

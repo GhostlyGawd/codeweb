@@ -14,20 +14,20 @@ import { normalizeGraph, scopeNote } from './lib/graph-ops.mjs';
 import { rankHotspots } from './lib/hotspots.mjs';
 
 const USAGE = 'usage: hotspots.mjs <graph.json> [--churn <map.json> | --git] [--all] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, loadGraph, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, churnPath = null, useGit = false, limit = null, all = false; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
-  else if (t === '--churn') churnPath = argv[++i];
-  else if (t === '--git') useGit = true;
-  else if (t === '--all') all = true; // #6: include non-product roles in the ranking
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    limit: { type: 'number', default: null },
+    churn: { type: 'string', default: null },
+    git: { type: 'bool', default: false },
+    all: { type: 'bool', default: false }, // #6: include non-product roles in the ranking
+  },
+});
+const { json, limit, all } = opts, churnPath = opts.churn, useGit = opts.git;
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 let churn = {};

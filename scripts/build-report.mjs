@@ -17,50 +17,30 @@ import { buildSimilarIndex, SIMILAR_SIDECAR } from './lib/similar-index.mjs'; //
 import { BRIEF_SIDECAR } from './lib/brief-sidecar.mjs'; // finding 23: session-brief's pre-rendered payload
 import { buildBrief } from './lib/brief-core.mjs';
 import { buildIndex } from './lib/graph-ops.mjs';
-import { sourceReader, atomicWrite } from './lib/cli.mjs';
+import { sourceReader, atomicWrite, loadGraph, parseArgs } from './lib/cli.mjs';
 
 const USAGE = 'usage: build-report.mjs [path/to/graph.json] [--out report.html] [--no-md] [--open]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-function parseArgs(argv) {
-  const a = { _: [], open: false, out: null, md: true };
-  for (let i = 0; i < argv.length; i++) {
-    const t = argv[i];
-    if (t === '--open') a.open = true;
-    else if (t === '--no-md') a.md = false;
-    else if (t === '--out') a.out = argv[++i];
-    else a._.push(t);
-  }
-  return a;
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — the local copy treated unknown flags as
+// positional paths (the exact bug class run.mjs's #5 fix closed); one policy now.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    open: { type: 'bool', default: false },
+    out: { type: 'string', default: null },
+    'no-md': { type: 'bool', default: false },
+  },
+});
+const args = { open: opts.open, out: opts.out, md: !opts['no-md'] };
 
-const args = parseArgs(process.argv.slice(2));
-const graphPath = resolve(args._[0] || join('.codeweb', 'graph.json'));
+// finding 24: one loader (arg -> CODEWEB_WS -> nearest .codeweb) — this file carried a
+// near-verbatim copy of loadGraph's error handling; loadGraph also ran normalizeGraph
+// (meta/array defaults, domain/role fills), so only the report-specific normalization remains.
+const { graph, abs: graphPath } = loadGraph(pos[0], { usage: USAGE });
 
-if (!existsSync(graphPath)) {
-  console.error(`[codeweb] graph not found: ${graphPath} — build it first (run /codeweb, or: node scripts/run.mjs <target> --out-dir <target>/.codeweb)`);
-  process.exit(2); // #5: 2 = usage/IO per the documented exit-code convention
-}
-
-let graph;
-try {
-  graph = JSON.parse(readFileSync(graphPath, 'utf8'));
-} catch (e) {
-  console.error(`[codeweb] invalid JSON in ${graphPath}: ${e.message}`);
-  process.exit(2); // #5: usage/IO
-}
-
-// --- normalize ---
-graph.meta = graph.meta || {};
-graph.nodes = Array.isArray(graph.nodes) ? graph.nodes : [];
-graph.edges = Array.isArray(graph.edges) ? graph.edges : [];
-graph.domains = Array.isArray(graph.domains) ? graph.domains : [];
-graph.overlaps = Array.isArray(graph.overlaps) ? graph.overlaps : [];
-
-for (const n of graph.nodes) if (!n.domain) n.domain = 'unassigned';
-
+// --- normalize (report-specific: dangling-edge drop + domain synthesis) ---
 const ids = new Set(graph.nodes.map((n) => n.id));
 const beforeEdges = graph.edges.length;
 graph.edges = graph.edges.filter((e) => ids.has(e.from) && ids.has(e.to));

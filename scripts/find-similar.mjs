@@ -17,21 +17,21 @@ import { structuralShingles } from './lib/skeleton.mjs'; // F6: Type-2 (rename-i
 import { loadSimilarIndex } from './lib/similar-index.mjs'; // finding 16: map-time shingle sets — zero source reads on the hot path
 
 const USAGE = 'usage: find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--structural] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, loadGraph, sourceReader } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, sourceReader, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, body = null, stdin = false, signature = null, k = 10, structural = false; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--stdin') stdin = true;
-  else if (t === '--structural') structural = true;
-  else if (t === '--body') body = argv[++i];
-  else if (t === '--signature') signature = argv[++i];
-  else if (t === '--k') k = Math.max(1, parseInt(argv[++i], 10) || 10);
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    stdin: { type: 'bool', default: false },
+    structural: { type: 'bool', default: false },
+    body: { type: 'string', default: null },
+    signature: { type: 'string', default: null },
+    k: { type: 'number', default: 10 },
+  },
+});
+const { json, body, stdin, signature, structural } = opts, k = Math.max(1, opts.k);
 // F6: --structural ranks by skeleton (identifier-normalized) shingles, so a clone with all variables
 // renamed scores ~1 even when its lexical (token) similarity is lower. Lexical is the default.
 const shg = structural ? (s) => structuralShingles(s, 3) : (s) => shingles(s, 3);

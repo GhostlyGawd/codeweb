@@ -274,6 +274,38 @@
 <p>  emits the same <code>found:false</code> + suggestions contract explain adopted in #2 (the old stderr</p>
 <p>  <code>die()</code> made MCP reply an empty string). Measured, even while a campaign runs: explain 9.3ms,</p>
 <p>  context 12.3ms. (perf-quality finding 20)</p>
+<ul>
+<li><strong>The report's graph sim is grid-based, frame-budgeted, and freeze-free.</strong> <code>gStep</code> computed</li>
+</ul>
+<p>  all-pairs repulsion per animation frame — 1,174ms/frame measured at 16.3k nodes (×~259 anneal</p>
+<p>  frames ≈ 5 minutes of sim CPU for one "Expand all" click), and the <code>prefers-reduced-motion</code></p>
+<p>  branch ran the whole anneal in ONE synchronous task (a hard freeze, not jank). Now: a uniform</p>
+<p>  spatial grid (only 3×3-neighborhood pairs interact — deterministic, 11.5x on the dense</p>
+<p>  micro-bench and far more on real spread-out layouts), a wall-clock frame budget (8ms of sim per</p>
+<p>  frame — small graphs settle in a blink, huge ones stay responsive), and the reduced-motion</p>
+<p>  settle chunked into ≤12ms slices with a single final draw. Spec L's harness gained the</p>
+<p>  expand-all row (finding 13(d)): <code>simMsPerFrame</code> recorded and judged in the verdict, so the</p>
+<p>  cliff that sat one click past the old green can never regress unmeasured. (perf-quality</p>
+<p>  finding 21)</p>
+<ul>
+<li><strong>Temp hygiene: nothing leaks into the OS tmpdir.</strong> The post-edit hook's per-edit ~1.2MB leak</li>
+</ul>
+<p>  died with finding 18 (no temp file exists at all); the two test files that leaked</p>
+<p>  (<code>stdout-flush</code>'s three <code>codeweb-flush-*</code> dirs, <code>efficiency-pilot-usage</code>'s <code>cw-usage-*</code> dir)</p>
+<p>  now clean up in <code>finally</code>; and a tripwire in <code>post-edit-diff.test.mjs</code> runs the hook end-to-end</p>
+<p>  and asserts no <code>codeweb-hook-*.json</code> appears — the leak signature can't return silently.</p>
+<p>  (perf-quality finding 22)</p>
+<ul>
+<li><strong>SessionStart serves a pre-rendered brief; MCP sweeps staleness once per burst.</strong> The</li>
+</ul>
+<p>  session-brief hook re-parsed and re-indexed the whole graph every session start (97–100ms on</p>
+<p>  this repo, 310–328ms at 17k nodes) for a payload that is a pure function of the graph — the</p>
+<p>  report stage now pre-renders <code>brief.json</code> (Spec P stamp pattern) and the hook serves it at the</p>
+<p>  boot floor, byte-identical output pinned across sidecar/parse/stale-fallback paths. The MCP</p>
+<p>  server also stat-swept every <code>meta.sources</code> entry TWICE per fast-path request (auto-refresh</p>
+<p>  check + payload annotation — 2×12–17ms at 5k files against 3–13ms answers); one memoized</p>
+<p>  verdict per (graph identity, 1s TTL) now serves both, threaded through context-core so the CLI</p>
+<p>  path is untouched. (perf-quality finding 23)</p>
 <h3 class="cl-grp">Added</h3>
 <ul>
 <li><strong>Specs K–P, landed on main after v0.9.0</strong> (previously missing from this section — the release</li>

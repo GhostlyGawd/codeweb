@@ -13,7 +13,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, existsSync, readFileSync } from 'node:fs';
-import { atomicWrite, SCAN_CACHE_NAME } from './lib/cli.mjs';
+import { atomicWrite, SCAN_CACHE_NAME, parseArgs } from './lib/cli.mjs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -32,23 +32,20 @@ const USAGE = `usage: run.mjs <SRC> [--target <label>] [--out-dir <dir>] [--open
   --full           recompute every stage (skip the fragment memo + edge cache)
   --allow-empty    permit a target with no supported source (writes an empty map)
   --coverage <p>   annotate the graph with a coverage report (lcov or c8 JSON) after mapping`;
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-
-const argv = process.argv.slice(2);
-const opts = { src: null, target: null, outDir: null, open: false, full: false, allowEmpty: false, coverage: null };
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--target') opts.target = argv[++i];
-  else if (t === '--out-dir') opts.outDir = argv[++i];
-  else if (t === '--open') opts.open = true;
-  else if (t === '--full') opts.full = true;
-  else if (t === '--allow-empty') opts.allowEmpty = true; // forwarded to extract: skip the empty-map guard
-  else if (t === '--coverage') opts.coverage = argv[++i]; // #13: measured-execution annotation after the map
-  // #5: an unrecognized flag used to silently become the TARGET PATH (so `--help` errored with
-  // "target not found: --help") — reject it with usage instead, per the 0/1/2 exit convention.
-  else if (t.startsWith('-')) { console.error(`[run] unknown flag: ${t}\n${USAGE}`); process.exit(2); }
-  else if (!opts.src) opts.src = t;
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs). This file pioneered the unknown-flag
+// rejection (#5: `--help` once became the target path); the shared loop carries that policy now.
+const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    target: { type: 'string', default: null },
+    'out-dir': { type: 'string', default: null },
+    open: { type: 'bool', default: false },
+    full: { type: 'bool', default: false },
+    'allow-empty': { type: 'bool', default: false }, // forwarded to extract: skip the empty-map guard
+    coverage: { type: 'string', default: null },     // #13: measured-execution annotation after the map
+  },
+});
+const opts = { src: pos[0] ?? null, target: flags.target, outDir: flags['out-dir'], open: flags.open, full: flags.full, allowEmpty: flags['allow-empty'], coverage: flags.coverage };
 if (!opts.src) { console.error(USAGE); process.exit(2); }
 // Resolve the target against the CALLER's cwd (not the plugin root the stages run in) — a relative
 // <SRC> must mean the same thing as a relative --out-dir. Fail here with one clean line, not a

@@ -19,20 +19,20 @@ import { maskAligned } from './lib/masking.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, doWrite = false, opp = null, merge = null, into = null; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--write') doWrite = true;
-  else if (t === '--opportunity') opp = argv[++i];
-  else if (t === '--merge') merge = argv[++i];
-  else if (t === '--into') into = argv[++i];
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    write: { type: 'bool', default: false },
+    opportunity: { type: 'string', default: null },
+    merge: { type: 'string', default: null },
+    into: { type: 'string', default: null },
+  },
+});
+const { json, merge, into } = opts, doWrite = opts.write, opp = opts.opportunity;
 const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath || (opp == null && merge == null)) die(USAGE, 2);
 

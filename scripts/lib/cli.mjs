@@ -10,6 +10,9 @@ import { readFileSync, existsSync, statSync, writeFileSync, renameSync, rmSync }
 import { resolve, dirname, join } from 'node:path';
 import { normalizeGraph } from './graph-ops.mjs';
 import { sha1 } from './hash.mjs';
+// finding 24: the pure helpers live in lib/common.mjs (no EPIPE side effect); re-exported
+// here so every existing importer keeps working unchanged.
+export { SRC_RE, SCAN_CACHE_NAME, sign, capList } from './common.mjs';
 
 // A consumer like `| head -1` closes the pipe early; without a handler Node dies on EPIPE with a
 // stack trace. Treat it as a normal end-of-output.
@@ -19,6 +22,47 @@ process.stdout.on('error', (e) => { if (e && e.code === 'EPIPE') process.exit(0)
 export function die(msg, code = 2) {
   console.error(msg);
   process.exit(code);
+}
+
+/**
+ * THE flag loop (finding 24). Twenty-five scripts hand-rolled `for (let i = 0; i < argv.length…)`
+ * with three different unknown-flag policies — run.mjs rejected unknown flags (the documented #5
+ * convention, adopted after `--help` silently became a target path), while trend/build-report
+ * still swallowed them as positionals. One loop, one policy:
+ *   - unknown flag  -> die(2) with the usage (never a silent positional),
+ *   - --help / -h   -> print usage, exit 0 (every CLI answers --help, including the 11 that didn't),
+ *   - value flags   -> next token; a missing or (for numbers) non-numeric value dies with the flag named.
+ * spec: { usage, flags: { name: { type: 'bool'|'string'|'number'|'float'|'pair', default? } } }.
+ * 'pair' consumes TWO tokens (reading-order's `--scope <kind> <value>`) -> [v1, v2].
+ * Returns { opts, pos } — opts keyed by the flag name (sans dashes), pos = positional tokens.
+ */
+export function parseArgs(argv, spec) {
+  const flags = spec.flags || {};
+  const opts = {};
+  for (const [k, f] of Object.entries(flags)) if (f.default !== undefined) opts[k] = f.default;
+  const pos = [];
+  for (let i = 0; i < argv.length; i++) {
+    const t = argv[i];
+    if (t === '--help' || t === '-h') { console.log(spec.usage); process.exit(0); }
+    if (t.startsWith('-') && t !== '-') {
+      const name = t.replace(/^--?/, '');
+      const f = flags[name];
+      if (!f) die(`unknown flag: ${t}\n${spec.usage}`, 2);
+      if (f.type === 'bool') { opts[name] = true; continue; }
+      const v = argv[++i];
+      if (v === undefined) die(`flag ${t} needs a value\n${spec.usage}`, 2);
+      if (f.type === 'number' || f.type === 'float') {
+        const n = f.type === 'float' ? parseFloat(v) : parseInt(v, 10);
+        if (Number.isNaN(n)) die(`flag ${t} needs a number (got "${v}")\n${spec.usage}`, 2);
+        opts[name] = n;
+      } else if (f.type === 'pair') {
+        const v2 = argv[++i];
+        if (v2 === undefined) die(`flag ${t} needs two values\n${spec.usage}`, 2);
+        opts[name] = [v, v2];
+      } else opts[name] = v;
+    } else pos.push(t);
+  }
+  return { opts, pos };
 }
 
 /** Set the exit code WITHOUT killing pending stdout writes. Callers must fall off the end. */
@@ -88,17 +132,7 @@ export function loadGraph(pathArg, { usage = null } = {}) {
  * (context-pack, find-similar, diff rename-matching all read node spans; the logic lives once).
  * bodyOf(node) = the exact source lines [line, line+loc-1], or null when unreadable.
  */
-// One truth for "what counts as a mappable source file" — the extractor's SRC list, mirrored
-// here for the hooks (Spec E consolidation; the hooks previously trailed the extractor's list).
-export const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
 
-// finding 17: THE scan-cache filename. run.mjs wrote `.scan-cache.json`, the post-edit hook
-// `scan-cache.json`, and refresh.mjs `extract-cache.json` — three identical caches for one
-// workspace, so the first hook fire after every map ran a COLD full re-scan (28.7s at 16k
-// symbols, against the hook's own 30s timeout) and the first MCP auto-refresh was cold too.
-// Every extract caller uses this constant; the cache is engine-namespaced, so callers must also
-// agree on engine flags (they do now — the hook dropped its lone --no-ctags).
-export const SCAN_CACHE_NAME = '.scan-cache.json';
 
 // #6 (IMPROVEMENTS.md): manifest-declared entrypoints — files a HOST invokes without a code edge.
 // deadcode's "safe to delete" tier listed the VS Code extension's activate/deactivate (package.json
@@ -211,22 +245,3 @@ export function checkStaleness(graph, { verify = process.env.CODEWEB_VERIFY_FRES
   return stale.length ? { count: stale.length, files: stale.slice(0, 8) } : null;
 }
 
-/** Signed-delta formatter for renderers ("+3", "-2", "+0" — a delta always shows its direction). */
-export const sign = (n) => (n >= 0 ? `+${n}` : `${n}`);
-
-/**
- * Shared list-truncation for budgeted output: keep the first `limit` items and describe the rest,
- * so a tool can return top-N + an explicit remainder instead of an unbounded dump (no silent caps).
- * limit == null / Infinity -> untouched.
- */
-export function capList(items, limit, offset = 0) {
-  const all = Array.isArray(items) ? items : [];
-  const off = Number.isFinite(offset) && offset > 0 ? Math.floor(offset) : 0;
-  if (limit == null || !Number.isFinite(limit)) {
-    return { items: off ? all.slice(off) : all, total: all.length, offset: off, truncated: false, remaining: 0 };
-  }
-  const lim = Math.max(0, Math.floor(limit));
-  const slice = all.slice(off, off + lim);
-  const remaining = Math.max(0, all.length - (off + slice.length));
-  return { items: slice, total: all.length, offset: off, truncated: remaining > 0, remaining };
-}

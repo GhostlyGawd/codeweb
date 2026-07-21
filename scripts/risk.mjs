@@ -15,21 +15,21 @@ import { normalizeGraph, buildIndex, allBlastCounts, productScope, scopeNote } f
 import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
 
 const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--churn <map.json> | --git] [--all] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, loadGraph, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, changed = null, churnPath = null, useGit = false, limit = null, all = false; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
-  else if (t === '--changed') changed = argv[++i];
-  else if (t === '--churn') churnPath = argv[++i];
-  else if (t === '--git') useGit = true;
-  else if (t === '--all') all = true; // #6: include non-product roles
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    limit: { type: 'number', default: null },
+    changed: { type: 'string', default: null },
+    churn: { type: 'string', default: null },
+    git: { type: 'bool', default: false },
+    all: { type: 'bool', default: false }, // #6: include non-product roles
+  },
+});
+const { json, limit, changed, all } = opts, churnPath = opts.churn, useGit = opts.git;
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 // churn map: file -> commit count

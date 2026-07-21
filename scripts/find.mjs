@@ -8,22 +8,22 @@
 // weighted by exports, role (product first — unless the query asks for tests), and fan-in.
 // Output is budgeted (top-N + true total + more.remaining), staleness-annotated like query.mjs.
 
-import { die, emitJson, emitText, loadGraph, capList, checkStaleness } from './lib/cli.mjs';
+import { die, emitJson, emitText, loadGraph, capList, checkStaleness, parseArgs } from './lib/cli.mjs';
 import { buildIndex } from './lib/graph-ops.mjs';
 import { findSymbols } from './lib/find-core.mjs';
 
 const USAGE = 'usage: find.mjs <graph.json> <query words...> [--limit 10] [--offset N] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-const argv = process.argv.slice(2);
-let json = false, limit = 10, offset = 0; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--limit') limit = parseInt(argv[++i], 10);
-  else if (t === '--offset') offset = parseInt(argv[++i], 10) || 0;
-  else if (t === '--full') limit = NaN; // capList treats non-finite as "everything"
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    limit: { type: 'number', default: 10 },
+    offset: { type: 'number', default: 0 },
+    full: { type: 'bool', default: false }, // everything (capList treats a null limit as "no cap")
+  },
+});
+const { json, offset } = opts, limit = opts.full ? NaN : opts.limit;
 const { graph } = loadGraph(pos[0], { usage: USAGE });
 const query = pos.slice(1).join(' ').trim();
 if (!query) die(USAGE, 2);

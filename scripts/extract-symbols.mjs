@@ -17,7 +17,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from '
 import { execFileSync } from 'node:child_process';
 import { relative, resolve, join, dirname, extname } from 'node:path';
 import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
-import { atomicWrite } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
+import { atomicWrite, parseArgs } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { maskJs, maskPy, maskRuby } from './lib/masking.mjs'; // comment/string/regex-literal blanking (one truth, shared with codemod's rewrite gate)
 import { sha1 } from './lib/hash.mjs'; // one truth — codeweb's own gate flagged the duplicate on this branch
@@ -45,20 +45,23 @@ const SCANNER_VERSION = 13; // v13: maskJs lexes regex literals (perf-quality fi
 // label separator, so the last ':' splits them.
 const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
 
-const argv = process.argv.slice(2);
-const opts = { path: null, out: null, ctags: true, target: null, cache: null, full: false, allowEmpty: false, engine: process.env.CODEWEB_ENGINE || null };
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--out') opts.out = argv[++i];
-  else if (t === '--target') opts.target = argv[++i];
-  else if (t === '--cache') opts.cache = argv[++i]; // F0: per-file scan cache (incremental freshness)
-  else if (t === '--full') opts.full = true;        // F9: ignore the edge cache, derive all edges from scratch
-  else if (t === '--no-ctags') opts.ctags = false;
-  else if (t === '--allow-empty') opts.allowEmpty = true; // intentionally-sparse targets: skip the empty-map guard
-  else if (t === '--engine') opts.engine = argv[++i]; // optional tree-sitter tier (exact cyclomatic); default regex
-  else if (!opts.path) opts.path = t;
-}
-if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--cache f.json] [--full] [--allow-empty] [--no-ctags] [--engine regex|tree-sitter]'); process.exit(2); }
+const USAGE = 'usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--cache f.json] [--full] [--allow-empty] [--no-ctags] [--engine regex|tree-sitter]';
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — the hand-rolled copy here treated any unknown
+// flag as the target path when <path> was still unset; one policy now, --help included.
+const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    out: { type: 'string', default: null },
+    target: { type: 'string', default: null },
+    cache: { type: 'string', default: null },       // F0: per-file scan cache (incremental freshness)
+    full: { type: 'bool', default: false },         // F9: ignore the edge cache, derive all edges from scratch
+    'no-ctags': { type: 'bool', default: false },
+    'allow-empty': { type: 'bool', default: false }, // intentionally-sparse targets: skip the empty-map guard
+    engine: { type: 'string', default: process.env.CODEWEB_ENGINE || null }, // optional tree-sitter tier (exact cyclomatic); default regex
+  },
+});
+const opts = { path: pos[0] ?? null, out: flags.out, ctags: !flags['no-ctags'], target: flags.target, cache: flags.cache, full: flags.full, allowEmpty: flags['allow-empty'], engine: flags.engine };
+if (!opts.path) { console.error(USAGE); process.exit(2); }
 const root = resolve(opts.path);
 
 // Spec E: role overrides from the TARGET's own codeweb.rules.json (`roles: [{glob, role}]`) —

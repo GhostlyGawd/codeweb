@@ -13,12 +13,14 @@ import { resolve, join, dirname } from 'node:path';
 import { normalizeGraph, buildIndex, fileCycles } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: fitness.mjs <graph.json> [--rules codeweb.rules.json] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish } from './lib/cli.mjs';
+import { die, emitJson, finish, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false, rulesArg = null; const pos = [];
-for (let i = 0; i < argv.length; i++) { const t = argv[i]; if (t === '--json') json = true; else if (t === '--rules') rulesArg = argv[++i]; else if (!t.startsWith('-')) pos.push(t); }
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: { json: { type: 'bool', default: false }, rules: { type: 'string', default: null } },
+});
+const { json } = opts, rulesArg = opts.rules;
 const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
 if (!graphPath) die(USAGE, 2);
 

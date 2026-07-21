@@ -20,32 +20,31 @@ import { buildIndex } from './lib/graph-ops.mjs';
 import { runQuery } from './lib/query-core.mjs'; // payload assembly lives once (CLI + in-process MCP)
 
 const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--limit N] [--offset N] [--json]`;
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, capList, checkStaleness, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, checkStaleness, loadGraph, parseArgs } from './lib/cli.mjs';
 import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
 
-function parseArgs(argv) {
-  const o = { graph: null, query: null, symbol: null, json: false, help: false, queries: 0, limit: null, offset: 0 };
-  const withVal = { '--callers': 'callers', '--callees': 'callees', '--tests': 'tests', '--dependents': 'dependents', '--impact': 'impact' };
-  const noVal = { '--cycles': 'cycles', '--orphans': 'orphans' };
-  for (let i = 0; i < argv.length; i++) {
-    const t = argv[i];
-    if (t === '--json') o.json = true;
-    else if (t === '--limit') o.limit = Math.max(0, parseInt(argv[++i], 10) || 0);
-    else if (t === '--offset') o.offset = Math.max(0, parseInt(argv[++i], 10) || 0);
-    else if (t === '--help' || t === '-h') o.help = true;
-    else if (t in withVal) {
-      o.query = withVal[t]; o.queries++;
-      o.symbol = (argv[i + 1] && !argv[i + 1].startsWith('-')) ? argv[++i] : undefined;
-    } else if (t in noVal) { o.query = noVal[t]; o.queries++; }
-    else if (!t.startsWith('-') && o.graph === null) o.graph = t;
-  }
-  return o;
-}
-
-const opts = parseArgs(process.argv.slice(2));
-const needsSymbol = ['callers', 'callees', 'tests', 'dependents', 'impact'].includes(opts.query);
-if (opts.help || opts.queries !== 1 || (needsSymbol && !opts.symbol)) die(USAGE, 2);
+// finding 24: THE flag loop (lib/cli.mjs parseArgs); the query-mode flags stay a thin post-pass —
+// exactly one of the mode flags must be present, and a symbol-taking mode needs a real symbol
+// (a missing value dies in parseArgs; an empty/flag-shaped one dies here, as before).
+const { opts: f, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    limit: { type: 'number', default: null },
+    offset: { type: 'number', default: 0 },
+    callers: { type: 'string', default: null },
+    callees: { type: 'string', default: null },
+    tests: { type: 'string', default: null },
+    dependents: { type: 'string', default: null },
+    impact: { type: 'string', default: null },
+    cycles: { type: 'bool', default: false },
+    orphans: { type: 'bool', default: false },
+  },
+});
+const opts = { graph: pos[0] ?? null, json: f.json, limit: f.limit, offset: Math.max(0, f.offset), query: null, symbol: undefined, queries: 0 };
+for (const q of ['callers', 'callees', 'tests', 'dependents', 'impact']) if (f[q] != null) { opts.query = q; opts.symbol = f[q]; opts.queries++; }
+for (const q of ['cycles', 'orphans']) if (f[q]) { opts.query = q; opts.queries++; }
+if (opts.queries !== 1 || (opts.symbol !== undefined && (!opts.symbol || opts.symbol.startsWith('-')))) die(USAGE, 2);
 
 // #5: one loader (arg -> CODEWEB_WS -> nearest .codeweb above cwd), one error message, one
 // normalization — the hand-rolled copy this replaced was the dogfood finding, applied here.

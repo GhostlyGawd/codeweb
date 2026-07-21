@@ -386,6 +386,23 @@ notes so validated results, papers, and new tools never get lost in commit histo
   before writing artifacts. `--allow-empty` (both CLIs) keeps intentionally-sparse targets
   workable. (IMPROVEMENTS.md #1)
 
+### Changed
+- **One flag loop.** 25 scripts carried the identical hand-rolled `for (…argv…)` parse with three
+  drifting policies — `run.mjs` rejected unknown flags (the documented #5 convention) while
+  `trend`/`build-report`/`extract-symbols` still swallowed them as positional paths (the exact bug
+  class #5 fixed: `--help` becoming the target path), and several CLIs answered no `--help` at all
+  (ci-gate, screenshot, extract-symbols). `lib/cli.mjs` now owns THE loop — declarative
+  `parseArgs(argv, spec)` with one policy: unknown flag → exit 2 with usage, `--help`/`-h` → usage
+  and exit 0, typed values (`bool`/`string`/`number`/`float`/`pair`) with missing/non-numeric
+  values rejected by name. All 25 scripts migrated to ~10-line specs (hand-written usage strings
+  kept — they're part of tested contracts); `build-report` also drops its near-verbatim copy of
+  the graph-load error handling and rides `loadGraph` like every other tool. The pure helpers
+  (`SRC_RE`, `SCAN_CACHE_NAME`, `sign`, `capList`) moved to side-effect-free `lib/common.mjs`
+  (re-exported from cli.mjs) so stage scripts can import constants without cli.mjs's module-level
+  EPIPE handler. Dogfood: this was codeweb's only HIGH-confidence self-finding, now zero
+  hand-rolled loops remain (`grep` proof: the one flag loop left is parseArgs itself).
+  (perf-quality finding 24)
+
 ## [0.9.0] - 2026-07-19
 
 ### Added

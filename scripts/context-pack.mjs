@@ -16,20 +16,20 @@ import { buildIndex, resolveSymbol, suggestSymbols } from './lib/graph-ops.mjs';
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: one payload assembler, two transports (CLI + MCP fast path)
 
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--json]   (or set CODEWEB_WS)';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, loadGraph, sourceReader } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, sourceReader, parseArgs } from './lib/cli.mjs';
 import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
 
-const argv = process.argv.slice(2);
-let json = false, windowN = 3, fullBodies = false, limit = null; const pos = [];
-for (let i = 0; i < argv.length; i++) {
-  const t = argv[i];
-  if (t === '--json') json = true;
-  else if (t === '--window') windowN = Math.max(0, parseInt(argv[++i], 10) || 3);
-  else if (t === '--full-bodies') fullBodies = true;
-  else if (t === '--limit') limit = Math.max(0, parseInt(argv[++i], 10) || 0);
-  else if (!t.startsWith('-')) pos.push(t);
-}
+// finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: {
+    json: { type: 'bool', default: false },
+    window: { type: 'number', default: 3 },
+    'full-bodies': { type: 'bool', default: false },
+    limit: { type: 'number', default: null },
+  },
+});
+const { json, limit } = opts, windowN = Math.max(0, opts.window), fullBodies = opts['full-bodies'];
 let graphPath, symbol;
 if (pos.length >= 2) { graphPath = pos[0]; symbol = pos[1]; }
 else if (pos.length === 1) { graphPath = null; symbol = pos[0]; } // #5: loadGraph discovers (env or nearest .codeweb)
