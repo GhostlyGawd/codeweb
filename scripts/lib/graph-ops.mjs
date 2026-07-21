@@ -451,6 +451,114 @@ export function structuralRegressions(before, after) {
   return { newCycles, lostCallers: lostCallers.sort() };
 }
 
+// finding 14: the Spec O-1 delta simulator, hoisted from optimize.mjs so EVERY merge chain stops
+// cloning the whole graph + re-running full SCC per candidate (campaign measured 289ms/candidate
+// at 20k nodes — ~29s for 100 candidates — on the exact pattern optimize had already replaced).
+// A merge only changes file-pairs witnessed by loser-incident edges; a delete only removes its
+// edges' witnesses. The table tracks pair -> witness count; simulate() hands the surviving pairs
+// to the SAME fileCycles as a pseudo-graph (one node per file) — same SCC code, same ordering,
+// byte-identical verdicts, no clone. commit()/commitDelete() advance the table so a cumulative
+// plan (campaign's delete-then-merge chain) stays O(edges touched) end to end.
+export function createMergeSimulator(graph) {
+  const CYCLE_KINDS = new Set(['call', 'import', 'inherit', 'ref']);
+  const SEP = '\0';
+  const fileOfId = new Map(graph.nodes.map((n) => [n.id, n.file]));
+  const alias = new Map(); // committed merges: loser -> canonical (resolved transitively)
+  const followAlias = (id) => { let cur = id, hop; while ((hop = alias.get(cur)) !== undefined) cur = hop; if (cur !== id) alias.set(id, cur); return cur; };
+  const deadEdges = new Set(); // edges whose witness was consumed by a committed delete
+  const incident = new Map();  // node id -> cycle-kind edges touching it (loser lists splice into the canonical on commit)
+  const pairCount = new Map(); // file-pair -> number of witnessing edges
+  const pk = (f, t) => f + SEP + t;
+  for (const e of graph.edges) {
+    if (!CYCLE_KINDS.has(e.kind)) continue;
+    if (!incident.has(e.from)) incident.set(e.from, []);
+    incident.get(e.from).push(e);
+    if (e.to !== e.from) {
+      if (!incident.has(e.to)) incident.set(e.to, []);
+      incident.get(e.to).push(e);
+    }
+    const f = fileOfId.get(e.from), t = fileOfId.get(e.to);
+    if (!f || !t || f === t) continue;
+    pairCount.set(pk(f, t), (pairCount.get(pk(f, t)) || 0) + 1);
+  }
+  // Current pair an edge witnesses (through committed aliases), or null (dead / self / unfiled).
+  const pairOf = (e) => {
+    if (deadEdges.has(e)) return null;
+    const a = followAlias(e.from), b = followAlias(e.to);
+    if (a === b) return null;
+    const f = fileOfId.get(a), t = fileOfId.get(b);
+    if (!f || !t || f === t) return null;
+    return pk(f, t);
+  };
+  const mergeDelta = (ids, into) => {
+    const canonical = followAlias(into);
+    const losers = new Set(ids.map(followAlias).filter((x) => x !== canonical));
+    const touched = new Set();
+    for (const id of losers) for (const e of incident.get(id) || []) touched.add(e);
+    const removed = new Map(), added = new Map();
+    for (const e of touched) {
+      const before = pairOf(e);
+      if (before) removed.set(before, (removed.get(before) || 0) + 1);
+      if (deadEdges.has(e)) continue;
+      const a0 = followAlias(e.from), b0 = followAlias(e.to);
+      const a = losers.has(a0) ? canonical : a0, b = losers.has(b0) ? canonical : b0;
+      if (a === b) continue; // self-loop after redirect — applyEdit drops these
+      const f = fileOfId.get(a), t = fileOfId.get(b);
+      if (!f || !t || f === t) continue;
+      added.set(pk(f, t), (added.get(pk(f, t)) || 0) + 1);
+    }
+    return { losers, canonical, removed, added };
+  };
+  const cyclesOfPairs = (pairs) => {
+    const files = new Set(); const edges = [];
+    for (const key of pairs) {
+      const [f, t] = key.split(SEP);
+      files.add(f); files.add(t);
+      edges.push({ from: f, to: t, kind: 'call' });
+    }
+    // pseudo-graph: one node per file, one call edge per surviving pair — fileCycles sees exactly
+    // the adjacency the merged full graph would produce, through the same code path.
+    return fileCycles({ nodes: [...files].map((f) => ({ id: f, file: f })), edges });
+  };
+  return {
+    /** File cycles of the graph AFTER merging ids into `into` — no mutation, no clone. */
+    simulate(ids, into) {
+      const { removed, added } = mergeDelta(ids, into);
+      const after = new Set();
+      for (const [key, c] of pairCount) if (c - (removed.get(key) || 0) > 0) after.add(key);
+      for (const key of added.keys()) after.add(key);
+      return { cycles: cyclesOfPairs(after) };
+    },
+    /** File cycles of the CURRENT (committed) state. */
+    currentCycles() {
+      return cyclesOfPairs(new Set(pairCount.keys()));
+    },
+    /** Advance the table past a merge (campaign's accepted step). */
+    commit(ids, into) {
+      const { losers, canonical, removed, added } = mergeDelta(ids, into);
+      for (const [key, c] of removed) { const left = (pairCount.get(key) || 0) - c; if (left > 0) pairCount.set(key, left); else pairCount.delete(key); }
+      for (const [key, c] of added) pairCount.set(key, (pairCount.get(key) || 0) + c);
+      for (const id of losers) {
+        alias.set(id, canonical);
+        const list = incident.get(id);
+        if (list) { incident.set(canonical, (incident.get(canonical) || []).concat(list)); incident.delete(id); }
+      }
+    },
+    /** Advance the table past node deletions (their edges stop witnessing pairs). */
+    commitDelete(ids) {
+      for (const id of ids) {
+        const rid = followAlias(id);
+        for (const e of incident.get(rid) || []) {
+          if (deadEdges.has(e)) continue;
+          const before = pairOf(e);
+          deadEdges.add(e);
+          if (before) { const left = pairCount.get(before) - 1; if (left > 0) pairCount.set(before, left); else pairCount.delete(before); }
+        }
+      }
+    },
+  };
+}
+
 // Pure structural edit simulation — models delete / merge / move on a DEEP COPY of the graph and
 // never mutates its argument, so simulate-edit and optimize build the hypothetical graph through
 // ONE path (codeweb dogfooding "logic lives once"). Returns a normalized graph; overlaps are

@@ -10,7 +10,7 @@
 // the graph WITH all prior steps applied (CMP-GREEN-CHAIN) — a merge that would introduce a file cycle
 // is dropped, so applying the whole plan in order never creates a cycle absent at the start.
 
-import { normalizeGraph, fileCycles, applyEdit, buildIndex, chooseCanonical } from './graph-ops.mjs';
+import { normalizeGraph, fileCycles, buildIndex, chooseCanonical, createMergeSimulator } from './graph-ops.mjs';
 
 const byRoiThenId = (a, b) => b.roi - a.roi || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
@@ -44,11 +44,15 @@ export function planCampaign(graph, { optimize = { opportunities: [] }, deadcode
   }).sort(byRoiThenId);
 
   // Phase 3 — ready merges, cumulatively pre-flighted from the graph-with-prior-steps-applied.
-  // Deletes are independent node removals, so applying them as ONE batched op is equivalent to the
-  // sequential chain — and O(1) whole-graph clones instead of O(deletes). (549 per-step clones of a
-  // 1.8MB graph made campaign the 8.9s outlier while every other tool answered in ~100ms.)
+  // finding 14: the chain rides graph-ops' createMergeSimulator (the Spec O-1 pair-witness table
+  // optimize already used) instead of applyEdit's whole-graph structuredClone + full file-SCC per
+  // candidate — measured 289ms/candidate at 20k nodes, ~29s for 100 candidates, on the exact
+  // pattern optimize had already replaced. Deletes advance the same table first (an orphan's
+  // edges stop witnessing pairs), then each accepted merge commits — identical verdicts to the
+  // clone chain (pinned by the property oracle in campaign.test.mjs), O(edges touched) end to end.
   const delIds = delSteps.map((s) => s.op.ids[0]);
-  let cur = delIds.length ? applyEdit(g0, { kind: 'delete', ids: delIds }) : g0;
+  const chain = createMergeSimulator(g0);
+  if (delIds.length) chain.commitDelete(delIds);
   const idx0 = buildIndex(g0);
   const cands = (optimize.opportunities || [])
     .filter((o) => o.tier === 'ready' && o.kind === 'duplicate-logic' && Array.isArray(o.nodes) && o.nodes.length >= 2)
@@ -56,13 +60,12 @@ export function planCampaign(graph, { optimize = { opportunities: [] }, deadcode
     .sort((a, b) => b.loc - a.loc || (a.o.id < b.o.id ? -1 : a.o.id > b.o.id ? 1 : 0));
   const mergeSteps = [];
   for (const m of cands) {
-    const sim = applyEdit(cur, { kind: 'merge', ids: m.o.nodes, into: m.canonical });
-    if (introducesCoupling(fileCycles(sim))) continue; // would introduce NEW coupling -> drop (gate would block)
+    if (introducesCoupling(chain.simulate(m.o.nodes, m.canonical).cycles)) continue; // NEW coupling -> drop (gate would block)
     mergeSteps.push({
       id: `merge:${m.canonical}`, type: 'merge', op: { kind: 'merge', ids: m.o.nodes.slice().sort(), into: m.canonical },
       roi: m.loc, gate: { ok: true }, delta: { locReclaimed: m.loc, cyclesBroken: 0 },
     });
-    cur = sim;
+    chain.commit(m.o.nodes, m.canonical);
   }
 
   const ordered = [...cutSteps, ...delSteps, ...mergeSteps];

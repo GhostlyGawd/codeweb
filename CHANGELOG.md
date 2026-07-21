@@ -135,6 +135,15 @@ notes so validated results, papers, and new tools never get lost in commit histo
   factor-gated, and a crashed advisor is itself a violation (observed: risk 0.18x — the
   pre-finding-9 loop would have measured ~20x and failed on arrival). The report expand-all bench
   row (d) lands with the finding-21 layout rewrite it measures. (perf-quality finding 13)
+- **campaign's merge chain stopped cloning the graph per candidate.** The cumulative pre-flight
+  ran `applyEdit` (a whole-graph `structuredClone`) plus full file-SCC for every ready merge —
+  289ms/candidate at 20k nodes, the exact pattern optimize's Spec O-1 had already replaced. The
+  pair-witness delta simulator now lives in graph-ops (`createMergeSimulator`, one truth) with
+  chaining commits (`commit`/`commitDelete`) so deletes and accepted merges advance the same
+  table; optimize rides it too (its `CODEWEB_OPT_SIM=clone` escape and equivalence tests intact).
+  Measured: 100 candidates at 20k nodes/60k edges = 20,757ms → 729ms (28.5x) with identical
+  accept decisions; a 120-case property oracle replays the historical clone chain verbatim and
+  requires step-for-step plan equality. (perf-quality finding 14)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
