@@ -12,7 +12,8 @@
 // Read-only over the target; never executes target code.
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, existsSync, readFileSync } from 'node:fs';
+import { atomicWrite } from './lib/cli.mjs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -99,7 +100,13 @@ const memoKey = createHash('sha1')
 const memoPath = join(ws, '.stages.json');
 let prevKey = null;
 try { prevKey = JSON.parse(readFileSync(memoPath, 'utf8')).key; } catch { /* absent/corrupt -> compute */ }
-const reusable = !opts.full && prevKey === memoKey && STAGE_OUTPUTS.every((f) => existsSync(join(ws, f)));
+// Reuse requires the outputs to not just EXIST but be READABLE (finding 3): a writer killed
+// mid-write used to leave a truncated graph.json that this memo then preserved forever — every
+// re-map said "stages reused" over corruption. Parsing the graph costs ~tens of ms, far below the
+// recompute it guards; artifact writes are rename-atomic now, so this is the belt to that brace.
+const graphParses = (p) => { try { JSON.parse(readFileSync(p, 'utf8')); return true; } catch { return false; } };
+const reusable = !opts.full && prevKey === memoKey && STAGE_OUTPUTS.every((f) => existsSync(join(ws, f)))
+  && graphParses(join(ws, 'graph.json'));
 
 if (reusable) {
   console.error('\n[run] stages reused (fragment unchanged) — skipping downstream recompute; --full forces');
@@ -108,7 +115,7 @@ if (reusable) {
   run('overlap', S('scripts/overlap.mjs'), [], true);
   run('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--out', join(ws, 'optimize.md')], false);
   run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json'), ...(opts.open ? ['--open'] : [])], false);
-  try { writeFileSync(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString() }) + '\n'); } catch { /* memo is best-effort */ }
+  try { atomicWrite(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString() }) + '\n'); } catch { /* memo is best-effort */ }
 }
 
 if (opts.coverage) run('coverage', S('scripts/coverage.mjs'), [join(ws, 'graph.json'), resolve(opts.coverage)], false); // #13

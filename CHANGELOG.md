@@ -36,6 +36,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
   survived re-extraction. The maskers moved to `scripts/lib/masking.mjs` (importable — the start of
   finding 25's decomposition) with a `keepValues` mode for the live/value/comment classification.
   (perf-quality finding 2)
+- **Workspace artifacts are crash-safe, and the stage memo validates before reusing.** Every
+  graph/fragment/sidecar/report writer now goes through `atomicWrite` (same-dir temp + rename —
+  readers see old bytes or new bytes, never a truncated half-write; the reproduced kill window was
+  the MCP server SIGTERM-ing its refresh child at 60s mid-`writeFileSync`), and `run.mjs`'s stage
+  memo refuses to reuse outputs whose graph.json no longer parses (pre-fix, a corrupt workspace
+  got "stages reused (fragment unchanged)" forever — the natural recovery path preserved the
+  corruption). `tests/atomic-writes.test.mjs` pins both. (perf-quality finding 3)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release

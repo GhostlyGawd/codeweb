@@ -13,7 +13,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { buildIndexLite, SIDECAR_NAME } from './lib/index-lite.mjs'; // Spec P: pre-edit hook fast path
-import { sourceReader } from './lib/cli.mjs';
+import { sourceReader, atomicWrite } from './lib/cli.mjs';
 
 const USAGE = 'usage: build-report.mjs [path/to/graph.json] [--out report.html] [--no-md] [--open]';
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
@@ -81,7 +81,7 @@ graph.meta.stats = {
 // generatedAt, the computed meta.stats, default-filled domains, and the dangling-edge drop
 // become part of the machine-readable artifact (they previously lived only in report.html/md).
 // Minified, matching the upstream writers (cluster3.mjs / overlap.mjs).
-writeFileSync(graphPath, JSON.stringify(graph));
+atomicWrite(graphPath, JSON.stringify(graph));
 
 // Spec P: the pre-edit hook's sidecar, stamped against the FINAL graph.json bytes just written
 // (mtime+size — the hook stats, never parses, to check freshness). Best-effort: a sidecar failure
@@ -89,7 +89,7 @@ writeFileSync(graphPath, JSON.stringify(graph));
 try {
   const st = statSync(graphPath);
   const lite = buildIndexLite(graph, { graphMtimeMs: st.mtimeMs, graphSize: st.size }, sourceReader(graph.meta?.root));
-  writeFileSync(join(dirname(graphPath), SIDECAR_NAME), JSON.stringify(lite));
+  atomicWrite(join(dirname(graphPath), SIDECAR_NAME), JSON.stringify(lite)); // hooks stat+read this concurrently
 } catch { /* the hook falls back to the graph path */ }
 
 // --- render ---
@@ -124,7 +124,7 @@ const html = template
   .replace('__GRAPH_DATA__', () => json);
 
 const outPath = args.out ? resolve(args.out) : join(dirname(graphPath), 'report.html');
-writeFileSync(outPath, html);
+atomicWrite(outPath, html);
 
 const s = graph.meta.stats;
 console.log(`[codeweb] wrote ${outPath}`);
@@ -136,7 +136,7 @@ console.log(`[codeweb] updated ${graphPath} (meta.generatedAt + meta.stats persi
 
 if (args.md) {
   const mdPath = join(dirname(outPath), 'report.md');
-  writeFileSync(mdPath, buildMermaid(graph));
+  atomicWrite(mdPath, buildMermaid(graph));
   console.log(`[codeweb] wrote ${mdPath}`);
 }
 

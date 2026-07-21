@@ -19,7 +19,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { shingles, jaccard } from './lib/shingles.mjs'; // shared body-shingle primitives (one truth)
 import { signature, bandKeys } from './lib/minhash.mjs'; // Spec N: LSH candidate generation at scale
 import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
-import { sourceReader } from './lib/cli.mjs'; // shared body access (one truth)
+import { sourceReader, atomicWrite } from './lib/cli.mjs'; // shared body access + rename-atomic artifact writes (one truth)
 
 const WS = process.env.CODEWEB_WS || '.live';   // per-target workspace dir (orchestrator sets this)
 const GRAPH_PATH = `${WS}/graph.json`;
@@ -426,7 +426,7 @@ _mark('signal-C (near-miss)');
 overlaps.sort((a, b) => SEV[b.severity] - SEV[a.severity] || CONF[b.confidence] - CONF[a.confidence] || b.rank - a.rank);
 overlaps.forEach((o, i) => { o.id = 'ov' + (i + 1); delete o.rank; });
 graph.overlaps = overlaps;
-writeFileSync(GRAPH_PATH, JSON.stringify(graph));
+atomicWrite(GRAPH_PATH, JSON.stringify(graph));
 
 const patternFindings = overlaps.filter((o) => o.kind === 'interface-pattern');
 const findings = overlaps.filter((o) => o.kind !== 'interface-pattern' && (o.confidence === 'high' || o.confidence === 'medium'));
@@ -450,7 +450,7 @@ const md = [
   '## Dismissed (body-refuted)', '', '_Same name, <15% body similarity — different logic, not duplication. Listed for transparency (no silent truncation)._', '',
   ...dismissed.map((o) => `- ${o.id} \`${o.title.replace(/`/g, '')}\` — body ${(o.bodySim * 100).toFixed(0)}%`),
 ].join('\n');
-writeFileSync(OVERLAP_MD, md);
+atomicWrite(OVERLAP_MD, md);
 
 // ---- console summary ----------------------------------------------------------------
 const drifted = findings.filter((o) => o.drifted).length;

@@ -13,7 +13,7 @@ import { parseLcov, parseIstanbul, annotateCoverage } from './lib/coverage.mjs';
 
 const USAGE = 'usage: coverage.mjs <graph.json> <lcov.info|coverage-final.json> [more...] [--json]';
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, emitText, finish, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, emitText, finish, loadGraph, atomicWrite } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false; const pos = [];
@@ -44,7 +44,7 @@ for (const reportPath of pos.slice(1)) {
 }
 
 const summary = annotateCoverage(graph, covFiles, labels.join('+'));
-writeFileSync(abs, JSON.stringify(graph, null, 2));
+atomicWrite(abs, JSON.stringify(graph, null, 2));
 
 const line = `codeweb coverage: ${summary.filesMapped} file(s) mapped, ${summary.symbolsCovered}/${summary.symbolsSeen} instrumented symbol(s) covered — annotated ${abs}`;
 if (json) { emitJson({ ok: true, graph: abs, ...summary, note: 'explain/tests/context answers now carry measured-coverage facts; re-annotate after codeweb_refresh' }); }

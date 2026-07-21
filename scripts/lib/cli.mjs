@@ -6,7 +6,7 @@
 // documented Node way to guarantee a full flush. stderr messages are small (< pipe buffer), so
 // die() may still hard-exit.
 
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, writeFileSync, renameSync, rmSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { normalizeGraph } from './graph-ops.mjs';
 
@@ -23,6 +23,23 @@ export function die(msg, code = 2) {
 /** Set the exit code WITHOUT killing pending stdout writes. Callers must fall off the end. */
 export function finish(code = 0) {
   process.exitCode = code;
+}
+
+/**
+ * Crash-safe artifact write: serialize to a same-directory temp file, then rename over the target.
+ * rename(2) is atomic on POSIX (and effectively so on NTFS), so a concurrent reader sees the OLD
+ * bytes or the NEW bytes — never a truncated half-write. Motivated by a reproduced corruption
+ * (perf-quality finding 3): the MCP server SIGTERMs its refresh child at 60s, and an in-place
+ * writeFileSync of a multi-MB graph.json killed mid-write left a workspace every query tool died
+ * on — which the stage memo then preserved. Every graph/fragment/sidecar writer goes through here.
+ * The temp name is pid-suffixed (concurrent writers can't collide); on rename failure the temp is
+ * removed and the error rethrown.
+ */
+export function atomicWrite(path, data) {
+  const tmp = `${path}.${process.pid}.tmp`;
+  writeFileSync(tmp, data);
+  try { renameSync(tmp, path); }
+  catch (e) { try { rmSync(tmp, { force: true }); } catch { /* best-effort */ } throw e; }
 }
 
 /** Write a JSON payload (any size) to stdout, flush-safe. Ends the turn via finish(code). */

@@ -18,6 +18,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { relative, resolve, join, dirname, extname } from 'node:path';
 import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
+import { atomicWrite } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { maskJs, maskPy, maskRuby } from './lib/masking.mjs'; // comment/string/regex-literal blanking (one truth, shared with codemod's rewrite gate)
 import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
@@ -1251,7 +1252,7 @@ if (nodes.length === 0 && !opts.allowEmpty) {
   console.error('[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
   process.exit(1);
 }
-if (newCache && !astLoadFailed) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
+if (newCache && !astLoadFailed) { try { atomicWrite(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
 // Dispatch note + banner report from the PROBE (what tier owns the run) plus the live load state:
 // `ast: loaded` (initialized this run) / `ast: idle` (available, nothing needed a parse — the warm
 // path Spec A exists for) / `ast: off` (regex opt-out, unavailable, or load failure).
@@ -1264,5 +1265,5 @@ const dispatchNote = astAvailable
 const anyAstLoaded = !!_tsEngineState || Object.values(langEngines).some(Boolean);
 const astState = anyAstLoaded ? 'loaded' : (!astAvailable || astLoadFailed) ? 'off' : 'idle';
 const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
-if (opts.out) { writeFileSync(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
+if (opts.out) { atomicWrite(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
 else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }

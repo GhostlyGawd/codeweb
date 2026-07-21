@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: refresh.mjs <graph.json> [--cache <path>] [--json]';
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish } from './lib/cli.mjs';
+import { die, emitJson, finish, atomicWrite } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, cache = null; const pos = [];
@@ -63,7 +63,7 @@ const updated = {
 // covered flag is worse than none) and say how to get it back.
 const hadCoverage = !!updated.meta.coverage;
 if (hadCoverage) delete updated.meta.coverage;
-writeFileSync(abs, JSON.stringify(updated));
+atomicWrite(abs, JSON.stringify(updated)); // finding 3: a SIGTERM mid-write (MCP's 60s timeout) must not truncate the graph
 
 const payload = {
   graph: abs, root,

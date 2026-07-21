@@ -28,7 +28,7 @@ import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit,
 const USAGE = 'usage: optimize.mjs <graph.json> [--json] [--out <optimize.md>]   (or set CODEWEB_WS)';
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 const READY_BODYSIM = 0.6; // body-confirmed "high" floor — must match overlap.mjs's confidence band
-import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, atomicWrite } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, outMd = null; const paths = [];
@@ -198,7 +198,7 @@ if (outMd) {
     section('Blocked — the gate would reject a naive merge', 'The simulated merge introduces a new file-level dependency cycle. Host the canonical in a neutral module first, then route both sides there.', 'blocked'),
     section('Review — needs human or agent judgement', 'Drifted copies, merely-structural confidence, or non-duplicate-logic findings. Read before acting.', 'review'),
   ].join('\n');
-  writeFileSync(resolve(outMd), md);
+  atomicWrite(resolve(outMd), md);
 }
 
 if (json) { emitJson(payload); } else {
