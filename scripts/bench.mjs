@@ -25,6 +25,7 @@ import { loadTypescript, rgAvailable, sampleSymbols, makeTsOracle, codewebArm, g
 
 const argv = process.argv.slice(2);
 const USAGE = 'usage: bench.mjs <graph.json> [--scope <rel>] [--n 30] [--seed 42] [--json] [--out <file>]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 let n = 30, seed = 42, scopeArg = '', outPath = null, asJson = false; const pos = [];
 for (let i = 0; i < argv.length; i++) {
   if (argv[i] === '--n') n = Math.max(1, parseInt(argv[++i], 10) || 30);

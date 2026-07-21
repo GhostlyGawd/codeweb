@@ -26,6 +26,7 @@ import { resolve } from 'node:path';
 import { normalizeGraph, buildIndex, callersOf, impactOf, fileCycles, applyEdit, chooseCanonical } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: optimize.mjs <graph.json> [--json] [--out <optimize.md>]   (or set CODEWEB_WS)';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 const READY_BODYSIM = 0.6; // body-confirmed "high" floor — must match overlap.mjs's confidence band
 import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 

@@ -22,6 +22,7 @@ import { normalizeGraph, reviewImpact, structuralRegressions } from './lib/graph
 import { incrementalOverlap } from './lib/dup-check.mjs'; // F3: duplication-delta in the edit gate
 
 const USAGE = 'usage: review.mjs <graph.json> (--changed <file[:s-e],...> | --range <gitref>) [--before <graph.json>] [--gate] [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);

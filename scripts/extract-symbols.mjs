@@ -57,7 +57,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--engine') opts.engine = argv[++i]; // optional tree-sitter tier (exact cyclomatic); default regex
   else if (!opts.path) opts.path = t;
 }
-if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--no-ctags]'); process.exit(1); }
+if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--cache f.json] [--full] [--allow-empty] [--no-ctags] [--engine regex|tree-sitter]'); process.exit(2); }
 const root = resolve(opts.path);
 
 // Spec E: role overrides from the TARGET's own codeweb.rules.json (`roles: [{glob, role}]`) —

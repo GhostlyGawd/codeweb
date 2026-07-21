@@ -38,12 +38,21 @@ export function emitText(text, code = 0) {
 }
 
 /**
- * Resolve the graph path from an explicit arg or the CODEWEB_WS workspace, load, parse, normalize.
- * Dies with the shared, actionable message on absence/corruption. Returns { graph, abs }.
+ * Resolve the graph path from an explicit arg, the CODEWEB_WS workspace, or — #5 — the nearest
+ * `.codeweb/graph.json` above the cwd (the same walk-up the hooks and MCP server already use, via
+ * findTarget below). Auto-discovery says which graph it picked (stderr), so a surprising choice is
+ * visible. Dies with the shared, actionable message on absence/corruption. Returns { graph, abs }.
  */
 export function loadGraph(pathArg, { usage = null } = {}) {
-  const graphPath = pathArg || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-  if (!graphPath) die(usage || 'usage: <graph.json> required (or set CODEWEB_WS)', 2);
+  let graphPath = pathArg || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
+  if (!graphPath) {
+    const near = findTarget(join(process.cwd(), 'x')); // findTarget walks up from a FILE's dir; anchor so the walk starts AT cwd
+    if (near) {
+      graphPath = near.baseline;
+      console.error(`[codeweb] using ${near.baseline} (nearest .codeweb above cwd)`);
+    }
+  }
+  if (!graphPath) die(usage || 'usage: <graph.json> required (or set CODEWEB_WS, or run from a mapped repo)', 2);
   const abs = resolve(graphPath);
   if (!existsSync(abs)) die(`graph not found: ${abs} — build it first (run /codeweb, or: node scripts/run.mjs <target> --out-dir <target>/.codeweb)`, 2);
   let graph;

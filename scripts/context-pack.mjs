@@ -17,6 +17,7 @@ import { resolve } from 'node:path';
 import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols, callersOf, calleesOf, impactOf } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--json]   (or set CODEWEB_WS)';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, capList, checkStaleness, loadGraph, sourceReader } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
@@ -31,7 +32,7 @@ for (let i = 0; i < argv.length; i++) {
 }
 let graphPath, symbol;
 if (pos.length >= 2) { graphPath = pos[0]; symbol = pos[1]; }
-else if (pos.length === 1 && process.env.CODEWEB_WS) { graphPath = `${process.env.CODEWEB_WS}/graph.json`; symbol = pos[0]; }
+else if (pos.length === 1) { graphPath = null; symbol = pos[0]; } // #5: loadGraph discovers (env or nearest .codeweb)
 else die(USAGE, 2);
 
 const { graph, abs } = loadGraph(graphPath, { usage: USAGE });

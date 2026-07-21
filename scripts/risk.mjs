@@ -15,6 +15,7 @@ import { normalizeGraph, buildIndex, impactOf } from './lib/graph-ops.mjs';
 import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
 
 const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--churn <map.json> | --git] [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);

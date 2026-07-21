@@ -18,6 +18,7 @@ import { normalizeGraph, buildIndex, callersOf, impactOf, applyEdit, structuralR
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);

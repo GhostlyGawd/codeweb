@@ -16,6 +16,7 @@ import { normalizeGraph, buildIndex, resolveSymbol } from './lib/graph-ops.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: placement.mjs <graph.json> --calls <id|label,...> [--name <label>] [--body <file>] [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);

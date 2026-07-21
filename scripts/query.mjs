@@ -16,13 +16,12 @@
 // operates on the union of all matches (reported in `matched`).
 // Exit codes: 0 = success (even if empty), 1 = symbol not found, 2 = usage / IO error.
 
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve, join } from 'node:path';
-import { normalizeGraph, buildIndex } from './lib/graph-ops.mjs';
+import { buildIndex } from './lib/graph-ops.mjs';
 import { runQuery } from './lib/query-core.mjs'; // payload assembly lives once (CLI + in-process MCP)
 
 const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--limit N] [--offset N] [--json]`;
-import { die, emitJson, finish, capList, checkStaleness } from './lib/cli.mjs';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
+import { die, emitJson, finish, capList, checkStaleness, loadGraph } from './lib/cli.mjs';
 
 function parseArgs(argv) {
   const o = { graph: null, query: null, symbol: null, json: false, help: false, queries: 0, limit: null, offset: 0 };
@@ -47,13 +46,9 @@ const opts = parseArgs(process.argv.slice(2));
 const needsSymbol = ['callers', 'callees', 'tests', 'dependents', 'impact'].includes(opts.query);
 if (opts.help || opts.queries !== 1 || (needsSymbol && !opts.symbol)) die(USAGE, 2);
 
-const graphPath = resolve(opts.graph || join('.codeweb', 'graph.json'));
-if (!existsSync(graphPath)) die(`graph not found: ${graphPath}`, 2);
-let raw;
-try { raw = JSON.parse(readFileSync(graphPath, 'utf8')); }
-catch (e) { die(`invalid JSON in ${graphPath}: ${e.message}`, 2); }
-
-const graph = normalizeGraph(raw);
+// #5: one loader (arg -> CODEWEB_WS -> nearest .codeweb above cwd), one error message, one
+// normalization — the hand-rolled copy this replaced was the dogfood finding, applied here.
+const { graph } = loadGraph(opts.graph, { usage: USAGE });
 const index = buildIndex(graph);
 
 const { payload, code } = runQuery(graph, index, { query: opts.query, symbol: opts.symbol, limit: opts.limit, offset: opts.offset });

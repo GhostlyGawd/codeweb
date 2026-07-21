@@ -35,6 +35,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
   shared-name-token tiers) — the most frequent agent mistake now teaches the recovery path
   instead of sending the agent back to grep. (IMPROVEMENTS.md #2)
 
+### Added
+- **The CLI grew a front door.** Every CLI answers `--help`/`-h` (exit 0) — including the
+  `codeweb` bin, where `--help` previously errored with `target not found: --help`; `run.mjs`
+  documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map
+  with `open <ws>/report.html in your browser`. Graph resolution now walks up to the nearest
+  `.codeweb/graph.json` above the cwd when no path/`CODEWEB_WS` is given (the same discovery the
+  hooks and MCP server already used) and announces which graph it picked — so bare
+  `npm run stats`, `query.mjs --callers X`, and `context-pack.mjs <symbol>` work from anywhere
+  inside a mapped repo. Exit codes on the first-touch scripts (`run`, `extract-symbols`,
+  `build-report`) now follow the documented 0/1/2 convention. (IMPROVEMENTS.md #5)
+
 ### Fixed
 - **The public prose can no longer understate the product — and what it said is fixed.** The
   homepage, product page, start page, and og-descriptions said "20 tools" (24 ship); the /codeweb

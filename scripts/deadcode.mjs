@@ -23,6 +23,7 @@ const ENTRYPOINTS = new Set(['main', 'default', 'index', 'setup', 'teardown', 'i
 // The effectiveness study flips this on to prove the H13 fix is load-bearing (safe-tier precision drops).
 const DEADCODE_LEGACY = process.env.CODEWEB_DEADCODE_LEGACY === '1';
 const USAGE = 'usage: deadcode.mjs <graph.json> [--json]   (or set CODEWEB_WS)';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);

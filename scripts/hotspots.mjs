@@ -14,6 +14,7 @@ import { normalizeGraph } from './lib/graph-ops.mjs';
 import { rankHotspots } from './lib/hotspots.mjs';
 
 const USAGE = 'usage: hotspots.mjs <graph.json> [--churn <map.json> | --git] [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, capList, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);

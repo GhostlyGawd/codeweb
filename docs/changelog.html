@@ -90,6 +90,18 @@
 <p>  concept search plus up to 3 deterministic near-match ids (case-fix, prefix, substring,</p>
 <p>  shared-name-token tiers) — the most frequent agent mistake now teaches the recovery path</p>
 <p>  instead of sending the agent back to grep. (IMPROVEMENTS.md #2)</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>The CLI grew a front door.</strong> Every CLI answers <code>--help</code>/<code>-h</code> (exit 0) — including the</li>
+</ul>
+<p>  <code>codeweb</code> bin, where <code>--help</code> previously errored with <code>target not found: --help</code>; <code>run.mjs</code></p>
+<p>  documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map</p>
+<p>  with <code>open &lt;ws&gt;/report.html in your browser</code>. Graph resolution now walks up to the nearest</p>
+<p>  <code>.codeweb/graph.json</code> above the cwd when no path/<code>CODEWEB_WS</code> is given (the same discovery the</p>
+<p>  hooks and MCP server already used) and announces which graph it picked — so bare</p>
+<p>  <code>npm run stats</code>, <code>query.mjs --callers X</code>, and <code>context-pack.mjs &lt;symbol&gt;</code> work from anywhere</p>
+<p>  inside a mapped repo. Exit codes on the first-touch scripts (<code>run</code>, <code>extract-symbols</code>,</p>
+<p>  <code>build-report</code>) now follow the documented 0/1/2 convention. (IMPROVEMENTS.md #5)</p>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
 <li><strong>The public prose can no longer understate the product — and what it said is fixed.</strong> The</li>

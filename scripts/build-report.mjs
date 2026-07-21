@@ -15,6 +15,9 @@ import { execSync } from 'node:child_process';
 import { buildIndexLite, SIDECAR_NAME } from './lib/index-lite.mjs'; // Spec P: pre-edit hook fast path
 import { sourceReader } from './lib/cli.mjs';
 
+const USAGE = 'usage: build-report.mjs [path/to/graph.json] [--out report.html] [--no-md] [--open]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
+
 const here = dirname(fileURLToPath(import.meta.url));
 
 function parseArgs(argv) {
@@ -33,8 +36,8 @@ const args = parseArgs(process.argv.slice(2));
 const graphPath = resolve(args._[0] || join('.codeweb', 'graph.json'));
 
 if (!existsSync(graphPath)) {
-  console.error(`[codeweb] graph not found: ${graphPath}`);
-  process.exit(1);
+  console.error(`[codeweb] graph not found: ${graphPath} — build it first (run /codeweb, or: node scripts/run.mjs <target> --out-dir <target>/.codeweb)`);
+  process.exit(2); // #5: 2 = usage/IO per the documented exit-code convention
 }
 
 let graph;
@@ -42,7 +45,7 @@ try {
   graph = JSON.parse(readFileSync(graphPath, 'utf8'));
 } catch (e) {
   console.error(`[codeweb] invalid JSON in ${graphPath}: ${e.message}`);
-  process.exit(1);
+  process.exit(2); // #5: usage/IO
 }
 
 // --- normalize ---
@@ -93,7 +96,7 @@ try {
 const templatePath = join(here, 'report-template.html');
 if (!existsSync(templatePath)) {
   console.error(`[codeweb] template missing: ${templatePath}`);
-  process.exit(1);
+  process.exit(2); // #5: usage/IO
 }
 const template = readFileSync(templatePath, 'utf8');
 

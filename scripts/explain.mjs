@@ -13,6 +13,7 @@ import { relianceLine } from './lib/reliance.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // Spec P: one truth for card assembly (CLI + sidecar)
 
 const USAGE = 'usage: explain.mjs <graph.json> <symbol> [--json]   (or set CODEWEB_WS)';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, loadGraph, checkStaleness, sourceReader } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);

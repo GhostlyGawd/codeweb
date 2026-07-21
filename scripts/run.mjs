@@ -23,6 +23,15 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..'); // plugin r
 // stage memo, so an old workspace can never serve outputs computed by an older pipeline.
 const MEMO_VERSION = 1;
 
+const USAGE = `usage: run.mjs <SRC> [--target <label>] [--out-dir <dir>] [--open] [--full] [--allow-empty]
+  <SRC>            path to the codebase to map (any of the 11 native languages)
+  --target <label> workspace slug (default: last two path segments of <SRC>)
+  --out-dir <dir>  where the artifacts go (default: .live/<slug> under the plugin root)
+  --open           open report.html when the map is built
+  --full           recompute every stage (skip the fragment memo + edge cache)
+  --allow-empty    permit a target with no supported source (writes an empty map)`;
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
+
 const argv = process.argv.slice(2);
 const opts = { src: null, target: null, outDir: null, open: false, full: false, allowEmpty: false };
 for (let i = 0; i < argv.length; i++) {
@@ -32,9 +41,12 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--open') opts.open = true;
   else if (t === '--full') opts.full = true;
   else if (t === '--allow-empty') opts.allowEmpty = true; // forwarded to extract: skip the empty-map guard
+  // #5: an unrecognized flag used to silently become the TARGET PATH (so `--help` errored with
+  // "target not found: --help") — reject it with usage instead, per the 0/1/2 exit convention.
+  else if (t.startsWith('-')) { console.error(`[run] unknown flag: ${t}\n${USAGE}`); process.exit(2); }
   else if (!opts.src) opts.src = t;
 }
-if (!opts.src) { console.error('usage: run.mjs <SRC> [--target <label>] [--out-dir <dir>]'); process.exit(1); }
+if (!opts.src) { console.error(USAGE); process.exit(2); }
 // Resolve the target against the CALLER's cwd (not the plugin root the stages run in) — a relative
 // <SRC> must mean the same thing as a relative --out-dir. Fail here with one clean line, not a
 // stage-level stack trace.
@@ -99,3 +111,5 @@ if (reusable) {
 
 console.error(`\n[run] done -> ${ws}`);
 console.error(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);
+// #5: the map's whole point is to be LOOKED AT — say so (auto-open stays opt-in via --open).
+if (!opts.open) console.error(`[run]   open ${join(ws, 'report.html')} in your browser (or re-run with --open)`);

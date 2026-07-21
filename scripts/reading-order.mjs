@@ -11,6 +11,7 @@ import { normalizeGraph } from './lib/graph-ops.mjs';
 import { readingOrder } from './lib/reading-order.mjs';
 
 const USAGE = 'usage: reading-order.mjs <graph.json> [--scope domain|file|symbol <value>] [--budget N] [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
