@@ -468,9 +468,9 @@ notes so validated results, papers, and new tools never get lost in commit histo
   blocks the release instead of shipping past it. Dispatched refs must be ancestors of `origin/main`
   (checked before the tag is created; a stray branch can no longer become a tagged release), and
   `@vscode/vsce` is exact-pinned to 3.9.2 at both call sites instead of executing whatever npm
-  serves as `@latest` that day. `tests/workflows.test.mjs` pins the gates as text invariants — the
-  round-1 regression class was gates silently dropped from these files. (perf-quality round 2,
-  finding #2)
+  serves as `@latest` that day. `tests/workflows.test.mjs` pins the gates as text invariants —
+  the round-1 regression class was gates silently dropped from these files.
+  (perf-quality round 2, finding #2)
 
 ### Changed
 - **CI got breadth, and the AST tier can no longer silently un-test itself.** The test job runs an
@@ -492,6 +492,14 @@ notes so validated results, papers, and new tools never get lost in commit histo
   differ from the serial version, the semantics class (random 2–6-step mutation sequences, warm ≡
   cold assert per step) does not. 40 trials: 58.0 s → 15.3 s; full suite ~93 s → ~55 s class.
   (perf-quality round 2, finding #6)
+- **Correction to the round-1 claim.** Commit `bfc6b92` ("implementation (all 32 findings)") did
+  NOT land findings 29–32 — the release gate, the test split, the CI matrix/skip guards, and the
+  consistency-gate coverage; this changelog documented findings 1–28 only. They ship in this round
+  as findings #2/#6/#3/#4. The four dropped items were precisely the gates that would have caught
+  the drop, so the honest closer is structural, not narrative: per-finding changelog entries land
+  WITH each finding (an empty [Unreleased] can no longer be rolled over shipped work), and the
+  package.json prose scan (finding #4) plus its regression tests make the surface where the drop
+  was publicly visible fail the build by itself. (perf-quality round 2, finding #1)
 
 ### Fixed
 - **The consistency gate scans package.json — and the npm listing stops lying.** The description

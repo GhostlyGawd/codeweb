@@ -603,9 +603,9 @@
 <p>  blocks the release instead of shipping past it. Dispatched refs must be ancestors of <code>origin/main</code></p>
 <p>  (checked before the tag is created; a stray branch can no longer become a tagged release), and</p>
 <p>  <code>@vscode/vsce</code> is exact-pinned to 3.9.2 at both call sites instead of executing whatever npm</p>
-<p>  serves as <code>@latest</code> that day. <code>tests/workflows.test.mjs</code> pins the gates as text invariants — the</p>
-<p>  round-1 regression class was gates silently dropped from these files. (perf-quality round 2,</p>
-<p>  finding #2)</p>
+<p>  serves as <code>@latest</code> that day. <code>tests/workflows.test.mjs</code> pins the gates as text invariants —</p>
+<p>  the round-1 regression class was gates silently dropped from these files.</p>
+<p>  (perf-quality round 2, finding #2)</p>
 <h3 class="cl-grp">Changed</h3>
 <ul>
 <li><strong>CI got breadth, and the AST tier can no longer silently un-test itself.</strong> The test job runs an</li>
@@ -630,6 +630,16 @@
 <p>  differ from the serial version, the semantics class (random 2–6-step mutation sequences, warm ≡</p>
 <p>  cold assert per step) does not. 40 trials: 58.0 s → 15.3 s; full suite ~93 s → ~55 s class.</p>
 <p>  (perf-quality round 2, finding #6)</p>
+<ul>
+<li><strong>Correction to the round-1 claim.</strong> Commit <code>bfc6b92</code> ("implementation (all 32 findings)") did</li>
+</ul>
+<p>  NOT land findings 29–32 — the release gate, the test split, the CI matrix/skip guards, and the</p>
+<p>  consistency-gate coverage; this changelog documented findings 1–28 only. They ship in this round</p>
+<p>  as findings #2/#6/#3/#4. The four dropped items were precisely the gates that would have caught</p>
+<p>  the drop, so the honest closer is structural, not narrative: per-finding changelog entries land</p>
+<p>  WITH each finding (an empty [Unreleased] can no longer be rolled over shipped work), and the</p>
+<p>  package.json prose scan (finding #4) plus its regression tests make the surface where the drop</p>
+<p>  was publicly visible fail the build by itself. (perf-quality round 2, finding #1)</p>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
 <li><strong>The consistency gate scans package.json — and the npm listing stops lying.</strong> The description</li>
