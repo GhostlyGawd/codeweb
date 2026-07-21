@@ -108,6 +108,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
   `CODEWEB_VERIFY_FRESHNESS=1` or `--full` forces the read+hash path. Verified byte-identical
   against the no-cache oracle and the 40-trial incremental-equivalence property suite.
   (perf-quality finding 10)
+- **`parseSignature` compiles zero regexes.** It built a fresh `RegExp` from the (mostly unique)
+  symbol name for every function/method node — 717ms self / 27% of a 2.9s regex-path extract in
+  profile; V8's regex cache never helps unique sources (micro: 8,400 unique-name constructions =
+  527ms vs 1.6ms for the scan floor). Replaced with an `indexOf` scan performing the identical
+  match — same left boundary, same optional `= [async] [function[*] [id]]` group semantics
+  (async still requires trailing whitespace, exactly as `async\s+` did), first completing
+  occurrence wins. Zero fragment diffs on the A/B corpus. (perf-quality finding 11)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release

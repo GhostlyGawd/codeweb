@@ -388,13 +388,41 @@ const paramName = (entry) => {
   return /^[A-Za-z_$][\w$]*$/.test(e) ? e : null;                          // destructuring/other -> dropped
 };
 function parseSignature(line, name, isPy) {
-  const nameEsc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  // the param-list open-paren for BOTH `name(...)` (declaration) and `name = [async] [function [g]] (...)`
-  // (arrow / function-expression assignment) — so `const f = (a, b) => …` parses, not just `function f(a, b)`.
-  const nameRe = new RegExp(`(?:^|[^\\w$])${nameEsc}\\s*(?:=\\s*(?:async\\s+)?(?:function\\s*\\*?\\s*[\\w$]*\\s*)?)?\\(`);
-  const m = nameRe.exec(line);
-  if (!m) return null;                       // no param paren attributable to `name` on this line
-  const open = m.index + m[0].length - 1;
+  // Find the param-list open-paren for BOTH `name(...)` (declaration) and `name = [async]
+  // [function [g]] (...)` (arrow / function-expression assignment) — so `const f = (a, b) => …`
+  // parses, not just `function f(a, b)`. finding 11: this used to compile a fresh RegExp from the
+  // (mostly unique) symbol name per node — 27% of a regex-path extract in profile. The indexOf
+  // scan below performs the identical match (same boundaries, same optional groups, first
+  // completing occurrence wins) with zero regex construction.
+  const n = line.length;
+  const isWs = (c) => c === ' ' || c === '\t' || c === '\f' || c === '\v' || c === ' ';
+  const isWord = (c) => c === '$' || c === '_' || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+  let open = -1;
+  for (let from = 0; from < n && open === -1;) {
+    const at = line.indexOf(name, from);
+    if (at === -1) break;
+    from = at + 1;
+    if (at > 0 && isWord(line[at - 1])) continue;               // left boundary: ^ or [^\w$]
+    let i = at + name.length;
+    while (i < n && isWs(line[i])) i++;
+    if (line[i] === '=') {                                       // `= [async] [function[*] [id]]` form
+      i++;
+      while (i < n && isWs(line[i])) i++;
+      if (line.startsWith('async', i) && isWs(line[i + 5] || '')) { // async requires trailing ws (as `async\s+` did)
+        i += 5;
+        while (i < n && isWs(line[i])) i++;
+      }
+      if (line.startsWith('function', i)) {
+        i += 8;
+        while (i < n && isWs(line[i])) i++;
+        if (line[i] === '*') { i++; while (i < n && isWs(line[i])) i++; }
+        while (i < n && isWord(line[i])) i++;                    // optional fn-expression name
+        while (i < n && isWs(line[i])) i++;
+      }
+    }
+    if (line[i] === '(') open = i;
+  }
+  if (open === -1) return null;              // no param paren attributable to `name` on this line
   let depth = 0, close = -1;
   for (let i = open; i < line.length; i++) { const ch = line[i]; if (ch === '(') depth++; else if (ch === ')') { depth--; if (depth === 0) { close = i; break; } } }
   if (close === -1) return null;             // params spill onto the next line -> null
