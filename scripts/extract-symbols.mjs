@@ -470,9 +470,21 @@ async function langEngineFor(langKey) {
 // is still GLOBAL (see below), so the fragment is identical with or without the cache. tree-sitter is
 // its own engine namespace (`+ts`) so class-qualified syms can't be served to a regex run, or vice versa.
 const engineMode = (useCtags ? 'ctags' : 'regex') + (opts.engine !== 'regex' && astProbe.ts ? '+ts' : '');
+// finding 10 signatures. rulesSig: role overrides are baked into cached nodes, so a rules change
+// invalidates the stamp tier wholesale. fileSig: products that resolve against the file SET
+// (re-export targets, import bindings) are only reusable while the list is unchanged.
+let rulesSig = 'none';
+try { rulesSig = sha1(readFileSync(join(root, 'codeweb.rules.json'), 'utf8')); } catch { /* absent */ }
+const fileSig = sha1(files.map(rel).sort().join('\n'));
 let oldCache = null;
 if (opts.cache) { try { const c = JSON.parse(readFileSync(opts.cache, 'utf8')); if (c && c.version === SCANNER_VERSION && c.engine === engineMode) oldCache = c; } catch { /* corrupt/absent -> cold */ } }
-const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, files: {} } : null;
+const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, rulesSig, fileSig, files: {} } : null;
+// finding 10: the STAMP TIER. A file whose mtime+size match its cache entry reuses every cached
+// per-file product (nodes, ranges, dynamic flag, re-export table, bindings, edges) without being
+// READ — warm extract drops from O(repo bytes) to O(changed bytes + one stat sweep). It trusts
+// the same stamps checkStaleness trusts; CODEWEB_VERIFY_FRESHNESS=1 or --full forces the
+// read+hash path, and a stamp mismatch (or missing product) falls back to it per file.
+const stampTier = !!(oldCache && !opts.full && process.env.CODEWEB_VERIFY_FRESHNESS !== '1' && oldCache.rulesSig === rulesSig);
 let scanCount = 0;
 const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)) || scanSymbols(f, text); };
 
@@ -492,6 +504,45 @@ const sources = {};
 const dynamicFiles = [];
 const DYNAMIC_RE = /\[[A-Za-z_$][\w$]*\]\s*\(|\bgetattr\s*\(|require\s*\(\s*[^'"`)\s]|\.emit\s*\(|globalThis\s*\[|window\s*\[/;
 for (const f of files) {
+  const r = rel(f);
+  const isPy = r.endsWith('.py');
+  const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
+  const isBraceLang = isJsTs || /\.(java|cs|php|kt|kts|swift)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
+  const isIndentLang = isPy || r.endsWith('.rb'); // extents by dedent (Python) / end-at-indent (Ruby)
+  const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp'
+    : r.endsWith('.py') ? 'python' : r.endsWith('.go') ? 'go' : r.endsWith('.rs') ? 'rust'
+    : r.endsWith('.rb') ? 'ruby' : r.endsWith('.php') ? 'php' : null; // #14: Ruby/PHP join the dispatch tier
+  // Does the AST tier owe this file products (methods/dispatch/complexity)? Drives cache-hit
+  // validity — a hit without them must re-scan — and the lazy engine load below (Spec A).
+  const needsAst = opts.engine !== 'regex' && ((isJsTs && astProbe.ts) || (langKey && astProbe[langKey]));
+
+  // ---- finding 10: stamp tier — one stat, zero reads for an unchanged file ----
+  const oldHit = stampTier ? oldCache.files[r] : null;
+  if (oldHit && oldHit.stamp && oldHit.hash && oldHit.nodes && oldHit.ranges && oldHit.syms
+      && (!needsAst || (oldHit.ast && (!isJsTs || oldHit.cx)))) {
+    let stq = null; try { stq = statSync(f); } catch { stq = null; }
+    if (stq && stq.size === oldHit.stamp.s && Math.round(stq.mtimeMs) === oldHit.stamp.m) {
+      sources[r] = { s: oldHit.stamp.s, m: oldHit.stamp.m, h: oldHit.hash };
+      if (oldHit.dyn) dynamicFiles.push(r);
+      for (const n of oldHit.nodes) nodes.push(n); // this-run-private objects (the cache is JSON.parse'd fresh per run)
+      fileSyms.set(f, { text: null, ranges: oldHit.ranges }); // text pulled lazily IF a landscape change needs it
+      if (needsAst && isJsTs) {
+        const tsr = oldHit.ast.tsr;
+        if (tsr && tsr.dispatch && tsr.dispatch.length) dispatchByFile.set(f, tsr.dispatch);
+      }
+      if (needsAst && langKey) {
+        typedLangsSeen.add(langKey);
+        const d = oldHit.ast.d;
+        if (d) {
+          if (d.thisCalls.length) dispatchByFile.set(f, (dispatchByFile.get(f) || []).concat(d.thisCalls));
+          if (d.typedIntents.length) typedIntentsByFile.set(r, d.typedIntents);
+        }
+      }
+      if (newCache) newCache.files[r] = oldHit; // carry every product (rex/bind/def included) forward
+      continue;
+    }
+  }
+
   // finding 4: stat BEFORE read and re-stat after, re-reading on mismatch — stamping from a single
   // post-read stat let a file modified between read and stat carry a fresh stamp over stale bytes
   // (a permanently false-fresh graph with no external tooling involved). If the file won't hold
@@ -507,22 +558,12 @@ for (const f of files) {
     st = null; // changed while reading — retry
   }
   if (text == null) continue;
-  const r = rel(f);
   const contentHash = sha1(text); // stamped into meta.sources (verify tier) and keys the scan cache
   sources[r] = st
     ? { s: st.size, m: Math.round(st.mtimeMs), h: contentHash }
     : { s: -1, m: 0, h: contentHash }; // never-fresh stamp for a file that kept changing
-  if (DYNAMIC_RE.test(text)) dynamicFiles.push(r);
-  const isPy = r.endsWith('.py');
-  const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
-  const isBraceLang = isJsTs || /\.(java|cs|php|kt|kts|swift)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
-  const isIndentLang = isPy || r.endsWith('.rb'); // extents by dedent (Python) / end-at-indent (Ruby)
-  const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp'
-    : r.endsWith('.py') ? 'python' : r.endsWith('.go') ? 'go' : r.endsWith('.rs') ? 'rust'
-    : r.endsWith('.rb') ? 'ruby' : r.endsWith('.php') ? 'php' : null; // #14: Ruby/PHP join the dispatch tier
-  // Does the AST tier owe this file products (methods/dispatch/complexity)? Drives cache-hit
-  // validity — a hit without them must re-scan — and the lazy engine load below (Spec A).
-  const needsAst = opts.engine !== 'regex' && ((isJsTs && astProbe.ts) || (langKey && astProbe[langKey]));
+  const isDyn = DYNAMIC_RE.test(text);
+  if (isDyn) dynamicFiles.push(r);
   let syms;
   let astHit = null; // the cache entry serving this file's AST products (fully-valid hit only)
   if (opts.cache) {
@@ -571,6 +612,7 @@ for (const f of files) {
     // are only discovered by the regex scan (field: true), so they must survive the handoff.
     if (tsResult) syms = syms.filter((s) => s.kind !== 'method' || s.field);
   }
+  const fileNodesStart = nodes.length; // finding 10: this file's node slice, cached for stamp-tier reuse
   const ranges = [];
   const fileIds = new Set(); // per-file id uniqueness — duplicate ids corrupt byName/edges/diff keys
   syms.forEach((s) => {
@@ -674,7 +716,25 @@ for (const f of files) {
     }
   }
   fileSyms.set(f, { text, ranges });
+  // finding 10: record the stamp-tier products for the next run. `nodes` are stored as built
+  // (run-global fields like `pub` are stripped at cache-write time); rex/bind/def attach in their
+  // own passes below.
+  if (newCache) {
+    const entry = newCache.files[r];
+    entry.stamp = st ? { s: st.size, m: Math.round(st.mtimeMs) } : null;
+    entry.dyn = isDyn ? 1 : 0;
+    entry.nodes = nodes.slice(fileNodesStart);
+    entry.ranges = ranges;
+  }
 }
+
+// finding 10: stamp-tier records carry no text — consumers pull it lazily, so an unchanged file
+// is read only when a landscape change (symbol set / file set) actually invalidates its cached
+// downstream products. On the no-change warm path nothing pulls, and the run does zero reads.
+const textOf = (fAbs, rec) => {
+  if (rec.text == null) { try { rec.text = readFileSync(fAbs, 'utf8'); } catch { rec.text = ''; } }
+  return rec.text;
+};
 
 // ---- index symbol names -> node ids ----
 const byName = new Map();
@@ -749,7 +809,15 @@ function defaultExportOf(r, text, names) {
 const defaultExportByFile = new Map(); // rel -> node id of the single-symbol default export (if any)
 for (const [fabs, recd] of fileSyms) {
   const rr = rel(fabs);
-  const ds = defaultExportOf(rr, recd.text, new Set(recd.ranges.map((rg) => rg.name)));
+  const entry = newCache && newCache.files[rr];
+  let ds;
+  // finding 10: the default-export id depends only on the file's own text+ranges, so a stamp-hit
+  // record serves the cached value; the nodeIdSet guard below re-applies fresh every run.
+  if (recd.text == null && entry && 'def' in entry) ds = entry.def;
+  else {
+    ds = defaultExportOf(rr, textOf(fabs, recd), new Set(recd.ranges.map((rg) => rg.name))) ?? null;
+    if (entry) entry.def = ds;
+  }
   if (ds && nodeIdSet.has(ds)) defaultExportByFile.set(rr, ds);
 }
 // ---- JS/TS re-export resolution (precision-safe, file-anchored) ---------------------------------
@@ -764,14 +832,24 @@ const esReExportRe = /export\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g;
 const esStarReExportRe = /export\s*\*\s*from\s*['"]([^'"]+)['"]/g; // plain form only (`export * as ns` binds a namespace, not names)
 const reExportByFile = new Map();     // rel file -> Map(exportedName -> { target: rel file, orig })
 const starReExportByFile = new Map(); // rel file -> [target rel files, in source order]
+// finding 10: the raw re-export tables resolve specifiers against the FILE SET only, so a
+// stamp-hit record's cached table is valid while the file list is unchanged (fileSig).
+const rexReuse = stampTier && oldCache.fileSig === fileSig;
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
   const r = rel(f);
   if (!/\.(jsx?|mjs|cjs|tsx?)$/.test(r)) continue; // JS/TS only
+  const entry = newCache && newCache.files[r];
+  if (rexReuse && fsRec.text == null && entry && entry.rex) {
+    if (entry.rex.map.length) reExportByFile.set(r, new Map(entry.rex.map.map(([exp2, target, orig]) => [exp2, { target, orig }])));
+    if (entry.rex.stars.length) starReExportByFile.set(r, entry.rex.stars);
+    continue;
+  }
+  const rexText = textOf(f, fsRec);
   const map = new Map();
   let m;
   esReExportRe.lastIndex = 0;
-  while ((m = esReExportRe.exec(fsRec.text))) {
+  while ((m = esReExportRe.exec(rexText))) {
     const target = resolveImport(f, m[2]); if (!target) continue;
     for (const part of m[1].split(',')) {
       const seg = part.trim().split(/\s+as\s+/);
@@ -782,11 +860,12 @@ for (const f of files) {
   if (map.size) reExportByFile.set(r, map);
   const stars = [];
   esStarReExportRe.lastIndex = 0;
-  while ((m = esStarReExportRe.exec(fsRec.text))) {
+  while ((m = esStarReExportRe.exec(rexText))) {
     const target = resolveImport(f, m[1]);
     if (target) stars.push(target);
   }
   if (stars.length) starReExportByFile.set(r, stars);
+  if (entry) entry.rex = { map: [...map].map(([exp2, v]) => [exp2, v.target, v.orig]), stars };
 }
 // v9: a BARREL IS A DEPENDENT. `export { X } from './impl'` means the barrel file must change when
 // X is renamed — the compiler counts that export specifier as a reference, and so must we (it was a
@@ -896,7 +975,7 @@ const pyReExportTableOf = (moduleRel) => {
   if (rec) {
     table = new Map();
     const re = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
-    const masked = maskedOnce(moduleRel, 'py', rec.text);
+    const masked = maskedOnce(moduleRel, 'py', textOf(modAbs, rec));
     let mm;
     while ((mm = re.exec(masked))) {
       for (const part of mm[3].replace(/[()]/g, '').split(',')) {
@@ -934,10 +1013,25 @@ const resolveFileMember = (fileRel, name) => {
   return null;
 };
 
+// F9: global symbol signature — a hash of the discovered symbol-node id set (module nodes are derived,
+// so excluded). A file's edges depend ONLY on its own text + global symbol resolution (byName/alias),
+// so when the symbol set is unchanged AND a file's content is unchanged, that file's edges are
+// identical and may be reused. Any added/removed/renamed symbol flips the signature -> full re-derive
+// (correctness over speed). This is what makes warm-incremental byte-identical to a cold full extract.
+// Package boundaries participate in the signature: adding/removing a manifest changes bare-name
+// resolution, so cached per-file edges must invalidate then too. (Moved above the binding loop for
+// finding 10 — cached bindings gate on it.)
+const pkgBoundaries = [...new Set(files.map((f) => pkgOf(rel(f))))].sort();
+const symbolSig = sha1(nodes.map((n) => n.id).slice().sort().join('\n') + '\0' + pkgBoundaries.join('\n'));
+
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
 const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
 const classAliasByFile = new Map(); // fileAbs -> Map(localName -> CLASS node id) [default import whose default export is a class — for instanceof/static-method ref edges]
 const importEdges = [];
+// finding 10: cached bindings embed RESOLVED target ids/files, so they are reusable only while
+// both the symbol set and the file list stand still — the same rule the F9 edge cache lives by.
+const bindSig = sha1(symbolSig + '\0' + fileSig);
+const bindReuse = stampTier && oldCache.bindSig === bindSig;
 const reqNamed = /(?:const|let|var)\s*\{([^}]*)\}\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
 const reqDefault = /(?:const|let|var)\s+([\w$]+)\s*=\s*require\(\s*['"]([^'"]+)['"]\s*\)/g;
 const esNamed = /import\s+(?:[\w$]+\s*,\s*)?\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g;
@@ -950,7 +1044,17 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
   const r = rel(f), isPy = r.endsWith('.py');
-  const text = fsRec.text, aId = anchorId(r), amap = new Map(), nsmap = new Map(), classmap = new Map();
+  const bindEntry = newCache && newCache.files[r];
+  if (bindReuse && fsRec.text == null && bindEntry && bindEntry.bind) { // finding 10: replay cached bindings
+    const b = bindEntry.bind;
+    if (b.a.length) aliasByFile.set(f, new Map(b.a));
+    if (b.ns.length) nsAliasByFile.set(f, new Map(b.ns));
+    if (b.cls.length) classAliasByFile.set(f, new Map(b.cls));
+    for (const pair of b.ie) importEdges.push(pair);
+    continue;
+  }
+  const importEdgesStart = importEdges.length;
+  const text = textOf(f, fsRec), aId = anchorId(r), amap = new Map(), nsmap = new Map(), classmap = new Map();
   let m;
   const addNamed = (namesStr, spec) => {
     const target = resolveImport(f, spec); if (!target) return;
@@ -1037,20 +1141,11 @@ for (const f of files) {
   if (amap.size) aliasByFile.set(f, amap);
   if (nsmap.size) nsAliasByFile.set(f, nsmap);
   if (classmap.size) classAliasByFile.set(f, classmap);
+  if (bindEntry) bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], ie: importEdges.slice(importEdgesStart) };
 }
 
 // ---- derive call edges (F9: incremental, per-file, cacheable) ------------------------------
 const LEGACY_FALLBACK = !!process.env.CODEWEB_LEGACY_FALLBACK; // A/B: restore pre-fix byName[0] wiring for regression testing
-
-// F9: global symbol signature — a hash of the discovered symbol-node id set (module nodes are derived,
-// so excluded). A file's edges depend ONLY on its own text + global symbol resolution (byName/alias),
-// so when the symbol set is unchanged AND a file's content is unchanged, that file's edges are
-// identical and may be reused. Any added/removed/renamed symbol flips the signature -> full re-derive
-// (correctness over speed). This is what makes warm-incremental byte-identical to a cold full extract.
-// Package boundaries participate in the signature: adding/removing a manifest changes bare-name
-// resolution, so cached per-file edges must invalidate then too.
-const pkgBoundaries = [...new Set(files.map((f) => pkgOf(rel(f))))].sort();
-const symbolSig = sha1(nodes.map((n) => n.id).slice().sort().join('\n') + '\0' + pkgBoundaries.join('\n'));
 
 // Derive ONE file's edges (call/ref/inherit), with from-side = its own symbols or its <module> node.
 // Pure w.r.t. the file: returns {edges, hasModule, ambiguous}. The precision gate (alias > same-file >
@@ -1182,16 +1277,18 @@ let ambiguousDropped = 0, edgedCount = 0;
 const edgeFiles = files.filter((f) => fileSyms.has(f));
 const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; // edge cache valid iff symbol set unchanged
 for (const f of edgeFiles) {
-  const { text, ranges } = fileSyms.get(f);
+  const rec = fileSyms.get(f);
   const r = rel(f);
-  const lines = (r.endsWith('.py') ? maskedOnce(r, 'py', text) : r.endsWith('.rb') ? maskedOnce(r, 'rb', text) : /\.(jsx?|mjs|cjs|tsx?|java|cs|php|kt|kts|swift)$/.test(r) ? maskedOnce(r, 'js', text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
   const prev = reuseEdges && oldCache.files[r];
   let result;
   if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges) {
     result = { edges: prev.edges, hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0 }; // reuse
   } else {
-    result = deriveFileEdges(r, lines, ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f));
+    // finding 10: text + mask only on the derive path — an edge-cache hit never touches the file
+    const text = textOf(f, rec);
+    const lines = (r.endsWith('.py') ? maskedOnce(r, 'py', text) : r.endsWith('.rb') ? maskedOnce(r, 'rb', text) : /\.(jsx?|mjs|cjs|tsx?|java|cs|php|kt|kts|swift)$/.test(r) ? maskedOnce(r, 'js', text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
+    result = deriveFileEdges(r, lines, rec.ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f));
     edgedCount++;
   }
   if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; }
@@ -1202,7 +1299,7 @@ for (const f of edgeFiles) {
   for (const e of result.edges) edges.push(e);
   ambiguousDropped += result.ambiguous;
 }
-if (newCache) newCache.symbolSig = symbolSig;
+if (newCache) { newCache.symbolSig = symbolSig; newCache.bindSig = bindSig; }
 
 // ---- append import edges (file anchor -> imported symbol) ----
 // Deduped against the call edges by (from,to): caller ids are file-local, so this set has no
@@ -1314,7 +1411,17 @@ if (nodes.length === 0 && !opts.allowEmpty) {
   console.error('[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
   process.exit(1);
 }
-if (newCache && !astLoadFailed) { try { atomicWrite(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
+if (newCache && !astLoadFailed) {
+  try {
+    // finding 10: cached nodes must not carry run-GLOBAL fields — `pub` is recomputed from the
+    // package-entry walk every run, and a stale cached true could never be cleared. Copies only
+    // (the live fragment keeps its pub flags).
+    for (const e of Object.values(newCache.files)) {
+      if (e.nodes) e.nodes = e.nodes.map((n) => { if (n.pub === undefined) return n; const { pub, ...rest } = n; return rest; });
+    }
+    atomicWrite(resolve(opts.cache), JSON.stringify(newCache));
+  } catch { /* cache is best-effort */ }
+}
 // Dispatch note + banner report from the PROBE (what tier owns the run) plus the live load state:
 // `ast: loaded` (initialized this run) / `ast: idle` (available, nothing needed a parse — the warm
 // path Spec A exists for) / `ast: off` (regex opt-out, unavailable, or load failure).

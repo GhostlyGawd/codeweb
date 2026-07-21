@@ -95,6 +95,19 @@ notes so validated results, papers, and new tools never get lost in commit histo
   participate exactly as in the BFS). risk: 19,784ms → 630ms with byte-identical payloads
   (blast sums equal); a property test pins all three implementations to each other on random
   graphs. (perf-quality finding 9)
+- **The STAMP TIER: a no-change warm extract reads zero files.** Even on 100% cache hits, warm
+  extraction re-read, re-hashed, re-split and re-masked every byte (the cache recovered ~15%; at
+  16k symbols a no-change re-map spent ~3.7s on pure re-verification — the floor under the
+  post-edit hook and MCP auto-refresh). The scan cache now stores every per-file product — nodes
+  with extents/signatures/complexity, ranges, dynamic flag, raw re-export table, import bindings —
+  and an mtime+size stamp: a matching stamp reuses all of it with ONE stat and NO read (measured:
+  760ms cold → ~125ms warm on a 63-file corpus, banner `scanned 0/63 … ast: idle`). Correctness
+  gates: role-override changes invalidate the tier (rulesSig); re-export tables gate on the file
+  list (fileSig); bindings gate on symbol set + file list (bindSig) and lazily re-read exactly the
+  files a landscape change invalidates. The tier trusts the same stamps `checkStaleness` trusts;
+  `CODEWEB_VERIFY_FRESHNESS=1` or `--full` forces the read+hash path. Verified byte-identical
+  against the no-cache oracle and the 40-trial incremental-equivalence property suite.
+  (perf-quality finding 10)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
