@@ -304,14 +304,45 @@ function scanSymbols(file, text) {
 }
 
 // ctags accelerator: returns array of {name,line,kind} or null
-function ctagsSymbols(file) {
-  const out = tryExec('ctags', ['--output-format=json', '--fields=+n-P', '-f', '-', file]);
-  if (out == null) return null;
-  const syms = [];
+const parseCtagsLines = (out, bucketByPath) => {
+  const syms = bucketByPath ? null : [];
   for (const ln of out.split(/\r?\n/)) {
     if (!ln.trim()) continue;
-    try { const j = JSON.parse(ln); if (j._type === 'tag' && j.name) syms.push({ name: j.name, line: j.line || 1, kind: j.kind || 'symbol', exports: false }); } catch { /* skip */ }
+    try {
+      const j = JSON.parse(ln);
+      if (j._type !== 'tag' || !j.name) continue;
+      const s = { name: j.name, line: j.line || 1, kind: j.kind || 'symbol', exports: false };
+      if (bucketByPath) { const arr = bucketByPath.get(j.path) || []; arr.push(s); bucketByPath.set(j.path, arr); }
+      else syms.push(s);
+    } catch { /* skip */ }
   }
+  return syms;
+};
+// finding 12: on a COLD run, ONE ctags process serves every file (`-L -`, list on stdin) instead
+// of one execFileSync per file — the spawn floor alone measured ≥0.9s per 600 files with a no-op
+// shim, ~10x more with real ctags option parsing; minutes of pure process churn at repo scale.
+// Warm runs keep the per-file spawn: misses are few there, and one small spawn beats re-tagging
+// the whole repo. A batch failure degrades to the per-file path, which degrades to the regex
+// scanner — the same graceful ladder as before, per file.
+let ctagsBatch; // undefined = not run, null = failed, Map(path -> syms)
+function ctagsBatchOnce() {
+  if (ctagsBatch !== undefined) return ctagsBatch;
+  try {
+    const out = execFileSync('ctags', ['--output-format=json', '--fields=+n-P', '-f', '-', '-L', '-'],
+      { encoding: 'utf8', maxBuffer: 1 << 28, input: files.join('\n') });
+    ctagsBatch = new Map();
+    parseCtagsLines(out, ctagsBatch);
+  } catch { ctagsBatch = null; }
+  return ctagsBatch;
+}
+function ctagsSymbols(file) {
+  if (oldCache == null) { // cold: the whole-run batch
+    const batch = ctagsBatchOnce();
+    if (batch != null) { const syms = batch.get(file) || []; return syms.length ? syms : null; }
+  }
+  const out = tryExec('ctags', ['--output-format=json', '--fields=+n-P', '-f', '-', file]);
+  if (out == null) return null;
+  const syms = parseCtagsLines(out, null);
   return syms.length ? syms : null;
 }
 

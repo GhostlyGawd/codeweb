@@ -115,6 +115,14 @@ notes so validated results, papers, and new tools never get lost in commit histo
   match — same left boundary, same optional `= [async] [function[*] [id]]` group semantics
   (async still requires trailing whitespace, exactly as `async\s+` did), first completing
   occurrence wins. Zero fragment diffs on the A/B corpus. (perf-quality finding 11)
+- **ctags runs once per cold extract, not once per file.** The ctags engine spawned one
+  `execFileSync` per file inside the main loop (≥0.9s of pure spawn floor per 600 files measured
+  with a no-op shim; ~10x with real ctags option parsing — minutes of process churn at repo
+  scale). Cold runs now tag the whole list through ONE process (`-L -`, list on stdin, bucketed by
+  the JSON `path` field); warm runs keep the per-file spawn (misses are few, and one small spawn
+  beats re-tagging the repo); an untouched warm run spawns nothing (stamp tier). Same graceful
+  ladder on failure: batch → per-file → regex scanner. Shim-verified: exactly one batch on cold,
+  zero on no-change warm, exactly one per-file on a one-file edit. (perf-quality finding 12)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
