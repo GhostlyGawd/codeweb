@@ -8,6 +8,9 @@
 
 import { extname } from 'node:path';
 
+/** Leading-whitespace width of a line — shared with lib/complexity.mjs (one truth; the gate flagged the drifted pair). */
+export const indentOf = (s) => s.length - s.replace(/^\s+/, '').length;
+
 export const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
 
 // `masked(kind)` returns the column/line-preserving masked text for this file (the extractor's
@@ -184,12 +187,11 @@ const stripSC = (line) => line
   .replace(/\\./g, ' ');                         // escaped chars — \{ \} in regex literals (e.g. /\s*\{/)
 export function bodyEnd(lines, startIdx, isPy) {
   if (isPy) {
-    const indent = (s) => s.length - s.replace(/^\s+/, '').length;
-    const base = indent(lines[startIdx] || '');
+    const base = indentOf(lines[startIdx] || '');
     let end = startIdx;
     for (let i = startIdx + 1; i < lines.length; i++) {
       if (lines[i].trim() === '') continue;        // blank lines don't end a body
-      if (indent(lines[i]) <= base) break;         // dedent to <= the def -> body ended above
+      if (indentOf(lines[i]) <= base) break;      // dedent to <= the def -> body ended above
       end = i;
     }
     return end;

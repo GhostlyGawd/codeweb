@@ -8,6 +8,8 @@
 // counted, so renaming can't change the number (CX-RENAME-INVARIANT). The exact per-language token set
 // is documented below; it is an APPROXIMATION (no AST), good enough as a ranking signal for hotspots.
 
+import { indentOf } from './lang-rules.mjs';
+
 // Strip line/block comments and string/template literals to ` `, so tokens inside them don't count.
 // Order: comments first, then strings (a `"` inside a `// comment` is already gone).
 const strip = (src, lang) => {
@@ -47,11 +49,11 @@ export function nestingDepth(src, lang = 'js') {
   if (lang === 'py') {
     const lines = (src || '').split(/\r?\n/).filter((l) => l.trim() !== '');
     if (!lines.length) return 0;
-    const indent = (l) => l.length - l.replace(/^\s+/, '').length;
-    const stack = [indent(lines[0])];
+    // one truth with bodyEnd's dedent measurement (lib/lang-rules.mjs)
+    const stack = [indentOf(lines[0])];
     let max = 0;
     for (const l of lines.slice(1)) {
-      const ind = indent(l);
+      const ind = indentOf(l);
       while (stack.length > 1 && ind <= stack[stack.length - 1]) stack.pop();
       if (ind > stack[stack.length - 1]) stack.push(ind);
       max = Math.max(max, stack.length - 1);
