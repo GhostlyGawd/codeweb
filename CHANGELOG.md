@@ -46,6 +46,11 @@ notes so validated results, papers, and new tools never get lost in commit histo
   **prose scans** (digit and word forms) plus a claim-ledger "N / N tools" check, so this class of
   rot now fails the build. The 2026-07-18 product review is archived to
   `docs/product-review-2026-07-18.md` with a historical header. (IMPROVEMENTS.md #3)
+- **`npm test` is green again on a fresh zero-dependency clone.** The Spec-N LSH suite's N6 case
+  asserts a Type-3 (AST-tier-only) finding but was missing the `tree-sitter unavailable` skip
+  guard every other AST test carries — so the suite failed 1 test exactly on the "just Node"
+  install path the README celebrates (CI never saw it because CI installs the optional
+  dependency). Verified both ways: runs with the engine, skips without. (IMPROVEMENTS.md #4)
 - **An empty scan no longer masquerades as a successful map.** Pointing codeweb at an empty
   directory, an unsupported-language tree, or a typo'd path used to print a green `[run] done`
   and write a blank report. The extractor now stops with an actionable message — the path it
