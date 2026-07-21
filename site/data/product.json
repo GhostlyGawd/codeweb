@@ -362,17 +362,17 @@
       "source": "performance.json"
     },
     {
-      "claim": "Five-language extraction parity",
+      "claim": "Multi-language extraction parity",
       "tag": "validated",
-      "metric": "JS · TS · Python · Rust · Go (Java + C# shipped v-next, not yet in the parity corpus)",
-      "sample": "per-language fixtures",
+      "metric": "11 native languages (JS/TS/Py/Rust/Go receipts; Java/C#/Ruby/PHP/Kotlin/Swift pinned by per-language suites)",
+      "sample": "per-language fixtures (JS/TS/Py/Rust/Go receipts; the rest pinned by tests/lang-*.test.mjs)",
       "source": "auxiliary.json"
     },
     {
       "claim": "MCP tool / CLI parity",
       "tag": "validated",
-      "metric": "20 / 20 tools",
-      "sample": "JSON-RPC conformance",
+      "metric": "24 / 24 tools",
+      "sample": "JSON-RPC conformance (suite: tests/mcp.test.mjs)",
       "source": "auxiliary.json"
     },
     {

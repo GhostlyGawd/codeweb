@@ -10,6 +10,25 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Added
+- **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
+  script would have refused to roll an "empty" release over real work):
+  - **K — the scale bench is runnable** (`bench/experiments/scale.mjs` portable + pre-flighted);
+    it found the next wall, which N then removed.
+  - **L — report.html measured at 16k symbols** (`bench/results/report-scale.json`): cold load,
+    interaction, and heap all green at TypeScript-compiler scale — no fix needed, receipt kept.
+  - **M — the efficiency pilot re-ran budgeted on v0.9.0** (5 engine-frozen reps,
+    `bench/experiments/efficiency-pilot.reps5-v090.json`): recall **+0.31 ± 0.04** at equal token
+    cost — the earlier ">90% fewer tokens" prediction was wrong and is recorded as such; the win
+    moved from cost to completeness. One per-task loss (flask) opened Spec Q.
+  - **N — LSH/MinHash banding in overlap** (`CODEWEB_LSH`, auto at scale): the quadratic
+    same-name/twin passes band first, making the scale caps true backstops; identical findings on
+    small inputs, byte-stable.
+  - **O — incremental stages, O-1** (extract rides the scan cache inside `run.mjs`; downstream
+    stages memoize on the fragment hash). O-2 (incremental cluster/overlap) measured under the
+    pre-registered rule and **deliberately not built** — the override is recorded in the spec.
+  - **P — resident daemon: NO-GO** (`docs/decisions/fastpath-daemon.md`): the per-edit surface is
+    already at the ~52ms node-boot floor via the **pre-edit sidecar** (`index-lite.json`), and a
+    resident graph risks stale-serving; revisit triggers documented.
 - **A symbol miss is never a dead end.** Every `found:false` answer (query/dependents/impact
   over CLI and MCP, `explain`, `context-pack`) now carries a hint pointing at `codeweb_find`
   concept search plus up to 3 deterministic near-match ids (case-fix, prefix, substring,
@@ -17,6 +36,16 @@ notes so validated results, papers, and new tools never get lost in commit histo
   instead of sending the agent back to grep. (IMPROVEMENTS.md #2)
 
 ### Fixed
+- **The public prose can no longer understate the product — and what it said is fixed.** The
+  homepage, product page, start page, and og-descriptions said "20 tools" (24 ship); the /codeweb
+  command steered agents off the fast path for 8 of the 11 native languages; the engine-detection
+  reference said five; README's axios headline carried pre-regeneration numbers (334/11 vs the
+  real 274/8); the site still promised the deleted sharding layer; the tree-sitter backlog doc
+  claimed "nothing wired" about a tier that shipped two releases ago. All fixed at the source —
+  site prose now derives counts (`{{toolCount}}`/`{{langCount}}`), and `check-consistency` gained
+  **prose scans** (digit and word forms) plus a claim-ledger "N / N tools" check, so this class of
+  rot now fails the build. The 2026-07-18 product review is archived to
+  `docs/product-review-2026-07-18.md` with a historical header. (IMPROVEMENTS.md #3)
 - **An empty scan no longer masquerades as a successful map.** Pointing codeweb at an empty
   directory, an unsupported-language tree, or a typo'd path used to print a green `[run] done`
   and write a blank report. The extractor now stops with an actionable message — the path it

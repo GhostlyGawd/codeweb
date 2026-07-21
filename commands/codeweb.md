@@ -43,15 +43,18 @@ overlap graph for restructuring.
 
 Activate the `codebase-anatomy` skill and follow its workflow. Parse the arguments above from
 `$ARGUMENTS`. If `target` is a git URL or `owner/repo`, treat it as **external mode** unless
-overridden. For JavaScript/TypeScript/Python targets, prefer the skill's **fast path** — a single
-deterministic command:
+overridden. For the **eleven native languages** — JavaScript, TypeScript, Python, Rust, Go, Java,
+C#, Ruby, PHP, Kotlin, Swift — prefer the skill's **fast path** — a single deterministic command:
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs" "<target>" --target "<label>" --out-dir "<target>/.codeweb"
 ```
 
-which runs extract → cluster → overlap → optimize → render in one shot; fall back to the agent-based
-dissection only for languages it can't parse or `--engine read`. Write all outputs under
+which runs extract → cluster → overlap → optimize → render in one shot (`--open` and
+`--allow-empty` pass straight through); fall back to the agent-based dissection **only** for
+languages outside that list or an explicit `--engine read`. `--depth`, `--focus`, and `--engine`
+steer the agent-based fallback — the fast path is always full-target, symbol-level, and
+deterministic. Write all outputs under
 `<target>/.codeweb/` (or a temp dir for cloned external repos) and finish by reporting the artifact
 paths and the top consolidation opportunities — lead with the **ready** tier from `optimize.md`
 (merges the regression gate would accept), then call out anything **blocked** by a projected cycle.

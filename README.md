@@ -46,7 +46,7 @@ codebase does the same work twice, which neither you nor the agent can see from 
 
 One command runs the whole deterministic pipeline and drops an interactive map at
 `<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report**, codeweb
-pointed read-only at **[axios](https://github.com/axios/axios)** — 334 product symbols across 11
+pointed read-only at **[axios](https://github.com/axios/axios)** — 274 product symbols across 8
 areas (tests and tooling hidden by default). No mockups; regenerate them any time with
 `node scripts/screenshot.mjs`.
 
