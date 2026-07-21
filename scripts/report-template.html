@@ -119,6 +119,7 @@
   <span class="meta" id="metaStats"></span>
   <span class="spacer"></span>
   <button id="roleFilter" title="Hide tests, fixtures, examples and generated code from every view" aria-pressed="true" hidden></button>
+  <button id="copyLink" class="tab" title="Copy a link to this exact view (tab · filter · selection)">copy link</button>
   <div role="tablist" aria-label="Report views" style="display:contents">
   <button class="tab on" role="tab" aria-selected="true" data-view="findings">Findings</button>
   <button class="tab" role="tab" aria-selected="false" data-view="matrix">Matrix</button>
@@ -237,6 +238,32 @@
   }
   computeDerived();
 
+  // ---------- shareable view state (#8) ----------
+  // The URL hash carries the WHOLE view — tab, role filter, selection — so "look at the Matrix"
+  // is a link, not an instruction. Legacy #s=<id> links keep working.
+  function parseHash() {
+    var h = (location.hash || '').replace(/^#/, '');
+    if (!h) return {};
+    var out = {};
+    h.split('&').forEach(function (kv) { var i = kv.indexOf('='); if (i > 0) out[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); });
+    return out;
+  }
+  var hashState = { tab: 'findings', roles: null, s: null };
+  function writeHash() {
+    var parts = [];
+    if (hashState.tab && hashState.tab !== 'findings') parts.push('tab=' + hashState.tab);
+    if (hashState.roles === 'all') parts.push('roles=all');
+    if (hashState.s) parts.push('s=' + encodeURIComponent(hashState.s));
+    try { history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname + location.search); } catch (e) { /* file:// quirk */ }
+  }
+  var copyBtn = document.getElementById('copyLink');
+  if (copyBtn) copyBtn.onclick = function () {
+    var url = location.href;
+    var done = function () { copyBtn.textContent = 'copied ✓'; setTimeout(function () { copyBtn.textContent = 'copy link'; }, 1200); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function () { window.prompt('Copy this link:', url); });
+    else window.prompt('Copy this link:', url);
+  };
+
   // ---------- meta bar + role filter ----------
   function renderMeta() {
     document.getElementById('metaTarget').textContent = (G.meta.target || '') + (G.meta.mode ? ' · ' + G.meta.mode : '');
@@ -259,6 +286,7 @@
     syncRoleBtn();
     roleBtn.onclick = function () {
       productOnly = !productOnly; syncRoleBtn();
+      hashState.roles = productOnly ? null : 'all'; writeHash();
       computeDerived(); renderMeta();
       rendered = {}; // every view re-renders against the new scope
       var cur = document.querySelector('.tab[role="tab"].on').getAttribute('data-view');
@@ -320,7 +348,7 @@
   function showNode(id) {
     var n = nodeById.get(id); if (!n) return;
     lastNodeId = id;
-    try { history.replaceState(null, '', '#s=' + encodeURIComponent(id)); } catch (e) { /* file:// quirk */ }
+    hashState.s = id; writeHash();
     var outs = outAdj.get(id) || [], ins = inAdj.get(id) || [];
     detail.innerHTML = '<h3>' + esc(n.label) + '</h3>' +
       '<div class="kv">' + esc(n.kind || '') + (n.role && n.role !== 'product' ? ' · ' + esc(n.role) : '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--hi)">duplicated</span>' : '') + '</div>' +
@@ -345,6 +373,24 @@
 
   // ---------- FINDINGS ----------
   function sev(files) { return files >= 6 ? 'hi' : files >= 4 ? 'med' : 'low'; }
+  // #8: the pipeline's own body-confirmed findings (G.overlaps) lead the tab — the client-side
+  // name-match sections below are the quick heuristic view; THESE are the ones optimize.md tiers.
+  var confClass = { high: 'hi', medium: 'med', low: 'low' };
+  var ovLive = G.overlaps.filter(function (o) { return o && o.title && o.confidence !== 'refuted'; })
+    .slice().sort(function (a, b) {
+      var r = { high: 0, medium: 1, low: 2 };
+      return (r[a.confidence] !== undefined ? r[a.confidence] : 3) - (r[b.confidence] !== undefined ? r[b.confidence] : 3) || String(a.title).localeCompare(String(b.title));
+    });
+  var ovDismissed = G.overlaps.length - ovLive.length;
+  function showOverlap(o) {
+    detail.innerHTML = '<h3>' + esc(o.title) + '</h3>' +
+      '<div class="kv"><span class="badge b-' + (confClass[o.confidence] || 'low') + '">' + esc(o.confidence) + '</span> · ' + esc(o.kind) + (o.drifted ? ' · drifted copies' : '') + (o.bodySim != null ? ' · body ' + Math.round(o.bodySim * 100) + '%' : '') + '</div>' +
+      (o.evidence ? '<div class="kv">' + esc(o.evidence) + '</div>' : '') +
+      (o.recommendation ? '<div class="sec">recommendation</div><div class="kv">' + esc(o.recommendation) + '</div>' : '') +
+      '<div class="sec">symbols (' + (o.nodes || []).length + ')</div><div class="lst" id="d_ov"></div>';
+    document.getElementById('d_ov').innerHTML = (o.nodes || []).slice(0, 60).map(function (id) { return nodeById.has(id) ? nodeRow(id) : '<div class="dim mono">' + esc(id) + '</div>'; }).join('') || '<div class="empty">—</div>';
+    bindNodeRows();
+  }
   function section(title, sub, n, body) {
     return '<div class="fsec"><div class="fhead"><h2>' + esc(title) + '</h2><span class="sub">' + esc(sub) + '</span><span class="pill">' + n + '</span></div>' + body + '</div>';
   }
@@ -372,7 +418,16 @@
         '<td class="dim">' + esc(d.domains.slice(0, 4).join(', ')) + (d.domains.length > 4 ? '…' : '') + '</td>' +
         '<td class="dim">' + d.files + ' implementations, none called in-repo</td></tr>';
     }).join('');
+    var ovRows = ovLive.slice(0, 40).map(function (o, i) {
+      return '<tr data-ov="' + i + '"><td><span class="badge b-' + (confClass[o.confidence] || 'low') + '">' + esc(o.confidence) + '</span></td>' +
+        '<td>' + esc(o.title) + '</td>' +
+        '<td class="dim">' + esc(o.kind) + (o.drifted ? ' · drifted' : '') + '</td>' +
+        '<td class="dim">' + esc((o.domains || []).slice(0, 3).join(', ')) + '</td></tr>';
+    }).join('');
     v.innerHTML =
+      section('Consolidation findings', 'body-confirmed by the overlap pipeline — optimize.md tiers these ready/blocked/review', ovLive.length,
+        (ovRows ? '<table class="f">' + ovRows + '</table>' : '<div class="empty">No pipeline findings 🎉</div>') +
+        (ovDismissed ? '<div class="empty">' + ovDismissed + ' candidate(s) dismissed (body-refuted) — full transparency list in overlap.md</div>' : '')) +
       section('Duplication', 'merge these — same function defined in many files', duplicates.length,
         dupRows ? '<table class="f">' + dupRows + '</table>' : '<div class="empty">No duplication found 🎉</div>') +
       (patterns.length ? section('Interface patterns', 'same-name implementations of a framework contract (nothing in-repo calls them) — NOT copy-paste; don’t merge', patterns.length,
@@ -381,9 +436,10 @@
         hotRows ? '<table class="f">' + hotRows + '</table>' : '<div class="empty">—</div>') +
       section('Likely dead code', 'nothing in this graph calls these', dead.length,
         deadRows ? '<table class="f">' + deadRows + '</table>' : '<div class="empty">—</div>');
+    v.querySelectorAll('tr[data-ov]').forEach(function (tr) { tr.onclick = function () { showOverlap(ovLive[+tr.getAttribute('data-ov')]); }; });
     v.querySelectorAll('tr[data-dup]').forEach(function (tr) { tr.onclick = function () { showDup(duplicates[+tr.getAttribute('data-dup')]); }; });
     v.querySelectorAll('tr[data-pat]').forEach(function (tr) { tr.onclick = function () { showDup(patterns[+tr.getAttribute('data-pat')]); }; });
-    v.querySelectorAll('tr[data-dup],tr[data-pat],tr[data-node]').forEach(function (tr) {
+    v.querySelectorAll('tr[data-ov],tr[data-dup],tr[data-pat],tr[data-node]').forEach(function (tr) {
       tr.setAttribute('tabindex', '0');
       tr.onkeydown = function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tr.onclick(); } };
     });
@@ -670,6 +726,7 @@
   // ---------- tab routing ----------
   var rendered = {};
   function activate(view) {
+    hashState.tab = view; writeHash();
     document.querySelectorAll('.tab[role="tab"]').forEach(function (t) { var on = t.getAttribute('data-view') === view; t.classList.toggle('on', on); t.setAttribute('aria-selected', String(on)); });
     document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('on', v.id === 'view-' + view); });
     if (view === 'findings' && !rendered.findings) { renderFindings(); rendered.findings = true; }
@@ -709,20 +766,25 @@
     }
   };
 
-  // deep link: #s=<node id> selects the symbol on load (shareable findings)
+  // deep link (#8): #tab=…&roles=…&s=… restores the WHOLE view; legacy #s=<id> still works.
   (function () {
-    var m = /^#s=(.+)$/.exec(location.hash || '');
-    if (!m) return;
-    var id = decodeURIComponent(m[1]);
-    if (!nodeById.has(id)) return;
-    activate('graph');
-    // after the first layout pass, expand JUST the target's area, then center + select
-    setTimeout(function () {
-      var tn = nodeById.get(id);
-      if (tn && !expanded.has(tn.domain)) { expanded.add(tn.domain); gLayout(); syncToggle(); }
-      var nd = W && W.idx.get(id);
-      if (nd) { selectedNode = id; centerOn(nd); showNode(id); gDraw(); }
-    }, REDUCED ? 50 : 900);
+    var st = parseHash();
+    if (st.roles === 'all' && !roleBtn.hidden && productOnly) roleBtn.onclick();
+    var id = st.s && nodeById.has(st.s) ? st.s : null;
+    var tab = ['findings', 'matrix', 'treemap', 'graph'].indexOf(st.tab) >= 0 ? st.tab : (id ? 'graph' : null);
+    if (tab) activate(tab);
+    if (!id) return;
+    if (tab === 'graph') {
+      // after the first layout pass, expand JUST the target's area, then center + select
+      setTimeout(function () {
+        var tn = nodeById.get(id);
+        if (tn && !expanded.has(tn.domain)) { expanded.add(tn.domain); gLayout(); syncToggle(); }
+        var nd = W && W.idx.get(id);
+        if (nd) { selectedNode = id; centerOn(nd); showNode(id); gDraw(); }
+      }, REDUCED ? 50 : 900);
+    } else {
+      showNode(id); // inspector works from any tab; the graph flow stays graph-only
+    }
   })();
 })();
 </script>

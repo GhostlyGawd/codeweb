@@ -48,6 +48,16 @@ notes so validated results, papers, and new tools never get lost in commit histo
   parent's span) to review. Dogfood receipts on the self-map: hotspots' top-10 went from five test
   helpers + the generated site bundle to all product code; campaign's plan dropped from 55 steps
   (-730 claimed LOC, mostly false orphans) to 26 grounded ones. (IMPROVEMENTS.md #6)
+- **The report now shows the pipeline's own findings — and every view is a link.** The
+  interactive report loaded `graph.overlaps` and never rendered it: the Findings tab showed only
+  a client-side name-match heuristic, so the body-confirmed, tiered findings in
+  `overlap.md`/`optimize.md` never reached the report's audience. A new **Consolidation
+  findings** section now leads the tab (confidence badges, evidence, recommendation, clickable
+  symbols; body-refuted candidates counted). The URL hash grew from node-only `#s=` to the whole
+  view — `#tab=…&roles=…&s=…` — restored on load (legacy links keep working), with a
+  **copy link** button in the header; hosted reports carry `og:title`/`og:description` built
+  from the target label and counts only (the meta.root privacy invariant holds, re-pinned by
+  test). (IMPROVEMENTS.md #8)
 - **The CLI grew a front door.** Every CLI answers `--help`/`-h` (exit 0) — including the
   `codeweb` bin, where `--help` previously errored with `target not found: --help`; `run.mjs`
   documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map

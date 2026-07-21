@@ -45,3 +45,38 @@ test('build-report does not embed the absolute local path (meta.root) in report.
     cleanup(dir);
   }
 });
+
+// #8 (IMPROVEMENTS.md): the report renders the PIPELINE's findings (G.overlaps), carries share
+// metadata (og:*), and ships the whole-view hash machinery — while the privacy invariant holds
+// (only the target LABEL and counts are embedded, never meta.root).
+test('report carries og metadata, the pipeline-findings renderer, and the shareable-hash machinery', () => {
+  const dir = tmpDir('codeweb-report-');
+  try {
+    const graph = {
+      meta: { target: 'acme/web', root: '/Users/secret-person/acme/src' },
+      domains: [], edges: [],
+      nodes: [
+        { id: 'a.js:x', label: 'x', kind: 'function', file: 'a.js', line: 1, loc: 2, domain: 'd' },
+        { id: 'b.js:y', label: 'y', kind: 'function', file: 'b.js', line: 1, loc: 2, domain: 'd' },
+      ],
+      overlaps: [
+        { kind: 'duplicate-logic', confidence: 'high', drifted: false, bodySim: 0.93, severity: 'high', title: 'x duplicated across a and b', domains: ['d'], nodes: ['a.js:x', 'b.js:y'], evidence: 'ev', recommendation: 'merge into a.js:x' },
+        { kind: 'duplicate-logic', confidence: 'refuted', title: 'same name, different logic', domains: ['d'], nodes: [] },
+      ],
+    };
+    const graphPath = join(dir, 'graph.json');
+    writeFileSync(graphPath, JSON.stringify(graph));
+    const r = runNode(script('build-report.mjs'), [graphPath, '--no-md']);
+    assert.equal(r.status, 0, r.stderr);
+    const html = readFileSync(join(dir, 'report.html'), 'utf8');
+    assert.match(html, /<meta property="og:title" content="codeweb — acme\/web map">/, 'og:title from the target label');
+    assert.match(html, /<meta property="og:description" content="2 symbols · 0 edges/, 'og:description from counts');
+    assert.ok(!html.includes('secret-person'), 'meta.root never reaches the shipped HTML (privacy invariant)');
+    assert.ok(html.includes('Consolidation findings'), 'pipeline findings section exists');
+    assert.ok(html.includes('showOverlap'), 'pipeline finding detail view wired');
+    assert.ok(html.includes('x duplicated across a and b'), 'the finding itself is embedded via graph data');
+    for (const marker of ['parseHash', 'writeHash', 'copyLink', "roles === 'all'"]) {
+      assert.ok(html.includes(marker), `hash/share machinery present: ${marker}`);
+    }
+  } finally { cleanup(dir); }
+});
