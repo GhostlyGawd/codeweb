@@ -133,9 +133,22 @@ function pkgOf(relFile) {
 }
 
 // ---- per-language regex symbol scan ----
+// finding 8: one mask per file per language. maskPy previously ran up to 4x per Python file
+// (symbol scan, extents, import binding, edge scan) and maskJs 2x per JS-family file (extents +
+// edges) — measured at 52% of a Python-corpus extract. Masking is a pure function of the text, so
+// the result is cached by rel path (extraction is one-shot per process; fileSyms already retains
+// every raw text, so the masked copy does not change the memory complexity class).
+const maskCache = new Map(); // `${rel}\x00${kind}` -> masked text
+function maskedOnce(relPath, kind, text) {
+  const k = relPath + '\x00' + kind;
+  let v = maskCache.get(k);
+  if (v === undefined) { v = kind === 'py' ? maskPy(text) : kind === 'rb' ? maskRuby(text) : maskJs(text); maskCache.set(k, v); }
+  return v;
+}
+
 function scanSymbols(file, text) {
   const ext = extname(file).toLowerCase();
-  const lines = (ext === '.py' ? maskPy(text) : text).split(/\r?\n/); // hide def/class inside docstrings
+  const lines = (ext === '.py' ? maskedOnce(rel(file), 'py', text) : text).split(/\r?\n/); // hide def/class inside docstrings
   const syms = [];
   const push = (name, line, kind, exported, owner) => { if (name && !KEYWORDS.has(name)) syms.push({ name, line: line + 1, kind, exports: !!exported, ...(owner ? { owner } : {}) }); };
   if (ext === '.py') {
@@ -532,7 +545,7 @@ for (const f of files) {
   // whole neighboring functions (a 5-line helper recorded as 550 loc on vite — poisoning
   // context-pack size, complexity, and body-confirmed duplication). maskJs/maskPy carry string/
   // comment state ACROSS lines; ${} interpolations stay live so real code still counts.
-  const scanLines = (isPy ? maskPy(text) : r.endsWith('.rb') ? maskRuby(text) : isBraceLang ? maskJs(text) : text).split(/\r?\n/);
+  const scanLines = (isPy ? maskedOnce(r, 'py', text) : r.endsWith('.rb') ? maskedOnce(r, 'rb', text) : isBraceLang ? maskedOnce(r, 'js', text) : text).split(/\r?\n/);
   const fileRole = roleFor(r);
   // When the tree-sitter engine is active it OWNS JS/TS method discovery (class-qualified ids) and the
   // dispatch edges; the regex scanner still owns classes, functions and const-arrow functions (which
@@ -868,26 +881,47 @@ for (const n of nodes) {
 // Spec Q2: resolve name N in Python module M through M's own `from X import N` re-exports
 // (flask's `from .templating import render_template as render_template`). Bounded depth,
 // masked text (a docstring can't fabricate a re-export), deterministic first-match.
+// finding 8: this used to re-mask the module and re-scan its from-imports on EVERY invocation —
+// once per unresolved pkg.member call site and per imported name (70% of a Python-corpus
+// extract). Two memos make it a table lookup with byte-identical results: the per-module
+// re-export table (local name -> {srcMod, orig}, first valid binding wins — the old scan order),
+// and the (module, name) -> id|null result. Null results are cached only from depth-0 calls, so a
+// depth-budget-truncated null can never mask a resolvable chain.
+const pyReExportTables = new Map(); // moduleRel -> Map(local -> {srcMod, orig}) | null
+const pyReExportTableOf = (moduleRel) => {
+  if (pyReExportTables.has(moduleRel)) return pyReExportTables.get(moduleRel);
+  const modAbs = absByRel.get(moduleRel);
+  const rec = modAbs && fileSyms.get(modAbs);
+  let table = null;
+  if (rec) {
+    table = new Map();
+    const re = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
+    const masked = maskedOnce(moduleRel, 'py', rec.text);
+    let mm;
+    while ((mm = re.exec(masked))) {
+      for (const part of mm[3].replace(/[()]/g, '').split(',')) {
+        const seg = part.trim().split(/\s+as\s+/);
+        const orig = (seg[0] || '').trim(), local = (seg[seg.length - 1] || '').trim();
+        if (!orig || orig === '*' || !local || table.has(local)) continue;
+        const srcMod = resolvePyModule(modAbs, mm[1].length, mm[2]);
+        if (srcMod && srcMod !== moduleRel) table.set(local, { srcMod, orig });
+      }
+    }
+  }
+  pyReExportTables.set(moduleRel, table);
+  return table;
+};
+const pyReExportMemo = new Map(); // `${moduleRel}\x00${name}` -> id | null
 const pyReExportResolve = (moduleRel, name, depth = 0) => {
   if (depth > 3) return null;
   const direct = moduleRel + ':' + name;
   if (nodeIdSet.has(direct)) return direct;
-  const modAbs = absByRel.get(moduleRel);
-  const rec = modAbs && fileSyms.get(modAbs);
-  if (!rec) return null;
-  const re = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
-  let mm;
-  const masked = maskPy(rec.text);
-  while ((mm = re.exec(masked))) {
-    for (const part of mm[3].replace(/[()]/g, '').split(',')) {
-      const seg = part.trim().split(/\s+as\s+/);
-      const orig = (seg[0] || '').trim(), local = (seg[seg.length - 1] || '').trim();
-      if (local !== name || !orig || orig === '*') continue;
-      const srcMod = resolvePyModule(modAbs, mm[1].length, mm[2]);
-      if (srcMod && srcMod !== moduleRel) return pyReExportResolve(srcMod, orig, depth + 1);
-    }
-  }
-  return null;
+  const memoKey = moduleRel + '\x00' + name;
+  if (pyReExportMemo.has(memoKey)) return pyReExportMemo.get(memoKey);
+  const hit = pyReExportTableOf(moduleRel)?.get(name);
+  const out = hit ? pyReExportResolve(hit.srcMod, hit.orig, depth + 1) : null;
+  if (out != null || depth === 0) pyReExportMemo.set(memoKey, out);
+  return out;
 };
 const resolveFileMember = (fileRel, name) => {
   const exact = fileRel + ':' + name;
@@ -989,7 +1023,7 @@ for (const f of files) {
   };
   const addSide = (spec) => { const t = resolveImport(f, spec); if (!t) return; if (aId) importEdges.push([aId, t + ':<module>']); };
   if (isPy) {
-    const pyText = maskPy(text); // don't bind imports that live in a docstring/comment
+    const pyText = maskedOnce(rel(f), 'py', text); // don't bind imports that live in a docstring/comment
     while ((m = pyFrom.exec(pyText))) addPyFrom(m[1].length, m[2], m[3]);
     while ((m = pyImport.exec(pyText))) addPyImports(m[1]);
   } else {
@@ -1150,7 +1184,7 @@ const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; /
 for (const f of edgeFiles) {
   const { text, ranges } = fileSyms.get(f);
   const r = rel(f);
-  const lines = (r.endsWith('.py') ? maskPy(text) : r.endsWith('.rb') ? maskRuby(text) : /\.(jsx?|mjs|cjs|tsx?|java|cs|php|kt|kts|swift)$/.test(r) ? maskJs(text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
+  const lines = (r.endsWith('.py') ? maskedOnce(r, 'py', text) : r.endsWith('.rb') ? maskedOnce(r, 'rb', text) : /\.(jsx?|mjs|cjs|tsx?|java|cs|php|kt|kts|swift)$/.test(r) ? maskedOnce(r, 'js', text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
   const prev = reuseEdges && oldCache.files[r];
   let result;

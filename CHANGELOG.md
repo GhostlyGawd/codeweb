@@ -77,6 +77,15 @@ notes so validated results, papers, and new tools never get lost in commit histo
   equal); ~1.5x wall on a small corpus where WASM init dominates, larger on big ones. `atomicWrite`
   also learned to write through non-regular files instead of renaming over them. (perf-quality
   finding 7)
+- **Python re-export resolution is a table lookup, and every file is masked once.**
+  `pyReExportResolve` re-masked the whole module and re-scanned its from-imports on EVERY
+  invocation — once per unresolved `pkg.member(...)` call site and per imported name, measured at
+  70% of a Python-corpus extract — and `maskPy`/`maskJs` ran up to 4x/2x per file across the
+  symbol/extent/import/edge scans. Each module's re-export table and each `(module, name)`
+  resolution are now memoized (first-valid-binding-wins preserves the old scan order; nulls cache
+  only from depth-0 calls so a depth-truncated null can't mask a resolvable chain), and a shared
+  per-file mask cache serves all five scan sites. Byte-identical fragments on a 261-file
+  re-export corpus (1,460 edges, zero field diffs). (perf-quality finding 8)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
