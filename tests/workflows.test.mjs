@@ -58,7 +58,9 @@ test('every actions/setup-node block across all three workflows enables the npm 
 
 test('ci.yml: post-install AST probe + skip ceiling — an install hiccup cannot green-skip the AST tier', () => {
   assert.match(ci, /web-tree-sitter/, 'the import probe must name the engine');
-  assert.match(ci, /# skipped/, 'the TAP skip summary must be parsed and bounded');
+  // Node 22 emits the TAP summary (`# skipped N`); Node 24's runner emits the spec-style summary
+  // (`ℹ skipped N`) — the node-24 leg was silently ceiling-open (S=0) until both were parsed.
+  assert.match(ci, /\(#\|ℹ\) skipped/, 'both TAP (node 22) and spec-style (node 24) skip summaries must be parsed');
 });
 
 test('ci.yml: a no-optional-deps job exercises the regex fallback for real', () => {

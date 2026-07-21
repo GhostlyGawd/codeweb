@@ -133,3 +133,39 @@ Container: Node v22.22.2, 4 cores. All timings `time` wall clock, this container
   no-RED-commits rule; every invariant still ran RED before its YAML edit. (2) site/build.mjs's
   banner now prints the resolved output dir (spec-directed) — the literal `built N page(s)` is
   unchanged. (3) docs/ is rebuilt in every CHANGELOG-touching commit (see #5 note).
+
+### CI red→green — skip-ceiling recalibration (post-push fix)
+
+- Cause: T-3.2's ceiling 6 was calibrated from the LOCAL census (5); the runner census is 7.
+  Run 29871314381 @1692629, job `test (ubuntu-latest, 22)` (88771829501): 644 tests, 637 pass,
+  0 fail, **7 skipped → `##[error]7 skips (ceiling 6)`**, exit 1.
+- The named 7 (from that job's TAP): 3x golden target (`ok 230/231/232 … # SKIP golden target not
+  on disk: D:/…`), 1x `bench: compiler-graded mode on a TS fixture # SKIP typescript not
+  resolvable`, 1x `graceful fallback … # SKIP engine available`, and the two CI-only skips:
+  **`ok 481 - L1: harness emits the full measurement schema on a fixture report # SKIP playwright
+  not resolvable`** and **`ok 482 - L2: a non-report input fails loudly … # SKIP playwright not
+  resolvable`** (tests/report-scale-bench.test.mjs — playwright resolves in the dev container,
+  not on runners).
+- Decision per CI-only skip: NOT installed in the workflow — the guard's own header says
+  "Skipped when playwright is not resolvable (CI stays zero-dep; the bench is a dev-side tool)";
+  playwright is in no manifest/lockfile, needs a ~minutes browser download per leg, and real
+  Playwright verification is WS-G's usage evidence. Both added to the named census instead.
+  New ceiling: 7 census + 1 headroom = **8**, enumerated by name in the ci.yml comment.
+- Per-leg reasoning (no per-leg ceilings): zero `process.platform`-conditional guards in tests/
+  (grep: 0), git present on all runners (git-guarded tests run), engine installs on all legs
+  (windows AST probe passed before fail-fast cancellation), D:/ golden fixture absent on the
+  windows runner too, typescript/playwright absent everywhere → census 7 on every leg. Confirmed
+  empirically where logs exist: ubuntu-22 TAP `# skipped 7`; ubuntu-24 `ℹ skipped 7`.
+- Second bug found while verifying: **the ubuntu-24 "pass" was vacuous** — node 24's runner emits
+  the spec-style summary (`ℹ skipped 7`), not TAP's `# skipped`, so awk parsed S=0 (ceiling-open,
+  the drift mode the spec had deemed acceptable-for-the-future — it was live today). Both awks
+  (ceiling + no-ast bound) now match `/^(#|ℹ) skipped/`; workflows.test.mjs invariant tightened to
+  pin the dual-format pattern (RED→GREEN). Verified: awk on the local TAP log → 5, on a node-24
+  style summary → 7, on TAP `# skipped 7` → 7.
+- Other jobs on the red run 29871314381: bench ✓, consistency ✓ (incl. "Committed site is fresh"),
+  test-no-ast ✓ (**644 tests, 599 pass, 0 fail, 45 skipped** on the runner = 7 census + 38
+  engine-guarded; premise probe, fallback grep, bound 60 all passed), test (ubuntu-latest, 24) ✓
+  (vacuously, see above), test (windows-latest, 22) **cancelled** by matrix fail-fast at the
+  ubuntu-22 failure — its first verdict comes from the rerun.
+- CHANGELOG #3 entry amended (ceiling 8 + census + dual-format note); test-no-ast comment updated
+  to the runner-measured 45.

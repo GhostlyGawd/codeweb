@@ -35,15 +35,27 @@ jobs:
         shell: bash
         run: node -e "await import('web-tree-sitter')"
       # `node --test "tests/**/*.test.mjs"` needs Node 22 to expand the glob (Node 20 did not).
-      # Skip ceiling 6 = today's true environment skips, 5 (3 golden-target, 1 bench TS_MODULE,
-      # 1 inverse fallback), + 1 headroom; the tier-wide failure mode adds ~38 and trips it hard.
-      - name: Run tests (skip ceiling 6)
+      # Skip ceiling 8 = the named runner census, 7, + 1 headroom. The census (verified from run
+      # 29871314381's TAP, one line per expected skip):
+      #   3x golden-target suite   — D:/ fixture path absent unless CODEWEB_GOLDEN_TARGET is set
+      #   1x bench compiler-graded — typescript not resolvable (TS_MODULE unset)
+      #   1x fallback-equivalence  — inverse skip: the engine IS installed in this job
+      #   2x report-scale L1/L2    — playwright not resolvable ("CI stays zero-dep" is that
+      #                              guard's own design; the browser harness is dev-side, WS-G)
+      # Every matrix leg shares this census: zero process.platform-conditional guards exist in
+      # tests/, git is present on all runners (the git-guarded tests run), the engine installs on
+      # all legs, and the golden D:/ path is absent on the windows runner too — so one ceiling, no
+      # per-leg values. The tier-wide failure mode adds ~38 skips and trips it hard.
+      # The awk matches BOTH summary formats: node 22 emits TAP ("# skipped N"), node 24's runner
+      # emits the spec-style summary ("ℹ skipped N") — with only the TAP pattern the node-24 leg
+      # was silently ceiling-open (S=0).
+      - name: Run tests (skip ceiling 8)
         shell: bash
         run: |
           set -o pipefail
           npm test 2>&1 | tee "$RUNNER_TEMP/test.log"
-          S=$(awk '/^# skipped/{n=$3} END{print n+0}' "$RUNNER_TEMP/test.log")
-          [ "$S" -le 6 ] || { echo "::error::$S skips (ceiling 6)"; exit 1; }
+          S=$(awk '/^(#|ℹ) skipped/{n=$3} END{print n+0}' "$RUNNER_TEMP/test.log")
+          [ "$S" -le 8 ] || { echo "::error::$S skips (ceiling 8)"; exit 1; }
 
   # Round 2 finding #3: the regex fallback, exercised for real. The fallback-equivalence test
   # (tests/extract-engine.test.mjs) inverse-skips whenever the engine is installed — i.e. always in
@@ -74,15 +86,15 @@ jobs:
         shell: bash
         run: |
           grep -E "^ok [0-9]+ - graceful fallback" "$RUNNER_TEMP/test.log" | grep -v "# SKIP" | grep -q .
-      # Runaway bound, deliberately loose — NOT the matrix job's ceiling 6: this job's ~38 AST
-      # skips are the point (43 measured engine-absent, 2026-07-21), and engine-guarded tests grow
-      # round over round. The sharp assertions are the premise probe + the functional grep above;
-      # 60 only catches a whole new tier silently skipping. Bump it deliberately as guarded tests
-      # grow.
+      # Runaway bound, deliberately loose — NOT the matrix job's ceiling 8: this job's ~38 AST
+      # skips are the point (45 measured on the runner, run 29871314381 = the 7-skip environment
+      # census + 38 engine-guarded), and engine-guarded tests grow round over round. The sharp
+      # assertions are the premise probe + the functional grep above; 60 only catches a whole new
+      # tier silently skipping. Bump it deliberately as guarded tests grow.
       - name: Runaway skip bound (60)
         shell: bash
         run: |
-          S=$(awk '/^# skipped/{n=$3} END{print n+0}' "$RUNNER_TEMP/test.log")
+          S=$(awk '/^(#|ℹ) skipped/{n=$3} END{print n+0}' "$RUNNER_TEMP/test.log")
           [ "$S" -le 60 ] || { echo "::error::$S skips (bound 60)"; exit 1; }
 
   # Spec C: the published numbers are promises, and promises are gates. bench:all measures the
