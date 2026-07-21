@@ -12,6 +12,7 @@ import { buildBrief, renderBrief } from './lib/brief-core.mjs';
 import { attachActivity } from './lib/stats.mjs';
 
 const USAGE = 'usage: brief.mjs <graph.json> [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 const argv = process.argv.slice(2);
 let json = false; const pos = [];
 for (const t of argv) { if (t === '--json') json = true; else if (!t.startsWith('-')) pos.push(t); else die(USAGE, 2); }

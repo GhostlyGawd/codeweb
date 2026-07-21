@@ -9,7 +9,169 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Added
+- **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
+  script would have refused to roll an "empty" release over real work):
+  - **K — the scale bench is runnable** (`bench/experiments/scale.mjs` portable + pre-flighted);
+    it found the next wall, which N then removed.
+  - **L — report.html measured at 16k symbols** (`bench/results/report-scale.json`): cold load,
+    interaction, and heap all green at TypeScript-compiler scale — no fix needed, receipt kept.
+  - **M — the efficiency pilot re-ran budgeted on v0.9.0** (5 engine-frozen reps,
+    `bench/experiments/efficiency-pilot.reps5-v090.json`): recall **+0.31 ± 0.04** at equal token
+    cost — the earlier ">90% fewer tokens" prediction was wrong and is recorded as such; the win
+    moved from cost to completeness. One per-task loss (flask) opened Spec Q.
+  - **N — LSH/MinHash banding in overlap** (`CODEWEB_LSH`, auto at scale): the quadratic
+    same-name/twin passes band first, making the scale caps true backstops; identical findings on
+    small inputs, byte-stable.
+  - **O — incremental stages, O-1** (extract rides the scan cache inside `run.mjs`; downstream
+    stages memoize on the fragment hash). O-2 (incremental cluster/overlap) measured under the
+    pre-registered rule and **deliberately not built** — the override is recorded in the spec.
+  - **P — resident daemon: NO-GO** (`docs/decisions/fastpath-daemon.md`): the per-edit surface is
+    already at the ~52ms node-boot floor via the **pre-edit sidecar** (`index-lite.json`), and a
+    resident graph risks stale-serving; revisit triggers documented.
+- **A symbol miss is never a dead end.** Every `found:false` answer (query/dependents/impact
+  over CLI and MCP, `explain`, `context-pack`) now carries a hint pointing at `codeweb_find`
+  concept search plus up to 3 deterministic near-match ids (case-fix, prefix, substring,
+  shared-name-token tiers) — the most frequent agent mistake now teaches the recovery path
+  instead of sending the agent back to grep. (IMPROVEMENTS.md #2)
+
+### Added
+- **Every ranked surface now honors the role model — and deadcode knows what a host invokes.**
+  The vite-playground precision lesson (rankings drowned by non-product code) was applied to
+  overlap only; hotspots, risk, deadcode, and campaign still ranked test helpers, bench scaffolding,
+  and the generated site bundle first on codeweb's own map. All four now default to **product
+  scope** with a counted exclusion line (`--all` / MCP `all:true` restores the everything view).
+  `deadcode` additionally learns **manifest-declared entrypoints** — files named by any
+  `package.json` `main`/`bin`/`exports`, `hooks/hooks.json`, or `.claude-plugin/plugin.json` are
+  review-tier, never "safe to delete" (the safe tier used to list the VS Code extension's
+  `activate`/`deactivate`) — and demotes **closure-scoped** functions (defined inside a reachable
+  parent's span) to review. Dogfood receipts on the self-map: hotspots' top-10 went from five test
+  helpers + the generated site bundle to all product code; campaign's plan dropped from 55 steps
+  (-730 claimed LOC, mostly false orphans) to 26 grounded ones. (IMPROVEMENTS.md #6)
+- **The report now shows the pipeline's own findings — and every view is a link.** The
+  interactive report loaded `graph.overlaps` and never rendered it: the Findings tab showed only
+  a client-side name-match heuristic, so the body-confirmed, tiered findings in
+  `overlap.md`/`optimize.md` never reached the report's audience. A new **Consolidation
+  findings** section now leads the tab (confidence badges, evidence, recommendation, clickable
+  symbols; body-refuted candidates counted). The URL hash grew from node-only `#s=` to the whole
+  view — `#tab=…&roles=…&s=…` — restored on load (legacy links keep working), with a
+  **copy link** button in the header; hosted reports carry `og:title`/`og:description` built
+  from the target label and counts only (the meta.root privacy invariant holds, re-pinned by
+  test). (IMPROVEMENTS.md #8)
+- **The report meets people where they are: light mode, print, full keyboard reach.** A light
+  theme follows the OS preference (`prefers-color-scheme`) with an explicit auto → light → dark
+  toggle (persisted; the canvas graph re-reads its label/halo colors from the theme tokens); a
+  print stylesheet makes the report paper-able; every hover affordance gained a
+  `:focus-visible` twin; matrix cells and treemap blocks are keyboard-reachable
+  (tabindex + Enter/Space + `aria-label`); the tablist has real `tabpanel`/`aria-controls`
+  wiring and roving arrow keys. Also: the undefined `--hi` token (the "duplicated" tag silently
+  lost its color) now uses `--stCritical`; the treemap caches its render like sibling tabs; the
+  mobile search-count no longer collides with the input; the editor-root picker is an inline
+  form instead of a blocking `prompt()`; and the whole-panel `aria-live` (which re-read the
+  entire inspector on every click) became a scoped one-line announcer. (IMPROVEMENTS.md #9)
+- **The value receipt is felt, not buried.** The session brief's activity line used to render
+  only the current calendar month's bucket and vanish when it was empty — every new user and
+  every 1st-of-the-month saw silence. It now leads with **lifetime totals** ("codeweb here since
+  2026-06: …", current month in parentheses), the brief warns when the map is a week old
+  ("built N day(s) ago — refresh with codeweb_refresh"), a successful `run.mjs` map ends with
+  the receipt line, and CLI queries (`query`/`explain`/`context-pack`) now count toward
+  `queriesServed` — the denominator stops undercounting non-MCP use. (IMPROVEMENTS.md #10)
+- **The agent loop closes over MCP — 27 tools — and codeweb_map reports progress.** Three
+  capabilities that existed only as CLIs join the MCP surface: **`codeweb_simulate`** (the
+  regression gate's verdict for a hypothetical delete/merge/move — pre-flight a refactor for the
+  cost of one call), **`codeweb_annotate`** (false-positive suppression memory, written beside
+  the graph, never to source), and **`codeweb_stats`** (the local value receipt). `codeweb_map`
+  is now async and, when the client sends a `progressToken`, emits `notifications/progress` per
+  pipeline stage — a big first map is no longer a silent black box (in-flight work drains before
+  the server exits). The MCP/CLI **parity receipt is re-measured at the full surface**
+  (`bench/results/auxiliary.json`): 26/26 parity pairs + JSON-RPC conformance at 27 listed tools,
+  11/11 auxiliary checks green — the old receipt covered the 20-tool era and its harness had the
+  count hardcoded (now derived). The handshake instructions teach the new loop steps.
+  (IMPROVEMENTS.md #11)
+- **Coverage→symbol mapping — "is this symbol actually tested?" is now a measured fact.**
+  (ROADMAP Phase 4's named-missing mechanism.) `scripts/coverage.mjs` (`npm run coverage`)
+  ingests a coverage report — lcov text (Node's own
+  `--test --experimental-test-coverage --test-reporter=lcov` output works directly) or a
+  c8/istanbul JSON — and stamps every instrumented symbol with `covered`/`hits` (declaration-line
+  hits don't count as body execution; unknown ≠ uncovered; ambiguous path suffixes dropped).
+  `explain`, `query --tests`, and `context-pack` answers then carry the facts — loudest one:
+  `⚠ NOT covered by the recorded test run` on the edit window of an unguarded symbol.
+  Optional + explicit like `--churn` (absent input leaves graphs byte-identical);
+  `run.mjs --coverage <report>` annotates right after mapping; `codeweb_refresh` drops stale
+  annotations and says how to restore them. Pinned end-to-end by `tests/coverage.test.mjs`,
+  including a real Node-runner dogfood. (IMPROVEMENTS.md #13)
+- **Ruby and PHP join the dispatch tier; Kotlin/Swift's blocker is recorded, not papered over.**
+  Two new vendored grammars (same pinned trusted source, `@vscode/tree-sitter-wasm@0.3.1`; Ruby
+  ABI 14, PHP ABI 15) power Spec-F-pattern walkers: Ruby wires `self.`/implicit-receiver calls
+  inside a class (the parser has already disambiguated a call from a bare identifier, so wiring
+  to a sibling method is precision-safe); PHP wires `$this->m()` plus `Type $p` typed-receiver
+  intents under the one-owner rule. The regex tier's bare-name resolution simultaneously got
+  STRICTER for both languages — a bare name can never reach another file's owner-qualified
+  method on a name coincidence anymore (that attribution now belongs to the dispatch tier, which
+  has receiver evidence). Kotlin/Swift stay regex-only with the blocker recorded in
+  `PROVENANCE.md`: no trusted wasm exists at our pinned ABI (upstream ships C sources and native
+  prebuilds only) — revisit when `@vscode/tree-sitter-wasm` grows them. (IMPROVEMENTS.md #14)
+- **The gate is a reviewer for adopters, not just a red ✗.** codeweb's own PRs already got the
+  sticky structural-review comment (delta, renames, findings); the reusable composite action
+  third parties consume ran the gate silently. The action now takes `comment: true` and posts
+  (and updates in place) the same digest via the calling workflow's `GITHUB_TOKEN` — the comment
+  lands **before** the verdict can fail the job, fork PRs with read-only tokens degrade
+  gracefully to the check verdict, and `docs/ci-gate.md` documents the
+  `pull-requests: write` requirement. Reviewers who never installed codeweb now see the blast
+  radius of every gated PR where they already look. (IMPROVEMENTS.md #15)
+- **The CLI grew a front door.** Every CLI answers `--help`/`-h` (exit 0) — including the
+  `codeweb` bin, where `--help` previously errored with `target not found: --help`; `run.mjs`
+  documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map
+  with `open <ws>/report.html in your browser`. Graph resolution now walks up to the nearest
+  `.codeweb/graph.json` above the cwd when no path/`CODEWEB_WS` is given (the same discovery the
+  hooks and MCP server already used) and announces which graph it picked — so bare
+  `npm run stats`, `query.mjs --callers X`, and `context-pack.mjs <symbol>` work from anywhere
+  inside a mapped repo. Exit codes on the first-touch scripts (`run`, `extract-symbols`,
+  `build-report`) now follow the documented 0/1/2 convention. (IMPROVEMENTS.md #5)
+
+### Fixed
+- **Spec Q closed: the flask Python import-edge regression was real, and it's fixed.** The
+  spec's bisect contract was executed first: the reps8-era engine (`c892f50`) resolved 14
+  `render_template` dependents, v0.9.0 resolved 7 — the package-boundary precision rule had also
+  killed calls backed by an explicit `from flask import render_template`. Three Python
+  resolution gaps fixed (each pinned by `tests/python-src-layout.test.mjs`): single-segment
+  absolute imports now resolve the repo's OWN top-level package (rooted, src-layout aware —
+  `import json` still can't grab a nested in-repo package); `__init__.py` re-exports are
+  followed (bounded chain) on both the from-import and the `pkg.member()` paths; an explicit
+  import binds bare calls across package boundaries (the import is evidence — unimported bare
+  names still respect the boundary); module-level import sites attribute to `<module>` (site
+  granularity). Flask pre-flight: **7 → 48 dependents, 26/26 truth sites** under id
+  normalization. `SCANNER_VERSION` 11→12 (cached edges invalidate); the research-page caveat now
+  records the closure. (IMPROVEMENTS.md #12)
+- **The VS Code lens is truthful again — and covers all 11 languages.** The extension README
+  promised "the lens re-reads the graph on change," but no watcher or change-event existed:
+  lenses showed stale numbers until a file was reopened. A `FileSystemWatcher` on
+  `**/.codeweb/graph.json` now fires `onDidChangeCodeLenses` (debounced), a manual
+  `codeweb: Refresh CodeLens from the graph` command exists, and the language selector grew from
+  9 to the engine's 11 (Ruby/PHP/Kotlin/Swift files finally get lenses). Extension v0.2.0.
+  (IMPROVEMENTS.md #7)
+- **The public prose can no longer understate the product — and what it said is fixed.** The
+  homepage, product page, start page, and og-descriptions said "20 tools" (24 ship); the /codeweb
+  command steered agents off the fast path for 8 of the 11 native languages; the engine-detection
+  reference said five; README's axios headline carried pre-regeneration numbers (334/11 vs the
+  real 274/8); the site still promised the deleted sharding layer; the tree-sitter backlog doc
+  claimed "nothing wired" about a tier that shipped two releases ago. All fixed at the source —
+  site prose now derives counts (`{{toolCount}}`/`{{langCount}}`), and `check-consistency` gained
+  **prose scans** (digit and word forms) plus a claim-ledger "N / N tools" check, so this class of
+  rot now fails the build. Site prose counts are template-derived (toolCount/langCount
+  placeholders filled at build time). The 2026-07-18 product review is archived to
+  `docs/product-review-2026-07-18.md` with a historical header. (IMPROVEMENTS.md #3)
+- **`npm test` is green again on a fresh zero-dependency clone.** The Spec-N LSH suite's N6 case
+  asserts a Type-3 (AST-tier-only) finding but was missing the `tree-sitter unavailable` skip
+  guard every other AST test carries — so the suite failed 1 test exactly on the "just Node"
+  install path the README celebrates (CI never saw it because CI installs the optional
+  dependency). Verified both ways: runs with the engine, skips without. (IMPROVEMENTS.md #4)
+- **An empty scan no longer masquerades as a successful map.** Pointing codeweb at an empty
+  directory, an unsupported-language tree, or a typo'd path used to print a green `[run] done`
+  and write a blank report. The extractor now stops with an actionable message — the path it
+  scanned, the supported extensions, and "is this the right directory?" — and `run.mjs` aborts
+  before writing artifacts. `--allow-empty` (both CLIs) keeps intentionally-sparse targets
+  workable. (IMPROVEMENTS.md #1)
 
 ## [0.9.0] - 2026-07-19
 

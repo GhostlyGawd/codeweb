@@ -8,12 +8,14 @@
 // Usage: node explain.mjs <graph.json> <symbol> [--json]   (or set CODEWEB_WS and pass <symbol>)
 // Exit: 0 ok, 1 symbol not found, 2 usage/IO.
 
-import { buildIndex, resolveSymbol } from './lib/graph-ops.mjs';
+import { buildIndex, resolveSymbol, suggestSymbols } from './lib/graph-ops.mjs';
 import { relianceLine } from './lib/reliance.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // Spec P: one truth for card assembly (CLI + sidecar)
 
 const USAGE = 'usage: explain.mjs <graph.json> <symbol> [--json]   (or set CODEWEB_WS)';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, loadGraph, checkStaleness, sourceReader } from './lib/cli.mjs';
+import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
 
 const argv = process.argv.slice(2);
 let json = false; const pos = [];
@@ -22,11 +24,22 @@ let graphArg = null, symbol = null;
 if (pos.length >= 2) { graphArg = pos[0]; symbol = pos[1]; }
 else if (pos.length === 1) { symbol = pos[0]; }
 if (!symbol) die(USAGE, 2);
-const { graph } = loadGraph(graphArg, { usage: USAGE });
+const { graph, abs } = loadGraph(graphArg, { usage: USAGE });
 
 const ids = resolveSymbol(graph, symbol);
-if (!ids.length) { if (json) emitJson({ symbol, found: false }, 1); else die(`symbol not found: ${symbol}`, 1); }
+if (!ids.length) {
+  // #2: never a dead end — same hint + near-matches contract as query-core.
+  const suggestions = suggestSymbols(graph, symbol);
+  if (json) {
+    const payload = { symbol, found: false, hint: `no symbol matches "${symbol}" — try codeweb_find "<free text>" (concept search, no name needed)${suggestions.length ? ' or a near-match below' : ''}` };
+    if (suggestions.length) payload.suggestions = suggestions;
+    emitJson(payload, 1);
+  } else {
+    die(`symbol not found: ${symbol}${suggestions.length ? ` — near matches: ${suggestions.join(', ')}` : ''} (concept search: find.mjs "<free text>")`, 1);
+  }
+}
 else {
+  bump(abs, 'queriesServed');
   const index = buildIndex(graph);
   const reader = sourceReader(graph.meta && graph.meta.root);
   const cards = buildCards(graph, index, reader, ids);

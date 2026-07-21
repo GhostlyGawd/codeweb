@@ -18,15 +18,15 @@ test('bumpVersion follows SemVer', () => {
   assert.throws(() => bumpVersion('0.2.0', 'nope'));
 });
 
-test('the real repo derives 24 MCP tools from the source', () => {
-  assert.equal(mcpToolCount(PLUGIN_ROOT), 24);
-  assert.equal(productToolCount(PLUGIN_ROOT), 24, 'product.json must list exactly the MCP tools');
+test('the real repo derives 27 MCP tools from the source', () => {
+  assert.equal(mcpToolCount(PLUGIN_ROOT), 27);
+  assert.equal(productToolCount(PLUGIN_ROOT), 27, 'product.json must list exactly the MCP tools');
 });
 
 test('the real repo is consistent (versions + tool count aligned)', () => {
   const r = checkConsistency(PLUGIN_ROOT);
   assert.equal(r.ok, true, `expected aligned, got: ${r.problems.join('; ')}`);
-  assert.equal(r.count, 24);
+  assert.equal(r.count, 27);
 });
 
 test('check-consistency CLI exits 0 on the aligned repo', () => {
@@ -97,4 +97,56 @@ test('checkConsistency catches drift, applySync repairs it (round-trip)', () => 
   } finally {
     cleanup(root);
   }
+});
+
+// #3 (IMPROVEMENTS.md): prose scans — hardcoded tool/language counts in public prose must match
+// the canonical facts. The v0.9.0 homepage said "20 tools" for a whole release; never again.
+test('scanProseCounts flags a stale tool count, in digits and words', async () => {
+  const { scanProseCounts } = await import('../scripts/release-utils.mjs');
+  const facts = { toolCount: 24, langCount: 11 };
+  assert.equal(scanProseCounts('drive the 24 MCP tools', 'f', facts).length, 0, 'correct count passes');
+  assert.equal(scanProseCounts('drive the 20 MCP tools', 'f', facts).length, 1, 'stale digit count flagged');
+  assert.equal(scanProseCounts('One graph. Twenty tools.', 'f', facts).length, 1, 'stale word count flagged');
+  assert.equal(scanProseCounts('static-analysis tools when available', 'f', facts).length, 0, 'unnumbered mentions pass');
+  assert.equal(scanProseCounts('over 20,000 comparisons with tools', 'f', facts).length, 0, 'unrelated numbers pass');
+});
+
+test('scanProseCounts flags a stale native-language count', async () => {
+  const { scanProseCounts } = await import('../scripts/release-utils.mjs');
+  const facts = { toolCount: 24, langCount: 11 };
+  assert.equal(scanProseCounts('eleven native today (JavaScript, …)', 'f', facts).length, 0);
+  assert.equal(scanProseCounts('five first-class languages', 'f', facts).length, 1);
+  assert.equal(scanProseCounts('12 native languages', 'f', facts).length, 1);
+});
+
+// The language count the site claims is DATA (product.json); this pins that data to the engine:
+// one file per supported extension must extract to exactly product.json's language list length.
+test('product.json languages match the extractor: one file per extension, counted', async () => {
+  const { productLanguageCount } = await import('../scripts/release-utils.mjs');
+  const dir = tmpDir('codeweb-langs-');
+  try {
+    writeTree(dir, {
+      'a.js': 'export function fjs() { return 1; }\n',
+      'b.mjs': 'export function fmjs() { return 1; }\n',
+      'c.cjs': 'function fcjs() { return 1; }\nmodule.exports = { fcjs };\n',
+      'd.jsx': 'export function fjsx() { return 1; }\n',
+      'e.ts': 'export function fts(): number { return 1; }\n',
+      'f.tsx': 'export function ftsx(): number { return 1; }\n',
+      'g.py': 'def fpy():\n    return 1\n',
+      'h.rs': 'pub fn frs() -> i32 { 1 }\n',
+      'i.go': 'package p\n\nfunc Fgo() int { return 1 }\n',
+      'j.java': 'public class J { public int fj() { return 1; } }\n',
+      'k.cs': 'public class K { public int Fk() { return 1; } }\n',
+      'l.rb': 'def frb\n  1\nend\n',
+      'm.php': '<?php\nfunction fphp() { return 1; }\n',
+      'n.kt': 'fun fkt(): Int = 1\n',
+      'o.kts': 'fun fkts(): Int = 1\n',
+      'p.swift': 'func fswift() -> Int { return 1 }\n',
+    });
+    const r = runNode(script('extract-symbols.mjs'), [dir, '--out', join(dir, 'f.json')]);
+    assert.equal(r.status, 0, r.stderr);
+    const langs = JSON.parse(readFileSync(join(dir, 'f.json'), 'utf8')).meta.languages;
+    assert.equal(langs.length, productLanguageCount(PLUGIN_ROOT),
+      `extractor languages [${langs.join(', ')}] must match product.json's count`);
+  } finally { cleanup(dir); }
 });

@@ -1,3 +1,9 @@
+> **Historical document** (archived from the repo root, 2026-07-20). The findings below describe
+> codeweb as of **2026-07-18**; the roadmap they motivated shipped in v0.8.0/v0.9.0 and is
+> re-measured in the Addendum at the bottom. Claims in the body (e.g. "no `mcpServers`", "20
+> tools") are point-in-time, not current. The live discovery document is
+> [`IMPROVEMENTS.md`](../IMPROVEMENTS.md) at the repo root.
+
 # codeweb — Product Review: Good → Great
 
 **Date:** 2026-07-18 · **Scope:** UI/UX, Features, Actual Performance, and a strategy for making codeweb a tool that makes agents more capable, intelligent, efficient, effective, and aware — while decreasing token usage.

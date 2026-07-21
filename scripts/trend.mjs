@@ -24,6 +24,9 @@ import { execFileSync } from 'node:child_process';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SPARK = '▁▂▃▄▅▆▇█';
 
+const USAGE = 'usage: trend.mjs (--git <repo> [--last N] [--focus <subdir>] | <a.json> <b.json> ... [--labels a,b,...]) [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
+
 function parseArgs(argv) {
   const a = { graphs: [], git: null, last: 10, focus: '.', json: false, labels: null };
   for (let i = 0; i < argv.length; i++) {

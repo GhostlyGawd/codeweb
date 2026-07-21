@@ -13,6 +13,7 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, copyFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { mcpToolCount } from '../scripts/release-utils.mjs';
 
 const SITE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(SITE, '..');
@@ -27,6 +28,11 @@ const product = JSON.parse(readSite('data', 'product.json'));
 const VERSION = pkg.version;
 const YEAR = String(new Date().getFullYear());
 const BASE = product.pagesBase.replace(/\/?$/, '/');
+// #3 (IMPROVEMENTS.md): the tool/language counts in site prose derive from the same sources the
+// consistency gate audits — {{toolCount}}/{{langCount}} in content, ${TOOLS}/${LANGS} here —
+// so the homepage physically can't understate the surface again.
+const TOOLS = mcpToolCount(ROOT);
+const LANGS = product.languages.length;
 
 // ---------------------------------------------------------------- helpers
 function fill(tpl, vars) {
@@ -134,10 +140,10 @@ function renderPhilosophy() {
 }
 
 const PIPELINE = [
-  { n: '01', t: 'extract', d: 'Parse-free atomic nodes + edges, per language (JS/TS/Python/Rust/Go).' },
+  { n: '01', t: 'extract', d: `Deterministic atomic nodes + edges across ${LANGS} languages (optional AST tier sharpens dispatch).` },
   { n: '02', t: 'cluster', d: 'Group nodes into semantic domains.' },
   { n: '03', t: 'overlap', d: 'Body-confirm cross-domain duplication and rank it.' },
-  { n: '04', t: 'render', d: 'A self-contained interactive map + 20 agent tools.' },
+  { n: '04', t: 'render', d: `A self-contained interactive map + ${TOOLS} agent tools.` },
 ];
 function renderPipeline() {
   return `<div class="pipeline">${PIPELINE.map((s) => `
@@ -163,7 +169,10 @@ function changelogToHtml(md) {
   const inline = (s) => esc(s)
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" rel="noopener">$1</a>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    // Changelog text is inserted into a page that still passes the {{placeholder}} fill — a
+    // literal "{{" in an entry would read as an unfilled token and fail the build (it did once).
+    .replace(/\{\{/g, '&#123;&#123;');
   for (const ln of lines) {
     if (/^##\s+/.test(ln)) { started = true; closeList(); out.push(`<h2 class="cl-ver">${inline(ln.replace(/^##\s+/, ''))}</h2>`); continue; }
     if (!started) continue;
@@ -181,6 +190,8 @@ function changelogToHtml(md) {
 const blocks = () => ({
   version: VERSION,
   year: YEAR,
+  toolCount: String(TOOLS),
+  langCount: String(LANGS),
   tagline: product.tagline,
   elevator: product.elevator,
   repo: product.repo,
@@ -206,8 +217,8 @@ function nav(active) {
 }
 
 const PAGES = [
-  { slug: 'index', nav: 'home', title: 'codeweb — the living map of your codebase', ogTitle: 'codeweb — the living map of your codebase', description: 'codeweb is the living map of your codebase — one deterministic graph served two ways: an interactive map for you, and 20 deterministic tools for the agents editing alongside you. Know what exists, and what an edit breaks, before you write.' },
-  { slug: 'product', nav: 'product', title: 'Product — codeweb', ogTitle: 'codeweb — one graph, two interfaces', description: 'The 20 deterministic MCP tools, the Tier 0–3 feature map, five-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.' },
+  { slug: 'index', nav: 'home', title: 'codeweb — the living map of your codebase', ogTitle: 'codeweb — the living map of your codebase', description: `codeweb is the living map of your codebase — one deterministic graph served two ways: an interactive map for you, and ${TOOLS} deterministic tools for the agents editing alongside you. Know what exists, and what an edit breaks, before you write.` },
+  { slug: 'product', nav: 'product', title: 'Product — codeweb', ogTitle: 'codeweb — one graph, two interfaces', description: `The ${TOOLS} deterministic MCP tools, the Tier 0–3 feature map, ${LANGS}-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.` },
   { slug: 'research', nav: 'research', title: 'Research — codeweb', ogTitle: 'codeweb — the evidence', description: 'A pre-registered effectiveness study (32/33 checks), an efficiency pilot, and an honest claim ledger: what is validated, what is preliminary, and what is a null result.' },
   { slug: 'start', nav: 'start', title: 'Get started — codeweb', ogTitle: 'Get started with codeweb', description: 'Install codeweb as a Claude Code plugin, run the engine directly, or register the MCP server. A five-minute quickstart and the core concepts.' },
   { slug: 'changelog', nav: 'changelog', title: 'Changelog — codeweb', ogTitle: 'codeweb changelog', description: 'Every release, capability, benchmark, and fix — kept in lock-step with the product under Keep a Changelog and Semantic Versioning.' },

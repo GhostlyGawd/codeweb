@@ -37,7 +37,7 @@ import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; //
 //     package-boundary manifests.
 // v9: tree-sitter tier default-on when installed (dispatch recall); export-star re-export chains
 //     resolve (barrel files no longer swallow edges).
-const SCANNER_VERSION = 11; // v11: cache entries carry AST products (ast/cx) so warm runs skip the engine (Spec A)
+const SCANNER_VERSION = 12; // v12: Spec Q — Python src-layout absolute imports, __init__ re-export following (from-import + member paths), <module>-site import origins; cached edges from v11 are stale
 const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -45,7 +45,7 @@ const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
 
 const argv = process.argv.slice(2);
-const opts = { path: null, out: null, ctags: true, target: null, cache: null, full: false, engine: process.env.CODEWEB_ENGINE || null };
+const opts = { path: null, out: null, ctags: true, target: null, cache: null, full: false, allowEmpty: false, engine: process.env.CODEWEB_ENGINE || null };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--out') opts.out = argv[++i];
@@ -53,10 +53,11 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--cache') opts.cache = argv[++i]; // F0: per-file scan cache (incremental freshness)
   else if (t === '--full') opts.full = true;        // F9: ignore the edge cache, derive all edges from scratch
   else if (t === '--no-ctags') opts.ctags = false;
+  else if (t === '--allow-empty') opts.allowEmpty = true; // intentionally-sparse targets: skip the empty-map guard
   else if (t === '--engine') opts.engine = argv[++i]; // optional tree-sitter tier (exact cyclomatic); default regex
   else if (!opts.path) opts.path = t;
 }
-if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--no-ctags]'); process.exit(1); }
+if (!opts.path) { console.error('usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--cache f.json] [--full] [--allow-empty] [--no-ctags] [--engine regex|tree-sitter]'); process.exit(2); }
 const root = resolve(opts.path);
 
 // Spec E: role overrides from the TARGET's own codeweb.rules.json (`roles: [{glob, role}]`) —
@@ -510,6 +511,18 @@ function parseSignature(line, name, isPy) {
 const useCtags = opts.ctags && toolExists('ctags');
 const files = listFiles();
 
+// #1 (IMPROVEMENTS.md): an empty scan must not masquerade as a successful map. If the target has
+// no supported source at all, say what was looked for and where, and stop — a green run over
+// nothing is the kind of silent lie the rest of the pipeline is engineered against.
+// `--allow-empty` keeps intentionally-sparse targets (CI skeletons, new repos) workable.
+const SUPPORTED_EXTS = SRC.source.match(/\(([^)]+)\)/)[1].split('|').map((e) => `.${e}`);
+if (files.length === 0 && !opts.allowEmpty) {
+  console.error(`[extract] no supported source files under ${root}`);
+  console.error(`[extract]   looked for: ${SUPPORTED_EXTS.join(' ')} (node_modules, dist, vendor and friends are skipped)`);
+  console.error('[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
+  process.exit(1);
+}
+
 // Tree-sitter tier — DEFAULT-ON since v9 (it was opt-in): dynamic-dispatch call edges (this.m(),
 // typed-receiver x.m()) are the regex tier's one recall gap, measured directly in the oracle A/B
 // (6/30 under-recalled symbols, all dispatch/re-export). web-tree-sitter is an optionalDependency —
@@ -590,7 +603,8 @@ for (const f of files) {
   const isBraceLang = isJsTs || /\.(java|cs|php|kt|kts|swift)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
   const isIndentLang = isPy || r.endsWith('.rb'); // extents by dedent (Python) / end-at-indent (Ruby)
   const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp'
-    : r.endsWith('.py') ? 'python' : r.endsWith('.go') ? 'go' : r.endsWith('.rs') ? 'rust' : null;
+    : r.endsWith('.py') ? 'python' : r.endsWith('.go') ? 'go' : r.endsWith('.rs') ? 'rust'
+    : r.endsWith('.rb') ? 'ruby' : r.endsWith('.php') ? 'php' : null; // #14: Ruby/PHP join the dispatch tier
   // Does the AST tier owe this file products (methods/dispatch/complexity)? Drives cache-hit
   // validity — a hit without them must re-scan — and the lazy engine load below (Spec A).
   const needsAst = opts.engine !== 'regex' && ((isJsTs && astProbe.ts) || (langKey && astProbe[langKey]));
@@ -742,6 +756,10 @@ for (const n of nodes) { if (!byName.has(n.label)) byName.set(n.label, []); byNa
 
 // ---- resolve imports: aliases (for accurate cross-file calls) + import edges ----
 const relSet = new Set(files.map(rel));
+const absByRel = new Map(files.map((f2) => [rel(f2), f2])); // Spec Q2: re-export resolution reads target modules
+// Spec Q4: a Python from-import is module-level code — the SITE (<module>) owns its import edge;
+// the node is created on demand by ensureModuleNode when the edges are appended.
+const pyImportOrigin = (r2) => r2 + ':<module>';
 const nodeIdSet = new Set(nodes.map((n) => n.id));
 const kindById = new Map(nodes.map((n) => [n.id, n.kind])); // for class-usage ref edges
 const anchorByFile = new Map(); // rel -> {id, loc} most-substantial symbol of the file
@@ -768,6 +786,16 @@ function resolvePyModule(fromAbs, level, dotted) {
     for (let i = 1; i < level; i++) baseAbs = dirname(baseAbs);
     const baseRel = rel(baseAbs).replace(/\\/g, '/');
     return pyFile([baseRel, ...parts].filter(Boolean).join('/'));
+  }
+  // Spec Q1: a SINGLE-segment absolute import resolves only when it names the repo's OWN
+  // top-level package — rooted at '' or 'src/' exactly (src-layout), never by suffix. That keeps
+  // `import json`/`import os` from grabbing a NESTED in-repo package (flask's src/flask/json)
+  // while `from flask import render_template` inside flask's repo finally resolves.
+  if (parts.length === 1) {
+    for (const c of [parts[0] + '/__init__.py', 'src/' + parts[0] + '/__init__.py', parts[0] + '.py', 'src/' + parts[0] + '.py']) {
+      if (relSet.has(c)) return c;
+    }
+    return null;
   }
   if (parts.length < 2) return null;
   const tail = parts.join('/');
@@ -924,11 +952,39 @@ for (const n of nodes) {
   memberByFile.set(key, memberByFile.has(key) ? AMBIGUOUS_MEMBER : n.id);
 }
 // `file:name` if it exists as a node id, else the unique qualified member, else null.
+// Spec Q2: resolve name N in Python module M through M's own `from X import N` re-exports
+// (flask's `from .templating import render_template as render_template`). Bounded depth,
+// masked text (a docstring can't fabricate a re-export), deterministic first-match.
+const pyReExportResolve = (moduleRel, name, depth = 0) => {
+  if (depth > 3) return null;
+  const direct = moduleRel + ':' + name;
+  if (nodeIdSet.has(direct)) return direct;
+  const modAbs = absByRel.get(moduleRel);
+  const rec = modAbs && fileSyms.get(modAbs);
+  if (!rec) return null;
+  const re = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
+  let mm;
+  const masked = maskPy(rec.text);
+  while ((mm = re.exec(masked))) {
+    for (const part of mm[3].replace(/[()]/g, '').split(',')) {
+      const seg = part.trim().split(/\s+as\s+/);
+      const orig = (seg[0] || '').trim(), local = (seg[seg.length - 1] || '').trim();
+      if (local !== name || !orig || orig === '*') continue;
+      const srcMod = resolvePyModule(modAbs, mm[1].length, mm[2]);
+      if (srcMod && srcMod !== moduleRel) return pyReExportResolve(srcMod, orig, depth + 1);
+    }
+  }
+  return null;
+};
 const resolveFileMember = (fileRel, name) => {
   const exact = fileRel + ':' + name;
   if (nodeIdSet.has(exact)) return exact;
   const m = memberByFile.get(exact);
-  return m && m !== AMBIGUOUS_MEMBER ? m : null;
+  if (m && m !== AMBIGUOUS_MEMBER) return m;
+  // Spec Q2 (member path): `flask.render_template(...)` through `import flask` — the member is a
+  // re-export in the package __init__; follow it exactly like the from-import path does.
+  if (fileRel.endsWith('.py')) { const viaReExport = pyReExportResolve(fileRel, name); if (viaReExport) return viaReExport; }
+  return null;
 };
 
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
@@ -972,7 +1028,15 @@ for (const f of files) {
       if (!orig || orig === '*') continue;
       const sub = resolvePyModule(f, level, dotted ? dotted + '.' + orig : orig);
       if (sub && sub !== pkgFile) { nsmap.set(local, sub); if (aId) importEdges.push([aId, sub + ':<module>']); continue; }
-      if (pkgFile) { const symId = pkgFile + ':' + orig; if (nodeIdSet.has(symId)) { amap.set(local, symId); if (aId && aId !== symId) importEdges.push([aId, symId]); } }
+      if (pkgFile) {
+        const symId = pkgFile + ':' + orig;
+        const resolvedSym = nodeIdSet.has(symId) ? symId : pyReExportResolve(pkgFile, orig); // Spec Q2
+        if (resolvedSym) {
+          amap.set(local, resolvedSym); // Spec Q3: an explicit import binds bare calls, boundary or not
+          const origin = pyImportOrigin(r); // Spec Q4: the SITE (module scope) owns the import edge
+          if (origin && origin !== resolvedSym) importEdges.push([origin, resolvedSym]);
+        }
+      }
     }
   };
   // Python `import a.b [as c], d`: bind a usable local name -> module object for member access. A
@@ -1070,7 +1134,12 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
       // handle legitimate cross-package calls; cross-package bare-name matches are collisions).
       const defs = byName.get(name) || [];
       const pkg = pkgOf(r);
-      const inPkg = defs.filter((d) => pkgOf(idFile(d)) === pkg);
+      let inPkg = defs.filter((d) => pkgOf(idFile(d)) === pkg);
+      // #14: in Ruby/PHP a bare name can NEVER legitimately reach another file's owner-qualified
+      // METHOD (a method needs a receiver: implicit self is same-class, $obj-> needs a type) —
+      // that attribution belongs to the dispatch tier, which has the receiver evidence. Without
+      // this, `helper(1)` in class A wired to B.helper across files on a name coincidence.
+      if (/\.(rb|php)$/.test(r)) inPkg = inPkg.filter((d) => { const lbl = d.slice(d.lastIndexOf(':') + 1); return !lbl.includes('.') || idFile(d) === r; });
       if (inPkg.length === 1) calleeId = inPkg[0];
       else if (LEGACY_FALLBACK) calleeId = defs[0];
       else { ambiguous++; return; }
@@ -1290,12 +1359,20 @@ const fragment = {
   },
   nodes, edges,
 };
+// #1: files existed but nothing was extractable — same honesty rule as the zero-file guard above.
+// (A `<module>` pseudo-node only exists where module-level code does something, so config-only
+// trees can land here.) Guarded before any artifact/cache write so a failed run leaves nothing.
+if (nodes.length === 0 && !opts.allowEmpty) {
+  console.error(`[extract] 0 symbols found in ${files.length} supported file(s) under ${root} — the files parsed but defined no functions, classes, or methods.`);
+  console.error('[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
+  process.exit(1);
+}
 if (newCache && !astLoadFailed) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
 // Dispatch note + banner report from the PROBE (what tier owns the run) plus the live load state:
 // `ast: loaded` (initialized this run) / `ast: idle` (available, nothing needed a parse — the warm
 // path Spec A exists for) / `ast: off` (regex opt-out, unavailable, or load failure).
-const astAvailable = opts.engine !== 'regex' && (astProbe.ts || astProbe.java || astProbe.csharp);
-const typedLangs = ['java', 'csharp', 'python', 'go', 'rust'].filter((k) => typedLangsSeen.has(k));
+const astAvailable = opts.engine !== 'regex' && Object.entries(astProbe).some(([k, v]) => k !== 'tsVersion' && v === true);
+const typedLangs = ['java', 'csharp', 'python', 'go', 'rust', 'php'].filter((k) => typedLangsSeen.has(k)); // ruby has no static types — self/implicit dispatch only
 const dispatchNote = astAvailable
   ? `; wired ${dispatchEdgeCount} dispatch edge(s)${dispatchDropped ? `, dropped ${dispatchDropped} (missing endpoint)` : ''}` +
     (typedLangs.length ? `; typed-dispatch (${typedLangs.join('+')}) ${typedWired} wired${typedDropped ? `, ${typedDropped} dropped (ambiguous/absent)` : ''}` : '')

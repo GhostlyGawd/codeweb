@@ -13,6 +13,7 @@ import { buildIndex } from './lib/graph-ops.mjs';
 import { findSymbols } from './lib/find-core.mjs';
 
 const USAGE = 'usage: find.mjs <graph.json> <query words...> [--limit 10] [--offset N] [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 const argv = process.argv.slice(2);
 let json = false, limit = 10, offset = 0; const pos = [];
 for (let i = 0; i < argv.length; i++) {

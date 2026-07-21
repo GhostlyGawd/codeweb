@@ -13,9 +13,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { runNode, tmpDir, cleanup, writeTree, script } from './helpers.mjs';
+import { runNode, tmpDir, cleanup, writeTree, script, PLUGIN_ROOT } from './helpers.mjs';
+
+// N6 exercises Signal C (Type-3 near-miss clones), which only the AST tier produces — without the
+// optional web-tree-sitter the finding cannot exist on EITHER path, so the test must skip exactly
+// like the type3-clones suite does (IMPROVEMENTS.md #4: a fresh zero-dep clone ran red here).
+const hasEngine = existsSync(join(PLUGIN_ROOT, 'scripts', 'grammars', 'tree-sitter-typescript.wasm')) && existsSync(join(PLUGIN_ROOT, 'node_modules', 'web-tree-sitter'));
 
 const RUN = script('run.mjs');
 
@@ -95,7 +100,7 @@ test('N5: small inputs keep the exact path by default — bytes equal a forced-e
   } finally { cleanup(dir); }
 });
 
-test('N6: Signal C near-miss clones — LSH and exact paths confirm the same finding', () => {
+test('N6: Signal C near-miss clones — LSH and exact paths confirm the same finding', { skip: hasEngine ? false : 'tree-sitter unavailable' }, () => {
   const dir = tmpDir('codeweb-lsh-');
   try {
     // Two near-identical 8-statement bodies in different files, different names: a Type-3 pair.

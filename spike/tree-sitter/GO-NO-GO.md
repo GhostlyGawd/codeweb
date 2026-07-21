@@ -93,9 +93,9 @@ in CI per pinned version (reuse the F9 IE-EQUIVALENCE harness).
 |---|---|---|
 | 1 | Footprint & install | **Resolved** — ~1.6 MB/lang vendored, pure WASM, offline. Vendor (don't fetch-on-use). |
 | 2 | Determinism across versions | **Resolved** — PASS with pinned grammar; CI must assert per pinned ABI. |
-| 3 | Performance at scale | **OPEN** — fixture is tiny. Must benchmark parse cost on axios + a large Go/Rust target vs the CI-gate budget **before** default-on. |
-| 4 | Per-language dispatch maturity | **Partly** — TS proven (`this` + typed param). Widen one language at a time behind the flag. |
-| 5 | Fallback semantics | **Design known** — regex stays the default + per-file fallback; record per-file engine in `meta`. Not yet implemented. |
+| 3 | Performance at scale | **OPEN** — fixture is tiny. Must benchmark parse cost on axios + a large Go/Rust target vs the CI-gate budget **before** default-on. *(Since resolved: `bench/results/ts-engine-bench.json` — cold 3.6–4.3× regex paid once per changed file, warm path engine-free; default-on stands.)* |
+| 4 | Per-language dispatch maturity | **Partly** — TS proven (`this` + typed param). Widen one language at a time behind the flag. *(Since executed: Java/C# in v0.8.0, Python/Go/Rust in v0.9.0 — `scripts/lib/ts-engine.mjs`.)* |
+| 5 | Fallback semantics | **Design known** — regex stays the default + per-file fallback; record per-file engine in `meta`. *(Since implemented: per-file fallback in `ts-engine.mjs` / `extract-symbols.mjs`; the banner reports `ast: loaded|idle|off`.)* |
 
 ### New question the spike surfaced — method id convention
 
@@ -104,7 +104,8 @@ collide. Dispatch resolution *knows* the receiver class, so its full value (disa
 `A.save` from `B.save`) needs **class-qualified method ids** (`file:Class.method`) — a schema
 refinement to settle **before** wiring dispatch into the live graph, since it ripples through
 query/diff/overlap/impact. The spike emits bare-name ids to stay schema-faithful and flags this as the
-first adoption decision, not a silent change.
+first adoption decision, not a silent change. *(Since settled: owner-qualified `file:Class.method`
+ids shipped across every tier — see `skills/codebase-anatomy/references/graph-schema.md`.)*
 
 ## Recommendation — GO, with these conditions
 

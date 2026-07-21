@@ -16,6 +16,7 @@ import { shingles, jaccard } from './lib/shingles.mjs';
 import { structuralShingles } from './lib/skeleton.mjs'; // F6: Type-2 (rename-invariant) similarity
 
 const USAGE = 'usage: find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--structural] [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, loadGraph, sourceReader } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);

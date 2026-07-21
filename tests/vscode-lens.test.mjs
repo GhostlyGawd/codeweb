@@ -4,6 +4,9 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { PLUGIN_ROOT } from './helpers.mjs';
 import lensCore from '../editor/vscode-codeweb/lens-core.js';
 
 const { buildLensIndex, blastOf, lensesForFile } = lensCore;
@@ -50,4 +53,20 @@ test('lens-core: minCallers hides sub-threshold symbols; unknown file yields no 
   assert.deepEqual(lensesForFile(ix, 'a.js', { minCallers: 1 }).map((l) => l.label), ['hub']);
   assert.deepEqual(lensesForFile(ix, 'nope.js'), []);
   assert.equal(ix.root, '/repo', 'root comes from graph.meta.root');
+});
+
+// #7 (IMPROVEMENTS.md): the extension's manifest + wiring stay truthful — all 11 native
+// languages get lenses, the graph is WATCHED (the README's re-read promise), and a manual
+// refresh command exists. String-level pins (the vscode API itself isn't available here).
+test('extension: selector covers all 11 native languages and wires the watcher + refresh', () => {
+  const src = readFileSync(join(PLUGIN_ROOT, 'editor', 'vscode-codeweb', 'extension.js'), 'utf8');
+  for (const lang of ['javascript', 'typescript', 'python', 'rust', 'go', 'java', 'csharp', 'ruby', 'php', 'kotlin', 'swift']) {
+    assert.ok(src.includes(`'${lang}'`), `selector includes ${lang}`);
+  }
+  assert.ok(src.includes('onDidChangeCodeLenses'), 'provider exposes the change event');
+  assert.ok(src.includes("createFileSystemWatcher('**/.codeweb/graph.json')"), 'graph watcher exists');
+  assert.ok(src.includes('codeweb.refreshLenses'), 'manual refresh command registered');
+  const pkg = JSON.parse(readFileSync(join(PLUGIN_ROOT, 'editor', 'vscode-codeweb', 'package.json'), 'utf8'));
+  assert.ok(pkg.contributes.commands.some((c) => c.command === 'codeweb.refreshLenses'), 'command in the manifest');
+  assert.ok(pkg.version !== '0.1.0', 'version bumped past 0.1.0');
 });

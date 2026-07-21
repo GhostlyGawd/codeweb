@@ -84,7 +84,7 @@ test('find over MCP: 23rd+ tool, served in-process from the cached graph, budget
     const byId = new Map(r.stdout.split('\n').filter(Boolean).map((l) => JSON.parse(l)).map((m) => [m.id, m]));
     const tools = byId.get(2).result.tools.map((t) => t.name);
     assert.ok(tools.includes('codeweb_find'), 'advertised');
-    assert.equal(tools.length, 24, `24 tools total (got ${tools.length})`);
+    assert.equal(tools.length, 27, `27 tools total (got ${tools.length})`);
     const payload = JSON.parse(byId.get(3).result.content[0].text);
     assert.equal(payload.results[0].label, 'retryRequest', `top hit over MCP (${payload.summary})`);
     assert.ok(payload.results.length <= 2, 'budget respected');

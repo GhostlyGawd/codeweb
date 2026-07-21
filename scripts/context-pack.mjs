@@ -14,10 +14,13 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { normalizeGraph, buildIndex, resolveSymbol, callersOf, calleesOf, impactOf } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols, callersOf, calleesOf, impactOf } from './lib/graph-ops.mjs';
+import { coverageNote } from './lib/coverage.mjs'; // #13
 
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--json]   (or set CODEWEB_WS)';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, capList, checkStaleness, loadGraph, sourceReader } from './lib/cli.mjs';
+import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
 
 const argv = process.argv.slice(2);
 let json = false, windowN = 3, fullBodies = false, limit = null; const pos = [];
@@ -31,14 +34,18 @@ for (let i = 0; i < argv.length; i++) {
 }
 let graphPath, symbol;
 if (pos.length >= 2) { graphPath = pos[0]; symbol = pos[1]; }
-else if (pos.length === 1 && process.env.CODEWEB_WS) { graphPath = `${process.env.CODEWEB_WS}/graph.json`; symbol = pos[0]; }
+else if (pos.length === 1) { graphPath = null; symbol = pos[0]; } // #5: loadGraph discovers (env or nearest .codeweb)
 else die(USAGE, 2);
 
 const { graph, abs } = loadGraph(graphPath, { usage: USAGE });
 
 const ids = resolveSymbol(graph, symbol);
-if (!ids.length) die(`symbol not found: ${symbol}`, 1);
+if (!ids.length) {
+  const suggestions = suggestSymbols(graph, symbol); // #2: offer the nearest labels, not a dead end
+  die(`symbol not found: ${symbol}${suggestions.length ? ` — near matches: ${suggestions.join(', ')}` : ''} (concept search: find.mjs "<free text>")`, 1);
+}
 
+bump(abs, 'queriesServed');
 const index = buildIndex(graph);
 const callerIds = callersOf(index, ids);
 const calleeIds = calleesOf(index, ids);
@@ -99,6 +106,11 @@ const payload = {
 if (cappedCallers.truncated) payload.moreCallers = { remaining: cappedCallers.remaining };
 const staleInfo = checkStaleness(graph);
 if (staleInfo) { payload.stale = staleInfo; payload.summary += ` — graph is stale for ${staleInfo.count}+ file(s); run codeweb_refresh`; }
+// #13: an edit window on an unmeasured symbol should SAY the blast radius is unguarded.
+if (graph.meta?.coverage) {
+  const uncoveredTargets = ids.filter((id) => index.byId.get(id)?.covered === false);
+  if (uncoveredTargets.length) { payload.coverage = uncoveredTargets.map((id) => `${id}: ${coverageNote(graph, index.byId.get(id))}`); payload.summary += ' — ⚠ target NOT covered by the recorded test run'; }
+}
 if (cappedCallees.truncated) payload.moreCallees = { remaining: cappedCallees.remaining };
 
 if (json) { emitJson(payload); } else {

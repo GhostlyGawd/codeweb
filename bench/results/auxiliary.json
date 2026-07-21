@@ -1,7 +1,7 @@
 {
   "cluster": "C6-auxiliary",
-  "generatedAt": "2026-06-22T16:46:54.889Z",
-  "elapsedMs": 162783,
+  "generatedAt": "2026-07-21T05:11:24.182Z",
+  "elapsedMs": 40335,
   "seeds": {
     "place": 641553,
     "fit": 3863,
@@ -11,11 +11,10 @@
     "mcpGraph": 969,
     "treemap": 30702
   },
-  "node": "v24.14.1",
+  "node": "v22.22.2",
   "realCorpus": {
-    "repo": "gorilla-mux",
-    "nodes": 261,
-    "edges": 280
+    "available": false,
+    "reason": "corpus/gorilla-mux not present"
   },
   "hasGit": true,
   "oracleNotes": {
@@ -129,10 +128,10 @@
     {
       "id": "A-MCP",
       "metric": "tools at CLI parity / protocol conformance",
-      "value": "20/20 parity; conformance=true; toolsList=20",
+      "value": "26/26 parity; conformance=true; toolsList=27",
       "ci": null,
       "passed": true,
-      "criterion": "all 20 tools == CLI on same input; initialize/tools.list/tools.call + error codes (-32602/-32601/-32700, isError) conform; probe trips",
+      "criterion": "all 26 parity tools == CLI on same input (codeweb_map covered by mcp.test.mjs); initialize/tools.list/tools.call + error codes (-32602/-32601/-32700, isError) conform; probe trips",
       "notes": ""
     }
   ],
@@ -196,12 +195,7 @@
       "perCase": {
         "synthetic": {
           "built": true,
-          "bytes": 30650,
-          "offenders": []
-        },
-        "real": {
-          "built": true,
-          "bytes": 126950,
+          "bytes": 61569,
           "offenders": []
         }
       },
@@ -327,14 +321,14 @@
       "canFail": true
     },
     "aMcp": {
-      "parityOk": 20,
-      "totalTools": 20,
+      "parityOk": 26,
+      "totalTools": 26,
       "parityFail": [],
       "conf": {
         "pureStdout": true,
         "initialize": true,
         "exitsClean": true,
-        "toolsListCount": 20,
+        "toolsListCount": 27,
         "toolsListMatches": true,
         "allHaveObjectSchema": true,
         "unknownTool": true,

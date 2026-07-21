@@ -83,10 +83,26 @@ export function monthLine(counters) {
   return parts.length ? parts.join(' · ') : null;
 }
 
-/** Attach the current month's activity to a brief object (mutates + returns it). */
+/** #10: sum every month — the receipt should never zero out on the 1st of a month. */
+export function lifetimeTotals(s) {
+  const out = {};
+  for (const m of Object.keys(s?.months || {})) {
+    for (const [k, v] of Object.entries(s.months[m])) out[k] = (out[k] || 0) + v;
+  }
+  return out;
+}
+
+/**
+ * Attach activity to a brief object (mutates + returns it). #10: carries BOTH the lifetime
+ * totals (never empty once codeweb has done anything here) and the current month's bucket —
+ * a returning user's receipt no longer resets to silence every calendar month.
+ */
 export function attachActivity(brief, graphPath) {
   const s = readStats(graphPath);
+  if (!s) return brief;
+  const life = lifetimeTotals(s);
+  if (!monthLine(life)) return brief;
   const m = monthNow();
-  if (s?.months?.[m] && monthLine(s.months[m])) brief.activity = { month: m, counters: s.months[m] };
+  brief.activity = { since: s.since || null, lifetime: life, month: m, counters: s.months?.[m] || {} };
   return brief;
 }

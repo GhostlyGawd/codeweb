@@ -31,6 +31,53 @@ export function productToolCount(root) {
   return p.toolPhases.reduce((n, ph) => n + ph.tools.length, 0);
 }
 
+/** Canonical native-language count (from product.json's data-driven list; null when absent). */
+export function productLanguageCount(root) {
+  const p = JSON.parse(readText(join(root, 'site', 'data', 'product.json')));
+  return Array.isArray(p.languages) ? p.languages.length : null;
+}
+
+// #3 (IMPROVEMENTS.md): the v0.9.0 gate audited structured surfaces (manifests, data files) but
+// not PROSE — so the homepage said "20 tools" for a whole release while 24 shipped. These scans
+// close that class: any hardcoded tool-count or native-language-count in the public prose must
+// equal the canonical number, or the build fails. Numbers written as words count too ("Twenty
+// tools" was one of the rotted instances).
+const WORD_NUM = { three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, twenty: 20, 'twenty-four': 24, 'twenty-seven': 27 };
+const numOf = (s) => (/^\d+$/.test(s) ? Number(s) : WORD_NUM[s.toLowerCase()] ?? null);
+
+/** Prose files the scans cover — hand-written surfaces where counts can rot. */
+export const PROSE_FILES = [
+  'README.md',
+  'site/content/index.html',
+  'site/content/product.html',
+  'site/content/start.html',
+  'site/content/research.html',
+  'commands/codeweb.md',
+  'skills/codebase-anatomy/SKILL.md',
+  'skills/codebase-anatomy/references/engine-detection.md',
+];
+
+/** Scan one text for tool-count / language-count claims that disagree with the canonical facts. */
+export function scanProseCounts(text, file, { toolCount, langCount }) {
+  const problems = [];
+  // "<N> [deterministic|read-only|agent|query|MCP|structural]* tools" — digits or number-words.
+  const toolRe = /\b(\d+|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|twenty-four|twenty-seven)((?:\s+(?:deterministic|read-only|agent|query|MCP|structural))*)\s+tools\b/gi;
+  for (const m of text.matchAll(toolRe)) {
+    const n = numOf(m[1]);
+    if (n != null && n !== toolCount) problems.push(`${file}: says "${m[0].trim()}" but ${toolCount} tools ship`);
+  }
+  // "<N> native|first-class [languages]" — the language-surface claim. Skipped when the repo
+  // carries no canonical language list (langCount null).
+  if (langCount != null) {
+    const langRe = /\b(\d+|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen)[- ](native|first-class)\b/gi;
+    for (const m of text.matchAll(langRe)) {
+      const n = numOf(m[1]);
+      if (n != null && n !== langCount) problems.push(`${file}: says "${m[0].trim()}" but ${langCount} native languages ship`);
+    }
+  }
+  return problems;
+}
+
 /**
  * Where the version + tool-count must be mirrored away from package.json.
  * Each sub is [regExp, replacementString]; ${version}/${count} are interpolated,
@@ -117,6 +164,25 @@ export function checkConsistency(root) {
   if (existsSync(mcpPath)) {
     const hard = readText(mcpPath).match(/version:\s*'(\d+\.\d+\.\d+)'/);
     if (hard && hard[1] !== version) problems.push(`mcp-server.mjs hardcodes serverInfo version ${hard[1]} != package.json ${version}`);
+  }
+
+  // #3: prose scans — hardcoded tool/language counts anywhere in the public prose must match the
+  // canonical facts (tool count from the TOOLS table, language count from product.json data).
+  const langCount = productLanguageCount(root);
+  for (const rel of PROSE_FILES) {
+    const p = join(root, rel);
+    if (!existsSync(p)) continue;
+    problems.push(...scanProseCounts(readText(p), rel, { toolCount: count, langCount }));
+  }
+  // The research-page claim ledger: an "N / N tools" parity metric must claim the shipped count.
+  const productPath = join(root, 'site', 'data', 'product.json');
+  if (existsSync(productPath)) {
+    for (const c of JSON.parse(readText(productPath)).claims || []) {
+      const m = /(\d+)\s*\/\s*(\d+)\s+tools/.exec(c.metric || '');
+      if (m && (Number(m[1]) !== count || Number(m[2]) !== count)) {
+        problems.push(`product.json claim "${c.claim}" metric says ${m[0]}; ${count} tools ship`);
+      }
+    }
   }
 
   return { ok: problems.length === 0, version, count, problems };

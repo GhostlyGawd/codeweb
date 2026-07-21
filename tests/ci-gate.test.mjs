@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { runNode, script, tmpDir, cleanup, writeTree } from './helpers.mjs';
+import { runNode, script, tmpDir, cleanup, writeTree, PLUGIN_ROOT } from './helpers.mjs';
 
 const hasGit = spawnSync('git', ['--version'], { encoding: 'utf8' }).status === 0;
 
@@ -90,4 +90,18 @@ test('ci-gate exits 2 (not a crash) when the base ref cannot be resolved', { ski
   } finally {
     cleanup(repo);
   }
+});
+
+// #15 (IMPROVEMENTS.md): the REUSABLE action carries the gate-as-reviewer — adopters get the
+// same sticky structural-review comment codeweb's own PRs get (opt-in, fork-safe).
+test('the composite action ships the sticky-comment reviewer, opt-in and fork-safe', () => {
+  const yml = readFileSync(join(PLUGIN_ROOT, '.github', 'actions', 'codeweb-gate', 'action.yml'), 'utf8');
+  assert.match(yml, /comment:\n/, 'comment input exists');
+  assert.match(yml, /default: 'false'/, 'comment is opt-in');
+  assert.match(yml, /--md "\$RUNNER_TEMP\/codeweb-gate\.md"/, 'the digest is produced for the comment');
+  assert.match(yml, /<!-- codeweb-gate -->/, 'sticky marker matches the self-repo workflow');
+  assert.match(yml, /updateComment|createComment/, 'posts or updates in place');
+  assert.match(yml, /continue-on-error: true/, 'comment posts before the verdict enforces');
+  assert.match(yml, /Enforce gate verdict/, 'the verdict still fails the job');
+  assert.match(yml, /pull-requests: write/, 'permission requirement documented in the input description');
 });

@@ -15,7 +15,7 @@ Every serious change starts with the same questions: *who uses this? what breaks
 does this already exist? is this dead?* Today an agent answers them by grepping and reading whole
 files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import
 graph once (~3 s for 3,000 symbols), then answers those questions **exactly, in milliseconds, for
-about a kilobyte each** — as **24 deterministic MCP tools for your agent** (no LLM in the loop) and
+about a kilobyte each** — as **27 deterministic MCP tools for your agent** (no LLM in the loop) and
 a self-contained **interactive map for you**.
 
 Measured on [vite](https://github.com/vitejs/vite) (3,000+ symbols), graded by the TypeScript
@@ -46,7 +46,7 @@ codebase does the same work twice, which neither you nor the agent can see from 
 
 One command runs the whole deterministic pipeline and drops an interactive map at
 `<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report**, codeweb
-pointed read-only at **[axios](https://github.com/axios/axios)** — 334 product symbols across 11
+pointed read-only at **[axios](https://github.com/axios/axios)** — 274 product symbols across 8
 areas (tests and tooling hidden by default). No mockups; regenerate them any time with
 `node scripts/screenshot.mjs`.
 
@@ -168,7 +168,7 @@ Then restart Claude Code so the `/codeweb` command, agents, and skill register.
 ```
 npx -y @ghostlygawd/codeweb /path/to/your/project --out-dir /path/to/your/project/.codeweb
 # then open /path/to/your/project/.codeweb/report.html
-claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp   # the 24 MCP tools, pluginless
+claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp   # the 27 MCP tools, pluginless
 ```
 Cursor, Windsurf, or any other MCP client: point it at the same `codeweb-mcp` command.
 
@@ -268,7 +268,7 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }   # required — the gate diffs against the PR base
       - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@main
-        with: { target: src }
+        with: { target: src, comment: true }   # comment posts the structural review on the PR
 ```
 
 Locally: `node scripts/ci-gate.mjs --base <ref> [--target <subdir>]`. Pure removals never trip the
@@ -369,6 +369,22 @@ codeweb reading-order: 6 symbol(s) — read top-down (foundations first):
 Scope it with `--scope domain|file|symbol <value>`; cycles degrade gracefully (members ordered by
 fan-in, never a crash). Deterministic and read-only; also the `codeweb_reading_order` MCP tool.
 
+## Measured coverage — "is this symbol actually tested?" (`coverage.mjs`)
+
+`codeweb_tests` answers from test-kind call edges (a heuristic). Feed codeweb a real coverage
+report and the answers become **measured**:
+
+```
+node --test --experimental-test-coverage --test-reporter=lcov > lcov.info   # Node's own runner
+node scripts/coverage.mjs .codeweb/graph.json lcov.info                      # or a c8/istanbul JSON
+```
+
+Every instrumented symbol gets `covered`/`hits` facts, and `explain`, `--tests`, and
+`context-pack` answers say `covered by the recorded run (peak N hits)` or — the loud one —
+`⚠ NOT covered by the recorded test run` before an agent edits an unguarded symbol. Optional and
+explicit (absent input leaves graphs byte-identical); `codeweb_refresh` drops stale annotations
+and says how to restore them.
+
 ## Agent tools — context & pre-flight (`context-pack`, `simulate-edit`)
 
 Two read-only tools that move work off the LLM and into the graph (full spec:
@@ -416,12 +432,15 @@ above are also exposed over MCP (below).
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing all
-**24** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
+**27** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
 `codeweb_map` (build/rebuild the graph over MCP), `codeweb_brief` (the day-one repo page —
 call it first), `codeweb_find` (concept search — free text like
 *"retry backoff"* ranked into starting symbols, no name needed), `codeweb_callers/callees/impact/
 cycles/orphans/diff`, the edit-loop tools `codeweb_context/refresh`, the intelligence tools
-`codeweb_hotspots/campaign/reading_order`, plus `codeweb_tests/find_similar/placement/review/
+`codeweb_hotspots/campaign/reading_order`, the pre-flight + hygiene loop
+`codeweb_simulate` (the gate's verdict for a hypothetical delete/merge/move — before any edit),
+`codeweb_annotate` (false-positive suppression memory, sidecar-only), and `codeweb_stats` (the
+local value receipt), plus `codeweb_tests/find_similar/placement/review/
 fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not exposed).
 
 **Installing the plugin registers the server automatically** (`.claude-plugin/plugin.json` carries
@@ -543,8 +562,9 @@ codeweb/
 
 - **More first-class languages** — eleven native today (JavaScript, TypeScript, Python, **Rust**,
   **Go**, **Java**, **C#**, **Ruby**, **PHP**, **Kotlin**, **Swift**); anything else routes through
-  the agent fallback. Dynamic-dispatch AST tiers now cover JS/TS, Java, C#, Python, Go, and Rust —
-  Ruby/PHP/Kotlin/Swift dispatch is the next increment there.
+  the agent fallback. Dynamic-dispatch AST tiers cover JS/TS, Java, C#, Python, Go, Rust, **Ruby**,
+  and **PHP**; Kotlin/Swift dispatch waits on a trusted wasm grammar at our pinned ABI
+  (recorded in `scripts/grammars/PROVENANCE.md`).
 
 _Recently shipped: an **agent-intelligence suite** — refactoring **hotspots** (complexity × fan-in ×
 churn), a gated ROI-ranked optimization **campaign** planner, a foundations-first **reading-order**,

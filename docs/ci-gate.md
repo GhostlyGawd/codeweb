@@ -11,6 +11,9 @@ duplication finding**, or a **symbol that loses all its callers**. Same verdict 
 ```yaml
 name: codeweb gate
 on: pull_request
+permissions:
+  contents: read
+  pull-requests: write            # only needed for `comment: true` below
 jobs:
   gate:
     runs-on: ubuntu-latest
@@ -21,10 +24,25 @@ jobs:
       - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@main
         with:
           target: src             # subdirectory to analyze (default: .)
+          comment: true           # post the structural review as a sticky PR comment
 ```
 
 `fetch-depth: 0` is **required**: the gate materializes the PR base commit to build the "before"
 graph, so the full history must be present.
+
+## The gate as a reviewer (`comment: true`)
+
+With `comment: true` the action posts (and keeps updated, via a sticky marker) the same
+**structural review digest** codeweb's own PRs get: the before→after delta (nodes, edges,
+renames, cross-domain coupling, cycles, duplication findings), what blocked (if anything), and
+the local reproduce command. Reviewers who never installed codeweb see the blast radius of every
+gated PR where they already look. Notes:
+
+- Requires `permissions: pull-requests: write` in the calling workflow (shown above) and a
+  `pull_request` event. Without either, the comment is skipped with a warning and the **check
+  verdict still enforces** — fork PRs with a read-only token degrade gracefully.
+- The comment posts **before** the verdict fails the job, so a blocking regression always
+  arrives with its explanation.
 
 ## What it does
 

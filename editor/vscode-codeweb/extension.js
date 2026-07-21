@@ -37,6 +37,17 @@ function loadIndex(graphPath) {
 }
 
 class CodewebLensProvider {
+  // #7 (IMPROVEMENTS.md): the README promised "re-reads the graph on change" but nothing ever
+  // re-invoked the provider — lenses showed yesterday's numbers until the file was reopened.
+  // A FileSystemWatcher on **/.codeweb/graph.json fires this emitter (debounced), and VS Code
+  // re-renders every visible lens.
+  constructor() {
+    this._emitter = new vscode.EventEmitter();
+    this.onDidChangeCodeLenses = this._emitter.event;
+  }
+  refresh() { graphCache.clear(); this._emitter.fire(); }
+  dispose() { this._emitter.dispose(); }
+
   provideCodeLenses(doc) {
     const cfg = vscode.workspace.getConfiguration('codeweb');
     if (!cfg.get('lens.enabled', true)) return [];
@@ -58,10 +69,22 @@ class CodewebLensProvider {
 }
 
 function activate(context) {
-  const selector = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'python', 'rust', 'go', 'java', 'csharp']
+  // All 11 native engine languages (extract-symbols SRC list) — the selector previously stopped at
+  // nine, so Ruby/PHP/Kotlin/Swift symbols in the graph never got lenses (#7).
+  const selector = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'python', 'rust', 'go', 'java', 'csharp', 'ruby', 'php', 'kotlin', 'swift']
     .map((language) => ({ language, scheme: 'file' }));
+  const provider = new CodewebLensProvider();
+  // Re-render lenses whenever any mapped graph is rebuilt (pipeline, codeweb_refresh, post-edit
+  // hook). Debounced: a refresh writes graph.json + sidecars back-to-back.
+  const watcher = vscode.workspace.createFileSystemWatcher('**/.codeweb/graph.json');
+  let pending = null;
+  const kick = () => { if (pending) clearTimeout(pending); pending = setTimeout(() => { pending = null; provider.refresh(); }, 250); };
+  watcher.onDidChange(kick); watcher.onDidCreate(kick); watcher.onDidDelete(kick);
   context.subscriptions.push(
-    vscode.languages.registerCodeLensProvider(selector, new CodewebLensProvider()),
+    provider,
+    watcher,
+    vscode.languages.registerCodeLensProvider(selector, provider),
+    vscode.commands.registerCommand('codeweb.refreshLenses', () => provider.refresh()),
     vscode.commands.registerCommand('codeweb.openReport', (graphPath, id) => {
       const report = path.join(path.dirname(graphPath), 'report.html');
       if (!fs.existsSync(report)) {

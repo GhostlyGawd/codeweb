@@ -134,6 +134,8 @@ export function probeAst() {
     python: rt.present && existsSync(LANG_GRAMMARS.python),
     go: rt.present && existsSync(LANG_GRAMMARS.go),
     rust: rt.present && existsSync(LANG_GRAMMARS.rust),
+    ruby: rt.present && existsSync(LANG_GRAMMARS.ruby),   // #14
+    php: rt.present && existsSync(LANG_GRAMMARS.php),     // #14
     tsVersion: ts ? tsVersionString(rt.version) : null,
   };
 }
@@ -299,6 +301,8 @@ const LANG_GRAMMARS = {
   python: join(HERE, '..', 'grammars', 'tree-sitter-python.wasm'),
   go: join(HERE, '..', 'grammars', 'tree-sitter-go.wasm'),
   rust: join(HERE, '..', 'grammars', 'tree-sitter-rust.wasm'),
+  ruby: join(HERE, '..', 'grammars', 'tree-sitter-ruby.wasm'),
+  php: join(HERE, '..', 'grammars', 'tree-sitter-php.wasm'),
 };
 const LANG_SHAPES = {
   java: { classes: new Set(['class_declaration']), method: 'method_declaration', invoke: 'method_invocation', param: 'formal_parameter', typeNode: 'type_identifier', thisNode: 'this' },
@@ -313,6 +317,103 @@ const LANG_SHAPES = {
 const BARE_TYPE = /^[A-Za-z_][\w]*$/;
 const stripRustRef = (t) => t.replace(/^&\s*(?:mut\s+)?/, '').trim();
 const LANG_WALKERS = {
+  // #14: Ruby — no static types, so the dispatch win is self./implicit-receiver calls INSIDE a
+  // class (the parser has already disambiguated `prepare(1)` as a CALL, so wiring it to a sibling
+  // method is precision-safe; a bare `other` identifier is NOT a call node and stays unwired).
+  // `def self.x` (singleton_method) groups with the class like the regex tier does.
+  ruby: (parser) => (text, relPath) => {
+    try {
+      const tree = parser.parse(String(text || ''));
+      const r = String(relPath).replace(/\\/g, '/');
+      const up = (n, types) => { let c = n.parent; while (c && !types.has(c.type)) c = c.parent; return c; };
+      const CLASSY = new Set(['class', 'module']);
+      const METHODY = new Set(['method', 'singleton_method']);
+      const nameOf = (n) => { const f = n.childForFieldName('name'); if (f) return f.text; for (let i = 0; i < n.childCount; i++) if (n.child(i).type === 'identifier') return n.child(i).text; return null; };
+      const classNameOf = (c) => { for (let i = 0; i < c.childCount; i++) if (c.child(i).type === 'constant') return c.child(i).text; return null; };
+      const methodsByClass = new Map();
+      walkTree(tree.rootNode, (n) => {
+        if (!CLASSY.has(n.type)) return;
+        const cn = classNameOf(n); if (!cn) return;
+        const set = methodsByClass.get(cn) || new Set();
+        walkTree(n, (m) => { if (METHODY.has(m.type) && up(m, CLASSY)?.id === n.id) { const mn = nameOf(m); if (mn) set.add(mn); } }); // .id: tree-sitter nodes are not reference-equal across traversals
+        methodsByClass.set(cn, set);
+      });
+      const thisCalls = [], seen = new Set();
+      walkTree(tree.rootNode, (n) => {
+        if (n.type !== 'call') return;
+        const recv = n.childForFieldName('receiver');
+        const mname = n.childForFieldName('method')?.text;
+        if (!mname) return;
+        if (recv && recv.type !== 'self') return; // typed receivers don't exist in Ruby — self/implicit only
+        const encl = up(n, METHODY); if (!encl) return;
+        const enclCls = up(encl, CLASSY); if (!enclCls) return;
+        const cls = classNameOf(enclCls); if (!cls) return;
+        if (!methodsByClass.get(cls)?.has(mname)) return;
+        const from = `${r}:${cls}.${nameOf(encl)}`;
+        const to = `${r}:${cls}.${mname}`;
+        const k = from + '\t' + to;
+        if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
+      });
+      thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
+      return { thisCalls, typedIntents: [] };
+    } catch { return null; }
+  },
+  // #14: PHP — `$this->m()` resolves in-class; `$p->m()` where the enclosing method declares
+  // `Type $p` becomes a typed intent, resolved globally under the one-owner rule.
+  php: (parser) => (text, relPath) => {
+    try {
+      const tree = parser.parse(String(text || ''));
+      const r = String(relPath).replace(/\\/g, '/');
+      const up = (n, type) => { let c = n.parent; while (c && c.type !== type) c = c.parent; return c; };
+      const varName = (vn) => { if (!vn || vn.type !== 'variable_name') return null; for (let i = 0; i < vn.childCount; i++) if (vn.child(i).type === 'name') return vn.child(i).text; return null; };
+      const methodsByClass = new Map();
+      walkTree(tree.rootNode, (n) => {
+        if (n.type !== 'class_declaration') return;
+        const cn = n.childForFieldName('name')?.text; if (!cn) return;
+        const set = methodsByClass.get(cn) || new Set();
+        walkTree(n, (m) => { if (m.type === 'method_declaration' && up(m, 'class_declaration')?.id === n.id) { const mn = m.childForFieldName('name')?.text; if (mn) set.add(mn); } }); // .id: see ruby note
+        methodsByClass.set(cn, set);
+      });
+      const typedParamsOf = (fn) => {
+        const map = new Map();
+        const params = fn?.childForFieldName('parameters');
+        if (!params) return map;
+        walkTree(params, (p) => {
+          if (p.type !== 'simple_parameter') return;
+          const ty = p.childForFieldName('type');
+          const nm = varName(p.childForFieldName('name'));
+          const tyText = ty?.text?.replace(/^\?/, ''); // ?Filter -> Filter (nullable)
+          if (nm && tyText && BARE_TYPE.test(tyText)) map.set(nm, tyText);
+        });
+        return map;
+      };
+      const thisCalls = [], typedIntents = [], seen = new Set();
+      walkTree(tree.rootNode, (n) => {
+        if (n.type !== 'member_call_expression') return;
+        const objName = varName(n.childForFieldName('object'));
+        const prop = n.childForFieldName('name')?.text;
+        if (!objName || !prop) return;
+        const encl = up(n, 'method_declaration'); if (!encl) return;
+        const enclCls = up(encl, 'class_declaration');
+        const cls = enclCls?.childForFieldName('name')?.text;
+        const from = `${r}:${cls ? cls + '.' : ''}${encl.childForFieldName('name')?.text}`;
+        if (objName === 'this') {
+          if (cls && methodsByClass.get(cls)?.has(prop)) {
+            const to = `${r}:${cls}.${prop}`;
+            const k = from + '\t' + to;
+            if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
+          }
+          return;
+        }
+        const t = typedParamsOf(encl).get(objName);
+        if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
+      });
+      thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
+      typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
+      return { thisCalls, typedIntents };
+    } catch { return null; }
+  },
+
   python: (parser) => (text, relPath) => {
     try {
       const tree = parser.parse(String(text || ''));

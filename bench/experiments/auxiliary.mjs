@@ -937,11 +937,22 @@ function cliEquivalents() {
     codeweb_refresh: ['refresh.mjs', (a) => [a.graph]],
     codeweb_hotspots: ['hotspots.mjs', (a) => [a.graph]],
     codeweb_campaign: ['campaign.mjs', (a) => [a.graph]],
-    codeweb_reading_order: ['reading-order.mjs', (a) => [a.graph]],
+    codeweb_reading_order: ['reading-order.mjs', (a) => [a.graph, ...(a.budget ? ['--budget', String(a.budget)] : [])]],
+    codeweb_brief: ['brief.mjs', (a) => [a.graph]],
+    codeweb_explain: ['explain.mjs', (a) => [a.graph, a.symbol]],
+    codeweb_find: ['find.mjs', (a) => [a.graph, a.query]],
+    codeweb_simulate: ['simulate-edit.mjs', (a) => [a.graph, '--delete', a.delete]],
+    codeweb_annotate: ['annotate.mjs', (a) => ['--dir', dirname(a.graph), '--list']],
+    codeweb_stats: ['stats.mjs', (a) => [a.graph]],
   };
 }
 
+// Tools with no --json CLI twin to diff against (codeweb_map wraps the whole pipeline into a
+// workspace; its contract is covered by tests/mcp.test.mjs, not text parity).
+const NON_PARITY_TOOLS = ['codeweb_map'];
+
 function checkAMcp(realGraphForRefresh) {
+  process.env.CODEWEB_NO_STATS = '1'; // parity must not depend on which surface bumped the ledger first
   // --- Build a stable on-disk fixture with a meta.root pointing at REAL source (find_similar,
   //     context, refresh need bodies on disk). ---
   const ws = tmp('cw-aux-mcp-');
@@ -989,7 +1000,13 @@ function checkAMcp(realGraphForRefresh) {
     codeweb_refresh: { graph: copyGraph('refresh-mcp') },     // overridden per-surface below
     codeweb_hotspots: { graph: GP },
     codeweb_campaign: { graph: GP },
-    codeweb_reading_order: { graph: GP },
+    codeweb_reading_order: { graph: GP, budget: 20 }, // explicit on BOTH surfaces (MCP injects 20 by default; the bare CLI defaults to 40)
+    codeweb_brief: { graph: GP },
+    codeweb_explain: { graph: GP, symbol: 'util.js:helper' },
+    codeweb_find: { graph: GP, query: 'helper util' },
+    codeweb_simulate: { graph: GP, delete: 'main.js:main' },
+    codeweb_annotate: { graph: GP, list: true },
+    codeweb_stats: { graph: GP },
   };
 
   try {
@@ -1008,7 +1025,7 @@ function checkAMcp(realGraphForRefresh) {
       const list = rpc([INIT, { jsonrpc: '2.0', id: 2, method: 'tools/list' }]).byId.get(2)?.result?.tools || [];
       const listed = list.map((t) => t.name).sort();
       conf.toolsListCount = listed.length;
-      conf.toolsListMatches = setEq(listed, toolNames) && listed.length === 20;
+      conf.toolsListMatches = setEq(listed, [...toolNames, ...NON_PARITY_TOOLS]) && listed.length === toolNames.length + NON_PARITY_TOOLS.length;
       conf.allHaveObjectSchema = list.every((t) => t.inputSchema?.type === 'object' && t.description);
 
       // error codes: unknown tool -> -32602; unknown method -> -32601; bad JSON -> -32700; missing arg -> isError
@@ -1077,7 +1094,7 @@ function checkAMcp(realGraphForRefresh) {
       metric: 'tools at CLI parity / protocol conformance',
       value: `${parityOk}/${toolNames.length} parity; conformance=${confAllTrue}; toolsList=${conf.toolsListCount}`,
       passed,
-      criterion: 'all 20 tools == CLI on same input; initialize/tools.list/tools.call + error codes (-32602/-32601/-32700, isError) conform; probe trips',
+      criterion: `all ${toolNames.length} parity tools == CLI on same input (codeweb_map covered by mcp.test.mjs); initialize/tools.list/tools.call + error codes (-32602/-32601/-32700, isError) conform; probe trips`,
       notes: parityFail.length ? `parity fails: ${JSON.stringify(parityFail.slice(0, 4))}` : (canFail ? '' : 'mismatch probe did not trip'),
     });
     return { parityOk, totalTools: toolNames.length, parityFail, conf, confAllTrue, canFail };

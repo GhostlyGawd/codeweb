@@ -13,6 +13,7 @@ import { resolve } from 'node:path';
 import { addSuppression, loadAnnotations } from './lib/annotations.mjs';
 
 const USAGE = 'usage: annotate.mjs (--suppress <fingerprint> [--note "..."] | --list) [--dir <.codeweb>] [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);

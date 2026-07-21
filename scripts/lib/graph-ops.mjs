@@ -30,6 +30,23 @@ export function roleOf(file) {
   return 'product';
 }
 
+// #6 (IMPROVEMENTS.md): one role accessor + one product-scope filter for every RANKED surface.
+// The vite-playground lesson (rankings drowned by fixtures) was applied to overlap only; hotspots,
+// risk, deadcode, and campaign ranked test helpers and generated bundles first on codeweb's own
+// map. Scope defaults to product with a COUNTED exclusion (never silent), --all restores.
+export const roleOfNode = (n) => n.role || roleOf(n.file || '');
+export function productScope(nodes, includeAll = false) {
+  if (includeAll) return { kept: nodes, excluded: 0, excludedByRole: {} };
+  const kept = [], excludedByRole = {};
+  for (const n of nodes) {
+    const r = roleOfNode(n);
+    if (r === 'product') kept.push(n);
+    else excludedByRole[r] = (excludedByRole[r] || 0) + 1;
+  }
+  return { kept, excluded: nodes.length - kept.length, excludedByRole };
+}
+export const scopeNote = (s) => (s.excluded ? `excluded ${s.excluded} non-product symbol(s) (${Object.entries(s.excludedByRole).sort().map(([r, c]) => `${r} ${c}`).join(', ')}) — --all includes them` : null);
+
 // Spec E: per-repo role OVERRIDES (codeweb.rules.json `roles: [{glob, role}]`) — heuristics can't
 // know a repo's private layout ("docs/ here is generated site output"). Compile the config into a
 // matcher; first matching glob wins; an unknown role THROWS (extraction fails loudly, exit 2).
@@ -121,6 +138,36 @@ export function buildIndex(graph) {
 export function resolveSymbol(graph, sym) {
   if (graph.nodes.some((n) => n.id === sym)) return [sym];
   return graph.nodes.filter((n) => n.label === sym).map((n) => n.id).sort();
+}
+
+// #2 (IMPROVEMENTS.md): when resolveSymbol misses, offer the nearest labels instead of a dead
+// end. Deterministic and cheap (one pass over nodes, miss path only). Matching is tiered —
+// case-insensitive equality, then prefix, then substring, then shared name-tokens — so a typo'd
+// case ("normalizepath") or a partial name ("create") still lands. Returns up to `cap` full ids.
+const nameTokens = (s) => s.split(/[^a-zA-Z0-9]+|(?<=[a-z0-9])(?=[A-Z])/).filter((t) => t.length >= 3).map((t) => t.toLowerCase());
+// (Local names below are deliberately collision-free: bare identifiers whose name uniquely matches
+// a global symbol elsewhere in this repo would wire a false ref edge — codeweb's own gate caught
+// `score`/`cap` here closing a 10-file cycle. Physician, heal thyself.)
+export function suggestSymbols(graph, sym, maxSuggestions = 3) {
+  // For `file:label` queries the label part carries the intent; match against it. Tokenize the
+  // ORIGINAL casing (camelCase boundaries are the token signal), lowercase only for comparisons.
+  const wantedRaw = sym.includes(':') ? sym.slice(sym.lastIndexOf(':') + 1) : sym;
+  const wanted = wantedRaw.toLowerCase();
+  if (!wanted) return [];
+  const wantedTokens = new Set(nameTokens(wantedRaw));
+  const suggestScored = [];
+  for (const n of graph.nodes) {
+    if (!n.label || n.label === '<module>') continue;
+    const label = n.label.toLowerCase();
+    let tier = 0;
+    if (label === wanted) tier = 4;
+    else if (wanted.length >= 3 && label.length >= 3 && (label.startsWith(wanted) || wanted.startsWith(label))) tier = 3;
+    else if (wanted.length >= 3 && label.length >= 3 && (label.includes(wanted) || wanted.includes(label))) tier = 2;
+    else if (wantedTokens.size && nameTokens(n.label).some((t) => wantedTokens.has(t))) tier = 1;
+    if (tier) suggestScored.push({ tier, label: n.label, id: n.id });
+  }
+  suggestScored.sort((a, b) => b.tier - a.tier || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0) || (a.id < b.id ? -1 : 1));
+  return suggestScored.slice(0, maxSuggestions).map((s) => s.id);
 }
 
 const unionSorted = (ids, adj) => {

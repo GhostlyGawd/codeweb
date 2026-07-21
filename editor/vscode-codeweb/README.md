@@ -7,8 +7,10 @@ Click a lens to open the symbol in the interactive `report.html` (`#s=<id>` deep
 - **callers** = direct reverse `call` edges (what `codeweb_callers` returns)
 - **blast** = the `codeweb_impact` closure: transitive callers + subclasses
 
-Zero dependencies, no build step, read-only. If the numbers look stale, refresh the map
-(`codeweb_refresh` or re-run the pipeline) — the lens re-reads the graph on change.
+Zero dependencies, no build step, read-only. The extension watches `.codeweb/graph.json` and
+re-renders lenses when the map is rebuilt (`codeweb_refresh`, the pipeline, or the post-edit
+hook); `codeweb: Refresh CodeLens from the graph` forces it manually. Lenses cover all 11
+native engine languages (JS/TS/JSX/TSX, Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, Swift).
 
 ## Requirements
 
@@ -23,8 +25,8 @@ Packaged:
 
 ```sh
 cd editor/vscode-codeweb
-npx --yes @vscode/vsce package        # -> codeweb-lens-0.1.0.vsix
-code --install-extension codeweb-lens-0.1.0.vsix
+npx --yes @vscode/vsce package        # -> codeweb-lens-0.2.0.vsix
+code --install-extension codeweb-lens-0.2.0.vsix
 ```
 
 ## Settings

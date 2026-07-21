@@ -79,3 +79,25 @@ test('HOT-CLI: hotspots.mjs --json ranks symbols with components', () => {
     assert.ok('complexity' in payload.ranked[0].components);
   } finally { cleanup(dir); }
 });
+
+// #6 (IMPROVEMENTS.md): product scope by default — test/bench/generated symbols leave the ranking
+// with a counted exclusion; allRoles restores the old everything view.
+test('HOT-SCOPE: non-product symbols are excluded by default, counted, and restored by allRoles', () => {
+  const g = {
+    meta: {}, domains: [], overlaps: [],
+    nodes: [
+      { id: 'src/a.js:hot', label: 'hot', kind: 'function', file: 'src/a.js', line: 1, loc: 2, complexity: 9, domain: 'd' },
+      { id: 'tests/h.test.js:runNode', label: 'runNode', kind: 'function', file: 'tests/h.test.js', line: 1, loc: 2, complexity: 1, domain: 'd' },
+      { id: 'bench/b.js:bench', label: 'bench', kind: 'function', file: 'bench/b.js', line: 1, loc: 2, complexity: 2, domain: 'd', role: 'bench' },
+    ],
+    edges: [],
+  };
+  const scoped = rankHotspots(g);
+  assert.deepEqual(scoped.ranked.map((r) => r.id), ['src/a.js:hot'], 'product only');
+  assert.equal(scoped.excluded, 2);
+  assert.equal(scoped.excludedByRole.test, 1);
+  assert.equal(scoped.excludedByRole.bench, 1);
+  const everything = rankHotspots(g, { allRoles: true });
+  assert.equal(everything.ranked.length, 3, 'allRoles sees everything');
+  assert.equal(everything.excluded, 0);
+});

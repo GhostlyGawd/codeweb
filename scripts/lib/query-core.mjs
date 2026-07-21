@@ -3,8 +3,21 @@
 // while the CLI keeps shipping the exact same payloads (one truth, two transports).
 // Pure over (graph, index): no I/O, no process, no exit codes — callers own those.
 
-import { buildIndex, resolveSymbol, callersOf, calleesOf, testersOf, importersOf, refsOf, dependentsOf, impactOf, fileCycles, orphans } from './graph-ops.mjs';
+import { buildIndex, resolveSymbol, suggestSymbols, callersOf, calleesOf, testersOf, importersOf, refsOf, dependentsOf, impactOf, fileCycles, orphans } from './graph-ops.mjs';
+import { coverageNote } from './coverage.mjs'; // #13: measured coverage on the tests answer
 import { capList } from './cli.mjs';
+
+// #2: a miss is never a dead end — every found:false payload names the next step (concept
+// search) and, when the graph has near-matches, up to 3 of them as directly-usable ids.
+export function notFoundPayload(graph, query, symbol) {
+  const suggestions = suggestSymbols(graph, symbol);
+  const payload = {
+    query, symbol, found: false,
+    hint: `no symbol matches "${symbol}" — try codeweb_find "<free text>" (concept search, no name needed)${suggestions.length ? ' or a near-match below' : ''}`,
+  };
+  if (suggestions.length) payload.suggestions = suggestions;
+  return payload;
+}
 
 // Budgeted list cap: `count` stays the TRUE total, `more` describes the remainder (absent when
 // nothing was cut).
@@ -37,10 +50,18 @@ export function runQuery(graph, index, opts) {
   let payload, code = 0;
   if (query === 'callers' || query === 'callees' || query === 'tests') {
     const matched = resolveSymbol(graph, symbol);
-    if (!matched.length) { payload = { query, symbol, found: false }; code = 1; }
+    if (!matched.length) { payload = notFoundPayload(graph, query, symbol); code = 1; }
     else {
       const results = query === 'callers' ? callersOf(index, matched) : query === 'callees' ? calleesOf(index, matched) : testersOf(index, matched);
       payload = budget({ query, symbol, summary: `${results.length} ${query === 'tests' ? 'test(s) exercise' : query + ' of'} ${symbol}`, matched, results, count: results.length }, 'results', limit, offset);
+      if (query === 'tests' && graph.meta?.coverage) {
+        // #13: the heuristic list gets a MEASURED companion — per matched symbol, did any
+        // recorded run actually execute it? "0 tests + not covered" is the loudest warning.
+        const notes = matched.map((id) => `${id}: ${coverageNote(graph, index.byId.get(id))}`);
+        payload.coverage = notes;
+        const uncovered = matched.filter((id) => index.byId.get(id)?.covered === false);
+        if (uncovered.length) payload.summary += ` — ⚠ ${uncovered.length} of ${matched.length} matched symbol(s) NOT covered by the recorded run`;
+      }
       if (query === 'callers' && !results.length) {
         const caveat = zeroCallerCaveat(graph, index, matched);
         if (caveat) { payload.caveat = caveat; payload.summary += ` — ⚠ ${caveat}`; }
@@ -48,7 +69,7 @@ export function runQuery(graph, index, opts) {
     }
   } else if (query === 'dependents') {
     const matched = resolveSymbol(graph, symbol);
-    if (!matched.length) { payload = { query: 'dependents', symbol, found: false }; code = 1; }
+    if (!matched.length) { payload = notFoundPayload(graph, 'dependents', symbol); code = 1; }
     else {
       const results = dependentsOf(index, matched);
       const inheritIn = [...new Set(matched.flatMap((id) => [...(index.inheritIn.get(id) || [])]))].sort();
@@ -64,7 +85,7 @@ export function runQuery(graph, index, opts) {
     }
   } else if (query === 'impact') {
     const matched = resolveSymbol(graph, symbol);
-    if (!matched.length) { payload = { query: 'impact', symbol, found: false }; code = 1; }
+    if (!matched.length) { payload = notFoundPayload(graph, 'impact', symbol); code = 1; }
     else {
       const results = impactOf(index, matched);
       const domains = [...new Set(results.map((id) => index.byId.get(id)?.domain || 'unassigned'))].sort();

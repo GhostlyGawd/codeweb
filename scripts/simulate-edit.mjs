@@ -18,6 +18,7 @@ import { resolve } from 'node:path';
 import { normalizeGraph, resolveSymbol, applyEdit, structuralRegressions } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: simulate-edit.mjs <graph.json> (--delete <sym> | --merge <s1,s2,..> [--into <id>] | --move <sym> --to <file>) [--json]';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);

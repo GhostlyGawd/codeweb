@@ -3,7 +3,7 @@
     <div class="hero-copy">
       <span class="eyebrow">Deterministic code map</span>
       <h1>The <span class="hl">living map</span> of your codebase.</h1>
-      <p class="hero-sub"><strong>Know what exists, and what an edit breaks — before you write.</strong> codeweb serves one deterministic graph two ways — an interactive map for you, and <strong>20 tools</strong> for the agents editing alongside you.</p>
+      <p class="hero-sub"><strong>Know what exists, and what an edit breaks — before you write.</strong> codeweb serves one deterministic graph two ways — an interactive map for you, and <strong>{{toolCount}} tools</strong> for the agents editing alongside you.</p>
       <div class="btn-row">
         <a class="btn btn-primary btn-lg" href="start.html">Map your repo</a>
         <a class="btn btn-lg" href="demo/">See the live demo</a>
@@ -42,7 +42,7 @@
       </div>
       <div class="duo-link" aria-hidden="true"><span>same graph</span></div>
       <div class="duo-side">
-        <div class="duo-cap"><span class="duo-tag duo-tag-2">For agents</span><h3>20 deterministic tools</h3></div>
+        <div class="duo-cap"><span class="duo-tag duo-tag-2">For agents</span><h3>{{toolCount}} deterministic tools</h3></div>
         <div class="duo-stage"><div id="cw-console" class="cw-console" aria-hidden="true"></div></div>
         <p>Over MCP, an agent asks <em>what already does this</em>, <em>what an edit breaks</em>, and <em>which fix is safe</em> — before it writes a line. No LLM in the analysis loop, so answers don't drift.</p>
       </div>
@@ -107,7 +107,7 @@
           </svg>
         </div>
         <div class="flow-n">04</div><h4>render</h4>
-        <p>A self-contained interactive map + 20 agent tools.</p>
+        <p>A self-contained interactive map + {{toolCount}} agent tools.</p>
       </div>
     </div>
   </div>
@@ -147,7 +147,7 @@
       <div>
         <span class="eyebrow">For learners and experts alike</span>
         <h2>Approachable at the surface, deep when you need it</h2>
-        <p>New to the codebase? Open the map, follow the foundations-first reading order, and see the domains at a glance. Shipping at scale? Wire the CI gate, drive the 20 MCP tools from your agent, and shard graphs too big to hold in memory.</p>
+        <p>New to the codebase? Open the map, follow the foundations-first reading order, and see the domains at a glance. Shipping at scale? Wire the CI gate, drive the {{toolCount}} MCP tools from your agent, on graphs measured green at 16k+ symbols.</p>
         <ul class="kicker-list">
           <li><span class="dot"></span><span><strong>Beginners</strong> — one command, one map, plain-language findings.</span></li>
           <li><span class="dot"></span><span><strong>Advanced</strong> — deterministic tools, fitness rules, sharded subgraphs, a PR gate.</span></li>

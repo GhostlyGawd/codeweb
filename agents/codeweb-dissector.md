@@ -43,7 +43,10 @@ return a single JSON object and nothing else.
 
 `id`, `label`, `kind` (function|class|method|module|file), `file`, `line`, `loc`
 (line count of the symbol body), `exports` (bool), and a one-sentence `summary` of what it
-does. Leave `domain` empty — the domain-mapper assigns it.
+does. For function/method nodes also emit `complexity` (decision-point count: if/for/while/
+case/catch/&&/||/ternary, base 1) and `maxDepth` (max block-nesting depth) when you can count
+them from the body — the fast path always carries both, and hotspot ranking reads them.
+Leave `domain` empty — the domain-mapper assigns it.
 
 ## Output
 

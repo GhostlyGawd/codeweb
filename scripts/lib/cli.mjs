@@ -38,12 +38,21 @@ export function emitText(text, code = 0) {
 }
 
 /**
- * Resolve the graph path from an explicit arg or the CODEWEB_WS workspace, load, parse, normalize.
- * Dies with the shared, actionable message on absence/corruption. Returns { graph, abs }.
+ * Resolve the graph path from an explicit arg, the CODEWEB_WS workspace, or — #5 — the nearest
+ * `.codeweb/graph.json` above the cwd (the same walk-up the hooks and MCP server already use, via
+ * findTarget below). Auto-discovery says which graph it picked (stderr), so a surprising choice is
+ * visible. Dies with the shared, actionable message on absence/corruption. Returns { graph, abs }.
  */
 export function loadGraph(pathArg, { usage = null } = {}) {
-  const graphPath = pathArg || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-  if (!graphPath) die(usage || 'usage: <graph.json> required (or set CODEWEB_WS)', 2);
+  let graphPath = pathArg || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
+  if (!graphPath) {
+    const near = findTarget(join(process.cwd(), 'x')); // findTarget walks up from a FILE's dir; anchor so the walk starts AT cwd
+    if (near) {
+      graphPath = near.baseline;
+      console.error(`[codeweb] using ${near.baseline} (nearest .codeweb above cwd)`);
+    }
+  }
+  if (!graphPath) die(usage || 'usage: <graph.json> required (or set CODEWEB_WS, or run from a mapped repo)', 2);
   const abs = resolve(graphPath);
   if (!existsSync(abs)) die(`graph not found: ${abs} — build it first (run /codeweb, or: node scripts/run.mjs <target> --out-dir <target>/.codeweb)`, 2);
   let graph;
@@ -60,6 +69,49 @@ export function loadGraph(pathArg, { usage = null } = {}) {
 // One truth for "what counts as a mappable source file" — the extractor's SRC list, mirrored
 // here for the hooks (Spec E consolidation; the hooks previously trailed the extractor's list).
 export const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
+
+// #6 (IMPROVEMENTS.md): manifest-declared entrypoints — files a HOST invokes without a code edge.
+// deadcode's "safe to delete" tier listed the VS Code extension's activate/deactivate (package.json
+// `main`) and hook scripts (hooks.json commands) on codeweb's own map; anything a manifest names is
+// review-tier, never safe. Sources: every package.json beside mapped files (main/bin/exports),
+// hooks/hooks.json, .claude-plugin/plugin.json (path-ish tokens). Fail-open: unreadable/absent
+// manifests contribute nothing. Returns Map<relFile, manifestRelPath>.
+export function manifestEntryFiles(root, relFiles) {
+  const entries = new Map();
+  if (!root || !existsSync(root)) return entries;
+  const relSet = new Set(relFiles);
+  const claim = (p, manifest, baseDir) => {
+    if (typeof p !== 'string' || !p) return;
+    const clean = p.replace(/^\.\//, '').replace(/\$\{[A-Z_]+\}\//g, '');
+    for (const cand of [clean, baseDir ? `${baseDir}/${clean}` : null]) {
+      if (cand && relSet.has(cand) && !entries.has(cand)) entries.set(cand, manifest);
+    }
+  };
+  const dirs = new Set(['']);
+  for (const f of relFiles) { let d = f; while (d.includes('/')) { d = d.slice(0, d.lastIndexOf('/')); dirs.add(d); } }
+  for (const d of dirs) {
+    const pjPath = join(root, d, 'package.json');
+    if (!existsSync(pjPath)) continue;
+    const manifest = d ? `${d}/package.json` : 'package.json';
+    try {
+      const pj = JSON.parse(readFileSync(pjPath, 'utf8'));
+      claim(pj.main, manifest, d);
+      const binVals = typeof pj.bin === 'string' ? [pj.bin] : Object.values(pj.bin || {});
+      for (const v of binVals) claim(v, manifest, d);
+      const flatExports = (x) => (typeof x === 'string' ? [x] : x && typeof x === 'object' ? Object.values(x).flatMap(flatExports) : []);
+      for (const v of flatExports(pj.exports)) claim(v, manifest, d);
+    } catch { /* fail-open */ }
+  }
+  // Plugin surfaces reference scripts by path inside command strings — extract path-ish tokens.
+  for (const manifest of ['hooks/hooks.json', '.claude-plugin/plugin.json']) {
+    const p = join(root, manifest);
+    if (!existsSync(p)) continue;
+    try {
+      for (const m of readFileSync(p, 'utf8').matchAll(/[\w@${}./-]+\.(?:mjs|cjs|js)/g)) claim(m[0], manifest, null);
+    } catch { /* fail-open */ }
+  }
+  return entries;
+}
 
 // Walk up from a file to the nearest mapped workspace (.codeweb/graph.json). Previously
 // duplicated verbatim in both hooks — codeweb's own campaign flagged it (Spec E dogfood).

@@ -1,5 +1,5 @@
 name: 'codeweb regression gate'
-description: 'Fail a pull request on a new dependency cycle, a new duplication finding, or a symbol that loses all its callers.'
+description: 'Fail a pull request on a new dependency cycle, a new duplication finding, or a symbol that loses all its callers — optionally posting the structural review as a sticky PR comment.'
 branding:
   icon: 'git-merge'
   color: 'purple'
@@ -12,6 +12,14 @@ inputs:
     description: 'The codeweb ref (branch/tag/sha) to run the gate with.'
     required: false
     default: 'main'
+  comment:
+    description: >-
+      Post the structural review (delta, renames, findings) as a sticky PR comment — the gate
+      becomes a reviewer, not just a red X (IMPROVEMENTS.md #15). Requires the calling workflow to
+      grant `permissions: pull-requests: write` and run on a pull_request event; fork PRs with a
+      read-only token skip the comment gracefully and keep the check verdict.
+    required: false
+    default: 'false'
 runs:
   using: 'composite'
   steps:
@@ -23,6 +31,10 @@ runs:
       shell: bash
       run: git clone --depth 1 --branch "${{ inputs.codeweb-ref }}" https://github.com/GhostlyGawd/codeweb.git "$RUNNER_TEMP/codeweb"
     - name: Run regression gate
+      id: gate
+      # The comment (if enabled) must post BEFORE the verdict can fail the job, so reviewers always
+      # see the review; the verdict is enforced in the final step.
+      continue-on-error: true
       shell: bash
       # Requires the consumer to checkout with `fetch-depth: 0` so the PR base sha is present.
       # Pass inputs through env vars, NOT inline ${{ }}, so a consumer-supplied target can't inject
@@ -34,3 +46,31 @@ runs:
         node "$RUNNER_TEMP/codeweb/scripts/ci-gate.mjs"
         --base "$CODEWEB_BASE"
         --target "$CODEWEB_TARGET"
+        --md "$RUNNER_TEMP/codeweb-gate.md"
+    - name: Post structural review comment
+      if: inputs.comment == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          let body;
+          try { body = fs.readFileSync(process.env.RUNNER_TEMP + '/codeweb-gate.md', 'utf8'); }
+          catch { core.info('no gate digest produced — skipping comment'); return; }
+          const marker = '<!-- codeweb-gate -->';
+          try {
+            const { data: comments } = await github.rest.issues.listComments({
+              ...context.repo, issue_number: context.issue.number, per_page: 100,
+            });
+            const mine = comments.find((c) => c.body && c.body.includes(marker));
+            if (mine) await github.rest.issues.updateComment({ ...context.repo, comment_id: mine.id, body });
+            else await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+          } catch (e) {
+            // Fork PRs carry a read-only token — keep the check verdict, skip the comment.
+            core.warning(`codeweb gate comment skipped (${e.status || ''} ${e.message}) — grant 'pull-requests: write' to enable it`);
+          }
+    - name: Enforce gate verdict
+      if: steps.gate.outcome != 'success'
+      shell: bash
+      run: |
+        echo "::error::codeweb gate reported structural regressions (see the PR comment / job log above)"
+        exit 1

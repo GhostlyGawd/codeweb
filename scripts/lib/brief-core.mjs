@@ -79,13 +79,23 @@ export function renderBrief(b) {
   const f = b.findings;
   L.push(`known issues: ${f.duplications} duplication finding(s), ${f.cycles} file cycle(s), ${f.orphanCandidates} orphan candidate(s)`);
   if (b.activity) {
-    const c = b.activity.counters;
-    const bits = [];
-    if (c.cardsDelivered) bits.push(`${c.cardsDelivered} pre-edit card(s)`);
-    if (c.cardCallersFollowed) bits.push(`${c.cardCallersFollowed} card-named caller(s) followed`);
-    if (c.regressionsFlagged) bits.push(`${c.regressionsFlagged} regression(s) flagged`);
-    if (c.queriesServed) bits.push(`${c.queriesServed} queries served`);
-    if (bits.length) L.push(`codeweb this month: ${bits.join(' · ')} (full receipt: scripts/stats.mjs)`);
+    // #10: lead with lifetime (never empty once anything happened), current month in parens.
+    const line = (c) => {
+      const bits = [];
+      if (c.cardsDelivered) bits.push(`${c.cardsDelivered} pre-edit card(s)`);
+      if (c.cardCallersFollowed) bits.push(`${c.cardCallersFollowed} card-named caller(s) followed`);
+      if (c.regressionsFlagged) bits.push(`${c.regressionsFlagged} regression(s) flagged`);
+      if (c.queriesServed) bits.push(`${c.queriesServed} queries served`);
+      return bits.join(' · ');
+    };
+    const life = line(b.activity.lifetime || b.activity.counters || {});
+    const month = line(b.activity.counters || {});
+    if (life) L.push(`codeweb here${b.activity.since ? ` since ${b.activity.since}` : ''}: ${life}${month && month !== life ? ` (this month: ${month})` : ''} (full receipt: scripts/stats.mjs)`);
+  }
+  // #10: an aging map quietly rots every card and lens — say so once it's a week old.
+  if (b.generatedAt) {
+    const days = Math.floor((Date.now() - Date.parse(b.generatedAt)) / 86400000);
+    if (days >= 7) L.push(`note: this map was built ${days} day(s) ago — refresh with codeweb_refresh (agents) or /codeweb (full rebuild).`);
   }
   L.push('ask codeweb before guessing: codeweb_find "<concept>" → codeweb_explain <id> → codeweb_context <id>.');
   return L.join('\n');

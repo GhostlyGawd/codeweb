@@ -16,15 +16,17 @@ import { planCampaign } from './lib/campaign.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: campaign.mjs <graph.json> [--json] [--budget N] [--git]   (or set CODEWEB_WS)';
+if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 import { die, emitJson, finish, loadGraph } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
-let json = false, budget = Infinity, git = false; const pos = [];
+let json = false, budget = Infinity, git = false, all = false; const pos = [];
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--json') json = true;
   else if (t === '--budget') budget = Math.max(0, parseInt(argv[++i], 10) || 0);
   else if (t === '--git') git = true;
+  else if (t === '--all') all = true; // #6: advisors include non-product roles
   else if (!t.startsWith('-')) pos.push(t);
 }
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
@@ -35,8 +37,9 @@ const advise = (script, extra = []) => {
   const r = spawnSync(process.execPath, [join(HERE, script), abs, ...extra, '--json'], { encoding: 'utf8', maxBuffer: 1 << 28 });
   try { return JSON.parse(r.stdout); } catch { return null; }
 };
+const allFlag = all ? ['--all'] : [];
 const optimize = advise('optimize.mjs') || { opportunities: [] };
-const deadcode = advise('deadcode.mjs') || { safe: [] };
+const deadcode = advise('deadcode.mjs', allFlag) || { safe: [] }; // #6: deadcode is role-scoped; campaign passes the choice through
 const breakCycles = advise('break-cycles.mjs') || { cycles: [] };
 
 const plan = planCampaign(graph, { optimize, deadcode, breakCycles, budget });

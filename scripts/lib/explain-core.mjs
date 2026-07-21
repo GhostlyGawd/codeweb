@@ -4,6 +4,7 @@
 
 import { callersOf, calleesOf, testersOf, impactOf, fanInOf } from './graph-ops.mjs';
 import { callerReliance, relianceLine } from './reliance.mjs';
+import { coverageNote } from './coverage.mjs'; // #13: measured-execution facts on the card
 
 /** Build the bounded explain card for each id. Identical to what `explain.mjs` always emitted. */
 export function buildCards(graph, index, reader, ids) {
@@ -35,11 +36,12 @@ export function buildCards(graph, index, reader, ids) {
       signature: n.signature ?? null,
       ...(n.complexity != null ? { complexity: n.complexity, maxDepth: n.maxDepth } : {}),
       dependents: { callers: callers.length, tests: tests.length, blastRadius: blast.length, blastDomains: blastDomains.length },
+      ...(coverageNote(graph, n) ? { coverage: coverageNote(graph, n) } : {}), // #13
       topCallers: topBy(callers, 5),
       topCallees: topBy(callees, 5),
       tests: tests.slice(0, 3),
       findings,
-      summary: `${n.kind} ${n.label} (${n.role || 'product'}, ${n.domain}) — ${callers.length} caller(s), ${tests.length} test(s), blast ${blast.length} across ${blastDomains.length} domain(s)${findings.length ? `; in ${findings.length} finding(s)` : ''}${relianceLine(reliance) ? `; ${relianceLine(reliance)}` : ''}${caveat ? `; ⚠ ${caveat}` : ''}`,
+      summary: `${n.kind} ${n.label} (${n.role || 'product'}, ${n.domain}) — ${callers.length} caller(s), ${tests.length} test(s), blast ${blast.length} across ${blastDomains.length} domain(s)${findings.length ? `; in ${findings.length} finding(s)` : ''}${relianceLine(reliance) ? `; ${relianceLine(reliance)}` : ''}${caveat ? `; ⚠ ${caveat}` : ''}${n.covered === false && graph.meta?.coverage ? '; ⚠ NOT covered by the recorded test run' : ''}`,
     };
   });
 }
