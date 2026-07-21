@@ -64,6 +64,14 @@ const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
   },
 });
 const opts = { path: pos[0] ?? null, out: flags.out, ctags: !flags['no-ctags'], target: flags.target, cache: flags.cache, full: flags.full, allowEmpty: flags['allow-empty'], engine: flags.engine };
+// Round 2, finding #7: an unknown engine value used to silently ENABLE the AST tier (anything
+// non-"regex" reads as tree-sitter below) — README's since-removed `--engine read` documented the
+// opposite intent. Loud exit 2 (the #24 arg policy); catches CODEWEB_ENGINE garbage too, since the
+// env feeds the same parseArgs default. 'ts' stays a valid tree-sitter alias.
+if (opts.engine && !['regex', 'tree-sitter', 'ts'].includes(opts.engine)) {
+  console.error(`[extract] unknown --engine "${opts.engine}" (valid: regex, tree-sitter)`);
+  process.exit(2);
+}
 if (!opts.path) { console.error(USAGE); process.exit(2); }
 const root = resolve(opts.path);
 

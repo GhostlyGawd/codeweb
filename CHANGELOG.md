@@ -509,6 +509,14 @@ notes so validated results, papers, and new tools never get lost in commit histo
   `docs/changelog.html` — the published Pages changelog was missing the round-1 "Removed" section
   at HEAD — is rebuilt and committed. Argv-less callers (release.mjs, `npm run build:site`, CI)
   keep the docs/ default. (perf-quality round 2, finding #5)
+- **The docs drift trio.** (a) `--engine` now validates its value — unknown engines (including a
+  typo'd `CODEWEB_ENGINE`, which feeds the same default) exit 2 with the valid set instead of
+  silently ENABLING the AST tier, and README's nonexistent `--engine read` mode is gone (`ts`
+  stays a valid tree-sitter alias). (b) The release-tag skill's runbook numbers match reality
+  (~590 tests, up to ~5 environment skips — it said "~400, tree-sitter-absence"). (c)
+  `scripts/release.mjs` exits 1 when its own consistency audit fails, BEFORE printing the gated
+  git commands — release prep can no longer end in "consistency: N problem(s)" followed by the
+  exact commands to ship anyway. (perf-quality round 2, finding #7)
 
 ## [0.9.0] - 2026-07-19
 

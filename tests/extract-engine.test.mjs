@@ -55,6 +55,17 @@ test('graceful fallback: with the engine unavailable, --engine tree-sitter == re
   assert.deepEqual(ts.nodes.map((n) => n.complexity), dflt.nodes.map((n) => n.complexity));
 });
 
+// Round 2, finding #7: README documented an `--engine read` mode that never existed — and any
+// unknown value (a CODEWEB_ENGINE typo included) silently ENABLED the AST tier, the opposite of
+// the documented intent. Unknown engines are now a loud exit 2, the #24 arg policy.
+test('unknown --engine exits 2 with the valid set; --engine regex still works', () => {
+  const bad = runNode(script('extract-symbols.mjs'), [FIXTURE, '--no-ctags', '--engine', 'read']);
+  assert.equal(bad.status, 2);
+  assert.match(bad.stderr, /unknown --engine .*valid: regex, tree-sitter/);
+  const ok = runNode(script('extract-symbols.mjs'), [FIXTURE, '--no-ctags', '--engine', 'regex']);
+  assert.equal(ok.status, 0, ok.stderr);
+});
+
 // --- Increment 2: class-qualified method ids + dynamic-dispatch edges (opt-in tree-sitter) -------
 const idsEndingWith = (frag, suffix) => frag.nodes.some((n) => n.id.endsWith(suffix));
 const hasEdge = (frag, fromSuf, toSuf) =>

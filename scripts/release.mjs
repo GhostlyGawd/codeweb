@@ -55,6 +55,9 @@ execFileSync(process.execPath, [join(ROOT, 'site', 'build.mjs')], { stdio: 'inhe
 const audit = checkConsistency(ROOT);
 console.log(`\nupdated: package.json, CHANGELOG.md, ${changed.join(', ')}, docs/`);
 console.log(audit.ok ? 'consistency: OK' : `consistency: ${audit.problems.length} problem(s) — ${audit.problems.join('; ')}`);
+// Round 2, finding #7: a failed audit must fail the prep — exit BEFORE the gated git commands
+// print (files are already written; exit 1 says "do not commit", matching the printed problems).
+if (!audit.ok) process.exit(1);
 console.log('\nNext (gated — run when ready):');
 console.log(`  git add -A && git commit -m "release: v${next}"`);
 console.log(`  git tag -a v${next} -m "codeweb v${next}"`);
