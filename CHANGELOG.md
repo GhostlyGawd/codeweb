@@ -9,7 +9,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Fixed
+- **An empty scan no longer masquerades as a successful map.** Pointing codeweb at an empty
+  directory, an unsupported-language tree, or a typo'd path used to print a green `[run] done`
+  and write a blank report. The extractor now stops with an actionable message — the path it
+  scanned, the supported extensions, and "is this the right directory?" — and `run.mjs` aborts
+  before writing artifacts. `--allow-empty` (both CLIs) keeps intentionally-sparse targets
+  workable. (IMPROVEMENTS.md #1)
 
 ## [0.9.0] - 2026-07-19
 

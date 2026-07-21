@@ -45,7 +45,7 @@ const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
 
 const argv = process.argv.slice(2);
-const opts = { path: null, out: null, ctags: true, target: null, cache: null, full: false, engine: process.env.CODEWEB_ENGINE || null };
+const opts = { path: null, out: null, ctags: true, target: null, cache: null, full: false, allowEmpty: false, engine: process.env.CODEWEB_ENGINE || null };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--out') opts.out = argv[++i];
@@ -53,6 +53,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--cache') opts.cache = argv[++i]; // F0: per-file scan cache (incremental freshness)
   else if (t === '--full') opts.full = true;        // F9: ignore the edge cache, derive all edges from scratch
   else if (t === '--no-ctags') opts.ctags = false;
+  else if (t === '--allow-empty') opts.allowEmpty = true; // intentionally-sparse targets: skip the empty-map guard
   else if (t === '--engine') opts.engine = argv[++i]; // optional tree-sitter tier (exact cyclomatic); default regex
   else if (!opts.path) opts.path = t;
 }
@@ -509,6 +510,18 @@ function parseSignature(line, name, isPy) {
 
 const useCtags = opts.ctags && toolExists('ctags');
 const files = listFiles();
+
+// #1 (IMPROVEMENTS.md): an empty scan must not masquerade as a successful map. If the target has
+// no supported source at all, say what was looked for and where, and stop — a green run over
+// nothing is the kind of silent lie the rest of the pipeline is engineered against.
+// `--allow-empty` keeps intentionally-sparse targets (CI skeletons, new repos) workable.
+const SUPPORTED_EXTS = SRC.source.match(/\(([^)]+)\)/)[1].split('|').map((e) => `.${e}`);
+if (files.length === 0 && !opts.allowEmpty) {
+  console.error(`[extract] no supported source files under ${root}`);
+  console.error(`[extract]   looked for: ${SUPPORTED_EXTS.join(' ')} (node_modules, dist, vendor and friends are skipped)`);
+  console.error('[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
+  process.exit(1);
+}
 
 // Tree-sitter tier — DEFAULT-ON since v9 (it was opt-in): dynamic-dispatch call edges (this.m(),
 // typed-receiver x.m()) are the regex tier's one recall gap, measured directly in the oracle A/B
@@ -1290,6 +1303,14 @@ const fragment = {
   },
   nodes, edges,
 };
+// #1: files existed but nothing was extractable — same honesty rule as the zero-file guard above.
+// (A `<module>` pseudo-node only exists where module-level code does something, so config-only
+// trees can land here.) Guarded before any artifact/cache write so a failed run leaves nothing.
+if (nodes.length === 0 && !opts.allowEmpty) {
+  console.error(`[extract] 0 symbols found in ${files.length} supported file(s) under ${root} — the files parsed but defined no functions, classes, or methods.`);
+  console.error('[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
+  process.exit(1);
+}
 if (newCache && !astLoadFailed) { try { writeFileSync(resolve(opts.cache), JSON.stringify(newCache)); } catch { /* cache is best-effort */ } }
 // Dispatch note + banner report from the PROBE (what tier owns the run) plus the live load state:
 // `ast: loaded` (initialized this run) / `ast: idle` (available, nothing needed a parse — the warm

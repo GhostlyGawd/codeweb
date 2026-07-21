@@ -24,13 +24,14 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..'); // plugin r
 const MEMO_VERSION = 1;
 
 const argv = process.argv.slice(2);
-const opts = { src: null, target: null, outDir: null, open: false, full: false };
+const opts = { src: null, target: null, outDir: null, open: false, full: false, allowEmpty: false };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--target') opts.target = argv[++i];
   else if (t === '--out-dir') opts.outDir = argv[++i];
   else if (t === '--open') opts.open = true;
   else if (t === '--full') opts.full = true;
+  else if (t === '--allow-empty') opts.allowEmpty = true; // forwarded to extract: skip the empty-map guard
   else if (!opts.src) opts.src = t;
 }
 if (!opts.src) { console.error('usage: run.mjs <SRC> [--target <label>] [--out-dir <dir>]'); process.exit(1); }
@@ -69,7 +70,7 @@ const run = (label, file, args, useEnv) => {
 const targetArg = opts.target ? ['--target', opts.target] : [];
 // Extract always runs — it is the change detector — and rides the scan cache (Spec A), so a
 // no-change re-run costs ~the regex baseline instead of a full parse.
-run('extract', S('scripts/extract-symbols.mjs'), [opts.src, ...targetArg, '--cache', join(ws, '.scan-cache.json'), '--out', join(ws, 'fragment.json')], false);
+run('extract', S('scripts/extract-symbols.mjs'), [opts.src, ...targetArg, ...(opts.allowEmpty ? ['--allow-empty'] : []), '--cache', join(ws, '.scan-cache.json'), '--out', join(ws, 'fragment.json')], false);
 
 // Spec B (docs/specs/perf-stage-memo-scale.md): the four downstream stages are pure functions of
 // (fragment bytes, CODEWEB_* levers, pipeline version). When that key matches the previous run and
