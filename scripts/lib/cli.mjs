@@ -7,8 +7,11 @@
 // die() may still hard-exit.
 
 import { readFileSync, existsSync, statSync, writeFileSync, renameSync, rmSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { resolve, dirname, join } from 'node:path';
 import { normalizeGraph } from './graph-ops.mjs';
+
+const sha1 = (s) => createHash('sha1').update(s).digest('hex');
 
 // A consumer like `| head -1` closes the pipe early; without a handler Node dies on EPIPE with a
 // stack trace. Treat it as a normal end-of-output.
@@ -161,12 +164,18 @@ export function sourceReader(root) {
 }
 
 /**
- * Staleness check against the extractor's per-file stamps (meta.sources: {rel: {s,m}}). Returns
+ * Staleness check against the extractor's per-file stamps (meta.sources: {rel: {s,m,h}}). Returns
  * null when the graph matches disk (or has no stamps/root); else { count, files: [up to 8 rels] }.
- * stat-only — a few ms even on thousands of files. New files can't be detected without a walk
- * (documented); changed + deleted are.
+ * stat-only by default — a few ms even on thousands of files. New files can't be detected without
+ * a walk (documented); changed + deleted are.
+ *
+ * verify tier (finding 4): mtime+size stamps are bypassed by mtime-preserving content changes
+ * (rsync -a, tar -x, git-restore-mtime, SOURCE_DATE_EPOCH builds) — the graph reads fresh while
+ * its edges describe old bytes. Pass {verify:true} — or set CODEWEB_VERIFY_FRESHNESS=1 once for
+ * those workflows — to additionally sha1-compare content where the stat matches (reads every
+ * stamped file; keep it opt-in).
  */
-export function checkStaleness(graph) {
+export function checkStaleness(graph, { verify = process.env.CODEWEB_VERIFY_FRESHNESS === '1' } = {}) {
   const root = graph?.meta?.root, sources = graph?.meta?.sources;
   if (!root || !sources || !existsSync(root)) return null;
   const stale = [];
@@ -174,6 +183,7 @@ export function checkStaleness(graph) {
     try {
       const cur = statSync(root + '/' + relPath);
       if (cur.size !== st.s || Math.round(cur.mtimeMs) !== st.m) stale.push(relPath);
+      else if (verify && st.h && sha1(readFileSync(root + '/' + relPath, 'utf8')) !== st.h) stale.push(relPath + ' (content changed, stamp preserved)'); // utf8 decode matches the extractor's hashing exactly
     } catch { stale.push(relPath + ' (deleted)'); }
     if (stale.length >= 64) break; // enough to know it's stale; don't stat forever
   }

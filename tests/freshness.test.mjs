@@ -105,6 +105,37 @@ test('SC3: refresh updates nodes+edges, re-attaches domain by id, drops overlaps
   } finally { cleanup(dir); }
 });
 
+// Perf-quality finding 4 — stamps carry a content hash, and the verify tier catches
+// mtime-preserving content changes (rsync -a / tar -x / git-restore-mtime workflows) that the
+// stat-only fast path is blind to. Reproduced pre-fix: same-length edit + utimesSync restore ->
+// checkStaleness returned null over a graph whose edges no longer matched the source.
+test('F4-VERIFY: mtime-preserving content change is invisible to stat-only, caught by verify tier', async () => {
+  const { checkStaleness } = await import('../scripts/lib/cli.mjs');
+  const { utimesSync, statSync } = await import('node:fs');
+  const dir = tmpDir('cw-fresh-v-');
+  try {
+    writeTree(dir, TREE);
+    const { frag } = extract(dir);
+    // every stamp carries {s, m, h}
+    for (const [rel, st] of Object.entries(frag.meta.sources)) {
+      assert.match(st.h ?? '', /^[0-9a-f]{40}$/, `${rel} stamp carries a sha1`);
+    }
+    assert.equal(checkStaleness(frag), null, 'fresh graph reads fresh');
+    // same-length content change, mtime restored — the bypass
+    const p = join(dir, 'c.js');
+    const st = statSync(p);
+    const orig = readFileSync(p, 'utf8');
+    const swapped = orig.replace('return 3', 'return 4'); // same byte length
+    assert.equal(swapped.length, orig.length, 'fixture edit must preserve length');
+    writeFileSync(p, swapped);
+    utimesSync(p, st.atime, st.mtime);
+    assert.equal(checkStaleness(frag), null, 'stat-only fast path is (documentedly) blind to this');
+    const v = checkStaleness(frag, { verify: true });
+    assert.ok(v && v.files.some((f) => f.startsWith('c.js')), 'verify tier flags the content change');
+    assert.match(v.files.find((f) => f.startsWith('c.js')), /content changed/, 'reason names the failure');
+  } finally { cleanup(dir); }
+});
+
 // SC3: refresh with no meta.root → exit 2 with a reason.
 test('SC3: refresh with missing meta.root → exit 2', () => {
   const dir = tmpDir('cw-fresh-nr-');

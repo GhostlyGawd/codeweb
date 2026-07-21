@@ -479,9 +479,26 @@ const sources = {};
 const dynamicFiles = [];
 const DYNAMIC_RE = /\[[A-Za-z_$][\w$]*\]\s*\(|\bgetattr\s*\(|require\s*\(\s*[^'"`)\s]|\.emit\s*\(|globalThis\s*\[|window\s*\[/;
 for (const f of files) {
-  let text; try { text = readFileSync(f, 'utf8'); } catch { continue; }
+  // finding 4: stat BEFORE read and re-stat after, re-reading on mismatch — stamping from a single
+  // post-read stat let a file modified between read and stat carry a fresh stamp over stale bytes
+  // (a permanently false-fresh graph with no external tooling involved). If the file won't hold
+  // still after 3 attempts, stamp it impossible (s:-1) so checkStaleness always flags it — the
+  // failure mode is fail-STALE, never fail-fresh.
+  let text = null, st = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let pre; try { pre = statSync(f); } catch { pre = null; }
+    try { text = readFileSync(f, 'utf8'); } catch { text = null; }
+    if (text == null) break;
+    let post; try { post = statSync(f); } catch { post = null; }
+    if (pre && post && pre.size === post.size && pre.mtimeMs === post.mtimeMs) { st = post; break; }
+    st = null; // changed while reading — retry
+  }
+  if (text == null) continue;
   const r = rel(f);
-  try { const st = statSync(f); sources[r] = { s: st.size, m: Math.round(st.mtimeMs) }; } catch { /* stamp is best-effort */ }
+  const contentHash = sha1(text); // stamped into meta.sources (verify tier) and keys the scan cache
+  sources[r] = st
+    ? { s: st.size, m: Math.round(st.mtimeMs), h: contentHash }
+    : { s: -1, m: 0, h: contentHash }; // never-fresh stamp for a file that kept changing
   if (DYNAMIC_RE.test(text)) dynamicFiles.push(r);
   const isPy = r.endsWith('.py');
   const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
@@ -496,7 +513,7 @@ for (const f of files) {
   let syms;
   let astHit = null; // the cache entry serving this file's AST products (fully-valid hit only)
   if (opts.cache) {
-    const h = sha1(text);
+    const h = contentHash;
     const hit = oldCache && oldCache.files[r];
     const hitOk = hit && hit.hash === h && (!needsAst || (hit.ast && (!isJsTs || hit.cx)));
     if (hitOk) { syms = hit.syms; if (needsAst) astHit = hit; }
@@ -1233,7 +1250,7 @@ const fragment = {
     // warm run that never initializes the engine emits the same meta as a cold one (Spec A).
     ...(opts.engine !== 'regex' && astProbe.ts && !astLoadFailed ? { complexityEngine: astProbe.tsVersion } : {}),
     languages, symbols: nodes.length,
-    sources, // per-file {s: size, m: mtimeMs} staleness stamps
+    sources, // per-file {s: size, m: mtimeMs, h: sha1} staleness stamps (h powers the verify tier — finding 4)
     // files with dynamic-dispatch patterns — the honest asterisk on every "0 callers" answer
     ...(dynamicFiles.length ? { dynamic: { files: dynamicFiles.length, sample: dynamicFiles.slice(0, 3) } } : {}),
     // per-DIRECTORY mtime stamps: adding/deleting a file touches its directory, so NEW files (which
