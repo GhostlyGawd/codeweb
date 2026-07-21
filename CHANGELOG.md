@@ -159,6 +159,15 @@ notes so validated results, papers, and new tools never get lost in commit histo
   an exact size-ratio precut, and reuses the scoring pass for `scanned`. Stale/absent sidecar or
   `--structural` falls back to the live path; a regression test pins byte-identical matches
   across sidecar, live, stale-fallback, and removed-sidecar paths. (perf-quality finding 16)
+- **One scan cache per workspace — the first hook fire after a map is no longer cold.** run.mjs,
+  the post-edit hook, and refresh each used a DIFFERENT cache filename for the same workspace
+  (`.scan-cache.json` / `scan-cache.json` / `extract-cache.json`), so the first post-edit hook
+  after every map ran a cold full re-scan (28.7s at 16k symbols against the hook's 30s timeout)
+  and the first MCP auto-refresh was cold too. All three now share `SCAN_CACHE_NAME` from
+  lib/cli.mjs — and the hook dropped its lone `--no-ctags`, which on ctags machines both thrashed
+  the engine-namespaced cache AND diffed a regex fragment against a ctags baseline (phantom
+  regressions). With finding 10, a no-change hook/refresh now scans zero files. (perf-quality
+  finding 17)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release

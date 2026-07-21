@@ -92,6 +92,14 @@ export function loadGraph(pathArg, { usage = null } = {}) {
 // here for the hooks (Spec E consolidation; the hooks previously trailed the extractor's list).
 export const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
 
+// finding 17: THE scan-cache filename. run.mjs wrote `.scan-cache.json`, the post-edit hook
+// `scan-cache.json`, and refresh.mjs `extract-cache.json` — three identical caches for one
+// workspace, so the first hook fire after every map ran a COLD full re-scan (28.7s at 16k
+// symbols, against the hook's own 30s timeout) and the first MCP auto-refresh was cold too.
+// Every extract caller uses this constant; the cache is engine-namespaced, so callers must also
+// agree on engine flags (they do now — the hook dropped its lone --no-ctags).
+export const SCAN_CACHE_NAME = '.scan-cache.json';
+
 // #6 (IMPROVEMENTS.md): manifest-declared entrypoints — files a HOST invokes without a code edge.
 // deadcode's "safe to delete" tier listed the VS Code extension's activate/deactivate (package.json
 // `main`) and hook scripts (hooks.json commands) on codeweb's own map; anything a manifest names is

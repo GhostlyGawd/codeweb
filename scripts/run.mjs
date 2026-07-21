@@ -13,7 +13,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, existsSync, readFileSync } from 'node:fs';
-import { atomicWrite } from './lib/cli.mjs';
+import { atomicWrite, SCAN_CACHE_NAME } from './lib/cli.mjs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -85,7 +85,7 @@ const run = (label, file, args, useEnv) => {
 const targetArg = opts.target ? ['--target', opts.target] : [];
 // Extract always runs — it is the change detector — and rides the scan cache (Spec A), so a
 // no-change re-run costs ~the regex baseline instead of a full parse.
-run('extract', S('scripts/extract-symbols.mjs'), [opts.src, ...targetArg, ...(opts.allowEmpty ? ['--allow-empty'] : []), '--cache', join(ws, '.scan-cache.json'), '--out', join(ws, 'fragment.json')], false);
+run('extract', S('scripts/extract-symbols.mjs'), [opts.src, ...targetArg, ...(opts.allowEmpty ? ['--allow-empty'] : []), '--cache', join(ws, SCAN_CACHE_NAME), '--out', join(ws, 'fragment.json')], false);
 
 // Spec B (docs/specs/perf-stage-memo-scale.md): the four downstream stages are pure functions of
 // (fragment bytes, CODEWEB_* levers, pipeline version). When that key matches the previous run and

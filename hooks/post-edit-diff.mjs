@@ -21,7 +21,7 @@ import { bump, correlateEdit } from '../scripts/lib/stats.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXTRACT = join(HERE, '..', 'scripts', 'extract-symbols.mjs');
-import { SRC_RE, findTarget } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a stale local copy missing five languages)
+import { SRC_RE, SCAN_CACHE_NAME, findTarget } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a stale local copy missing five languages)
 
 
 // Returns { root, newCycles, lostCallers } when an edit introduces a structural regression, else null.
@@ -34,10 +34,13 @@ export function check(raw) {
   let baseline; try { baseline = JSON.parse(readFileSync(t.baseline, 'utf8')); } catch { return null; }
   const tmpOut = join(tmpdir(), `codeweb-hook-${process.pid}.json`);
   try {
-    // Incremental: the per-file scan cache lives beside the graph, so an edit re-scans only the
-    // changed file(s) instead of the whole target on every keystroke-batch.
-    const cache = join(dirname(t.baseline), 'scan-cache.json');
-    execFileSync(process.execPath, [EXTRACT, t.root, '--no-ctags', '--cache', cache, '--out', tmpOut], { stdio: 'ignore' });
+    // Incremental: THE per-file scan cache (finding 17: one shared name — the hook used its own
+    // `scan-cache.json` and always ran cold after a map; it also passed --no-ctags, flipping the
+    // cache's engine namespace on ctags machines AND diffing a regex fragment against a
+    // ctags-engine baseline, which could fabricate phantom regressions). Same name, same engine
+    // flags as run.mjs -> the hook rides the map-time warm cache and the stamp tier.
+    const cache = join(dirname(t.baseline), SCAN_CACHE_NAME);
+    execFileSync(process.execPath, [EXTRACT, t.root, '--cache', cache, '--out', tmpOut], { stdio: 'ignore' });
   } catch { return null; }
   let after; try { after = JSON.parse(readFileSync(tmpOut, 'utf8')); } catch { return null; }
   const reg = structuralRegressions(baseline, after);

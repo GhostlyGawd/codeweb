@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const USAGE = 'usage: refresh.mjs <graph.json> [--cache <path>] [--json]';
 if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, atomicWrite } from './lib/cli.mjs';
+import { die, emitJson, finish, atomicWrite, SCAN_CACHE_NAME } from './lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 let json = false, cache = null; const pos = [];
@@ -39,7 +39,7 @@ const root = graph.meta && graph.meta.root;
 if (!root || !existsSync(root)) die(`cannot refresh: graph.meta.root is missing or not on disk (got ${root || 'none'}) — refresh re-extracts from the recorded target root`, 2);
 
 // re-extract (cached) from the recorded root; the extractor emits the fragment on stdout
-const cachePath = cache || join(dirname(abs), 'extract-cache.json'); // default cache beside the graph
+const cachePath = cache || join(dirname(abs), SCAN_CACHE_NAME); // finding 17: THE shared cache — refresh used its own extract-cache.json and ran cold after every map
 const r = spawnSync(process.execPath, [join(HERE, 'extract-symbols.mjs'), root, '--cache', cachePath], { encoding: 'utf8', maxBuffer: 1 << 28 });
 if (r.status !== 0) die(`extract failed: ${(r.stderr || '').trim() || r.status}`, 2);
 let fresh;
