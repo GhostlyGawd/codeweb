@@ -9,10 +9,11 @@ Standing rules: TDD (failing test lands in the same commit, first); never weaken
 
 **Cache invalidation (both #11 and #10 change derivation) · hardened:** the original premise here was wrong —
 `.scan-cache.json` ALREADY has a version stamp: `SCANNER_VERSION = 13` (extract-symbols.mjs:45), checked at :266
-(mismatch ⇒ cache discarded, cold rebuild). No new `rev` field: **bump `SCANNER_VERSION` 13 → 14** once for the
+(mismatch ⇒ cache discarded, cold rebuild). No new `rev` field: **bump `SCANNER_VERSION` 14 → 15** once for the
 workstream (else a warm cache replays pre-fix rex tables (`rexReuse`, fileSig-only), bindings (`bindSig`), edges
-(`symbolSig`)). **WS-D interlock:** round2-ws-d.md T-19.1 claims the same bump ("13 → 14") — that spec must become
-**14 → 15** (orchestrator: edit WS-D; one mechanism, monotonic). IE-EQUIVALENCE unaffected (same version both sides).
+(`symbolSig`)). **Ladder (orchestrator-reconciled, monotonic by build order):** WS-B T-0 takes 13 → **14**
+(mask/lexing changes land first); this workstream takes 14 → **15**; round2-ws-d.md T-19.1 takes 15 → **16**
+(orchestrator edits WS-D post-review). IE-EQUIVALENCE unaffected (same version both sides of every comparison).
 
 ## #11 — NodeNext `.js` specifiers can't reach `.ts/.tsx` sources
 
@@ -138,7 +139,7 @@ edges re-closing the extract-symbols cycle. So:
   a FUTURE 1–2-char product symbol bare-called cross-file is dropped by this guard — count those drops in a distinct
   `shortDropped` surfaced in the stderr banner (`dropped K ambiguous (S short-name)`; stdout-flush greps presence
   only, format extension safe); fixture (c) asserts S ≥ 1; document the guard in the precision-gate comment.
-- Cache invalidation = `SCANNER_VERSION` 13 → 14 (header note · hardened — no separate `rev` field) lands here.
+- Cache invalidation = `SCANNER_VERSION` 14 → 15 (header note · hardened — ladder: B=14, C=15, D=16) lands here.
 
 ### T-10.5 — restore natural names, delete workaround comments (the finding's own success proof)
 - scripts/lib/cli.mjs:197-199: delete the comment; rename `relPath` → `rel` in `sourceReader`'s `linesOf`.
