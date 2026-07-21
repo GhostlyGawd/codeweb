@@ -9,6 +9,7 @@ import { readFileSync } from 'node:fs';
 import { PLUGIN_ROOT, runNode, script, tmpDir, cleanup, writeTree } from './helpers.mjs';
 import {
   bumpVersion, rollChangelog, mcpToolCount, productToolCount, checkConsistency, applySync, syncTargets,
+  scanProseCounts,
 } from '../scripts/release-utils.mjs';
 
 test('bumpVersion follows SemVer', () => {
@@ -77,7 +78,8 @@ test('checkConsistency catches drift, applySync repairs it (round-trip)', () => 
   const root = tmpDir('codeweb-rel-');
   try {
     writeTree(root, {
-      'package.json': JSON.stringify({ version: '0.3.0' }),
+      // Round 2, finding #4: the description drift the gate used to skip — scanned AND sync-repaired.
+      'package.json': JSON.stringify({ version: '0.3.0', description: 'engine with 15 MCP tools' }),
       '.claude-plugin/plugin.json': JSON.stringify({
         version: '0.1.0',
         description: 'exposes 15 deterministic read-only query tools over MCP for agents',
@@ -94,6 +96,7 @@ test('checkConsistency catches drift, applySync repairs it (round-trip)', () => 
     assert.ok(before.problems.some((p) => /plugin\.json version/.test(p)));
     assert.ok(before.problems.some((p) => /advertises 15 tools/.test(p)));
     assert.ok(before.problems.some((p) => /SKILL\.md version/.test(p)));
+    assert.ok(before.problems.some((p) => /package\.json.*15 MCP tools/.test(p)), 'the description drift is scanned');
 
     const changed = applySync(root, before.version, before.count);
     assert.ok(changed.includes('.claude-plugin/plugin.json'));
@@ -104,6 +107,16 @@ test('checkConsistency catches drift, applySync repairs it (round-trip)', () => 
   } finally {
     cleanup(root);
   }
+});
+
+// Round 2, finding #4: the exact live drift the gate printed OK over — package.json's description
+// said "24 MCP tools" while 27 shipped (the npm listing, the most public surface). The existing
+// toolRe already matches the phrase; what was missing was scanning the file at all.
+test('scanProseCounts flags the live package.json description string against 27 tools', () => {
+  const live = 'The living map of your codebase — deterministic call/import graph engine, 24 MCP tools for coding agents, and a self-contained interactive report.';
+  const problems = scanProseCounts(live, 'package.json (description)', { toolCount: 27, langCount: 11 });
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /24 MCP tools/);
 });
 
 // #3 (IMPROVEMENTS.md): prose scans — hardcoded tool/language counts in public prose must match

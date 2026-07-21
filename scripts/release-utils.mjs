@@ -106,6 +106,13 @@ export function syncTargets(version, count) {
       file: 'scripts/mcp-server.mjs',
       subs: [[/(version:\s*')\d+\.\d+\.\d+(')/, `$1${version}$2`]],
     },
+    {
+      // Round 2, finding #4: the npm listing said "24 MCP tools" while 27 shipped, and neither the
+      // gate nor the version roll touched it. The description's tool count now self-heals here.
+      // No version sub — package.json IS the version source, bumped by release.mjs.
+      file: 'package.json',
+      subs: [[/(\d+)(\s+MCP tools)/, `${count}$2`]],
+    },
   ];
 }
 
@@ -174,6 +181,13 @@ export function checkConsistency(root) {
     if (!existsSync(p)) continue;
     problems.push(...scanProseCounts(readText(p), rel, { toolCount: count, langCount }));
   }
+  // Round 2, finding #4: package.json's description is prose on the most public surface (the npm
+  // listing) — scan it too. Description-only, not the raw JSON: keywords/scripts can't
+  // false-positive, and `|| ''` keeps description-less fixtures green.
+  problems.push(...scanProseCounts(
+    JSON.parse(readText(join(root, 'package.json'))).description || '',
+    'package.json (description)', { toolCount: count, langCount },
+  ));
   // The research-page claim ledger: an "N / N tools" parity metric must claim the shipped count.
   const productPath = join(root, 'site', 'data', 'product.json');
   if (existsSync(productPath)) {

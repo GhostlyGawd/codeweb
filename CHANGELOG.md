@@ -485,6 +485,16 @@ notes so validated results, papers, and new tools never get lost in commit histo
   `>=22` honestly — Node 20's `npm test` glob is broken and the matrix never tested it.
   (perf-quality round 2, finding #3)
 
+### Fixed
+- **The consistency gate scans package.json — and the npm listing stops lying.** The description
+  said "24 MCP tools" while 27 shipped, and `check-consistency` printed OK over it because
+  package.json was in neither the prose scans nor the sync targets. The gate now scans the
+  description (description-only — keywords/scripts can't false-positive), version-sync repairs the
+  count at every roll, the live drift is corrected to 27, and the drifted-fixture round-trip in
+  `tests/release-tooling.test.mjs` pins the class. Mid-change, the scan alone turned the real-repo
+  consistency tests red on the live drift — the gate catching, in-repo, exactly what it was built
+  for. (perf-quality round 2, finding #4)
+
 ## [0.9.0] - 2026-07-19
 
 ### Added
