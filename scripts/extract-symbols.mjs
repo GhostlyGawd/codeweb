@@ -603,7 +603,8 @@ for (const f of files) {
   const isBraceLang = isJsTs || /\.(java|cs|php|kt|kts|swift)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
   const isIndentLang = isPy || r.endsWith('.rb'); // extents by dedent (Python) / end-at-indent (Ruby)
   const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp'
-    : r.endsWith('.py') ? 'python' : r.endsWith('.go') ? 'go' : r.endsWith('.rs') ? 'rust' : null;
+    : r.endsWith('.py') ? 'python' : r.endsWith('.go') ? 'go' : r.endsWith('.rs') ? 'rust'
+    : r.endsWith('.rb') ? 'ruby' : r.endsWith('.php') ? 'php' : null; // #14: Ruby/PHP join the dispatch tier
   // Does the AST tier owe this file products (methods/dispatch/complexity)? Drives cache-hit
   // validity — a hit without them must re-scan — and the lazy engine load below (Spec A).
   const needsAst = opts.engine !== 'regex' && ((isJsTs && astProbe.ts) || (langKey && astProbe[langKey]));
@@ -1133,7 +1134,12 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
       // handle legitimate cross-package calls; cross-package bare-name matches are collisions).
       const defs = byName.get(name) || [];
       const pkg = pkgOf(r);
-      const inPkg = defs.filter((d) => pkgOf(idFile(d)) === pkg);
+      let inPkg = defs.filter((d) => pkgOf(idFile(d)) === pkg);
+      // #14: in Ruby/PHP a bare name can NEVER legitimately reach another file's owner-qualified
+      // METHOD (a method needs a receiver: implicit self is same-class, $obj-> needs a type) —
+      // that attribution belongs to the dispatch tier, which has the receiver evidence. Without
+      // this, `helper(1)` in class A wired to B.helper across files on a name coincidence.
+      if (/\.(rb|php)$/.test(r)) inPkg = inPkg.filter((d) => { const lbl = d.slice(d.lastIndexOf(':') + 1); return !lbl.includes('.') || idFile(d) === r; });
       if (inPkg.length === 1) calleeId = inPkg[0];
       else if (LEGACY_FALLBACK) calleeId = defs[0];
       else { ambiguous++; return; }
@@ -1365,8 +1371,8 @@ if (newCache && !astLoadFailed) { try { writeFileSync(resolve(opts.cache), JSON.
 // Dispatch note + banner report from the PROBE (what tier owns the run) plus the live load state:
 // `ast: loaded` (initialized this run) / `ast: idle` (available, nothing needed a parse — the warm
 // path Spec A exists for) / `ast: off` (regex opt-out, unavailable, or load failure).
-const astAvailable = opts.engine !== 'regex' && (astProbe.ts || astProbe.java || astProbe.csharp);
-const typedLangs = ['java', 'csharp', 'python', 'go', 'rust'].filter((k) => typedLangsSeen.has(k));
+const astAvailable = opts.engine !== 'regex' && Object.entries(astProbe).some(([k, v]) => k !== 'tsVersion' && v === true);
+const typedLangs = ['java', 'csharp', 'python', 'go', 'rust', 'php'].filter((k) => typedLangsSeen.has(k)); // ruby has no static types — self/implicit dispatch only
 const dispatchNote = astAvailable
   ? `; wired ${dispatchEdgeCount} dispatch edge(s)${dispatchDropped ? `, dropped ${dispatchDropped} (missing endpoint)` : ''}` +
     (typedLangs.length ? `; typed-dispatch (${typedLangs.join('+')}) ${typedWired} wired${typedDropped ? `, ${typedDropped} dropped (ambiguous/absent)` : ''}` : '')

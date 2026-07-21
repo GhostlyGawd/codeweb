@@ -154,6 +154,33 @@
 <p>  count hardcoded (now derived). The handshake instructions teach the new loop steps.</p>
 <p>  (IMPROVEMENTS.md #11)</p>
 <ul>
+<li><strong>Coverage→symbol mapping — "is this symbol actually tested?" is now a measured fact.</strong></li>
+</ul>
+<p>  (ROADMAP Phase 4's named-missing mechanism.) <code>scripts/coverage.mjs</code> (<code>npm run coverage</code>)</p>
+<p>  ingests a coverage report — lcov text (Node's own</p>
+<p>  <code>--test --experimental-test-coverage --test-reporter=lcov</code> output works directly) or a</p>
+<p>  c8/istanbul JSON — and stamps every instrumented symbol with <code>covered</code>/<code>hits</code> (declaration-line</p>
+<p>  hits don't count as body execution; unknown ≠ uncovered; ambiguous path suffixes dropped).</p>
+<p>  <code>explain</code>, <code>query --tests</code>, and <code>context-pack</code> answers then carry the facts — loudest one:</p>
+<p>  <code>⚠ NOT covered by the recorded test run</code> on the edit window of an unguarded symbol.</p>
+<p>  Optional + explicit like <code>--churn</code> (absent input leaves graphs byte-identical);</p>
+<p>  <code>run.mjs --coverage &lt;report&gt;</code> annotates right after mapping; <code>codeweb_refresh</code> drops stale</p>
+<p>  annotations and says how to restore them. Pinned end-to-end by <code>tests/coverage.test.mjs</code>,</p>
+<p>  including a real Node-runner dogfood. (IMPROVEMENTS.md #13)</p>
+<ul>
+<li><strong>Ruby and PHP join the dispatch tier; Kotlin/Swift's blocker is recorded, not papered over.</strong></li>
+</ul>
+<p>  Two new vendored grammars (same pinned trusted source, <code>@vscode/tree-sitter-wasm@0.3.1</code>; Ruby</p>
+<p>  ABI 14, PHP ABI 15) power Spec-F-pattern walkers: Ruby wires <code>self.</code>/implicit-receiver calls</p>
+<p>  inside a class (the parser has already disambiguated a call from a bare identifier, so wiring</p>
+<p>  to a sibling method is precision-safe); PHP wires <code>$this-&gt;m()</code> plus <code>Type $p</code> typed-receiver</p>
+<p>  intents under the one-owner rule. The regex tier's bare-name resolution simultaneously got</p>
+<p>  STRICTER for both languages — a bare name can never reach another file's owner-qualified</p>
+<p>  method on a name coincidence anymore (that attribution now belongs to the dispatch tier, which</p>
+<p>  has receiver evidence). Kotlin/Swift stay regex-only with the blocker recorded in</p>
+<p>  <code>PROVENANCE.md</code>: no trusted wasm exists at our pinned ABI (upstream ships C sources and native</p>
+<p>  prebuilds only) — revisit when <code>@vscode/tree-sitter-wasm</code> grows them. (IMPROVEMENTS.md #14)</p>
+<ul>
 <li><strong>The CLI grew a front door.</strong> Every CLI answers <code>--help</code>/<code>-h</code> (exit 0) — including the</li>
 </ul>
 <p>  <code>codeweb</code> bin, where <code>--help</code> previously errored with <code>target not found: --help</code>; <code>run.mjs</code></p>

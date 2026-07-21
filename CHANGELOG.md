@@ -100,6 +100,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
   `run.mjs --coverage <report>` annotates right after mapping; `codeweb_refresh` drops stale
   annotations and says how to restore them. Pinned end-to-end by `tests/coverage.test.mjs`,
   including a real Node-runner dogfood. (IMPROVEMENTS.md #13)
+- **Ruby and PHP join the dispatch tier; Kotlin/Swift's blocker is recorded, not papered over.**
+  Two new vendored grammars (same pinned trusted source, `@vscode/tree-sitter-wasm@0.3.1`; Ruby
+  ABI 14, PHP ABI 15) power Spec-F-pattern walkers: Ruby wires `self.`/implicit-receiver calls
+  inside a class (the parser has already disambiguated a call from a bare identifier, so wiring
+  to a sibling method is precision-safe); PHP wires `$this->m()` plus `Type $p` typed-receiver
+  intents under the one-owner rule. The regex tier's bare-name resolution simultaneously got
+  STRICTER for both languages — a bare name can never reach another file's owner-qualified
+  method on a name coincidence anymore (that attribution now belongs to the dispatch tier, which
+  has receiver evidence). Kotlin/Swift stay regex-only with the blocker recorded in
+  `PROVENANCE.md`: no trusted wasm exists at our pinned ABI (upstream ships C sources and native
+  prebuilds only) — revisit when `@vscode/tree-sitter-wasm` grows them. (IMPROVEMENTS.md #14)
 - **The CLI grew a front door.** Every CLI answers `--help`/`-h` (exit 0) — including the
   `codeweb` bin, where `--help` previously errored with `target not found: --help`; `run.mjs`
   documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map

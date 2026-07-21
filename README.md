@@ -562,8 +562,9 @@ codeweb/
 
 - **More first-class languages** — eleven native today (JavaScript, TypeScript, Python, **Rust**,
   **Go**, **Java**, **C#**, **Ruby**, **PHP**, **Kotlin**, **Swift**); anything else routes through
-  the agent fallback. Dynamic-dispatch AST tiers now cover JS/TS, Java, C#, Python, Go, and Rust —
-  Ruby/PHP/Kotlin/Swift dispatch is the next increment there.
+  the agent fallback. Dynamic-dispatch AST tiers cover JS/TS, Java, C#, Python, Go, Rust, **Ruby**,
+  and **PHP**; Kotlin/Swift dispatch waits on a trusted wasm grammar at our pinned ABI
+  (recorded in `scripts/grammars/PROVENANCE.md`).
 
 _Recently shipped: an **agent-intelligence suite** — refactoring **hotspots** (complexity × fan-in ×
 churn), a gated ROI-ranked optimization **campaign** planner, a foundations-first **reading-order**,
