@@ -206,6 +206,12 @@ notes so validated results, papers, and new tools never get lost in commit histo
   expand-all row (finding 13(d)): `simMsPerFrame` recorded and judged in the verdict, so the
   cliff that sat one click past the old green can never regress unmeasured. (perf-quality
   finding 21)
+- **Temp hygiene: nothing leaks into the OS tmpdir.** The post-edit hook's per-edit ~1.2MB leak
+  died with finding 18 (no temp file exists at all); the two test files that leaked
+  (`stdout-flush`'s three `codeweb-flush-*` dirs, `efficiency-pilot-usage`'s `cw-usage-*` dir)
+  now clean up in `finally`; and a tripwire in `post-edit-diff.test.mjs` runs the hook end-to-end
+  and asserts no `codeweb-hook-*.json` appears — the leak signature can't return silently.
+  (perf-quality finding 22)
 
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
