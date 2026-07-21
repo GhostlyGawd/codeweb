@@ -163,12 +163,7 @@ export async function loadTsEngine() {
     // Spec H helpers: statement normalization + FNV-1a hash for Type-3 fingerprints.
     const FN_LIKE = new Set(['function_declaration', 'generator_function_declaration', 'function_expression', 'arrow_function', 'method_definition']);
     const JS_KW = new Set(['if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'return', 'break', 'continue', 'throw', 'try', 'catch', 'finally', 'new', 'delete', 'typeof', 'instanceof', 'in', 'of', 'void', 'yield', 'await', 'async', 'function', 'class', 'extends', 'super', 'this', 'const', 'let', 'var', 'null', 'undefined', 'true', 'false']);
-    // Built via RegExp so no quote character appears inside a regex LITERAL — the extractor's
-    // maskJs doesn't mask regex literals, and a bare quote there flips its string state and
-    // swallows the following lines (codeweb's own gate caught exactly that on this file).
-    const Q = String.fromCharCode(39), DQ = String.fromCharCode(34), BT = String.fromCharCode(96);
-    const strRe = (q) => new RegExp(q + '(?:[^' + q + '\\\\]|\\\\[^])*' + q, 'g');
-    const TPL_STR_RE = strRe(BT), SQ_STR_RE = strRe(Q), DQ_STR_RE = strRe(DQ);
+    const TPL_STR_RE = /`(?:[^`\\]|\\[^])*`/g, SQ_STR_RE = /'(?:[^'\\]|\\[^])*'/g, DQ_STR_RE = /"(?:[^"\\]|\\[^])*"/g;
     const stmtHash = (text) => {
       // one tokenizing pass: keywords keep identity (uppercased), identifiers -> I, numbers -> N,
       // string/template contents -> S, whitespace dropped. Statement STRUCTURE survives; naming

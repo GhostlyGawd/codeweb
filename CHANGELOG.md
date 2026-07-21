@@ -9,6 +9,21 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+### Fixed
+- **The JS masker now lexes regex literals.** `maskJs` tracked strings/templates/comments but not
+  regex literals, so a quote inside the ubiquitous escaping-helper pattern (`replace(/…/g)` with a
+  quote in the regex) desynced its string state — bodies ran to EOF, absorbing neighbors and
+  fabricating call edges from the absorbed code — and a backtick inside a regex flipped template
+  state (an odd count blanked the rest of the file: codeweb's own `lib/complexity.mjs` extracted
+  as 5 nodes / 0 edges, and 13 of 25 deadcode "safe" items on the self-map were false positives).
+  Regex literals are now recognized with the standard prev-significant-token heuristic (escape-
+  and char-class-aware; division and JSX close tags unaffected) and their interiors blanked like
+  strings — including inside `${}` interpolations, where a `{2}` quantifier corrupted brace
+  matching. The `String.fromCharCode` authoring convention that worked around the blind spot is
+  deleted (ts-engine.mjs string regexes, Ruby mask regexes) and now serves as a live self-test;
+  `tests/maskjs-regex-literals.test.mjs` pins the two reproduced corruptions plus a self-map
+  regression on complexity.mjs. (perf-quality finding 1)
+
 ### Added
 - **Specs K–P, landed on main after v0.9.0** (previously missing from this section — the release
   script would have refused to roll an "empty" release over real work):

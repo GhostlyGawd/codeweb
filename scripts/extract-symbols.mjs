@@ -87,11 +87,9 @@ function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
 // a `#` or `"""` inside them can't be mistaken for a comment/docstring delimiter. Best-effort, same
 // ethos as stripSC: escapes inside triple-strings aren't tracked, worst case is a slightly-off mask.
 // Ruby masking (Spec I): line-local — string contents first (so interpolation can't fake a
-// comment), then `#`-to-EOL. Regexes built via RegExp so no quote character sits inside a regex
-// LITERAL (maskJs doesn't mask those; a bare quote there desyncs its string state when codeweb
-// maps itself — its own gate caught this class on ts-engine.mjs).
-const RB_DQ = new RegExp('"(?:[^"\\\\]|\\\\[^])*"', 'g');
-const RB_SQ = new RegExp(String.fromCharCode(39) + '(?:[^' + String.fromCharCode(39) + '\\\\]|\\\\[^])*' + String.fromCharCode(39), 'g');
+// comment), then `#`-to-EOL.
+const RB_DQ = /"(?:[^"\\]|\\[^])*"/g;
+const RB_SQ = /'(?:[^'\\]|\\[^])*'/g;
 function maskRuby(text) {
   return text.split(/\r?\n/).map((ln) => ln
     .replace(RB_DQ, '""')
@@ -141,16 +139,46 @@ function maskPy(text) {
 // `cartSubtotal() -> computeLineTotal()` fabricating two edges — the same phantom-edge class the
 // Python docstring mask already fixes). STRING-AWARE: a `//` inside a string (`"http://…"`) is not a
 // comment. Template literals are special — their TEXT is blanked but a `${ … }` interpolation is REAL
-// code and is kept verbatim (so `${ fmt() }` still edges). Block comments and template literals may
+// code and is kept verbatim (so `${ fmt() }` still edges). REGEX-AWARE (#1): a `/` in expression
+// position — start of input, after most punctuation, or after a keyword like `return` — opens a
+// regex literal; its interior (which may hold quotes, backticks, or braces: the ubiquitous
+// escaping-helper replace(/…/g) patterns, or a {2} quantifier) is blanked like a string so it can
+// never desync the string/template state or the brace counters (the bug that ran bodies to EOF and
+// fabricated edges from the absorbed code). After an identifier, `)`, `]`, `.`, or `<` (JSX close
+// tags), `/` is division and passes through; a candidate with no closing `/` on the line falls
+// back to division (regex literals cannot span lines). Block comments and template literals may
 // span lines, so that open state is carried across the loop. Best-effort (same ethos as maskPy):
-// escapes inside template exprs and nested templates aren't fully state-tracked; worst case is a
+// pathological forms (`a++ /b/ c`) mis-lex exactly as in every heuristic lexer; worst case is a
 // slightly-off mask, never a crash.
+const REGEX_PREV_KW = new Set(['return', 'typeof', 'instanceof', 'in', 'of', 'new', 'delete', 'void', 'throw', 'case', 'do', 'else', 'yield', 'await']);
 function maskJs(text) {
   const lines = text.split(/\r?\n/);
   const out = [];
   let inBlock = false;   // inside /* */ spanning lines
   let inTemplate = false; // inside `...` template TEXT (not inside ${})
   let exprDepth = 0;      // brace depth inside a template ${ ... } interpolation (0 = not in expr)
+  let lastSig = null;     // last significant real-code char emitted (null = nothing yet)
+  let lastWord = '';      // trailing identifier run ending at lastSig (for keyword detection)
+  const note = (ch) => { if (ch !== ' ' && ch !== '\t') { lastWord = /[A-Za-z0-9_$]/.test(ch) ? lastWord + ch : ''; lastSig = ch; } };
+  const noteValue = () => { lastSig = ')'; lastWord = ''; };  // a string/template/regex just closed: a value — `/` after it is division
+  const regexCanFollow = () =>
+    lastSig === null ? true
+      : /[A-Za-z0-9_$]/.test(lastSig) ? REGEX_PREV_KW.has(lastWord)
+        : !(lastSig === ')' || lastSig === ']' || lastSig === '.' || lastSig === '<');
+  // Scan the regex literal opened by the `/` at i: escape- and char-class-aware ([/] does not close).
+  // Returns {close, end} (closing `/`, index past the flags) or null when unterminated on this line.
+  const scanRegex = (line, i) => {
+    const n = line.length;
+    let cls = false;
+    for (let j = i + 1; j < n; j++) {
+      const cj = line[j];
+      if (cj === '\\') { j++; continue; }
+      if (cls) { if (cj === ']') cls = false; continue; }
+      if (cj === '[') { cls = true; continue; }
+      if (cj === '/') { let k = j + 1; while (k < n && /[a-z]/i.test(line[k])) k++; return { close: j, end: k }; }
+    }
+    return null;
+  };
   for (const line of lines) {
     const n = line.length; let res = '', i = 0;
     while (i < n) {
@@ -162,19 +190,23 @@ function maskJs(text) {
       }
       if (inTemplate && exprDepth === 0) {           // template TEXT — blank it, watch for `${` / closing backtick
         const ch = line[i];
-        if (ch === '`') { res += ' '; i++; inTemplate = false; continue; }
-        if (ch === '$' && line[i + 1] === '{') { res += '${'; i += 2; exprDepth = 1; continue; } // keep expr
+        if (ch === '`') { res += ' '; i++; inTemplate = false; noteValue(); continue; }
+        if (ch === '$' && line[i + 1] === '{') { res += '${'; i += 2; exprDepth = 1; lastSig = '{'; lastWord = ''; continue; } // keep expr
         res += ' '; i++; continue;                   // blank template literal text
       }
       if (exprDepth > 0) {                            // inside ${ ... } — keep verbatim (real code), match braces
         const ch = line[i];
         if (ch === '"' || ch === "'") {               // skip string interior so a `}` inside it can't miscount
           let j = i + 1; while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
-          const stop = Math.min(j + 1, n); res += line.slice(i, stop); i = stop; continue;
+          const stop = Math.min(j + 1, n); res += line.slice(i, stop); i = stop; noteValue(); continue;
+        }
+        if (ch === '/' && regexCanFollow()) {         // regex literal in the interpolation — blank it so a
+          const m = scanRegex(line, i);               // quote or {n} quantifier can't desync brace matching
+          if (m) { res += '/' + ' '.repeat(m.close - i - 1) + '/' + ' '.repeat(m.end - m.close - 1); i = m.end; noteValue(); continue; }
         }
         if (ch === '{') exprDepth++;
-        else if (ch === '}') { exprDepth--; if (exprDepth === 0) { res += ch; i++; inTemplate = true; continue; } }
-        res += ch; i++; continue;
+        else if (ch === '}') { exprDepth--; if (exprDepth === 0) { res += ch; i++; inTemplate = true; note(ch); continue; } }
+        note(ch); res += ch; i++; continue;
       }
       const ch = line[i];                             // normal code
       if (ch === '/' && line[i + 1] === '/') { res += ' '.repeat(n - i); i = n; continue; } // line comment
@@ -184,12 +216,16 @@ function maskJs(text) {
         else { res += ' '.repeat(end + 2 - i); i = end + 2; }
         continue;
       }
+      if (ch === '/' && regexCanFollow()) {                                                  // regex literal
+        const m = scanRegex(line, i);
+        if (m) { res += '/' + ' '.repeat(m.close - i - 1) + '/' + ' '.repeat(m.end - m.close - 1); i = m.end; noteValue(); continue; }
+      }
       if (ch === '"' || ch === "'") {                                                        // string literal
         let j = i + 1; while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
-        const stop = Math.min(j + 1, n); res += ' '.repeat(stop - i); i = stop; continue;
+        const stop = Math.min(j + 1, n); res += ' '.repeat(stop - i); i = stop; noteValue(); continue;
       }
       if (ch === '`') { res += ' '; i++; inTemplate = true; continue; }                      // open template literal
-      res += ch; i++;
+      note(ch); res += ch; i++;
     }
     out.push(res);
   }
