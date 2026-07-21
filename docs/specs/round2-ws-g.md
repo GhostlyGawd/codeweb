@@ -92,24 +92,24 @@ byte-identity of `report.html` (tests/build-report.test.mjs:55) stays green.
   over the result in the label branch. Correct across theme flips because applyTheme redraws
   (ground truth above). −16.8k getComputedStyle per draw.
 - **T-37.2** Screen-space label LOD with a per-frame cap. Candidate rule replaces world-space
-  `nd.r > 7.5` (:796) with screen radius `nd.r * cam.k > 7.5` (same 7.5, now screen px — pin the
-  constant); collect candidates during the node pass, draw labels in a second pass capped at
+  `nd.r > 7.5` (:796) with screen radius `nd.r * cam.k > 7.5` (same 7.5, now screen px — pin it);
+  collect candidates during the node pass, draw labels in a second pass capped at
   `LABEL_CAP = 300`, priority order (deterministic): bubbles > selectedNode + its lit neighbors >
   search hits (when `hl.size < 40`) > screen radius desc, tie-break by id. Flicker-free: rank
   depends only on (r, cam.k, hl, selection), never positions — stable across anneal frames at
-  fixed camera. Extract the pure ranking fn (`labelPick(nodes, cam, hl, cap)`) so extractFn can
-  pin it in node: cap, priority order, position-independence, same input → same output array.
+  fixed camera. Extract pure `labelPick(nodes, cam, hl, cap)`; extractFn-pin in node: cap,
+  priority order, position-independence, same input → same output array.
 - **T-37.3** Edge batching by EXACT style bucket — no quantization. W.edges weights are integers
   (buildW counts them), and alpha/width (:775-782) are pure functions of (state, bubble-pair,
   weight), saturating by w=29 (alpha) resp. w=72 (width). Bucket key = `state|pair|min(weight,72)`
   with state ∈ {dim, tangle, norm} → strokeStyle/lineWidth strings byte-identical to today's.
-  Acceptance is exact equality, not pixel-diff: property test — for every edge of a synthetic
-  50k-edge set, old per-edge style === its bucket's style; bucket count ≤ 432 (3·2·72 hard
+  Acceptance is exact equality, not pixel-diff: property test — every edge of a synthetic
+  50k-edge set has old per-edge style === its bucket's style; bucket count ≤ 432 (3·2·72 hard
   bound); dim/tangle/norm never share a bucket. One `beginPath`+`stroke` per bucket; per-edge
   `moveTo`+`quadraticCurveTo`. Low-zoom fast path is an INTENTIONAL geometry LOD, exempt from
-  parity: at `cam.k < 0.35`, weight-1 non-bubble-pair edges draw straight `lineTo` (curve
-  deviation ≈0.045·screen-length px — visible on long edges; accepted, eyeballed in T-37.5's
-  run). Extract `edgeBucketKey(e, A, B, on)` as a pure fn.
+  parity: at `cam.k < 0.35`, weight-1 non-bubble-pair edges draw straight `lineTo` (deviation
+  ≈0.045·screen-length px — visible on long edges; accepted, eyeballed in T-37.5's run). Extract
+  `edgeBucketKey(e, A, B, on)` as a pure fn.
 - **T-37.4** Reuse `refreshHits`: have `refreshHits()` (template:824) also store `hitIds:Set` +
   `hitDomains:Set`; `gDraw`'s search branch (:760-763) uses them instead of re-scanning AN per
   frame. Re-run `refreshHits()` where the active set changes (role-filter toggle path calling
