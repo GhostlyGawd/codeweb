@@ -354,406 +354,379 @@ const LANG_GRAMMARS = {
   ruby: join(HERE, '..', 'grammars', 'tree-sitter-ruby.wasm'),
   php: join(HERE, '..', 'grammars', 'tree-sitter-php.wasm'),
 };
-const LANG_SHAPES = {
-  java: { classes: new Set(['class_declaration']), method: 'method_declaration', invoke: 'method_invocation', param: 'formal_parameter', typeNode: 'type_identifier', thisNode: 'this' },
-  csharp: { classes: new Set(['class_declaration']), method: 'method_declaration', invoke: 'invocation_expression', param: 'parameter', typeNode: 'identifier', thisNode: 'this_expression' },
-};
-
-// Spec F: Python/Go/Rust dispatch walkers — the shape table fits the Java/C# family; these three
-// need dedicated tree shapes (probed empirically, pinned by tests). Same contract as the shape
-// path: regex owns nodes; the walker returns ONLY {thisCalls, typedIntents}, self/receiver calls
-// resolved in-file, typed intents resolved globally by extract-symbols under the one-owner rule.
-// Receivers/types accepted only as bare identifiers (precision over recall, as everywhere).
+// ---- one dispatch skeleton, seven language tables (finding 26) ------------------------------
+// Every dispatch tier answers the same two questions — "is this a self/receiver call to a
+// sibling method?" (thisCalls, resolved in-file) and "is the receiver a typed parameter?"
+// (typedIntents, resolved globally by extract-symbols under the one-owner rule) — but the walker
+// skeleton (ancestor climb, owner index, dedupe, sort) was previously copy-pasted per language,
+// with `up()` defined five times in two drifted signatures and `typedParamsOf` four times.
+// One skeleton now; each language declares only its genuine tree shape: how to index owners,
+// what a member-call node looks like, what "self" is, and how typed params read. Same contract
+// as before: receivers/types accepted only as bare identifiers (precision over recall), regex
+// owns the nodes, walkers return ONLY {thisCalls, typedIntents}.
 const BARE_TYPE = /^[A-Za-z_][\w]*$/;
 const stripRustRef = (t) => t.replace(/^&\s*(?:mut\s+)?/, '').trim();
-const LANG_WALKERS = {
+/** THE ancestor climb (was five per-language copies): nearest ancestor whose type is in `types`. */
+const upTo = (n, types) => { let c = n.parent; while (c && !types.has(c.type)) c = c.parent; return c; };
+/** THE typed-parameter reader: `entry(p)` -> {nm, ty}|null per `paramType` node (deep for PHP). */
+const typedParamsFrom = (T) => (methodNode) => {
+  const map = new Map();
+  const params = methodNode?.childForFieldName('parameters');
+  if (!params) return map;
+  const each = (p) => { if (p.type === T.paramType) { const e = T.entry(p); if (e) map.set(e.nm, e.ty); } };
+  if (T.deep) walkTree(params, each);
+  else for (let i = 0; i < params.childCount; i++) each(params.child(i));
+  return map;
+};
+
+// Per-language helpers the tables share with their collectOwners
+const RUBY_CLASSY = new Set(['class', 'module']);
+const RUBY_METHODY = new Set(['method', 'singleton_method']);
+const rubyNameOf = (n) => { const f = n.childForFieldName('name'); if (f) return f.text; for (let i = 0; i < n.childCount; i++) if (n.child(i).type === 'identifier') return n.child(i).text; return null; };
+const rubyClassNameOf = (c) => { for (let i = 0; i < c.childCount; i++) if (c.child(i).type === 'constant') return c.child(i).text; return null; };
+const phpVarName = (vn) => { if (!vn || vn.type !== 'variable_name') return null; for (let i = 0; i < vn.childCount; i++) if (vn.child(i).type === 'name') return vn.child(i).text; return null; };
+const goRecvOf = (m) => { // -> {varName, typeName} | null, pointer stripped
+  const recv = m.childForFieldName('receiver');
+  if (!recv) return null;
+  for (let i = 0; i < recv.childCount; i++) {
+    const p = recv.child(i);
+    if (p.type !== 'parameter_declaration') continue;
+    const nm = p.childForFieldName('name')?.text;
+    let ty = p.childForFieldName('type');
+    if (ty?.type === 'pointer_type') ty = ty.child(1) || ty;
+    const tn = ty?.text?.replace(/^\*/, '');
+    if (nm && tn && BARE_TYPE.test(tn)) return { varName: nm, typeName: tn };
+  }
+  return null;
+};
+const GO_FN_TYPES = new Set(['method_declaration', 'function_declaration']);
+const PHP_METHOD = new Set(['method_declaration']), PHP_CLASS = new Set(['class_declaration']);
+const PY_FN = new Set(['function_definition']), PY_CLASS = new Set(['class_definition']);
+const RS_FN = new Set(['function_item']), RS_IMPL = new Set(['impl_item']);
+const JC_METHOD = new Set(['method_declaration']), JC_CLASS = new Set(['class_declaration']);
+const rustImplType = (imp) => { const t = imp.childForFieldName('type'); return t && BARE_TYPE.test(t.text) ? t.text : null; };
+const fieldName = (n) => n?.childForFieldName('name')?.text || null;
+
+// Each table: collectOwners(root) -> Map(owner -> Set(members)); callSite(n) -> {obj, prop}|null;
+// enclosingOf(n) -> {owner, name, methodNode, ...}|null (its own null-guards match the old
+// walker exactly); isSelf(obj, ctx); identName(obj) -> bare receiver name|null (typed path);
+// typedParams -> {paramType, deep?, entry} or absent (no typed tier, e.g. Ruby).
+const LANG_DISPATCH = {
   // #14: Ruby — no static types, so the dispatch win is self./implicit-receiver calls INSIDE a
   // class (the parser has already disambiguated `prepare(1)` as a CALL, so wiring it to a sibling
   // method is precision-safe; a bare `other` identifier is NOT a call node and stays unwired).
   // `def self.x` (singleton_method) groups with the class like the regex tier does.
-  ruby: (parser) => (text, relPath) => {
-    let tree = null;
-    try {
-      tree = parser.parse(String(text || ''));
-      const r = String(relPath).replace(/\\/g, '/');
-      const up = (n, types) => { let c = n.parent; while (c && !types.has(c.type)) c = c.parent; return c; };
-      const CLASSY = new Set(['class', 'module']);
-      const METHODY = new Set(['method', 'singleton_method']);
-      const nameOf = (n) => { const f = n.childForFieldName('name'); if (f) return f.text; for (let i = 0; i < n.childCount; i++) if (n.child(i).type === 'identifier') return n.child(i).text; return null; };
-      const classNameOf = (c) => { for (let i = 0; i < c.childCount; i++) if (c.child(i).type === 'constant') return c.child(i).text; return null; };
+  ruby: {
+    collectOwners(root) {
       const methodsByClass = new Map();
-      walkTree(tree.rootNode, (n) => {
-        if (!CLASSY.has(n.type)) return;
-        const cn = classNameOf(n); if (!cn) return;
+      walkTree(root, (n) => {
+        if (!RUBY_CLASSY.has(n.type)) return;
+        const cn = rubyClassNameOf(n); if (!cn) return;
         const set = methodsByClass.get(cn) || new Set();
-        walkTree(n, (m) => { if (METHODY.has(m.type) && up(m, CLASSY)?.id === n.id) { const mn = nameOf(m); if (mn) set.add(mn); } }); // .id: tree-sitter nodes are not reference-equal across traversals
+        walkTree(n, (m) => { if (RUBY_METHODY.has(m.type) && upTo(m, RUBY_CLASSY)?.id === n.id) { const mn = rubyNameOf(m); if (mn) set.add(mn); } }); // .id: tree-sitter nodes are not reference-equal across traversals
         methodsByClass.set(cn, set);
       });
-      const thisCalls = [], seen = new Set();
-      walkTree(tree.rootNode, (n) => {
-        if (n.type !== 'call') return;
-        const recv = n.childForFieldName('receiver');
-        const mname = n.childForFieldName('method')?.text;
-        if (!mname) return;
-        if (recv && recv.type !== 'self') return; // typed receivers don't exist in Ruby — self/implicit only
-        const encl = up(n, METHODY); if (!encl) return;
-        const enclCls = up(encl, CLASSY); if (!enclCls) return;
-        const cls = classNameOf(enclCls); if (!cls) return;
-        if (!methodsByClass.get(cls)?.has(mname)) return;
-        const from = `${r}:${cls}.${nameOf(encl)}`;
-        const to = `${r}:${cls}.${mname}`;
-        const k = from + '\t' + to;
-        if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
-      });
-      thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
-      return { thisCalls, typedIntents: [] };
-    } catch { return null; } finally { if (tree) tree.delete(); } // finding 6
+      return methodsByClass;
+    },
+    callSite(n) {
+      if (n.type !== 'call') return null;
+      const recv = n.childForFieldName('receiver');
+      const prop = n.childForFieldName('method')?.text;
+      if (!prop) return null;
+      if (recv && recv.type !== 'self') return null; // typed receivers don't exist in Ruby — self/implicit only
+      return { obj: recv, prop };
+    },
+    enclosingOf(n) {
+      const encl = upTo(n, RUBY_METHODY); if (!encl) return null;
+      const enclCls = upTo(encl, RUBY_CLASSY); if (!enclCls) return null;
+      const cls = rubyClassNameOf(enclCls); if (!cls) return null;
+      return { owner: cls, name: rubyNameOf(encl), methodNode: encl };
+    },
+    isSelf: () => true, // callSite already filtered to self/implicit
+    identName: () => null,
   },
   // #14: PHP — `$this->m()` resolves in-class; `$p->m()` where the enclosing method declares
   // `Type $p` becomes a typed intent, resolved globally under the one-owner rule.
-  php: (parser) => (text, relPath) => {
-    let tree = null;
-    try {
-      tree = parser.parse(String(text || ''));
-      const r = String(relPath).replace(/\\/g, '/');
-      const up = (n, type) => { let c = n.parent; while (c && c.type !== type) c = c.parent; return c; };
-      const varName = (vn) => { if (!vn || vn.type !== 'variable_name') return null; for (let i = 0; i < vn.childCount; i++) if (vn.child(i).type === 'name') return vn.child(i).text; return null; };
+  php: {
+    collectOwners(root) {
       const methodsByClass = new Map();
-      walkTree(tree.rootNode, (n) => {
+      walkTree(root, (n) => {
         if (n.type !== 'class_declaration') return;
-        const cn = n.childForFieldName('name')?.text; if (!cn) return;
+        const cn = fieldName(n); if (!cn) return;
         const set = methodsByClass.get(cn) || new Set();
-        walkTree(n, (m) => { if (m.type === 'method_declaration' && up(m, 'class_declaration')?.id === n.id) { const mn = m.childForFieldName('name')?.text; if (mn) set.add(mn); } }); // .id: see ruby note
+        walkTree(n, (m) => { if (m.type === 'method_declaration' && upTo(m, PHP_CLASS)?.id === n.id) { const mn = fieldName(m); if (mn) set.add(mn); } }); // .id: see ruby note
         methodsByClass.set(cn, set);
       });
-      const typedParamsOf = (fn) => {
-        const map = new Map();
-        const params = fn?.childForFieldName('parameters');
-        if (!params) return map;
-        walkTree(params, (p) => {
-          if (p.type !== 'simple_parameter') return;
-          const ty = p.childForFieldName('type');
-          const nm = varName(p.childForFieldName('name'));
-          const tyText = ty?.text?.replace(/^\?/, ''); // ?Filter -> Filter (nullable)
-          if (nm && tyText && BARE_TYPE.test(tyText)) map.set(nm, tyText);
-        });
-        return map;
-      };
-      const thisCalls = [], typedIntents = [], seen = new Set();
-      walkTree(tree.rootNode, (n) => {
-        if (n.type !== 'member_call_expression') return;
-        const objName = varName(n.childForFieldName('object'));
-        const prop = n.childForFieldName('name')?.text;
-        if (!objName || !prop) return;
-        const encl = up(n, 'method_declaration'); if (!encl) return;
-        const enclCls = up(encl, 'class_declaration');
-        const cls = enclCls?.childForFieldName('name')?.text;
-        const from = `${r}:${cls ? cls + '.' : ''}${encl.childForFieldName('name')?.text}`;
-        if (objName === 'this') {
-          if (cls && methodsByClass.get(cls)?.has(prop)) {
-            const to = `${r}:${cls}.${prop}`;
-            const k = from + '\t' + to;
-            if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
-          }
-          return;
-        }
-        const t = typedParamsOf(encl).get(objName);
-        if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
-      });
-      thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
-      typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
-      return { thisCalls, typedIntents };
-    } catch { return null; } finally { if (tree) tree.delete(); } // finding 6
+      return methodsByClass;
+    },
+    callSite(n) {
+      if (n.type !== 'member_call_expression') return null;
+      const objName = phpVarName(n.childForFieldName('object'));
+      const prop = fieldName(n);
+      if (!objName || !prop) return null;
+      return { obj: objName, prop };
+    },
+    enclosingOf(n) {
+      const encl = upTo(n, PHP_METHOD); if (!encl) return null;
+      const enclCls = upTo(encl, PHP_CLASS);
+      return { owner: enclCls ? fieldName(enclCls) : null, name: encl.childForFieldName('name')?.text, methodNode: encl };
+    },
+    isSelf: (obj) => obj === 'this',
+    identName: (obj) => obj,
+    typedParams: {
+      paramType: 'simple_parameter', deep: true, // parameters nest (defaults/attributes) — walk, don't index
+      entry(p) {
+        const nm = phpVarName(p.childForFieldName('name'));
+        const ty = p.childForFieldName('type')?.text?.replace(/^\?/, ''); // ?Filter -> Filter (nullable)
+        return nm && ty && BARE_TYPE.test(ty) ? { nm, ty } : null;
+      },
+    },
   },
-
-  python: (parser) => (text, relPath) => {
-    let tree = null;
-    try {
-      tree = parser.parse(String(text || ''));
-      const r = String(relPath).replace(/\\/g, '/');
-      const name = (n) => n?.childForFieldName('name')?.text || null;
-      const up = (n, type) => { let c = n.parent; while (c && c.type !== type) c = c.parent; return c; };
+  python: {
+    collectOwners(root) {
       const methodsByClass = new Map();
-      walkTree(tree.rootNode, (n) => {
+      walkTree(root, (n) => {
         if (n.type !== 'class_definition') return;
-        const cn = name(n); if (!cn) return;
+        const cn = fieldName(n); if (!cn) return;
         const set = methodsByClass.get(cn) || new Set();
         const body = n.childForFieldName('body');
-        if (body) for (let i = 0; i < body.childCount; i++) { const m = body.child(i); if (m.type === 'function_definition') { const mn = name(m); if (mn) set.add(mn); } }
+        if (body) for (let i = 0; i < body.childCount; i++) { const m = body.child(i); if (m.type === 'function_definition') { const mn = fieldName(m); if (mn) set.add(mn); } }
         methodsByClass.set(cn, set);
       });
-      const typedParamsOf = (fn) => {
-        const map = new Map();
-        const params = fn?.childForFieldName('parameters');
-        if (!params) return map;
-        for (let i = 0; i < params.childCount; i++) {
-          const p = params.child(i);
-          if (p.type !== 'typed_parameter') continue;
-          const id = p.child(0), ty = p.childForFieldName('type');
-          if (id?.type === 'identifier' && ty && BARE_TYPE.test(ty.text)) map.set(id.text, ty.text);
-        }
-        return map;
-      };
-      const thisCalls = [], typedIntents = [], seen = new Set();
-      walkTree(tree.rootNode, (n) => {
-        if (n.type !== 'call') return;
-        const fn = n.childForFieldName('function');
-        if (!fn || fn.type !== 'attribute') return;
-        const obj = fn.childForFieldName('object'), prop = fn.childForFieldName('attribute')?.text;
-        if (!obj || obj.type !== 'identifier' || !prop) return;
-        const encl = up(n, 'function_definition'); if (!encl) return;
-        const enclCls = up(encl, 'class_definition');
-        const from = `${r}:${enclCls ? name(enclCls) + '.' : ''}${name(encl)}`;
-        if (obj.text === 'self' || obj.text === 'cls') {
-          const cls = enclCls && name(enclCls);
-          if (cls && methodsByClass.get(cls)?.has(prop)) {
-            const to = `${r}:${cls}.${prop}`;
-            const k = from + '\t' + to;
-            if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
-          }
-          return;
-        }
-        const t = typedParamsOf(encl).get(obj.text);
-        if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
-      });
-      thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
-      typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
-      return { thisCalls, typedIntents };
-    } catch { return null; } finally { if (tree) tree.delete(); } // finding 6
+      return methodsByClass;
+    },
+    callSite(n) {
+      if (n.type !== 'call') return null;
+      const fn = n.childForFieldName('function');
+      if (!fn || fn.type !== 'attribute') return null;
+      const obj = fn.childForFieldName('object'), prop = fn.childForFieldName('attribute')?.text;
+      if (!obj || obj.type !== 'identifier' || !prop) return null;
+      return { obj, prop };
+    },
+    enclosingOf(n) {
+      const encl = upTo(n, PY_FN); if (!encl) return null;
+      const enclCls = upTo(encl, PY_CLASS);
+      return { owner: enclCls ? fieldName(enclCls) : null, name: fieldName(encl), methodNode: encl };
+    },
+    isSelf: (obj) => obj.text === 'self' || obj.text === 'cls',
+    identName: (obj) => obj.text,
+    typedParams: {
+      paramType: 'typed_parameter',
+      entry(p) {
+        const id = p.child(0), ty = p.childForFieldName('type');
+        return id?.type === 'identifier' && ty && BARE_TYPE.test(ty.text) ? { nm: id.text, ty: ty.text } : null;
+      },
+    },
   },
-  go: (parser) => (text, relPath) => {
-    let tree = null;
-    try {
-      tree = parser.parse(String(text || ''));
-      const r = String(relPath).replace(/\\/g, '/');
-      const up = (n, types) => { let c = n.parent; while (c && !types.has(c.type)) c = c.parent; return c; };
-      const FN_TYPES = new Set(['method_declaration', 'function_declaration']);
-      const recvOf = (m) => { // -> {varName, typeName} | null, pointer stripped
-        const recv = m.childForFieldName('receiver');
-        if (!recv) return null;
-        for (let i = 0; i < recv.childCount; i++) {
-          const p = recv.child(i);
-          if (p.type !== 'parameter_declaration') continue;
-          const nm = p.childForFieldName('name')?.text;
-          let ty = p.childForFieldName('type');
-          if (ty?.type === 'pointer_type') ty = ty.child(1) || ty;
-          const tn = ty?.text?.replace(/^\*/, '');
-          if (nm && tn && BARE_TYPE.test(tn)) return { varName: nm, typeName: tn };
-        }
-        return null;
-      };
+  go: {
+    collectOwners(root) {
       const methodsByType = new Map();
-      walkTree(tree.rootNode, (n) => {
+      walkTree(root, (n) => {
         if (n.type !== 'method_declaration') return;
-        const rec = recvOf(n), mn = n.childForFieldName('name')?.text;
+        const rec = goRecvOf(n), mn = fieldName(n);
         if (!rec || !mn) return;
         const set = methodsByType.get(rec.typeName) || new Set();
         set.add(mn);
         methodsByType.set(rec.typeName, set);
       });
-      const typedParamsOf = (fn) => {
-        const map = new Map();
-        const params = fn?.childForFieldName('parameters');
-        if (!params) return map;
-        for (let i = 0; i < params.childCount; i++) {
-          const p = params.child(i);
-          if (p.type !== 'parameter_declaration') continue;
-          const nm = p.childForFieldName('name')?.text;
-          let ty = p.childForFieldName('type');
-          if (ty?.type === 'pointer_type') ty = ty.child(1) || ty;
-          const tn = ty?.text?.replace(/^\*/, '');
-          if (nm && tn && BARE_TYPE.test(tn)) map.set(nm, tn);
-        }
-        return map;
-      };
-      const thisCalls = [], typedIntents = [], seen = new Set();
-      walkTree(tree.rootNode, (n) => {
-        if (n.type !== 'call_expression') return;
-        const fn = n.childForFieldName('function');
-        if (!fn || fn.type !== 'selector_expression') return;
-        const obj = fn.childForFieldName('operand'), prop = fn.childForFieldName('field')?.text;
-        if (!obj || obj.type !== 'identifier' || !prop) return;
-        const encl = up(n, FN_TYPES); if (!encl) return;
-        const enclName = encl.childForFieldName('name')?.text; if (!enclName) return;
-        const enclRecv = encl.type === 'method_declaration' ? recvOf(encl) : null;
-        const from = `${r}:${enclRecv ? enclRecv.typeName + '.' : ''}${enclName}`;
-        if (enclRecv && obj.text === enclRecv.varName) {
-          if (methodsByType.get(enclRecv.typeName)?.has(prop)) {
-            const to = `${r}:${enclRecv.typeName}.${prop}`;
-            const k = from + '\t' + to;
-            if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
-          }
-          return;
-        }
-        const t = typedParamsOf(encl).get(obj.text);
-        if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
-      });
-      thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
-      typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
-      return { thisCalls, typedIntents };
-    } catch { return null; } finally { if (tree) tree.delete(); } // finding 6
+      return methodsByType;
+    },
+    callSite(n) {
+      if (n.type !== 'call_expression') return null;
+      const fn = n.childForFieldName('function');
+      if (!fn || fn.type !== 'selector_expression') return null;
+      const obj = fn.childForFieldName('operand'), prop = fn.childForFieldName('field')?.text;
+      if (!obj || obj.type !== 'identifier' || !prop) return null;
+      return { obj, prop };
+    },
+    enclosingOf(n) {
+      const encl = upTo(n, GO_FN_TYPES); if (!encl) return null;
+      const name = fieldName(encl); if (!name) return null;
+      const rec = encl.type === 'method_declaration' ? goRecvOf(encl) : null;
+      return { owner: rec ? rec.typeName : null, name, methodNode: encl, recvVar: rec ? rec.varName : null };
+    },
+    isSelf: (obj, ctx) => !!ctx.recvVar && obj.text === ctx.recvVar, // the receiver VARIABLE is Go's `this`
+    identName: (obj) => obj.text,
+    typedParams: {
+      paramType: 'parameter_declaration',
+      entry(p) {
+        const nm = p.childForFieldName('name')?.text;
+        let ty = p.childForFieldName('type');
+        if (ty?.type === 'pointer_type') ty = ty.child(1) || ty;
+        const tn = ty?.text?.replace(/^\*/, '');
+        return nm && tn && BARE_TYPE.test(tn) ? { nm, ty: tn } : null;
+      },
+    },
   },
-  rust: (parser) => (text, relPath) => {
-    let tree = null;
-    try {
-      tree = parser.parse(String(text || ''));
-      const r = String(relPath).replace(/\\/g, '/');
-      const up = (n, type) => { let c = n.parent; while (c && c.type !== type) c = c.parent; return c; };
-      const implType = (imp) => { const t = imp.childForFieldName('type'); return t && BARE_TYPE.test(t.text) ? t.text : null; };
+  rust: {
+    collectOwners(root) {
       const methodsByType = new Map();
-      walkTree(tree.rootNode, (n) => {
+      walkTree(root, (n) => {
         if (n.type !== 'impl_item') return;
-        const tn = implType(n); if (!tn) return;
+        const tn = rustImplType(n); if (!tn) return;
         const set = methodsByType.get(tn) || new Set();
         const body = n.childForFieldName('body');
-        if (body) for (let i = 0; i < body.childCount; i++) { const f = body.child(i); if (f.type === 'function_item') { const fn = f.childForFieldName('name')?.text; if (fn) set.add(fn); } }
+        if (body) for (let i = 0; i < body.childCount; i++) { const f = body.child(i); if (f.type === 'function_item') { const fn = fieldName(f); if (fn) set.add(fn); } }
         methodsByType.set(tn, set);
       });
-      const typedParamsOf = (fn) => {
-        const map = new Map();
-        const params = fn?.childForFieldName('parameters');
-        if (!params) return map;
-        for (let i = 0; i < params.childCount; i++) {
-          const p = params.child(i);
-          if (p.type !== 'parameter') continue;
-          const nm = p.childForFieldName('pattern')?.text;
-          const tn = p.childForFieldName('type') ? stripRustRef(p.childForFieldName('type').text) : null;
-          if (nm && tn && BARE_TYPE.test(nm) && BARE_TYPE.test(tn)) map.set(nm, tn);
-        }
-        return map;
-      };
-      const thisCalls = [], typedIntents = [], seen = new Set();
-      walkTree(tree.rootNode, (n) => {
-        if (n.type !== 'call_expression') return;
-        const fn = n.childForFieldName('function');
-        if (!fn || fn.type !== 'field_expression') return;
-        const obj = fn.childForFieldName('value'), prop = fn.childForFieldName('field')?.text;
-        if (!obj || !prop) return;
-        const encl = up(n, 'function_item'); if (!encl) return;
-        const enclImpl = up(encl, 'impl_item');
-        const implName = enclImpl && implType(enclImpl);
-        const from = `${r}:${implName ? implName + '.' : ''}${encl.childForFieldName('name')?.text}`;
-        if (obj.type === 'self' || obj.text === 'self') {
-          if (implName && methodsByType.get(implName)?.has(prop)) {
-            const to = `${r}:${implName}.${prop}`;
-            const k = from + '\t' + to;
-            if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
-          }
-          return;
-        }
-        if (obj.type !== 'identifier') return;
-        const t = typedParamsOf(encl).get(obj.text);
-        if (t) { const k = from + '\t' + t + '\t' + prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); } }
-      });
-      thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
-      typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
-      return { thisCalls, typedIntents };
-    } catch { return null; } finally { if (tree) tree.delete(); } // finding 6
+      return methodsByType;
+    },
+    callSite(n) {
+      if (n.type !== 'call_expression') return null;
+      const fn = n.childForFieldName('function');
+      if (!fn || fn.type !== 'field_expression') return null;
+      const obj = fn.childForFieldName('value'), prop = fn.childForFieldName('field')?.text;
+      if (!obj || !prop) return null;
+      return { obj, prop };
+    },
+    enclosingOf(n) {
+      const encl = upTo(n, RS_FN); if (!encl) return null;
+      const enclImpl = upTo(encl, RS_IMPL);
+      const implName = enclImpl && rustImplType(enclImpl);
+      return { owner: implName || null, name: encl.childForFieldName('name')?.text, methodNode: encl };
+    },
+    isSelf: (obj) => obj.type === 'self' || obj.text === 'self',
+    identName: (obj) => (obj.type === 'identifier' ? obj.text : null),
+    typedParams: {
+      paramType: 'parameter',
+      entry(p) {
+        const nm = p.childForFieldName('pattern')?.text;
+        const tn = p.childForFieldName('type') ? stripRustRef(p.childForFieldName('type').text) : null;
+        return nm && tn && BARE_TYPE.test(nm) && BARE_TYPE.test(tn) ? { nm, ty: tn } : null;
+      },
+    },
   },
+  // Java/C# (docs/specs/java-cs-tree-sitter.md): both REQUIRE an enclosing class (a top-level
+  // function doesn't exist), so enclosingOf null-guards owner AND name — matching the old shape
+  // walker's `if (!mName || !cName) return`.
+  java: {
+    collectOwners(root) {
+      const methodsByClass = new Map();
+      walkTree(root, (n) => {
+        if (n.type !== 'class_declaration') return;
+        const cn = fieldName(n); if (!cn) return;
+        const set = methodsByClass.get(cn) || new Set();
+        const body = n.childForFieldName('body');
+        if (body) for (let i = 0; i < body.childCount; i++) { const m = body.child(i); if (m.type === 'method_declaration') { const mn = fieldName(m); if (mn) set.add(mn); } }
+        methodsByClass.set(cn, set);
+      });
+      return methodsByClass;
+    },
+    callSite(n) {
+      if (n.type !== 'method_invocation') return null;
+      const obj = n.childForFieldName('object');
+      const prop = fieldName(n);
+      if (!obj || !prop) return null;
+      return { obj, prop };
+    },
+    enclosingOf(n) {
+      const encl = upTo(n, JC_METHOD); if (!encl) return null;
+      const enclCls = upTo(encl, JC_CLASS);
+      const owner = enclCls && fieldName(enclCls), name = fieldName(encl);
+      if (!owner || !name) return null;
+      return { owner, name, methodNode: encl };
+    },
+    isSelf: (obj) => obj.type === 'this',
+    identName: (obj) => (obj.type === 'identifier' ? obj.text : null),
+    typedParams: {
+      paramType: 'formal_parameter',
+      entry(p) {
+        const tNode = p.childForFieldName('type');
+        const nNode = p.childForFieldName('name');
+        return tNode?.type === 'type_identifier' && nNode ? { nm: nNode.text, ty: tNode.text } : null;
+      },
+    },
+  },
+  csharp: {
+    collectOwners(root) {
+      const methodsByClass = new Map();
+      walkTree(root, (n) => {
+        if (n.type !== 'class_declaration') return;
+        const cn = fieldName(n); if (!cn) return;
+        const set = methodsByClass.get(cn) || new Set();
+        const body = n.childForFieldName('body');
+        if (body) for (let i = 0; i < body.childCount; i++) { const m = body.child(i); if (m.type === 'method_declaration') { const mn = fieldName(m); if (mn) set.add(mn); } }
+        methodsByClass.set(cn, set);
+      });
+      return methodsByClass;
+    },
+    callSite(n) {
+      if (n.type !== 'invocation_expression') return null;
+      const fn = n.childForFieldName('function');
+      if (!fn || fn.type !== 'member_access_expression') return null;
+      const obj = fn.childForFieldName('expression');
+      const prop = fieldName(fn);
+      if (!obj || !prop) return null;
+      return { obj, prop };
+    },
+    enclosingOf(n) {
+      const encl = upTo(n, JC_METHOD); if (!encl) return null;
+      const enclCls = upTo(encl, JC_CLASS);
+      const owner = enclCls && fieldName(enclCls), name = fieldName(encl);
+      if (!owner || !name) return null;
+      return { owner, name, methodNode: encl };
+    },
+    isSelf: (obj) => obj.type === 'this_expression',
+    identName: (obj) => (obj.type === 'identifier' ? obj.text : null),
+    typedParams: {
+      paramType: 'parameter',
+      entry(p) {
+        const tNode = p.childForFieldName('type');
+        const nNode = p.childForFieldName('name');
+        return tNode?.type === 'identifier' && nNode ? { nm: nNode.text, ty: tNode.text } : null;
+      },
+    },
+  },
+};
+
+/** THE dispatch walk (was seven copies): owner index -> call sites -> dedupe -> sorted result. */
+const makeDispatchWalker = (parser, L) => (text, relPath) => {
+  let tree = null;
+  try {
+    tree = parser.parse(String(text || ''));
+    const r = String(relPath).replace(/\\/g, '/');
+    const owners = L.collectOwners(tree.rootNode);
+    const paramsOf = L.typedParams ? typedParamsFrom(L.typedParams) : null;
+    const thisCalls = [], typedIntents = [], seen = new Set();
+    walkTree(tree.rootNode, (n) => {
+      const site = L.callSite(n); if (!site) return;
+      const ctx = L.enclosingOf(n); if (!ctx) return;
+      const from = `${r}:${ctx.owner ? ctx.owner + '.' : ''}${ctx.name}`;
+      if (L.isSelf(site.obj, ctx)) {
+        if (ctx.owner && owners.get(ctx.owner)?.has(site.prop)) {
+          const to = `${r}:${ctx.owner}.${site.prop}`;
+          const k = from + '\t' + to;
+          if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
+        }
+        return;
+      }
+      if (!paramsOf) return;
+      const id = L.identName(site.obj);
+      if (id == null) return;
+      const t = paramsOf(ctx.methodNode).get(id);
+      if (t) { const k = from + '\t' + t + '\t' + site.prop; if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: site.prop }); } }
+    });
+    thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
+    typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
+    return { thisCalls, typedIntents };
+  } catch { return null; } finally { if (tree) tree.delete(); } // per-file fallback: regex output stands alone (finding 6: free either way)
 };
 
 const _langEngines = {}; // key -> undefined(not tried)/null(unavailable)/engine
 
-/** Lazily load the dispatch engine for 'java'|'csharp'|'python'|'go'|'rust'. Returns { extractDispatch } or null. */
+/** Lazily load the dispatch engine for any LANG_DISPATCH key (java/csharp/python/go/rust/ruby/php). Returns { extractDispatch } or null. */
 export async function loadLangEngine(key) {
   if (_langEngines[key] !== undefined) return _langEngines[key];
   try {
     const grammarPath = LANG_GRAMMARS[key];
-    const shape = LANG_SHAPES[key];
-    if (!grammarPath || (!shape && !LANG_WALKERS[key]) || !existsSync(grammarPath)) { _langEngines[key] = null; return null; }
+    if (!grammarPath || !LANG_DISPATCH[key] || !existsSync(grammarPath)) { _langEngines[key] = null; return null; }
     const ts = await import('web-tree-sitter');
     const { Parser, Language } = ts;
     await Parser.init();
     const parser = new Parser();
     parser.setLanguage(await Language.load(readFileSync(grammarPath)));
 
-    if (LANG_WALKERS[key]) { // Spec F: dedicated tree-shape walker (python/go/rust)
-      _langEngines[key] = { extractDispatch: LANG_WALKERS[key](parser) };
-      return _langEngines[key];
-    }
-
-    const className = (n) => n.childForFieldName('name')?.text || null;
-    const enclosing = (node, types) => { let c = node.parent; while (c && !types.has(c.type)) c = c.parent; return c; };
-    const METHOD_SET = new Set([shape.method]);
-
-    const extractDispatch = (text, relPath) => {
-      let tree = null;
-      try {
-        tree = parser.parse(String(text || ''));
-        const r = String(relPath).replace(/\\/g, '/');
-        const qualId = (cls, m) => `${r}:${cls}.${m}`;
-        const methodsByClass = new Map(); // class -> Set(method names) in THIS file
-        walkTree(tree.rootNode, (n) => {
-          if (!shape.classes.has(n.type)) return;
-          const cname = className(n);
-          if (!cname) return;
-          const set = methodsByClass.get(cname) || new Set();
-          const body = n.childForFieldName('body');
-          if (body) for (let i = 0; i < body.childCount; i++) {
-            const m = body.child(i);
-            if (m.type === shape.method) { const mn = className(m); if (mn) set.add(mn); }
-          }
-          methodsByClass.set(cname, set);
-        });
-
-        // declared param types of the enclosing method: identifier -> class/type name
-        const paramTypesOf = (methodNode) => {
-          const map = new Map();
-          const params = methodNode?.childForFieldName('parameters');
-          if (!params) return map;
-          for (let i = 0; i < params.childCount; i++) {
-            const p = params.child(i);
-            if (p.type !== shape.param) continue;
-            const tNode = p.childForFieldName('type');
-            const nNode = p.childForFieldName('name');
-            if (tNode?.type === shape.typeNode && nNode) map.set(nNode.text, tNode.text);
-          }
-          return map;
-        };
-
-        const thisCalls = [], typedIntents = [];
-        const seen = new Set();
-        walkTree(tree.rootNode, (n) => {
-          if (n.type !== shape.invoke) return;
-          let obj, prop;
-          if (key === 'java') {
-            obj = n.childForFieldName('object');
-            prop = n.childForFieldName('name')?.text;
-          } else {
-            const fn = n.childForFieldName('function');
-            if (!fn || fn.type !== 'member_access_expression') return;
-            obj = fn.childForFieldName('expression');
-            prop = fn.childForFieldName('name')?.text;
-          }
-          if (!obj || !prop) return;
-          const mNode = enclosing(n, METHOD_SET);
-          const cNode = mNode && enclosing(mNode, shape.classes);
-          const mName = mNode && className(mNode), cName = cNode && className(cNode);
-          if (!mName || !cName) return;
-          const from = qualId(cName, mName);
-          if (obj.type === shape.thisNode) {
-            if (methodsByClass.get(cName)?.has(prop)) {
-              const to = qualId(cName, prop);
-              const k = from + '\t' + to;
-              if (from !== to && !seen.has(k)) { seen.add(k); thisCalls.push({ from, to }); }
-            }
-            return;
-          }
-          if (obj.type === 'identifier') {
-            const t = paramTypesOf(mNode).get(obj.text);
-            if (t) {
-              const k = from + '\t' + t + '\t' + prop;
-              if (!seen.has(k)) { seen.add(k); typedIntents.push({ from, recvType: t, method: prop }); }
-            }
-          }
-        });
-        thisCalls.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
-        typedIntents.sort((a, b) => ((a.from + a.recvType + a.method) < (b.from + b.recvType + b.method) ? -1 : 1));
-        return { thisCalls, typedIntents };
-      } catch { return null; } finally { if (tree) tree.delete(); } // per-file fallback: regex output stands alone (finding 6: free either way)
-    };
-
-    _langEngines[key] = { extractDispatch };
+    _langEngines[key] = { extractDispatch: makeDispatchWalker(parser, LANG_DISPATCH[key]) };
   } catch { _langEngines[key] = null; }
   return _langEngines[key];
 }

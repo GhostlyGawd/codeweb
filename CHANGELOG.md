@@ -387,6 +387,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
   workable. (IMPROVEMENTS.md #1)
 
 ### Changed
+- **One dispatch skeleton, seven language tables.** `ts-engine.mjs` repeated its per-language
+  dispatch walker seven times (Java/C# via a shape closure; Ruby/PHP/Python/Go/Rust as five
+  hand-copied closures), with `up()` defined five times in two drifted signatures,
+  `typedParamsOf` four times plus a renamed `paramTypesOf`, and the owner-index + dedupe + sort
+  epilogue cloned per language — the same-name copies were also why deadcode showed @-suffixed
+  orphan ids for this file. Now `makeDispatchWalker(parser, table)` owns THE skeleton (ancestor
+  climb `upTo`, `typedParamsFrom`, seen-key dedupe, sorted `{thisCalls, typedIntents}` return,
+  try/finally `tree.delete()`), and each language declares only its genuine tree shape:
+  `collectOwners` / `callSite` / `enclosingOf` / `isSelf` / `identName` / `typedParams` —
+  ~25 declarative lines per language, 762→735 total with seven walkers collapsed to one.
+  Verified byte-identical on a purpose-built 7-language dispatch corpus (this-calls AND typed
+  intents wired in every language, incl. Go receiver-variable "self", Rust `&`-ref stripping,
+  PHP nullable-type params) plus pycorp and corpus7; language/AST suites and the full 582-test
+  run green. (perf-quality finding 26)
 - **The extractor is decomposed — and testable in-process.** `extract-symbols.mjs` was a
   1,500-line script/module hybrid: per-language scan rules, body extents, signatures, import/
   re-export/member resolution, and the caches all interleaved, with `byName`/`files` as module

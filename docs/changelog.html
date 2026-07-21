@@ -513,6 +513,25 @@
 <p>  workable. (IMPROVEMENTS.md #1)</p>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li><strong>The extractor is decomposed — and testable in-process.</strong> <code>extract-symbols.mjs</code> was a</li>
+</ul>
+<p>  1,500-line script/module hybrid: per-language scan rules, body extents, signatures, import/</p>
+<p>  re-export/member resolution, and the caches all interleaved, with <code>byName</code>/<code>files</code> as module</p>
+<p>  globals — so every extractor test shelled out (253 <code>runNode(</code> spawn sites across the suite).</p>
+<p>  Two pure modules now hold the substance: <code>lib/lang-rules.mjs</code> (the 11-language regex symbol</p>
+<p>  scan, <code>bodyEnd</code> brace/dedent extents, <code>parseSignature</code>, KEYWORDS/DYNAMIC_RE/langOf — functions</p>
+<p>  of their arguments, no IO) and <code>lib/import-resolve.mjs</code> (<code>createImportResolver(ctx)</code> — relative</p>
+<p>  and Python module resolution, JS/TS re-export chains incl. <code>export *</code>, Python from-import</p>
+<p>  re-export tables, unique-member lookup, and per-file import binding, all over injected context</p>
+<p>  with no module-global state). The orchestrator keeps enumeration, caching (stamp/hash/bind/rex</p>
+<p>  replay), engines, and edge derivation — 968 lines, down from 1,506 — and the extractor's own</p>
+<p>  <code>SRC</code> extension list is now the shared <code>SRC_RE</code> from <code>lib/common.mjs</code> (the hand-mirrored copy</p>
+<p>  the file itself warned could drift). Bodies moved verbatim; proof: fragments byte-identical</p>
+<p>  old-vs-new on four corpora × both engine tiers × cold/warm/replayed-cache paths, including an</p>
+<p>  old-engine scan cache replayed by the new engine, plus a same-tree self-map A/B. The first</p>
+<p>  in-process extractor tests land with it (<code>tests/lang-rules.test.mjs</code>: 10 cases, 137ms, zero</p>
+<p>  spawns — the seam #30's spawn-collapse needs). (perf-quality finding 25)</p>
+<ul>
 <li><strong>One flag loop.</strong> 25 scripts carried the identical hand-rolled <code>for (…argv…)</code> parse with three</li>
 </ul>
 <p>  drifting policies — <code>run.mjs</code> rejected unknown flags (the documented #5 convention) while</p>
