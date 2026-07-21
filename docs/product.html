@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Product — codeweb</title>
-<meta name="description" content="The 24 deterministic MCP tools, the Tier 0–3 feature map, 11-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.">
+<meta name="description" content="The 27 deterministic MCP tools, the Tier 0–3 feature map, 11-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="codeweb">
 <meta property="og:title" content="codeweb — one graph, two interfaces">
-<meta property="og:description" content="The 24 deterministic MCP tools, the Tier 0–3 feature map, 11-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.">
+<meta property="og:description" content="The 27 deterministic MCP tools, the Tier 0–3 feature map, 11-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.">
 <meta property="og:url" content="https://ghostlygawd.github.io/codeweb/product.html">
 <meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -44,7 +44,7 @@
   <div class="wrap">
     <div class="section-head">
       <span class="eyebrow">Product</span>
-      <h2>One graph. 24 tools. Every phase of the edit loop.</h2>
+      <h2>One graph. 27 tools. Every phase of the edit loop.</h2>
       <p class="lead">codeweb turns a repository into a queryable structural graph, then exposes it as deterministic tools an agent calls at exactly the moment it needs them — before writing, while reviewing, and when optimizing.</p>
     </div>
     <div class="tool-explorer">
@@ -62,17 +62,17 @@
       <button class="te-station" type="button" role="tab" aria-selected="false" data-te="2" style="--phase:var(--med)">
         <span class="te-step">03</span>
         <span class="te-title">Review-time intelligence</span>
-        <span class="te-badge">5</span>
+        <span class="te-badge">6</span>
       </button>
       <button class="te-station" type="button" role="tab" aria-selected="false" data-te="3" style="--phase:var(--purple)">
         <span class="te-step">04</span>
         <span class="te-title">Optimize-time intelligence</span>
-        <span class="te-badge">3</span>
+        <span class="te-badge">4</span>
       </button>
       <button class="te-station" type="button" role="tab" aria-selected="false" data-te="4" style="--phase:var(--good)">
         <span class="te-step">05</span>
         <span class="te-title">Freshness & context</span>
-        <span class="te-badge">2</span>
+        <span class="te-badge">3</span>
       </button>
       <button class="te-station" type="button" role="tab" aria-selected="false" data-te="5" style="--phase:var(--pink)">
         <span class="te-step">06</span>
@@ -119,6 +119,7 @@
             <div class="te-tool"><span class="te-name">codeweb_risk</span><span class="te-desc">Rank symbols by change-risk (fan-in, fan-out, LOC, blast radius, churn) for triage.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_break_cycles</span><span class="te-desc">For each file cycle, propose the cheapest edge to sever — verified to actually break it.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_deadcode</span><span class="te-desc">Confidence-tiered dead code: safe-to-delete vs review-first (test-guarded / entrypoint-like).</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_annotate</span><span class="te-desc">undefined</span></div>
           </div>
         </div>
       </div>
@@ -130,6 +131,7 @@
             <div class="te-tool"><span class="te-name">codeweb_codemod</span><span class="te-desc">Plan a consolidation merge (report-only over MCP): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, projected gate verdict.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_hotspots</span><span class="te-desc">Rank symbols by complexity × fan-in × churn — where to refactor first.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_campaign</span><span class="te-desc">An ordered, cumulatively pre-flighted ROI worklist (dead code + cycle cuts + merges). Read-only plan.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_simulate</span><span class="te-desc">undefined</span></div>
           </div>
         </div>
       </div>
@@ -140,6 +142,7 @@
           <div class="te-tools">
             <div class="te-tool"><span class="te-name">codeweb_context</span><span class="te-desc">Blast-radius-scoped context in one call: a symbol's body, direct callers (with bodies), callees (location-only), and transitive impact ids.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_refresh</span><span class="te-desc">Re-extract from disk so mid-task queries reflect edits, not a stale snapshot. Incremental; preserves domains.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_stats</span><span class="te-desc">undefined</span></div>
           </div>
         </div>
       </div>
@@ -155,7 +158,7 @@
       </div>
       </div>
     </div>
-    <p class="muted" style="margin-top:var(--s-5)">All 24 tools are read-only. The one mutating operation — <code>codeweb_codemod --write</code> — is gated, reversible, and deliberately <strong>not</strong> exposed over MCP. Every tool has CLI/MCP parity, verified by JSON-RPC conformance tests.</p>
+    <p class="muted" style="margin-top:var(--s-5)">All 27 tools are read-only. The one mutating operation — <code>codeweb_codemod --write</code> — is gated, reversible, and deliberately <strong>not</strong> exposed over MCP. Every tool has CLI/MCP parity, verified by JSON-RPC conformance tests.</p>
   </div>
 </section>
 

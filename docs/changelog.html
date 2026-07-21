@@ -106,6 +106,40 @@
 <p>  helpers + the generated site bundle to all product code; campaign's plan dropped from 55 steps</p>
 <p>  (-730 claimed LOC, mostly false orphans) to 26 grounded ones. (IMPROVEMENTS.md #6)</p>
 <ul>
+<li><strong>The report now shows the pipeline's own findings — and every view is a link.</strong> The</li>
+</ul>
+<p>  interactive report loaded <code>graph.overlaps</code> and never rendered it: the Findings tab showed only</p>
+<p>  a client-side name-match heuristic, so the body-confirmed, tiered findings in</p>
+<p>  <code>overlap.md</code>/<code>optimize.md</code> never reached the report's audience. A new **Consolidation</p>
+<p>  findings** section now leads the tab (confidence badges, evidence, recommendation, clickable</p>
+<p>  symbols; body-refuted candidates counted). The URL hash grew from node-only <code>#s=</code> to the whole</p>
+<p>  view — <code>#tab=…&amp;roles=…&amp;s=…</code> — restored on load (legacy links keep working), with a</p>
+<p>  <strong>copy link</strong> button in the header; hosted reports carry <code>og:title</code>/<code>og:description</code> built</p>
+<p>  from the target label and counts only (the meta.root privacy invariant holds, re-pinned by</p>
+<p>  test). (IMPROVEMENTS.md #8)</p>
+<ul>
+<li><strong>The report meets people where they are: light mode, print, full keyboard reach.</strong> A light</li>
+</ul>
+<p>  theme follows the OS preference (<code>prefers-color-scheme</code>) with an explicit auto → light → dark</p>
+<p>  toggle (persisted; the canvas graph re-reads its label/halo colors from the theme tokens); a</p>
+<p>  print stylesheet makes the report paper-able; every hover affordance gained a</p>
+<p>  <code>:focus-visible</code> twin; matrix cells and treemap blocks are keyboard-reachable</p>
+<p>  (tabindex + Enter/Space + <code>aria-label</code>); the tablist has real <code>tabpanel</code>/<code>aria-controls</code></p>
+<p>  wiring and roving arrow keys. Also: the undefined <code>--hi</code> token (the "duplicated" tag silently</p>
+<p>  lost its color) now uses <code>--stCritical</code>; the treemap caches its render like sibling tabs; the</p>
+<p>  mobile search-count no longer collides with the input; the editor-root picker is an inline</p>
+<p>  form instead of a blocking <code>prompt()</code>; and the whole-panel <code>aria-live</code> (which re-read the</p>
+<p>  entire inspector on every click) became a scoped one-line announcer. (IMPROVEMENTS.md #9)</p>
+<ul>
+<li><strong>The value receipt is felt, not buried.</strong> The session brief's activity line used to render</li>
+</ul>
+<p>  only the current calendar month's bucket and vanish when it was empty — every new user and</p>
+<p>  every 1st-of-the-month saw silence. It now leads with <strong>lifetime totals</strong> ("codeweb here since</p>
+<p>  2026-06: …", current month in parentheses), the brief warns when the map is a week old</p>
+<p>  ("built N day(s) ago — refresh with codeweb_refresh"), a successful <code>run.mjs</code> map ends with</p>
+<p>  the receipt line, and CLI queries (<code>query</code>/<code>explain</code>/<code>context-pack</code>) now count toward</p>
+<p>  <code>queriesServed</code> — the denominator stops undercounting non-MCP use. (IMPROVEMENTS.md #10)</p>
+<ul>
 <li><strong>The CLI grew a front door.</strong> Every CLI answers <code>--help</code>/<code>-h</code> (exit 0) — including the</li>
 </ul>
 <p>  <code>codeweb</code> bin, where <code>--help</code> previously errored with <code>target not found: --help</code>; <code>run.mjs</code></p>
@@ -117,6 +151,15 @@
 <p>  inside a mapped repo. Exit codes on the first-touch scripts (<code>run</code>, <code>extract-symbols</code>,</p>
 <p>  <code>build-report</code>) now follow the documented 0/1/2 convention. (IMPROVEMENTS.md #5)</p>
 <h3 class="cl-grp">Fixed</h3>
+<ul>
+<li><strong>The VS Code lens is truthful again — and covers all 11 languages.</strong> The extension README</li>
+</ul>
+<p>  promised "the lens re-reads the graph on change," but no watcher or change-event existed:</p>
+<p>  lenses showed stale numbers until a file was reopened. A <code>FileSystemWatcher</code> on</p>
+<p>  <code>**/.codeweb/graph.json</code> now fires <code>onDidChangeCodeLenses</code> (debounced), a manual</p>
+<p>  <code>codeweb: Refresh CodeLens from the graph</code> command exists, and the language selector grew from</p>
+<p>  9 to the engine's 11 (Ruby/PHP/Kotlin/Swift files finally get lenses). Extension v0.2.0.</p>
+<p>  (IMPROVEMENTS.md #7)</p>
 <ul>
 <li><strong>The public prose can no longer understate the product — and what it said is fixed.</strong> The</li>
 </ul>

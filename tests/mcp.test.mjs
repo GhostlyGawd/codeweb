@@ -81,11 +81,11 @@ test('M1: initialize returns protocolVersion, an object tools capability, and se
 test('M2: tools/list exposes the full tool set with object schemas + correct required args', () => {
   const tools = rpc([INIT, { jsonrpc: '2.0', id: 2, method: 'tools/list' }]).byId.get(2).result.tools;
   assert.deepEqual(tools.map((t) => t.name).sort(),
-    ['codeweb_break_cycles', 'codeweb_brief', 'codeweb_callees', 'codeweb_callers', 'codeweb_campaign', 'codeweb_codemod',
+    ['codeweb_annotate', 'codeweb_break_cycles', 'codeweb_brief', 'codeweb_callees', 'codeweb_callers', 'codeweb_campaign', 'codeweb_codemod',
       'codeweb_context', 'codeweb_cycles', 'codeweb_deadcode', 'codeweb_diff', 'codeweb_explain', 'codeweb_find',
       'codeweb_find_similar', 'codeweb_fitness', 'codeweb_hotspots', 'codeweb_impact', 'codeweb_map',
       'codeweb_orphans', 'codeweb_placement', 'codeweb_reading_order', 'codeweb_refresh', 'codeweb_review',
-      'codeweb_risk', 'codeweb_tests']);
+      'codeweb_risk', 'codeweb_simulate', 'codeweb_stats', 'codeweb_tests']);
   for (const t of tools) {
     assert.ok(t.description && t.description.length > 0, `${t.name} has a description`);
     assert.equal(t.inputSchema.type, 'object', `${t.name} inputSchema is an object`);
@@ -345,4 +345,81 @@ test('M15: codeweb_reading_order returns a bounded foundations-first path (F8)',
 	// helper is a foundation (called by main) -> must precede main in the reading order
 	const ids = payload.order.map((o) => o.id);
 	assert.ok(ids.indexOf('util.js:helper') < ids.indexOf('main.js:main'), 'callee precedes caller');
+});
+
+// #11 (IMPROVEMENTS.md): the loop's last steps arrive over MCP — pre-flight, suppression
+// memory, the value receipt — and codeweb_map reports progress when the client asks for it.
+test('codeweb_simulate pre-flights a delete and returns the gate verdict', () => {
+  const input = [
+    { jsonrpc: '2.0', id: 1, method: 'initialize', params: {} },
+    { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'codeweb_simulate', arguments: { graph: GP, delete: 'b.js:helper' } } },
+  ].map((m) => JSON.stringify(m)).join('\n') + '\n';
+  const r = spawnServer(input);
+  const res = parseLines(r.stdout).find((m) => m.id === 2)?.result;
+  assert.ok(res && !res.isError, JSON.stringify(res));
+  const p = JSON.parse(res.content[0].text);
+  assert.equal(p.op, 'delete');
+  // gate semantics: a pure removal passes; the verdict shape is the contract
+  assert.ok(typeof p.projected.ok === 'boolean' && Array.isArray(p.projected.newCycles) && Array.isArray(p.projected.lostCallers), 'projected gate verdict shape');
+});
+
+test('codeweb_simulate validates its mode arguments', () => {
+  const input = [
+    { jsonrpc: '2.0', id: 1, method: 'initialize', params: {} },
+    { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'codeweb_simulate', arguments: { graph: GP } } },
+  ].map((m) => JSON.stringify(m)).join('\n') + '\n';
+  const res = parseLines(spawnServer(input).stdout).find((m) => m.id === 2)?.result;
+  assert.ok(res.isError, 'no mode -> isError');
+  assert.match(res.content[0].text, /exactly one of/);
+});
+
+test('codeweb_annotate records a suppression beside the graph and lists it back', () => {
+  const ws = tmpDir('codeweb-mcp-ann-');
+  try {
+    const gp = join(ws, 'graph.json');
+    writeFileSync(gp, JSON.stringify(GRAPH));
+    const input = [
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: {} },
+      { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'codeweb_annotate', arguments: { graph: gp, suppress: 'orphan:a.js:main', note: 'framework-invoked' } } },
+      { jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'codeweb_annotate', arguments: { graph: gp, list: true } } },
+    ].map((m) => JSON.stringify(m)).join('\n') + '\n';
+    const r = spawnServer(input);
+    const lines = parseLines(r.stdout);
+    const add = lines.find((m) => m.id === 2)?.result;
+    assert.ok(add && !add.isError, JSON.stringify(add));
+    const listed = JSON.parse(lines.find((m) => m.id === 3).result.content[0].text);
+    assert.ok(JSON.stringify(listed).includes('orphan:a.js:main'), 'suppression listed back');
+    assert.ok(readFileSync(join(ws, 'annotations.json'), 'utf8').includes('framework-invoked'), 'written beside the graph');
+  } finally { cleanup(ws); }
+});
+
+test('codeweb_stats serves the value receipt over MCP', () => {
+  const input = [
+    { jsonrpc: '2.0', id: 1, method: 'initialize', params: {} },
+    { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'codeweb_stats', arguments: { graph: GP } } },
+  ].map((m) => JSON.stringify(m)).join('\n') + '\n';
+  const res = parseLines(spawnServer(input).stdout).find((m) => m.id === 2)?.result;
+  assert.ok(res && !res.isError, JSON.stringify(res));
+  const p = JSON.parse(res.content[0].text);
+  assert.ok(p.empty || p.months, 'receipt shape (empty note or months)');
+});
+
+test('codeweb_map emits notifications/progress when the client sends a progressToken', () => {
+  const dir = tmpDir('codeweb-mcp-map-');
+  try {
+    writeTree(dir, { 'a.js': 'export function alpha() { return 1; }\n' });
+    const input = [
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: {} },
+      { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'codeweb_map', arguments: { target: dir }, _meta: { progressToken: 'map-1' } } },
+    ].map((m) => JSON.stringify(m)).join('\n') + '\n';
+    const r = spawnServer(input);
+    const lines = parseLines(r.stdout);
+    const progress = lines.filter((m) => m.method === 'notifications/progress');
+    assert.ok(progress.length >= 2, `at least stage + done notifications (got ${progress.length})`);
+    assert.ok(progress.every((n) => n.params.progressToken === 'map-1'), 'token echoed');
+    assert.ok(progress.some((n) => /extract/.test(n.params.message)), 'stage names surface');
+    const res = lines.find((m) => m.id === 2)?.result;
+    assert.ok(res && !res.isError, JSON.stringify(res));
+    assert.match(res.content[0].text, /"ok":true/);
+  } finally { cleanup(dir); }
 });

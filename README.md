@@ -15,7 +15,7 @@ Every serious change starts with the same questions: *who uses this? what breaks
 does this already exist? is this dead?* Today an agent answers them by grepping and reading whole
 files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import
 graph once (~3 s for 3,000 symbols), then answers those questions **exactly, in milliseconds, for
-about a kilobyte each** — as **24 deterministic MCP tools for your agent** (no LLM in the loop) and
+about a kilobyte each** — as **27 deterministic MCP tools for your agent** (no LLM in the loop) and
 a self-contained **interactive map for you**.
 
 Measured on [vite](https://github.com/vitejs/vite) (3,000+ symbols), graded by the TypeScript
@@ -168,7 +168,7 @@ Then restart Claude Code so the `/codeweb` command, agents, and skill register.
 ```
 npx -y @ghostlygawd/codeweb /path/to/your/project --out-dir /path/to/your/project/.codeweb
 # then open /path/to/your/project/.codeweb/report.html
-claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp   # the 24 MCP tools, pluginless
+claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp   # the 27 MCP tools, pluginless
 ```
 Cursor, Windsurf, or any other MCP client: point it at the same `codeweb-mcp` command.
 
@@ -416,12 +416,15 @@ above are also exposed over MCP (below).
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing all
-**24** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
+**27** of codeweb's queries + the capability suite as tools any MCP client can call mid-task:
 `codeweb_map` (build/rebuild the graph over MCP), `codeweb_brief` (the day-one repo page —
 call it first), `codeweb_find` (concept search — free text like
 *"retry backoff"* ranked into starting symbols, no name needed), `codeweb_callers/callees/impact/
 cycles/orphans/diff`, the edit-loop tools `codeweb_context/refresh`, the intelligence tools
-`codeweb_hotspots/campaign/reading_order`, plus `codeweb_tests/find_similar/placement/review/
+`codeweb_hotspots/campaign/reading_order`, the pre-flight + hygiene loop
+`codeweb_simulate` (the gate's verdict for a hypothetical delete/merge/move — before any edit),
+`codeweb_annotate` (false-positive suppression memory, sidecar-only), and `codeweb_stats` (the
+local value receipt), plus `codeweb_tests/find_similar/placement/review/
 fitness/risk/break_cycles/deadcode/codemod` (the last is plan-only — `--write` is not exposed).
 
 **Installing the plugin registers the server automatically** (`.claude-plugin/plugin.json` carries

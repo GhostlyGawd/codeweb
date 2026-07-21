@@ -76,6 +76,18 @@ notes so validated results, papers, and new tools never get lost in commit histo
   ("built N day(s) ago — refresh with codeweb_refresh"), a successful `run.mjs` map ends with
   the receipt line, and CLI queries (`query`/`explain`/`context-pack`) now count toward
   `queriesServed` — the denominator stops undercounting non-MCP use. (IMPROVEMENTS.md #10)
+- **The agent loop closes over MCP — 27 tools — and codeweb_map reports progress.** Three
+  capabilities that existed only as CLIs join the MCP surface: **`codeweb_simulate`** (the
+  regression gate's verdict for a hypothetical delete/merge/move — pre-flight a refactor for the
+  cost of one call), **`codeweb_annotate`** (false-positive suppression memory, written beside
+  the graph, never to source), and **`codeweb_stats`** (the local value receipt). `codeweb_map`
+  is now async and, when the client sends a `progressToken`, emits `notifications/progress` per
+  pipeline stage — a big first map is no longer a silent black box (in-flight work drains before
+  the server exits). The MCP/CLI **parity receipt is re-measured at the full surface**
+  (`bench/results/auxiliary.json`): 26/26 parity pairs + JSON-RPC conformance at 27 listed tools,
+  11/11 auxiliary checks green — the old receipt covered the 20-tool era and its harness had the
+  count hardcoded (now derived). The handshake instructions teach the new loop steps.
+  (IMPROVEMENTS.md #11)
 - **The CLI grew a front door.** Every CLI answers `--help`/`-h` (exit 0) — including the
   `codeweb` bin, where `--help` previously errored with `target not found: --help`; `run.mjs`
   documents all its flags, rejects unknown ones with usage (exit 2), and ends a successful map

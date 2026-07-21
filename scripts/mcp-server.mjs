@@ -15,7 +15,7 @@
 // corrupts the stream for the client, so all diagnostics go to stderr (here: none).
 
 import { createInterface } from 'node:readline';
-import { spawnSync } from 'node:child_process';
+import { spawnSync, spawn } from 'node:child_process';
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -47,6 +47,7 @@ const INSTRUCTIONS = [
   'Loop: BEFORE editing a symbol call codeweb_context (bounded edit window) or codeweb_impact (blast radius).',
   'AFTER editing call codeweb_refresh, then codeweb_diff (before vs after) to gate the edit.',
   'Before WRITING a new function call codeweb_find_similar (does this exist?) and codeweb_placement (where does it belong?).',
+  'Before a refactor, codeweb_simulate pre-flights a delete/merge/move; after verifying a finding is wrong, codeweb_annotate suppresses it so it stops resurfacing.',
   'No symbol name yet? codeweb_find turns a concept ("retry backoff") into ranked starting symbols.',
   '`graph` is optional — the server finds the nearest .codeweb/graph.json from cwd. No graph yet? codeweb_map builds one (~3s for 3k symbols).',
   'Responses are budgeted (top-N + more.remaining). Pass full:true for the unabridged list, or limit/offset to page.',
@@ -191,6 +192,21 @@ const TOOLS = [
     budget: { arg: 'budget', flag: '--budget', value: 20 },
     argv: (a) => (a.scope && a.value ? ['--scope', a.scope, a.value] : []),
     description: 'A foundations-first reading path (depended-upon leaves before orchestrators) to understand a codebase or one scope fast. scope: domain|file|symbol + value narrows it; budget bounds the list (default 20).' },
+  { name: 'codeweb_simulate', need: [], opt: ['graph', 'delete', 'merge', 'into', 'move', 'to'], bin: scriptOf('simulate-edit.mjs'),
+    valid: (a) => {
+      const modes = ['delete', 'merge', 'move'].filter((k) => a[k]);
+      if (modes.length !== 1) return 'pass exactly one of `delete` (symbol), `merge` (id1,id2,…), or `move` (symbol, with `to`: target file)';
+      if (a.move && !a.to) return '`move` needs `to` (the destination file)';
+      return null;
+    },
+    argv: (a) => a.delete ? ['--delete', a.delete] : a.merge ? ['--merge', a.merge, ...(a.into ? ['--into', a.into] : [])] : ['--move', a.move, '--to', a.to],
+    description: 'PRE-FLIGHT an edit without performing it: predicts the regression gate\'s structural verdict ({newCycles, lostCallers, ok}) for a hypothetical delete / merge / move. Call BEFORE committing to a refactor plan — a doomed edit is discarded for the cost of one call.' },
+  { name: 'codeweb_annotate', need: [], opt: ['graph', 'suppress', 'note', 'list'], bin: scriptOf('annotate.mjs'), dirFromGraph: true,
+    valid: (a) => (a.suppress || a.list) ? null : 'pass `suppress` (a finding fingerprint, from codeweb_deadcode/overlap output) or list:true',
+    argv: (a) => a.list ? ['--list'] : ['--suppress', a.suppress, ...(a.note ? ['--note', a.note] : [])],
+    description: 'Record a FALSE-POSITIVE suppression for a finding (never touches source — writes .codeweb/annotations.json): after you verify a deadcode/duplication finding is wrong, suppress its fingerprint so it stops resurfacing; the finding count reports suppressed separately. list:true shows current suppressions.' },
+  { name: 'codeweb_stats', need: [], opt: ['graph'], bin: scriptOf('stats.mjs'), argv: () => [],
+    description: 'The local value receipt: what codeweb actually did in this workspace (pre-edit cards, regressions flagged before landing, queries served), month by month plus lifetime. Local-only counters; nothing leaves the machine.' },
   { name: 'codeweb_map', need: [], opt: ['target', 'out'], graphless: true, map: true,
     description: 'Build (or rebuild) the codeweb graph for a repo: runs the deterministic pipeline (extract -> cluster -> overlap -> optimize -> report) into <target>/.codeweb. ~3s for a 3k-symbol repo. Call when a query reports "no graph found", or after large changes. Returns the graph path + stats; artifacts include report.html and graph.json.' },
 ];
@@ -220,6 +236,12 @@ const PROP = {
   target: { type: 'string', description: 'Repo/subdir to map (default: the server cwd)' },
   out: { type: 'string', description: 'Output workspace (default: <target>/.codeweb)' },
   all: { type: 'boolean', description: 'Include non-product roles (tests/fixtures/bench/generated) in the ranking; default is product scope with a counted exclusion' },
+  delete: { type: 'string', description: 'Symbol id/label to hypothetically delete' },
+  move: { type: 'string', description: 'Symbol id/label to hypothetically move' },
+  to: { type: 'string', description: 'Destination file for a hypothetical move' },
+  suppress: { type: 'string', description: 'The finding fingerprint to suppress (from deadcode/overlap output)' },
+  note: { type: 'string', description: 'Why this finding is a false positive (stored with the suppression)' },
+  list: { type: 'boolean', description: 'List current suppressions instead of adding one' },
 };
 const schema = (t) => ({
   type: 'object',
@@ -228,21 +250,54 @@ const schema = (t) => ({
 });
 
 // ---- codeweb_map -----------------------------------------------------------------------------
-function handleMap(id, args) {
+// #11: async with PROGRESS — a big first map used to be a silent black box for its whole
+// duration. When the client sends a progressToken (params._meta), each pipeline stage line
+// becomes a notifications/progress; the reply lands when the child exits. Other requests keep
+// being served meanwhile (JSON-RPC responses may arrive out of order).
+const MAP_STAGES = ['extract', 'cluster', 'overlap', 'optimize', 'report'];
+// stdin close used to exit(0) immediately; with map now ASYNC that would kill an in-flight
+// pipeline (spawnSync clients like the test harness close stdin right after writing). Track
+// pending async work and drain it before exiting.
+let pendingAsync = 0;
+let stdinClosed = false;
+const asyncDone = () => { pendingAsync--; if (stdinClosed && pendingAsync <= 0) process.exit(0); };
+function handleMap(id, args, meta) {
   const target = resolve(args.target || process.cwd());
   if (!existsSync(target)) return errResult(id, `target not found: ${target}`);
   const out = resolve(args.out || join(target, '.codeweb'));
-  const r = spawnSync(process.execPath, [scriptOf('run.mjs'), target, '--out-dir', out], { encoding: 'utf8', maxBuffer: 1 << 28, timeout: 300_000 });
-  if (r.status !== 0) {
-    return errResult(id, `codeweb_map failed (exit ${r.status}): ${(r.stderr || '').trim().split('\n').slice(-3).join('\n')}`);
-  }
-  const graphPath = join(out, 'graph.json');
-  let stats = '';
-  try {
-    const g = JSON.parse(readFileSync(graphPath, 'utf8'));
-    stats = `${(g.nodes || []).length} symbols, ${(g.edges || []).length} edges, ${(g.domains || []).length} domains, ${(g.overlaps || []).length} overlap findings`;
-  } catch { stats = 'built (stats unreadable)'; }
-  return reply(id, { content: [{ type: 'text', text: JSON.stringify({ ok: true, graph: graphPath, summary: `mapped ${target}: ${stats}`, artifacts: { report: join(out, 'report.html'), optimize: join(out, 'optimize.md') } }) }] });
+  const token = meta && meta.progressToken;
+  pendingAsync++;
+  const child = spawn(process.execPath, [scriptOf('run.mjs'), target, '--out-dir', out], { stdio: ['ignore', 'ignore', 'pipe'] });
+  let stderrBuf = '';
+  child.stderr.on('data', (d) => {
+    stderrBuf += d;
+    if (stderrBuf.length > 65536) stderrBuf = stderrBuf.slice(-32768);
+    if (token === undefined || token === null) return;
+    for (const line of String(d).split('\n')) {
+      const m = /^\[run\] ([a-z-]+)$/.exec(line.trim());
+      if (m && MAP_STAGES.includes(m[1])) {
+        send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.indexOf(m[1]), total: MAP_STAGES.length, message: `stage: ${m[1]}` } });
+      }
+    }
+  });
+  const timer = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, 300_000);
+  child.on('error', (e) => { clearTimeout(timer); errResult(id, `codeweb_map failed: ${e.message}`); asyncDone(); });
+  child.on('close', (code) => {
+    clearTimeout(timer);
+    if (code !== 0) {
+      errResult(id, `codeweb_map failed (exit ${code}): ${stderrBuf.trim().split('\n').slice(-3).join('\n')}`);
+      return asyncDone();
+    }
+    if (token !== undefined && token !== null) send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.length, total: MAP_STAGES.length, message: 'done' } });
+    const graphPath = join(out, 'graph.json');
+    let stats = '';
+    try {
+      const g = JSON.parse(readFileSync(graphPath, 'utf8'));
+      stats = `${(g.nodes || []).length} symbols, ${(g.edges || []).length} edges, ${(g.domains || []).length} domains, ${(g.overlaps || []).length} overlap findings`;
+    } catch { stats = 'built (stats unreadable)'; }
+    reply(id, { content: [{ type: 'text', text: JSON.stringify({ ok: true, graph: graphPath, summary: `mapped ${target}: ${stats}`, artifacts: { report: join(out, 'report.html'), optimize: join(out, 'optimize.md') } }) }] });
+    asyncDone();
+  });
 }
 
 // ---- tools/call ------------------------------------------------------------------------------
@@ -257,14 +312,16 @@ function handleToolCall(id, params) {
     }
   }
   if (tool.valid) { const problem = tool.valid(args); if (problem) return errResult(id, problem); }
-  if (tool.map) return handleMap(id, args);
+  if (tool.map) return handleMap(id, args, params && params._meta);
 
   const cliArgs = [];
   let graphPath = null;
   if (!tool.graphless) {
     graphPath = args.graph || discoverGraph();
     if (!graphPath) return errResult(id, NO_GRAPH);
-    cliArgs.push(graphPath);
+    // #11: annotate's CLI addresses the WORKSPACE (--dir beside the graph), not the graph file.
+    if (tool.dirFromGraph) cliArgs.push('--dir', dirname(resolve(graphPath)));
+    else cliArgs.push(graphPath);
   }
 
   if (graphPath) bump(resolve(graphPath), 'queriesServed'); // the receipt's denominator
@@ -368,4 +425,4 @@ function handle(line) {
 
 const rl = createInterface({ input: process.stdin });
 rl.on('line', handle);
-rl.on('close', () => process.exit(0));
+rl.on('close', () => { stdinClosed = true; if (pendingAsync <= 0) process.exit(0); });
