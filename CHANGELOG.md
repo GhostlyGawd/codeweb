@@ -386,6 +386,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
   before writing artifacts. `--allow-empty` (both CLIs) keeps intentionally-sparse targets
   workable. (IMPROVEMENTS.md #1)
 
+### Removed
+- **spike/ and .live/ are out of the tree — the self-map stops counting prototypes.**
+  `spike/tree-sitter/` was a graduated prototype (the engine shipped as `lib/ts-engine.mjs` in
+  PR #17) still tracked with its own package.json and drifted copies of production functions;
+  `.live/` tracked five dev scripts nothing referenced, every one superseded by shipped code
+  (confirm.mjs → overlap's body confirmation, rust-dissect.mjs → the native Rust tier,
+  cli-sketch/ → finding 24's `parseArgs`, measure.mjs → cluster3). Both deleted — git history
+  keeps them; prose references now say so. `.live/` is fully gitignored (it stays run.mjs's
+  default workspace target, generated artifacts only), and `codeweb.rules.json` gains standing
+  `spike/** → example` and `.live/** → generated` role overrides so a future prototype tree can
+  never pollute the self-metrics again. Self-map effect: 13 → 12 domains (spike/tree-sitter
+  gone), 33 → 28 self-overlap findings (all five spike-only findings gone), 1,240 → 1,215 nodes.
+  (perf-quality finding 28)
+
 ### Changed
 - **THE similarity thresholds live once — and churn is bounded and cached.** The 0.6
   high-confidence floor (with the 0.35/0.15 bands) was independently hardcoded in four files and

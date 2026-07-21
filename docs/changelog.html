@@ -513,6 +513,22 @@
 <p>  workable. (IMPROVEMENTS.md #1)</p>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li><strong>THE similarity thresholds live once — and churn is bounded and cached.</strong> The 0.6</li>
+</ul>
+<p>  high-confidence floor (with the 0.35/0.15 bands) was independently hardcoded in four files and</p>
+<p>  the K=3 shingle size in five, each copy documenting the coupling in a "must match overlap.mjs"</p>
+<p>  comment instead of importing it. <code>lib/shingles.mjs</code> now exports <code>BANDS</code>/<code>K</code>; overlap's</p>
+<p>  confidence tiers, optimize's READY floor, find-similar's tiers + low-band cutoff, dup-check's</p>
+<p>  HIGH gate, similar-index's SIMILAR_K, and skeleton's default all import them (values unchanged</p>
+<p>  — pipeline outputs byte-identical). Same disease, different organ: the full-history <code>git log</code></p>
+<p>  churn parser was byte-near-identical in risk.mjs and hotspots.mjs, unbounded (whole history</p>
+<p>  per advisory run) and uncached (campaign ran it twice back-to-back). <code>lib/churn.mjs</code> now owns</p>
+<p>  it: windowed to the last 5,000 commits (deterministic per HEAD, unlike a <code>--since</code> that drifts</p>
+<p>  with the clock) and cached beside the graph keyed by <code>rev-parse HEAD</code> + window — on this repo,</p>
+<p>  hotspots <code>--git</code> after risk <code>--git</code> serves from the cache in ~97ms with zero git spawns.</p>
+<p>  <code>tests/churn.test.mjs</code> pins counts, the poison-proved cache hit, HEAD invalidation, the window</p>
+<p>  bound, and the not-a-repo <code>{}</code> degradation. (perf-quality finding 27)</p>
+<ul>
 <li><strong>One dispatch skeleton, seven language tables.</strong> <code>ts-engine.mjs</code> repeated its per-language</li>
 </ul>
 <p>  dispatch walker seven times (Java/C# via a shape closure; Ruby/PHP/Python/Go/Rust as five</p>

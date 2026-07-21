@@ -27,7 +27,8 @@ to the regex path per-file.
 A grammar `.wasm` must sit inside the runtime's ABI window. `tree-sitter-wasms@0.1.13` ships ABI-13
 grammars (built with `tree-sitter-cli@0.20.x`) that **fail to load** against `web-tree-sitter@0.26.9`
 with a `dylink` metadata error. Always vendor a grammar whose ABI matches the pinned runtime, and bump
-both together. The spike that established this is at `spike/tree-sitter/` (PR #17).
+both together. The spike that established this was `spike/tree-sitter/` (PR #17; the graduated
+prototype was removed from the tree in the perf-quality round — git history keeps it).
 
 ## Kotlin / Swift — recorded blocker (2026-07-21)
 

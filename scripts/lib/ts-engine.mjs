@@ -1,7 +1,8 @@
 // codeweb optional tree-sitter engine (TypeScript/JavaScript) — exact cyclomatic complexity.
 //
-// This is the ADDITIVE, opt-in tier from docs/backlog-ast-tree-sitter.md (spike: spike/tree-sitter/,
-// PR #17). The regex engine (scripts/lib/complexity.mjs) remains the default and the fallback; this
+// This is the ADDITIVE, opt-in tier from docs/backlog-ast-tree-sitter.md (spike: spike/tree-sitter/
+// in PR #17 — graduated here and since removed; git history keeps it). The regex engine
+// (scripts/lib/complexity.mjs) remains the default and the fallback; this
 // module is loaded only when `--engine tree-sitter` is requested. web-tree-sitter is an
 // OPTIONAL dependency — if it (or the vendored grammar) is unavailable, loadTsEngine() returns null
 // and the caller falls back to regex per-file. It NEVER executes the target (static parse) and is
@@ -146,7 +147,7 @@ export async function loadTsEngine() {
     // Whole-file JS/TS extractor (Increment 2): the source of truth for METHOD nodes (class-qualified
     // ids `<rel>:Class.method`, BARE labels) + the dynamic-dispatch call edges the regex engine drops
     // (`this.m()` and typed-receiver `x.m()`). One parse per file; ported from the proven precision
-    // contract in spike/tree-sitter/extract-ts.mjs. Returns null on any failure so the caller falls
+    // contract the spike established (spike/tree-sitter/extract-ts.mjs, PR #17 — now history-only). Returns null on any failure so the caller falls
     // back to the regex scanner per-file. Classes/functions keep bare ids (regex still owns them).
     // Spec H helpers: statement normalization + FNV-1a hash for Type-3 fingerprints.
     const FN_LIKE = new Set(['function_declaration', 'generator_function_declaration', 'function_expression', 'arrow_function', 'method_definition']);
