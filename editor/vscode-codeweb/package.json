@@ -1,21 +1,37 @@
 {
   "name": "codeweb-lens",
   "displayName": "codeweb CodeLens",
-  "description": "Callers and blast radius above every mapped symbol, served from .codeweb/graph.json — the codeweb structure graph, in the editor.",
-  "version": "0.1.0",
+  "description": "Callers and blast radius above every mapped symbol, served from .codeweb/graph.json \u2014 the codeweb structure graph, in the editor.",
+  "version": "0.2.0",
   "publisher": "codeweb",
   "license": "MIT",
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Other"],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
   "main": "./extension.js",
-  "activationEvents": ["onStartupFinished"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "capabilities": {
     "virtualWorkspaces": false,
-    "untrustedWorkspaces": { "supported": true, "description": "Read-only: renders numbers from .codeweb/graph.json; never executes workspace code." }
+    "untrustedWorkspaces": {
+      "supported": true,
+      "description": "Read-only: renders numbers from .codeweb/graph.json; never executes workspace code."
+    }
   },
   "contributes": {
     "commands": [
-      { "command": "codeweb.openReport", "title": "codeweb: Open symbol in the interactive report" }
+      {
+        "command": "codeweb.openReport",
+        "title": "codeweb: Open symbol in the interactive report"
+      },
+      {
+        "command": "codeweb.refreshLenses",
+        "title": "codeweb: Refresh CodeLens from the graph"
+      }
     ],
     "configuration": {
       "title": "codeweb",
@@ -23,7 +39,7 @@
         "codeweb.lens.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Show codeweb CodeLens (callers · blast) above mapped symbols."
+          "description": "Show codeweb CodeLens (callers \u00b7 blast) above mapped symbols."
         },
         "codeweb.lens.minCallers": {
           "type": "number",

@@ -59,6 +59,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
   `build-report`) now follow the documented 0/1/2 convention. (IMPROVEMENTS.md #5)
 
 ### Fixed
+- **The VS Code lens is truthful again — and covers all 11 languages.** The extension README
+  promised "the lens re-reads the graph on change," but no watcher or change-event existed:
+  lenses showed stale numbers until a file was reopened. A `FileSystemWatcher` on
+  `**/.codeweb/graph.json` now fires `onDidChangeCodeLenses` (debounced), a manual
+  `codeweb: Refresh CodeLens from the graph` command exists, and the language selector grew from
+  9 to the engine's 11 (Ruby/PHP/Kotlin/Swift files finally get lenses). Extension v0.2.0.
+  (IMPROVEMENTS.md #7)
 - **The public prose can no longer understate the product — and what it said is fixed.** The
   homepage, product page, start page, and og-descriptions said "20 tools" (24 ship); the /codeweb
   command steered agents off the fast path for 8 of the 11 native languages; the engine-detection
