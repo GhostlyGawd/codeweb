@@ -215,3 +215,77 @@ Container: Node v22.22.2, 4 cores. All timings `time` wall clock, this container
   untouched (IR1/IR2 were test-fixture bugs, not import-resolve bugs).
 - Commits: class (a) test-portability 5b22064; class (b) bench fix b6c3b4e; class (c) skips +
   per-leg ceiling + this entry (see final sha in git log).
+
+### WS-A review+verification
+
+Reviewer container: Node v22.22.2, 4 cores, idle (load avg 0.65 before the timed run). Reviewed
+head cd3c8ca; every commit d75e3ad→cd3c8ca diffed against the frozen spec. CI at cd3c8ca: all 7
+jobs green.
+
+Verdicts per finding (spec tasks vs what landed, plus fresh usage evidence):
+
+- **#2 — PASS.** T-2.1/2.2/2.3 exact to spec: release.yml `test` job (npm ci → npm test →
+  check-consistency), `needs: test` on publish, dispatch ancestor guard between version-verify and
+  tag-create with `fetch-depth: 0`, vsce pinned 3.9.2 at both call sites with the pin comment.
+  Fresh: `node --test tests/workflows.test.mjs` → 9/9 pass solo; release.yml re-read at HEAD.
+  Behavior proof stays deferred to the next tag/dispatch, as the spec directs.
+- **#3 — PASS** (incl. all four followups). Matrix/probe/ceilings/test-no-ast/gate-deps as
+  specced. The two red→green cycles were adversarially re-checked: the 6→8 recalibration is a
+  census correction, not a weakening (the guard FIRED — proof it works — and every skip is named);
+  the dual-format awk fix TIGHTENED a live vacuous pass (node-24 leg was ceiling-open at S=0).
+  Windows followups are honest: all 5 class-(a) fixes preserve every assertion byte-for-byte
+  (IR1/IR2 platform-honest paths, rel ids unchanged; P2 npm.cmd win32-only; K3/report-scale
+  `pathToFileURL`); the bench `file://` fix is correct Node ESM semantics on every platform (POSIX
+  accepts both forms, windows requires the URL — `D:` parses as a scheme); the 3 ctags-shim skips
+  are genuinely environment-bound (shebang fake unspawnable via the extractor's no-shell
+  execFileSync on windows — the product's real-ctags path is NOT skipped) and honestly include the
+  vacuously-passing middle sibling. Windows ceiling 11 = enumerated 7 shared + 3 shim + 1 headroom
+  — census and ceiling agree.
+  **Matrix question (windows×24): deliberate, not a silent hole** — the exclusion is written into
+  the frozen spec (T-3.1's explicit `exclude`, "3 jobs"), commented in ci.yml ("one Node line is
+  enough there" — the windows cell's value is path semantics), and restated in the red→green 2
+  entry. No change made.
+- **#4 — PASS.** Scan (description-only, `|| ''`), sync sub, live 24→27, round-trip + live-string
+  tests — all per spec, one commit per the commit rule. Fresh: real repo
+  `node scripts/check-consistency.mjs` → exit 0 `OK — v0.9.0, 27 tools`; `git archive` copy with
+  planted `27→24` → **exit 1**, actionable: `x package.json (description): says "24 MCP tools" but
+  27 tools ship` + the version-sync fix hint.
+- **#5 — PASS.** `--out` via shared parseArgs (usage string present), all 8 site-build tests
+  retargeted to a tmpDir with zero assertions weakened (invariants identical, only the output dir
+  moved; tracked-docs coverage moved to the CI freshness gate exactly as specced). Fresh: full
+  `npm test` → `git status --porcelain` → **empty**; fresh `node site/build.mjs --out <tmp>` →
+  all five pages **byte-identical** to committed docs/ (cmp), changelog.html included.
+- **#6 — PASS; deviation adjudicated: accept, and the bar is in fact met on an idle container.**
+  Mechanism exact to spec (asserts byte-identical, ops/messages unchanged, 40 trials at CI depth,
+  per-trial seeds, guard throws on garbage — re-verified: `CODEWEB_IE_TRIALS=abc` → loud fail).
+  Fresh timings, idle 4-core container: `time npm test` → **55.8 s** wall (614 tests, 609 pass,
+  0 fail, 5 skipped) — the plan's ~55 s bar, met; CI depth `CODEWEB_IE_TRIALS=40` → **60.8 s**
+  (644/639/0/5); solo `CODEWEB_IE_TRIALS=40 node --test tests/incremental-edges.test.mjs` →
+  **12.3 s**, 44/44. The build-time 71.0/73.6 s were measured on a loaded container (the ledger's
+  own CPU math — 162 s user+sys at depth 10 → 40.6 s ideal floor, ~2.9 effective cores — is
+  reproduced here and explains both numbers). Slowest files now (one TAP run, per-file sums):
+  bench-all 9.9 s, simulate-edit 9.5 s, incremental-edges 6.2 s @depth 10, overlap-lsh 5.3 s,
+  mcp 5.2 s — no single-file floor remains; further splits would shave seconds at most and the
+  residual is spawn overhead, i.e. IMPROVEMENTS #6's own "deeper unlock stays #40" (WS-H). The
+  CHANGELOG's "full suite ~93 s → ~55 s class" is empirically supported by the fresh measurement;
+  no amendment needed. Plan bar note amended here (ledger), plan untouched.
+- **#7 — PASS with one ledger correction.** Guard/README/SKILL/release-exit all landed per spec.
+  Fresh: `extract-symbols.mjs … --engine read` → **exit 2**, `[extract] unknown --engine "read"
+  (valid: regex, tree-sitter)`; `run.mjs --engine read` → **exit 2** `unknown flag: --engine` +
+  usage (run.mjs never had the flag; the #24 policy rejects it). Correction: the #7 entry's second
+  grep claim ("`grep -rn -- '--engine read' README.md docs/ .claude/ | grep -v 'docs/specs/'` →
+  0 hits") is wrong at fcd15bf and at HEAD — it hits docs/changelog.html once, the CHANGELOG
+  mirror QUOTING the removal ("README's nonexistent `--engine read` mode is gone"), same
+  descriptive-mention class as the spec's own docs/specs/ carve-out; README itself is clean
+  (`grep -n -- '--engine read' README.md` → 0). Note: README:200's `--engine hybrid|read|tools`
+  is the `/codeweb` slash-command surface where `read` is a real value (commands/codeweb.md:21) —
+  not drift. No file change needed; the record is corrected by this entry.
+- **#1 — PASS.** Correction bullet verified truthful: bfc6b92 is titled "all 32 findings" and
+  touches **zero** `.github/workflows` files (`git show --name-only` → 0 matches), so 29–32
+  (workflow gates + test split) demonstrably did not land there. 7 per-finding entries present
+  (`grep -c 'round 2, finding #'` → 7); the structural closer is exactly the spec's (a)+(b)+#4
+  gate; the infeasible diff-closer correctly not built.
+
+No assertion was weakened anywhere in the workstream (all 12 touched test files diffed
+before/after); CHANGELOG entries present for every finding and accurate against fresh evidence.
+Nothing structural found; the one recorded inaccuracy (#7 grep) is corrected above.
