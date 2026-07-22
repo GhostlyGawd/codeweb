@@ -109,6 +109,21 @@
 <p>  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)</p>
 <h3 class="cl-grp">Performance</h3>
 <ul>
+<li><strong><code>maskJs</code> lexes ~3–5× faster, byte-identically.</strong> The masker ran a compiled-regex <code>.test()</code></li>
+</ul>
+<p>  per character (word-class tracking) plus a one-char string append per character — ~27–30 MB/s</p>
+<p>  on real mixes, on the hottest path in the engine (every cold/changed file, and the whole repo</p>
+<p>  after any symbol-set change until the name-delta work lands). Two changes, zero byte diffs:</p>
+<p>  the word-class test is a charCode range check, and each lexer state now span-copies whole runs</p>
+<p>  of plain text up to its next special character (special sets re-derived from the post-WS-B</p>
+<p>  state machine and documented in place), folding the run into the significant-char state with</p>
+<p>  one backward walk that reproduces the old per-char accumulation exactly. Measured min-of-3:</p>
+<p>  26.8 → 135.8 MB/s (5.1×) on the 800-file bench corpus, 30.2 → 95.0 MB/s (3.2×) on this repo's</p>
+<p>  own 229 mask-eligible files. Byte-identity is pinned by a committed oracle test that embeds</p>
+<p>  the pre-change masker verbatim and compares outputs over every mask-eligible repo file, a</p>
+<p>  loaded bench-corpus tree, and adversarial fixtures, in all mode combinations — which is also</p>
+<p>  why this ships with NO scanner-version bump. (round 2, finding #20)</p>
+<ul>
 <li><strong>Tree-sitter parse trees are freed.</strong> web-tree-sitter has no FinalizationRegistry, and none of</li>
 </ul>
 <p>  the engine's 8 parse sites called <code>tree.delete()</code> — every cold/changed-file extract on a default</p>

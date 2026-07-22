@@ -193,6 +193,10 @@ export function maskRuby(text) {
 // private fields `#x` are unaffected; the branch order guarantees a `#` inside strings/templates
 // never reaches it.
 const REGEX_PREV_KW = new Set(['return', 'typeof', 'instanceof', 'in', 'of', 'new', 'delete', 'void', 'throw', 'case', 'do', 'else', 'yield', 'await']);
+// Round 2, finding #20 (T-20.1): charCode word-class — exactly [A-Za-z0-9_$], replacing a compiled
+// regex .test() per character on the hottest path in the repo (masking runs on every cold/changed
+// file and, pre-#17, on the whole repo after any symbol-set change).
+const isWordCode = (c) => (c >= 97 && c <= 122) || (c >= 65 && c <= 90) || (c >= 48 && c <= 57) || c === 36 || c === 95;
 export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
   const lines = text.split(/\r?\n/);
   const out = [];
@@ -210,14 +214,40 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
   const tpl = [];
   let lastSig = null;     // last significant real-code char emitted (null = nothing yet)
   let lastWord = '';      // trailing identifier run ending at lastSig (for keyword detection)
-  const note = (ch) => { if (ch !== ' ' && ch !== '\t') { lastWord = /[A-Za-z0-9_$]/.test(ch) ? lastWord + ch : ''; lastSig = ch; } };
+  const note = (ch) => { if (ch !== ' ' && ch !== '\t') { lastWord = isWordCode(ch.charCodeAt(0)) ? lastWord + ch : ''; lastSig = ch; } };
+  // Round 2, finding #20 (T-20.2): fold a whole span of plain code into lastSig/lastWord in ONE
+  // backward walk, reproducing note()'s per-char accumulation exactly — including its
+  // across-spaces quirk (`foo bar` accumulates lastWord `foobar`: spaces/tabs are skipped, they
+  // never reset the word). From the run end: skip spaces/tabs; no other char -> both unchanged;
+  // first other char is the new lastSig; if non-word, lastWord = ''; else collect word chars
+  // walking further back (still skipping spaces/tabs, stopping at the first other char), and
+  // prefix the INCOMING lastWord iff the walk exhausted the run (note()'s invariant guarantees
+  // lastWord is '' whenever lastSig is non-word, so the unconditional prefix is exact).
+  const noteRun = (line, from, to) => {
+    let end = to;
+    while (end > from) { const c = line.charCodeAt(end - 1); if (c === 32 || c === 9) end--; else break; }
+    if (end === from) return;
+    const sig = line.charCodeAt(end - 1);
+    lastSig = line[end - 1];
+    if (!isWordCode(sig)) { lastWord = ''; return; }
+    let word = line[end - 1];
+    let exhausted = true;
+    for (let k = end - 2; k >= from; k--) {
+      const c = line.charCodeAt(k);
+      if (c === 32 || c === 9) continue;
+      if (isWordCode(c)) { word = line[k] + word; continue; }
+      exhausted = false; break;
+    }
+    lastWord = exhausted ? lastWord + word : word;
+  };
   const noteValue = () => { lastSig = ')'; lastWord = ''; };  // a string/template/regex just closed: a value — `/` after it is division
   const regexCanFollow = () =>
     lastSig === null ? true
-      : /[A-Za-z0-9_$]/.test(lastSig) ? REGEX_PREV_KW.has(lastWord)
+      : isWordCode(lastSig.charCodeAt(0)) ? REGEX_PREV_KW.has(lastWord)
         : !(lastSig === ')' || lastSig === ']' || lastSig === '.' || lastSig === '<');
   // Scan the regex literal opened by the `/` at i: escape- and char-class-aware ([/] does not close).
   // Returns {close, end} (closing `/`, index past the flags) or null when unterminated on this line.
+  // Flags loop is charCode A-Za-z (65-90 | 97-122) — what /[a-z]/i matched (finding #20).
   const scanRegex = (line, i) => {
     const n = line.length;
     let cls = false;
@@ -226,11 +256,29 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
       if (cj === '\\') { j++; continue; }
       if (cls) { if (cj === ']') cls = false; continue; }
       if (cj === '[') { cls = true; continue; }
-      if (cj === '/') { let k = j + 1; while (k < n && /[a-z]/i.test(line[k])) k++; return { close: j, end: k }; }
+      if (cj === '/') {
+        let k = j + 1;
+        while (k < n) { const fc = line.charCodeAt(k); if ((fc >= 65 && fc <= 90) || (fc >= 97 && fc <= 122)) k++; else break; }
+        return { close: j, end: k };
+      }
     }
     return null;
   };
   const value = (s) => (keepValues ? s : ' '.repeat(s.length));
+  // Round 2, finding #20 (T-20.2): span-copy. Instead of one branch cascade + one `res += ch` per
+  // character, each state scans ahead to its next SPECIAL character and appends the whole run with
+  // one slice (or one repeat), then hands the special char to the unchanged branch logic. The
+  // special sets are RE-DERIVED from the state machine as it stands after WS-B (#8/#13) — the #20
+  // spec's enumeration predated those and missed two members, noted inline:
+  //   normal code:      `/` `"` `'` `` ` ``  (+ `#` in hashComment mode) — openers of
+  //                     comment/regex/string/template; everything else runs through noteRun.
+  //   `${}` interior:   `"` `'` `/` `` ` `` `{` `}` — the backtick is IN the set (finding #8's
+  //                     nested-template push lives here; the spec's set predated it).
+  //   template TEXT:    `` ` `` `$` `\` — the backslash is IN the set (finding #8's \`-escape
+  //                     consumes TWO chars, so it must stop a run); the run is blanked
+  //                     (keepValues-gated) and never touches lastSig/lastWord, as per-char before.
+  //   block comment:    already spanned via indexOf('*/'), unchanged.
+  // `keepValues` only switches copy-vs-blank of value spans; it never changes a special set.
   for (const line of lines) {
     const n = line.length; let res = '', i = 0;
     while (i < n) {
@@ -242,22 +290,28 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
       }
       const top = tpl.length ? tpl[tpl.length - 1] : null;
       if (top && top.depth === 0) {                  // template TEXT — blank it, watch for `${` / \-escape / closing backtick
+        let j = i;
+        while (j < n) { const c = line.charCodeAt(j); if (c === 96 || c === 92 || c === 36) break; j++; }
+        if (j > i) { res += keepValues ? line.slice(i, j) : ' '.repeat(j - i); i = j; continue; } // text run: no lastSig/lastWord update
         const ch = line[i];
         if (ch === '`') { res += keepValues ? '`' : ' '; i++; tpl.pop(); noteValue(); continue; } // close: pop to the outer frame's expr (or normal code)
         if (ch === '\\') {                            // \` and \$ are TEXT (2 chars; 1 at EOL), keepValues-gated like other text
           const stop = Math.min(i + 2, n);
           res += keepValues ? line.slice(i, stop) : ' '.repeat(stop - i); i = stop; continue;
         }
-        if (ch === '$' && line[i + 1] === '{') { res += '${'; i += 2; top.depth = 1; lastSig = '{'; lastWord = ''; continue; } // keep expr
-        res += keepValues ? ch : ' '; i++; continue; // template literal text
+        if (line[i + 1] === '{') { res += '${'; i += 2; top.depth = 1; lastSig = '{'; lastWord = ''; continue; } // ch === '$': keep expr
+        res += keepValues ? '$' : ' '; i++; continue; // lone $ is template text
       }
       if (top) {                                      // top.depth > 0: inside ${ ... } — keep code verbatim, match braces.
+        let j = i;
+        while (j < n) { const c = line.charCodeAt(j); if (c === 34 || c === 39 || c === 47 || c === 96 || c === 123 || c === 125) break; j++; }
+        if (j > i) { res += line.slice(i, j); noteRun(line, i, j); i = j; continue; } // plain-code run
         // Check order matters: string -> regex -> backtick-push -> braces. If backtick-push
         // preceded the regex check, `${s.split(/`/)}` would push a phantom frame.
         const ch = line[i];
         if (ch === '"' || ch === "'") {               // string literal: whole quoted slice through value()
-          let j = i + 1; while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
-          const stop = Math.min(j + 1, n); res += value(line.slice(i, stop)); i = stop; noteValue(); continue;
+          let k = i + 1; while (k < n && line[k] !== ch) { if (line[k] === '\\') k++; k++; }
+          const stop = Math.min(k + 1, n); res += value(line.slice(i, stop)); i = stop; noteValue(); continue;
         }
         if (ch === '/' && regexCanFollow()) {         // regex literal in the interpolation — blank it so a
           const m = scanRegex(line, i);               // quote or {n} quantifier can't desync brace matching
@@ -268,7 +322,11 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
         else if (ch === '}') { top.depth--; if (top.depth === 0) { res += ch; i++; note(ch); continue; } } // back to this frame's TEXT
         note(ch); res += ch; i++; continue;
       }
-      const ch = line[i];                             // normal code
+      // normal code: span-copy the run to the next special char, then branch on it
+      let j = i;
+      while (j < n) { const c = line.charCodeAt(j); if (c === 47 || c === 34 || c === 39 || c === 96 || (c === 35 && hashComment)) break; j++; }
+      if (j > i) { res += line.slice(i, j); noteRun(line, i, j); i = j; continue; }
+      const ch = line[i];
       if (ch === '/' && line[i + 1] === '/') { res += ' '.repeat(n - i); i = n; continue; } // line comment
       if (hashComment && ch === '#') { res += ' '.repeat(n - i); i = n; continue; }         // PHP `#` comment (finding #13)
       if (ch === '/' && line[i + 1] === '*') {                                               // block comment
@@ -282,11 +340,11 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
         if (m) { res += '/' + value(line.slice(i + 1, m.close)) + '/' + value(line.slice(m.close + 1, m.end)); i = m.end; noteValue(); continue; }
       }
       if (ch === '"' || ch === "'") {                                                        // string literal
-        let j = i + 1; while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
-        const stop = Math.min(j + 1, n); res += value(line.slice(i, stop)); i = stop; noteValue(); continue;
+        let k = i + 1; while (k < n && line[k] !== ch) { if (line[k] === '\\') k++; k++; }
+        const stop = Math.min(k + 1, n); res += value(line.slice(i, stop)); i = stop; noteValue(); continue;
       }
       if (ch === '`') { res += keepValues ? '`' : ' '; i++; tpl.push({ depth: 0 }); continue; } // open template literal (push a frame)
-      note(ch); res += ch; i++;
+      note(ch); res += ch; i++;                                                               // division `/` falls through here
     }
     out.push(res);
   }

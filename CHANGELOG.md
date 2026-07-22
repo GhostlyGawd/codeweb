@@ -59,6 +59,19 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **`maskJs` lexes ~3–5× faster, byte-identically.** The masker ran a compiled-regex `.test()`
+  per character (word-class tracking) plus a one-char string append per character — ~27–30 MB/s
+  on real mixes, on the hottest path in the engine (every cold/changed file, and the whole repo
+  after any symbol-set change until the name-delta work lands). Two changes, zero byte diffs:
+  the word-class test is a charCode range check, and each lexer state now span-copies whole runs
+  of plain text up to its next special character (special sets re-derived from the post-WS-B
+  state machine and documented in place), folding the run into the significant-char state with
+  one backward walk that reproduces the old per-char accumulation exactly. Measured min-of-3:
+  26.8 → 135.8 MB/s (5.1×) on the 800-file bench corpus, 30.2 → 95.0 MB/s (3.2×) on this repo's
+  own 229 mask-eligible files. Byte-identity is pinned by a committed oracle test that embeds
+  the pre-change masker verbatim and compares outputs over every mask-eligible repo file, a
+  loaded bench-corpus tree, and adversarial fixtures, in all mode combinations — which is also
+  why this ships with NO scanner-version bump. (round 2, finding #20)
 - **Tree-sitter parse trees are freed.** web-tree-sitter has no FinalizationRegistry, and none of
   the engine's 8 parse sites called `tree.delete()` — every cold/changed-file extract on a default
   install leaked WASM pages for the process lifetime (measured: 1,312MB vs 217MB peak RSS on an
