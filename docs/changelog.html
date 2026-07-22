@@ -621,8 +621,10 @@
 <p>  fallback-equivalence test ran UN-skipped (it inverse-skips wherever the engine is installed —</p>
 <p>  i.e. always in the matrix job). <code>codeweb-gate.yml</code> now runs <code>npm ci</code>, so the structural self-gate</p>
 <p>  analyzes PRs with the same engine tier the product ships instead of regex-blind. <code>engines</code> says</p>
-<p>  <code>&gt;=22</code> honestly — Node 20's <code>npm test</code> glob is broken and the matrix never tested it.</p>
-<p>  (perf-quality round 2, finding #3)</p>
+<p>  <code>&gt;=22</code> honestly — Node 20's <code>npm test</code> glob is broken and the matrix never tested it. The</p>
+<p>  matrix's first real windows catch: <code>bench/all.mjs</code> dynamic-imported a bare absolute path — an</p>
+<p>  unsupported ESM scheme on windows (<code>D:\...</code>) that crashed the whole bench; it imports via</p>
+<p>  <code>file://</code> URL now. (perf-quality round 2, finding #3)</p>
 <ul>
 <li><strong>The suite's 60-second floor is gone.</strong> IE-EQUIVALENCE ran its 40 property trials sequentially</li>
 </ul>

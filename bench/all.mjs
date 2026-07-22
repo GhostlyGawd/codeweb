@@ -15,7 +15,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, rmSync, mkdirSync, mkdtempSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { tmpdir } from 'node:os';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -150,7 +150,9 @@ if (existsSync(opt.corpus)) {
 // The synthetic corpus that actually TRIGGERS the machinery: every function is a twin candidate
 // (LSH engages on its own past 800), and 15 planted same-name clusters must be found. The old
 // harness corpus produced 0 candidates / 0 groups — an idle pipeline timed as if it were load.
-const { writeLoadedCorpus } = await import(join(ROOT, 'bench', 'lib', 'loaded-corpus.mjs'));
+// file:// URL, not a bare absolute path — on windows a D:\ path is an unsupported ESM scheme and
+// this import crashed the whole bench (the matrix's first real windows catch).
+const { writeLoadedCorpus } = await import(pathToFileURL(join(ROOT, 'bench', 'lib', 'loaded-corpus.mjs')).href);
 const loadedSrc = join(ws, 'loaded-src');
 const loadedWs = join(ws, 'loaded-ws');
 rmSync(loadedSrc, { recursive: true, force: true }); rmSync(loadedWs, { recursive: true, force: true });

@@ -485,8 +485,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fallback-equivalence test ran UN-skipped (it inverse-skips wherever the engine is installed —
   i.e. always in the matrix job). `codeweb-gate.yml` now runs `npm ci`, so the structural self-gate
   analyzes PRs with the same engine tier the product ships instead of regex-blind. `engines` says
-  `>=22` honestly — Node 20's `npm test` glob is broken and the matrix never tested it.
-  (perf-quality round 2, finding #3)
+  `>=22` honestly — Node 20's `npm test` glob is broken and the matrix never tested it. The
+  matrix's first real windows catch: `bench/all.mjs` dynamic-imported a bare absolute path — an
+  unsupported ESM scheme on windows (`D:\...`) that crashed the whole bench; it imports via
+  `file://` URL now. (perf-quality round 2, finding #3)
 - **The suite's 60-second floor is gone.** IE-EQUIVALENCE ran its 40 property trials sequentially
   in one `test()` (59.8 s solo — nothing else exceeded 13.3 s); the trials now run as concurrent
   subtests (cap 4) over the new async spawn helper `runNodeAsync`, with the depth env-gated as
