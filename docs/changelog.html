@@ -147,6 +147,24 @@
 <p>  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)</p>
 <h3 class="cl-grp">Performance</h3>
 <ul>
+<li><strong><code>diff</code> rename detection is indexed, memoized, and honest about its cap.</strong> The removed×added</li>
+</ul>
+<p>  rename matcher called <code>graph.nodes.find</code> twice per candidate pair (an O(nodes) scan inside an</p>
+<p>  O(removed×added) loop) and re-shingled every added body once per removed node — 1,733 ms of</p>
+<p>  rename-detection overhead on a 14,964-node graph with 195 relabeled nodes. The logic moved into a</p>
+<p>  pure, ambient-state-free <code>detectRenames()</code> (WS-F #33 lifts it verbatim) that uses the already-built</p>
+<p>  <code>byId</code> indexes, hoists each old body's skeleton out of the inner loop, and memoizes each new body's</p>
+<p>  skeleton once for the whole pass (null bodies memoized too, so an unreadable body is not re-read per</p>
+<p>  removed node and still routes to the span-shape fallback). Bodies are capped at <code>BODY_LINE_CAP</code> lines</p>
+<p>  before shingling like overlap/dup-check — a &gt;400-line rename's similarity can shift to the overlap</p>
+<p>  answer BY DESIGN (a &gt;400-line rename still detects; test-covered), while every short-body fixture pin</p>
+<p>  stays byte-identical. Detection above <code>RENAME_CAP</code> (200) nodes on either side is now surfaced: an</p>
+<p>  additive <code>nodes.renameCheck = { skipped, removed, added, cap }</code> field plus one text-mode line name</p>
+<p>  the skip (absent when both sides fit, and when a side is empty nothing was skippable) — the field is</p>
+<p>  documented in diff.mjs's header and breaks neither the graphless MCP <code>codeweb_diff</code> passthrough nor</p>
+<p>  the graph-ops-based hook gate. Measured min-of-3 @14,964 nodes: 195-rename overhead 1,733 → <strong>30 ms</strong>;</p>
+<p>  <code>renamed[]</code> byte-identical to the pre-fix binary (195 pairs). (round 2, finding #28)</p>
+<ul>
 <li><strong><code>campaign</code> runs its three advisors concurrently and stops cloning the graph it owns.</strong> The</li>
 </ul>
 <p>  worklist composer spawned optimize, deadcode, and break-cycles with three BLOCKING <code>spawnSync</code></p>

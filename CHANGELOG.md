@@ -91,6 +91,22 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **`diff` rename detection is indexed, memoized, and honest about its cap.** The removed×added
+  rename matcher called `graph.nodes.find` twice per candidate pair (an O(nodes) scan inside an
+  O(removed×added) loop) and re-shingled every added body once per removed node — 1,733 ms of
+  rename-detection overhead on a 14,964-node graph with 195 relabeled nodes. The logic moved into a
+  pure, ambient-state-free `detectRenames()` (WS-F #33 lifts it verbatim) that uses the already-built
+  `byId` indexes, hoists each old body's skeleton out of the inner loop, and memoizes each new body's
+  skeleton once for the whole pass (null bodies memoized too, so an unreadable body is not re-read per
+  removed node and still routes to the span-shape fallback). Bodies are capped at `BODY_LINE_CAP` lines
+  before shingling like overlap/dup-check — a >400-line rename's similarity can shift to the overlap
+  answer BY DESIGN (a >400-line rename still detects; test-covered), while every short-body fixture pin
+  stays byte-identical. Detection above `RENAME_CAP` (200) nodes on either side is now surfaced: an
+  additive `nodes.renameCheck = { skipped, removed, added, cap }` field plus one text-mode line name
+  the skip (absent when both sides fit, and when a side is empty nothing was skippable) — the field is
+  documented in diff.mjs's header and breaks neither the graphless MCP `codeweb_diff` passthrough nor
+  the graph-ops-based hook gate. Measured min-of-3 @14,964 nodes: 195-rename overhead 1,733 → **30 ms**;
+  `renamed[]` byte-identical to the pre-fix binary (195 pairs). (round 2, finding #28)
 - **`campaign` runs its three advisors concurrently and stops cloning the graph it owns.** The
   worklist composer spawned optimize, deadcode, and break-cycles with three BLOCKING `spawnSync`
   calls (wall = sum of the three children), then `planCampaign` `structuredClone`d the whole graph

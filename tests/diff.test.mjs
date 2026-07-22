@@ -11,7 +11,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { writeFileSync } from 'node:fs';
-import { runNode, tmpDir, cleanup, script } from './helpers.mjs';
+import { runNode, tmpDir, cleanup, script, writeTree } from './helpers.mjs';
 
 const N = (id, file, domain, exports) => ({ id, label: id.split(':')[1], file, domain, exports });
 // before: a -> b -> c (no cycle / overlap / orphan; a.js:fa is exported)
@@ -152,4 +152,107 @@ test('D6: --json output is byte-stable and the CLI actually ran (not a vacuous p
   const b = d(B, A, '--json');
   assert.notEqual(a.status, null, 'diff.mjs exists and executed (guards against vacuous RED green)');
   assert.equal(a.stdout, b.stdout, 'identical inputs -> identical bytes');
+});
+
+// ---- Round 2, finding #28 (T-28.1): rename-detection characterization + cap-trip marker ----
+// These pin renamed[] across the detectRenames extraction/memoization (T-28.2). All four bodies are
+// SHORT (< the 400-line cap), so the line cap changes nothing here — they stay byte-identical.
+const REN_BODY = 'function alpha(u) {\n  const r = get(u.id);\n  if (!r) return null;\n  return r.value + compute(r);\n}';
+const REN_OTHER = 'function zeta() {\n  while (queue.length) drain(queue.pop());\n}';
+const fn = (id, file, line, loc) => ({ id, label: id.split(':')[1], kind: 'function', file, line, loc, exports: true, domain: 'core' });
+// before/after graphs with independent meta.root dirs (diff reads each side's bodies from its own root)
+function renameCase(name, srcBefore, srcAfter, beforeNodes, afterNodes, { noRoot = false } = {}) {
+  const dir = tmpDir('codeweb-diffren-');
+  const rootB = join(dir, 'b'), rootA = join(dir, 'a');
+  if (!noRoot) { if (srcBefore) writeTree(rootB, srcBefore); if (srcAfter) writeTree(rootA, srcAfter); }
+  const meta = (t, root) => ({ target: t, ...(noRoot ? {} : { root: root.replace(/\\/g, '/') }) });
+  const g = (t, root, nodes) => ({ meta: meta(t, root), nodes, edges: [], domains: [], overlaps: [] });
+  const bp = join(dir, 'before.json'), ap = join(dir, 'after.json');
+  writeFileSync(bp, JSON.stringify(g('b', rootB, beforeNodes)));
+  writeFileSync(ap, JSON.stringify(g('a', rootA, afterNodes)));
+  const r = dj(bp, ap);
+  cleanup(dir);
+  return r.json;
+}
+
+test('D-RENAME-PIN-inplace: same file, new name, same body -> renamed (not delete+add)', () => {
+  const j = renameCase('inplace',
+    { 'f.js': REN_BODY.replace('alpha', 'oldName') + '\n' },
+    { 'f.js': REN_BODY.replace('alpha', 'newName') + '\n' },
+    [fn('f.js:oldName', 'f.js', 1, 5)], [fn('f.js:newName', 'f.js', 1, 5)]);
+  assert.equal(j.nodes.renamed.length, 1);
+  assert.equal(j.nodes.renamed[0].from, 'f.js:oldName');
+  assert.equal(j.nodes.renamed[0].to, 'f.js:newName');
+  assert.ok(j.nodes.renamed[0].sim >= 0.85, `structural sim recorded, got ${j.nodes.renamed[0].sim}`);
+  assert.deepEqual(j.nodes.added, []);
+  assert.deepEqual(j.nodes.removed, []);
+  assert.equal(j.nodes.renameCheck, undefined, 'no cap marker on a small diff');
+});
+
+test('D-RENAME-PIN-move: same label, moved file, same body -> renamed via the sameLabel path', () => {
+  const j = renameCase('move',
+    { 'old.js': REN_BODY.replace('alpha', 'helper') + '\n' },
+    { 'new.js': REN_BODY.replace('alpha', 'helper') + '\n' },
+    [fn('old.js:helper', 'old.js', 1, 5)], [fn('new.js:helper', 'new.js', 1, 5)]);
+  assert.equal(j.nodes.renamed.length, 1);
+  assert.equal(j.nodes.renamed[0].from, 'old.js:helper');
+  assert.equal(j.nodes.renamed[0].to, 'new.js:helper');
+});
+
+test('D-RENAME-PIN-submatch: a genuinely different body (sim < 0.85) is NOT a rename', () => {
+  const j = renameCase('sub',
+    { 'c.js': REN_BODY.replace('alpha', 'foo') + '\n' },
+    { 'c.js': REN_OTHER.replace('zeta', 'bar') + '\n' },
+    [fn('c.js:foo', 'c.js', 1, 5)], [fn('c.js:bar', 'c.js', 1, 3)]);
+  assert.deepEqual(j.nodes.renamed, [], 'below the 0.85 bar and loc differs -> churn, not a rename');
+  assert.deepEqual(j.nodes.added, ['c.js:bar']);
+  assert.deepEqual(j.nodes.removed, ['c.js:foo']);
+});
+
+test('D-RENAME-PIN-spanshape: unreadable bodies fall back to same-file span-shape (sim null)', () => {
+  const j = renameCase('span', null, null,
+    [fn('d.js:gone', 'd.js', 1, 7)], [fn('d.js:reborn', 'd.js', 1, 8)], { noRoot: true });
+  assert.equal(j.nodes.renamed.length, 1, 'same file + |loc diff|<=1 with no readable body -> span-shape match');
+  assert.equal(j.nodes.renamed[0].from, 'd.js:gone');
+  assert.equal(j.nodes.renamed[0].to, 'd.js:reborn');
+  assert.equal(j.nodes.renamed[0].sim, null, 'span-shape match records sim null');
+});
+
+test('D-RENAME-LONGBODY: an obvious >400-line rename still detects under the body cap', () => {
+  const lines = Array.from({ length: 450 }, (_, i) => `  const s${i} = step${i % 9}(acc) + ${i};`).join('\n');
+  const big = (nm) => `function ${nm}(acc) {\n${lines}\n}`;
+  const j = renameCase('long',
+    { 'big.js': big('bigOld') + '\n' }, { 'big.js': big('bigNew') + '\n' },
+    [fn('big.js:bigOld', 'big.js', 1, 452)], [fn('big.js:bigNew', 'big.js', 1, 452)]);
+  assert.equal(j.nodes.renamed.length, 1, 'long-body rename detected on its first 400 capped lines');
+  assert.equal(j.nodes.renamed[0].from, 'big.js:bigOld');
+  assert.equal(j.nodes.renamed[0].to, 'big.js:bigNew');
+});
+
+test('D-RENAME-CAP: >200 on a side skips detection with an additive renameCheck marker (empty side gets none)', () => {
+  const many = Array.from({ length: 201 }, (_, i) => fn(`f${i}.js:fn${i}`, `f${i}.js`, 1, 3));
+  // both sides non-empty AND removed > 200 -> detection capped, marker present, renamed stays []
+  const capped = renameCase('cap', null, null, many, [fn('new.js:brandNew', 'new.js', 1, 4)], { noRoot: true });
+  assert.deepEqual(capped.nodes.renamed, [], 'capped runs do not detect renames');
+  assert.deepEqual(capped.nodes.renameCheck, { skipped: true, removed: 201, added: 1, cap: 200 }, 'additive skip marker with the counts');
+  assert.equal(capped.nodes.added.length, 1);
+  assert.equal(capped.nodes.removed.length, 201);
+  // removed > 200 but the ADDED side is empty -> nothing was skippable -> NO marker (silent, as today)
+  const emptyAdd = renameCase('capEmpty', null, null, many, [], { noRoot: true });
+  assert.equal(emptyAdd.nodes.renameCheck, undefined, 'an empty side is not a skipped detection');
+  assert.deepEqual(emptyAdd.nodes.renamed, []);
+});
+
+test('D-RENAME-CAP-text: the cap-trip prints one text-mode line naming the skip', () => {
+  const dir = tmpDir('codeweb-diffcap-');
+  try {
+    const many = Array.from({ length: 201 }, (_, i) => fn(`f${i}.js:fn${i}`, `f${i}.js`, 1, 3));
+    const g = (t, nodes) => ({ meta: { target: t }, nodes, edges: [], domains: [], overlaps: [] });
+    const bp = join(dir, 'b.json'), ap = join(dir, 'a.json');
+    writeFileSync(bp, JSON.stringify(g('b', many)));
+    writeFileSync(ap, JSON.stringify(g('a', [fn('new.js:brandNew', 'new.js', 1, 4)])));
+    const r = d(bp, ap);
+    assert.match(r.stdout, /rename detection skipped/i, 'text mode surfaces the cap trip');
+    assert.match(r.stdout, /201/);
+  } finally { cleanup(dir); }
 });
