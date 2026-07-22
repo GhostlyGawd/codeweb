@@ -104,6 +104,45 @@ test('(e) python: __init__ param shadows a module symbol inside __init__ only', 
   } finally { cleanup(dir); }
 });
 
+// (f) — round-2 WS-D review: the closure-local magnet (the `dep` CI incident, generalized). A
+// symbol nested inside another file's FUNCTION body is lexically unreachable from other files, at
+// ANY name length — the >=3-char guard's documented residual. graph-ops' `dep` loop variables
+// bare-ref-resolved to import-resolve's package-unique `dep` closure and fabricated the cycle the
+// structural gate blocked; renaming the closure moved the target but left the class. The fallback
+// now excludes closure-local targets; same-file resolution (sameFileByName) is untouched — WS-C's
+// two legitimate short survivors are exactly that path.
+test('(f) closure-local magnet: loop-var `dep` never ref-resolves into another file\'s closure', () => {
+  const { dir, frag } = extract({
+    'lib/target.mjs':
+      'export function outer(list) {\n' +
+      '  const deps = new Set();\n' +
+      '  const dep = (t) => { if (t) deps.add(t); return t; };\n' +
+      '  for (const x of list) dep(x);\n' +
+      '  return deps;\n' +
+      '}\n',
+    'lib/consumer.mjs':
+      'export function impactOf(map, id) {\n' +
+      '  const visited = new Set([id]);\n' +
+      '  const queue = [id];\n' +
+      '  for (let qi = 0; qi < queue.length; qi++) {\n' +
+      '    const callers = map.get(queue[qi]);\n' +
+      '    if (callers) for (const dep of callers) if (!visited.has(dep)) { visited.add(dep); queue.push(dep); }\n' +
+      '  }\n' +
+      '  return visited;\n' +
+      '}\n',
+    'lib/helper.mjs': 'export function summarize(rows) {\n  return rows.length;\n}\n',
+    'lib/caller.mjs': 'export function report(rows) {\n  return summarize(rows);\n}\n',
+  });
+  try {
+    assert.ok(!hasEdge(frag.edges, 'lib/consumer.mjs:impactOf', 'lib/target.mjs:dep'),
+      `a closure-local is unreachable from another file — no fallback edge; edges: ${JSON.stringify(frag.edges)}`);
+    assert.ok(hasEdge(frag.edges, 'lib/target.mjs:outer', 'lib/target.mjs:dep', 'call'),
+      `same-file closure call must survive (sameFileByName path, not the fallback); edges: ${JSON.stringify(frag.edges)}`);
+    assert.ok(hasEdge(frag.edges, 'lib/caller.mjs:report', 'lib/helper.mjs:summarize', 'call'),
+      `positive control: the pkg-unique fallback still resolves TOP-LEVEL targets; edges: ${JSON.stringify(frag.edges)}`);
+  } finally { cleanup(dir); }
+});
+
 test('(d) suppression is per-binding: f(map) loses the edge, sibling h() keeps it', () => {
   const { dir, frag } = extract({
     'src/f.mjs':

@@ -99,6 +99,39 @@ test('CF-MIGRATE: a stale-version cache (planted poison) is discarded — cold r
   } finally { cleanup(dir); }
 });
 
+// WS-D review — the closure-local fallback tightening (v17) adds a cross-file input the id set
+// cannot see: NESTING. Wrapping a top-level helper into a closure keeps its node id, so an
+// unannotated symbolSig would replay every consumer's stale fallback edge. The eligibility marker
+// on symbolSig + the delta maps must (1) invalidate the consumer, (2) stay on the DELTA path for
+// disjoint files, (3) end byte-equal to cold.
+test('CF-NEST-FLIP: nesting a fallback target invalidates its consumers, warm stays byte-equal to cold', () => {
+  const dir = tmpDir('codeweb-cf-'); const root = join(dir, 'src');
+  writeTree(root, {
+    't.js': 'export function helper(x) { return x + 1; }\n',
+    'c.js': 'export function consume(v) {\n  return helper(v);\n}\n',
+    'd.js': 'export function standalone() {\n  return 4;\n}\n',
+  });
+  const cachePath = join(dir, 'cache.json');
+  try {
+    extract(root, join(dir, 'g0.json'), cachePath);
+    const g0 = readJSON(join(dir, 'g0.json'));
+    assert.ok(g0.edges.some((e) => e.from === 'c.js:consume' && e.to === 't.js:helper'),
+      `top-level helper: the pkg-unique fallback resolves (control); edges: ${JSON.stringify(g0.edges)}`);
+    // nest helper inside a wrapper: SAME node id t.js:helper, now closure-local
+    writeFileSync(join(root, 't.js'),
+      'export function factory(x) {\n  const helper = (y) => y + 1;\n  return helper(x);\n}\n');
+    const stderr = extract(root, join(dir, 'g1.json'), cachePath);
+    const g1 = readJSON(join(dir, 'g1.json'));
+    assert.ok(!g1.edges.some((e) => e.from === 'c.js:consume' && e.to === 't.js:helper'),
+      `nested helper is fallback-ineligible — the consumer must re-derive and drop the edge; edges: ${JSON.stringify(g1.edges)}`);
+    assert.match(stderr, /edged 2\/3/, `t.js changed + c.js dirtied re-derive; disjoint d.js replays (delta path, not wholesale): ${stderr}`);
+    const r = runNode(EXTRACT, [root, '--out', join(dir, 'cold.json'), '--cache', join(dir, 'coldc.json'), '--no-ctags', '--full']);
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(readFileSync(join(dir, 'g1.json')).equals(readFileSync(join(dir, 'cold.json'))),
+      'warm post-flip == cold full, byte-for-byte');
+  } finally { cleanup(dir); }
+});
+
 test('CF-SKIP-WRITE: an unchanged fragment is not rewritten (mtime stable), a changed one is', () => {
   const dir = tmpDir('codeweb-cf-'); const root = join(dir, 'src'); writeTree(root, FIXTURE);
   const cachePath = join(dir, 'cache.json');

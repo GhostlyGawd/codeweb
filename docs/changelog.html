@@ -51,6 +51,21 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
+<li><strong>Bare-name fallback edges can no longer target another file's closure-locals.</strong> The</li>
+</ul>
+<p>  unique-in-package fallback resolved a bare name to ANY package-unique symbol — including</p>
+<p>  functions nested inside other functions, which no other file can lexically reach. The measured</p>
+<p>  magnet was real: graph-ops' <code>dep</code> loop variables ref-resolved into import-resolve's private</p>
+<p>  <code>dep</code> closure and fabricated a graph-ops ↔ import-resolve cycle the structural gate blocked</p>
+<p>  (31 such edges existed on the self-map, including the <code>scanJsReExports → graph-ops:map</code> half of</p>
+<p>  that same cycle). The fallback now filters closure-local targets (positive containment on</p>
+<p>  function/method ranges; PHP/Ruby exempt — their nested definitions become reachable at runtime;</p>
+<p>  same-file resolution untouched). Nesting is now part of the resolution landscape, so a</p>
+<p>  wrap-into-closure edit invalidates consumers: the eligibility bit annotates <code>symbolSig</code> and both</p>
+<p>  name-delta label maps, pinned by a warm-vs-cold byte-equality test that fails without the</p>
+<p>  annotation. Derivation-semantics change ⇒ <code>SCANNER_VERSION</code> 16 → 17 (one cold rebuild).</p>
+<p>  (round 2, WS-D review — the #10 short-name guard's documented residual, closed at any length)</p>
+<ul>
 <li><strong>The JS masker now lexes regex literals.</strong> <code>maskJs</code> tracked strings/templates/comments but not</li>
 </ul>
 <p>  regex literals, so a quote inside the ubiquitous escaping-helper pattern (<code>replace(/…/g)</code> with a</p>

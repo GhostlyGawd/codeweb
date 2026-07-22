@@ -264,10 +264,10 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
   function bindFileImports({ fAbs, r, isPy, text, aId, defaultExportByFile, kindById }) {
     const amap = new Map(), nsmap = new Map(), classmap = new Map(), edges = [];
     const deps = new Set(), bindCand = new Set();
-    // named addDep, not `dep`: a 3-char package-unique symbol here turned graph-ops' `dep` LOOP
-    // VARIABLES into fabricated bare-ref edges on the self-map (the >=3-char fallback guard's
-    // documented residual class) and closed a phantom graph-ops <-> import-resolve cycle the
-    // structural gate correctly blocked. The name is private; only the label hygiene matters.
+    // Record-and-return: every resolved target joins `deps` (finding #17's bindDeps). The name is
+    // free to be anything — the extractor's fallback no longer targets closure-locals (the `dep`
+    // cycle incident, closed by the WS-D-review guard in extract-symbols.mjs); `addDep` stays
+    // because a verb names an action better than the noun did.
     const addDep = (t) => { if (t) deps.add(t); return t; };
     let m;
   const addNamed = (namesStr, spec) => {

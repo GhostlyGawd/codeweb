@@ -10,6 +10,19 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Fixed
+- **Bare-name fallback edges can no longer target another file's closure-locals.** The
+  unique-in-package fallback resolved a bare name to ANY package-unique symbol — including
+  functions nested inside other functions, which no other file can lexically reach. The measured
+  magnet was real: graph-ops' `dep` loop variables ref-resolved into import-resolve's private
+  `dep` closure and fabricated a graph-ops ↔ import-resolve cycle the structural gate blocked
+  (31 such edges existed on the self-map, including the `scanJsReExports → graph-ops:map` half of
+  that same cycle). The fallback now filters closure-local targets (positive containment on
+  function/method ranges; PHP/Ruby exempt — their nested definitions become reachable at runtime;
+  same-file resolution untouched). Nesting is now part of the resolution landscape, so a
+  wrap-into-closure edit invalidates consumers: the eligibility bit annotates `symbolSig` and both
+  name-delta label maps, pinned by a warm-vs-cold byte-equality test that fails without the
+  annotation. Derivation-semantics change ⇒ `SCANNER_VERSION` 16 → 17 (one cold rebuild).
+  (round 2, WS-D review — the #10 short-name guard's documented residual, closed at any length)
 - **The JS masker now lexes regex literals.** `maskJs` tracked strings/templates/comments but not
   regex literals, so a quote inside the ubiquitous escaping-helper pattern (`replace(/…/g)` with a
   quote in the regex) desynced its string state — bodies ran to EOF, absorbing neighbors and

@@ -47,12 +47,14 @@ import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; //
 // v14: round-2 truth fixes (#8 template frames, #9 spread/IIFE, #12 accessor ids, #13 Ruby
 // heredoc/PHP #, #14 Python f-strings, #15 crash belts) change cached syms/ast.tsr/edges.
 // Ladder (orchestrator-reconciled, monotonic by build order): WS-B took 13 -> 14; WS-C took
-// 14 -> 15; WS-D (this) takes 15 -> 16.
-const SCANNER_VERSION = 16; // v16: round-2 cache-format change (#19: edge tuples interned per
-// entry as ids+[from,to,kind] triples, `syms` dropped — nodes/ranges are the one stored copy)
-// plus #17's additive name-delta fields (cand/bindCand/bindDeps/pyrex, cache-top pkgSig). A v15
-// cache is discarded at load (one cold rebuild, never a crash) — the read gate below only
-// accepts an exact version match.
+// 14 -> 15; WS-D took 15 -> 16; the WS-D review takes 16 -> 17.
+// v16: round-2 cache-format change (#19: edge tuples interned per entry as ids+[from,to,kind]
+// triples, `syms` dropped — nodes/ranges are the one stored copy) plus #17's additive name-delta
+// fields (cand/bindCand/bindDeps/pyrex, cache-top pkgSig).
+const SCANNER_VERSION = 17; // v17: derivation-semantics change (WS-D review) — the bare-name
+// fallback excludes closure-local targets (closureLocalIds), and symbolSig annotates eligibility
+// so a nesting flip invalidates cached edges. A previous-version cache is discarded at load (one
+// cold rebuild, never a crash) — the read gate below only accepts an exact version match.
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
 // label separator, so the last ':' splits them.
@@ -762,7 +764,32 @@ for (const [r, stars] of starReExportByFile) {
 // resolution, so cached per-file edges must invalidate then too. (Moved above the binding loop for
 // finding 10 — cached bindings gate on it.)
 const pkgBoundaries = [...new Set(files.map((f) => pkgOf(rel(f))))].sort();
-const symbolSig = sha1(nodes.map((n) => n.id).slice().sort().join('\n') + '\0' + pkgBoundaries.join('\n'));
+// Round-2 WS-D review — the closure-local magnet (#10's >=3-char guard left every 3+-char name
+// exposed; the `dep` CI incident was one). A symbol whose range sits strictly inside another
+// FUNCTION/METHOD body is lexically unreachable from other files in every lexically-scoped
+// language here, so the cross-file bare-name fallback must never target it. Positive kinds only:
+// unknown container kinds (ctags interfaces/structs/namespaces) leave members eligible — the
+// conservative direction. PHP and Ruby are exempt (a PHP nested function becomes GLOBAL when the
+// enclosing function runs; a Ruby nested def lands on the enclosing class) — their bare cross-file
+// reach is already method-filtered at the fallback. Same-file resolution (sameFileByName) is
+// untouched: WS-C's two legitimate short survivors are exactly that path.
+function collectClosureLocals(r, ranges, out) {
+  if (!ranges || ranges.length < 2 || /\.(php|rb)$/.test(r)) return;
+  const sorted = ranges.slice().sort((a, b) => a.start - b.start || b.end - a.end);
+  const stack = []; // start-ascending open ranges; lazy-pop mirrors the enclosing-index sweep
+  for (const rg of sorted) {
+    while (stack.length && stack[stack.length - 1].end < rg.start) stack.pop();
+    if (stack.some((p) => (p.kind === 'function' || p.kind === 'method')
+      && p.start <= rg.start && p.end >= rg.end && !(p.start === rg.start && p.end === rg.end))) out.add(rg.id);
+    stack.push(rg);
+  }
+}
+const closureLocalIds = new Set();
+for (const [fAbs2, rec2] of fileSyms) collectClosureLocals(rel(fAbs2), rec2.ranges, closureLocalIds);
+// Eligibility is part of the resolution landscape, so it ANNOTATES symbolSig ('\u0001' marker):
+// a nesting flip changes no node id, and an unannotated sig would replay every consumer's stale
+// verdict (fallback hit or drop) wholesale — the same blind-spot class rexSig closed for barrels.
+const symbolSig = sha1(nodes.map((n) => n.id + (closureLocalIds.has(n.id) ? '\u0001' : '')).slice().sort().join('\n') + '\0' + pkgBoundaries.join('\n'));
 const pkgSig = sha1(pkgBoundaries.join('\n')); // finding #17: pkg-boundary repartition alone (zero label delta) must stay a wholesale flip
 
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
@@ -810,7 +837,7 @@ const deltaDirty = (() => {
   if (oldCache.pkgSig !== pkgSig) return null;        // (a)
   if (!rexStable) return null;                        // (e)
   for (const [r2, e] of Object.entries(oldCache.files)) {                                  // (c)
-    if (!e.nodes || !e.hash || e.cand === undefined || !e.bind || e.bindCand === undefined || e.bindDeps === undefined) return null;
+    if (!e.nodes || !e.ranges || !e.hash || e.cand === undefined || !e.bind || e.bindCand === undefined || e.bindDeps === undefined) return null;
     if (r2.endsWith('.py') && e.pyrex === undefined) return null;
   }
   // (e) py belt: a changed .py file whose OWN def set moved can retarget an edge-time chain that
@@ -832,16 +859,21 @@ const deltaDirty = (() => {
       if (oldHas !== newHas) return null;    // chain landing pad appeared/vanished -> wholesale
     }
   }
-  // dirty labels: def-id-list delta per label, old vs new, bidirectional by construction
+  // dirty labels: def-id-list delta per label, old vs new, bidirectional by construction.
+  // WS-D review: both lists carry the closure-local eligibility marker (same '\u0001' scheme as
+  // symbolSig) — a nesting flip keeps the id but moves the marker, and the label MUST dirty then
+  // (the fallback's verdict on it changed while cand/bindDeps see nothing).
+  const oldLocal = new Set();
+  for (const [r2, e] of Object.entries(oldCache.files)) collectClosureLocals(r2, e.ranges, oldLocal);
   const oldByLabel = new Map();
   for (const e of Object.values(oldCache.files)) {
-    for (const n of e.nodes) { let l = oldByLabel.get(n.label); if (!l) oldByLabel.set(n.label, l = []); l.push(n.id); }
+    for (const n of e.nodes) { let l = oldByLabel.get(n.label); if (!l) oldByLabel.set(n.label, l = []); l.push(n.id + (oldLocal.has(n.id) ? '\u0001' : '')); }
   }
   const dirty = new Set();
   for (const [label, ids] of byName) {
     const o = oldByLabel.get(label);
     if (!o) { dirty.add(label); continue; }
-    const a = [...ids].sort(), b = o.sort();
+    const a = ids.map((id) => id + (closureLocalIds.has(id) ? '\u0001' : '')).sort(), b = o.sort();
     if (a.length !== b.length || a.some((v, i2) => v !== b[i2])) dirty.add(label);
   }
   for (const label of oldByLabel.keys()) if (!byName.has(label)) dirty.add(label);
@@ -1004,6 +1036,10 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
       // that attribution belongs to the dispatch tier, which has the receiver evidence. Without
       // this, `helper(1)` in class A wired to B.helper across files on a name coincidence.
       if (/\.(rb|php)$/.test(r)) inPkg = inPkg.filter((d) => { const lbl = d.slice(d.lastIndexOf(':') + 1); return !lbl.includes('.') || idFile(d) === r; });
+      // WS-D review — closure-local magnet: a bare name in ANOTHER file can never lexically reach
+      // a symbol nested inside a function body (see closureLocalIds above; the `dep` CI incident).
+      // Same-file defs stay eligible (belt — sameFileByName resolves them before this point).
+      inPkg = inPkg.filter((d) => idFile(d) === r || !closureLocalIds.has(d));
       if (inPkg.length === 1) {
         // finding #10 (T-10.3): ROLE-GATE the unique-global fallback for ref kinds — product
         // never ref-resolves into test/bench/fixture code. REJECT-form, not filter-form: a name
