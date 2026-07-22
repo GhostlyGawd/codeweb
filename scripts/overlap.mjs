@@ -252,17 +252,26 @@ if (lshOn(cand.length)) {
   // callee-label sets — a pair at the 0.5 confirm threshold is proposed with P≈0.9998. Mega-hub
   // co-callers share too little to collide, so no hub exclusion is needed on this path.
   console.error(`[overlap] LSH path engaged: ${cand.length} twin candidate(s)`); // finding 13: the bench asserts this fires at scale
+  // Round 2, #24 (tier 1): ~99% of buckets are singletons, and singletons hit the `ids.length < 2`
+  // continue BEFORE the cap check — they touch neither skippedBuckets (cap 64 >= 2), seenPair,
+  // flagged, nor twins, so sorting/walking them was a pure tax (~1.4s of the 5.1s stage at 15.7k).
+  // multiKeys records a key exactly when its bucket reaches length 2 (once); the full `buckets`
+  // Map keeps singletons so `buckets: buckets.size` is unchanged; sorting/walking ONLY multiKeys
+  // is the same string sort over the same multi-occupancy keys => same visit order => pair
+  // sequence, skippedBuckets, and counts all byte-identical.
   const buckets = new Map();
+  const multiKeys = [];
   for (const [id, s] of cand) {
     for (const bk of bandKeys(signature(s, 192), 64, 3)) {
-      if (!buckets.has(bk)) buckets.set(bk, []);
-      buckets.get(bk).push(id);
+      let b = buckets.get(bk);
+      if (!b) buckets.set(bk, (b = []));
+      b.push(id);
+      if (b.length === 2) multiKeys.push(bk);
     }
   }
   let skippedBuckets = 0;
-  for (const bk of [...buckets.keys()].sort()) {
-    const ids = buckets.get(bk);
-    if (ids.length < 2) continue;
+  for (const bk of multiKeys.sort()) {
+    const ids = buckets.get(bk); // length >= 2 by construction
     if (ids.length > LSH_BUCKET_CAP) { skippedBuckets++; continue; }
     ids.sort();
     for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) considerPair(ids[i], ids[j]);
@@ -365,19 +374,23 @@ let t3Lsh = null; // { buckets, skippedBuckets } when LSH generated the near-mis
     // Spec N: multiset Jaccard reduces exactly to set Jaccard under occurrence-expansion
     // (`hash#k` for the k-th occurrence), so 32×4 banding at the 0.7 confirm threshold proposes
     // true pairs with P≈0.9998 — then sharedOf computes the exact count for each candidate.
+    // Round 2, #24 (tier 1): multi-occupancy-only sort/walk, exactly like Signal B — singleton
+    // buckets have zero side effects to preserve (the len<2 continue precedes the cap check).
     const buckets = new Map();
+    const multiKeys = [];
     for (const n of t3Nodes) {
       const items = [];
       for (const [h, c] of countsOf.get(n.id)) for (let k = 1; k <= c; k++) items.push(h + '#' + k);
       for (const bk of bandKeys(signature(items, 128), 32, 4)) {
-        if (!buckets.has(bk)) buckets.set(bk, []);
-        buckets.get(bk).push(n.id);
+        let b = buckets.get(bk);
+        if (!b) buckets.set(bk, (b = []));
+        b.push(n.id);
+        if (b.length === 2) multiKeys.push(bk);
       }
     }
     let skippedBuckets = 0;
-    for (const bk of [...buckets.keys()].sort()) {
-      const ids = buckets.get(bk);
-      if (ids.length < 2) continue;
+    for (const bk of multiKeys.sort()) {
+      const ids = buckets.get(bk); // length >= 2 by construction
       if (ids.length > LSH_BUCKET_CAP) { skippedBuckets++; continue; }
       ids.sort();
       for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
