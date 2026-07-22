@@ -264,10 +264,14 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
   function bindFileImports({ fAbs, r, isPy, text, aId, defaultExportByFile, kindById }) {
     const amap = new Map(), nsmap = new Map(), classmap = new Map(), edges = [];
     const deps = new Set(), bindCand = new Set();
-    const dep = (t) => { if (t) deps.add(t); return t; };
+    // named addDep, not `dep`: a 3-char package-unique symbol here turned graph-ops' `dep` LOOP
+    // VARIABLES into fabricated bare-ref edges on the self-map (the >=3-char fallback guard's
+    // documented residual class) and closed a phantom graph-ops <-> import-resolve cycle the
+    // structural gate correctly blocked. The name is private; only the label hygiene matters.
+    const addDep = (t) => { if (t) deps.add(t); return t; };
     let m;
   const addNamed = (namesStr, spec) => {
-    const target = dep(resolveImport(fAbs, spec)); if (!target) return;
+    const target = addDep(resolveImport(fAbs, spec)); if (!target) return;
     for (const part of namesStr.split(',')) {
       const seg = part.trim().split(/\s+as\s+/);
       const orig = seg[0].trim(), local = seg[seg.length - 1].trim();
@@ -275,7 +279,7 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
       bindCand.add(orig);
       const symId = target + ':' + orig;
       // Direct symbol in the target, else follow a renamed re-export chain (`export {orig as …} from`).
-      const resolved = nodeIdSet.has(symId) ? symId : resolveReExport(target, orig, undefined, dep);
+      const resolved = nodeIdSet.has(symId) ? symId : resolveReExport(target, orig, undefined, addDep);
       if (resolved) { amap.set(local, resolved); if (aId && aId !== resolved) edges.push([aId, resolved]); }
     }
   };
@@ -283,17 +287,17 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
   // member-access binding) OR a symbol defined in MOD's file (-> precise alias, like addNamed). The
   // coarse "imports this module" edge lands on the target's <module> node.
   const addPyFrom = (level, dotted, namesStr) => {
-    const pkgFile = dep(resolvePyModule(fAbs, level, dotted));
+    const pkgFile = addDep(resolvePyModule(fAbs, level, dotted));
     for (const part of namesStr.replace(/[()]/g, '').split(',')) {
       const seg = part.trim().split(/\s+as\s+/);
       const orig = (seg[0] || '').trim(), local = (seg[seg.length - 1] || '').trim();
       if (!orig || orig === '*') continue;
       bindCand.add(orig);
-      const sub = dep(resolvePyModule(fAbs, level, dotted ? dotted + '.' + orig : orig));
+      const sub = addDep(resolvePyModule(fAbs, level, dotted ? dotted + '.' + orig : orig));
       if (sub && sub !== pkgFile) { nsmap.set(local, sub); if (aId) edges.push([aId, sub + ':<module>']); continue; }
       if (pkgFile) {
         const symId = pkgFile + ':' + orig;
-        const resolvedSym = nodeIdSet.has(symId) ? symId : pyReExportResolve(pkgFile, orig, 0, dep); // Spec Q2
+        const resolvedSym = nodeIdSet.has(symId) ? symId : pyReExportResolve(pkgFile, orig, 0, addDep); // Spec Q2
         if (resolvedSym) {
           amap.set(local, resolvedSym); // Spec Q3: an explicit import binds bare calls, boundary or not
           const origin = pyImportOrigin(r); // Spec Q4: the SITE (module scope) owns the import edge
@@ -310,7 +314,7 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
       const seg = part.trim().split(/\s+as\s+/);
       const dotted = (seg[0] || '').trim(); if (!dotted) continue;
       const alias = seg.length > 1 ? seg[1].trim() : null;
-      const t = dep(resolvePyModule(fAbs, 0, dotted)); if (!t) continue;
+      const t = addDep(resolvePyModule(fAbs, 0, dotted)); if (!t) continue;
       const local = alias || (dotted.includes('.') ? null : dotted);
       if (local) nsmap.set(local, t);
       if (aId) edges.push([aId, t + ':<module>']);
@@ -323,7 +327,7 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
   // node (created on demand below), NOT on its anchor symbol — member-access now produces the precise
   // per-symbol edges, so attributing the coarse edge to one symbol only pollutes its dependents.
   const addModuleBinding = (local, spec, isDefault) => {
-    const t = dep(resolveImport(fAbs, spec)); if (!t) return;
+    const t = addDep(resolveImport(fAbs, spec)); if (!t) return;
     if (local) nsmap.set(local, t);
     // A default import binds the target's default export: attribute to its single owning symbol when
     // there is one (class/fn AxiosError), else the module object (object-default barrel -> <module>).
@@ -337,7 +341,7 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
     const edgeTarget = defSym || (t + ':<module>');
     if (aId && aId !== edgeTarget) edges.push([aId, edgeTarget]);
   };
-  const addSide = (spec) => { const t = dep(resolveImport(fAbs, spec)); if (!t) return; if (aId) edges.push([aId, t + ':<module>']); };
+  const addSide = (spec) => { const t = addDep(resolveImport(fAbs, spec)); if (!t) return; if (aId) edges.push([aId, t + ':<module>']); };
   if (isPy) {
     const pyText = maskedOnce(r, 'py', text); // don't bind imports that live in a docstring/comment
     while ((m = pyFrom.exec(pyText))) addPyFrom(m[1].length, m[2], m[3]);

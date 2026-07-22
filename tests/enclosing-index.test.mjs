@@ -11,6 +11,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { buildInnermostIndex, createOwnerStack } from '../scripts/lib/enclosing.mjs';
+import { probeAst } from '../scripts/lib/ts-engine.mjs';
 import { writeLoadedCorpus } from '../bench/lib/loaded-corpus.mjs';
 import { runNode, script, tmpDir, cleanup, writeTree } from './helpers.mjs';
 import { prng, int, pick } from './_proptest.mjs';
@@ -86,34 +87,53 @@ test('ENC-PROP: owner stack equals the :422 class-owner scan over a line-sorted 
 
 // Golden mini-fixture: nested classes, same-name methods, a method AFTER an inner class closes,
 // and a same-line class+method — the owner-qualified id scheme pins which class won each method.
-test('ENC-GOLD: owner-qualified ids unchanged on nested/adjacent/same-line class shapes', () => {
-  const dir = tmpDir('codeweb-enc-');
-  const root = join(dir, 'src');
-  writeTree(root, {
-    'x.js': [
-      'export class Outer {',      // 1..11
-      '  ping() { return 1; }',    // 2
-      '  static Inner = class Inner2 {', // 3 (field arrow? no — class expr; regex sees "Inner2"? keep simple)
-      '  }',
-      '  pong() { return 2; }',    // 5
-      '}',
-      'class Late { ping() { return 3; } }', // 7: class + method on ONE line — class must not own... (start > rg.start)
-      'class A { m() { return 4; } }',
-      'class B { m() { return 5; } }',
-      'function free() { return 6; }',
-      '',
-    ].join('\n'),
-  });
-  const r = runNode(EXTRACT, [root, '--no-ctags', '--out', join(dir, 'f.json')]);
+// Two goldens, one per tier (the no-ast CI leg proved the single default-engine golden was
+// AST-shaped — `A.m`/`B.m`/`Late.ping` are tree-sitter method nodes the regex scanner never
+// discovers): ENC-GOLD pins the REGEX tier explicitly (`--engine regex`), the exact path #21's
+// owner stack changed, byte-identical on every CI leg with no skip; ENC-GOLD-AST keeps the
+// default-engine ids under the suite's named engine-availability skip idiom.
+const GOLD_FIXTURE = {
+  'x.js': [
+    'export class Outer {',      // 1..6
+    '  ping() { return 1; }',    // 2
+    '  static Inner = class Inner2 {', // 3
+    '  }',
+    '  pong() { return 2; }',    // 5
+    '}',
+    'class Late { ping() { return 3; } }', // 7: class + method on ONE line
+    'class A { m() { return 4; } }',
+    'class B { m() { return 5; } }',
+    'function free() { return 6; }',
+    '',
+  ].join('\n'),
+};
+const goldIds = (dir, extra) => {
+  const r = runNode(EXTRACT, [join(dir, 'src'), '--no-ctags', '--out', join(dir, 'f.json'), ...extra]);
   assert.equal(r.status, 0, r.stderr);
-  const ids = JSON.parse(readFileSync(join(dir, 'f.json'), 'utf8')).nodes.map((n) => n.id).sort();
+  return JSON.parse(readFileSync(join(dir, 'f.json'), 'utf8')).nodes.map((n) => n.id).sort();
+};
+
+test('ENC-GOLD: regex-tier owner-qualified ids unchanged on nested/adjacent/same-line class shapes', () => {
+  const dir = tmpDir('codeweb-enc-');
+  writeTree(join(dir, 'src'), GOLD_FIXTURE);
   try {
-    // Pinned against the PRE-#21 extractor's real output (the golden was captured before the
-    // index landed): Outer owns ping/pong, A/B own their same-name m's, and the same-line
-    // `class Late { ping() ... }` resolves to Late.ping via the SCANNER's own owner attribution
-    // (s.owner from the symbol scan) — the :422 fallback scan, which this finding hoists, only
-    // runs when the scanner did NOT attribute an owner, and its strict `start > rg.start`
-    // same-line exclusion is pinned by the ENC-PROP property above.
+    // The regex tier discovers multi-line methods only, so the single-line bodies of
+    // Late/A/B contribute their CLASS nodes alone; Outer owns ping/pong via the #21 owner stack
+    // (strict same-line exclusion pinned by ENC-PROP). This exact list is what the no-ast CI leg
+    // sees — pinned verbatim, every leg, no engine dependence.
+    assert.deepEqual(goldIds(dir, ['--engine', 'regex']),
+      ['x.js:A', 'x.js:B', 'x.js:Late', 'x.js:Outer', 'x.js:Outer.ping', 'x.js:Outer.pong', 'x.js:free']);
+  } finally { cleanup(dir); }
+});
+
+test('ENC-GOLD-AST: default-engine ids add the tree-sitter method nodes (single-line bodies)', { skip: !probeAst().ts && 'tree-sitter engine unavailable' }, () => {
+  const dir = tmpDir('codeweb-enc-');
+  writeTree(join(dir, 'src'), GOLD_FIXTURE);
+  try {
+    const ids = goldIds(dir, []);
+    // Captured against the pre-#21 extractor's real default-engine output: the AST tier owns the
+    // single-line method nodes (Late.ping/A.m/B.m arrive class-qualified from the parse tree —
+    // the :422 fallback only runs when the scanner attributed no owner).
     for (const want of ['x.js:Outer', 'x.js:Outer.ping', 'x.js:Outer.pong', 'x.js:A.m', 'x.js:B.m', 'x.js:Late.ping', 'x.js:free']) {
       assert.ok(ids.includes(want), `${want} present (got ${ids.join(', ')})`);
     }
