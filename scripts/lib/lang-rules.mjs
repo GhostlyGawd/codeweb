@@ -315,4 +315,4 @@ export function parseSignature(line, name, isPy) {
 export const DYNAMIC_RE = /\[[A-Za-z_$][\w$]*\]\s*\(|\bgetattr\s*\(|require\s*\(\s*[^'"`)\s]|\.emit\s*\(|globalThis\s*\[|window\s*\[/;
 
 /** Language of a repo-relative file path (extension-keyed; the meta.languages vocabulary). */
-export const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
+export const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : /\.(tsx?|mts|cts)$/.test(f) ? 'typescript' : 'javascript');

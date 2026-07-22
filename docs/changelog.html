@@ -773,6 +773,26 @@
 <p>  break the shared idempotence property. keepValues output stays byte-identical to before</p>
 <p>  (differentially verified). Limits documented in the header (nested same-quote f-strings are</p>
 <p>  best-effort). (perf-quality round 2, finding #14)</p>
+<ul>
+<li><strong>NodeNext <code>.js</code> specifiers reach their <code>.ts/.tsx</code> sources.</strong> Under</li>
+</ul>
+<p>  <code>moduleResolution: node16/nodenext</code> TypeScript REQUIRES relative imports spelled with the</p>
+<p>  emitted extension (<code>./x.js</code> for <code>./x.ts</code>) — the resolver's candidate list never mapped those</p>
+<p>  back, so alias, namespace (<code>import * as u</code> → empty nsmap), and re-export edges silently</p>
+<p>  vanished in modern TS repos, with the unique-bare-name rescue masking the hole just often</p>
+<p>  enough to look random. One exported candidate builder (<code>importCandidates</code> + <code>EXT_REMAP</code>:</p>
+<p>  <code>.js→.ts/.tsx</code>, <code>.mjs→.mts</code>, <code>.cjs→.cts</code>, <code>.jsx→.tsx</code>, plus the missing</p>
+<p>  <code>/index.tsx|jsx|cjs|mts|cts</code> candidates) now serves both <code>resolveImport</code> and the</p>
+<p>  pub-entrypoint walk — the walk's stale duplicate list (already missing <code>.tsx/.jsx//index.mjs</code>,</p>
+<p>  so a <code>main: "./src/index.js"</code> backed by <code>src/index.ts</code> never marked anything <code>pub</code>) is gone.</p>
+<p>  Direct extensions stay before remaps: the literal on-disk file wins (Node runtime semantics —</p>
+<p>  a deliberate, documented divergence from tsc's substitute-first probe order), so every remap is</p>
+<p>  a pure recall addition and existing corpora extract byte-identically (A/B-verified against the</p>
+<p>  pre-fix resolver). <code>.mts/.cts</code> join <code>SRC_RE</code> and the JS/TS dispatch points — the remap table</p>
+<p>  only means something if those sources are enumerated. Six fixture packages in</p>
+<p>  <code>tests/import-nodenext.test.mjs</code> (disambiguation, namespace member, re-export chain + barrel</p>
+<p>  dependent, <code>.mjs→.mts</code> + <code>/index.tsx</code>, pub-walk mirror, both-exist precedence pin).</p>
+<p>  (perf-quality round 2, finding #11)</p>
 <h2 class="cl-ver">[0.9.0] - 2026-07-19</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>

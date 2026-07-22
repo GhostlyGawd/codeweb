@@ -20,7 +20,7 @@ import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; 
 import { atomicWrite, parseArgs } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
 import { SRC_RE } from './lib/common.mjs'; // finding 25: one truth for the mappable-source list (the copy here could drift)
 import { KEYWORDS, scanSymbols, bodyEnd, parseSignature, DYNAMIC_RE, langOf } from './lib/lang-rules.mjs'; // finding 25: pure per-language rules
-import { createImportResolver, defaultExportOf } from './lib/import-resolve.mjs'; // finding 25: cross-file name binding, one place
+import { createImportResolver, defaultExportOf, importCandidates } from './lib/import-resolve.mjs'; // finding 25: cross-file name binding, one place; finding #11: shared specifier-candidate list
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { maskJs, maskPy, maskRuby } from './lib/masking.mjs'; // comment/string/regex-literal blanking (one truth, shared with codemod's rewrite gate)
 import { sha1 } from './lib/hash.mjs'; // one truth — codeweb's own gate flagged the duplicate on this branch
@@ -312,7 +312,7 @@ const dynamicFiles = [];
 for (const f of files) {
   const r = rel(f);
   const isPy = r.endsWith('.py');
-  const isJsTs = /\.(jsx?|mjs|cjs|tsx?)$/.test(r);
+  const isJsTs = /\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(r); // finding #11: .mts/.cts are TS files
   const isBraceLang = isJsTs || /\.(java|cs|php|kt|kts|swift)$/.test(r); // maskJs handles //, /* */ and "…" for all of them
   const isIndentLang = isPy || r.endsWith('.rb'); // extents by dedent (Python) / end-at-indent (Ruby)
   const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp'
@@ -585,7 +585,7 @@ const rexReuse = stampTier && oldCache.fileSig === fileSig;
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
   const r = rel(f);
-  if (!/\.(jsx?|mjs|cjs|tsx?)$/.test(r)) continue; // JS/TS only
+  if (!/\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(r)) continue; // JS/TS only (finding #11: .mts/.cts included)
   const entry = newCache && newCache.files[r];
   if (rexReuse && fsRec.text == null && entry && entry.rex) {
     resolver.loadJsReExports(r, entry.rex.map, entry.rex.stars);
@@ -620,7 +620,12 @@ for (const [r, stars] of starReExportByFile) {
   const addEntry = (dir, spec) => {
     if (typeof spec !== 'string' || !spec || spec.endsWith('.d.ts') || spec.endsWith('.json')) return;
     const base = (dir ? dir + '/' : '') + spec.replace(/^\.\//, '');
-    for (const cand of [base, base + '.js', base + '.mjs', base + '.cjs', base + '.ts', base.replace(/\/+$/, '') + '/index.js', base.replace(/\/+$/, '') + '/index.ts']) {
+    // finding #11: the ONE candidate list, shared with resolveImport (this local copy had drifted —
+    // no `.tsx/.jsx`, no `/index.mjs`, and no NodeNext ext remap, so a `main: "./src/index.js"`
+    // whose source is `src/index.ts` never marked anything pub). Membership stays ours: `sources`
+    // spans every statted file. Behavior superset: `.tsx/.jsx` now probe BEFORE index candidates,
+    // matching TS resolution (a main naming `x` with both `x.tsx` and `x/index.js` prefers `x.tsx`).
+    for (const cand of importCandidates(base)) {
       const norm = cand.replace(/\/{2,}/g, '/');
       if (sources[norm]) { entryFiles.add(norm); return; }
     }
@@ -870,7 +875,7 @@ for (const f of edgeFiles) {
   } else {
     // finding 10: text + mask only on the derive path — an edge-cache hit never touches the file
     const text = textOf(f, rec);
-    const lines = (r.endsWith('.py') ? maskedOnce(r, 'py', text) : r.endsWith('.rb') ? maskedOnce(r, 'rb', text) : /\.(jsx?|mjs|cjs|tsx?|java|cs|php|kt|kts|swift)$/.test(r) ? maskedOnce(r, 'js', text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
+    const lines = (r.endsWith('.py') ? maskedOnce(r, 'py', text) : r.endsWith('.rb') ? maskedOnce(r, 'rb', text) : /\.(jsx?|mjs|cjs|tsx?|mts|cts|java|cs|php|kt|kts|swift)$/.test(r) ? maskedOnce(r, 'js', text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
     result = deriveFileEdges(r, lines, rec.ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f));
     edgedCount++;
   }

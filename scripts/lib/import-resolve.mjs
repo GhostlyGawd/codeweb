@@ -9,6 +9,36 @@
 
 import { dirname, resolve } from 'node:path';
 
+// Finding #11: NodeNext/node16 TypeScript REQUIRES relative specifiers spelled with the EMITTED
+// extension (`./x.js` for `./x.ts`) — on-disk-miss remaps recover the source file. One exported
+// table + one candidate builder shared by resolveImport AND the extractor's pub-entrypoint walk
+// (extract-symbols already imports this module), so the two lists provably cannot drift — the
+// pub-walk copy had already lost `.tsx/.jsx//index.mjs`.
+export const EXT_REMAP = { '.js': ['.ts', '.tsx'], '.mjs': ['.mts'], '.cjs': ['.cts'], '.jsx': ['.tsx'] };
+const DIRECT_EXTS = ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx'];
+const INDEX_CANDS = ['/index.js', '/index.ts', '/index.mjs', '/index.tsx', '/index.jsx', '/index.cjs', '/index.mts', '/index.cts'];
+
+/**
+ * Ordered resolution candidates for a relative-import base path. Candidate STRINGS only —
+ * membership (relSet / the pub-walk's statted `sources`) stays caller-owned. Order is the
+ * precedence contract: base itself, direct extensions, ext remaps, index files. Direct exts stay
+ * BEFORE remaps, so an on-disk `x.js` always wins over `x.ts` — Node runtime semantics, a
+ * DELIBERATE divergence from tsc (which probes substituted `x.ts`/`x.tsx` before the literal
+ * `x.js`, presuming `.js` is its own emit). That keeps every remap a pure recall addition: no
+ * specifier that resolved before can flip target (pinned by import-nodenext i6). Within a key,
+ * tsc's substitution order (`.ts` before `.tsx`) is kept.
+ */
+export function importCandidates(base) {
+  const out = [base];
+  for (const e of DIRECT_EXTS) out.push(base + e);
+  for (const key of Object.keys(EXT_REMAP)) {
+    if (base.endsWith(key)) for (const ext of EXT_REMAP[key]) out.push(base.slice(0, -key.length) + ext);
+  }
+  const idx = base.replace(/\/+$/, '');
+  for (const e of INDEX_CANDS) out.push(idx + e);
+  return out;
+}
+
 // A file's DEFAULT EXPORT, when it is a single named symbol defined in that file (`export default
 // class X` / `export default function X` / `export default X;` / `export { X as default }` /
 // `module.exports = X`). Returns its node id, else null (an object/array/expression default — e.g.
@@ -37,9 +67,8 @@ export function createImportResolver({ rel: relPathOf, relSet, absByRel, fileSym
 const pyImportOrigin = (r2) => r2 + ':<module>';
 function resolveImport(fromAbs, spec) {
   if (!/^[.]/.test(spec)) return null; // local relative imports only
-  let r = relPathOf(resolve(dirname(fromAbs), spec)).replace(/\\/g, '/');
-  const cands = [r, r + '.js', r + '.mjs', r + '.cjs', r + '.ts', r + '.tsx', r + '.jsx', r + '/index.js', r + '/index.ts', r + '/index.mjs'];
-  for (const c of cands) if (relSet.has(c)) return c;
+  const r = relPathOf(resolve(dirname(fromAbs), spec)).replace(/\\/g, '/');
+  for (const c of importCandidates(r)) if (relSet.has(c)) return c;
   return null;
 }
 // Resolve a Python module spec to a repo-relative file (`x.py` or a package's `x/__init__.py`).

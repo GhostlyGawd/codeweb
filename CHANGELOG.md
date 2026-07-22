@@ -616,6 +616,24 @@ notes so validated results, papers, and new tools never get lost in commit histo
   break the shared idempotence property. keepValues output stays byte-identical to before
   (differentially verified). Limits documented in the header (nested same-quote f-strings are
   best-effort). (perf-quality round 2, finding #14)
+- **NodeNext `.js` specifiers reach their `.ts/.tsx` sources.** Under
+  `moduleResolution: node16/nodenext` TypeScript REQUIRES relative imports spelled with the
+  emitted extension (`./x.js` for `./x.ts`) — the resolver's candidate list never mapped those
+  back, so alias, namespace (`import * as u` → empty nsmap), and re-export edges silently
+  vanished in modern TS repos, with the unique-bare-name rescue masking the hole just often
+  enough to look random. One exported candidate builder (`importCandidates` + `EXT_REMAP`:
+  `.js→.ts/.tsx`, `.mjs→.mts`, `.cjs→.cts`, `.jsx→.tsx`, plus the missing
+  `/index.tsx|jsx|cjs|mts|cts` candidates) now serves both `resolveImport` and the
+  pub-entrypoint walk — the walk's stale duplicate list (already missing `.tsx/.jsx//index.mjs`,
+  so a `main: "./src/index.js"` backed by `src/index.ts` never marked anything `pub`) is gone.
+  Direct extensions stay before remaps: the literal on-disk file wins (Node runtime semantics —
+  a deliberate, documented divergence from tsc's substitute-first probe order), so every remap is
+  a pure recall addition and existing corpora extract byte-identically (A/B-verified against the
+  pre-fix resolver). `.mts/.cts` join `SRC_RE` and the JS/TS dispatch points — the remap table
+  only means something if those sources are enumerated. Six fixture packages in
+  `tests/import-nodenext.test.mjs` (disambiguation, namespace member, re-export chain + barrel
+  dependent, `.mjs→.mts` + `/index.tsx`, pub-walk mirror, both-exist precedence pin).
+  (perf-quality round 2, finding #11)
 
 ## [0.9.0] - 2026-07-19
 
