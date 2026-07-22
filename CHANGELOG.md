@@ -10,6 +10,16 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Fixed
+- **Retargeting a re-export barrel no longer leaves stale call edges in warm extracts.** Flipping
+  a forward (`export { x } from './a.js'` → `'./b.js'`, or a Python from-import chain) changes
+  ZERO symbols, so the shipped engine's wholesale reuse gate (symbol signature + per-file content
+  hash) replayed unchanged consumers' cached edges still aimed at the OLD chain target — found by
+  #17's extended IE generator (5/40 trials red under the pre-delta engine), reproduced
+  deterministically by IE-REX-FLIP, and re-verified red against the workstream-entry tree. Both
+  reuse gates (edges and binds) now also require an unchanged re-export landscape (`rexSig`
+  canonical-table hash, plus a Python (module, name)-membership belt for edge-time chains).
+  Landed inside #17 part 1 (`8582b4f`); recorded here so the truth fix is visible outside the
+  perf entry. (round 2, finding #17 — WS-D review note)
 - **Bare-name fallback edges can no longer target another file's closure-locals.** The
   unique-in-package fallback resolved a bare name to ANY package-unique symbol — including
   functions nested inside other functions, which no other file can lexically reach. The measured

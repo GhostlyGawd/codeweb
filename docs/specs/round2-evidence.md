@@ -747,3 +747,95 @@ re-baseline:
 
 Fix sha `b6f1040`; coordinator-confirmed final CI state: **all 7 jobs green** (test
 ubuntu-22/24, windows-22, test-no-ast, bench, consistency, gate — gate comment shows cycles +0).
+
+### WS-D review+verification
+
+Reviewer pass over `4115acc`/`729aa5d`/`8a471f5`/`8582b4f`/`a6083cb`/`a140fdf`/`b002d40`/
+`b6f1040`/`1535d3c` vs the frozen spec. Verdict: **all five findings pass**; every diff maps to
+its T-task; one adjudication produced a code fix (below, `1bd4d02`); one CHANGELOG gap filled.
+All fresh numbers min-of-3, one session, one box, `writeLoadedCorpus` trees.
+
+**(a) The `dep`→`addDep` rename — adjudicated: the rename WAS the T-10.5 disease; the CLASS is
+now fixed, and the rename ratified on the merits only.** Counterfactual fixture (a 3-char
+package-unique closure `dep` in one file + `for (const dep of …) … visited.add(dep)` loop vars in
+another): at head `1535d3c` the fallback STILL fabricated `consumer.mjs:impactOf →
+target.mjs:dep (ref)` — the rename moved the target, not the mechanism. Fix (`1bd4d02`,
+red-first `extract-refscope (f)`): the pkg-unique fallback excludes **closure-local** targets —
+ids whose range sits strictly inside a `function`/`method` range (positive kinds only, so unknown
+ctags container kinds stay eligible; `.php`/`.rb` exempt — nested definitions there become
+reachable at runtime; same-file untouched — WS-C's 2 legitimate short survivors are exactly the
+sameFileByName path, and they remain: refs into ≤2-char symbols still **2**, both same-file
+`regrade.mjs:f`). Nesting joins the resolution landscape: the eligibility bit annotates
+`symbolSig` AND both delta label maps — a wrap-into-closure edit keeps the node id, so an
+unannotated sig would wholesale-replay every consumer's stale verdict; `CF-NEST-FLIP` pins
+warm==cold bytes + delta-path selectivity (`edged 2/3`), and fails RED with the annotation
+neutralized. Derivation-semantics change ⇒ `SCANNER_VERSION` 16 → **17**. **Revert-proof**: with
+`dep` RESTORED in import-resolve.mjs, the self-map has **0** cross-file edges into it, **0**
+graph-ops↔import-resolve edges either direction, 7 same-file `dep` edges intact — the guard, not
+the name, closes the incident; `addDep` kept because a verb names an action, dodge comment
+rewritten. Self-map delta (regex, both trees): **−31 fabricated closure-local edges** — including
+`scanJsReExports → graph-ops:map`, the OTHER half of the CI cycle, and the extract-symbols →
+import-resolve factory-closure refs (real runtime deps, but resolved by name-coincidence; the
+principled home is the dispatch/member tier) — **+13** formerly-shadowed top-level uniques (the
+fallback's documented heuristic on a cleaner candidate set; none cross-role).
+Product→non-product refs **0**; self-map-roles 2/2; gate vs PR base: **cycles +0 −0, ok**.
+
+**(b) #19 cache shortfall — accept with justification, and the FINAL net recorded.** Provenance:
+IMPROVEMENTS.md measured `syms+nodes+ranges` as an aggregate 44 %; the spec's ≥ 40 % derived from
+reading `syms` as ~a third of it; builder measured syms 6 % (nodes carry the weight). Mechanism
+exactly as specced; the −32.3 %/−38.4 % ledger numbers are the **#19-commit point**. Fresh at the
+review head WITH #17's cand/bindDeps fields (spec estimated +5–10 %): default 18,856,987 →
+**14,149,552 B (−25.0 %)**, regex 15,821,267 → **11,113,832 B (−29.8 %)** — so T-17.1's "net
+≥ 35 %" line is also missed, same estimate provenance, cand at the top of its predicted band.
+The criteria that gate behavior all hold (warm floors below; fragment 22.75 → 14.22 MB; memo belt
+9.2× cheaper at 5× coverage). Named cheap next term (future pass, not built — it is another
+format change): stored nodes carry default-valued fields (`exports:false, domain:'', summary:''`,
+`weight:1`) on every row; field-compaction attacks the 29 % `nodes` share directly.
+
+**(c) #21 AST tier 1.34× — bar's intent met; residual profiled parse-bound.** Fresh 8k-fn
+interleaved min-of-3: regex 1,505 → 750 ms = **2.01×** (the tier the finding profiled; bar ≥ 2×
+holds); AST tier 3,426 → 2,571 ms = 1.33×. Direct profile: `extractJsTs` (tree-sitter parse +
+walk + t3 + cx) alone = **~1,390–1,470 ms** on that file — a constant #21 never touched; the
+enclosing/owner term fell ~750–850 ms in BOTH tiers. Sorted node/edge sets equal across trees
+(8,005 nodes / 48,093 edges); main-tree byte-determinism holds under a pinned epoch.
+
+**(d) builder's five scrutiny items**: (1) = (b) above. (2) rexSig+py-belt vs trigger (e):
+rexSig-inequality → wholesale is a strict SUPERSET of "any changed file's table differs" (global
+canonical-table hash + fileSig conjunct + the (srcMod,orig) membership belt) — never weaker,
+post-freeze but red-first; **IE-REX-FLIP re-verified RED against the pre-#17 engine (d35ca2e
+worktree)** — the staleness bug was real and shipped; accepted. A CHANGELOG gap found: the truth
+fix was invisible outside the perf entry — Fixed entry added in this pass. (3) IE op-stream
+bytes: uniform 8-op pick is a semantics-class superset; delfile frequency was never pinned and
+IE-DANGLING pins deletion deterministically; #6 precedent applies — accepted. (4) = (c) above.
+(5) hash-hit-derives-binds: replay requires `text == null` at both bind gates, so a hash-hit
+(read) file re-derives from in-hand text — a strictly-fresher subset of T-17.3's allowance, zero
+extra IO — accepted.
+
+**(e) sweep**: every T-task maps to its diff (T-20.1/2/3 with re-derived special sets ✓;
+T-21.1/2/3 lib+property+goldens ✓; T-19.1/2/3 incl. size-first sha belt, `SOURCE_DATE_EPOCH`
+lever, S5/S6 ✓; T-17.1–17.5 incl. the three-conjunct rule at :1175 ✓; T-18.1/2/3 ✓). Never-weaken:
+the `:80` assertion string is **byte-verbatim** under the kill-switch leg (diffed against
+`bfc6b92`), scenario per the spec's blessed superset; `rulesSig` conjunct present in BOTH
+`reuseEdges` and `deltaDirty` (R5 green). ENC-GOLD split: regex golden runs skip-free everywhere
+(id list = the no-ast leg verbatim), ENC-GOLD-AST under the named probe skip, un-skipped here —
+no coverage lost. #18a seams exercised LIVE against the hook binary in a scratch workspace:
+no-change+sidecar → silent exit 0; corrupt sidecar × valid graph → fallback WARN, exit 0; valid
+sidecar × graph tampered to same-length garbage under a matching stamp → **correct
+lost-callers verdict from the sidecar** (the legacy path would have parsed garbage and gone
+silent); both corrupt → exit 0, zero bytes. CHANGELOG+docs rebuilt in every finding commit
+(`b6f1040` carried none — test/naming-only, noted).
+
+**Usage verification (fresh, this box, head `1bd4d02`)**: mask corpus800 **4.83×/5.07×**
+(keepValues off/on), repo-mix 2.82×/3.08× — bar ≥ 1.4×, **0 byte diffs** over 1,033 files × both
+modes vs the d35ca2e masker. Warm noop extract 601 → **574 ms**; add-one-function **741 ms =
+1.29× noop** (bar ≤ ~1.3×), `edged 1/800` ×3; `run.mjs` warm noop 828 → **711 ms**. Kill-switch:
+same mutation, `edged 1/800` (delta) vs **`edged 800/800`** (`CODEWEB_NAME_DELTA=0`), fragments
+byte-identical delta == kill-switch == cold-full. Planted v15 cache → `scanned 800/800` cold
+rebuild, cache rewritten v17, bytes == cold-full; warm→warm `scanned 0/800` ×2, byte-identical.
+Hook no-change fire **876 ms with sidecar / 1,214 ms without** (−338 ms ≈ the finding's ~325 ms
+estimate; absolute < 1.5 s either way). **IE-EQUIVALENCE at FULL depth on the review head:
+default leg 47/47, kill-switch leg 47/47** (`CODEWEB_IE_TRIALS=40`). Full `npm test`: 700 tests,
+**695 pass, 0 fail, 5 skipped** (pre-existing env skips), tree clean. `check-consistency: OK`;
+`bench/all.mjs --gate`: all promises hold (local benchmarks.json refresh reverted, per WS-D
+precedent). CI on the final head: recorded in PR #57 checks post-push (all 7 required green —
+see the PR timeline for this sha).
