@@ -1247,3 +1247,17 @@ bitwise-deterministic (seeded, no Math.random, insertion-order). NOT faked, NOT 
 `npm test`: **769 tests, 764 pass, 0 fail, 5 skipped** (pre-existing env skips; report-scale-bench L1/L2
 ran locally as playwright was `npm i --no-save`'d — they SKIP in CI, no NEW skips), wall **77s**,
 `git status --porcelain` empty. Shas: #36 6fa2afe · #38 666347c · #37 1597be8 · #35 18423d8+f845dc3.
+
+### CI red→green (post-push)
+First push (57815dc): 6/7 CI jobs green; `test-no-ast` (regex-only leg) showed 1 fail — **NOT a WS-G
+test**. The CI log's single `not ok` was **#420 `S6 reader-overlap: two readers released together by
+a writer barrier → both start before either ends (I4)`** (`tests/mcp-scenarios.test.mjs`, WS-F's
+file — file-disjoint from WS-G), error `both readers ended · 1 !== 2 · expected 2 actual 1`: a
+timing-sensitive MCP concurrency overlap assertion. It PASSED in all three AST legs (ubuntu-22/24,
+windows) that same run, and reproducing the no-AST condition locally (`mv node_modules/web-tree-sitter`
+aside → `npm test`, ±playwright) passed 0-fail twice — confirming a FLAKE, not a regex-tier defect. All
+WS-G tests passed no-AST in that very log (T-37 buckets #600–601, labelPick #602–604, report-sim
+#609–612, lens-core #745–748, extension #750). WS-G touches no MCP file, so the fix is a re-run, not a
+source change. Empty re-trigger (8b15fed) → **run 29965060233: all 7 jobs green** (consistency, gate,
+bench, test-no-ast, test ubuntu-22/24, test windows-22). WS-G tests are engine-agnostic (synthetic
+fixtures, never the AST tier), so no skip-guard or fixture change was needed or made.
