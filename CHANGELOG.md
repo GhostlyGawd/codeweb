@@ -74,10 +74,12 @@ notes so validated results, papers, and new tools never get lost in commit histo
   maxDepth` are never read). The embed now strips `t3,signature,complexity,maxDepth` per node and `kind`
   per edge into **fresh** objects — `graph` is never mutated, so `graph.json` on disk and the map-time
   sidecars keep every field for the editor lens, the MCP query tools, and the hooks (the strip is
-  embed-only). On the 16.8k loaded corpus this drops `report.html` from 13.88 MB to 9.97 MB (−28.2%,
-  ~4.1 MB of `signature/complexity/maxDepth/kind`); on AST-tier runs the per-function `t3` statement
-  fingerprints (arrays emitted for ≥6-statement bodies) are the largest contributor and the strip
-  removes those too. The dead `domSummary` builder (`report-template.html:228`, zero readers) is
+  embed-only). On the 16.8k loaded corpus (AST tier, tree-sitter present) this drops `report.html`
+  from 13.88 MB to 9.97 MB (−28.2%): ~4.1 MB stripped = ~1.2 MB `t3` (present on 13.4k/17.6k nodes,
+  short fns so avg 7.5 stmt-hashes) + ~2.9 MB `signature/complexity/maxDepth/edge-kind`. On
+  statement-heavy code the per-function `t3` fingerprints (arrays emitted for ≥6-statement bodies) grow
+  and dominate — codeweb's own `scripts/` (avg t3 len 18) strips 32.8% of the embed; the ≥40% target
+  assumed such corpora. The dead `domSummary` builder (`report-template.html:228`, zero readers) is
   deleted. `report.html` stays byte-deterministic across rebuilds (verified: two independent rebuilds
   of the 16.8k report are byte-identical). (round 2, finding #36)
 - **The prescribed per-edit loop is now in-process: `codeweb_diff` serves from the cached graph and

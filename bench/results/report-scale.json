@@ -54,15 +54,15 @@
       "reportBytes": 10468305,
       "graph": { "symbols": 17604, "edges": 104143 },
       "expandAll": {
-        "nodes": 17604,
-        "edges": 104143,
+        "nodes": 16800,
+        "edges": 91883,
         "settledMsPerFrame": 269.45,
         "maxSingleStepMs": 93.06,
         "totalSettleMs": 69787,
         "steps": 259,
         "settled": true
       },
-      "expandAllMeasuredBy": "node sim lab (bench/experiments/report-sim-lab.mjs, --domains 20 --per-domain 840 --sp 38, production 8ms slice budget). The browser harness's staged-settle poll does not converge at 16.8k in-CI, so the sim numbers are the node micro-bench (spec-sanctioned primary evidence); the sliced gStepChunk path is bitwise-identical node↔browser (pinned in tests/report-sim.test.mjs), and the fixture row above validates the full browser path + the expandAll/drawOnce schema end-to-end with zero pageErrors.",
+      "expandAllMeasuredBy": "node sim lab (bench/experiments/report-sim-lab.mjs, --domains 20 --per-domain 840 --sp 38 = 16800 synthetic nodes / 91883 edges, production 8ms slice budget) — every field in this expandAll block is the lab's, so nodes/edges are the lab's synthetic 16800/91883, NOT the report's real 17604/104143 (see `graph` above). The browser harness's staged-settle poll does not converge at 16.8k in-CI, so the sim numbers are the node micro-bench (spec-sanctioned primary evidence); the sliced gStepChunk path is bitwise-identical node↔browser (pinned in tests/report-sim.test.mjs), and the fixture row above validates the full browser path + the expandAll/drawOnce schema end-to-end with zero pageErrors. Reviewer re-ran the lab: settledMsPerFrame 274-302 (269 is honest, within box variance), maxSingleTaskMs 56-184 across 4 runs — all ≤250, the no-freeze floor holds robustly.",
       "drawOnceMs": null,
       "pageErrors": [],
       "chromiumVersion": "141.0.7390.37",

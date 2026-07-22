@@ -107,6 +107,9 @@ test('S2 refresh→diff in one burst: the diff reads POST-refresh bytes (waited,
     const payload = JSON.parse(rDiff.result.content[0].text);
     // MECHANISM (deterministic): the diff read post-refresh bytes — it awaited the refresh writer tail (I6).
     assert.ok(payload.nodes.added.includes('util.js:brandNewFn'), `diff read post-refresh bytes (added: ${payload.nodes.added})`);
+    // cross-stream guard (see S6): the refresh `end` line (stderr) can trail its reply (stdout) —
+    // await it on the trace stream so the snapshot below reliably contains it.
+    await h.traceEvent((e) => e.ev === 'end' && e.tool === 'codeweb_refresh' && e.id === 10);
     const ev = h.trace();
     assert.ok(ev.some((e) => e.ev === 'end' && e.tool === 'codeweb_refresh' && e.id === 10), 'the refresh writer ran to completion');
     assert.ok(!ev.some((e) => e.ev === 'start' && e.id === 11), 'the diff was served IN-PROCESS (#33) — no child spawned; refresh is the loop\'s only child');
@@ -128,6 +131,10 @@ test('S3 two codeweb_map on one out dir in a burst: end(map#1) < start(map#2), s
     ]);
     const r20 = await h.reply(20); const r21 = await h.reply(21);
     assert.ok(!r20.result.isError && !r21.result.isError, 'both maps succeed');
+    // cross-stream guard (see S6): await map#2's `start` on the trace stream — by I1 serialization it
+    // is emitted after map#1's `end`, and readline preserves per-stream order, so once start#21 is in
+    // the snapshot both boundary events are present (the replies alone, on stdout, do not prove it).
+    await h.traceEvent((e) => e.ev === 'start' && e.id === 21);
     const ev = h.trace();
     const endMap1 = traceIx(ev, (e) => e.ev === 'end' && e.id === 20);
     const startMap2 = traceIx(ev, (e) => e.ev === 'start' && e.id === 21);
@@ -154,6 +161,10 @@ test('I7 autoRefresh-skip: explicit refresh + a stale-triggering query in one bu
       { jsonrpc: '2.0', id: 31, method: 'tools/call', params: { name: 'codeweb_impact', arguments: { graph, symbol: 'util.js:helper' } } },
     ]);
     await h.reply(31); await h.reply(30);
+    // cross-stream guard (see S6): await the explicit refresh `end` (id 30) on the trace stream — the
+    // skip-autorefresh line and start#30 are emitted before it on the same stream, so once end#30 is
+    // in, the snapshot is complete for both the skip assertion and the exactly-one-refresh count.
+    await h.traceEvent((e) => e.ev === 'end' && e.id === 30);
     const ev = h.trace();
     assert.ok(ev.some((e) => e.ev === 'skip-autorefresh' && e.ws === dirname(graph)), 'autoRefresh skipped because a writer is already queued (I7)');
     const refreshStarts = ev.filter((e) => e.ev === 'start' && e.tool === 'codeweb_refresh');
@@ -272,6 +283,12 @@ test('S6 reader-overlap: two readers released together by a writer barrier → b
       { jsonrpc: '2.0', id: 61, method: 'tools/call', params: { name: 'codeweb_hotspots', arguments: { graph } } },
     ]);
     for (const id of [59, 60, 61]) await h.reply(id);
+    // Replies arrive on stdout; the CODEWEB_MCP_TRACE start/end lines arrive on stderr — two pipes
+    // with NO cross-stream ordering guarantee, so awaiting the replies does NOT prove both readers'
+    // `end` NDJSON lines have been parsed off stderr yet (the observed CI flake: ends.length 1 !== 2).
+    // Await both `end` events on the trace stream directly; readline preserves per-stream order, so
+    // once both ends are in, both earlier `start` lines are guaranteed present too — snapshot complete.
+    await Promise.all([60, 61].map((id) => h.traceEvent((e) => e.ev === 'end' && e.id === id)));
     const ev = h.trace().filter((e) => e.id === 60 || e.id === 61); // reader events only
     const starts = ev.map((e, i) => ({ e, i })).filter((x) => x.e.ev === 'start').map((x) => x.i);
     const ends = ev.map((e, i) => ({ e, i })).filter((x) => x.e.ev === 'end').map((x) => x.i);
@@ -296,6 +313,11 @@ test('I4 cap: 4 readers released by a writer barrier peak at exactly READER_CAP=
       { jsonrpc: '2.0', id: 73, method: 'tools/call', params: { name: 'codeweb_break_cycles', arguments: { graph } } },
     ]);
     for (const id of [69, 70, 71, 72, 73]) await h.reply(id);
+    // Same cross-stream guard as S6: replies (stdout) do not prove the trace `end` lines (stderr) are
+    // parsed, so await every reader's `end` before scanning — a lagging snapshot could miss an end
+    // (inflating `active` past 3) or miss a start (failing peak>=2). Awaiting the ends makes the
+    // start/end interleaving the peak count sees COMPLETE and deterministic.
+    await Promise.all([70, 71, 72, 73].map((id) => h.traceEvent((e) => e.ev === 'end' && e.id === id)));
     // count only the 4 READER children — the barrier writer (69) ran to completion before any of them.
     const readerIds = new Set([70, 71, 72, 73]);
     let active = 0, peak = 0;
@@ -320,6 +342,10 @@ test('I2/I3 writer-barrier: [reader, writer, reader] one burst → end(reader1) 
       { jsonrpc: '2.0', id: 82, method: 'tools/call', params: { name: 'codeweb_hotspots', arguments: { graph } } },
     ]);
     for (const id of [80, 81, 82]) await h.reply(id);
+    // cross-stream guard (see S6): await reader2's `start` (id 82) on the trace stream — it is the last
+    // of the three boundary events in execution order (end#80 < start#81 < start#82), so its presence
+    // guarantees the two earlier ones are in the snapshot (the replies, on stdout, do not prove it).
+    await h.traceEvent((e) => e.ev === 'start' && e.id === 82);
     const ev = h.trace();
     const endReader1 = traceIx(ev, (e) => e.ev === 'end' && e.id === 80);
     const startWriter = traceIx(ev, (e) => e.ev === 'start' && e.id === 81);

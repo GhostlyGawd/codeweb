@@ -122,10 +122,12 @@
 <p>  maxDepth<code> are never read). The embed now strips </code>t3,signature,complexity,maxDepth<code> per node and </code>kind`</p>
 <p>  per edge into <strong>fresh</strong> objects — <code>graph</code> is never mutated, so <code>graph.json</code> on disk and the map-time</p>
 <p>  sidecars keep every field for the editor lens, the MCP query tools, and the hooks (the strip is</p>
-<p>  embed-only). On the 16.8k loaded corpus this drops <code>report.html</code> from 13.88 MB to 9.97 MB (−28.2%,</p>
-<p>  ~4.1 MB of <code>signature/complexity/maxDepth/kind</code>); on AST-tier runs the per-function <code>t3</code> statement</p>
-<p>  fingerprints (arrays emitted for ≥6-statement bodies) are the largest contributor and the strip</p>
-<p>  removes those too. The dead <code>domSummary</code> builder (<code>report-template.html:228</code>, zero readers) is</p>
+<p>  embed-only). On the 16.8k loaded corpus (AST tier, tree-sitter present) this drops <code>report.html</code></p>
+<p>  from 13.88 MB to 9.97 MB (−28.2%): ~4.1 MB stripped = ~1.2 MB <code>t3</code> (present on 13.4k/17.6k nodes,</p>
+<p>  short fns so avg 7.5 stmt-hashes) + ~2.9 MB <code>signature/complexity/maxDepth/edge-kind</code>. On</p>
+<p>  statement-heavy code the per-function <code>t3</code> fingerprints (arrays emitted for ≥6-statement bodies) grow</p>
+<p>  and dominate — codeweb's own <code>scripts/</code> (avg t3 len 18) strips 32.8% of the embed; the ≥40% target</p>
+<p>  assumed such corpora. The dead <code>domSummary</code> builder (<code>report-template.html:228</code>, zero readers) is</p>
 <p>  deleted. <code>report.html</code> stays byte-deterministic across rebuilds (verified: two independent rebuilds</p>
 <p>  of the 16.8k report are byte-identical). (round 2, finding #36)</p>
 <ul>

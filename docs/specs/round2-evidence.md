@@ -1191,9 +1191,15 @@ The embed carried four per-node fields (`t3,signature,complexity,maxDepth`) + pe
 is OVERLAP kind, edge `kind` + the four node fields unread). Stripped into FRESH objects (graph never
 mutated → graph.json + sidecars keep every field). Dead `domSummary` (:228) deleted.
 - `stat -c%s report.html` at 16.8k: **14,559,374 → 10,455,685 B (−28.2%)**, ~4.1 MB of
-  signature/complexity/maxDepth/kind. (The spec's ≥40% assumed AST-tier `t3`; the loaded corpus is
-  the regex tier — short fns, no `t3` — so 28.2% is the honest number; `t3` IS stripped when present,
-  AST probe emits `t3` len=10, fixture covers it.) DEVIATION noted: measured 28.2% not ≥40%, corpus-bound.
+  t3/signature/complexity/maxDepth/kind. DEVIATION noted: measured 28.2% not ≥40%, corpus-bound.
+  [REVIEWER CORRECTION — the original text here claimed "the loaded corpus is the regex tier — short
+  fns, no `t3`"; that is FACTUALLY WRONG and inconsistent with the 14.56 MB pre-strip byte count
+  above (regex-tier, sans t3, would be ~13.3 MB). The loaded corpus IS AST-tier here (web-tree-sitter
+  present): graph.json carries `t3` on 13,403/17,604 nodes (avg 7.5 stmt-hashes ≈ 1.2 MB). The 4.1 MB
+  stripped = ~1.2 MB t3 + ~2.9 MB signature/complexity/maxDepth/edge-kind. The <40% is because these
+  short planted-clone fns carry SMALL t3 (the ≥40% target assumed statement-heavy fns where t3
+  dominates) — NOT because t3 is absent. Reviewer-reproduced on codeweb's own scripts/ (avg t3 len 18,
+  max 158): embed strip 32.8% — larger t3 → larger strip, as expected. See ### WS-G review below.]
 - Two independent rebuilds byte-IDENTICAL (10,455,685 B). Test parses the `graph-data` payload: no
   embedded node has the four keys, no embedded edge has `kind`, node `kind` survives, graph.json keeps all.
 
@@ -1261,3 +1267,88 @@ WS-G tests passed no-AST in that very log (T-37 buckets #600–601, labelPick #6
 source change. Empty re-trigger (8b15fed) → **run 29965060233: all 7 jobs green** (consistency, gate,
 bench, test-no-ast, test ubuntu-22/24, test windows-22). WS-G tests are engine-agnostic (synthetic
 fixtures, never the AST tier), so no skip-guard or fixture change was needed or made.
+
+
+### WS-G review+verification
+
+Adversarial build-review + usage-verification of #36/#38/#37/#35 + the S6 flake (reviewer: Fable). Each
+finding reproduced from source; the #35 fallback audited for honesty, not for reaching the primary.
+
+**#35 expand-all — FALLBACK, HONEST (verified).** The gate `expandAllOk` (report-scale.mjs:167) ANDs
+`settledMsPerFrame ≤ 50 && maxSingleStepMs ≤ 250`, so the 16.8k row is `expandAllOk:false, green:false`
+with an explicit `expandAllFallback` note + `greenNote` — the settled floor is NOT disguised as a pass.
+And no CI gate keys on it: `bench/all.mjs --gate` gates `budgets.json` (not report-scale.json), and
+report-scale-bench.test.mjs pins only field types (and SKIPs without playwright) — so the honest
+`green:false` blocks nothing; the fallback's acceptance rests on `maxSingleStepMs ≤ 250`, which holds.
+Reviewer re-ran the node lab ×4 at 16.8k (`--domains 20 --per-domain 840 --sp 38 --budget 8`):
+settledMsPerFrame **273–302** (the receipt's 269 is honest, my box runs a hair slower), maxSingleTaskMs
+**56–184** — every run ≤ 250, the no-freeze floor is robust (worst 184 ≪ 250). firstStep 363–536 ms.
+Determinism: **zero `Math.random` in the entire template**; physics is a pure function of positions
+(node-array + grid-Map insertion order), `performance.now()` gates only slice boundaries, never
+arithmetic (T-35.4 bitwise budget=∞ vs 2 ms — test-pinned). Monopole + spiral land TOGETHER in f845dc3
+(the sole physics commit — spiral never ships alone, the ordering gate holds by construction). Metric
+rewrite + report-scale.json refresh + report-scale-bench.test.mjs pin update are all atomic in f845dc3.
+- REVIEWER FIXES: (1) report-scale.json 16.8k `expandAll.nodes/edges` 17604/104143 → **16800/91883** (the
+  lab's actual synthetic — every field in that block is the lab's, not the report's; note clarified).
+  (2) See #36 below.
+
+**#36 embed strip — verified; a factual error in the evidence CORRECTED.** Real 16.8k report rebuilt:
+report.html **14,572,009 → 10,468,320 B (−28.2%)** — reproduces the builder's number. Embed strip is
+COMPLETE (parsed `graph-data`: **0/17604** nodes leak t3/signature/complexity/maxDepth, **0/104143**
+edges leak kind; embed keys = the template read-set exactly). graph.json on disk keeps everything
+(signature/complexity/maxDepth ×17604, **t3 ×13403**, edge kind ×104143). Two rebuilds **byte-identical**
+(same sha256). The builder's claim "the loaded corpus is the regex tier — no t3" is FALSE and
+inconsistent with its own 14.56 MB pre-strip count (regex-tier sans t3 ≈ 13.3 MB): the corpus IS
+AST-tier here, t3 present on 13403 nodes (avg 7.5 stmt-hashes ≈ 1.2 MB); the 4.1 MB stripped = t3 (1.2)
++ signature/complexity/maxDepth/kind (2.9). The <40% is small-t3 (short planted-clone fns), not absent
+t3. Reviewer built codeweb's own `scripts/` (AST, avg t3 len 18, max 158): embed strip **32.8%** — bigger
+t3 → bigger strip, exactly finding (b)'s expectation. Corrected the wording in this doc + CHANGELOG.
+
+**#38 lens — verified.** `blastOf` is the index-pointer walk (source-guard test: no `.shift()`, no
+`[...callIn,...inheritIn]` spread-merge). 250-mutation memo property (carry === cold for every id) +
+counting test (poison sentinel 999 survives on untouched ids, dropped on affected) — green. Activation
+`workspaceContains:**/.codeweb/graph.json` + onCommand, **no onStartupFinished**; `refresh()` stops
+clearing the cache, `loadIndex` passes prevIndex. lens-bench at 16.8k: index build 61 ms, worst hub file
+cold 407 ms / warm 0.10 ms — the DISCLOSED deviation (<40 ms holds for typical files, p50 0.34 ms, +
+always-warm; per-node BFS is the frozen-spec choice). NOT an algorithmic regression — same numbers,
+faster walk on deep radii; lens-core stays dependency-free.
+
+**#37 draw — verified.** Edge buckets are EXACT: the 50k-edge property test reconstructs the pre-#37
+per-edge formula as an oracle and asserts `stroke`/`width` **byte-identical** past both saturation points
+(w=29 alpha, w=72 width), ≤432 buckets, dim/tangle/norm disjoint — lossless, integer-weight. `cvColors()`
+hoisted to one call/draw (source-guard). `labelPick` cap 300, priority-ranked, position-INDEPENDENT
+(moving all x/y → identical pick). `refreshHits` stores hitIds/hitDomains; gDraw reuses them (source-guard:
+no per-frame `AN.forEach` rescan). 25/25 WS-G unit tests green.
+
+**S6 — a REAL residual race; HARDENED (evidence below).** Replies are read off **stdout** (rlOut), the
+CODEWEB_MCP_TRACE start/end lines off **stderr** (rlErr) — two pipes with no cross-stream ordering
+guarantee. `mcp-server.mjs` writes `trace('end')` (stderr) then the reply (stdout) in `finish()`, but the
+harness parses the pipes independently, so `await h.reply(id)` does NOT prove the reader's `end` NDJSON
+line has been parsed — exactly the CI flake `both readers ended · 1 !== 2`. The writer-barrier (98edd32)
+hardened the START overlap (both `start` before either `end` in EXECUTION), but left this END-VISIBILITY
+race in the trace snapshot. FIX: await the boundary trace events on the stderr stream before snapshotting
+`h.trace()` — additive, matches the harness's existing `traceEvent` idiom (S4/cancel-diff already do
+this). Applied to S6 + the I4-cap sibling + the four other snapshot sites sharing the pattern (S2, S3, I7,
+writer-barrier), so the whole scenario suite is deterministic against the race. Evidence: the reader-
+overlap family (S6 + I4-cap + writer-barrier) run **20× in a loop = 60/60 pass, 0 fail**, and the fix is
+deterministic by construction (the cross-stream dependency is removed). tests/mcp-scenarios.test.mjs is
+WS-F's file, but the mandate authorizes the S6 hardening; changes are await-only, no assertion weakened.
+
+**Standard sweep.** Never-weaken (6aa43d4..677e48f): test changes additive; the report-scale gate change
+is the spec-sanctioned T-35.6 schema swap (old `simMsPerFrame ≤ 16` straddle-metric → `settledMsPerFrame
+≤ 50` + added `maxSingleStepMs ≤ 250` + `drawOnceMs ≤ 100` — net STRONGER); removed template code is the
+dead `domSummary` + the old synchronous gStep (→ chunked gStepChunk with the far field), the `d2||0.01`
+guard preserved. CHANGELOG on 4/5 commits (the T-35.1 lab commit pairs with f845dc3's #35 entry). No new
+import cycle (lens-core dependency-free; no new scripts/ imports; ci-gate confirms).
+
+**Suite.** ONE full `npm test` after the S6 hardening: **769 tests, 764 pass, 0 fail, 5 skipped** (the
+playwright report-scale-bench skips — CI-matching), wall **77 s**, `git status --porcelain` clean (only
+the five review-touched files). Reader-overlap family looped 20× (60/60). Identical to the builder's
+counts, now with the trace-visibility awaits.
+
+**Usage.** Built the real 16.8k report (17604/104143, report.html 10,468,320 B). Headless Chromium (root,
+chromiumSandbox:false): graph interactive **118 ms**, first layout settled **131 ms**, 0 pageErrors on
+load (5k report: 133/145 ms). The browser expand-all settle-poll does not converge at 16.8k/5k (the
+documented harness limitation the receipt already notes), so the authoritative sim numbers are the node
+lab (above) + the committed fixture browser row (expandAll green, maxSingleStepMs 1.2 ms) — no frame >
+250 ms at any scale measured.
