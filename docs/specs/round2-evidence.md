@@ -630,3 +630,97 @@ Usage verification (all fresh at 8c4dc9d):
   honestly. No gate bug; nothing to fix.
 - Full `npm test` ×1 post-fix: **58.7 s wall; 676 tests, 671 pass, 0 fail, 5 skipped**
   (pre-existing env skips; +4 tests this pass), `git status --porcelain` clean after commit.
+
+## WS-D
+
+Builder evidence for findings **#20 → #21 → #19 → #17 → #18a** (spec `round2-ws-d.md`, frozen).
+Commits: #20 `4115acc`, #21 `729aa5d`, #19 `8a471f5`, #17 `8582b4f` (generator + rexSig truth
+fix) + `a6083cb` (delta), #18a `a140fdf`. All numbers min-of-3, one session, one 4-core box,
+`writeLoadedCorpus` trees (`{files:800}` = 17,604 syms ≈ the 16.8k class; `{files:1400}` ≈
+29.4k); BEFORE side is the WS-D-entry tree `d35ca2e` via a worktree, same session. Bench
+discipline per spec header: ratios are the gates, absolutes are evidence (sole absolute gate:
+the hook's < 1.5 s).
+
+- **#20 maskJs (byte-identity + ≥ 1.4×)** — `tests/maskjs-identity.test.mjs` embeds the pre-#20
+  masker verbatim as a frozen oracle: identity over every mask-eligible repo file (229, incl.
+  .php hashComment), a loaded-corpus tree, and adversarial fixtures, all 4 mode combinations —
+  green pre-patch, gates the patch, and is why #20 ships with NO version bump. Derived special
+  sets re-verified against the CURRENT (post-WS-B) state machine per the spec's unresolved note —
+  two members the spec's enumeration predates, documented in code: expr-interior includes
+  `` ` `` (#8 nested push), template-text includes `\` (2-char escape). Throughput (repeatable
+  one-liner in the commit + this ledger's method): 800-file corpus 148.8 → 29.3 ms =
+  26.75 → 135.83 MB/s (**5.08×**; keepValues 4.81×); repo mix 30.16 → 95.02 MB/s (**3.15×**).
+  Gate ≥ 1.4×: cleared.
+- **#21 enclosing index (≥ 2× big-file, ± 5 % corpus, byte-identical)** — new
+  `scripts/lib/enclosing.mjs` (cohesive for WS-H #40) + 300-trial property suites with the OLD
+  linear scans embedded verbatim (object-identity equality incl. duplicate-start tie-breaks) +
+  golden owner-id fixture + big-file determinism. 8k-fn single file (`{files:1, fnsPerFile:8000}`):
+  regex tier 1,514 → 734 ms (**2.06×**, the tier the finding profiled); AST tier 3,210 → 2,393 ms
+  (1.34× — tree-sitter parse dominates there, recorded honestly). `cmp` byte-identical fragments
+  BOTH tiers vs d35ca2e. 800-file corpus 1,257 → 1,162 ms (inside the ± 5 % bound, faster).
+- **#19 warm floor (v16)** — SCANNER_VERSION 15 → 16 (B=14/C=15/D=16 ladder, no rev field).
+  Interned edges + syms dropped + hash-hit full-product replay (rulesSig-gated); CF-MIGRATE
+  plants a poisoned previous-generation cache → cold banner `scanned N/N`, no poison, output
+  byte-equal to no-cache, cache rewritten at the live version. Compact fragment + sha1
+  skip-write (`(unchanged)` banner, CF-SKIP-WRITE pins mtime stability). `.stages.json` →
+  per-output {s, h}, size-first; S5 (parseable same-length graph.json tamper) and S6 (report.md
+  tamper) red-first then green; SOURCE_DATE_EPOCH joins the lever string. **DEVIATION (spec
+  estimate vs measurement)**: cache −32.3 % default engine (18,856,987 → 12,774,593 B) /
+  −38.4 % regex (15.8 → 9.7 MB) vs the spec's ≥ 40 % — its estimate read `syms` as a third of
+  the 44 % symbol share; measured decomposition: syms 6 %, nodes 29 %, ranges 8 %; the edge term
+  fell 8.24 → 3.51 MB (−57 %). Mechanism exactly as specced; flagged for reviewer adjudication.
+  Fragment 22.7 → 14.2 MB. Warm no-change `run.mjs` 825 → 677 ms mid-WS; **701 ms final** (with
+  #17 cand fields + #18a sidecar freshness in the loop) — the floor criterion's ratio (≤ ~84 %
+  of before) holds either way. Memo belt: 13.9 MB graph parse 329.6 ms → 35.8 ms 5-output
+  stat+read+sha1 (9.2× cheaper, 5× the coverage). IE-EQUIVALENCE gained warm-vs-cold fragment
+  BYTE equality per step (the #17 oracle) — green before #17 landed.
+- **#17 name-delta (the round's riskiest)** — extended generator landed FIRST per spec
+  (delsym/rensym incl. colliding, pkg toggle, rex flip). **Found a genuine pre-existing
+  staleness bug**: the spec's own "green under wholesale" premise failed 5/40 trials — a barrel
+  flip (`export { shared9 } from './rexutil.js'` → `'./rexutil2.js'`) changes zero symbols, so
+  the SHIPPED engine replayed the unchanged consumer's stale call edge (IE-REX-FLIP repro).
+  Fixed red-first with `rexSig` (canonical JS re-export + py from-import tables) on BOTH reuse
+  gates — the spec's hardened trigger (e) made total; plus the py belt: a changed .py file whose
+  (srcMod, orig) chain-landing-pad membership moved goes wholesale (edge-time
+  `pyReExportResolve` is invisible to cand/bindDeps — mechanical superset of (e), noted).
+  Delta rule as hardened: three conjuncts incl. **bind-replay** (T-17.3's deps API: resolved
+  targets + every visited chain file, dead ends included; the py memo now stores visited files
+  so bindDeps are bind-order-independent). Kill-switch `CODEWEB_NAME_DELTA=0` verified: the :80
+  wholesale assertion VERBATIM under that leg (same tree, same add-a3 step) and the whole IE
+  suite passes with the ambient switch (47/47 at 40 trials). **IE at FULL depth: default leg
+  47/47, kill-switch leg 47/47, `CODEWEB_IE_TRIALS=40`**, fragment byte-equality every step.
+  Bench @16.8k: noop 560 ms; **add-one-unique 710 ms = 1.27× noop (bar ≤ ~1.3×; was 2.12×)**,
+  `edged 1/800`; body-edit 759 ms `1/800` (unchanged class); delete 703 `1/800`; rename 708
+  `3/800`; add-colliding(anchor0) 1,127 ms `800/800` — honesty row, near-wholesale by design.
+  @29.4k: add-one 2,294 → 1,277 ms = **1.22× noop** (was 2.14×), `edged 1/1400`. Hook
+  add-one-function end-to-end 1,909 → 1,027 ms. Caveat per spec: loaded-corpus emits no imports
+  — bench exercises the bare-name path; bind-coupling correctness is IE's (IE-BIND-COUPLING:
+  rensym of imported `a1` re-edges c.js, b.js replays). Deviations noted in the commit:
+  hash-hit files re-derive binds from in-hand text (sound subset of "stamp/hash unchanged"
+  replay, no extra IO).
+- **#18a hook-baseline sidecar (< 1.5 s)** — graph-ops split (`baselineSummary` /
+  `regressionsAgainstSummary`, `structuralRegressions` = composition), `hook-baseline.json`
+  beside graph.json (stamp-first, sha1-on-mismatch with shared read), write points in run.mjs
+  (reuse path only when stale) + refresh.mjs (free string), both try/catch. Five BDD scenarios
+  incl. the sidecar-consumption proof (dropped baseline cycle key reported as NEW) and
+  both-corrupt → silent exit 0. Hook no-change fire @16.8k: 1,167 → **889 ms** — the absolute
+  < 1.5 s floor holds with margin (this box is faster than the finding's 1,624 ms box; same
+  corpus size, method noted). hook-fastpath-floor.md revisit triggers point the residual at
+  #18b/WS-H.
+- **Suite + gates**: full `npm test` at IE full depth (`CODEWEB_IE_TRIALS=40`): **70.1 s wall,
+  727 tests, 722 pass, 0 fail, 5 skipped** (pre-existing env skips; +51 tests this workstream),
+  `git status --porcelain` clean. `check-consistency: OK`. `bench/all.mjs --gate`: "all
+  promises hold" (local refresh of benchmarks.json reverted — gate result recorded here).
+  Interlocks honored: WS-C's `rulesSig` conjunct preserved in `reuseEdges` AND required by the
+  delta path (R5 green); masking special sets re-derived from WS-B-final state; no fixture or
+  generator assumes the pre-.mts/.cts extension list (identity test derives from the live
+  dispatch set).
+
+Reviewer-scrutiny items: (1) #19's cache-size shortfall vs the spec's ≥ 40 % estimate
+(mechanism-faithful, decomposition above — adjudicate estimate vs bar); (2) the rexSig/py-belt
+superset of hardened trigger (e) — strictly more conservative, never weaker, but post-freeze;
+(3) IE op-stream bytes differ from the frozen generator (uniform 8-op pick vs the old
+delfile×2 weighting — #6 precedent claimed); (4) #21's AST-tier big-file ratio (1.34×) is below
+the 2× bar the regex tier clears — parse-dominated, pre-existing constant; (5) the
+`hash-hit-derives-binds` simplification in #17 (T-17.3 allows replay there; derive chosen —
+sound, no IO cost).
