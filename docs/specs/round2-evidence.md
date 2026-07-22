@@ -839,3 +839,107 @@ default leg 47/47, kill-switch leg 47/47** (`CODEWEB_IE_TRIALS=40`). Full `npm t
 `bench/all.mjs --gate`: all promises hold (local benchmarks.json refresh reverted, per WS-D
 precedent). CI on the final head: recorded in PR #57 checks post-push (all 7 required green —
 see the PR timeline for this sha).
+
+## WS-E
+
+Builder evidence — advisors + leftovers (#41 #22 #23 #24 #26 #27 #28 #42), spec
+`docs/specs/round2-ws-e.md` (hardened; authoritative). Container: Node v22.22.2, 4 cores. Bench
+corpus built once via `writeLoadedCorpus("<scratch>/cw-ws-e/src",{files:680})` → **14,964 function
+nodes / 88,465 edges** (`node scripts/run.mjs <src> --target e-loaded --out-dir <ws>`); baseline
+worktree at the WS-E-start sha **9ac5543** for before/after + byte-identity. All timings min-of-3
+unless noted. Strict TDD; per-finding commit + CHANGELOG entry + `node site/build.mjs` in the same
+commit; trailer on every commit.
+
+### Prior builder (landed before this session; NOT re-done)
+
+`#41` **1532c02**, `#22` **2882724**, `#23` **9d23435 + cac8e2a**, `#24` **ee8b638 + dfdee97 +
+9ac5543** (7 commits, pushed). Their per-finding evidence lives in the CHANGELOG entries; this
+ledger section was not written before the credit-limit death, so it starts here. The dead builder
+also left an uncommitted partial `tests/dup-check.test.mjs` (#26 characterization + sidecar tests).
+
+### Partial-test decision (#26)
+
+The orphaned `tests/dup-check.test.mjs` (+112 lines: `IOV-PIN-26` characterization + `DC-SIDECAR-EQ`
+equivalence) was **coherent and matched the spec's #26 test plan — kept and completed**, with ONE
+fixture bug fixed: `DC-SIDECAR-EQ`'s long-body copy renamed the function (`.replace(/longOne/,
+'longCopy')`), so the two capped bodies differed by one identifier token and sim was ~0.9993, not the
+asserted 1 (`IOV-PIN-26` correctly does NOT rename its copy). Removed the rename so the 400-line copy
+is byte-identical → sim exactly 1, which is the cap-parity the test pins. After the fix the test was
+RED only on the missing impl (`SIMILAR_VERSION` undefined), as required.
+
+### #26 — dup-check pool from similar-index — b759a0b
+
+- `BODY_LINE_CAP` (400) + `capBody` centralized in `lib/shingles.mjs`, imported by overlap/dup-check/
+  find-similar/the sidecar builder (local copies deleted); overlap byte-identical (logic untouched).
+  `SIMILAR_VERSION = 2` (one const, builder + loader) — `buildSimilarIndex` + find-similar's live
+  path now cap node bodies; find-similar payload gains `bodyLineCap`; candidate text uncapped.
+  `review.mjs` passes `loadSimilarIndex(abs)`.
+- TDD: `DC-SIDECAR-EQ` RED (SIMILAR_VERSION undefined) → GREEN. `node --test tests/dup-check.test.mjs
+  tests/find-similar.test.mjs` → 21/21. overlap/type3/skeleton/rename suites 29/29.
+- Baseline (pre-#26, live path, this container): 1-changed **374 ms**, 50-changed **1,804 ms**
+  (task-recorded 396/1646 — same class). After (fresh v2 sidecar, min-of-3): 1-changed **6 ms
+  (62×, bar ≤ ~60 ms)**, 50-changed **1,115 ms**. Equivalence: sidecar output byte-equal to live on
+  200 corpus ids (and the fixture set: CRLF file + >400-line pool body; stale/v1 rejected; missing id
+  falls back; changed id judged live).
+
+### #27 — campaign concurrent advisors + clone opt-out — da4be54
+
+- Three `spawnSync` → async `spawn` + `Promise.all` (stdout collected, stderr drained + discarded,
+  exit code ignored, error/non-JSON → default). `planCampaign` gains `clone` (default true); campaign
+  passes `clone:false` (owns its graph; normalizeGraph is idempotent + never touches meta).
+- TDD: `CMP-CONCURRENT-STABLE` GREEN on the sequential code first (characterization), then still GREEN
+  after the switch (byte-stable). `node --test tests/campaign.test.mjs` → 10/10.
+- Wall (min-of-3, corpus graph): **1.65 → 0.89 s**; payload `cmp`-identical to the 9ac5543 binary.
+
+### #28 — diff rename detection: indexed + memoized + capped-with-a-note — 54d5213
+
+- Pure top-level `detectRenames({before, after, bIx, aIx, nodesRemoved, nodesAdded, bReader,
+  aReader})` (WS-F #33 lifts verbatim): `byId` indexes (no `g.nodes.find`), old-skeleton hoisted, new-
+  skeleton memoized once (null bodies too), bodies capped at `BODY_LINE_CAP`. Additive
+  `nodes.renameCheck = {skipped, removed, added, cap}` + one text line when detection is capped (>200
+  a side, both non-empty); documented in the header.
+- TDD: 5 characterization pins GREEN on 9ac5543 (rename-in-place, move-with-name, sub-0.85 non-match,
+  span-shape fallback, >400-line rename), cap-trip `renameCheck` tests RED → GREEN. `node --test
+  tests/diff.test.mjs tests/rename-explain.test.mjs` → 18/18.
+- Evidence: `after.json` = corpus graph with 195 relabeled nodes; rename overhead vs the 0-rename diff
+  (min-of-3): **1,733 → 30 ms (bar ≤ ~50 ms)**; `renamed[]` byte-identical to the 9ac5543 binary
+  (195 pairs).
+
+### #42 — migration leftovers + trend fast path — 2060cb8
+
+- T-42.1 dead `writeFileSync` imports dropped (overlap/build-report/coverage/refresh; grep-verified).
+  T-42.2 `coverage.mjs` writes the graph compact (`JSON.stringify(graph)`); `coverage.test` pins
+  parse+compact. T-42.3 jsdoc moved above `sourceReader` (comment-only). T-42.4 `import-resolve.mjs`
+  re-indented uniform 2-space — the two verbatim-moved blocks (lines 58–251 base-0, 273–356 base-2)
+  shifted +2; `git diff -w --quiet` → exit 0, `node --check` OK, no multi-line literals in the spans.
+  T-42.5 `stats.mjs` (×3) + `annotations.mjs` (×1) → `atomicWrite` (bytes/pretty-print unchanged); no
+  import cycle (cli's deps are leaf modules, nothing imports stats/annotations). T-42.6 `staleNote` on
+  `bench/results/scale-typescript.json`. T-42.7 `run.mjs --stages through-overlap` (unknown value exit
+  2; partial run never writes the memo) + `trend.mjs --git` reuses one ws with the `meta.target===sha7`
+  belt.
+- TDD: `stage-memo` S7 (partial skips report+memo, full run after is not poisoned) + S8 (`--stages
+  bogus` exit 2); `trend` reused-ws belt (failed middle commit zeroed, neighbors correct). Suites:
+  coverage/atomic-writes/stats/annotations/suppression/stage-memo/trend/pipeline/import → 68/68.
+- Evidence: `trend --git --last 2` on a 2-commit 680-file repo — per-commit **~7.5 → ~4.6 s**
+  (extract-dominated; optimize+report skipped); snapshot metrics (nodes/confirmed/candidates/coupling)
+  byte-identical to the 9ac5543 full-pipeline path.
+
+### Closing
+
+- ONE full `npm test` at 2060cb8: **721 tests, 716 pass, 0 fail, 5 skipped** (the pre-existing env
+  skips — golden target ×3, TS bench, extract-engine inverse fallback; **zero new skips**, all new
+  tests path-portable), wall ~67 s, `git status --porcelain` empty after.
+- `check-consistency: OK — v0.9.0, 27 tools`; docs/ rebuilt in each finding commit (freshness gate
+  green: `node site/build.mjs` + `git diff --quiet -- docs` → exit 0 at HEAD). No existing assertion
+  weakened (new tests + append-only; the only edit to a pre-existing test file is the #26 fixture-bug
+  fix in the dead builder's own uncommitted lines).
+- Reviewer-scrutiny items: (1) #26 sidecar↔live bit-equality rests on `round6(inter/(a+b-inter)) ===
+  round6(jaccard)` — verified byte-equal on 200 corpus ids, not just the fixtures. (2) #27 `clone:false`
+  is safe ONLY because `normalizeGraph` is idempotent additive default-filling that never touches
+  `meta` (loadGraph already normalized the graph); every other planCampaign caller keeps the clone.
+  (3) #28 `detectRenames` must stay ambient-state-free for WS-F #33 — it takes all inputs as params.
+  (4) #42.4 re-indent trusts `git diff -w` empty for correctness; confirmed no multi-line string/
+  template in the shifted spans (only inline-comment backticks) so no hidden content change.
+  (5) #42.7 the memo-write skip on partial runs is the belt and the per-output existence+hash check is
+  the brace; the trend `meta.target===sha7` guard is defense-in-depth atop run.mjs's exit-non-zero.
+- CI on the final head recorded in PR #57 checks post-push.
