@@ -81,6 +81,29 @@ test('(c) short-name guard: a free-floating 1-char bare ref is dropped and count
   } finally { cleanup(dir); }
 });
 
+// (e) — the spec's blessed Python over-suppression, pinned at its BOUNDARY: parseSignature's raw
+// sweep makes `__init__(self, helper)` shadow `helper` inside __init__ (a bare use under a binding
+// IS the binding — Python scoping agrees), while a sibling method with no such param keeps its
+// real cross-file body ref. The suppression must drop param-refs only, never real body refs.
+test('(e) python: __init__ param shadows a module symbol inside __init__ only', () => {
+  const { dir, frag } = extract({
+    'src/helper.py': 'def helper():\n    return 1\n',
+    'src/klass.py':
+      'class Widget:\n' +
+      '    def __init__(self, helper):\n' +
+      '        self.h = probe(helper)\n' +
+      '\n' +
+      '    def render(self):\n' +
+      '        return probe(helper)\n',
+  });
+  try {
+    assert.ok(!hasEdge(frag.edges, 'src/klass.py:Widget.__init__', 'src/helper.py:helper'),
+      `the __init__ param binds helper — no fallback ref from __init__; edges: ${JSON.stringify(frag.edges)}`);
+    assert.ok(hasEdge(frag.edges, 'src/klass.py:Widget.render', 'src/helper.py:helper', 'ref'),
+      `render has no such binding — its real body ref must survive; edges: ${JSON.stringify(frag.edges)}`);
+  } finally { cleanup(dir); }
+});
+
 test('(d) suppression is per-binding: f(map) loses the edge, sibling h() keeps it', () => {
   const { dir, frag } = extract({
     'src/f.mjs':

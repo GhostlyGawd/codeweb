@@ -954,7 +954,11 @@ let ambiguousDropped = 0, shortNameDropped = 0, edgedCount = 0;
 // got no `test` edge (the blast-radius coveringTests signal). With empty ranges, enclosing() returns
 // null and the call is correctly attributed to the file's <module> (created on demand).
 const edgeFiles = files.filter((f) => fileSyms.has(f));
-const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig; // edge cache valid iff symbol set unchanged
+// Edge cache valid iff the symbol set AND the role rules are unchanged: finding #10 made edge
+// derivation role-DEPENDENT (the ref role gate's verdicts are baked into cached edges), and a
+// rules-file role flip changes no node id — symbolSig alone would replay stamp-era verdicts
+// indefinitely. Mirrors the stamp tier's rulesSig gate ("a rules change invalidates wholesale").
+const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig && oldCache.rulesSig === rulesSig;
 for (const f of edgeFiles) {
   const rec = fileSyms.get(f);
   const r = rel(f);

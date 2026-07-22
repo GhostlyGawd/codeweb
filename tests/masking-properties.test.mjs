@@ -23,7 +23,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { maskJs, maskPy, maskRuby } from '../scripts/lib/masking.mjs';
+import { maskJs, maskPy, maskRuby, maskAligned } from '../scripts/lib/masking.mjs';
 import { SCRIPTS } from './helpers.mjs';
 
 // ---- corpus: the spec's fixture sources (inline, frozen by the spec) ------------------------
@@ -150,5 +150,19 @@ test('P3 maskRuby: idempotence + line-count preservation over the corpus', () =>
     const m1 = maskRuby(text);
     assert.equal(m1.split('\n').length, text.split(/\r?\n/).length, `maskRuby(${id}): line count`);
     assert.equal(maskRuby(m1), m1, `maskRuby(${id}): idempotence`);
+  }
+});
+
+// P4 (round-2 WS-C review): maskAligned's dispatch must cover every JS/TS-family extension the
+// extractor enumerates — finding #11 added `.mts/.cts` to SRC_RE, and a dispatch miss here is not
+// a soft degrade: codemod's rewrite gate reads null as "no aligned mask for this language" and
+// falls back to UNMASKED whole-file replacement (string/comment occurrences lose their protection).
+test('P4 maskAligned: every JS-family extension the extractor enumerates gets the aligned mask', () => {
+  const src = 'const s = "fake(call)";\n// fake(comment)\nreal(call);\n';
+  for (const f of ['a.js', 'a.mjs', 'a.cjs', 'a.jsx', 'a.ts', 'a.tsx', 'a.mts', 'a.cts', 'a.java', 'a.cs', 'a.kt', 'a.kts', 'a.swift']) {
+    const m = maskAligned(f, src);
+    assert.notEqual(m, null, `${f}: must dispatch to maskJs, not null`);
+    assert.ok(!m.includes('fake(call)') && !m.includes('fake(comment)'), `${f}: string/comment blanked`);
+    assert.ok(m.includes('real(call);'), `${f}: live code preserved`);
   }
 });
