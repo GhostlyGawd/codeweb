@@ -84,6 +84,30 @@ test('LSH-PAIRS-EQ: lshCandidatePairs ≡ verbatim string-key reference — pair
   assert.ok(multiSeen >= 100, `generator must produce multi-occupancy buckets (saw ${multiSeen})`);
 });
 
+// LSH-TIER2-COLLISION-SPILL (round 2, #24, T-24.3): a TRUE 32-bit band-fold collision must never
+// merge two DIFFERENT row tuples. Items `itm_285` and `itm_13184` fold to the same uint32 on band 0
+// (rows=3, K=192) with different tuples — found by search, deterministic under the fixed PERM_SEEDS.
+// The numeric bucket keeps the first tuple; the second, colliding-but-different tuple MUST spill to
+// the side map and group only with its own exact-tuple duplicates. This is the one path the random
+// property cannot reach (a fold collision at 2^32 ~never occurs over the generator's entry counts),
+// so the spill branch would otherwise ship untested. The precondition asserts FAIL LOUDLY if a hash
+// change ever dissolves the collision — find a new colliding pair, never delete the coverage.
+test('LSH-TIER2-COLLISION-SPILL: a true band-fold collision spills by exact tuple, never merges differing tuples', () => {
+  const rows = 3, off = 0;
+  const fold = (sig) => { let h = 0x811c9dc5; for (let r = 0; r < rows; r++) h = Math.imul(h ^ sig[off + r], 0x01000193); return h >>> 0; };
+  const sA = signature(['itm_285'], 192), sB = signature(['itm_13184'], 192);
+  assert.equal(fold(sA), fold(sB), 'band-0 fold must collide (else the spill path is untested — search a new pair)');
+  assert.notEqual(sA.slice(off, off + rows).join(','), sB.slice(off, off + rows).join(','), 'the colliding tuples must DIFFER (that is what the spill exists for)');
+  // A1/A2 are one tuple, B1/B2 the colliding-but-different other; on band 0 they share a fold.
+  const entries = [['A1', ['itm_285']], ['B1', ['itm_13184']], ['A2', ['itm_285']], ['B2', ['itm_13184']]];
+  const config = { K: 192, bands: 64, rows: 3, bucketCap: 64 };
+  const got = lshCandidatePairs(entries, config);
+  assert.deepEqual(got, referenceLsh(entries, config), 'spill grouping ≡ string-key reference under a real fold collision');
+  const set = new Set(got.pairs.map((p) => p.join('|')));
+  assert.ok(set.has('A1|A2') && set.has('B1|B2'), 'each tuple groups with its own exact-tuple duplicate');
+  assert.ok(!set.has('A1|B1') && !set.has('A1|B2') && !set.has('A2|B1') && !set.has('A2|B2'), 'the fold collision must NOT merge the differing tuples');
+});
+
 test('LSH-PAIRS-DETERMINISTIC: identical entries in identical order -> identical result object', () => {
   const rng = prng(0x24DE7);
   const entries = randomEntries(rng);

@@ -943,3 +943,74 @@ RED only on the missing impl (`SIMILAR_VERSION` undefined), as required.
   (5) #42.7 the memo-write skip on partial runs is the belt and the per-output existence+hash check is
   the brace; the trend `meta.target===sha7` guard is defense-in-depth atop run.mjs's exit-non-zero.
 - CI on the final head recorded in PR #57 checks post-push.
+
+### WS-E review+verification
+
+Independent adversarial review (no prior reviewer saw any of WS-E). Container: Node v22.22.2, 4 cores;
+corpus re-built (`writeLoadedCorpus({files:680})`) → **14,964 nodes / 88,465 edges** (matches the
+builder). Baseline worktrees at the per-fix pre-shas (base `1532c02~1`, `2882724`, `cac8e2a`,
+`9ac5543`) for real before/after diffs. All eight findings **HELD**; the (a)-(f) equivalence
+properties all adjudicated **held — no counterexample**.
+
+- **#41 HELD** — LINT-NUL green over all tracked `.mjs`; tripwire proven: a planted NUL in a tracked
+  file turns it RED naming `file: byte 0x00 at offset N`, green after restore.
+- **#22 HELD (a: held)** — beyond the property test, ran the REAL pre-#22 `readingOrder` (base worktree)
+  vs HEAD on **900 fresh-seeded random graphs (108 with self-loops) + 7,656 budget checks** and the
+  15k corpus: every budget's output is byte-identical to the old code AND an exact prefix of the full
+  order (budgets 0..n+2, and 40/100000/∞). Candidate key `(un,fi,id)` reads only the emitted set via
+  `un` — no lookahead over `remaining`, confirmed in code and empirically.
+- **#23 HELD (b: held)** — built ref-only-ring / call+ref-shadow / multi-SCC / dense-SCC-with-ref-pair
+  fixtures; `break-cycles` stdout (json AND text) is **byte-identical HEAD vs pre-#23 baseline** on all
+  four, including the ref-subtlety verdicts (1-call cut fails, ref keeps the pair alive → next cut).
+  `CYCLE_KINDS` exported, used in `fileCycles`/`cheapestCuts`/`createMergeSimulator`, zero inline copies.
+- **#24 HELD (c: held)** — instrumented `lshCandidatePairs` to dump real Signal-B/C entries on the 15k
+  corpus, then diffed tier-2 output vs a string-key reference on those exact entries: Signal B **26,485
+  pairs**, `buckets 901782==901782`, `skipped 64==64`; Signal C `74==74` — **pair SEQUENCE, set, and
+  counts all byte-equal**. Core hashing (signature/bandKeys/PERM_SEEDS) unchanged since baseline.
+  Collision handling: the random property can't reach a true 2³² band-fold collision; **added
+  `LSH-TIER2-COLLISION-SPILL`** — searched out a real collision (`itm_285`/`itm_13184` share band-0 fold
+  with differing tuples) and proved the spill groups each tuple only with its own duplicate, deep-equal
+  to the string-key reference (precondition-guarded so a hash change fails loudly).
+- **#26 HELD (d: held)** — the sidecar path `round6(inter/(a+b−inter))` equals `round6(jaccard)` because
+  `rec.sh` is a deduped set (`[...set].sort()`), `rec.n=|set|`, and `capBody` is applied before
+  shingling; **2,138 real-corpus probes, 0 mismatch**. sidecar≡live on the FRESH 15k map — clone-dense
+  400-changed sample, 35 real >0.6 matches, **byte-identical**. Refresh: `refresh.mjs` rewrites
+  graph.json (new mtime/size) but not the sidecar → `loadSimilarIndex` stamp check fails → null → live
+  fallback (correct, unaccelerated). Sidecar is written by `build-report.mjs` at map time; keeping it
+  fresh+accelerated post-refresh is **WS-F #25's `writeSidecars`** — a documented dependency, no
+  correctness gap.
+- **#27 HELD (e: held)** — `normalizeGraph` is idempotent (`asArray` returns the same array; 2nd pass a
+  no-op) and never replaces/mutates `meta` (`g.meta = g.meta || {}` — same object reference,
+  target/stats preserved). Alias-corruption probe: `campaign --json` on a graph with
+  `meta.target="MY_REAL_TARGET"` emits that value under `clone:false` (a corrupting normalize would emit
+  the `'target'` fallback). Only `campaign.mjs` passes `clone:false`. Spawn: stdio piped, stderr
+  drained+discarded, exit code ignored, `error`→null→default, resolve idempotent.
+- **#28 HELD (f: held)** — `renamed[]` **byte-identical 195/195** HEAD vs baseline on the relabeled 15k
+  graph; cap-trip (250/250) emits `renameCheck {skipped,removed,added,cap:200}` with `renamed:[]`.
+  `detectRenames` takes every input as a param (no ambient state) — WS-F #33 lifts verbatim.
+- **#42 HELD** — dead `writeFileSync` imports gone (0 remaining, 4 files); coverage compact +
+  byte-deterministic across runs (SOURCE_DATE_EPOCH); jsdoc move comment-only; `import-resolve`
+  `git diff -w` empty; stats(×3)+annotations(×1) `atomicWrite`; `staleNote` NOTE-only (diff adds only
+  the note — receipt NOT regenerated); `--stages through-overlap` (unknown→exit 2; partial run writes
+  no memo, and `outputsIntact()`'s per-output size+sha1 check on `.stages.json` is the brace so a
+  partial ws can never satisfy a full-run memo); trend one-ws + `meta.target===sha7` belt. All #42
+  suites 34/34.
+- **Never-weaken audit**: every touched test is additive or STRENGTHENED — `bench-all` now asserts the
+  `cyclic` section, `coverage` asserts compactness; the only "-" lines are import-list widenings. No
+  assertion weakened. (Minor: the Closing's "only edit to a pre-existing test file is the #26 fixture
+  fix" is imprecise — those two strengthenings also touch pre-existing files — but the substance, no
+  weakening, holds.) CHANGELOG per finding (#24's single entry lands at 9ac5543); `node site/build.mjs`
+  + `git diff --quiet -- docs` → clean.
+
+Fresh perf (min-of-3) vs the E bar: reading-order @15k **433 ms** (<1 s); break-cycles dense-SCC
+(60f/240deps, cycles=1 verified:false — the densified worst case) **161 ms** (<1 s); overlap Signal-B
+twin-enumeration **424 ms vs pre-#24 baseline 2877 ms = 6.8×** (≥4×) with overlap.md + 16 graph.json
+overlaps byte-identical; dup-check 1-changed sidecar-fresh **6 ms** (≤60 ms; live 384 ms); campaign
+**986 ms** (max-child+compose); diff rename overhead **30 ms** (784−754; ≤50 ms), renamed[] identical.
+Bench rows `readingOrder`/`breakCycles` + the `cyclic` section are wired into `bench/all.mjs`; budgets
+are FACTORS (0.7 / 0.45 / 0.9); `node bench/all.mjs --gate` → **all promises hold**. ONE full
+`npm test`: **721 tests, 716 pass, 0 fail, 5 skipped** (pre-existing env skips), wall ~68 s,
+`git status --porcelain` empty. `check-consistency: OK — v0.9.0, 27 tools`. NOTE: committed
+`bench/results/benchmarks.json` is a pre-existing receipt (WS-E did not touch it — correctly avoiding
+machine-specific drift; `--gate` regenerates+gates fresh). Review added one test (collision-spill);
+committed with the trailer. CI on the review head confirmed post-push.
