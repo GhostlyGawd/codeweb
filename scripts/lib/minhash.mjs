@@ -85,3 +85,47 @@ export function estimate(sigA, sigB) {
   for (let i = 0; i < sigA.length; i++) if (sigA[i] === sigB[i]) match++;
   return match / sigA.length;
 }
+
+/**
+ * Round 2, #24 (T-24.2): THE banding + bucketing + pair-enumeration walk, hoisted from overlap.mjs
+ * (both signals ran their own copy). entries = iterable of [id, items]; returns
+ * { pairs, buckets, skippedBuckets }.
+ *
+ * ORDER IS LOAD-BEARING, not just the pair set: downstream consumption is order-sensitive
+ * (Signal B pushes twins in walk order and byLabelPair keeps the FIRST twin per label pair at a
+ * slice(0,16) rank where sim ties are routine; Signal C's pairShared insertion order feeds
+ * t3Findings). `pairs` is therefore in the LEGACY WALK ORDER, never re-sorted: ascending
+ * lexicographic sort of the legacy string band keys `${band}:${row.toString(36)},…` over ONE
+ * global map (note "10:" < "2:" — bands interleave in string order), then i<j within each
+ * bucket's sorted ids, first-seen dedup. Buckets over `bucketCap` ids are skipped and counted
+ * (the mega-hub analogue); singletons count in `buckets` but are never walked (tier 1 — they
+ * have no side effects to preserve). Pinned deep-equal (pairs array order included) against a
+ * verbatim string-key reference implementation by the LSH-PAIRS-EQ property.
+ */
+export function lshCandidatePairs(entries, { K, bands, rows, bucketCap }) {
+  const buckets = new Map();
+  const multiKeys = [];
+  for (const [id, items] of entries) {
+    for (const bk of bandKeys(signature(items, K), bands, rows)) {
+      let b = buckets.get(bk);
+      if (!b) buckets.set(bk, (b = []));
+      b.push(id);
+      if (b.length === 2) multiKeys.push(bk); // recorded once, exactly at multi-occupancy
+    }
+  }
+  let skippedBuckets = 0;
+  const pairs = [];
+  const seen = new Set();
+  for (const bk of multiKeys.sort()) {
+    const ids = buckets.get(bk); // length >= 2 by construction
+    if (ids.length > bucketCap) { skippedBuckets++; continue; }
+    const sorted = [...ids].sort();
+    for (let i = 0; i < sorted.length; i++) for (let j = i + 1; j < sorted.length; j++) {
+      const key = sorted[i] + '|' + sorted[j];
+      if (seen.has(key)) continue;
+      seen.add(key);
+      pairs.push([sorted[i], sorted[j]]);
+    }
+  }
+  return { pairs, buckets: buckets.size, skippedBuckets };
+}

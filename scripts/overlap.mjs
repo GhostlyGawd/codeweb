@@ -17,7 +17,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { shingles, jaccard, K, BANDS } from './lib/shingles.mjs'; // shared body-shingle primitives + THE thresholds (one truth, finding 27)
-import { signature, bandKeys } from './lib/minhash.mjs'; // Spec N: LSH candidate generation at scale
+import { lshCandidatePairs } from './lib/minhash.mjs'; // Spec N + round 2 #24: LSH candidate generation at scale (one walk, both signals)
 import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
 import { sourceReader, atomicWrite } from './lib/cli.mjs'; // shared body access + rename-atomic artifact writes (one truth)
 
@@ -252,31 +252,13 @@ if (lshOn(cand.length)) {
   // callee-label sets — a pair at the 0.5 confirm threshold is proposed with P≈0.9998. Mega-hub
   // co-callers share too little to collide, so no hub exclusion is needed on this path.
   console.error(`[overlap] LSH path engaged: ${cand.length} twin candidate(s)`); // finding 13: the bench asserts this fires at scale
-  // Round 2, #24 (tier 1): ~99% of buckets are singletons, and singletons hit the `ids.length < 2`
-  // continue BEFORE the cap check — they touch neither skippedBuckets (cap 64 >= 2), seenPair,
-  // flagged, nor twins, so sorting/walking them was a pure tax (~1.4s of the 5.1s stage at 15.7k).
-  // multiKeys records a key exactly when its bucket reaches length 2 (once); the full `buckets`
-  // Map keeps singletons so `buckets: buckets.size` is unchanged; sorting/walking ONLY multiKeys
-  // is the same string sort over the same multi-occupancy keys => same visit order => pair
-  // sequence, skippedBuckets, and counts all byte-identical.
-  const buckets = new Map();
-  const multiKeys = [];
-  for (const [id, s] of cand) {
-    for (const bk of bandKeys(signature(s, 192), 64, 3)) {
-      let b = buckets.get(bk);
-      if (!b) buckets.set(bk, (b = []));
-      b.push(id);
-      if (b.length === 2) multiKeys.push(bk);
-    }
-  }
-  let skippedBuckets = 0;
-  for (const bk of multiKeys.sort()) {
-    const ids = buckets.get(bk); // length >= 2 by construction
-    if (ids.length > LSH_BUCKET_CAP) { skippedBuckets++; continue; }
-    ids.sort();
-    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) considerPair(ids[i], ids[j]);
-  }
-  twinLsh = { buckets: buckets.size, skippedBuckets };
+  // Round 2, #24: THE banding/bucketing/pair-walk lives in lib/minhash.mjs (lshCandidatePairs) —
+  // pairs arrive pre-deduped IN THE LEGACY WALK ORDER (order is load-bearing: byLabelPair keeps
+  // the first twin per label pair at a slice rank where sim ties are routine), and considerPair
+  // judges each exactly as before.
+  const { pairs, buckets, skippedBuckets } = lshCandidatePairs(cand, { K: 192, bands: 64, rows: 3, bucketCap: LSH_BUCKET_CAP });
+  for (const [x, y] of pairs) considerPair(x, y);
+  twinLsh = { buckets, skippedBuckets };
 } else {
   // Historical exact path (kept bit-for-bit for small inputs): inverted caller index under the
   // declared caps. Deterministic global budget on twin-pair enumeration: smallest caller-groups
@@ -374,33 +356,20 @@ let t3Lsh = null; // { buckets, skippedBuckets } when LSH generated the near-mis
     // Spec N: multiset Jaccard reduces exactly to set Jaccard under occurrence-expansion
     // (`hash#k` for the k-th occurrence), so 32×4 banding at the 0.7 confirm threshold proposes
     // true pairs with P≈0.9998 — then sharedOf computes the exact count for each candidate.
-    // Round 2, #24 (tier 1): multi-occupancy-only sort/walk, exactly like Signal B — singleton
-    // buckets have zero side effects to preserve (the len<2 continue precedes the cap check).
-    const buckets = new Map();
-    const multiKeys = [];
-    for (const n of t3Nodes) {
+    // Round 2, #24: same lib walk as Signal B (occurrence-expanded items; 128 perms, 32x4 bands).
+    // Pairs arrive pre-deduped first-seen, so the shared>0 insertion order into pairShared equals
+    // today's — sharedOf computes the exact count per pair in sequence.
+    const entries = t3Nodes.map((n) => {
       const items = [];
       for (const [h, c] of countsOf.get(n.id)) for (let k = 1; k <= c; k++) items.push(h + '#' + k);
-      for (const bk of bandKeys(signature(items, 128), 32, 4)) {
-        let b = buckets.get(bk);
-        if (!b) buckets.set(bk, (b = []));
-        b.push(n.id);
-        if (b.length === 2) multiKeys.push(bk);
-      }
+      return [n.id, items];
+    });
+    const { pairs, buckets, skippedBuckets } = lshCandidatePairs(entries, { K: 128, bands: 32, rows: 4, bucketCap: LSH_BUCKET_CAP });
+    for (const [a, b] of pairs) {
+      const shared = sharedOf(a, b);
+      if (shared) pairShared.set(a + '|' + b, shared);
     }
-    let skippedBuckets = 0;
-    for (const bk of multiKeys.sort()) {
-      const ids = buckets.get(bk); // length >= 2 by construction
-      if (ids.length > LSH_BUCKET_CAP) { skippedBuckets++; continue; }
-      ids.sort();
-      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
-        const key = ids[i] + '|' + ids[j];
-        if (pairShared.has(key)) continue;
-        const shared = sharedOf(ids[i], ids[j]);
-        if (shared) pairShared.set(key, shared);
-      }
-    }
-    t3Lsh = { buckets: buckets.size, skippedBuckets };
+    t3Lsh = { buckets, skippedBuckets };
   } else {
     // Historical exact path (kept bit-for-bit for small inputs): owners index under the declared
     // owner cap.
