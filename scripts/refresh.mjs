@@ -70,10 +70,24 @@ try {
   writeHookBaselineBeside(abs, computeHookBaseline(updated, updatedJson, statSync(abs).mtimeMs));
 } catch { /* sidecar failure must never fail a refresh */ }
 
+// Round 2, finding #25: rebuild the map-time sidecar TRIO (brief/index-lite/similar-index) beside the
+// just-written graph so the prescribed post-edit refresh no longer kills the hook / find_similar fast
+// paths until the next full map. Write order is graph → hook-baseline (WS-D, above) → trio.
+// normalizeGraph runs POST-write so its mutation can't leak into the graph bytes; the sidecar content
+// then equals what each consumer's fallback computes from the on-disk graph (that parity is the
+// contract). writeSidecars is best-effort (never throws). Extraction stays spawned (in-process is #40).
+let sidecars = [];
+try {
+  const { writeSidecars } = await import('./lib/sidecars.mjs');
+  const { normalizeGraph } = await import('./lib/graph-ops.mjs');
+  sidecars = writeSidecars(abs, normalizeGraph(updated));
+} catch { /* sidecar failure must never fail a refresh */ }
+
 const payload = {
   graph: abs, root,
   before, after: { nodes: updated.nodes.length, edges: updated.edges.length },
   domainsReattached: reattached, scanned: /scanned (\d+)/.exec(r.stderr)?.[1] ?? null,
+  sidecars,
 };
 if (hadCoverage) payload.note = 'coverage annotations dropped (spans changed) — re-run scripts/coverage.mjs with a fresh report';
 if (json) { emitJson(payload); } else {

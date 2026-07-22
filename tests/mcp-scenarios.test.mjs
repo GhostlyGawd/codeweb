@@ -8,9 +8,11 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join, dirname } from 'node:path';
-import { writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { startServer, initServer } from './mcp-harness.mjs';
 import { tmpDir, cleanup, script, writeTree, runNode, readJSON } from './helpers.mjs';
+import { loadBriefSidecar } from '../scripts/lib/brief-sidecar.mjs';
+import { loadSimilarIndex } from '../scripts/lib/similar-index.mjs';
 
 const TRACE_ENV = { CODEWEB_MCP_TRACE: '1', CODEWEB_NO_AUTOREFRESH: '1' };
 
@@ -224,4 +226,37 @@ test('T-34.3 batch fan-out: [{ping id:9},{unknown-tool id:10}] → normal reply 
     assert.equal(invalid.length, 2, '[1,2] → exactly two -32600 lines; the notification-only batch stays silent');
     h.close(); assert.equal((await h.exited).code, 0);
   } finally { h.child.kill('SIGKILL'); }
+});
+
+// ---- S5 refresh-preserves-sidecars (BY MECHANISM: stamps match, not wall-clock) ----------------
+// A refresh used to rewrite graph.json but leave brief/index-lite/similar-index stale until the next
+// full map, so every hook + find_similar fast path lost its floor. #25 rebuilds the trio in refresh.
+// We assert by MECHANISM: after codeweb_refresh, all three loaders return non-null AND their stamps
+// equal statSync(graph.json) — the exact freshness check the hooks run (never a timing measurement).
+test('S5 refresh-preserves-sidecars: after codeweb_refresh all three sidecars are FRESH (stamps === statSync(graph.json))', async () => {
+  const { dir, src, graph } = mapFresh('codeweb-scn-s5-');
+  const cw = dirname(graph);
+  assert.ok(existsSync(join(cw, 'brief.json')) && existsSync(join(cw, 'index-lite.json')) && existsSync(join(cw, 'similar-index.json')), 'map wrote the trio');
+  const h = startServer({ env: TRACE_ENV });
+  try {
+    await initServer(h);
+    writeFileSync(join(src, 'util.js'), readFileSync(join(src, 'util.js'), 'utf8') + '\nexport function fresh() { return 42; }\n');
+    h.send({ jsonrpc: '2.0', id: 50, method: 'tools/call', params: { name: 'codeweb_refresh', arguments: { graph } } });
+    const r = await h.reply(50);
+    assert.ok(!r.result.isError, 'refresh succeeded');
+    const payload = JSON.parse(r.result.content[0].text);
+    assert.deepEqual(payload.sidecars, ['brief', 'index-lite', 'similar-index'], 'refresh reports the rebuilt trio');
+    // MECHANISM: the loaders validate against graph.json's stat — non-null means the hook fast path engages.
+    const st = statSync(graph);
+    const stamp = { graphMtimeMs: st.mtimeMs, graphSize: st.size };
+    assert.ok(loadBriefSidecar(graph), 'brief sidecar loads (fresh) against the refreshed graph');
+    const sim = loadSimilarIndex(graph);
+    assert.ok(sim, 'similar-index loads (fresh) — find_similar stops falling back to live');
+    assert.deepEqual(sim.stamp, stamp, 'similar-index stamp === statSync(graph.json)');
+    const lite = JSON.parse(readFileSync(join(cw, 'index-lite.json'), 'utf8'));
+    assert.deepEqual(lite.stamp, stamp, 'index-lite stamp === statSync(graph.json)');
+    const brief = JSON.parse(readFileSync(join(cw, 'brief.json'), 'utf8'));
+    assert.deepEqual(brief.stamp, stamp, 'brief stamp === statSync(graph.json)');
+    h.close(); assert.equal((await h.exited).code, 0);
+  } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });

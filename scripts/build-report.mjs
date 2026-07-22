@@ -8,16 +8,12 @@
 // (defaults, dangling-edge removal, computed stats), injects it into report-template.html, and
 // writes a single self-contained HTML file. No network/CDN required.
 
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
-import { buildIndexLite, SIDECAR_NAME } from './lib/index-lite.mjs'; // Spec P: pre-edit hook fast path
-import { buildSimilarIndex, SIMILAR_SIDECAR } from './lib/similar-index.mjs'; // finding 16: find-similar's map-time shingle sets
-import { BRIEF_SIDECAR } from './lib/brief-sidecar.mjs'; // finding 23: session-brief's pre-rendered payload
-import { buildBrief } from './lib/brief-core.mjs';
-import { buildIndex } from './lib/graph-ops.mjs';
-import { sourceReader, atomicWrite, loadGraph, parseArgs } from './lib/cli.mjs';
+import { writeSidecars } from './lib/sidecars.mjs'; // finding #25: THE map-time sidecar trio writer (refresh reuses it)
+import { atomicWrite, loadGraph, parseArgs } from './lib/cli.mjs';
 
 const USAGE = 'usage: build-report.mjs [path/to/graph.json] [--out report.html] [--no-md] [--open]';
 
@@ -71,22 +67,11 @@ graph.meta.stats = {
 // Minified, matching the upstream writers (cluster3.mjs / overlap.mjs).
 atomicWrite(graphPath, JSON.stringify(graph));
 
-// Spec P: the pre-edit hook's sidecar, stamped against the FINAL graph.json bytes just written
-// (mtime+size — the hook stats, never parses, to check freshness). Best-effort: a sidecar failure
-// must never fail the map.
-try {
-  const st = statSync(graphPath);
-  const reader = sourceReader(graph.meta?.root);
-  const stamp = { graphMtimeMs: st.mtimeMs, graphSize: st.size };
-  const lite = buildIndexLite(graph, stamp, reader);
-  atomicWrite(join(dirname(graphPath), SIDECAR_NAME), JSON.stringify(lite)); // hooks stat+read this concurrently
-  // finding 16: find-similar's exact shingle sets, persisted once at map time so the prescribed
-  // before-every-write check stops re-reading and re-shingling the whole repo per call.
-  atomicWrite(join(dirname(graphPath), SIMILAR_SIDECAR), JSON.stringify(buildSimilarIndex(graph, stamp, reader)));
-  // finding 23: the SessionStart brief, pre-rendered — the hook serves it at the boot floor
-  // instead of re-parsing + re-indexing the whole graph per session start.
-  atomicWrite(join(dirname(graphPath), BRIEF_SIDECAR), JSON.stringify({ version: 1, stamp, brief: buildBrief(graph, buildIndex(graph)) }));
-} catch { /* the consumers fall back to their live paths */ }
+// Spec P / finding #25: the map-time sidecar trio (brief.json, index-lite.json, similar-index.json),
+// stamped against the FINAL graph.json bytes just written (mtime+size — the hooks stat, never parse,
+// to check freshness). THE one writer now lives in lib/sidecars.mjs so refresh reuses it verbatim (a
+// refresh used to leave all three stale until the next full map). Best-effort — never fails the map.
+writeSidecars(graphPath, graph);
 
 // --- render ---
 const templatePath = join(here, 'report-template.html');

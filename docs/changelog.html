@@ -51,6 +51,25 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
+<li>**<code>codeweb_refresh</code> now regenerates the sidecar trio, so the hook / find_similar fast paths keep</li>
+</ul>
+<p>  their floor for the whole session.** <code>refresh.mjs</code> rewrote <code>graph.json</code> but never touched</p>
+<p>  <code>brief.json</code>, <code>index-lite.json</code>, or <code>similar-index.json</code> — and all three stamp on graph mtime+size,</p>
+<p>  so one refresh invalidated every one until the next full map (measured: session-brief 63–70 →</p>
+<p>  106–127 ms, pre-edit 73–81 → 98–135 ms, <code>find_similar --body</code> 605 → 1,104 ms). Since the server's</p>
+<p>  INSTRUCTIONS prescribe <code>codeweb_refresh</code> after every edit, every real session lost the floor within</p>
+<p>  minutes and never got it back. The map-time sidecar writer is now ONE lib (<code>scripts/lib/sidecars.mjs</code>,</p>
+<p>  <code>writeSidecars</code>): <code>build-report.mjs</code> calls it (byte-identical outputs to the old inline block,</p>
+<p>  asserted) and refresh calls it after its atomic graph write. brief + index-lite are pure functions of</p>
+<p>  the graph and are always rewritten; similar-index is rebuilt when <code>meta.root</code> is readable (via the</p>
+<p>  current v2 capped-shingle builder — closing the #26 dup-check-pool staleness that also depended on</p>
+<p>  this) and otherwise REMOVED so a stale one is never silently served. All three share ONE stat stamp</p>
+<p>  and are written strictly after the graph rename, so a crash between the two leaves only stamp-</p>
+<p>  mismatched sidecars (every loader falls back to null → the live path) — a fresh-stamped-wrong-content</p>
+<p>  sidecar is impossible by ordering. Coexists with WS-D's <code>hook-baseline.json</code> (write order: graph →</p>
+<p>  hook-baseline → trio). Scenario <strong>S5</strong> asserts freshness by MECHANISM (stamps match statSync, not</p>
+<p>  wall-clock). (round 2, finding #25)</p>
+<ul>
 <li>**MCP cancellation is honored, and malformed / batch JSON-RPC frames get a real answer instead of a</li>
 </ul>
 <p>  silent hang.** <code>handle()</code> dropped every id-less message, so <code>notifications/cancelled</code> was ignored —</p>

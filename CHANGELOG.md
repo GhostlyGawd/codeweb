@@ -10,6 +10,23 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Fixed
+- **`codeweb_refresh` now regenerates the sidecar trio, so the hook / find_similar fast paths keep
+  their floor for the whole session.** `refresh.mjs` rewrote `graph.json` but never touched
+  `brief.json`, `index-lite.json`, or `similar-index.json` — and all three stamp on graph mtime+size,
+  so one refresh invalidated every one until the next full map (measured: session-brief 63–70 →
+  106–127 ms, pre-edit 73–81 → 98–135 ms, `find_similar --body` 605 → 1,104 ms). Since the server's
+  INSTRUCTIONS prescribe `codeweb_refresh` after every edit, every real session lost the floor within
+  minutes and never got it back. The map-time sidecar writer is now ONE lib (`scripts/lib/sidecars.mjs`,
+  `writeSidecars`): `build-report.mjs` calls it (byte-identical outputs to the old inline block,
+  asserted) and refresh calls it after its atomic graph write. brief + index-lite are pure functions of
+  the graph and are always rewritten; similar-index is rebuilt when `meta.root` is readable (via the
+  current v2 capped-shingle builder — closing the #26 dup-check-pool staleness that also depended on
+  this) and otherwise REMOVED so a stale one is never silently served. All three share ONE stat stamp
+  and are written strictly after the graph rename, so a crash between the two leaves only stamp-
+  mismatched sidecars (every loader falls back to null → the live path) — a fresh-stamped-wrong-content
+  sidecar is impossible by ordering. Coexists with WS-D's `hook-baseline.json` (write order: graph →
+  hook-baseline → trio). Scenario **S5** asserts freshness by MECHANISM (stamps match statSync, not
+  wall-clock). (round 2, finding #25)
 - **MCP cancellation is honored, and malformed / batch JSON-RPC frames get a real answer instead of a
   silent hang.** `handle()` dropped every id-less message, so `notifications/cancelled` was ignored —
   a wrong `codeweb_map` burned up to 300s unstoppable and still replied. Non-object frames (`42`,
