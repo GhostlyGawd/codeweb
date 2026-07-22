@@ -51,6 +51,17 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
+<li><strong><code>break-cycles.mjs</code> and <code>diff.mjs</code> are searchable again (raw NUL bytes removed).</strong> Both</li>
+</ul>
+<p>  product files embedded literal NUL bytes as template-literal key separators, so <code>file</code>, <code>grep</code>,</p>
+<p>  and ripgrep classified them as binary — invisible to every code search (three separate audits</p>
+<p>  hit it this round, and one edit to break-cycles left it binary). The four raw bytes are now</p>
+<p>  the <code>'\x00'</code> escape (the graph-ops/extract-symbols idiom — same runtime string, so break-cycles</p>
+<p>  and diff output stays byte-identical, verified against the pre-fix binaries on a cyclic</p>
+<p>  fixture in both <code>--json</code> and text mode). A new lint tripwire, <code>tests/no-control-bytes.test.mjs</code>,</p>
+<p>  fails naming any tracked <code>.mjs</code> file containing a raw byte below 0x09 (<code>\t</code>/<code>\n</code>/<code>\r</code></p>
+<p>  unaffected), so the class stays closed. (round 2, finding #41)</p>
+<ul>
 <li><strong>Retargeting a re-export barrel no longer leaves stale call edges in warm extracts.</strong> Flipping</li>
 </ul>
 <p>  a forward (<code>export { x } from './a.js'</code> → <code>'./b.js'</code>, or a Python from-import chain) changes</p>

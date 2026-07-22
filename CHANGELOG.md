@@ -10,6 +10,15 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Fixed
+- **`break-cycles.mjs` and `diff.mjs` are searchable again (raw NUL bytes removed).** Both
+  product files embedded literal NUL bytes as template-literal key separators, so `file`, `grep`,
+  and ripgrep classified them as binary — invisible to every code search (three separate audits
+  hit it this round, and one edit to break-cycles left it binary). The four raw bytes are now
+  the `'\x00'` escape (the graph-ops/extract-symbols idiom — same runtime string, so break-cycles
+  and diff output stays byte-identical, verified against the pre-fix binaries on a cyclic
+  fixture in both `--json` and text mode). A new lint tripwire, `tests/no-control-bytes.test.mjs`,
+  fails naming any tracked `.mjs` file containing a raw byte below 0x09 (`\t`/`\n`/`\r`
+  unaffected), so the class stays closed. (round 2, finding #41)
 - **Retargeting a re-export barrel no longer leaves stale call edges in warm extracts.** Flipping
   a forward (`export { x } from './a.js'` → `'./b.js'`, or a Python from-import chain) changes
   ZERO symbols, so the shipped engine's wholesale reuse gate (symbol signature + per-file content
