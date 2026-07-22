@@ -8,7 +8,7 @@
 // Exit: 0 ok (advisory), 2 usage/IO.
 
 import { readFileSync, existsSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeGraph } from './lib/graph-ops.mjs';
@@ -32,17 +32,35 @@ const { json, git, all } = opts, budget = Math.max(0, opts.budget);
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 // run each advisor as its tested artifact (--json); a failed advisor degrades to empty (the campaign
-// still composes whatever the others found).
-const advise = (script, extra = []) => {
-  const r = spawnSync(process.execPath, [join(HERE, script), abs, ...extra, '--json'], { encoding: 'utf8', maxBuffer: 1 << 28 });
-  try { return JSON.parse(r.stdout); } catch { return null; }
-};
+// still composes whatever the others found). finding #27: the three run CONCURRENTLY (async spawn +
+// Promise.all) instead of three blocking spawnSync calls — wall drops to ~max(child) + compose. Each
+// child's stdout is collected; stderr is drained and DISCARDED (spawnSync collected-and-discarded
+// child stderr — preserve exactly that; an UNDRAINED stderr pipe blocks a child at ~64KB and
+// deadlocks the run, so we must read it and emit nothing). Exit code is IGNORED — parse stdout
+// regardless of status, exactly as spawnSync did; a spawn 'error' or non-JSON stdout yields null ->
+// the existing `|| {…}` default. Chunk collection has no maxBuffer cliff (superset of the old 1<<28).
+// Child argv + env are unchanged. Promise.all's array order fixes the payload composition order, so
+// campaign's own stdout is composed only after all three settle — byte-identical to the sequential run.
+const advise = (script, extra = []) => new Promise((res) => {
+  const child = spawn(process.execPath, [join(HERE, script), abs, ...extra, '--json'], { stdio: ['ignore', 'pipe', 'pipe'] });
+  const out = [];
+  child.stdout.on('data', (c) => out.push(c));
+  child.stderr.on('data', () => {}); // drain + discard: match spawnSync's collect-and-discard; never interleave, never deadlock
+  child.on('error', () => res(null)); // spawn failure -> null -> default (resolve is idempotent if 'close' also fires)
+  child.on('close', () => { try { res(JSON.parse(Buffer.concat(out).toString('utf8'))); } catch { res(null); } });
+});
 const allFlag = all ? ['--all'] : [];
-const optimize = advise('optimize.mjs') || { opportunities: [] };
-const deadcode = advise('deadcode.mjs', allFlag) || { safe: [] }; // #6: deadcode is role-scoped; campaign passes the choice through
-const breakCycles = advise('break-cycles.mjs') || { cycles: [] };
+const [optimize, deadcode, breakCycles] = await Promise.all([
+  advise('optimize.mjs'),
+  advise('deadcode.mjs', allFlag), // #6: deadcode is role-scoped; campaign passes the choice through
+  advise('break-cycles.mjs'),
+]).then(([o, d, b]) => [o || { opportunities: [] }, d || { safe: [] }, b || { cycles: [] }]);
 
-const plan = planCampaign(graph, { optimize, deadcode, breakCycles, budget });
+// clone:false — campaign OWNS this freshly-parsed graph (loadGraph already normalized it), and
+// normalizeGraph is idempotent additive default-filling that never touches `meta`, so re-normalizing
+// in place is safe and the `graph.meta?.target` read below still sees the real target (finding #27,
+// −260 ms at 15.7k by skipping the structuredClone). Every OTHER planCampaign caller keeps the default.
+const plan = planCampaign(graph, { optimize, deadcode, breakCycles, budget, clone: false });
 const t0 = plan.totals;
 const payload = {
   target: graph.meta?.target || 'target',

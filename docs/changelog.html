@@ -147,6 +147,22 @@
 <p>  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)</p>
 <h3 class="cl-grp">Performance</h3>
 <ul>
+<li><strong><code>campaign</code> runs its three advisors concurrently and stops cloning the graph it owns.</strong> The</li>
+</ul>
+<p>  worklist composer spawned optimize, deadcode, and break-cycles with three BLOCKING <code>spawnSync</code></p>
+<p>  calls (wall = sum of the three children), then <code>planCampaign</code> <code>structuredClone</code>d the whole graph</p>
+<p>  defensively. The advisors now run under async <code>spawn</code> + <code>Promise.all</code> (wall ≈ max child + compose):</p>
+<p>  each child's stdout is collected while its stderr is drained and discarded (matching spawnSync's</p>
+<p>  collect-and-discard — an undrained stderr pipe deadlocks a child at ~64 KB), the exit code is</p>
+<p>  ignored exactly as before, a spawn error or non-JSON stdout degrades to the empty default, and</p>
+<p>  <code>Promise.all</code>'s array order fixes the composition order so campaign's own stdout is byte-identical</p>
+<p>  regardless of which child finishes first. <code>planCampaign</code> gains <code>clone</code> (default <code>true</code>); campaign</p>
+<p>  passes <code>clone:false</code> because it owns the freshly-parsed graph and <code>normalizeGraph</code> is idempotent</p>
+<p>  additive default-filling that never touches <code>meta</code> (every other caller keeps the safe clone).</p>
+<p>  Pinned by CMP-CONCURRENT-STABLE (single-line JSON, byte-stable across runs, <code>meta.target</code> survives</p>
+<p>  the in-place normalize) and the unchanged CMP-DELTA-EQUIV property. Measured min-of-3 @14,964 nodes:</p>
+<p>  campaign wall 1.65 → <strong>0.89 s</strong>, payload <code>cmp</code>-identical to the pre-fix binary. (round 2, finding #27)</p>
+<ul>
 <li>**<code>dup-check</code> serves its comparison pool from the map-time similar-index sidecar (no per-call</li>
 </ul>
 <p>  re-shingle of the whole repo).** The review/PostToolUse duplication gate re-read and re-shingled</p>

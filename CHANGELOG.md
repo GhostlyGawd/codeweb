@@ -91,6 +91,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **`campaign` runs its three advisors concurrently and stops cloning the graph it owns.** The
+  worklist composer spawned optimize, deadcode, and break-cycles with three BLOCKING `spawnSync`
+  calls (wall = sum of the three children), then `planCampaign` `structuredClone`d the whole graph
+  defensively. The advisors now run under async `spawn` + `Promise.all` (wall ≈ max child + compose):
+  each child's stdout is collected while its stderr is drained and discarded (matching spawnSync's
+  collect-and-discard — an undrained stderr pipe deadlocks a child at ~64 KB), the exit code is
+  ignored exactly as before, a spawn error or non-JSON stdout degrades to the empty default, and
+  `Promise.all`'s array order fixes the composition order so campaign's own stdout is byte-identical
+  regardless of which child finishes first. `planCampaign` gains `clone` (default `true`); campaign
+  passes `clone:false` because it owns the freshly-parsed graph and `normalizeGraph` is idempotent
+  additive default-filling that never touches `meta` (every other caller keeps the safe clone).
+  Pinned by CMP-CONCURRENT-STABLE (single-line JSON, byte-stable across runs, `meta.target` survives
+  the in-place normalize) and the unchanged CMP-DELTA-EQUIV property. Measured min-of-3 @14,964 nodes:
+  campaign wall 1.65 → **0.89 s**, payload `cmp`-identical to the pre-fix binary. (round 2, finding #27)
 - **`dup-check` serves its comparison pool from the map-time similar-index sidecar (no per-call
   re-shingle of the whole repo).** The review/PostToolUse duplication gate re-read and re-shingled
   every non-test function body on every invocation — 374 ms for a single changed symbol at 14,964
