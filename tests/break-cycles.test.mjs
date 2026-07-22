@@ -7,8 +7,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, script, tmpDir, writeTree, cleanup } from './helpers.mjs';
-import { prng, int } from './_proptest.mjs';
-import { normalizeGraph, fileCycles } from '../scripts/lib/graph-ops.mjs';
+import { prng, int, pick } from './_proptest.mjs';
+import { normalizeGraph, fileCycles, cheapestCuts } from '../scripts/lib/graph-ops.mjs';
 
 const BC = script('break-cycles.mjs');
 const write = (g) => { const dir = tmpDir('cw-bc-'); writeTree(dir, { 'graph.json': JSON.stringify(g) }); return { dir, graphPath: join(dir, 'graph.json') }; };
@@ -121,4 +121,138 @@ test('CB-DETERMINISTIC: identical input -> identical stdout', () => {
   try {
     assert.equal(runNode(BC, [graphPath, '--json']).stdout, runNode(BC, [graphPath, '--json']).stdout);
   } finally { cleanup(dir); }
+});
+
+// ---- Round 2, finding #23 (T-23.2): cheapestCuts ≡ the whole-graph oracle -----------------------
+// FROZEN ORACLE: a verbatim copy of the pre-#23 per-cycle candidate/verify path — candidates from
+// STRUCTURAL edges, each candidate verified by re-running fileCycles on the WHOLE graph with the
+// candidate's edges removed (edgeKey-set filter), same-key survival. The SCC-pseudo-graph
+// implementation must deep-equal this on every graph; deep-equal is ORDER-sensitive, so it pins
+// the candidate trial order, the chosen cut, and underlyingEdges element order, not just verdicts.
+function oracleCheapestCuts(graph) {
+  const STRUCTURAL = new Set(['call', 'import', 'inherit']);
+  const oEdgeKey = (e) => [e.from, e.to, e.kind].join(String.fromCharCode(0));
+  const fileOf = new Map(graph.nodes.map((n) => [n.id, n.file]));
+  const structuralEdges = graph.edges.filter((e) => STRUCTURAL.has(e.kind));
+  const cycleKey = (c) => c.join('|');
+  const cyclesWithout = (removeKeys) => fileCycles({ ...graph, edges: graph.edges.filter((e) => !removeKeys.has(oEdgeKey(e))) });
+  return fileCycles(graph).map((cycle) => {
+    const inCycle = new Set(cycle);
+    const fe = new Map();
+    for (const e of structuralEdges) {
+      const f = fileOf.get(e.from), t = fileOf.get(e.to);
+      if (f && t && f !== t && inCycle.has(f) && inCycle.has(t)) {
+        const k = `${f}\x00${t}`; if (!fe.has(k)) fe.set(k, []); fe.get(k).push(e);
+      }
+    }
+    const candidates = [...fe.entries()].map(([k, edges]) => { const [fromFile, toFile] = k.split('\x00'); return { fromFile, toFile, weight: edges.length, edges }; })
+      .sort((a, b) => a.weight - b.weight || (a.fromFile < b.fromFile ? -1 : a.fromFile > b.fromFile ? 1 : 0) || (a.toFile < b.toFile ? -1 : a.toFile > b.toFile ? 1 : 0));
+    const meanWeight = candidates.length ? candidates.reduce((s, c) => s + c.weight, 0) / candidates.length : 0;
+    const key = cycleKey(cycle);
+    let chosen = null;
+    for (const cand of candidates) {
+      const rm = new Set(cand.edges.map(oEdgeKey));
+      if (!cyclesWithout(rm).some((c) => cycleKey(c) === key)) { chosen = cand; break; }
+    }
+    if (chosen) return { files: cycle, meanWeight, verified: true, cut: { fromFile: chosen.fromFile, toFile: chosen.toFile, weight: chosen.weight, underlyingEdges: chosen.edges.map((e) => ({ from: e.from, to: e.to, kind: e.kind })) } };
+    return { files: cycle, meanWeight, verified: false, cut: null, note: 'no single file->file edge cut breaks this cycle — needs a multi-edge cut or a restructure (extract a shared module)' };
+  });
+}
+
+// Seeded cyclic graphs over ALL FOUR cycle kinds, duplicate (from,to,kind) edges included:
+// a guaranteed file ring (sometimes closed ONLY by ref edges — candidates empty, verified:false)
+// plus random extra edges, plus deliberate call+ref pairs (a pair that stays alive via ref after
+// its structural cut — the STRUCTURAL-vs-fileCycles kind-set subtlety).
+function randomCyclicKindGraph(rng) {
+  const nFiles = int(rng, 2, 6);
+  const files = Array.from({ length: nFiles }, (_, i) => `f${i}.js`);
+  const perFile = int(rng, 1, 3);
+  const nodes = [];
+  for (const f of files) for (let j = 0; j < perFile; j++) nodes.push({ id: `${f}:s${j}`, label: `${f[1]}s${j}`, kind: 'function', file: f, line: j + 1, loc: 1, exports: true, domain: 'd' });
+  const nodeIn = (f) => `${f}:s${int(rng, 0, perFile - 1)}`;
+  const KINDS = ['call', 'import', 'inherit', 'ref'];
+  const edges = [];
+  // guaranteed ring over a shuffled subset of >= 2 files
+  const shuffled = files.slice();
+  for (let i = shuffled.length - 1; i > 0; i--) { const j = int(rng, 0, i); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
+  const ring = shuffled.slice(0, int(rng, 2, nFiles));
+  const refOnlyRing = rng() < 0.3; // the ref-closed-cycle case: no structural in-cycle edge
+  for (let i = 0; i < ring.length; i++) {
+    edges.push({ from: nodeIn(ring[i]), to: nodeIn(ring[(i + 1) % ring.length]), kind: refOnlyRing ? 'ref' : pick(rng, KINDS) });
+  }
+  // random extras (any kind, any files) + duplicates of already-present edges
+  const nExtra = int(rng, 0, 10);
+  for (let e = 0; e < nExtra; e++) {
+    const from = nodeIn(pick(rng, files)), to = nodeIn(pick(rng, files));
+    if (from === to) continue;
+    edges.push({ from, to, kind: pick(rng, KINDS) });
+  }
+  for (let d = 0; d < 3; d++) if (edges.length && rng() < 0.5) edges.push({ ...pick(rng, edges) }); // duplicate (from,to,kind)
+  // deliberate call+ref shadow pairs: a ref edge on the same file pair as an existing call edge
+  for (const e of edges.slice()) {
+    if (e.kind === 'call' && rng() < 0.25) edges.push({ from: e.from, to: e.to, kind: 'ref' });
+  }
+  return normalizeGraph({ meta: {}, nodes, edges, domains: [], overlaps: [] });
+}
+
+// ★ round 2 #23 property — cheapestCuts (SCC-pseudo-graph verification) deep-equals the frozen
+// whole-graph oracle, order and all. MUTATION CHECK (demonstrated RED during the build, kept
+// documented here): making the witness table count STRUCTURAL kinds only — instead of all
+// CYCLE_KINDS — flips CB-REF-ALIVE below and this property (a pair alive only via ref would be
+// counted dead, verifying a cut that does NOT break the cycle). fileCycles counts ref; the
+// witness table must too.
+test('CB-PSEUDO-EQ: cheapestCuts ≡ whole-graph oracle over 150 seeded all-kind cyclic graphs (incl. ref-closed + duplicates)', () => {
+  const rng = prng(0x23C0DE);
+  let refClosedSeen = 0, unverifiedSeen = 0, dupSeen = 0;
+  for (let c = 0; c < 150; c++) {
+    const g = randomCyclicKindGraph(rng);
+    const seen = new Set(); let hasDup = false;
+    for (const e of g.edges) { const k = `${e.from}|${e.to}|${e.kind}`; if (seen.has(k)) hasDup = true; seen.add(k); }
+    if (hasDup) dupSeen++;
+    const got = cheapestCuts(g);
+    const want = oracleCheapestCuts(g);
+    assert.deepEqual(got, want, `case ${c}: cheapestCuts must equal the whole-graph oracle`);
+    for (const cy of got) {
+      if (!cy.verified) {
+        unverifiedSeen++;
+        assert.equal(cy.cut, null, `case ${c}: unverified cycle carries cut:null`);
+        assert.match(cy.note, /no single file->file edge cut/, `case ${c}: unverified cycle carries today's note`);
+      }
+    }
+    // the ref-closed shape: a cycle whose in-cycle edges are all ref -> candidates empty -> verified:false
+    const fileOf = new Map(g.nodes.map((n) => [n.id, n.file]));
+    for (const cy of got) {
+      const inC = new Set(cy.files);
+      const structuralIn = g.edges.some((e) => ['call', 'import', 'inherit'].includes(e.kind)
+        && inC.has(fileOf.get(e.from)) && inC.has(fileOf.get(e.to)) && fileOf.get(e.from) !== fileOf.get(e.to));
+      if (!structuralIn) { refClosedSeen++; assert.equal(cy.verified, false, `case ${c}: ref-closed cycle must be verified:false`); }
+    }
+  }
+  assert.ok(refClosedSeen >= 5, `generator must produce ref-closed cycles (saw ${refClosedSeen})`);
+  assert.ok(unverifiedSeen >= 5, `generator must produce unverified cycles (saw ${unverifiedSeen})`);
+  assert.ok(dupSeen >= 10, `generator must produce duplicate (from,to,kind) edges (saw ${dupSeen})`);
+});
+
+// CB-REF-ALIVE (the spec's scenario, and the permanent mutation guard): given a pair with 1 call +
+// 1 ref edge, when its structural cut is tried, the cycle SURVIVES (the ref still closes it) and
+// the next candidate is chosen — exactly today's verdict. A STRUCTURAL-only witness table would
+// pick the 1-edge cut and go RED here.
+test('CB-REF-ALIVE: given a call+ref pair, when its structural cut is tried, then the cycle survives and the next candidate is chosen', () => {
+  const nodes = [];
+  for (let i = 0; i < 3; i++) nodes.push({ id: `A.js:a${i}`, label: `a${i}`, kind: 'function', file: 'A.js', line: i + 1, loc: 1, exports: true, domain: 'd' });
+  for (let i = 0; i < 3; i++) nodes.push({ id: `B.js:b${i}`, label: `b${i}`, kind: 'function', file: 'B.js', line: i + 1, loc: 1, exports: true, domain: 'd' });
+  const edges = [
+    { from: 'A.js:a0', to: 'B.js:b0', kind: 'call' }, // A->B: 1 structural (weight 1 — tried first)
+    { from: 'A.js:a1', to: 'B.js:b1', kind: 'ref' },  // ...but the pair stays ALIVE via ref
+    { from: 'B.js:b0', to: 'A.js:a1', kind: 'call' }, // B->A: 2 structural (weight 2 — tried second)
+    { from: 'B.js:b1', to: 'A.js:a2', kind: 'call' },
+  ];
+  const g = normalizeGraph({ meta: {}, nodes, edges, domains: [], overlaps: [] });
+  const out = cheapestCuts(g);
+  assert.equal(out.length, 1);
+  assert.equal(out[0].verified, true);
+  assert.deepEqual({ fromFile: out[0].cut.fromFile, toFile: out[0].cut.toFile, weight: out[0].cut.weight },
+    { fromFile: 'B.js', toFile: 'A.js', weight: 2 },
+    'the 1-call A->B cut must FAIL (ref keeps the pair alive) and the 2-call B->A cut wins');
+  assert.deepEqual(out, oracleCheapestCuts(g), 'and the whole-graph oracle agrees verbatim');
 });

@@ -88,6 +88,7 @@ const advisorRuns = {
   hotspots: sh(S('hotspots.mjs'), [gpath, '--json']),
   campaign: sh(S('campaign.mjs'), [gpath, '--json']),
   readingOrder: sh(S('reading-order.mjs'), [gpath, '--json']), // round 2, #22: was 75.9s@15.7k with no bench row
+  breakCycles: sh(S('break-cycles.mjs'), [gpath, '--json']),   // round 2, #23: absent from every advisor list
 };
 const advisors = Object.fromEntries(Object.entries(advisorRuns).map(([k, r]) => [k, {
   ms: r.ms, ok: r.status === 0, factorVsRegexBaseline: r.status === 0 ? factorOf(r.ms) : null,
@@ -178,8 +179,37 @@ else {
   };
 }
 
+// ---------------------------------------------------------------- cyclic corpus (round 2, #23)
+// The dense-SCC corpus break-cycles' worst case lives on: one files-wide double-ring SCC where NO
+// single-pair cut works, so every candidate is tried. The main bench corpus is acyclic by
+// construction, which is exactly how the 22.8s whole-graph re-verify regression stayed
+// gate-invisible. Gated as a FACTOR of this run's regex baseline (budgets.json's portability
+// contract — no absolute-ms budgets), plus the machinery check cycles >= 1.
+const { writeCyclicCorpus } = await import(pathToFileURL(join(ROOT, 'bench', 'lib', 'loaded-corpus.mjs')).href);
+const cyclicSrc = join(ws, 'cyclic-src');
+const cyclicWs = join(ws, 'cyclic-ws');
+rmSync(cyclicSrc, { recursive: true, force: true }); rmSync(cyclicWs, { recursive: true, force: true });
+const cycPlan = writeCyclicCorpus(cyclicSrc);
+const cyclicRun = sh(S('run.mjs'), [cyclicSrc, '--target', 'bench-cyclic', '--out-dir', cyclicWs]);
+let cyclic;
+if (cyclicRun.status !== 0) cyclic = { ok: false, error: `run failed (exit ${cyclicRun.status})` };
+else {
+  const bc = sh(S('break-cycles.mjs'), [join(cyclicWs, 'graph.json'), '--json']);
+  const camp = sh(S('campaign.mjs'), [join(cyclicWs, 'graph.json'), '--json']);
+  let bcPayload = null; try { bcPayload = JSON.parse(bc.stdout); } catch { /* counted via ok below */ }
+  cyclic = {
+    ok: bc.status === 0 && bcPayload != null,
+    files: cycPlan.files, extraPairDeps: cycPlan.extraPairDeps, fns: cycPlan.fns,
+    cycles: bcPayload ? bcPayload.count : null,
+    breakCyclesMs: bc.ms,
+    breakCyclesFactorVsRegexBaseline: factorOf(bc.ms),
+    campaignMs: camp.status === 0 ? camp.ms : null,
+    ...(measurable ? {} : { factorNote: `baseline ${regexBase.ms}ms < ${BASELINE_FLOOR_MS}ms floor — factor gates only at repo scale` }),
+  };
+}
+
 // ---------------------------------------------------------------- write + gate
-const payload = { ranAt: new Date().toISOString(), node: process.version, budgets, pipeline, session, toolBudgets, advisors, loaded, tsEngine };
+const payload = { ranAt: new Date().toISOString(), node: process.version, budgets, pipeline, session, toolBudgets, advisors, loaded, cyclic, tsEngine };
 const json = JSON.stringify(payload, null, 2) + '\n';
 mkdirSync(dirname(opt.out), { recursive: true }); writeFileSync(opt.out, json);
 mkdirSync(dirname(opt.site), { recursive: true }); writeFileSync(opt.site, json);
@@ -211,6 +241,17 @@ if (opt.gate) {
   else {
     if (budgets.loadedOverlapFindingsMin != null && loaded.overlapFindings < budgets.loadedOverlapFindingsMin) violations.push(`loaded corpus: ${loaded.overlapFindings} overlap findings < loadedOverlapFindingsMin ${budgets.loadedOverlapFindingsMin}`);
     if (budgets.loadedLshRequired && !loaded.lshEngaged) violations.push('loaded corpus: LSH path did not engage (banner absent)');
+  }
+  // round 2, #23: the cyclic corpus must engage the cut machinery (cycles >= 1 — the acyclic-
+  // corpus lesson) and break-cycles holds a factor promise there (skip-with-note below the
+  // BASELINE_FLOOR_MS rule, like every other factor).
+  if (!cyclic.ok) violations.push(`cyclic corpus: ${cyclic.error || 'break-cycles failed'}`);
+  else {
+    if (!(cyclic.cycles >= 1)) violations.push(`cyclic corpus: ${cyclic.cycles} cycle(s) — the cut machinery did not engage`);
+    const cycMax = budgets.cyclicBreakCyclesFactorVsRegexBaselineMax;
+    if (cycMax != null && cyclic.breakCyclesFactorVsRegexBaseline != null && cyclic.breakCyclesFactorVsRegexBaseline > cycMax) {
+      violations.push(`cyclic break-cycles: ${cyclic.breakCyclesFactorVsRegexBaseline}x regex baseline > ${cycMax}x`);
+    }
   }
   if (violations.length) { console.error(`[bench:all] GATE FAILED:\n  - ${violations.join('\n  - ')}`); process.exit(1); }
   console.log('[bench:all] gate: all promises hold');

@@ -91,6 +91,27 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **`break-cycles` verifies cuts on the SCC-induced pseudo-graph instead of re-running whole-graph
+  Tarjan per candidate.** A dense SCC (no single-pair cut works) tried every candidate, and each
+  trial filtered ALL graph edges + recomputed file cycles over the whole graph — 19.5 s (22.8 s on
+  the finding's box) for one dense 60-file SCC inside a 93k-edge graph, inherited by campaign
+  (20.3 s), and gate-invisible because break-cycles was absent from the bench and the bench corpus
+  is acyclic by construction. Verification now runs the SAME `fileCycles` on a per-cycle
+  pseudo-graph (one node per file, one edge per surviving in-SCC pair, from a pair-witness table
+  counting ALL four cycle kinds — the ref subtlety: candidates stay STRUCTURAL/severable, but a
+  pair alive only via `ref` must survive a structural cut). The verdict is exact, not
+  approximate — removal only touches in-SCC pairs and an outside router would itself have been in
+  the SCC — pinned by a 150-case seeded property (all four kinds, duplicate edges, ref-closed
+  cycles) deep-equal against a frozen whole-graph oracle, plus the CB-REF-ALIVE scenario (a
+  STRUCTURAL-only witness table goes red there — mutation-checked during the build). The cut
+  logic moved to `graph-ops.cheapestCuts` behind a byte-identity pin (json + text, fixture +
+  cyclic corpus), and `CYCLE_KINDS` is now one exported truth for fileCycles, the merge
+  simulator, and the witness table. Measured min-of-3: embedded dense SCC 19.5 s → **0.35 s**;
+  campaign on the same graph 20.3 s → 1.58 s; payloads byte-identical. `bench/all.mjs` gains a
+  `breakCycles` advisor row plus a `cyclic` section over a new pinned dense-SCC corpus
+  (`writeCyclicCorpus`: double-ring construction makes "no single-pair cut breaks it" guaranteed),
+  factor-gated so the whole-graph re-verify class can never ship unseen again. (round 2,
+  finding #23)
 - **`reading-order` answers at the budget instead of ordering the whole graph first.** The greedy
   "fewest unemitted callees" loop recounted every remaining node's unemitted callees per emitted
   item and applied the budget only after the COMPLETE order existed — 48.8 s (75.9 s on the

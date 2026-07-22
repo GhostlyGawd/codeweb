@@ -147,6 +147,29 @@
 <p>  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)</p>
 <h3 class="cl-grp">Performance</h3>
 <ul>
+<li>**<code>break-cycles</code> verifies cuts on the SCC-induced pseudo-graph instead of re-running whole-graph</li>
+</ul>
+<p>  Tarjan per candidate.** A dense SCC (no single-pair cut works) tried every candidate, and each</p>
+<p>  trial filtered ALL graph edges + recomputed file cycles over the whole graph — 19.5 s (22.8 s on</p>
+<p>  the finding's box) for one dense 60-file SCC inside a 93k-edge graph, inherited by campaign</p>
+<p>  (20.3 s), and gate-invisible because break-cycles was absent from the bench and the bench corpus</p>
+<p>  is acyclic by construction. Verification now runs the SAME <code>fileCycles</code> on a per-cycle</p>
+<p>  pseudo-graph (one node per file, one edge per surviving in-SCC pair, from a pair-witness table</p>
+<p>  counting ALL four cycle kinds — the ref subtlety: candidates stay STRUCTURAL/severable, but a</p>
+<p>  pair alive only via <code>ref</code> must survive a structural cut). The verdict is exact, not</p>
+<p>  approximate — removal only touches in-SCC pairs and an outside router would itself have been in</p>
+<p>  the SCC — pinned by a 150-case seeded property (all four kinds, duplicate edges, ref-closed</p>
+<p>  cycles) deep-equal against a frozen whole-graph oracle, plus the CB-REF-ALIVE scenario (a</p>
+<p>  STRUCTURAL-only witness table goes red there — mutation-checked during the build). The cut</p>
+<p>  logic moved to <code>graph-ops.cheapestCuts</code> behind a byte-identity pin (json + text, fixture +</p>
+<p>  cyclic corpus), and <code>CYCLE_KINDS</code> is now one exported truth for fileCycles, the merge</p>
+<p>  simulator, and the witness table. Measured min-of-3: embedded dense SCC 19.5 s → <strong>0.35 s</strong>;</p>
+<p>  campaign on the same graph 20.3 s → 1.58 s; payloads byte-identical. <code>bench/all.mjs</code> gains a</p>
+<p>  <code>breakCycles</code> advisor row plus a <code>cyclic</code> section over a new pinned dense-SCC corpus</p>
+<p>  (<code>writeCyclicCorpus</code>: double-ring construction makes "no single-pair cut breaks it" guaranteed),</p>
+<p>  factor-gated so the whole-graph re-verify class can never ship unseen again. (round 2,</p>
+<p>  finding #23)</p>
+<ul>
 <li><strong><code>reading-order</code> answers at the budget instead of ordering the whole graph first.</strong> The greedy</li>
 </ul>
 <p>  "fewest unemitted callees" loop recounted every remaining node's unemitted callees per emitted</p>

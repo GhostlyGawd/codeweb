@@ -439,35 +439,60 @@ export function fileCycles(graph) {
 const STRUCTURAL = new Set(['call', 'import', 'inherit']);
 
 /** For each file-level dependency cycle, the CHEAPEST verified file->file cut (or verified:false
- *  with a note when no single-pair cut breaks it). Returns break-cycles' `cycles` payload array. */
+ *  with a note when no single-pair cut breaks it). Returns break-cycles' `cycles` payload array.
+ *
+ *  Round 2, #23 (T-23.3): verification runs on the SCC-induced file PSEUDO-GRAPH instead of
+ *  re-filtering all edges + full whole-graph Tarjan per candidate (measured 19.5s for one dense
+ *  60-file SCC inside a 93k-edge graph — per-candidate × whole-graph). Why the pseudo-graph
+ *  verdict is EXACT, not approximate: a candidate's removal only touches in-SCC pairs, so the
+ *  outside graph is unchanged; a post-removal cycle among SCC files routing through an outside
+ *  file is impossible — that router would reach and be reached by SCC members and would have been
+ *  IN the SCC pre-removal; and SCCs only shrink under edge removal, so no new outside coupling can
+ *  appear. Hence same-key survival on the pseudo-graph (one node per file, one edge per surviving
+ *  in-SCC pair — the createMergeSimulator.cyclesOfPairs precedent, same fileCycles code path)
+ *  ⇔ same-key survival on the whole graph, per candidate. Pinned by CB-PSEUDO-EQ against a frozen
+ *  whole-graph oracle, deep-equal (trial order, chosen cut, underlyingEdges order included). */
 export function cheapestCuts(graph) {
   const fileOf = new Map(graph.nodes.map((n) => [n.id, n.file]));
-  const structuralEdges = graph.edges.filter((e) => STRUCTURAL.has(e.kind));
-
-  // fileCycles with a set of symbol edges removed — independent reconstruction, trusted primitive.
-  function cyclesWithout(removeKeys) {
-    return fileCycles({ ...graph, edges: graph.edges.filter((e) => !removeKeys.has(edgeKey(e))) });
-  }
 
   return fileCycles(graph).map((cycle) => {
     const inCycle = new Set(cycle);
-    // file->file dependencies WITHIN the cycle, with their underlying symbol edges
-    const fe = new Map(); // "from\x00to" -> [edges]
-    for (const e of structuralEdges) {
+    const key = cycleKey(cycle);
+    // ONE pass over graph.edges in file order: candidates (STRUCTURAL only — severable deps, with
+    // their underlying symbol edges in today's byte order) and the pair-witness table (ALL
+    // CYCLE_KINDS — the subtlety: STRUCTURAL omits `ref` while fileCycles counts it, so witness
+    // counts must NOT reuse STRUCTURAL or a ref-alive pair would be counted dead). Duplicate
+    // (from,to,kind) edges each count on both sides: edgeKey-set removal removes every duplicate
+    // the candidate also collected, so removed-per-pair === candidate.weight exactly.
+    const fe = new Map();          // "from\x00to" -> [structural edges]  (candidates)
+    const pairWitness = new Map(); // "from\x00to" -> CYCLE_KINDS witness count
+    for (const e of graph.edges) {
+      if (!CYCLE_KINDS.has(e.kind)) continue;
       const f = fileOf.get(e.from), t = fileOf.get(e.to);
-      if (f && t && f !== t && inCycle.has(f) && inCycle.has(t)) {
-        const k = `${f}\x00${t}`; if (!fe.has(k)) fe.set(k, []); fe.get(k).push(e);
-      }
+      if (!f || !t || f === t || !inCycle.has(f) || !inCycle.has(t)) continue;
+      const k = `${f}\x00${t}`;
+      pairWitness.set(k, (pairWitness.get(k) || 0) + 1);
+      if (STRUCTURAL.has(e.kind)) { if (!fe.has(k)) fe.set(k, []); fe.get(k).push(e); }
     }
-    const candidates = [...fe.entries()].map(([k, edges]) => { const [fromFile, toFile] = k.split('\x00'); return { fromFile, toFile, weight: edges.length, edges }; })
+    // (fromFile,toFile) is unique per candidate, so this comparator is a total order and the
+    // sorted trial order is Map-insertion-independent — today's exact comparator, kept verbatim.
+    const candidates = [...fe.entries()].map(([k, edges]) => { const [fromFile, toFile] = k.split('\x00'); return { fromFile, toFile, weight: edges.length, edges, pairKey: k }; })
       .sort((a, b) => a.weight - b.weight || (a.fromFile < b.fromFile ? -1 : a.fromFile > b.fromFile ? 1 : 0) || (a.toFile < b.toFile ? -1 : a.toFile > b.toFile ? 1 : 0));
     const meanWeight = candidates.length ? candidates.reduce((s, c) => s + c.weight, 0) / candidates.length : 0;
-    const key = cycleKey(cycle);
-    // pick the cheapest candidate whose removal actually breaks THIS cycle (verified)
+    // trial order = the sorted order, first success wins (as today)
     let chosen = null;
     for (const cand of candidates) {
-      const rm = new Set(cand.edges.map(edgeKey));
-      if (!cyclesWithout(rm).some((c) => cycleKey(c) === key)) { chosen = cand; break; }
+      // surviving pairs = every pair whose witness count survives the cut (only the candidate's
+      // own pair loses witnesses, and it loses exactly candidate.weight of them)
+      const pfiles = new Set(); const pedges = [];
+      for (const [k, count] of pairWitness) {
+        if (count - (k === cand.pairKey ? cand.weight : 0) <= 0) continue;
+        const [f, t] = k.split('\x00');
+        pfiles.add(f); pfiles.add(t);
+        pedges.push({ from: f, to: t, kind: 'call' });
+      }
+      const surviving = fileCycles({ nodes: [...pfiles].map((f) => ({ id: f, file: f })), edges: pedges });
+      if (!surviving.some((c) => cycleKey(c) === key)) { chosen = cand; break; }
     }
     if (chosen) return { files: cycle, meanWeight, verified: true, cut: { fromFile: chosen.fromFile, toFile: chosen.toFile, weight: chosen.weight, underlyingEdges: chosen.edges.map((e) => ({ from: e.from, to: e.to, kind: e.kind })) } };
     return { files: cycle, meanWeight, verified: false, cut: null, note: 'no single file->file edge cut breaks this cycle — needs a multi-edge cut or a restructure (extract a shared module)' };
