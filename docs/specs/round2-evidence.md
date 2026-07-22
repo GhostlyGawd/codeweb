@@ -1174,3 +1174,76 @@ ONE full `npm test` on the review head: **752 tests, 747 pass, 0 fail, 5 skipped
 skips), wall **~75 s** (node duration_ms 75245), `git status --porcelain` **empty**. CI on 98edd32 green
 (`codeweb gate` + `ci` both success, run 29956777910/29956777979 — the 7 legs). Review adds no source or
 test change — only this ledger entry; committed with the trailer. CI on the review head confirmed post-push.
+
+## WS-G
+
+Report & editor — the performance/UX workstream (#36 #38 #37 #35). Build order per the frozen spec:
+#36 (slim embed) → #38 (editor lens BFS) → #37 (draw loop, so #35's sim is measurable without draw
+noise) → #35 (expand-all sim, research risk + receipt re-run — last). File-disjoint from A–F except
+`bench/results/`. Standing invariant re-verified after #36 and #35: `report.html` byte-identical
+across two rebuilds. Corpus: `writeLoadedCorpus("/tmp/cw16k",{files:800})` (17604 nodes / 104143
+edges) → `run.mjs`; the sim numbers below are the node lab (`bench/experiments/report-sim-lab.mjs`,
+spec-sanctioned primary evidence) with a headless-Chromium fixture run validating the schema end-to-end.
+
+### #36 — slim report.html embed — 6fa2afe
+The embed carried four per-node fields (`t3,signature,complexity,maxDepth`) + per-edge `kind` that
+`report-template.html` never reads (grep-verified: node `kind` read at :248/:269/:424/:427, `o.kind`
+is OVERLAP kind, edge `kind` + the four node fields unread). Stripped into FRESH objects (graph never
+mutated → graph.json + sidecars keep every field). Dead `domSummary` (:228) deleted.
+- `stat -c%s report.html` at 16.8k: **14,559,374 → 10,455,685 B (−28.2%)**, ~4.1 MB of
+  signature/complexity/maxDepth/kind. (The spec's ≥40% assumed AST-tier `t3`; the loaded corpus is
+  the regex tier — short fns, no `t3` — so 28.2% is the honest number; `t3` IS stripped when present,
+  AST probe emits `t3` len=10, fixture covers it.) DEVIATION noted: measured 28.2% not ≥40%, corpus-bound.
+- Two independent rebuilds byte-IDENTICAL (10,455,685 B). Test parses the `graph-data` payload: no
+  embedded node has the four keys, no embedded edge has `kind`, node `kind` survives, graph.json keeps all.
+
+### #38 — lens pointer-queue BFS + persistent memo + activation — 666347c
+`blastOf` used `queue.shift()` (O(frontier²)) + `[...callIn,...inheritIn]` per visit; rewritten to
+`impactCountOf`'s shape (index-pointer queue, direct Set iteration) — numbers IDENTICAL (hub blast
+17600 = 17600). `buildLensIndex(graph, prevIndex)` carries memo entries ∉ forward-closure of the
+call/inherit edge delta's `to` seeds; `refresh()` stopped clearing the cache; `activationEvents`
+`onStartupFinished` → `workspaceContains:**/.codeweb/graph.json` + onCommand fallbacks.
+- `lens-bench.mjs /tmp/cw16k-ws/graph.json`: worst file cold **492ms**, warm **0.23ms**; per-file COLD
+  p50 **0.34ms**, 81% of files <40ms. Hub files (mean blast 2262, MAX 17600 = whole graph) 100–460ms
+  cold — the synthetic corpus is pathologically connected; per-node BFS is O(Σblast). DEVIATION: <40ms
+  holds for typical files + always warm, not the densest hub files at 16.8k (frozen spec chose
+  dependency-free per-node BFS over the SCC blastAll). old shift() vs new on the max hub walk: 29.5→23.3ms.
+- Property test: 250 randomized edge+NODE mutations → carried === cold for every id; counting test:
+  untouched id keeps poisoned sentinel, affected dropped. Scale-doubling budget 2N/N ~2× (linear).
+
+### #37 — draw loop — 1597be8
+`cvColors()` hoisted to one call/draw (was one per labeled node, ≤16.8k/draw). Edges batch into ≤432
+exact style buckets `state|pair|min(weight,72)` — 50k-edge property test: bucket style === old
+per-edge style BYTE-EXACT; one `beginPath`+`stroke`/bucket (was 104143/draw). Labels: screen-space
+gate `nd.r*cam.k>7.5` + per-frame cap 300, priority-ranked (bubbles>hl>screen-r>id), position-
+independent (proven: moving all x/y → same pick). `refreshHits` stores hitIds/hitDomains, gDraw
+reuses (no per-frame AN rescan — source-guarded). `drawOnce()` probe + root-sandbox launch fix.
+- Fixture browser run: `drawOnceMs 0.9`, expandAll green, 0 pageErrors. report.html byte-identical ×2.
+
+### #35 — expand-all sim — 18423d8 (T-35.1 lab) + f845dc3 — FALLBACK
+Four-part fix IN ORDER: far-field monopole (per-cell mass + COM, non-adjacent push, 2×CUT latch at
+C>4096) + golden-spiral hatch (SP=38, K_FAR=0.8, lands WITH the monopole) + chunkable `gStepChunk`
+(cursor on sim, forces across slices, ONE integrate+decay/step, bitwise-equal budget=∞ vs 2ms —
+pinned) + reduced-motion discrete stills (`_settleDraws`, `fpsProbe`). T-35.6: `expandAll` rewritten
+from the unstable 10-frame sample to run-to-settle `{settledMsPerFrame, maxSingleStepMs, totalSettleMs,
+steps}`; `report-scale.mjs` gates both; `report-scale.json` rewritten (fixture browser + 16.8k lab
+rows, honest verdict, "GREEN no fix needed" retired); bench-test pins + report-at-scale.md thresholds
+updated. `scale-typescript.json:35` LEFT to WS-E (no TS checkout — NOTE only, per spec ground-truth).
+
+**PRIMARY-vs-FALLBACK: FALLBACK, honest floor.** Sim lab settledMsPerFrame / maxSingleStepMs (8ms budget):
+- **1k** (1000n): **3.65ms** / 40.4ms — primary MET (≤50)
+- **5k** (5000n): **45.6ms** / 20.3ms — primary MET (≤50)
+- **16.8k** (17604n): **269.45ms** / **93.06ms** — settled is the documented FLOOR (>50; the far field
+  is O(n·cells), ≤50ms needs a hierarchical Barnes-Hut tree, out of frozen scope); maxSingleStepMs
+  93ms ≤ 250 no-freeze floor MET (was 774ms as one unsliced task, or ~1.2s pre-#35 explosion).
+Baseline (hatch seed) reproduced: 250ms/step, first 1225ms, 1.5M-px span → monopole+spiral compacts to
+229k px, no explosion. fps: 8ms frame budget ⇒ sustained ~60fps between slices (browser fpsProbe added;
+16.8k browser probe hung on the 10MB load + 15s expandAll — flaky at scale; fixture run green). Layout
+bitwise-deterministic (seeded, no Math.random, insertion-order). NOT faked, NOT wedged.
+
+### Suite + determinism
+`report.html` byte-determinism (build-report.test.mjs:55) green after #36 AND #35 (re-verified: two
+16.8k rebuilds identical, 10,468,305 B). Sim determinism pinned in report-sim.test.mjs. ONE full
+`npm test`: **769 tests, 764 pass, 0 fail, 5 skipped** (pre-existing env skips; report-scale-bench L1/L2
+ran locally as playwright was `npm i --no-save`'d — they SKIP in CI, no NEW skips), wall **77s**,
+`git status --porcelain` empty. Shas: #36 6fa2afe · #38 666347c · #37 1597be8 · #35 18423d8+f845dc3.
