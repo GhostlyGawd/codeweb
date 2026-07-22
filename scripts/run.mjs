@@ -12,7 +12,7 @@
 // Read-only over the target; never executes target code.
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, existsSync, readFileSync } from 'node:fs';
+import { mkdirSync, existsSync, readFileSync, statSync } from 'node:fs';
 import { atomicWrite, SCAN_CACHE_NAME, parseArgs } from './lib/cli.mjs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -88,22 +88,42 @@ run('extract', S('scripts/extract-symbols.mjs'), [opts.src, ...targetArg, ...(op
 // (fragment bytes, CODEWEB_* levers, pipeline version). When that key matches the previous run and
 // every output still exists, reuse the outputs — wall-time changes, never a byte. --full forces.
 const STAGE_OUTPUTS = ['graph.json', 'overlap.md', 'optimize.md', 'report.html', 'report.md'];
+// Round 2, finding #19 (T-19.3): SOURCE_DATE_EPOCH joins the lever string when set — the stage
+// outputs bake it in (graph.json's generatedAt rides the hashed bytes), so a changed epoch must
+// never reuse old-epoch bytes, which the per-output hashes below would then fossilize.
 const levers = Object.keys(process.env)
   .filter((k) => k.startsWith('CODEWEB_') && k !== 'CODEWEB_WS').sort()
-  .map((k) => `${k}=${process.env[k]}`).join(';');
+  .map((k) => `${k}=${process.env[k]}`).join(';')
+  + (process.env.SOURCE_DATE_EPOCH !== undefined ? `;SOURCE_DATE_EPOCH=${process.env.SOURCE_DATE_EPOCH}` : '');
 const memoKey = createHash('sha1')
   .update(`v${MEMO_VERSION}|${levers}|`).update(readFileSync(join(ws, 'fragment.json')))
   .digest('hex');
 const memoPath = join(ws, '.stages.json');
-let prevKey = null;
-try { prevKey = JSON.parse(readFileSync(memoPath, 'utf8')).key; } catch { /* absent/corrupt -> compute */ }
-// Reuse requires the outputs to not just EXIST but be READABLE (finding 3): a writer killed
-// mid-write used to leave a truncated graph.json that this memo then preserved forever — every
-// re-map said "stages reused" over corruption. Parsing the graph costs ~tens of ms, far below the
-// recompute it guards; artifact writes are rename-atomic now, so this is the belt to that brace.
-const graphParses = (p) => { try { JSON.parse(readFileSync(p, 'utf8')); return true; } catch { return false; } };
-const reusable = !opts.full && prevKey === memoKey && STAGE_OUTPUTS.every((f) => existsSync(join(ws, f)))
-  && graphParses(join(ws, 'graph.json'));
+const sha1hex = (buf) => createHash('sha1').update(buf).digest('hex');
+// Round 2, finding #19 (T-19.3): the memo records {s: byteLen, h: sha1} per output, hashed from
+// each output's FINAL bytes (post-rename) just before the memo write. Reuse then requires the key
+// match AND every output to exist with matching size (checked FIRST — truncation never hashes)
+// and sha1. This replaces graphParses(): the old belt full-parsed graph.json (~167 ms @13.9 MB)
+// yet caught only unparseable corruption of that one file — the other four outputs had no belt at
+// all, and a parseable byte-tamper sailed through. Any miss -> recompute all (all-or-nothing, as
+// before); a memo without `outputs` (old shape) or corrupt -> recompute once, upgraded on write; a
+// crash between an output rename and the memo write leaves mismatched hashes -> recompute.
+let prevMemo = null;
+try { prevMemo = JSON.parse(readFileSync(memoPath, 'utf8')); } catch { /* absent/corrupt -> compute */ }
+const outputsIntact = () => {
+  if (!prevMemo || !prevMemo.outputs) return false; // old-shape memo: recompute, one run upgrades
+  for (const f of STAGE_OUTPUTS) {
+    const rec = prevMemo.outputs[f];
+    if (!rec) return false;
+    const p = join(ws, f);
+    let st; try { st = statSync(p); } catch { return false; }      // missing
+    if (st.size !== rec.s) return false;                           // truncated/resized: size first, never hash
+    try { if (sha1hex(readFileSync(p)) !== rec.h) return false; }  // tampered — parseable or not
+    catch { return false; }
+  }
+  return true;
+};
+const reusable = !opts.full && prevMemo?.key === memoKey && outputsIntact();
 
 if (reusable) {
   console.error('\n[run] stages reused (fragment unchanged) — skipping downstream recompute; --full forces');
@@ -112,7 +132,11 @@ if (reusable) {
   run('overlap', S('scripts/overlap.mjs'), [], true);
   run('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--out', join(ws, 'optimize.md')], false);
   run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json'), ...(opts.open ? ['--open'] : [])], false);
-  try { atomicWrite(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString() }) + '\n'); } catch { /* memo is best-effort */ }
+  try {
+    const outputs = {};
+    for (const f of STAGE_OUTPUTS) { const b = readFileSync(join(ws, f)); outputs[f] = { s: b.length, h: sha1hex(b) }; }
+    atomicWrite(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString(), outputs }) + '\n');
+  } catch { /* memo is best-effort */ }
 }
 
 if (opts.coverage) run('coverage', S('scripts/coverage.mjs'), [join(ws, 'graph.json'), resolve(opts.coverage)], false); // #13

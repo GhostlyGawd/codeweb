@@ -15,7 +15,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runNode, runNodeAsync, script, tmpDir, cleanup, writeTree, readJSON } from './helpers.mjs';
-import { writeFileSync, rmSync } from 'node:fs';
+import { writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { prng, int, pick } from './_proptest.mjs';
 
@@ -145,6 +145,10 @@ test('IE-EQUIVALENCE: warm incremental == cold full, for random mutation sequenc
         const cold = await coldFullAsync(dir, root, `${trial}_${s}`);
         assert.deepEqual(sortedNodes(warm), sortedNodes(cold), `trial ${trial} step ${s} (${op}): nodes diverge`);
         assert.deepEqual(sortedEdges(warm), sortedEdges(cold), `trial ${trial} step ${s} (${op}): edges diverge`);
+        // #19 proof (and #17's shared oracle): warm and cold `--out` files are byte-equal — the
+        // sorted-set compares above stay as diagnostics, the buffers are the gate.
+        assert.ok(readFileSync(join(dir, `warm${s}.json`)).equals(readFileSync(join(dir, `cold${trial}_${s}.json`))),
+          `trial ${trial} step ${s} (${op}): warm fragment bytes diverge from cold full`);
       }
     } finally { cleanup(dir); }
   })));

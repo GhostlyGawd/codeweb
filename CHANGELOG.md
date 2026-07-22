@@ -59,6 +59,26 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **The warm no-change floor sheds its four avoidable terms.** (a) The scan cache no longer
+  stores `syms` (symbols sat in it three times over) and interns per-file edges as an id table +
+  `[from,to,kind]` triples instead of verbose objects — the edge term shrank 57 %, the whole
+  cache 32–38 % depending on engine tier (measured 18.9 → 12.8 MB at the 16.8k-symbol bench
+  corpus; the spec's ≥ 40 % estimate assumed `syms` was a full third of the symbol bytes — the
+  measured decomposition shows 6 %, with `nodes` dominating). A content-hash hit now replays the
+  FULL cached product set (nodes/ranges/dyn/ast/typed intents, entry carried forward with a
+  refreshed stamp) instead of rebuilding nodes from cached syms, gated on rulesSig like the stamp
+  tier. Cache format change ⇒ SCANNER_VERSION 15 → 16 (the WS-B/C/D ladder); any older cache is
+  discarded for one cold rebuild — pinned by a planted-poison migration test proving byte-equal
+  output to no-cache. (b) `--out` fragments are written compact (22.7 → 14.2 MB at 16.8k; every
+  reader JSON.parses) and an unchanged fragment is never rewritten — size + sha1 equality skips
+  the write and the banner says `(unchanged)`. (c) `run.mjs`'s stage memo now records
+  `{size, sha1}` per output and validates all five before reuse (size first, so truncation never
+  hashes) — replacing the old graph.json-only full-parse belt (330 ms at 13.9 MB) with a 36 ms
+  read-back that also catches parseable byte-tampering and guards the four outputs that had no
+  belt at all (new S5/S6 scenarios); `SOURCE_DATE_EPOCH` joins the memo key so a changed epoch is
+  never served stale bytes. Warm no-change pipeline at the 16.8k corpus: 825 → 677 ms min-of-3.
+  IE-EQUIVALENCE now additionally asserts warm-vs-cold fragment BYTE equality at every mutation
+  step — the shared oracle the name-delta work (#17) reuses. (round 2, finding #19)
 - **Per-file edge derivation is no longer quadratic in symbols-per-file.** `enclosing()` linearly
   scanned ALL of a file's ranges on every call-site match (profiled: `addEdge` 50.8 % self on an
   8,000-function file — the monorepo hub-file shape), and the method-owner attribution re-scanned

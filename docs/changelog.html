@@ -109,6 +109,28 @@
 <p>  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)</p>
 <h3 class="cl-grp">Performance</h3>
 <ul>
+<li><strong>The warm no-change floor sheds its four avoidable terms.</strong> (a) The scan cache no longer</li>
+</ul>
+<p>  stores <code>syms</code> (symbols sat in it three times over) and interns per-file edges as an id table +</p>
+<p>  <code>[from,to,kind]</code> triples instead of verbose objects — the edge term shrank 57 %, the whole</p>
+<p>  cache 32–38 % depending on engine tier (measured 18.9 → 12.8 MB at the 16.8k-symbol bench</p>
+<p>  corpus; the spec's ≥ 40 % estimate assumed <code>syms</code> was a full third of the symbol bytes — the</p>
+<p>  measured decomposition shows 6 %, with <code>nodes</code> dominating). A content-hash hit now replays the</p>
+<p>  FULL cached product set (nodes/ranges/dyn/ast/typed intents, entry carried forward with a</p>
+<p>  refreshed stamp) instead of rebuilding nodes from cached syms, gated on rulesSig like the stamp</p>
+<p>  tier. Cache format change ⇒ SCANNER_VERSION 15 → 16 (the WS-B/C/D ladder); any older cache is</p>
+<p>  discarded for one cold rebuild — pinned by a planted-poison migration test proving byte-equal</p>
+<p>  output to no-cache. (b) <code>--out</code> fragments are written compact (22.7 → 14.2 MB at 16.8k; every</p>
+<p>  reader JSON.parses) and an unchanged fragment is never rewritten — size + sha1 equality skips</p>
+<p>  the write and the banner says <code>(unchanged)</code>. (c) <code>run.mjs</code>'s stage memo now records</p>
+<p>  <code>{size, sha1}</code> per output and validates all five before reuse (size first, so truncation never</p>
+<p>  hashes) — replacing the old graph.json-only full-parse belt (330 ms at 13.9 MB) with a 36 ms</p>
+<p>  read-back that also catches parseable byte-tampering and guards the four outputs that had no</p>
+<p>  belt at all (new S5/S6 scenarios); <code>SOURCE_DATE_EPOCH</code> joins the memo key so a changed epoch is</p>
+<p>  never served stale bytes. Warm no-change pipeline at the 16.8k corpus: 825 → 677 ms min-of-3.</p>
+<p>  IE-EQUIVALENCE now additionally asserts warm-vs-cold fragment BYTE equality at every mutation</p>
+<p>  step — the shared oracle the name-delta work (#17) reuses. (round 2, finding #19)</p>
+<ul>
 <li><strong>Per-file edge derivation is no longer quadratic in symbols-per-file.</strong> <code>enclosing()</code> linearly</li>
 </ul>
 <p>  scanned ALL of a file's ranges on every call-site match (profiled: <code>addEdge</code> 50.8 % self on an</p>

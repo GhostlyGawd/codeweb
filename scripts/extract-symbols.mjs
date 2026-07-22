@@ -46,12 +46,13 @@ import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; //
 // v13: maskJs lexes regex literals (perf-quality finding 1) — extents/edges cached by v12 are stale.
 // v14: round-2 truth fixes (#8 template frames, #9 spread/IIFE, #12 accessor ids, #13 Ruby
 // heredoc/PHP #, #14 Python f-strings, #15 crash belts) change cached syms/ast.tsr/edges.
-// Ladder (orchestrator-reconciled, monotonic by build order): WS-B took 13 -> 14; WS-C (this)
-// takes 14 -> 15; WS-D (#17/#19) takes 15 -> 16.
-const SCANNER_VERSION = 15; // v15: round-2 resolution fixes (#11 NodeNext ext remaps + .mts/.cts,
-// #10 decl-line ref skip, param shadow, short-name guard, ref role gate) change cached edges and
-// the per-file `short` counter — a v14 cache would replay pre-fix rex tables, bindings, and edges
-// from the stamp tier indefinitely.
+// Ladder (orchestrator-reconciled, monotonic by build order): WS-B took 13 -> 14; WS-C took
+// 14 -> 15; WS-D (this) takes 15 -> 16.
+const SCANNER_VERSION = 16; // v16: round-2 cache-format change (#19: edge tuples interned per
+// entry as ids+[from,to,kind] triples, `syms` dropped — nodes/ranges are the one stored copy)
+// plus #17's additive name-delta fields (cand/bindCand/bindDeps/pyrex, cache-top pkgSig). A v15
+// cache is discarded at load (one cold rebuild, never a crash) — the read gate below only
+// accepts an exact version match.
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
 // label separator, so the last ':' splits them.
@@ -287,6 +288,18 @@ const fileSig = sha1(files.map(rel).sort().join('\n'));
 let oldCache = null;
 if (opts.cache) { try { const c = JSON.parse(readFileSync(opts.cache, 'utf8')); if (c && c.version === SCANNER_VERSION && c.engine === engineMode) oldCache = c; } catch { /* corrupt/absent -> cold */ } }
 const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, rulesSig, fileSig, files: {} } : null;
+// finding #19 (T-19.1): per-entry edge interning — edges were 46 % of cache bytes as verbose
+// objects. Stored form: `ids` (distinct endpoint ids, first-use order) + `edges` as
+// [fromIdx, toIdx, kindIdx] triples, kindIdx into the CLOSED kind set the derive emits (weight is
+// always 1). Encoded once at cache-write time from the in-memory object edges; replay decodes
+// FRESH objects per run (cached state must never alias the live fragment).
+const EDGE_KINDS = ['call', 'ref', 'inherit', 'test'];
+const encodeEntryEdges = (edgeObjs) => {
+  const ids = []; const idIdx = new Map();
+  const ix = (v) => { let k = idIdx.get(v); if (k === undefined) { k = ids.length; ids.push(v); idIdx.set(v, k); } return k; };
+  return { ids, edges: edgeObjs.map((e) => [ix(e.from), ix(e.to), EDGE_KINDS.indexOf(e.kind)]) };
+};
+const decodeEntryEdges = (entry) => entry.edges.map(([f, t, k]) => ({ from: entry.ids[f], to: entry.ids[t], kind: EDGE_KINDS[k], weight: 1 }));
 // finding 10: the STAMP TIER. A file whose mtime+size match its cache entry reuses every cached
 // per-file product (nodes, ranges, dynamic flag, re-export table, bindings, edges) without being
 // READ — warm extract drops from O(repo bytes) to O(changed bytes + one stat sweep). It trusts
@@ -330,7 +343,7 @@ for (const f of files) {
 
   // ---- finding 10: stamp tier — one stat, zero reads for an unchanged file ----
   const oldHit = stampTier ? oldCache.files[r] : null;
-  if (oldHit && oldHit.stamp && oldHit.hash && oldHit.nodes && oldHit.ranges && oldHit.syms
+  if (oldHit && oldHit.stamp && oldHit.hash && oldHit.nodes && oldHit.ranges // #19: `syms` dropped from the product set
       && (!needsAst || (oldHit.ast && (!isJsTs || oldHit.cx)))) {
     let stq = null; try { stq = statSync(f); } catch { stq = null; }
     if (stq && stq.size === oldHit.stamp.s && Math.round(stq.mtimeMs) === oldHit.stamp.m) {
@@ -383,9 +396,36 @@ for (const f of files) {
     const h = contentHash;
     const hit = oldCache && oldCache.files[r];
     const hitOk = hit && hit.hash === h && (!needsAst || (hit.ast && (!isJsTs || hit.cx)));
-    if (hitOk) { syms = hit.syms; if (needsAst) astHit = hit; }
-    else syms = scanFile(f, text); // cache miss -> re-scan
-    newCache.files[r] = { hash: h, syms };                          // prune deleted files (only current)
+    // finding #19 (T-19.1): `syms` are no longer stored (symbols sat in the cache 3x as
+    // syms+nodes+ranges). A content-hash hit therefore replays the FULL stamp-tier product set —
+    // nodes/ranges/dyn/ast dispatch/typed intents, entry carried forward wholesale — with the
+    // text already read and the stamp refreshed. Same validity gate as the stamp tier: rulesSig
+    // unchanged (role verdicts are baked into cached nodes) plus the ast/cx conjuncts above;
+    // anything less falls through to a fresh scanFile (ast products, which are role-free, still
+    // reuse via astHit when content-valid).
+    if (hitOk && hit.nodes && hit.ranges && oldCache.rulesSig === rulesSig) {
+      for (const nd of hit.nodes) nodes.push(nd); // this-run-private objects (cache JSON.parse'd fresh per run)
+      fileSyms.set(f, { text, ranges: hit.ranges });
+      if (needsAst && isJsTs) {
+        const tsr = hit.ast.tsr;
+        if (tsr && tsr.dispatch && tsr.dispatch.length) dispatchByFile.set(f, tsr.dispatch);
+      }
+      if (needsAst && langKey) {
+        typedLangsSeen.add(langKey);
+        const d = hit.ast.d;
+        if (d) {
+          if (d.thisCalls.length) dispatchByFile.set(f, (dispatchByFile.get(f) || []).concat(d.thisCalls));
+          if (d.typedIntents.length) typedIntentsByFile.set(r, d.typedIntents);
+        }
+      }
+      newCache.files[r] = hit; // carry every product (rex/bind/def/edges included) forward
+      hit.stamp = st ? { s: st.size, m: Math.round(st.mtimeMs) } : null; // refreshed stamp
+      hit.dyn = isDyn ? 1 : 0; // identical by construction (same text)
+      continue;
+    }
+    if (hitOk) astHit = hit;
+    syms = scanFile(f, text); // cache miss -> re-scan
+    newCache.files[r] = { hash: h };                                // prune deleted files (only current)
     if (astHit) { newCache.files[r].ast = astHit.ast; newCache.files[r].cx = astHit.cx; }
   } else {
     syms = scanFile(f, text);
@@ -978,8 +1018,8 @@ for (const f of edgeFiles) {
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
   const prev = reuseEdges && oldCache.files[r];
   let result;
-  if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges) {
-    result = { edges: prev.edges, hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0, short: prev.short || 0 }; // reuse
+  if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges && prev.ids) {
+    result = { edges: decodeEntryEdges(prev), hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0, short: prev.short || 0 }; // reuse (#19: decode fresh objects)
   } else {
     // finding 10: text + mask only on the derive path — an edge-cache hit never touches the file
     const text = textOf(f, rec);
@@ -1114,6 +1154,9 @@ if (newCache && !astLoadFailed && cacheDirty) {
     // (the live fragment keeps its pub flags).
     for (const e of Object.values(newCache.files)) {
       if (e.nodes) e.nodes = e.nodes.map((n) => { if (n.pub === undefined) return n; const { pub, ...rest } = n; return rest; });
+      // finding #19 (T-19.1): edges are interned at write time — every entry holds decoded object
+      // edges in memory (the edge loop (re)assigns them each run), encoded here in one pass.
+      if (e.edges) { const enc = encodeEntryEdges(e.edges); e.ids = enc.ids; e.edges = enc.edges; }
     }
     atomicWrite(resolve(opts.cache), JSON.stringify(newCache));
   } catch { /* cache is best-effort */ }
@@ -1130,5 +1173,20 @@ const dispatchNote = astAvailable
 const anyAstLoaded = !!_tsEngineState || Object.values(langEngines).some(Boolean);
 const astState = anyAstLoaded ? 'loaded' : (!astAvailable || astLoadFailed) ? 'off' : 'idle';
 const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges (${shortNameDropped} short-name)${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
-if (opts.out) { atomicWrite(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
-else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }
+// finding #19 (T-19.2): `--out` writes COMPACT JSON (22.7 -> 13.5 MB @16.8k; every fragment
+// reader JSON.parses, the hook already receives compact stdout, and run.mjs's memoKey hashes raw
+// bytes — so the format change costs exactly one downstream-stage recompute on the first
+// post-upgrade run, then stabilizes), and an unchanged fragment is never rewritten: out-file
+// exists ∧ sizes equal ∧ sha1 old === sha1 new ⇔ identical bytes (the determinism invariant) ->
+// skip the write, banner gains `(unchanged)`. Stdout path unchanged.
+if (opts.out) {
+  const outPath = resolve(opts.out);
+  const json = JSON.stringify(fragment);
+  let unchanged = false;
+  try {
+    const prev = statSync(outPath);
+    if (prev.size === Buffer.byteLength(json)) unchanged = sha1(readFileSync(outPath, 'utf8')) === sha1(json);
+  } catch { /* absent/unreadable -> write */ }
+  if (!unchanged) atomicWrite(outPath, json);
+  console.error(banner + (unchanged ? ' (unchanged)' : '') + ` -> ${opts.out}`);
+} else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }
