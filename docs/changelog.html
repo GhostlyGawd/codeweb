@@ -676,6 +676,103 @@
 <p>  <code>scripts/release.mjs</code> exits 1 when its own consistency audit fails, BEFORE printing the gated</p>
 <p>  git commands — release prep can no longer end in "consistency: N problem(s)" followed by the</p>
 <p>  exact commands to ship anyway. (perf-quality round 2, finding #7)</p>
+<ul>
+<li><strong>One huge single-line string can no longer kill the entire extract.</strong> The string regexes in</li>
+</ul>
+<p>  <code>complexity.mjs</code>'s strip, <code>maskRuby</code>'s RB_DQ/RB_SQ, and ts-engine's <code>stmtHash</code> used the</p>
+<p>  alternation form V8 recurses per character — a &gt;=8.4 MB inlined string (base64 asset, dataset)</p>
+<p>  threw an uncaught RangeError from <code>cyclomatic</code> in BOTH tiers, taking the whole map, post-edit</p>
+<p>  hook, and MCP refresh with it. All three sites now use the unrolled-loop form, preserving each</p>
+<p>  site's escape atom (<code>\\.</code> vs <code>\\[^]</code> — they differ on backslash-newline in templates; a seeded</p>
+<p>  5,000-case per-site equivalence property pins each), and <code>cyclomatic</code>/<code>nestingDepth</code> are belted:</p>
+<p>  any internal throw degrades that node to 1/0 instead of killing the run — combined with</p>
+<p>  ts-engine's existing null-on-throw per-file fallback, no single file can kill an extract in</p>
+<p>  either tier. <code>SCANNER_VERSION</code> 13 -&gt; 14 so warm caches can't replay pre-fix products.</p>
+<p>  (perf-quality round 2, finding #15)</p>
+<ul>
+<li><strong>The JS masker learned nested templates.</strong> <code>maskJs</code>'s two scalars (inTemplate, exprDepth) could</li>
+</ul>
+<p>  not represent a template inside <code>${}</code> on ordinary modern JS: nested-template TEXT stayed live</p>
+<p>  (`<code> </code>Usage: ${xs.map((n) =&gt; <code>fabricateMe(${n})</code>)}<code> </code><code> fabricated a call edge), a </code>}` inside that</p>
+<p>  nested text closed the interpolation and INVERTED template state (edges lost, extents run to</p>
+<p>  EOF), an escaped `<code> \</code> `<code> did the same (no </code>\<code> handling in text), and </code>${}`-interior strings were</p>
+<p>  kept verbatim even in blank-values mode (string content fabricated edges — deadcode's safe tier</p>
+<p>  corrupted again, one idiom over from round 1's regex-literal fix). Template state is now a stack</p>
+<p>  of frames (nested backticks push; text <code>\</code> consumes escapes; expr strings route through the</p>
+<p>  keepValues gate, so codemod's two-view diff classifies a name inside <code>${'…'}</code> as inside-a-value),</p>
+<p>  every delimiter backtick blanks in default mode, and default-mode <code>maskJs</code> is now IDEMPOTENT over</p>
+<p>  the corpus — pinned with per-line length preservation by the new shared property suite</p>
+<p>  (<code>tests/masking-properties.test.mjs</code>, corpus-scoped with the value-then-division counterexample</p>
+<p>  documented). Five repro fixtures run under both engine tiers in</p>
+<p>  <code>tests/maskjs-nested-templates.test.mjs</code>. (perf-quality round 2, finding #8)</p>
+<ul>
+<li><strong>Spread calls edge; IIFE-initialized consts are values, not functions.</strong> The two mis-lexings</li>
+</ul>
+<p>  that made BOTH of the self-map's deadcode "safe to delete" verdicts false: (a) <code>...metrics(</code> was</p>
+<p>  routed into the member-call branch by the <code>.</code> before the match, where the backward identifier</p>
+<p>  match can never succeed on dots — the call edge was silently DROPPED and <code>trend.mjs:metrics</code></p>
+<p>  showed 0 callers; a <code>..</code>-preceded match now falls through to <code>addEdge</code> (<code>a?.b(</code> and <code>...obj.fn(</code></p>
+<p>  verified unchanged). (b) The const-arrow rule matched <code>const PERM_SEEDS = (() =&gt; {…})()</code> — an</p>
+<p>  IIFE-initialized VALUE became a <code>function</code> node invisible to callRe/refRe, a guaranteed deadcode</p>
+<p>  false positive; <code>=(?!\s*\(\()</code> now rejects it (the accepted loss — a genuinely function-valued,</p>
+<p>  non-invoked <code>const g = ((a) =&gt; a)</code> — is pinned in the test so re-widening is a conscious flip).</p>
+<p>  Dogfood re-run: <code>trend.mjs:metrics</code> has 2 call edges in, <code>PERM_SEEDS</code> is no node, and the</p>
+<p>  self-map deadcode safe tier is EMPTY (was: exactly these two false positives — campaign would</p>
+<p>  have emitted DELETEs that break trend and minhash at runtime). The self-map regression is now a</p>
+<p>  test (<code>tests/spread-iife-selfmap.test.mjs</code> extracts the real trend.mjs + minhash.mjs texts).</p>
+<p>  (perf-quality round 2, finding #9)</p>
+<ul>
+<li>**Accessors both exist, declaration lines fabricate nothing, and the regex tier sees modern TS</li>
+</ul>
+<p>  methods.** Three related truths: (a) the AST tier's method dedupe silently DROPPED the second</p>
+<p>  body with a colliding id — always a real get/set pair or static/instance same-name (TS overload</p>
+<p>  signatures are never framed); the second now suffixes <code>@</code> + its 1-based start line — the scheme</p>
+<p>  the regex tier's file-level disambiguator already used, so both tiers emit byte-identical ids</p>
+<p>  (getter keeps the bare id: no query/fingerprint churn) — and the cross-tier defensive dedupe</p>
+<p>  suffixes instead of dropping. (b) The self-definition guard covered only a node's own start</p>
+<p>  line, so setter/impl declaration lines were scanned as calls with the CLASS as scope —</p>
+<p>  fabricated <code>Widget -&gt; Widget.value</code> phantom callers hid every accessor/overloaded member from</p>
+<p>  deadcode; a per-file declStarts map now skips any same-named declaration line, and body-less</p>
+<p>  overload stubs (which have no range) are covered by a class-enclosed stub-line guard over both</p>
+<p>  callRe and refRe (class-gated — narrowed from the audit's unconditional line guard, which would</p>
+<p>  have suppressed 112 ordinary <code>finish(code);</code>-shaped statement lines in this repo alone).</p>
+<p>  (c) The regex method matcher stacks modifiers, admits default params (<code>[^;]*</code> interior — not</p>
+<p>  <code>[^;{}]*</code>, which would regress destructured params) and <code>: Type</code> return annotations —</p>
+<p>  <code>get value(): number {</code>, <code>compute(n: any): number {</code>, <code>render(x = 1) {</code> were all invisible, their</p>
+<p>  bodies' calls re-attributed to the class. Self-map after: zero class-&gt;own-member edges.</p>
+<p>  <code>tests/accessor-overload-truth.test.mjs</code> runs the fixture in BOTH tiers and asserts identical id</p>
+<p>  sets. (perf-quality round 2, finding #12)</p>
+<ul>
+<li><strong>Ruby heredocs and PHP <code>#</code> comments stop fabricating symbols and edges.</strong> Ruby's symbol scan ran</li>
+</ul>
+<p>  on RAW text and <code>maskRuby</code> had no heredoc state, so a <code>&lt;&lt;~SQL</code> body containing <code>helper(1)</code> and</p>
+<p>  <code>def phantom_method</code> produced a phantom node and a fabricated module-&gt;helper call edge.</p>
+<p>  <code>maskRuby</code> is now a stateful line loop with a FIFO queue of pending heredoc tags: body and</p>
+<p>  terminator lines mask to empty lines (nothing inside a body can queue, scan, or edge), the</p>
+<p>  opener TOKEN masks to the literal <code>''</code> so <code>sql = &lt;&lt;~SQL.strip</code> stays live code, <code>a &lt;&lt; b</code> shift</p>
+<p>  and <code>&lt;&lt;=</code> never match, stacked <code>f(&lt;&lt;~A, &lt;&lt;~B)</code> queues in order, and <code>~</code>/<code>-</code> tags terminate by</p>
+<p>  trimmed equality while plain tags need column 0 — and the Ruby scan now consumes <code>masked('rb')</code></p>
+<p>  (the edge scan already did). PHP routes through <code>maskJs</code>, which now takes <code>{hashComment:true}</code></p>
+<p>  (.php only — JS private fields unaffected): <code># legacy note: helper(1)</code> no longer fabricates a</p>
+<p>  module-&gt;helper call. Accepted limits documented in the mask header: heredoc-interior <code>#{…}</code></p>
+<p>  interpolation blanks with the body (the pre-existing Ruby interpolation gap), and quoted-tag</p>
+<p>  <code>&lt;&lt;~"TAG"</code> openers are eaten by the string replaces first (backtick-quoted tags still open).</p>
+<p>  (perf-quality round 2, finding #13)</p>
+<ul>
+<li><strong>Python f-strings keep their <code>{…}</code> code.</strong> <code>maskPy</code> treated f-strings as plain strings, so</li>
+</ul>
+<p>  <code>return f"total={compute(x)}"</code> dropped the <code>report -&gt; compute</code> edge — functions invoked only</p>
+<p>  from f-strings (logging/formatting, idiomatic Python) showed 0 callers, poisoning caller counts</p>
+<p>  and blast radii; the maskPy limit list didn't even mention it. A quote preceded by a 1-3 char</p>
+<p>  <code>[rRbBuUfF]</code> run containing <code>f</code>/<code>F</code> (covers <code>f</code>, <code>rf</code>, <code>fr</code>, <code>Rf</code>, …) is now an f-string: <code>{…}</code></p>
+<p>  interpolation code is kept verbatim in both modes (the exact analogue of the JS <code>${}</code> rule) with</p>
+<p>  a brace-depth counter for nested <code>{}</code> (dicts, <code>f"{x:{w}}"</code> format specs), <code>&#123;&#123;</code>/<code>}}</code> blank as</p>
+<p>  text, triple-quoted f-strings carry expr state across lines, and a quoted run INSIDE the expr</p>
+<p>  blanks through the keepValues gate as one slice — NOT verbatim, which would fabricate edges from</p>
+<p>  string content (<code>f"{'compute(1)'}"</code>, the #8 n4 analogue — pinned by the decoy2 fixture) and</p>
+<p>  break the shared idempotence property. keepValues output stays byte-identical to before</p>
+<p>  (differentially verified). Limits documented in the header (nested same-quote f-strings are</p>
+<p>  best-effort). (perf-quality round 2, finding #14)</p>
 <h2 class="cl-ver">[0.9.0] - 2026-07-19</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
