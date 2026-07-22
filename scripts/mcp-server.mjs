@@ -592,8 +592,34 @@ function handle(line) {
   if (!s) return;
   let msg;
   try { msg = JSON.parse(s); } catch { return fail(null, -32700, 'Parse error'); }
+  // #34 (T-34.3): a JSON-RPC batch array — MINIMAL per-member fan-out. Each member is processed
+  // exactly as if it had arrived on its own line; responses are emitted as individual NDJSON lines
+  // in settle order, NOT collected into a response array (a documented deviation — a collector would
+  // have to thread through a dozen async settle sites, and a cancel-suppressed member gets NO response
+  // and would hold the array open forever). An EMPTY array is the JSON-RPC-mandated Invalid Request.
+  if (Array.isArray(msg)) {
+    if (msg.length === 0) return fail(null, -32600, 'Invalid Request');
+    for (const m of msg) handleMessage(m);
+    return;
+  }
+  handleMessage(msg);
+}
+
+function handleMessage(msg) {
+  // #34 (T-34.2): non-object frames (number/string/bool/null, and a nested array via fan-out) are
+  // Invalid Request, not a silent drop.
+  if (msg === null || typeof msg !== 'object' || Array.isArray(msg)) return fail(null, -32600, 'Invalid Request');
   const { id, method, params } = msg;
-  if (id === undefined || id === null) return; // JSON-RPC notification: never responded to
+  // #34 (T-34.1): cancellation is an id-less notification — handle it BEFORE the id-less drop. Kill
+  // the in-flight child (or mark a still-queued job so it never spawns) and SUPPRESS its reply; the
+  // job still releases its slot / writersPending / asyncDone (I5). Unknown or already-settled
+  // requestId → ignore (MCP: a server MAY ignore it).
+  if (method === 'notifications/cancelled') {
+    const j = inflight.get(params && params.requestId);
+    if (j) { j.cancelled = true; j.kill(); }
+    return;
+  }
+  if (id === undefined || id === null) return; // other JSON-RPC notifications: never responded to
   if (method === 'initialize') {
     const wanted = params && params.protocolVersion;
     return reply(id, {

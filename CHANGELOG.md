@@ -10,6 +10,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Fixed
+- **MCP cancellation is honored, and malformed / batch JSON-RPC frames get a real answer instead of a
+  silent hang.** `handle()` dropped every id-less message, so `notifications/cancelled` was ignored —
+  a wrong `codeweb_map` burned up to 300s unstoppable and still replied. Non-object frames (`42`,
+  `"x"`, `null`) and JSON-RPC batch arrays destructured to `id === undefined` and were dropped with no
+  response, so a conforming `2024-11-05`/`2025-03-26` client that sent a batch hung forever. Now: an
+  id→child map (owned by `runChild`) lets `notifications/cancelled` SIGKILL the in-flight child (or
+  mark a still-queued job so it never spawns) and suppress its reply while still releasing the queue
+  slot / drain counter; a non-object frame answers `-32600` Invalid Request; a batch array is handled
+  by minimal per-member fan-out — each member is processed as if it arrived alone and its response is
+  emitted as its own NDJSON line (an empty array is a single `-32600`). Line-framed rather than
+  array-collected responses is a documented, adjudicated tradeoff (a collector would deadlock on a
+  cancel-suppressed member, which gets no response); every by-id-correlating client — every driver in
+  this repo — is unaffected. Scenarios **S4** (cancel kills the child, no reply, ping still answers)
+  and **S7** (malformed + batch frames) pin it. (round 2, finding #34)
 - **The MCP queue is now keyed by WORKSPACE DIRECTORY, so refresh→diff ordering actually holds (and
   map/autoRefresh joined the queue).** The per-workspace serialization the queue comment promised did
   not hold: `codeweb_diff` is `graphless`, so it queued under a shared `'(graphless)'` slot while

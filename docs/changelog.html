@@ -51,6 +51,22 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
+<li>**MCP cancellation is honored, and malformed / batch JSON-RPC frames get a real answer instead of a</li>
+</ul>
+<p>  silent hang.** <code>handle()</code> dropped every id-less message, so <code>notifications/cancelled</code> was ignored —</p>
+<p>  a wrong <code>codeweb_map</code> burned up to 300s unstoppable and still replied. Non-object frames (<code>42</code>,</p>
+<p>  <code>"x"</code>, <code>null</code>) and JSON-RPC batch arrays destructured to <code>id === undefined</code> and were dropped with no</p>
+<p>  response, so a conforming <code>2024-11-05</code>/<code>2025-03-26</code> client that sent a batch hung forever. Now: an</p>
+<p>  id→child map (owned by <code>runChild</code>) lets <code>notifications/cancelled</code> SIGKILL the in-flight child (or</p>
+<p>  mark a still-queued job so it never spawns) and suppress its reply while still releasing the queue</p>
+<p>  slot / drain counter; a non-object frame answers <code>-32600</code> Invalid Request; a batch array is handled</p>
+<p>  by minimal per-member fan-out — each member is processed as if it arrived alone and its response is</p>
+<p>  emitted as its own NDJSON line (an empty array is a single <code>-32600</code>). Line-framed rather than</p>
+<p>  array-collected responses is a documented, adjudicated tradeoff (a collector would deadlock on a</p>
+<p>  cancel-suppressed member, which gets no response); every by-id-correlating client — every driver in</p>
+<p>  this repo — is unaffected. Scenarios <strong>S4</strong> (cancel kills the child, no reply, ping still answers)</p>
+<p>  and <strong>S7</strong> (malformed + batch frames) pin it. (round 2, finding #34)</p>
+<ul>
 <li>**The MCP queue is now keyed by WORKSPACE DIRECTORY, so refresh→diff ordering actually holds (and</li>
 </ul>
 <p>  map/autoRefresh joined the queue).** The per-workspace serialization the queue comment promised did</p>

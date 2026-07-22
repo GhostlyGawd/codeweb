@@ -8,7 +8,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join, dirname } from 'node:path';
-import { writeFileSync, readFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { startServer, initServer } from './mcp-harness.mjs';
 import { tmpDir, cleanup, script, writeTree, runNode, readJSON } from './helpers.mjs';
 
@@ -166,4 +166,62 @@ test('I7 autoRefresh-skip: explicit refresh + a stale-triggering query in one bu
     assert.equal(refreshStarts.length, 1, 'exactly ONE refresh child spawned (the explicit one, not autoRefresh too)');
     h.close(); assert.equal((await h.exited).code, 0);
   } finally { h.child.kill('SIGKILL'); cleanup(dir); }
+});
+
+// ---- S4 cancellation-kills-child (T-34.1, I5: cancel suppresses the reply, still releases) -------
+test('S4 cancellation-kills-child: notifications/cancelled on a running map → trace kill, NO reply for its id, ping answers, exit 0', async () => {
+  const target = tmpDir('codeweb-scn-s4-');
+  const out = join(target, '.codeweb');
+  writeTree(join(target, 'src'), { 'a.js': 'export function alpha() { return 1; }\n' });
+  const h = startServer({ env: TRACE_ENV });
+  try {
+    await initServer(h);
+    h.send({ jsonrpc: '2.0', id: 40, method: 'tools/call', params: { name: 'codeweb_map', arguments: { target: join(target, 'src'), out } } });
+    await h.traceEvent((e) => e.ev === 'start' && e.id === 40 && e.tool === 'codeweb_map'); // map child spawned
+    h.send({ jsonrpc: '2.0', method: 'notifications/cancelled', params: { requestId: 40, reason: 'user' } });
+    const kill = await h.traceEvent((e) => e.ev === 'kill' && e.id === 40);
+    assert.equal(kill.reason, 'cancel', 'child killed by the cancel (not a timeout)');
+    h.send({ jsonrpc: '2.0', id: 41, method: 'ping' });
+    await h.reply(41); // server is alive
+    h.close();
+    assert.equal((await h.exited).code, 0, 'server drains and exits 0 after the cancel');
+    assert.ok(!h.responses().some((r) => r.id === 40), 'no reply for the cancelled map (drain bounds the negative assertion)');
+    assert.ok(!existsSync(join(out, 'graph.json')), 'killed before the report stage — no graph.json written');
+  } finally { h.child.kill('SIGKILL'); cleanup(target); }
+});
+
+// ---- S7 malformed-and-batch-frames (T-34.2 / T-34.3) -------------------------------------------
+test('S7 malformed-and-batch-frames: 42, "x", null, [] each answer ONE -32600 (id:null); a following ping answers', async () => {
+  const h = startServer({ env: TRACE_ENV });
+  try {
+    await initServer(h);
+    const frames = ['42', '"x"', 'null', '[]'];
+    for (let i = 0; i < frames.length; i++) {
+      h.sendRaw(frames[i]);
+      h.send({ jsonrpc: '2.0', id: 200 + i, method: 'ping' });
+      await h.reply(200 + i); // the later ping proves the malformed frame was processed (no hang)
+    }
+    const invalid = h.responses().filter((r) => r.id === null && r.error && r.error.code === -32600);
+    assert.equal(invalid.length, 4, 'one Invalid Request per frame (three scalars + the empty array), never a silent drop');
+    h.close(); assert.equal((await h.exited).code, 0);
+  } finally { h.child.kill('SIGKILL'); }
+});
+
+test('T-34.3 batch fan-out: [{ping id:9},{unknown-tool id:10}] → normal reply for 9 AND -32602 for 10 as individual lines; notifications stay silent', async () => {
+  const h = startServer({ env: TRACE_ENV });
+  try {
+    await initServer(h);
+    h.sendRaw(JSON.stringify([{ jsonrpc: '2.0', id: 9, method: 'ping' }, { jsonrpc: '2.0', id: 10, method: 'tools/call', params: { name: 'codeweb_nope', arguments: {} } }]));
+    const r9 = await h.reply(9); const r10 = await h.reply(10);
+    assert.ok(r9.result && !r9.error, 'ping member answered normally under its own id');
+    assert.equal(r10.error.code, -32602, 'unknown-tool member → its own -32602 line (not collected into an array)');
+    // [1,2] → two -32600; a batch of only a notification → silence, but a later ping still answers.
+    h.sendRaw('[1,2]');
+    h.sendRaw(JSON.stringify([{ jsonrpc: '2.0', method: 'notifications/initialized' }]));
+    h.send({ jsonrpc: '2.0', id: 12, method: 'ping' });
+    await h.reply(12);
+    const invalid = h.responses().filter((r) => r.id === null && r.error && r.error.code === -32600);
+    assert.equal(invalid.length, 2, '[1,2] → exactly two -32600 lines; the notification-only batch stays silent');
+    h.close(); assert.equal((await h.exited).code, 0);
+  } finally { h.child.kill('SIGKILL'); }
 });
