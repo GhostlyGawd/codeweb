@@ -54,9 +54,11 @@ export function maskPy(text, { keepValues = false } = {}) {
 }
 
 // Ruby masking (Spec I): line-local — string contents first (so interpolation can't fake a
-// comment), then `#`-to-EOL. Not column-preserving (see header).
-const RB_DQ = /"(?:[^"\\]|\\[^])*"/g;
-const RB_SQ = /'(?:[^'\\]|\\[^])*'/g;
+// comment), then `#`-to-EOL. Not column-preserving (see header). Round 2, finding #15: unrolled-loop
+// form (this site's escape atom is `\\[^]`) — the alternation form recursed per character in V8 and
+// a >=8.4MB single-line string RangeError'd the whole extract.
+const RB_DQ = /"[^"\\]*(?:\\[^][^"\\]*)*"/g;
+const RB_SQ = /'[^'\\]*(?:\\[^][^'\\]*)*'/g;
 export function maskRuby(text) {
   return text.split(/\r?\n/).map((ln) => ln
     .replace(RB_DQ, '""')

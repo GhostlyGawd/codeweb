@@ -531,6 +531,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
   `scripts/release.mjs` exits 1 when its own consistency audit fails, BEFORE printing the gated
   git commands — release prep can no longer end in "consistency: N problem(s)" followed by the
   exact commands to ship anyway. (perf-quality round 2, finding #7)
+- **One huge single-line string can no longer kill the entire extract.** The string regexes in
+  `complexity.mjs`'s strip, `maskRuby`'s RB_DQ/RB_SQ, and ts-engine's `stmtHash` used the
+  alternation form V8 recurses per character — a >=8.4 MB inlined string (base64 asset, dataset)
+  threw an uncaught RangeError from `cyclomatic` in BOTH tiers, taking the whole map, post-edit
+  hook, and MCP refresh with it. All three sites now use the unrolled-loop form, preserving each
+  site's escape atom (`\\.` vs `\\[^]` — they differ on backslash-newline in templates; a seeded
+  5,000-case per-site equivalence property pins each), and `cyclomatic`/`nestingDepth` are belted:
+  any internal throw degrades that node to 1/0 instead of killing the run — combined with
+  ts-engine's existing null-on-throw per-file fallback, no single file can kill an extract in
+  either tier. `SCANNER_VERSION` 13 -> 14 so warm caches can't replay pre-fix products.
+  (perf-quality round 2, finding #15)
 
 ## [0.9.0] - 2026-07-19
 

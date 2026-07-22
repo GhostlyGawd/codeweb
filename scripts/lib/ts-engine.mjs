@@ -152,7 +152,9 @@ export async function loadTsEngine() {
     // Spec H helpers: statement normalization + FNV-1a hash for Type-3 fingerprints.
     const FN_LIKE = new Set(['function_declaration', 'generator_function_declaration', 'function_expression', 'arrow_function', 'method_definition']);
     const JS_KW = new Set(['if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'return', 'break', 'continue', 'throw', 'try', 'catch', 'finally', 'new', 'delete', 'typeof', 'instanceof', 'in', 'of', 'void', 'yield', 'await', 'async', 'function', 'class', 'extends', 'super', 'this', 'const', 'let', 'var', 'null', 'undefined', 'true', 'false']);
-    const TPL_STR_RE = /`(?:[^`\\]|\\[^])*`/g, SQ_STR_RE = /'(?:[^'\\]|\\[^])*'/g, DQ_STR_RE = /"(?:[^"\\]|\\[^])*"/g;
+    // Round 2, finding #15: unrolled-loop form (escape atom `\\[^]`) — the alternation form recursed
+    // per character in V8; a >=8.4MB single-line string in any statement RangeError'd stmtHash.
+    const TPL_STR_RE = /`[^`\\]*(?:\\[^][^`\\]*)*`/g, SQ_STR_RE = /'[^'\\]*(?:\\[^][^'\\]*)*'/g, DQ_STR_RE = /"[^"\\]*(?:\\[^][^"\\]*)*"/g;
     const stmtHash = (text) => {
       // one tokenizing pass: keywords keep identity (uppercased), identifiers -> I, numbers -> N,
       // string/template contents -> S, whitespace dropped. Statement STRUCTURE survives; naming
