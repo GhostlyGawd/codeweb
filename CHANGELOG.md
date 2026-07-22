@@ -91,6 +91,25 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **Overlap's LSH stops paying the singleton-bucket tax (~85% of Signal B).** At 15.7k nodes the
+  64-band twin pass built ~1M ~25-char string keys into one map ending at ~950k buckets, 99.3%
+  singletons — then sorted and walked all of them, while actual similarity confirmations were
+  ~30 ms. Two tiers, each landed behind its own proof: (1) sort/walk only multi-occupancy buckets
+  (singletons hit the `< 2` continue before the cap check, so they touch NOTHING — no side
+  effects to preserve); (2) numeric band-hash bucketing in the new `lshCandidatePairs`
+  (lib/minhash.mjs — one walk for both signals, band-major for map locality): rows fold to a
+  uint32, each bucket verifies its first-insert row tuple, true hash collisions spill
+  deterministically to a per-band side map keyed by the exact tuple string — grouping stays
+  exactly the string-key grouping provably, and legacy string keys are materialized ONLY for
+  multi-occupancy groups, so the pair sequence handed to the confirm chain equals the legacy
+  global string-sort walk order by construction (order is load-bearing: byLabelPair keeps the
+  first twin per label pair at a slice rank where sim ties are routine). Pinned by the
+  LSH-PAIRS-EQ property (220 seeded cases deep-equal a verbatim string-key reference — the pairs
+  ARRAY pins order; buckets/skippedBuckets asserted) and byte-identical graph.json + overlap.md +
+  stdout vs the pre-fix binary on the 15k corpus and the self-map (both tiers separately).
+  Measured min-of-3 @14,964 nodes: Signal-B twin-enumeration mark 2,724 → 1,234 (tier 1) →
+  **400 ms (6.8×)**; Signal-C 238 → 118 ms; overlap stage wall 3.37 → 0.93 s. (round 2,
+  finding #24)
 - **`break-cycles` verifies cuts on the SCC-induced pseudo-graph instead of re-running whole-graph
   Tarjan per candidate.** A dense SCC (no single-pair cut works) tried every candidate, and each
   trial filtered ALL graph edges + recomputed file cycles over the whole graph — 19.5 s (22.8 s on

@@ -147,6 +147,27 @@
 <p>  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)</p>
 <h3 class="cl-grp">Performance</h3>
 <ul>
+<li><strong>Overlap's LSH stops paying the singleton-bucket tax (~85% of Signal B).</strong> At 15.7k nodes the</li>
+</ul>
+<p>  64-band twin pass built ~1M ~25-char string keys into one map ending at ~950k buckets, 99.3%</p>
+<p>  singletons — then sorted and walked all of them, while actual similarity confirmations were</p>
+<p>  ~30 ms. Two tiers, each landed behind its own proof: (1) sort/walk only multi-occupancy buckets</p>
+<p>  (singletons hit the <code>&lt; 2</code> continue before the cap check, so they touch NOTHING — no side</p>
+<p>  effects to preserve); (2) numeric band-hash bucketing in the new <code>lshCandidatePairs</code></p>
+<p>  (lib/minhash.mjs — one walk for both signals, band-major for map locality): rows fold to a</p>
+<p>  uint32, each bucket verifies its first-insert row tuple, true hash collisions spill</p>
+<p>  deterministically to a per-band side map keyed by the exact tuple string — grouping stays</p>
+<p>  exactly the string-key grouping provably, and legacy string keys are materialized ONLY for</p>
+<p>  multi-occupancy groups, so the pair sequence handed to the confirm chain equals the legacy</p>
+<p>  global string-sort walk order by construction (order is load-bearing: byLabelPair keeps the</p>
+<p>  first twin per label pair at a slice rank where sim ties are routine). Pinned by the</p>
+<p>  LSH-PAIRS-EQ property (220 seeded cases deep-equal a verbatim string-key reference — the pairs</p>
+<p>  ARRAY pins order; buckets/skippedBuckets asserted) and byte-identical graph.json + overlap.md +</p>
+<p>  stdout vs the pre-fix binary on the 15k corpus and the self-map (both tiers separately).</p>
+<p>  Measured min-of-3 @14,964 nodes: Signal-B twin-enumeration mark 2,724 → 1,234 (tier 1) →</p>
+<p>  <strong>400 ms (6.8×)</strong>; Signal-C 238 → 118 ms; overlap stage wall 3.37 → 0.93 s. (round 2,</p>
+<p>  finding #24)</p>
+<ul>
 <li>**<code>break-cycles</code> verifies cuts on the SCC-induced pseudo-graph instead of re-running whole-graph</li>
 </ul>
 <p>  Tarjan per candidate.** A dense SCC (no single-pair cut works) tried every candidate, and each</p>
