@@ -603,6 +603,19 @@ notes so validated results, papers, and new tools never get lost in commit histo
   interpolation blanks with the body (the pre-existing Ruby interpolation gap), and quoted-tag
   `<<~"TAG"` openers are eaten by the string replaces first (backtick-quoted tags still open).
   (perf-quality round 2, finding #13)
+- **Python f-strings keep their `{…}` code.** `maskPy` treated f-strings as plain strings, so
+  `return f"total={compute(x)}"` dropped the `report -> compute` edge — functions invoked only
+  from f-strings (logging/formatting, idiomatic Python) showed 0 callers, poisoning caller counts
+  and blast radii; the maskPy limit list didn't even mention it. A quote preceded by a 1-3 char
+  `[rRbBuUfF]` run containing `f`/`F` (covers `f`, `rf`, `fr`, `Rf`, …) is now an f-string: `{…}`
+  interpolation code is kept verbatim in both modes (the exact analogue of the JS `${}` rule) with
+  a brace-depth counter for nested `{}` (dicts, `f"{x:{w}}"` format specs), `{{`/`}}` blank as
+  text, triple-quoted f-strings carry expr state across lines, and a quoted run INSIDE the expr
+  blanks through the keepValues gate as one slice — NOT verbatim, which would fabricate edges from
+  string content (`f"{'compute(1)'}"`, the #8 n4 analogue — pinned by the decoy2 fixture) and
+  break the shared idempotence property. keepValues output stays byte-identical to before
+  (differentially verified). Limits documented in the header (nested same-quote f-strings are
+  best-effort). (perf-quality round 2, finding #14)
 
 ## [0.9.0] - 2026-07-19
 

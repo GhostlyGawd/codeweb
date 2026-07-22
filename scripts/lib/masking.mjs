@@ -15,17 +15,73 @@
 // see `def`/`class`/calls that live INSIDE documentation — the root cause of phantom symbols and
 // fabricated edges (e.g. flask helpers.py's make_response docstring fabricates a render_template
 // caller). Single-line '...'/"..." strings are blanked first so a `#` or `"""` inside them can't be
-// mistaken for a comment/docstring delimiter. Best-effort: escapes inside triple-strings aren't
-// tracked, worst case is a slightly-off mask.
+// mistaken for a comment/docstring delimiter. F-STRINGS (round 2, finding #14): a quote preceded by
+// a 1-3 char [rRbBuUfF] prefix run containing f/F is an f-string — its `{…}` interpolations are
+// EXECUTING code (the exact analogue of the JS `${}` rule) and are kept verbatim in both modes,
+// with a brace-depth counter for nested {} (dicts, format specs f"{x:{w}}") and `{{`/`}}` blanking
+// as 2-char text; a quoted run INSIDE the expr blanks through the keepValues gate as one slice
+// (delimiters included — kept-in-default quotes would re-mask as normal strings and break
+// idempotence), and consuming the whole run keeps a `}` inside it from closing the expr early.
+// Triple-quoted f-strings carry expr state across lines; a single-line f-string whose expr is
+// unterminated at EOL resets to code state (single-line strings never span lines). Nested f-strings
+// inside an expr (f"{f'{x}'}", py3.12 same-quote nesting) are treated as plain quoted runs — the
+// inner {x} blanks; accepted best-effort. Best-effort limits: escapes inside triple-strings aren't
+// tracked; worst case is a slightly-off mask.
 export function maskPy(text, { keepValues = false } = {}) {
   const lines = text.split(/\r?\n/);
   const out = [];
-  let triple = null; // active multi-line triple-quote delimiter ('"""' or "'''")
+  let triple = null; // active multi-line triple-quote: {delim: '"""'|"'''", isF, exprDepth}
+  // f-string prefix sniff at a quote at line[i]: the MAXIMAL word-char run ending at i is a string
+  // prefix iff 1-3 chars, all in [rRbBuUfF], containing f/F. Maximality makes the left word
+  // boundary automatic (`x1f"…"` scans back to `x1f` and is rejected).
+  const fPrefixAt = (line, i) => {
+    let j = i;
+    while (j > 0 && /[A-Za-z0-9_]/.test(line[j - 1])) j--;
+    const run = line.slice(j, i);
+    return run.length >= 1 && run.length <= 3 && /^[rRbBuUfF]+$/.test(run) && /[fF]/.test(run);
+  };
+  // Scan an f-string BODY from i (text or expr per st.exprDepth) to EOL or the closing st.delim.
+  // Mutates st.exprDepth; sets st.closed when the delimiter closed on this line. Returns {res, i}.
+  const scanF = (line, i, st) => {
+    const n = line.length; let res = '';
+    while (i < n) {
+      if (st.exprDepth > 0) {                          // inside {…} — real code, verbatim in both modes
+        const ch = line[i];
+        if (ch === '"' || ch === "'") {                // quoted run inside the expr -> keepValues gate
+          let j = i + 1;
+          while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
+          const stop = Math.min(j + 1, n);
+          res += keepValues ? line.slice(i, stop) : ' '.repeat(stop - i);
+          i = stop; continue;
+        }
+        if (ch === '{') { st.exprDepth++; res += ch; i++; continue; }
+        if (ch === '}') { st.exprDepth--; res += ch; i++; continue; } // depth 0 -> back to TEXT
+        res += ch; i++; continue;
+      }
+      if (line.startsWith(st.delim, i)) {              // closing delimiter
+        res += keepValues ? st.delim : ' '.repeat(st.delim.length);
+        i += st.delim.length; st.closed = true; break;
+      }
+      const ch = line[i];                              // f-string TEXT
+      if (ch === '{' && line[i + 1] === '{') { res += keepValues ? '{{' : '  '; i += 2; continue; }
+      if (ch === '}' && line[i + 1] === '}') { res += keepValues ? '}}' : '  '; i += 2; continue; }
+      if (ch === '{') { res += '{'; i++; st.exprDepth = 1; continue; }
+      if (ch === '\\') { const stop = Math.min(i + 2, n); res += keepValues ? line.slice(i, stop) : ' '.repeat(stop - i); i = stop; continue; }
+      res += keepValues ? ch : ' '; i++; continue;
+    }
+    return { res, i };
+  };
   for (const line of lines) {
     const n = line.length; let res = '', i = 0;
     while (i < n) {
       if (triple) {
-        const end = line.indexOf(triple, i);
+        if (triple.isF) {                              // triple f-string body: text/expr carry across lines
+          const r2 = scanF(line, i, triple);
+          res += r2.res; i = r2.i;
+          if (triple.closed) triple = null;
+          continue;
+        }
+        const end = line.indexOf(triple.delim, i);
         if (end === -1) { res += keepValues ? line.slice(i) : ' '.repeat(n - i); i = n; }
         else { res += keepValues ? line.slice(i, end + 3) : ' '.repeat(end + 3 - i); i = end + 3; triple = null; }
         continue;
@@ -33,11 +89,24 @@ export function maskPy(text, { keepValues = false } = {}) {
       const ch = line[i];
       if (ch === '#') { res += ' '.repeat(n - i); i = n; continue; }      // comment to EOL
       if (ch === '"' || ch === "'") {
+        const isF = fPrefixAt(line, i);
         const tri = line.substr(i, 3);
         if (tri === '"""' || tri === "'''") {
+          if (isF) {                                                          // f-triple opens (may close same-line)
+            res += keepValues ? tri : '   '; i += 3;
+            triple = { delim: tri, isF: true, exprDepth: 0 };
+            continue;                                                         // the triple branch scans the remainder
+          }
           const end = line.indexOf(tri, i + 3);
-          if (end === -1) { triple = tri; res += keepValues ? line.slice(i) : ' '.repeat(n - i); i = n; }   // opens, spans lines
+          if (end === -1) { triple = { delim: tri, isF: false }; res += keepValues ? line.slice(i) : ' '.repeat(n - i); i = n; }   // opens, spans lines
           else { res += keepValues ? line.slice(i, end + 3) : ' '.repeat(end + 3 - i); i = end + 3; }      // single-line triple
+          continue;
+        }
+        if (isF) {                                                             // single-line f-string
+          res += keepValues ? ch : ' ';                                        // opening delimiter
+          const st = { delim: ch, isF: true, exprDepth: 0 };
+          const r2 = scanF(line, i + 1, st);
+          res += r2.res; i = r2.i;                                             // unterminated at EOL -> reset to code state
           continue;
         }
         let j = i + 1;                                                         // single-line string
