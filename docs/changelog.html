@@ -51,6 +51,21 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
+<li><strong>A dying child no longer crashes the whole MCP server (unhandled EPIPE on child stdin).</strong></li>
+</ul>
+<p>  <code>codeweb_find_similar</code> is the one tool that writes to a child's stdin (the candidate <code>body</code>); when</p>
+<p>  the body exceeded the 64KB pipe buffer and the child exited before draining it (bad graph path,</p>
+<p>  arg-validation <code>die(2)</code>, the 120s SIGKILL), the flush raised EPIPE with no <code>'error'</code> listener and</p>
+<p>  <strong>Node killed the server</strong> — every tool dead, the request unanswered (repro'd: 1 MB body + bad</p>
+<p>  graph → exit 1 at ~241ms). The async conversion introduced it; the pre-conversion <code>spawnSync({input})</code></p>
+<p>  had contained it. Fixed by attaching <code>child.stdin.on('error', …)</code> before writing and wrapping</p>
+<p>  <code>stdin.end()</code> in try/catch (covering the async EPIPE, the synchronous <code>ERR_STREAM_DESTROYED</code>, and a</p>
+<p>  null <code>stdin</code> after spawn failure). The failed call is now a normal <code>isError</code> result and a subsequent</p>
+<p>  request answers. The server's *own* stdout was never at risk — it inherits <code>lib/cli.mjs</code>'s</p>
+<p>  <code>process.stdout</code> EPIPE→exit(0) handler via an import side effect (a duplicate listener would be dead</p>
+<p>  code); scenario <strong>S1</strong> pins both halves (child-stdin EPIPE and client-closes-stdout). Also dropped</p>
+<p>  the dead <code>spawnSync</code> import left by the async conversion. (round 2, finding #29)</p>
+<ul>
 <li><strong><code>break-cycles.mjs</code> and <code>diff.mjs</code> are searchable again (raw NUL bytes removed).</strong> Both</li>
 </ul>
 <p>  product files embedded literal NUL bytes as template-literal key separators, so <code>file</code>, <code>grep</code>,</p>

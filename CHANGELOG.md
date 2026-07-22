@@ -10,6 +10,19 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Fixed
+- **A dying child no longer crashes the whole MCP server (unhandled EPIPE on child stdin).**
+  `codeweb_find_similar` is the one tool that writes to a child's stdin (the candidate `body`); when
+  the body exceeded the 64KB pipe buffer and the child exited before draining it (bad graph path,
+  arg-validation `die(2)`, the 120s SIGKILL), the flush raised EPIPE with no `'error'` listener and
+  **Node killed the server** — every tool dead, the request unanswered (repro'd: 1 MB body + bad
+  graph → exit 1 at ~241ms). The async conversion introduced it; the pre-conversion `spawnSync({input})`
+  had contained it. Fixed by attaching `child.stdin.on('error', …)` before writing and wrapping
+  `stdin.end()` in try/catch (covering the async EPIPE, the synchronous `ERR_STREAM_DESTROYED`, and a
+  null `stdin` after spawn failure). The failed call is now a normal `isError` result and a subsequent
+  request answers. The server's *own* stdout was never at risk — it inherits `lib/cli.mjs`'s
+  `process.stdout` EPIPE→exit(0) handler via an import side effect (a duplicate listener would be dead
+  code); scenario **S1** pins both halves (child-stdin EPIPE and client-closes-stdout). Also dropped
+  the dead `spawnSync` import left by the async conversion. (round 2, finding #29)
 - **`break-cycles.mjs` and `diff.mjs` are searchable again (raw NUL bytes removed).** Both
   product files embedded literal NUL bytes as template-literal key separators, so `file`, `grep`,
   and ripgrep classified them as binary — invisible to every code search (three separate audits

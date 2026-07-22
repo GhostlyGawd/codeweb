@@ -15,7 +15,7 @@
 // corrupts the stream for the client, so all diagnostics go to stderr (here: none).
 
 import { createInterface } from 'node:readline';
-import { spawnSync, spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -55,6 +55,12 @@ const INSTRUCTIONS = [
   'Responses are budgeted (top-N + more.remaining). Pass full:true for the unabridged list, or limit/offset to page.',
 ].join('\n');
 
+// #29 (T-29.2c): this writes the SERVER's stdout. The mid-session "client closed its read end"
+// crash does NOT exist here — the process already inherits lib/cli.mjs:19's process.stdout
+// 'error' handler (EPIPE → exit 0) via the :29 import side effect. A second listener would be
+// dead code (cli's registers first and exits before a second could run for EPIPE; for non-EPIPE
+// errors cli's handler rethrows, masking any later listener). Non-EPIPE stdout errors stay
+// fail-fast by design. Scenario S1b pins this guard (and fails if the cli.mjs import is dropped).
 const send = (msg) => process.stdout.write(JSON.stringify(msg) + '\n');
 const reply = (id, result) => send({ jsonrpc: '2.0', id, result });
 const fail = (id, code, message) => send({ jsonrpc: '2.0', id, error: { code, message } });
@@ -481,7 +487,14 @@ function handleToolCall(id, params) {
     const settle = (fn) => { if (settled) return; settled = true; clearTimeout(timer); fn(); release(); asyncDone(); };
     child.stdout.on('data', (d) => { out += d; });
     child.stderr.on('data', (d) => { errBuf += d; if (errBuf.length > 65536) errBuf = errBuf.slice(-32768); });
-    if (tool.input) child.stdin.end(tool.input(args) || '');
+    // #29: a child that dies before draining a >64KB stdin write (bad graph path, arg-validation
+    // die(2), the SIGKILL) EPIPEs the flush — unhandled, that killed the whole server. The 'error'
+    // listener covers the async EPIPE; the try/catch covers synchronous ERR_STREAM_DESTROYED (child
+    // already exited) and a null child.stdin after a spawn failure. find_similar is the sole writer.
+    if (tool.input) {
+      try { child.stdin.on('error', () => { /* async EPIPE — child gone; the close/error handler settles */ }); child.stdin.end(tool.input(args) || ''); }
+      catch { /* stdin destroyed/absent — the child's own close/error path settles this job */ }
+    }
     child.on('error', (e) => settle(() => errResult(id, (e && e.message) || 'spawn failed')));
     child.on('close', (code) => settle(() => {
       if (timedOut) return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
