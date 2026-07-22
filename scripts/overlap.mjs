@@ -221,7 +221,14 @@ if (scaffoldCluster.length) {
 
 _mark('signal-A (same-name groups + body confirm)');
 // ---- Signal B: structural twins -----------------------------------------------------
-const cand = [...outLabels.entries()].filter(([, s]) => s.size >= TWIN_MIN_OUT);
+// Finding #16: `cand` was built from ALL-edge outLabels and the twin loop never consulted roles —
+// Signal B bypassed the product scope the header advertises (11 of 13 self-findings paired
+// tests/* helpers). Both members of every pair come from `cand`, so ONE caller-side filter covers
+// the twin loop, LSH and exact paths alike; considerPair/jaccard judging is untouched.
+// CODEWEB_ALL_ROLES=1 short-circuits before the byId lookup — candidates byte-identical to the
+// unfiltered build. (Callee-side is already covered upstream: real extracts relabel test->product
+// calls to kind `test`, which the outLabels build skips.)
+const cand = [...outLabels.entries()].filter(([id, s]) => s.size >= TWIN_MIN_OUT && (ALL_ROLES || (byId.get(id) && nodeRole(byId.get(id)) === 'product')));
 const seenPair = new Set();
 const flagged = new Set(overlaps.flatMap((o) => o.nodes));
 const twins = [];

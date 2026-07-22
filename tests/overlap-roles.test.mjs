@@ -68,3 +68,55 @@ test('duplicated FIXTURE helpers are excluded from findings by default; CODEWEB_
     assert.ok(all.out.overlaps.some((o) => o.title.includes('text')), 'CODEWEB_ALL_ROLES=1 widens the scope');
   } finally { cleanup(all.dir); }
 });
+
+// Finding #16 — Signal B (structural twins) bypassed the product-role scope its own header
+// advertises: `cand` was built from ALL-edge outLabels and the twin loop never consulted roles,
+// so 11 of 13 self-findings were "merge the test helpers" — the exact advice role-scoping was
+// built to kill. The fixture writes `call`-kind edges directly (real extracts relabel
+// test->product calls to kind `test`, which Signal B already skips — the CALLER-side filter is
+// the thing under test).
+test('Signal B: twin candidates scope to product roles; CODEWEB_ALL_ROLES=1 restores', () => {
+  const tBody = 'function tHelper(x) {\n  return setup(x) && check(x);\n}\n';
+  const pBody = 'function pHelper(x) {\n  return c1(x) + c2(x) + c3(x) + c4(x);\n}\n';
+  const files = {
+    'tests/h1.test.js': tBody,
+    'tests/h2.test.js': tBody,
+    'src/p1.js': pBody,
+    'src/p2.js': pBody,
+    'src/c.js': 'function c1() {}\nfunction c2() {}\nfunction c3() {}\nfunction c4() {}\n',
+  };
+  const nodes = [
+    mkNode('tests/h1.test.js', 'tA', 1, { role: 'test' }),
+    mkNode('tests/h2.test.js', 'tB', 1, { role: 'test' }),
+    mkNode('src/p1.js', 'pA', 1, { role: 'product' }),
+    mkNode('src/p2.js', 'pB', 1, { role: 'product' }),
+    mkNode('src/c.js', 'c1', 1, { role: 'product' }),
+    mkNode('src/c.js', 'c2', 2, { role: 'product' }),
+    mkNode('src/c.js', 'c3', 3, { role: 'product' }),
+    mkNode('src/c.js', 'c4', 4, { role: 'product' }),
+  ];
+  // each of tA/tB/pA/pB calls all of c1..c4 -> out-label sets of size 4 (>= TWIN_MIN_OUT), jaccard 1
+  const edges = [];
+  for (const from of ['tests/h1.test.js:tA', 'tests/h2.test.js:tB', 'src/p1.js:pA', 'src/p2.js:pB']) {
+    for (const c of ['c1', 'c2', 'c3', 'c4']) edges.push({ from, to: `src/c.js:${c}`, kind: 'call', weight: 1 });
+  }
+
+  const scoped = runOverlap(files, nodes, edges);
+  try {
+    const twins = scoped.out.overlaps.filter((o) => o.kind === 'parallel-impl');
+    assert.ok(twins.some((o) => o.nodes.includes('src/p1.js:pA') && o.nodes.includes('src/p2.js:pB')),
+      `the product twin pair pA/pB is still found: ${JSON.stringify(twins)}`);
+    assert.ok(!twins.some((o) => o.nodes.includes('tests/h1.test.js:tA') && o.nodes.includes('tests/h2.test.js:tB')),
+      `test helpers must not pair by default: ${JSON.stringify(twins)}`);
+    const testIds = ['tests/h1.test.js:tA', 'tests/h2.test.js:tB'];
+    assert.ok(!twins.some((o) => o.nodes.some((n) => testIds.includes(n))),
+      `no twin finding may contain a test node at all (no cross-role pair): ${JSON.stringify(twins)}`);
+  } finally { cleanup(scoped.dir); }
+
+  const all = runOverlap(files, nodes, edges, { CODEWEB_ALL_ROLES: '1' });
+  try {
+    const twins = all.out.overlaps.filter((o) => o.kind === 'parallel-impl');
+    assert.ok(twins.some((o) => o.nodes.includes('tests/h1.test.js:tA') && o.nodes.includes('tests/h2.test.js:tB')),
+      `CODEWEB_ALL_ROLES=1 restores the test-helper pairing: ${JSON.stringify(twins)}`);
+  } finally { cleanup(all.dir); }
+});

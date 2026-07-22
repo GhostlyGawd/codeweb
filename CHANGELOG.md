@@ -658,6 +658,18 @@ notes so validated results, papers, and new tools never get lost in commit histo
   mechanism (including the test→product survival pin and the per-binding positive control).
   `SCANNER_VERSION` 14 → 15 so warm caches can't replay pre-fix edges.
   (perf-quality round 2, finding #10)
+- **Overlap's Signal B honors the product-role scope its header advertises.** The role filter fed
+  Signals A and C (via `defs`), but Signal B's twin candidates came from `outLabels` built over
+  ALL graph edges and the twin loop never consulted roles — on the self-map every emitted
+  `parallel-impl` finding paired test helpers ("merge the test helpers", the flagship bad advice
+  role-scoping was built to kill) while the header claimed those symbols were excluded. One
+  caller-side filter on `cand` closes it: both members of every pair come from `cand`, so the
+  twin loop, LSH and exact paths are all covered; `considerPair`/jaccard judging is untouched;
+  `CODEWEB_ALL_ROLES=1` short-circuits before the role lookup and restores the old scope exactly
+  (byte-identical findings, A/B-verified against the pre-fix overlap on the same map — 16
+  test-helper pairings on the post-#10/#11 self-map, all excluded by default, ONLY they).
+  Signal-B case in `tests/overlap-roles.test.mjs` writes `call`-kind edges directly to exercise
+  the caller-side filter. (perf-quality round 2, finding #16)
 
 ## [0.9.0] - 2026-07-19
 

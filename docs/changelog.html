@@ -819,6 +819,20 @@
 <p>  mechanism (including the test→product survival pin and the per-binding positive control).</p>
 <p>  <code>SCANNER_VERSION</code> 14 → 15 so warm caches can't replay pre-fix edges.</p>
 <p>  (perf-quality round 2, finding #10)</p>
+<ul>
+<li><strong>Overlap's Signal B honors the product-role scope its header advertises.</strong> The role filter fed</li>
+</ul>
+<p>  Signals A and C (via <code>defs</code>), but Signal B's twin candidates came from <code>outLabels</code> built over</p>
+<p>  ALL graph edges and the twin loop never consulted roles — on the self-map every emitted</p>
+<p>  <code>parallel-impl</code> finding paired test helpers ("merge the test helpers", the flagship bad advice</p>
+<p>  role-scoping was built to kill) while the header claimed those symbols were excluded. One</p>
+<p>  caller-side filter on <code>cand</code> closes it: both members of every pair come from <code>cand</code>, so the</p>
+<p>  twin loop, LSH and exact paths are all covered; <code>considerPair</code>/jaccard judging is untouched;</p>
+<p>  <code>CODEWEB_ALL_ROLES=1</code> short-circuits before the role lookup and restores the old scope exactly</p>
+<p>  (byte-identical findings, A/B-verified against the pre-fix overlap on the same map — 16</p>
+<p>  test-helper pairings on the post-#10/#11 self-map, all excluded by default, ONLY they).</p>
+<p>  Signal-B case in <code>tests/overlap-roles.test.mjs</code> writes <code>call</code>-kind edges directly to exercise</p>
+<p>  the caller-side filter. (perf-quality round 2, finding #16)</p>
 <h2 class="cl-ver">[0.9.0] - 2026-07-19</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
