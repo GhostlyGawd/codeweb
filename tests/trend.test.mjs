@@ -116,3 +116,41 @@ test('trend --git charts duplication rising across real commits', { skip: hasGit
     cleanup(repo);
   }
 });
+
+// Round 2, finding #42 (T-42.7): the reused-ws fast path (one ws dir across commits, run.mjs
+// --stages through-overlap). A mid-series run FAILURE must yield a zeroed row for THAT commit —
+// never the previous commit's (stale) graph out of the shared ws — and neighbors stay correctly
+// attributed (the meta.target === sha7 belt).
+test('trend --git reused-ws belt: a failed middle commit is zeroed; neighbors stay correctly attributed', { skip: hasGit ? false : 'git not available' }, () => {
+  const repo = tmpDir('codeweb-trendfail-');
+  const gitC = (...args) => {
+    const r = spawnSync('git', ['-C', repo, ...args], { encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`git ${args.join(' ')}: ${r.stderr}`);
+    return r;
+  };
+  try {
+    gitC('init', '-q');
+    gitC('config', 'user.email', 't@example.com');
+    gitC('config', 'user.name', 'Test');
+    gitC('config', 'commit.gpgsign', 'false');
+    // c1: real source -> a real graph (nodes > 0)
+    writeTree(repo, { 'src/a.js': SAME });
+    gitC('add', '-A'); gitC('commit', '-q', '-m', 'c1');
+    // c2: delete all source under focus -> run.mjs fails (empty map) -> a zeroed row, NOT c1's metrics
+    gitC('rm', '-q', 'src/a.js'); gitC('commit', '-q', '-m', 'c2 empty');
+    // c3: a byte-identical duplicate pair -> confirmed >= 1, its OWN fresh metrics (not c1's stale graph)
+    writeTree(repo, { 'src/a.js': SAME, 'src/b.js': SAME });
+    gitC('add', '-A'); gitC('commit', '-q', '-m', 'c3 dup');
+
+    const r = runNode(script('trend.mjs'), ['--git', repo, '--last', '3', '--focus', 'src', '--json']);
+    assert.equal(r.status, 0, r.stderr);
+    const rows = JSON.parse(r.stdout).snapshots;
+    assert.equal(rows.length, 3, 'one row per commit');
+    assert.ok(rows[0].nodes >= 1, 'c1 has a real graph');
+    assert.equal(rows[1].nodes, 0, 'the failed middle commit is zeroed — NOT c1 stale metrics out of the shared ws');
+    assert.ok(rows[1].error, 'the failed commit carries an error');
+    assert.ok(rows[2].confirmed >= 1 && rows[2].nodes >= 2, 'c3 correctly attributed (fresh — not c1 stale)');
+  } finally {
+    cleanup(repo);
+  }
+});

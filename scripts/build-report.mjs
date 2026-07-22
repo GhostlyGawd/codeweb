@@ -8,7 +8,7 @@
 // (defaults, dangling-edge removal, computed stats), injects it into report-template.html, and
 // writes a single self-contained HTML file. No network/CDN required.
 
-import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';

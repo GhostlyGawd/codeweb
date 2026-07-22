@@ -138,3 +138,34 @@ test('S6: a tampered report.md forces recompute (the four non-graph outputs are 
     assert.ok(!reused(after), 'tampered report.md -> stages re-run');
   } finally { cleanup(dir); }
 });
+
+// Round 2, finding #42 (T-42.7): the trend fast path — a partial `--stages through-overlap` run.
+test('S7: --stages through-overlap computes through overlap, skips report + memo, never poisons a full run', () => {
+  const dir = tmpDir('codeweb-memo-');
+  try {
+    writeTree(dir, FIXTURE);
+    const ws = join(dir, 'ws');
+    const partial = runPipeline(dir, ws, ['--stages', 'through-overlap']);
+    assert.match(partial, /skipping optimize \+ report/, 'the partial run announces the skip');
+    assert.ok(existsSync(join(ws, 'graph.json')) && existsSync(join(ws, 'overlap.md')), 'extract+cluster+overlap ran');
+    for (const f of ['report.html', 'optimize.md', '.stages.json']) {
+      assert.ok(!existsSync(join(ws, f)), `${f} is NOT produced by a partial run (the memo is never written)`);
+    }
+    // a subsequent FULL run in the same ws must recompute EVERYTHING — the partial ws never satisfied a memo
+    const full = runPipeline(dir, ws);
+    assert.ok(!reused(full), 'full run after a partial recomputes (memo not poisoned by the partial ws)');
+    for (const f of OUTPUTS) assert.ok(existsSync(join(ws, f)), `${f} produced by the full run`);
+    assert.ok(existsSync(join(ws, '.stages.json')), 'the full run wrote the memo');
+    assert.ok(reused(runPipeline(dir, ws)), 'the memo is valid now — a second full run reuses');
+  } finally { cleanup(dir); }
+});
+
+test('S8: --stages with an unknown phase exits 2 (no silent typo path)', () => {
+  const dir = tmpDir('codeweb-memo-');
+  try {
+    writeTree(dir, FIXTURE);
+    const r = runNode(RUN, [join(dir, 'src'), '--out-dir', join(dir, 'ws'), '--stages', 'through-report']);
+    assert.equal(r.status, 2, 'an unknown --stages value dies with usage');
+    assert.match(r.stderr, /unknown --stages/);
+  } finally { cleanup(dir); }
+});

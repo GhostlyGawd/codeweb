@@ -98,21 +98,38 @@ function gitSnapshots(repo, last, focus) {
   const log = git(['log', '-n', String(last), '--format=%H\t%cs', '--', focus]).trim();
   if (!log) return [];
   const commits = log.split(/\r?\n/).map((l) => { const [sha, date] = l.split('\t'); return { sha, date }; }).reverse();
+  // finding #42: ONE workspace dir reused across every commit (the extractor's scan cache persists in
+  // it, so files unchanged commit-to-commit aren't re-parsed); worktree churn stays per-commit. Each
+  // run is `--stages through-overlap` — extract+cluster+overlap only (all metrics() reads: nodes/edges
+  // from extract, domains from cluster, overlaps from overlap) — skipping optimize+report (~half the
+  // per-commit wall) and never writing the stage memo.
+  const wsBase = mkdtempSync(join(tmpdir(), 'codeweb-trend-ws-'));
+  const ws = join(wsBase, 'ws');
   const rows = [];
-  for (const { sha, date } of commits) {
-    const base = mkdtempSync(join(tmpdir(), 'codeweb-trend-'));
-    const wt = join(base, 'wt'), ws = join(base, 'ws');
-    const label = `${sha.slice(0, 7)} (${date})`;
-    try {
-      git(['worktree', 'add', '--detach', '--force', wt, sha]);
-      execFileSync(process.execPath, [join(HERE, 'run.mjs'), join(wt, focus), '--target', sha.slice(0, 7), '--out-dir', ws], { stdio: 'ignore' });
-      rows.push({ label, ...metrics(loadSnapshot(join(ws, 'graph.json'))) });
-    } catch (e) {
-      rows.push({ label, error: String((e && e.message) || e), confirmed: 0, candidates: 0, coupling: 0, nodes: 0, files: 0 });
-    } finally {
-      try { git(['worktree', 'remove', '--force', wt]); } catch { /* best-effort */ }
-      try { rmSync(base, { recursive: true, force: true }); } catch { /* best-effort */ }
+  try {
+    for (const { sha, date } of commits) {
+      const sha7 = sha.slice(0, 7);
+      const base = mkdtempSync(join(tmpdir(), 'codeweb-trend-'));
+      const wt = join(base, 'wt');
+      const label = `${sha7} (${date})`;
+      try {
+        git(['worktree', 'add', '--detach', '--force', wt, sha]);
+        execFileSync(process.execPath, [join(HERE, 'run.mjs'), join(wt, focus), '--target', sha7, '--out-dir', ws, '--stages', 'through-overlap'], { stdio: 'ignore' });
+        // Reused-ws belt: a failed run leaves the PREVIOUS commit's graph.json in the shared ws.
+        // Accept the row only if the loaded graph is THIS commit's (meta.target === sha7) — else skip
+        // it exactly like a thrown run, so a stale graph is never misattributed to this commit.
+        const g = loadSnapshot(join(ws, 'graph.json'));
+        if (g.meta?.target !== sha7) throw new Error(`stale graph in reused ws (meta.target ${g.meta?.target ?? 'none'} != ${sha7})`);
+        rows.push({ label, ...metrics(g) });
+      } catch (e) {
+        rows.push({ label, error: String((e && e.message) || e), confirmed: 0, candidates: 0, coupling: 0, nodes: 0, files: 0 });
+      } finally {
+        try { git(['worktree', 'remove', '--force', wt]); } catch { /* best-effort */ }
+        try { rmSync(base, { recursive: true, force: true }); } catch { /* best-effort */ }
+      }
     }
+  } finally {
+    try { rmSync(wsBase, { recursive: true, force: true }); } catch { /* best-effort */ }
   }
   return rows;
 }

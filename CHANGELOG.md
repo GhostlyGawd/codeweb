@@ -91,6 +91,24 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **Migration leftovers swept, plus a `trend --git` fast path.** Seven small chores from the
+  lib-extraction migration: (1) dead `writeFileSync` imports dropped from overlap/build-report/
+  coverage/refresh; (2) `coverage.mjs` writes the annotated graph COMPACT (was the last
+  pretty-printed graph.json — 20.6 → 13.0 MB); (3) the stranded "THE body reader" jsdoc moved back
+  above `sourceReader`; (4) `lib/import-resolve.mjs` re-indented to uniform 2-space (the two verbatim-
+  moved blocks were left at column 0 / column 2 — `git diff -w` empty, extract-equivalence suites
+  green); (5) `lib/stats.mjs` + `lib/annotations.mjs` writes now go through `atomicWrite` (crash-safe,
+  bytes/formatting unchanged, best-effort try/catch preserved); (6) a `staleNote` on
+  `bench/results/scale-typescript.json` (v0.9.0 pre-fix; real re-run is WS-G #35). (7) **trend fast
+  path:** `run.mjs` gains `--stages through-overlap` (extract + cluster + overlap only; any other
+  value exits 2 — no silent typo path; a partial run NEVER writes the stage memo, so a partial
+  workspace can't satisfy a later full run's reuse check), and `trend.mjs --git` now reuses ONE
+  workspace dir across commits (scan-cache persistence; worktree churn stays per-commit) running each
+  commit through-overlap. A reused-ws belt accepts a commit's row only when the loaded
+  `graph.meta.target` equals that commit's sha7, so a failed commit's row is never misattributed to a
+  stale graph left in the shared workspace. Metrics are byte-identical to the pre-fix full-pipeline
+  path; measured on a 2-commit 680-file repo: per-commit ~7.5 → **~4.6 s** (extract-dominated, the
+  optimize+report stages skipped). (round 2, finding #42)
 - **`diff` rename detection is indexed, memoized, and honest about its cap.** The removed×added
   rename matcher called `graph.nodes.find` twice per candidate pair (an O(nodes) scan inside an
   O(removed×added) loop) and re-shingled every added body once per removed node — 1,733 ms of

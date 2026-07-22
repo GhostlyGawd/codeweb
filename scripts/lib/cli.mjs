@@ -127,13 +127,6 @@ export function loadGraph(pathArg, { usage = null } = {}) {
   return { graph, abs };
 }
 
-/**
- * Cached, best-effort source access for a graph's target (meta.root) — THE body reader
- * (context-pack, find-similar, diff rename-matching all read node spans; the logic lives once).
- * bodyOf(node) = the exact source lines [line, line+loc-1], or null when unreadable.
- */
-
-
 // #6 (IMPROVEMENTS.md): manifest-declared entrypoints — files a HOST invokes without a code edge.
 // deadcode's "safe to delete" tier listed the VS Code extension's activate/deactivate (package.json
 // `main`) and hook scripts (hooks.json commands) on codeweb's own map; anything a manifest names is
@@ -191,6 +184,11 @@ export function findTarget(filePath) {
   return null;
 }
 
+/**
+ * Cached, best-effort source access for a graph's target (meta.root) — THE body reader
+ * (context-pack, find-similar, diff rename-matching all read node spans; the logic lives once).
+ * bodyOf(node) = the exact source lines [line, line+loc-1], or null when unreadable.
+ */
 export function sourceReader(root) {
   const available = !!root && existsSync(root);
   const cache = new Map();

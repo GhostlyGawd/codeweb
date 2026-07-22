@@ -7,7 +7,7 @@
 // Optional and explicit (like --churn): never runs in the deterministic pipeline by default;
 // codeweb_refresh re-extracts nodes, so re-annotate after a refresh. Exit: 0 ok, 2 usage/IO.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseLcov, parseIstanbul, annotateCoverage } from './lib/coverage.mjs';
 
@@ -44,7 +44,7 @@ for (const reportPath of pos.slice(1)) {
 }
 
 const summary = annotateCoverage(graph, covFiles, labels.join('+'));
-atomicWrite(abs, JSON.stringify(graph, null, 2));
+atomicWrite(abs, JSON.stringify(graph)); // finding #42: compact (was the last pretty-printed graph.json — 20.6 → 13.0 MB)
 
 const line = `codeweb coverage: ${summary.filesMapped} file(s) mapped, ${summary.symbolsCovered}/${summary.symbolsSeen} instrumented symbol(s) covered — annotated ${abs}`;
 if (json) { emitJson({ ok: true, graph: abs, ...summary, note: 'explain/tests/context answers now carry measured-coverage facts; re-annotate after codeweb_refresh' }); }

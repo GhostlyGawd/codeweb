@@ -6,7 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { runNode, script, tmpDir, cleanup, writeTree, readJSON } from './helpers.mjs';
 import { parseLcov, parseIstanbul, annotateCoverage, coverageNote } from '../scripts/lib/coverage.mjs';
@@ -65,6 +65,10 @@ test('C3 the CLI annotates a graph on disk and explain/tests/context surface the
     const r = runNode(script('coverage.mjs'), [gp, lp]);
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /1\/2 instrumented symbol\(s\) covered/);
+
+    // finding #42: the annotated graph is written COMPACT (was the last pretty-printed graph.json)
+    const raw = readFileSync(gp, 'utf8');
+    assert.equal(raw, JSON.stringify(JSON.parse(raw)), 'annotated graph.json parses and is compact (no pretty-print)');
 
     const ex = runNode(script('explain.mjs'), [gp, 'src/a.js:cold', '--json']);
     const card = JSON.parse(ex.stdout).cards?.[0] ?? JSON.parse(ex.stdout)[0] ?? JSON.parse(ex.stdout);

@@ -8,7 +8,7 @@
 // Usage: node refresh.mjs <graph.json> [--cache <path>] [--json]
 // Exit: 0 ok, 2 usage / missing meta.root.
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

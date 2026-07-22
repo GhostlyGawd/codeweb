@@ -31,6 +31,8 @@ const USAGE = `usage: run.mjs <SRC> [--target <label>] [--out-dir <dir>] [--open
   --open           open report.html when the map is built
   --full           recompute every stage (skip the fragment memo + edge cache)
   --allow-empty    permit a target with no supported source (writes an empty map)
+  --stages <phase> partial pipeline; only 'through-overlap' (extract+cluster+overlap, skip
+                   optimize+report) — the trend fast path; never writes the stage memo
   --coverage <p>   annotate the graph with a coverage report (lcov or c8 JSON) after mapping`;
 // finding 24: THE flag loop (lib/cli.mjs parseArgs). This file pioneered the unknown-flag
 // rejection (#5: `--help` once became the target path); the shared loop carries that policy now.
@@ -42,11 +44,19 @@ const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
     open: { type: 'bool', default: false },
     full: { type: 'bool', default: false },
     'allow-empty': { type: 'bool', default: false }, // forwarded to extract: skip the empty-map guard
+    stages: { type: 'string', default: null },       // finding #42: partial pipeline (trend fast path)
     coverage: { type: 'string', default: null },     // #13: measured-execution annotation after the map
   },
 });
-const opts = { src: pos[0] ?? null, target: flags.target, outDir: flags['out-dir'], open: flags.open, full: flags.full, allowEmpty: flags['allow-empty'], coverage: flags.coverage };
+const opts = { src: pos[0] ?? null, target: flags.target, outDir: flags['out-dir'], open: flags.open, full: flags.full, allowEmpty: flags['allow-empty'], stages: flags.stages, coverage: flags.coverage };
 if (!opts.src) { console.error(USAGE); process.exit(2); }
+// finding #42: --stages is a partial pipeline. Only 'through-overlap' is valid — any other value dies
+// with usage (exit 2), so a typo can never silently run a different phase set. A partial run computes
+// extract+cluster+overlap (graph.json's nodes/edges/domains/overlaps — all trend's metrics need),
+// skips optimize+report, and NEVER writes the stage memo (a partial workspace must never satisfy a
+// later full run's reuse check — the belt; the memo's per-output existence+hash check is the brace).
+if (opts.stages !== null && opts.stages !== 'through-overlap') { console.error(`[run] unknown --stages "${opts.stages}" (valid: through-overlap)\n${USAGE}`); process.exit(2); }
+const partial = opts.stages === 'through-overlap';
 // Resolve the target against the CALLER's cwd (not the plugin root the stages run in) — a relative
 // <SRC> must mean the same thing as a relative --out-dir. Fail here with one clean line, not a
 // stage-level stack trace.
@@ -130,20 +140,28 @@ if (reusable) {
 } else {
   run('cluster', S('scripts/cluster3.mjs'), [], true);
   run('overlap', S('scripts/overlap.mjs'), [], true);
-  run('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--out', join(ws, 'optimize.md')], false);
-  run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json'), ...(opts.open ? ['--open'] : [])], false);
-  try {
-    const outputs = {};
-    for (const f of STAGE_OUTPUTS) { const b = readFileSync(join(ws, f)); outputs[f] = { s: b.length, h: sha1hex(b) }; }
-    atomicWrite(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString(), outputs }) + '\n');
-  } catch { /* memo is best-effort */ }
+  if (partial) {
+    // trend fast path: extract+cluster+overlap only. Skip optimize+report AND the memo write — a
+    // partial workspace lacks optimize.md/report.* so it must never satisfy a later full run's memo.
+    console.error('\n[run] --stages through-overlap: skipping optimize + report (memo not written)');
+  } else {
+    run('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--out', join(ws, 'optimize.md')], false);
+    run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json'), ...(opts.open ? ['--open'] : [])], false);
+    try {
+      const outputs = {};
+      for (const f of STAGE_OUTPUTS) { const b = readFileSync(join(ws, f)); outputs[f] = { s: b.length, h: sha1hex(b) }; }
+      atomicWrite(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString(), outputs }) + '\n');
+    } catch { /* memo is best-effort */ }
+  }
 }
 
 // Round 2, finding #18a: persist the post-edit hook's baseline summary beside graph.json — the
 // hook then skips its per-edit baseline parse + before-side cycle/index recompute. On the reuse
 // path only when the sidecar is missing/stale (one graph parse, amortized); best-effort by
 // contract — a sidecar failure must never fail a map.
-try {
+// finding #42: a partial (through-overlap) run produces no report — skip the post-edit hook sidecar
+// too (it accompanies a full map; the trend fast path only needs graph.json for its metrics).
+if (!partial) try {
   const { computeHookBaseline, writeHookBaselineBeside, hookBaselineFresh } = await import('./lib/hook-baseline.mjs');
   const gp = join(ws, 'graph.json');
   if (!reusable || !hookBaselineFresh(gp)) {
@@ -155,9 +173,13 @@ try {
 if (opts.coverage) run('coverage', S('scripts/coverage.mjs'), [join(ws, 'graph.json'), resolve(opts.coverage)], false); // #13
 
 console.error(`\n[run] done -> ${ws}`);
-console.error(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);
-// #5: the map's whole point is to be LOOKED AT — say so (auto-open stays opt-in via --open).
-if (!opts.open) console.error(`[run]   open ${join(ws, 'report.html')} in your browser (or re-run with --open)`);
+if (partial) {
+  console.error(`[run]   ${ws}/graph.json · overlap.md · fragment.json (through-overlap: no report)`);
+} else {
+  console.error(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);
+  // #5: the map's whole point is to be LOOKED AT — say so (auto-open stays opt-in via --open).
+  if (!opts.open) console.error(`[run]   open ${join(ws, 'report.html')} in your browser (or re-run with --open)`);
+}
 // #10: the value receipt shows up where the user already is — one line, only when non-empty.
 try {
   const { readStats, lifetimeTotals, monthLine } = await import('./lib/stats.mjs');

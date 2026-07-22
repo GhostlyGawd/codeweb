@@ -15,7 +15,7 @@
 // Confidence (with source):  body mean >=0.6 high(confirmed) · 0.35-0.6 medium(DRIFTED) ·
 //   0.15-0.35 low · <0.15 refuted (dismissed as coincidental).  Precision over recall.
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { shingles, jaccard, K, BANDS, BODY_LINE_CAP } from './lib/shingles.mjs'; // shared body-shingle primitives + THE thresholds + body cap (one truth, findings 27 + 26)
 import { lshCandidatePairs } from './lib/minhash.mjs'; // Spec N + round 2 #24: LSH candidate generation at scale (one walk, both signals)
 import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code

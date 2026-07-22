@@ -147,6 +147,26 @@
 <p>  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)</p>
 <h3 class="cl-grp">Performance</h3>
 <ul>
+<li><strong>Migration leftovers swept, plus a <code>trend --git</code> fast path.</strong> Seven small chores from the</li>
+</ul>
+<p>  lib-extraction migration: (1) dead <code>writeFileSync</code> imports dropped from overlap/build-report/</p>
+<p>  coverage/refresh; (2) <code>coverage.mjs</code> writes the annotated graph COMPACT (was the last</p>
+<p>  pretty-printed graph.json — 20.6 → 13.0 MB); (3) the stranded "THE body reader" jsdoc moved back</p>
+<p>  above <code>sourceReader</code>; (4) <code>lib/import-resolve.mjs</code> re-indented to uniform 2-space (the two verbatim-</p>
+<p>  moved blocks were left at column 0 / column 2 — <code>git diff -w</code> empty, extract-equivalence suites</p>
+<p>  green); (5) <code>lib/stats.mjs</code> + <code>lib/annotations.mjs</code> writes now go through <code>atomicWrite</code> (crash-safe,</p>
+<p>  bytes/formatting unchanged, best-effort try/catch preserved); (6) a <code>staleNote</code> on</p>
+<p>  <code>bench/results/scale-typescript.json</code> (v0.9.0 pre-fix; real re-run is WS-G #35). (7) **trend fast</p>
+<p>  path:** <code>run.mjs</code> gains <code>--stages through-overlap</code> (extract + cluster + overlap only; any other</p>
+<p>  value exits 2 — no silent typo path; a partial run NEVER writes the stage memo, so a partial</p>
+<p>  workspace can't satisfy a later full run's reuse check), and <code>trend.mjs --git</code> now reuses ONE</p>
+<p>  workspace dir across commits (scan-cache persistence; worktree churn stays per-commit) running each</p>
+<p>  commit through-overlap. A reused-ws belt accepts a commit's row only when the loaded</p>
+<p>  <code>graph.meta.target</code> equals that commit's sha7, so a failed commit's row is never misattributed to a</p>
+<p>  stale graph left in the shared workspace. Metrics are byte-identical to the pre-fix full-pipeline</p>
+<p>  path; measured on a 2-commit 680-file repo: per-commit ~7.5 → <strong>~4.6 s</strong> (extract-dominated, the</p>
+<p>  optimize+report stages skipped). (round 2, finding #42)</p>
+<ul>
 <li><strong><code>diff</code> rename detection is indexed, memoized, and honest about its cap.</strong> The removed×added</li>
 </ul>
 <p>  rename matcher called <code>graph.nodes.find</code> twice per candidate pair (an O(nodes) scan inside an</p>
