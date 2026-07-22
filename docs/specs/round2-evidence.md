@@ -568,3 +568,65 @@ legs un-skipped). `SCANNER_VERSION` 14 → 15 landed with #10's commit per the s
   No design changes; no assertion weakened (the only fixture-count shifts are the documented
   self-map-derived measurements, and the exact `ambiguousDropped` 1/0 assertions were verified
   unshifted).
+
+### WS-C review+verification
+
+Reviewer pass over 70c94ac / ce5a76f / 4853084 / 8c4dc9d vs the frozen spec. Verdict: **all three
+findings pass**; every diff maps to its T-task; no existing assertion touched (new files +
+append-only); i6 precedence pin present (both directions); CHANGELOG + docs/changelog.html rebuilt
+in each commit; `check-consistency` OK. Three small gaps found and fixed in this pass (below),
+each red-first; one residual noted. Builder-flagged scrutiny items adjudicated:
+
+- **(a) SRC_RE widening coherence** — full extension-universe sweep: extractor dispatch points
+  (:320/:593/:969), `langOf`, SRC_RE, importCandidates all coherent. TWO stragglers found, both
+  same class as the flagged one, both FIXED (red-first): `codemod.mjs:151` repoint loop skipped
+  `.mts/.cts` importers (CM-IMPORT-REPOINT-MTS pins it), and — worse — `maskAligned`
+  (masking.mjs:303) returned null for `.mts/.cts`, so codemod's rewrite gate fell back to
+  UNMASKED whole-file label replacement for them (masking-properties P4 pins the dispatch
+  contract). Deliberately left: bench replay/determinism corpora SRC_REs (frozen lists),
+  bench-core's `.tsx?` corpus walk, cli.mjs:174 script-name claim scan (scripts are .mjs).
+  **Residual (design-level, not fixed):** the repoint loop matches specifiers against deletion
+  files LITERALLY — a NodeNext `./x.mjs` specifier naming a deleted `x.mts` source won't repoint,
+  and a repoint TO a `.mts` canonical would emit the `.mts` spelling; remap-aware repointing
+  needs importCandidates against deletionFiles (future pass).
+- **(b) role property source** — stamped `node.role` and the :816 gate share ONE `roleFor`
+  closure per run, and the stamp tier is rulesSig-gated: within a run and across rules edits they
+  cannot diverge... except through the EDGE cache, which keyed on symbolSig alone. A rules-file
+  role flip changes no node id, so run 2 replayed run 1's gate verdicts against fresh stamps —
+  product→bench refs the gate now forbids shipped from cache (reproduced red). FIXED:
+  `reuseEdges` now also requires `oldCache.rulesSig === rulesSig` (mirror of the stamp tier's
+  gate); role-overrides R5 pins flip-then-warm-rederive. The builder's deviation (reading
+  `node.role`, not literal `roleOf`) is CORRECT — raw roleOf would mis-assert every
+  override-covered file.
+- **(c) LEGACY_FALLBACK interaction** — property extraction run under both modes. Default:
+  771 refs, 0 cross-role. `CODEWEB_LEGACY_FALLBACK=1`: decl-line skip, param shadow, and the
+  short guard all HOLD (≤2-char refs stay 2, both same-file; 828 short drops identical) — they
+  sit UPSTREAM of the lever; 28 product→non-product refs reappear via the lever's own
+  `defs[0]` branch only, which is its documented purpose (resurrect pre-fix wiring for A/B
+  regression proof; extract-symbols.test.mjs asserts a fabricated edge COMES BACK under it).
+  Correct by design; property test correctly runs default-mode.
+- **(d) Python class-paren over-suppression** — fixture written (refscope (e)): a class whose
+  `__init__(self, helper)` shadows module symbol `helper`. Confirmed: the param-ref inside
+  `__init__` drops (1 ambiguous), `render`'s real cross-file body ref SURVIVES
+  (`Widget.render → helper.py:helper`). Suppression is per-binding in Python too; green as-built.
+
+Usage verification (all fresh at 8c4dc9d):
+- Self-map: `1240 symbols, 4102 edges from 228 files` — ref edges **771**, product→non-product
+  refs **0**, refs into ≤2-char symbols **2** (both same-file, regrade.mjs `f`),
+  product→non-product calls **0**, T-10.5 cycle-class edges **0** (re-derived, not trusted).
+- Overlap on that map: default **11 findings, 0 parallel-impl, 0 non-product nodes anywhere**;
+  `CODEWEB_ALL_ROLES=1` **129 findings**, graph.json AND overlap.md **byte-identical** to the
+  pre-#16 overlap (ce5a76f worktree ≡ e67965c's overlap.mjs) under the same env — criterion 3
+  (i)–(iii) re-derived, set equality holds (16 ALL_ROLES twins, 0 all-product, 0 default).
+- i1–i6 re-run green; NodeNext package end-to-end: `query --callers src/x-parse.ts:parse` →
+  exactly `src/main.ts:run` (the audit's 0-answer case answers); y-parse:parse → 0.
+- SCANNER_VERSION gate: planted a v14 cache with a poisoned edge → discarded (poison absent,
+  full rescan, cache rewritten v15, fragment byte-identical to cold).
+- CI at 8c4dc9d: **all 7 jobs green** (gate, consistency, bench, test ×3 matrix, test-no-ast).
+  Gate adjudication: the PR digest reads `edges +13 −1` — the gate maps `--target scripts`
+  only, where the removed fabrications never existed (they pointed into tests//bench/); its
+  regression classes (new cycles / duplication / a SURVIVING symbol losing all callers) key
+  `lostCallers` on call-kind in-edges only, so deliberate ref-fabrication removal passes
+  honestly. No gate bug; nothing to fix.
+- Full `npm test` ×1 post-fix: **58.7 s wall; 676 tests, 671 pass, 0 fail, 5 skipped**
+  (pre-existing env skips; +4 tests this pass), `git status --porcelain` clean after commit.
