@@ -20,6 +20,13 @@
 // --no-ctags forces the deterministic regex scanner; the AST leg runs the same fixture under the
 // default tree-sitter engine (skip-guarded on availability, the suite convention) and the id sets
 // must be identical across tiers (the engine A/B extended to this fixture).
+//
+// Review addition (WS-B build review): over.ts pins the MODULE-LEVEL overload-stub direction of the
+// T-12.2 class-gate decision. `export function f(x: number): string;` stubs match the function rule
+// in BOTH tiers (functions are regex-scanner-owned even under tree-sitter), so every stub line is a
+// declaration start — declStarts suppresses its own-name callRe match and the @line scheme dedupes
+// ids. The class gate never needs to fire there, and narrowing it to class enclosings reintroduced
+// no <module> fabrication (verified empirically against both tiers before pinning).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -45,11 +52,18 @@ const W_TS =
   '  move({ x, y }) { return normalize(x + y); }\n' +
   '}\n';
 
+const OVER_TS =
+  'export function f(x: number): string;\n' +
+  'export function f(x: string): number;\n' +
+  'export function f(x: any): any { return g(x); }\n' +
+  'export function g(v: number): number { return v; }\n' +
+  'export function caller() { return f(1); }\n';
+
 let DIR;
 const frags = new Map();
 function extract(engine) {
   if (frags.has(engine)) return frags.get(engine);
-  if (!DIR) { DIR = tmpDir('codeweb-accessor-'); writeTree(DIR, { 'w.ts': W_TS }); }
+  if (!DIR) { DIR = tmpDir('codeweb-accessor-'); writeTree(DIR, { 'w.ts': W_TS, 'over.ts': OVER_TS }); }
   const out = join(DIR, `fragment-${engine}.json`);
   const res = runNode(script('extract-symbols.mjs'), [DIR, '--target', 'accessor-x', '--no-ctags', '--out', out],
     { env: { CODEWEB_ENGINE: engine } });
@@ -86,6 +100,20 @@ for (const [engine, label, skip] of TIERS) {
       "the setter's normalize(v) call attributes to the @5 id");
     assert.ok(hasEdge(f.edges, 'w.ts:Widget.compute', 'w.ts:normalize'), 'impl body call survives');
     assert.ok(hasEdge(f.edges, 'w.ts:Widget.move', 'w.ts:normalize'), 'destructured-param body call survives');
+  });
+
+  test(`module-level overload stubs (${label}): stubs get @line ids; no <module> or self fabrication`, { skip }, () => {
+    const f = extract(engine);
+    const ids = new Set(f.nodes.map((n) => n.id));
+    assert.ok(ids.has('over.ts:f') && ids.has('over.ts:f@2') && ids.has('over.ts:f@3'),
+      'each stub line is a declaration with its own range; ids dedupe via @line');
+    assert.ok(!f.edges.some((e) => e.from === 'over.ts:<module>'),
+      'no <module> caller in over.ts — stub lines are declaration lines (declStarts), not free code');
+    assert.ok(!f.edges.some((e) => e.from.startsWith('over.ts:f') && e.to.startsWith('over.ts:f')),
+      'no f -> f self edges from stub/impl declaration lines');
+    assert.ok(hasEdge(f.edges, 'over.ts:f@3', 'over.ts:g'), "the impl body's g(x) call edges from the impl id");
+    assert.ok(hasEdge(f.edges, 'over.ts:caller', 'over.ts:f@3'),
+      'caller() resolves to the impl id (sameFileByName keeps the last same-named range)');
   });
 }
 

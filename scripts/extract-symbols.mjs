@@ -774,8 +774,14 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
   // callRe AND refRe there (refRe on stub params would fabricate ref edges to short repo symbols,
   // the #10 magnet class). Name-independent, one regex test per line — no per-match RegExp. The
   // class gate narrows the spec's unconditional line guard: the same shape inside a FUNCTION body
-  // is an ordinary call statement (`finish(code);` — 112 such lines in this repo alone) whose edges
-  // must survive; class bodies cannot contain statements, so nothing real is suppressed there.
+  // is an ordinary call statement (`finish(code);` — review-measured: the unconditional guard hits
+  // 675 tracked js/ts lines, 382 of them non-keyword-led statements) whose edges must survive;
+  // class bodies cannot contain statements, so the gate suppresses nothing real — with ONE known
+  // residual (review-verified): a bare call statement inside an ES2022 `static {}` block is
+  // stub-shaped with a class enclosing, so its class-attributed edge is suppressed. Accepted:
+  // rare construct, and pre-#12 that edge mis-attributed the call to the class node anyway.
+  // Module-level TS overload stubs need no guard at all — each stub line matches the function rule
+  // in both tiers, so declStarts covers it (pinned in tests/accessor-overload-truth.test.mjs).
   const STUB_LINE_RE = /^\s*(?:(?:public|private|protected|static|readonly|abstract|override|async)\s+)*[A-Za-z_$][\w$]*\s*\([^;{]*\)\s*(?::[^{;]*)?;\s*$/;
   const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g;
   const csBaseRe = /\b(?:class|struct|record)\s+[A-Za-z_]\w*(?:<[^>]*>)?\s*:\s*([A-Za-z_][\w.]*)/g; // C# `class A : Base, IFace` -> Base
