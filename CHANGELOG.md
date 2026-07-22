@@ -542,6 +542,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
   ts-engine's existing null-on-throw per-file fallback, no single file can kill an extract in
   either tier. `SCANNER_VERSION` 13 -> 14 so warm caches can't replay pre-fix products.
   (perf-quality round 2, finding #15)
+- **The JS masker learned nested templates.** `maskJs`'s two scalars (inTemplate, exprDepth) could
+  not represent a template inside `${}` on ordinary modern JS: nested-template TEXT stayed live
+  (`` `Usage: ${xs.map((n) => `fabricateMe(${n})`)}` `` fabricated a call edge), a `}` inside that
+  nested text closed the interpolation and INVERTED template state (edges lost, extents run to
+  EOF), an escaped `` \` `` did the same (no `\` handling in text), and `${}`-interior strings were
+  kept verbatim even in blank-values mode (string content fabricated edges — deadcode's safe tier
+  corrupted again, one idiom over from round 1's regex-literal fix). Template state is now a stack
+  of frames (nested backticks push; text `\` consumes escapes; expr strings route through the
+  keepValues gate, so codemod's two-view diff classifies a name inside `${'…'}` as inside-a-value),
+  every delimiter backtick blanks in default mode, and default-mode `maskJs` is now IDEMPOTENT over
+  the corpus — pinned with per-line length preservation by the new shared property suite
+  (`tests/masking-properties.test.mjs`, corpus-scoped with the value-then-division counterexample
+  documented). Five repro fixtures run under both engine tiers in
+  `tests/maskjs-nested-templates.test.mjs`. (perf-quality round 2, finding #8)
 
 ## [0.9.0] - 2026-07-19
 

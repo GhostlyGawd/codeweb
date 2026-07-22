@@ -72,7 +72,9 @@ export function maskRuby(text) {
 // `cartSubtotal() -> computeLineTotal()` fabricating two edges — the same phantom-edge class the
 // Python docstring mask already fixes). STRING-AWARE: a `//` inside a string (`"http://…"`) is not a
 // comment. Template literals are special — their TEXT is blanked but a `${ … }` interpolation is REAL
-// code and is kept verbatim (so `${ fmt() }` still edges). REGEX-AWARE (#1): a `/` in expression
+// code and is kept live (so `${ fmt() }` still edges); string literals INSIDE `${}` are VALUES and
+// route through the keepValues gate, and a nested template inside `${}` pushes its own frame
+// (round 2, finding #8 — see the tpl stack below). REGEX-AWARE (#1): a `/` in expression
 // position — start of input, after most punctuation, or after a keyword like `return` — opens a
 // regex literal; its interior (which may hold quotes, backticks, or braces: the ubiquitous
 // escaping-helper replace(/…/g) patterns, or a {2} quantifier) is blanked like a string so it can
@@ -88,8 +90,17 @@ export function maskJs(text, { keepValues = false } = {}) {
   const lines = text.split(/\r?\n/);
   const out = [];
   let inBlock = false;   // inside /* */ spanning lines
-  let inTemplate = false; // inside `...` template TEXT (not inside ${})
-  let exprDepth = 0;      // brace depth inside a template ${ ... } interpolation (0 = not in expr)
+  // Round 2, finding #8: template state is a STACK of frames — one {depth} per open template
+  // literal — replacing the two scalars (inTemplate, exprDepth) that could not represent a nested
+  // template inside `${}` (its text stayed live and its `}`s decremented the OUTER expr depth,
+  // inverting state). Invariants: in template TEXT ⇔ tpl.length && top.depth === 0; inside a `${}`
+  // expr ⇔ top.depth > 0. Cross-line invariant: the only state crossing a newline is inBlock, the
+  // tpl stack, and lastSig/lastWord — a line ending mid-TEXT resumes in TEXT, mid-expr at depth>0
+  // resumes in that expr (multi-line templates and multi-line `${}` flow through unchanged), and an
+  // unterminated template at EOF simply blanks the remainder as text. Every template-delimiter
+  // backtick — open, close, nested push from expr — emits keepValues ? '`' : ' ' (a verbatim
+  // backtick in default-mode output would flip state on re-mask, breaking idempotence).
+  const tpl = [];
   let lastSig = null;     // last significant real-code char emitted (null = nothing yet)
   let lastWord = '';      // trailing identifier run ending at lastSig (for keyword detection)
   const note = (ch) => { if (ch !== ' ' && ch !== '\t') { lastWord = /[A-Za-z0-9_$]/.test(ch) ? lastWord + ch : ''; lastSig = ch; } };
@@ -122,24 +133,32 @@ export function maskJs(text, { keepValues = false } = {}) {
         else { res += ' '.repeat(end + 2 - i); i = end + 2; inBlock = false; }
         continue;
       }
-      if (inTemplate && exprDepth === 0) {           // template TEXT — blank it, watch for `${` / closing backtick
+      const top = tpl.length ? tpl[tpl.length - 1] : null;
+      if (top && top.depth === 0) {                  // template TEXT — blank it, watch for `${` / \-escape / closing backtick
         const ch = line[i];
-        if (ch === '`') { res += keepValues ? '`' : ' '; i++; inTemplate = false; noteValue(); continue; }
-        if (ch === '$' && line[i + 1] === '{') { res += '${'; i += 2; exprDepth = 1; lastSig = '{'; lastWord = ''; continue; } // keep expr
+        if (ch === '`') { res += keepValues ? '`' : ' '; i++; tpl.pop(); noteValue(); continue; } // close: pop to the outer frame's expr (or normal code)
+        if (ch === '\\') {                            // \` and \$ are TEXT (2 chars; 1 at EOL), keepValues-gated like other text
+          const stop = Math.min(i + 2, n);
+          res += keepValues ? line.slice(i, stop) : ' '.repeat(stop - i); i = stop; continue;
+        }
+        if (ch === '$' && line[i + 1] === '{') { res += '${'; i += 2; top.depth = 1; lastSig = '{'; lastWord = ''; continue; } // keep expr
         res += keepValues ? ch : ' '; i++; continue; // template literal text
       }
-      if (exprDepth > 0) {                            // inside ${ ... } — keep verbatim (real code), match braces
+      if (top) {                                      // top.depth > 0: inside ${ ... } — keep code verbatim, match braces.
+        // Check order matters: string -> regex -> backtick-push -> braces. If backtick-push
+        // preceded the regex check, `${s.split(/`/)}` would push a phantom frame.
         const ch = line[i];
-        if (ch === '"' || ch === "'") {               // skip string interior so a `}` inside it can't miscount
+        if (ch === '"' || ch === "'") {               // string literal: whole quoted slice through value()
           let j = i + 1; while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
-          const stop = Math.min(j + 1, n); res += line.slice(i, stop); i = stop; noteValue(); continue;
+          const stop = Math.min(j + 1, n); res += value(line.slice(i, stop)); i = stop; noteValue(); continue;
         }
         if (ch === '/' && regexCanFollow()) {         // regex literal in the interpolation — blank it so a
           const m = scanRegex(line, i);               // quote or {n} quantifier can't desync brace matching
           if (m) { res += '/' + value(line.slice(i + 1, m.close)) + '/' + value(line.slice(m.close + 1, m.end)); i = m.end; noteValue(); continue; }
         }
-        if (ch === '{') exprDepth++;
-        else if (ch === '}') { exprDepth--; if (exprDepth === 0) { res += ch; i++; inTemplate = true; note(ch); continue; } }
+        if (ch === '`') { res += keepValues ? '`' : ' '; i++; tpl.push({ depth: 0 }); continue; } // nested template opens: push a frame
+        if (ch === '{') top.depth++;
+        else if (ch === '}') { top.depth--; if (top.depth === 0) { res += ch; i++; note(ch); continue; } } // back to this frame's TEXT
         note(ch); res += ch; i++; continue;
       }
       const ch = line[i];                             // normal code
@@ -158,7 +177,7 @@ export function maskJs(text, { keepValues = false } = {}) {
         let j = i + 1; while (j < n && line[j] !== ch) { if (line[j] === '\\') j++; j++; }
         const stop = Math.min(j + 1, n); res += value(line.slice(i, stop)); i = stop; noteValue(); continue;
       }
-      if (ch === '`') { res += keepValues ? '`' : ' '; i++; inTemplate = true; continue; }   // open template literal
+      if (ch === '`') { res += keepValues ? '`' : ' '; i++; tpl.push({ depth: 0 }); continue; } // open template literal (push a frame)
       note(ch); res += ch; i++;
     }
     out.push(res);
