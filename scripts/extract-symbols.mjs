@@ -42,7 +42,10 @@ import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; //
 //     package-boundary manifests.
 // v9: tree-sitter tier default-on when installed (dispatch recall); export-star re-export chains
 //     resolve (barrel files no longer swallow edges).
-const SCANNER_VERSION = 13; // v13: maskJs lexes regex literals (perf-quality finding 1) — extents/edges cached by v12 are stale
+// v13: maskJs lexes regex literals (perf-quality finding 1) — extents/edges cached by v12 are stale.
+const SCANNER_VERSION = 14; // v14: round-2 truth fixes (#8 template frames, #9 spread/IIFE, #12 accessor ids,
+// #13 Ruby heredoc/PHP #, #14 Python f-strings, #15 crash belts) change cached syms/ast.tsr/edges —
+// a v13 cache would replay pre-fix nodes/edges from the stamp tier indefinitely.
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
 // label separator, so the last ':' splits them.
