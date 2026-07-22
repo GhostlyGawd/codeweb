@@ -51,6 +51,24 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li>**The interactive graph's draw loop got substantially cheaper per frame: theme colors are read once</li>
+</ul>
+<p>  per draw, edges stroke in exact style batches, and labels are screen-space-gated and capped.** Every</p>
+<p>  labeled node used to call <code>getComputedStyle</code> (up to one per symbol — 16.8k reads on a full 16.8k</p>
+<p>  draw); <code>cvColors()</code> is now hoisted to one call at the top of <code>gDraw</code> (theme flips already redraw, so</p>
+<p>  it stays in sync). Edges stroked one <code>beginPath</code>+<code>stroke</code> each (104k strokes at 16.8k); they now</p>
+<p>  group into ≤432 exact style buckets keyed <code>state|bubble-pair|min(weight,72)</code> — alpha saturates at</p>
+<p>  weight 29 and width at 72, so the key reproduces the old per-edge stroke/width byte-for-byte (a</p>
+<p>  50k-edge property test asserts equality), and each bucket strokes once. Labels used a world-space</p>
+<p>  radius gate (<code>nd.r &gt; 7.5</code>, so a big node lost its label when zoomed out) with no cap; they now use a</p>
+<p>  screen-space gate (<code>nd.r * cam.k &gt; 7.5</code>) and a per-frame cap of 300, picked by a position-independent</p>
+<p>  rank (bubbles &gt; selection/search hits &gt; screen radius, tie-break by id) so they never flicker across</p>
+<p>  anneal frames. The search highlight set is computed once in <code>refreshHits</code> (stored id/domain Sets) and</p>
+<p>  reused by <code>gDraw</code> instead of rescanning the active node set every frame. <code>__codewebStage.drawOnce()</code></p>
+<p>  times one full draw; <code>report-scale.mjs</code> measures it, judges it (<code>drawOnceOk</code>, &lt;100 ms), and launches</p>
+<p>  Chromium with <code>chromiumSandbox:false</code> when running as root. The draw helpers ship as pure functions,</p>
+<p>  node-tested via the template-extraction pattern. (round 2, finding #37)</p>
+<ul>
 <li>**The editor CodeLens recomputes far less on every save: blast radius uses the canonical</li>
 </ul>
 <p>  pointer-queue walk, the blast memo now persists across graph refreshes, and the extension only</p>

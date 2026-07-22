@@ -55,6 +55,9 @@ test('L1: harness emits the full measurement schema on a fixture report', { skip
     assert.ok(j.expandAll && Number.isFinite(j.expandAll.simMsPerFrame), `expand-all measured (${JSON.stringify(j.expandAll)})`);
     assert.ok(j.expandAll.nodes > 0, 'expand-all actually put symbols on canvas');
     assert.equal(typeof j.verdict.expandAllOk, 'boolean', 'the verdict judges expand-all too');
+    // finding #37: the fitted full-draw cost is measured and judged
+    assert.ok(j.drawOnceMs === null || Number.isFinite(j.drawOnceMs), `drawOnce measured (${j.drawOnceMs})`);
+    assert.equal(typeof j.verdict.drawOnceOk, 'boolean', 'the verdict judges the draw loop too');
     assert.ok(j.chromiumVersion, 'environment noted');
   } finally { cleanup(dir); }
 });

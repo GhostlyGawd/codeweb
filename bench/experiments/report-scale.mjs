@@ -78,7 +78,10 @@ async function main() {
   if (!existsSync(graphPath)) { console.error(`graph.json not found next to the report (${graphPath}) — needed for the stats row`); process.exit(2); }
   const g = JSON.parse(readFileSync(graphPath, 'utf8'));
 
-  const browser = await chromium.launch({ executablePath: findChromium() });
+  // finding #37: as root (CI containers, this build box) bare Chromium refuses to launch —
+  // "Running as root without --no-sandbox". Disable the sandbox only then; a no-op for normal runners.
+  const asRoot = typeof process.getuid === 'function' && process.getuid() === 0;
+  const browser = await chromium.launch({ executablePath: findChromium(), chromiumSandbox: asRoot ? false : undefined });
   const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
   const pageErrors = [];
   page.on('pageerror', (e) => pageErrors.push(String(e.message).slice(0, 200)));
@@ -143,6 +146,14 @@ async function main() {
   // nodes ≈ 5.5 min of sim CPU per click; the grid layout must keep it inside a frame budget).
   const expandAll = await page.evaluate(() => (window.__codewebStage && window.__codewebStage.expandAll ? window.__codewebStage.expandAll(10) : null));
 
+  // finding #37: one full gDraw at the fitted camera with every symbol on canvas — the draw-loop
+  // cost the batched edges + capped labels + hoisted cvColors must keep well under a frame.
+  const drawOnceMs = await page.evaluate(() => {
+    if (!window.__codewebStage || !window.__codewebStage.drawOnce) return null;
+    const fit = document.getElementById('gFit'); if (fit) fit.click();
+    return Math.round(window.__codewebStage.drawOnce() * 100) / 100;
+  });
+
   const heapUsedBytes = await page.evaluate(() => (performance.memory && performance.memory.usedJSHeapSize) || null);
   const chromiumVersion = browser.version();
   await browser.close();
@@ -152,8 +163,9 @@ async function main() {
     timeToGraphOk: timeToGraphMs <= 10000,
     searchOk: searchMs <= 300,
     expandAllOk: !expandAll || expandAll.simMsPerFrame <= 16, // one 60fps frame of sim work
+    drawOnceOk: drawOnceMs == null || drawOnceMs <= 100, // finding #37: fitted full draw < 100ms
     crashed: pageErrors.length > 0,
-    green: timeToGraphMs <= 10000 && searchMs <= 300 && (!expandAll || expandAll.simMsPerFrame <= 16) && pageErrors.length === 0,
+    green: timeToGraphMs <= 10000 && searchMs <= 300 && (!expandAll || expandAll.simMsPerFrame <= 16) && (drawOnceMs == null || drawOnceMs <= 100) && pageErrors.length === 0,
   };
 
   const row = {
@@ -169,6 +181,7 @@ async function main() {
     searchMs,
     stagedBlastMs,
     expandAll,
+    drawOnceMs,
     heapUsedBytes,
     pageErrors,
     chromiumVersion,

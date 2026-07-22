@@ -10,6 +10,22 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Changed
+- **The interactive graph's draw loop got substantially cheaper per frame: theme colors are read once
+  per draw, edges stroke in exact style batches, and labels are screen-space-gated and capped.** Every
+  labeled node used to call `getComputedStyle` (up to one per symbol — 16.8k reads on a full 16.8k
+  draw); `cvColors()` is now hoisted to one call at the top of `gDraw` (theme flips already redraw, so
+  it stays in sync). Edges stroked one `beginPath`+`stroke` each (104k strokes at 16.8k); they now
+  group into ≤432 exact style buckets keyed `state|bubble-pair|min(weight,72)` — alpha saturates at
+  weight 29 and width at 72, so the key reproduces the old per-edge stroke/width byte-for-byte (a
+  50k-edge property test asserts equality), and each bucket strokes once. Labels used a world-space
+  radius gate (`nd.r > 7.5`, so a big node lost its label when zoomed out) with no cap; they now use a
+  screen-space gate (`nd.r * cam.k > 7.5`) and a per-frame cap of 300, picked by a position-independent
+  rank (bubbles > selection/search hits > screen radius, tie-break by id) so they never flicker across
+  anneal frames. The search highlight set is computed once in `refreshHits` (stored id/domain Sets) and
+  reused by `gDraw` instead of rescanning the active node set every frame. `__codewebStage.drawOnce()`
+  times one full draw; `report-scale.mjs` measures it, judges it (`drawOnceOk`, <100 ms), and launches
+  Chromium with `chromiumSandbox:false` when running as root. The draw helpers ship as pure functions,
+  node-tested via the template-extraction pattern. (round 2, finding #37)
 - **The editor CodeLens recomputes far less on every save: blast radius uses the canonical
   pointer-queue walk, the blast memo now persists across graph refreshes, and the extension only
   activates in workspaces that actually hold a codeweb graph.** `blastOf` (`lens-core.js`) walked the

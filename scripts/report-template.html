@@ -342,7 +342,7 @@
     roleBtn.onclick = function () {
       productOnly = !productOnly; syncRoleBtn();
       hashState.roles = productOnly ? null : 'all'; writeHash();
-      computeDerived(); renderMeta();
+      computeDerived(); refreshHits(); renderMeta(); // #37: AN changed — recompute the reused hit sets
       rendered = {}; // every view re-renders against the new scope
       var cur = document.querySelector('.tab[role="tab"].on').getAttribute('data-view');
       if (gInit) { gLayout(); syncToggle(); }
@@ -751,15 +751,62 @@
   }
   function gFit() { var ns = W.nodes; if (!ns.length) return; var a = 1e9, b = 1e9, c = -1e9, d = -1e9; ns.forEach(function (n) { a = Math.min(a, n.x); b = Math.min(b, n.y); c = Math.max(c, n.x); d = Math.max(d, n.y); }); var w = cv.width / DPR, h = cv.height / DPR; cam.k = Math.max(0.05, Math.min((w - 70) / Math.max(1, c - a), (h - 70) / Math.max(1, d - b), 2.5)); cam.x = w / 2 - (a + c) / 2 * cam.k; cam.y = h / 2 - (b + d) / 2 * cam.k; }
   function X(x) { return x * cam.k + cam.x; } function Y(y) { return y * cam.k + cam.y; }
+  // ---------- draw helpers (pure; node-tested via extractFn in tests/report-draw.test.mjs) --------
+  // #37: labels are picked by a position-INDEPENDENT rank, so they never flicker across anneal
+  // frames at a fixed camera — rank is (bubble, hl membership, screen radius, id), never x/y. Capped
+  // per frame so a zoomed-in view never tries to paint thousands of labels.
+  function labelPick(nodes, cam, hl, cap) {
+    var scored = [];
+    for (var i = 0; i < nodes.length; i++) {
+      var nd = nodes[i];
+      var rank = nd.bubble ? 0 : (hl && hl.has(nd.id)) ? 1 : 2; // bubbles > selection/hits > the rest
+      scored.push({ nd: nd, rank: rank, sr: nd.r * cam.k });
+    }
+    scored.sort(function (a, b) {
+      if (a.rank !== b.rank) return a.rank - b.rank;
+      if (a.sr !== b.sr) return b.sr - a.sr;                     // larger screen radius first
+      return a.nd.id < b.nd.id ? -1 : a.nd.id > b.nd.id ? 1 : 0; // deterministic tie-break by id
+    });
+    var out = [];
+    for (var k = 0; k < scored.length && out.length < cap; k++) out.push(scored[k].nd);
+    return out;
+  }
+  // #37: edges batch by EXACT style bucket — one beginPath+stroke per (state, bubble-pair, weight)
+  // group instead of per edge. alpha saturates at w=29, width at w=72, so min(weight,72) keys both
+  // without losing a byte of the old per-edge style. ≤ 3·2·72 = 432 buckets at any n.
+  function edgeBucketKey(e, A, B, on) {
+    var pair = !!(A.bubble && B.bubble);
+    var state = !on ? 'dim' : (e.cross && !pair) ? 'tangle' : 'norm';
+    return state + '|' + (pair ? 1 : 0) + '|' + Math.min(e.weight, 72);
+  }
+  function edgeStyleFor(key) {
+    var p = key.split('|'), state = p[0], pair = p[1] === '1', w = +p[2];
+    var wgt = Math.min(1, Math.log(w + 1) / 3.4);
+    return {
+      stroke: state === 'dim' ? 'rgba(125,122,135,0.05)'
+        : state === 'tangle' ? 'rgba(236,131,90,' + (0.25 + wgt * 0.4) + ')'
+        : 'rgba(156,153,166,' + (0.14 + wgt * 0.34) + ')',
+      width: pair ? Math.max(0.8, Math.min(6, Math.log(w + 1) * 1.4)) : 1,
+    };
+  }
+  // #37: the search highlight set, computed ONCE per search/scope change (refreshHits stores it),
+  // not rescanned across the whole active node set every frame.
+  function hitScan(nodes, term) {
+    var t = (term || '').toLowerCase(), hits = [], ids = new Set(), doms = new Set();
+    if (t) for (var i = 0; i < nodes.length; i++) { var n = nodes[i]; if (n.label.toLowerCase().indexOf(t) >= 0) { hits.push(n); ids.add(n.id); doms.add(n.domain); } }
+    return { hits: hits, ids: ids, doms: doms };
+  }
+  var LABEL_CAP = 300; // #37: at most this many labels per frame, priority-ranked
   function gDraw() {
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
-    // highlight set: search matches, or the selected node + its neighbors (neighbors inside a
-    // collapsed bubble light the bubble — the connection is never invisible)
+    // #37: one getComputedStyle per draw (was one per labeled node → 16.8k/draw). Theme flips call
+    // applyTheme → setTimeout(gDraw), so a per-draw read stays in sync with the page.
+    var thc = cvColors();
+    // highlight set: search matches (reused from refreshHits), or the selected node + its neighbors
+    // (neighbors inside a collapsed bubble light the bubble — the connection is never invisible)
     var hl = null, hlDom = null;
     if (searchTerm) {
-      var t = searchTerm.toLowerCase();
-      hl = new Set(); hlDom = new Set();
-      AN.forEach(function (n) { if (n.label.toLowerCase().indexOf(t) >= 0) { hl.add(n.id); hlDom.add(n.domain); } });
+      hl = hitIds; hlDom = hitDomains; // #37: refreshHits already computed these — no per-frame AN rescan
     } else if (selectedNode) {
       hl = new Set([selectedNode]); hlDom = new Set();
       var lightUp = function (id) { var n = nodeById.get(id); if (!n) return; hl.add(mapEnd(n)); hlDom.add(n.domain); };
@@ -767,23 +814,32 @@
     }
     var lit = function (nd) { return !hl || hl.has(nd.id) || (nd.bubble && hlDom && hlDom.has(nd.domain)); };
     lastLit = hl ? new Set(W.nodes.filter(lit).map(function (n) { return n.id; })) : null;
-    // edges: quadratic curves, weight -> alpha/width; cross-area edges wear the tangle color
+    // edges: quadratic curves, weight -> alpha/width; cross-area edges wear the tangle color. Grouped
+    // into ≤432 exact style buckets, one beginPath+stroke each (was one stroke per edge — 104k at 16.8k).
+    var lowZoom = cam.k < 0.35; // intentional geometry LOD: weight-1 non-bubble edges draw straight
+    var buckets = new Map();
     W.edges.forEach(function (e) {
       var A = W.idx.get(e.from), B = W.idx.get(e.to); if (!A || !B) return;
       var on = !hl || (lit(A) && lit(B));
-      var wgt = Math.min(1, Math.log(e.weight + 1) / 3.4);
-      // between two collapsed bubbles EVERY edge is cross-area — orange would be noise there;
-      // the tangle color only means something once symbols are on screen
-      var tangle = e.cross && !(A.bubble && B.bubble);
-      ctx.strokeStyle = !on ? 'rgba(125,122,135,0.05)'
-        : tangle ? 'rgba(236,131,90,' + (0.25 + wgt * 0.4) + ')'
-        : 'rgba(156,153,166,' + (0.14 + wgt * 0.34) + ')';
-      ctx.lineWidth = A.bubble && B.bubble ? Math.max(0.8, Math.min(6, Math.log(e.weight + 1) * 1.4)) : 1;
-      var x1 = X(A.x), y1 = Y(A.y), x2 = X(B.x), y2 = Y(B.y);
-      var mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1;
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo(mx - dy * 0.09, my + dx * 0.09, x2, y2); ctx.stroke();
+      var key = edgeBucketKey(e, A, B, on);
+      var b = buckets.get(key); if (!b) buckets.set(key, b = []); b.push(e);
     });
-    // nodes: fill + darker ring of the same hue; selection wears the brand accent
+    buckets.forEach(function (list, key) {
+      var st = edgeStyleFor(key); ctx.strokeStyle = st.stroke; ctx.lineWidth = st.width;
+      var kp = key.split('|'), straight = lowZoom && kp[1] === '0' && kp[2] === '1';
+      ctx.beginPath();
+      for (var m = 0; m < list.length; m++) {
+        var e = list[m], A = W.idx.get(e.from), B = W.idx.get(e.to);
+        var x1 = X(A.x), y1 = Y(A.y), x2 = X(B.x), y2 = Y(B.y);
+        ctx.moveTo(x1, y1);
+        if (straight) ctx.lineTo(x2, y2);
+        else { var mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1; ctx.quadraticCurveTo(mx - dy * 0.09, my + dx * 0.09, x2, y2); }
+      }
+      ctx.stroke();
+    });
+    // nodes: fill + darker ring of the same hue; selection wears the brand accent. Labels are
+    // collected here (screen-space LOD) and drawn in a capped, priority-ranked second pass.
+    var labelCands = [];
     W.nodes.forEach(function (nd) {
       var vis = lit(nd);
       var c = colorOf(nd.domain);
@@ -792,18 +848,22 @@
       ctx.fillStyle = c; ctx.fill();
       ctx.lineWidth = nd.bubble ? 2 : 1.4; ctx.strokeStyle = shade(c, 0.5); ctx.stroke();
       if (selectedNode === nd.id) { ctx.lineWidth = 2.5; ctx.strokeStyle = '#C6F24E'; ctx.beginPath(); ctx.arc(X(nd.x), Y(nd.y), nd.r + 2.5, 0, 6.2832); ctx.stroke(); }
-      var showLabel = vis && (nd.bubble || nd.r > 7.5 || cam.k > 1.7 || (hl && hl.has(nd.id) && hl.size < 40));
-      if (showLabel) {
-        var lx = X(nd.x) + nd.r + 4, ly = Y(nd.y) + 3.5;
-        ctx.font = (nd.bubble ? '600 12px ' : '500 10.5px ') + UIFONT;
-        var thc = cvColors();
-        ctx.lineWidth = 3; ctx.strokeStyle = thc.halo; ctx.lineJoin = 'round';
-        var txt = nd.bubble ? nd.label + ' · ' + nd.count : nd.label;
-        ctx.strokeText(txt, lx, ly);
-        ctx.fillStyle = nd.bubble ? thc.label : thc.dim; ctx.fillText(txt, lx, ly);
-      }
       ctx.globalAlpha = 1;
+      // #37: screen-space gate (was world-space nd.r>7.5 — a big node lost its label when zoomed out).
+      var cand = vis && (nd.bubble || nd.r * cam.k > 7.5 || cam.k > 1.7 || (hl && hl.has(nd.id) && hl.size < 40));
+      if (cand) labelCands.push(nd);
     });
+    var toLabel = labelPick(labelCands, cam, hl, LABEL_CAP);
+    ctx.globalAlpha = 1; ctx.lineJoin = 'round';
+    for (var li = 0; li < toLabel.length; li++) {
+      var lnd = toLabel[li];
+      var lx = X(lnd.x) + lnd.r + 4, ly = Y(lnd.y) + 3.5;
+      ctx.font = (lnd.bubble ? '600 12px ' : '500 10.5px ') + UIFONT;
+      ctx.lineWidth = 3; ctx.strokeStyle = thc.halo;
+      var txt = lnd.bubble ? lnd.label + ' · ' + lnd.count : lnd.label;
+      ctx.strokeText(txt, lx, ly);
+      ctx.fillStyle = lnd.bubble ? thc.label : thc.dim; ctx.fillText(txt, lx, ly);
+    }
   }
   function gPick(mx, my) { var best = null, bd = 1e9; W.nodes.forEach(function (nd) { var dx = X(nd.x) - mx, dy = Y(nd.y) - my, d = Math.sqrt(dx * dx + dy * dy); if (d < nd.r + 4 && d < bd) { bd = d; best = nd; } }); return best; }
   var gdrag = null, gmoved = false;
@@ -818,13 +878,14 @@
   // Search NAVIGATES: live typing dims non-matches; Enter cycles matches (centering + selecting
   // each), Escape clears. The count chip narrates n/N for screen readers too.
   var gsearchEl = document.getElementById('gsearch'), gcountEl = document.getElementById('gcount');
-  var searchHits = [], searchIx = -1;
+  var searchHits = [], searchIx = -1, hitIds = new Set(), hitDomains = new Set();
   function centerOn(nd) { var w = cv.width / DPR, h = cv.height / DPR; cam.k = Math.max(cam.k, 0.9); cam.x = w / 2 - nd.x * cam.k; cam.y = h / 2 - nd.y * cam.k; }
   function refreshHits() {
     // search SYMBOLS (the active scope), not whatever bubbles the current view draws — a domain
-    // view must still find normalizePath and expand to it on Enter.
-    var t = searchTerm.toLowerCase();
-    searchHits = t ? AN.filter(function (n) { return n.label.toLowerCase().indexOf(t) >= 0; }) : [];
+    // view must still find normalizePath and expand to it on Enter. #37: this ALSO stores the id +
+    // domain Sets gDraw's search highlight reuses, so the draw loop stops rescanning AN per frame.
+    var r = hitScan(AN, searchTerm);
+    searchHits = r.hits; hitIds = r.ids; hitDomains = r.doms;
     searchIx = -1;
     gcountEl.textContent = searchTerm ? (searchHits.length ? searchHits.length + ' match(es) — Enter jumps' : 'no matches') : '';
   }
@@ -896,6 +957,10 @@
       gDraw();
       return { nodes: W.nodes.length, edges: W.edges.length, simMsPerFrame: Math.round(ms * 100) / 100 };
     },
+    // finding #37: time ONE full gDraw at the current camera (ms). The draw-loop evidence probe —
+    // the batched edges + capped labels + hoisted cvColors must keep a fitted 16.8k draw well under
+    // a frame. Called after gFit() by the report-scale harness; pure measurement, no state change.
+    drawOnce: function () { var t0 = performance.now(); gDraw(); return performance.now() - t0; },
     // screen-space bounding box of the drawn graph (CSS px) — lets the screenshot pipeline crop
     // to content instead of shipping empty canvas
     graphBBox: function () {
