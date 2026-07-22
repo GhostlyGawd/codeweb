@@ -589,6 +589,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
   bodies' calls re-attributed to the class. Self-map after: zero class->own-member edges.
   `tests/accessor-overload-truth.test.mjs` runs the fixture in BOTH tiers and asserts identical id
   sets. (perf-quality round 2, finding #12)
+- **Ruby heredocs and PHP `#` comments stop fabricating symbols and edges.** Ruby's symbol scan ran
+  on RAW text and `maskRuby` had no heredoc state, so a `<<~SQL` body containing `helper(1)` and
+  `def phantom_method` produced a phantom node and a fabricated module->helper call edge.
+  `maskRuby` is now a stateful line loop with a FIFO queue of pending heredoc tags: body and
+  terminator lines mask to empty lines (nothing inside a body can queue, scan, or edge), the
+  opener TOKEN masks to the literal `''` so `sql = <<~SQL.strip` stays live code, `a << b` shift
+  and `<<=` never match, stacked `f(<<~A, <<~B)` queues in order, and `~`/`-` tags terminate by
+  trimmed equality while plain tags need column 0 — and the Ruby scan now consumes `masked('rb')`
+  (the edge scan already did). PHP routes through `maskJs`, which now takes `{hashComment:true}`
+  (.php only — JS private fields unaffected): `# legacy note: helper(1)` no longer fabricates a
+  module->helper call. Accepted limits documented in the mask header: heredoc-interior `#{…}`
+  interpolation blanks with the body (the pre-existing Ruby interpolation gap), and quoted-tag
+  `<<~"TAG"` openers are eaten by the string replaces first (backtick-quoted tags still open).
+  (perf-quality round 2, finding #13)
 
 ## [0.9.0] - 2026-07-19
 

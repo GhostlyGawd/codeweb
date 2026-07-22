@@ -156,7 +156,12 @@ const maskCache = new Map(); // `${rel}\x00${kind}` -> masked text
 function maskedOnce(relPath, kind, text) {
   const k = relPath + '\x00' + kind;
   let v = maskCache.get(k);
-  if (v === undefined) { v = kind === 'py' ? maskPy(text) : kind === 'rb' ? maskRuby(text) : maskJs(text); maskCache.set(k, v); }
+  if (v === undefined) {
+    v = kind === 'py' ? maskPy(text)
+      : kind === 'rb' ? maskRuby(text)
+      : maskJs(text, relPath.endsWith('.php') ? { hashComment: true } : undefined); // PHP `#` comments (finding #13)
+    maskCache.set(k, v);
+  }
   return v;
 }
 

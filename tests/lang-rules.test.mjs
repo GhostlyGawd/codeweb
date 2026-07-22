@@ -12,7 +12,7 @@ import { scanSymbols, bodyEnd, parseSignature, KEYWORDS, langOf } from '../scrip
 import { createImportResolver, defaultExportOf } from '../scripts/lib/import-resolve.mjs';
 import { maskPy } from '../scripts/lib/masking.mjs';
 
-const noMask = () => { throw new Error('masked() must not be called for non-Python files'); };
+const noMask = () => { throw new Error('masked() must not be called for non-masked languages'); }; // .py and .rb scan masked text (finding #13); everything else raw
 
 test('LR1: scanSymbols — JS functions/classes/methods/field-arrows, in-process', () => {
   const text = [

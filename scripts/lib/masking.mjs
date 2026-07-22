@@ -53,17 +53,51 @@ export function maskPy(text, { keepValues = false } = {}) {
   return out.join('\n');
 }
 
-// Ruby masking (Spec I): line-local — string contents first (so interpolation can't fake a
-// comment), then `#`-to-EOL. Not column-preserving (see header). Round 2, finding #15: unrolled-loop
-// form (this site's escape atom is `\\[^]`) — the alternation form recursed per character in V8 and
-// a >=8.4MB single-line string RangeError'd the whole extract.
+// Ruby masking (Spec I): per-line — string contents first (so interpolation can't fake a comment),
+// then `#`-to-EOL, then heredoc openers. Not column-preserving (see header); line COUNT is
+// preserved. Round 2, finding #15: unrolled-loop string regexes (this site's escape atom is
+// `\\[^]`) — the alternation form recursed per character in V8 and a >=8.4MB single-line string
+// RangeError'd the whole extract. Round 2, finding #13: HEREDOC state — a FIFO queue of pending
+// tags. Per-line order: (1) queue non-empty -> this line is heredoc BODY: emit an EMPTY line
+// (dequeue when it matches the FRONT tag's terminator rule — `~`/`-` tags by trimmed equality,
+// plain tags at column 0), and run NO string/comment replaces or opener scanning on it (a `<<X`
+// inside a body must not queue); (2) otherwise mask strings/comments FIRST (an opener inside
+// "…"/#… is already gone — note this also eats '"TAG"'/"'TAG'" QUOTED-tag openers before the scan;
+// only backtick-quoted tags survive to it — accepted limit), then scan for openers
+// `<<[~-]?TAG` (no space after `<<`, so `a << b` shift stays code; `<<=` never matches), queueing
+// left-to-right (stacked `f(<<~A, <<~B)` works) and replacing each opener TOKEN with the
+// two-character literal '' — an empty Ruby string, so `sql = <<~SQL.strip` masks to
+// `sql = ''.strip` and the rest of the line stays live. Opener-token blanking is also what keeps
+// maskRuby idempotent (a re-mask sees no opener). Accepted limit: `#{…}` interpolation inside
+// heredoc bodies is blanked with the body — consistent with RB_DQ already replacing
+// "…#{helper(x)}…" with "" (Ruby interpolation edges are a pre-existing, documented recall gap).
 const RB_DQ = /"[^"\\]*(?:\\[^][^"\\]*)*"/g;
 const RB_SQ = /'[^'\\]*(?:\\[^][^'\\]*)*'/g;
+const RB_HEREDOC_OPEN = /<<([~-]?)(["'`]?)([A-Za-z_]\w*)\2/g;
 export function maskRuby(text) {
-  return text.split(/\r?\n/).map((ln) => ln
-    .replace(RB_DQ, '""')
-    .replace(RB_SQ, "''")
-    .replace(/#.*$/, '')).join('\n');
+  const out = [];
+  const pending = []; // FIFO of open heredoc tags: {tag, flex} — flex = `~`/`-` (indented terminator allowed)
+  for (const ln of text.split(/\r?\n/)) {
+    if (pending.length) {
+      const front = pending[0];
+      const isTerm = front.flex
+        ? ln.trim() === front.tag
+        : ln.startsWith(front.tag) && ln.slice(front.tag.length).trim() === ''; // /^TAG\s*$/, column 0
+      if (isTerm) pending.shift();
+      out.push(''); // body AND terminator lines mask to length-0 lines
+      continue;
+    }
+    let masked = ln.replace(RB_DQ, '""').replace(RB_SQ, "''").replace(/#.*$/, '');
+    RB_HEREDOC_OPEN.lastIndex = 0;
+    if (masked.includes('<<')) {
+      masked = masked.replace(RB_HEREDOC_OPEN, (_all, dash, _q, tag) => {
+        pending.push({ tag, flex: dash !== '' });
+        return "''";
+      });
+    }
+    out.push(masked);
+  }
+  return out.join('\n');
 }
 
 // JS/TS counterpart of maskPy for the edge-derivation scan: blanks `//` line comments and `/* */`
@@ -85,8 +119,12 @@ export function maskRuby(text) {
 // span lines, so that open state is carried across the loop. Best-effort (same ethos as maskPy):
 // pathological forms (`a++ /b/ c`) mis-lex exactly as in every heuristic lexer; worst case is a
 // slightly-off mask, never a crash.
+// Round 2, finding #13 (T-13.2): {hashComment:true} treats `#` in normal code as a to-EOL comment —
+// PHP's third comment syntax. php-only (set by maskAligned/maskedOnce for .php paths), so JS
+// private fields `#x` are unaffected; the branch order guarantees a `#` inside strings/templates
+// never reaches it.
 const REGEX_PREV_KW = new Set(['return', 'typeof', 'instanceof', 'in', 'of', 'new', 'delete', 'void', 'throw', 'case', 'do', 'else', 'yield', 'await']);
-export function maskJs(text, { keepValues = false } = {}) {
+export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
   const lines = text.split(/\r?\n/);
   const out = [];
   let inBlock = false;   // inside /* */ spanning lines
@@ -163,6 +201,7 @@ export function maskJs(text, { keepValues = false } = {}) {
       }
       const ch = line[i];                             // normal code
       if (ch === '/' && line[i + 1] === '/') { res += ' '.repeat(n - i); i = n; continue; } // line comment
+      if (hashComment && ch === '#') { res += ' '.repeat(n - i); i = n; continue; }         // PHP `#` comment (finding #13)
       if (ch === '/' && line[i + 1] === '*') {                                               // block comment
         const end = line.indexOf('*/', i + 2);
         if (end === -1) { inBlock = true; res += ' '.repeat(n - i); i = n; }
@@ -191,6 +230,7 @@ export function maskJs(text, { keepValues = false } = {}) {
 export function maskAligned(relPath, text, opts = {}) {
   const r = String(relPath);
   if (r.endsWith('.py')) return maskPy(text, opts);
-  if (/\.(jsx?|mjs|cjs|tsx?|java|cs|php|kt|kts|swift)$/.test(r)) return maskJs(text, opts);
+  if (r.endsWith('.php')) return maskJs(text, { ...opts, hashComment: true }); // PHP `#` comments (finding #13)
+  if (/\.(jsx?|mjs|cjs|tsx?|java|cs|kt|kts|swift)$/.test(r)) return maskJs(text, opts);
   return null;
 }

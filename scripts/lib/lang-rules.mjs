@@ -13,11 +13,13 @@ export const indentOf = (s) => s.length - s.replace(/^\s+/, '').length;
 
 export const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
 
-// `masked(kind)` returns the column/line-preserving masked text for this file (the extractor's
-// per-file memo) — only the Python branch needs it here (def/class inside docstrings).
+// `masked(kind)` returns the masked text for this file (the extractor's per-file memo) — the
+// Python AND Ruby branches need it here (def/class inside docstrings; def/class inside heredoc
+// bodies — round 2, finding #13). maskPy is column-preserving; maskRuby preserves line count only,
+// which is all the line-anchored Ruby rules read.
 export function scanSymbols(file, text, masked) {
   const ext = extname(file).toLowerCase();
-  const lines = (ext === '.py' ? masked('py') : text).split(/\r?\n/); // hide def/class inside docstrings
+  const lines = (ext === '.py' ? masked('py') : ext === '.rb' ? masked('rb') : text).split(/\r?\n/); // hide def/class inside docstrings/heredocs
   const syms = [];
   const push = (name, line, kind, exported, owner) => { if (name && !KEYWORDS.has(name)) syms.push({ name, line: line + 1, kind, exports: !!exported, ...(owner ? { owner } : {}) }); };
   if (ext === '.py') {
