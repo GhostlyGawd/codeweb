@@ -379,3 +379,81 @@ spec predicted for these fixtures). Windows-portability: all new tests use helpe
 join/tmpDir/writeTree, no dynamic imports of local files except via file:// URL (kv-check lives in
 scratch, not the repo), no CRLF assumptions (property test compares against split(/\r?\n/) lines
 per spec).
+
+### WS-B review+verification
+
+Reviewer: adversarial build review + usage verification over 566e375, 292580e, ea2d18f, 85b1835,
+bdb778e, 5febde3, 91668e5, a27ea03 (spec `docs/specs/round2-ws-b.md`, frozen). Container: same
+class as builder's (tree-sitter engine present — all AST legs ran un-skipped). Review commits:
+**2ca9ad1** (docs rebuild), **d641c44** (module-stub pin + residual notes), this entry.
+
+- **T-0 — PASS, gate proven both directions.** Planted a v13 `.scan-cache.json` with poisoned
+  cached syms+nodes -> warm run discarded it (correct output, cache rewritten v14). Control:
+  same poison at v14 -> `POISONED_ALPHA` REPLAYED (stamp tier serves cached `nodes`), proving the
+  probe sensitive and the `version === SCANNER_VERSION` check at :282 the discriminator.
+- **#15 — PASS.** Escape atoms per site verified in the diffs (`\\.` complexity trio; `\\[^]`
+  RB_DQ/RB_SQ + stmtHash trio); HL suite 8/8 incl. 9M in-process repros, escape-heavy 2M shape,
+  5,000-case seeded equivalence, shipped-source tripwire, mock-throw belt (exactly 1/0), E2E both
+  tiers. Belt is try/catch on whole bodies -> covers all call sites as specced.
+- **#8 — PASS.** Frame-stack diff matches spec (emission rule, check order string->regex->
+  backtick-push, `\` as 2-char text, cross-line invariant comment). n1–n5 through the real
+  extractor BOTH tiers: call-edge sets EXACTLY ground truth (5 edges: realUser->fabricateMe,
+  later->helper, afterEsc->helper, outer->inner, tick->inner; zero extras, zero ref noise), n2
+  `fmt.loc` = 3 exactly as hand-traced. Property suite green (P2 idempotence corpus-scoped,
+  counterexample documented in-header as specced).
+- **#9 — PASS; deviation RATIFIED with proof.** Probe table over spec-vs-landed lookahead
+  placement: spec's `=\s*(?!\(\()` wrong on **7/16** cases (including its own primary target
+  `const PERM_SEEDS = (() => {` — `\s*` backtracking defeats it); landed `=(?!\s*\(\()\s*`
+  correct **16/16**, incl. the brief's `= ((a)=>a)`, `=((x)=>x)()`, tab/space variants, and both
+  documented residuals (`= ( (` and async-IIFE still match). Spread guard verified (`a?.b(`,
+  `...obj.fn(` non-cases hold).
+- **#12 — PASS; class-gate narrowing verified BOTH directions; one residual documented.**
+  (1) b1/w.ts re-run fresh, both tiers: identical id sets (`Widget.value` + `Widget.value@5`),
+  exactly 3 ground-truth edges, zero `Widget -> member` phantoms, setter's normalize at `@5`.
+  (2) Module-level TS overload stubs (`export function f(x: number): string;` + impl): **no
+  fabrication in either tier** — stub lines match the function rule in both tiers (functions are
+  regex-owned even under tree-sitter), so each stub is a declaration start covered by declStarts,
+  ids dedupe to `f`/`f@2`/`f@3`, `caller -> f@3`, `f@3 -> g`, zero `<module>` edges. No guard
+  extension needed; pinned as new over.ts legs in tests/accessor-overload-truth.test.mjs
+  (d641c44). Corrections: builder's "112 statement lines" is an UNDER-count — the spec's
+  unconditional regex hits **675** tracked js/ts lines (382 non-keyword-led; 74 in scripts/
+  alone), a fortiori justifying the narrowing. One real residual found: a bare call statement in
+  an ES2022 `static {}` block is stub-shaped with class enclosing -> its class-attributed edge is
+  suppressed (verified vs pre-#12 worktree: `A -> register` existed, now gone). Accepted + now
+  documented at STUB_LINE_RE: rare construct, and the pre-fix edge mis-attributed the call to the
+  class node. `finish(code);`-class statement lines verified surviving in the fresh self-map
+  (`query.mjs:<module> -> lib/cli.mjs:finish [call]` present).
+- **#13 — PASS.** Heredoc state machine per spec (FIFO, front-tag terminator rules, opener token
+  -> `''`, `a << b`/`<<=` immune); fixture green; empirical limit check matches the docs:
+  quoted-tag `<<~"SQL"` opener eaten by RB_DQ (body stays live — documented), backtick-tag still
+  opens (body masked). The limit is documented where users look: maskRuby header AND the
+  CHANGELOG #13 entry, which now reaches docs/changelog.html via 2ca9ad1.
+- **#14 — PASS; interpretation verified correct.** The whole-slice keepValues gate is the only
+  reading consistent with the spec's mandated idempotence property (kept-in-default delimiters
+  re-mask as normal strings). 8 adversarial in-process cases (nested/escaped/same-quote-3.12
+  quotes in exprs, format specs, dicts, `{{code}}`, unterminated expr): all idempotent +
+  column-preserving, expr CODE live, expr-string CONTENT blanked. E2E nested-quote fixture:
+  `wrap -> fmt` exists, `wrap -> decoy` absent. **keepValues differential vs pre-#14 masker
+  (worktree at 5febde3): 7/7 byte-identical** incl. the spec fixture.
+- **Never-weaken audit — CLEAN.** Across 6f7d96b..a27ea03 the only existing-test change is the
+  `noMask` error-message string in tests/lang-rules.test.mjs (spec-directed comment update; throw
+  semantics unchanged). 7 new test files, zero assertions loosened. CHANGELOG entries present for
+  all six findings.
+- **Dogfood (fresh full self-map via run.mjs at d641c44):** `trend.mjs:metrics` call-callers =
+  **2** (`gitSnapshots`, `<module>`); `PERM_SEEDS` nodes = **0**; deadcode -> **safe tier EMPTY
+  (0 safe, 8 review**, all entrypoint/closure-guarded**)**; `class -> own member` edges = **0**;
+  `@line` ids = 5, all legitimate test/bench same-name collisions.
+- **Suites:** tier-equivalence (incremental-edges IE-*, type3-clones, extract-engine, ts-engine,
+  extract-v7): 47 pass / 1 pre-existing env skip. Full `npm test` at review HEAD: **58.5 s wall,
+  658 tests, 653 pass, 0 fail, 5 skipped** (pre-existing env skips; +2 tests = the new
+  module-stub legs), `git status` clean after (only intended review edits present pre-commit).
+  `check-consistency` OK.
+- **CI on a27ea03:** 6/7 green (test ×3 OS/node legs, test-no-ast, gate, bench); `consistency`
+  **red** — docs/changelog.html stale vs WS-B's six CHANGELOG entries. That is WS-A finding #5's
+  freshness gate making its first real catch, one workstream after landing. Fixed mechanically in
+  2ca9ad1 (in-place `node site/build.mjs`, byte-identical to a temp rebuild, exactly the six
+  missing paragraphs); fresh CI run on the review head expected green (checked post-push).
+
+Verdict: **all six findings PASS**; both builder deviations (#9 lookahead placement, #12 class
+gate) ratified with fresh adversarial proof; no structural problems. Residuals documented, none
+blocking. WS-C may rebase.
