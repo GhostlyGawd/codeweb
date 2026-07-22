@@ -13,6 +13,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { runNode, tmpDir, cleanup, writeTree, script, readJSON, PLUGIN_ROOT } from './helpers.mjs';
 
 const RUN = script('run.mjs');
@@ -20,7 +21,9 @@ const BENCH = join(PLUGIN_ROOT, 'bench', 'experiments', 'report-scale.mjs');
 
 let HAVE_PW = false;
 try {
-  const { resolvePlaywright } = await import(BENCH);
+  // file:// URL keeps this import working on windows (a D:\ path is an unsupported ESM scheme —
+  // the crash was swallowed by this catch and mis-reported as "playwright not resolvable")
+  const { resolvePlaywright } = await import(pathToFileURL(BENCH).href);
   HAVE_PW = !!resolvePlaywright();
 } catch { /* bench script missing/broken -> tests run and fail loudly */ }
 const SKIP = HAVE_PW ? false : 'playwright not resolvable';

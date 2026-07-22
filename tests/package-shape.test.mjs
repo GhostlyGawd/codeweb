@@ -30,7 +30,10 @@ test('P1: manifest is publishable — bins, files, no runtime deps, not private'
 });
 
 test('P2: npm pack ships engine + plugin surfaces, excludes repo-only trees', () => {
-  const r = spawnSync('npm', ['pack', '--dry-run', '--json'], { cwd: PLUGIN_ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
+  // Platform-honest spawn: on windows npm is npm.cmd — a bare 'npm' is ENOENT (status null), and
+  // .cmd files need a shell since Node's CVE-2024-27980 hardening. Assertions unchanged.
+  const WIN = process.platform === 'win32';
+  const r = spawnSync(WIN ? 'npm.cmd' : 'npm', ['pack', '--dry-run', '--json'], { cwd: PLUGIN_ROOT, encoding: 'utf8', maxBuffer: 1 << 26, shell: WIN });
   assert.equal(r.status, 0, r.stderr);
   const files = JSON.parse(r.stdout)[0].files.map((f) => f.path);
   for (const must of ['scripts/mcp-server.mjs', 'scripts/run.mjs', 'scripts/extract-symbols.mjs', '.claude-plugin/plugin.json', 'hooks/hooks.json', 'LICENSE', 'README.md']) {

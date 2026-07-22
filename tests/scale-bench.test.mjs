@@ -13,6 +13,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { runNode, tmpDir, cleanup, writeTree, script, readJSON, PLUGIN_ROOT } from './helpers.mjs';
 
 const RUN = script('run.mjs');
@@ -84,7 +85,8 @@ test('K2: scale.mjs emits the full schema and restores the edited source byte-id
 });
 
 test('K3: stagesReused honesty is pinned at the parser level', async () => {
-  const { parseStageTimes, sawReuseBanner } = await import(SCALE);
+  // dynamic import needs a file:// URL — a windows absolute path (D:\...) is an unsupported scheme
+  const { parseStageTimes, sawReuseBanner } = await import(pathToFileURL(SCALE).href);
   assert.deepEqual(
     parseStageTimes('[run] extract done in 12ms\nnoise\n[run] overlap done in 340ms\n'),
     { extract: 12, overlap: 340 },
