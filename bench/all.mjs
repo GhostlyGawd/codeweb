@@ -87,6 +87,7 @@ const advisorRuns = {
   deadcode: sh(S('deadcode.mjs'), [gpath, '--json']),
   hotspots: sh(S('hotspots.mjs'), [gpath, '--json']),
   campaign: sh(S('campaign.mjs'), [gpath, '--json']),
+  readingOrder: sh(S('reading-order.mjs'), [gpath, '--json']), // round 2, #22: was 75.9s@15.7k with no bench row
 };
 const advisors = Object.fromEntries(Object.entries(advisorRuns).map(([k, r]) => [k, {
   ms: r.ms, ok: r.status === 0, factorVsRegexBaseline: r.status === 0 ? factorOf(r.ms) : null,
@@ -162,6 +163,9 @@ let loaded;
 if (loadedRun.status !== 0) loaded = { ok: false, error: `run failed (exit ${loadedRun.status})` };
 else {
   const lg = JSON.parse(readFileSync(join(loadedWs, 'graph.json'), 'utf8'));
+  // round 2, #22: reading-order timed at load (default budget) — the 75.9s@15.7k regression
+  // lived exactly here, invisible because no harness ever timed it on a loaded graph.
+  const loadedReadingOrder = sh(S('reading-order.mjs'), [join(loadedWs, 'graph.json'), '--json']);
   loaded = {
     ok: true,
     files: planted.files, fns: planted.fns, plantedClusters: planted.plantedClusters,
@@ -170,6 +174,7 @@ else {
     lshEngaged: /\[overlap\] LSH path engaged/.test(loadedRun.stderr),
     stageMs: stageTimesOf(loadedRun.stderr),
     mapMs: loadedRun.ms,
+    readingOrderMs: loadedReadingOrder.status === 0 ? loadedReadingOrder.ms : null,
   };
 }
 

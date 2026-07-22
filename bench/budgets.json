@@ -12,11 +12,12 @@
     "report": 2
   },
   "advisorFactorVsRegexBaselineMax": {
-    "comment": "finding 13(c) — observed at set-time: risk 0.18, deadcode 0.15, hotspots 0.17, campaign 0.89. The quadratic risk loop this round fixed would have measured ~20x.",
+    "comment": "finding 13(c) — observed at set-time: risk 0.18, deadcode 0.15, hotspots 0.17, campaign 0.89. The quadratic risk loop this round fixed would have measured ~20x. Round 2 #22: readingOrder observed 0.16 post-fix (pre-fix would have measured ~9x on the self-map and 78x on the loaded corpus) — budget 0.5 is ~3x headroom.",
     "risk": 1,
     "deadcode": 1,
     "hotspots": 1,
-    "campaign": 3
+    "campaign": 3,
+    "readingOrder": 0.5
   },
   "loadedOverlapFindingsMin": 15,
   "loadedLshRequired": true

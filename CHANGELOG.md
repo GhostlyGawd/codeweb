@@ -91,6 +91,21 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **`reading-order` answers at the budget instead of ordering the whole graph first.** The greedy
+  "fewest unemitted callees" loop recounted every remaining node's unemitted callees per emitted
+  item and applied the budget only after the COMPLETE order existed — 48.8 s (75.9 s on the
+  finding's box) for the default 40-item answer at a 15k-node corpus, on track to hit the MCP
+  server's 120 s spawn timeout at 30k. The greedy choice depends only on the emitted set, so the
+  loop now exits at the budget with live unemitted-callee counters (decremented through a
+  reverse-caller map; self-call edges keep their own +1 until emission), swap-pop removal, and an
+  index-pointer queue in the symbol-scope closure — first-N byte-identical to the full order's
+  prefix, pinned by a 200-case seeded property against a frozen copy of the old implementation
+  (all three scope kinds, self-calls and cycles included) plus `cmp` against the pre-fix binary at
+  budget 40 AND full order on the 15k corpus. Budget normalization is pinned at the lib boundary
+  (finite budgets truncate like the old slice; NaN/±Infinity mean full order). Measured min-of-3:
+  48.8 s → **0.37 s** at budget 40 (full order 6.4 s). `bench/all.mjs` gains a `readingOrder`
+  advisor row + `readingOrderMs` on the loaded corpus, budget-gated at 0.5× the regex-extract
+  baseline, so this can never regress invisibly again. (round 2, finding #22)
 - **The post-edit hook stops re-verifying an unchanged baseline (hook-baseline sidecar).** On
   every edit the hook JSON.parsed the multi-MB baseline graph and recomputed its file cycles and
   caller index — map-time artifacts that cannot have changed since map time. `run.mjs` (after
