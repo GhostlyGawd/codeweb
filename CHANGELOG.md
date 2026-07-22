@@ -10,6 +10,24 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Fixed
+- **The MCP queue is now keyed by WORKSPACE DIRECTORY, so refresh→diff ordering actually holds (and
+  map/autoRefresh joined the queue).** The per-workspace serialization the queue comment promised did
+  not hold: `codeweb_diff` is `graphless`, so it queued under a shared `'(graphless)'` slot while
+  `codeweb_refresh` queued under the graph *file* path — fired together (which Claude Code does
+  routinely, and the server's own INSTRUCTIONS prescribe per edit), diff completed *before* refresh
+  and gated against pre-refresh bytes (can pass a real regression or flag a phantom one). Two other
+  spawn sites bypassed the queue entirely: `codeweb_map` and the internal auto-refresh ran outside it,
+  so two maps on one out dir interleaved stage-by-stage and an auto-refresh could race an explicit
+  refresh into two concurrent extracts on one scan cache. Redesigned as ONE per-workspace-directory
+  queue (`dirname(resolve(graph.json))` for graph tools, `resolve(out)` for map, `dirname(after)` for
+  diff via a new `queueFrom`) with a single `runChild` wrapper owning spawn/timeout/settle-once/trace
+  for every child. `handleMap` gains the settle-once guard it never had (a spawn failure there used to
+  double-reply and double-decrement the drain counter — now exactly one reply, verified). Auto-refresh
+  skips when the workspace already has a writer queued/in-flight (`writersPending`, read race-free in
+  the same readline drain) and otherwise enqueues as a writer. Stage 1 preserves full per-workspace
+  serialization; reader concurrency lands separately (#32). Opt-in `CODEWEB_MCP_TRACE=1` emits an
+  NDJSON queue-event stream on stderr (default silent) for the by-mechanism scenario suite (S2/S3/I7).
+  (round 2, findings #30 #31)
 - **A dying child no longer crashes the whole MCP server (unhandled EPIPE on child stdin).**
   `codeweb_find_similar` is the one tool that writes to a child's stdin (the candidate `body`); when
   the body exceeded the 64KB pipe buffer and the child exited before draining it (bad graph path,

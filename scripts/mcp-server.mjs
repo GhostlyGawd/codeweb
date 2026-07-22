@@ -12,7 +12,10 @@
 //   - codeweb_map builds/rebuilds the graph so the loop never dead-ends on "graph not found".
 //
 // CRITICAL: stdout carries ONLY JSON-RPC messages (one per line). Any stray write to stdout
-// corrupts the stream for the client, so all diagnostics go to stderr (here: none).
+// corrupts the stream for the client, so stdout stays pure. stderr is SILENT by default; the opt-in
+// CODEWEB_MCP_TRACE=1 emits one NDJSON queue event per line on stderr (start/end/kill/skip-
+// autorefresh) for by-mechanism scenario assertions — free-form on stderr, so it cannot corrupt the
+// protocol, and every trace write is try/catch-guarded (a client may close stderr — the #29 lesson).
 
 import { createInterface } from 'node:readline';
 import { spawn } from 'node:child_process';
@@ -65,6 +68,14 @@ const send = (msg) => process.stdout.write(JSON.stringify(msg) + '\n');
 const reply = (id, result) => send({ jsonrpc: '2.0', id, result });
 const fail = (id, code, message) => send({ jsonrpc: '2.0', id, error: { code, message } });
 const errResult = (id, text) => reply(id, { content: [{ type: 'text', text }], isError: true });
+
+// #30/#31/#32 observability: opt-in NDJSON queue trace on stderr for BDD-by-mechanism assertions
+// (scenario tests assert event INTERLEAVINGS, not wall-clock). Default off with ZERO stderr writes.
+const TRACE = process.env.CODEWEB_MCP_TRACE === '1';
+function trace(ev, obj) {
+  if (!TRACE) return;
+  try { process.stderr.write(JSON.stringify({ ev, ...obj }) + '\n'); } catch { /* client closed stderr */ }
+}
 
 // ---- graph auto-discovery -------------------------------------------------------------------
 // Explicit arg > CODEWEB_WS workspace > nearest `.codeweb/graph.json` walking up from cwd.
@@ -124,28 +135,26 @@ function staleOnce(absPath, entry) {
 // stale answer WITH its stale annotation (never a dead end).
 const AUTOREFRESH_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_context', 'codeweb_explain', 'codeweb_find', 'codeweb_brief']);
 const refreshAttempt = new Map(); // abs graph path -> last attempt ms
-const refreshInFlight = new Set();
+// #31 (T-31.2): autoRefresh joins the workspace queue as a WRITER — SKIP when the workspace already
+// has a writer queued or in-flight (writersPending > 0, read race-free per I7, so an explicit
+// codeweb_refresh no longer races it into two concurrent extracts on one scan cache); else enqueue.
+// The triggering request ALWAYS serves its stale-but-annotated answer immediately (fire-and-forget,
+// never awaited); later requests keep the `stale` annotation until the enqueued writer lands and
+// cachedGraph's mtime+size stamp reloads. A queued READER never suppresses it (readers can't supply
+// freshness). refreshInFlight is gone (subsumed by writersPending).
 function autoRefresh(absGraph) {
   if (process.env.CODEWEB_NO_AUTOREFRESH === '1') return;
   try {
     const entry = cachedGraph(absGraph);
     if (!staleOnce(absGraph, entry)) return;
+    const key = dirname(absGraph); // workspace dir — the same key graph tools queue under
+    if (wsOf(key).writersPending > 0) { trace('skip-autorefresh', { id: null, tool: 'codeweb_refresh', ws: key, pid: null }); return; }
     const last = refreshAttempt.get(absGraph) || 0;
-    if (Date.now() - last < 15_000 || refreshInFlight.has(absGraph)) return; // one attempt per 15s per graph
+    if (Date.now() - last < 15_000) return; // one attempt per 15s per graph
     refreshAttempt.set(absGraph, Date.now());
-    refreshInFlight.add(absGraph);
-    // finding 19: fire-and-forget — the CURRENT call serves its stale-but-ANNOTATED answer
-    // immediately (the standing philosophy: stale-but-annotated beats broken) instead of stalling
-    // this call AND every queued request behind an inline synchronous refresh (807ms measured on
-    // a one-file touch; a 4–28s stall at the 16k benchmark). The refresh writes atomically, so
-    // the next cachedGraph() reloads and serves fresh.
-    pendingAsync++;
-    let settled = false;
-    const child = spawn(process.execPath, [scriptOf('refresh.mjs'), absGraph], { stdio: 'ignore' });
-    const timer = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, 60_000);
-    const done = (ok) => { if (settled) return; settled = true; clearTimeout(timer); refreshInFlight.delete(absGraph); if (ok) { try { bump(absGraph, 'autoRefreshes'); } catch { /* receipt only */ } } asyncDone(); };
-    child.on('error', () => done(false));
-    child.on('close', (code) => done(code === 0));
+    // id:null -> not client-cancellable; onSettle bumps the receipt on success. 60s kill headroom.
+    enqueueChild(null, { kind: 'writer', key, tool: 'codeweb_refresh', bin: scriptOf('refresh.mjs'), argv: [absGraph], stdio: 'ignore', timeoutMs: 60_000,
+      onSettle: ({ code }) => { if (code === 0) { try { bump(absGraph, 'autoRefreshes'); } catch { /* receipt only */ } } } });
   } catch { /* stale-but-annotated beats broken */ }
 }
 
@@ -173,7 +182,7 @@ const TOOLS = [
   { name: 'codeweb_tests', need: ['symbol'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 20 },
     argv: (a) => ['--tests', a.symbol],
     description: 'The tests that exercise a symbol (test-edge in-neighbors). Run the right subset after editing a symbol.' },
-  { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: scriptOf('diff.mjs'), graphless: true,
+  { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: scriptOf('diff.mjs'), graphless: true, queueFrom: (a) => a.after,
     argv: (a) => [a.before, a.after],
     description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression (new cycle, new duplication, a symbol that lost all callers). Call AFTER an edit to gate it.' },
   { name: 'codeweb_explain', need: ['symbol'], opt: ['graph'], bin: scriptOf('explain.mjs'),
@@ -293,34 +302,118 @@ const MAP_STAGES = ['extract', 'cluster', 'overlap', 'optimize', 'report'];
 let pendingAsync = 0;
 let stdinClosed = false;
 const asyncDone = () => { pendingAsync--; if (stdinClosed && pendingAsync <= 0) process.exit(0); };
-const spawnQueues = new Map(); // finding 19: workspace key -> tail promise (per-graph child serialization)
+// ---- per-workspace queue (#30/#31/#32) -------------------------------------------------------
+// spawnQueues was keyed by the graph FILE path, so refresh (keyed by its graph) and diff (keyed by
+// the shared '(graphless)' slot) never collided — the ordering the old comment promised did not
+// hold. State is now per-WORKSPACE-DIRECTORY: every graph tool, map, and keyed-graphless tool (diff)
+// normalizes to the dir that holds graph.json / the map out dir, so operations on ONE workspace
+// serialize and different workspaces run concurrently. Invariants I1–I7 live in the WS-F spec. STAGE
+// 1 keeps full per-workspace serialization (readers chain too) while re-keying and routing map/
+// autoRefresh through the queue; #32 splits readers out under a concurrency cap. writersPending is
+// the race-free ('increment before any await') signal autoRefresh reads to skip a queued writer (I7).
+const workspaces = new Map(); // wsKey -> { writerTail: Promise, writersPending: int }
+function wsOf(key) {
+  let w = workspaces.get(key);
+  if (!w) { w = { writerTail: Promise.resolve(), writersPending: 0 }; workspaces.set(key, w); }
+  return w;
+}
+// writers = the tools that MUTATE a workspace (graph consumers must re-read after them) + the
+// internal autoRefresh + map; every other spawned tool and fast-path fallback spawn is a reader.
+const WRITER_TOOLS = new Set(['codeweb_refresh', 'codeweb_annotate', 'codeweb_map']);
+const inflight = new Map(); // request id -> { kill, cancelled } (#34: id→child; runChild owns it)
+
+// THE queue key: graph tools -> dir of graph.json; map -> resolve(out); keyed-graphless (diff) ->
+// dir of queueFrom(args). All normalize to one workspace-dir identity (T-30.1). '(graphless)' is a
+// defensive fallback, unreachable today (only diff+map are graphless; diff has queueFrom, map is
+// keyed by out above) — a unit pins that.
+function queueKeyFor(tool, args, graphPath) {
+  if (tool.map) return resolve(args.out || join(resolve(args.target || process.cwd()), '.codeweb'));
+  if (tool.graphless) {
+    const from = tool.queueFrom && tool.queueFrom(args);
+    return from ? dirname(resolve(from)) : '(graphless)';
+  }
+  return dirname(resolve(graphPath));
+}
+
+// THE one child wrapper (T-31.1): owns spawn/timeout/settle-once/trace/inflight for map, autoRefresh
+// AND every spawned tool — so the settle-once guard, the #34 cancel hook, and the trace hook plug in
+// ONCE. handleMap had no settle-once flag (I5: a spawn failure there double-replied + double-
+// decremented pendingAsync); routing it here fixes that. Guards the error+close DOUBLE-fire (Node:
+// 'close' may or may not follow 'error') with `settled`. onSettle shapes the reply and is NEVER
+// called on a cancel (a cancelled request gets no response, MCP). Resolves (never rejects) on settle.
+function runChild(id, entry, spec, releaseAll) {
+  return new Promise((resolve_) => {
+    const key = spec.key, tool = spec.tool;
+    if (entry && entry.cancelled) { // cancelled while still queued — never spawn (I5)
+      trace('kill', { id, tool, ws: key, pid: null, reason: 'cancel' });
+      releaseAll(); return resolve_();
+    }
+    let settled = false, timedOut = false, child = null, timer = null, out = '', errBuf = '';
+    const finish = (code) => {
+      if (settled) return; settled = true;
+      if (timer) clearTimeout(timer);
+      const pid = child ? child.pid : null;
+      if (entry && entry.cancelled) trace('kill', { id, tool, ws: key, pid, reason: 'cancel' });
+      else if (timedOut) trace('kill', { id, tool, ws: key, pid, reason: 'timeout' });
+      else trace('end', { id, tool, ws: key, pid });
+      if (!(entry && entry.cancelled)) spec.onSettle({ code, out, errBuf, timedOut }); // cancel suppresses the reply (I5)
+      releaseAll(); resolve_();
+    };
+    try { child = spawn(process.execPath, [spec.bin, ...spec.argv], { stdio: spec.stdio }); }
+    catch (e) { errBuf = (e && e.message) || 'spawn failed'; return finish(null); }
+    if (entry) entry.kill = () => { try { child.kill('SIGKILL'); } catch { /* raced exit */ } };
+    trace('start', { id, tool, ws: key, pid: child.pid });
+    timer = setTimeout(() => { timedOut = true; try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, spec.timeoutMs);
+    if (child.stdout) child.stdout.on('data', (d) => { out += d; });
+    if (child.stderr) child.stderr.on('data', (d) => { errBuf += d; if (errBuf.length > 65536) errBuf = errBuf.slice(-32768); if (spec.onStderr) spec.onStderr(String(d)); });
+    if (spec.input != null && child.stdin) {
+      // #29: guard the stdin flush (async EPIPE + sync ERR_STREAM_DESTROYED + null stdin).
+      try { child.stdin.on('error', () => {}); child.stdin.end(spec.input); }
+      catch { /* destroyed/absent — the close/error path settles */ }
+    }
+    child.on('error', () => finish(null)); // double-fire guarded by `settled`
+    child.on('close', (code) => finish(code));
+  });
+}
+
+// Enqueue a child on its workspace. writersPending increments SYNCHRONOUSLY here (I7), before any
+// await, so autoRefresh's same-drain skip check is race-free. STAGE 1: reader and writer both chain
+// on writerTail (full serialization preserved). releaseAll runs exactly once on every settle path
+// (I5): deletes the inflight entry, decrements writersPending, calls asyncDone().
+function enqueueChild(id, spec) {
+  const w = wsOf(spec.key);
+  const entry = (id != null) ? { kill: () => {}, cancelled: false } : null;
+  if (entry) inflight.set(id, entry);
+  pendingAsync++;
+  if (spec.kind === 'writer') w.writersPending++;
+  let released = false;
+  const releaseAll = () => {
+    if (released) return; released = true;
+    if (entry) inflight.delete(id);
+    if (spec.kind === 'writer') w.writersPending--;
+    asyncDone();
+  };
+  const run = () => runChild(id, entry, spec, releaseAll);
+  const job = w.writerTail.then(run, run); // chain even if a prior job rejected (runChild never rejects)
+  w.writerTail = job;
+  return job;
+}
+
+// ---- codeweb_map -----------------------------------------------------------------------------
 function handleMap(id, args, meta) {
   const target = resolve(args.target || process.cwd());
-  if (!existsSync(target)) return errResult(id, `target not found: ${target}`);
+  if (!existsSync(target)) return errResult(id, `target not found: ${target}`); // sync validation stays PRE-enqueue
   const out = resolve(args.out || join(target, '.codeweb'));
   const token = meta && meta.progressToken;
-  pendingAsync++;
-  const child = spawn(process.execPath, [scriptOf('run.mjs'), target, '--out-dir', out], { stdio: ['ignore', 'ignore', 'pipe'] });
-  let stderrBuf = '';
-  child.stderr.on('data', (d) => {
-    stderrBuf += d;
-    if (stderrBuf.length > 65536) stderrBuf = stderrBuf.slice(-32768);
+  const onStderr = (chunk) => {
     if (token === undefined || token === null) return;
-    for (const line of String(d).split('\n')) {
+    for (const line of chunk.split('\n')) {
       const m = /^\[run\] ([a-z-]+)$/.exec(line.trim());
-      if (m && MAP_STAGES.includes(m[1])) {
-        send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.indexOf(m[1]), total: MAP_STAGES.length, message: `stage: ${m[1]}` } });
-      }
+      if (m && MAP_STAGES.includes(m[1])) send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.indexOf(m[1]), total: MAP_STAGES.length, message: `stage: ${m[1]}` } });
     }
-  });
-  const timer = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, 300_000);
-  child.on('error', (e) => { clearTimeout(timer); errResult(id, `codeweb_map failed: ${e.message}`); asyncDone(); });
-  child.on('close', (code) => {
-    clearTimeout(timer);
-    if (code !== 0) {
-      errResult(id, `codeweb_map failed (exit ${code}): ${stderrBuf.trim().split('\n').slice(-3).join('\n')}`);
-      return asyncDone();
-    }
+  };
+  const onSettle = ({ code, errBuf }) => {
+    if (code !== 0) return errResult(id, `codeweb_map failed (exit ${code}): ${(errBuf || '').trim().split('\n').slice(-3).join('\n')}`);
     if (token !== undefined && token !== null) send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.length, total: MAP_STAGES.length, message: 'done' } });
     const graphPath = join(out, 'graph.json');
     let stats = '';
@@ -329,8 +422,9 @@ function handleMap(id, args, meta) {
       stats = `${(g.nodes || []).length} symbols, ${(g.edges || []).length} edges, ${(g.domains || []).length} domains, ${(g.overlaps || []).length} overlap findings`;
     } catch { stats = 'built (stats unreadable)'; }
     reply(id, { content: [{ type: 'text', text: JSON.stringify({ ok: true, graph: graphPath, summary: `mapped ${target}: ${stats}`, artifacts: { report: join(out, 'report.html'), optimize: join(out, 'optimize.md') } }) }] });
-    asyncDone();
-  });
+  };
+  // map is a WRITER keyed by resolve(out) — two maps on one out serialize; queued readers wait (I2).
+  enqueueChild(id, { kind: 'writer', key: out, tool: 'codeweb_map', bin: scriptOf('run.mjs'), argv: [target, '--out-dir', out], stdio: ['ignore', 'ignore', 'pipe'], timeoutMs: 300_000, onStderr, onSettle });
 }
 
 // ---- tools/call ------------------------------------------------------------------------------
@@ -468,35 +562,19 @@ function handleToolCall(id, params) {
     if (args.offset != null && (tool.opt || []).includes('offset')) cliArgs.push('--offset', String(args.offset));
   }
   const bin = tool.bin || QUERY;
-  // finding 19: children are ASYNC — the handleMap pattern, generalized to every spawned tool.
-  // spawnSync blocked the readline loop, so ONE slow advisor head-of-line-blocked every queued
-  // request (a 2.5ms structural query measured at 527.6ms behind a concurrent campaign; a wedged
-  // child could freeze the whole server for 120s). Fast-path tools answer in-process ABOVE and
-  // never wait; spawned children serialize PER WORKSPACE so stateful sequences on one graph
-  // (annotate then list; refresh then diff) keep their order while other workspaces run
-  // concurrently. JSON-RPC replies may land out of order — the protocol (and every driver in
-  // this repo) correlates by id; pendingAsync keeps stdin-close from killing in-flight work.
-  const queueKey = graphPath ? resolve(graphPath) : '(graphless)';
-  pendingAsync++;
-  const prev = spawnQueues.get(queueKey) || Promise.resolve();
-  const job = prev.then(() => new Promise((release) => {
-    let settled = false;
-    const child = spawn(process.execPath, [bin, ...cliArgs, '--json'], { stdio: [tool.input ? 'pipe' : 'ignore', 'pipe', 'pipe'] });
-    let out = '', errBuf = '', timedOut = false;
-    const timer = setTimeout(() => { timedOut = true; try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, SPAWN_TIMEOUT_MS);
-    const settle = (fn) => { if (settled) return; settled = true; clearTimeout(timer); fn(); release(); asyncDone(); };
-    child.stdout.on('data', (d) => { out += d; });
-    child.stderr.on('data', (d) => { errBuf += d; if (errBuf.length > 65536) errBuf = errBuf.slice(-32768); });
-    // #29: a child that dies before draining a >64KB stdin write (bad graph path, arg-validation
-    // die(2), the SIGKILL) EPIPEs the flush — unhandled, that killed the whole server. The 'error'
-    // listener covers the async EPIPE; the try/catch covers synchronous ERR_STREAM_DESTROYED (child
-    // already exited) and a null child.stdin after a spawn failure. find_similar is the sole writer.
-    if (tool.input) {
-      try { child.stdin.on('error', () => { /* async EPIPE — child gone; the close/error handler settles */ }); child.stdin.end(tool.input(args) || ''); }
-      catch { /* stdin destroyed/absent — the child's own close/error path settles this job */ }
-    }
-    child.on('error', (e) => settle(() => errResult(id, (e && e.message) || 'spawn failed')));
-    child.on('close', (code) => settle(() => {
+  // finding 19 + #30/#31/#32: spawned children are ASYNC and queue PER WORKSPACE (dir of graph.json /
+  // map out / diff's `after`). spawnSync once blocked the readline loop, head-of-line-blocking every
+  // queued request; fast-path tools answer in-process ABOVE and never queue. STAGE 1 keeps full per-
+  // workspace serialization (readers chain too); #32 splits readers under a concurrency cap. Replies
+  // may land out of order — clients correlate by id; pendingAsync keeps stdin-close from killing work.
+  enqueueChild(id, {
+    kind: WRITER_TOOLS.has(tool.name) ? 'writer' : 'reader',
+    key: queueKeyFor(tool, args, graphPath),
+    tool: tool.name, bin, argv: [...cliArgs, '--json'],
+    stdio: [tool.input ? 'pipe' : 'ignore', 'pipe', 'pipe'],
+    input: tool.input ? (tool.input(args) || '') : undefined,
+    timeoutMs: SPAWN_TIMEOUT_MS,
+    onSettle: ({ code, out, errBuf, timedOut }) => {
       if (timedOut) return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
       if (code === 2 || code == null) {
         const text = (errBuf || 'query failed').trim() || 'query failed';
@@ -505,9 +583,8 @@ function handleToolCall(id, params) {
       }
       // exit 0 (results) or 1 (found:false / gate-fail) both emit valid JSON on stdout — pass through.
       reply(id, { content: [{ type: 'text', text: (out || '').trim() }] });
-    }));
-  }));
-  spawnQueues.set(queueKey, job);
+    },
+  });
 }
 
 function handle(line) {
@@ -532,6 +609,14 @@ function handle(line) {
   return fail(id, -32601, `method not found: ${method}`);
 }
 
-const rl = createInterface({ input: process.stdin });
-rl.on('line', handle);
-rl.on('close', () => { stdinClosed = true; if (pendingAsync <= 0) process.exit(0); });
+// Start the readline loop ONLY when run as the entry point (node mcp-server.mjs) — so tests can
+// import the pure helpers (queueKeyFor) without a server attaching to their own stdin.
+const isMain = !!process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  const rl = createInterface({ input: process.stdin });
+  rl.on('line', handle);
+  rl.on('close', () => { stdinClosed = true; if (pendingAsync <= 0) process.exit(0); });
+}
+
+// Exported for unit tests (the server side-effects are gated behind isMain above).
+export { queueKeyFor, TOOLS };

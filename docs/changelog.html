@@ -51,6 +51,26 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
+<li>**The MCP queue is now keyed by WORKSPACE DIRECTORY, so refresh→diff ordering actually holds (and</li>
+</ul>
+<p>  map/autoRefresh joined the queue).** The per-workspace serialization the queue comment promised did</p>
+<p>  not hold: <code>codeweb_diff</code> is <code>graphless</code>, so it queued under a shared <code>'(graphless)'</code> slot while</p>
+<p>  <code>codeweb_refresh</code> queued under the graph *file* path — fired together (which Claude Code does</p>
+<p>  routinely, and the server's own INSTRUCTIONS prescribe per edit), diff completed *before* refresh</p>
+<p>  and gated against pre-refresh bytes (can pass a real regression or flag a phantom one). Two other</p>
+<p>  spawn sites bypassed the queue entirely: <code>codeweb_map</code> and the internal auto-refresh ran outside it,</p>
+<p>  so two maps on one out dir interleaved stage-by-stage and an auto-refresh could race an explicit</p>
+<p>  refresh into two concurrent extracts on one scan cache. Redesigned as ONE per-workspace-directory</p>
+<p>  queue (<code>dirname(resolve(graph.json))</code> for graph tools, <code>resolve(out)</code> for map, <code>dirname(after)</code> for</p>
+<p>  diff via a new <code>queueFrom</code>) with a single <code>runChild</code> wrapper owning spawn/timeout/settle-once/trace</p>
+<p>  for every child. <code>handleMap</code> gains the settle-once guard it never had (a spawn failure there used to</p>
+<p>  double-reply and double-decrement the drain counter — now exactly one reply, verified). Auto-refresh</p>
+<p>  skips when the workspace already has a writer queued/in-flight (<code>writersPending</code>, read race-free in</p>
+<p>  the same readline drain) and otherwise enqueues as a writer. Stage 1 preserves full per-workspace</p>
+<p>  serialization; reader concurrency lands separately (#32). Opt-in <code>CODEWEB_MCP_TRACE=1</code> emits an</p>
+<p>  NDJSON queue-event stream on stderr (default silent) for the by-mechanism scenario suite (S2/S3/I7).</p>
+<p>  (round 2, findings #30 #31)</p>
+<ul>
 <li><strong>A dying child no longer crashes the whole MCP server (unhandled EPIPE on child stdin).</strong></li>
 </ul>
 <p>  <code>codeweb_find_similar</code> is the one tool that writes to a child's stdin (the candidate <code>body</code>); when</p>

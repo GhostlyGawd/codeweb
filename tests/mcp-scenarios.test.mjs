@@ -7,12 +7,28 @@
 
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { join } from 'node:path';
-import { writeFileSync, readFileSync, mkdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { startServer, initServer } from './mcp-harness.mjs';
 import { tmpDir, cleanup, script, writeTree, runNode, readJSON } from './helpers.mjs';
 
 const TRACE_ENV = { CODEWEB_MCP_TRACE: '1', CODEWEB_NO_AUTOREFRESH: '1' };
+
+// Map a fresh isolated workspace (mutating scenarios each get their own). Returns { dir, src, graph }.
+function mapFresh(prefix) {
+  const dir = tmpDir(prefix);
+  const src = join(dir, 'src');
+  writeTree(src, {
+    'main.js': 'import { helper } from "./util.js";\nexport function main() { return helper(2) + helper(3); }\n',
+    'util.js': 'export function helper(x) {\n  if (x > 0) return x * 2;\n  return 0;\n}\n',
+  });
+  const out = join(dir, '.codeweb');
+  const r = runNode(script('run.mjs'), [src, '--out-dir', out]);
+  assert.equal(r.status, 0, `mapFresh built: ${r.stderr}`);
+  return { dir, src, graph: join(out, 'graph.json') };
+}
+// index of the first trace event matching pred, or -1.
+const traceIx = (events, pred) => events.findIndex(pred);
 
 // A real mapped workspace (run.mjs over a small tree) — graph.json with meta.root on disk plus the
 // map-time sidecars. Shared by the read-only scenarios (find_similar, sidecar checks, advisors).
@@ -71,4 +87,83 @@ test('S1b epipe-survival: client closes its stdout read end mid-burst → server
     const { code } = await h.exited;
     assert.equal(code, 0, 'server exits 0 on stdout EPIPE (never a crash / non-zero)');
   } finally { h.child.kill('SIGKILL'); }
+});
+
+// ---- S2 refresh-then-diff-parallel-ordering (I2: a reader waits for an earlier-queued writer) ---
+// The #30 bug: diff was graphless ('(graphless)' slot) while refresh keyed to the graph path, so
+// fired together diff completed BEFORE refresh and gated against stale bytes. Now both key to the
+// workspace dir (diff via queueFrom=after), so diff waits — and reads the post-refresh graph.
+test('S2 refresh→diff in one burst: end(refresh) < start(diff), and diff reads the post-refresh edit', async () => {
+  const { dir, src, graph } = mapFresh('codeweb-scn-s2-');
+  const h = startServer({ env: TRACE_ENV });
+  try {
+    await initServer(h);
+    const before = join(dir, 'before.json');
+    writeFileSync(before, readFileSync(graph));                       // pre-edit snapshot
+    writeFileSync(join(src, 'util.js'), readFileSync(join(src, 'util.js'), 'utf8') + '\nexport function brandNewFn(z) {\n  return z * 7;\n}\n'); // on-disk edit
+    // ONE stdin write, refresh line first — enqueue order == line order in a single drain.
+    h.sendBurst([
+      { jsonrpc: '2.0', id: 10, method: 'tools/call', params: { name: 'codeweb_refresh', arguments: { graph } } },
+      { jsonrpc: '2.0', id: 11, method: 'tools/call', params: { name: 'codeweb_diff', arguments: { before, after: graph } } },
+    ]);
+    const rDiff = await h.reply(11);
+    await h.reply(10);
+    const payload = JSON.parse(rDiff.result.content[0].text);
+    assert.ok(payload.nodes.added.includes('util.js:brandNewFn'), `diff read post-refresh bytes (added: ${payload.nodes.added})`);
+    // MECHANISM: end(refresh) strictly precedes start(diff) in the trace stream.
+    const ev = h.trace();
+    const endRefresh = traceIx(ev, (e) => e.ev === 'end' && e.tool === 'codeweb_refresh' && e.id === 10);
+    const startDiff = traceIx(ev, (e) => e.ev === 'start' && e.tool === 'codeweb_diff' && e.id === 11);
+    assert.ok(endRefresh >= 0 && startDiff >= 0, `both events present (end#refresh=${endRefresh}, start#diff=${startDiff})`);
+    assert.ok(endRefresh < startDiff, 'refresh completes before diff starts (I2 ordering holds under parallel fire)');
+    h.close(); assert.equal((await h.exited).code, 0);
+  } finally { h.child.kill('SIGKILL'); cleanup(dir); }
+});
+
+// ---- S3 map-concurrency-serialization (I1: writers on one workspace never overlap, FIFO) --------
+test('S3 two codeweb_map on one out dir in a burst: end(map#1) < start(map#2), surviving graph parses', async () => {
+  const target = tmpDir('codeweb-scn-s3-');
+  const out = join(target, '.codeweb');
+  writeTree(join(target, 'src'), { 'a.js': 'export function alpha() { return beta(); }\nfunction beta() { return 1; }\n' });
+  const h = startServer({ env: TRACE_ENV });
+  try {
+    await initServer(h);
+    h.sendBurst([
+      { jsonrpc: '2.0', id: 20, method: 'tools/call', params: { name: 'codeweb_map', arguments: { target: join(target, 'src'), out } } },
+      { jsonrpc: '2.0', id: 21, method: 'tools/call', params: { name: 'codeweb_map', arguments: { target: join(target, 'src'), out } } },
+    ]);
+    const r20 = await h.reply(20); const r21 = await h.reply(21);
+    assert.ok(!r20.result.isError && !r21.result.isError, 'both maps succeed');
+    const ev = h.trace();
+    const endMap1 = traceIx(ev, (e) => e.ev === 'end' && e.id === 20);
+    const startMap2 = traceIx(ev, (e) => e.ev === 'start' && e.id === 21);
+    assert.ok(endMap1 >= 0 && startMap2 >= 0, `both boundary events present (end#20=${endMap1}, start#21=${startMap2})`);
+    assert.ok(endMap1 < startMap2, 'map#1 finishes before map#2 starts — no stage-by-stage interleave (I1)');
+    assert.ok(readJSON(join(out, 'graph.json')).nodes.length >= 1, 'the surviving workspace parses green');
+    h.close(); assert.equal((await h.exited).code, 0);
+  } finally { h.child.kill('SIGKILL'); cleanup(target); }
+});
+
+// ---- I7 / T-31.2 autoRefresh-skip: a queued explicit writer suppresses the internal autoRefresh ---
+// autoRefresh runs WITH freshness enabled here (no CODEWEB_NO_AUTOREFRESH). A stale workspace + an
+// explicit refresh queued in the same drain → writersPending>0 → skip-autorefresh, exactly ONE
+// refresh child spawns (the explicit one), never two concurrent extracts on one scan cache.
+test('I7 autoRefresh-skip: explicit refresh + a stale-triggering query in one burst → skip-autorefresh, ONE refresh child', async () => {
+  const { dir, src, graph } = mapFresh('codeweb-scn-i7-');
+  const h = startServer({ env: { CODEWEB_MCP_TRACE: '1' } }); // autoRefresh ENABLED
+  try {
+    await initServer(h);
+    // Make the graph stale: edit a source file so meta.sources stamps mismatch disk.
+    writeFileSync(join(src, 'util.js'), readFileSync(join(src, 'util.js'), 'utf8') + '\nexport function extra() { return 9; }\n');
+    h.sendBurst([
+      { jsonrpc: '2.0', id: 30, method: 'tools/call', params: { name: 'codeweb_refresh', arguments: { graph } } },
+      { jsonrpc: '2.0', id: 31, method: 'tools/call', params: { name: 'codeweb_impact', arguments: { graph, symbol: 'util.js:helper' } } },
+    ]);
+    await h.reply(31); await h.reply(30);
+    const ev = h.trace();
+    assert.ok(ev.some((e) => e.ev === 'skip-autorefresh' && e.ws === dirname(graph)), 'autoRefresh skipped because a writer is already queued (I7)');
+    const refreshStarts = ev.filter((e) => e.ev === 'start' && e.tool === 'codeweb_refresh');
+    assert.equal(refreshStarts.length, 1, 'exactly ONE refresh child spawned (the explicit one, not autoRefresh too)');
+    h.close(); assert.equal((await h.exited).code, 0);
+  } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });
