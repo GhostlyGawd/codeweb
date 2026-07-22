@@ -724,3 +724,26 @@ delfile×2 weighting — #6 precedent claimed); (4) #21's AST-tier big-file rati
 the 2× bar the regex tier clears — parse-dominated, pre-existing constant; (5) the
 `hash-hit-derives-binds` simplification in #17 (T-17.3 allows replay there; derive chosen —
 sound, no IO cost).
+
+### WS-D CI red→green (b6f1040)
+
+Head `b002d40` had two CI reds; both root-caused and fixed honestly, no gate suppression or
+re-baseline:
+- **gate**: ONE new cycle `lib/graph-ops.mjs ↔ lib/import-resolve.mjs` — not an import: #17's
+  private 3-char `dep` closure became a package-unique symbol, and graph-ops' `dep` LOOP
+  VARIABLES (impactOf/impactCountOf BFS pushes) bare-ref-resolved to it via the unique-name
+  fallback, closing a cycle with the pre-existing `scanJsReExports → graph-ops:map` ref (the
+  ≥3-char guard's documented residual magnet class). Fix: rename to `addDep` (naming hygiene;
+  behavior byte-identical — IE 40-trial both legs re-verified 47/47 post-rename, import/python/
+  cache/hook suites 107/107). Gate re-run vs `d35ca2e`: edges +49 −6, **cycles +0 −0, "ok — no
+  structural regressions"**.
+- **test-no-ast**: ENC-GOLD's expected ids were AST-shaped (`A.m`/`B.m`/`Late.ping` are
+  tree-sitter method nodes; the regex scanner never discovers single-line-body methods). Split
+  per the suite's named-skip idiom: ENC-GOLD pins the REGEX tier explicitly (`--engine regex` —
+  the exact path #21's owner stack changed), byte-identical on every leg with NO skip, id list
+  matching the no-ast leg verbatim; ENC-GOLD-AST keeps the default-engine golden under
+  `{ skip: !probeAst().ts && 'tree-sitter engine unavailable' }` (+1 named skip on the no-ast
+  leg: 50 ≤ its documented 60 runaway bound; matrix ceilings 8/11 unaffected).
+
+Fix sha `b6f1040`; coordinator-confirmed final CI state: **all 7 jobs green** (test
+ubuntu-22/24, windows-22, test-no-ast, bench, consistency, gate — gate comment shows cycles +0).
