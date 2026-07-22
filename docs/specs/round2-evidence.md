@@ -457,3 +457,114 @@ class as builder's (tree-sitter engine present — all AST legs ran un-skipped).
 Verdict: **all six findings PASS**; both builder deviations (#9 lookahead placement, #12 class
 gate) ratified with fresh adversarial proof; no structural problems. Residuals documented, none
 blocking. WS-C may rebase.
+
+## WS-C
+
+Builder evidence — truth: resolution (#11, #10, #16), spec `docs/specs/round2-ws-c.md` (hardened;
+authoritative). Base e67965c (post-WS-B). Strict TDD: every finding's fixtures ran RED first
+(failure reasons below), then the fix, then green. Container: tree-sitter engine present (all AST
+legs un-skipped). `SCANNER_VERSION` 14 → 15 landed with #10's commit per the spec ladder
+(B=14, C=15, D=16).
+
+### Baseline (before first WS-C change, HEAD e67965c)
+
+- `node scripts/extract-symbols.mjs . --no-ctags --out <scratch>/baseline.json` →
+  `1232 symbols, 4521 edges (3906 call + 615 import) from 225 files; dropped 554 ambiguous`.
+- **Ref-edge total: 1,180**. **Into ≤2-char symbols: 234 across 8** (`g`@replay-mine ×74,
+  `f`@regrade ×52, `p`@regrade ×51, `d`@diff ×38, `w`@diff ×11, `q`@query ×4, `G`@post-edit-diff
+  ×3, `C`@post-edit-diff ×1 — all test/bench, matching the audit exactly). **Product→non-product
+  ref edges: 209** (audit measured 193 pre-WS-B; WS-B's truth fixes shifted the count — recorded
+  both). **Product→non-product calls: 2** (out of ref scope, recorded per spec):
+  `scripts/lib/minhash.mjs:<module> → tests/replay-mine.test.mjs:g` and
+  `scripts/lib/stats.mjs:monthLine → bench/experiments/efficiency-pilot.regrade.mjs:f`.
+
+### Finding #11 — 70c94ac
+
+- T-11.1 RED (`node --test tests/import-nodenext.test.mjs` → 5 fail / 1 pass): i1 `edges: []` +
+  would-be ambiguous drop (alias miss → bare-name two-defs); i2 `edges: []` (nsmap empty); i3
+  call edge present ONLY via the unique-bare-name rescue, barrel dependent edge absent (re-export
+  table empty); i4 `edges: []` (`.mts` files not enumerated at all); i5 `pub` missing. i6 GREEN
+  pre-fix by design — the hardened both-exist precedence pin (literal on-disk `.js` wins; the
+  remap must never flip it).
+- T-11.2/11.3: `EXT_REMAP` + `importCandidates` exported from lib/import-resolve.mjs; resolveImport
+  and the pub-walk's `addEntry` iterate the ONE list (membership caller-owned). After: **i1–i6
+  6/6 green**.
+- **Byte-identity (criterion 1)**: no-remap-miss corpus (direct `.js` hits, extensionless→`.js`,
+  dir→`/index.js`, `.ts` direct, python imports) extracted by the PRE-fix resolver (git worktree
+  at e67965c) vs post-fix, both `--no-ctags --engine regex`: `cmp` → **byte-identical**.
+- Suites: import-anchor-precision / import-default-export / import-member-edges /
+  import-object-alias-precision / python-imports / incremental-edges / package-shape / extract-v7
+  → 41/41; neighbors (extract-symbols, reference-edges, test-edges, module-scope, inherit-edges,
+  lang-rules, codemod, both hooks, stdout-flush) → 62/62.
+- **Mechanical adjustment (noted)**: `.mts/.cts` added to `SRC_RE` + the JS/TS dispatch points
+  (isJsTs, re-export scan filter, edge-mask dispatch, langOf) — the frozen i4 fixture requires
+  `.mts` sources to extract, which requires them enumerated and masked as TS. Residual (out of
+  WS-C scope, noted for a future pass): codemod.mjs:151's import-repoint loop still filters on
+  the old extension list, so a rename's import repoint skips `.mts/.cts` importers.
+
+### Finding #10 — ce5a76f
+
+- T-10.1 RED: `tests/extract-refscope.test.mjs` → (a)(b)(c)(d) fail with the documented
+  fabrications, (a-inv) green pre-fix (the one-directional pin); `tests/self-map-roles.test.mjs`
+  PROPERTY → fail with **209** product→non-product ref violations on the real self-map.
+- T-10.2–T-10.4 (one commit): decl-line refRe skip + paren-balance continuation; param-shadow
+  from `parseSignature(...).raw` token sweep (+ spilled-tail + continuation sweep; per-file local
+  maps — cached `ranges` gain no non-JSON state); ≥3-char fallback guard with distinct
+  `shortDropped` surfaced as `(N short-name)` in the banner (helpers' `dropped (\d+) ambiguous`
+  grep unaffected — format extension only); reject-form ref role gate at the unique-in-package
+  branch. `SCANNER_VERSION` 14 → 15 + per-file `short` cache field.
+- **Self-map re-measurement** (`node scripts/extract-symbols.mjs . --no-ctags --out …` at
+  ce5a76f): banner `1240 symbols, 4102 edges (3482 call + 620 import) from 228 files; dropped
+  1287 ambiguous bare-call edges (826 short-name)`. **Ref edges 1,180 → 771. Into ≤2-char
+  symbols 234 → 2** — both survivors are SAME-FILE refs to `bench/experiments/
+  efficiency-pilot.regrade.mjs:f`, a real 1-char `const f = (x) => …` formatter (line 169),
+  resolved via sameFileByName — never the fallback — bench-role both sides: legitimate,
+  explained. **Product→non-product refs 209 → 0** (empty ALLOWLIST). The 2 baseline cross-role
+  CALLS also gone (both were 1-char bare-fallback wirings — the short guard covers calls too).
+  Fabricated cross-role class: **~0 achieved**.
+- T-10.5: both rename-workaround comments deleted; natural names restored
+  (`cli.mjs` `linesOf(relPath→rel)`; import-resolve destructure `rel/textOf/maskedOnce`, all
+  internal uses renamed back). Self-map second test pins zero edges from
+  `scripts/lib/{import-resolve,cli}.mjs:*` into `extract-symbols.mjs:{rel,textOf,maskedOnce}` —
+  the exact cycle class the renames dodged. Property test green **×2 runs**.
+- Suites: refscope 5/5; self-map-roles 2/2 ×2; reference-edges / test-edges / extract-symbols
+  (exact `ambiguousDropped` 1/0 assertions HOLD — fixtures have no shadowing/short names) /
+  extract-v7 / inherit-edges / deadcode / spread-iife-selfmap (`trend.mjs:metrics`, `PERM_SEEDS`
+  WS-B assertions hold) / accessor-overload-truth / id-collision / module-scope → 61/61;
+  tier-equivalence (incremental-edges IE-*, extract-engine, type3-clones, ts-engine,
+  lazy-ts-engine) → 46 pass / 1 pre-existing env skip; language suites (py/go/rust/java/cs/rb/
+  php/kt/swift), signature, suppression, annotations, cli consumers → green.
+
+### Finding #16 — 4853084
+
+- T-16.1 RED: the new Signal-B case reproduced the audit disease exactly — tA/tB paired as ov1
+  plus 4 cross-role pairs alongside the legitimate pA/pB.
+- T-16.2: the one-line caller-side `cand` filter. Suites: overlap-roles (old + new) + overlap +
+  overlap-lsh + overlap-caps → 14/14 (lsh/caps fixtures stamp `role:'product'`; overlap.test
+  paths product-role — re-checked per the spec's risk note before landing).
+- **A/B on the SAME post-#10/#11 self-map** (fragment → workspace, overlap run 4 ways):
+  (before) pre-#16 overlap (e67965c worktree), default scope → **16 parallel-impl findings, all
+  16 containing non-product nodes** (test-helper pairs: `extract`/`runOverlap`/`buildMapped`/
+  `<module>`-of-test-files …). (after) post-#16 default → **0 parallel-impl**; every emitted
+  finding across all kinds (11 total) references product-role nodes only — the header's
+  "excluded" claim is now TRUE for Signal B. (i) set equality: default ≡ ALL_ROLES∩all-product
+  (both empty — ONLY the excluded class vanished). (ii) surviving product pairs: none exist on
+  the post-#10 map (the audit's ov1/ov2 class dissolved when #10 removed fabricated edges from
+  twin candidacy — the spec's "counts are pre-fix baseline, not acceptance" note, live);
+  vacuously identical in both runs. (iii) `CODEWEB_ALL_ROLES=1`: new overlap's COMPLETE
+  `overlaps` output byte-identical to the pre-#16 overlap under the same env (**129 findings**)
+  — the filter is provably inert under the escape hatch, so `cand` is byte-identical to today's.
+
+### Closing
+
+- Full `npm test` ×2 at 4853084: **57.4 s / 57.0 s wall; 672 tests, 667 pass, 0 fail, 5
+  skipped** (pre-existing env skips; +14 tests = 6 nodenext + 5 refscope + 2 self-map-roles + 1
+  Signal-B; zero new skips, all new tests path-portable). `git status --porcelain` clean after
+  both runs. `check-consistency` OK at every commit; docs/ rebuilt in the SAME commit as each
+  CHANGELOG entry (WS-B's freshness lesson applied).
+- Deviations, all mechanical + noted above: `.mts/.cts` SRC_RE widening (#11); the property test
+  reads stamped `node.role` (= roleFor: rules overrides + roleOf — the gate's exact truth) rather
+  than raw `roleOf(file)`; baseline cross-role count 209 vs the audit's 193 (post-WS-B tree).
+  No design changes; no assertion weakened (the only fixture-count shifts are the documented
+  self-map-derived measurements, and the exact `ambiguousDropped` 1/0 assertions were verified
+  unshifted).
