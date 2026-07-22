@@ -15,7 +15,8 @@ import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { structuralRegressions } from '../scripts/lib/graph-ops.mjs';
+import { structuralRegressions, regressionsAgainstSummary } from '../scripts/lib/graph-ops.mjs';
+import { loadHookBaseline } from '../scripts/lib/hook-baseline.mjs';
 import { bump, correlateEdit } from '../scripts/lib/stats.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -30,7 +31,6 @@ export function check(raw) {
   if (!fp || !SRC_RE.test(fp)) return null;
   const t = findTarget(fp);
   if (!t) return null;
-  let baseline; try { baseline = JSON.parse(readFileSync(t.baseline, 'utf8')); } catch { return null; }
   let after;
   try {
     // Incremental: THE per-file scan cache (finding 17: one shared name — the hook used its own
@@ -46,7 +46,23 @@ export function check(raw) {
     after = JSON.parse(execFileSync(process.execPath, [EXTRACT, t.root, '--cache', cache],
       { encoding: 'utf8', maxBuffer: 1 << 28, stdio: ['ignore', 'pipe', 'ignore'] }));
   } catch { return null; }
-  const reg = structuralRegressions(baseline, after);
+  // Round 2, finding #18a: the map-time sidecar carries the baseline's cycle keys + caller
+  // counts, so the before side needs NO JSON.parse of the multi-MB graph and NO
+  // normalizeGraph/fileCycles/buildIndex recompute. Seam matrix (all fail-open): graph.json
+  // missing -> findTarget already returned null above (no new seam); sidecar missing/stale/
+  // corrupt x graph valid -> the legacy path below, sharing the bytes the hash check already
+  // read (one read); sidecar valid x graph tampered under a matching stamp -> sidecar consumed —
+  // CORRECT: it snapshots map-time truth where the legacy path would parse the tampered file;
+  // both corrupt -> null -> silent exit 0 (the hooks.json advisory contract).
+  const side = loadHookBaseline(t.baseline);
+  let reg;
+  if (side.summary) {
+    reg = regressionsAgainstSummary(side.summary, after);
+  } else {
+    let baseline;
+    try { baseline = JSON.parse(side.graphBytes != null ? side.graphBytes : readFileSync(t.baseline, 'utf8')); } catch { return null; }
+    reg = structuralRegressions(baseline, after);
+  }
   if (!reg.newCycles.length && !reg.lostCallers.length) return null;
   return { root: t.root, ...reg };
 }

@@ -92,6 +92,109 @@ test('hook flags a NEW cycle introduced by an edit (vs the baseline)', () => {
   assert.match(res.stderr || '', /cycle/i, 'warns about the new dependency cycle');
 });
 
+// ---- Round 2, finding #18a — the hook-baseline sidecar (BDD) --------------------------------
+// The hook used to JSON.parse the multi-MB baseline graph and recompute its cycles + caller
+// index on EVERY edit — an artifact that cannot have changed since map time. run.mjs/refresh now
+// persist `hook-baseline.json` (cycle keys + callIn counts + a graph.json stamp/hash) beside
+// graph.json; the hook consumes it when the stamp (or, on stamp mismatch, the byte hash)
+// matches, and falls back to today's parse path otherwise — fail-open at every seam.
+import { rmSync as rmSync18, readFileSync as readFileSync18, statSync as statSync18 } from 'node:fs';
+import { runNode as runNode18 } from './helpers.mjs';
+import { HOOK_BASELINE_NAME } from '../scripts/lib/hook-baseline.mjs';
+import { check } from '../hooks/post-edit-diff.mjs';
+
+const CYCLE_FIXTURE = {
+  'x.mjs': 'import { y } from "./y.mjs";\nexport function x() { return y(); }\n',
+  'y.mjs': 'import { x } from "./x.mjs";\nexport function y() { return 1; }\nexport function lonely() { return x(); }\n',
+};
+
+function mapWithRun(dir) {
+  const r = runNode18(script('run.mjs'), [dir, '--out-dir', join(dir, '.codeweb')]);
+  assert.equal(r.status, 0, r.stderr);
+}
+
+test('S18-1: given a map, the sidecar exists beside graph.json and stamp-matches it', () => {
+  const dir = tmpDir('codeweb-hb-');
+  try {
+    writeTree(dir, CYCLE_FIXTURE);
+    mapWithRun(dir);
+    const side = JSON.parse(readFileSync18(join(dir, '.codeweb', HOOK_BASELINE_NAME), 'utf8'));
+    const st = statSync18(join(dir, '.codeweb', 'graph.json'));
+    assert.equal(side.version, 1);
+    assert.equal(side.graph.s, st.size, 'stamped size matches graph.json');
+    assert.equal(side.graph.m, Math.round(st.mtimeMs), 'stamped mtime matches graph.json');
+    assert.ok(Array.isArray(side.cycles) && side.cycles.some((k) => k.includes('x.mjs')), 'cycle keys recorded');
+    assert.ok(side.callIn && typeof side.callIn === 'object', 'callIn counts recorded');
+  } finally { cleanup(dir); }
+});
+
+test('S18-2: a valid sidecar yields the same verdict as the legacy parse path on the same payload', () => {
+  const dir = tmpDir('codeweb-hb-');
+  try {
+    writeTree(dir, CYCLE_FIXTURE);
+    mapWithRun(dir);
+    // edit y.mjs so `lonely` loses its caller relationship target... make x() stop calling y():
+    writeFileSync(join(dir, 'x.mjs'), 'import { y } from "./y.mjs";\nexport function x() { return 1; }\n');
+    const payload = JSON.stringify({ tool_input: { file_path: join(dir, 'x.mjs') } });
+    const viaSidecar = check(payload);
+    rmSync18(join(dir, '.codeweb', HOOK_BASELINE_NAME));
+    const viaGraph = check(payload);
+    assert.deepEqual(viaSidecar, viaGraph, 'sidecar path and legacy path agree verdict-for-verdict');
+  } finally { cleanup(dir); }
+});
+
+test('S18-3: removing a baseline cycle key from the sidecar makes the hook report that cycle as NEW — the sidecar, not the graph, was consumed', () => {
+  const dir = tmpDir('codeweb-hb-');
+  try {
+    writeTree(dir, CYCLE_FIXTURE);
+    mapWithRun(dir);
+    const sidePath = join(dir, '.codeweb', HOOK_BASELINE_NAME);
+    const side = JSON.parse(readFileSync18(sidePath, 'utf8'));
+    const dropped = side.cycles.filter((k) => !k.includes('x.mjs'));
+    assert.notEqual(dropped.length, side.cycles.length, 'fixture guarantees an x<->y cycle to drop');
+    // rewrite the sidecar, then re-stamp it against graph.json so it still validates
+    const st = statSync18(join(dir, '.codeweb', 'graph.json'));
+    writeFileSync(sidePath, JSON.stringify({ ...side, cycles: dropped, graph: { ...side.graph, s: st.size, m: Math.round(st.mtimeMs) } }));
+    const payload = JSON.stringify({ tool_input: { file_path: join(dir, 'x.mjs') } });
+    const out = check(payload); // no source change: the cycle exists in the graph AND on disk
+    assert.ok(out, 'verdict fired');
+    assert.ok(out.newCycles.some((c) => c.join('|').includes('x.mjs')), 'the dropped baseline cycle is reported as new — only the sidecar could say that');
+  } finally { cleanup(dir); }
+});
+
+test('S18-4: a stale or corrupt sidecar falls back to the legacy path with the correct verdict', () => {
+  const dir = tmpDir('codeweb-hb-');
+  try {
+    writeTree(dir, CYCLE_FIXTURE);
+    mapWithRun(dir);
+    const sidePath = join(dir, '.codeweb', HOOK_BASELINE_NAME);
+    const payload = JSON.stringify({ tool_input: { file_path: join(dir, 'x.mjs') } });
+    const want = (() => { rmSync18(sidePath, { force: true }); return check(payload); })(); // legacy truth (no sidecar)
+    mapWithRun(dir); // restore sidecar
+    // stale: poisoned stamp AND hash -> must fall back, not consume the poison
+    const side = JSON.parse(readFileSync18(sidePath, 'utf8'));
+    writeFileSync(sidePath, JSON.stringify({ ...side, cycles: [], graph: { s: 1, m: 1, h: 'nope' } }));
+    assert.deepEqual(check(payload), want, 'stale sidecar -> legacy verdict');
+    // corrupt: unparseable
+    writeFileSync(sidePath, '{nope');
+    assert.deepEqual(check(payload), want, 'corrupt sidecar -> legacy verdict');
+  } finally { cleanup(dir); }
+});
+
+test('S18-5: both sidecar AND graph corrupt -> the hook binary exits 0 silently (the contract is fail-open)', () => {
+  const dir = tmpDir('codeweb-hb-');
+  try {
+    writeTree(dir, CYCLE_FIXTURE);
+    mapWithRun(dir);
+    writeFileSync(join(dir, '.codeweb', HOOK_BASELINE_NAME), '{nope');
+    writeFileSync(join(dir, '.codeweb', 'graph.json'), '{also nope'); // stamp mismatch + unparseable
+    const res = spawnSync(process.execPath, [HOOK],
+      { input: JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: join(dir, 'x.mjs') } }), encoding: 'utf8' });
+    assert.equal(res.status, 0, 'always exit 0');
+    assert.ok(!/cycle|regression/i.test(res.stderr || ''), 'no structural output — silence IS the fail-open');
+  } finally { cleanup(dir); }
+});
+
 // Perf-quality finding 22 — the hook must write NO temp files. Pre-fix it left a pid-named
 // ~1.2MB codeweb-hook-<pid>.json FILE in os.tmpdir() on EVERY edit, forever (the fragment now
 // streams back on stdout). Tripwire: running the hook end-to-end adds no such file. (The suite's

@@ -109,6 +109,25 @@
 <p>  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)</p>
 <h3 class="cl-grp">Performance</h3>
 <ul>
+<li><strong>The post-edit hook stops re-verifying an unchanged baseline (hook-baseline sidecar).</strong> On</li>
+</ul>
+<p>  every edit the hook JSON.parsed the multi-MB baseline graph and recomputed its file cycles and</p>
+<p>  caller index — map-time artifacts that cannot have changed since map time. <code>run.mjs</code> (after</p>
+<p>  the stage run; on the reuse path only when missing/stale) and <code>refresh.mjs</code> (from the JSON</p>
+<p>  string it just wrote — free) now persist <code>hook-baseline.json</code> beside graph.json: version,</p>
+<p>  graph stamp (size + mtime) + byte sha1, cycle keys, and caller counts, via the new</p>
+<p>  <code>baselineSummary</code>/<code>regressionsAgainstSummary</code> split in graph-ops (<code>structuralRegressions</code> is</p>
+<p>  their composition — one truth, existing callers untouched). The hook consumes it when the</p>
+<p>  stamp — or, on stamp mismatch, the hash (identical-bytes rewrites re-validate; the bytes read</p>
+<p>  are shared with the fallback parse, one read) — matches, and falls back to today's path</p>
+<p>  otherwise. Fail-open at every seam, pinned by five BDD scenarios including the</p>
+<p>  poisoned-sidecar proof (a baseline cycle key removed from the sidecar is reported as new —</p>
+<p>  only the sidecar could say that) and both-corrupt silent-exit-0. Both write points are</p>
+<p>  best-effort try/catch. Measured min-of-3 at the 16.8k corpus: no-change hook fire 1,167 →</p>
+<p>  889 ms (the &lt; 1.5 s floor holds with margin); the in-process-extraction residual is #18b,</p>
+<p>  deferred to WS-H and pointed to from hook-fastpath-floor.md's revisit triggers. (round 2,</p>
+<p>  finding #18a)</p>
+<ul>
 <li><strong>Adding one function no longer re-derives the whole repo (name-delta invalidation).</strong> A</li>
 </ul>
 <p>  symbol-set change used to fail the edge/binding caches for EVERY file — the canonical agent</p>

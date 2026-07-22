@@ -437,18 +437,39 @@ export function orphans(graph, index) {
 // `after` but not `before`, and a symbol that EXISTS in both but lost ALL its callers (deleting a
 // symbol entirely is not a regression — only a surviving-but-orphaned one is). Duplication and
 // coupling deltas need the full pipeline; that stays diff.mjs.
-export function structuralRegressions(before, after) {
-  const b = normalizeGraph(before), a = normalizeGraph(after);
-  const cycleKey = (c) => c.join('|');
-  const beforeCycles = new Set(fileCycles(b).map(cycleKey));
+//
+// Round 2, finding #18a: split into the BEFORE-side summary (computable once, at map time — the
+// hook-baseline sidecar persists it) and the comparison against it, with structuralRegressions
+// as their composition — one truth, three entry points, existing callers untouched.
+const cycleKey = (c) => c.join('|');
+
+/** The before-side digest: cycle keys + per-id caller counts (only ids with >= 1 caller — all the
+ *  comparison consults). Computed on the normalizeGraph'd graph so cycle keys match composition. */
+export function baselineSummary(graph) {
+  const g = normalizeGraph(graph);
+  const cycles = fileCycles(g).map(cycleKey);
+  const bi = buildIndex(g);
+  const callIn = {};
+  for (const [id, callers] of bi.callIn) if (callers.size) callIn[id] = callers.size;
+  return { cycles, callIn };
+}
+
+/** The after-side comparison against a summary ({cycles: [key...], callIn: {id: count}}). */
+export function regressionsAgainstSummary(summary, after) {
+  const a = normalizeGraph(after);
+  const beforeCycles = new Set(summary.cycles);
   const newCycles = fileCycles(a).filter((c) => !beforeCycles.has(cycleKey(c)));
-  const bi = buildIndex(b), ai = buildIndex(a);
+  const ai = buildIndex(a);
   const afterIds = new Set(a.nodes.map((n) => n.id));
   const lostCallers = [];
-  for (const [id, callers] of bi.callIn) {
-    if (callers.size && afterIds.has(id) && !(ai.callIn.get(id)?.size)) lostCallers.push(id);
+  for (const id of Object.keys(summary.callIn)) {
+    if (afterIds.has(id) && !(ai.callIn.get(id)?.size)) lostCallers.push(id);
   }
   return { newCycles, lostCallers: lostCallers.sort() };
+}
+
+export function structuralRegressions(before, after) {
+  return regressionsAgainstSummary(baselineSummary(before), after);
 }
 
 // finding 14: the Spec O-1 delta simulator, hoisted from optimize.mjs so EVERY merge chain stops

@@ -60,7 +60,15 @@ const updated = {
 // covered flag is worse than none) and say how to get it back.
 const hadCoverage = !!updated.meta.coverage;
 if (hadCoverage) delete updated.meta.coverage;
-atomicWrite(abs, JSON.stringify(updated)); // finding 3: a SIGTERM mid-write (MCP's 60s timeout) must not truncate the graph
+const updatedJson = JSON.stringify(updated);
+atomicWrite(abs, updatedJson); // finding 3: a SIGTERM mid-write (MCP's 60s timeout) must not truncate the graph
+// Round 2, finding #18a: refresh re-baselines the post-edit hook's sidecar — `h`/`s` from the
+// in-memory string just written (free), `m` from a post-rename stat. Best-effort by contract.
+try {
+  const { computeHookBaseline, writeHookBaselineBeside } = await import('./lib/hook-baseline.mjs');
+  const { statSync } = await import('node:fs');
+  writeHookBaselineBeside(abs, computeHookBaseline(updated, updatedJson, statSync(abs).mtimeMs));
+} catch { /* sidecar failure must never fail a refresh */ }
 
 const payload = {
   graph: abs, root,

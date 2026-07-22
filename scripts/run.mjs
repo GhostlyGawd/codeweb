@@ -139,6 +139,19 @@ if (reusable) {
   } catch { /* memo is best-effort */ }
 }
 
+// Round 2, finding #18a: persist the post-edit hook's baseline summary beside graph.json — the
+// hook then skips its per-edit baseline parse + before-side cycle/index recompute. On the reuse
+// path only when the sidecar is missing/stale (one graph parse, amortized); best-effort by
+// contract — a sidecar failure must never fail a map.
+try {
+  const { computeHookBaseline, writeHookBaselineBeside, hookBaselineFresh } = await import('./lib/hook-baseline.mjs');
+  const gp = join(ws, 'graph.json');
+  if (!reusable || !hookBaselineFresh(gp)) {
+    const bytes = readFileSync(gp, 'utf8');
+    writeHookBaselineBeside(gp, computeHookBaseline(JSON.parse(bytes), bytes, statSync(gp).mtimeMs));
+  }
+} catch { /* sidecar is best-effort */ }
+
 if (opts.coverage) run('coverage', S('scripts/coverage.mjs'), [join(ws, 'graph.json'), resolve(opts.coverage)], false); // #13
 
 console.error(`\n[run] done -> ${ws}`);

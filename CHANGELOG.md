@@ -59,6 +59,23 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **The post-edit hook stops re-verifying an unchanged baseline (hook-baseline sidecar).** On
+  every edit the hook JSON.parsed the multi-MB baseline graph and recomputed its file cycles and
+  caller index — map-time artifacts that cannot have changed since map time. `run.mjs` (after
+  the stage run; on the reuse path only when missing/stale) and `refresh.mjs` (from the JSON
+  string it just wrote — free) now persist `hook-baseline.json` beside graph.json: version,
+  graph stamp (size + mtime) + byte sha1, cycle keys, and caller counts, via the new
+  `baselineSummary`/`regressionsAgainstSummary` split in graph-ops (`structuralRegressions` is
+  their composition — one truth, existing callers untouched). The hook consumes it when the
+  stamp — or, on stamp mismatch, the hash (identical-bytes rewrites re-validate; the bytes read
+  are shared with the fallback parse, one read) — matches, and falls back to today's path
+  otherwise. Fail-open at every seam, pinned by five BDD scenarios including the
+  poisoned-sidecar proof (a baseline cycle key removed from the sidecar is reported as new —
+  only the sidecar could say that) and both-corrupt silent-exit-0. Both write points are
+  best-effort try/catch. Measured min-of-3 at the 16.8k corpus: no-change hook fire 1,167 →
+  889 ms (the < 1.5 s floor holds with margin); the in-process-extraction residual is #18b,
+  deferred to WS-H and pointed to from hook-fastpath-floor.md's revisit triggers. (round 2,
+  finding #18a)
 - **Adding one function no longer re-derives the whole repo (name-delta invalidation).** A
   symbol-set change used to fail the edge/binding caches for EVERY file — the canonical agent
   edit (add a function) cost a full re-read + re-mask + re-derive (2.1× the no-change floor

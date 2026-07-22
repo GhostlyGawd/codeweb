@@ -58,8 +58,12 @@ boot + cache JSON parse + fragment serialize/parse, and (b) `structuralRegressio
 
 - Hook end-to-end > 1.5s at the 16k benchmark → implement in-process extraction (finding 25's
   decomposition makes the extractor importable; kills node boot + cache parse + fragment
-  serialize/parse ≈ half the residual).
-- `structuralRegressions` > 500ms at scale → incremental regression check (persist the baseline's
-  file-pair table via `createMergeSimulator`'s shape and diff pairs, not graphs).
+  serialize/parse ≈ half the residual). Round-2 status: #18a's `hook-baseline.json` sidecar
+  removed the baseline parse + before-side recompute (~280 ms class); the residual is the child
+  extract itself — that in-process half is round-2 finding **#18b, deferred to WS-H** (it needs
+  #40's orchestrator decomposition).
+- `structuralRegressions` > 500ms at scale → incremental regression check. Round-2 #18a landed
+  the map-time half: `baselineSummary`/`regressionsAgainstSummary` (graph-ops) persist the
+  before side at map/refresh, so the hook only computes the after side per edit.
 - Anything here regresses → `bench/all.mjs` stage factors (finding 13) catch extract; the hook
   path itself is exercised by `tests/post-edit-diff.test.mjs` + `tests/cache-unification.test.mjs`.
