@@ -634,6 +634,30 @@ notes so validated results, papers, and new tools never get lost in commit histo
   `tests/import-nodenext.test.mjs` (disambiguation, namespace member, re-export chain + barrel
   dependent, `.mjs→.mts` + `/index.tsx`, pub-walk mirror, both-exist precedence pin).
   (perf-quality round 2, finding #11)
+- **Bare-ref magnets are gone — parameters stop fabricating cross-role edges.** Measured on the
+  self-map: 234 of 1,180 ref edges targeted 8 single-letter test/bench symbols and 209 ref edges
+  ran product → non-product, all fabricated from PARAMETERS — refRe scanned declaration lines
+  (`function metrics(g) {` emitted a ref from metrics to a test file's global `g`) and body uses
+  of params hit the role-blind unique-global fallback. The codebase renamed its own parameters to
+  dodge this (`sourceReader`'s `relPath`, import-resolve's `relPathOf/recTextOf/maskTextOf` —
+  comments admitting it). Four mechanisms now close the class: (1) refRe skips declaration lines
+  (with paren-balance continuation for multi-line signatures; callRe/inherit/instanceof scans
+  untouched); (2) a bare name token-bound by the signature of ANY enclosing range never reaches
+  the fallback — shadowing semantics, per binding (a call through a param invokes the param's
+  value, never the global; `sig.raw` over-collection only ever suppresses fallback edges);
+  (3) the unique-global fallback rejects 1–2-char names, counted and surfaced in the banner as
+  `(N short-name)` — never silent (the 4 short product symbols all resolve same-file; nothing
+  legitimate is lost); (4) ref kinds are role-gated in REJECT form — a product caller whose
+  unique in-package def is non-product code drops as ambiguous (filter-form would fabricate a
+  product→product edge from a name collision); the gate is deliberately one-directional, the
+  missing mirror of the test→product relabel that feeds testIn/coverage. Self-map after: refs
+  into ≤2-char symbols 234 → 2 (both same-file refs to a real one-letter bench formatter),
+  product→non-product refs 209 → 0, and both rename workarounds are deleted with the natural
+  names restored — `tests/self-map-roles.test.mjs` re-extracts the repo and pins the invariant
+  plus the exact cycle class the renames dodged; `tests/extract-refscope.test.mjs` isolates each
+  mechanism (including the test→product survival pin and the per-binding positive control).
+  `SCANNER_VERSION` 14 → 15 so warm caches can't replay pre-fix edges.
+  (perf-quality round 2, finding #10)
 
 ## [0.9.0] - 2026-07-19
 

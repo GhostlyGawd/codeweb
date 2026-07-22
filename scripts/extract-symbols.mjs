@@ -43,9 +43,14 @@ import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; //
 // v9: tree-sitter tier default-on when installed (dispatch recall); export-star re-export chains
 //     resolve (barrel files no longer swallow edges).
 // v13: maskJs lexes regex literals (perf-quality finding 1) — extents/edges cached by v12 are stale.
-const SCANNER_VERSION = 14; // v14: round-2 truth fixes (#8 template frames, #9 spread/IIFE, #12 accessor ids,
-// #13 Ruby heredoc/PHP #, #14 Python f-strings, #15 crash belts) change cached syms/ast.tsr/edges —
-// a v13 cache would replay pre-fix nodes/edges from the stamp tier indefinitely.
+// v14: round-2 truth fixes (#8 template frames, #9 spread/IIFE, #12 accessor ids, #13 Ruby
+// heredoc/PHP #, #14 Python f-strings, #15 crash belts) change cached syms/ast.tsr/edges.
+// Ladder (orchestrator-reconciled, monotonic by build order): WS-B took 13 -> 14; WS-C (this)
+// takes 14 -> 15; WS-D (#17/#19) takes 15 -> 16.
+const SCANNER_VERSION = 15; // v15: round-2 resolution fixes (#11 NodeNext ext remaps + .mts/.cts,
+// #10 decl-line ref skip, param shadow, short-name guard, ref role gate) change cached edges and
+// the per-file `short` counter — a v14 cache would replay pre-fix rex tables, bindings, and edges
+// from the stamp tier indefinitely.
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
 // label separator, so the last ':' splits them.
@@ -705,14 +710,47 @@ for (const f of files) {
 const LEGACY_FALLBACK = !!process.env.CODEWEB_LEGACY_FALLBACK; // A/B: restore pre-fix byName[0] wiring for regression testing
 
 // Derive ONE file's edges (call/ref/inherit), with from-side = its own symbols or its <module> node.
-// Pure w.r.t. the file: returns {edges, hasModule, ambiguous}. The precision gate (alias > same-file >
-// unique-global, drop-ambiguous) is unchanged — only the plumbing moved into a function so it can be
-// cached per file and skipped when the file + symbol set are unchanged.
+// Pure w.r.t. the file: returns {edges, hasModule, ambiguous, short}. The precision gate (alias >
+// same-file > unique-global, drop-ambiguous) is unchanged — only the plumbing moved into a function
+// so it can be cached per file and skipped when the file + symbol set are unchanged.
 function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) {
   const local = []; const localSet = new Set();
-  let hasModule = false, ambiguous = 0;
+  let hasModule = false, ambiguous = 0, shortDropped = 0;
   const isPy = r.endsWith('.py');
   const enclosing = (lineNo) => { let best = null; for (const rg of ranges) if (lineNo >= rg.start && lineNo <= rg.end && (!best || rg.start > best.start)) best = rg; return best; };
+  // Round 2, finding #10 (T-10.2/T-10.4): declaration START lines + per-range signature tokens.
+  // refRe never scans a decl line (24% of self-map ref edges were fabricated there — `function
+  // metrics(g) {` emitted a ref from metrics to a test file's global g), and every identifier
+  // token in a range's signature becomes a SHADOW set for the fallback path: a bare use under a
+  // binding IS the binding (a call through a param invokes the param's value, never the global).
+  // sig.raw over-collects (destructure keys, default-value exprs, TS annotations) — that only
+  // suppresses fallback edges, precision-safe by construction. Multi-line signatures: when the
+  // param list opened at/after the name doesn't balance on the decl line, continuation lines keep
+  // the refRe skip AND sweep their tokens until the cumulative paren balance closes. Local maps
+  // only — `ranges` objects also live in the scan cache and must not grow non-JSON state.
+  const startLines = new Set(ranges.map((rg) => rg.start));
+  const paramsOf = new Map(); // range -> Set(identifier tokens in its signature)
+  const sweepInto = (set, s) => { for (const t of s.match(/[A-Za-z_$][\w$]*/g) || []) set.add(t); };
+  // Unbalanced paren depth of `name`'s param list on its decl line (0 = balanced or no list).
+  const sigSpill = (ln, name, set) => {
+    const at = ln.indexOf(name);
+    if (at === -1) return 0;
+    const open = ln.indexOf('(', at + name.length);
+    if (open === -1) return 0;
+    let depth = 0;
+    for (let k = open; k < ln.length; k++) {
+      if (ln[k] === '(') depth++;
+      else if (ln[k] === ')') { depth--; if (depth <= 0) return 0; }
+    }
+    sweepInto(set, ln.slice(open + 1)); // spilled: parseSignature returned null, sweep the tail
+    return depth;
+  };
+  for (const rg of ranges) {
+    const set = new Set();
+    const sig = parseSignature(lines[rg.start - 1] || '', rg.name, isPy);
+    if (sig) sweepInto(set, sig.raw);
+    paramsOf.set(rg, set);
+  }
   // Round 2, finding #12: every declaration start line per NAME. addEdge skips a match whose name
   // has a declaration starting on that line — a getter/setter pair or an overload impl line used to
   // be scanned as a CALL with the class as scope (`Widget -> Widget.value` phantom callers, hiding
@@ -738,6 +776,24 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
     else { callerId = r + ':<module>'; hasModule = true; } // module/top-level scope
     let calleeId = aliased || sameFileByName.get(name);
     if (!calleeId) {
+      if (kind === 'call' || kind === 'ref') {
+        // finding #10 (T-10.4): PARAM SHADOW — a bare name token-bound by the signature of ANY
+        // enclosing range never reaches the fallback (alias/same-file resolution already missed;
+        // this is shadowing semantics, per BINDING, not per name-per-file — a sibling without the
+        // param keeps its edge). Kills the body-use half of the parameter-magnet class.
+        const lineNo = lineIdx + 1;
+        for (const rg of ranges) {
+          if (lineNo >= rg.start && lineNo <= rg.end && paramsOf.get(rg).has(name)) { ambiguous++; return; }
+        }
+        // finding #10 (T-10.4): >=3-CHAR GUARD — 1-2-char bare names are the measured magnet
+        // class (234 self-map ref edges into 8 one-letter test/bench symbols) and had ZERO
+        // legitimate cross-file bare-fallback in-edges on any measured corpus (the 4 short
+        // product symbols all resolve same-file; Ruby's cross-file bare reach is method-gated
+        // below). NOT silent: counted in `shortDropped`, surfaced in the banner as
+        // "(N short-name)" — a future real 1-2-char cross-file symbol shows up there, and the
+        // guard is revisited only on that evidence.
+        if (name.length < 3) { ambiguous++; shortDropped++; return; }
+      }
       // package-scoped unique-name fallback: resolve only within the caller's package (imports
       // handle legitimate cross-package calls; cross-package bare-name matches are collisions).
       const defs = byName.get(name) || [];
@@ -748,7 +804,18 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
       // that attribution belongs to the dispatch tier, which has the receiver evidence. Without
       // this, `helper(1)` in class A wired to B.helper across files on a name coincidence.
       if (/\.(rb|php)$/.test(r)) inPkg = inPkg.filter((d) => { const lbl = d.slice(d.lastIndexOf(':') + 1); return !lbl.includes('.') || idFile(d) === r; });
-      if (inPkg.length === 1) calleeId = inPkg[0];
+      if (inPkg.length === 1) {
+        // finding #10 (T-10.3): ROLE-GATE the unique-global fallback for ref kinds — product
+        // never ref-resolves into test/bench/fixture code. REJECT-form, not filter-form: a name
+        // with one product def among several defs stays an ambiguous DROP (filter-form would
+        // fabricate a product->product edge from the collision — byName['rel'] on the self-map
+        // is exactly that trap). Mirror of the test->product relabel below, which is BY
+        // CONSTRUCTION one-directional: test/bench->product edges become kind `test` and power
+        // testIn/coverage — never gate that direction. Role truth is roleFor (rules overrides +
+        // roleOf), the same truth stamped on nodes.
+        if (kind === 'ref' && roleFor(r) === 'product' && roleFor(idFile(inPkg[0])) !== 'product') { ambiguous++; return; }
+        calleeId = inPkg[0];
+      }
       else if (LEGACY_FALLBACK) calleeId = defs[0];
       else { ambiguous++; return; }
     }
@@ -793,8 +860,30 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
   const isCs = r.endsWith('.cs');
   const instanceofRe = /\binstanceof\s+([A-Za-z_$][\w$]*)/g; // `x instanceof X` -> ref to class X
   const pyBasesRe = /^\s*class\s+[A-Za-z_]\w*\s*\(([^)]*)\)/;
+  // finding #10 (T-10.2): >0 while inside a spilled multi-line signature; the ranges it belongs to
+  // keep collecting param tokens until the cumulative paren balance closes.
+  let contDepth = 0, contRanges = null;
   for (let i = 0; i < lines.length; i++) {
     const ln = lines[i];
+    // finding #10 (T-10.2): signature-line + continuation state — decided BEFORE any scan (and
+    // before the stub-line `continue`, which must not desync the balance). `sigLine` suppresses
+    // refRe ONLY; callRe/inherit/instanceof scans are untouched. Accepted recall loss: a ref
+    // argument inside a single-line decl+body (`const f = () => emit(handler)`) — decl lines are
+    // where the measured fabrication lives, body-line refs are unaffected.
+    let sigLine = false;
+    if (contDepth > 0) {
+      sigLine = true;
+      for (const rg of contRanges) sweepInto(paramsOf.get(rg), ln);
+      for (let k = 0; k < ln.length; k++) { if (ln[k] === '(') contDepth++; else if (ln[k] === ')') contDepth--; }
+      if (contDepth <= 0) { contDepth = 0; contRanges = null; }
+    } else if (startLines.has(i + 1)) {
+      sigLine = true;
+      for (const rg of ranges) {
+        if (rg.start !== i + 1) continue;
+        const d = sigSpill(ln, rg.name, paramsOf.get(rg));
+        if (d > 0) { contDepth = d; (contRanges = contRanges || []).push(rg); }
+      }
+    }
     if (isPy) {
       const pm = pyBasesRe.exec(ln);
       if (pm) for (const part of pm[1].split(',')) {
@@ -847,16 +936,18 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
       }
       addEdge(i, m[1]);
     }
-    refRe.lastIndex = 0;
-    while ((m = refRe.exec(ln))) addEdge(i, m[1], 'ref'); // a bare identifier ARGUMENT is a reference (callback/value), not an invocation
+    if (!sigLine) { // finding #10 (T-10.2): a signature line's params are bindings, not references
+      refRe.lastIndex = 0;
+      while ((m = refRe.exec(ln))) addEdge(i, m[1], 'ref'); // a bare identifier ARGUMENT is a reference (callback/value), not an invocation
+    }
     instanceofRe.lastIndex = 0;
     while ((m = instanceofRe.exec(ln))) { const cls = classOf(m[1]); if (cls) addResolved(i, cls, 'ref'); }
   }
-  return { edges: local, hasModule, ambiguous };
+  return { edges: local, hasModule, ambiguous, short: shortDropped };
 }
 
 const edges = [];
-let ambiguousDropped = 0, edgedCount = 0;
+let ambiguousDropped = 0, shortNameDropped = 0, edgedCount = 0;
 // Every successfully-read file derives edges — NOT only files with discovered symbols. A test file
 // whose only "functions" are anonymous callbacks (`test('…', () => { foo() })`) discovers zero
 // symbols; excluding it dropped its module-scope call to `foo` entirely, so the imported prod symbol
@@ -871,7 +962,7 @@ for (const f of edgeFiles) {
   const prev = reuseEdges && oldCache.files[r];
   let result;
   if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges) {
-    result = { edges: prev.edges, hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0 }; // reuse
+    result = { edges: prev.edges, hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0, short: prev.short || 0 }; // reuse
   } else {
     // finding 10: text + mask only on the derive path — an edge-cache hit never touches the file
     const text = textOf(f, rec);
@@ -879,13 +970,14 @@ for (const f of edgeFiles) {
     result = deriveFileEdges(r, lines, rec.ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f));
     edgedCount++;
   }
-  if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; }
+  if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; cacheEntry.short = result.short; }
   if (result.hasModule && !nodeIdSet.has(r + ':<module>')) {
     nodes.push({ id: r + ':<module>', label: '<module>', kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleFor(r) });
     nodeIdSet.add(r + ':<module>');
   }
   for (const e of result.edges) edges.push(e);
   ambiguousDropped += result.ambiguous;
+  shortNameDropped += result.short;
 }
 if (newCache) { newCache.symbolSig = symbolSig; newCache.bindSig = bindSig; }
 
@@ -1020,6 +1112,6 @@ const dispatchNote = astAvailable
   : '';
 const anyAstLoaded = !!_tsEngineState || Object.values(langEngines).some(Boolean);
 const astState = anyAstLoaded ? 'loaded' : (!astAvailable || astLoadFailed) ? 'off' : 'idle';
-const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
+const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges (${shortNameDropped} short-name)${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
 if (opts.out) { atomicWrite(resolve(opts.out), JSON.stringify(fragment, null, 2)); console.error(banner + ` -> ${opts.out}`); }
 else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }

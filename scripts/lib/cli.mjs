@@ -194,13 +194,10 @@ export function findTarget(filePath) {
 export function sourceReader(root) {
   const available = !!root && existsSync(root);
   const cache = new Map();
-  // (Parameter deliberately NOT named `rel`: a bare identifier that uniquely matches a global
-  // symbol elsewhere wires a false ref edge — the gate caught `rel` here closing a cycle with
-  // the extractor the moment cli.mjs gained an importer there. Same lesson as graph-ops' score/cap.)
-  const linesOf = (relPath) => {
+  const linesOf = (rel) => {
     if (!available) return null;
-    if (!cache.has(relPath)) { try { cache.set(relPath, readFileSync(root + '/' + relPath, 'utf8').split(/\r?\n/)); } catch { cache.set(relPath, null); } }
-    return cache.get(relPath);
+    if (!cache.has(rel)) { try { cache.set(rel, readFileSync(root + '/' + rel, 'utf8').split(/\r?\n/)); } catch { cache.set(rel, null); } }
+    return cache.get(rel);
   };
   const bodyOf = (n) => {
     const lines = n && linesOf(n.file);

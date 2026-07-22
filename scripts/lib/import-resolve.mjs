@@ -54,20 +54,13 @@ export function defaultExportOf(r, text, names) {
   return null;
 }
 
-export function createImportResolver({ rel: relPathOf, relSet, absByRel, fileSyms, textOf: recTextOf, maskedOnce: maskTextOf, nodeIdSet, nodes }) {
-  // relPathOf/recTextOf/maskTextOf: the injected accessors are RENAMED at the destructure — their
-  // new names are label-free across the whole self-map (a rename that lands on ANY existing
-  // symbol name, e.g. bench-core's relOf, just moves the false edge to a new file).
-  // callers' names (rel/textOf/maskedOnce) are real symbols in extract-symbols.mjs, and the
-  // extractor's bare-name pass would read our calls as references INTO the orchestrator —
-  // a false import-resolve -> extract-symbols edge closing a dependency cycle (the same
-  // dogfood false-ref class as sourceReader's relPath rename).
+export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, maskedOnce, nodeIdSet, nodes }) {
 // Spec Q4: a Python from-import is module-level code — the SITE (<module>) owns its import edge;
 // the node is created on demand by ensureModuleNode when the edges are appended.
 const pyImportOrigin = (r2) => r2 + ':<module>';
 function resolveImport(fromAbs, spec) {
   if (!/^[.]/.test(spec)) return null; // local relative imports only
-  const r = relPathOf(resolve(dirname(fromAbs), spec)).replace(/\\/g, '/');
+  const r = rel(resolve(dirname(fromAbs), spec)).replace(/\\/g, '/');
   for (const c of importCandidates(r)) if (relSet.has(c)) return c;
   return null;
 }
@@ -83,7 +76,7 @@ function resolvePyModule(fromAbs, level, dotted) {
   if (level > 0) {
     let baseAbs = dirname(fromAbs);
     for (let i = 1; i < level; i++) baseAbs = dirname(baseAbs);
-    const baseRel = relPathOf(baseAbs).replace(/\\/g, '/');
+    const baseRel = rel(baseAbs).replace(/\\/g, '/');
     return pyFile([baseRel, ...parts].filter(Boolean).join('/'));
   }
   // Spec Q1: a SINGLE-segment absolute import resolves only when it names the repo's OWN
@@ -196,7 +189,7 @@ const pyReExportTableOf = (moduleRel) => {
   if (rec) {
     table = new Map();
     const re = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
-    const masked = maskTextOf(moduleRel, 'py', recTextOf(modAbs, rec));
+    const masked = maskedOnce(moduleRel, 'py', textOf(modAbs, rec));
     let mm;
     while ((mm = re.exec(masked))) {
       for (const part of mm[3].replace(/[()]/g, '').split(',')) {
@@ -324,7 +317,7 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
   };
   const addSide = (spec) => { const t = resolveImport(fAbs, spec); if (!t) return; if (aId) edges.push([aId, t + ':<module>']); };
   if (isPy) {
-    const pyText = maskTextOf(r, 'py', text); // don't bind imports that live in a docstring/comment
+    const pyText = maskedOnce(r, 'py', text); // don't bind imports that live in a docstring/comment
     while ((m = pyFrom.exec(pyText))) addPyFrom(m[1].length, m[2], m[3]);
     while ((m = pyImport.exec(pyText))) addPyImports(m[1]);
   } else {
