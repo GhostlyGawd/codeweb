@@ -614,9 +614,10 @@
 <p>  <code>npm ci</code> a probe (<code>node -e "await import('web-tree-sitter')"</code>) fails the job when the</p>
 <p>  optionalDependency install hiccuped, and the skip count is bounded (ceiling 8 = a named runner</p>
 <p>  census of 7 environment skips — 3 golden-target, 1 TS_MODULE bench, 1 inverse fallback, 2</p>
-<p>  playwright report-scale — + 1 headroom; the tier-wide failure mode adds ~38 skips and trips it</p>
-<p>  hard; both node 22's TAP and node 24's spec-style summaries are parsed). A new <code>test-no-ast</code></p>
-<p>  job installs with</p>
+<p>  playwright report-scale — + 1 headroom; windows runs its own ceiling 11, its leg adding exactly</p>
+<p>  the 3 named ctags-shim platform skips; the tier-wide failure mode adds ~38 skips and trips</p>
+<p>  either ceiling hard; both node 22's TAP and node 24's spec-style summaries are parsed). A new</p>
+<p>  <code>test-no-ast</code> job installs with</p>
 <p>  <code>--omit=optional</code> and proves the regex fallback green stand-alone, asserting the</p>
 <p>  fallback-equivalence test ran UN-skipped (it inverse-skips wherever the engine is installed —</p>
 <p>  i.e. always in the matrix job). <code>codeweb-gate.yml</code> now runs <code>npm ci</code>, so the structural self-gate</p>

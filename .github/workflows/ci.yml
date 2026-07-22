@@ -17,6 +17,11 @@ jobs:
         exclude:
           - os: windows-latest
             node: '24'
+        include:
+          # windows ceiling = the shared census 7 + 3 named ctags-shim platform skips
+          # (tests/ctags-batch.test.mjs: the shebang fake is unspawnable there) + 1 headroom.
+          - os: windows-latest
+            skip_ceiling: 11
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -42,20 +47,22 @@ jobs:
       #   1x fallback-equivalence  — inverse skip: the engine IS installed in this job
       #   2x report-scale L1/L2    — playwright not resolvable ("CI stays zero-dep" is that
       #                              guard's own design; the browser harness is dev-side, WS-G)
-      # Every matrix leg shares this census: zero process.platform-conditional guards exist in
-      # tests/, git is present on all runners (the git-guarded tests run), the engine installs on
-      # all legs, and the golden D:/ path is absent on the windows runner too — so one ceiling, no
-      # per-leg values. The tier-wide failure mode adds ~38 skips and trips it hard.
+      # The ubuntu legs share this census exactly (git present on all runners so the git-guarded
+      # tests run; the engine installs on all legs; the golden D:/ path is absent everywhere,
+      # windows runner included). The windows leg adds exactly 3 named platform skips — the
+      # ctags-shim trio (see matrix include above) — hence its per-leg ceiling 11. The tier-wide
+      # failure mode adds ~38 skips and trips either ceiling hard.
       # The awk matches BOTH summary formats: node 22 emits TAP ("# skipped N"), node 24's runner
       # emits the spec-style summary ("ℹ skipped N") — with only the TAP pattern the node-24 leg
       # was silently ceiling-open (S=0).
-      - name: Run tests (skip ceiling 8)
+      - name: Run tests (skip ceiling)
         shell: bash
         run: |
           set -o pipefail
           npm test 2>&1 | tee "$RUNNER_TEMP/test.log"
           S=$(awk '/^(#|ℹ) skipped/{n=$3} END{print n+0}' "$RUNNER_TEMP/test.log")
-          [ "$S" -le 8 ] || { echo "::error::$S skips (ceiling 8)"; exit 1; }
+          CEIL="${{ matrix.skip_ceiling || 8 }}"
+          [ "$S" -le "$CEIL" ] || { echo "::error::$S skips (ceiling $CEIL)"; exit 1; }
 
   # Round 2 finding #3: the regex fallback, exercised for real. The fallback-equivalence test
   # (tests/extract-engine.test.mjs) inverse-skips whenever the engine is installed — i.e. always in

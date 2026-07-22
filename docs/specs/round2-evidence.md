@@ -169,3 +169,49 @@ Container: Node v22.22.2, 4 cores. All timings `time` wall clock, this container
   ubuntu-22 failure — its first verdict comes from the rerun.
 - CHANGELOG #3 entry amended (ceiling 8 + census + dual-format note); test-no-ast comment updated
   to the runner-measured 45.
+
+### CI red→green 2 — the windows leg's 8 genuine failures (the matrix doing its job)
+
+- Run 29871812634 @49c218d: the ubuntu-22 recalibration held (ubuntu-22 ✓, ubuntu-24 ✓ — now
+  genuinely, via the `ℹ` parse — bench ✓, consistency ✓, test-no-ast ✓); `test (windows-latest,
+  22)` failed with **644 tests, 629 pass, 8 fail, 7 skipped** — real failures, not ceiling. There
+  is no windows/node-24 leg to check: the matrix excludes it by spec design (T-3.1).
+- The named 8 (job 88771829501→88773434629 log) and classification:
+  1. `B1+B4: sections present, session valid, mirror byte-identical, corpus skip explicit` —
+     child bench crashed: `ERR_UNSUPPORTED_ESM_URL_SCHEME` at bench/all.mjs:153 (`await
+     import(<abs path>)`; on windows `D:\...` is not a valid ESM specifier). **Class (b)** small
+     product fix: import via `pathToFileURL(...).href` (the pattern report-scale.mjs:74 already
+     uses). bench/ is not a WS-B..H-owned surface.
+  2. `B2: a lowered budget fails the gate by name` — same root cause, same fix.
+  3. `cold run: ONE batched ctags process (-L -) serves every file` — the logging ctags fake is a
+     shebang node script: unspawnable on windows (CreateProcess runs .exe/.com only; Node's
+     CVE-2024-27980 hardening EINVALs .cmd/.bat without a shell, and the extractor's execFileSync
+     rightly uses no shell). The extractor silently fell back to regex → zero invocations.
+     **Class (c)** named platform skip — the FAKE is unix-only, not the feature (a real ctags.exe
+     on PATH spawns fine); counted in the windows census.
+  4. `warm run with one changed file: one PER-FILE spawn` — same shim, same class (c). The middle
+     sibling (`untouched warm run: zero ctags processes`) was PASSING VACUOUSLY on windows
+     (0 == 0 with ctags never engaged) — skipped with the same named guard for honesty; windows
+     census = 7 shared + 3 ctags-shim = 10, per-leg ceiling 11 via `matrix.include.skip_ceiling`
+     (`CEIL="${{ matrix.skip_ceiling || 8 }}"`).
+  5. `IR1: re-export chain — renamed barrel export resolves…` — **class (a)** test bug: the
+     in-process fake universe used POSIX `'/r'` literals; import-resolve's resolveImport runs
+     node:path `resolve()`, which on windows re-anchors `/r/...` to the current drive
+     (`D:\r\...`), so the test's `rel()` no longer matched and every lookup left the universe.
+     Product path semantics are fine (real runs feed real platform paths). Fix: platform-honest
+     root `resolve('/r')` + `join()`-built abs paths + backslash-normalizing `rel()`; rel ids and
+     every assertion unchanged.
+  6. `IR2: bindFileImports — named import through the barrel binds…` — same universe, same
+     class (a) fix.
+  7. `P2: npm pack ships engine + plugin surfaces…` — **class (a)**: `spawnSync('npm', …)` is
+     ENOENT on windows (npm is `npm.cmd`) → status null. Fix: `npm.cmd` + `shell: true` on win32
+     only; assertions unchanged.
+  8. `K3: stagesReused honesty is pinned at the parser level` — **class (a)**: the test itself
+     `await import(<abs path>)`ed scale.mjs. Fix: `pathToFileURL`. Rider: report-scale-bench's
+     guard had the identical import bug swallowed by its catch (windows would report "playwright
+     not resolvable" for the wrong reason) — fixed the same way; CI census unaffected.
+- Nothing tripped the WS-B..H stop-tripwire: the two product-file failures live in bench/all.mjs;
+  extract-symbols/masking/lang-rules/import-resolve/overlap/mcp-server/report/editor are
+  untouched (IR1/IR2 were test-fixture bugs, not import-resolve bugs).
+- Commits: class (a) test-portability 5b22064; class (b) bench fix b6c3b4e; class (c) skips +
+  per-leg ceiling + this entry (see final sha in git log).
