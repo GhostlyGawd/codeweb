@@ -51,6 +51,25 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li>**The prescribed per-edit loop is now in-process: <code>codeweb_diff</code> serves from the cached graph and</li>
+</ul>
+<p>  <code>codeweb_stats</code> no longer spawns a child.<strong> <code>codeweb_diff</code> booted node and parsed </strong>two** graphs per</p>
+<p>  call (131–136 ms @1.2k; ~500 ms at 16k) in the refresh→diff sequence the INSTRUCTIONS prescribe per</p>
+<p>  edit; <code>codeweb_stats</code> spawned a child (92–95 ms) to read a ~200-byte <code>stats.json</code> the server already</p>
+<p>  had the reader for. diff's comparison + #28 rename detection are lifted verbatim into a new</p>
+<p>  <code>scripts/lib/diff-core.mjs</code> (<code>diffGraphs(before, after, {names, bIx?, aIx?}) → {payload, code}</code>);</p>
+<p>  <code>diff.mjs</code> becomes load → diffGraphs → emit (exit codes and <code>--json</code>/text bytes unchanged, asserted).</p>
+<p>  The MCP fast path parses the caller's before snapshot fresh (never inserted into the graph cache —</p>
+<p>  its FIFO eviction would drop the hot live graph), reads the after side from <code>cachedGraph</code> (re-stat +</p>
+<p>  reload on change), and — I6 — awaits the after-workspace writer tail first, so a concurrent refresh</p>
+<p>  lands before the diff reads (it does not reopen #30) and a cancel while it awaits suppresses the</p>
+<p>  reply; any throw falls back to the spawned <code>diff.mjs</code>, whose stderr becomes the errResult (never</p>
+<p>  invented text). <code>codeweb_stats</code> mirrors the brief fast path via a new <code>receiptPayload</code> in</p>
+<p>  <code>lib/stats.mjs</code> (the one place the empty-note literal lives; <code>stats.mjs --json</code> serves it too).</p>
+<p>  Byte-for-byte parity with both CLIs is asserted (MD1/MD2/MD2b for diff; empty + non-empty ledgers</p>
+<p>  for stats; missing-graph errResult identical to the spawn path). After this, refresh is the loop's</p>
+<p>  only child. (round 2, finding #33)</p>
+<ul>
 <li><strong>Read-only MCP tools on one workspace now run concurrently (reader/writer queue split).</strong> Stage 1</li>
 </ul>
 <p>  of the queue redesign kept full per-workspace serialization; the 12+ read-only spawned tools</p>

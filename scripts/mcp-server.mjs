@@ -20,15 +20,16 @@
 import { createInterface } from 'node:readline';
 import { spawn } from 'node:child_process';
 import { readFileSync, existsSync, statSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols } from './lib/graph-ops.mjs';
+import { diffGraphs } from './lib/diff-core.mjs'; // #33: the codeweb_diff comparison, served in-process
 import { runQuery } from './lib/query-core.mjs';
 import { findSymbols } from './lib/find-core.mjs';
 import { buildBrief } from './lib/brief-core.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's card assembler, in-process
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
-import { bump, attachActivity } from './lib/stats.mjs';
+import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
 import { checkStaleness, sourceReader } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -464,6 +465,54 @@ function handleMap(id, args, meta) {
   enqueueChild(id, { kind: 'writer', key: out, tool: 'codeweb_map', bin: scriptOf('run.mjs'), argv: [target, '--out-dir', out], stdio: ['ignore', 'ignore', 'pipe'], timeoutMs: 300_000, onStderr, onSettle });
 }
 
+// THE spawned-tool reply shaper (shared by the generic tool path and the #33 diff spawn fallback):
+// exit 2 / null → errResult (graph-not-found gains the MCP next step); otherwise the child's JSON.
+const spawnedToolReply = (id) => ({ code, out, errBuf, timedOut }) => {
+  if (timedOut) return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
+  if (code === 2 || code == null) {
+    const text = (errBuf || 'query failed').trim() || 'query failed';
+    return errResult(id, /graph not found/.test(text) ? `${text}\n${NO_GRAPH}` : text);
+  }
+  // exit 0 (results) or 1 (found:false / gate-fail) both emit valid JSON on stdout — pass through.
+  reply(id, { content: [{ type: 'text', text: (out || '').trim() }] });
+};
+
+// ---- codeweb_diff fast path (#33) ------------------------------------------------------------
+// The prescribed refresh→diff loop's last child goes IN-PROCESS: the AFTER side comes from
+// cachedGraph (re-stat + reload on mtime/size change — disk truth by mechanism), reusing its cached
+// index; the BEFORE side is a fresh parse of the caller's snapshot, deliberately NOT inserted into
+// graphCache (its FIFO eviction would drop the hot live graph for a one-shot temp snapshot). I6: it
+// AWAITS the after-workspace writerTail first (else a concurrent refresh could hand it pre-refresh
+// bytes — reopening #30); it is NOT registered in readersInFlight (ONE live read, rename-atomic-
+// safe; the before side is a caller snapshot). It registers a SUPPRESS-ONLY inflight entry (T-34.1):
+// no child to kill, but a cancel while it awaits suppresses the reply. Any throw → the spawned
+// diff.mjs fallback (a reader job), whose stderr/exit-2 becomes the errResult — never invented text.
+function handleDiff(id, args, tool) {
+  const key = dirname(resolve(args.after)); // == queueKeyFor(diff) — the after-workspace
+  const entry = { kill: () => {}, cancelled: false };
+  inflight.set(id, entry);
+  pendingAsync++;
+  const spawnFallback = () => {
+    // hand off to the spawned reader path; keep the work COUNTED across the handoff — no asyncDone
+    // runs between this -- and enqueueChild's ++, so stdin-close cannot exit in the gap.
+    inflight.delete(id);
+    pendingAsync--;
+    enqueueChild(id, { kind: 'reader', key, tool: tool.name, bin: tool.bin, argv: [args.before, args.after, '--json'], stdio: ['ignore', 'pipe', 'pipe'], timeoutMs: SPAWN_TIMEOUT_MS, onSettle: spawnedToolReply(id) });
+  };
+  const attempt = () => {
+    if (entry.cancelled) { inflight.delete(id); asyncDone(); return; } // cancel while awaiting → suppress reply (I5)
+    let payload;
+    try {
+      const before = normalizeGraph(JSON.parse(readFileSync(resolve(args.before), 'utf8'))); // NOT cached (temp snapshot must not evict the live graph)
+      const afterEntry = cachedGraph(resolve(args.after)); // re-stats + reloads on mismatch
+      payload = diffGraphs(before, afterEntry.graph, { names: { before: basename(args.before), after: basename(args.after) }, aIx: afterEntry.index }).payload;
+    } catch { return spawnFallback(); }
+    reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
+    inflight.delete(id); asyncDone();
+  };
+  wsOf(key).writerTail.then(attempt, attempt); // I6: await the after-workspace writer tail first
+}
+
 // ---- tools/call ------------------------------------------------------------------------------
 function handleToolCall(id, params) {
   const name = params && params.name;
@@ -477,6 +526,7 @@ function handleToolCall(id, params) {
   }
   if (tool.valid) { const problem = tool.valid(args); if (problem) return errResult(id, problem); }
   if (tool.map) return handleMap(id, args, params && params._meta);
+  if (tool.name === 'codeweb_diff') return handleDiff(id, args, tool); // #33: in-process from cachedGraph, spawn fallback
 
   const cliArgs = [];
   let graphPath = null;
@@ -590,6 +640,16 @@ function handleToolCall(id, params) {
       }
     } catch { /* fall through to the spawned artifact */ }
   }
+  // Fast path (#33): the value receipt is a ~200-byte stats.json the server already has the reader
+  // for — spawning a child to read it cost 92–95 ms. cachedGraph(...) throws EXACTLY where the CLI's
+  // loadGraph dies (missing/invalid graph), and that throw falls through to the spawned CLI whose
+  // stderr/exit-2 becomes the errResult — so the fast path never invents its own error text.
+  if (tool.name === 'codeweb_stats') {
+    try {
+      cachedGraph(resolve(graphPath));
+      return reply(id, { content: [{ type: 'text', text: JSON.stringify(receiptPayload(resolve(graphPath))) }] });
+    } catch { /* fall through to the spawned artifact (identical graph-not-found errResult) */ }
+  }
   cliArgs.push(...tool.argv(args));
   // budget injection: default top-N unless the caller set the budget arg explicitly or asked full
   if (tool.budget) {
@@ -612,16 +672,7 @@ function handleToolCall(id, params) {
     stdio: [tool.input ? 'pipe' : 'ignore', 'pipe', 'pipe'],
     input: tool.input ? (tool.input(args) || '') : undefined,
     timeoutMs: SPAWN_TIMEOUT_MS,
-    onSettle: ({ code, out, errBuf, timedOut }) => {
-      if (timedOut) return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
-      if (code === 2 || code == null) {
-        const text = (errBuf || 'query failed').trim() || 'query failed';
-        // the CLIs' graph-not-found message gains the MCP-native next step
-        return errResult(id, /graph not found/.test(text) ? `${text}\n${NO_GRAPH}` : text);
-      }
-      // exit 0 (results) or 1 (found:false / gate-fail) both emit valid JSON on stdout — pass through.
-      reply(id, { content: [{ type: 'text', text: (out || '').trim() }] });
-    },
+    onSettle: spawnedToolReply(id),
   });
 }
 

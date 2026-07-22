@@ -10,6 +10,23 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Changed
+- **The prescribed per-edit loop is now in-process: `codeweb_diff` serves from the cached graph and
+  `codeweb_stats` no longer spawns a child.** `codeweb_diff` booted node and parsed **two** graphs per
+  call (131–136 ms @1.2k; ~500 ms at 16k) in the refresh→diff sequence the INSTRUCTIONS prescribe per
+  edit; `codeweb_stats` spawned a child (92–95 ms) to read a ~200-byte `stats.json` the server already
+  had the reader for. diff's comparison + #28 rename detection are lifted verbatim into a new
+  `scripts/lib/diff-core.mjs` (`diffGraphs(before, after, {names, bIx?, aIx?}) → {payload, code}`);
+  `diff.mjs` becomes load → diffGraphs → emit (exit codes and `--json`/text bytes unchanged, asserted).
+  The MCP fast path parses the caller's before snapshot fresh (never inserted into the graph cache —
+  its FIFO eviction would drop the hot live graph), reads the after side from `cachedGraph` (re-stat +
+  reload on change), and — I6 — awaits the after-workspace writer tail first, so a concurrent refresh
+  lands before the diff reads (it does not reopen #30) and a cancel while it awaits suppresses the
+  reply; any throw falls back to the spawned `diff.mjs`, whose stderr becomes the errResult (never
+  invented text). `codeweb_stats` mirrors the brief fast path via a new `receiptPayload` in
+  `lib/stats.mjs` (the one place the empty-note literal lives; `stats.mjs --json` serves it too).
+  Byte-for-byte parity with both CLIs is asserted (MD1/MD2/MD2b for diff; empty + non-empty ledgers
+  for stats; missing-graph errResult identical to the spawn path). After this, refresh is the loop's
+  only child. (round 2, finding #33)
 - **Read-only MCP tools on one workspace now run concurrently (reader/writer queue split).** Stage 1
   of the queue redesign kept full per-workspace serialization; the 12+ read-only spawned tools
   inherited write-ordering they don't need, so behind one slow advisor every other spawned tool on

@@ -91,11 +91,17 @@ test('S1b epipe-survival: client closes its stdout read end mid-burst → server
   } finally { h.child.kill('SIGKILL'); }
 });
 
-// ---- S2 refresh-then-diff-parallel-ordering (I2: a reader waits for an earlier-queued writer) ---
+// ---- S2 refresh-then-diff-parallel-ordering (I6/I2: the diff waits for the earlier-queued writer) -
 // The #30 bug: diff was graphless ('(graphless)' slot) while refresh keyed to the graph path, so
 // fired together diff completed BEFORE refresh and gated against stale bytes. Now both key to the
-// workspace dir (diff via queueFrom=after), so diff waits — and reads the post-refresh graph.
-test('S2 refresh→diff in one burst: end(refresh) < start(diff), and diff reads the post-refresh edit', async () => {
+// workspace dir (diff via queueFrom=after) so the diff waits for the refresh. NOTE the tree changed
+// under this test across the workstream: #33 moved codeweb_diff IN-PROCESS (it awaits the after-
+// workspace writerTail per I6, then serves from cachedGraph — refresh is now the loop's ONLY child),
+// so there is no `start(diff)` child event any more. The ordering is asserted by the DETERMINISTIC
+// post-refresh PAYLOAD: cachedGraph re-stats after the refresh's writerTail resolves, so the diff
+// sees the edit's node — impossible if it had not waited (the #30 regression) — plus end(refresh)
+// fired and the diff spawned NO child (the #33 fast path engaged).
+test('S2 refresh→diff in one burst: the diff reads POST-refresh bytes (waited, I6) and is served in-process (no child)', async () => {
   const { dir, src, graph } = mapFresh('codeweb-scn-s2-');
   const h = startServer({ env: TRACE_ENV });
   try {
@@ -111,13 +117,11 @@ test('S2 refresh→diff in one burst: end(refresh) < start(diff), and diff reads
     const rDiff = await h.reply(11);
     await h.reply(10);
     const payload = JSON.parse(rDiff.result.content[0].text);
+    // MECHANISM (deterministic): the diff read post-refresh bytes — it awaited the refresh writer tail (I6).
     assert.ok(payload.nodes.added.includes('util.js:brandNewFn'), `diff read post-refresh bytes (added: ${payload.nodes.added})`);
-    // MECHANISM: end(refresh) strictly precedes start(diff) in the trace stream.
     const ev = h.trace();
-    const endRefresh = traceIx(ev, (e) => e.ev === 'end' && e.tool === 'codeweb_refresh' && e.id === 10);
-    const startDiff = traceIx(ev, (e) => e.ev === 'start' && e.tool === 'codeweb_diff' && e.id === 11);
-    assert.ok(endRefresh >= 0 && startDiff >= 0, `both events present (end#refresh=${endRefresh}, start#diff=${startDiff})`);
-    assert.ok(endRefresh < startDiff, 'refresh completes before diff starts (I2 ordering holds under parallel fire)');
+    assert.ok(ev.some((e) => e.ev === 'end' && e.tool === 'codeweb_refresh' && e.id === 10), 'the refresh writer ran to completion');
+    assert.ok(!ev.some((e) => e.ev === 'start' && e.id === 11), 'the diff was served IN-PROCESS (#33) — no child spawned; refresh is the loop\'s only child');
     h.close(); assert.equal((await h.exited).code, 0);
   } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });
@@ -327,5 +331,33 @@ test('I2/I3 writer-barrier: [reader, writer, reader] one burst → end(reader1) 
     assert.ok(endReader1 <= startWriter, 'the writer waits for the earlier-queued reader to finish (I3)');
     assert.ok(startWriter < startReader2, 'the later reader waits for the writer (I2)');
     h.close(); assert.equal((await h.exited).code, 0);
+  } finally { h.child.kill('SIGKILL'); cleanup(dir); }
+});
+
+// ---- cancel-during-diff-fast-path (T-34.1 × #33 I6): the async non-child path suppresses too ------
+// The #33 diff fast path is the ONE async non-child path. It awaits the after-workspace writerTail;
+// a cancel while it awaits must suppress its reply (no child to kill — a no-op kill + the cancelled
+// flag). We queue a slow writer (refresh) ahead of the diff so the diff is provably still awaiting.
+test('cancel-during-diff-fast-path: cancel while the diff awaits the writer tail → NO reply, ping answers', async () => {
+  const { dir, src, graph } = mapFresh('codeweb-scn-cdf-');
+  const before = join(dir, 'before.json');
+  writeFileSync(before, readFileSync(graph));
+  writeFileSync(join(src, 'util.js'), readFileSync(join(src, 'util.js'), 'utf8') + '\nexport function slowly() { return 1; }\n');
+  const h = startServer({ env: TRACE_ENV });
+  try {
+    await initServer(h);
+    // refresh (writer) + diff (fast path, awaits the refresh tail) in one burst.
+    h.sendBurst([
+      { jsonrpc: '2.0', id: 90, method: 'tools/call', params: { name: 'codeweb_refresh', arguments: { graph } } },
+      { jsonrpc: '2.0', id: 91, method: 'tools/call', params: { name: 'codeweb_diff', arguments: { before, after: graph } } },
+    ]);
+    await h.traceEvent((e) => e.ev === 'start' && e.id === 90); // refresh running → diff is awaiting its tail
+    h.send({ jsonrpc: '2.0', method: 'notifications/cancelled', params: { requestId: 91, reason: 'user' } });
+    await h.reply(90); // refresh completes; the diff's suppressed attempt runs on its tail
+    h.send({ jsonrpc: '2.0', id: 92, method: 'ping' });
+    await h.reply(92);
+    h.close();
+    assert.equal((await h.exited).code, 0, 'server drains and exits 0');
+    assert.ok(!h.responses().some((r) => r.id === 91), 'the cancelled diff fast path emitted NO reply');
   } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });

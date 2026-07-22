@@ -20,6 +20,12 @@ export function readStats(graphPath) {
   try { return JSON.parse(readFileSync(statsPathOf(graphPath), 'utf8')); } catch { return null; }
 }
 
+/** The JSON receipt payload: the ledger, or the empty-note shape. THE one place the empty note lives
+ *  (finding #33: stats.mjs --json and the MCP codeweb_stats fast path both serve this, byte-identical). */
+export function receiptPayload(graphPath) {
+  return readStats(graphPath) || { empty: true, note: 'no activity recorded yet — counters accrue as the hooks and MCP server run (CODEWEB_NO_STATS=1 disables)' };
+}
+
 /** Increment a counter in the current month's bucket. Silent no-op on opt-out or any error. */
 export function bump(graphPath, counter, n = 1) {
   if (process.env.CODEWEB_NO_STATS === '1' || !graphPath || !counter) return;
