@@ -59,6 +59,18 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **Per-file edge derivation is no longer quadratic in symbols-per-file.** `enclosing()` linearly
+  scanned ALL of a file's ranges on every call-site match (profiled: `addEdge` 50.8 % self on an
+  8,000-function file — the monorepo hub-file shape), and the method-owner attribution re-scanned
+  ranges-so-far per method. Both are now index lookups: an innermost-range-per-line array built in
+  one O(lines + R log R) stack sweep (lookup O(1)), and a live open-class stack across the
+  line-sorted build loop (amortized O(1) per method). Behavior-identical by construction and by
+  proof: a 300-trial property suite embeds the old linear scans verbatim as oracles — duplicate
+  starts, overlaps, degenerate ranges included — and the 8k-fn fixture extract is byte-identical
+  before/after in both engine tiers. Measured min-of-3 against the workstream-entry tree: the
+  8k-fn single-file extract 1,514 → 734 ms (2.06×) on the regex tier (3,210 → 2,393 ms with the
+  AST tier, which is parse-dominated); the 800-file corpus is unchanged-to-faster (1,257 →
+  1,162 ms). (round 2, finding #21)
 - **`maskJs` lexes ~3–5× faster, byte-identically.** The masker ran a compiled-regex `.test()`
   per character (word-class tracking) plus a one-char string append per character — ~27–30 MB/s
   on real mixes, on the hottest path in the engine (every cold/changed file, and the whole repo

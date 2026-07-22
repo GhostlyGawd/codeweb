@@ -23,6 +23,7 @@ import { KEYWORDS, scanSymbols, bodyEnd, parseSignature, DYNAMIC_RE, langOf } fr
 import { createImportResolver, defaultExportOf, importCandidates } from './lib/import-resolve.mjs'; // finding 25: cross-file name binding, one place; finding #11: shared specifier-candidate list
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { maskJs, maskPy, maskRuby } from './lib/masking.mjs'; // comment/string/regex-literal blanking (one truth, shared with codemod's rewrite gate)
+import { buildInnermostIndex, createOwnerStack } from './lib/enclosing.mjs'; // finding #21: O(1) enclosing-range lookups (property-pinned identical to the linear scans)
 import { sha1 } from './lib/hash.mjs'; // one truth — codeweb's own gate flagged the duplicate on this branch
 import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
 
@@ -427,6 +428,11 @@ for (const f of files) {
   const fileNodesStart = nodes.length; // finding 10: this file's node slice, cached for stamp-tier reuse
   const ranges = [];
   const fileIds = new Set(); // per-file id uniqueness — duplicate ids corrupt byName/edges/diff keys
+  // finding #21 (T-21.2): live open-class stack replaces the per-method scan over ranges-so-far —
+  // syms is line-sorted (classes precede their methods), so pushes arrive start-ascending and each
+  // method's owner is an amortized-O(1) query with the scan's exact semantics (strict
+  // `start > rg.start`: a class starting on the method's own line never owns it; property-pinned).
+  const openClasses = createOwnerStack();
   syms.forEach((s) => {
     const start = s.line;
     // real body extent (brace match / dedent), NOT next-symbol-line — so the last symbol can't
@@ -439,15 +445,16 @@ for (const f of files) {
     // classes/impls/receivers were previously ONE colliding id.
     let owner = s.owner;
     if (!owner && s.kind === 'method') {
-      let best = null;
-      for (const rg of ranges) if (rg.kind === 'class' && start > rg.start && start <= rg.end && (!best || rg.start > best.start)) best = rg;
+      const best = openClasses.ownerOf(start);
       if (best) owner = best.name;
     }
     if (s.field && !owner) return; // arrow-field candidate with no enclosing class -> not a method
     let id = r + ':' + (owner ? owner + '.' + s.name : s.name);
     if (fileIds.has(id)) id += '@' + start; // last-resort disambiguator (e.g. TS overload stubs)
     fileIds.add(id);
-    ranges.push({ id, name: s.name, start, end, kind: s.kind });
+    const range = { id, name: s.name, start, end, kind: s.kind };
+    ranges.push(range);
+    if (s.kind === 'class') openClasses.push(range);
     const node = { id, label: s.name, kind: s.kind, file: r, line: start, loc, exports: s.exports, domain: '', summary: '', role: fileRole };
     if (s.kind === 'function' || s.kind === 'method') {
       node.signature = parseSignature(lines[start - 1] || '', s.name, isPy); // F3: contract for callers
@@ -717,7 +724,13 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
   const local = []; const localSet = new Set();
   let hasModule = false, ambiguous = 0, shortDropped = 0;
   const isPy = r.endsWith('.py');
-  const enclosing = (lineNo) => { let best = null; for (const rg of ranges) if (lineNo >= rg.start && lineNo <= rg.end && (!best || rg.start > best.start)) best = rg; return best; };
+  // finding #21 (T-21.1): innermost-range-per-line precompute — the old per-call linear scan over
+  // ALL ranges made big generated/hub files quadratic (8k-fn file: addEdge 50.8 % self). One
+  // O(lines + R log R) sweep at entry; lookup O(1); property-pinned identical (incl. the
+  // duplicate-start tie-break) in tests/enclosing-index.test.mjs. Zero behavior change —
+  // addEdge/addResolved consume the same winning range objects.
+  const innermost = buildInnermostIndex(ranges, lines.length);
+  const enclosing = (lineNo) => (lineNo <= lines.length && innermost[lineNo]) || null;
   // Round 2, finding #10 (T-10.2/T-10.4): declaration START lines + per-range signature tokens.
   // refRe never scans a decl line (24% of self-map ref edges were fabricated there — `function
   // metrics(g) {` emitted a ref from metrics to a test file's global g), and every identifier
