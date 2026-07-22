@@ -20,6 +20,7 @@ import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { normalizeGraph, reviewImpact, structuralRegressions } from './lib/graph-ops.mjs';
 import { incrementalOverlap } from './lib/dup-check.mjs'; // F3: duplication-delta in the edit gate
+import { loadSimilarIndex } from './lib/similar-index.mjs'; // finding #26: serve the dup-check pool from the map-time sidecar
 
 const USAGE = 'usage: review.mjs <graph.json> (--changed <file[:s-e],...> | --range <gitref>) [--before <graph.json>] [--gate] [--json]';
 import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
@@ -40,7 +41,7 @@ const graphPath = pos[0];
 if (!graphPath || (changed == null && range == null)) die(USAGE, 2);
 
 const load = (p) => loadGraph(p).graph; // Spec E: one truth with every other CLI (was a duplicated pre-loadGraph copy)
-const graph = load(graphPath);
+const { graph, abs } = loadGraph(graphPath); // abs feeds loadSimilarIndex (finding #26)
 
 // build hunks from --changed (explicit) or --range (git)
 function parseChanged(csv) {
@@ -83,7 +84,11 @@ if (before != null) {
 // now duplicates an existing one (the overlap delta a refreshed graph's overlaps:[] cannot show). A
 // new body-confirmed duplication is a regression (fails --gate), closing the prevent-duplication hole.
 const root = graph.meta?.root;
-const newDuplications = (root && existsSync(root)) ? incrementalOverlap(graph, impact.changedSymbols, { root }) : [];
+// finding #26: serve the pool from the map-time sidecar when it's stamp-fresh; a stale/absent stamp
+// yields null and incrementalOverlap runs the live path unchanged (fall back toward correctness). The
+// changed symbols always shingle live regardless. Until WS-F #25 regenerates sidecars on refresh, the
+// fresh path mostly engages after full maps — byte-identical either way.
+const newDuplications = (root && existsSync(root)) ? incrementalOverlap(graph, impact.changedSymbols, { root, similarIndex: loadSimilarIndex(abs) }) : [];
 if (newDuplications.length) hasRegression = true;
 
 const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural, newDuplications };

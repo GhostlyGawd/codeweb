@@ -147,6 +147,29 @@
 <p>  fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)</p>
 <h3 class="cl-grp">Performance</h3>
 <ul>
+<li>**<code>dup-check</code> serves its comparison pool from the map-time similar-index sidecar (no per-call</li>
+</ul>
+<p>  re-shingle of the whole repo).** The review/PostToolUse duplication gate re-read and re-shingled</p>
+<p>  every non-test function body on every invocation — 374 ms for a single changed symbol at 14,964</p>
+<p>  nodes (1,804 ms for 50), a repeated tax inside the agent edit loop. <code>incrementalOverlap</code> now takes</p>
+<p>  an optional <code>similarIndex</code>: pool members with a sidecar record use the stored shingle-set size for</p>
+<p>  the exact size-ratio precut BEFORE any read, and survivors intersect by iterating the stored set</p>
+<p>  against the live candidate — the integer intersection count makes <code>round6</code> sim bit-equal to the</p>
+<p>  live Jaccard, so the reported set is byte-identical (verified live == sidecar on 200 corpus ids and</p>
+<p>  by the DC-SIDECAR-EQ equivalence test, which includes a CRLF file and a &gt;400-line pool body for</p>
+<p>  reader/cap parity). Changed ids always shingle live (their bodies are the new code under judgment);</p>
+<p>  a stale/absent sidecar falls back to the live path unchanged. <code>review.mjs</code> passes</p>
+<p>  <code>loadSimilarIndex(abs)</code>. Measured min-of-3 @14,964 nodes: 1 changed symbol 374 → <strong>6 ms (62×)</strong>;</p>
+<p>  50 changed 1,804 → 1,115 ms. <strong>Surfaced behavior change:</strong> <code>BODY_LINE_CAP</code> (400) is now one exported</p>
+<p>  const in <code>lib/shingles.mjs</code> (imported by overlap, dup-check, find-similar, diff, and the sidecar</p>
+<p>  builder), and <code>buildSimilarIndex</code> + find-similar's live path now cap node bodies to their first 400</p>
+<p>  lines like overlap/dup-check always did — so a &gt;400-line body's find-similar ranking changes to the</p>
+<p>  overlap/dup-check answer, BY DESIGN. Surfaced three ways: find-similar's JSON payload gains</p>
+<p>  <code>bodyLineCap</code>, both file headers document it, and the candidate text (<code>--body</code>/<code>--stdin</code>/</p>
+<p>  <code>--signature</code>) stays UNCAPPED. The sidecar schema is bumped 1 → 2 (one <code>SIMILAR_VERSION</code> const,</p>
+<p>  stamped by the builder and checked by the loader) so stale uncapped v1 sidecars are rejected, never</p>
+<p>  served. (round 2, finding #26)</p>
+<ul>
 <li><strong>Overlap's LSH stops paying the singleton-bucket tax (~85% of Signal B).</strong> At 15.7k nodes the</li>
 </ul>
 <p>  64-band twin pass built ~1M ~25-char string keys into one map ending at ~950k buckets, 99.3%</p>

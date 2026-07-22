@@ -179,6 +179,121 @@ test('DUP-GATE-THRESHOLD: a ~50%-similar edit is below the high bar -> not flagg
   } finally { cleanup(dir); }
 });
 
+// ---- Round 2, finding #26 (T-26.1): characterization pins across the sidecar/cap rework --------
+// ALL of these stay byte-identical through the BODY_LINE_CAP move and the similar-index pool:
+// dup-check already capped pool bodies at 400 lines, so centralizing the constant changes nothing
+// here; only buildSimilarIndex and find-similar's live path change behavior (their own tests).
+test('IOV-PIN-26: >400-line pool body (capped), unreadable body, and no-match are pinned', () => {
+  const dir = tmpDir('codeweb-iovpin-');
+  try {
+    const srcRoot = join(dir, 'src');
+    // 450-line pool body; the changed candidate is byte-identical to its FIRST 400 lines, so the
+    // pinned sim is exactly 1 IFF the pool side is capped at 400 (uncapping the pool would sink it)
+    const longLines = Array.from({ length: 450 }, (_, i) => `  const v${i} = seed${i % 7}(x) + ${i};`);
+    const longBody = 'function longPool(x) {\n' + longLines.slice(0, 448).join('\n') + '\n}';
+    const cappedCopy = longBody.split('\n').slice(0, 400).join('\n');
+    writeTree(srcRoot, {
+      'p.js': longBody + '\n',
+      'x.js': cappedCopy + '\n',
+      'n.js': 'function noMatch(y) {\n  return y ? qqq(y) : www(y);\n}\n',
+    });
+    const node = (id, file, line, loc) => ({ id, label: id.split(':')[1], kind: 'function', file, line, loc, domain: 'd', exports: true });
+    const g = {
+      meta: { root: srcRoot.replace(/\\/g, '/') }, domains: [], overlaps: [],
+      nodes: [
+        node('p.js:longPool', 'p.js', 1, longBody.split('\n').length),
+        node('x.js:cand', 'x.js', 1, cappedCopy.split('\n').length),
+        node('n.js:noMatch', 'n.js', 1, 3),
+        node('gone.js:unreadable', 'gone.js', 1, 5), // file absent on disk
+      ],
+      edges: [],
+    };
+    const root = srcRoot.replace(/\\/g, '/');
+    assert.deepEqual(incrementalOverlap(g, ['x.js:cand'], { root }),
+      [{ id: 'x.js:cand', dupOf: 'p.js:longPool', sim: 1 }],
+      'capped pool body: the 400-line-identical candidate confirms at exactly 1');
+    assert.deepEqual(incrementalOverlap(g, ['n.js:noMatch'], { root }), [], 'no-match stays empty');
+    assert.deepEqual(incrementalOverlap(g, ['gone.js:unreadable'], { root }), [], 'unreadable body: skipped, no crash');
+  } finally { cleanup(dir); }
+});
+
+// ---- Round 2, finding #26 (T-26.3): the pool served from similar-index ------------------------
+function sidecarFixture() {
+  const dir = tmpDir('codeweb-dcsc-');
+  const srcRoot = join(dir, 'src');
+  const longLines = Array.from({ length: 448 }, (_, i) => `  const w${i} = base${i % 5}(x) * ${i};`);
+  const longBody = 'function longOne(x) {\n' + longLines.join('\n') + '\n}';
+  const BODY = 'function validate(u) {\n  if (!u.email) return false;\n  if (!u.password) return false;\n  if (!u.active) return false;\n  return u.role === "admin" || u.role === "owner";\n}';
+  const files = {
+    'a.js': BODY + '\n',
+    // CRLF line endings — proves reader/cap parity between the sidecar builder and dup-check's reader
+    'crlf.js': BODY.replace(/validate/g, 'checkUser').split('\n').join('\r\n') + '\r\n',
+    'long.js': longBody + '\n',
+    'c.js': BODY.replace(/validate/g, 'freshCopy') + '\n',
+    // lc.js is longOne's FIRST 400 lines verbatim (no rename): once the pool caps longOne at 400
+    // its body is byte-identical to lc.js, so the confirmed sim is EXACTLY 1 — that identity is the
+    // cap parity being pinned (renaming the fn would perturb one shingle and sink sim below 1).
+    'lc.js': longBody.split('\n').slice(0, 400).join('\n') + '\n',
+  };
+  writeTree(srcRoot, files);
+  const node = (id, file, body, sepLines) => ({ id, label: id.split(':')[1], kind: 'function', file, line: 1, loc: sepLines, domain: 'd', exports: true });
+  const graph = {
+    meta: { root: srcRoot.replace(/\\/g, '/'), target: 'dcsc' }, domains: [], overlaps: [],
+    nodes: [
+      node('a.js:validate', 'a.js', BODY, BODY.split('\n').length),
+      node('crlf.js:checkUser', 'crlf.js', BODY, BODY.split('\n').length),
+      node('long.js:longOne', 'long.js', longBody, longBody.split('\n').length),
+      node('c.js:freshCopy', 'c.js', BODY, BODY.split('\n').length),
+      node('lc.js:longCopy', 'lc.js', longBody, 400),
+    ],
+    edges: [],
+  };
+  const gp = join(dir, 'graph.json');
+  writeFileSync(gp, JSON.stringify(graph));
+  return { dir, gp, graph, root: srcRoot.replace(/\\/g, '/') };
+}
+
+test('DC-SIDECAR-EQ: sidecar-fresh ≡ live byte-identical (CRLF + >400-line pool bodies); stale/v1 rejected; missing id still found; changed ids shingle live', async () => {
+  const { statSync, utimesSync } = await import('node:fs');
+  const { buildSimilarIndex, loadSimilarIndex, SIMILAR_SIDECAR, SIMILAR_VERSION } = await import('../scripts/lib/similar-index.mjs');
+  const { sourceReader } = await import('../scripts/lib/cli.mjs');
+  const { dir, gp, graph, root } = sidecarFixture();
+  try {
+    const changed = ['c.js:freshCopy', 'lc.js:longCopy'];
+    const live = incrementalOverlap(graph, changed, { root });
+    assert.ok(live.some((d) => d.id === 'c.js:freshCopy' && (d.dupOf === 'a.js:validate' || d.dupOf === 'crlf.js:checkUser')), 'fixture actually detects (CRLF pool member reachable)');
+    assert.ok(live.some((d) => d.id === 'lc.js:longCopy' && d.dupOf === 'long.js:longOne' && d.sim === 1), 'long pool body capped: 400-line copy confirms at 1');
+    // fresh sidecar (v2, capped) -> byte-identical results
+    const st = statSync(gp);
+    const idx = buildSimilarIndex(graph, { graphMtimeMs: st.mtimeMs, graphSize: st.size }, sourceReader(root));
+    assert.equal(idx.version, SIMILAR_VERSION, 'builder stamps THE version const');
+    writeFileSync(join(dir, SIMILAR_SIDECAR), JSON.stringify(idx));
+    const loaded = loadSimilarIndex(gp);
+    assert.ok(loaded, 'fresh v2 sidecar loads');
+    const viaSidecar = incrementalOverlap(graph, changed, { root, similarIndex: loaded });
+    assert.equal(JSON.stringify(viaSidecar), JSON.stringify(live), 'sidecar path byte-identical to live');
+    // changed ids always shingle LIVE: doctoring a changed id's sidecar record must change nothing
+    const doctored = structuredClone(loaded);
+    doctored.nodes['c.js:freshCopy'] = { n: 3, sh: ['zz zz zz', 'yy yy yy', 'xx xx xx'] };
+    assert.equal(JSON.stringify(incrementalOverlap(graph, changed, { root, similarIndex: doctored })), JSON.stringify(live),
+      'a changed id is judged on its live body, never its sidecar record');
+    // missing pool id -> per-node live fallback, still found
+    const partial = structuredClone(loaded);
+    delete partial.nodes['a.js:validate'];
+    delete partial.nodes['long.js:longOne'];
+    assert.equal(JSON.stringify(incrementalOverlap(graph, changed, { root, similarIndex: partial })), JSON.stringify(live),
+      'missing sidecar records fall back per node');
+    // v1 (uncapped era) sidecar is REJECTED by the loader — never served
+    const v1 = { ...structuredClone(loaded), version: 1 };
+    writeFileSync(join(dir, SIMILAR_SIDECAR), JSON.stringify(v1));
+    assert.equal(loadSimilarIndex(gp), null, 'version 1 sidecar rejected');
+    // stale stamp -> null -> callers use the live path (identical by construction)
+    writeFileSync(join(dir, SIMILAR_SIDECAR), JSON.stringify(idx));
+    utimesSync(gp, new Date(st.atimeMs + 3000), new Date(st.mtimeMs + 3000));
+    assert.equal(loadSimilarIndex(gp), null, 'stale stamp rejected');
+  } finally { cleanup(dir); }
+});
+
 // Perf-quality finding 15 — the exact size-ratio prefilter must never change the reported set.
 // Property: over random body pools, incrementalOverlap's results equal a filterless oracle
 // (plain jaccard over every pair at the same bar).

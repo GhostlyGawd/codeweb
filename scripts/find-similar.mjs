@@ -5,6 +5,13 @@
 // write-time PREVENTION. Read-only, deterministic. Shares the K=3 shingler with overlap.mjs via
 // ./lib/shingles.mjs (one truth).
 //
+// finding #26 (SURFACED behavior change): existing function/method bodies are shingled on their FIRST
+// BODY_LINE_CAP lines — the SAME cap overlap/dup-check/the map-time sidecar apply, so the live path and
+// the sidecar path give one answer (finding-15's "one answer per question", the capped one). A
+// >400-line body's ranking can therefore differ from the pre-#26 uncapped answer, BY DESIGN; the JSON
+// payload carries `bodyLineCap` so the cap is visible. The CANDIDATE text (--body/--stdin/--signature)
+// stays UNCAPPED — only node bodies are capped.
+//
 // Usage:
 //   node find-similar.mjs <graph.json> (--body <file> | --stdin | --signature "<text>") [--k N] [--json]
 // Exit: 0 ok (even with zero matches), 2 usage / source unavailable.
@@ -12,7 +19,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { normalizeGraph, isTestFile } from './lib/graph-ops.mjs';
-import { shingles, jaccard, K, BANDS } from './lib/shingles.mjs'; // THE size + bands (finding 27)
+import { shingles, jaccard, K, BANDS, BODY_LINE_CAP, capBody } from './lib/shingles.mjs'; // THE size + bands + body cap (findings 27 + 26)
 import { structuralShingles } from './lib/skeleton.mjs'; // F6: Type-2 (rename-invariant) similarity
 import { loadSimilarIndex } from './lib/similar-index.mjs'; // finding 16: map-time shingle sets — zero source reads on the hot path
 
@@ -81,7 +88,7 @@ for (const n of graph.nodes) {
   } else {
     const src = bodyOf(n);
     if (src == null) continue;
-    sim = jaccard(candidate, shg(src));
+    sim = jaccard(candidate, shg(capBody(src))); // finding #26: node body capped (candidate stays uncapped) so live ≡ sidecar
   }
   if (sim < BANDS.low) continue; // exclude below the low band
   matches.push({ id: n.id, label: n.label, file: n.file, line: n.line, domain: n.domain, sim: +sim.toFixed(6), tier: tierOf(sim) });
@@ -92,6 +99,7 @@ const top = matches.slice(0, k);
 const payload = {
   candidate: { source: body != null ? 'body' : stdin ? 'stdin' : 'signature', shingles: candidate.size, mode: structural ? 'structural' : 'lexical' },
   index: simIndex ? 'sidecar' : 'live',
+  bodyLineCap: BODY_LINE_CAP, // finding #26: existing bodies shingled on their first N lines (candidate uncapped)
   matches: top, count: top.length, scanned,
 };
 

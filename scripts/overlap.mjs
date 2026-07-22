@@ -16,7 +16,7 @@
 //   0.15-0.35 low · <0.15 refuted (dismissed as coincidental).  Precision over recall.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { shingles, jaccard, K, BANDS } from './lib/shingles.mjs'; // shared body-shingle primitives + THE thresholds (one truth, finding 27)
+import { shingles, jaccard, K, BANDS, BODY_LINE_CAP } from './lib/shingles.mjs'; // shared body-shingle primitives + THE thresholds + body cap (one truth, findings 27 + 26)
 import { lshCandidatePairs } from './lib/minhash.mjs'; // Spec N + round 2 #24: LSH candidate generation at scale (one walk, both signals)
 import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
 import { sourceReader, atomicWrite } from './lib/cli.mjs'; // shared body access + rename-atomic artifact writes (one truth)
@@ -72,11 +72,11 @@ const reader = sourceReader(SOURCE_ROOT);
 // thousand-line bodies (TypeScript's checker.ts) that WAS the pipeline's wall. Pure caching,
 // zero semantics change.
 const _shingleMemo = new Map();
-// BODY_LINE_CAP (Spec B addendum): thousand-line bodies (TypeScript's checker.ts) yield 10k+
-// element shingle sets, and pairwise Jaccard over those made Signal A alone exceed 9 minutes on
-// a 28k-symbol graph. Bodies longer than the cap shingle their FIRST 400 lines — deterministic,
-// counted, and declared in the md header + affected findings' evidence. Never silent.
-const BODY_LINE_CAP = 400;
+// BODY_LINE_CAP (Spec B addendum; the constant now lives in lib/shingles.mjs, finding #26 — imported
+// above): thousand-line bodies (TypeScript's checker.ts) yield 10k+ element shingle sets, and pairwise
+// Jaccard over those made Signal A alone exceed 9 minutes on a 28k-symbol graph. Bodies longer than the
+// cap shingle their FIRST 400 lines — deterministic, counted, and declared in the md header + affected
+// findings' evidence. Never silent.
 let bodiesCapped = 0;
 const cappedIds = new Set();
 const bodyShingles = (n) => {

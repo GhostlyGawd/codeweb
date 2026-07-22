@@ -91,6 +91,27 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **`dup-check` serves its comparison pool from the map-time similar-index sidecar (no per-call
+  re-shingle of the whole repo).** The review/PostToolUse duplication gate re-read and re-shingled
+  every non-test function body on every invocation — 374 ms for a single changed symbol at 14,964
+  nodes (1,804 ms for 50), a repeated tax inside the agent edit loop. `incrementalOverlap` now takes
+  an optional `similarIndex`: pool members with a sidecar record use the stored shingle-set size for
+  the exact size-ratio precut BEFORE any read, and survivors intersect by iterating the stored set
+  against the live candidate — the integer intersection count makes `round6` sim bit-equal to the
+  live Jaccard, so the reported set is byte-identical (verified live == sidecar on 200 corpus ids and
+  by the DC-SIDECAR-EQ equivalence test, which includes a CRLF file and a >400-line pool body for
+  reader/cap parity). Changed ids always shingle live (their bodies are the new code under judgment);
+  a stale/absent sidecar falls back to the live path unchanged. `review.mjs` passes
+  `loadSimilarIndex(abs)`. Measured min-of-3 @14,964 nodes: 1 changed symbol 374 → **6 ms (62×)**;
+  50 changed 1,804 → 1,115 ms. **Surfaced behavior change:** `BODY_LINE_CAP` (400) is now one exported
+  const in `lib/shingles.mjs` (imported by overlap, dup-check, find-similar, diff, and the sidecar
+  builder), and `buildSimilarIndex` + find-similar's live path now cap node bodies to their first 400
+  lines like overlap/dup-check always did — so a >400-line body's find-similar ranking changes to the
+  overlap/dup-check answer, BY DESIGN. Surfaced three ways: find-similar's JSON payload gains
+  `bodyLineCap`, both file headers document it, and the candidate text (`--body`/`--stdin`/
+  `--signature`) stays UNCAPPED. The sidecar schema is bumped 1 → 2 (one `SIMILAR_VERSION` const,
+  stamped by the builder and checked by the loader) so stale uncapped v1 sidecars are rejected, never
+  served. (round 2, finding #26)
 - **Overlap's LSH stops paying the singleton-bucket tax (~85% of Signal B).** At 15.7k nodes the
   64-band twin pass built ~1M ~25-char string keys into one map ending at ~950k buckets, 99.3%
   singletons — then sorted and walked all of them, while actual similarity confirmations were
