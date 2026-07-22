@@ -1116,3 +1116,61 @@ byte-identical). Never-weaken: every touched pre-existing test stayed green unto
 path-portable with ZERO new skips. ONE full `npm test`: **752 tests, 747 pass, 0 fail, 5 skipped**
 (the same pre-existing env skips), wall **~72 s**, `git status --porcelain` empty. push -u + CI check
 to follow.
+
+### WS-F review+verification
+
+Independent adversarial review completing an interrupted pass. Container: Node **v22.22.2**, 4 cores.
+Method: scripted stdio client via `tests/mcp-harness.mjs` (long-lived server, TRACE + NO_AUTOREFRESH)
+for the crash/queue/cancel/diff items, real `run.mjs`/`refresh.mjs`/`find-similar.mjs`/`diff.mjs`
+children for the sidecar + byte-parity items, and a direct import of the exported `queueKeyFor` for the
+key mechanism. The builder's S1–S7/I1–I7 closing lists were spot-checked, not trusted. **All seven
+findings HELD; no counterexample, no fix needed.** Per-finding: **#29 held · #30 held · #31 held ·
+#34 held · #25 held (closes WS-E #26) · #32 held · #33 held.**
+
+The five load-bearing reproductions (all GREEN):
+
+1. **#29 EPIPE survival — HELD.** `find_similar` with a **1 MB `body`** and `graph:/no/such/dir/nope.json`
+   (child dies on the bad graph before draining stdin): the request is **ANSWERED** as an isError result
+   (`graph not found … build it first`), a subsequent **ping ANSWERS** (server ALIVE — the exact crash
+   the finding exists for), and stdin-close exits **0**. The guard is `child.stdin.on('error',…)` before
+   `child.stdin.end()` wrapped in try/catch (mcp-server.mjs:388–392); the SERVER's stdout EPIPE stays
+   covered by the INHERITED `lib/cli.mjs:19` handler (no masking dup).
+2. **#25 sidecars → closes WS-E #26 — HELD (mechanism, not timing).** After a real map, all three sidecars
+   (`brief.json`/`index-lite.json`/`similar-index.json`) carry `stamp == statSync(graph.json)`
+   `{graphMtimeMs, graphSize}`. After an on-disk edit + `codeweb_refresh` (graph stat moved
+   1361→1568 B): the trio **re-stamps to the NEW graph**, the fresh `similar-index` **contains the new
+   node** (content refreshed, not just the stamp), `refresh --json` reports `sidecars:['brief','index-
+   lite','similar-index']`, and **`hook-baseline.json` (WS-D) coexists** with the trio. Critically,
+   `find_similar` reports **`index:sidecar` BOTH pre- AND post-refresh** — the WS-E reviewer's required
+   close of the #26 gap (pre-#25 a refresh stranded stale sidecars → live fallback) holds by mechanism.
+   dup-check's pool reads the same `loadSimilarIndex` sidecar (lib/dup-check.mjs recOf), so it is fresh too.
+3. **#33 diff byte-parity + no cycle — HELD.** MCP in-process `codeweb_diff` result text **=== `diff.mjs
+   --json` stdout byte-for-byte** on two real before/after pairs: an add-a-function pair (**375/375 B**)
+   and a **rename pair** that trips `detectRenames` (renamed `helper→helperRenamed` sim 1.0; **425/425 B**).
+   `lib/diff-core.mjs` is a **leaf**: imported by exactly `diff.mjs` + `mcp-server.mjs`, and its four deps
+   (graph-ops/shingles/skeleton/cli) do **not** import it back — **+0 cycle**, gate confirmed.
+4. **#30 refresh→diff ordering + #34 cancellation — HELD (scripted, not code-reading).** `queueKeyFor`
+   normalizes `refresh` (dir of graph), `diff` (dir of `after` via `queueFrom`), `map` (`out`), and
+   `annotate` (dirFromGraph) to the **one workspace dir** — the collision #30 needs; the `(graphless)`
+   fallback is **unreachable** for shipped tools. Behaviorally: refresh+diff in ONE burst → the diff
+   payload contains the edit's node (read POST-refresh bytes — the **I6** writer-tail wait), `end(refresh)`
+   fired, and **no child spawned for the diff** (#33 in-process). Cancellation: a started `codeweb_map` +
+   `notifications/cancelled{requestId}` → **`kill` trace reason:`cancel`**, a following **ping answers**,
+   drain **exits 0**, and **NO reply** for the cancelled id (suppressed). Importing `queueKeyFor` did not
+   start a server — independently exercising the isMain guard below.
+5. **Never-weaken audit — HELD.** `git diff a5657c6..98edd32` touches **only NEW test files**
+   (mcp-harness/scenarios/inprocess/queue + sidecars.test); every pre-existing suite (mcp.test,
+   mcp-budget, hook-sidecar, efficiency-pilot, find/brief/stats/awareness) is **byte-identical, 0-line
+   diff** across the whole WS-F range. No pre-existing assertion weakened, none skipped.
+
+**Prior reviewer's real find (98edd32 — not re-done here, CI already green):** the Windows main-guard
+`resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))` (both sides `resolve()`d — the
+proven session-brief.mjs idiom) so the server reliably starts on Windows; plus S6 reader-overlap/I4-cap
+determinism via a **writer-barrier** (one refresh both readers capture releases them in a single promise
+resolution — overlap deterministic under stdin-chunk/enqueue jitter, reproduced under a CPU hog) and a
+fail-fast scenario-exit race. That commit's suite (752/747) is unchanged here.
+
+ONE full `npm test` on the review head: **752 tests, 747 pass, 0 fail, 5 skipped** (pre-existing env
+skips), wall **~75 s** (node duration_ms 75245), `git status --porcelain` **empty**. CI on 98edd32 green
+(`codeweb gate` + `ci` both success, run 29956777910/29956777979 — the 7 legs). Review adds no source or
+test change — only this ledger entry; committed with the trailer. CI on the review head confirmed post-push.
