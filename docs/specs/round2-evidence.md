@@ -1014,3 +1014,105 @@ are FACTORS (0.7 / 0.45 / 0.9); `node bench/all.mjs --gate` → **all promises h
 `bench/results/benchmarks.json` is a pre-existing receipt (WS-E did not touch it — correctly avoiding
 machine-specific drift; `--gate` regenerates+gates fresh). Review added one test (collision-spill);
 committed with the trailer. CI on the review head confirmed post-push.
+
+## WS-F
+
+MCP server & hooks — the BDD workstream (#29 #30 #31 #34 #25 #32 #33). Build order per the frozen spec
+(crash first, then the queue redesign as two stages): #29 → #30+#31 → #34 → #25 → #32 → #33. New BDD
+spine: `tests/mcp-harness.mjs` (long-lived stdio client — none existed; 6 suites shared a spawnSync
+batch pattern that cannot "send after observing") + `tests/mcp-scenarios.test.mjs` (S1–S7). All cross-
+request ordering asserted by CODEWEB_MCP_TRACE mechanism, never wall-clock. Server startup gated behind
+`isMain` so tests import `queueKeyFor` without spawning a readline loop.
+
+### #29 — EPIPE guard — 4f664e0
+Repro confirmed RED first: `find_similar` + 1 MB body + bad graph → `exit 1`, EPIPE thrown, request
+unanswered (`scratchpad/build-f/repro29.mjs`). Fix: `child.stdin.on('error',…)` before writing +
+try/catch around `stdin.end()`; named the INHERITED `lib/cli.mjs:19` stdout guard at `send()` (no
+masking dup — T-29.2 correction verified: cli.mjs already installs it via import side effect); dropped
+the dead `spawnSync` import. Post-fix: `exit 0`, `id2` answered isError, `id3` ping answered.
+- **S1a** epipe-survival GREEN — find_similar 1MB+bad graph → isError, subsequent ping answers, exit 0.
+- **S1b** stdout-close GREEN — 400-reply burst + destroy read end → server exits 0 (pins the cli.mjs guard).
+M-series 28/28 unchanged.
+
+### #30 + #31 — per-workspace-dir queue (stage 1) — 69eddce
+The queue redesign's stage 1, landed as ONE coherent change. `spawnQueues` (keyed by graph FILE path)
+→ per-WORKSPACE-DIR state `wsOf(key) → {writerTail, writersPending}`; key = `dirname(resolve(graph))`
+for graph tools, `resolve(out)` for map, `dirname(resolve(after))` for diff (new `queueFrom`). One
+`runChild` wrapper owns spawn/timeout/settle-once/trace/inflight for every child. handleMap routed
+through it (gains the settle-once guard it lacked); autoRefresh joins as a writer, SKIPs when
+`writersPending>0`, else enqueues (`refreshInFlight` deleted). `CODEWEB_MCP_TRACE=1` → NDJSON stderr
+events (silent by default).
+- **S2** refresh→diff ordering GREEN (this stage: trace end(refresh) < start(diff); adjusted at #33, see below).
+- **S3** map serialization GREEN — end(map#1) < start(map#2), surviving graph parses (**I1**).
+- **I5** GREEN — a failing map settles exactly once (one reply) + drains exit 0 (`mcp-queue.test.mjs`).
+- **I7** GREEN — explicit refresh + stale query in one burst → `skip-autorefresh` trace, exactly ONE refresh child.
+- `queueKeyFor` unit GREEN incl. the `(graphless)` fallback pinned unreachable for shipped tools.
+M-series 28/28; find/brief/stats/awareness/mcp-budget 49/49 unchanged.
+
+### #34 — cancellation + malformed/batch frames — 1510d8e
+Wrote S4/S7/batch RED first (3/3 red), then split `handle()` → `handle` (array/scalar dispatch) +
+`handleMessage`. `notifications/cancelled` → `inflight.get(requestId)` → SIGKILL running child or mark
+a queued job (never spawns), suppress reply, still release (I5). Non-object frame → `-32600`. Batch
+array → minimal per-member fan-out (individual NDJSON lines, NOT array-collected — the T-34.3
+adjudicated tradeoff; empty array → single `-32600`).
+- **S4** cancellation-kills-child GREEN — trace `kill(cancel)`, NO reply for the id, ping answers, exit 0, no graph.json.
+- **S7** malformed-and-batch GREEN — 42/"x"/null/[] each one `-32600`, following ping answers.
+- batch fan-out GREEN — `[{ping id:9},{unknown id:10}]` → reply 9 + `-32602` 10; `[1,2]` → two `-32600`; notification member silent.
+M7/M10 (notifications, parse-error) unchanged.
+
+### #25 — refresh regenerates the sidecar trio — 4fc1548
+New `scripts/lib/sidecars.mjs writeSidecars(absGraphPath, graph)` — THE one map-time writer. build-
+report migrated to one call (byte-identical to the old inline block, asserted). refresh calls it after
+its atomic write (`normalizeGraph(updated)` POST-write for consumer parity); write order graph →
+hook-baseline (WS-D, untouched) → trio; reports `payload.sidecars`. similar-index rebuilt via the
+CURRENT v2 capped builder when `meta.root` readable, else REMOVED (never silently stale) — **the #25/#26
+interlock**: this rebuild is what re-freshes #26's dup-check pool source after a refresh (verified v2
+via `SIMILAR_VERSION`, not hardcoded). ONE stat stamp shared by the trio; crash-window property holds.
+- **S5** refresh-preserves-sidecars GREEN by MECHANISM — all three loaders non-null, brief/index-lite/similar stamps === `statSync(graph.json)` (not wall-clock).
+- sidecars lib unit 7/7 — byte-identical migration; both similar-index branches (root readable→rebuilt, absent/gone→removed); one-stamp equality; crash-window→all loaders null; session-brief `preview()` sidecar path ≡ graph path after a refresh.
+build-report/hook-sidecar/find-similar/dup-check/freshness 34/34 unchanged (migration proven byte-identical).
+
+### #32 — reader concurrency (stage 2) — 2770840
+Writer/reader split on the stage-1 machinery: readers capture writerTail (I2), await it, then acquire
+one of `READER_CAP=3` global slots (FIFO waiters, I4); writers chain on the join of writerTail +
+enqueue-time `readersInFlight` snapshot (I1+I3 conservative). Slot acquired only AFTER the I2 wait
+(no cross-workspace deadlock). Aggressive "writers skip readers" stays REJECTED. `READER_CAP=1` =
+rollback lever.
+- **S6** reader-overlap GREEN — risk + hotspots: both `start` precede either `end` (children alive together, **I4**).
+- cap test GREEN — 4 readers, peak concurrent ≤3 and ≥2 (**I4** enforced, real overlap).
+- writer-barrier GREEN — [reader, writer, reader] → end(reader₁) ≤ start(writer) < start(reader₂) (**I2**+**I3**).
+- **S2 re-verified GREEN** after this stage (the redesign's third verification).
+Latency (evidence, not CI-asserted, @445 symbols): risk solo **152 ms**, hotspots solo **149 ms**,
+the two concurrent **146 ms** ≈ max, vs ~301 ms sum — the #32 win.
+
+### #33 — per-edit loop in-process — abdc3f3
+**The #33/#28 interlock**: `detectRenames` lifted VERBATIM (WS-E #28 made it ambient-free for exactly
+this) into new `scripts/lib/diff-core.mjs` — not re-fixed. `diffGraphs(before, after, {names,bIx?,aIx?})
+→ {payload, code}`; diff.mjs is load → diffGraphs → emit (exit codes + bytes unchanged). MCP diff fast
+path: before = fresh parse (NOT graph-cached — FIFO would evict the live graph); after = `cachedGraph`
+(re-stat/reload); awaits after-workspace writerTail (I6); suppress-only inflight (cancel while awaiting
+→ no reply); any throw → spawned diff.mjs fallback (errResult verbatim). stats: `receiptPayload()` in
+lib/stats.mjs (one empty-note truth); MCP fast path mirrors brief, cachedGraph parity → bad graph falls
+through to the spawn.
+- **I6** GREEN — diff fast path awaits writerTail; cancel-during-diff-fast-path → NO reply, ping answers.
+- diff parity GREEN — MCP text === `diff.mjs --json` byte-for-byte (MD1/MD2/MD2b).
+- stats parity GREEN — MCP text === `stats.mjs --json` (empty + non-empty ledgers); missing-graph errResult identical to the spawn.
+- **S2 adjusted (mechanical drift, noted)**: #33 moved diff in-process so there is no `start(diff)`
+  child event; S2 now asserts ordering by the DETERMINISTIC post-refresh payload (the edit's node
+  appears — impossible without the I6 wait) + end(refresh) fired + NO child spawned. Refresh is now the
+  loop's only child.
+Latency (evidence): diff answers in-process in the ms class (session init+brief+diff wall **102 ms**
+@445; the diff itself sub-ms warm); stats spawns no child.
+
+### Closing — WS-F
+Six commits: 4f664e0 (#29) · 69eddce (#30+#31) · 1510d8e (#34) · 4fc1548 (#25) · 2770840 (#32) ·
+abdc3f3 (#33). Each carries a CHANGELOG entry + a `node site/build.mjs` docs rebuild in the same
+commit; `check-consistency: OK — v0.9.0, 27 tools`. S1–S7 all GREEN; invariants I1–I7 each carry an
+assertion (I1 S3, I2 S2/writer-barrier, I3 writer-barrier, I4 S6/cap, I5 map-settle-once unit, I6
+diff-fast-path/cancel, I7 autoRefresh-skip). No new cycle: `lib/diff-core.mjs` is a leaf (imported by
+diff.mjs + mcp-server.mjs; imports only graph-ops/shingles/skeleton/cli — nothing imports it back).
+SOURCE_DATE_EPOCH byte-identity preserved for every sidecar writer (build-report migration asserted
+byte-identical). Never-weaken: every touched pre-existing test stayed green untouched; new tests are
+path-portable with ZERO new skips. ONE full `npm test`: **752 tests, 747 pass, 0 fail, 5 skipped**
+(the same pre-existing env skips), wall **~72 s**, `git status --porcelain` empty. push -u + CI check
+to follow.
