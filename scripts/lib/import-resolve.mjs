@@ -143,7 +143,10 @@ const starReExportByFile = new Map(); // rel file -> [target rel files, in sourc
 // Resolve `targetRel`'s exported `name` to a real symbol node id, following renamed re-export chains
 // and `export *` forwards (first star target that resolves wins — source order, deterministic).
 // Returns the node id or null (unknown name / dead-ends at a non-symbol). Cycle-guarded.
-function resolveReExport(targetRel, name, seen) {
+// finding #17: `visit` (optional) observes EVERY file the walk consults — dead ends included —
+// so bind-time callers can record their true file dependencies (bindDeps).
+function resolveReExport(targetRel, name, seen, visit) {
+  if (visit) visit(targetRel);                 // consulted: its symbol set decides the hit below
   const key = targetRel + ':' + name;
   if (nodeIdSet.has(key)) return key;          // a real symbol in the target file
   seen = seen || new Set();
@@ -151,9 +154,9 @@ function resolveReExport(targetRel, name, seen) {
   seen.add(key);
   const reMap = reExportByFile.get(targetRel);
   const hop = reMap && reMap.get(name);
-  if (hop) { const hit = resolveReExport(hop.target, hop.orig, seen); if (hit) return hit; }
+  if (hop) { const hit = resolveReExport(hop.target, hop.orig, seen, visit); if (hit) return hit; }
   for (const star of starReExportByFile.get(targetRel) || []) {
-    const hit = resolveReExport(star, name, seen);
+    const hit = resolveReExport(star, name, seen, visit);
     if (hit) return hit;
   }
   return null;
@@ -204,16 +207,26 @@ const pyReExportTableOf = (moduleRel) => {
   pyReExportTables.set(moduleRel, table);
   return table;
 };
-const pyReExportMemo = new Map(); // `${moduleRel}\x00${name}` -> id | null
-const pyReExportResolve = (moduleRel, name, depth = 0) => {
+// finding #17: the memo stores {out, files} — the files the computed walk consulted below this
+// node — so a memo HIT can replay them into a caller's `visit` collector; without that, bindDeps
+// would depend on which file bound FIRST (order-dependent, and deep chains would go unrecorded).
+const pyReExportMemo = new Map(); // `${moduleRel}\x00${name}` -> {out: id|null, files: [...]}
+const pyReExportResolve = (moduleRel, name, depth = 0, visit = null) => {
   if (depth > 3) return null;
+  if (visit) visit(moduleRel);
   const direct = moduleRel + ':' + name;
   if (nodeIdSet.has(direct)) return direct;
   const memoKey = moduleRel + '\x00' + name;
-  if (pyReExportMemo.has(memoKey)) return pyReExportMemo.get(memoKey);
+  if (pyReExportMemo.has(memoKey)) {
+    const m = pyReExportMemo.get(memoKey);
+    if (visit) for (const f of m.files) visit(f);
+    return m.out;
+  }
   const hit = pyReExportTableOf(moduleRel)?.get(name);
-  const out = hit ? pyReExportResolve(hit.srcMod, hit.orig, depth + 1) : null;
-  if (out != null || depth === 0) pyReExportMemo.set(memoKey, out);
+  const childFiles = [];
+  const collect = (f) => { childFiles.push(f); if (visit) visit(f); };
+  const out = hit ? pyReExportResolve(hit.srcMod, hit.orig, depth + 1, collect) : null;
+  if (out != null || depth === 0) pyReExportMemo.set(memoKey, { out, files: childFiles });
   return out;
 };
 const resolveFileMember = (fileRel, name) => {
@@ -242,19 +255,27 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
    * bindings for member access (nsmap), class aliases for instanceof/static refs (classmap),
    * and the coarse import edges ([from, to] id pairs, in source order). The caller owns cache
    * replay/record; `edges` here is what the extractor's binding loop pushed into importEdges.
+   * finding #17: also returns `deps` — every file this bind CONSULTED (resolved targets of every
+   * import form, ns targets included because deriveFileEdges later resolves members against
+   * their live symbol tables, plus every file VISITED by the re-export walks, dead ends
+   * included) — and `bindCand`, the ORIGINAL imported names. Together they are the name-delta
+   * replay rule's per-file inputs.
    */
   function bindFileImports({ fAbs, r, isPy, text, aId, defaultExportByFile, kindById }) {
     const amap = new Map(), nsmap = new Map(), classmap = new Map(), edges = [];
+    const deps = new Set(), bindCand = new Set();
+    const dep = (t) => { if (t) deps.add(t); return t; };
     let m;
   const addNamed = (namesStr, spec) => {
-    const target = resolveImport(fAbs, spec); if (!target) return;
+    const target = dep(resolveImport(fAbs, spec)); if (!target) return;
     for (const part of namesStr.split(',')) {
       const seg = part.trim().split(/\s+as\s+/);
       const orig = seg[0].trim(), local = seg[seg.length - 1].trim();
       if (!orig) continue;
+      bindCand.add(orig);
       const symId = target + ':' + orig;
       // Direct symbol in the target, else follow a renamed re-export chain (`export {orig as …} from`).
-      const resolved = nodeIdSet.has(symId) ? symId : resolveReExport(target, orig);
+      const resolved = nodeIdSet.has(symId) ? symId : resolveReExport(target, orig, undefined, dep);
       if (resolved) { amap.set(local, resolved); if (aId && aId !== resolved) edges.push([aId, resolved]); }
     }
   };
@@ -262,16 +283,17 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
   // member-access binding) OR a symbol defined in MOD's file (-> precise alias, like addNamed). The
   // coarse "imports this module" edge lands on the target's <module> node.
   const addPyFrom = (level, dotted, namesStr) => {
-    const pkgFile = resolvePyModule(fAbs, level, dotted);
+    const pkgFile = dep(resolvePyModule(fAbs, level, dotted));
     for (const part of namesStr.replace(/[()]/g, '').split(',')) {
       const seg = part.trim().split(/\s+as\s+/);
       const orig = (seg[0] || '').trim(), local = (seg[seg.length - 1] || '').trim();
       if (!orig || orig === '*') continue;
-      const sub = resolvePyModule(fAbs, level, dotted ? dotted + '.' + orig : orig);
+      bindCand.add(orig);
+      const sub = dep(resolvePyModule(fAbs, level, dotted ? dotted + '.' + orig : orig));
       if (sub && sub !== pkgFile) { nsmap.set(local, sub); if (aId) edges.push([aId, sub + ':<module>']); continue; }
       if (pkgFile) {
         const symId = pkgFile + ':' + orig;
-        const resolvedSym = nodeIdSet.has(symId) ? symId : pyReExportResolve(pkgFile, orig); // Spec Q2
+        const resolvedSym = nodeIdSet.has(symId) ? symId : pyReExportResolve(pkgFile, orig, 0, dep); // Spec Q2
         if (resolvedSym) {
           amap.set(local, resolvedSym); // Spec Q3: an explicit import binds bare calls, boundary or not
           const origin = pyImportOrigin(r); // Spec Q4: the SITE (module scope) owns the import edge
@@ -288,7 +310,7 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
       const seg = part.trim().split(/\s+as\s+/);
       const dotted = (seg[0] || '').trim(); if (!dotted) continue;
       const alias = seg.length > 1 ? seg[1].trim() : null;
-      const t = resolvePyModule(fAbs, 0, dotted); if (!t) continue;
+      const t = dep(resolvePyModule(fAbs, 0, dotted)); if (!t) continue;
       const local = alias || (dotted.includes('.') ? null : dotted);
       if (local) nsmap.set(local, t);
       if (aId) edges.push([aId, t + ':<module>']);
@@ -301,7 +323,7 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
   // node (created on demand below), NOT on its anchor symbol — member-access now produces the precise
   // per-symbol edges, so attributing the coarse edge to one symbol only pollutes its dependents.
   const addModuleBinding = (local, spec, isDefault) => {
-    const t = resolveImport(fAbs, spec); if (!t) return;
+    const t = dep(resolveImport(fAbs, spec)); if (!t) return;
     if (local) nsmap.set(local, t);
     // A default import binds the target's default export: attribute to its single owning symbol when
     // there is one (class/fn AxiosError), else the module object (object-default barrel -> <module>).
@@ -315,7 +337,7 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
     const edgeTarget = defSym || (t + ':<module>');
     if (aId && aId !== edgeTarget) edges.push([aId, edgeTarget]);
   };
-  const addSide = (spec) => { const t = resolveImport(fAbs, spec); if (!t) return; if (aId) edges.push([aId, t + ':<module>']); };
+  const addSide = (spec) => { const t = dep(resolveImport(fAbs, spec)); if (!t) return; if (aId) edges.push([aId, t + ':<module>']); };
   if (isPy) {
     const pyText = maskedOnce(r, 'py', text); // don't bind imports that live in a docstring/comment
     while ((m = pyFrom.exec(pyText))) addPyFrom(m[1].length, m[2], m[3]);
@@ -328,7 +350,7 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
     while ((m = esDefault.exec(text))) addModuleBinding(m[1], m[2], true);
     while ((m = esSide.exec(text))) addSide(m[1]);
   }
-    return { amap, nsmap, classmap, edges };
+    return { amap, nsmap, classmap, edges, deps, bindCand };
   }
 
   return {

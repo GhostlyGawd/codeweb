@@ -59,6 +59,29 @@ notes so validated results, papers, and new tools never get lost in commit histo
   fields (brief reads generatedAt; staleness reads the stamps). (perf-quality finding 5)
 
 ### Performance
+- **Adding one function no longer re-derives the whole repo (name-delta invalidation).** A
+  symbol-set change used to fail the edge/binding caches for EVERY file — the canonical agent
+  edit (add a function) cost a full re-read + re-mask + re-derive (2.1× the no-change floor
+  measured at the 16.8k-symbol corpus). The caches now compute the NAME DELTA — labels whose
+  sorted definition-id lists differ between the cached and live symbol tables — and re-derive
+  only files that could see it: a file's cached edges replay iff its content hash is unchanged,
+  its candidate-name set (every identifier reaching the edge resolver, recorded pre-resolution)
+  is disjoint from the delta, and its import BINDING replayed (the hardening conjunct: aliased
+  imports and namespace member calls ride the bind rule — original imported names plus a
+  content-hash check over every file the bind consulted, re-export walks and dead ends
+  included). Wholesale transitions stay wholesale: package-boundary changes, file add/delete,
+  re-export-landscape moves (rexSig, with a Python (module, name)-membership belt for edge-time
+  chains), rules changes, migration, `--full`/verify mode — and the kill-switch
+  `CODEWEB_NAME_DELTA=0` restores the old wholesale mechanism outright (identical bytes, only
+  wall-time moves). Proven by the extended IE-EQUIVALENCE property harness at full CI depth (40
+  trials, both env legs) with warm-vs-cold fragment BYTE equality at every mutation step, plus
+  new incrementality assertions: add-one-function re-edges only the edited file + its
+  bind-coupled importer while a crafted disjoint file replays; a def rename of an imported name
+  re-edges the importer. Measured min-of-3 @16.8k: add-one-function 1,326 → 710 ms — 1.27× the
+  same-session noop floor (bar ≤ ~1.3×, was 2.12×); body-edit unchanged (771 → 759 ms); delete
+  1,279 → 703 ms; rename 1,329 → 708 ms; the colliding-name add (a name every file calls) stays
+  honestly near-wholesale at 1,127 ms. @29.4k: add-one-function 2,294 → 1,277 ms (1.22× noop,
+  was 2.14×). Hook add-one-function end-to-end 1,909 → 1,027 ms. (round 2, finding #17)
 - **The warm no-change floor sheds its four avoidable terms.** (a) The scan cache no longer
   stores `syms` (symbols sat in it three times over) and interns per-file edges as an id table +
   `[from,to,kind]` triples instead of verbose objects — the edge term shrank 57 %, the whole

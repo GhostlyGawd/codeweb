@@ -24,8 +24,8 @@ const sortedNodes = (g) => g.nodes.map((n) => n.id).sort();
 const sortedEdges = (g) => g.edges.map((e) => `${e.from} ${e.to} ${e.kind}`).sort();
 const edgedCount = (stderr) => { const m = /edged (\d+)\/(\d+)/.exec(stderr); return m ? { edged: +m[1], total: +m[2] } : null; };
 
-function extract(root, out, cache, extra = []) {
-  const r = runNode(EXTRACT, [root, '--out', out, '--cache', cache, '--no-ctags', ...extra]);
+function extract(root, out, cache, extra = [], env = {}) {
+  const r = runNode(EXTRACT, [root, '--out', out, '--cache', cache, '--no-ctags', ...extra], { env });
   assert.equal(r.status, 0, `extract failed: ${r.stderr}`);
   return { graph: readJSON(out), stderr: r.stderr };
 }
@@ -63,31 +63,96 @@ test('IE-COLD-PARITY: cold cache == no-cache == --full (caching changes nothing 
   } finally { cleanup(dir); }
 });
 
+// Round 2, finding #17 (T-17.4 adjudication): the old third act of this test — "a changed symbol
+// set forces a full re-edge" — pinned the wholesale MECHANISM, not the user-visible guarantee.
+// The replacement is a STRICT SUPERSET, nothing deleted:
+//   - the default-env leg (below) replaces it with strictly stronger checks: the add-one-function
+//     step re-edges the edited file plus candidate-intersecting files while a crafted DISJOINT
+//     file does not re-edge (edged < total), byte-equal to cold;
+//   - the CODEWEB_NAME_DELTA=0 leg (next test) re-runs the SAME scenario — BASE tree (+ the same
+//     disjoint d.js), the same add-a3 step — keeping the original assertion VERBATIM: the one
+//     assertion moved under the env that pins its semantics, scenario intact.
+// d.js is the crafted disjoint file: no imports (bind holds vacuously), candidates {d2} — never
+// intersecting the a3/a1x deltas these tests generate.
+const DISJOINT = 'export function d1() { return d2(); }\nexport function d2() { return 1; }\n';
+// The two tests that assert DELTA behavior (edged < total) pin the lever ON ('' overrides an
+// ambient '0' through runNode's env merge; any value but '0' is on) — so running the whole suite
+// under CODEWEB_NAME_DELTA=0 (the rollback-verification mode) still passes: equivalence tests
+// respect the ambient lever, mechanism tests pin the leg they prove.
+const DELTA_ON = { CODEWEB_NAME_DELTA: '' };
+
 test('IE-INCREMENTALITY: a pure body edit re-edges only the changed file AND still equals cold full', () => {
   const dir = tmpDir('codeweb-ie-'); const root = join(dir, 'src'); writeTree(root, BASE);
+  writeFileSync(join(root, 'd.js'), DISJOINT);
   const cache = join(dir, 'cache.json');
   try {
-    extract(root, join(dir, 'g0.json'), cache); // warm
+    extract(root, join(dir, 'g0.json'), cache, [], DELTA_ON); // warm
     // pure body edit to b.js (no symbol added/removed)
     writeFileSync(join(root, 'b.js'), 'export function b1(y) { return y * 2 + 0; }\n');
-    const warm = extract(root, join(dir, 'g1.json'), cache);
+    const warm = extract(root, join(dir, 'g1.json'), cache, [], DELTA_ON);
     const ec = edgedCount(warm.stderr);
     assert.ok(ec, `banner reports an "edged N/M" counter (got: ${warm.stderr})`);
     assert.equal(ec.edged, 1, `only the one changed file is re-edged (got ${ec.edged}/${ec.total})`);
-    // re-edging the WRONG file would still show 1/3 — so also assert the OUTPUT matches cold full
+    // re-edging the WRONG file would still show 1/4 — so also assert the OUTPUT matches cold full
     const cold = coldFull(dir, root, '1');
     assert.deepEqual(sortedEdges(warm.graph), sortedEdges(cold), 'warm output equals cold full after a body edit');
     // edit TWO files (still body-only) -> exactly two re-edged
     writeFileSync(join(root, 'a.js'), 'export function a1(x) { return b1(x) + 2; }\nexport function a2() { return 22; }\n');
     writeFileSync(join(root, 'c.js'), 'import { a1 } from "./a.js";\nexport function c1() { return a1(4); }\n');
-    const warm2 = extract(root, join(dir, 'g2.json'), cache);
+    const warm2 = extract(root, join(dir, 'g2.json'), cache, [], DELTA_ON);
     assert.equal(edgedCount(warm2.stderr).edged, 2, 'two changed files -> two re-edged');
     assert.deepEqual(sortedEdges(warm2.graph), sortedEdges(coldFull(dir, root, '2')));
-    // ADD a symbol -> symbol set changes -> safe fallback re-edges every file
+    // ADD a symbol (a3 to a.js) -> NAME-DELTA path: a.js re-edges (content changed), c.js re-edges
+    // (bind-coupled to a.js: its bindDeps hash moved, so its bind re-derived), b.js and the
+    // crafted-disjoint d.js REPLAY (cand {b1-callers…}/{d2} never see the {a3} delta, binds hold)
     writeFileSync(join(root, 'a.js'), 'export function a1(x) { return b1(x) + 2; }\nexport function a2() { return 22; }\nexport function a3() { return 3; }\n');
-    const grow = extract(root, join(dir, 'g3.json'), cache);
+    const grow = extract(root, join(dir, 'g3.json'), cache, [], DELTA_ON);
+    const ec2 = edgedCount(grow.stderr);
+    assert.ok(ec2.edged < ec2.total, `add-one-function stays incremental under the name delta (got ${ec2.edged}/${ec2.total})`);
+    assert.equal(ec2.edged, 2, `exactly the edited file + its bind-coupled importer re-edge (got ${ec2.edged}/${ec2.total})`);
+    // and the OUTPUT is byte-equal to a cold full extract — replaying the wrong file cannot pass
+    const cold3 = coldFull(dir, root, '3');
+    assert.deepEqual(sortedNodes(grow.graph), sortedNodes(cold3));
+    assert.deepEqual(sortedEdges(grow.graph), sortedEdges(cold3));
+    assert.ok(readFileSync(join(dir, 'g3.json')).equals(readFileSync(join(dir, 'cold3.json'))), 'delta-path fragment bytes equal cold full');
+  } finally { cleanup(dir); }
+});
+
+test('IE-INCREMENTALITY (kill-switch leg): CODEWEB_NAME_DELTA=0 restores the wholesale mechanism verbatim', () => {
+  const dir = tmpDir('codeweb-ie-'); const root = join(dir, 'src'); writeTree(root, BASE);
+  writeFileSync(join(root, 'd.js'), DISJOINT);
+  const cache = join(dir, 'cache.json');
+  const ENV = { CODEWEB_NAME_DELTA: '0' };
+  try {
+    extract(root, join(dir, 'g0.json'), cache, [], ENV); // warm
+    // the SAME add-a3 step as the default leg
+    writeFileSync(join(root, 'a.js'), 'export function a1(x) { return b1(x) + 1; }\nexport function a2() { return 2; }\nexport function a3() { return 3; }\n');
+    const grow = extract(root, join(dir, 'g3.json'), cache, [], ENV);
     const ec2 = edgedCount(grow.stderr);
     assert.equal(ec2.edged, ec2.total, 'a changed symbol set forces a full re-edge (correctness over speed)');
+    // and the wholesale leg's bytes equal cold full too (both paths emit identical bytes)
+    const cold = coldFull(dir, root, 'ks');
+    assert.deepEqual(sortedEdges(grow.graph), sortedEdges(cold));
+    assert.ok(readFileSync(join(dir, 'g3.json')).equals(readFileSync(join(dir, 'coldks.json'))), 'kill-switch fragment bytes equal cold full');
+  } finally { cleanup(dir); }
+});
+
+test('IE-BIND-COUPLING: rensym of an IMPORTED name re-edges the importer (the aliased-import trap)', () => {
+  const dir = tmpDir('codeweb-ie-'); const root = join(dir, 'src'); writeTree(root, BASE);
+  const cache = join(dir, 'cache.json');
+  try {
+    extract(root, join(dir, 'g0.json'), cache, [], DELTA_ON); // warm
+    // rename BASE's a1 (imported by c.js) — c.js's text is UNCHANGED and its cand holds `a1`
+    // (dirty too), but the load-bearing conjunct is the BIND rule: a.js is in c.js's bindDeps,
+    // its hash moved, so c.js re-binds -> re-edges. b.js (candidates disjoint, no imports) replays.
+    writeFileSync(join(root, 'a.js'), 'export function a1x(x) { return b1(x) + 1; }\nexport function a2() { return 2; }\n');
+    const warm = extract(root, join(dir, 'g1.json'), cache, [], DELTA_ON);
+    const ec = edgedCount(warm.stderr);
+    assert.equal(ec.edged, 2, `the renamed file + its importer re-edge, b.js replays (got ${ec.edged}/${ec.total})`);
+    const cold = coldFull(dir, root, 'bc');
+    assert.deepEqual(sortedNodes(warm.graph), sortedNodes(cold));
+    assert.deepEqual(sortedEdges(warm.graph), sortedEdges(cold));
+    assert.ok(!sortedEdges(warm.graph).includes('c.js:c1 a.js:a1 call'), 'no stale edge to the renamed-away a1');
   } finally { cleanup(dir); }
 });
 

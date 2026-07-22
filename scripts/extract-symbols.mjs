@@ -763,6 +763,7 @@ for (const [r, stars] of starReExportByFile) {
 // finding 10 — cached bindings gate on it.)
 const pkgBoundaries = [...new Set(files.map((f) => pkgOf(rel(f))))].sort();
 const symbolSig = sha1(nodes.map((n) => n.id).slice().sort().join('\n') + '\0' + pkgBoundaries.join('\n'));
+const pkgSig = sha1(pkgBoundaries.join('\n')); // finding #17: pkg-boundary repartition alone (zero label delta) must stay a wholesale flip
 
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
 const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
@@ -779,26 +780,116 @@ const rexStable = !!(oldCache && oldCache.fileSig === fileSig && rexSig != null 
 const bindSig = sha1(symbolSig + '\0' + fileSig);
 const bindReuse = stampTier && oldCache.bindSig === bindSig && rexStable;
 if (oldCache && (oldCache.bindSig !== bindSig || oldCache.symbolSig !== symbolSig || oldCache.fileSig !== fileSig || oldCache.rexSig !== rexSig)) cacheDirty = true;
+
+// ---- finding #17: name-delta invalidation --------------------------------------------------
+// A symbolSig flip used to re-derive EVERY file's binds and edges (full re-read) — adding one
+// function was 2.3x the noop floor. When the flip is a pure NAME delta, only files that could
+// SEE the delta re-derive: dirty labels = labels whose sorted def-id lists differ between the
+// old cache's nodes and the live nodes (both at this pre-module-node point — cached entries
+// never contain module nodes, so the domains match by construction). A file's cached products
+// replay only under per-file rules (below) whose union provably covers every byName consumer —
+// the has() gate, the pkg-scoped unique fallback, and every ambiguity transition (0->1, 1->2,
+// 2->1, 1->1' retarget) is a def-list change on that label.
+// WHOLESALE-FLIP transitions (delta ineligible, full re-derive as today):
+//   (a) pkgSig moved — pkgOf repartitions inPkg with zero label delta;
+//   (b) fileSig changed — specifier + <module> landscape (add/delete);
+//   (c) old cache lacks the #17 fields (cand/bindCand/bindDeps, py pyrex) — additive migration,
+//       no extra version bump: one wholesale run records them;
+//   (d) --full / CODEWEB_VERIFY_FRESHNESS=1;
+//   (e) the re-export landscape moved (rexSig, incl. its py (srcMod,orig)-membership belt below)
+//       — forwarding flips retarget OTHER files' chains with zero label delta, and Py chains are
+//       also walked at EDGE time via resolveFileMember, invisible to consumers' cand/bindDeps;
+//   (f) kill-switch CODEWEB_NAME_DELTA=0 — wholesale for edges AND binds (rollback lever; both
+//       paths emit identical bytes, only wall-time moves).
+const deltaDirty = (() => {
+  if (!oldCache || opts.full || process.env.CODEWEB_VERIFY_FRESHNESS === '1') return null; // (d)
+  if (process.env.CODEWEB_NAME_DELTA === '0') return null;                                 // (f)
+  if (oldCache.rulesSig !== rulesSig) return null;    // role verdicts baked into cached edges (finding #10 / R5)
+  if (oldCache.symbolSig === symbolSig) return null;  // today's wholesale-valid path — untouched
+  if (oldCache.fileSig !== fileSig) return null;      // (b)
+  if (oldCache.pkgSig !== pkgSig) return null;        // (a)
+  if (!rexStable) return null;                        // (e)
+  for (const [r2, e] of Object.entries(oldCache.files)) {                                  // (c)
+    if (!e.nodes || !e.hash || e.cand === undefined || !e.bind || e.bindCand === undefined || e.bindDeps === undefined) return null;
+    if (r2.endsWith('.py') && e.pyrex === undefined) return null;
+  }
+  // (e) py belt: a changed .py file whose OWN def set moved can retarget an edge-time chain that
+  // lands on it (pyReExportResolve's nodeIdSet.has(srcMod:orig)) — invisible to cand/bindDeps
+  // even with every TABLE unchanged (rexStable). Wholesale iff any (srcMod, orig) pair named by
+  // ANY stored table changed membership in srcMod's own node-id set.
+  const pyPairs = []; // [srcMod, orig]
+  for (const e of Object.values(oldCache.files)) {
+    if (e.pyrex) for (const [, srcMod, orig] of e.pyrex) pyPairs.push([srcMod, orig]);
+  }
+  if (pyPairs.length) {
+    for (const [srcMod, orig] of pyPairs) {
+      const o = oldCache.files[srcMod], nw = newCache.files[srcMod];
+      if (!o || !nw) continue;               // srcMod outside the universe -> fileSig owns it
+      if (o.hash === nw.hash) continue;      // unchanged file: same defs
+      const id = srcMod + ':' + orig;
+      const oldHas = o.nodes.some((n) => n.id === id);
+      const newHas = (nw.nodes || []).some((n) => n.id === id);
+      if (oldHas !== newHas) return null;    // chain landing pad appeared/vanished -> wholesale
+    }
+  }
+  // dirty labels: def-id-list delta per label, old vs new, bidirectional by construction
+  const oldByLabel = new Map();
+  for (const e of Object.values(oldCache.files)) {
+    for (const n of e.nodes) { let l = oldByLabel.get(n.label); if (!l) oldByLabel.set(n.label, l = []); l.push(n.id); }
+  }
+  const dirty = new Set();
+  for (const [label, ids] of byName) {
+    const o = oldByLabel.get(label);
+    if (!o) { dirty.add(label); continue; }
+    const a = [...ids].sort(), b = o.sort();
+    if (a.length !== b.length || a.some((v, i2) => v !== b[i2])) dirty.add(label);
+  }
+  for (const label of oldByLabel.keys()) if (!byName.has(label)) dirty.add(label);
+  return dirty;
+})();
+const bindReplayed = new Set(); // rel paths whose bind was REPLAYED this run — the edge rule's third conjunct
+
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
   const r = rel(f), isPy = r.endsWith('.py');
   const bindEntry = newCache && newCache.files[r];
-  if (bindReuse && fsRec.text == null && bindEntry && bindEntry.bind) { // finding 10: replay cached bindings
-    const b = bindEntry.bind;
+  const replayBind = (b) => {
     if (b.a.length) aliasByFile.set(f, new Map(b.a));
     if (b.ns.length) nsAliasByFile.set(f, new Map(b.ns));
     if (b.cls.length) classAliasByFile.set(f, new Map(b.cls));
     for (const pair of b.ie) importEdges.push(pair);
+    bindReplayed.add(r);
+  };
+  if (bindReuse && fsRec.text == null && bindEntry && bindEntry.bind) { // finding 10: replay cached bindings
+    replayBind(bindEntry.bind);
     continue;
   }
-  const { amap, nsmap, classmap, edges: bindEdges } = resolver.bindFileImports({
+  // finding #17 (T-17.3): per-file bind replay under a name delta — stamp unchanged (text never
+  // pulled), fileSig+pkgSig unchanged (eligibility above), bindCand ∩ dirty = ∅, and every file
+  // in bindDeps content-unchanged (ns targets included: deriveFileEdges resolves members against
+  // their live symbol tables). Ineligible/intersecting -> re-bind this file only (lazy textOf).
+  if (deltaDirty && fsRec.text == null && bindEntry && bindEntry.bind
+      && bindEntry.bindCand && !bindEntry.bindCand.some((n) => deltaDirty.has(n))
+      && bindEntry.bindDeps && bindEntry.bindDeps.every((d) => {
+        const o = oldCache.files[d], nw = newCache.files[d];
+        return o && nw && o.hash === nw.hash;
+      })) {
+    replayBind(bindEntry.bind);
+    continue;
+  }
+  const { amap, nsmap, classmap, edges: bindEdges, deps, bindCand } = resolver.bindFileImports({
     fAbs: f, r, isPy, text: textOf(f, fsRec), aId: anchorId(r), defaultExportByFile, kindById,
   });
   for (const pair of bindEdges) importEdges.push(pair);
   if (amap.size) aliasByFile.set(f, amap);
   if (nsmap.size) nsAliasByFile.set(f, nsmap);
   if (classmap.size) classAliasByFile.set(f, classmap);
-  if (bindEntry) { bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], ie: bindEdges }; cacheDirty = true; }
+  if (bindEntry) {
+    bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], ie: bindEdges };
+    bindEntry.bindDeps = [...deps].sort();   // finding #17 (T-17.3)
+    bindEntry.bindCand = [...bindCand].sort();
+    cacheDirty = true;
+  }
 }
 
 // ---- derive call edges (F9: incremental, per-file, cacheable) ------------------------------
@@ -812,6 +903,13 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
   const local = []; const localSet = new Set();
   let hasModule = false, ambiguous = 0, shortDropped = 0;
   const isPy = r.endsWith('.py');
+  // finding #17 (T-17.1): the file's CANDIDATE name set — every name reaching addEdge, recorded
+  // after the KEYWORDS return and BEFORE the aliased/byName gate, so alias locals, decl-line
+  // self-captures, and names that resolved to NOTHING this run are all included (an unresolvable
+  // name is exactly what a later-added symbol turns into an edge). Qualified-name scans
+  // (csBase/pyBases) contribute what addEdge receives — the split tail. Collected from the SAME
+  // masked lines the edges derive from, so cand and edges cannot skew across mask versions.
+  const cand = new Set();
   // finding #21 (T-21.1): innermost-range-per-line precompute — the old per-call linear scan over
   // ALL ranges made big generated/hub files quadratic (8k-fn file: addEdge 50.8 % self). One
   // O(lines + R log R) sweep at entry; lookup O(1); property-pinned identical (incl. the
@@ -868,6 +966,7 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
   const classOf = (name) => (classAliasMap && classAliasMap.get(name)) || sameFileClasses.get(name) || null;
   const addEdge = (lineIdx, name, kind = 'call') => {
     if (KEYWORDS.has(name)) return;
+    cand.add(name); // finding #17: pre-gate — see the declaration above
     const aliased = aliasMap && aliasMap.get(name);
     if (!aliased && !byName.has(name)) return;
     if (declStarts.get(name)?.has(lineIdx + 1)) return; // any same-named declaration line — finding #12 (subsumes the old own-definition guard)
@@ -1044,7 +1143,7 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
     instanceofRe.lastIndex = 0;
     while ((m = instanceofRe.exec(ln))) { const cls = classOf(m[1]); if (cls) addResolved(i, cls, 'ref'); }
   }
-  return { edges: local, hasModule, ambiguous, short: shortDropped };
+  return { edges: local, hasModule, ambiguous, short: shortDropped, cand: [...cand].sort() };
 }
 
 const edges = [];
@@ -1066,10 +1165,18 @@ for (const f of edgeFiles) {
   const rec = fileSyms.get(f);
   const r = rel(f);
   const cacheEntry = newCache && newCache.files[r]; // carries the content hash from discovery
-  const prev = reuseEdges && oldCache.files[r];
+  const prev = (reuseEdges || deltaDirty) && oldCache.files[r];
+  // finding #17 (T-17.2): under a name delta, F's cached edges replay iff — three conjuncts, the
+  // third is the hardening — (1) F's content hash is unchanged (below), (2) cand(F) ∩ dirty = ∅,
+  // and (3) F's BIND replayed this run. The pair alone is unsound: `import { foo as bar }` holds
+  // `bar` in cand while dirty holds `foo`, and member calls `u.merge()` never reach addEdge — both
+  // ride the bind rule (bindCand + dep hashes), which precedes this loop. No-import files hold
+  // vacuously (empty deps; their bind replays whenever their stamp holds).
+  const deltaOk = reuseEdges
+    || (deltaDirty && prev && prev.cand && !prev.cand.some((n) => deltaDirty.has(n)) && bindReplayed.has(r));
   let result;
-  if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges && prev.ids) {
-    result = { edges: decodeEntryEdges(prev), hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0, short: prev.short || 0 }; // reuse (#19: decode fresh objects)
+  if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges && prev.ids && deltaOk) {
+    result = { edges: decodeEntryEdges(prev), hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0, short: prev.short || 0, cand: prev.cand }; // reuse (#19: decode fresh objects)
   } else {
     // finding 10: text + mask only on the derive path — an edge-cache hit never touches the file
     const text = textOf(f, rec);
@@ -1077,7 +1184,7 @@ for (const f of edgeFiles) {
     result = deriveFileEdges(r, lines, rec.ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f));
     edgedCount++;
   }
-  if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; cacheEntry.short = result.short; }
+  if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; cacheEntry.short = result.short; if (result.cand) cacheEntry.cand = result.cand; }
   if (result.hasModule && !nodeIdSet.has(r + ':<module>')) {
     nodes.push({ id: r + ':<module>', label: '<module>', kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleFor(r) });
     nodeIdSet.add(r + ':<module>');
@@ -1086,7 +1193,7 @@ for (const f of edgeFiles) {
   ambiguousDropped += result.ambiguous;
   shortNameDropped += result.short;
 }
-if (newCache) { newCache.symbolSig = symbolSig; newCache.bindSig = bindSig; if (rexSig != null) newCache.rexSig = rexSig; }
+if (newCache) { newCache.symbolSig = symbolSig; newCache.bindSig = bindSig; newCache.pkgSig = pkgSig; if (rexSig != null) newCache.rexSig = rexSig; }
 
 // ---- append import edges (file anchor -> imported symbol) ----
 // Deduped against the call edges by (from,to): caller ids are file-local, so this set has no
