@@ -306,17 +306,35 @@ const asyncDone = () => { pendingAsync--; if (stdinClosed && pendingAsync <= 0) 
 // spawnQueues was keyed by the graph FILE path, so refresh (keyed by its graph) and diff (keyed by
 // the shared '(graphless)' slot) never collided — the ordering the old comment promised did not
 // hold. State is now per-WORKSPACE-DIRECTORY: every graph tool, map, and keyed-graphless tool (diff)
-// normalizes to the dir that holds graph.json / the map out dir, so operations on ONE workspace
-// serialize and different workspaces run concurrently. Invariants I1–I7 live in the WS-F spec. STAGE
-// 1 keeps full per-workspace serialization (readers chain too) while re-keying and routing map/
-// autoRefresh through the queue; #32 splits readers out under a concurrency cap. writersPending is
-// the race-free ('increment before any await') signal autoRefresh reads to skip a queued writer (I7).
-const workspaces = new Map(); // wsKey -> { writerTail: Promise, writersPending: int }
+// normalizes to the dir that holds graph.json / the map out dir, so operations on ONE workspace order
+// correctly and different workspaces run concurrently. Draining rules = invariants I1–I7 (WS-F spec):
+//  I1 writers on one workspace never overlap, FIFO (chain on writerTail);
+//  I2 a reader never starts before an earlier-QUEUED writer (awaits the writerTail snapshot at enqueue);
+//  I3 a writer also waits for every reader ENQUEUED BEFORE it (join of writerTail + a readersInFlight
+//     snapshot) — the CONSERVATIVE rule: a spawned reader makes MULTIPLE workspace reads (graph.json
+//     then a sidecar), and a writer landing mid-read hands it a torn old/new state today's full
+//     serialization makes impossible; preserving that linearization is the contract;
+//  I4 readers run concurrently under a GLOBAL cap of READER_CAP children (FIFO waiters); a reader
+//     acquires its slot only AFTER its I2 writerTail wait resolves and holds it only while its child
+//     runs, so a reader blocked on a writer holds no slot (no cross-workspace starvation/deadlock);
+//  I5 every job settles exactly once and always releases slot + writersPending + inflight + asyncDone;
+//  I7 writersPending increments synchronously at enqueue so autoRefresh's same-drain skip is race-free.
+// #32's win is reader-reader overlap (two advisors ≈ max, not sum); the aggressive 'writers skip
+// readers' variant was reviewed and REJECTED (torn multi-artifact reads) — do not reintroduce it
+// without per-result graph-stamp labeling. READER_CAP=1 restores full serialization (the rollback lever).
+const workspaces = new Map(); // wsKey -> { writerTail: Promise, writersPending: int, readersInFlight: Set<Promise> }
 function wsOf(key) {
   let w = workspaces.get(key);
-  if (!w) { w = { writerTail: Promise.resolve(), writersPending: 0 }; workspaces.set(key, w); }
+  if (!w) { w = { writerTail: Promise.resolve(), writersPending: 0, readersInFlight: new Set() }; workspaces.set(key, w); }
   return w;
 }
+// I4: a global reader concurrency cap with a FIFO waiter queue. A released slot is handed DIRECTLY to
+// the next waiter (count unchanged) so ordering is preserved; only an unclaimed release grows the count.
+const READER_CAP = 3;
+let readerSlots = READER_CAP;
+const readerWaiters = [];
+const acquireReaderSlot = () => (readerSlots > 0 ? (readerSlots--, Promise.resolve()) : new Promise((res) => readerWaiters.push(res)));
+const releaseReaderSlot = () => { const next = readerWaiters.shift(); if (next) next(); else readerSlots++; };
 // writers = the tools that MUTATE a workspace (graph consumers must re-read after them) + the
 // internal autoRefresh + map; every other spawned tool and fast-path fallback spawn is a reader.
 const WRITER_TOOLS = new Set(['codeweb_refresh', 'codeweb_annotate', 'codeweb_map']);
@@ -377,25 +395,44 @@ function runChild(id, entry, spec, releaseAll) {
 }
 
 // Enqueue a child on its workspace. writersPending increments SYNCHRONOUSLY here (I7), before any
-// await, so autoRefresh's same-drain skip check is race-free. STAGE 1: reader and writer both chain
-// on writerTail (full serialization preserved). releaseAll runs exactly once on every settle path
-// (I5): deletes the inflight entry, decrements writersPending, calls asyncDone().
+// await. WRITERS chain on the join of writerTail + an enqueue-time readersInFlight snapshot (I1 FIFO
+// + I3 conservative) and skip the slot gate. READERS capture writerTail at enqueue (I2), await it,
+// THEN acquire one global reader slot (I4) held only while the child runs; a reader is registered in
+// readersInFlight from enqueue until settle so a later writer (I3) waits for it. releaseAll runs
+// exactly once on every settle path (I5): releases the slot, deletes inflight, decrements
+// writersPending / removes from readersInFlight, calls asyncDone().
 function enqueueChild(id, spec) {
   const w = wsOf(spec.key);
   const entry = (id != null) ? { kill: () => {}, cancelled: false } : null;
   if (entry) inflight.set(id, entry);
   pendingAsync++;
-  if (spec.kind === 'writer') w.writersPending++;
-  let released = false;
+
+  if (spec.kind === 'writer') {
+    w.writersPending++; // I7: before any await
+    const readerSnapshot = [...w.readersInFlight]; // I3: readers enqueued before this writer
+    let released = false;
+    const releaseAll = () => { if (released) return; released = true; if (entry) inflight.delete(id); w.writersPending--; asyncDone(); };
+    const job = Promise.allSettled([w.writerTail, ...readerSnapshot]).then(() => runChild(id, entry, spec, releaseAll));
+    w.writerTail = job; // I1: the next writer chains after this one
+    return job;
+  }
+
+  // reader
+  let released = false, slotHeld = false, job;
   const releaseAll = () => {
     if (released) return; released = true;
+    if (slotHeld) { releaseReaderSlot(); slotHeld = false; }
     if (entry) inflight.delete(id);
-    if (spec.kind === 'writer') w.writersPending--;
+    w.readersInFlight.delete(job);
     asyncDone();
   };
-  const run = () => runChild(id, entry, spec, releaseAll);
-  const job = w.writerTail.then(run, run); // chain even if a prior job rejected (runChild never rejects)
-  w.writerTail = job;
+  const tail = w.writerTail; // I2: snapshot the writer tail at enqueue
+  job = tail.then(async () => {
+    if (entry && entry.cancelled) return; // cancelled while queued behind a writer: acquire no slot
+    await acquireReaderSlot();            // I4: only AFTER the I2 wait — a blocked reader holds no slot
+    slotHeld = true;
+  }).then(() => runChild(id, entry, spec, releaseAll));
+  w.readersInFlight.add(job);
   return job;
 }
 
@@ -564,9 +601,10 @@ function handleToolCall(id, params) {
   const bin = tool.bin || QUERY;
   // finding 19 + #30/#31/#32: spawned children are ASYNC and queue PER WORKSPACE (dir of graph.json /
   // map out / diff's `after`). spawnSync once blocked the readline loop, head-of-line-blocking every
-  // queued request; fast-path tools answer in-process ABOVE and never queue. STAGE 1 keeps full per-
-  // workspace serialization (readers chain too); #32 splits readers under a concurrency cap. Replies
-  // may land out of order — clients correlate by id; pendingAsync keeps stdin-close from killing work.
+  // queued request; fast-path tools answer in-process ABOVE and never queue. Readers on one workspace
+  // now run concurrently under READER_CAP (I4) while still ordering after any earlier-queued writer
+  // (I2); writers stay serialized (I1) and wait for earlier readers (I3). Replies may land out of
+  // order — clients correlate by id; pendingAsync keeps stdin-close from killing in-flight work.
   enqueueChild(id, {
     kind: WRITER_TOOLS.has(tool.name) ? 'writer' : 'reader',
     key: queueKeyFor(tool, args, graphPath),

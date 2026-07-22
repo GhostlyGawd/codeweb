@@ -9,6 +9,22 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+### Changed
+- **Read-only MCP tools on one workspace now run concurrently (reader/writer queue split).** Stage 1
+  of the queue redesign kept full per-workspace serialization; the 12+ read-only spawned tools
+  inherited write-ordering they don't need, so behind one slow advisor every other spawned tool on
+  that graph queued (hotspots-behind-risk measured ≈ risk+hotspots, the head-of-line shape prior-#19
+  fixed only for the in-process fast paths). Tools are now classified writer vs reader: writers keep
+  the FIFO chain (I1) and additionally wait for readers enqueued before them (I3, the conservative
+  rule — a spawned reader makes multiple workspace reads and a writer landing mid-read would hand it a
+  torn state, so today's linearization is preserved); readers order after any earlier-queued writer
+  (I2) then run under a global cap of 3 concurrent children (I4, FIFO waiters). Measured: risk solo
+  152 ms, hotspots solo 149 ms, the two concurrent **146 ms** (≈ max, not the ~301 ms sum) at 445
+  symbols. `READER_CAP=1` restores full serialization (the rollback lever). The aggressive
+  "writers skip readers" variant was reviewed and rejected (torn multi-artifact reads). Scenarios
+  **S6** (reader overlap), the cap test (never 4 concurrent), and the writer-barrier test
+  (`end(reader₁) ≤ start(writer) < start(reader₂)`) pin I2/I3/I4 by mechanism. (round 2, finding #32)
+
 ### Fixed
 - **`codeweb_refresh` now regenerates the sidecar trio, so the hook / find_similar fast paths keep
   their floor for the whole session.** `refresh.mjs` rewrote `graph.json` but never touched

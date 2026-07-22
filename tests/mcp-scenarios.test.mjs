@@ -260,3 +260,72 @@ test('S5 refresh-preserves-sidecars: after codeweb_refresh all three sidecars ar
     h.close(); assert.equal((await h.exited).code, 0);
   } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });
+
+// ---- S6 reader-overlap (I4: two readers on one workspace run CONCURRENTLY, ≈ max not sum) --------
+// Before #32 every spawned tool on one workspace chained on a single tail, so hotspots-behind-risk ≈
+// risk+hotspots (measured 203–225 ms ≈ sum). Now readers overlap under READER_CAP. MECHANISM (per the
+// single-drain rule: child `start`s within a drain precede any `end`, which needs a later I/O tick):
+// both start events precede either end — the two children are alive simultaneously.
+test('S6 reader-overlap: risk + hotspots in one burst → both start before either ends (children alive together)', async () => {
+  const h = startServer({ env: TRACE_ENV });
+  try {
+    await initServer(h);
+    h.sendBurst([
+      { jsonrpc: '2.0', id: 60, method: 'tools/call', params: { name: 'codeweb_risk', arguments: { graph: MGRAPH } } },
+      { jsonrpc: '2.0', id: 61, method: 'tools/call', params: { name: 'codeweb_hotspots', arguments: { graph: MGRAPH } } },
+    ]);
+    await h.reply(60); await h.reply(61);
+    const ev = h.trace().filter((e) => e.id === 60 || e.id === 61);
+    const starts = ev.map((e, i) => ({ e, i })).filter((x) => x.e.ev === 'start').map((x) => x.i);
+    const ends = ev.map((e, i) => ({ e, i })).filter((x) => x.e.ev === 'end').map((x) => x.i);
+    assert.equal(starts.length, 2, 'both readers spawned a child');
+    assert.equal(ends.length, 2, 'both readers ended');
+    assert.ok(Math.max(...starts) < Math.min(...ends), 'both start events precede either end — concurrent (I4), not serialized');
+    h.close(); assert.equal((await h.exited).code, 0);
+  } finally { h.child.kill('SIGKILL'); }
+});
+
+// ---- READER_CAP: 4 readers on one workspace never exceed 3 concurrent children (I4) --------------
+test('I4 cap: 4 readers in one burst never run 4 concurrently (active start-minus-end count ≤ READER_CAP=3)', async () => {
+  const h = startServer({ env: TRACE_ENV });
+  try {
+    await initServer(h);
+    h.sendBurst([
+      { jsonrpc: '2.0', id: 70, method: 'tools/call', params: { name: 'codeweb_risk', arguments: { graph: MGRAPH } } },
+      { jsonrpc: '2.0', id: 71, method: 'tools/call', params: { name: 'codeweb_hotspots', arguments: { graph: MGRAPH } } },
+      { jsonrpc: '2.0', id: 72, method: 'tools/call', params: { name: 'codeweb_deadcode', arguments: { graph: MGRAPH } } },
+      { jsonrpc: '2.0', id: 73, method: 'tools/call', params: { name: 'codeweb_break_cycles', arguments: { graph: MGRAPH } } },
+    ]);
+    for (const id of [70, 71, 72, 73]) await h.reply(id);
+    let active = 0, peak = 0;
+    for (const e of h.trace()) { if (e.ev === 'start') { active++; peak = Math.max(peak, active); } else if (e.ev === 'end') active--; }
+    assert.ok(peak <= 3, `never more than READER_CAP=3 children alive at once (peak was ${peak})`);
+    assert.ok(peak >= 2, `readers DID overlap (peak ${peak}) — not accidentally serialized`);
+    h.close(); assert.equal((await h.exited).code, 0);
+  } finally { h.child.kill('SIGKILL'); }
+});
+
+// ---- writer-barrier (I2 + I3): a writer waits for an earlier reader; a later reader waits for it ---
+test('I2/I3 writer-barrier: [reader, writer, reader] one burst → end(reader1) ≤ start(writer) < start(reader2)', async () => {
+  const { dir, graph } = mapFresh('codeweb-scn-barrier-');
+  const h = startServer({ env: TRACE_ENV });
+  try {
+    await initServer(h);
+    // reader1 (risk) is registered in readersInFlight at enqueue; the writer (refresh) snapshots it and
+    // waits (I3); reader2 (hotspots) captures the writer's tail and waits for it (I2). One drain → order.
+    h.sendBurst([
+      { jsonrpc: '2.0', id: 80, method: 'tools/call', params: { name: 'codeweb_risk', arguments: { graph } } },
+      { jsonrpc: '2.0', id: 81, method: 'tools/call', params: { name: 'codeweb_refresh', arguments: { graph } } },
+      { jsonrpc: '2.0', id: 82, method: 'tools/call', params: { name: 'codeweb_hotspots', arguments: { graph } } },
+    ]);
+    for (const id of [80, 81, 82]) await h.reply(id);
+    const ev = h.trace();
+    const endReader1 = traceIx(ev, (e) => e.ev === 'end' && e.id === 80);
+    const startWriter = traceIx(ev, (e) => e.ev === 'start' && e.id === 81);
+    const startReader2 = traceIx(ev, (e) => e.ev === 'start' && e.id === 82);
+    assert.ok(endReader1 >= 0 && startWriter >= 0 && startReader2 >= 0, `boundary events present (end#80=${endReader1}, start#81=${startWriter}, start#82=${startReader2})`);
+    assert.ok(endReader1 <= startWriter, 'the writer waits for the earlier-queued reader to finish (I3)');
+    assert.ok(startWriter < startReader2, 'the later reader waits for the writer (I2)');
+    h.close(); assert.equal((await h.exited).code, 0);
+  } finally { h.child.kill('SIGKILL'); cleanup(dir); }
+});
