@@ -289,3 +289,93 @@ Verdicts per finding (spec tasks vs what landed, plus fresh usage evidence):
 No assertion was weakened anywhere in the workstream (all 12 touched test files diffed
 before/after); CHANGELOG entries present for every finding and accurate against fresh evidence.
 Nothing structural found; the one recorded inaccuracy (#7 grep) is corrected above.
+
+## WS-B
+
+Builder evidence — truth: lexing/masking (#15, #8, #9, #12, #13, #14), spec
+`docs/specs/round2-ws-b.md` (hardened; authoritative). Base 6f7d96b. Strict TDD: every finding's
+fixtures were run RED first (failure reasons recorded below), then the fix, then green. Full suite
+once at the end: `time npm test` → **55.7 s wall, 656 tests, 651 pass, 0 fail, 5 skipped** (the 5
+are the pre-existing environment skips — golden-target ×3, TS_MODULE bench, extract-engine inverse
+fallback; WS-B's 7 new test files add ZERO skips on this container), `git status --porcelain`
+empty after.
+
+- **T-0 — `566e375`.** `SCANNER_VERSION` 13 → 14 (`extract-symbols.mjs`), v14 comment names the
+  six findings. Interlock honored: B takes 13→14; C/D renumber to 14→15 / 15→16 (orchestrator).
+  `node --test tests/incremental-edges.test.mjs tests/cache-unification.test.mjs` → pass (mixed-
+  version cache byte-identity risk retired before any behavior change landed).
+- **#15 — `292580e`.** Pre-fix repro (scratch): `extract-symbols.mjs` on
+  `src/generated/data.js` = 9,000,000-char string INSIDE `payload()`'s body → **exit 1,
+  `RangeError: Maximum call stack size exceeded`, in BOTH default and `CODEWEB_ENGINE=regex`**
+  (spec's claim reproduced verbatim). New `tests/huge-line-crash.test.mjs` red pre-fix: HL-CX +
+  HL-RB (in-process RangeError), HL-SHIPPED (unrolled regexes absent), HL-BELT (no belt), HL-E2E ×2
+  (exit 1 both tiers); HL-RB-ESC (escape-heavy 2M shape) and HL-EQ (old-vs-new inlined equivalence,
+  5,000 seeded strings incl. `\n` — pins each site's escape atom) were green by construction and
+  guard the new form. Post-fix: 8/8 green; `complexity.test.mjs` + `maskjs-regex-literals` +
+  `ts-engine` + `type3-clones` zero diffs. Belt is kept exercised post-fix via the spec's mock-throw
+  option (String object with throwing replace/split → exactly 1/0).
+- **#8 — `ea2d18f`.** New `tests/maskjs-nested-templates.test.mjs` red pre-fix in BOTH tiers:
+  n1 fabricated `docs → fabricateMe`, n2 lost `later → helper` (state inversion), n3 lost
+  `afterEsc → helper` (no `\` handling), n4 fabricated `host → phantom` (verbatim `${'…'}`); n5 is
+  the design pin (green both sides: middle-frame liveness + string→regex→backtick-push order).
+  Shared property suite `tests/masking-properties.test.mjs` (corpus = spec fixtures + all tracked
+  scripts/lib/*.mjs, 10 fixtures + 33 lib files): P2 maskJs idempotence red pre-fix (first failure:
+  n1.mjs), P1 lengths + maskPy/maskRuby legs green throughout, value-then-division counterexample
+  documented in-header. Post-fix all green; JM-*, maskjs-regex-literals (untouched), extract-engine,
+  extract-v7, type3, codemod, IE suites zero diffs. Mechanical adjustment (noted in test header):
+  the huge-line corpus member participates at 1M chars (mask-semantics properties are
+  size-independent; the 9M crash class is covered at full size in huge-line-crash.test.mjs).
+- **#9 — `85b1835`.** New `tests/spread-iife-selfmap.test.mjs` red pre-fix: SP-1 no
+  `report → metrics` edge (member-branch dead end), SP-2 `PERM_SEEDS`/`g` yielded function symbols,
+  SP-3 real-text self-map had 0 metrics callers + a PERM_SEEDS node. **Deviation (mechanical):**
+  the spec's lookahead placement `=\s*(?!\(\()` is defeated by `\s*` backtracking (verified: still
+  matched); landed as `=(?!\s*\(\()\s*` — same rejection class, anchored at `=`; residuals match
+  the spec's documented set. **Dogfood proof (fresh self-map via run.mjs at this sha):**
+  `trend.mjs:metrics` call-callers = **2** (`gitSnapshots`, `<module>` — the :109/:141 spread
+  sites), `PERM_SEEDS` nodes = **0**, `deadcode selfmap/graph.json` → **safe tier EMPTY (0 safe,
+  8 review)** — the review 8 are entrypoint/closure-guarded, not the finding's class.
+- **#12 — `bdb778e`.** New `tests/accessor-overload-truth.test.mjs` red pre-fix: no
+  `w.ts:Widget.value@5` in either tier (AST dropped the setter at the methodIds dedupe; regex saw
+  only the setter and missed getter/compute/render), fabricated `Widget → Widget.value/…` phantom
+  callers from decl/stub lines, probe table red on `static *gen2()` + `render(props = {})`.
+  Post-fix: both tiers emit **identical id sets** (`Widget.value` bare = getter, `Widget.value@5`
+  = setter; A/B assert), setter's `normalize` attributes to `@5`, zero `class → own member` edges.
+  **Deviation (adjudicate):** the spec's stub-line guard applied unconditionally matches **112
+  real statement lines in this repo** (`finish(code);`, `claim(pj.main, manifest, d);` — measured
+  with the spec's own regex over git-tracked sources); suppressing callRe there would drop real
+  edges (e.g. cli.mjs:finish's only callers) — violating the plan's "no recall regression" bar.
+  Landed class-gated: the guard fires only when `enclosing(line).kind === 'class'` (class bodies
+  cannot contain call statements; stubs live exactly there). Same mechanism, one regex test per
+  line, kills the fixture's fabrications; nothing real suppressed. Self-map spot check at this
+  sha: `class → own member` edges = **0**; `@line` ids = 5, all legitimate same-name collisions in
+  test/bench files. Suites: ts-engine, extract-engine (incl. dispatch-count :125), extract-v7,
+  type3, IE, id-collision, all language suites — zero diffs (no exact-set assertion tripped).
+- **#13 — `5febde3`.** New `tests/ruby-heredoc-php-hash.test.mjs` red pre-fix: `phantom_method`
+  node existed + `db.rb:<module> → db.rb:helper` fabricated (raw-text Ruby scan; heredoc body
+  live); x.php had 2 call edges to helper (module fabrication from the `#` line). Post-fix green:
+  no phantom node, exactly one `real → helper` edge per language; `real_caller → helper` survives.
+  maskRuby heredoc state machine per spec (FIFO queue; opener token → literal `''`; body/terminator
+  → length-0 lines; `~`/`-` trimmed-equality vs column-0 terminators; `a << b`/`<<=` never match);
+  `.rb` scan routed through `masked('rb')`; maskJs `{hashComment}` php-gated at maskAligned +
+  maskedOnce. lang-ruby-php-kotlin-swift + lang-dispatch-ruby-php green unchanged (grep-verified
+  fixture independence held); masking-properties (incl. heredoc idempotence) green; noMask comment
+  updated to "non-masked languages" per spec.
+- **#14 — `91668e5`.** New `tests/python-fstring-edges.test.mjs` red pre-fix: `report → compute`,
+  `multi → compute`, `prefixed → compute` all missing (f-strings blanket-blanked); decoy/decoy2
+  no-edge pins green pre- AND post-fix (the value()-routing decision holds). Post-fix 5/5;
+  python-docstring-mask + python-imports + python-src-layout green; masking-properties maskPy
+  idempotence + length stayed green through the landing (the spec's mandated property).
+  **Differential check:** keepValues output byte-identical to pre-fix maskPy on the fixture and on
+  plain-string/comment shapes (old masker from git HEAD~1 imported side-by-side). Interpretation
+  note: the spec's parenthetical "(delimiters kept…)" for expr-interior quoted runs is implemented
+  as the whole-slice keepValues gate (delimiters blank in default mode, same shape as maskJs :157)
+  — the reading the spec itself mandates via the idempotence property (kept-in-default quotes
+  re-mask as normal strings and go red).
+
+Suite discipline: relevant subsets per finding (recorded above), ONE full run at the end
+(55.7 s / 656 / 651 / 0 / 5), tree clean. No existing assertion weakened or changed — the risk
+note's "may legitimately change" set was not needed (all exact-set assertions stayed green as the
+spec predicted for these fixtures). Windows-portability: all new tests use helpers'
+join/tmpDir/writeTree, no dynamic imports of local files except via file:// URL (kv-check lives in
+scratch, not the repo), no CRLF assumptions (property test compares against split(/\r?\n/) lines
+per spec).
