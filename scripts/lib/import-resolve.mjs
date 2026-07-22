@@ -334,6 +334,6 @@ const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]
   return {
     resolveImport, resolvePyModule,
     reExportByFile, starReExportByFile, scanJsReExports, loadJsReExports, resolveReExport,
-    pyReExportResolve, resolveFileMember, bindFileImports,
+    pyReExportResolve, pyReExportTableOf, resolveFileMember, bindFileImports,
   };
 }

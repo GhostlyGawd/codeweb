@@ -646,6 +646,48 @@ for (const f of files) {
   const { map, stars } = resolver.scanJsReExports(f, r, textOf(f, fsRec));
   if (entry) { entry.rex = { map: [...map].map(([exp2, v]) => [exp2, v.target, v.orig]), stars }; cacheDirty = true; }
 }
+// Round 2, finding #17 — re-export/from-import-table signature (`rexSig`). Cached per-file edges
+// and binds EMBED RESOLVED IDS reached through re-export chains (`export { x } from`, Python
+// `from .m import x`), and a chain retarget — flipping a barrel's `from './util'` to
+// `'./util2'` — changes ZERO symbols: symbolSig/bindSig could not see it, and the extended IE
+// generator's `rex` op reproduced today's engine replaying the consumer's STALE call edge (the
+// pre-#17 wholesale gate had the same blind spot the delta spec's trigger (e) names). rexSig is
+// sha1 over every file's canonical table — JS: sorted named re-exports + stars in source order
+// (order is resolution precedence); Py: the stored `pyrex` from-import triples — comparable only
+// while the file SET is unchanged (resolution is file-set-relative, and a fileSig change already
+// re-derives binds wholesale). A py file not read this run serves its cached `pyrex`; if any is
+// missing (cache built before this field), rexSig is null -> never equal -> one conservative
+// wholesale re-derive populates it (the write-time sweep below records it for every file read).
+for (const f of files) {
+  const fsRec = fileSyms.get(f); if (!fsRec) continue;
+  const r = rel(f);
+  if (!r.endsWith('.py')) continue;
+  const entry = newCache && newCache.files[r];
+  if (!entry || entry.pyrex !== undefined || fsRec.text == null) continue; // carried or unread
+  const table = resolver.pyReExportTableOf(r);
+  entry.pyrex = table ? [...table].map(([local, v]) => [local, v.srcMod, v.orig]) : null;
+}
+const rexSig = (() => {
+  if (!newCache) return null;
+  const parts = [];
+  for (const f of files) {
+    const r = rel(f);
+    if (/\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(r)) {
+      const map = reExportByFile.get(r);
+      const stars = starReExportByFile.get(r);
+      if (!map && !stars) continue;
+      const rows = map ? [...map].map(([exp2, v]) => [exp2, v.target, v.orig]).sort((a, b) => (a[0] < b[0] ? -1 : 1)) : [];
+      parts.push(r + '\x01' + JSON.stringify(rows) + '\x01' + JSON.stringify(stars || []));
+    } else if (r.endsWith('.py')) {
+      const entry = newCache.files[r];
+      if (!entry) continue;
+      if (entry.pyrex === undefined) return null; // unknowable -> conservative re-derive
+      if (entry.pyrex && entry.pyrex.length) parts.push(r + '\x01' + JSON.stringify(entry.pyrex));
+    }
+  }
+  return sha1(parts.join('\n'));
+})();
+
 // v9: a BARREL IS A DEPENDENT. `export { X } from './impl'` means the barrel file must change when
 // X is renamed — the compiler counts that export specifier as a reference, and so must we (it was a
 // measured recall gap: index.ts barrels missing from every dependents answer). Named re-exports edge
@@ -728,9 +770,15 @@ const classAliasByFile = new Map(); // fileAbs -> Map(localName -> CLASS node id
 const importEdges = [];
 // finding 10: cached bindings embed RESOLVED target ids/files, so they are reusable only while
 // both the symbol set and the file list stand still — the same rule the F9 edge cache lives by.
+// finding #17: ... AND the re-export landscape (rexSig): a barrel/from-import retarget changes
+// zero symbols but re-aims the resolved ids cached binds embed. rexStable additionally requires
+// an unchanged file SET — stored py tables are file-set-relative, so cross-file-set comparison
+// would compare stale-vs-stale (accepted cost: a file add/delete that changes NO symbol now
+// re-derives once instead of replaying — strictly safer than the corner it closes).
+const rexStable = !!(oldCache && oldCache.fileSig === fileSig && rexSig != null && oldCache.rexSig === rexSig);
 const bindSig = sha1(symbolSig + '\0' + fileSig);
-const bindReuse = stampTier && oldCache.bindSig === bindSig;
-if (oldCache && (oldCache.bindSig !== bindSig || oldCache.symbolSig !== symbolSig || oldCache.fileSig !== fileSig)) cacheDirty = true;
+const bindReuse = stampTier && oldCache.bindSig === bindSig && rexStable;
+if (oldCache && (oldCache.bindSig !== bindSig || oldCache.symbolSig !== symbolSig || oldCache.fileSig !== fileSig || oldCache.rexSig !== rexSig)) cacheDirty = true;
 for (const f of files) {
   const fsRec = fileSyms.get(f); if (!fsRec) continue;
   const r = rel(f), isPy = r.endsWith('.py');
@@ -1011,7 +1059,9 @@ const edgeFiles = files.filter((f) => fileSyms.has(f));
 // derivation role-DEPENDENT (the ref role gate's verdicts are baked into cached edges), and a
 // rules-file role flip changes no node id — symbolSig alone would replay stamp-era verdicts
 // indefinitely. Mirrors the stamp tier's rulesSig gate ("a rules change invalidates wholesale").
-const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig && oldCache.rulesSig === rulesSig;
+// finding #17: rexStable joins the gate — a re-export retarget changes no node id either, and the
+// stale-replay it caused (IE `rex` op, REX-FLIP test) was reachable pre-#17.
+const reuseEdges = !opts.full && oldCache && oldCache.symbolSig === symbolSig && oldCache.rulesSig === rulesSig && rexStable;
 for (const f of edgeFiles) {
   const rec = fileSyms.get(f);
   const r = rel(f);
@@ -1036,7 +1086,7 @@ for (const f of edgeFiles) {
   ambiguousDropped += result.ambiguous;
   shortNameDropped += result.short;
 }
-if (newCache) { newCache.symbolSig = symbolSig; newCache.bindSig = bindSig; }
+if (newCache) { newCache.symbolSig = symbolSig; newCache.bindSig = bindSig; if (rexSig != null) newCache.rexSig = rexSig; }
 
 // ---- append import edges (file anchor -> imported symbol) ----
 // Deduped against the call edges by (from,to): caller ids are file-local, so this set has no
@@ -1149,6 +1199,17 @@ if (nodes.length === 0 && !opts.allowEmpty) {
 }
 if (newCache && !astLoadFailed && cacheDirty) {
   try {
+    // finding #17: pyrex catch-up — files read AFTER the pre-bind sweep (e.g. a wholesale edge
+    // re-derive pulled their text) record their from-import table now, so a migrating cache
+    // converges to a computable rexSig in one wholesale run.
+    for (const [r2, e] of Object.entries(newCache.files)) {
+      if (!r2.endsWith('.py') || e.pyrex !== undefined) continue;
+      const fabs2 = absByRel.get(r2);
+      const rec2 = fabs2 && fileSyms.get(fabs2);
+      if (!rec2 || rec2.text == null) continue; // never read this run: populated on its next read
+      const table = resolver.pyReExportTableOf(r2);
+      e.pyrex = table ? [...table].map(([local, v]) => [local, v.srcMod, v.orig]) : null;
+    }
     // finding 10: cached nodes must not carry run-GLOBAL fields — `pub` is recomputed from the
     // package-entry walk every run, and a stale cached true could never be cleared. Copies only
     // (the live fragment keeps its pub flags).

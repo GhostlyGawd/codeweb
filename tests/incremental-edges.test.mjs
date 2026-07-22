@@ -91,6 +91,26 @@ test('IE-INCREMENTALITY: a pure body edit re-edges only the changed file AND sti
   } finally { cleanup(dir); }
 });
 
+// Round 2, finding #17 — the deterministic repro the extended generator's `rex` op first hit:
+// flipping a barrel's forward (`export { shared9 } from './rexutil.js'` -> `'./rexutil2.js'`)
+// changes ZERO symbols, so the pre-#17 wholesale gate (symbolSig + per-file hash) replayed the
+// UNCHANGED consumer's cached call edge to the OLD chain target. rexSig closes it: warm == cold.
+test('IE-REX-FLIP: retargeting a re-export barrel re-aims the consumer edge (warm == cold)', () => {
+  const dir = tmpDir('codeweb-ie-'); const root = join(dir, 'src');
+  writeTree(root, { ...REX_FILES, 'rexbarrel.js': REX_BARREL('rexutil.js') });
+  const cache = join(dir, 'cache.json');
+  try {
+    const w1 = extract(root, join(dir, 'g0.json'), cache).graph;
+    assert.ok(sortedEdges(w1).includes('rexuser.js:useShared rexutil.js:shared9 call'), 'baseline chain resolves to rexutil');
+    writeFileSync(join(root, 'rexbarrel.js'), REX_BARREL('rexutil2.js')); // the flip: zero label delta
+    const warm = extract(root, join(dir, 'g1.json'), cache);
+    const cold = coldFull(dir, root, 'rx');
+    assert.deepEqual(sortedEdges(warm.graph), sortedEdges(cold), 'warm equals cold after the flip');
+    assert.ok(sortedEdges(warm.graph).includes('rexuser.js:useShared rexutil2.js:shared9 call'), 'consumer edge re-aimed at rexutil2');
+    assert.ok(!sortedEdges(warm.graph).includes('rexuser.js:useShared rexutil.js:shared9 call'), 'stale edge to the old target is gone');
+  } finally { cleanup(dir); }
+});
+
 test('IE-DANGLING: deleting a file that another file imports leaves no dangling edge (warm == cold)', () => {
   const dir = tmpDir('codeweb-ie-'); const root = join(dir, 'src'); writeTree(root, BASE);
   const cache = join(dir, 'cache.json');
@@ -112,8 +132,29 @@ test('IE-DANGLING: deleting a file that another file imports leaves no dangling 
 // mutation sequences with a warm ≡ cold assert per step — is unchanged. Trials are independent,
 // deterministic per index, and concurrency-safe; a diverging step still fails its own named
 // `trial N` subtest with the step/op message.
+//
+// Round 2, finding #17 (T-17.4) — extended op set, landed FIRST (green under wholesale semantics)
+// so the name-delta invalidation is built under it, not fitted to it:
+//   delsym  — strip one previously-added g-function (falls back to addsym when none exist);
+//   rensym  — rename a DEF in place (call sites untouched); sometimes a COLLIDING rename onto a
+//             name defined elsewhere, forcing a 1 -> 2 unique->ambiguous transition;
+//   pkg     — toggle a nested package.json under sub/ (first use also plants sub/p.js) — a
+//             pkg-boundary repartition with zero label delta (delta-ineligibility (a));
+//   rex     — plant a re-export chain (rexutil/rexutil2 both defining shared9, a rexbarrel
+//             forwarding it, a rexuser importing through the barrel), then FLIP the barrel's
+//             target between the twins — retargets the consumer's chain with zero label delta
+//             (delta-ineligibility (e)).
+// Per-trial seeds keep 2025+trial; op-stream bytes differ from the previous generator (the #6
+// precedent), the semantics class is a strict superset.
 const TRIALS = Number(process.env.CODEWEB_IE_TRIALS || (process.env.CI ? 40 : 10));
 if (!Number.isInteger(TRIALS) || TRIALS < 1) throw new Error('CODEWEB_IE_TRIALS must be a positive integer');
+
+const REX_BARREL = (target) => `export { shared9 } from "./${target}";\n`;
+const REX_FILES = {
+  'rexutil.js': 'export function shared9() { return 1; }\n',
+  'rexutil2.js': 'export function shared9() { return 2; }\n',
+  'rexuser.js': 'import { shared9 } from "./rexbarrel.js";\nexport function useShared() { return shared9(); }\n',
+};
 
 test('IE-EQUIVALENCE: warm incremental == cold full, for random mutation sequences', { concurrency: 4 }, async (t) => {
   await Promise.all([...Array(TRIALS).keys()].map((trial) => t.test(`trial ${trial}`, async () => {
@@ -126,19 +167,41 @@ test('IE-EQUIVALENCE: warm incremental == cold full, for random mutation sequenc
       await extractAsync(root, join(dir, 'warm.json'), cache); // initial warm
       const steps = int(rng, 2, 6);
       for (let s = 0; s < steps; s++) {
-        const op = pick(rng, ['body', 'addsym', 'addfile', 'delfile', 'delfile']);
-        const keys = Object.keys(tree);
+        let op = pick(rng, ['body', 'addsym', 'addfile', 'delfile', 'delsym', 'rensym', 'pkg', 'rex']);
+        const keys = Object.keys(tree).filter((f) => f.endsWith('.js'));
+        if (op === 'delsym' && !keys.some((f) => /^export function g\d+\(\) \{ return b1\(1\); \}$/m.test(tree[f]))) op = 'addsym';
         if (op === 'body') {
           const f = pick(rng, keys);
           tree[f] = tree[f] + `\n// touch ${int(rng, 0, 9999)}\n`;
         } else if (op === 'addsym') {
           const f = pick(rng, keys);
           tree[f] = tree[f] + `\nexport function g${int(rng, 0, 9999)}() { return b1(1); }\n`;
+        } else if (op === 'delsym') {
+          const withG = keys.filter((f) => /^export function g\d+\(\) \{ return b1\(1\); \}$/m.test(tree[f]));
+          const f = pick(rng, withG);
+          tree[f] = tree[f].replace(/\nexport function g\d+\(\) \{ return b1\(1\); \}\n/, '\n');
+        } else if (op === 'rensym') {
+          const f = pick(rng, keys);
+          const defs = [...tree[f].matchAll(/export function ([A-Za-z_]\w*)\(/g)].map((m) => m[1]);
+          if (defs.length) {
+            const oldName = pick(rng, defs);
+            const others = keys.filter((k) => k !== f).flatMap((k) => [...tree[k].matchAll(/export function ([A-Za-z_]\w*)\(/g)].map((m) => m[1]));
+            // colliding rename (1 -> 2 unique->ambiguous) roughly half the time when possible
+            const newName = others.length && rng() < 0.5 ? pick(rng, others) : `r${int(rng, 0, 9999)}`;
+            tree[f] = tree[f].replace(new RegExp(`export function ${oldName}\\(`), `export function ${newName}(`);
+          }
         } else if (op === 'addfile') {
           tree[`m${int(rng, 0, 9999)}.js`] = `export function n${int(rng, 0, 9)}() { return b1(1); }\n`;
         } else if (op === 'delfile' && keys.length > 1) {
           const f = pick(rng, keys); // genuinely pick from the CURRENT tree (was a bug: tree.length on an object)
           delete tree[f]; try { rmSync(join(root, f)); } catch { /* already gone */ }
+        } else if (op === 'pkg') {
+          if (!tree['sub/p.js']) tree['sub/p.js'] = `export function subfn${int(rng, 0, 999)}() { return 1; }\n`;
+          if (tree['sub/package.json']) { delete tree['sub/package.json']; try { rmSync(join(root, 'sub/package.json')); } catch { /* gone */ } }
+          else tree['sub/package.json'] = '{"name":"sub"}\n';
+        } else if (op === 'rex') {
+          if (!tree['rexbarrel.js']) { Object.assign(tree, REX_FILES); tree['rexbarrel.js'] = REX_BARREL('rexutil.js'); }
+          else tree['rexbarrel.js'] = REX_BARREL(tree['rexbarrel.js'].includes('rexutil2') ? 'rexutil.js' : 'rexutil2.js');
         }
         writeTree(root, tree); // re-stage survivors; deleted files already removed from disk
         const warm = (await extractAsync(root, join(dir, `warm${s}.json`), cache)).graph;
