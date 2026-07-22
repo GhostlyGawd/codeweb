@@ -51,6 +51,22 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li>**<code>report.html</code> no longer embeds the four per-node fields and the per-edge field the template never</li>
+</ul>
+<p>  reads.** The self-contained report inlines the graph into a <code>&lt;script id="graph-data"&gt;</code> payload the</p>
+<p>  browser parses on load, but <code>report-template.html</code>'s read-set is `id,label,domain,kind,role,file,</p>
+<p>  line,loc,exports,summary<code> per node and </code>from,to,weight<code> per edge (grep-verified: node </code>kind` is read</p>
+<p>  at :248/:269/:424/:427, <code>o.kind</code> is OVERLAP kind, and edge <code>kind</code> / node `t3,signature,complexity,</p>
+<p>  maxDepth<code> are never read). The embed now strips </code>t3,signature,complexity,maxDepth<code> per node and </code>kind`</p>
+<p>  per edge into <strong>fresh</strong> objects — <code>graph</code> is never mutated, so <code>graph.json</code> on disk and the map-time</p>
+<p>  sidecars keep every field for the editor lens, the MCP query tools, and the hooks (the strip is</p>
+<p>  embed-only). On the 16.8k loaded corpus this drops <code>report.html</code> from 13.88 MB to 9.97 MB (−28.2%,</p>
+<p>  ~4.1 MB of <code>signature/complexity/maxDepth/kind</code>); on AST-tier runs the per-function <code>t3</code> statement</p>
+<p>  fingerprints (arrays emitted for ≥6-statement bodies) are the largest contributor and the strip</p>
+<p>  removes those too. The dead <code>domSummary</code> builder (<code>report-template.html:228</code>, zero readers) is</p>
+<p>  deleted. <code>report.html</code> stays byte-deterministic across rebuilds (verified: two independent rebuilds</p>
+<p>  of the 16.8k report are byte-identical). (round 2, finding #36)</p>
+<ul>
 <li>**The prescribed per-edit loop is now in-process: <code>codeweb_diff</code> serves from the cached graph and</li>
 </ul>
 <p>  <code>codeweb_stats</code> no longer spawns a child.<strong> <code>codeweb_diff</code> booted node and parsed </strong>two** graphs per</p>

@@ -10,6 +10,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Changed
+- **`report.html` no longer embeds the four per-node fields and the per-edge field the template never
+  reads.** The self-contained report inlines the graph into a `<script id="graph-data">` payload the
+  browser parses on load, but `report-template.html`'s read-set is `id,label,domain,kind,role,file,
+  line,loc,exports,summary` per node and `from,to,weight` per edge (grep-verified: node `kind` is read
+  at :248/:269/:424/:427, `o.kind` is OVERLAP kind, and edge `kind` / node `t3,signature,complexity,
+  maxDepth` are never read). The embed now strips `t3,signature,complexity,maxDepth` per node and `kind`
+  per edge into **fresh** objects — `graph` is never mutated, so `graph.json` on disk and the map-time
+  sidecars keep every field for the editor lens, the MCP query tools, and the hooks (the strip is
+  embed-only). On the 16.8k loaded corpus this drops `report.html` from 13.88 MB to 9.97 MB (−28.2%,
+  ~4.1 MB of `signature/complexity/maxDepth/kind`); on AST-tier runs the per-function `t3` statement
+  fingerprints (arrays emitted for ≥6-statement bodies) are the largest contributor and the strip
+  removes those too. The dead `domSummary` builder (`report-template.html:228`, zero readers) is
+  deleted. `report.html` stays byte-deterministic across rebuilds (verified: two independent rebuilds
+  of the 16.8k report are byte-identical). (round 2, finding #36)
 - **The prescribed per-edit loop is now in-process: `codeweb_diff` serves from the cached graph and
   `codeweb_stats` no longer spawns a child.** `codeweb_diff` booted node and parsed **two** graphs per
   call (131–136 ms @1.2k; ~500 ms at 16k) in the refresh→diff sequence the INSTRUCTIONS prescribe per

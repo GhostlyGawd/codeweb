@@ -225,7 +225,6 @@
     var n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
     return 'rgb(' + Math.round(r * f) + ',' + Math.round(g * f) + ',' + Math.round(b * f) + ')';
   }
-  var domSummary = {}; G.domains.forEach(function (d) { domSummary[d.name] = d; });
 
   // ---------- active scope + derived metrics (recomputed when the role filter toggles) ----------
   var AN = [], AE = [], activeIds = null, domainNames = [], duplicates = [], patterns = [], dupNodeIds = new Set(), hotspots = [], dead = [];

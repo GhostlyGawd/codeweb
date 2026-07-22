@@ -94,6 +94,23 @@ delete embed.meta.root;
 delete embed.meta.generatedAt;
 delete embed.meta.sources;
 delete embed.meta.dirs;
+// finding #36: the report template never reads these per-node/per-edge fields (grep-verified
+// against report-template.html's read-set: nodes → id,label,domain,kind,role,file,line,loc,
+// exports,summary; edges → from,to,weight), yet at scale they dominate report.html — per-node
+// `t3` structural fingerprints run to ~kB each, so 16.8k nodes carry multiple MB of bytes the
+// browser parses and discards. Strip them from the EMBEDDED copy with FRESH objects: `graph`
+// is never mutated, so graph.json on disk (:68) and the sidecars (:74) — read by the editor
+// lens, the MCP tools, and the hooks — keep every field. Embed-only slimming, ≥40% smaller.
+embed.nodes = graph.nodes.map((n) => {
+  const m = { ...n };
+  delete m.t3; delete m.signature; delete m.complexity; delete m.maxDepth;
+  return m;
+});
+embed.edges = graph.edges.map((e) => {
+  const m = { ...e };
+  delete m.kind;
+  return m;
+});
 
 // Escape "<" so the JSON can live inside a <script type="application/json"> tag without ever
 // forming "</script>". Inside JSON, "<" only appears within string values, where < is a
