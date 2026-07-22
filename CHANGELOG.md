@@ -556,6 +556,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
   (`tests/masking-properties.test.mjs`, corpus-scoped with the value-then-division counterexample
   documented). Five repro fixtures run under both engine tiers in
   `tests/maskjs-nested-templates.test.mjs`. (perf-quality round 2, finding #8)
+- **Spread calls edge; IIFE-initialized consts are values, not functions.** The two mis-lexings
+  that made BOTH of the self-map's deadcode "safe to delete" verdicts false: (a) `...metrics(` was
+  routed into the member-call branch by the `.` before the match, where the backward identifier
+  match can never succeed on dots — the call edge was silently DROPPED and `trend.mjs:metrics`
+  showed 0 callers; a `..`-preceded match now falls through to `addEdge` (`a?.b(` and `...obj.fn(`
+  verified unchanged). (b) The const-arrow rule matched `const PERM_SEEDS = (() => {…})()` — an
+  IIFE-initialized VALUE became a `function` node invisible to callRe/refRe, a guaranteed deadcode
+  false positive; `=(?!\s*\(\()` now rejects it (the accepted loss — a genuinely function-valued,
+  non-invoked `const g = ((a) => a)` — is pinned in the test so re-widening is a conscious flip).
+  Dogfood re-run: `trend.mjs:metrics` has 2 call edges in, `PERM_SEEDS` is no node, and the
+  self-map deadcode safe tier is EMPTY (was: exactly these two false positives — campaign would
+  have emitted DELETEs that break trend and minhash at runtime). The self-map regression is now a
+  test (`tests/spread-iife-selfmap.test.mjs` extracts the real trend.mjs + minhash.mjs texts).
+  (perf-quality round 2, finding #9)
 
 ## [0.9.0] - 2026-07-19
 

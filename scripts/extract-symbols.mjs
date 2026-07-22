@@ -775,7 +775,14 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
     }
     callRe.lastIndex = 0; let m;
     while ((m = callRe.exec(ln))) {
-      if (ln[m.index - 1] === '.') {
+      // Round 2, finding #9: `...fn(` (the char before the `.` is another `.`) is a SPREAD call,
+      // not a member call — the backward identifier match below can never succeed on dots, so the
+      // member branch silently dropped the edge (trend.mjs:metrics showed 0 callers). Fall through
+      // to addEdge instead. Verified non-cases: `a?.b(` has [m.index-2]==='?' (member branch,
+      // unchanged); `...obj.fn(` matches at `fn` with [idx-2]==='j' (member branch, correct).
+      // Accepted noise: `1..toString(` and the syntax error `x...y(` now reach addEdge — both
+      // resolve only if the name is a repo symbol; harmless.
+      if (ln[m.index - 1] === '.' && ln[m.index - 2] !== '.') {
         // member call obj.fn(): resolve ONLY when obj is a namespace/default import alias (a param or
         // local obj.method() must stay unresolved — see reference-edges PRECISION). This recovers the
         // cross-file usage the bare-name pass can't see (util.merge(), AxiosHeaders.from()).

@@ -159,7 +159,16 @@ export function scanSymbols(file, text, masked) {
     lines.forEach((ln, i) => {
       let m;
       if ((m = /^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s*\*?\s*([A-Za-z_$][\w$]*)/.exec(ln))) push(m[1], i, 'function', exported(ln));
-      else if ((m = /^\s*(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\*?\s*\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/.exec(ln))) push(m[1], i, 'function', exported(ln));
+      // Round 2, finding #9: `(?!\s*\(\()` rejects IIFE initializers — `const PERM_SEEDS = (() => {…})()`
+      // matched via the `\([^)]*\)\s*=>` alternative eating the inner paren, minting a function node
+      // for a VALUE (a guaranteed deadcode false positive). The lookahead is anchored AT the `=`
+      // with the whitespace inside it (a `=\s*(?!\(\()` form is defeated by `\s*` backtracking).
+      // The `= ((` prefix is the only line-local signal (the invoking `()` sits on a later line for
+      // multi-line IIFEs), so genuinely function-valued, non-invoked `const g = ((a) => a)` ALSO
+      // loses its node — accepted recall loss, pinned in tests/spread-iife-selfmap.test.mjs.
+      // Residuals: a space-separated `= ( (` IIFE and `= (async () => {…})()` still match;
+      // `= (function () {})()` never matched any alternative — arrow-IIFEs were the only false-node class.
+      else if ((m = /^\s*(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=(?!\s*\(\()\s*(?:async\s*)?(?:function\b|\*?\s*\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/.exec(ln))) push(m[1], i, 'function', exported(ln));
       else if ((m = /^\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)/.exec(ln))) push(m[1], i, 'class', exported(ln));
       else if ((m = /^\s{2,}(?:public|private|protected|static|readonly|async|get|set|\*)?\s*([A-Za-z_$][\w$]*)\s*\([^;=]*\)\s*\{/.exec(ln))) push(m[1], i, 'method', false);
       // class-field arrow methods (`handleClick = () => {` / `run = async (x) => …`) — the standard
