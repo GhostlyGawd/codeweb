@@ -144,7 +144,9 @@ async function main() {
   // finding 13(d)/21: the expand-all row — EVERY symbol on canvas, per-frame sim cost. This is
   // the cliff that sat one click past the old green verdict (all-pairs: 1,278ms/frame at 16.3k
   // nodes ≈ 5.5 min of sim CPU per click; the grid layout must keep it inside a frame budget).
-  const expandAll = await page.evaluate(() => (window.__codewebStage && window.__codewebStage.expandAll ? window.__codewebStage.expandAll(10) : null));
+  // finding #35 (T-35.6): run the PRODUCTION chunker to settle and read settledMsPerFrame (mean of
+  // the last 10 logical steps) + maxSingleStepMs (worst uninterruptible slice at the shipping budget).
+  const expandAll = await page.evaluate(() => (window.__codewebStage && window.__codewebStage.expandAll ? window.__codewebStage.expandAll() : null));
 
   // finding #37: one full gDraw at the fitted camera with every symbol on canvas — the draw-loop
   // cost the batched edges + capped labels + hoisted cvColors must keep well under a frame.
@@ -159,13 +161,17 @@ async function main() {
   await browser.close();
 
   // Spec L thresholds — the receipt judges itself.
+  // finding #35 (T-35.6): expand-all gates on BOTH the settled per-step cost AND the worst single
+  // uninterruptible task — settledMsPerFrame ≤ 50 (primary) is the sim-cheap-per-frame target;
+  // maxSingleStepMs ≤ 250 (the chunker guarantees it) is the "no frame freezes" floor.
+  const expandAllOk = !expandAll || (expandAll.settledMsPerFrame <= 50 && expandAll.maxSingleStepMs <= 250);
   const verdict = {
     timeToGraphOk: timeToGraphMs <= 10000,
     searchOk: searchMs <= 300,
-    expandAllOk: !expandAll || expandAll.simMsPerFrame <= 16, // one 60fps frame of sim work
+    expandAllOk,
     drawOnceOk: drawOnceMs == null || drawOnceMs <= 100, // finding #37: fitted full draw < 100ms
     crashed: pageErrors.length > 0,
-    green: timeToGraphMs <= 10000 && searchMs <= 300 && (!expandAll || expandAll.simMsPerFrame <= 16) && (drawOnceMs == null || drawOnceMs <= 100) && pageErrors.length === 0,
+    green: timeToGraphMs <= 10000 && searchMs <= 300 && expandAllOk && (drawOnceMs == null || drawOnceMs <= 100) && pageErrors.length === 0,
   };
 
   const row = {

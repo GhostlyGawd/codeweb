@@ -30,10 +30,18 @@ export function extractFnSource(name, source) {
   return source.slice(start, i);
 }
 
-// gStep closes over W and sim in the template; recreate that closure so the extracted body runs.
-export function loadGStep(templatePath = TEMPLATE) {
-  const src = extractFnSource('gStep', readFileSync(templatePath, 'utf8'));
+// gStepChunk closes over W and sim in the template; recreate that closure so the extracted body
+// runs. Returns a factory (W, sim) -> chunk(deadline). chunk(Infinity) runs one whole logical step
+// in one task (returns true); chunk(now+budget) advances one slice and returns false until the step
+// completes. The chunker OWNS the alpha decay (one decay per completed logical step).
+export function loadGStepChunk(templatePath = TEMPLATE) {
+  const src = extractFnSource('gStepChunk', readFileSync(templatePath, 'utf8'));
   return (W, sim) => new Function('W', 'sim', 'return (' + src + ')')(W, sim);
+}
+// Back-compat alias: a "full logical step" driver used by the determinism tests.
+export function loadGStep(templatePath = TEMPLATE) {
+  const chunkFactory = loadGStepChunk(templatePath);
+  return (W, sim) => { const chunk = chunkFactory(W, sim); return () => { while (!chunk(Infinity)) { /* setup→integrate */ } }; };
 }
 
 function lcg(seed) { let s = seed >>> 0; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32; }
@@ -85,31 +93,40 @@ function occupancy(nodes, CUT = 220) {
   return { p95, liveCells: grid.size, spanX: Math.round(c - a), spanY: Math.round(d - b) };
 }
 
-// Run to settle (alpha ≤ 0.02, hard step cap). Returns the fix's judged metrics. `budgetMs` (if set)
-// is only used by callers that already wrap a chunker; the plain gStep is one uninterruptible task.
-export function runToSettle(W, gStep, { alphaFloor = 0.02, decay = 0.985, maxSteps = 600 } = {}) {
-  const sim = { alpha: 1 };
-  const step = gStep(W, sim);
-  const times = [];
-  let n = 0;
+// Run to settle (alpha ≤ 0.02, hard step cap). `makeChunk` is loadGStepChunk's factory; the chunker
+// owns the alpha decay. `budgetMs` bounds each uninterruptible task: Infinity = one task per logical
+// step; a finite budget times the PRODUCTION slice path. Returns the numbers the #35 receipt gates:
+// settledMsPerStep (mean of the last 10 LOGICAL steps), maxSingleTaskMs (the worst single slice),
+// firstStepMs, totalSettleMs, steps, and cell occupancy. `positions()` returns the final layout.
+export function runToSettle(W, makeChunk, { alphaFloor = 0.02, maxSteps = 600, budgetMs = Infinity } = {}) {
+  const sim = { alpha: 1, cur: null, farCoarse: false };
+  const chunk = makeChunk(W, sim);
+  const stepTimes = [];
+  let maxSlice = 0, n = 0;
   const t0 = performance.now();
   while (sim.alpha > alphaFloor && n < maxSteps) {
-    const t = performance.now();
-    step();
-    times.push(performance.now() - t);
-    sim.alpha *= decay;
+    const ts = performance.now();
+    let done = false;
+    while (!done) {
+      const s0 = performance.now();
+      done = chunk(budgetMs === Infinity ? Infinity : performance.now() + budgetMs);
+      const sliceMs = performance.now() - s0;
+      if (sliceMs > maxSlice) maxSlice = sliceMs;
+    }
+    stepTimes.push(performance.now() - ts);
     n++;
   }
   const totalMs = performance.now() - t0;
-  const last10 = times.slice(-10);
+  const last10 = stepTimes.slice(-10);
   const settledMsPerStep = last10.reduce((a, b) => a + b, 0) / Math.max(1, last10.length);
   return {
     steps: n,
     settledMsPerStep: Math.round(settledMsPerStep * 100) / 100,
-    maxSingleTaskMs: Math.round(Math.max(...times) * 100) / 100,
-    firstStepMs: Math.round(times[0] * 100) / 100,
+    maxSingleTaskMs: Math.round(maxSlice * 100) / 100,
+    firstStepMs: Math.round((stepTimes[0] || 0) * 100) / 100,
     totalSettleMs: Math.round(totalMs),
     occupancy: occupancy(W.nodes),
+    positions: () => W.nodes.map((nd) => [nd.x, nd.y]),
   };
 }
 
@@ -117,10 +134,13 @@ function main() {
   const argv = process.argv.slice(2);
   const num = (flag, def) => { const i = argv.indexOf(flag); return i >= 0 ? Number(argv[i + 1]) : def; };
   const opts = { domains: num('--domains', 20), perDomain: num('--per-domain', 840), seed: num('--seed', 0xC0FFEE), sp: num('--sp', 0) };
+  const iBudget = argv.indexOf('--budget');
+  const budgetMs = iBudget >= 0 ? Number(argv[iBudget + 1]) : Infinity;
   const W = buildSyntheticW(opts);
-  const gStep = loadGStep();
-  const r = runToSettle(W, gStep);
-  console.log(`sim lab — ${W.nodes.length} nodes, ${W.edges.length} edges, seeding ${opts.sp > 0 ? 'spiral SP=' + opts.sp : 'baseline hatch-14'}`);
+  const chunk = loadGStepChunk();
+  const r = runToSettle(W, chunk, { budgetMs });
+  delete r.positions;
+  console.log(`sim lab — ${W.nodes.length} nodes, ${W.edges.length} edges, seeding ${opts.sp > 0 ? 'spiral SP=' + opts.sp : 'baseline hatch-14'}, budget ${budgetMs === Infinity ? '∞' : budgetMs + 'ms'}`);
   console.log(JSON.stringify(r, null, 2));
 }
 

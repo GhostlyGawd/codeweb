@@ -51,6 +51,32 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li>**"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a</li>
+</ul>
+<p>  real long-range term, and runs in interruptible slices so no single task blows a frame — plus the</p>
+<p>  receipt that judges it is measured honestly.** The old anneal packed every symbol onto its area</p>
+<p>  bubble (radius-14 hatch) and repelled only within a 3×3 grid neighborhood, so the ONLY way the</p>
+<p>  layout could spread was an accidental ±185k-px explosion whose first step was one ~1.2s synchronous</p>
+<p>  task at 16.8k. Now symbols seed on a golden-spiral phyllotaxis hatch (near-equilibrium spacing), a</p>
+<p>  Barnes-Hut-lite <strong>far-field monopole</strong> (per-cell mass + center of mass, pushing every node from each</p>
+<p>  non-adjacent cell, with a 2×CUT coarsening latch when live cells exceed 4096) gives repulsion its</p>
+<p>  missing long-range term, and <code>gStep</code> became <strong><code>gStepChunk(deadline)</code></strong> — a cursor-driven state</p>
+<p>  machine that accumulates forces across slices with the grid/aggregate snapshot frozen per logical</p>
+<p>  step and exactly ONE integrate + alpha-decay per completed step, so slicing changes only WHEN work</p>
+<p>  runs, never the arithmetic (bitwise-equal to a whole-step run — pinned in the lab). <code>gTick</code> and the</p>
+<p>  reduced-motion loop drive it against their budgets; motion-safe settles now redraw at most once per</p>
+<p>  second as discrete progress stills. The result at 16.8k (node sim lab, <code>bench/experiments/report-sim-lab.mjs</code>):</p>
+<p>  the worst single uninterruptible task drops from <strong>774 ms → 93 ms</strong> (≤ the 250 ms no-freeze floor) and</p>
+<p>  the ±185k spread compacts to ~230k px, while the per-step settled cost stays ~<strong>270 ms</strong> — the far</p>
+<p>  field is O(n·cells) and reaching the ≤50 ms/frame primary target at this scale needs a hierarchical</p>
+<p>  tree (a documented <strong>floor</strong>, per the finding's fallback: no task &gt; 250 ms + interactive, not a pass).</p>
+<p>  The receipt (<code>__codewebStage.expandAll</code>) was rewritten from an unstable 10-frame sample that straddled</p>
+<p>  the explosion (508→116→37 ms across back-to-back calls) to a run-to-settle returning</p>
+<p>  <code>{settledMsPerFrame, maxSingleStepMs, totalSettleMs, steps}</code>, and <code>report-scale.mjs</code> gates on both</p>
+<p>  <code>settledMsPerFrame ≤ 50</code> and <code>maxSingleStepMs ≤ 250</code>. Layout stays a pure, bitwise-deterministic</p>
+<p>  function of (graph, interaction sequence) — seeded, no <code>Math.random</code>, insertion-order iteration.</p>
+<p>  (round 2, finding #35)</p>
+<ul>
 <li>**The interactive graph's draw loop got substantially cheaper per frame: theme colors are read once</li>
 </ul>
 <p>  per draw, edges stroke in exact style batches, and labels are screen-space-gated and capped.** Every</p>

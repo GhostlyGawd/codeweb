@@ -3,58 +3,74 @@
   "thresholds": {
     "timeToGraphMs": 10000,
     "searchMs": 300,
+    "drawOnceMs": 100,
+    "expandAll": {
+      "settledMsPerFrame": 50,
+      "maxSingleStepMs": 250,
+      "note": "finding #35: settledMsPerFrame ≤ 50 is the primary sim-cheap-per-frame target; maxSingleStepMs ≤ 250 is the no-single-frame-freezes floor the chunker guarantees. Both must hold for expandAllOk."
+    },
     "crash": "none tolerated"
   },
-  "verdict": "GREEN at 16k symbols with no fix needed — the graph view draws the domain overview first (21 areas, not 16k nodes), which is built-in level-of-detail; the full-symbol work happens per expanded domain",
+  "verdict": "MEASURED, finding #35 landed. The graph view draws the domain overview first (built-in level-of-detail), and 'Expand all symbols' now seeds symbols on a golden-spiral hatch, adds a far-field monopole so repulsion has a long-range term (no more ±185k explosion), and runs the anneal in interruptible slices (gStepChunk) so no single task freezes a frame. At the 16.8k loaded corpus the worst single uninterruptible task drops from ~774ms (one whole gStep) to ~93ms — inside the 250ms no-freeze floor — but the far field is O(n·cells) and the settled per-step cost is ~270ms, above the 50ms/frame primary target. Per finding #35's fallback (reaching ≤50ms at this scale needs a hierarchical Barnes-Hut tree, out of the frozen scope): this ships at its best measured settle with maxSingleStepMs ≤ 250 as the honest FLOOR, not a pass — expandAllOk is true only where settledMsPerFrame ≤ 50 (holds through mid-thousands of symbols; the 16.8k row is the documented floor). The old 'GREEN at 16k, no fix needed' claim is retired.",
   "rows": [
     {
       "bench": "report at scale (Spec L, docs/specs/report-at-scale.md)",
-      "label": "fixture (3 symbols)",
-      "reportBytes": 51296,
-      "graph": {
-        "symbols": 3,
-        "edges": 3
-      },
-      "domContentLoadedMs": 26,
-      "loadMs": 57,
-      "timeToGraphMs": 157,
-      "layoutSettleMs": 173,
+      "label": "loaded corpus fixture (268 symbols)",
+      "reportBytes": 233679,
+      "graph": { "symbols": 268, "edges": 1602 },
+      "domContentLoadedMs": 130,
+      "loadMs": 130,
+      "timeToGraphMs": 281,
+      "layoutSettleMs": 293,
       "layoutSettled": true,
       "searchMs": 0.5,
-      "stagedBlastMs": 2449,
+      "stagedBlastMs": 728,
+      "expandAll": {
+        "nodes": 268,
+        "edges": 1602,
+        "settledMsPerFrame": 0.7,
+        "maxSingleStepMs": 1.2,
+        "totalSettleMs": 176,
+        "steps": 259,
+        "settled": true
+      },
+      "expandAllMeasuredBy": "headless Chromium (bench/experiments/report-scale.mjs)",
+      "drawOnceMs": 0.9,
       "heapUsedBytes": 10000000,
       "pageErrors": [],
       "chromiumVersion": "141.0.7390.37",
       "verdict": {
         "timeToGraphOk": true,
         "searchOk": true,
+        "expandAllOk": true,
+        "drawOnceOk": true,
         "crashed": false,
         "green": true
       }
     },
     {
       "bench": "report at scale (Spec L, docs/specs/report-at-scale.md)",
-      "label": "microsoft/TypeScript src (16k symbols)",
-      "reportBytes": 13641611,
-      "graph": {
-        "symbols": 16286,
-        "edges": 44640
+      "label": "loaded corpus 16.8k",
+      "reportBytes": 10468305,
+      "graph": { "symbols": 17604, "edges": 104143 },
+      "expandAll": {
+        "nodes": 17604,
+        "edges": 104143,
+        "settledMsPerFrame": 269.45,
+        "maxSingleStepMs": 93.06,
+        "totalSettleMs": 69787,
+        "steps": 259,
+        "settled": true
       },
-      "domContentLoadedMs": 1743,
-      "loadMs": 1750,
-      "timeToGraphMs": 217,
-      "layoutSettleMs": 4813,
-      "layoutSettled": true,
-      "searchMs": 21.8,
-      "stagedBlastMs": 7370,
-      "heapUsedBytes": 31200000,
+      "expandAllMeasuredBy": "node sim lab (bench/experiments/report-sim-lab.mjs, --domains 20 --per-domain 840 --sp 38, production 8ms slice budget). The browser harness's staged-settle poll does not converge at 16.8k in-CI, so the sim numbers are the node micro-bench (spec-sanctioned primary evidence); the sliced gStepChunk path is bitwise-identical node↔browser (pinned in tests/report-sim.test.mjs), and the fixture row above validates the full browser path + the expandAll/drawOnce schema end-to-end with zero pageErrors.",
+      "drawOnceMs": null,
       "pageErrors": [],
       "chromiumVersion": "141.0.7390.37",
       "verdict": {
-        "timeToGraphOk": true,
-        "searchOk": true,
-        "crashed": false,
-        "green": true
+        "expandAllOk": false,
+        "expandAllFallback": "maxSingleStepMs 93.06 ≤ 250 (no-freeze floor MET; the chunker guarantees it); settledMsPerFrame 269.45 > 50 is the documented FLOOR (far field is O(n·cells) — ≤50ms needs a hierarchical tree). Before #35 the same click was one ~774ms uninterruptible task with a ±185k-px explosion.",
+        "green": false,
+        "greenNote": "primary sim target not met at 16.8k by design of the frozen scope; shipped as the honest fallback floor, not a pass."
       }
     }
   ]

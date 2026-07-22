@@ -10,6 +10,30 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Changed
+- **"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a
+  real long-range term, and runs in interruptible slices so no single task blows a frame — plus the
+  receipt that judges it is measured honestly.** The old anneal packed every symbol onto its area
+  bubble (radius-14 hatch) and repelled only within a 3×3 grid neighborhood, so the ONLY way the
+  layout could spread was an accidental ±185k-px explosion whose first step was one ~1.2s synchronous
+  task at 16.8k. Now symbols seed on a golden-spiral phyllotaxis hatch (near-equilibrium spacing), a
+  Barnes-Hut-lite **far-field monopole** (per-cell mass + center of mass, pushing every node from each
+  non-adjacent cell, with a 2×CUT coarsening latch when live cells exceed 4096) gives repulsion its
+  missing long-range term, and `gStep` became **`gStepChunk(deadline)`** — a cursor-driven state
+  machine that accumulates forces across slices with the grid/aggregate snapshot frozen per logical
+  step and exactly ONE integrate + alpha-decay per completed step, so slicing changes only WHEN work
+  runs, never the arithmetic (bitwise-equal to a whole-step run — pinned in the lab). `gTick` and the
+  reduced-motion loop drive it against their budgets; motion-safe settles now redraw at most once per
+  second as discrete progress stills. The result at 16.8k (node sim lab, `bench/experiments/report-sim-lab.mjs`):
+  the worst single uninterruptible task drops from **774 ms → 93 ms** (≤ the 250 ms no-freeze floor) and
+  the ±185k spread compacts to ~230k px, while the per-step settled cost stays ~**270 ms** — the far
+  field is O(n·cells) and reaching the ≤50 ms/frame primary target at this scale needs a hierarchical
+  tree (a documented **floor**, per the finding's fallback: no task > 250 ms + interactive, not a pass).
+  The receipt (`__codewebStage.expandAll`) was rewritten from an unstable 10-frame sample that straddled
+  the explosion (508→116→37 ms across back-to-back calls) to a run-to-settle returning
+  `{settledMsPerFrame, maxSingleStepMs, totalSettleMs, steps}`, and `report-scale.mjs` gates on both
+  `settledMsPerFrame ≤ 50` and `maxSingleStepMs ≤ 250`. Layout stays a pure, bitwise-deterministic
+  function of (graph, interaction sequence) — seeded, no `Math.random`, insertion-order iteration.
+  (round 2, finding #35)
 - **The interactive graph's draw loop got substantially cheaper per frame: theme colors are read once
   per draw, edges stroke in exact style batches, and labels are screen-space-gated and capped.** Every
   labeled node used to call `getComputedStyle` (up to one per symbol — 16.8k reads on a full 16.8k

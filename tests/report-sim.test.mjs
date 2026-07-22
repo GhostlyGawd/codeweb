@@ -7,13 +7,13 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildSyntheticW, loadGStep, runToSettle } from '../bench/experiments/report-sim-lab.mjs';
+import { buildSyntheticW, loadGStepChunk, runToSettle } from '../bench/experiments/report-sim-lab.mjs';
 
-test('report-sim: gStep extracts from the template and a small sim settles + terminates', () => {
+test('report-sim: gStepChunk extracts from the template and a small sim settles + terminates', () => {
   const W = buildSyntheticW({ domains: 4, perDomain: 40 });
-  const gStep = loadGStep();
-  const r = runToSettle(W, gStep, { maxSteps: 400 });
-  assert.ok(r.steps > 0 && r.steps < 400, `settles before the hard cap (${r.steps} steps)`);
+  const chunk = loadGStepChunk();
+  const r = runToSettle(W, chunk, { maxSteps: 500 });
+  assert.ok(r.steps > 0 && r.steps < 500, `settles before the hard cap (${r.steps} steps)`);
   assert.ok(Number.isFinite(r.settledMsPerStep) && r.settledMsPerStep >= 0, 'settled ms/step measured');
   assert.ok(Number.isFinite(r.maxSingleTaskMs), 'max single task measured');
   assert.ok(Number.isFinite(r.occupancy.p95), 'cell-occupancy p95 measured');
@@ -21,11 +21,10 @@ test('report-sim: gStep extracts from the template and a small sim settles + ter
 });
 
 test('report-sim: the layout is deterministic — identical seeds give bitwise-equal positions ×2 runs', () => {
-  const gStep = loadGStep();
+  const chunk = loadGStepChunk();
   const run = () => {
     const W = buildSyntheticW({ domains: 5, perDomain: 60, seed: 12345 });
-    runToSettle(W, gStep, { maxSteps: 400 });
-    return W.nodes.map((n) => [n.x, n.y]);
+    return runToSettle(W, chunk, { maxSteps: 500 }).positions();
   };
   const a = run(), b = run();
   assert.equal(a.length, b.length, 'same node count');
@@ -36,11 +35,10 @@ test('report-sim: the layout is deterministic — identical seeds give bitwise-e
 });
 
 test('report-sim: the spiral seeding is also deterministic and stays finite', () => {
-  const gStep = loadGStep();
+  const chunk = loadGStepChunk();
   const run = () => {
     const W = buildSyntheticW({ domains: 6, perDomain: 50, seed: 999, sp: 38 });
-    runToSettle(W, gStep, { maxSteps: 400 });
-    return W.nodes.map((n) => [n.x, n.y]);
+    return runToSettle(W, chunk, { maxSteps: 500 }).positions();
   };
   const a = run(), b = run();
   for (let i = 0; i < a.length; i++) {
@@ -48,4 +46,25 @@ test('report-sim: the spiral seeding is also deterministic and stays finite', ()
     assert.equal(a[i][1], b[i][1], `node ${i} y bitwise-equal`);
     assert.ok(Number.isFinite(a[i][0]) && Number.isFinite(a[i][1]), 'finite');
   }
+});
+
+// finding #35 T-35.4: slicing must not change the arithmetic. Positions are frozen until the
+// integrate phase and forces accumulate into fx/fy across slices, so a budget=2ms sliced settle is
+// BITWISE-EQUAL to a budget=∞ (one-task-per-step) settle — only WHEN work runs differs. This is the
+// contract that lets the chunker cap maxSingleStepMs without touching the layout.
+test('report-sim: sliced (budget=2ms) settle is bitwise-equal to a budget=∞ settle (T-35.4)', () => {
+  const chunk = loadGStepChunk();
+  const whole = runToSettle(buildSyntheticW({ domains: 6, perDomain: 90, seed: 7 }), chunk, { maxSteps: 500, budgetMs: Infinity });
+  const sliced = runToSettle(buildSyntheticW({ domains: 6, perDomain: 90, seed: 7 }), chunk, { maxSteps: 500, budgetMs: 2 });
+  const a = whole.positions(), b = sliced.positions();
+  assert.equal(whole.steps, sliced.steps, 'same logical step count');
+  assert.equal(a.length, b.length);
+  for (let i = 0; i < a.length; i++) {
+    assert.equal(a[i][0], b[i][0], `node ${i} x identical whether sliced or not`);
+    assert.equal(a[i][1], b[i][1], `node ${i} y identical whether sliced or not`);
+  }
+  // both tasks are measured and finite; the slice-bounds-the-task-cost effect is demonstrated at
+  // scale in the receipt (16.8k: 774ms whole-step → 93ms sliced), not asserted on this tiny fixture
+  // where a single GC pause dwarfs a sub-millisecond step and would make the comparison flap.
+  assert.ok(Number.isFinite(sliced.maxSingleTaskMs) && Number.isFinite(whole.maxSingleTaskMs), 'single-task cost measured on both paths');
 });
