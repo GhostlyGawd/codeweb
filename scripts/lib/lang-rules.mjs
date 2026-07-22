@@ -170,7 +170,16 @@ export function scanSymbols(file, text, masked) {
       // `= (function () {})()` never matched any alternative — arrow-IIFEs were the only false-node class.
       else if ((m = /^\s*(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=(?!\s*\(\()\s*(?:async\s*)?(?:function\b|\*?\s*\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/.exec(ln))) push(m[1], i, 'function', exported(ln));
       else if ((m = /^\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)/.exec(ln))) push(m[1], i, 'class', exported(ln));
-      else if ((m = /^\s{2,}(?:public|private|protected|static|readonly|async|get|set|\*)?\s*([A-Za-z_$][\w$]*)\s*\([^;=]*\)\s*\{/.exec(ln))) push(m[1], i, 'method', false);
+      // Round 2, finding #12 (T-12.3): modifiers STACK (`public static run(`), the `*` sits outside
+      // the \s+-terminated group (or `*gen() {` — no space after `*` — regresses to invisible), the
+      // param interior is [^;]* — NOT [^;{}]* (that would regress destructured params `move({ x, y })`,
+      // matched today) — additionally admitting default params (`render(x = 1)`), and a `: Type`
+      // return annotation is allowed before the brace (`get value(): number {` was invisible, its
+      // body's calls re-attributed to the class). Methods actually NAMED get/set keep matching: the
+      // modifier group requires trailing \s+, so it backtracks to zero reps and the name capture
+      // takes the word. Known noise class (pre-existing, pinned in tests): `it('works', function () {`
+      // matches in all variants; `describe('x', () => {` matches in none; `if (…) {` dies in KEYWORDS.
+      else if ((m = /^\s{2,}(?:(?:public|private|protected|static|readonly|async|get|set)\s+)*(?:\*\s*)?([A-Za-z_$][\w$]*)\s*\([^;]*\)(?:\s*:\s*[^{;=]+)?\s*\{/.exec(ln))) push(m[1], i, 'method', false);
       // class-field arrow methods (`handleClick = () => {` / `run = async (x) => …`) — the standard
       // React/TS pattern the method regex (name + paren) can't see. Marked `field`: the node is only
       // kept when an ENCLOSING CLASS confirms it (a bare local `cb = () => {}` reassignment inside a

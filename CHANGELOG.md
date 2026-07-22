@@ -570,6 +570,25 @@ notes so validated results, papers, and new tools never get lost in commit histo
   have emitted DELETEs that break trend and minhash at runtime). The self-map regression is now a
   test (`tests/spread-iife-selfmap.test.mjs` extracts the real trend.mjs + minhash.mjs texts).
   (perf-quality round 2, finding #9)
+- **Accessors both exist, declaration lines fabricate nothing, and the regex tier sees modern TS
+  methods.** Three related truths: (a) the AST tier's method dedupe silently DROPPED the second
+  body with a colliding id — always a real get/set pair or static/instance same-name (TS overload
+  signatures are never framed); the second now suffixes `@` + its 1-based start line — the scheme
+  the regex tier's file-level disambiguator already used, so both tiers emit byte-identical ids
+  (getter keeps the bare id: no query/fingerprint churn) — and the cross-tier defensive dedupe
+  suffixes instead of dropping. (b) The self-definition guard covered only a node's own start
+  line, so setter/impl declaration lines were scanned as calls with the CLASS as scope —
+  fabricated `Widget -> Widget.value` phantom callers hid every accessor/overloaded member from
+  deadcode; a per-file declStarts map now skips any same-named declaration line, and body-less
+  overload stubs (which have no range) are covered by a class-enclosed stub-line guard over both
+  callRe and refRe (class-gated — narrowed from the audit's unconditional line guard, which would
+  have suppressed 112 ordinary `finish(code);`-shaped statement lines in this repo alone).
+  (c) The regex method matcher stacks modifiers, admits default params (`[^;]*` interior — not
+  `[^;{}]*`, which would regress destructured params) and `: Type` return annotations —
+  `get value(): number {`, `compute(n: any): number {`, `render(x = 1) {` were all invisible, their
+  bodies' calls re-attributed to the class. Self-map after: zero class->own-member edges.
+  `tests/accessor-overload-truth.test.mjs` runs the fixture in BOTH tiers and asserts identical id
+  sets. (perf-quality round 2, finding #12)
 
 ## [0.9.0] - 2026-07-19
 

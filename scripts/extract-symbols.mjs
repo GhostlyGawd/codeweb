@@ -485,11 +485,16 @@ for (const f of files) {
       const end = Math.min(m.endLine, total);
       const loc = Math.min(end - start + 1, 2000);
       const body = lines.slice(start - 1, end).join('\n');
-      if (fileIds.has(m.id)) continue; // regex tier already owns this id (defensive)
-      fileIds.add(m.id);
-      ranges.push({ id: m.id, name: m.label, start, end, kind: 'method' });
+      let mid = m.id;
+      // finding #12: a cross-tier id collision suffixes '@' + 1-based start line (the regex tier's
+      // scheme at the fileIds check above) instead of silently dropping the node — the drop was how
+      // a setter vanished whenever the regex tier had already claimed the getter's id.
+      if (fileIds.has(mid)) mid += '@' + start;
+      if (fileIds.has(mid)) continue; // still colliding (same line): ids must stay unique
+      fileIds.add(mid);
+      ranges.push({ id: mid, name: m.label, start, end, kind: 'method' });
       nodes.push({
-        id: m.id, label: m.label, kind: 'method', file: r, line: start, loc,
+        id: mid, label: m.label, kind: 'method', file: r, line: start, loc,
         exports: false, domain: '', summary: '', role: fileRole,
         signature: parseSignature(lines[start - 1] || '', m.label, false),
         complexity: m.complexity,
@@ -698,6 +703,15 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
   let hasModule = false, ambiguous = 0;
   const isPy = r.endsWith('.py');
   const enclosing = (lineNo) => { let best = null; for (const rg of ranges) if (lineNo >= rg.start && lineNo <= rg.end && (!best || rg.start > best.start)) best = rg; return best; };
+  // Round 2, finding #12: every declaration start line per NAME. addEdge skips a match whose name
+  // has a declaration starting on that line — a getter/setter pair or an overload impl line used to
+  // be scanned as a CALL with the class as scope (`Widget -> Widget.value` phantom callers, hiding
+  // accessors from deadcode). Generalizes the old own-start-line guard (caller.name === name at
+  // caller.start), which this strictly subsumes. addEdge ONLY — addResolved stays untouched so an
+  // ns-alias member call ON a decl line still edges; and the guard keys on the matched NAME, so the
+  // setter's normalize(v) call on its own decl line still edges from the @line id.
+  const declStarts = new Map(); // name -> Set(1-based start lines)
+  for (const rg of ranges) { let s = declStarts.get(rg.name); if (!s) declStarts.set(rg.name, s = new Set()); s.add(rg.start); }
   const sameFileByName = new Map(ranges.map((rg) => [rg.name, rg.id]));
   const sameFileClasses = new Map(ranges.filter((rg) => rg.kind === 'class').map((rg) => [rg.name, rg.id]));
   // The CLASS node a name refers to (imported class alias OR a same-file class) — for ref edges from
@@ -707,8 +721,8 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
     if (KEYWORDS.has(name)) return;
     const aliased = aliasMap && aliasMap.get(name);
     if (!aliased && !byName.has(name)) return;
+    if (declStarts.get(name)?.has(lineIdx + 1)) return; // any same-named declaration line — finding #12 (subsumes the old own-definition guard)
     const caller = enclosing(lineIdx + 1);
-    if (caller && caller.name === name && lineIdx + 1 === caller.start) return; // its own definition
     let callerId;
     if (caller) callerId = caller.id;
     else { callerId = r + ':<module>'; hasModule = true; } // module/top-level scope
@@ -750,6 +764,14 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
   };
   const callRe = /([A-Za-z_$][\w$]*)\s*\(/g;
   const refRe = /[(,]\s*([A-Za-z_$][\w$]*)\s*(?=[,)])/g;
+  // finding #12: body-less TS overload stubs have NO range, so declStarts can't cover them. A line
+  // shaped `name(params)[: Ret];` whose ENCLOSING range is a CLASS is a signature, not code — skip
+  // callRe AND refRe there (refRe on stub params would fabricate ref edges to short repo symbols,
+  // the #10 magnet class). Name-independent, one regex test per line — no per-match RegExp. The
+  // class gate narrows the spec's unconditional line guard: the same shape inside a FUNCTION body
+  // is an ordinary call statement (`finish(code);` — 112 such lines in this repo alone) whose edges
+  // must survive; class bodies cannot contain statements, so nothing real is suppressed there.
+  const STUB_LINE_RE = /^\s*(?:(?:public|private|protected|static|readonly|abstract|override|async)\s+)*[A-Za-z_$][\w$]*\s*\([^;{]*\)\s*(?::[^{;]*)?;\s*$/;
   const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g;
   const csBaseRe = /\b(?:class|struct|record)\s+[A-Za-z_]\w*(?:<[^>]*>)?\s*:\s*([A-Za-z_][\w.]*)/g; // C# `class A : Base, IFace` -> Base
   const isCs = r.endsWith('.cs');
@@ -773,6 +795,7 @@ function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) 
         while ((xm = csBaseRe.exec(ln))) { const base = xm[1].split('.').pop(); if (base) addEdge(i, base, 'inherit'); }
       }
     }
+    if (STUB_LINE_RE.test(ln) && enclosing(i + 1)?.kind === 'class') continue; // overload-stub line (finding #12): no calls, no refs
     callRe.lastIndex = 0; let m;
     while ((m = callRe.exec(ln))) {
       // Round 2, finding #9: `...fn(` (the char before the `.` is another `.`) is a SPREAD call,

@@ -241,8 +241,16 @@ export async function loadTsEngine() {
               // methods etc. still attribute dispatch, but are not class methods)
               if (cls?.name && mname && parentIds.length && parentIds[parentIds.length - 1] === cls.bodyId) {
                 methodsByClass.get(cls.name)?.add(mname);
-                const mid = mkId(`${cls.name}.${mname}`);
-                if (!methodIds.has(mid)) { // overloads collapse to one node
+                let mid = mkId(`${cls.name}.${mname}`);
+                // Round 2, finding #12: a mid collision here is always TWO REAL BODIES (get/set
+                // pair, or static/instance same-name) — TS overload *signatures* are
+                // method_signature nodes, never framed by FN_LIKE. The second body was silently
+                // dropped; it now suffixes the method's 1-based start line (frame.row is already
+                // startPosition.row + 1 — do NOT add 1 again: the suffix must byte-match the regex
+                // tier's '@' + start for A/B id equality). First occurrence keeps the bare id, so
+                // existing queries/fingerprints don't churn.
+                if (methodIds.has(mid)) mid += '@' + frame.row;
+                if (!methodIds.has(mid)) { // same-line collision (minified pair) would still clash: ids must stay unique
                   methodIds.add(mid);
                   frame.methodRec = { id: mid, label: mname, line: frame.row, endLine: node.endPosition.row + 1, complexity: 1 };
                   methods.push(frame.methodRec);
