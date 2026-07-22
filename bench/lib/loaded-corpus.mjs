@@ -69,3 +69,50 @@ export function writeLoadedCorpus(dir, { files = 60, fnsPerFile = 21, seed = 0xC
   }
   return { files, fns: files * fnsPerFile, plantedClusters: Math.min(15, files), copiesPerCluster: Math.floor(files / 15) };
 }
+
+// Round 2, finding #23 — a pinned corpus whose file graph is one DENSE files-wide SCC: file i
+// imports+calls file (i+1)%files (the ring guarantees the SCC), plus `extraPairDeps` extra
+// cross-file deps densifying it so no single file->file cut breaks it — the break-cycles worst
+// case (every candidate tried, verified:false), which the acyclic-by-construction corpus above
+// can never exercise (the 22.8s whole-graph re-verify regression was gate-invisible exactly
+// because of that). The pre-fix cost was per-candidate × WHOLE-graph edges, so each file also
+// carries `fillerFnsPerFile` same-file-calling filler functions — cycle-neutral weight that makes
+// a re-verify regression visible in the factor gate (and, written beside writeLoadedCorpus output
+// in one tree, reproduces the finding's 93k-edge measurement; file/function names are disjoint by
+// prefix, so the two generators compose). Deterministic: seeded LCG, no Date/Math.random.
+export function writeCyclicCorpus(dir, { files = 60, extraPairDeps = 240, fillerFnsPerFile = 40, seed = 0xC7C11C } = {}) {
+  mkdirSync(dir, { recursive: true });
+  let s = seed >>> 0;
+  const rnd = () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296);
+  const pick = (n) => Math.floor(rnd() * n);
+
+  const deps = Array.from({ length: files }, () => new Set());
+  for (let i = 0; i < files; i++) deps[i].add((i + 1) % files); // the ring: one files-wide SCC
+  // The first `files` extras are a deterministic stride-2 second ring: with both rings present,
+  // removing ANY single file->file pair leaves the whole SCC strongly connected (cut a ring pair
+  // (a,a+1) and a+1 is still reached via stride-2 from a+(files-1); cut a stride-2 or random pair
+  // and the full ring survives) — so "no single-pair cut breaks it" is GUARANTEED, not luck,
+  // whenever extraPairDeps >= files. The remainder is seeded-random densification.
+  let added = 0, guard = 0;
+  for (let i = 0; i < files && added < extraPairDeps; i++) { deps[i].add((i + 2) % files); added++; }
+  while (added < extraPairDeps && guard++ < extraPairDeps * 60) {
+    const from = pick(files), to = pick(files);
+    if (to === from || deps[from].has(to)) continue;
+    deps[from].add(to); added++;
+  }
+  for (let i = 0; i < files; i++) {
+    const targets = [...deps[i]]; // insertion order: ring edge first, extras in seeded order
+    const out = targets.map((t) => `import { cyc_${t}_0 } from './cyc${t}.mjs';`);
+    out.push(`export function cyc_${i}_0(x) {`);
+    targets.forEach((t, k) => out.push(`  const v${k} = cyc_${t}_0(x + ${k});`));
+    out.push(`  return x + ${targets.length};`);
+    out.push('}');
+    for (let k = 0; k < fillerFnsPerFile; k++) {
+      out.push(`export function cyc_${i}_p${k}(x) {`);
+      out.push(`  return cyc_${i}_p${(k + 1) % fillerFnsPerFile}(x) + cyc_${i}_p${(k + 2) % fillerFnsPerFile}(x) + ${k};`);
+      out.push('}');
+    }
+    writeFileSync(join(dir, `cyc${i}.mjs`), out.join('\n') + '\n');
+  }
+  return { files, extraPairDeps: added, fns: files * (1 + fillerFnsPerFile) };
+}

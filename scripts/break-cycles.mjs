@@ -2,18 +2,16 @@
 // codeweb break-cycles (F9) — for each file-level dependency cycle, propose the CHEAPEST file->file
 // dependency to sever (fewest underlying symbol edges) and PROVE it works by recomputing fileCycles
 // on the graph with that edge removed. Never proposes a cut that doesn't break the cycle, and never
-// a fabricated edge. Read-only, deterministic. Built on ./lib/graph-ops.mjs (fileCycles — one truth).
+// a fabricated edge. Read-only, deterministic. Built on ./lib/graph-ops.mjs (fileCycles +
+// cheapestCuts — one truth; round 2 #23 hoisted the cut logic there: this file is argv/IO/render).
 //
 // Usage: node break-cycles.mjs <graph.json> [--json]   (or set CODEWEB_WS)
 // Exit: 0 ok, 2 usage/IO.
 
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { normalizeGraph, fileCycles, edgeKey } from './lib/graph-ops.mjs';
+import { cheapestCuts } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: break-cycles.mjs <graph.json> [--limit N] [--json]   (or set CODEWEB_WS)';
-const STRUCTURAL = new Set(['call', 'import', 'inherit']); // the kinds fileCycles considers
-import { die, emitJson, finish, loadGraph, capList, parseArgs } from './lib/cli.mjs';
+import { emitJson, finish, loadGraph, capList, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
 const { opts, pos } = parseArgs(process.argv.slice(2), {
@@ -23,38 +21,7 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
 const { json, limit } = opts;
 const { graph } = loadGraph(pos[0], { usage: USAGE });
 
-const fileOf = new Map(graph.nodes.map((n) => [n.id, n.file]));
-const structuralEdges = graph.edges.filter((e) => STRUCTURAL.has(e.kind));
-const cycleKey = (c) => c.join('|');
-
-// fileCycles with a set of symbol edges removed — independent reconstruction, trusted primitive.
-function cyclesWithout(removeKeys) {
-  return fileCycles({ ...graph, edges: graph.edges.filter((e) => !removeKeys.has(edgeKey(e))) });
-}
-
-const cycles = fileCycles(graph).map((cycle) => {
-  const inCycle = new Set(cycle);
-  // file->file dependencies WITHIN the cycle, with their underlying symbol edges
-  const fe = new Map(); // "from\x00to" -> [edges]
-  for (const e of structuralEdges) {
-    const f = fileOf.get(e.from), t = fileOf.get(e.to);
-    if (f && t && f !== t && inCycle.has(f) && inCycle.has(t)) {
-      const k = `${f}\x00${t}`; if (!fe.has(k)) fe.set(k, []); fe.get(k).push(e);
-    }
-  }
-  const candidates = [...fe.entries()].map(([k, edges]) => { const [fromFile, toFile] = k.split('\x00'); return { fromFile, toFile, weight: edges.length, edges }; })
-    .sort((a, b) => a.weight - b.weight || (a.fromFile < b.fromFile ? -1 : a.fromFile > b.fromFile ? 1 : 0) || (a.toFile < b.toFile ? -1 : a.toFile > b.toFile ? 1 : 0));
-  const meanWeight = candidates.length ? candidates.reduce((s, c) => s + c.weight, 0) / candidates.length : 0;
-  const key = cycleKey(cycle);
-  // pick the cheapest candidate whose removal actually breaks THIS cycle (verified)
-  let chosen = null;
-  for (const cand of candidates) {
-    const rm = new Set(cand.edges.map(edgeKey));
-    if (!cyclesWithout(rm).some((c) => cycleKey(c) === key)) { chosen = cand; break; }
-  }
-  if (chosen) return { files: cycle, meanWeight, verified: true, cut: { fromFile: chosen.fromFile, toFile: chosen.toFile, weight: chosen.weight, underlyingEdges: chosen.edges.map((e) => ({ from: e.from, to: e.to, kind: e.kind })) } };
-  return { files: cycle, meanWeight, verified: false, cut: null, note: 'no single file->file edge cut breaks this cycle — needs a multi-edge cut or a restructure (extract a shared module)' };
-});
+const cycles = cheapestCuts(graph);
 
 const capped = capList(cycles, limit);
 const payload = { target: graph.meta?.target || 'target', summary: `${cycles.length} file dependency cycle(s), ${cycles.filter((c) => c.verified).length} with a verified cheapest cut`, count: cycles.length, cycles: capped.items };
