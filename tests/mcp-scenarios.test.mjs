@@ -5,7 +5,7 @@
 // write (sendBurst) so line order == enqueue order in a single readline drain. Queue invariants
 // I1–I6 each carry an assertion here or in mcp.test.mjs (unit level).
 
-import { test, before, after } from 'node:test';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join, dirname } from 'node:path';
 import { writeFileSync, readFileSync, existsSync, statSync } from 'node:fs';
@@ -31,23 +31,11 @@ function mapFresh(prefix) {
 }
 // index of the first trace event matching pred, or -1.
 const traceIx = (events, pred) => events.findIndex(pred);
-
-// A real mapped workspace (run.mjs over a small tree) — graph.json with meta.root on disk plus the
-// map-time sidecars. Shared by the read-only scenarios (find_similar, sidecar checks, advisors).
-let MAPPED, MGRAPH;
-before(() => {
-  MAPPED = tmpDir('codeweb-scn-map-');
-  const src = join(MAPPED, 'src');
-  writeTree(src, {
-    'main.js': 'import { helper } from "./util.js";\nexport function main() { return helper(2) + helper(3); }\n',
-    'util.js': 'export function helper(x) {\n  if (x > 0) return x * 2;\n  return 0;\n}\nexport function spare(y) {\n  return y + 1;\n}\n',
-  });
-  const out = join(MAPPED, '.codeweb');
-  const r = runNode(script('run.mjs'), [src, '--out-dir', out]);
-  assert.equal(r.status, 0, `map fixture built: ${r.stderr}`);
-  MGRAPH = join(out, 'graph.json');
-});
-after(() => { if (MAPPED) cleanup(MAPPED); });
+// Await server exit, but FAIL FAST (never hang CI) if it doesn't happen — returns { code, signal }.
+const exited = (h, ms = 10000) => Promise.race([
+  h.exited,
+  new Promise((_, rej) => setTimeout(() => rej(new Error(`server did not exit within ${ms}ms`)), ms)),
+]);
 
 // ---- S1 epipe-survival -------------------------------------------------------------------------
 // The IMPROVEMENTS #29 repro: find_similar with a >64KB body and a bad graph path makes the child
@@ -67,7 +55,7 @@ test('S1a epipe-survival: find_similar 1MB body + bad graph → isError result, 
     const r3 = await h.reply(3);
     assert.ok(r3.result && !r3.error, 'ping answered after the EPIPE-prone call — server survived');
     h.close();
-    const { code } = await h.exited;
+    const { code } = await exited(h);
     assert.equal(code, 0, 'clean exit on stdin close');
   } finally { h.child.kill('SIGKILL'); }
 });
@@ -86,7 +74,7 @@ test('S1b epipe-survival: client closes its stdout read end mid-burst → server
     h.sendBurst(burst);
     // Destroy our read end almost immediately — the server's pending writes now EPIPE.
     setTimeout(() => h.destroyStdout(), 5);
-    const { code } = await h.exited;
+    const { code } = await exited(h);
     assert.equal(code, 0, 'server exits 0 on stdout EPIPE (never a crash / non-zero)');
   } finally { h.child.kill('SIGKILL'); }
 });
@@ -122,7 +110,7 @@ test('S2 refresh→diff in one burst: the diff reads POST-refresh bytes (waited,
     const ev = h.trace();
     assert.ok(ev.some((e) => e.ev === 'end' && e.tool === 'codeweb_refresh' && e.id === 10), 'the refresh writer ran to completion');
     assert.ok(!ev.some((e) => e.ev === 'start' && e.id === 11), 'the diff was served IN-PROCESS (#33) — no child spawned; refresh is the loop\'s only child');
-    h.close(); assert.equal((await h.exited).code, 0);
+    h.close(); assert.equal((await exited(h)).code, 0);
   } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });
 
@@ -146,7 +134,7 @@ test('S3 two codeweb_map on one out dir in a burst: end(map#1) < start(map#2), s
     assert.ok(endMap1 >= 0 && startMap2 >= 0, `both boundary events present (end#20=${endMap1}, start#21=${startMap2})`);
     assert.ok(endMap1 < startMap2, 'map#1 finishes before map#2 starts — no stage-by-stage interleave (I1)');
     assert.ok(readJSON(join(out, 'graph.json')).nodes.length >= 1, 'the surviving workspace parses green');
-    h.close(); assert.equal((await h.exited).code, 0);
+    h.close(); assert.equal((await exited(h)).code, 0);
   } finally { h.child.kill('SIGKILL'); cleanup(target); }
 });
 
@@ -170,7 +158,7 @@ test('I7 autoRefresh-skip: explicit refresh + a stale-triggering query in one bu
     assert.ok(ev.some((e) => e.ev === 'skip-autorefresh' && e.ws === dirname(graph)), 'autoRefresh skipped because a writer is already queued (I7)');
     const refreshStarts = ev.filter((e) => e.ev === 'start' && e.tool === 'codeweb_refresh');
     assert.equal(refreshStarts.length, 1, 'exactly ONE refresh child spawned (the explicit one, not autoRefresh too)');
-    h.close(); assert.equal((await h.exited).code, 0);
+    h.close(); assert.equal((await exited(h)).code, 0);
   } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });
 
@@ -190,7 +178,7 @@ test('S4 cancellation-kills-child: notifications/cancelled on a running map → 
     h.send({ jsonrpc: '2.0', id: 41, method: 'ping' });
     await h.reply(41); // server is alive
     h.close();
-    assert.equal((await h.exited).code, 0, 'server drains and exits 0 after the cancel');
+    assert.equal((await exited(h)).code, 0, 'server drains and exits 0 after the cancel');
     assert.ok(!h.responses().some((r) => r.id === 40), 'no reply for the cancelled map (drain bounds the negative assertion)');
     assert.ok(!existsSync(join(out, 'graph.json')), 'killed before the report stage — no graph.json written');
   } finally { h.child.kill('SIGKILL'); cleanup(target); }
@@ -209,7 +197,7 @@ test('S7 malformed-and-batch-frames: 42, "x", null, [] each answer ONE -32600 (i
     }
     const invalid = h.responses().filter((r) => r.id === null && r.error && r.error.code === -32600);
     assert.equal(invalid.length, 4, 'one Invalid Request per frame (three scalars + the empty array), never a silent drop');
-    h.close(); assert.equal((await h.exited).code, 0);
+    h.close(); assert.equal((await exited(h)).code, 0);
   } finally { h.child.kill('SIGKILL'); }
 });
 
@@ -228,7 +216,7 @@ test('T-34.3 batch fan-out: [{ping id:9},{unknown-tool id:10}] → normal reply 
     await h.reply(12);
     const invalid = h.responses().filter((r) => r.id === null && r.error && r.error.code === -32600);
     assert.equal(invalid.length, 2, '[1,2] → exactly two -32600 lines; the notification-only batch stays silent');
-    h.close(); assert.equal((await h.exited).code, 0);
+    h.close(); assert.equal((await exited(h)).code, 0);
   } finally { h.child.kill('SIGKILL'); }
 });
 
@@ -261,52 +249,61 @@ test('S5 refresh-preserves-sidecars: after codeweb_refresh all three sidecars ar
     assert.deepEqual(lite.stamp, stamp, 'index-lite stamp === statSync(graph.json)');
     const brief = JSON.parse(readFileSync(join(cw, 'brief.json'), 'utf8'));
     assert.deepEqual(brief.stamp, stamp, 'brief stamp === statSync(graph.json)');
-    h.close(); assert.equal((await h.exited).code, 0);
+    h.close(); assert.equal((await exited(h)).code, 0);
   } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });
 
 // ---- S6 reader-overlap (I4: two readers on one workspace run CONCURRENTLY, ≈ max not sum) --------
 // Before #32 every spawned tool on one workspace chained on a single tail, so hotspots-behind-risk ≈
-// risk+hotspots (measured 203–225 ms ≈ sum). Now readers overlap under READER_CAP. MECHANISM (per the
-// single-drain rule: child `start`s within a drain precede any `end`, which needs a later I/O tick):
-// both start events precede either end — the two children are alive simultaneously.
-test('S6 reader-overlap: risk + hotspots in one burst → both start before either ends (children alive together)', async () => {
+// risk+hotspots (measured 203–225 ms ≈ sum). Now readers overlap under READER_CAP. DETERMINISM: a
+// WRITER (refresh) barrier fronts the burst — both readers capture ITS writerTail at enqueue (I2) and
+// are released by the SAME promise resolution, so their `.then` continuations run in ONE microtask
+// drain and both `start` events fire before either child's `end` (a later I/O tick) — independent of
+// stdin-chunk / enqueue jitter that a bare two-reader burst is subject to under load. Timing is never
+// asserted, only the trace interleaving (I4 permits the overlap the pre-#32 single tail forbade).
+test('S6 reader-overlap: two readers released together by a writer barrier → both start before either ends (I4)', async () => {
+  const { dir, graph } = mapFresh('codeweb-scn-s6-');
   const h = startServer({ env: TRACE_ENV });
   try {
     await initServer(h);
     h.sendBurst([
-      { jsonrpc: '2.0', id: 60, method: 'tools/call', params: { name: 'codeweb_risk', arguments: { graph: MGRAPH } } },
-      { jsonrpc: '2.0', id: 61, method: 'tools/call', params: { name: 'codeweb_hotspots', arguments: { graph: MGRAPH } } },
+      { jsonrpc: '2.0', id: 59, method: 'tools/call', params: { name: 'codeweb_refresh', arguments: { graph } } }, // barrier writer
+      { jsonrpc: '2.0', id: 60, method: 'tools/call', params: { name: 'codeweb_risk', arguments: { graph } } },
+      { jsonrpc: '2.0', id: 61, method: 'tools/call', params: { name: 'codeweb_hotspots', arguments: { graph } } },
     ]);
-    await h.reply(60); await h.reply(61);
-    const ev = h.trace().filter((e) => e.id === 60 || e.id === 61);
+    for (const id of [59, 60, 61]) await h.reply(id);
+    const ev = h.trace().filter((e) => e.id === 60 || e.id === 61); // reader events only
     const starts = ev.map((e, i) => ({ e, i })).filter((x) => x.e.ev === 'start').map((x) => x.i);
     const ends = ev.map((e, i) => ({ e, i })).filter((x) => x.e.ev === 'end').map((x) => x.i);
     assert.equal(starts.length, 2, 'both readers spawned a child');
     assert.equal(ends.length, 2, 'both readers ended');
     assert.ok(Math.max(...starts) < Math.min(...ends), 'both start events precede either end — concurrent (I4), not serialized');
-    h.close(); assert.equal((await h.exited).code, 0);
-  } finally { h.child.kill('SIGKILL'); }
+    h.close(); assert.equal((await exited(h)).code, 0);
+  } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });
 
-// ---- READER_CAP: 4 readers on one workspace never exceed 3 concurrent children (I4) --------------
-test('I4 cap: 4 readers in one burst never run 4 concurrently (active start-minus-end count ≤ READER_CAP=3)', async () => {
+// ---- READER_CAP: 4 readers released together never exceed 3 concurrent children (I4) -------------
+test('I4 cap: 4 readers released by a writer barrier peak at exactly READER_CAP=3 concurrent (never 4)', async () => {
+  const { dir, graph } = mapFresh('codeweb-scn-cap-');
   const h = startServer({ env: TRACE_ENV });
   try {
     await initServer(h);
     h.sendBurst([
-      { jsonrpc: '2.0', id: 70, method: 'tools/call', params: { name: 'codeweb_risk', arguments: { graph: MGRAPH } } },
-      { jsonrpc: '2.0', id: 71, method: 'tools/call', params: { name: 'codeweb_hotspots', arguments: { graph: MGRAPH } } },
-      { jsonrpc: '2.0', id: 72, method: 'tools/call', params: { name: 'codeweb_deadcode', arguments: { graph: MGRAPH } } },
-      { jsonrpc: '2.0', id: 73, method: 'tools/call', params: { name: 'codeweb_break_cycles', arguments: { graph: MGRAPH } } },
+      { jsonrpc: '2.0', id: 69, method: 'tools/call', params: { name: 'codeweb_refresh', arguments: { graph } } }, // barrier writer
+      { jsonrpc: '2.0', id: 70, method: 'tools/call', params: { name: 'codeweb_risk', arguments: { graph } } },
+      { jsonrpc: '2.0', id: 71, method: 'tools/call', params: { name: 'codeweb_hotspots', arguments: { graph } } },
+      { jsonrpc: '2.0', id: 72, method: 'tools/call', params: { name: 'codeweb_deadcode', arguments: { graph } } },
+      { jsonrpc: '2.0', id: 73, method: 'tools/call', params: { name: 'codeweb_break_cycles', arguments: { graph } } },
     ]);
-    for (const id of [70, 71, 72, 73]) await h.reply(id);
+    for (const id of [69, 70, 71, 72, 73]) await h.reply(id);
+    // count only the 4 READER children — the barrier writer (69) ran to completion before any of them.
+    const readerIds = new Set([70, 71, 72, 73]);
     let active = 0, peak = 0;
-    for (const e of h.trace()) { if (e.ev === 'start') { active++; peak = Math.max(peak, active); } else if (e.ev === 'end') active--; }
+    for (const e of h.trace()) { if (!readerIds.has(e.id)) continue; if (e.ev === 'start') { active++; peak = Math.max(peak, active); } else if (e.ev === 'end') active--; }
     assert.ok(peak <= 3, `never more than READER_CAP=3 children alive at once (peak was ${peak})`);
     assert.ok(peak >= 2, `readers DID overlap (peak ${peak}) — not accidentally serialized`);
-    h.close(); assert.equal((await h.exited).code, 0);
-  } finally { h.child.kill('SIGKILL'); }
+    h.close(); assert.equal((await exited(h)).code, 0);
+  } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });
 
 // ---- writer-barrier (I2 + I3): a writer waits for an earlier reader; a later reader waits for it ---
@@ -330,7 +327,7 @@ test('I2/I3 writer-barrier: [reader, writer, reader] one burst → end(reader1) 
     assert.ok(endReader1 >= 0 && startWriter >= 0 && startReader2 >= 0, `boundary events present (end#80=${endReader1}, start#81=${startWriter}, start#82=${startReader2})`);
     assert.ok(endReader1 <= startWriter, 'the writer waits for the earlier-queued reader to finish (I3)');
     assert.ok(startWriter < startReader2, 'the later reader waits for the writer (I2)');
-    h.close(); assert.equal((await h.exited).code, 0);
+    h.close(); assert.equal((await exited(h)).code, 0);
   } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });
 
@@ -357,7 +354,7 @@ test('cancel-during-diff-fast-path: cancel while the diff awaits the writer tail
     h.send({ jsonrpc: '2.0', id: 92, method: 'ping' });
     await h.reply(92);
     h.close();
-    assert.equal((await h.exited).code, 0, 'server drains and exits 0');
+    assert.equal((await exited(h)).code, 0, 'server drains and exits 0');
     assert.ok(!h.responses().some((r) => r.id === 91), 'the cancelled diff fast path emitted NO reply');
   } finally { h.child.kill('SIGKILL'); cleanup(dir); }
 });

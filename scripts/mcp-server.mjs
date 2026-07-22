@@ -726,7 +726,7 @@ function handleMessage(msg) {
 
 // Start the readline loop ONLY when run as the entry point (node mcp-server.mjs) — so tests can
 // import the pure helpers (queueKeyFor) without a server attaching to their own stdin.
-const isMain = !!process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain = !!process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
 if (isMain) {
   const rl = createInterface({ input: process.stdin });
   rl.on('line', handle);
