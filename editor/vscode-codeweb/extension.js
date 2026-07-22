@@ -26,11 +26,13 @@ function findGraph(dir) {
 
 function loadIndex(graphPath) {
   let st;
-  try { st = fs.statSync(graphPath); } catch { return null; }
+  try { st = fs.statSync(graphPath); } catch { graphCache.delete(graphPath); return null; }
   const hit = graphCache.get(graphPath);
   if (hit && hit.mtimeMs === st.mtimeMs && hit.size === st.size) return hit.index;
   try {
-    const index = buildLensIndex(JSON.parse(fs.readFileSync(graphPath, 'utf8')));
+    // #38: hand the previous index to buildLensIndex so the unchanged symbols' blast radii carry
+    // across the rebuild (memo persistence) instead of every closure recomputing from scratch.
+    const index = buildLensIndex(JSON.parse(fs.readFileSync(graphPath, 'utf8')), hit && hit.index);
     graphCache.set(graphPath, { mtimeMs: st.mtimeMs, size: st.size, index });
     return index;
   } catch { return null; }
@@ -45,7 +47,11 @@ class CodewebLensProvider {
     this._emitter = new vscode.EventEmitter();
     this.onDidChangeCodeLenses = this._emitter.event;
   }
-  refresh() { graphCache.clear(); this._emitter.fire(); }
+  // #38: refresh no longer clears graphCache. loadIndex detects the graph.json mtime/size change
+  // and rebuilds on the next provideCodeLenses, carrying the blastMemo entries the edge delta
+  // leaves untouched (buildLensIndex(graph, prevIndex)); a stale entry for a deleted graph is
+  // dropped by loadIndex's stat-failure path. Clearing here would throw that memo away every save.
+  refresh() { this._emitter.fire(); }
   dispose() { this._emitter.dispose(); }
 
   provideCodeLenses(doc) {

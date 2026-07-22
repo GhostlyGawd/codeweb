@@ -13,7 +13,9 @@
   ],
   "main": "./extension.js",
   "activationEvents": [
-    "onStartupFinished"
+    "workspaceContains:**/.codeweb/graph.json",
+    "onCommand:codeweb.refreshLenses",
+    "onCommand:codeweb.openReport"
   ],
   "capabilities": {
     "virtualWorkspaces": false,

@@ -51,6 +51,24 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li>**The editor CodeLens recomputes far less on every save: blast radius uses the canonical</li>
+</ul>
+<p>  pointer-queue walk, the blast memo now persists across graph refreshes, and the extension only</p>
+<p>  activates in workspaces that actually hold a codeweb graph.** <code>blastOf</code> (<code>lens-core.js</code>) walked the</p>
+<p>  BFS frontier with <code>queue.shift()</code> — O(frontier) per pop, the same O(n²) cliff <code>graph-ops</code>'s</p>
+<p>  <code>impactCountOf</code> already fixed (19.9s→0.3s on a 240k closure) — and rebuilt a <code>[...callIn, ...inheritIn]</code></p>
+<p>  array on every visit; it now mirrors <code>impactCountOf</code> exactly (index-pointer queue, direct Set</p>
+<p>  iteration), with byte-identical results (verified: hub blast 17600 = 17600). `buildLensIndex(graph,</p>
+<p>  prevIndex)` carries every memo entry whose blast provably cannot have moved — the invalid set is the</p>
+<p>  forward closure of the call/inherit edge delta's <code>to</code> endpoints over the new graph — so a save that</p>
+<p>  touches a few edges no longer reruns every symbol's transitive closure (<code>refresh()</code> stopped clearing</p>
+<p>  the cache; a full-file pass is warm-0.23 ms vs cold-hundreds-of-ms on a dense graph). <code>package.json</code></p>
+<p>  <code>activationEvents</code> moved from <code>onStartupFinished</code> (every window) to `workspaceContains:**/.codeweb/</p>
+<p>  graph.json` plus the two commands as an explicit palette fallback. Property test: for randomized</p>
+<p>  graph pairs mutating 1–5 edges AND adding/removing nodes with their edges, the carried index returns</p>
+<p>  the same blast as a cold rebuild for every id; a counting test proves untouched ids are reused, not</p>
+<p>  recomputed. (round 2, finding #38)</p>
+<ul>
 <li>**<code>report.html</code> no longer embeds the four per-node fields and the per-edge field the template never</li>
 </ul>
 <p>  reads.** The self-contained report inlines the graph into a <code>&lt;script id="graph-data"&gt;</code> payload the</p>

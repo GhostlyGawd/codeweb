@@ -10,6 +10,22 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Changed
+- **The editor CodeLens recomputes far less on every save: blast radius uses the canonical
+  pointer-queue walk, the blast memo now persists across graph refreshes, and the extension only
+  activates in workspaces that actually hold a codeweb graph.** `blastOf` (`lens-core.js`) walked the
+  BFS frontier with `queue.shift()` — O(frontier) per pop, the same O(n²) cliff `graph-ops`'s
+  `impactCountOf` already fixed (19.9s→0.3s on a 240k closure) — and rebuilt a `[...callIn, ...inheritIn]`
+  array on every visit; it now mirrors `impactCountOf` exactly (index-pointer queue, direct Set
+  iteration), with byte-identical results (verified: hub blast 17600 = 17600). `buildLensIndex(graph,
+  prevIndex)` carries every memo entry whose blast provably cannot have moved — the invalid set is the
+  forward closure of the call/inherit edge delta's `to` endpoints over the new graph — so a save that
+  touches a few edges no longer reruns every symbol's transitive closure (`refresh()` stopped clearing
+  the cache; a full-file pass is warm-0.23 ms vs cold-hundreds-of-ms on a dense graph). `package.json`
+  `activationEvents` moved from `onStartupFinished` (every window) to `workspaceContains:**/.codeweb/
+  graph.json` plus the two commands as an explicit palette fallback. Property test: for randomized
+  graph pairs mutating 1–5 edges AND adding/removing nodes with their edges, the carried index returns
+  the same blast as a cold rebuild for every id; a counting test proves untouched ids are reused, not
+  recomputed. (round 2, finding #38)
 - **`report.html` no longer embeds the four per-node fields and the per-edge field the template never
   reads.** The self-contained report inlines the graph into a `<script id="graph-data">` payload the
   browser parses on load, but `report-template.html`'s read-set is `id,label,domain,kind,role,file,
