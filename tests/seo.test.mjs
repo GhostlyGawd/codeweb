@@ -23,6 +23,20 @@ test('F6: robots.txt + sitemap.xml exist, and internal markdown is excluded from
   }
 });
 
+test('F6b: the IndexNow key deploys with the site and matches the committed key', () => {
+  const key = read('site/indexnow-key.txt').trim();
+  assert.match(key, /^[a-f0-9]{32}$/, 'key is 32 hex chars');
+  assert.ok(existsSync(join(PLUGIN_ROOT, 'docs', `${key}.txt`)), 'the build emits the key file at the site root');
+  assert.equal(read(`docs/${key}.txt`).trim(), key, 'file content is the key itself (the IndexNow ownership proof)');
+});
+
+test('F6c: search engines get pinged on every site deploy, no account needed', () => {
+  const wf = read('.github/workflows/indexnow.yml');
+  assert.match(wf, /api\.indexnow\.org/, 'posts to the shared IndexNow endpoint (Bing, Yandex, and the rest)');
+  assert.match(wf, /docs\/\*\*/, 'fires when the deployed site changes');
+  assert.match(wf, /sitemap\.xml/, 'submits the URLs the sitemap already declares');
+});
+
 test('F5: the demo — the most-shared URL — finally unfurls', () => {
   const demo = read('docs/demo/index.html');
   assert.match(demo, /<title>[^<]*axios[^<]*<\/title>/i, 'the title says what the demo IS');

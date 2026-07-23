@@ -1,0 +1,33 @@
+name: indexnow
+
+# SEO F6: tell the IndexNow-federated engines (Bing, Yandex, Seznam, Naver) the site changed.
+# The key file deploys with the site (site/build.mjs emits docs/<key>.txt), so the ping needs no
+# account and no secret. Google ignores IndexNow — it finds the same sitemap through robots.txt;
+# Search Console remains the only piece that needs the operator (OPERATOR-ACTIONS.md §3).
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**']
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Submit the sitemap's URLs to api.indexnow.org
+        run: |
+          KEY="$(tr -d '[:space:]' < site/indexnow-key.txt)"
+          URLS="$(grep -o '<loc>[^<]*</loc>' docs/sitemap.xml | sed 's/<[^>]*>//g' | jq -R . | jq -s .)"
+          BODY="$(jq -n --arg host "ghostlygawd.github.io" \
+                        --arg key "$KEY" \
+                        --arg keyLocation "https://ghostlygawd.github.io/codeweb/${KEY}.txt" \
+                        --argjson urlList "$URLS" \
+                        '{host:$host,key:$key,keyLocation:$keyLocation,urlList:$urlList}')"
+          echo "$BODY"
+          CODE="$(curl -sS -o /tmp/resp -w '%{http_code}' -X POST 'https://api.indexnow.org/indexnow' \
+                  -H 'Content-Type: application/json; charset=utf-8' -d "$BODY")"
+          cat /tmp/resp; echo "IndexNow response: $CODE"
+          case "$CODE" in 2*) exit 0 ;; *) exit 1 ;; esac
