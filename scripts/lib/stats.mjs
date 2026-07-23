@@ -57,6 +57,30 @@ export function bump(graphPath, counter, n = 1) {
   } catch { /* a receipt must never break the tool */ }
 }
 
+// REVENUE §3.2: the one honest in-product ask — computed ONLY from local counters, at a success
+// high point, throttled hard. Due when codeweb has demonstrably delivered (3+ regressions caught
+// before landing, or 200+ queries served) and no ask has fired in 30 days. Fail-open to FALSE:
+// any doubt means silence, never a nag. CODEWEB_NO_STATS=1 disables (no ledger -> no ask).
+const ASK_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000;
+export function sponsorAskDue(graphPath) {
+  try {
+    const s = readStats(graphPath);
+    if (!s) return false;
+    if (s.lastSponsorAskAt && Date.now() - Date.parse(s.lastSponsorAskAt) < ASK_INTERVAL_MS) return false;
+    const life = lifetimeTotals(s);
+    return (life.regressionsFlagged || 0) >= 3 || (life.queriesServed || 0) >= 200;
+  } catch { return false; }
+}
+export function recordSponsorAsk(graphPath) {
+  if (process.env.CODEWEB_NO_STATS === '1' || !graphPath) return;
+  try {
+    const s = readStats(graphPath);
+    if (!s) return;
+    s.lastSponsorAskAt = new Date().toISOString();
+    atomicWrite(statsPathOf(graphPath), JSON.stringify(s));
+  } catch { /* a receipt must never break the tool */ }
+}
+
 /** RETENTION §4: stamp a completed FULL map — firstMapAt (once), lastMapAt, mapCount, and the
  *  monthly fullMaps counter (the refresh-vs-remap ratio's denominator). Dates and integers only;
  *  same locality/fail-open contract as bump(). Reused (memo-hit) runs must NOT call this — the

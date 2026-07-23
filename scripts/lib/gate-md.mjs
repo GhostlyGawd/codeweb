@@ -55,6 +55,6 @@ export function gateComment(p, { history = null } = {}) {
   L.push('');
   // R7: the footer finally links home — this comment is codeweb's highest-frequency impression
   // on people who never installed it.
-  L.push('<sub>codeweb structural review (same verdict as the gate). Reproduce locally: `node scripts/ci-gate.mjs --base <base-sha> --target <dir>` · [map your own repo with codeweb →](https://github.com/GhostlyGawd/codeweb)</sub>');
+  L.push('<sub>codeweb structural review (same verdict as the gate). Reproduce locally: `node scripts/ci-gate.mjs --base <base-sha> --target <dir>` · [map your own repo with codeweb →](https://github.com/GhostlyGawd/codeweb) · free & local · [support the project](https://github.com/sponsors/GhostlyGawd)</sub>');
   return L.join('\n') + '\n';
 }

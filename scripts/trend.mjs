@@ -168,3 +168,8 @@ if (opts.history) {
 }
 if (!rows.length) { console.error('[codeweb] no snapshots to chart'); process.exit(1); }
 console.log(renderTrend(rows, { json: opts.json }));
+// REVENUE §3.4: someone graphing structural health over 5+ snapshots is doing by hand the job a
+// hosted rollup would do — the team-lead surface gets the one-line rail (text mode only).
+if (!opts.json && rows.length >= 5) {
+  console.log('\ncodeweb is free forever — sponsoring funds the benchmarks: https://github.com/sponsors/GhostlyGawd');
+}

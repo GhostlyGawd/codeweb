@@ -287,6 +287,15 @@ if (partial) {
     // Returning user (the hooks/MCP have accrued activity here): receipt instead of onboarding.
     console.error(`[run]   codeweb here so far: ${receipt} (full receipt: scripts/stats.mjs)`);
     if (!opts.open) console.error(`[run]   open ${join(ws, 'report.html')} in your browser (or re-run with --open)`);
+    // REVENUE §3.2: the ONE in-product ask, at the receipt high point only — local counters,
+    // 30-day throttle, never on first contact, never on agent/failure surfaces.
+    try {
+      const { sponsorAskDue, recordSponsorAsk } = await import('./lib/stats.mjs');
+      if (sponsorAskDue(join(ws, 'graph.json'))) {
+        console.error('[run]   codeweb is free forever — sponsoring funds the frontier-agent benchmarks behind its claims: https://github.com/sponsors/GhostlyGawd');
+        recordSponsorAsk(join(ws, 'graph.json'));
+      }
+    } catch { /* the ask must never break the pipeline */ }
   } else {
     // ACTIVATION A5: first map of this repo — the three moves that turn one run into a habit.
     // #5 still holds: the map's whole point is to be LOOKED AT, so seeing it is step 1.

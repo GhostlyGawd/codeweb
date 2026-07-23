@@ -28,13 +28,13 @@ test('--out redirects the whole build', () => {
 test('builder runs and reports the expected page count', () => {
   const r = runNode(BUILD, ['--out', OUT]);
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /built 6 page\(s\)/); // +case-study (SEO F8)
+  assert.match(r.stdout, /built 7 page\(s\)/); // +case-study (SEO F8) +support (REVENUE §4.3)
 });
 
 test('emits every page in the information architecture', () => {
   runNode(BUILD, ['--out', OUT]);
   const files = htmlFiles();
-  for (const p of ['index.html', 'product.html', 'research.html', 'start.html', 'changelog.html', 'case-study.html']) {
+  for (const p of ['index.html', 'product.html', 'research.html', 'start.html', 'changelog.html', 'case-study.html', 'support.html']) {
     assert.ok(files.includes(p), `missing ${p}`);
   }
 });
