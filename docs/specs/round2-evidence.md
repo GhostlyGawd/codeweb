@@ -1444,3 +1444,68 @@ honest number is recorded; the child-boundary elimination (gate i) is the load-b
 term. (5) The engine load-failure stderr is now deduped per-run via a `_failLogged` set (untested
 path — engines load fine on every gate box) instead of the old per-`===undefined` gate; astLoadFailed
 (the fragment-affecting flag) is per-run and P1-covered.
+
+### WS-H review+verification
+
+Adversarial build-review + usage-verification of #40 (extract-symbols decomposition) + #18b (in-process
+hook), the FINAL round-2 workstream (reviewer: Fable). Every claim reproduced from source; the whole
+ballgame is byte-identity of the foundation file. **VERDICT: PASS — no structural problem found, no
+assertion weakened, no code fix needed (this entry is the only change).**
+
+**Self-map byte-cmp — IDENTICAL (the load-bearing test).** Froze ONE 249-file source tree
+(`SOURCE_DATE_EPOCH=1753056000`), ran the FULL pipeline at 319b0ae (pre-WS-H) and 6fb49ff against it
+(`--out-dir` outside the tree). Banners character-identical (1390 symbols / 4469 edges / 1603 dropped /
+3 dispatch). `cmp` byte-identical (generatedAt included): **fragment.json, graph.json, report.md,
+report.html, overlap.md, optimize.md**. The 4 mtime-stamped sidecars (index-lite/brief/similar-index/
+hook-baseline) differ ONLY in the embedded graph.json `graphMtimeMs`/`"m"` wall-clock stamp (the two
+maps ran ~5 s apart) — content-identical once normalized, and the graph content hash `b0d41d7b…` +
+size 1029278 match (the "mod generatedAt" carve-out, not structural). P1 direct `extract --out` also
+byte-identical. The decomposition changes NOTHING observable.
+
+**IE-EQUIVALENCE @ 40, both legs.** default **48/48** (IE-EQUIVALENCE 40/40), kill-switch
+`CODEWEB_NAME_DELTA=0` **48/48** (40/40). No flake at the full floor.
+
+**ctx-completeness + leaf.** Free-identifier audit of edge-derive.mjs: every name resolves to one of
+5 pure imports (KEYWORDS/parseSignature/isTestFile/buildInnermostIndex/importCandidates), local
+`idFile`, the 6 ctx fields (byName/pkgOf/roleFor/resolveFileMember/closureLocalIds/legacyFallback), or
+a function param/local — **zero reach-back** into orchestrator scope (the one bare `nodes` is comment
+prose). #17 `cand` moved with the body (local, returned sorted); #19 interning + #17 delta stayed
+orchestration (no reference in the lib). Call-site (:902) provides exactly the 6 destructured fields.
+**Leaf:** only extract-symbols imports edge-derive; its 4 imported libs are node:path-only (no
+back-edge) — **+0 cycle** confirmed by reading.
+
+**Main-guard side-effect-free.** run-extract.test.mjs 4/4 (SE-IMPORT-CLEAN + IE-TWO-RUNS +
+…-CONCURRENT + RE-ERRORS). Independent probe: `import()` under adversarial argv (`--out
+SHOULD_NOT_EXIST.json --engine bogus`) fired no main(), wrote no file, exposed runExtract. `runExtract`
+throws ExtractError; only main() exits.
+
+**22 conversions honest.** Extractor-invoking spawn sites **80 → 58 = exactly 22 retired** (≥20 bar,
+occurrence-level, no double-counting); 23 sites converted − 1 deliberate CLI-pin spawn added in
+run-extract.test.mjs; incremental-edges keeps 1 (IE-INPROC-PARITY). Spot-checked call-apply-chain,
+class-usage-ref, signature, python-imports, extract-rust: genuinely in-process (import runExtract, 0
+extractor spawns), and the ONLY dropped assertion is the spawn `status===0` boilerplate — content
+assertions identical. 10 converted files (51 tests) green on **regex + tree-sitter + default** tiers
+(no AST assumption introduced).
+
+**#18b parity + perf.** Hook suite (post-edit-diff + hook-sidecar + cache-unification) 20/20;
+S18b-PARITY proves additionalContext byte-identical in-process vs `CODEWEB_HOOK_INPROC=0`. Independent
+perf (median-of-5, 16.8k `writeLoadedCorpus({files:800})`, this box): no-change fire **in-process 681
+ms vs forced-spawn 1067 ms, Δ386 ms** — **< 700 ms floor MET** (method: `node post-edit-diff.mjs` with
+a no-change PostToolUse payload on stdin, hrtime end-to-end, mapped once to warm the cache). Fallback
+counter verified: a forced in-process failure (`CODEWEB_ENGINE=bogus` → runExtract throws) bumps
+`hookInprocFallbacks:1`, hook fail-open exit 0. hook-fastpath-floor.md closure honest (my 681/1067
+reproduces its 698/1089 within box noise; `>1.5 s` trigger legitimately consumed, next trigger set).
+
+**Never-weaken (319b0ae..6fb49ff).** Kill-switch assertion VERBATIM (`assert.equal(ec2.edged,
+ec2.total, 'a changed symbol set forces a full re-edge (correctness over speed)')`); 14 `deepEqual`
+correctness gates intact; the 3 byte-gates moved `assert.ok(Buffer.equals(--out files))` →
+`assert.equal(fragment bytes)` (identical strictness, same messages); rulesSig conjunct (:918) + WS-D
+`CODEWEB_NAME_DELTA==='0'` (:799) present; CHANGELOG + docs/changelog.html landed with every commit.
+
+**Usage.** Full `run.mjs` map on the real repo end-to-end via runExtract (1390 symbols, all 5 stages,
+9 artifacts). Real post-edit hook, fired as hooks.json does: no-change → null; forced edge-derive↔
+graph-ops cycle → correctly flagged, in-process (`hookInprocFallbacks` 0). Full `npm test`
+(CODEWEB_IE_TRIALS=40): **817 pass / 0 fail / 5 env-skips**, 69 s, porcelain clean. CI `ci` #167 =
+success at 6fb49ff (pre-push).
+
+Shas reviewed: 52254c5 · c7c8983 · d2132a2 · 173a119 · 247134d · 851c0f2 · 6fb49ff.
