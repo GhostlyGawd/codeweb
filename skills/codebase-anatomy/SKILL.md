@@ -158,6 +158,14 @@ on the top subsystems by size and cross-domain edge density. If total nodes woul
 cap symbol expansion to the focus area and state it. The HTML renderer auto-starts in
 domain-aggregated view above ~600 nodes and lets the user expand.
 
+## Execute the campaign (`/codeweb-apply`)
+
+When the user asks to ACT on the consolidation plan (not just see it), follow `commands/apply.md`
+verbatim: **ready-tier merges only**, per step simulate → apply (`codemod.mjs --write`) →
+refresh → diff-gate → run the mapped test subset → commit, or **revert and record blocked with
+the gate's reason**. The deterministic gate owns every verdict — never overrule a red diff or a
+failing test. End with the receipt line (`applied N merge(s) · −L LOC · blocked B · gate green`).
+
 ## Handoffs
 
 Each of these is a separate skill that may or may not be installed. When one is absent, the

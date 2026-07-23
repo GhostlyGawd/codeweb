@@ -24,6 +24,7 @@ import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols, findingBuckets, bucketsLine } from './lib/graph-ops.mjs';
 import { readHistory } from './lib/history.mjs'; // RETENTION R1/R8: the brief's progression tail
+import { loadNarration } from './lib/narration.mjs'; // AI-IDEAS 3: agent-written notes, provenance-labeled
 import { diffGraphs } from './lib/diff-core.mjs'; // #33: the codeweb_diff comparison, served in-process
 import { runQuery } from './lib/query-core.mjs';
 import { findSymbols } from './lib/find-core.mjs';
@@ -620,6 +621,8 @@ function handleToolCall(id, params) {
       if (stale) payload.stale = stale;
       // RETENTION R1/R8: the progression tail rides the brief here too (hook/CLI parity).
       try { const h = readHistory(resolve(graphPath), 4); if (h.length >= 2) payload.history = h; } catch { /* best-effort */ }
+      // AI-IDEAS 3: agent-written narration (provenance-labeled downstream); stale -> absent.
+      try { const n = loadNarration(resolve(graphPath)); if (n) payload.narration = n; } catch { /* best-effort */ }
       return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
     } catch { /* fall through to the spawned artifact */ }
   }

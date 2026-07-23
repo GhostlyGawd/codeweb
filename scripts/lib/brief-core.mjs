@@ -76,7 +76,12 @@ export function renderBrief(b) {
   L.push(`codeweb brief — ${b.target || b.root || 'mapped repo'}: ${b.size.symbols} symbols / ${b.size.files} files / ${b.size.domains} domains (${(b.languages || []).join(', ') || 'unknown languages'})`);
   if (b.domains.length) {
     L.push('areas:');
-    for (const d of b.domains) L.push(`  - ${d.name} (${d.nodes}): ${d.summary}`);
+    for (const d of b.domains) {
+      // AI-IDEAS Idea 3: the narration sidecar's one-liner says what the area is FOR — always
+      // provenance-labeled, and absent (or stale) it simply isn't here.
+      const note = b.narration?.domains?.[d.name];
+      L.push(`  - ${d.name} (${d.nodes}): ${d.summary}${note ? ` — ${note} [agent-written]` : ''}`);
+    }
   }
   if (b.loadBearing.length) {
     L.push(`load-bearing (most depended-on — check impact before touching): ${b.loadBearing.slice(0, 6).map((s) => `${s.label}×${s.fanIn}`).join(', ')}`);

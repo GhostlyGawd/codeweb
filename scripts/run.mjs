@@ -37,6 +37,7 @@ const USAGE = `usage: run.mjs [<SRC>] [--target <label>] [--out-dir <dir>] [--op
   --target <label> display label stamped into the map (default: last two path segments of <SRC>)
   --out-dir <dir>  where the artifacts go (default: <SRC>/.codeweb — where MCP + hooks find them)
   --open           open report.html when the map is built
+  --serve          after the map, serve the workspace at http://127.0.0.1:<port> (localhost only)
   --full           recompute every stage (skip the fragment memo + edge cache)
   --allow-empty    permit a target with no supported source (writes an empty map)
   --stages <phase> partial pipeline; only 'through-overlap' (extract+cluster+overlap, skip
@@ -50,6 +51,7 @@ const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
     target: { type: 'string', default: null },
     'out-dir': { type: 'string', default: null },
     open: { type: 'bool', default: false },
+    serve: { type: 'bool', default: false },         // AI-IDEAS/reach: give the report a real origin, localhost only
     full: { type: 'bool', default: false },
     'allow-empty': { type: 'bool', default: false }, // forwarded to extract: skip the empty-map guard
     stages: { type: 'string', default: null },       // finding #42: partial pipeline (trend fast path)
@@ -59,7 +61,7 @@ const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
 // FUNNEL #2 / FORMS cut #4: the main form has zero required fields. <SRC> defaults to the
 // current directory; the empty-target guard downstream keeps a wrong cwd from producing a
 // silent nonsense map.
-const opts = { src: pos[0] ?? '.', target: flags.target, outDir: flags['out-dir'], open: flags.open, full: flags.full, allowEmpty: flags['allow-empty'], stages: flags.stages, coverage: flags.coverage };
+const opts = { src: pos[0] ?? '.', target: flags.target, outDir: flags['out-dir'], open: flags.open, serve: flags.serve, full: flags.full, allowEmpty: flags['allow-empty'], stages: flags.stages, coverage: flags.coverage };
 // finding #42: --stages is a partial pipeline. Only 'through-overlap' is valid — any other value dies
 // with usage (exit 2), so a typo can never silently run a different phase set. A partial run computes
 // extract+cluster+overlap (graph.json's nodes/edges/domains/overlaps — all trend's metrics need),
@@ -305,4 +307,6 @@ if (partial) {
     console.error(`[run]   2. live queries in Claude Code: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp`);
     console.error(`[run]   3. after edits: re-run codeweb here — the refresh is cache-warm (seconds, not a re-map)`);
   }
+  // reach: --serve keeps the process alive serving THIS workspace on localhost (Ctrl-C to stop).
+  if (opts.serve) run('serve', S('scripts/serve.mjs'), [ws], false);
 }
