@@ -70,7 +70,16 @@
 <p>  orchestrator injects <code>readPkg</code> + the statted <code>sources</code> map and applies the returned ids-to-stamp,</p>
 <p>  order-safe because the walk never reads <code>pub</code>) and <code>resolveTypedIntents</code> (Java/C# typed-receiver</p>
 <p>  dispatch), which mechanically retires the finding's named shadowing smells (<code>rel</code> loop-var vs the</p>
-<p>  <code>rel()</code> fn, a <code>files</code> local vs the global). (round 2, finding #40)</p>
+<p>  <code>rel()</code> fn, a <code>files</code> local vs the global). Stage 3: the orchestrator now exposes</p>
+<p>  <code>runExtract(opts)</code> and its <strong>import is side-effect-free</strong> — argv parsing, every <code>process.exit</code>, and</p>
+<p>  the <code>--out</code>/stdout writes moved to a <code>main()</code> reached only through the repo's proven</p>
+<p>  <code>import.meta.url</code> guard idiom; the guard-path exits became <code>ExtractError</code> throws with</p>
+<p>  byte-identical message text (usage / bad-engine / not-found / empty-tree / zero-symbols), which</p>
+<p>  <code>main()</code> prints and exits on. Run state that was module-global is now <code>runExtract</code> locals; the WASM</p>
+<p>  parser engines stay memoized process-wide (the load *promise* is single-flighted, so concurrent</p>
+<p>  first-calls don't double-init). <code>import('extract-symbols.mjs')</code> now parses no argv, writes no</p>
+<p>  files, and never exits — the precondition for the in-process hook (#18b) and for running the</p>
+<p>  extractor under node:test's concurrent subtests. (round 2, finding #40)</p>
 <ul>
 <li>**"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a</li>
 </ul>

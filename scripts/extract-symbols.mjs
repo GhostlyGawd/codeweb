@@ -16,6 +16,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { relative, resolve, join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url'; // finding #40 (T-40.3): main-guard idiom (the hooks' verbatim compare)
 import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
 import { atomicWrite, parseArgs } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
 import { SRC_RE } from './lib/common.mjs'; // finding 25: one truth for the mappable-source list (the copy here could drift)
@@ -61,31 +62,32 @@ const SCANNER_VERSION = 17; // v17: derivation-semantics change (WS-D review) �
 // truth shared with the edge deriver that keys on it most.
 
 const USAGE = 'usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--cache f.json] [--full] [--allow-empty] [--no-ctags] [--engine regex|tree-sitter]';
-// finding 24: THE flag loop (lib/cli.mjs parseArgs) — the hand-rolled copy here treated any unknown
-// flag as the target path when <path> was still unset; one policy now, --help included.
-const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
-  usage: USAGE,
-  flags: {
-    out: { type: 'string', default: null },
-    target: { type: 'string', default: null },
-    cache: { type: 'string', default: null },       // F0: per-file scan cache (incremental freshness)
-    full: { type: 'bool', default: false },         // F9: ignore the edge cache, derive all edges from scratch
-    'no-ctags': { type: 'bool', default: false },
-    'allow-empty': { type: 'bool', default: false }, // intentionally-sparse targets: skip the empty-map guard
-    engine: { type: 'string', default: process.env.CODEWEB_ENGINE || null }, // optional tree-sitter tier (exact cyclomatic); default regex
-  },
-});
-const opts = { path: pos[0] ?? null, out: flags.out, ctags: !flags['no-ctags'], target: flags.target, cache: flags.cache, full: flags.full, allowEmpty: flags['allow-empty'], engine: flags.engine };
-// Round 2, finding #7: an unknown engine value used to silently ENABLE the AST tier (anything
-// non-"regex" reads as tree-sitter below) — README's since-removed `--engine read` documented the
-// opposite intent. Loud exit 2 (the #24 arg policy); catches CODEWEB_ENGINE garbage too, since the
-// env feeds the same parseArgs default. 'ts' stays a valid tree-sitter alias.
-if (opts.engine && !['regex', 'tree-sitter', 'ts'].includes(opts.engine)) {
-  console.error(`[extract] unknown --engine "${opts.engine}" (valid: regex, tree-sitter)`);
-  process.exit(2);
+// finding #40 (WS-H T-40.3): argv parsing, ALL process exits, and the --out/stdout writes live in
+// main() + the guard at EOF; runExtract(opts) is a pure engine call whose IMPORT is side-effect-free
+// (the precondition for #18b's in-process hook and the deep fix for #6's spawn-bound trials).
+// Guard-path exits become ExtractError throws with byte-identical message text — main() prints+exits.
+class ExtractError extends Error {
+  constructor(code, message) { super(message); this.name = 'ExtractError'; this.code = code; }
 }
-if (!opts.path) { console.error(USAGE); process.exit(2); }
-const root = resolve(opts.path);
+// WASM parser engines are stateless and expensive to init — memoized PROCESS-WIDE (not per
+// runExtract call), so the in-process hook (#18b) and #6's concurrent IE trials pay the ~1.4s init
+// at most once. Memoize the load PROMISE, not the resolved value, so two concurrent first-calls
+// single-flight it; a null resolution = load-failed, kept (per-process "once failed, stays null",
+// mirroring the old module-global memo).
+let _tsEnginePromise;               // undefined = not attempted; Promise<engine|null>
+const _langEnginePromises = {};     // langKey -> Promise<engine|null>
+
+export async function runExtract(opts = {}) {
+  // Defaults == today's CLI defaults (ctags on, engine from CODEWEB_ENGINE) so engineMode / cache
+  // namespace / SCANNER_VERSION match — a warm cache the CLI wrote is reused by an in-process call.
+  opts = { path: null, out: null, ctags: true, target: null, cache: null, full: false, allowEmpty: false, engine: process.env.CODEWEB_ENGINE || null, ...opts };
+  // finding #7: an unknown engine must not silently enable the AST tier — loud (exit 2 via main);
+  // catches CODEWEB_ENGINE garbage too (same default). 'ts' stays a valid tree-sitter alias.
+  if (opts.engine && !['regex', 'tree-sitter', 'ts'].includes(opts.engine)) {
+    throw new ExtractError(2, `[extract] unknown --engine "${opts.engine}" (valid: regex, tree-sitter)`);
+  }
+  if (!opts.path) throw new ExtractError(2, USAGE);
+  const root = resolve(opts.path);
 
 // Spec E: role overrides from the TARGET's own codeweb.rules.json (`roles: [{glob, role}]`) —
 // applied after path heuristics, first match wins, invalid config is a hard exit 2 (never a
@@ -94,9 +96,9 @@ let roleOverride = () => null;
 try {
   const rulesPath = join(root, 'codeweb.rules.json');
   if (existsSync(rulesPath)) roleOverride = compileRoleOverrides(JSON.parse(readFileSync(rulesPath, 'utf8')).roles);
-} catch (e) { console.error(`[extract] ${e.message}`); process.exit(2); }
+} catch (e) { throw new ExtractError(2, `[extract] ${e.message}`); }
 const roleFor = (rel) => roleOverride(rel) || roleOf(rel);
-if (!existsSync(root)) { console.error(`[extract] not found: ${root}`); process.exit(1); }
+if (!existsSync(root)) throw new ExtractError(1, `[extract] not found: ${root}`);
 
 const SRC = SRC_RE; // finding 25: the extractor and the hooks share ONE source-extension list
 const SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
@@ -226,10 +228,9 @@ const files = listFiles();
 // `--allow-empty` keeps intentionally-sparse targets (CI skeletons, new repos) workable.
 const SUPPORTED_EXTS = SRC.source.match(/\(([^)]+)\)/)[1].split('|').map((e) => `.${e}`);
 if (files.length === 0 && !opts.allowEmpty) {
-  console.error(`[extract] no supported source files under ${root}`);
-  console.error(`[extract]   looked for: ${SUPPORTED_EXTS.join(' ')} (node_modules, dist, vendor and friends are skipped)`);
-  console.error('[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
-  process.exit(1);
+  throw new ExtractError(1, `[extract] no supported source files under ${root}\n` +
+    `[extract]   looked for: ${SUPPORTED_EXTS.join(' ')} (node_modules, dist, vendor and friends are skipped)\n` +
+    '[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
 }
 
 // Tree-sitter tier — DEFAULT-ON since v9 (it was opt-in): dynamic-dispatch call edges (this.m(),
@@ -254,26 +255,26 @@ if (opts.engine !== 'regex') {
 // Poison guard: if a probe said "available" but the real load later fails, complexity/dispatch
 // fell back to regex mid-run — a `+ts`-namespaced cache must never memoize that state.
 let astLoadFailed = false;
-let _tsEngineState; // undefined = not attempted, null = load failed, object = loaded
+let astEngineLoadedThisRun = false;    // per-run: an engine actually initialized this run (banner: loaded vs idle)
+const _failLogged = new Set();          // per-run: engine keys whose load-failure was already logged
 async function tsEngineGet() {
   if (!astProbe.ts) return null;
-  if (_tsEngineState === undefined) {
-    _tsEngineState = await loadTsEngine();
-    if (!_tsEngineState) { astLoadFailed = true; console.error('[extract] AST probe passed but the ts engine failed to load — scan cache disabled for this run'); }
-  }
-  return _tsEngineState;
+  if (_tsEnginePromise === undefined) _tsEnginePromise = loadTsEngine().then((e) => e || null, () => null); // single-flight, process-wide
+  const eng = await _tsEnginePromise;
+  if (eng) astEngineLoadedThisRun = true;
+  else { astLoadFailed = true; if (!_failLogged.has('ts')) { _failLogged.add('ts'); console.error('[extract] AST probe passed but the ts engine failed to load — scan cache disabled for this run'); } }
+  return eng;
 }
 // Java/C# dispatch tier (docs/specs/java-cs-tree-sitter.md): regex keeps owning their NODES;
 // the AST contributes the dispatch edges regex precision-gates away. Loaded lazily on the first
 // file of each language; unavailable -> byte-identical regex output (the standing contract).
-const langEngines = {}; // 'java'|'csharp' -> engine|null
 async function langEngineFor(langKey) {
   if (opts.engine === 'regex' || !astProbe[langKey]) return null;
-  if (langEngines[langKey] === undefined) {
-    langEngines[langKey] = await loadLangEngine(langKey);
-    if (!langEngines[langKey]) { astLoadFailed = true; console.error(`[extract] AST probe passed but the ${langKey} engine failed to load — scan cache disabled for this run`); }
-  }
-  return langEngines[langKey];
+  if (_langEnginePromises[langKey] === undefined) _langEnginePromises[langKey] = loadLangEngine(langKey).then((e) => e || null, () => null); // single-flight, process-wide
+  const eng = await _langEnginePromises[langKey];
+  if (eng) astEngineLoadedThisRun = true;
+  else { astLoadFailed = true; if (!_failLogged.has(langKey)) { _failLogged.add(langKey); console.error(`[extract] AST probe passed but the ${langKey} engine failed to load — scan cache disabled for this run`); } }
+  return eng;
 }
 
 // F0: load the scan cache (keyed by content hash + engine mode + scanner version). A re-run reuses
@@ -1036,9 +1037,8 @@ const fragment = {
 // (A `<module>` pseudo-node only exists where module-level code does something, so config-only
 // trees can land here.) Guarded before any artifact/cache write so a failed run leaves nothing.
 if (nodes.length === 0 && !opts.allowEmpty) {
-  console.error(`[extract] 0 symbols found in ${files.length} supported file(s) under ${root} — the files parsed but defined no functions, classes, or methods.`);
-  console.error('[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
-  process.exit(1);
+  throw new ExtractError(1, `[extract] 0 symbols found in ${files.length} supported file(s) under ${root} — the files parsed but defined no functions, classes, or methods.\n` +
+    '[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
 }
 if (newCache && !astLoadFailed && cacheDirty) {
   try {
@@ -1074,23 +1074,52 @@ const dispatchNote = astAvailable
   ? `; wired ${dispatchEdgeCount} dispatch edge(s)${dispatchDropped ? `, dropped ${dispatchDropped} (missing endpoint)` : ''}` +
     (typedLangs.length ? `; typed-dispatch (${typedLangs.join('+')}) ${typedWired} wired${typedDropped ? `, ${typedDropped} dropped (ambiguous/absent)` : ''}` : '')
   : '';
-const anyAstLoaded = !!_tsEngineState || Object.values(langEngines).some(Boolean);
+const anyAstLoaded = astEngineLoadedThisRun;
 const astState = anyAstLoaded ? 'loaded' : (!astAvailable || astLoadFailed) ? 'off' : 'idle';
 const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges (${shortNameDropped} short-name)${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
-// finding #19 (T-19.2): `--out` writes COMPACT JSON (22.7 -> 13.5 MB @16.8k; every fragment
-// reader JSON.parses, the hook already receives compact stdout, and run.mjs's memoKey hashes raw
-// bytes — so the format change costs exactly one downstream-stage recompute on the first
-// post-upgrade run, then stabilizes), and an unchanged fragment is never rewritten: out-file
-// exists ∧ sizes equal ∧ sha1 old === sha1 new ⇔ identical bytes (the determinism invariant) ->
-// skip the write, banner gains `(unchanged)`. Stdout path unchanged.
-if (opts.out) {
-  const outPath = resolve(opts.out);
-  const json = JSON.stringify(fragment);
-  let unchanged = false;
-  try {
-    const prev = statSync(outPath);
-    if (prev.size === Buffer.byteLength(json)) unchanged = sha1(readFileSync(outPath, 'utf8')) === sha1(json);
-  } catch { /* absent/unreadable -> write */ }
-  if (!unchanged) atomicWrite(outPath, json);
-  console.error(banner + (unchanged ? ' (unchanged)' : '') + ` -> ${opts.out}`);
-} else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }
+  return { fragment, banner };
+}
+
+// ---- CLI front door: argv parse, --out/stdout write, exit codes (the ONLY process-lifecycle owner) ----
+async function main() {
+  const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
+    usage: USAGE,
+    flags: {
+      out: { type: 'string', default: null },
+      target: { type: 'string', default: null },
+      cache: { type: 'string', default: null },       // F0: per-file scan cache (incremental freshness)
+      full: { type: 'bool', default: false },         // F9: ignore the edge cache, derive all edges from scratch
+      'no-ctags': { type: 'bool', default: false },
+      'allow-empty': { type: 'bool', default: false }, // intentionally-sparse targets: skip the empty-map guard
+      engine: { type: 'string', default: process.env.CODEWEB_ENGINE || null }, // optional tree-sitter tier (exact cyclomatic); default regex
+    },
+  });
+  const opts = { path: pos[0] ?? null, out: flags.out, ctags: !flags['no-ctags'], target: flags.target, cache: flags.cache, full: flags.full, allowEmpty: flags['allow-empty'], engine: flags.engine };
+  let result;
+  try { result = await runExtract(opts); }
+  catch (e) { if (e instanceof ExtractError) { console.error(e.message); process.exit(e.code); } throw e; }
+  const { fragment, banner } = result;
+  // finding #19 (T-19.2): `--out` writes COMPACT JSON and an unchanged fragment is never rewritten
+  // (out-file exists ∧ sizes equal ∧ sha1 old === sha1 new ⇔ identical bytes) -> skip the write,
+  // banner gains `(unchanged)`. Stdout path unchanged. This is CLI I/O — never reached at import.
+  if (opts.out) {
+    const outPath = resolve(opts.out);
+    const json = JSON.stringify(fragment);
+    let unchanged = false;
+    try {
+      const prev = statSync(outPath);
+      if (prev.size === Buffer.byteLength(json)) unchanged = sha1(readFileSync(outPath, 'utf8')) === sha1(json);
+    } catch { /* absent/unreadable -> write */ }
+    if (!unchanged) atomicWrite(outPath, json);
+    console.error(banner + (unchanged ? ' (unchanged)' : '') + ` -> ${opts.out}`);
+  } else { process.stdout.write(JSON.stringify(fragment)); console.error(banner); }
+}
+
+// Execute the CLI ONLY when run directly — the repo's proven guard idiom (post-edit-diff.mjs:79,
+// pre-edit-impact.mjs, session-brief.mjs use it verbatim). LEXICAL compare (path.resolve, no
+// realpath): safe here because extract-symbols is NOT a package.json `bin` entry (only run.mjs /
+// mcp-server.mjs are) and every in-repo caller spawns it by real absolute path — do NOT expose it
+// via `bin` without realpathSync on both sides (a symlinked argv[1] would skip main()).
+if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
+  main();
+}

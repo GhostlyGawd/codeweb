@@ -28,7 +28,16 @@ notes so validated results, papers, and new tools never get lost in commit histo
   orchestrator injects `readPkg` + the statted `sources` map and applies the returned ids-to-stamp,
   order-safe because the walk never reads `pub`) and `resolveTypedIntents` (Java/C# typed-receiver
   dispatch), which mechanically retires the finding's named shadowing smells (`rel` loop-var vs the
-  `rel()` fn, a `files` local vs the global). (round 2, finding #40)
+  `rel()` fn, a `files` local vs the global). Stage 3: the orchestrator now exposes
+  `runExtract(opts)` and its **import is side-effect-free** — argv parsing, every `process.exit`, and
+  the `--out`/stdout writes moved to a `main()` reached only through the repo's proven
+  `import.meta.url` guard idiom; the guard-path exits became `ExtractError` throws with
+  byte-identical message text (usage / bad-engine / not-found / empty-tree / zero-symbols), which
+  `main()` prints and exits on. Run state that was module-global is now `runExtract` locals; the WASM
+  parser engines stay memoized process-wide (the load *promise* is single-flighted, so concurrent
+  first-calls don't double-init). `import('extract-symbols.mjs')` now parses no argv, writes no
+  files, and never exits — the precondition for the in-process hook (#18b) and for running the
+  extractor under node:test's concurrent subtests. (round 2, finding #40)
 - **"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a
   real long-range term, and runs in interruptible slices so no single task blows a frame — plus the
   receipt that judges it is measured honestly.** The old anneal packed every symbol onto its area
