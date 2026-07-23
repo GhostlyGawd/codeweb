@@ -162,6 +162,14 @@ jobs:
             echo "::notice::NPM_TOKEN not configured — npm publish skipped (prep only)"
             exit 0
           fi
+          # Idempotent like the release step above: a notes-repair re-dispatch must not die on
+          # npm's "cannot publish over previously published versions".
+          VERSION="${{ steps.ver.outputs.version }}"
+          PKG="$(node -p "require('./package.json').name")"
+          if [ "$(npm view "${PKG}@${VERSION}" version 2>/dev/null)" = "$VERSION" ]; then
+            echo "npm already has ${PKG}@${VERSION} — nothing to publish"
+            exit 0
+          fi
           npm publish --provenance --access public
 
       - name: Publish to VS Code Marketplace (gated on VSCE_PAT)
