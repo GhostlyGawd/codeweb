@@ -10,11 +10,15 @@
 
 **Your coding agent greps. codeweb knows.**
 
+**Free & MIT-licensed. Runs entirely on your machine — no account, no server, no telemetry. Reads your code; never executes it.**
+<br><sub>DETERMINISTIC · READ-ONLY · ZERO-DEPENDENCY</sub>
+
 Every serious change starts with the same questions: *who uses this? what breaks if I change it?
 does this already exist? is this dead?* Today an agent answers them by grepping and reading whole
 files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import
 graph once (~3 s for 3,000 symbols), then answers those questions **exactly, in milliseconds, for
-about a kilobyte each** — as **27 deterministic MCP tools for your agent** (no LLM in the loop) and
+about a kilobyte each** — as **27 deterministic MCP tools** (MCP is the open protocol coding agents
+like Claude Code, Cursor, and Windsurf use to call tools; no LLM in codeweb's loop) and
 a self-contained **interactive map for you**.
 
 Measured on [vite](https://github.com/vitejs/vite) (3,000+ symbols), graded by the TypeScript
@@ -160,25 +164,33 @@ codeweb this month: 41 pre-edit card(s) · 5 card-named caller(s) followed · 2 
 
 ## Install
 
-This is a self-contained Claude Code plugin — **zero required dependencies**, just Node.js. It runs
-on an empty `node_modules` (CI-verified); one *optional* wasm grammar (`web-tree-sitter`) sharpens
+**Free & MIT-licensed. Runs entirely on your machine — no account, no server, no telemetry. Reads
+your code; never executes it.** Zero required dependencies — it runs on an empty `node_modules`
+(CI-verified); you need **Node.js ≥ 22**. One *optional* wasm grammar (`web-tree-sitter`) sharpens
 extraction when present and is never required. Releases are published from CI with **npm provenance**
 — verify any install with `npm audit signatures`.
 
-**As a Claude Code plugin:**
+**Using Claude Code?** The plugin adds the `/codeweb` command, ambient pre-edit impact cards, and
+all 27 tools:
 ```
 /plugin marketplace add GhostlyGawd/codeweb
 /plugin install codeweb
 ```
 Then restart Claude Code so the `/codeweb` command, agents, and skill register.
 
-**Or from npm — any repo, any MCP client, no clone:**
+**Using Cursor, Windsurf, or another MCP agent?** Register the same zero-dependency stdio server
+(shown with Claude Code's syntax — swap in your client's add-server command):
 ```
-npx -y @ghostlygawd/codeweb /path/to/your/project --out-dir /path/to/your/project/.codeweb
-# then open /path/to/your/project/.codeweb/report.html
-claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp   # the 27 MCP tools, pluginless
+claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
 ```
-Cursor, Windsurf, or any other MCP client: point it at the same `codeweb-mcp` command.
+
+**Just want the map — no AI involved?** One command, from your project directory:
+```
+cd your-project
+npx -y @ghostlygawd/codeweb .    # ~3 s for 3,000 symbols — then open .codeweb/report.html
+```
+
+*Not sure? Run the npx one-liner — it's the whole map, no install, nothing to undo.*
 
 **Or run the engine from a clone:**
 ```
@@ -188,15 +200,26 @@ node codeweb/scripts/run.mjs /path/to/your/project   # map lands in /path/to/you
 node codeweb/scripts/run.mjs codeweb/bench/corpus/flask --out-dir /tmp/flask-map
 ```
 
-Requires Node.js — the whole deterministic pipeline (extract → cluster → overlap → render) runs
-on Node, no external dependencies. Static-analysis tools (universal-ctags, ripgrep, madge, etc.)
-are *optional* — they only sharpen the agent fallback path; the default engine reads the code
+Requires **Node.js ≥ 22** — the whole deterministic pipeline (extract → cluster → overlap → render)
+runs on Node, no external dependencies. Static-analysis tools (universal-ctags, ripgrep, madge,
+etc.) are *optional* — they only sharpen the agent fallback path; the default engine reads the code
 directly.
 
 **In your editor:** [`editor/vscode-codeweb`](editor/vscode-codeweb/) is a zero-dependency VS Code
 extension that shows **`N callers · blast M`** CodeLens above every mapped symbol (served from the
 nearest `.codeweb/graph.json`, same numbers as `codeweb_callers`/`codeweb_impact`), with
 click-through into the interactive report.
+
+## What you can do — three jobs
+
+Everything below serves one of three jobs. Skim for yours; each section carries the full flags.
+
+- **Know before you edit** — who calls this, what breaks, does this already exist: `impact`,
+  `context-pack`, `find`, `find-similar`, and the ambient pre-edit card.
+- **Gate every edit** — the structural regression verdict on edits, PRs, and architecture rules:
+  `diff`, `ci-gate`, `review`, `fitness`, and the post-edit hook.
+- **Clean up, ranked** — consolidation and dead-code work ordered by evidence: `optimize`,
+  `deadcode`, `hotspots`, `campaign`, `trend`.
 
 ## Use
 

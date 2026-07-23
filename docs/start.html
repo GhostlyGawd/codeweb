@@ -44,31 +44,45 @@
   <div class="wrap">
     <div class="section-head">
       <span class="eyebrow">Get started</span>
-      <h2>Three ways in — pick the one that fits your loop</h2>
-      <p class="lead">codeweb has zero required dependencies — it runs on an empty <code>node_modules</code>. You need Node.js ≥ 22; optional extras (a wasm grammar, ctags, ripgrep) sharpen extraction but are never required.</p>
+      <h2>Three ways in — pick the one that fits your situation</h2>
+      <p class="lead"><strong>Free &amp; MIT-licensed. Runs entirely on your machine — no account, no server, no telemetry. Reads your code; never executes it.</strong> Zero required dependencies (an empty <code>node_modules</code> works); you need Node.js ≥ 22. Optional extras (a wasm grammar, ctags, ripgrep) sharpen extraction but are never required.</p>
     </div>
     <div class="grid cols-3">
       <div class="card">
         <div class="eyebrow">Recommended</div>
-        <h3>As a Claude Code plugin</h3>
-        <p>Registers the <code>/codeweb</code> command, the agents, and the skill.</p>
+        <h3>Using Claude Code?</h3>
+        <p>The plugin adds the <code>/codeweb</code> command, ambient pre-edit impact cards, and all 27 tools.</p>
 <pre><code>/plugin marketplace add GhostlyGawd/codeweb
 /plugin install codeweb</code></pre>
         <p class="muted">Restart Claude Code, then run <code>/codeweb</code> on any project.</p>
       </div>
       <div class="card">
-        <h3>Run it from npm</h3>
-        <p>No plugin, no clone — one command maps any repo.</p>
-<pre><code>npx -y @ghostlygawd/codeweb /path/to/project \
-  --out-dir /path/to/project/.codeweb</code></pre>
-        <p class="muted">Open <code>.codeweb/report.html</code> when it finishes. (Cloning the repo and running <code>scripts/run.mjs</code> works identically — zero dependencies either way.)</p>
-      </div>
-      <div class="card">
-        <h3>Register the MCP server</h3>
-        <p>Expose all 27 tools to any MCP-capable agent — Claude Code, Cursor, Windsurf, anything stdio.</p>
+        <h3>Using Cursor, Windsurf, or another MCP agent?</h3>
+        <p>Register the same zero-dependency stdio server (JSON-RPC 2.0) — all 27 tools, no plugin.</p>
 <pre><code>claude mcp add codeweb -- \
   npx -y -p @ghostlygawd/codeweb codeweb-mcp</code></pre>
-        <p class="muted">Zero-dependency stdio server (JSON-RPC 2.0).</p>
+        <p class="muted">Shown with Claude Code's syntax — swap in your client's add-server command.</p>
+      </div>
+      <div class="card">
+        <h3>Just want the map — no AI involved?</h3>
+        <p>One command from your project directory. Nothing to install, nothing to undo.</p>
+<pre><code>cd your-project
+npx -y @ghostlygawd/codeweb .</code></pre>
+        <p class="muted">~3 s for 3,000 symbols — open <code>.codeweb/report.html</code> when it finishes.</p>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:1rem"><em>Not sure? Run the npx one-liner — it's the whole map, no install.</em></p>
+    <!-- CRO C8: the page that asks for work finally shows the reward + what success looks like -->
+    <div class="grid cols-2" style="margin-top:1.25rem">
+      <div class="card">
+        <a href="demo/"><img src="assets/05-axios-graph.png" alt="The interactive map codeweb builds — axios, 274 product symbols across 8 areas" style="width:100%;border-radius:8px"></a>
+        <p class="muted" style="margin-top:.5rem">~3 s for 3,000 symbols → this, for your repo. (Click it — that's the live axios demo.)</p>
+      </div>
+      <div class="card">
+        <p><strong>What success looks like</strong> — the run ends with a result, not a log:</p>
+<pre><code>[run] mapped 1668 symbols -> 14 actionable finding(s) · 6 ready merge(s)
+[run] done -> your-project/.codeweb · codeweb v0.9.0
+[run] next:  1. see the map: open .codeweb/report.html</code></pre>
       </div>
     </div>
   </div>
