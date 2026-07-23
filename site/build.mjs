@@ -350,7 +350,10 @@ function injectDemoNav() {
   // SEO F5: the most-shared URL on the property unfurled as a bare grey link — no description,
   // no card image, a title that never said "axios". Replace the head's identity block wholesale
   // (markered, idempotent; any generator-era og tags are stripped so there is one authority).
-  html = html.replace(/<!--cw-head-->[\s\S]*?<!--\/cw-head-->\n?/, '')
+  // The strip must RESTORE a bare <title> anchor — the injected block contains the title, so a
+  // plain delete would leave the re-inject below with nothing to replace (the docs-fresh CI gate
+  // caught exactly that: strip-without-anchor made every rebuild remove the head block).
+  html = html.replace(/<!--cw-head-->[\s\S]*?<!--\/cw-head-->\n?/, '<title>codeweb — system map</title>\n')
     .replace(/^<meta (property="og:|name="(description|twitter:))[^\n]*\n?/gm, '')
     .replace(/^<link rel="canonical"[^\n]*\n?/gm, '')
     .replace(/<title>[^<]*<\/title>/,
