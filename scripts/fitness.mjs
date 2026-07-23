@@ -34,10 +34,41 @@ catch (e) { die(`invalid JSON in ${gAbs}: ${e.message}`, 2); }
 const rulesPath = rulesArg ? resolve(rulesArg)
   : [join(dirname(gAbs), 'codeweb.rules.json'), resolve('codeweb.rules.json')].find(existsSync);
 if (!rulesPath || !existsSync(rulesPath)) die('no rules file (pass --rules <codeweb.rules.json>)', 2);
-let rules;
-try { rules = JSON.parse(readFileSync(rulesPath, 'utf8')).rules; }
+let rulesDoc;
+try { rulesDoc = JSON.parse(readFileSync(rulesPath, 'utf8')); }
 catch (e) { die(`invalid rules JSON in ${rulesPath}: ${e.message}`, 2); }
-if (!Array.isArray(rules)) die('rules file must be { "rules": [ ... ] }', 2);
+let rules = rulesDoc.rules;
+// FORMS F5: codeweb.rules.json legitimately carries `roles` (extractor config, Spec E) without
+// `rules` — codeweb's own root file is exactly that. Rejecting the user's VALID product config
+// as malformed was the worst message on the gate persona's favorite form.
+let rulesNote = null;
+if (rules === undefined && rulesDoc.roles !== undefined) {
+  rules = [];
+  rulesNote = `0 rules configured — ${rulesPath} has \`roles\` (extractor config); add a "rules": [] section for fitness`;
+}
+if (!Array.isArray(rules)) die(`rules file must be { "rules": [ ... ] } — found top-level key(s): ${Object.keys(rulesDoc).join(', ') || 'none'} in ${rulesPath}`, 2);
+
+// FORMS F4: a gate whose failure mode is PASSING is worse than no gate. Every rule's params are
+// validated at load — missing numeric `limit` used to compare against undefined (always ok),
+// a typo'd severity silently demoted to warning, a missing id rendered "ruleId: undefined".
+// Unknown TYPE already died loudly; the same rigor now applies one level down.
+const SEVERITIES = new Set(['error', 'warning']);
+rules.forEach((rule, i) => {
+  const where = `rule ${i}${typeof rule.id === 'string' && rule.id ? ` ('${rule.id}')` : ''}`;
+  const bad = (msg) => die(`invalid rule: ${where} ${msg} in ${rulesPath}`, 2);
+  if (typeof rule.id !== 'string' || !rule.id) bad('needs a string `id`');
+  if (rule.severity !== undefined && !SEVERITIES.has(rule.severity)) bad(`has unknown severity "${rule.severity}" (valid: error | warning)`);
+  switch (rule.type) {
+    case 'max-fan-in': case 'max-symbol-loc':
+      if (typeof rule.limit !== 'number' || !Number.isFinite(rule.limit)) bad('needs a numeric `limit`'); break;
+    case 'forbidden-dependency':
+      if (typeof rule.from !== 'string' || typeof rule.to !== 'string') bad('needs string `from` and `to` domains'); break;
+    case 'layer':
+      if (!Array.isArray(rule.order) || rule.order.length < 2) bad('needs `order` (an array of >=2 domain names, top first)'); break;
+    case 'no-cycles': break;
+    default: bad(`has unknown type "${rule.type}" (valid: forbidden-dependency | layer | no-cycles | max-fan-in | max-symbol-loc)`);
+  }
+});
 
 const index = buildIndex(graph);
 const domOf = (id) => index.byId.get(id)?.domain || 'unassigned';
@@ -77,12 +108,13 @@ for (const rule of rules) {
 }
 
 const errors = violations.filter((v) => v.severity === 'error');
-const payload = { target: graph.meta?.target || 'target', rulesChecked: rules.length, violations, ok: errors.length === 0, errorCount: errors.length, warningCount: violations.length - errors.length };
+const payload = { target: graph.meta?.target || 'target', rulesChecked: rules.length, violations, ok: errors.length === 0, errorCount: errors.length, warningCount: violations.length - errors.length, ...(rulesNote ? { note: rulesNote } : {}) };
 const code = errors.length ? 1 : 0;
 
 if (json) { emitJson(payload, code); } else {
 
 console.log(`codeweb fitness: ${payload.target} — ${rules.length} rule(s), ${violations.length} violation(s) (${payload.errorCount} error, ${payload.warningCount} warning)`);
+if (rulesNote) console.log(`  note: ${rulesNote}`);
 for (const v of violations) {
   console.log(`\n[${v.severity.toUpperCase()}] ${v.ruleId} — ${v.message}`);
   for (const s of v.subjects.slice(0, 12)) console.log(`    ${s}`);

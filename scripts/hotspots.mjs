@@ -13,7 +13,7 @@ import { normalizeGraph, scopeNote } from './lib/graph-ops.mjs';
 import { rankHotspots } from './lib/hotspots.mjs';
 import { churnFromGit } from './lib/churn.mjs'; // finding 27: ONE bounded, HEAD-cached git-churn parser (shared with risk)
 
-const USAGE = 'usage: hotspots.mjs <graph.json> [--churn <map.json> | --git] [--all] [--json]';
+const USAGE = 'usage: hotspots.mjs <graph.json> [--limit N] [--churn <map.json> | --git] [--all] [--json]'; // F10: --limit was real but hidden
 import { die, emitJson, finish, capList, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.

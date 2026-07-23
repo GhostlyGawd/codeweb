@@ -104,11 +104,11 @@ test('M2: tools/list exposes the full tool set with object schemas + correct req
   assert.deepEqual(req('codeweb_find_similar'), [], 'signature|body validated at call time');
   assert.deepEqual(req('codeweb_placement'), ['calls']);
   assert.deepEqual(req('codeweb_review'), ['changed']);
-  assert.deepEqual(req('codeweb_fitness'), ['rules']);
+  assert.deepEqual(req('codeweb_fitness'), [], 'F12: rules is optional — the CLI discovers codeweb.rules.json');
   assert.deepEqual(req('codeweb_risk'), []);
   assert.deepEqual(req('codeweb_break_cycles'), []);
   assert.deepEqual(req('codeweb_deadcode'), []);
-  assert.deepEqual(req('codeweb_codemod'), ['merge', 'into']);
+  assert.deepEqual(req('codeweb_codemod'), ['merge'], 'F12: into is optional — the engine infers the survivor');
   assert.deepEqual(req('codeweb_context'), ['symbol']);
   assert.deepEqual(req('codeweb_refresh'), []);
   assert.deepEqual(req('codeweb_hotspots'), []);

@@ -154,6 +154,24 @@ const nameTokens = (s) => s.split(/[^a-zA-Z0-9]+|(?<=[a-z0-9])(?=[A-Z])/).filter
 // (Local names below are deliberately collision-free: bare identifiers whose name uniquely matches
 // a global symbol elsewhere in this repo would wire a false ref edge — codeweb's own gate caught
 // `score`/`cap` here closing a 10-file cycle. Physician, heal thyself.)
+// FORMS F13: bounded edit distance for the typo tier — true iff levenshtein(a,b) <= 2, with the
+// row-minimum early bail so a hopeless pair costs O(min-prefix), not O(len^2).
+function editDistanceLe2(a, b) {
+  if (Math.abs(a.length - b.length) > 2) return false;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    let rowMin = i;
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      if (cur[j] < rowMin) rowMin = cur[j];
+    }
+    if (rowMin > 2) return false;
+    prev = cur;
+  }
+  return prev[b.length] <= 2;
+}
+
 export function suggestSymbols(graph, sym, maxSuggestions = 3) {
   // For `file:label` queries the label part carries the intent; match against it. Tokenize the
   // ORIGINAL casing (camelCase boundaries are the token signal), lowercase only for comparisons.
@@ -166,10 +184,13 @@ export function suggestSymbols(graph, sym, maxSuggestions = 3) {
     if (!n.label || n.label === '<module>') continue;
     const label = n.label.toLowerCase();
     let tier = 0;
-    if (label === wanted) tier = 4;
-    else if (wanted.length >= 3 && label.length >= 3 && (label.startsWith(wanted) || wanted.startsWith(label))) tier = 3;
-    else if (wanted.length >= 3 && label.length >= 3 && (label.includes(wanted) || wanted.includes(label))) tier = 2;
-    else if (wantedTokens.size && nameTokens(n.label).some((t) => wantedTokens.has(t))) tier = 1;
+    if (label === wanted) tier = 5;
+    else if (wanted.length >= 3 && label.length >= 3 && (label.startsWith(wanted) || wanted.startsWith(label))) tier = 4;
+    else if (wanted.length >= 3 && label.length >= 3 && (label.includes(wanted) || wanted.includes(label))) tier = 3;
+    else if (wantedTokens.size && nameTokens(n.label).some((t) => wantedTokens.has(t))) tier = 2;
+    // FORMS F13: the typo tier — `helpr`, `mane`: 1-2 edits from a real label, invisible to every
+    // token-shaped tier above. Lowest priority so real-name matches always outrank it.
+    else if (wanted.length >= 3 && label.length >= 3 && editDistanceLe2(label, wanted)) tier = 1;
     if (tier) suggestScored.push({ tier, label: n.label, id: n.id });
   }
   suggestScored.sort((a, b) => b.tier - a.tier || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0) || (a.id < b.id ? -1 : 1));

@@ -30,8 +30,8 @@ const { opts: f, pos } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
   flags: {
     json: { type: 'bool', default: false },
-    limit: { type: 'number', default: null },
-    offset: { type: 'number', default: 0 },
+    limit: { type: 'number', default: null, min: 0 },  // F14c: a negative limit minted empty pages
+    offset: { type: 'number', default: 0, min: 0 },
     callers: { type: 'string', default: null },
     callees: { type: 'string', default: null },
     tests: { type: 'string', default: null },

@@ -24,6 +24,11 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
 });
 const { json } = opts, budget = Math.max(1, opts.budget);
 const scopeKind = opts.scope ? opts.scope[0] : 'all', scopeValue = opts.scope ? opts.scope[1] : null;
+// FORMS F8: a typo'd scope kind silently answered a DIFFERENT question (the whole repo). Same
+// hardening --stages already has: enumerate the valid set, die 2.
+if (opts.scope && !['domain', 'file', 'symbol'].includes(scopeKind)) {
+  die(`unknown --scope kind "${scopeKind}" (valid: domain | file | symbol)\n${USAGE}`, 2);
+}
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const scope = { kind: scopeKind, value: scopeValue };
