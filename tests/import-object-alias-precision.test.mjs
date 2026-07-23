@@ -14,6 +14,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 const FILES = {
   'utils.mjs':
@@ -42,20 +43,19 @@ let SRC, OUT;
 before(() => { SRC = tmpDir('codeweb-objalias-'); writeTree(SRC, FILES); OUT = join(SRC, 'fragment.json'); });
 after(() => cleanup(SRC));
 
-function extract() {
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'objalias-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  return readJSON(OUT);
+async function extract() {
+  const { fragment } = await runExtract({ path: SRC, target: 'objalias-x', ctags: false });
+  return fragment;
 }
 
-test('PRECISION: a bare object-default alias reference does NOT resolve to the anchor', () => {
-  const frag = extract();
+test('PRECISION: a bare object-default alias reference does NOT resolve to the anchor', async () => {
+  const frag = await extract();
   assert.ok(!hasEdge(frag.edges, 'consumer.mjs:use', 'utils.mjs:merge'),
     'register(utils, cb) passes the module object, not merge -> no edge to merge');
 });
 
-test('RECALL: member access on the object alias still resolves', () => {
-  const frag = extract();
+test('RECALL: member access on the object alias still resolves', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:shape', 'utils.mjs:merge', 'call'),
     'utils.merge() still resolves to utils.mjs:merge');
 });

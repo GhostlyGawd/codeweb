@@ -17,14 +17,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, script, tmpDir, cleanup, writeTree, readJSON, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
-function extract(files) {
+async function extract(files) {
   const dir = tmpDir('codeweb-pysrc-');
   writeTree(dir, files);
-  const out = join(dir, 'f.json');
-  const r = runNode(script('extract-symbols.mjs'), [dir, '--out', out]);
-  if (r.status !== 0) { cleanup(dir); throw new Error(`extract failed: ${r.stderr}`); }
-  const frag = readJSON(out);
+  let frag;
+  try { frag = (await runExtract({ path: dir })).fragment; }
+  catch (e) { cleanup(dir); throw new Error(`extract failed: ${e.message}`); }
   cleanup(dir);
   return frag;
 }
@@ -41,23 +41,23 @@ const FIXTURE = {
   'examples/app/other.py': 'import json\n\ndef fine():\n    return json\n',
 };
 
-test('Q1+Q2: from <own-pkg> import name resolves through the src-layout __init__ re-export', () => {
-  const frag = extract(FIXTURE);
+test('Q1+Q2: from <own-pkg> import name resolves through the src-layout __init__ re-export', async () => {
+  const frag = await extract(FIXTURE);
   const target = 'src/mypkg/templating.py:render_template';
   assert.ok(frag.nodes.some((n) => n.id === target), 'target exists');
   const importEdges = frag.edges.filter((e) => e.kind === 'import' && e.to === target);
   assert.ok(importEdges.length >= 1, `the from-import wires an import edge to the re-exported def (got: ${JSON.stringify(frag.edges.filter((e) => e.to === target))})`);
 });
 
-test('Q3: an explicit import binds calls across a package boundary', () => {
-  const frag = extract(FIXTURE);
+test('Q3: an explicit import binds calls across a package boundary', async () => {
+  const frag = await extract(FIXTURE);
   const target = 'src/mypkg/templating.py:render_template';
   assert.ok(hasEdge(frag.edges, 'examples/app/views.py:index', target, 'call'),
     `index() call wires despite examples/ being its own package (edges to target: ${JSON.stringify(frag.edges.filter((e) => e.to === target))})`);
 });
 
-test('Q4: the module-level import site attributes to <module>, matching site granularity', () => {
-  const frag = extract(FIXTURE);
+test('Q4: the module-level import site attributes to <module>, matching site granularity', async () => {
+  const frag = await extract(FIXTURE);
   const target = 'src/mypkg/templating.py:render_template';
   // (from,to) dedupe means a module-level CALL to the same target subsumes the import edge —
   // the site is a dependent either way; kind is not the contract here.
@@ -68,8 +68,8 @@ test('Q4: the module-level import site attributes to <module>, matching site gra
     'the __init__ re-export site is itself an import dependent');
 });
 
-test('Q-guard: `import json` never grabs an in-repo NESTED json package', () => {
-  const frag = extract(FIXTURE);
+test('Q-guard: `import json` never grabs an in-repo NESTED json package', async () => {
+  const frag = await extract(FIXTURE);
   const bad = frag.edges.filter((e) => e.from.startsWith('examples/app/other.py') && e.to.startsWith('src/mypkg/json/'));
   assert.equal(bad.length, 0, `stdlib name must not wire into a nested package: ${JSON.stringify(bad)}`);
 });

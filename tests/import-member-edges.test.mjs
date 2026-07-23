@@ -12,6 +12,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 const FILES = {
   'util.mjs':
@@ -43,38 +44,37 @@ let SRC, OUT;
 before(() => { SRC = tmpDir('codeweb-imp-'); writeTree(SRC, FILES); OUT = join(SRC, 'fragment.json'); });
 after(() => cleanup(SRC));
 
-function extract() {
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'imp-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  return readJSON(OUT);
+async function extract() {
+  const { fragment } = await runExtract({ path: SRC, target: 'imp-x', ctags: false });
+  return fragment;
 }
 
-test('RECALL: a namespace/default-import member call resolves to the imported symbol', () => {
-  const frag = extract();
+test('RECALL: a namespace/default-import member call resolves to the imported symbol', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:build', 'util.mjs:merge', 'call'),
     'build -> util.mjs:merge via util.merge()');
 });
 
-test('RECALL: default-import construction (new Widget()) resolves to the class', () => {
-  const frag = extract();
+test('RECALL: default-import construction (new Widget()) resolves to the class', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:build', 'widget.mjs:Widget', 'call'),
     'build -> widget.mjs:Widget via new Widget()');
 });
 
-test('RECALL: a static member call on a default-import alias resolves (Widget.from())', () => {
-  const frag = extract();
+test('RECALL: a static member call on a default-import alias resolves (Widget.from())', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:build', 'widget.mjs:Widget.from', 'call'),
     'build -> widget.mjs:Widget.from via Widget.from()');
 });
 
-test('PRECISION: a param obj.merge() does NOT fabricate an edge to the imported merge', () => {
-  const frag = extract();
+test('PRECISION: a param obj.merge() does NOT fabricate an edge to the imported merge', async () => {
+  const frag = await extract();
   assert.ok(!hasEdge(frag.edges, 'precision.mjs:run', 'util.mjs:merge', 'call'),
     'obj is a param, not an import alias -> no edge');
 });
 
-test('DEPENDENTS: --dependents is a superset of --callers and includes the member-access caller', () => {
-  const frag = extract();
+test('DEPENDENTS: --dependents is a superset of --callers and includes the member-access caller', async () => {
+  const frag = await extract();
   const GP = join(SRC, 'graph.json');
   writeTree(SRC, { 'graph.json': JSON.stringify(frag) });
   const dep = runNode(script('query.mjs'), [GP, '--dependents', 'util.mjs:merge', '--json']);

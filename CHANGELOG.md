@@ -43,7 +43,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
   wall ~4.5×, 12.9 s → 2.85 s at 40 trials — every assertion identical, the `edged N/M` reads moved
   from stderr to the returned banner, the fragment byte-compares to `JSON.stringify(fragment)`, and
   a new IE-INPROC-PARITY spawn keeps the CLI surface pinned byte-for-byte), plus `call-apply-chain`
-  and `test-edges` (extractor in-process, their `query.mjs` spawns untouched). (round 2, finding #40)
+  and `test-edges` (extractor in-process, their `query.mjs` spawns untouched). Stage 4b: the
+  import/edge-precision + language-extraction family (18 more files) went in-process too, clearing
+  the plan's bar — **22 extractor-invoking spawn sites retired** (the convertible subset dropped
+  80→58), and the dynamic extractor child-process launches during the incremental-edges run drop
+  from 116 to 1 at 10 trials (≈382→1 at 40-trial CI depth). Non-extractor spawns (`query.mjs`,
+  `context-pack.mjs`) and the CLI-surface owners (`cli-front-door`, `empty-target`) stay spawn-based.
+  (round 2, finding #40)
 - **"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a
   real long-range term, and runs in interruptible slices so no single task blows a frame — plus the
   receipt that judges it is measured honestly.** The old anneal packed every symbol onto its area

@@ -85,7 +85,13 @@
 <p>  wall ~4.5×, 12.9 s → 2.85 s at 40 trials — every assertion identical, the <code>edged N/M</code> reads moved</p>
 <p>  from stderr to the returned banner, the fragment byte-compares to <code>JSON.stringify(fragment)</code>, and</p>
 <p>  a new IE-INPROC-PARITY spawn keeps the CLI surface pinned byte-for-byte), plus <code>call-apply-chain</code></p>
-<p>  and <code>test-edges</code> (extractor in-process, their <code>query.mjs</code> spawns untouched). (round 2, finding #40)</p>
+<p>  and <code>test-edges</code> (extractor in-process, their <code>query.mjs</code> spawns untouched). Stage 4b: the</p>
+<p>  import/edge-precision + language-extraction family (18 more files) went in-process too, clearing</p>
+<p>  the plan's bar — <strong>22 extractor-invoking spawn sites retired</strong> (the convertible subset dropped</p>
+<p>  80→58), and the dynamic extractor child-process launches during the incremental-edges run drop</p>
+<p>  from 116 to 1 at 10 trials (≈382→1 at 40-trial CI depth). Non-extractor spawns (<code>query.mjs</code>,</p>
+<p>  <code>context-pack.mjs</code>) and the CLI-surface owners (<code>cli-front-door</code>, <code>empty-target</code>) stay spawn-based.</p>
+<p>  (round 2, finding #40)</p>
 <ul>
 <li>**"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a</li>
 </ul>

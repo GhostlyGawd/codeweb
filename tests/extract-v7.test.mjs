@@ -11,23 +11,22 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runNode, script, tmpDir, cleanup, writeTree, readJSON, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 import { join } from 'node:path';
 
 const EXTRACT = script('extract-symbols.mjs');
 
-function extract(files) {
+async function extract(files) {
   const dir = tmpDir('codeweb-v7-');
   try {
     writeTree(dir, files);
-    const out = join(dir, 'fragment.json');
-    const r = runNode(EXTRACT, [dir, '--no-ctags', '--out', out]);
-    assert.equal(r.status, 0, r.stderr);
-    return readJSON(out);
+    const { fragment } = await runExtract({ path: dir, ctags: false });
+    return fragment;
   } finally { cleanup(dir); }
 }
 
-test('body spans survive multi-line template literals with braces (no more swallowed neighbors)', () => {
-  const frag = extract({
+test('body spans survive multi-line template literals with braces (no more swallowed neighbors)', async () => {
+  const frag = await extract({
     'tpl.js': [
       'export function warn(base) {',
       '  return [',
@@ -49,8 +48,8 @@ test('body spans survive multi-line template literals with braces (no more swall
   assert.equal(tiny.loc, 3, `tiny spans exactly its 3 lines (got ${tiny.loc})`);
 });
 
-test('nodes carry a role derived from their path', () => {
-  const frag = extract({
+test('nodes carry a role derived from their path', async () => {
+  const frag = await extract({
     'src/core.js': 'export function core() {\n  return 1;\n}\n',
     'tests/core.test.js': 'export function tHelper() {\n  return core();\n}\n',
     'examples/demo.js': 'export function demo() {\n  return 2;\n}\n',
@@ -63,21 +62,21 @@ test('nodes carry a role derived from their path', () => {
   assert.equal(role('playground/play.js:play'), 'example');
 });
 
-test('bare-name resolution stays inside a package boundary (no cross-package collision edges)', () => {
+test('bare-name resolution stays inside a package boundary (no cross-package collision edges)', async () => {
   const files = {
     'packages/app/package.json': '{"name":"app"}',
     'packages/app/main.js': 'export function boot() {\n  return normalize("x");\n}\n',
     'packages/lib/package.json': '{"name":"lib"}',
     'packages/lib/util.js': 'export function normalize(p) {\n  return p.trim();\n}\n',
   };
-  const frag = extract(files);
+  const frag = await extract(files);
   // normalize is globally unique but lives in ANOTHER package with no import -> the edge would be a
   // name-collision fabrication; it must be dropped as ambiguous.
   assert.ok(!hasEdge(frag.edges, 'packages/app/main.js:boot', 'packages/lib/util.js:normalize'),
     'no bare-name edge across package boundaries');
 
   // the SAME shape without manifests (single-package tree) keeps resolving as before
-  const single = extract({
+  const single = await extract({
     'app/main.js': 'export function boot() {\n  return normalize("x");\n}\n',
     'lib/util.js': 'export function normalize(p) {\n  return p.trim();\n}\n',
   });
@@ -85,8 +84,8 @@ test('bare-name resolution stays inside a package boundary (no cross-package col
     'unique-global fallback unchanged when there are no package boundaries');
 });
 
-test('class-field arrow methods: discovered inside a class (qualified), NOT outside one', () => {
-  const frag = extract({
+test('class-field arrow methods: discovered inside a class (qualified), NOT outside one', async () => {
+  const frag = await extract({
     'comp.js': [
       'export class Button {',
       '  handleClick = () => {',
@@ -109,8 +108,8 @@ test('class-field arrow methods: discovered inside a class (qualified), NOT outs
   assert.ok(!ids.some((i) => /:cb$|\.cb$/.test(i)), 'a local arrow reassignment inside a function is not a phantom method');
 });
 
-test('v9: `export * from` barrel chains resolve to the real symbol (no swallowed edges)', () => {
-  const frag = extract({
+test('v9: `export * from` barrel chains resolve to the real symbol (no swallowed edges)', async () => {
+  const frag = await extract({
     'impl/core.js': 'export function realWork(x) {\n  return x + 1;\n}\n',
     'impl/index.js': 'export * from "./core.js";\n',
     'barrel.js': 'export * from "./impl/index.js";\n',

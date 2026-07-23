@@ -15,6 +15,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 // cli.mjs mirrors the real query.mjs shape: a small self-contained `parseArgs`, a non-exported
 // helper `fmt`, then a block of TOP-LEVEL dispatch that calls parseArgs, an imported helper, and
@@ -57,48 +58,47 @@ let SRC, OUT;
 before(() => { SRC = tmpDir('codeweb-modscope-'); writeTree(SRC, FILES); OUT = join(SRC, 'fragment.json'); });
 after(() => cleanup(SRC));
 
-function extract() {
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'mod-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  return readJSON(OUT);
+async function extract() {
+  const { fragment } = await runExtract({ path: SRC, target: 'mod-x', ctags: false });
+  return fragment;
 }
 
 const MOD = 'cli.mjs:<module>';
 const PYMOD = 'app.py:<module>';
 
-test('emits a per-file `module` node for files with top-level calls', () => {
-  const frag = extract();
+test('emits a per-file `module` node for files with top-level calls', async () => {
+  const frag = await extract();
   const mod = frag.nodes.find((n) => n.id === MOD);
   assert.ok(mod, 'cli.mjs:<module> node exists');
   assert.equal(mod.kind, 'module', 'kind is "module"');
   assert.equal(mod.file, 'cli.mjs', 'file points at the owning file');
 });
 
-test('top-level calls attribute to the module node, not the trailing function', () => {
-  const frag = extract();
+test('top-level calls attribute to the module node, not the trailing function', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, MOD, 'cli.mjs:parseArgs', 'call'), 'module -> parseArgs');
   assert.ok(hasEdge(frag.edges, MOD, 'ops.mjs:runImpact', 'call'), 'module -> ops:runImpact (alias-resolved)');
   assert.ok(hasEdge(frag.edges, MOD, 'cli.mjs:fmt', 'call'), 'module -> fmt');
 });
 
-test('PRECISION: the trailing function does NOT absorb top-level calls (the EOF-range bug)', () => {
-  const frag = extract();
+test('PRECISION: the trailing function does NOT absorb top-level calls (the EOF-range bug)', async () => {
+  const frag = await extract();
   const fromParseArgs = frag.edges.filter((e) => e.from === 'cli.mjs:parseArgs' && e.kind === 'call');
   assert.equal(fromParseArgs.length, 0, 'parseArgs calls nothing within its real body [5,7]');
   assert.ok(!hasEdge(frag.edges, 'cli.mjs:parseArgs', 'ops.mjs:runImpact'), 'no fabricated parseArgs -> runImpact');
   assert.ok(!hasEdge(frag.edges, 'cli.mjs:parseArgs', 'cli.mjs:fmt'), 'no fabricated parseArgs -> fmt');
 });
 
-test('RECALL: a non-exported helper called only from module scope is not a false orphan', () => {
-  const frag = extract();
+test('RECALL: a non-exported helper called only from module scope is not a false orphan', async () => {
+  const frag = await extract();
   // fmt is not exported and only called at top level -> its sole caller must be the module node.
   // Pre-fix this edge dropped or mis-attributed, making fmt look like dead code to --orphans.
   const callersOfFmt = frag.edges.filter((e) => e.to === 'cli.mjs:fmt' && e.kind === 'call').map((e) => e.from);
   assert.deepEqual(callersOfFmt, [MOD], 'fmt has exactly the module node as its caller');
 });
 
-test('Python: dedent body extent + module attribution', () => {
-  const frag = extract();
+test('Python: dedent body extent + module attribution', async () => {
+  const frag = await extract();
   const mod = frag.nodes.find((n) => n.id === PYMOD);
   assert.ok(mod && mod.kind === 'module', 'app.py:<module> node exists');
   assert.ok(hasEdge(frag.edges, PYMOD, 'app.py:parse', 'call'), 'module -> parse');
@@ -108,8 +108,8 @@ test('Python: dedent body extent + module attribution', () => {
     'run absorbs no top-level calls');
 });
 
-test('regex literals with braces do not corrupt body-end (scanSymbols repro)', () => {
-  const frag = extract();
+test('regex literals with braces do not corrupt body-end (scanSymbols repro)', async () => {
+  const frag = await extract();
   // scan's real body is [1,3]; the line-4 call must attribute to the module, not be swallowed as a
   // self-call. Pre-fix, the `\{` in scan's regex left brace depth > 0 so scan ran past line 3.
   assert.ok(hasEdge(frag.edges, 'rx.mjs:<module>', 'rx.mjs:scan', 'call'), 'module -> scan');

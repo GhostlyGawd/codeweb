@@ -12,6 +12,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 const FILES = {
   'pkg/__init__.py': '',
@@ -47,50 +48,49 @@ let SRC, OUT;
 before(() => { SRC = tmpDir('codeweb-pyimp-'); writeTree(SRC, FILES); OUT = join(SRC, 'fragment.json'); });
 after(() => cleanup(SRC));
 
-function extract() {
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'pyimp-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  return readJSON(OUT);
+async function extract() {
+  const { fragment } = await runExtract({ path: SRC, target: 'pyimp-x', ctags: false });
+  return fragment;
 }
 
-test('RECALL+PRECISION: a relative named import pins the bare call to the exact symbol', () => {
-  const frag = extract();
+test('RECALL+PRECISION: a relative named import pins the bare call to the exact symbol', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'pkg/services.py:process', 'pkg/utils.py:helper', 'call'),
     'helper() resolves to pkg/utils.py:helper via `from .utils import helper`');
   assert.ok(!hasEdge(frag.edges, 'pkg/services.py:process', 'pkg/other.py:helper', 'call'),
     'the alias pins utils.helper, not the same-named other.helper');
 });
 
-test('RECALL: a relative submodule member call resolves (from . import models; models.build())', () => {
-  const frag = extract();
+test('RECALL: a relative submodule member call resolves (from . import models; models.build())', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'pkg/services.py:process', 'pkg/models.py:build', 'call'),
     'models.build() -> pkg/models.py:build');
 });
 
-test('RECALL: an absolute aliased module member call resolves (import pkg.models as m; m.build())', () => {
-  const frag = extract();
+test('RECALL: an absolute aliased module member call resolves (import pkg.models as m; m.build())', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'pkg/handlers.py:handle', 'pkg/models.py:build', 'call'),
     'm.build() -> pkg/models.py:build');
 });
 
-test('the submodule import emits a coarse <module> edge (not a symbol edge)', () => {
-  const frag = extract();
+test('the submodule import emits a coarse <module> edge (not a symbol edge)', async () => {
+  const frag = await extract();
   assert.ok(frag.nodes.some((n) => n.id === 'pkg/models.py:<module>' && n.kind === 'module'),
     'a <module> node exists for the imported submodule');
   assert.ok(hasEdge(frag.edges, 'pkg/services.py:process', 'pkg/models.py:<module>', 'import'),
     '`from . import models` lands a coarse edge on pkg/models.py:<module>');
 });
 
-test('PRECISION: a param obj.helper() fabricates no edge', () => {
-  const frag = extract();
+test('PRECISION: a param obj.helper() fabricates no edge', async () => {
+  const frag = await extract();
   assert.ok(!hasEdge(frag.edges, 'pkg/services.py:run', 'pkg/utils.py:helper'),
     'obj is a param, not an import alias -> no edge to utils.helper');
   assert.ok(!hasEdge(frag.edges, 'pkg/services.py:run', 'pkg/other.py:helper'),
     'obj is a param, not an import alias -> no edge to other.helper');
 });
 
-test('DEPENDENTS: --dependents build includes both the submodule and absolute-alias callers', () => {
-  const frag = extract();
+test('DEPENDENTS: --dependents build includes both the submodule and absolute-alias callers', async () => {
+  const frag = await extract();
   const GP = join(SRC, 'graph.json');
   writeTree(SRC, { 'graph.json': JSON.stringify(frag) });
   const dep = runNode(script('query.mjs'), [GP, '--dependents', 'pkg/models.py:build', '--json']);
