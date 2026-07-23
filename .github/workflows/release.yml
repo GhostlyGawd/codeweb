@@ -114,14 +114,17 @@ jobs:
             echo "See [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md)." > /tmp/notes.md
           fi
 
-      # Idempotent: re-running (or re-pushing a tag) never duplicates or clobbers a release.
+      # Idempotent: re-running never duplicates a release. An existing release gets its notes
+      # re-synced from CHANGELOG.md instead of a skip — that is the repair path for published
+      # notes (agent sessions cannot edit releases directly; re-dispatching this workflow can).
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="v${{ steps.ver.outputs.version }}"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "release $TAG already exists — nothing to do"
+            echo "release $TAG already exists — re-syncing its notes from CHANGELOG.md"
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file /tmp/notes.md
             exit 0
           fi
           case "$TAG" in *-*) PRE=--prerelease ;; *) PRE= ;; esac
