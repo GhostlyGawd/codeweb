@@ -614,6 +614,11 @@ agents it serves: the AI-assisted build is disclosed in the commit history's co-
 owning that is the point — codeweb is dogfood for the exact loop it supports. Issues and questions
 welcome; see [`SECURITY.md`](SECURITY.md) for the security posture and reporting route.
 
+**Stay current:** codeweb never phones home, so releases are the only channel through which an
+installed copy can hear about new capabilities. **Watch → Custom → Releases** on GitHub gets you
+the changelog when they land (a star, kindly, notifies nobody). `node scripts/run.mjs` prints the
+running version in its done banner so you can tell when you're behind.
+
 ## Handoffs
 
 If you have them installed, codeweb's domain map and overlap list feed naturally into

@@ -26,6 +26,7 @@ import { buildBrief } from './brief-core.mjs';
 import { buildIndexLite, SIDECAR_NAME } from './index-lite.mjs';
 import { buildSimilarIndex, SIMILAR_SIDECAR } from './similar-index.mjs';
 import { BRIEF_SIDECAR } from './brief-sidecar.mjs';
+import { STALE_SIDECAR } from './stale-stamps.mjs'; // RETENTION R3: change-nudge without the graph parse
 
 /**
  * Write the map-time sidecar trio beside a just-written graph.json, all stamped against ONE stat of
@@ -51,6 +52,10 @@ export function writeSidecars(absGraphPath, graph) {
     // index-lite.json — the pre-edit hook's slim sidecar (its version is owned by buildIndexLite).
     atomicWrite(join(dir, SIDECAR_NAME), JSON.stringify(buildIndexLite(graph, stamp, reader)));
     written.push('index-lite');
+    // stale-stamps.json (R3) — {root, sources, dirs} so the SessionStart hook can run the
+    // change-based staleness sweep at the sidecar boot floor (never parsing the multi-MB graph).
+    atomicWrite(join(dir, STALE_SIDECAR), JSON.stringify({ version: 1, stamp, root: graph.meta?.root || null, sources: graph.meta?.sources || null, dirs: graph.meta?.dirs || null }));
+    written.push('stale-stamps');
     // similar-index.json — find-similar's shingle sets (version owned by buildSimilarIndex / v2).
     if (graph.meta?.root && existsSync(graph.meta.root)) {
       atomicWrite(join(dir, SIMILAR_SIDECAR), JSON.stringify(buildSimilarIndex(graph, stamp, reader)));

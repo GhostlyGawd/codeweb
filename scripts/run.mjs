@@ -17,11 +17,16 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, existsSync, readFileSync, statSync } from 'node:fs';
 import { atomicWrite, SCAN_CACHE_NAME, parseArgs } from './lib/cli.mjs';
 import { findingBuckets } from './lib/graph-ops.mjs'; // ACTIVATION A3/A4: banner speaks the one findings vocabulary
+import { metricsRow, appendHistory } from './lib/history.mjs'; // RETENTION R1/R8: the since-last-map delta + per-map ledger
+import { recordMap } from './lib/stats.mjs';                   // RETENTION §4: firstMapAt/lastMapAt/mapCount
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..'); // plugin root (parent of scripts/)
+// RETENTION R10: the running version prints in the done banner — with no phone-home by design,
+// the banner is the only place a user can self-diagnose being releases behind.
+const VERSION = (() => { try { return JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version; } catch { return '0.0.0'; } })();
 
 // Bump when ANY downstream stage (cluster/overlap/optimize/report) changes behavior — it keys the
 // stage memo, so an old workspace can never serve outputs computed by an older pipeline.
@@ -80,6 +85,24 @@ if (opts.coverage && !existsSync(resolve(opts.coverage))) {
 // orphaned maps in the npx cache where nothing could ever find them.
 const ws = opts.outDir ? resolve(opts.outDir) : join(opts.src, '.codeweb');
 mkdirSync(ws, { recursive: true });
+// RETENTION R6: the workspace self-declares what is cache and what is MEMORY. `rm -rf .codeweb`
+// is the natural clean-rebuild move — and it used to destroy the only two non-regenerable
+// artifacts (annotations.json = triaged judgement, history.jsonl = the progression ledger).
+// With this contract in place, git-tracked cleanup has a safe boundary. Never overwritten.
+try {
+  const gi = join(ws, '.gitignore');
+  if (!existsSync(gi)) {
+    atomicWrite(gi, [
+      '# codeweb workspace — everything here is regenerable cache EXCEPT the whitelisted memory:',
+      '# commit annotations.json (team judgement) and history.jsonl (progression); stats.json stays local.',
+      '*',
+      '!.gitignore',
+      '!annotations.json',
+      '!history.jsonl',
+      '',
+    ].join('\n'));
+  }
+} catch { /* the contract is best-effort — never fail a map over it */ }
 
 const env = { ...process.env, CODEWEB_WS: ws };
 const node = process.execPath;
@@ -131,6 +154,7 @@ const bannerFromGraph = () => {
   } catch { return null; }
 };
 let banner = null;
+let sinceLast = null; // RETENTION R1: {prev, cur} metric rows when a previous map existed
 
 const targetArg = opts.target ? ['--target', opts.target] : [];
 // Extract always runs — it is the change detector — and rides the scan cache (Spec A), so a
@@ -182,6 +206,10 @@ if (reusable) {
   console.error('\n[run] stages reused (fragment unchanged) — skipping downstream recompute; --full forces');
   banner = prevMemo.banner || bannerFromGraph(); // pre-banner memos: one parse, this run only
 } else {
+  // RETENTION R1: hold the PREVIOUS map's metrics BEFORE cluster overwrites graph.json — the
+  // re-map summary then leads with what changed since, instead of repeating the first run.
+  let prevRow = null;
+  if (!partial) { try { prevRow = metricsRow(JSON.parse(readFileSync(join(ws, 'graph.json'), 'utf8'))); } catch { /* first map here */ } }
   run('cluster', S('scripts/cluster3.mjs'), [], true);
   run('overlap', S('scripts/overlap.mjs'), [], true);
   if (partial) {
@@ -193,8 +221,19 @@ if (reusable) {
     run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json'), ...(opts.open ? ['--open'] : [])], false);
     const headline = optOut.match(/(\d+) actionable findings · (\d+) ready · (\d+) blocked · (\d+) judgement/);
     const locM = optOut.match(/~(\d+) LOC reclaimed/);
-    banner = bannerFromGraph();
-    if (banner && headline) { banner.ready = Number(headline[2]); if (locM) banner.loc = Number(locM[1]); }
+    // ONE parse of the final graph feeds the banner, the history row, and the delta.
+    let freshGraph = null;
+    try { freshGraph = JSON.parse(readFileSync(join(ws, 'graph.json'), 'utf8')); } catch { /* banner/delta degrade */ }
+    if (freshGraph) {
+      banner = { symbols: freshGraph.meta?.stats?.nodes ?? (freshGraph.nodes || []).length, ...findingBuckets(freshGraph.overlaps) };
+      if (headline) { banner.ready = Number(headline[2]); if (locM) banner.loc = Number(locM[1]); }
+      // R1/R8: one appended row per FULL map — brief/trend/report read the series; reused
+      // (memo-hit) runs never reach here, so the ledger records real recomputes only.
+      const freshRow = metricsRow(freshGraph);
+      appendHistory(join(ws, 'graph.json'), freshRow);
+      if (prevRow) sinceLast = { prev: prevRow, cur: freshRow };
+      recordMap(join(ws, 'graph.json')); // §4: firstMapAt/lastMapAt/mapCount/fullMaps
+    }
     try {
       const outputs = {};
       for (const f of STAGE_OUTPUTS) { const b = readFileSync(join(ws, f)); outputs[f] = { s: b.length, h: sha1hex(b) }; }
@@ -220,7 +259,7 @@ if (!partial) try {
 
 if (opts.coverage) run('coverage', S('scripts/coverage.mjs'), [join(ws, 'graph.json'), resolve(opts.coverage)], false); // #13
 
-console.error(`\n[run] done -> ${ws}`);
+console.error(`\n[run] done -> ${ws} · codeweb v${VERSION}`);
 if (partial) {
   console.error(`[run]   ${ws}/graph.json · overlap.md · fragment.json (through-overlap: no report)`);
 } else {
@@ -230,6 +269,12 @@ if (partial) {
     const ready = banner.ready > 0 ? ` · ${banner.ready} ready merge(s)` : '';
     const loc = banner.loc > 0 ? ` (~${banner.loc} LOC reclaimable)` : '';
     console.error(`[run] mapped ${banner.symbols} symbols -> ${banner.actionable} actionable finding(s)${ready}${loc} — details: optimize.md`);
+  }
+  // RETENTION R1: the re-map is a PROGRESS REPORT — measured deltas only, never projections.
+  if (sinceLast) {
+    const { prev, cur } = sinceLast;
+    const when = prev.at ? ` (${String(prev.at).slice(0, 10)})` : '';
+    console.error(`[run] since last map${when}: dups ${prev.confirmed} -> ${cur.confirmed} · cycles ${prev.cycles} -> ${cur.cycles} · symbols ${prev.symbols} -> ${cur.symbols}`);
   }
   console.error(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);
   // #10: the value receipt shows up where the user already is — one line, only when non-empty.

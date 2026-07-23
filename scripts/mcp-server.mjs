@@ -19,10 +19,11 @@
 
 import { createInterface } from 'node:readline';
 import { spawn } from 'node:child_process';
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols, findingBuckets, bucketsLine } from './lib/graph-ops.mjs';
+import { readHistory } from './lib/history.mjs'; // RETENTION R1/R8: the brief's progression tail
 import { diffGraphs } from './lib/diff-core.mjs'; // #33: the codeweb_diff comparison, served in-process
 import { runQuery } from './lib/query-core.mjs';
 import { findSymbols } from './lib/find-core.mjs';
@@ -96,6 +97,21 @@ function discoverGraph() {
   return null;
 }
 const NO_GRAPH = 'no graph found — pass `graph`, or build one for this repo with the codeweb_map tool (or /codeweb). The graph lives at <target>/.codeweb/graph.json.';
+// RETENTION R11a: the unsupported-language marker codeweb_map leaves on a no-source failure —
+// checked wherever NO_GRAPH would fire, so repeat sessions get routed instead of re-walled.
+function discoverUnsupported() {
+  const spots = [];
+  if (process.env.CODEWEB_WS) spots.push(join(process.env.CODEWEB_WS, 'unsupported.json'));
+  let dir = process.cwd();
+  for (let i = 0; i < 40; i++) {
+    spots.push(join(dir, '.codeweb', 'unsupported.json'));
+    const up = dirname(dir);
+    if (up === dir) break;
+    dir = up;
+  }
+  return spots.find(existsSync) || null;
+}
+const atomicWriteJson = (p, obj) => writeFileSync(p, JSON.stringify(obj)); // marker-sized writes only
 
 // ---- persistent graph cache (in-process serving) ---------------------------------------------
 // The stdio server lives for the whole session, so structural queries answer from a PARSED,
@@ -459,7 +475,15 @@ function handleMap(id, args, meta) {
     }
   };
   const onSettle = ({ code, errBuf }) => {
-    if (code !== 0) return errResult(id, `codeweb_map failed (exit ${code}): ${(errBuf || '').trim().split('\n').slice(-3).join('\n')}`);
+    if (code !== 0) {
+      // RETENTION R11a: an unsupported-language repo fails IDENTICALLY every session with no
+      // memory. Leave a marker the NO_GRAPH path reads, so the next session routes straight to
+      // the agent fallback instead of hitting the same wall. Best-effort.
+      if (/no supported source files/.test(errBuf || '')) {
+        try { atomicWriteJson(join(out, 'unsupported.json'), { at: new Date().toISOString(), reason: 'no supported source files', hint: 'use the /codeweb agent fallback (agent-based mapping); delete this file to retry codeweb_map' }); } catch { /* marker only */ }
+      }
+      return errResult(id, `codeweb_map failed (exit ${code}): ${(errBuf || '').trim().split('\n').slice(-3).join('\n')}`);
+    }
     if (token !== undefined && token !== null) send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.length, total: MAP_STAGES.length, message: 'done' } });
     const graphPath = join(out, 'graph.json');
     let stats = '';
@@ -559,7 +583,12 @@ function handleToolCall(id, params) {
   let graphPath = null;
   if (!tool.graphless) {
     graphPath = args.graph || discoverGraph();
-    if (!graphPath) return errResult(id, NO_GRAPH);
+    if (!graphPath) {
+      // R11a: no graph AND a remembered unsupported-language failure -> route, don't re-wall.
+      const marker = discoverUnsupported();
+      if (marker) return errResult(id, `this repo was previously found to have no natively-supported source (marker: ${marker}) — codeweb's extractor cannot map it. In Claude Code, the /codeweb command's AGENT FALLBACK maps it by reading. Delete the marker file to retry codeweb_map.`);
+      return errResult(id, NO_GRAPH);
+    }
     // #11: annotate's CLI addresses the WORKSPACE (--dir beside the graph), not the graph file.
     if (tool.dirFromGraph) cliArgs.push('--dir', dirname(resolve(graphPath)));
     else cliArgs.push(graphPath);
@@ -589,6 +618,8 @@ function handleToolCall(id, params) {
       const payload = attachActivity(buildBrief(graph, index), resolve(graphPath));
       const stale = staleOnce(resolve(graphPath), entry);
       if (stale) payload.stale = stale;
+      // RETENTION R1/R8: the progression tail rides the brief here too (hook/CLI parity).
+      try { const h = readHistory(resolve(graphPath), 4); if (h.length >= 2) payload.history = h; } catch { /* best-effort */ }
       return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
     } catch { /* fall through to the spawned artifact */ }
   }

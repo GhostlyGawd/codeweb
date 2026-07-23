@@ -24,7 +24,7 @@ import { execFileSync } from 'node:child_process';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SPARK = '▁▂▃▄▅▆▇█';
 
-const USAGE = 'usage: trend.mjs (--git <repo> [--last N] [--focus <subdir>] | <a.json> <b.json> ... [--labels a,b,...]) [--json]';
+const USAGE = 'usage: trend.mjs (--history <history.jsonl> | --git <repo> [--last N] [--focus <subdir>] | <a.json> <b.json> ... [--labels a,b,...]) [--json]';
 import { parseArgs } from './lib/cli.mjs';
 
 // ---- pure metrics ----
@@ -141,15 +141,28 @@ const { opts: f, pos } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
   flags: {
     git: { type: 'string', default: null },
+    history: { type: 'string', default: null }, // RETENTION R8: the instant path — read the per-map ledger
     last: { type: 'number', default: 10 },
     focus: { type: 'string', default: '.' },
     labels: { type: 'string', default: null },
     json: { type: 'bool', default: false },
   },
 });
-const opts = { graphs: pos, git: f.git, last: Math.max(1, f.last), focus: f.focus, json: f.json, labels: f.labels != null ? f.labels.split(',') : null };
+const opts = { graphs: pos, git: f.git, history: f.history, last: Math.max(1, f.last), focus: f.focus, json: f.json, labels: f.labels != null ? f.labels.split(',') : null };
 let rows = [];
-if (opts.git) {
+if (opts.history) {
+  // RETENTION R8: run.mjs appends one metrics row per full map to .codeweb/history.jsonl — the
+  // series this dashboard used to recompute (N full pipeline runs into a temp dir) and discard.
+  // Instant, no pipeline; --git remains for backfilling history that predates the ledger.
+  const raw = readFileSync(resolve(opts.history), 'utf8');
+  rows = raw.split('\n').filter((l) => l.trim()).flatMap((l) => {
+    try { return [JSON.parse(l)]; } catch { return []; } // a torn tail line is skipped, not fatal
+  }).map((r, i) => ({
+    label: r.at ? String(r.at).slice(0, 10) : `map ${i + 1}`,
+    confirmed: r.confirmed ?? 0, candidates: r.candidates ?? 0, coupling: r.coupling ?? 0,
+    nodes: r.symbols ?? 0, files: r.files ?? 0,
+  }));
+} else if (opts.git) {
   rows = gitSnapshots(resolve(opts.git), opts.last, opts.focus);
 } else if (opts.graphs.length) {
   rows = opts.graphs.map((p, i) => {

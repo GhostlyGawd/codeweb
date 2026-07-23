@@ -332,11 +332,29 @@
       else if (o.confidence === 'high' || o.confidence === 'medium') fb.actionable++;
       else fb.review++;
     });
+    // RETENTION R2: a refresh drops findings and stamps the drop — never render that as "0".
+    var findingsChip = (G.meta.overlapsDroppedAt && !(G.overlaps || []).length)
+      ? 'findings not recounted' : fb.actionable + ' actionable';
+    // RETENTION R9: the report's own age, computed at VIEW time from the file's modified date —
+    // the embedded bytes stay deterministic (no timestamp travels in the HTML itself).
+    var mappedAgo = '', fileDate = '';
+    try {
+      var lm = new Date(document.lastModified);
+      if (!isNaN(lm.getTime())) {
+        fileDate = lm.toLocaleString();
+        var days = Math.floor((Date.now() - lm.getTime()) / 86400000);
+        mappedAgo = 'mapped ' + (days <= 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago');
+      }
+    } catch (e) { /* honesty is best-effort */ }
     el.textContent = [
       AN.length + ' symbols' + (productOnly && nonProduct ? ' (+' + nonProduct + ' hidden)' : ''),
-      AE.length + ' edges', domainNames.length + ' areas', fb.actionable + ' actionable'
+      AE.length + ' edges', domainNames.length + ' areas', findingsChip, mappedAgo
     ].filter(Boolean).join('  ·  ');
+    var gen = document.querySelector('meta[name="generator"]');
     el.title = 'findings: actionable ' + fb.actionable + ' · needs review ' + fb.review + ' · dismissed ' + fb.dismissed +
+      (G.meta.overlapsDroppedAt ? '\nfindings were dropped by a refresh — re-run the pipeline to recount' : '') +
+      (fileDate ? '\nreport file date: ' + fileDate + ' (rebuild: node scripts/run.mjs <src>)' : '') +
+      (gen ? '\nbuilt by ' + gen.content : '') +
       (G.meta.engine ? '\nextraction engine: ' + G.meta.engine : ''); // breakdown + internals live in the tooltip
   }
   renderMeta();

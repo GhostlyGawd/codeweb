@@ -69,7 +69,7 @@ test('the trio shares ONE stamp === statSync(graph.json), and all three loaders 
   try {
     const { gp } = synthGraph(dir);
     const touched = writeSidecars(gp, normalizeGraph(JSON.parse(readFileSync(gp, 'utf8'))));
-    assert.deepEqual(touched, ['brief', 'index-lite', 'similar-index']);
+    assert.deepEqual(touched, ['brief', 'index-lite', 'stale-stamps', 'similar-index']);
     const stamp = stampOf(gp);
     const brief = JSON.parse(readSidecar(dir, 'brief.json'));
     const lite = JSON.parse(readSidecar(dir, 'index-lite.json'));
@@ -88,7 +88,7 @@ test('similar-index is REBUILT when meta.root is readable', () => {
   const dir = tmpDir('codeweb-sc-simA-');
   try {
     const { gp } = synthGraph(dir);
-    assert.deepEqual(writeSidecars(gp, normalizeGraph(JSON.parse(readFileSync(gp, 'utf8')))), ['brief', 'index-lite', 'similar-index']);
+    assert.deepEqual(writeSidecars(gp, normalizeGraph(JSON.parse(readFileSync(gp, 'utf8')))), ['brief', 'index-lite', 'stale-stamps', 'similar-index']);
     assert.ok(existsSync(join(dir, 'similar-index.json')) && loadSimilarIndex(gp), 'rebuilt + loadable');
   } finally { cleanup(dir); }
 });
@@ -99,7 +99,7 @@ test('similar-index is REMOVED when meta.root is absent (brief + index-lite stil
     const { gp } = synthGraph(dir, { root: null }); // no meta.root
     writeFileSync(join(dir, 'similar-index.json'), '{"stale":true}'); // a stale one is present
     const touched = writeSidecars(gp, normalizeGraph(JSON.parse(readFileSync(gp, 'utf8'))));
-    assert.deepEqual(touched, ['brief', 'index-lite', 'similar-index removed']);
+    assert.deepEqual(touched, ['brief', 'index-lite', 'stale-stamps', 'similar-index removed']);
     assert.ok(!existsSync(join(dir, 'similar-index.json')), 'the stale similar-index is removed, never silently served');
     assert.equal(loadSimilarIndex(gp), null, 'loader → null → the live path');
     assert.ok(existsSync(join(dir, 'brief.json')) && existsSync(join(dir, 'index-lite.json')), 'brief + index-lite still written (graph-pure)');
@@ -111,7 +111,7 @@ test('similar-index is REMOVED when meta.root is set but gone from disk', () => 
   try {
     const { gp } = synthGraph(dir, { root: join(dir, 'was-here-now-deleted') });
     writeFileSync(join(dir, 'similar-index.json'), '{"stale":true}');
-    assert.deepEqual(writeSidecars(gp, normalizeGraph(JSON.parse(readFileSync(gp, 'utf8')))), ['brief', 'index-lite', 'similar-index removed']);
+    assert.deepEqual(writeSidecars(gp, normalizeGraph(JSON.parse(readFileSync(gp, 'utf8')))), ['brief', 'index-lite', 'stale-stamps', 'similar-index removed']);
     assert.ok(!existsSync(join(dir, 'similar-index.json')), 'removed when the recorded root no longer exists');
   } finally { cleanup(dir); }
 });

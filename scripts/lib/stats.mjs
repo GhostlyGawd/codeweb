@@ -14,6 +14,17 @@ import { atomicWrite } from './cli.mjs'; // finding #42: crash-safe writes for t
 
 const statsPathOf = (graphPath) => join(dirname(graphPath), 'stats.json');
 const monthNow = () => new Date().toISOString().slice(0, 7);
+// RETENTION §4.2: ISO-week key (e.g. 2026-W30) — month buckets hide the weekly rhythm the
+// product actually lives on; the week series is the user's own local retention curve.
+function isoWeekNow() {
+  const d = new Date();
+  const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  const week = Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
+  return `${t.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
+}
 
 /** Read the ledger beside a graph.json, or null. Never throws. */
 export function readStats(graphPath) {
@@ -34,6 +45,33 @@ export function bump(graphPath, counter, n = 1) {
     const m = monthNow();
     if (!s.months[m]) s.months[m] = {};
     s.months[m][counter] = (s.months[m][counter] || 0) + n;
+    // RETENTION §4: sessions get the two extra grains the nudges and the local retention curve
+    // need — a lastSessionAt stamp and an ISO-week bucket (sessions/week is the real rhythm).
+    if (counter === 'briefInjected') {
+      s.lastSessionAt = new Date().toISOString();
+      if (!s.weeks) s.weeks = {};
+      const w = isoWeekNow();
+      s.weeks[w] = (s.weeks[w] || 0) + n;
+    }
+    atomicWrite(statsPathOf(graphPath), JSON.stringify(s));
+  } catch { /* a receipt must never break the tool */ }
+}
+
+/** RETENTION §4: stamp a completed FULL map — firstMapAt (once), lastMapAt, mapCount, and the
+ *  monthly fullMaps counter (the refresh-vs-remap ratio's denominator). Dates and integers only;
+ *  same locality/fail-open contract as bump(). Reused (memo-hit) runs must NOT call this — the
+ *  map did not change, so "when did I last map?" keeps its honest answer. */
+export function recordMap(graphPath) {
+  if (process.env.CODEWEB_NO_STATS === '1' || !graphPath) return;
+  try {
+    const s = readStats(graphPath) || { since: monthNow(), months: {} };
+    const now = new Date().toISOString();
+    if (!s.firstMapAt) s.firstMapAt = now;
+    s.lastMapAt = now;
+    s.mapCount = (s.mapCount || 0) + 1;
+    const m = monthNow();
+    if (!s.months[m]) s.months[m] = {};
+    s.months[m].fullMaps = (s.months[m].fullMaps || 0) + 1;
     atomicWrite(statsPathOf(graphPath), JSON.stringify(s));
   } catch { /* a receipt must never break the tool */ }
 }
@@ -83,10 +121,13 @@ export function correlateEdit(graphPath, editedRel) {
 }
 
 /** One line for a month's counters, or null when the bucket is empty. */
+// Bookkeeping counters that are NOT delivered value — the receipt line must stay a value
+// receipt (and run.mjs's first-contact `next:` block keys off the receipt being empty).
+const RECEIPT_SILENT = new Set(['fullMaps']);
 export function monthLine(counters) {
   if (!counters) return null;
   const parts = LABELS.filter(([k]) => counters[k] > 0).map(([k, f]) => f(counters[k]));
-  for (const k of Object.keys(counters)) if (!LABELS.some(([l]) => l === k) && counters[k] > 0) parts.push(`${counters[k]} ${k}`);
+  for (const k of Object.keys(counters)) if (!RECEIPT_SILENT.has(k) && !LABELS.some(([l]) => l === k) && counters[k] > 0) parts.push(`${counters[k]} ${k}`);
   return parts.length ? parts.join(' · ') : null;
 }
 

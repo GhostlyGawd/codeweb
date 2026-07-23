@@ -11,13 +11,14 @@
 // (no `.codeweb/graph.json` up-tree -> no-op), and only checks the edges-only regression subset
 // (cycles + lost-callers) — run `scripts/diff.mjs` or re-run /codeweb for the full delta.
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { structuralRegressions, regressionsAgainstSummary } from '../scripts/lib/graph-ops.mjs';
 import { loadHookBaseline } from '../scripts/lib/hook-baseline.mjs';
 import { bump, correlateEdit } from '../scripts/lib/stats.mjs';
+import { atomicWrite } from '../scripts/lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXTRACT = join(HERE, '..', 'scripts', 'extract-symbols.mjs');
@@ -87,6 +88,33 @@ export async function check(raw) {
   return { root: t.root, ...reg };
 }
 
+// RETENTION R4: surface each regression ONCE per baseline. The old behavior re-flagged the same
+// accepted/deferred tradeoff on every subsequent edit to the target, indefinitely — and repeated
+// identical warnings train dismissal, killing the channel for the one real catch. A small
+// sidecar (.codeweb/flagged.json) records the flagged keys against the baseline graph's
+// mtime+size stamp; a re-map or refresh changes the stamp and resets the memory. Fail-open in
+// the NOISY direction: a sidecar error keeps the warning (never hides a fresh regression).
+export function dedupeFlags(baselinePath, out) {
+  try {
+    const st = statSync(baselinePath);
+    const cur = { m: st.mtimeMs, s: st.size };
+    const p = join(dirname(baselinePath), 'flagged.json');
+    let doc = null; try { doc = JSON.parse(readFileSync(p, 'utf8')); } catch { /* first flag */ }
+    const known = doc && doc.baseline?.m === cur.m && doc.baseline?.s === cur.s ? new Set(doc.keys || []) : new Set();
+    const keyOfCycle = (c) => 'cycle:' + [...c].sort().join('|');
+    const keys = [...out.newCycles.map(keyOfCycle), ...out.lostCallers.map((id) => 'lost:' + id)];
+    const fresh = new Set(keys.filter((k) => !known.has(k)));
+    for (const k of keys) known.add(k);
+    atomicWrite(p, JSON.stringify({ baseline: cur, keys: [...known].sort() }));
+    if (!fresh.size) return null; // everything here was already surfaced against this baseline
+    return {
+      ...out,
+      newCycles: out.newCycles.filter((c) => fresh.has(keyOfCycle(c))),
+      lostCallers: out.lostCallers.filter((id) => fresh.has('lost:' + id)),
+    };
+  } catch { return out; }
+}
+
 function format(out) {
   const lines = [`[codeweb] ⚠ structural regression after edit (target: ${out.root}):`];
   for (const c of out.newCycles) lines.push(`  new dependency cycle: ${c.join(' <-> ')}`);
@@ -106,6 +134,8 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     try {
       const fp = JSON.parse(raw)?.tool_input?.file_path || JSON.parse(raw)?.tool_input?.filePath;
       const t = fp && SRC_RE.test(fp) && findTarget(fp);
+      // R4: dedupe BEFORE the ledger so regressionsFlagged counts fresh flags, not repeats.
+      if (out && t) { try { out = dedupeFlags(t.baseline, out); } catch { /* keep the warning */ } }
       if (t) {
         bump(t.baseline, 'postEditChecks');
         if (out) bump(t.baseline, 'regressionsFlagged', out.newCycles.length + out.lostCallers.length);

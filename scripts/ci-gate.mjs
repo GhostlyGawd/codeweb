@@ -13,7 +13,7 @@
 // --md writes the structural review as a PR-comment-ready markdown digest (lib/gate-md.mjs) —
 // best-effort: a digest failure never changes the gate's verdict.
 
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync, readFileSync, appendFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,7 +22,7 @@ import { gateComment } from './lib/gate-md.mjs';
 import { die, parseArgs } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const USAGE = 'usage: ci-gate.mjs --base <ref> [--repo <path>] [--target <subdir>] [--md <file>]';
+const USAGE = 'usage: ci-gate.mjs --base <ref> [--repo <path>] [--target <subdir>] [--md <file>] [--history <file>]\n  --history <file>  append this run\'s AFTER metrics to a JSONL ledger (persist it via actions/cache)\n                    and render the cross-PR trend line in the --md comment';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — unknown flags were silently ignored here,
 // and this was one of the CLIs answering no --help; one policy now.
@@ -33,6 +33,7 @@ const { opts } = parseArgs(process.argv.slice(2), {
     repo: { type: 'string', default: '.' },
     target: { type: 'string', default: '.' },
     md: { type: 'string', default: null },
+    history: { type: 'string', default: null }, // RETENTION R7: the gate finally accrues something
   },
 });
 if (!opts.base) die(USAGE, 2);
@@ -66,11 +67,25 @@ try {
   } else {
     code = d.status;
   }
+  // RETENTION R7: the gate ledger — every run computes exactly the metrics trend.mjs charts, and
+  // used to discard them with RUNNER_TEMP. With --history (an actions/cache-persisted JSONL),
+  // each run appends the AFTER graph's row and the comment gains a cross-PR trajectory line.
+  // Best-effort: a ledger failure never changes the verdict.
+  let history = null;
+  if (opts.history) {
+    try {
+      const { metricsRow } = await import('./lib/history.mjs');
+      const row = { ...metricsRow(JSON.parse(readFileSync(afterGraph, 'utf8'))), at: new Date().toISOString() };
+      appendFileSync(resolve(opts.history), JSON.stringify(row) + '\n');
+      history = readFileSync(resolve(opts.history), 'utf8').split('\n').filter((l) => l.trim())
+        .flatMap((l) => { try { return [JSON.parse(l)]; } catch { return []; } }).slice(-5);
+    } catch (e) { console.error(`[codeweb] gate history not recorded: ${(e && e.message) || e}`); }
+  }
   // PR-comment digest — a second diff over the already-built graphs (ms), rendered budgeted
   if (opts.md) {
     try {
       const dj = spawnSync(node, [join(HERE, 'diff.mjs'), beforeGraph, afterGraph, '--json'], { encoding: 'utf8', maxBuffer: 1 << 26 });
-      writeFileSync(opts.md, gateComment(JSON.parse(dj.stdout)));
+      writeFileSync(opts.md, gateComment(JSON.parse(dj.stdout), { history }));
     } catch (e) { console.error(`[codeweb] gate comment not written: ${(e && e.message) || e}`); }
   }
 } catch (e) {
