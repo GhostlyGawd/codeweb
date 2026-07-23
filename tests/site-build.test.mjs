@@ -28,13 +28,13 @@ test('--out redirects the whole build', () => {
 test('builder runs and reports the expected page count', () => {
   const r = runNode(BUILD, ['--out', OUT]);
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /built 5 page\(s\)/);
+  assert.match(r.stdout, /built 6 page\(s\)/); // +case-study (SEO F8)
 });
 
 test('emits every page in the information architecture', () => {
   runNode(BUILD, ['--out', OUT]);
   const files = htmlFiles();
-  for (const p of ['index.html', 'product.html', 'research.html', 'start.html', 'changelog.html']) {
+  for (const p of ['index.html', 'product.html', 'research.html', 'start.html', 'changelog.html', 'case-study.html']) {
     assert.ok(files.includes(p), `missing ${p}`);
   }
 });
@@ -72,13 +72,19 @@ test('footer version is in lock-step with package.json', () => {
 test('pages are self-contained — no third-party network origins', () => {
   runNode(BUILD, ['--out', OUT]);
   for (const [f, html] of Object.entries(snapshot())) {
-    // links to github.com are allowed (source/releases); no other external hosts or CDNs
+    // links to github.com are allowed (source/releases); no other external hosts or CDNs.
+    // schema.org / opensource.org / npmjs.com are TEXT references (JSON-LD @context, license
+    // and sameAs URLs — SEO F10) — nothing on the page fetches them; the self-contained
+    // property this test protects is about network REQUESTS (scripts, styles, images, fonts).
     const externals = (html.match(/https?:\/\/[^\s"')]+/g) || [])
       .filter((u) => !u.startsWith('https://github.com/'))
       .filter((u) => !u.startsWith('https://ghostlygawd.github.io/'))
       .filter((u) => !u.startsWith('https://keepachangelog.com/'))
       .filter((u) => !u.startsWith('https://semver.org/'))
-      .filter((u) => !u.startsWith('http://www.w3.org/'));
+      .filter((u) => !u.startsWith('http://www.w3.org/'))
+      .filter((u) => !u.startsWith('https://schema.org'))
+      .filter((u) => !u.startsWith('https://opensource.org/'))
+      .filter((u) => !u.startsWith('https://www.npmjs.com/'));
     assert.deepEqual(externals, [], `${f} references unexpected external origins: ${externals.join(', ')}`);
   }
 });

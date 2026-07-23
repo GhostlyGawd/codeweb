@@ -119,6 +119,12 @@ export function syncTargets(version, count) {
       subs: [[/(^version:\s*).+$/m, `$1${version}`]],
     },
     {
+      // SEO F2: the MCP-registry manifest tracks the package version (top-level + the npm
+      // package entry) so a release republish never ships a stale shelf listing.
+      file: 'server.json',
+      subs: [[/("version":\s*")[^"]+(")/g, `$1${version}$2`]],
+    },
+    {
       file: 'README.md',
       subs: [[/(badge\/version-)\d+\.\d+\.\d+(-)/, `$1${version}$2`]],
     },

@@ -1,0 +1,44 @@
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Case study</span>
+      <h1>Mapping axios: 3 confirmed duplications in a 50M-download library</h1>
+      <p class="lead">We pointed codeweb at <a href="https://github.com/axios/axios" rel="noopener">axios</a> — the HTTP client downloaded ~50M times a week — read-only, no setup, one command. Measured at axios v1.18.1 (<code>a209bfb1</code>); the pinned command below reproduces these numbers exactly.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <a href="demo/"><img src="assets/05-axios-graph.png" alt="codeweb's domain view of axios — eight auto-detected areas sized by symbol count and linked by call/import coupling" style="width:100%;border-radius:8px" loading="lazy"></a>
+        <p class="muted" style="margin-top:.5rem">The unedited generated report — <a href="demo/">click around it live</a>.</p>
+      </div>
+      <div class="card">
+        <h3>The map, in one command</h3>
+<pre><code>node scripts/run.mjs path/to/axios/lib --target axios
+# 274 symbols · 374 edges · 8 domains · 17 overlap candidates</code></pre>
+        <p>Domains auto-clustered from the code's own structure: <code>helpers</code>, <code>core</code>, <code>adapters</code>, <code>cancel</code>, <code>defaults</code>, <code>platform/node</code>, <code>platform/common</code>, root.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Precision, not noise: 17 candidates → 3 real duplications</h2>
+      <p class="lead">Anyone can grep for same-named functions. codeweb confirms each overlap against the <strong>actual function bodies</strong> (token-shingle similarity), so the 17 raw candidates resolve honestly:</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card"><h3>3 body-confirmed</h3><p>Genuinely the same logic in two places — two of them <strong>byte-for-byte identical</strong> across files.</p></div>
+      <div class="card"><h3>12 dismissed</h3><p>Same name, <em>different bodies</em>. Refuted so you don't chase them — that 12-of-17 dismissal rate is the point.</p></div>
+      <div class="card"><h3>2 unverified</h3><p>Left for a human to judge, not asserted.</p></div>
+    </div>
+    <div class="card" style="margin-top:1.25rem">
+      <h3>And the safety call that a linter can't make</h3>
+      <p>codeweb <em>simulates</em> each merge against its own regression gate: two of the three merges would introduce a <strong>new dependency cycle</strong> (verdict: blocked, with the fix — host the canonical in a neutral module). The safe one (<code>setFormDataHeaders</code>, 91% body match) is marked <strong>ready</strong>: the gate stays green and the duplication count drops by one.</p>
+    </div>
+    <div class="btn-row" style="margin-top:1.25rem">
+      <a class="btn btn-primary" href="demo/">Explore the live map →</a>
+      <a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/docs/case-study-axios.md" rel="noopener">Full write-up + reproduce-it commands</a>
+      <a class="btn" href="start.html">Map your own repo</a>
+    </div>
+  </div>
+</section>

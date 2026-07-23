@@ -2,16 +2,24 @@
   "name": "@ghostlygawd/codeweb",
   "version": "0.9.0",
   "type": "module",
-  "description": "The living map of your codebase — deterministic call/import graph engine, 27 MCP tools for coding agents, and a self-contained interactive report.",
+  "description": "See what an edit breaks before you write it — deterministic call/import graph of your codebase, 27 MCP tools for coding agents, and a self-contained interactive map. Claude Code plugin & MCP server; zero deps, runs 100% locally.",
   "keywords": [
     "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude-code",
     "code-analysis",
+    "static-analysis",
     "call-graph",
     "dependency-graph",
-    "claude-code",
+    "codebase-map",
+    "impact-analysis",
+    "code-visualization",
+    "architecture",
     "agent-tools",
     "dead-code",
-    "duplication"
+    "duplication",
+    "refactoring"
   ],
   "homepage": "https://github.com/GhostlyGawd/codeweb#readme",
   "repository": {
