@@ -1,5 +1,8 @@
 # Case study: codeweb on axios
 
+**Measured at axios v1.18.1 (`a209bfb1`), 2026-07.** axios moves; at HEAD your counts will differ —
+the pinned command below reproduces these numbers exactly.
+
 We pointed codeweb at [**axios**](https://github.com/axios/axios) — the HTTP client downloaded
 ~50M times a week — read-only, no setup, one command. It never executes target code; it reads the
 source, builds the graph, and reports. Here is exactly what it found in `lib/`.
@@ -60,9 +63,10 @@ That is the difference between a linter and codeweb: it tells you **what's reall
 
 ```
 git clone https://github.com/axios/axios.git
+git -C axios checkout a209bfb1        # v1.18.1 — the pin these numbers were measured at
 git clone https://github.com/GhostlyGawd/codeweb.git
 node codeweb/scripts/run.mjs axios/lib --target axios
-# open codeweb/.codeweb/runs/axios/report.html · overlap.md · optimize.md
+# open axios/lib/.codeweb/report.html · overlap.md · optimize.md (the map lands inside the target)
 ```
 
 The full ranked advisory is in `optimize.md`; the body-confirmed overlap list (with the 12 dismissals)

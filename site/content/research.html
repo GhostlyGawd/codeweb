@@ -41,20 +41,20 @@
     <div class="split">
       <div>
         <span class="eyebrow">The efficiency pilot</span>
-        <h2>Frontier agents find more, in fewer steps</h2>
-        <p>On a caller-discovery micro-benchmark against a grep baseline, with the engine frozen across 8 repetitions, codeweb improved a frontier agent's recall by <strong>+0.265 ± 0.045</strong> — every one of the 8 reps positive, roughly six times the noise floor — while cutting discovery steps by <strong>~34%</strong> (−6.84 ± 3.33).</p>
-        <p class="muted">Precision was a weaker positive (+0.199 ± 0.147, one negative rep). The mechanism is deterministic: fixing import-alias and member-access resolution took axios <code>AxiosError</code>'s recovered callers from 1 to 20 — no model involved. We label the pilot preliminary because the truth set is fresh and grading is strict at the symbol level.</p>
+        <h2>Frontier agents find more, at equal cost</h2>
+        <p>On a caller-discovery micro-benchmark against a grep baseline — engine frozen, treatment consuming the <strong>budgeted</strong> responses agents actually receive over MCP — codeweb improved a frontier agent's recall by <strong>+0.310 ± 0.039</strong> (every one of the 5 reps positive) and precision by <strong>+0.234 ± 0.080</strong>, at <strong>equal token cost</strong> (v0.9.0).</p>
+        <p class="muted">Runtime tokens and tool-calls were a wash — reported plainly, not rounded up. The mechanism is deterministic: fixing import-alias and member-access resolution took axios <code>AxiosError</code>'s recovered callers from 1 to 20 — no model involved. We label the pilot preliminary because grading is strict at the symbol level. One target regressed (flask, a Python import-edge gap) — since bisected to a real extractor regression and fixed (Spec Q, closed): the same pre-flight now finds every truth site.</p>
       </div>
       <div class="callout callout-good">
         <h3>Why it's believable</h3>
-        <p>The step reduction is oracle-independent — it doesn't depend on how the truth set is scored. The recall gain clears the measurement noise by ~6×, and the paired design cancels the shared oracle noise that swung the grep baseline run-to-run.</p>
-        <p class="muted" style="margin-bottom:0">Source: <code>bench/experiments/efficiency-pilot.reps8.json</code></p>
+        <p>The paired design cancels the shared oracle noise that swung the grep baseline run-to-run, the recall gain clears the measurement noise by ~8×, and the null half of the result (no token savings) is published beside the win.</p>
+        <p class="muted" style="margin-bottom:0">Source: <code>bench/experiments/efficiency-pilot.reps5-v090.json</code> · <code>efficiency-pilot.usage-v090.json</code></p>
       </div>
     </div>
     <div class="callout" style="margin-top:1.5rem">
-      <h3>Re-run on the budgeted surface (v0.9.0, 5 reps)</h3>
-      <p>We re-ran the pilot with the treatment agent consuming the <strong>budgeted</strong> responses agents actually get over MCP (top-20 + a cursor, not the full dump). Recall held at <strong>+0.310 ± 0.039</strong> (all 5 reps positive) and precision at <strong>+0.234 ± 0.080</strong> — the budget costs no accuracy. The token savings the earlier run showed did <em>not</em> reappear: on a base agent that is already frugal, runtime tokens and tool-calls are a wash. The honest read is <strong>+0.31 recall at equal cost</strong> — the advantage moved from spend to completeness. One target regressed (flask, a Python import-edge gap) — since bisected to a real extractor regression and fixed (Spec Q, closed): the same pre-flight now finds every truth site.</p>
-      <p class="muted" style="margin-bottom:0">Source: <code>bench/experiments/efficiency-pilot.reps5-v090.json</code> · <code>efficiency-pilot.usage-v090.json</code></p>
+      <h3>The earlier run — and what didn't replicate</h3>
+      <p>An earlier 8-rep run (different base model, unbudgeted responses) found the same recall advantage (<strong>+0.265 ± 0.045</strong>, all reps positive) <em>plus</em> large savings: ~34% fewer discovery steps and ~44% fewer tokens. On the current, more frugal base agent those savings <strong>did not replicate</strong> — the advantage moved from spend to completeness. We lead with the current number and keep this one as labeled history, because that is what the receipts say.</p>
+      <p class="muted" style="margin-bottom:0">Source: <code>bench/experiments/efficiency-pilot.reps8.json</code> · <code>efficiency-pilot.usage.json</code></p>
     </div>
   </div>
 </section>

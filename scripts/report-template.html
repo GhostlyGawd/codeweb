@@ -323,11 +323,21 @@
   function renderMeta() {
     document.getElementById('metaTarget').textContent = (G.meta.target || '') + (G.meta.mode ? ' · ' + G.meta.mode : '');
     var el = document.getElementById('metaStats');
+    // ACTIVATION A4: the masthead count is the SAME "actionable" number stdout and optimize.md
+    // report (bucket rule mirrors lib/graph-ops.mjs findingBuckets). "dup-groups" was a
+    // name-collision heuristic that contradicted the findings ledger on every run.
+    var fb = { actionable: 0, review: 0, dismissed: 0 };
+    (G.overlaps || []).forEach(function (o) {
+      if (o.confidence === 'refuted') fb.dismissed++;
+      else if (o.confidence === 'high' || o.confidence === 'medium') fb.actionable++;
+      else fb.review++;
+    });
     el.textContent = [
       AN.length + ' symbols' + (productOnly && nonProduct ? ' (+' + nonProduct + ' hidden)' : ''),
-      AE.length + ' edges', domainNames.length + ' areas', duplicates.length + ' dup-groups'
+      AE.length + ' edges', domainNames.length + ' areas', fb.actionable + ' actionable'
     ].filter(Boolean).join('  ·  ');
-    el.title = G.meta.engine ? 'extraction engine: ' + G.meta.engine : ''; // internals live in the tooltip, not the masthead
+    el.title = 'findings: actionable ' + fb.actionable + ' · needs review ' + fb.review + ' · dismissed ' + fb.dismissed +
+      (G.meta.engine ? '\nextraction engine: ' + G.meta.engine : ''); // breakdown + internals live in the tooltip
   }
   renderMeta();
   var roleBtn = document.getElementById('roleFilter');

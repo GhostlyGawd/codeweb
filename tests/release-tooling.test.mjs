@@ -139,6 +139,25 @@ test('scanProseCounts flags a stale native-language count', async () => {
   assert.equal(scanProseCounts('12 native languages', 'f', facts).length, 1);
 });
 
+// PROOF F2 / CRO C2: the two phrasings that shipped a whole release stale because the scanner
+// missed them — "(N total)" after an MCP-tools mention, and a bare "<Word> languages" heading.
+test('scanProseCounts catches the "(N total)" and bare "N languages" phrasings that slipped v0.9.0', async () => {
+  const { scanProseCounts } = await import('../scripts/release-utils.mjs');
+  const facts = { toolCount: 27, langCount: 11 };
+  assert.equal(scanProseCounts('and 5 new MCP tools (20 total) shipped', 'f', facts).length, 1,
+    'a stale parenthetical total after an MCP-tools mention is flagged');
+  assert.equal(scanProseCounts('and 2 new MCP tools (27 total) shipped', 'f', facts).length, 0,
+    'a correct parenthetical total passes');
+  assert.equal(scanProseCounts('<h2>Five languages, parse-free</h2>', 'f', facts).length, 1,
+    'a bare stale language count is flagged even without native/first-class');
+  assert.equal(scanProseCounts('<h2>Eleven languages, parse-free</h2>', 'f', facts).length, 0,
+    'the correct bare count passes');
+  assert.equal(scanProseCounts('parity across the original five languages is validated', 'f', facts).length, 0,
+    'historical counts marked "original" are exempt');
+  assert.equal(scanProseCounts('supports 40+ languages via LSP', 'f', facts).length, 0,
+    'open-ended "+" counts about other tools pass');
+});
+
 // The language count the site claims is DATA (product.json); this pins that data to the engine:
 // one file per supported extension must extract to exactly product.json's language list length.
 test('product.json languages match the extractor: one file per extension, counted', async () => {

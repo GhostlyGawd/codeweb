@@ -30,7 +30,8 @@ test('E2 given only unsupported files, extract exits 1 with the same guidance', 
     const r = runNode(script('extract-symbols.mjs'), [dir, '--out', join(dir, 'f.json')]);
     assert.equal(r.status, 1);
     assert.match(r.stderr, /no supported source files/i);
-    assert.match(r.stderr, /right (directory|path)/i, 'asks whether the path is right');
+    assert.match(r.stderr, /(wrong|right) (directory|path)/i, 'asks whether the path is right');
+    assert.match(r.stderr, /agent fallback|\/codeweb/i, 'routes non-native languages to the agent fallback');
   } finally { cleanup(dir); }
 });
 

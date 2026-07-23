@@ -4,9 +4,11 @@
 // targets never clobbers each other's outputs. Resolves all paths from the plugin root, so it works
 // regardless of the caller's cwd (e.g. `node ${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs <target>`).
 //
-//   node scripts/run.mjs <SRC> [--target <label>] [--out-dir <dir>]
+//   node scripts/run.mjs [<SRC>] [--target <label>] [--out-dir <dir>]
 //
-// Default workspace: <plugin>/.codeweb/runs/<slug>  (override with --out-dir, e.g. <target>/.codeweb).
+// Default workspace: <SRC>/.codeweb (override with --out-dir) — inside the mapped repo, exactly
+// where MCP graph discovery and the three hooks walk up to find it (FUNNEL #2: the old default
+// under the npx package root orphaned maps in the npx cache where nothing could ever find them).
 // Stages read their workspace from CODEWEB_WS (default '.live' when run standalone).
 // Outputs in the workspace: fragment.json, graph.json, overlap.md, report.html, report.md.
 // Read-only over the target; never executes target code.
@@ -14,6 +16,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, existsSync, readFileSync, statSync } from 'node:fs';
 import { atomicWrite, SCAN_CACHE_NAME, parseArgs } from './lib/cli.mjs';
+import { findingBuckets } from './lib/graph-ops.mjs'; // ACTIVATION A3/A4: banner speaks the one findings vocabulary
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -24,10 +27,10 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..'); // plugin r
 // stage memo, so an old workspace can never serve outputs computed by an older pipeline.
 const MEMO_VERSION = 1;
 
-const USAGE = `usage: run.mjs <SRC> [--target <label>] [--out-dir <dir>] [--open] [--full] [--allow-empty]
-  <SRC>            path to the codebase to map (any of the 11 native languages)
-  --target <label> workspace slug (default: last two path segments of <SRC>)
-  --out-dir <dir>  where the artifacts go (default: .live/<slug> under the plugin root)
+const USAGE = `usage: run.mjs [<SRC>] [--target <label>] [--out-dir <dir>] [--open] [--full] [--allow-empty]
+  <SRC>            path to the codebase to map (default: current directory)
+  --target <label> display label stamped into the map (default: last two path segments of <SRC>)
+  --out-dir <dir>  where the artifacts go (default: <SRC>/.codeweb — where MCP + hooks find them)
   --open           open report.html when the map is built
   --full           recompute every stage (skip the fragment memo + edge cache)
   --allow-empty    permit a target with no supported source (writes an empty map)
@@ -48,8 +51,10 @@ const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
     coverage: { type: 'string', default: null },     // #13: measured-execution annotation after the map
   },
 });
-const opts = { src: pos[0] ?? null, target: flags.target, outDir: flags['out-dir'], open: flags.open, full: flags.full, allowEmpty: flags['allow-empty'], stages: flags.stages, coverage: flags.coverage };
-if (!opts.src) { console.error(USAGE); process.exit(2); }
+// FUNNEL #2 / FORMS cut #4: the main form has zero required fields. <SRC> defaults to the
+// current directory; the empty-target guard downstream keeps a wrong cwd from producing a
+// silent nonsense map.
+const opts = { src: pos[0] ?? '.', target: flags.target, outDir: flags['out-dir'], open: flags.open, full: flags.full, allowEmpty: flags['allow-empty'], stages: flags.stages, coverage: flags.coverage };
 // finding #42: --stages is a partial pipeline. Only 'through-overlap' is valid — any other value dies
 // with usage (exit 2), so a typo can never silently run a different phase set. A partial run computes
 // extract+cluster+overlap (graph.json's nodes/edges/domains/overlaps — all trend's metrics need),
@@ -63,11 +68,10 @@ const partial = opts.stages === 'through-overlap';
 opts.src = resolve(opts.src);
 if (!existsSync(opts.src)) { console.error(`[run] target not found: ${opts.src}`); process.exit(1); }
 
-// slug = whole target label (or last 2 path segments of src), so e.g. ecc/scripts -> "ecc-scripts"
-// rather than a collision-prone "scripts".
-const base = opts.target || opts.src.replace(/\\/g, '/').replace(/\/+$/, '').split('/').slice(-2).join('/');
-const slug = base.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'target';
-const ws = opts.outDir ? resolve(opts.outDir) : join(ROOT, '.codeweb', 'runs', slug);
+// FUNNEL #2: the default workspace lives INSIDE the target (<SRC>/.codeweb) — exactly where MCP
+// graph discovery and all three hooks walk up to. The old default (under the npx package root)
+// orphaned maps in the npx cache where nothing could ever find them.
+const ws = opts.outDir ? resolve(opts.outDir) : join(opts.src, '.codeweb');
 mkdirSync(ws, { recursive: true });
 
 const env = { ...process.env, CODEWEB_WS: ws };
@@ -88,6 +92,38 @@ const run = (label, file, args, useEnv) => {
   // never see a timestamp from here.
   console.error(`[run] ${label} done in ${Date.now() - t0}ms`);
 };
+// ACTIVATION A2: optimize's per-item advisory dump (~90 lines on a real repo) buried the result
+// under logistics. The stage runs CAPTURED: its headline lines still print (stdout, as before),
+// the dump lives in optimize.md with a one-line pointer here; CODEWEB_VERBOSE=1 restores the
+// firehose. Returns stdout so the banner can scrape the ready/LOC pair.
+const runCapture = (label, file, args) => {
+  console.error(`\n[run] ${label}`);
+  const t0 = Date.now();
+  let out = '';
+  try {
+    out = execFileSync(node, [file, ...args], { stdio: ['ignore', 'pipe', 'inherit'], env: process.env, cwd: ROOT, encoding: 'utf8' });
+  } catch (e) {
+    if (e.stdout) process.stderr.write(String(e.stdout)); // surface whatever it printed before dying
+    console.error(`\n[run] stage '${label}' failed${typeof e?.status === 'number' ? ` (exit ${e.status})` : ''} — aborting`);
+    process.exit(1);
+  }
+  const lines = out.split('\n');
+  const verbose = process.env.CODEWEB_VERBOSE === '1';
+  const shown = (verbose ? out : lines.slice(0, 3).join('\n')).trimEnd();
+  if (shown) console.log(shown);
+  if (!verbose && lines.length > 4) console.log(`  full advisory: ${join(ws, 'optimize.md')}`);
+  console.error(`[run] ${label} done in ${Date.now() - t0}ms`);
+  return out;
+};
+// ACTIVATION A3: the banner's headline numbers — one graph parse on a fresh map; the stage memo
+// caches them (`banner`) so the reuse path prints the same result line parse-free.
+const bannerFromGraph = () => {
+  try {
+    const g = JSON.parse(readFileSync(join(ws, 'graph.json'), 'utf8'));
+    return { symbols: g.meta?.stats?.nodes ?? (g.nodes || []).length, ...findingBuckets(g.overlaps) };
+  } catch { return null; }
+};
+let banner = null;
 
 const targetArg = opts.target ? ['--target', opts.target] : [];
 // Extract always runs — it is the change detector — and rides the scan cache (Spec A), so a
@@ -137,6 +173,7 @@ const reusable = !opts.full && prevMemo?.key === memoKey && outputsIntact();
 
 if (reusable) {
   console.error('\n[run] stages reused (fragment unchanged) — skipping downstream recompute; --full forces');
+  banner = prevMemo.banner || bannerFromGraph(); // pre-banner memos: one parse, this run only
 } else {
   run('cluster', S('scripts/cluster3.mjs'), [], true);
   run('overlap', S('scripts/overlap.mjs'), [], true);
@@ -145,12 +182,16 @@ if (reusable) {
     // partial workspace lacks optimize.md/report.* so it must never satisfy a later full run's memo.
     console.error('\n[run] --stages through-overlap: skipping optimize + report (memo not written)');
   } else {
-    run('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--out', join(ws, 'optimize.md')], false);
+    const optOut = runCapture('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--out', join(ws, 'optimize.md')]);
     run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json'), ...(opts.open ? ['--open'] : [])], false);
+    const headline = optOut.match(/(\d+) actionable findings · (\d+) ready · (\d+) blocked · (\d+) judgement/);
+    const locM = optOut.match(/~(\d+) LOC reclaimed/);
+    banner = bannerFromGraph();
+    if (banner && headline) { banner.ready = Number(headline[2]); if (locM) banner.loc = Number(locM[1]); }
     try {
       const outputs = {};
       for (const f of STAGE_OUTPUTS) { const b = readFileSync(join(ws, f)); outputs[f] = { s: b.length, h: sha1hex(b) }; }
-      atomicWrite(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString(), outputs }) + '\n');
+      atomicWrite(memoPath, JSON.stringify({ key: memoKey, at: new Date().toISOString(), outputs, ...(banner ? { banner } : {}) }) + '\n');
     } catch { /* memo is best-effort */ }
   }
 }
@@ -176,13 +217,31 @@ console.error(`\n[run] done -> ${ws}`);
 if (partial) {
   console.error(`[run]   ${ws}/graph.json · overlap.md · fragment.json (through-overlap: no report)`);
 } else {
+  // ACTIVATION A3: the banner leads with the RESULT (what the map found), not logistics. Numbers
+  // come from the graph itself (memo-cached on reuse) + optimize's headline; never recomputed here.
+  if (banner) {
+    const ready = banner.ready > 0 ? ` · ${banner.ready} ready merge(s)` : '';
+    const loc = banner.loc > 0 ? ` (~${banner.loc} LOC reclaimable)` : '';
+    console.error(`[run] mapped ${banner.symbols} symbols -> ${banner.actionable} actionable finding(s)${ready}${loc} — details: optimize.md`);
+  }
   console.error(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);
-  // #5: the map's whole point is to be LOOKED AT — say so (auto-open stays opt-in via --open).
-  if (!opts.open) console.error(`[run]   open ${join(ws, 'report.html')} in your browser (or re-run with --open)`);
+  // #10: the value receipt shows up where the user already is — one line, only when non-empty.
+  let receipt = null;
+  try {
+    const { readStats, lifetimeTotals, monthLine } = await import('./lib/stats.mjs');
+    receipt = monthLine(lifetimeTotals(readStats(join(ws, 'graph.json'))));
+  } catch { /* receipt must never break the pipeline */ }
+  if (receipt) {
+    // Returning user (the hooks/MCP have accrued activity here): receipt instead of onboarding.
+    console.error(`[run]   codeweb here so far: ${receipt} (full receipt: scripts/stats.mjs)`);
+    if (!opts.open) console.error(`[run]   open ${join(ws, 'report.html')} in your browser (or re-run with --open)`);
+  } else {
+    // ACTIVATION A5: first map of this repo — the three moves that turn one run into a habit.
+    // #5 still holds: the map's whole point is to be LOOKED AT, so seeing it is step 1.
+    const openCmd = process.platform === 'win32' ? 'start ""' : process.platform === 'darwin' ? 'open' : 'xdg-open';
+    console.error(`[run] next:`);
+    console.error(`[run]   1. ${opts.open ? 'the map is opening in your browser' : `see the map: ${openCmd} ${join(ws, 'report.html')}`}`);
+    console.error(`[run]   2. live queries in Claude Code: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp`);
+    console.error(`[run]   3. after edits: re-run codeweb here — the refresh is cache-warm (seconds, not a re-map)`);
+  }
 }
-// #10: the value receipt shows up where the user already is — one line, only when non-empty.
-try {
-  const { readStats, lifetimeTotals, monthLine } = await import('./lib/stats.mjs');
-  const receipt = monthLine(lifetimeTotals(readStats(join(ws, 'graph.json'))));
-  if (receipt) console.error(`[run]   codeweb here so far: ${receipt} (full receipt: scripts/stats.mjs)`);
-} catch { /* receipt must never break the pipeline */ }

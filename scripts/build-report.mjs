@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { writeSidecars } from './lib/sidecars.mjs'; // finding #25: THE map-time sidecar trio writer (refresh reuses it)
 import { atomicWrite, loadGraph, parseArgs } from './lib/cli.mjs';
+import { findingBuckets, bucketsLine } from './lib/graph-ops.mjs'; // ACTIVATION A4: one triple, same numbers on every surface
 
 const USAGE = 'usage: build-report.mjs [path/to/graph.json] [--out report.html] [--no-md] [--open]';
 
@@ -134,7 +135,7 @@ atomicWrite(outPath, html);
 const s = graph.meta.stats;
 console.log(`[codeweb] wrote ${outPath}`);
 console.log(
-  `[codeweb] ${s.nodes} nodes, ${s.edges} edges, ${s.domains} domains, ${s.overlaps} overlaps` +
+  `[codeweb] ${s.nodes} nodes, ${s.edges} edges, ${s.domains} domains — ${bucketsLine(findingBuckets(graph.overlaps))}` +
     (droppedEdges ? ` (dropped ${droppedEdges} dangling edges)` : '')
 );
 console.log(`[codeweb] updated ${graphPath} (meta.generatedAt + meta.stats persisted)`);

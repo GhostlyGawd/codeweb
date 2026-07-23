@@ -41,6 +41,9 @@ export function preview(raw) {
   }
   const brief = attachActivity(payload, graphPath);
   const text = renderBrief(brief);
+  // ACTIVATION A7: an EMPTY map must not be announced as "mapped" — renderBrief already leads
+  // with the empty verdict, so the prefix only adds the path.
+  if (!brief.size || brief.size.symbols === 0) return `[codeweb] ${text}\n(map file: ${graphPath})`;
   return `[codeweb] this repo is mapped (${graphPath}).\n${text}`;
 }
 

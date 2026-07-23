@@ -1,0 +1,18 @@
+{
+  "name": "codeweb",
+  "owner": {
+    "name": "GhostlyGawd",
+    "url": "https://github.com/GhostlyGawd"
+  },
+  "metadata": {
+    "description": "codeweb — the living map of your codebase. Deterministic call/import graph, 27 read-only MCP tools, ambient pre/post-edit hooks, and a self-contained interactive report.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "codeweb",
+      "source": "./",
+      "description": "Map any repo in seconds: /codeweb builds the graph; hooks brief every session and impact-check every edit; 27 deterministic MCP tools answer impact, callers, duplication, dead code, and risk before the agent writes."
+    }
+  ]
+}

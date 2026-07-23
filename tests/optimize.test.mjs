@@ -195,7 +195,7 @@ test('--out writes an optimize.md artifact with the tiered sections', () => {
   assert.match(md, /# codeweb — consolidation advisory/);
   assert.match(md, /## Ready/);
   assert.match(md, /## Blocked/);
-  assert.match(md, /## Review/);
+  assert.match(md, /## Judgement calls/); // A4: the review TIER displays as "judgement" (the triple owns "review")
   assert.match(md, /`dup` re-implemented in 2 files/);
 });
 

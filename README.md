@@ -2,12 +2,11 @@
 
 <img src="assets/brand/hero.svg" alt="codeweb — the living map of your codebase" width="840">
 
-[![Claude Code plugin](https://img.shields.io/badge/Claude_Code-plugin-c6f24e?style=flat-square)](#install)
-[![zero dependencies](https://img.shields.io/badge/dependencies-zero-3fb950?style=flat-square)](#how-it-works)
+[![CI](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml/badge.svg)](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/%40ghostlygawd%2Fcodeweb?style=flat-square&color=c6f24e)](https://www.npmjs.com/package/@ghostlygawd/codeweb)
+[![license: MIT](https://img.shields.io/npm/l/%40ghostlygawd%2Fcodeweb?style=flat-square&color=3fb950)](LICENSE)
 [![deterministic engine](https://img.shields.io/badge/engine-deterministic-c6f24e?style=flat-square)](#how-it-works)
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
-[![version](https://img.shields.io/badge/version-0.9.0-c6f24e?style=flat-square)](CHANGELOG.md)
-[![changelog](https://img.shields.io/badge/changelog-Keep_a_Changelog-ffb65c?style=flat-square)](CHANGELOG.md)
 
 **Your coding agent greps. codeweb knows.**
 
@@ -31,8 +30,9 @@ Don't take vite's word for it — **run the same referee on your own repo**:
 `npm run bench -- <path>/.codeweb/graph.json` (context cost always; recall/precision graded by the
 TypeScript compiler wherever `typescript` resolves — same engine as the published results).
 
-In the frontier-agent A/B, the same channel lifted caller-discovery recall **+0.27** with
-**~34% fewer tool calls and ~44% fewer tokens** than grep. And the byproduct is the part you can
+In the frontier-agent A/B on v0.9.0's budgeted responses — the replies agents actually receive —
+codeweb lifted caller-discovery recall **+0.31 at equal token cost** vs grep (all 5 engine-frozen
+reps positive). And the byproduct is the part you can
 see: the map also surfaces **duplication, dead code, hotspots, and tangled domains** — where your
 codebase does the same work twice, which neither you nor the agent can see from inside a file.
 
@@ -116,21 +116,26 @@ overlap graph.
 
 We didn't only assert codeweb works; we **pre-registered hypotheses and measured it**, applying the
 same rigor codeweb brings to code: independent oracles, a pinned cross-language corpus, confidence
-intervals, and adversarial review. **32 of 33 pre-registered checks pass** — and the testing was
-rigorous enough to **find and fix two real bugs** the engine's own 286-test suite had missed.
+intervals, and adversarial review. **32 of 33 pre-registered checks pass**
+([the full check-by-check receipt](bench/preregistration.md), with the frozen registration preserved
+at tag `v0.8.0` for timestamp proof) — and the testing was rigorous enough to **find and fix two real
+bugs** the engine's own 286-test suite had missed.
 
 - **Correctness held against independent oracles** — **zero observed disagreements across >490,000
   comparisons** (cycles, impact, callers/callees, context-pack); 0 violations over 20,000 edit-safety trials.
 - **Detection is accurate** — exact-clone **F1 1.0** (vs 0.67 name-match), renamed-clone recall **1.0
   structural vs 0.0 lexical**, reuse-ranking **MRR 0.99**.
 - **It scales** — runtime grows **sub-quadratically** (sub-linear in this corpus, b=0.33); structural
-  queries answer in **~95–120 ms** on a 3,201-symbol graph; zero runtime dependencies.
+  queries answer in **~95–120 ms** on a 3,201-symbol graph; zero required dependencies.
 - **It's honest** — the one pass/fail miss (incremental speedup at high churn) is reported as a measured
   curve; the agent A/B capstone returned a null (no headroom on clean tasks) and says so plainly.
-- **And it measurably helps a frontier agent** — a post-hoc discovery pilot (Theme-5b, §3.8) found codeweb
-  lifts a frontier agent's caller-discovery **recall +0.27** while using **~34% fewer tool-calls** and
-  **~44% fewer tokens** than grep (all 8 engine-frozen reps positive); the harder edit-quality capstone
-  stays an honest null.
+- **And it measurably helps a frontier agent** — the v0.9.0 discovery pilot, run on the budgeted
+  responses agents actually receive, found codeweb lifts caller-discovery **recall +0.31 ± 0.04 at
+  equal token cost** vs grep (all 5 engine-frozen reps positive; precision +0.23 ± 0.08 —
+  [`bench/experiments/efficiency-pilot.reps5-v090.json`](bench/experiments/efficiency-pilot.reps5-v090.json)).
+  An earlier 8-rep run on a different base model also showed ~34% fewer tool-calls and ~44% fewer
+  tokens; those savings **did not replicate** on the current frugal base agent, and we report that
+  rather than quoting the better number. The harder edit-quality capstone stays an honest null.
 
 > **▶ Every number above is a receipt — see the [evidence ledger](https://ghostlygawd.github.io/codeweb/research.html).**
 > The benchmark harnesses and raw results live in [`bench/`](bench/); every number regenerates with
@@ -155,7 +160,10 @@ codeweb this month: 41 pre-edit card(s) · 5 card-named caller(s) followed · 2 
 
 ## Install
 
-This is a self-contained Claude Code plugin — zero npm dependencies, just Node.js.
+This is a self-contained Claude Code plugin — **zero required dependencies**, just Node.js. It runs
+on an empty `node_modules` (CI-verified); one *optional* wasm grammar (`web-tree-sitter`) sharpens
+extraction when present and is never required. Releases are published from CI with **npm provenance**
+— verify any install with `npm audit signatures`.
 
 **As a Claude Code plugin:**
 ```
@@ -175,7 +183,9 @@ Cursor, Windsurf, or any other MCP client: point it at the same `codeweb-mcp` co
 **Or run the engine from a clone:**
 ```
 git clone https://github.com/GhostlyGawd/codeweb.git
-node codeweb/scripts/run.mjs /path/to/your/project --out-dir /path/to/your/project/.codeweb
+node codeweb/scripts/run.mjs /path/to/your/project   # map lands in /path/to/your/project/.codeweb
+# kick the tires on bundled sample code first (no stakes, ~2s):
+node codeweb/scripts/run.mjs codeweb/bench/corpus/flask --out-dir /tmp/flask-map
 ```
 
 Requires Node.js — the whole deterministic pipeline (extract → cluster → overlap → render) runs
@@ -568,8 +578,8 @@ codeweb/
 
 _Recently shipped: an **agent-intelligence suite** — refactoring **hotspots** (complexity × fan-in ×
 churn), a gated ROI-ranked optimization **campaign** planner, a foundations-first **reading-order**,
-**Type-2 (renamed) clone** detection, false-positive **suppression memory**, and **5 new MCP tools
-(20 total)** · a **[live interactive demo](https://ghostlygawd.github.io/codeweb/demo/)** on GitHub
+**Type-2 (renamed) clone** detection, false-positive **suppression memory**, and a growing MCP
+surface (**27 tools today**) · a **[live interactive demo](https://ghostlygawd.github.io/codeweb/demo/)** on GitHub
 Pages · Go and Rust on the fast path · duplication-over-time trend (`trend.mjs`) · a one-command CI
 regression gate + GitHub Action._
 
@@ -591,11 +601,23 @@ npm run release -- --minor  # roll the changelog, bump, sync, rebuild; prints th
 ```
 
 `check-consistency` runs in CI, applying codeweb's own "fail on regression" philosophy to its public
-comms — the reason this README and the plugin manifest can't quietly disagree about how many tools
-ship.
+comms. What it actually gates: version strings across every surface, the derived MCP tool count
+(including prose mentions of tool and language counts in the README, the site, the skill, and the
+npm description), the CHANGELOG entry for the current version, and that every evidence file the
+ledger cites exists on disk. Prose it can't reach (the already-published npm page) is fixed at the
+next release, which re-runs the same gate.
+
+## About
+
+Built by **rhenmcleod** ([GhostlyGawd](https://github.com/GhostlyGawd) on GitHub) — with the coding
+agents it serves: the AI-assisted build is disclosed in the commit history's co-author trailers, and
+owning that is the point — codeweb is dogfood for the exact loop it supports. Issues and questions
+welcome; see [`SECURITY.md`](SECURITY.md) for the security posture and reporting route.
 
 ## Handoffs
 
-codeweb's domain map and overlap list feed naturally into `refactor-cleaner` (act on the
-consolidation list), `codebase-onboarding` (use the domain map for a guide), and `code-tour`
-(anchor a tour to the symbol index).
+If you have them installed, codeweb's domain map and overlap list feed naturally into
+`refactor-cleaner` (act on the consolidation list), `codebase-onboarding` (use the domain map for
+a guide), and `code-tour` (anchor a tour to the symbol index). None are required — without them,
+the ideal second step is simply: apply the top **ready** merge from `optimize.md`, re-run
+codeweb, and watch the findings count drop.

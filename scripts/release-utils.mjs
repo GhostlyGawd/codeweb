@@ -66,11 +66,33 @@ export function scanProseCounts(text, file, { toolCount, langCount }) {
     const n = numOf(m[1]);
     if (n != null && n !== toolCount) problems.push(`${file}: says "${m[0].trim()}" but ${toolCount} tools ship`);
   }
+  // "(N total)" after an MCP-tools mention — the exact phrasing that shipped v0.9.0 with
+  // "(20 total)" for a whole release: "total" isn't adjacent to "tools", so the tools scan
+  // above can't see it. Context-gated to the preceding ~80 chars mentioning MCP tools, so
+  // unrelated totals ("20,000 trials total") never trip it.
+  const totalRe = /\b(\d+)\s+total\)/g;
+  for (const m of text.matchAll(totalRe)) {
+    const before = text.slice(Math.max(0, m.index - 80), m.index);
+    if (!/MCP\s+tools?/i.test(before)) continue;
+    const n = numOf(m[1]);
+    if (n != null && n !== toolCount) problems.push(`${file}: says "${m[0].trim()}" but ${toolCount} tools ship`);
+  }
   // "<N> native|first-class [languages]" — the language-surface claim. Skipped when the repo
   // carries no canonical language list (langCount null).
   if (langCount != null) {
     const langRe = /\b(\d+|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen)[- ](native|first-class)\b/gi;
     for (const m of text.matchAll(langRe)) {
+      const n = numOf(m[1]);
+      if (n != null && n !== langCount) problems.push(`${file}: says "${m[0].trim()}" but ${langCount} native languages ship`);
+    }
+    // Bare "<N> languages" — the "Five languages, parse-free" heading class. Exemptions:
+    // a preceding "original" (a historical count, e.g. "the original five languages"), and
+    // open-ended "N+" counts (claims about OTHER tools' breadth, e.g. "40+ languages").
+    const bareLangRe = /\b(\d+\+?|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen)\s+languages?\b/gi;
+    for (const m of text.matchAll(bareLangRe)) {
+      if (m[1].endsWith('+')) continue;
+      const before = text.slice(Math.max(0, m.index - 20), m.index);
+      if (/original\s*$/i.test(before)) continue;
       const n = numOf(m[1]);
       if (n != null && n !== langCount) problems.push(`${file}: says "${m[0].trim()}" but ${langCount} native languages ship`);
     }

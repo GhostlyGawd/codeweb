@@ -104,10 +104,13 @@ const graph = {
 atomicWrite(GRAPH, JSON.stringify(graph));
 
 // stats
+// ACTIVATION A1: these lines land inside the user's first ten seconds — counts only, no
+// dev-run fossils, and never a NaN (the 0-node --allow-empty map skips the percentage).
 const isolated = adj.filter((a) => a.length === 0).length;
 const hubCount = isHub.filter(Boolean).length;
 console.log(`hubs stripped (indeg>=${HUB_INDEG}): ${hubCount}`);
-console.log(`domains: ${domains.length}  (was 32, hub-named)`);
-console.log(`isolated-after-dehub: ${isolated} (${Math.round(isolated / nodes.length * 100)}%)`);
-console.log('--- top 18 domains ---');
-for (const d of domains.slice(0, 18)) console.log(String(d.nodes).padStart(4), d.name);
+console.log(`domains: ${domains.length} (hub-named)`);
+if (nodes.length > 0) console.log(`isolated-after-dehub: ${isolated} (${Math.round(isolated / nodes.length * 100)}%)`);
+const shown = domains.slice(0, 18);
+if (shown.length) console.log(`--- top ${shown.length} domain${shown.length === 1 ? '' : 's'} ---`);
+for (const d of shown) console.log(String(d.nodes).padStart(4), d.name);

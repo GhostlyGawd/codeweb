@@ -22,7 +22,7 @@ import { spawn } from 'node:child_process';
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols, findingBuckets, bucketsLine } from './lib/graph-ops.mjs';
 import { diffGraphs } from './lib/diff-core.mjs'; // #33: the codeweb_diff comparison, served in-process
 import { runQuery } from './lib/query-core.mjs';
 import { findSymbols } from './lib/find-core.mjs';
@@ -114,6 +114,8 @@ function cachedGraph(absPath) {
   return entry;
 }
 const QUERY_KIND = { codeweb_callers: 'callers', codeweb_callees: 'callees', codeweb_tests: 'tests', codeweb_impact: 'impact', codeweb_cycles: 'cycles', codeweb_orphans: 'orphans' };
+// ACTIVATION A7: the tools whose answers are ABOUT structure — vacuous on a 0-symbol map.
+const STRUCTURAL_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_find', 'codeweb_explain', 'codeweb_context']);
 
 // finding 23: ONE staleness verdict per request burst. autoRefresh stat-swept every meta.sources
 // entry and the payload's stale annotation swept them all AGAIN — 2 x 12-17ms at 5k files against
@@ -457,7 +459,9 @@ function handleMap(id, args, meta) {
     let stats = '';
     try {
       const g = JSON.parse(readFileSync(graphPath, 'utf8'));
-      stats = `${(g.nodes || []).length} symbols, ${(g.edges || []).length} edges, ${(g.domains || []).length} domains, ${(g.overlaps || []).length} overlap findings`;
+      // ACTIVATION A4: same findings vocabulary as every other surface (raw overlap count read
+      // as a contradiction next to the triple).
+      stats = `${(g.nodes || []).length} symbols, ${(g.edges || []).length} edges, ${(g.domains || []).length} domains — ${bucketsLine(findingBuckets(g.overlaps))}`;
     } catch { stats = 'built (stats unreadable)'; }
     reply(id, { content: [{ type: 'text', text: JSON.stringify({ ok: true, graph: graphPath, summary: `mapped ${target}: ${stats}`, artifacts: { report: join(out, 'report.html'), optimize: join(out, 'optimize.md') } }) }] });
   };
@@ -540,6 +544,18 @@ function handleToolCall(id, params) {
 
   if (graphPath) bump(resolve(graphPath), 'queriesServed'); // the receipt's denominator
   if (graphPath && AUTOREFRESH_TOOLS.has(tool.name)) autoRefresh(resolve(graphPath));
+
+  // ACTIVATION A7: a map built with --allow-empty EXISTS but knows nothing. A normal-looking
+  // answer from it ("0 callers", "0 matches") reads as a verdict about the code — it isn't.
+  // Structural tools get one honest line instead. brief/stats/refresh/map still run: the brief
+  // renders the empty verdict itself, and refresh/map are how the void gets filled.
+  if (graphPath && STRUCTURAL_TOOLS.has(tool.name)) {
+    try {
+      if (cachedGraph(resolve(graphPath)).graph.nodes.length === 0) {
+        return errResult(id, `the map at ${graphPath} is EMPTY (built with --allow-empty; no supported source found) — structural answers would be vacuous, not "0 findings". Re-map at the code root, or use the /codeweb agent fallback for non-native languages.`);
+      }
+    } catch { /* unreadable graph: each tool's own path reports it */ }
+  }
 
   // Fast path: the briefing assembles in-process from the cached graph (same object as the CLI
   // via brief-core). Any surprise falls back to the spawned artifact.
@@ -725,8 +741,11 @@ function handleMessage(msg) {
 }
 
 // Start the readline loop ONLY when run as the entry point (node mcp-server.mjs) — so tests can
-// import the pure helpers (queueKeyFor) without a server attaching to their own stdin.
-const isMain = !!process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+// import the pure helpers (queueKeyFor) without a server attaching to their own stdin. The
+// published bin is a Node-version-guard shim that dynamic-imports this file (argv[1] = the shim),
+// so it announces itself via CODEWEB_BIN instead.
+const isMain = (!!process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url)))
+  || process.env.CODEWEB_BIN === '1';
 if (isMain) {
   const rl = createInterface({ input: process.stdin });
   rl.on('line', handle);

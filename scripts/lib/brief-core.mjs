@@ -64,6 +64,13 @@ export function buildBrief(graph, index) {
 /** One-page text rendering (the session-start injection format). */
 export function renderBrief(b) {
   const L = [];
+  // ACTIVATION A7: an --allow-empty map has zero symbols. Say THAT — the normal render
+  // ("0 symbols … ask codeweb before guessing") would point agents at a map that knows nothing.
+  if (!b.size || b.size.symbols === 0) {
+    L.push(`codeweb brief — ${b.target || b.root || 'this repo'}: a map exists here but it is EMPTY (no supported source found — likely a non-native language, or the map was built at the wrong root).`);
+    L.push('In Claude Code, the /codeweb command falls back to agent-based mapping for non-native languages; otherwise re-run codeweb at the code root.');
+    return L.join('\n');
+  }
   L.push(`codeweb brief — ${b.target || b.root || 'mapped repo'}: ${b.size.symbols} symbols / ${b.size.files} files / ${b.size.domains} domains (${(b.languages || []).join(', ') || 'unknown languages'})`);
   if (b.domains.length) {
     L.push('areas:');

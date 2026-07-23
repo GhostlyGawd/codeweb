@@ -228,9 +228,13 @@ const files = listFiles();
 // `--allow-empty` keeps intentionally-sparse targets (CI skeletons, new repos) workable.
 const SUPPORTED_EXTS = SRC.source.match(/\(([^)]+)\)/)[1].split('|').map((e) => `.${e}`);
 if (files.length === 0 && !opts.allowEmpty) {
+  // ACTIVATION A6: the two real escapes lead — wrong directory (most common) and non-native
+  // language (the agent fallback exists precisely for this). --allow-empty is the niche one.
   throw new ExtractError(1, `[extract] no supported source files under ${root}\n` +
     `[extract]   looked for: ${SUPPORTED_EXTS.join(' ')} (node_modules, dist, vendor and friends are skipped)\n` +
-    '[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
+    '[extract]   wrong directory? Point at the code root. Non-native language? In Claude Code, the\n' +
+    '[extract]   /codeweb command falls back to agent-based mapping — no extractor needed.\n' +
+    '[extract]   (Intentionally sparse target? --allow-empty writes an empty map.)');
 }
 
 // Tree-sitter tier — DEFAULT-ON since v9 (it was opt-in): dynamic-dispatch call edges (this.m(),

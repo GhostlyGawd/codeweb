@@ -137,12 +137,12 @@ if (outMd) {
   const md = [
     '# codeweb — consolidation advisory',
     '',
-    `> **${t0.findings} actionable findings** · ${t0.ready} ready · ${t0.blocked} blocked · ${t0.review} review on **${payload.target}**.`,
+    `> **${t0.findings} actionable findings** · ${t0.ready} ready · ${t0.blocked} blocked · ${t0.review} judgement call(s) on **${payload.target}**.`,
     `> Applying all **ready** merges would remove ${t0.duplicationRemovable} duplication finding(s) and reclaim ~${t0.locReclaimable} LOC while keeping the gate green. Advisory only — no code is written; each merge stays a human + gate decision.`,
     '',
     section('Ready — the gate would accept these', 'Body-confirmed ≥60%, not drifted, and the simulated merge stays acyclic. Each is a checklist item.', 'ready'),
     section('Blocked — the gate would reject a naive merge', 'The simulated merge introduces a new file-level dependency cycle. Host the canonical in a neutral module first, then route both sides there.', 'blocked'),
-    section('Review — needs human or agent judgement', 'Drifted copies, merely-structural confidence, or non-duplicate-logic findings. Read before acting.', 'review'),
+    section('Judgement calls — read before acting', 'Drifted copies, merely-structural confidence, or non-duplicate-logic findings (the tier the JSON calls `review`).', 'review'),
   ].join('\n');
   atomicWrite(resolve(outMd), md);
 }
@@ -151,9 +151,11 @@ if (json) { emitJson(payload); } else {
 
 const t = payload.totals;
 console.log(`codeweb optimize: ${payload.target}`);
-console.log(`  ${t.findings} actionable findings · ${t.ready} ready · ${t.blocked} blocked · ${t.review} review`);
+// ACTIVATION A4: the tier the JSON calls `review` DISPLAYS as "judgement call(s)" — "N review"
+// next to the findings triple's "needs review M" read as the same number disagreeing.
+console.log(`  ${t.findings} actionable findings · ${t.ready} ready · ${t.blocked} blocked · ${t.review} judgement call(s)`);
 console.log(`  if all ready merges applied: -${t.duplicationRemovable} duplication finding(s), ~${t.locReclaimable} LOC reclaimed (gate would stay green)`);
-const TAG = { ready: 'READY  ', blocked: 'BLOCKED', review: 'REVIEW ' };
+const TAG = { ready: 'READY  ', blocked: 'BLOCKED', review: 'JUDGE  ' };
 for (const o of opportunities) {
   console.log(`\n[${TAG[o.tier]} ${o.severity.toUpperCase().padEnd(6)} ${o.confidence.padEnd(6)}${o.bodySim != null ? ` ${(o.bodySim * 100).toFixed(0).padStart(3)}%` : '     '}] ${o.id} ${o.title.replace(/`/g, '')}`);
   console.log(`  gate: ${o.gate}`);
