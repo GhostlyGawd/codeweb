@@ -48,9 +48,11 @@ export function appendHistory(graphPath, row) {
 export function readHistory(graphPath, tail = 8) {
   try {
     const rows = [];
-    for (const line of readFileSync(historyPathOf(graphPath), 'utf8').split('\n')) {
-      if (!line.trim()) continue;
-      try { rows.push(JSON.parse(line)); } catch { /* torn tail line */ }
+    // (loop var deliberately not named `line` — trend.mjs exports a global `line()` and the
+    // scripts/-scoped self-gate wired the bare name into a false history->trend ref edge.)
+    for (const row of readFileSync(historyPathOf(graphPath), 'utf8').split('\n')) {
+      if (!row.trim()) continue;
+      try { rows.push(JSON.parse(row)); } catch { /* torn tail line */ }
     }
     return rows.slice(-tail);
   } catch { return []; }
