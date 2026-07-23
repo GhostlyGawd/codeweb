@@ -296,6 +296,10 @@ function emitCrawlFiles() {
     '</urlset>',
     '',
   ].join('\n'));
+  // The IndexNow ownership proof: a stable committed key, served at the site root, so the
+  // deploy-time ping (.github/workflows/indexnow.yml) needs no account and no secret.
+  const indexNowKey = readSite('indexnow-key.txt').trim();
+  writeFileSync(join(DOCS, `${indexNowKey}.txt`), `${indexNowKey}\n`);
 }
 
 // ---------------------------------------------------------------- assets

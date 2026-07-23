@@ -5,22 +5,22 @@ consoles); none of it is code, and none of it can be done from a PR. The growth 
 (`SEO.md`, `FUNNEL.md`, `CRO.md`, `RETENTION.md`) rank the first item as worth more traffic than
 every code change combined.
 
-## 1. GitHub repo settings (SEO F1 · minutes · highest reach)
+## 1. GitHub repo settings (SEO F1 · one command · highest reach)
 
-**Settings → General**, on https://github.com/GhostlyGawd/codeweb:
+Remote agent sessions cannot do this one: the session proxy refuses repository-settings writes
+(verified — `PATCH /repos` returns 403 with "Repository settings writes are not permitted
+through this proxy"). From your own terminal it is one command — `gh` there is logged in as
+you, and you have the admin permission this needs. A local Claude Code session can run it too.
 
-- **Description** (leads with the searched nouns; the persuasion angle is CRO C11):
+```
+gh repo edit GhostlyGawd/codeweb \
+  --description "See what an edit breaks before you write it — deterministic call/import graph + 27 MCP tools for coding agents. Claude Code plugin & MCP server; zero deps, runs 100% locally." \
+  --homepage "https://ghostlygawd.github.io/codeweb/" \
+  --add-topic mcp,mcp-server,model-context-protocol,claude-code,claude-code-plugin,call-graph,dependency-graph,code-analysis,static-analysis,code-visualization,codebase-map,dead-code,refactoring,developer-tools,ai-agents
+```
 
-  > See what an edit breaks before you write it — deterministic call/import graph + 27 MCP tools for coding agents. Claude Code plugin & MCP server; zero deps, runs 100% locally.
-
-- **Website**: `https://ghostlygawd.github.io/codeweb/`
-
-- **Topics** (paste all — every top-10 rival for "mcp call graph codebase" carries 10–20 of these;
-  codeweb currently has zero):
-
-  `mcp` `mcp-server` `model-context-protocol` `claude-code` `claude-code-plugin` `call-graph`
-  `dependency-graph` `code-analysis` `static-analysis` `code-visualization` `codebase-map`
-  `dead-code` `refactoring` `developer-tools` `ai-agents`
+(Same three fields can be pasted into **Settings → General** instead. Every top-10 rival for
+"mcp call graph codebase" carries 10–20 topics; codeweb currently has zero.)
 
 ## 2. MCP registry publish (SEO F2 · ~30 min once)
 
@@ -36,25 +36,33 @@ mcp-publisher publish             # validates + submits server.json
 Re-run `mcp-publisher publish` after each release (the release checklist prints a reminder once
 this is wired; until then, it's manual).
 
-## 3. Search engine submission (SEO F6 · minutes, after next Pages deploy)
+## 3. Search engines (SEO F6 · Bing handled · Google needs 3 clicks)
 
-`robots.txt` + `sitemap.xml` now deploy with the site. Then:
+Bing, Yandex, and the other IndexNow engines are handled: every site deploy pings them with the
+sitemap's URLs (`.github/workflows/indexnow.yml` — no account, no secret; the ownership proof is
+the key file the build emits). Google doesn't take IndexNow pings; it finds the sitemap through
+`robots.txt` on its own schedule, so indexing happens either way. Search Console only adds the
+dashboard (queries, impressions, index status) — and it needs your Google sign-in, which an
+agent can't do for you:
 
-- **Google Search Console** → add property `ghostlygawd.github.io/codeweb/` (URL-prefix), verify
-  via the HTML-tag method if asked, submit `https://ghostlygawd.github.io/codeweb/sitemap.xml`.
-- **Bing Webmaster Tools** → same property, same sitemap (imports from Search Console in one click).
+1. https://search.google.com/search-console → **Add property** → *URL prefix* →
+   `https://ghostlygawd.github.io/codeweb/`
+2. Verify by **HTML tag** → send the `content="..."` token to an agent (one-line addition to the
+   site head template), or use any other method you already have.
+3. **Sitemaps** → submit `sitemap.xml`.
 
-## 4. npm 0.9.1 publish (SEO F4 · rides the next release)
+Bing Webmaster Tools (optional, dashboard only) can then import the verified Search Console
+property in one click.
 
-The published 0.9.0 registry doc still says "24 MCP tools" and misses the category keywords.
-`package.json`'s description/keywords are already updated in-repo — cutting **v0.9.1** via the
-normal release flow (`node scripts/release.mjs --patch`, then the release workflow) republishes
-and re-indexes npm. No extra action beyond the release itself.
+## 4. npm 0.9.1 publish — nothing left to do
 
-## 5. Decide: the personal email in plugin.json (SEO F8 note)
+`NPM_TOKEN` is configured and working: the 0.9.0 publish came from the release workflow's npm
+step, not a laptop. Cutting a release republishes npm automatically, and v0.9.1 carries the
+corrected registry doc (27 tools, category keywords) plus the site as the package homepage.
 
-`.claude-plugin/plugin.json` publishes a personal email in `author`. Keep it (fine for OSS) or
-swap for the GitHub no-reply address — your call; the release sync won't touch it.
+## 5. Personal email in plugin.json — resolved
+
+`.claude-plugin/plugin.json` now lists the GitHub no-reply address.
 
 ## 6. VS Code Marketplace (parked)
 
