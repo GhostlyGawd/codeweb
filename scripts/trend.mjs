@@ -28,21 +28,13 @@ const USAGE = 'usage: trend.mjs (--history <history.jsonl> | --git <repo> [--las
 import { parseArgs } from './lib/cli.mjs';
 
 // ---- pure metrics ----
+// RETENTION R8 — and the gate's own catch on this very change: metricsRow (lib/history.mjs) is
+// THE one metrics computation (run.mjs's ledger rows, ci-gate's --history, and this dashboard);
+// this adapter only renames symbols->nodes for trend's legacy row shape.
+import { metricsRow } from './lib/history.mjs';
 function metrics(g) {
-  const overlaps = Array.isArray(g.overlaps) ? g.overlaps : [];
-  const dl = overlaps.filter((o) => o.kind === 'duplicate-logic');
-  const confirmed = dl.filter((o) => o.confidence === 'high').length;
-  const candidates = dl.filter((o) => o.confidence !== 'refuted').length;
-  const nodes = Array.isArray(g.nodes) ? g.nodes : [];
-  const edges = Array.isArray(g.edges) ? g.edges : [];
-  const dom = new Map(nodes.map((n) => [n.id, n.domain || 'unassigned']));
-  let coupling = 0;
-  for (const e of edges) {
-    if (e.kind === 'test') continue;
-    const a = dom.get(e.from), b = dom.get(e.to);
-    if (a != null && b != null && a !== b) coupling += e.weight || 1;
-  }
-  return { confirmed, candidates, coupling, nodes: nodes.length, files: new Set(nodes.map((n) => n.file).filter(Boolean)).size };
+  const r = metricsRow(g);
+  return { confirmed: r.confirmed, candidates: r.candidates, coupling: r.coupling, nodes: r.symbols, files: r.files };
 }
 
 // ---- pure rendering ----
