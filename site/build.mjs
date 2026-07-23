@@ -224,13 +224,34 @@ function nav(active) {
   return navTpl.replace(`data-nav="${active}"`, `data-nav="${active}" aria-current="page"`);
 }
 
+// SEO F7: keep the brand, append the CATEGORY — nobody searches "living map"; they search
+// "codebase map", "call graph", "MCP server". Titles/descriptions carry both vocabularies.
 const PAGES = [
-  { slug: 'index', nav: 'home', title: 'codeweb — the living map of your codebase', ogTitle: 'codeweb — the living map of your codebase', description: `codeweb is the living map of your codebase — one deterministic graph served two ways: an interactive map for you, and ${TOOLS} deterministic tools for the agents editing alongside you. Know what exists, and what an edit breaks, before you write.` },
-  { slug: 'product', nav: 'product', title: 'Product — codeweb', ogTitle: 'codeweb — one graph, two interfaces', description: `The ${TOOLS} deterministic MCP tools, the Tier 0–3 feature map, ${LANGS}-language extraction, and the CI gate that fails a PR when an edit makes the structure worse.` },
-  { slug: 'research', nav: 'research', title: 'Research — codeweb', ogTitle: 'codeweb — the evidence', description: 'A pre-registered effectiveness study (32/33 checks), an efficiency pilot, and an honest claim ledger: what is validated, what is preliminary, and what is a null result.' },
-  { slug: 'start', nav: 'start', title: 'Get started — codeweb', ogTitle: 'Get started with codeweb', description: 'Install codeweb as a Claude Code plugin, run the engine directly, or register the MCP server. A five-minute quickstart and the core concepts.' },
+  { slug: 'index', nav: 'home', title: 'codeweb — interactive codebase map & call graph MCP tools for coding agents', ogTitle: 'codeweb — the living map of your codebase', description: `codeweb maps your codebase into a deterministic call/import graph — an interactive map for you, and ${TOOLS} deterministic MCP tools for the coding agents editing alongside you (Claude Code plugin & MCP server). Know what exists, and what an edit breaks, before you write.` },
+  { slug: 'product', nav: 'product', title: `${TOOLS} MCP tools & the CI structural gate — codeweb`, ogTitle: 'codeweb — one graph, two interfaces', description: `The ${TOOLS} deterministic MCP tools, the Tier 0–3 feature map, ${LANGS}-language call/import graph extraction, and the CI gate that fails a PR when an edit makes the structure worse.` },
+  { slug: 'research', nav: 'research', title: 'Research, benchmarks & the honest claim ledger — codeweb', ogTitle: 'codeweb — the evidence', description: 'A pre-registered effectiveness study (32/33 checks), an efficiency pilot, and an honest claim ledger: what is validated, what is preliminary, and what is a null result.' },
+  { slug: 'start', nav: 'start', title: 'Get started — install the codebase-map plugin, npx, or MCP server — codeweb', ogTitle: 'Get started with codeweb', description: 'Install codeweb as a Claude Code plugin, run the npx one-liner, or register the MCP server for Cursor/Windsurf. Free & MIT; runs entirely on your machine; Node ≥ 22.' },
   { slug: 'changelog', nav: 'changelog', title: 'Changelog — codeweb', ogTitle: 'codeweb changelog', description: 'Every release, capability, benchmark, and fix — kept in lock-step with the product under Keep a Changelog and Semantic Versioning.' },
+  // SEO F8: the one genuinely link-worthy story, promoted from stranded raw markdown to a page.
+  { slug: 'case-study', nav: 'research', title: 'Case study: mapping axios — 3 confirmed duplications in a 50M-download library — codeweb', ogTitle: 'Case study: codeweb maps axios', description: 'codeweb pointed read-only at axios v1.18.1: 3 body-confirmed duplications (two byte-identical), 12 false positives dismissed, and a cycle-safe merge plan for each — reproducible byte-for-byte.' },
 ];
+
+// SEO F10: one SoftwareApplication block, filled from the same derived vars as everything else —
+// the machine-readable tie between the site, the repo, and the npm package.
+const JSONLD = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'codeweb',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Windows, macOS, Linux (Node.js >= 22)',
+  softwareVersion: VERSION,
+  description: `Deterministic call/import graph of your codebase — ${TOOLS} MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.`,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  license: 'https://opensource.org/licenses/MIT',
+  codeRepository: 'https://github.com/GhostlyGawd/codeweb',
+  url: 'https://ghostlygawd.github.io/codeweb/',
+  sameAs: ['https://github.com/GhostlyGawd/codeweb', 'https://www.npmjs.com/package/@ghostlygawd/codeweb'],
+});
 
 function buildPage(page) {
   const contentFile = join(SITE, 'content', `${page.slug}.html`);
@@ -243,12 +264,35 @@ function buildPage(page) {
     ogTitle: esc(page.ogTitle),
     canonical,
     ogImage: `${BASE}assets/og.png`,
+    jsonld: JSONLD,
     nav: nav(page.nav),
     footer: fill(footerTpl, blocks()),
     content,
   });
   writeFileSync(join(DOCS, `${page.slug}.html`), html);
   return true;
+}
+
+// SEO F6 + F8: the site's first crawl path in — robots.txt (allow all, exclude the internal
+// working markdown that shares the publish root) + sitemap.xml from the same PAGES table.
+function emitCrawlFiles() {
+  const urls = [BASE, ...PAGES.filter((p) => p.slug !== 'index').map((p) => `${BASE}${p.slug}.html`), `${BASE}demo/`];
+  writeFileSync(join(DOCS, 'robots.txt'), [
+    'User-agent: *',
+    'Allow: /',
+    'Disallow: /*.md$',
+    'Disallow: /decisions/',
+    'Disallow: /specs/',
+    `Sitemap: ${BASE}sitemap.xml`,
+    '',
+  ].join('\n'));
+  writeFileSync(join(DOCS, 'sitemap.xml'), [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...urls.map((u) => `  <url><loc>${u}</loc></url>`),
+    '</urlset>',
+    '',
+  ].join('\n'));
 }
 
 // ---------------------------------------------------------------- assets
@@ -303,6 +347,29 @@ function injectDemoNav() {
     + `<!--/cw-nav-->`;
   if (!html.includes('<b>codeweb</b>')) return false;
   html = html.replace('<b>codeweb</b>', wm);
+  // SEO F5: the most-shared URL on the property unfurled as a bare grey link — no description,
+  // no card image, a title that never said "axios". Replace the head's identity block wholesale
+  // (markered, idempotent; any generator-era og tags are stripped so there is one authority).
+  // The strip must RESTORE a bare <title> anchor — the injected block contains the title, so a
+  // plain delete would leave the re-inject below with nothing to replace (the docs-fresh CI gate
+  // caught exactly that: strip-without-anchor made every rebuild remove the head block).
+  html = html.replace(/<!--cw-head-->[\s\S]*?<!--\/cw-head-->\n?/, '<title>codeweb — system map</title>\n')
+    .replace(/^<meta (property="og:|name="(description|twitter:))[^\n]*\n?/gm, '')
+    .replace(/^<link rel="canonical"[^\n]*\n?/gm, '')
+    .replace(/<title>[^<]*<\/title>/,
+      `<!--cw-head--><title>Live demo — axios call graph, mapped by codeweb</title>
+<meta name="description" content="Click around a real codeweb map: axios (50M downloads/week), 274 product symbols across 8 areas — findings, force graph, treemap, and coupling matrix. Built read-only by the deterministic pipeline.">
+<link rel="canonical" href="${BASE}demo/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="Live demo — axios, mapped by codeweb">
+<meta property="og:description" content="A real interactive codeweb map of axios: 274 product symbols, 8 areas, body-confirmed duplication findings. No mockups.">
+<meta property="og:url" content="${BASE}demo/">
+<meta property="og:image" content="${BASE}assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="codeweb — interactive call-graph map of a codebase">
+<meta name="twitter:card" content="summary_large_image"><!--/cw-head-->`);
   writeFileSync(p, html);
   return true;
 }
@@ -313,6 +380,7 @@ function main() {
   buildAssets();
   let n = 0;
   for (const p of PAGES) if (buildPage(p)) n++;
+  emitCrawlFiles(); // F6: robots.txt + sitemap.xml, derived from the same PAGES table
   const wrapped = [injectDemoNav() && 'demo'].filter(Boolean);
   process.stdout.write(`codeweb site: built ${n} page(s) + assets into ${DOCS} (v${VERSION})\n`);
   if (wrapped.length) process.stdout.write(`  wrapped with shared nav: ${wrapped.join(', ')}\n`);

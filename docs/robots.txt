@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /*.md$
+Disallow: /decisions/
+Disallow: /specs/
+Sitemap: https://ghostlygawd.github.io/codeweb/sitemap.xml

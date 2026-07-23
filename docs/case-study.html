@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case study: mapping axios — 3 confirmed duplications in a 50M-download library — codeweb</title>
+<meta name="description" content="codeweb pointed read-only at axios v1.18.1: 3 body-confirmed duplications (two byte-identical), 12 false positives dismissed, and a cycle-safe merge plan for each — reproducible byte-for-byte.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="Case study: codeweb maps axios">
+<meta property="og:description" content="codeweb pointed read-only at axios v1.18.1: 3 body-confirmed duplications (two byte-identical), 12 false positives dismissed, and a cycle-safe merge plan for each — reproducible byte-for-byte.">
+<meta property="og:url" content="https://ghostlygawd.github.io/codeweb/case-study.html">
+<meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="codeweb — interactive call-graph map of a codebase">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#100e14">
+<link rel="canonical" href="https://ghostlygawd.github.io/codeweb/case-study.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.9.0","description":"Deterministic call/import graph of your codebase — 27 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header class="site-nav">
+  <a class="brand" href="index.html" aria-label="codeweb home">
+    <svg class="glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
+      <rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
+    </svg>
+    <span class="wm">code<span class="w">web</span></span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html" data-nav="home">Home</a>
+    <a href="product.html" data-nav="product">Product</a>
+    <a href="research.html" data-nav="research" aria-current="page">Research</a>
+    <a href="start.html" data-nav="start">Get Started</a>
+    <a href="changelog.html" data-nav="changelog">Changelog</a>
+  </nav>
+  <div class="nav-right">
+    <a class="nav-ghost" href="demo/">Live demo</a>
+    <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Case study</span>
+      <h1>Mapping axios: 3 confirmed duplications in a 50M-download library</h1>
+      <p class="lead">We pointed codeweb at <a href="https://github.com/axios/axios" rel="noopener">axios</a> — the HTTP client downloaded ~50M times a week — read-only, no setup, one command. Measured at axios v1.18.1 (<code>a209bfb1</code>); the pinned command below reproduces these numbers exactly.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <a href="demo/"><img src="assets/05-axios-graph.png" alt="codeweb's domain view of axios — eight auto-detected areas sized by symbol count and linked by call/import coupling" style="width:100%;border-radius:8px" loading="lazy"></a>
+        <p class="muted" style="margin-top:.5rem">The unedited generated report — <a href="demo/">click around it live</a>.</p>
+      </div>
+      <div class="card">
+        <h3>The map, in one command</h3>
+<pre><code>node scripts/run.mjs path/to/axios/lib --target axios
+# 274 symbols · 374 edges · 8 domains · 17 overlap candidates</code></pre>
+        <p>Domains auto-clustered from the code's own structure: <code>helpers</code>, <code>core</code>, <code>adapters</code>, <code>cancel</code>, <code>defaults</code>, <code>platform/node</code>, <code>platform/common</code>, root.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Precision, not noise: 17 candidates → 3 real duplications</h2>
+      <p class="lead">Anyone can grep for same-named functions. codeweb confirms each overlap against the <strong>actual function bodies</strong> (token-shingle similarity), so the 17 raw candidates resolve honestly:</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card"><h3>3 body-confirmed</h3><p>Genuinely the same logic in two places — two of them <strong>byte-for-byte identical</strong> across files.</p></div>
+      <div class="card"><h3>12 dismissed</h3><p>Same name, <em>different bodies</em>. Refuted so you don't chase them — that 12-of-17 dismissal rate is the point.</p></div>
+      <div class="card"><h3>2 unverified</h3><p>Left for a human to judge, not asserted.</p></div>
+    </div>
+    <div class="card" style="margin-top:1.25rem">
+      <h3>And the safety call that a linter can't make</h3>
+      <p>codeweb <em>simulates</em> each merge against its own regression gate: two of the three merges would introduce a <strong>new dependency cycle</strong> (verdict: blocked, with the fix — host the canonical in a neutral module). The safe one (<code>setFormDataHeaders</code>, 91% body match) is marked <strong>ready</strong>: the gate stays green and the duplication count drops by one.</p>
+    </div>
+    <div class="btn-row" style="margin-top:1.25rem">
+      <a class="btn btn-primary" href="demo/">Explore the live map →</a>
+      <a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/docs/case-study-axios.md" rel="noopener">Full write-up + reproduce-it commands</a>
+      <a class="btn" href="start.html">Map your own repo</a>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
+            <rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
+          </svg>
+          <span class="wm">code<span class="w">web</span></span>
+        </a>
+        <p>A deterministic map of your codebase — one graph, read by humans and the agents editing alongside them.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="product.html">Features</a>
+        <a href="demo/">Live demo</a>
+        <a href="start.html">Get started</a>
+        <a href="changelog.html">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Proof</h5>
+        <a href="research.html">Research</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">Benchmarks</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Raw results</a>
+      </div>
+      <div class="footer-col">
+        <h5>Project</h5>
+        <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>codeweb v0.9.0 · MIT · © 2026 rhenmcleod (<a href="https://github.com/GhostlyGawd">GhostlyGawd</a>)</span>
+      <span>Deterministic build · zero third-party requests on this page</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/livemap.js" defer></script>
+</body>
+</html>
