@@ -1352,3 +1352,95 @@ load (5k report: 133/145 ms). The browser expand-all settle-poll does not conver
 documented harness limitation the receipt already notes), so the authoritative sim numbers are the node
 lab (above) + the committed fixture browser row (expandAll green, maxSingleStepMs 1.2 ms) — no frame >
 250 ms at any scale measured.
+
+## WS-H
+
+Builder evidence for findings **#40 (extract-symbols decomposition, staged always-green) → #18b
+(in-process post-edit hook)** (spec `round2-ws-h.md`, frozen). This is the FINAL workstream — the
+tracked residual of round-1 #25, now actually closed. Commits: T-40.1 `52254c5`, T-40.2 `c7c8983`,
+T-40.3 `d2132a2`, T-40.4 `173a119`, T-40.5 `247134d`, T-18b `851c0f2`. All extractor changes are
+**output-preserving** — the KILL CRITERION never triggered (byte-identity held on the first attempt
+at every stage).
+
+**Rebase gate — free-variable audit RE-DERIVED against HEAD (319b0ae), not the spec-time table.**
+`deriveFileEdges`'s free identifiers programmatically re-audited against the CURRENT engine (post
+WS-B/C/D). Result vs the spec's 7-row table: **two lib-local pure imports the spec-time table
+predates** — `parseSignature` (lang-rules; the #10 param-shadow sig scan) and `buildInnermostIndex`
+(enclosing; the #21 index, built function-local per WS-D's own note) — plus **two NEW ctx fields
+from B/C/D drift**: `roleFor` (the #10 T-10.3 ref role-gate, post-C) and `closureLocalIds` (the
+WS-D-review closure-local magnet fix, post-D). Final ctx = `{ byName, pkgOf, roleFor,
+resolveFileMember, closureLocalIds, legacyFallback }`; lib imports = `KEYWORDS, parseSignature`
+(lang-rules), `isTestFile` (graph-ops), `buildInnermostIndex` (enclosing); `idFile` defined in
+edge-derive.mjs and imported back. #17's `cand` collection + return field moved WITH the body; #19
+interning and #17 delta/dirty-label stayed orchestration (verified free-of-reach-back).
+
+**P1 — frozen-tree self-map byte-cmp (`SOURCE_DATE_EPOCH=1753056000`, out/cache OUTSIDE the frozen
+tree).** Baseline `base.json` captured at pre-WS-H HEAD (1372 symbols, 4443 edges, 994,185 B).
+`cmp base.json cand.json` **silent (byte-identical) after every stage** — T-40.1, T-40.2, T-40.3 —
+cold AND warm (warm run2 == `--full`). Final at `851c0f2`: `cmp base.json final.json` **silent** —
+the entire decomposition + in-process hook produces bit-identical extractor output over the whole
+codeweb repo (all languages, ctags+tree-sitter engine).
+
+**P2 — IE-EQUIVALENCE at 40 trials (`CODEWEB_IE_TRIALS=40`).** After T-40.1: default leg **47/47**,
+kill-switch leg (`CODEWEB_NAME_DELTA=0`) **47/47**, fragment byte-equal every step. After T-40.4
+(now in-process) + T-18b: **48/48** (47 + IE-INPROC-PARITY), both legs. The WS-C `rulesSig` conjunct
+and WS-D kill-switch are preserved verbatim (kill-switch wholesale assertion unchanged).
+
+**#40 build (always-green, per-stage commit):**
+- **T-40.1** `createEdgeDeriver(ctx)` → new leaf `scripts/lib/edge-derive.mjs` (import-resolve's
+  factory template; only rename in the moved body: `LEGACY_FALLBACK`→`legacyFallback`). Orchestrator
+  −259/+12 lines. `tests/edge-derive.test.mjs` (11 in-process seam cases, no spawn). Acyclic:
+  edge-derive imports only node:path-only siblings.
+- **T-40.2** `markPublicApi` (pub-API entry walk, now fs-free — orchestrator injects `readPkg` +
+  statted `sources`, applies the returned ids-to-stamp; order-safe, the walk never reads `pub`) +
+  `resolveTypedIntents` (Java/C# typed dispatch) joined edge-derive.mjs, clearing #40's named
+  shadowing smells (`rel` loop-var vs `rel()`; `files` local vs global). +5 seam cases.
+- **T-40.3** `export async runExtract(opts)` + `main()` + the repo's `import.meta.url` guard idiom.
+  Import is SIDE-EFFECT-FREE: SE-IMPORT-CLEAN (empty cwd stays empty, no argv/exit/writes),
+  IE-TWO-RUNS + IE-TWO-RUNS-CONCURRENT (each fragment byte-equals a fresh CLI run), RE-ERRORS
+  (guard paths throw `ExtractError`, never `process.exit` — only `main()` exits). WASM engines are
+  process-wide survivors memoizing the load PROMISE (single-flight); per-run flags drive the banner.
+- **T-40.4** starter trio in-process: `incremental-edges` (the IE property sweep — its own wall
+  **12,939 → 2,851 ms** at 40 trials = **4.54×**; full-file 15.5 → 3.6 s = 4.3×), `call-apply-chain`,
+  `test-edges`. **DEVIATION**: the spec's ≥5× estimate — measured **4.3–4.5×**; the floor is now
+  genuine per-extract `rg` file-enumeration + IO (node-boot-per-child + per-child WASM init
+  eliminated; a `CODEWEB_ENGINE=regex` run is the same wall, so WASM is NOT the floor). Recorded for
+  reviewer adjudication (same posture as WS-D #19/#21).
+- **T-40.5** family batch (18 files): import/edge-precision family + language-extraction widening +
+  `maskjs-regex-literals` (margin).
+
+**P3 — spawn accounting (extractor-invoking subset, the plan-§H bar).** Pre-H HEAD subset = **80**
+(`grep -rhoE "runNode\(EXTRACT|runNode\(script\('extract-symbols|runNodeAsync\(…"`); after T-40.5 =
+**58** → **22 sites retired ≥ 20 bar** (cleared with margin). Total `runNode(` 314 → 293.
+Non-extractor spawns (`query.mjs`, `context-pack.mjs`) untouched; `cli-front-door` + `empty-target`
+never converted (CLI-surface owners). One retained extractor spawn is deliberate: IE-INPROC-PARITY
+(pins the CLI surface byte-for-byte). **Dynamic** (strace, `execve` of extract-symbols during
+`incremental-edges`): **116 → 1** extractor node-child launches at 10 trials (≈382 → 1 at 40-trial
+CI depth).
+
+**#18b — in-process post-edit hook (T-18b), CONDITIONAL gate MET.** IE-INPROC-PARITY holds:
+S18b-PARITY proves `additionalContext` byte-identical across the in-process path and
+`CODEWEB_HOOK_INPROC=0` (forced spawn) on the regression fixture; the extractor-level IE-INPROC-PARITY
+proves the fragment == CLI stdout. The hook lazily `import()`s `runExtract` AFTER the findTarget guard
+(inert fires pay nothing) and reuses runExtract's own #17 warm-cache name-delta machinery — zero
+splice logic in the hook. **Perf (16.8k `writeLoadedCorpus({files:800})`, median-of-5, this box)**:
+no-change fire **in-process 698 ms** vs **forced-spawn 1,089 ms** on the same corpus (the #18a row is
+889 ms, sha `a140fdf`) — **< 700 ms floor MET**; strace: **0 extractor child processes in-process vs
+1 spawned** (the child-boundary term — node boot + fragment stringify/parse — provably eliminated,
+~391 ms median Δ). `hookInprocFallbacks` observed during the hook suite = **0** (no divergence).
+Rollback lever `CODEWEB_HOOK_INPROC=0` + one-shot spawn fallback + fallback counter all in place.
+`hook-fastpath-floor.md`'s "> 1.5 s → in-process extraction" revisit trigger is now consumed.
+
+**Reviewer-scrutiny items:** (1) T-40.4's IE wall drop is **4.3–4.5×**, below the spec's ≥5× estimate
+— the residual is genuine per-extract `rg` enumeration + IO (the spawn/boot overhead IS gone;
+WASM verified not the floor), analogous to WS-D's #19 size / #21 AST-ratio estimate-vs-measurement
+deviations. (2) `markPublicApi`'s `readPkg(dir)` returns the parsed object|null (spec wrote
+"string|null") — a faithful reading of "the lib does no fs"; the orchestrator owns the
+readFileSync+JSON.parse. (3) The unindented `runExtract` body (no re-indent) was a deliberate
+byte-safety choice: no lint gate in CI, no multi-line template literals in the body (scanned), so
+wrapping without re-indentation guarantees byte-identity and keeps the diff reviewable (the moved
+lines show as unchanged context). (4) #18b in-process 698 ms sits right at the 700 ms floor — the
+honest number is recorded; the child-boundary elimination (gate i) is the load-bearing, provable
+term. (5) The engine load-failure stderr is now deduped per-run via a `_failLogged` set (untested
+path — engines load fine on every gate box) instead of the old per-`===undefined` gate; astLoadFailed
+(the fragment-affecting flag) is per-run and P1-covered.
