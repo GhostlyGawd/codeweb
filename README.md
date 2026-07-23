@@ -633,32 +633,26 @@ next release, which re-runs the same gate.
 
 ## About
 
-Built by **rhenmcleod** ([GhostlyGawd](https://github.com/GhostlyGawd) on GitHub) — with the coding
-agents it serves: the AI-assisted build is disclosed in the commit history's co-author trailers, and
-owning that is the point — codeweb is dogfood for the exact loop it supports. Issues and questions
-welcome; see [`SECURITY.md`](SECURITY.md) for the security posture and reporting route.
+Built by [GhostlyGawd](https://github.com/GhostlyGawd), together with the coding agents it serves —
+the AI-assisted build is disclosed in the commit co-author trailers. Issues and questions welcome.
+See [`SECURITY.md`](SECURITY.md) for security reporting.
 
-**Stay current:** codeweb never phones home, so releases are the only channel through which an
-installed copy can hear about new capabilities. **Watch → Custom → Releases** on GitHub gets you
-the changelog when they land (a star, kindly, notifies nobody). `node scripts/run.mjs` prints the
-running version in its done banner so you can tell when you're behind.
+**Stay current:** codeweb never phones home, so to hear about new versions, watch the repo's
+Releases on GitHub (**Watch → Custom → Releases**). The run banner prints your installed version
+so you can tell when you're behind.
 
 ## Support the project
 
-**The free-forever contract, stated once and kept always:** everything that runs on your machine
-is free forever — the engine, all 27 MCP tools, the hooks, the report, the CLI, the self-hosted
-CI gate, every language, every fix. No accounts, no telemetry, no license keys, ever.
+Everything that runs on your machine is **free forever** — the engine, all 27 MCP tools, the
+hooks, the report, the CLI, the CI gate, every language, every fix. No accounts, no telemetry,
+no license keys.
 
-What [sponsorship](https://github.com/sponsors/GhostlyGawd) buys is the part an MIT license can't
-ship: the frontier-agent **benchmark spend** behind every published claim (paid API tokens; the
-roadmap's later phases say "heavy multi-agent spend" out loud) and the per-language grammar
-provenance work. Tiers are jobs, not amounts — see
-[what sponsoring pays for](https://ghostlygawd.github.io/codeweb/support.html).
+[Sponsoring](https://github.com/sponsors/GhostlyGawd) pays for the two things that actually cost
+money: API tokens for the agent benchmarks behind the published claims, and per-language grammar
+verification. Details: [what sponsoring pays for](https://ghostlygawd.github.io/codeweb/support.html).
 
-**Running codeweb across an org?** Enterprise support contracts exist — SLA'd email support,
-private onboarding, architecture-rules setup, paid priority on feature work. **$3–6k/yr flat**,
-capped at a handful of customers. Write to the address on the GitHub profile with "codeweb
-support" in the subject.
+**Enterprise support** for orgs: SLA'd email support, onboarding help, and priority on feature
+work — **$3–6k/yr flat**, limited to a few customers. Contact via the GitHub profile.
 
 ## Handoffs
 

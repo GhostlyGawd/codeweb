@@ -292,7 +292,7 @@ if (partial) {
     try {
       const { sponsorAskDue, recordSponsorAsk } = await import('./lib/stats.mjs');
       if (sponsorAskDue(join(ws, 'graph.json'))) {
-        console.error('[run]   codeweb is free forever — sponsoring funds the frontier-agent benchmarks behind its claims: https://github.com/sponsors/GhostlyGawd');
+        console.error('[run]   codeweb is free — sponsoring pays for its benchmarks: https://github.com/sponsors/GhostlyGawd');
         recordSponsorAsk(join(ws, 'graph.json'));
       }
     } catch { /* the ask must never break the pipeline */ }
