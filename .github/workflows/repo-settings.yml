@@ -1,0 +1,41 @@
+name: repo-settings
+
+# Settings-as-code for the About block (description, homepage, topics) — the one repo surface
+# no session credential can reach: remote agent sessions are proxy-blocked from settings
+# writes, and Actions' GITHUB_TOKEN has no administration permission at all. The escape hatch
+# is a fine-grained PAT the owner creates in the web UI (this repo only, Administration:
+# read+write), stored as the REPO_SETTINGS_TOKEN secret. Until that secret exists this
+# workflow no-ops with a notice (the NPM_TOKEN pattern). Once it runs,
+# .github/repo-settings.json is the source of truth: edit it by PR, and the merge re-applies.
+on:
+  push:
+    branches: [main]
+    paths: ['.github/repo-settings.json']
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply .github/repo-settings.json (gated on REPO_SETTINGS_TOKEN)
+        env:
+          TOKEN: ${{ secrets.REPO_SETTINGS_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::notice::REPO_SETTINGS_TOKEN not configured — settings not applied (prep only). Create a fine-grained PAT scoped to this repo with Administration: read+write, add it as a repository secret named REPO_SETTINGS_TOKEN, then re-run."
+            exit 0
+          fi
+          DESC="$(jq -r .description .github/repo-settings.json)"
+          SITE="$(jq -r .homepage .github/repo-settings.json)"
+          CODE="$(jq -n --arg d "$DESC" --arg h "$SITE" '{description:$d,homepage:$h}' \
+            | curl -s -o /tmp/r1 -w '%{http_code}' -X PATCH "https://api.github.com/repos/$GITHUB_REPOSITORY" \
+                   -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.github+json" -d @-)"
+          echo "PATCH /repos: $CODE"; [ "$CODE" = "200" ] || { cat /tmp/r1; exit 1; }
+          CODE="$(jq '{names:.topics}' .github/repo-settings.json \
+            | curl -s -o /tmp/r2 -w '%{http_code}' -X PUT "https://api.github.com/repos/$GITHUB_REPOSITORY/topics" \
+                   -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.github+json" -d @-)"
+          echo "PUT /topics: $CODE"; [ "$CODE" = "200" ] || { cat /tmp/r2; exit 1; }
+          echo "applied: description, homepage, and $(jq '.topics|length' .github/repo-settings.json) topics"

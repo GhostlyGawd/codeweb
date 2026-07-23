@@ -84,6 +84,18 @@ test('F8: the case study is a real built page, not stranded markdown', () => {
   assert.match(cs, /3 (real|confirmed) duplications?/i, 'the rankable claim is the title story');
 });
 
+test('F1b: repo About settings are code — the workflow applies what the JSON declares', () => {
+  const cfg = readJSON(join(PLUGIN_ROOT, '.github', 'repo-settings.json'));
+  assert.match(cfg.description, /call\/import graph/, 'description carries the CRO wording');
+  assert.equal(cfg.homepage, 'https://ghostlygawd.github.io/codeweb/');
+  assert.ok(cfg.topics.includes('mcp-server') && cfg.topics.length >= 10, 'the SEO topic set rides along');
+  assert.ok(cfg.topics.every((t) => /^[a-z0-9-]+$/.test(t)), 'every topic is GitHub-valid (lowercase, hyphens)');
+  const wf = read('.github/workflows/repo-settings.yml');
+  assert.match(wf, /repo-settings\.json/, 'the JSON is the source of truth');
+  assert.match(wf, /REPO_SETTINGS_TOKEN/, 'gated on the owner-created secret');
+  assert.match(wf, /\/topics/, 'applies topics, not just the PATCH fields');
+});
+
 test('F1: the zero-code operator actions are written down where the operator will find them', () => {
   const ops = read('OPERATOR-ACTIONS.md');
   assert.match(ops, /topics/i, 'GitHub topics list');

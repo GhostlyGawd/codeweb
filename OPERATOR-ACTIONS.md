@@ -5,22 +5,26 @@ consoles); none of it is code, and none of it can be done from a PR. The growth 
 (`SEO.md`, `FUNNEL.md`, `CRO.md`, `RETENTION.md`) rank the first item as worth more traffic than
 every code change combined.
 
-## 1. GitHub repo settings (SEO F1 · one command · highest reach)
+## 1. GitHub repo settings (SEO F1 · two browser steps, once · highest reach)
 
-Remote agent sessions cannot do this one: the session proxy refuses repository-settings writes
-(verified — `PATCH /repos` returns 403 with "Repository settings writes are not permitted
-through this proxy"). From your own terminal it is one command — `gh` there is logged in as
-you, and you have the admin permission this needs. A local Claude Code session can run it too.
+No session credential can write repo settings — the remote proxy refuses with 403, and
+Actions' `GITHUB_TOKEN` has no administration permission. So the settings are code now:
+`.github/repo-settings.json` holds the description, homepage, and topics (`mcp`, `mcp-server`,
+`model-context-protocol`, and twelve more), and `.github/workflows/repo-settings.yml` applies
+it. It only needs a credential you mint in the browser:
 
-```
-gh repo edit GhostlyGawd/codeweb \
-  --description "See what an edit breaks before you write it — deterministic call/import graph + 27 MCP tools for coding agents. Claude Code plugin & MCP server; zero deps, runs 100% locally." \
-  --homepage "https://ghostlygawd.github.io/codeweb/" \
-  --add-topic mcp,mcp-server,model-context-protocol,claude-code,claude-code-plugin,call-graph,dependency-graph,code-analysis,static-analysis,code-visualization,codebase-map,dead-code,refactoring,developer-tools,ai-agents
-```
+1. https://github.com/settings/personal-access-tokens/new → **Fine-grained token** →
+   Repository access: *Only select repositories* → `codeweb` → Permissions → Repository →
+   **Administration: Read and write**. A short expiration is fine — it's needed once.
+2. Repo → **Settings → Secrets and variables → Actions → New repository secret** → name it
+   `REPO_SETTINGS_TOKEN`, paste the token.
+3. Tell the agent (or Actions → repo-settings → Run workflow yourself). Delete the token
+   afterwards if you like; while the secret exists, any merged edit to `repo-settings.json`
+   re-applies automatically.
 
-(Same three fields can be pasted into **Settings → General** instead. Every top-10 rival for
-"mcp call graph codebase" carries 10–20 topics; codeweb currently has zero.)
+Zero-token alternative: the **About ⚙ gear** on the repo page edits description, website, and
+topics in one dialog — paste the values from `.github/repo-settings.json`. (Every top-10 rival
+for "mcp call graph codebase" carries 10–20 topics; codeweb currently has zero.)
 
 ## 2. MCP registry publish (SEO F2 · ~30 min once)
 
