@@ -84,6 +84,10 @@ test('F8: the case study is a real built page, not stranded markdown', () => {
   assert.match(cs, /3 (real|confirmed) duplications?/i, 'the rankable claim is the title story');
 });
 
+test('F6d: the Search Console ownership proof rides the shared head — dropping it would silently unverify the property', () => {
+  assert.match(read('docs/index.html'), /<meta name="google-site-verification" content="[\w-]{20,}"/, 'the verification meta tag is served at the property root');
+});
+
 test('F1b: repo About settings are code — the workflow applies what the JSON declares', () => {
   const cfg = readJSON(join(PLUGIN_ROOT, '.github', 'repo-settings.json'));
   assert.match(cfg.description, /call\/import graph/, 'description carries the CRO wording');
