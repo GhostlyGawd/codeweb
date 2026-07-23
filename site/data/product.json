@@ -40,7 +40,7 @@
       {
         "num": "32 / 33",
         "label": "pre-registered checks pass",
-        "src": "bench/results"
+        "src": "bench/preregistration.md"
       },
       {
         "num": "~490k",
@@ -48,9 +48,9 @@
         "src": "correctness-query.json"
       },
       {
-        "num": "+0.27 / −34%",
-        "label": "agent caller-discovery recall / fewer steps (pilot)",
-        "src": "efficiency-pilot"
+        "num": "+0.31 / equal cost",
+        "label": "agent caller-discovery recall at equal token cost (v0.9.0 pilot)",
+        "src": "efficiency-pilot.reps5-v090.json"
       }
     ]
   },
@@ -388,17 +388,31 @@
       "source": "auxiliary.json"
     },
     {
-      "claim": "Agent caller-discovery recall (vs grep)",
+      "claim": "Agent caller-discovery recall on budgeted responses (vs grep) — the current run",
+      "tag": "preliminary",
+      "metric": "+0.310 ± 0.039 recall (all 5 reps positive), precision +0.234 ± 0.080",
+      "sample": "5 engine-frozen reps, v0.9.0, budgeted treatment (MCP-parity)",
+      "source": "efficiency-pilot.reps5-v090.json"
+    },
+    {
+      "claim": "Agent runtime tokens / tool-calls on budgeted responses (vs grep) — the current run",
+      "tag": "null",
+      "metric": "a wash: totalTokens −84k ± 381k, toolCalls +0.95 ± 3.6 — equal cost, reported plainly",
+      "sample": "5 reps, 39/39 agents joined from transcripts",
+      "source": "efficiency-pilot.usage-v090.json"
+    },
+    {
+      "claim": "Agent caller-discovery recall (vs grep) — earlier run, different base model",
       "tag": "preliminary",
       "metric": "+0.265 ± 0.045 (all 8 reps positive, ~6× the noise floor)",
-      "sample": "8 engine-frozen reps, frontier agents",
+      "sample": "8 engine-frozen reps, claude-opus-4-8, unbudgeted responses",
       "source": "efficiency-pilot.reps8.json"
     },
     {
-      "claim": "Agent discovery steps (vs grep)",
+      "claim": "Agent discovery steps (vs grep) — earlier run; savings did NOT replicate on v0.9.0",
       "tag": "preliminary",
-      "metric": "−6.84 ± 3.33 steps (~34% fewer)",
-      "sample": "8 engine-frozen reps",
+      "metric": "−6.84 ± 3.33 steps (~34% fewer) then; +0.9 ± 3.7 (wash) on the current run",
+      "sample": "8 engine-frozen reps, claude-opus-4-8",
       "source": "efficiency-pilot.reps8.json"
     },
     {
@@ -427,7 +441,7 @@
     },
     {
       "instead_of": "\"Agents provably edit better\"",
-      "we_say": "It improves caller-discovery recall (+0.27) and cuts discovery steps (~34%) on frontier agents. The full edit-quality A/B (H18) was a null on clean tasks — a floor effect, reported honestly."
+      "we_say": "It improves caller-discovery recall (+0.31, all reps positive) at equal token cost on the budgeted responses agents receive (v0.9.0). An earlier run on a different base model also showed ~34% fewer steps; that savings did not replicate, and we say so. The full edit-quality A/B (H18) was a null on clean tasks — a floor effect, reported honestly."
     },
     {
       "instead_of": "\"100% deterministic\"",

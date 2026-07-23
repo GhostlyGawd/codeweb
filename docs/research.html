@@ -51,7 +51,7 @@
       <div class="stat">
         <div class="num">32 / 33</div>
         <div class="label">pre-registered checks pass</div>
-        <div class="src">bench/results</div>
+        <div class="src">bench/preregistration.md</div>
       </div>
       <div class="stat">
         <div class="num">~490k</div>
@@ -59,9 +59,9 @@
         <div class="src">correctness-query.json</div>
       </div>
       <div class="stat">
-        <div class="num">+0.27 / −34%</div>
-        <div class="label">agent caller-discovery recall / fewer steps (pilot)</div>
-        <div class="src">efficiency-pilot</div>
+        <div class="num">+0.31 / equal cost</div>
+        <div class="label">agent caller-discovery recall at equal token cost (v0.9.0 pilot)</div>
+        <div class="src">efficiency-pilot.reps5-v090.json</div>
       </div></div>
   </div>
 </section>
@@ -190,16 +190,30 @@
         <td><span class="chip chip-validated">Validated</span></td>
       </tr>
       <tr>
-        <td class="claim">Agent caller-discovery recall (vs grep)</td>
+        <td class="claim">Agent caller-discovery recall on budgeted responses (vs grep) — the current run</td>
+        <td class="num">+0.310 ± 0.039 recall (all 5 reps positive), precision +0.234 ± 0.080</td>
+        <td class="muted">5 engine-frozen reps, v0.9.0, budgeted treatment (MCP-parity)</td>
+        <td class="src">efficiency-pilot.reps5-v090.json</td>
+        <td><span class="chip chip-preliminary">Preliminary</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Agent runtime tokens / tool-calls on budgeted responses (vs grep) — the current run</td>
+        <td class="num">a wash: totalTokens −84k ± 381k, toolCalls +0.95 ± 3.6 — equal cost, reported plainly</td>
+        <td class="muted">5 reps, 39/39 agents joined from transcripts</td>
+        <td class="src">efficiency-pilot.usage-v090.json</td>
+        <td><span class="chip chip-null">Null (honest)</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Agent caller-discovery recall (vs grep) — earlier run, different base model</td>
         <td class="num">+0.265 ± 0.045 (all 8 reps positive, ~6× the noise floor)</td>
-        <td class="muted">8 engine-frozen reps, frontier agents</td>
+        <td class="muted">8 engine-frozen reps, claude-opus-4-8, unbudgeted responses</td>
         <td class="src">efficiency-pilot.reps8.json</td>
         <td><span class="chip chip-preliminary">Preliminary</span></td>
       </tr>
       <tr>
-        <td class="claim">Agent discovery steps (vs grep)</td>
-        <td class="num">−6.84 ± 3.33 steps (~34% fewer)</td>
-        <td class="muted">8 engine-frozen reps</td>
+        <td class="claim">Agent discovery steps (vs grep) — earlier run; savings did NOT replicate on v0.9.0</td>
+        <td class="num">−6.84 ± 3.33 steps (~34% fewer) then; +0.9 ± 3.7 (wash) on the current run</td>
+        <td class="muted">8 engine-frozen reps, claude-opus-4-8</td>
         <td class="src">efficiency-pilot.reps8.json</td>
         <td><span class="chip chip-preliminary">Preliminary</span></td>
       </tr>
@@ -228,20 +242,20 @@
     <div class="split">
       <div>
         <span class="eyebrow">The efficiency pilot</span>
-        <h2>Frontier agents find more, in fewer steps</h2>
-        <p>On a caller-discovery micro-benchmark against a grep baseline, with the engine frozen across 8 repetitions, codeweb improved a frontier agent's recall by <strong>+0.265 ± 0.045</strong> — every one of the 8 reps positive, roughly six times the noise floor — while cutting discovery steps by <strong>~34%</strong> (−6.84 ± 3.33).</p>
-        <p class="muted">Precision was a weaker positive (+0.199 ± 0.147, one negative rep). The mechanism is deterministic: fixing import-alias and member-access resolution took axios <code>AxiosError</code>'s recovered callers from 1 to 20 — no model involved. We label the pilot preliminary because the truth set is fresh and grading is strict at the symbol level.</p>
+        <h2>Frontier agents find more, at equal cost</h2>
+        <p>On a caller-discovery micro-benchmark against a grep baseline — engine frozen, treatment consuming the <strong>budgeted</strong> responses agents actually receive over MCP — codeweb improved a frontier agent's recall by <strong>+0.310 ± 0.039</strong> (every one of the 5 reps positive) and precision by <strong>+0.234 ± 0.080</strong>, at <strong>equal token cost</strong> (v0.9.0).</p>
+        <p class="muted">Runtime tokens and tool-calls were a wash — reported plainly, not rounded up. The mechanism is deterministic: fixing import-alias and member-access resolution took axios <code>AxiosError</code>'s recovered callers from 1 to 20 — no model involved. We label the pilot preliminary because grading is strict at the symbol level. One target regressed (flask, a Python import-edge gap) — since bisected to a real extractor regression and fixed (Spec Q, closed): the same pre-flight now finds every truth site.</p>
       </div>
       <div class="callout callout-good">
         <h3>Why it's believable</h3>
-        <p>The step reduction is oracle-independent — it doesn't depend on how the truth set is scored. The recall gain clears the measurement noise by ~6×, and the paired design cancels the shared oracle noise that swung the grep baseline run-to-run.</p>
-        <p class="muted" style="margin-bottom:0">Source: <code>bench/experiments/efficiency-pilot.reps8.json</code></p>
+        <p>The paired design cancels the shared oracle noise that swung the grep baseline run-to-run, the recall gain clears the measurement noise by ~8×, and the null half of the result (no token savings) is published beside the win.</p>
+        <p class="muted" style="margin-bottom:0">Source: <code>bench/experiments/efficiency-pilot.reps5-v090.json</code> · <code>efficiency-pilot.usage-v090.json</code></p>
       </div>
     </div>
     <div class="callout" style="margin-top:1.5rem">
-      <h3>Re-run on the budgeted surface (v0.9.0, 5 reps)</h3>
-      <p>We re-ran the pilot with the treatment agent consuming the <strong>budgeted</strong> responses agents actually get over MCP (top-20 + a cursor, not the full dump). Recall held at <strong>+0.310 ± 0.039</strong> (all 5 reps positive) and precision at <strong>+0.234 ± 0.080</strong> — the budget costs no accuracy. The token savings the earlier run showed did <em>not</em> reappear: on a base agent that is already frugal, runtime tokens and tool-calls are a wash. The honest read is <strong>+0.31 recall at equal cost</strong> — the advantage moved from spend to completeness. One target regressed (flask, a Python import-edge gap) — since bisected to a real extractor regression and fixed (Spec Q, closed): the same pre-flight now finds every truth site.</p>
-      <p class="muted" style="margin-bottom:0">Source: <code>bench/experiments/efficiency-pilot.reps5-v090.json</code> · <code>efficiency-pilot.usage-v090.json</code></p>
+      <h3>The earlier run — and what didn't replicate</h3>
+      <p>An earlier 8-rep run (different base model, unbudgeted responses) found the same recall advantage (<strong>+0.265 ± 0.045</strong>, all reps positive) <em>plus</em> large savings: ~34% fewer discovery steps and ~44% fewer tokens. On the current, more frugal base agent those savings <strong>did not replicate</strong> — the advantage moved from spend to completeness. We lead with the current number and keep this one as labeled history, because that is what the receipts say.</p>
+      <p class="muted" style="margin-bottom:0">Source: <code>bench/experiments/efficiency-pilot.reps8.json</code> · <code>efficiency-pilot.usage.json</code></p>
     </div>
   </div>
 </section>
@@ -272,7 +286,7 @@
       <h2>What we deliberately don't claim</h2>
       <p class="lead">The fastest way to lose trust is to overstate. Here's where we hold back, and the precise claim we make instead.</p>
     </div>
-    <div class="callout honesty"><ul><li><strong>"Finds all clones / 100% recall"</strong> → High-precision, body-confirmed overlap on the clones it surfaces (F1 1.0 synthetic, 0.98 on real axios) — it deliberately drops ambiguous edges because a false positive costs more than a miss.</li><li><strong>"Replaces human review"</strong> → It produces candidate lists and shows which merges are cycle-safe to apply — a structural pre-flight, not a semantic verdict.</li><li><strong>"Agents provably edit better"</strong> → It improves caller-discovery recall (+0.27) and cuts discovery steps (~34%) on frontier agents. The full edit-quality A/B (H18) was a null on clean tasks — a floor effect, reported honestly.</li><li><strong>"100% deterministic"</strong> → Byte-deterministic, set-valued output — one digest across 20 runs per repo for nodes, edges, domains, and overlaps.</li><li><strong>"Sub-second every time"</strong> → Typical query ~95–120 ms; worst-case p95 264 ms on 3,201 symbols, where Node startup (~63 ms) dominates.</li><li><strong>"Beats commercial tools"</strong> → We compare only to stated, reproducible baselines (name-matching, lexical, random, the legacy fallback) — no head-to-head against tools we can't reproduce.</li></ul></div>
+    <div class="callout honesty"><ul><li><strong>"Finds all clones / 100% recall"</strong> → High-precision, body-confirmed overlap on the clones it surfaces (F1 1.0 synthetic, 0.98 on real axios) — it deliberately drops ambiguous edges because a false positive costs more than a miss.</li><li><strong>"Replaces human review"</strong> → It produces candidate lists and shows which merges are cycle-safe to apply — a structural pre-flight, not a semantic verdict.</li><li><strong>"Agents provably edit better"</strong> → It improves caller-discovery recall (+0.31, all reps positive) at equal token cost on the budgeted responses agents receive (v0.9.0). An earlier run on a different base model also showed ~34% fewer steps; that savings did not replicate, and we say so. The full edit-quality A/B (H18) was a null on clean tasks — a floor effect, reported honestly.</li><li><strong>"100% deterministic"</strong> → Byte-deterministic, set-valued output — one digest across 20 runs per repo for nodes, edges, domains, and overlaps.</li><li><strong>"Sub-second every time"</strong> → Typical query ~95–120 ms; worst-case p95 264 ms on 3,201 symbols, where Node startup (~63 ms) dominates.</li><li><strong>"Beats commercial tools"</strong> → We compare only to stated, reproducible baselines (name-matching, lexical, random, the legacy fallback) — no head-to-head against tools we can't reproduce.</li></ul></div>
     <div class="btn-row" style="margin-top:var(--s-6)">
       <a class="btn btn-primary" href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">Browse the benchmarks</a>
       <a class="btn" href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Inspect the raw results</a>
@@ -315,7 +329,7 @@
       </div>
     </div>
     <div class="footer-base">
-      <span>codeweb v0.9.0 · MIT · © 2026 rhenmcleod</span>
+      <span>codeweb v0.9.0 · MIT · © 2026 rhenmcleod (<a href="https://github.com/GhostlyGawd">GhostlyGawd</a>)</span>
       <span>Deterministic build · zero third-party requests on this page</span>
     </div>
   </div>
