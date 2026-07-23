@@ -207,4 +207,5 @@ test('CHANGELOG never @-mentions a number — bare @digit is banned outside code
 test('the release workflow re-syncs notes for an existing release instead of skipping', () => {
   const wf = readFileSync(join(PLUGIN_ROOT, '.github', 'workflows', 'release.yml'), 'utf8');
   assert.match(wf, /gh release edit .*--notes-file/, 're-dispatch is the only path that can repair published notes');
+  assert.match(wf, /npm view "\$\{PKG\}@\$\{VERSION\}"/, 'the npm step skips an already-published version, so a notes-repair re-dispatch stays green');
 });
