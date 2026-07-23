@@ -10,6 +10,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Changed
+- **The symbol extractor is being decomposed into testable, importable pieces (the tracked residual
+  of round-1 #25, now actually being closed).** Stage 1: per-file call/ref/inherit derivation —
+  `deriveFileEdges`, the precision gate (alias > same-file > unique-in-package, drop-ambiguous, plus
+  the short-name / closure-local / role / rb-php filters) — moved verbatim out of the 1,400-line
+  orchestrator into `scripts/lib/edge-derive.mjs` as a `createEdgeDeriver(ctx)` factory
+  (import-resolve's proven template: explicit injected context, zero module-global reach-back). The
+  free-variable context was re-derived against the *current* engine, not the spec-time table:
+  injected `byName`, `pkgOf`, `roleFor` (the #10 ref role-gate), `resolveFileMember`,
+  `closureLocalIds` (the WS-D-review magnet fix), `legacyFallback`; `KEYWORDS`/`parseSignature`/
+  `isTestFile`/`buildInnermostIndex` are the lib's own pure-module imports; `idFile` (the id→file
+  split) is now defined there as one truth and imported back. Edge derivation is now unit-testable
+  in-process at function-call speed (`tests/edge-derive.test.mjs`, no spawn) while staying
+  byte-identical to the old inline function — proven by IE-EQUIVALENCE at 40 trials and a full
+  self-map cold+warm byte-`cmp`. (round 2, finding #40)
 - **"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a
   real long-range term, and runs in interruptible slices so no single task blows a frame — plus the
   receipt that judges it is measured honestly.** The old anneal packed every symbol onto its area

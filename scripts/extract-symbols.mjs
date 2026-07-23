@@ -19,11 +19,12 @@ import { relative, resolve, join, dirname } from 'node:path';
 import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
 import { atomicWrite, parseArgs } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
 import { SRC_RE } from './lib/common.mjs'; // finding 25: one truth for the mappable-source list (the copy here could drift)
-import { KEYWORDS, scanSymbols, bodyEnd, parseSignature, DYNAMIC_RE, langOf } from './lib/lang-rules.mjs'; // finding 25: pure per-language rules
+import { scanSymbols, bodyEnd, parseSignature, DYNAMIC_RE, langOf } from './lib/lang-rules.mjs'; // finding 25: pure per-language rules
 import { createImportResolver, defaultExportOf, importCandidates } from './lib/import-resolve.mjs'; // finding 25: cross-file name binding, one place; finding #11: shared specifier-candidate list
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { maskJs, maskPy, maskRuby } from './lib/masking.mjs'; // comment/string/regex-literal blanking (one truth, shared with codemod's rewrite gate)
-import { buildInnermostIndex, createOwnerStack } from './lib/enclosing.mjs'; // finding #21: O(1) enclosing-range lookups (property-pinned identical to the linear scans)
+import { createOwnerStack } from './lib/enclosing.mjs'; // finding #21: live open-class stack (property-pinned identical to the linear scan)
+import { createEdgeDeriver, idFile } from './lib/edge-derive.mjs'; // finding #40: per-file call/ref/inherit derivation as a factory; idFile (id->file split) is its one truth, imported back
 import { sha1 } from './lib/hash.mjs'; // one truth — codeweb's own gate flagged the duplicate on this branch
 import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
 
@@ -56,9 +57,8 @@ const SCANNER_VERSION = 17; // v17: derivation-semantics change (WS-D review) �
 // so a nesting flip invalidates cached edges. A previous-version cache is discarded at load (one
 // cold rebuild, never a crash) — the read gate below only accepts an exact version match.
 
-// Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
-// label separator, so the last ':' splits them.
-const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
+// idFile (id -> file split) is defined+exported by lib/edge-derive.mjs and imported above — one
+// truth shared with the edge deriver that keys on it most.
 
 const USAGE = 'usage: extract-symbols.mjs <path> [--out f.json] [--target label] [--cache f.json] [--full] [--allow-empty] [--no-ctags] [--engine regex|tree-sitter]';
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — the hand-rolled copy here treated any unknown
@@ -927,260 +927,13 @@ for (const f of files) {
 // ---- derive call edges (F9: incremental, per-file, cacheable) ------------------------------
 const LEGACY_FALLBACK = !!process.env.CODEWEB_LEGACY_FALLBACK; // A/B: restore pre-fix byName[0] wiring for regression testing
 
-// Derive ONE file's edges (call/ref/inherit), with from-side = its own symbols or its <module> node.
-// Pure w.r.t. the file: returns {edges, hasModule, ambiguous, short}. The precision gate (alias >
-// same-file > unique-global, drop-ambiguous) is unchanged — only the plumbing moved into a function
-// so it can be cached per file and skipped when the file + symbol set are unchanged.
-function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) {
-  const local = []; const localSet = new Set();
-  let hasModule = false, ambiguous = 0, shortDropped = 0;
-  const isPy = r.endsWith('.py');
-  // finding #17 (T-17.1): the file's CANDIDATE name set — every name reaching addEdge, recorded
-  // after the KEYWORDS return and BEFORE the aliased/byName gate, so alias locals, decl-line
-  // self-captures, and names that resolved to NOTHING this run are all included (an unresolvable
-  // name is exactly what a later-added symbol turns into an edge). Qualified-name scans
-  // (csBase/pyBases) contribute what addEdge receives — the split tail. Collected from the SAME
-  // masked lines the edges derive from, so cand and edges cannot skew across mask versions.
-  const cand = new Set();
-  // finding #21 (T-21.1): innermost-range-per-line precompute — the old per-call linear scan over
-  // ALL ranges made big generated/hub files quadratic (8k-fn file: addEdge 50.8 % self). One
-  // O(lines + R log R) sweep at entry; lookup O(1); property-pinned identical (incl. the
-  // duplicate-start tie-break) in tests/enclosing-index.test.mjs. Zero behavior change —
-  // addEdge/addResolved consume the same winning range objects.
-  const innermost = buildInnermostIndex(ranges, lines.length);
-  const enclosing = (lineNo) => (lineNo <= lines.length && innermost[lineNo]) || null;
-  // Round 2, finding #10 (T-10.2/T-10.4): declaration START lines + per-range signature tokens.
-  // refRe never scans a decl line (24% of self-map ref edges were fabricated there — `function
-  // metrics(g) {` emitted a ref from metrics to a test file's global g), and every identifier
-  // token in a range's signature becomes a SHADOW set for the fallback path: a bare use under a
-  // binding IS the binding (a call through a param invokes the param's value, never the global).
-  // sig.raw over-collects (destructure keys, default-value exprs, TS annotations) — that only
-  // suppresses fallback edges, precision-safe by construction. Multi-line signatures: when the
-  // param list opened at/after the name doesn't balance on the decl line, continuation lines keep
-  // the refRe skip AND sweep their tokens until the cumulative paren balance closes. Local maps
-  // only — `ranges` objects also live in the scan cache and must not grow non-JSON state.
-  const startLines = new Set(ranges.map((rg) => rg.start));
-  const paramsOf = new Map(); // range -> Set(identifier tokens in its signature)
-  const sweepInto = (set, s) => { for (const t of s.match(/[A-Za-z_$][\w$]*/g) || []) set.add(t); };
-  // Unbalanced paren depth of `name`'s param list on its decl line (0 = balanced or no list).
-  const sigSpill = (ln, name, set) => {
-    const at = ln.indexOf(name);
-    if (at === -1) return 0;
-    const open = ln.indexOf('(', at + name.length);
-    if (open === -1) return 0;
-    let depth = 0;
-    for (let k = open; k < ln.length; k++) {
-      if (ln[k] === '(') depth++;
-      else if (ln[k] === ')') { depth--; if (depth <= 0) return 0; }
-    }
-    sweepInto(set, ln.slice(open + 1)); // spilled: parseSignature returned null, sweep the tail
-    return depth;
-  };
-  for (const rg of ranges) {
-    const set = new Set();
-    const sig = parseSignature(lines[rg.start - 1] || '', rg.name, isPy);
-    if (sig) sweepInto(set, sig.raw);
-    paramsOf.set(rg, set);
-  }
-  // Round 2, finding #12: every declaration start line per NAME. addEdge skips a match whose name
-  // has a declaration starting on that line — a getter/setter pair or an overload impl line used to
-  // be scanned as a CALL with the class as scope (`Widget -> Widget.value` phantom callers, hiding
-  // accessors from deadcode). Generalizes the old own-start-line guard (caller.name === name at
-  // caller.start), which this strictly subsumes. addEdge ONLY — addResolved stays untouched so an
-  // ns-alias member call ON a decl line still edges; and the guard keys on the matched NAME, so the
-  // setter's normalize(v) call on its own decl line still edges from the @line id.
-  const declStarts = new Map(); // name -> Set(1-based start lines)
-  for (const rg of ranges) { let s = declStarts.get(rg.name); if (!s) declStarts.set(rg.name, s = new Set()); s.add(rg.start); }
-  const sameFileByName = new Map(ranges.map((rg) => [rg.name, rg.id]));
-  const sameFileClasses = new Map(ranges.filter((rg) => rg.kind === 'class').map((rg) => [rg.name, rg.id]));
-  // The CLASS node a name refers to (imported class alias OR a same-file class) — for ref edges from
-  // `instanceof X` and `X.staticMethod()`. Null for non-classes (an object alias like `utils`).
-  const classOf = (name) => (classAliasMap && classAliasMap.get(name)) || sameFileClasses.get(name) || null;
-  const addEdge = (lineIdx, name, kind = 'call') => {
-    if (KEYWORDS.has(name)) return;
-    cand.add(name); // finding #17: pre-gate — see the declaration above
-    const aliased = aliasMap && aliasMap.get(name);
-    if (!aliased && !byName.has(name)) return;
-    if (declStarts.get(name)?.has(lineIdx + 1)) return; // any same-named declaration line — finding #12 (subsumes the old own-definition guard)
-    const caller = enclosing(lineIdx + 1);
-    let callerId;
-    if (caller) callerId = caller.id;
-    else { callerId = r + ':<module>'; hasModule = true; } // module/top-level scope
-    let calleeId = aliased || sameFileByName.get(name);
-    if (!calleeId) {
-      if (kind === 'call' || kind === 'ref') {
-        // finding #10 (T-10.4): PARAM SHADOW — a bare name token-bound by the signature of ANY
-        // enclosing range never reaches the fallback (alias/same-file resolution already missed;
-        // this is shadowing semantics, per BINDING, not per name-per-file — a sibling without the
-        // param keeps its edge). Kills the body-use half of the parameter-magnet class.
-        const lineNo = lineIdx + 1;
-        for (const rg of ranges) {
-          if (lineNo >= rg.start && lineNo <= rg.end && paramsOf.get(rg).has(name)) { ambiguous++; return; }
-        }
-        // finding #10 (T-10.4): >=3-CHAR GUARD — 1-2-char bare names are the measured magnet
-        // class (234 self-map ref edges into 8 one-letter test/bench symbols) and had ZERO
-        // legitimate cross-file bare-fallback in-edges on any measured corpus (the 4 short
-        // product symbols all resolve same-file; Ruby's cross-file bare reach is method-gated
-        // below). NOT silent: counted in `shortDropped`, surfaced in the banner as
-        // "(N short-name)" — a future real 1-2-char cross-file symbol shows up there, and the
-        // guard is revisited only on that evidence.
-        if (name.length < 3) { ambiguous++; shortDropped++; return; }
-      }
-      // package-scoped unique-name fallback: resolve only within the caller's package (imports
-      // handle legitimate cross-package calls; cross-package bare-name matches are collisions).
-      const defs = byName.get(name) || [];
-      const pkg = pkgOf(r);
-      let inPkg = defs.filter((d) => pkgOf(idFile(d)) === pkg);
-      // #14: in Ruby/PHP a bare name can NEVER legitimately reach another file's owner-qualified
-      // METHOD (a method needs a receiver: implicit self is same-class, $obj-> needs a type) —
-      // that attribution belongs to the dispatch tier, which has the receiver evidence. Without
-      // this, `helper(1)` in class A wired to B.helper across files on a name coincidence.
-      if (/\.(rb|php)$/.test(r)) inPkg = inPkg.filter((d) => { const lbl = d.slice(d.lastIndexOf(':') + 1); return !lbl.includes('.') || idFile(d) === r; });
-      // WS-D review — closure-local magnet: a bare name in ANOTHER file can never lexically reach
-      // a symbol nested inside a function body (see closureLocalIds above; the `dep` CI incident).
-      // Same-file defs stay eligible (belt — sameFileByName resolves them before this point).
-      inPkg = inPkg.filter((d) => idFile(d) === r || !closureLocalIds.has(d));
-      if (inPkg.length === 1) {
-        // finding #10 (T-10.3): ROLE-GATE the unique-global fallback for ref kinds — product
-        // never ref-resolves into test/bench/fixture code. REJECT-form, not filter-form: a name
-        // with one product def among several defs stays an ambiguous DROP (filter-form would
-        // fabricate a product->product edge from the collision — byName['rel'] on the self-map
-        // is exactly that trap). Mirror of the test->product relabel below, which is BY
-        // CONSTRUCTION one-directional: test/bench->product edges become kind `test` and power
-        // testIn/coverage — never gate that direction. Role truth is roleFor (rules overrides +
-        // roleOf), the same truth stamped on nodes.
-        if (kind === 'ref' && roleFor(r) === 'product' && roleFor(idFile(inPkg[0])) !== 'product') { ambiguous++; return; }
-        calleeId = inPkg[0];
-      }
-      else if (LEGACY_FALLBACK) calleeId = defs[0];
-      else { ambiguous++; return; }
-    }
-    if (!calleeId || calleeId === callerId) return;
-    const edgeKind = ((kind === 'call' || kind === 'ref') && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
-    const key = callerId + ' ' + calleeId + ' ' + edgeKind;
-    if (localSet.has(key)) return;
-    localSet.add(key);
-    local.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
-  };
-  // Push an edge to an ALREADY-RESOLVED callee id — used for namespace/default import member-access,
-  // where the callee is resolved via the import binding rather than bare-name lookup.
-  const addResolved = (lineIdx, calleeId, kind = 'call') => {
-    const caller = enclosing(lineIdx + 1);
-    let callerId;
-    if (caller) callerId = caller.id; else { callerId = r + ':<module>'; hasModule = true; }
-    if (!calleeId || calleeId === callerId) return;
-    const edgeKind = ((kind === 'call' || kind === 'ref') && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
-    const key = callerId + ' ' + calleeId + ' ' + edgeKind; // call & ref to the same target coexist
-    if (localSet.has(key)) return;
-    localSet.add(key);
-    local.push({ from: callerId, to: calleeId, kind: edgeKind, weight: 1 });
-  };
-  const callRe = /([A-Za-z_$][\w$]*)\s*\(/g;
-  const refRe = /[(,]\s*([A-Za-z_$][\w$]*)\s*(?=[,)])/g;
-  // finding #12: body-less TS overload stubs have NO range, so declStarts can't cover them. A line
-  // shaped `name(params)[: Ret];` whose ENCLOSING range is a CLASS is a signature, not code — skip
-  // callRe AND refRe there (refRe on stub params would fabricate ref edges to short repo symbols,
-  // the #10 magnet class). Name-independent, one regex test per line — no per-match RegExp. The
-  // class gate narrows the spec's unconditional line guard: the same shape inside a FUNCTION body
-  // is an ordinary call statement (`finish(code);` — review-measured: the unconditional guard hits
-  // 675 tracked js/ts lines, 382 of them non-keyword-led statements) whose edges must survive;
-  // class bodies cannot contain statements, so the gate suppresses nothing real — with ONE known
-  // residual (review-verified): a bare call statement inside an ES2022 `static {}` block is
-  // stub-shaped with a class enclosing, so its class-attributed edge is suppressed. Accepted:
-  // rare construct, and pre-#12 that edge mis-attributed the call to the class node anyway.
-  // Module-level TS overload stubs need no guard at all — each stub line matches the function rule
-  // in both tiers, so declStarts covers it (pinned in tests/accessor-overload-truth.test.mjs).
-  const STUB_LINE_RE = /^\s*(?:(?:public|private|protected|static|readonly|abstract|override|async)\s+)*[A-Za-z_$][\w$]*\s*\([^;{]*\)\s*(?::[^{;]*)?;\s*$/;
-  const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g;
-  const csBaseRe = /\b(?:class|struct|record)\s+[A-Za-z_]\w*(?:<[^>]*>)?\s*:\s*([A-Za-z_][\w.]*)/g; // C# `class A : Base, IFace` -> Base
-  const isCs = r.endsWith('.cs');
-  const instanceofRe = /\binstanceof\s+([A-Za-z_$][\w$]*)/g; // `x instanceof X` -> ref to class X
-  const pyBasesRe = /^\s*class\s+[A-Za-z_]\w*\s*\(([^)]*)\)/;
-  // finding #10 (T-10.2): >0 while inside a spilled multi-line signature; the ranges it belongs to
-  // keep collecting param tokens until the cumulative paren balance closes.
-  let contDepth = 0, contRanges = null;
-  for (let i = 0; i < lines.length; i++) {
-    const ln = lines[i];
-    // finding #10 (T-10.2): signature-line + continuation state — decided BEFORE any scan (and
-    // before the stub-line `continue`, which must not desync the balance). `sigLine` suppresses
-    // refRe ONLY; callRe/inherit/instanceof scans are untouched. Accepted recall loss: a ref
-    // argument inside a single-line decl+body (`const f = () => emit(handler)`) — decl lines are
-    // where the measured fabrication lives, body-line refs are unaffected.
-    let sigLine = false;
-    if (contDepth > 0) {
-      sigLine = true;
-      for (const rg of contRanges) sweepInto(paramsOf.get(rg), ln);
-      for (let k = 0; k < ln.length; k++) { if (ln[k] === '(') contDepth++; else if (ln[k] === ')') contDepth--; }
-      if (contDepth <= 0) { contDepth = 0; contRanges = null; }
-    } else if (startLines.has(i + 1)) {
-      sigLine = true;
-      for (const rg of ranges) {
-        if (rg.start !== i + 1) continue;
-        const d = sigSpill(ln, rg.name, paramsOf.get(rg));
-        if (d > 0) { contDepth = d; (contRanges = contRanges || []).push(rg); }
-      }
-    }
-    if (isPy) {
-      const pm = pyBasesRe.exec(ln);
-      if (pm) for (const part of pm[1].split(',')) {
-        const base = part.trim();
-        if (!base || base.includes('=')) continue;
-        const name = base.replace(/^.*\./, '');
-        if (/^[A-Za-z_]\w*$/.test(name)) addEdge(i, name, 'inherit');
-      }
-    } else {
-      extendsRe.lastIndex = 0; let xm;
-      while ((xm = extendsRe.exec(ln))) addEdge(i, xm[1], 'inherit');
-      if (isCs) {
-        csBaseRe.lastIndex = 0;
-        while ((xm = csBaseRe.exec(ln))) { const base = xm[1].split('.').pop(); if (base) addEdge(i, base, 'inherit'); }
-      }
-    }
-    if (STUB_LINE_RE.test(ln) && enclosing(i + 1)?.kind === 'class') continue; // overload-stub line (finding #12): no calls, no refs
-    callRe.lastIndex = 0; let m;
-    while ((m = callRe.exec(ln))) {
-      // Round 2, finding #9: `...fn(` (the char before the `.` is another `.`) is a SPREAD call,
-      // not a member call — the backward identifier match below can never succeed on dots, so the
-      // member branch silently dropped the edge (trend.mjs:metrics showed 0 callers). Fall through
-      // to addEdge instead. Verified non-cases: `a?.b(` has [m.index-2]==='?' (member branch,
-      // unchanged); `...obj.fn(` matches at `fn` with [idx-2]==='j' (member branch, correct).
-      // Accepted noise: `1..toString(` and the syntax error `x...y(` now reach addEdge — both
-      // resolve only if the name is a repo symbol; harmless.
-      if (ln[m.index - 1] === '.' && ln[m.index - 2] !== '.') {
-        // member call obj.fn(): resolve ONLY when obj is a namespace/default import alias (a param or
-        // local obj.method() must stay unresolved — see reference-edges PRECISION). This recovers the
-        // cross-file usage the bare-name pass can't see (util.merge(), AxiosHeaders.from()).
-        const before = ln.slice(0, m.index - 1);
-        const om = /([A-Za-z_$][\w$]*)$/.exec(before);
-        if (om) {
-          if (nsAliasMap && nsAliasMap.has(om[1])) {
-            const calleeId = resolveFileMember(nsAliasMap.get(om[1]), m[1]);
-            if (calleeId) addResolved(i, calleeId, 'call');
-          }
-          const cls = classOf(om[1]);
-          if (cls) addResolved(i, cls, 'ref'); // X.staticMethod() -> the caller depends on the class X
-          // X.member.call(...) / X.member.apply(...): the real invocation is of X-file:member.
-          if ((m[1] === 'call' || m[1] === 'apply') && nsAliasMap) {
-            const chain = /([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)$/.exec(before);
-            if (chain && nsAliasMap.has(chain[1])) {
-              const calleeId = resolveFileMember(nsAliasMap.get(chain[1]), chain[2]);
-              if (calleeId) addResolved(i, calleeId, 'call');
-            }
-          }
-        }
-        continue; // not an import-alias member -> stay precision-safe (no edge)
-      }
-      addEdge(i, m[1]);
-    }
-    if (!sigLine) { // finding #10 (T-10.2): a signature line's params are bindings, not references
-      refRe.lastIndex = 0;
-      while ((m = refRe.exec(ln))) addEdge(i, m[1], 'ref'); // a bare identifier ARGUMENT is a reference (callback/value), not an invocation
-    }
-    instanceofRe.lastIndex = 0;
-    while ((m = instanceofRe.exec(ln))) { const cls = classOf(m[1]); if (cls) addResolved(i, cls, 'ref'); }
-  }
-  return { edges: local, hasModule, ambiguous, short: shortDropped, cand: [...cand].sort() };
-}
+// finding #40 (WS-H T-40.1): per-file edge derivation moved VERBATIM into lib/edge-derive.mjs's
+// createEdgeDeriver factory. Free-vars re-derived against the CURRENT engine (not the spec-time
+// table): injected ctx = byName, pkgOf, roleFor (#10 ref role-gate), resolveFileMember (resolver
+// method), closureLocalIds (WS-D-review magnet fix), legacyFallback (the env read stays here);
+// KEYWORDS/parseSignature/isTestFile/buildInnermostIndex are the lib's own pure-module imports.
+// The edge loop below (cache replay/record) + #17 delta/dirty-label computation stay orchestration.
+const { deriveFileEdges } = createEdgeDeriver({ byName, pkgOf, roleFor, resolveFileMember, closureLocalIds, legacyFallback: LEGACY_FALLBACK });
 
 const edges = [];
 let ambiguousDropped = 0, shortNameDropped = 0, edgedCount = 0;

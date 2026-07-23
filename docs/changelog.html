@@ -51,6 +51,22 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li>**The symbol extractor is being decomposed into testable, importable pieces (the tracked residual</li>
+</ul>
+<p>  of round-1 #25, now actually being closed).** Stage 1: per-file call/ref/inherit derivation —</p>
+<p>  <code>deriveFileEdges</code>, the precision gate (alias &gt; same-file &gt; unique-in-package, drop-ambiguous, plus</p>
+<p>  the short-name / closure-local / role / rb-php filters) — moved verbatim out of the 1,400-line</p>
+<p>  orchestrator into <code>scripts/lib/edge-derive.mjs</code> as a <code>createEdgeDeriver(ctx)</code> factory</p>
+<p>  (import-resolve's proven template: explicit injected context, zero module-global reach-back). The</p>
+<p>  free-variable context was re-derived against the *current* engine, not the spec-time table:</p>
+<p>  injected <code>byName</code>, <code>pkgOf</code>, <code>roleFor</code> (the #10 ref role-gate), <code>resolveFileMember</code>,</p>
+<p>  <code>closureLocalIds</code> (the WS-D-review magnet fix), <code>legacyFallback</code>; <code>KEYWORDS</code>/<code>parseSignature</code>/</p>
+<p>  <code>isTestFile</code>/<code>buildInnermostIndex</code> are the lib's own pure-module imports; <code>idFile</code> (the id→file</p>
+<p>  split) is now defined there as one truth and imported back. Edge derivation is now unit-testable</p>
+<p>  in-process at function-call speed (<code>tests/edge-derive.test.mjs</code>, no spawn) while staying</p>
+<p>  byte-identical to the old inline function — proven by IE-EQUIVALENCE at 40 trials and a full</p>
+<p>  self-map cold+warm byte-<code>cmp</code>. (round 2, finding #40)</p>
+<ul>
 <li>**"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a</li>
 </ul>
 <p>  real long-range term, and runs in interruptible slices so no single task blows a frame — plus the</p>
