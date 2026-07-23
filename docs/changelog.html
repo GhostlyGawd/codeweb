@@ -65,7 +65,12 @@
 <p>  split) is now defined there as one truth and imported back. Edge derivation is now unit-testable</p>
 <p>  in-process at function-call speed (<code>tests/edge-derive.test.mjs</code>, no spawn) while staying</p>
 <p>  byte-identical to the old inline function — proven by IE-EQUIVALENCE at 40 trials and a full</p>
-<p>  self-map cold+warm byte-<code>cmp</code>. (round 2, finding #40)</p>
+<p>  self-map cold+warm byte-<code>cmp</code>. Stage 2: the two remaining global-resolution passes joined the same</p>
+<p>  lib as pure functions — <code>markPublicApi</code> (the v10 public-API entrypoint walk, now doing no fs: the</p>
+<p>  orchestrator injects <code>readPkg</code> + the statted <code>sources</code> map and applies the returned ids-to-stamp,</p>
+<p>  order-safe because the walk never reads <code>pub</code>) and <code>resolveTypedIntents</code> (Java/C# typed-receiver</p>
+<p>  dispatch), which mechanically retires the finding's named shadowing smells (<code>rel</code> loop-var vs the</p>
+<p>  <code>rel()</code> fn, a <code>files</code> local vs the global). (round 2, finding #40)</p>
 <ul>
 <li>**"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a</li>
 </ul>

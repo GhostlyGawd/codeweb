@@ -24,7 +24,7 @@ import { createImportResolver, defaultExportOf, importCandidates } from './lib/i
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { maskJs, maskPy, maskRuby } from './lib/masking.mjs'; // comment/string/regex-literal blanking (one truth, shared with codemod's rewrite gate)
 import { createOwnerStack } from './lib/enclosing.mjs'; // finding #21: live open-class stack (property-pinned identical to the linear scan)
-import { createEdgeDeriver, idFile } from './lib/edge-derive.mjs'; // finding #40: per-file call/ref/inherit derivation as a factory; idFile (id->file split) is its one truth, imported back
+import { createEdgeDeriver, idFile, markPublicApi, resolveTypedIntents } from './lib/edge-derive.mjs'; // finding #40: per-file derivation factory + pub-API walk + typed-intent resolution; idFile (id->file split) is its one truth, imported back
 import { sha1 } from './lib/hash.mjs'; // one truth — codeweb's own gate flagged the duplicate on this branch
 import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
 
@@ -710,49 +710,14 @@ for (const [r, stars] of starReExportByFile) {
 // installs the package. Stamp them `pub: true` so answers stop implying "0 in-repo callers" means
 // "safe to rename/delete". JS/TS manifests only (other ecosystems: conventional entries, later).
 {
-  const entryFiles = new Set();
-  const pkgDirs = new Set(['']);
-  for (const f of files) pkgDirs.add(pkgOf(rel(f)));
-  const addEntry = (dir, spec) => {
-    if (typeof spec !== 'string' || !spec || spec.endsWith('.d.ts') || spec.endsWith('.json')) return;
-    const base = (dir ? dir + '/' : '') + spec.replace(/^\.\//, '');
-    // finding #11: the ONE candidate list, shared with resolveImport (this local copy had drifted —
-    // no `.tsx/.jsx`, no `/index.mjs`, and no NodeNext ext remap, so a `main: "./src/index.js"`
-    // whose source is `src/index.ts` never marked anything pub). Membership stays ours: `sources`
-    // spans every statted file. Behavior superset: `.tsx/.jsx` now probe BEFORE index candidates,
-    // matching TS resolution (a main naming `x` with both `x.tsx` and `x/index.js` prefers `x.tsx`).
-    for (const cand of importCandidates(base)) {
-      const norm = cand.replace(/\/{2,}/g, '/');
-      if (sources[norm]) { entryFiles.add(norm); return; }
-    }
-  };
-  const collectExports = (dir, v) => {
-    if (typeof v === 'string') addEntry(dir, v);
-    else if (v && typeof v === 'object') for (const k of Object.keys(v)) { if (k !== 'types') collectExports(dir, v[k]); }
-  };
-  for (const dir of pkgDirs) {
-    let pkg; try { pkg = JSON.parse(readFileSync(join(root, dir, 'package.json'), 'utf8')); } catch { continue; }
-    addEntry(dir, pkg.main); addEntry(dir, pkg.module); if (typeof pkg.browser === 'string') addEntry(dir, pkg.browser);
-    if (typeof pkg.bin === 'string') addEntry(dir, pkg.bin);
-    else if (pkg.bin && typeof pkg.bin === 'object') for (const v of Object.values(pkg.bin)) addEntry(dir, v);
-    collectExports(dir, pkg.exports);
-  }
-  if (entryFiles.size) {
-    const byIdMut = new Map(nodes.map((n) => [n.id, n]));
-    const reOut = new Map(); // fromModuleId -> [toIds]
-    for (const [a, b] of reExportEdges) { if (!reOut.has(a)) reOut.set(a, []); reOut.get(a).push(b); }
-    const seenFiles = new Set(), queue = [...entryFiles];
-    for (let qi = 0; qi < queue.length; qi++) { // index-pointer, not shift(): O(frontier) pops go quadratic (finding 9)
-      const file = queue[qi];
-      if (seenFiles.has(file)) continue;
-      seenFiles.add(file);
-      for (const n of nodes) if (n.file === file && n.exports && n.kind !== 'module') n.pub = true;
-      for (const to of reOut.get(file + ':<module>') || []) {
-        if (to.endsWith(':<module>')) queue.push(to.slice(0, -':<module>'.length));
-        else { const n = byIdMut.get(to); if (n && n.exports) n.pub = true; }
-      }
-    }
-  }
+  // finding #40 (T-40.2): the walk is lib/edge-derive.markPublicApi (pure, no fs — the lib gets
+  // readPkg + the statted `sources` membership); the orchestrator owns the single `pub` mutation
+  // (order-safe — the walk never reads pub, so a returned ids-to-stamp Set is equivalent).
+  const pubIds = markPublicApi({
+    nodes, relFiles: files.map(rel), pkgOf, sources, reExportEdges,
+    readPkg: (dir) => { try { return JSON.parse(readFileSync(join(root, dir, 'package.json'), 'utf8')); } catch { return null; } },
+  });
+  if (pubIds.size) { const byId = new Map(nodes.map((n) => [n.id, n])); for (const id of pubIds) { const n = byId.get(id); if (n) n.pub = true; } }
 }
 
 // F9: global symbol signature — a hash of the discovered symbol-node id set (module nodes are derived,
@@ -1034,30 +999,12 @@ for (const f of edgeFiles) {
 // WHOLE graph — the receiver's class must resolve to exactly ONE file, and the qualified method
 // must be a real node. Anything ambiguous or absent is dropped and counted, never guessed (the
 // same precision contract every dispatch tier honors).
-let typedWired = 0, typedDropped = 0;
-if (typedIntentsByFile.size) {
-  const classFiles = new Map(); // class name -> Set(rel files that define it, per owner-qualified ids)
-  for (const id of nodeIdSet) {
-    const m = /^(.+):([A-Za-z_$][\w$]*)\.[^.]+$/.exec(id);
-    if (!m) continue;
-    if (!classFiles.has(m[2])) classFiles.set(m[2], new Set());
-    classFiles.get(m[2]).add(m[1]);
-  }
-  for (const rel of [...typedIntentsByFile.keys()].sort()) {
-    for (const it of typedIntentsByFile.get(rel)) {
-      const files = classFiles.get(it.recvType);
-      if (!files || files.size !== 1) { typedDropped++; continue; } // unknown or ambiguous class -> never guess
-      const toId = [...files][0] + ':' + it.recvType + '.' + it.method;
-      if (!nodeIdSet.has(toId) || !nodeIdSet.has(it.from) || it.from === toId) { typedDropped++; continue; }
-      const kind = (isTestFile(idFile(it.from)) && !isTestFile(idFile(toId))) ? 'test' : 'call';
-      const key = it.from + '\t' + toId + '\t' + kind;
-      if (edgeTriKeys.has(key)) continue;
-      edgeTriKeys.add(key);
-      edges.push({ from: it.from, to: toId, kind, weight: 1 });
-      typedWired++;
-    }
-  }
-}
+// finding #40 (T-40.2): typed-receiver resolution is lib/edge-derive.resolveTypedIntents — moving
+// it here also clears #40's named shadowing smells (`rel` loop-var vs the rel() fn; `files` local
+// vs the global). Tri-keys are appended to the caller-owned edgeTriKeys; edges pushed in order.
+const _typed = resolveTypedIntents({ intentsByFile: typedIntentsByFile, nodeIdSet, existingTriKeys: edgeTriKeys });
+for (const e of _typed.edges) edges.push(e);
+const typedWired = _typed.wired, typedDropped = _typed.dropped;
 
 // meta — the single source of truth for the target. `root` (absolute, forward-slashed) + each
 // node's relative `file` path reconstruct any source file, so downstream stages (overlap/confirm

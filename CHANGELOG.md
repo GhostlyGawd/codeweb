@@ -23,7 +23,12 @@ notes so validated results, papers, and new tools never get lost in commit histo
   split) is now defined there as one truth and imported back. Edge derivation is now unit-testable
   in-process at function-call speed (`tests/edge-derive.test.mjs`, no spawn) while staying
   byte-identical to the old inline function — proven by IE-EQUIVALENCE at 40 trials and a full
-  self-map cold+warm byte-`cmp`. (round 2, finding #40)
+  self-map cold+warm byte-`cmp`. Stage 2: the two remaining global-resolution passes joined the same
+  lib as pure functions — `markPublicApi` (the v10 public-API entrypoint walk, now doing no fs: the
+  orchestrator injects `readPkg` + the statted `sources` map and applies the returned ids-to-stamp,
+  order-safe because the walk never reads `pub`) and `resolveTypedIntents` (Java/C# typed-receiver
+  dispatch), which mechanically retires the finding's named shadowing smells (`rel` loop-var vs the
+  `rel()` fn, a `files` local vs the global). (round 2, finding #40)
 - **"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a
   real long-range term, and runs in interruptible slices so no single task blows a frame — plus the
   receipt that judges it is measured honestly.** The old anneal packed every symbol onto its area

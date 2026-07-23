@@ -16,6 +16,7 @@
 import { KEYWORDS, parseSignature } from './lang-rules.mjs';
 import { isTestFile } from './graph-ops.mjs';
 import { buildInnermostIndex } from './enclosing.mjs';
+import { importCandidates } from './import-resolve.mjs'; // finding #11: the ONE entry-candidate list (pub walk shares it)
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
 // label separator, so the last ':' splits them. (One truth — the orchestrator imports this back.)
@@ -283,4 +284,99 @@ export function createEdgeDeriver(ctx) {
   }
 
   return { deriveFileEdges };
+}
+
+// finding #40 (WS-H T-40.2): the two remaining global-resolution passes over the assembled node
+// universe join this cohesive lib (both are ~30-45-line pure passes; import-resolve stays the
+// import-binding home). Neither mutates the graph — each RETURNS what to apply, so the orchestrator
+// owns the single write (the pub-walk never reads `pub`, so returning ids-to-stamp is order-safe).
+
+/**
+ * v10 PUBLIC API walk — symbols reachable from a package entrypoint (package.json main/module/
+ * browser/bin/exports, followed through re-export chains) have callers the graph CANNOT see. This
+ * pass does NO fs: the caller injects `readPkg(dir) -> parsed package.json object | null` and the
+ * pre-statted `sources` membership map. Returns the Set of node ids to stamp `pub: true`
+ * (order-safe: the walk never reads `pub`). Moved verbatim from the extractor; `sources`/
+ * `importCandidates` membership + re-export-chain BFS unchanged.
+ */
+export function markPublicApi({ nodes, relFiles, pkgOf, sources, reExportEdges, readPkg }) {
+  const stamp = new Set();
+  const entryFiles = new Set();
+  const pkgDirs = new Set(['']);
+  for (const rf of relFiles) pkgDirs.add(pkgOf(rf));
+  const addEntry = (dir, spec) => {
+    if (typeof spec !== 'string' || !spec || spec.endsWith('.d.ts') || spec.endsWith('.json')) return;
+    const base = (dir ? dir + '/' : '') + spec.replace(/^\.\//, '');
+    // finding #11: the ONE candidate list, shared with resolveImport. Membership stays the caller's:
+    // `sources` spans every statted file. `.tsx/.jsx` probe BEFORE index candidates (TS resolution).
+    for (const cand of importCandidates(base)) {
+      const norm = cand.replace(/\/{2,}/g, '/');
+      if (sources[norm]) { entryFiles.add(norm); return; }
+    }
+  };
+  const collectExports = (dir, v) => {
+    if (typeof v === 'string') addEntry(dir, v);
+    else if (v && typeof v === 'object') for (const k of Object.keys(v)) { if (k !== 'types') collectExports(dir, v[k]); }
+  };
+  for (const dir of pkgDirs) {
+    const pkg = readPkg(dir); if (!pkg) continue;
+    addEntry(dir, pkg.main); addEntry(dir, pkg.module); if (typeof pkg.browser === 'string') addEntry(dir, pkg.browser);
+    if (typeof pkg.bin === 'string') addEntry(dir, pkg.bin);
+    else if (pkg.bin && typeof pkg.bin === 'object') for (const v of Object.values(pkg.bin)) addEntry(dir, v);
+    collectExports(dir, pkg.exports);
+  }
+  if (entryFiles.size) {
+    const byIdMut = new Map(nodes.map((n) => [n.id, n]));
+    const reOut = new Map(); // fromModuleId -> [toIds]
+    for (const [a, b] of reExportEdges) { if (!reOut.has(a)) reOut.set(a, []); reOut.get(a).push(b); }
+    const seenFiles = new Set(), queue = [...entryFiles];
+    for (let qi = 0; qi < queue.length; qi++) { // index-pointer, not shift(): O(frontier) pops go quadratic (finding 9)
+      const file = queue[qi];
+      if (seenFiles.has(file)) continue;
+      seenFiles.add(file);
+      for (const n of nodes) if (n.file === file && n.exports && n.kind !== 'module') stamp.add(n.id);
+      for (const to of reOut.get(file + ':<module>') || []) {
+        if (to.endsWith(':<module>')) queue.push(to.slice(0, -':<module>'.length));
+        else { const n = byIdMut.get(to); if (n && n.exports) stamp.add(n.id); }
+      }
+    }
+  }
+  return stamp;
+}
+
+/**
+ * Typed-receiver dispatch (Java/C#): resolve each {from, recvType, method} intent against the WHOLE
+ * graph — the receiver's class must resolve to exactly ONE file and the qualified method must be a
+ * real node; anything ambiguous or absent is dropped and counted, never guessed. Returns
+ * {edges, wired, dropped}; tri-keys are appended to the caller-owned `existingTriKeys` (today's
+ * semantics — the caller dedups the appended edges against the rest of the edge set). Moving it here
+ * mechanically clears #40's named shadowing smells (`rel` loop-var vs the `rel()` fn; a `files`
+ * local vs the global).
+ */
+export function resolveTypedIntents({ intentsByFile, nodeIdSet, existingTriKeys }) {
+  const edges = [];
+  let wired = 0, dropped = 0;
+  if (!intentsByFile.size) return { edges, wired, dropped };
+  const classFiles = new Map(); // class name -> Set(rel files that define it, per owner-qualified ids)
+  for (const id of nodeIdSet) {
+    const m = /^(.+):([A-Za-z_$][\w$]*)\.[^.]+$/.exec(id);
+    if (!m) continue;
+    if (!classFiles.has(m[2])) classFiles.set(m[2], new Set());
+    classFiles.get(m[2]).add(m[1]);
+  }
+  for (const relFile of [...intentsByFile.keys()].sort()) {
+    for (const it of intentsByFile.get(relFile)) {
+      const defFiles = classFiles.get(it.recvType);
+      if (!defFiles || defFiles.size !== 1) { dropped++; continue; } // unknown or ambiguous class -> never guess
+      const toId = [...defFiles][0] + ':' + it.recvType + '.' + it.method;
+      if (!nodeIdSet.has(toId) || !nodeIdSet.has(it.from) || it.from === toId) { dropped++; continue; }
+      const kind = (isTestFile(idFile(it.from)) && !isTestFile(idFile(toId))) ? 'test' : 'call';
+      const key = it.from + '\t' + toId + '\t' + kind;
+      if (existingTriKeys.has(key)) continue;
+      existingTriKeys.add(key);
+      edges.push({ from: it.from, to: toId, kind, weight: 1 });
+      wired++;
+    }
+  }
+  return { edges, wired, dropped };
 }
