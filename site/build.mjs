@@ -234,6 +234,9 @@ const PAGES = [
   { slug: 'changelog', nav: 'changelog', title: 'Changelog — codeweb', ogTitle: 'codeweb changelog', description: 'Every release, capability, benchmark, and fix — kept in lock-step with the product under Keep a Changelog and Semantic Versioning.' },
   // SEO F8: the one genuinely link-worthy story, promoted from stranded raw markdown to a page.
   { slug: 'case-study', nav: 'research', title: 'Case study: mapping axios — 3 confirmed duplications in a 50M-download library — codeweb', ogTitle: 'Case study: codeweb maps axios', description: 'codeweb pointed read-only at axios v1.18.1: 3 body-confirmed duplications (two byte-identical), 12 false positives dismissed, and a cycle-safe merge plan for each — reproducible byte-for-byte.' },
+  // REVENUE §4.3: the funding-receipts page — what sponsorship pays for, in the same voice as
+  // the bench receipts. The free-forever contract leads.
+  { slug: 'support', nav: 'support', title: 'Support codeweb — what sponsorship funds — codeweb', ogTitle: 'Support codeweb', description: 'Everything local is free forever. Sponsoring funds the frontier-agent benchmark spend and grammar provenance work behind codeweb\'s receipts — plus enterprise support contracts for orgs.' },
 ];
 
 // SEO F10: one SoftwareApplication block, filled from the same derived vars as everything else —

@@ -7,6 +7,7 @@
 [![license: MIT](https://img.shields.io/npm/l/%40ghostlygawd%2Fcodeweb?style=flat-square&color=3fb950)](LICENSE)
 [![deterministic engine](https://img.shields.io/badge/engine-deterministic-c6f24e?style=flat-square)](#how-it-works)
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
+[![sponsor](https://img.shields.io/badge/%E2%99%A5-sponsor-ea4aaa?style=flat-square)](https://github.com/sponsors/GhostlyGawd)
 
 **Your coding agent greps. codeweb knows.**
 
@@ -632,15 +633,24 @@ next release, which re-runs the same gate.
 
 ## About
 
-Built by **rhenmcleod** ([GhostlyGawd](https://github.com/GhostlyGawd) on GitHub) — with the coding
-agents it serves: the AI-assisted build is disclosed in the commit history's co-author trailers, and
-owning that is the point — codeweb is dogfood for the exact loop it supports. Issues and questions
-welcome; see [`SECURITY.md`](SECURITY.md) for the security posture and reporting route.
+Built by [GhostlyGawd](https://github.com/GhostlyGawd). Much of the code was written with AI
+agents; the commit co-author trailers say which. Issues and questions welcome. Security
+reporting: [`SECURITY.md`](SECURITY.md).
 
-**Stay current:** codeweb never phones home, so releases are the only channel through which an
-installed copy can hear about new capabilities. **Watch → Custom → Releases** on GitHub gets you
-the changelog when they land (a star, kindly, notifies nobody). `node scripts/run.mjs` prints the
-running version in its done banner so you can tell when you're behind.
+**Stay current:** codeweb never phones home. To hear about new versions, watch Releases on
+GitHub (**Watch → Custom → Releases**).
+
+## Support the project
+
+Everything that runs on your machine is **free forever**. No accounts, no telemetry, no license
+keys.
+
+[Sponsorship](https://github.com/sponsors/GhostlyGawd) funds development — mainly the AI bills
+from benchmarking, and new language support. Details on the
+[support page](https://ghostlygawd.github.io/codeweb/support.html).
+
+**Enterprise support**: email support with an SLA, onboarding help, and priority on feature
+requests. **$3–6k/yr**, limited to a few customers. Contact via the GitHub profile.
 
 ## Handoffs
 
