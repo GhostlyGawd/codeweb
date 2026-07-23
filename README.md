@@ -633,26 +633,23 @@ next release, which re-runs the same gate.
 
 ## About
 
-Built by [GhostlyGawd](https://github.com/GhostlyGawd), together with the coding agents it serves —
-the AI-assisted build is disclosed in the commit co-author trailers. Issues and questions welcome.
-See [`SECURITY.md`](SECURITY.md) for security reporting.
+Built by [GhostlyGawd](https://github.com/GhostlyGawd). Much of the code was written with AI
+agents; the commit co-author trailers say which. Issues and questions welcome. Security
+reporting: [`SECURITY.md`](SECURITY.md).
 
-**Stay current:** codeweb never phones home, so to hear about new versions, watch the repo's
-Releases on GitHub (**Watch → Custom → Releases**). The run banner prints your installed version
-so you can tell when you're behind.
+**Stay current:** codeweb never phones home. To hear about new versions, watch Releases on
+GitHub (**Watch → Custom → Releases**).
 
 ## Support the project
 
-Everything that runs on your machine is **free forever** — the engine, all 27 MCP tools, the
-hooks, the report, the CLI, the CI gate, every language, every fix. No accounts, no telemetry,
-no license keys.
+Everything that runs on your machine is **free forever**. No accounts, no telemetry, no license
+keys.
 
-[Sponsoring](https://github.com/sponsors/GhostlyGawd) pays for the two things that actually cost
-money: API tokens for the agent benchmarks behind the published claims, and per-language grammar
-verification. Details: [what sponsoring pays for](https://ghostlygawd.github.io/codeweb/support.html).
+[Sponsorship](https://github.com/sponsors/GhostlyGawd) covers benchmark API costs and the work
+of adding new languages. Details on the [support page](https://ghostlygawd.github.io/codeweb/support.html).
 
-**Enterprise support** for orgs: SLA'd email support, onboarding help, and priority on feature
-work — **$3–6k/yr flat**, limited to a few customers. Contact via the GitHub profile.
+**Enterprise support**: email support with an SLA, onboarding help, and priority on feature
+requests. **$3–6k/yr**, limited to a few customers. Contact via the GitHub profile.
 
 ## Handoffs
 
