@@ -189,3 +189,22 @@ test('product.json languages match the extractor: one file per extension, counte
       `extractor languages [${langs.join(', ')}] must match product.json's count`);
   } finally { cleanup(dir); }
 });
+
+// The v0.10.0 release page credited a stranger: GitHub renders bare "@14" as a mention of the
+// user LOGIN "14", and release notes list mentioned users as contributors — our benchmark
+// notation "@14,964 nodes" name-dropped github.com/14. Notes come straight from CHANGELOG.md,
+// so the ban lives at the source. Code spans are exempt (`pkg@1.2.3` never autolinks).
+test('CHANGELOG never @-mentions a number — bare @digit is banned outside code spans', () => {
+  const changelog = readFileSync(join(PLUGIN_ROOT, 'CHANGELOG.md'), 'utf8');
+  const bad = [];
+  changelog.split('\n').forEach((line, i) => {
+    const plain = line.split(/(`[^`]*`)/).filter((p) => !p.startsWith('`')).join('');
+    for (const m of plain.match(/@\d[\w,.]*/g) || []) bad.push(`line ${i + 1}: ${m}`);
+  });
+  assert.deepEqual(bad, [], `write "at 14,964", never "@14,964" — GitHub reads it as a user mention: ${bad.join('; ')}`);
+});
+
+test('the release workflow re-syncs notes for an existing release instead of skipping', () => {
+  const wf = readFileSync(join(PLUGIN_ROOT, '.github', 'workflows', 'release.yml'), 'utf8');
+  assert.match(wf, /gh release edit .*--notes-file/, 're-dispatch is the only path that can repair published notes');
+});

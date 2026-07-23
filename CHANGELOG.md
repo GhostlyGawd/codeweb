@@ -155,7 +155,7 @@ _Nothing yet. Open work lands here before it ships in the next tagged release._
   of the 16.8k report are byte-identical). (round 2, finding #36)
 - **The prescribed per-edit loop is now in-process: `codeweb_diff` serves from the cached graph and
   `codeweb_stats` no longer spawns a child.** `codeweb_diff` booted node and parsed **two** graphs per
-  call (131–136 ms @1.2k; ~500 ms at 16k) in the refresh→diff sequence the INSTRUCTIONS prescribe per
+  call (131–136 ms at 1.2k; ~500 ms at 16k) in the refresh→diff sequence the INSTRUCTIONS prescribe per
   edit; `codeweb_stats` spawned a child (92–95 ms) to read a ~200-byte `stats.json` the server already
   had the reader for. diff's comparison + #28 rename detection are lifted verbatim into a new
   `scripts/lib/diff-core.mjs` (`diffGraphs(before, after, {names, bIx?, aIx?}) → {payload, code}`);
@@ -361,7 +361,7 @@ _Nothing yet. Open work lands here before it ships in the next tagged release._
   additive `nodes.renameCheck = { skipped, removed, added, cap }` field plus one text-mode line name
   the skip (absent when both sides fit, and when a side is empty nothing was skippable) — the field is
   documented in diff.mjs's header and breaks neither the graphless MCP `codeweb_diff` passthrough nor
-  the graph-ops-based hook gate. Measured min-of-3 @14,964 nodes: 195-rename overhead 1,733 → **30 ms**;
+  the graph-ops-based hook gate. Measured min-of-3 at 14,964 nodes: 195-rename overhead 1,733 → **30 ms**;
   `renamed[]` byte-identical to the pre-fix binary (195 pairs). (round 2, finding #28)
 - **`campaign` runs its three advisors concurrently and stops cloning the graph it owns.** The
   worklist composer spawned optimize, deadcode, and break-cycles with three BLOCKING `spawnSync`
@@ -375,7 +375,7 @@ _Nothing yet. Open work lands here before it ships in the next tagged release._
   passes `clone:false` because it owns the freshly-parsed graph and `normalizeGraph` is idempotent
   additive default-filling that never touches `meta` (every other caller keeps the safe clone).
   Pinned by CMP-CONCURRENT-STABLE (single-line JSON, byte-stable across runs, `meta.target` survives
-  the in-place normalize) and the unchanged CMP-DELTA-EQUIV property. Measured min-of-3 @14,964 nodes:
+  the in-place normalize) and the unchanged CMP-DELTA-EQUIV property. Measured min-of-3 at 14,964 nodes:
   campaign wall 1.65 → **0.89 s**, payload `cmp`-identical to the pre-fix binary. (round 2, finding #27)
 - **`dup-check` serves its comparison pool from the map-time similar-index sidecar (no per-call
   re-shingle of the whole repo).** The review/PostToolUse duplication gate re-read and re-shingled
@@ -388,7 +388,7 @@ _Nothing yet. Open work lands here before it ships in the next tagged release._
   by the DC-SIDECAR-EQ equivalence test, which includes a CRLF file and a >400-line pool body for
   reader/cap parity). Changed ids always shingle live (their bodies are the new code under judgment);
   a stale/absent sidecar falls back to the live path unchanged. `review.mjs` passes
-  `loadSimilarIndex(abs)`. Measured min-of-3 @14,964 nodes: 1 changed symbol 374 → **6 ms (62×)**;
+  `loadSimilarIndex(abs)`. Measured min-of-3 at 14,964 nodes: 1 changed symbol 374 → **6 ms (62×)**;
   50 changed 1,804 → 1,115 ms. **Surfaced behavior change:** `BODY_LINE_CAP` (400) is now one exported
   const in `lib/shingles.mjs` (imported by overlap, dup-check, find-similar, diff, and the sidecar
   builder), and `buildSimilarIndex` + find-similar's live path now cap node bodies to their first 400
@@ -414,7 +414,7 @@ _Nothing yet. Open work lands here before it ships in the next tagged release._
   LSH-PAIRS-EQ property (220 seeded cases deep-equal a verbatim string-key reference — the pairs
   ARRAY pins order; buckets/skippedBuckets asserted) and byte-identical graph.json + overlap.md +
   stdout vs the pre-fix binary on the 15k corpus and the self-map (both tiers separately).
-  Measured min-of-3 @14,964 nodes: Signal-B twin-enumeration mark 2,724 → 1,234 (tier 1) →
+  Measured min-of-3 at 14,964 nodes: Signal-B twin-enumeration mark 2,724 → 1,234 (tier 1) →
   **400 ms (6.8×)**; Signal-C 238 → 118 ms; overlap stage wall 3.37 → 0.93 s. (round 2,
   finding #24)
 - **`break-cycles` verifies cuts on the SCC-induced pseudo-graph instead of re-running whole-graph
@@ -488,10 +488,10 @@ _Nothing yet. Open work lands here before it ships in the next tagged release._
   trials, both env legs) with warm-vs-cold fragment BYTE equality at every mutation step, plus
   new incrementality assertions: add-one-function re-edges only the edited file + its
   bind-coupled importer while a crafted disjoint file replays; a def rename of an imported name
-  re-edges the importer. Measured min-of-3 @16.8k: add-one-function 1,326 → 710 ms — 1.27× the
+  re-edges the importer. Measured min-of-3 at 16.8k: add-one-function 1,326 → 710 ms — 1.27× the
   same-session noop floor (bar ≤ ~1.3×, was 2.12×); body-edit unchanged (771 → 759 ms); delete
   1,279 → 703 ms; rename 1,329 → 708 ms; the colliding-name add (a name every file calls) stays
-  honestly near-wholesale at 1,127 ms. @29.4k: add-one-function 2,294 → 1,277 ms (1.22× noop,
+  honestly near-wholesale at 1,127 ms. at 29.4k: add-one-function 2,294 → 1,277 ms (1.22× noop,
   was 2.14×). Hook add-one-function end-to-end 1,909 → 1,027 ms. (round 2, finding #17)
 - **The warm no-change floor sheds its four avoidable terms.** (a) The scan cache no longer
   stores `syms` (symbols sat in it three times over) and interns per-file edges as an id table +
