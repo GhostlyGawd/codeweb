@@ -14,19 +14,41 @@
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { die, parseArgs } from './lib/cli.mjs';
 import { getVersion, mcpToolCount, applySync, bumpVersion, rollChangelog, checkConsistency, readText, writeText } from './release-utils.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const args = process.argv.slice(2);
-const dry = args.includes('--dry-run');
-const bumpLevel = (args.find((a) => ['--major', '--minor', '--patch'].includes(a)) || '').slice(2);
-const explicit = (args.find((a) => a.startsWith('--version=')) || '').split('=')[1];
+// FORMS F7: the last hand-rolled parser, on the one form where a typo is destructive — a
+// `--dryrun` typo used to run the REAL prep, and `--version=banana` shipped "banana" toward
+// package.json/plugin.json/SKILL.md. The house parser (unknown-flag death, --help) + a semver
+// check close both. `--version=X.Y.Z` (the historically documented form) normalizes first.
+const USAGE = 'usage: release.mjs (--major | --minor | --patch | --version X.Y.Z) [--dry-run]';
+const argv = process.argv.slice(2).flatMap((a) => (a.startsWith('--version=') ? ['--version', a.slice('--version='.length)] : [a]));
+const { opts, pos } = parseArgs(argv, {
+  usage: USAGE,
+  flags: {
+    major: { type: 'bool', default: false },
+    minor: { type: 'bool', default: false },
+    patch: { type: 'bool', default: false },
+    version: { type: 'string', default: null },
+    'dry-run': { type: 'bool', default: false },
+  },
+});
+if (pos.length) die(`unexpected argument: ${pos[0]}\n${USAGE}`, 2);
+const dry = opts['dry-run'];
+const bumpLevel = ['major', 'minor', 'patch'].find((k) => opts[k]) || '';
+const explicit = opts.version;
+if (explicit != null && !/^\d+\.\d+\.\d+(-[\w.]+)?$/.test(explicit)) {
+  die(`--version must be semver X.Y.Z (got "${explicit}")\n${USAGE}`, 2);
+}
+const modes = ['major', 'minor', 'patch'].filter((k) => opts[k]).length + (explicit != null ? 1 : 0);
+if (modes > 1) die(`pass exactly one of --major | --minor | --patch | --version\n${USAGE}`, 2);
 const today = new Date().toISOString().slice(0, 10);
 
 const current = getVersion(ROOT);
 const next = explicit || (bumpLevel ? bumpVersion(current, bumpLevel) : null);
 if (!next) {
-  process.stderr.write('usage: release.mjs (--major|--minor|--patch | --version=X.Y.Z) [--dry-run]\n');
+  process.stderr.write(USAGE + '\n');
   process.exit(2);
 }
 const count = mcpToolCount(ROOT);

@@ -67,6 +67,13 @@ const partial = opts.stages === 'through-overlap';
 // stage-level stack trace.
 opts.src = resolve(opts.src);
 if (!existsSync(opts.src)) { console.error(`[run] target not found: ${opts.src}`); process.exit(1); }
+// FORMS F9: --coverage names a FILE — check it now, not after five stages of work on a large
+// repo (the map used to build fully, then die on an lcov typo with an "aborting" frame that
+// hid the map's success).
+if (opts.coverage && !existsSync(resolve(opts.coverage))) {
+  console.error(`[run] coverage report not found: ${resolve(opts.coverage)} (expected an lcov or c8 JSON file)\n${USAGE}`);
+  process.exit(2);
+}
 
 // FUNNEL #2: the default workspace lives INSIDE the target (<SRC>/.codeweb) — exactly where MCP
 // graph discovery and all three hooks walk up to. The old default (under the npx package root)

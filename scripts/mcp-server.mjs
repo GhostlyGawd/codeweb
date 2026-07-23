@@ -212,12 +212,16 @@ const TOOLS = [
   { name: 'codeweb_placement', need: ['calls'], opt: ['graph'], bin: scriptOf('placement.mjs'),
     argv: (a) => ['--calls', a.calls],
     description: 'Where a NEW symbol belongs: given the comma-separated ids/labels it will call, suggests the domain + file by callee gravity, and warns if it duplicates an existing symbol.' },
-  { name: 'codeweb_review', need: ['changed'], opt: ['graph', 'before', 'gate', 'limit', 'full'], bin: scriptOf('review.mjs'),
+  // FORMS F11: limit/full were advertised here but wired to nothing (no budget entry, no CLI
+  // flags) — a schema that lies teaches agents to distrust tools/list.
+  { name: 'codeweb_review', need: ['changed'], opt: ['graph', 'before', 'gate'], bin: scriptOf('review.mjs'),
     argv: (a) => ['--changed', a.changed, ...(a.before ? ['--before', a.before] : []), ...(a.gate ? ['--gate'] : [])],
     description: 'Structural review of a change: changed files (comma-separated, optionally file:start-end) -> changed symbols, blast radius, domains, fan-in-ranked review order. With `before` (a prior graph.json) + gate:true it FAILS on a structural regression — the full review gate, agent-reachable.' },
-  { name: 'codeweb_fitness', need: ['rules'], opt: ['graph'], bin: scriptOf('fitness.mjs'),
-    argv: (a) => ['--rules', a.rules],
-    description: 'Check the graph against architectural fitness rules (codeweb.rules.json): forbidden-dependency, layering, no-cycles, max-fan-in, max-symbol-loc. Reports violations.' },
+  // FORMS F12: `rules` demoted to optional — the CLI already discovers codeweb.rules.json beside
+  // the graph or in cwd; requiring it here made the same call fail one transport over.
+  { name: 'codeweb_fitness', need: [], opt: ['graph', 'rules'], bin: scriptOf('fitness.mjs'),
+    argv: (a) => (a.rules ? ['--rules', a.rules] : []),
+    description: 'Check the graph against architectural fitness rules (codeweb.rules.json): forbidden-dependency, layering, no-cycles, max-fan-in, max-symbol-loc. Reports violations. `rules` is optional — defaults to codeweb.rules.json beside the graph or in cwd.' },
   { name: 'codeweb_risk', need: [], opt: ['graph', 'changed', 'limit', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('risk.mjs'),
     argv: (a) => [...(a.changed ? ['--changed', a.changed] : []), ...(a.all ? ['--all'] : [])],
     description: 'Rank symbols by change-risk (fan-in, fan-out, loc, blast radius, churn); `changed` scopes to a comma-separated file list. Budgeted: top 15 by default.' },
@@ -225,9 +229,11 @@ const TOOLS = [
     description: 'For each file dependency cycle, the cheapest dependency edge to sever — verified to actually break the cycle. Budgeted: top 10 cycles by default.' },
   { name: 'codeweb_deadcode', need: [], opt: ['graph', 'limit', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 20 }, bin: scriptOf('deadcode.mjs'), argv: (a) => (a.all ? ['--all'] : []),
     description: 'Confidence-tiered dead-code: safe-to-delete vs review-first (test-guarded or entrypoint-like), each with its loc span. Budgeted: top 20 per tier by span (totals stay true; full:true for everything).' },
-  { name: 'codeweb_codemod', need: ['merge', 'into'], opt: ['graph'], bin: scriptOf('codemod.mjs'),
-    argv: (a) => ['--merge', a.merge, '--into', a.into],
-    description: 'Plan a consolidation merge (report-only): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, and the projected regression-gate verdict. Read-only — does NOT modify source.' },
+  // FORMS F12: `into` demoted to optional — the CLI picks the canonical survivor itself when
+  // --into is omitted; a required field the engine can infer is form friction.
+  { name: 'codeweb_codemod', need: ['merge'], opt: ['graph', 'into'], bin: scriptOf('codemod.mjs'),
+    argv: (a) => ['--merge', a.merge, ...(a.into ? ['--into', a.into] : [])],
+    description: 'Plan a consolidation merge (report-only): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, and the projected regression-gate verdict. `into` is optional — omitted, the engine picks the canonical survivor. Read-only — does NOT modify source.' },
   { name: 'codeweb_hotspots', need: [], opt: ['graph', 'limit', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('hotspots.mjs'), argv: (a) => (a.all ? ['--all'] : []),
     description: 'Rank symbols by refactoring priority (complexity x fan-in x churn): where to focus first. Budgeted: top 15 with raw components.' },
   { name: 'codeweb_campaign', need: [], opt: ['graph', 'budget', 'full', 'all'], budget: { arg: 'budget', flag: '--budget', value: 25 }, bin: scriptOf('campaign.mjs'), argv: (a) => (a.all ? ['--all'] : []),
@@ -266,9 +272,9 @@ const PROP = {
   structural: { type: 'boolean', description: 'Match identifier-normalized skeletons (catches renamed/Type-2 clones)' },
   calls: { type: 'string', description: 'Comma-separated ids/labels the new symbol will call (its intended callees)' },
   changed: { type: 'string', description: 'Comma-separated changed files, each optionally file:start-end (whole file if no range)' },
-  rules: { type: 'string', description: 'Path to a codeweb.rules.json fitness-rules file' },
+  rules: { type: 'string', description: 'Path to a codeweb.rules.json fitness-rules file. OPTIONAL — defaults to codeweb.rules.json beside the graph or in cwd' },
   merge: { type: 'string', description: 'Comma-separated symbol ids/labels to consolidate (merge)' },
-  into: { type: 'string', description: 'The id/label to keep as the canonical survivor of the merge' },
+  into: { type: 'string', description: 'The id/label to keep as the canonical survivor of the merge. OPTIONAL — omitted, the engine infers it' },
   gate: { type: 'boolean', description: 'Fail (isError-style exit) on a structural regression vs `before`' },
   limit: { type: 'number', description: 'Max items to return (each tool has a sensible default; full:true disables)' },
   offset: { type: 'number', description: 'Skip N items (page through a budgeted list via more.nextOffset)' },
@@ -477,6 +483,9 @@ const spawnedToolReply = (id) => ({ code, out, errBuf, timedOut }) => {
     const text = (errBuf || 'query failed').trim() || 'query failed';
     return errResult(id, /graph not found/.test(text) ? `${text}\n${NO_GRAPH}` : text);
   }
+  // FORMS F1 (belt): an exit-1 child with EMPTY stdout is a die()-style miss, not a result — an
+  // empty success here read as "no objections" right before a doomed refactor. Surface stderr.
+  if (code === 1 && !(out || '').trim()) return errResult(id, (errBuf || '').trim() || 'tool failed (exit 1, no output)');
   // exit 0 (results) or 1 (found:false / gate-fail) both emit valid JSON on stdout — pass through.
   reply(id, { content: [{ type: 'text', text: (out || '').trim() }] });
 };
@@ -523,10 +532,24 @@ function handleToolCall(id, params) {
   const args = (params && params.arguments) || {};
   const tool = TOOLS.find((t) => t.name === name);
   if (!tool) return fail(id, -32602, `unknown tool: ${name}`);
+  // FORMS F2: three distinct verdicts — "missing" for a wrong TYPE invited the model to re-send
+  // the same wrong shape (the argument was there all along).
   for (const k of tool.need) {
-    if (typeof args[k] !== 'string' || args[k] === '') {
-      return errResult(id, `missing required argument: ${k}`);
+    const v = args[k];
+    if (v === undefined || v === null) return errResult(id, `missing required argument: ${k}`);
+    if (typeof v !== 'string') return errResult(id, `argument ${k} must be a string (got ${typeof v})`);
+    if (v === '') return errResult(id, `argument ${k} must be non-empty`);
+  }
+  // FORMS F3: ONE clamp for every numeric param. Garbage ("abc" -> NaN) silently disabled the
+  // budget the tool exists to protect; a negative value minted empty pages with a nextOffset:0
+  // loop. Normalized in place so fast paths and spawn paths see the same real number.
+  for (const k of ['limit', 'offset', 'window', 'budget']) {
+    if (args[k] === undefined || args[k] === null) continue;
+    const n = Number(args[k]);
+    if (typeof args[k] === 'boolean' || String(args[k]).trim() === '' || !Number.isFinite(n) || n < 0) {
+      return errResult(id, `argument ${k} must be a non-negative number (got ${JSON.stringify(args[k])})`);
     }
+    args[k] = n;
   }
   if (tool.valid) { const problem = tool.valid(args); if (problem) return errResult(id, problem); }
   if (tool.map) return handleMap(id, args, params && params._meta);

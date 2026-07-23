@@ -93,10 +93,22 @@ export async function runExtract(opts = {}) {
 // applied after path heuristics, first match wins, invalid config is a hard exit 2 (never a
 // silent skip). Absent file / absent section -> byte-identical behavior to before.
 let roleOverride = () => null;
-try {
+{
   const rulesPath = join(root, 'codeweb.rules.json');
-  if (existsSync(rulesPath)) roleOverride = compileRoleOverrides(JSON.parse(readFileSync(rulesPath, 'utf8')).roles);
-} catch (e) { throw new ExtractError(2, `[extract] ${e.message}`); }
+  if (existsSync(rulesPath)) {
+    // FORMS F6: the envelope gets the same care as the values — the parse error names the FILE
+    // (it used to surface as a bare "Unexpected end of JSON input"), and a misspelled top-level
+    // key warns instead of silently un-applying every role override.
+    let doc;
+    try { doc = JSON.parse(readFileSync(rulesPath, 'utf8')); }
+    catch (e) { throw new ExtractError(2, `[extract] invalid JSON in ${rulesPath}: ${e.message}`); }
+    for (const k of Object.keys(doc)) {
+      if (k !== 'roles' && k !== 'rules') console.error(`[extract] warning: unknown top-level key "${k}" in ${rulesPath} (valid: roles, rules) — ignored`);
+    }
+    try { roleOverride = compileRoleOverrides(doc.roles); }
+    catch (e) { throw new ExtractError(2, `[extract] invalid roles in ${rulesPath}: ${e.message}`); }
+  }
+}
 const roleFor = (rel) => roleOverride(rel) || roleOf(rel);
 if (!existsSync(root)) throw new ExtractError(1, `[extract] not found: ${root}`);
 

@@ -15,7 +15,7 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { normalizeGraph, resolveSymbol, applyEdit, structuralRegressions } from './lib/graph-ops.mjs';
+import { normalizeGraph, resolveSymbol, suggestSymbols, applyEdit, structuralRegressions } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: simulate-edit.mjs <graph.json> (--delete <sym> | --merge <s1,s2,..> [--into <id>] | --move <sym> --to <file>) [--json]';
 import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
@@ -38,23 +38,44 @@ if (move != null && to == null) die('move requires --to <file>', 2);
 
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
-let opName, after, target, intoOut = null, toOut = null;
+// FORMS F1: a miss must NEVER be an empty stdout — this is the tool the INSTRUCTIONS prescribe
+// before every refactor, and an empty MCP reply read as "no objections" before a doomed edit.
+// JSON mode emits the same found:false + suggestions contract query/explain use (exit 1);
+// text mode keeps the classic stderr line.
+const missPayload = (symArg) => {
+  const suggestions = suggestSymbols(graph, symArg);
+  const p = { symbol: symArg, found: false, hint: `no symbol matches "${symArg}" — try codeweb_find "<free text>" (concept search, no name needed)${suggestions.length ? ' or a near-match below' : ''}` };
+  if (suggestions.length) p.suggestions = suggestions;
+  return p;
+};
+
+let opName, after, target, intoOut = null, toOut = null, miss = null;
 if (del != null) {
   const ids = resolveSymbol(graph, del);
-  if (!ids.length) die(`symbol not found: ${del}`, 1);
-  opName = 'delete'; target = ids; after = applyEdit(graph, { kind: 'delete', ids });
+  if (!ids.length) miss = missPayload(del);
+  else { opName = 'delete'; target = ids; after = applyEdit(graph, { kind: 'delete', ids }); }
 } else if (merge != null) {
   const syms = merge.split(',').map((s) => s.trim()).filter(Boolean);
   const ids = [...new Set(syms.flatMap((s) => resolveSymbol(graph, s)))].sort();
-  if (ids.length < 2) die(`merge needs >=2 resolved symbols (got ${ids.length})`, ids.length ? 2 : 1);
-  const canonical = into != null ? (resolveSymbol(graph, into)[0] || into) : ids[0]; // default: smallest id
-  opName = 'merge'; target = ids; intoOut = canonical; after = applyEdit(graph, { kind: 'merge', ids, into: canonical });
+  if (ids.length === 0) miss = missPayload(merge);
+  else if (ids.length < 2) die(`merge needs >=2 resolved symbols (got ${ids.length})`, 2);
+  else {
+    const canonical = into != null ? (resolveSymbol(graph, into)[0] || into) : ids[0]; // default: smallest id
+    opName = 'merge'; target = ids; intoOut = canonical; after = applyEdit(graph, { kind: 'merge', ids, into: canonical });
+  }
 } else {
   const ids = resolveSymbol(graph, move);
-  if (!ids.length) die(`symbol not found: ${move}`, 1);
-  opName = 'move'; target = ids; toOut = to;
-  after = ids.reduce((g, id) => applyEdit(g, { kind: 'move', id, to }), graph); // move every matched def
+  if (!ids.length) miss = missPayload(move);
+  else {
+    opName = 'move'; target = ids; toOut = to;
+    after = ids.reduce((g, id) => applyEdit(g, { kind: 'move', id, to }), graph); // move every matched def
+  }
 }
+
+if (miss) {
+  if (json) { emitJson(miss, 1); }
+  else { die(`symbol not found: ${miss.symbol}${miss.suggestions ? ` (near: ${miss.suggestions.join(', ')})` : ''}`, 1); }
+} else {
 
 const { newCycles, lostCallers } = structuralRegressions(graph, after);
 const projected = { newCycles, lostCallers, ok: newCycles.length === 0 && lostCallers.length === 0 };
@@ -68,4 +89,5 @@ if (newCycles.length) console.log(`  new file cycle(s): ${newCycles.map((c) => c
 if (lostCallers.length) console.log(`  symbol(s) left with no callers: ${lostCallers.join(', ')}`);
 console.log('  (structural pre-flight: duplication delta is out of scope — run the full pipeline for that.)');
 finish();
+}
 }

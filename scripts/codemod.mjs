@@ -18,7 +18,7 @@ import { normalizeGraph, buildIndex, callersOf, importersOf, impactOf, applyEdit
 import { maskAligned } from './lib/masking.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const USAGE = 'usage: codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]';
+const USAGE = 'usage: codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> [--into <id>]) [--json] [--write]'; // F14a: --into is optional (survivor inferred)
 import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.

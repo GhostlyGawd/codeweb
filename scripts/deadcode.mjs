@@ -22,7 +22,9 @@ const ENTRYPOINTS = new Set(['main', 'default', 'index', 'setup', 'teardown', 'i
 // a function DEFINED IN a test file falls through to `safe`. Defaults OFF (shipped: test-file -> review).
 // The effectiveness study flips this on to prove the H13 fix is load-bearing (safe-tier precision drops).
 const DEADCODE_LEGACY = process.env.CODEWEB_DEADCODE_LEGACY === '1';
-const USAGE = 'usage: deadcode.mjs <graph.json> [--all] [--json]   (or set CODEWEB_WS)';
+// FORMS F10: the usage names EVERY real flag — the parser rejects unknown flags loudly, so a
+// flag missing from --help was undiscoverable except by reading source.
+const USAGE = 'usage: deadcode.mjs <graph.json> [--limit N] [--all] [--show-suppressed] [--annotations <dir>] [--json]   (or set CODEWEB_WS)';
 import { die, emitJson, finish, capList, loadGraph, manifestEntryFiles, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.

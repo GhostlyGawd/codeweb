@@ -54,6 +54,9 @@ export function parseArgs(argv, spec) {
       if (f.type === 'number' || f.type === 'float') {
         const n = f.type === 'float' ? parseFloat(v) : parseInt(v, 10);
         if (Number.isNaN(n)) die(`flag ${t} needs a number (got "${v}")\n${spec.usage}`, 2);
+        // FORMS F14c: flags can declare a floor (min: 0 on limits/offsets) — a negative limit
+        // silently minted empty pages with a nextOffset:0 loop instead of an error.
+        if (f.min !== undefined && n < f.min) die(`flag ${t} must be >= ${f.min} (got ${v})\n${spec.usage}`, 2);
         opts[name] = n;
       } else if (f.type === 'pair') {
         const v2 = argv[++i];

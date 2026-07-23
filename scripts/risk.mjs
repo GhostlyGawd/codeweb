@@ -14,7 +14,7 @@ import { normalizeGraph, buildIndex, allBlastCounts, productScope, scopeNote } f
 import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
 import { churnFromGit } from './lib/churn.mjs'; // finding 27: ONE bounded, HEAD-cached git-churn parser (shared with hotspots)
 
-const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--churn <map.json> | --git] [--all] [--json]';
+const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--limit N] [--churn <map.json> | --git] [--all] [--json]'; // F10: --limit was real but hidden
 import { die, emitJson, finish, capList, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
