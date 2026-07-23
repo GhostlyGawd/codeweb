@@ -51,6 +51,23 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li>**The post-edit structural-regression hook now extracts IN-PROCESS instead of spawning a child</li>
+</ul>
+<p>  node process — the last residual term of the hook fast-path floor.** Enabled by #40 making</p>
+<p>  <code>extract-symbols</code> importable with a side-effect-free import, the hook lazily</p>
+<p>  <code>import()</code>s <code>runExtract</code> (after the inert-fire guard, so a no-op fire still pays nothing) and calls</p>
+<p>  it directly, killing the child node boot plus the fragment <code>stringify</code>(child)+<code>JSON.parse</code>(hook)</p>
+<p>  round-trip across the process boundary. The symbol-set delta/splice against the #18a baseline</p>
+<p>  fragment is <code>runExtract</code>'s own warm-cache machinery (WS-D's #17 name-delta path) — the hook adds no</p>
+<p>  splice or invalidation logic, so the in-process fire runs exactly what IE-EQUIVALENCE proved</p>
+<p>  byte-identical. Measured at the 16.8k-symbol class (median-of-5, this box): no-change fire</p>
+<p>  <strong>1,089 ms → 698 ms</strong> (the forced-spawn path vs in-process on the same corpus; 0 extractor child</p>
+<p>  processes vs 1, strace-verified), under the 700 ms floor and down from #18a's 889 ms row. A</p>
+<p>  fail-open crash ladder keeps the guarantee: <code>CODEWEB_HOOK_INPROC=0</code> forces the old spawn (the</p>
+<p>  rollback lever), and any throw from the lazy import or <code>runExtract</code> triggers one spawn fallback,</p>
+<p>  bumped as <code>hookInprocFallbacks</code> so a silent divergence is ledger-visible. additionalContext is</p>
+<p>  byte-identical across both transports (path-parity test). (round 2, finding #18b)</p>
+<ul>
 <li>**The symbol extractor is being decomposed into testable, importable pieces (the tracked residual</li>
 </ul>
 <p>  of round-1 #25, now actually being closed).** Stage 1: per-file call/ref/inherit derivation —</p>

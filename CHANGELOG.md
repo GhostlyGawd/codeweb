@@ -10,6 +10,21 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Changed
+- **The post-edit structural-regression hook now extracts IN-PROCESS instead of spawning a child
+  node process — the last residual term of the hook fast-path floor.** Enabled by #40 making
+  `extract-symbols` importable with a side-effect-free import, the hook lazily
+  `import()`s `runExtract` (after the inert-fire guard, so a no-op fire still pays nothing) and calls
+  it directly, killing the child node boot plus the fragment `stringify`(child)+`JSON.parse`(hook)
+  round-trip across the process boundary. The symbol-set delta/splice against the #18a baseline
+  fragment is `runExtract`'s own warm-cache machinery (WS-D's #17 name-delta path) — the hook adds no
+  splice or invalidation logic, so the in-process fire runs exactly what IE-EQUIVALENCE proved
+  byte-identical. Measured at the 16.8k-symbol class (median-of-5, this box): no-change fire
+  **1,089 ms → 698 ms** (the forced-spawn path vs in-process on the same corpus; 0 extractor child
+  processes vs 1, strace-verified), under the 700 ms floor and down from #18a's 889 ms row. A
+  fail-open crash ladder keeps the guarantee: `CODEWEB_HOOK_INPROC=0` forces the old spawn (the
+  rollback lever), and any throw from the lazy import or `runExtract` triggers one spawn fallback,
+  bumped as `hookInprocFallbacks` so a silent divergence is ledger-visible. additionalContext is
+  byte-identical across both transports (path-parity test). (round 2, finding #18b)
 - **The symbol extractor is being decomposed into testable, importable pieces (the tracked residual
   of round-1 #25, now actually being closed).** Stage 1: per-file call/ref/inherit derivation —
   `deriveFileEdges`, the precision gate (alias > same-file > unique-in-package, drop-ambiguous, plus
