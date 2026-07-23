@@ -54,11 +54,13 @@ agent can't do for you:
 Bing Webmaster Tools (optional, dashboard only) can then import the verified Search Console
 property in one click.
 
-## 4. npm 0.9.1 publish — nothing left to do
+## 4. npm republish — nothing left to do
 
 `NPM_TOKEN` is configured and working: the 0.9.0 publish came from the release workflow's npm
-step, not a laptop. Cutting a release republishes npm automatically, and v0.9.1 carries the
+step, not a laptop. Cutting a release republishes npm automatically; v0.10.0 carries the
 corrected registry doc (27 tools, category keywords) plus the site as the package homepage.
+(Planned as "0.9.1" before Batches 7–8 landed feature work — the changelog's `### Added`
+sections make it a minor per the release runbook.)
 
 ## 5. Personal email in plugin.json — resolved
 
