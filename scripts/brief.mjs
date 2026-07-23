@@ -24,6 +24,7 @@ const brief = attachActivity(buildBrief(graph, buildIndex(graph)), abs);
 const stale = checkStaleness(graph);
 if (stale) brief.stale = stale;
 try { const h = readHistory(abs, 4); if (h.length >= 2) brief.history = h; } catch { /* best-effort */ }
+try { const { loadNarration } = await import('./lib/narration.mjs'); const n = loadNarration(abs); if (n) brief.narration = n; } catch { /* sidecar is best-effort */ }
 
 if (json) { emitJson(brief); } else {
   let text = renderBrief(brief);

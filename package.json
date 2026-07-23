@@ -29,7 +29,9 @@
   "license": "MIT",
   "bin": {
     "codeweb": "bin/codeweb.mjs",
-    "codeweb-mcp": "bin/codeweb-mcp.mjs"
+    "codeweb-mcp": "bin/codeweb-mcp.mjs",
+    "codeweb-query": "bin/codeweb-query.mjs",
+    "codeweb-diff": "bin/codeweb-diff.mjs"
   },
   "files": [
     "bin",
