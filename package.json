@@ -1,6 +1,6 @@
 {
   "name": "@ghostlygawd/codeweb",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "type": "module",
   "description": "See what an edit breaks before you write it — deterministic call/import graph of your codebase, 27 MCP tools for coding agents, and a self-contained interactive map. Claude Code plugin & MCP server; zero deps, runs 100% locally.",
   "keywords": [

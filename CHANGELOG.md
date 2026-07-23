@@ -9,6 +9,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+_Nothing yet. Open work lands here before it ships in the next tagged release._
+
+## [0.10.0] - 2026-07-23
+
 ### Changed
 - **The last hand-rolled CLI flag loops now route through the shared `parseArgs(spec)` (lib/cli.mjs),
   so every front door enforces the one #24 unknown-flag policy — reject with usage, exit 2, never a
@@ -1602,7 +1606,8 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/GhostlyGawd/codeweb/compare/v0.7.0...v0.7.1
