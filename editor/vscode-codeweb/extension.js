@@ -63,10 +63,17 @@ class CodewebLensProvider {
     if (!index || !index.root) return [];
     const rel = path.relative(index.root, doc.uri.fsPath).split(path.sep).join('/');
     if (rel.startsWith('..')) return [];
+    // RETENTION R9: the lens presents map-time numbers — its tooltip says WHEN that was, so a
+    // week-old count is never mistaken for a live one. One stat per render, fail-open.
+    let mapped = '';
+    try {
+      const days = Math.floor((Date.now() - fs.statSync(graphPath).mtimeMs) / 86400000);
+      mapped = ` · mapped ${days <= 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago'}`;
+    } catch { /* age is best-effort */ }
     return lensesForFile(index, rel, { minCallers: cfg.get('lens.minCallers', 0) }).map((l) =>
       new vscode.CodeLens(new vscode.Range(l.line - 1, 0, l.line - 1, 0), {
         title: `${l.callers} caller${l.callers === 1 ? '' : 's'} · blast ${l.blast}`,
-        tooltip: `codeweb: ${l.id} — click to open in the interactive report`,
+        tooltip: `codeweb: ${l.id}${mapped} — click to open in the interactive report (re-map: node scripts/run.mjs)`,
         command: 'codeweb.openReport',
         arguments: [graphPath, l.id],
       })

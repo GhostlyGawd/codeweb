@@ -22,6 +22,7 @@ let lastCardMeta = null;
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXPLAIN = join(HERE, '..', 'scripts', 'explain.mjs');
 import { SRC_RE, findTarget } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a duplicated walk + a trailing language list)
+import { loadStaleStamps } from '../scripts/lib/stale-stamps.mjs'; // RETENTION R3: per-file freshness for the card
 
 // Spec P (docs/specs/fastpath-decision.md): two data sources, ONE format path. The sidecar
 // (index-lite.json, written at map time) serves in ~10ms; the graph path (13.5MB parse + explain
@@ -91,8 +92,18 @@ export function preview(raw) {
   const entry = side === undefined ? graphEntry(t, rel) : side;
   if (!entry) return null;
   const { symbols, total, top, card, topId, cardFiles } = entry;
+  // RETENTION R3: when THIS file's stamp no longer matches the map, the card says so — quoting
+  // week-old blast radii with full confidence is how dashboards die. Stat-only, fail-open.
+  let behind = '';
+  try {
+    const st = loadStaleStamps(t.baseline)?.sources?.[rel];
+    if (st) {
+      const cur = statSync(resolve(fp));
+      if (cur.size !== st.s || Math.round(cur.mtimeMs) !== st.m) behind = ' — map behind for this file (numbers are from the last map; /codeweb re-maps in seconds)';
+    }
+  } catch { /* freshness note is best-effort */ }
   let msg = `[codeweb] editing ${rel}: ${symbols} symbol(s), ${total} in-repo dependent edge(s)` +
-    (top && top.c > 0 ? ` (most depended-on: ${top.label} ×${top.c})` : '') + '.';
+    (top && top.c > 0 ? ` (most depended-on: ${top.label} ×${top.c})` : '') + '.' + behind;
   // AMBIENT context: the ~1KB explain card for the file's most-depended-on symbol, so the blast
   // radius arrives without the agent having to ask. Fail-open either path.
   if (card) {

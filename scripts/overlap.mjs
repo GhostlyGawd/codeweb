@@ -20,6 +20,7 @@ import { shingles, jaccard, K, BANDS, BODY_LINE_CAP } from './lib/shingles.mjs';
 import { lshCandidatePairs } from './lib/minhash.mjs'; // Spec N + round 2 #24: LSH candidate generation at scale (one walk, both signals)
 import { roleOf, findingBuckets, bucketsLine } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code; A5: one findings vocabulary
 import { sourceReader, atomicWrite } from './lib/cli.mjs'; // shared body access + rename-atomic artifact writes (one truth)
+import { loadAnnotations, applySuppressions } from './lib/annotations.mjs'; // RETENTION R5: triaged judgement applies at THE source
 
 const WS = process.env.CODEWEB_WS || '.live';   // per-target workspace dir (orchestrator sets this)
 const GRAPH_PATH = `${WS}/graph.json`;
@@ -414,14 +415,23 @@ let t3Lsh = null; // { buckets, skippedBuckets } when LSH generated the near-mis
 _mark('signal-C (near-miss)');
 // ---- rank, split, write -------------------------------------------------------------
 overlaps.sort((a, b) => SEV[b.severity] - SEV[a.severity] || CONF[b.confidence] - CONF[a.confidence] || b.rank - a.rank);
-overlaps.forEach((o, i) => { o.id = 'ov' + (i + 1); delete o.rank; });
-graph.overlaps = overlaps;
+// RETENTION R5: apply .codeweb/annotations.json suppressions HERE, at the one place every
+// downstream surface reads from — report, brief, trend, and the gate all consume graph.overlaps,
+// so a triaged false positive stops resurfacing on all four at once (the README's promise).
+// Identity fingerprints (lib/annotations) guarantee a genuinely CHANGED finding resurfaces;
+// every surviving finding carries its fingerprint so codeweb_annotate can quote it directly.
+const { visible: keptOverlaps, suppressed: suppressedOverlaps } = applySuppressions(overlaps, loadAnnotations(WS));
+keptOverlaps.forEach((o, i) => { o.id = 'ov' + (i + 1); delete o.rank; });
+const overlapsOut = keptOverlaps;
+graph.overlaps = overlapsOut;
+if (suppressedOverlaps.length) graph.meta.suppressedOverlaps = suppressedOverlaps.length;
+else delete graph.meta.suppressedOverlaps;
 atomicWrite(GRAPH_PATH, JSON.stringify(graph));
 
-const patternFindings = overlaps.filter((o) => o.kind === 'interface-pattern');
-const findings = overlaps.filter((o) => o.kind !== 'interface-pattern' && (o.confidence === 'high' || o.confidence === 'medium'));
-const unverified = overlaps.filter((o) => o.kind !== 'interface-pattern' && o.confidence === 'low');
-const dismissed = overlaps.filter((o) => o.confidence === 'refuted');
+const patternFindings = overlapsOut.filter((o) => o.kind === 'interface-pattern');
+const findings = overlapsOut.filter((o) => o.kind !== 'interface-pattern' && (o.confidence === 'high' || o.confidence === 'medium'));
+const unverified = overlapsOut.filter((o) => o.kind !== 'interface-pattern' && o.confidence === 'low');
+const dismissed = overlapsOut.filter((o) => o.confidence === 'refuted');
 const fmt = (o) => {
   const syms = o.nodes.slice(0, 10).map((id) => '  - `' + id + '`').join('\n') + (o.nodes.length > 10 ? `\n  - …+${o.nodes.length - 10} more` : '');
   return [`### ${o.id} · [${o.severity.toUpperCase()}] ${o.title}`, `**Kind:** ${o.kind}  ·  **Confidence:** ${o.confidence}${o.bodySim != null ? ` (body ${(o.bodySim * 100).toFixed(0)}%)` : ''}  ·  **Domains:** ${o.domains.join(', ')}`, ``, o.evidence, ``, `**→ ${o.recommendation}**`, ``, `<details><summary>${o.nodes.length} symbols</summary>`, ``, syms, `</details>`, ``].join('\n');
@@ -429,7 +439,7 @@ const fmt = (o) => {
 const md = [
   '# codeweb — overlap / consolidation opportunities',
   '',
-  `> **${findings.length} findings** · ${patternFindings.length} interface patterns · ${unverified.length} unverified · ${dismissed.length} dismissed (body-refuted) on **${graph.meta?.target || 'target'}**.`,
+  `> **${findings.length} findings** · ${patternFindings.length} interface patterns · ${unverified.length} unverified · ${dismissed.length} dismissed (body-refuted)${suppressedOverlaps.length ? ` · ${suppressedOverlaps.length} suppressed (triaged false-positive — codeweb_annotate list shows them)` : ''} on **${graph.meta?.target || 'target'}**.`,
   `> ${HAVE_SOURCE ? 'Confidence is **body-confirmed** (token-shingle similarity of real function bodies).' : 'Source unavailable — confidence is structural (shared calls + LOC).'} Each finding is a checklist item.`,
   ...(nonProductSkipped ? ['', `> Scope: **product code** — ${nonProductSkipped} test/fixture/example/bench symbols excluded (set CODEWEB_ALL_ROLES=1 to include them).`] : []),
   ...(hubLabelsSkipped || budgetLabelsSkipped || bodiesCapped ? ['', `> Scale caps: ${hubLabelsSkipped} hub label(s) (>${TWIN_HUB_CAP} callers) excluded from twin seeding${budgetLabelsSkipped ? `; ${budgetLabelsSkipped} label(s) past the ${TWIN_PAIR_BUDGET.toLocaleString('en-US')}-pair twin budget (smallest groups seeded first)` : ''}${bodiesCapped ? `; ${bodiesCapped} long body/bodies shingled on their first ${BODY_LINE_CAP} lines` : ''}; same-name groups larger than ${GROUP_CAP} body-confirm on a ${GROUP_CAP}-node sample (marked in their evidence). Deterministic, never silent.`] : []),
@@ -446,6 +456,7 @@ atomicWrite(OVERLAP_MD, md);
 const drifted = findings.filter((o) => o.drifted).length;
 console.log(`source: ${HAVE_SOURCE ? 'FOUND — body-confirmed' : 'absent — structural fallback'}`);
 // A5: the ONE findings vocabulary — the same triple build-report and the banner print.
-console.log(`${bucketsLine(findingBuckets(graph.overlaps))}${drifted ? ` (${drifted} drifted)` : ''}`);
+// R5: the suppressed count is visible, never silent (the README's suppressedCount promise).
+console.log(`${bucketsLine(findingBuckets(graph.overlaps))}${drifted ? ` (${drifted} drifted)` : ''}${suppressedOverlaps.length ? ` · suppressed ${suppressedOverlaps.length}` : ''}`);
 console.log('--- top findings ---');
 for (const o of findings.slice(0, 14)) console.log(`[${o.severity.toUpperCase().padEnd(6)} ${o.confidence.padEnd(6)}${o.bodySim != null ? ' ' + (o.bodySim * 100).toFixed(0).padStart(3) + '%' : '     '}] ${o.title.replace(/`/g, '')}`);

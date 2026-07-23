@@ -12,6 +12,9 @@ import { normalizeGraph, buildIndex } from '../scripts/lib/graph-ops.mjs';
 import { buildBrief, renderBrief } from '../scripts/lib/brief-core.mjs';
 import { loadBriefSidecar } from '../scripts/lib/brief-sidecar.mjs'; // finding 23: serve the map-time render at the boot floor
 import { bump, attachActivity } from '../scripts/lib/stats.mjs';
+import { checkStaleness } from '../scripts/lib/cli.mjs';           // R3: the change-based nudge
+import { loadStaleStamps } from '../scripts/lib/stale-stamps.mjs'; // R3: stamps without the graph parse
+import { readHistory } from '../scripts/lib/history.mjs';          // R1/R8: the progression line
 
 function findGraph(startDir) {
   let dir = resolve(startDir);
@@ -35,11 +38,19 @@ export function preview(raw) {
   // the common path is stat + one small read instead of parse + index of the whole graph (97ms on
   // this repo, 310-328ms at 17k nodes). Stamp mismatch (graph rebuilt since) -> the parse path.
   let payload = loadBriefSidecar(graphPath);
+  let staleMeta = null; // {root, sources, dirs} for the R3 change check, from whichever path ran
   if (!payload) {
     let graph; try { graph = normalizeGraph(JSON.parse(readFileSync(graphPath, 'utf8'))); } catch { return null; }
     payload = buildBrief(graph, buildIndex(graph));
+    staleMeta = { root: graph.meta?.root, sources: graph.meta?.sources, dirs: graph.meta?.dirs };
+  } else {
+    staleMeta = loadStaleStamps(graphPath); // sidecar path: stamps sidecar keeps the boot floor
   }
   const brief = attachActivity(payload, graphPath);
+  // R3: the change-based nudge — the sweep is stat-only (12-17ms at 5k files), fail-open.
+  try { if (staleMeta?.sources) { const v = checkStaleness({ meta: staleMeta }); if (v) brief.stale = v; } } catch { /* nudge is best-effort */ }
+  // R1/R8: the progression line — one small file read.
+  try { const h = readHistory(graphPath, 4); if (h.length >= 2) brief.history = h; } catch { /* memory is best-effort */ }
   const text = renderBrief(brief);
   // ACTIVATION A7: an EMPTY map must not be announced as "mapped" — renderBrief already leads
   // with the empty verdict, so the prefix only adds the path.

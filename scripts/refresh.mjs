@@ -50,7 +50,10 @@ for (const n of fresh.nodes) { const d = oldDomainById.get(n.id); if (d) { n.dom
 
 const before = { nodes: graph.nodes.length, edges: graph.edges.length };
 const updated = {
-  meta: { ...graph.meta, ...fresh.meta, target: graph.meta.target || fresh.meta.target },
+  // RETENTION R2: the overlap drop is STAMPED, never silent — brief/report render "not recounted
+  // since refresh" instead of a false "0 findings" (the human's reason to return, zeroed by the
+  // product's own best freshness feature). A full map rebuilds meta from the fragment, clearing it.
+  meta: { ...graph.meta, ...fresh.meta, target: graph.meta.target || fresh.meta.target, overlapsDroppedAt: new Date().toISOString() },
   nodes: fresh.nodes,
   edges: fresh.edges,
   domains: graph.domains || [],   // domain summaries preserved (node assignments re-attached above)

@@ -8,7 +8,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { structuralRegressions } from '../scripts/lib/graph-ops.mjs';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, script, PLUGIN_ROOT } from './helpers.mjs';
@@ -236,6 +236,9 @@ test('S18b-PARITY: additionalContext byte-identical via the in-process path and 
     const runWith = (env) => spawnSync(process.execPath, [HOOK], { input: payload, encoding: 'utf8', env: { ...process.env, ...env } });
     const ctx = (r) => { try { return JSON.parse(r.stdout).hookSpecificOutput.additionalContext; } catch { return `__NO_CONTEXT__:${r.stdout}`; } };
     const inproc = runWith({ CODEWEB_HOOK_INPROC: '' });   // default: in-process
+    // RETENTION R4: the hook now surfaces each regression ONCE per baseline (flagged.json) —
+    // reset that memory so the second transport fires on equal footing for the parity check.
+    rmSync(join(dir, '.codeweb', 'flagged.json'), { force: true });
     const spawned = runWith({ CODEWEB_HOOK_INPROC: '0' }); // rollback lever: forced spawn
     assert.equal(inproc.status, 0, 'in-process fire fail-open exit 0');
     assert.equal(spawned.status, 0, 'forced-spawn fire fail-open exit 0');

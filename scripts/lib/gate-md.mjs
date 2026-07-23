@@ -12,8 +12,11 @@ const cap = (arr, n) => ({ head: arr.slice(0, n), more: Math.max(0, arr.length -
 /**
  * payload = the `diff.mjs --json` object. Returns the full comment body (marker included, so the
  * workflow can find-and-update its own comment instead of stacking new ones).
+ * opts.history (RETENTION R7): metric rows from prior gated runs ({confirmed} each, oldest ->
+ * newest) — renders the cross-PR trajectory line, the thing that keeps a team's gate installed
+ * through its first annoying red X.
  */
-export function gateComment(p) {
+export function gateComment(p, { history = null } = {}) {
   const L = [];
   L.push(MARKER);
   L.push(`## codeweb gate — ${p.ok ? '✅ no structural regressions' : `❌ ${p.regressions.length} regression type(s)`}`);
@@ -44,7 +47,14 @@ export function gateComment(p) {
   section('New duplication findings', p.overlaps.added, (o) => `- ${o.kind}: ${o.title || '(untitled)'}`, 5);
   section('Symbols that lost all callers', lost, (id) => `- \`${id}\``, 5);
   section('Renames (not churn)', p.nodes.renamed, (r) => `- \`${r.from}\` → \`${r.to}\`${r.sim != null ? ` (body ${(r.sim * 100).toFixed(0)}%)` : ''}`, 5);
+  // R7: trajectory — a verdict says "this PR"; the series says "the gate is working".
+  if (Array.isArray(history) && history.length >= 2) {
+    L.push('');
+    L.push(`<sub>confirmed duplications across the last ${history.length} gated runs: ${history.map((r) => r.confirmed).join(' → ')}</sub>`);
+  }
   L.push('');
-  L.push('<sub>codeweb structural review (same verdict as the gate). Reproduce locally: `node scripts/ci-gate.mjs --base <base-sha> --target <dir>`.</sub>');
+  // R7: the footer finally links home — this comment is codeweb's highest-frequency impression
+  // on people who never installed it.
+  L.push('<sub>codeweb structural review (same verdict as the gate). Reproduce locally: `node scripts/ci-gate.mjs --base <base-sha> --target <dir>` · [map your own repo with codeweb →](https://github.com/GhostlyGawd/codeweb)</sub>');
   return L.join('\n') + '\n';
 }

@@ -57,7 +57,9 @@ export function buildBrief(graph, index) {
     loadBearing,
     entryPoints,
     tests: { symbols: testNodes.length, dirs: topTestDirs },
-    findings: { duplications: dup, cycles: cyc, orphanCandidates: orph },
+    // RETENTION R2: a refresh drops overlaps and STAMPS the drop — a 0 that means "pending
+    // recount" must never render as "nothing to fix" (the human's reason to return).
+    findings: { duplications: dup, cycles: cyc, orphanCandidates: orph, ...(graph.meta?.overlapsDroppedAt && dup === 0 ? { notRecounted: true } : {}) },
   };
 }
 
@@ -84,7 +86,17 @@ export function renderBrief(b) {
   }
   L.push(`tests: ${b.tests.symbols} test symbol(s)${b.tests.dirs.length ? ` under ${b.tests.dirs.join(', ')}` : ''}`);
   const f = b.findings;
-  L.push(`known issues: ${f.duplications} duplication finding(s), ${f.cycles} file cycle(s), ${f.orphanCandidates} orphan candidate(s)`);
+  if (f.notRecounted) {
+    // R2: the refresh dropped the findings — say THAT, never a false zero.
+    L.push(`known issues: duplication not recounted since the last refresh (run /codeweb or codeweb_map to recount) · ${f.cycles} file cycle(s), ${f.orphanCandidates} orphan candidate(s)`);
+  } else {
+    L.push(`known issues: ${f.duplications} duplication finding(s), ${f.cycles} file cycle(s), ${f.orphanCandidates} orphan candidate(s)`);
+  }
+  // R1/R8: the progression line — value the user already created, resurfaced (readHistory tail
+  // attached by the callers that know the graph path; pure render here).
+  if (Array.isArray(b.history) && b.history.length >= 2) {
+    L.push(`progress: confirmed dups over your last ${b.history.length} maps: ${b.history.map((r) => r.confirmed).join(' -> ')}`);
+  }
   if (b.activity) {
     // #10: lead with lifetime (never empty once anything happened), current month in parens.
     const line = (c) => {
@@ -99,8 +111,11 @@ export function renderBrief(b) {
     const month = line(b.activity.counters || {});
     if (life) L.push(`codeweb here${b.activity.since ? ` since ${b.activity.since}` : ''}: ${life}${month && month !== life ? ` (this month: ${month})` : ''} (full receipt: scripts/stats.mjs)`);
   }
-  // #10: an aging map quietly rots every card and lens — say so once it's a week old.
-  if (b.generatedAt) {
+  // RETENTION R3: the nudge fires on CHANGE, not on a calendar — the job is refresh-on-change.
+  // The 7-day age note stays as the fallback for an untouched-repo map that merely aged.
+  if (b.stale?.count) {
+    L.push(`note: this map is behind by ${b.stale.count}+ changed file(s) — /codeweb re-maps in seconds (agents: codeweb_map).`);
+  } else if (b.generatedAt) {
     const days = Math.floor((Date.now() - Date.parse(b.generatedAt)) / 86400000);
     if (days >= 7) L.push(`note: this map was built ${days} day(s) ago — refresh with codeweb_refresh (agents) or /codeweb (full rebuild).`);
   }

@@ -248,7 +248,7 @@ test('S5 refresh-preserves-sidecars: after codeweb_refresh all three sidecars ar
     const r = await h.reply(50);
     assert.ok(!r.result.isError, 'refresh succeeded');
     const payload = JSON.parse(r.result.content[0].text);
-    assert.deepEqual(payload.sidecars, ['brief', 'index-lite', 'similar-index'], 'refresh reports the rebuilt trio');
+    assert.deepEqual(payload.sidecars, ['brief', 'index-lite', 'stale-stamps', 'similar-index'], 'refresh reports the rebuilt trio');
     // MECHANISM: the loaders validate against graph.json's stat — non-null means the hook fast path engages.
     const st = statSync(graph);
     const stamp = { graphMtimeMs: st.mtimeMs, graphSize: st.size };
