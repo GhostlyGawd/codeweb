@@ -219,7 +219,7 @@ test('F9: run.mjs --coverage validates the path before any stage runs', () => {
     const r = runNode(script('run.mjs'), [dir, '--out-dir', join(dir, 'ws'), '--coverage', '/nope.lcov']);
     assert.notEqual(r.status, 0);
     assert.match(r.stderr, /coverage/i);
-    assert.match(r.stderr, /\/nope\.lcov/, 'names the bad path');
+    assert.match(r.stderr, /[\\/]nope\.lcov/, 'names the bad path (either separator — resolve() is drive-lettered on Windows)');
     assert.ok(!/\[run\] extract/.test(r.stderr), 'died at parse time — not after five stages of work');
   } finally { cleanup(dir); }
 });
