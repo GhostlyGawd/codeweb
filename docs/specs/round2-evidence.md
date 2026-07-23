@@ -1509,3 +1509,37 @@ graph-ops cycle → correctly flagged, in-process (`hookInprocFallbacks` 0). Ful
 success at 6fb49ff (pre-push).
 
 Shas reviewed: 52254c5 · c7c8983 · d2132a2 · 173a119 · 247134d · 851c0f2 · 6fb49ff.
+
+## Finding #39 (late-added)
+
+**REFACTOR · cli — the last hand-rolled flag loops routed through `parseArgs`.** #24 put ONE
+unknown-flag policy in lib/cli.mjs (`parseArgs(argv, spec)`: unknown → `die(2)` with usage; `--help`
+→ usage, exit 0; never a silent positional). Six scripts still hand-rolled their own loop. **All six
+converted** (none was already done — query.mjs / site/build.mjs #5 were the pre-existing exemplars I
+matched): `explain.mjs`, `diff.mjs`, `brief.mjs`, `coverage.mjs`, `stats.mjs`,
+`scripts/bench-ts-engine.mjs`. Each keeps its `{ json: {type:'bool'} }` spec (bench-ts-engine:
+`{ out: {type:'string'} }` + optional target positional); accepted flags/positionals/`--help`
+preserved exactly. Dead `die` import dropped from brief/stats (loop was its only use); `parseArgs`
+added to the existing `./lib/cli.mjs` import in 5 scripts (**+0 module edge, +0 cycle**), and a fresh
+`./lib/cli.mjs` import in bench-ts-engine (leaf CLI — nothing imports it, so **+0 cycle** too).
+
+**The live bug (explain.mjs, diff.mjs).** Their loops had NO else-branch —
+`for (const t of argv) { if (t === '--json') json = true; else if (!t.startsWith('-')) pos.push(t); }`
+— so an unknown flag was neither a value nor a positional: silently dropped.
+
+**Failing → passing (measured, fixture graph, one resolvable symbol).**
+
+| invocation | before | after |
+|---|---|---|
+| `explain.mjs g.json alpha --jsno` | exit **0** (typo ignored) | exit **2** `unknown flag: --jsno` + usage |
+| `diff.mjs g.json g.json --nope` | exit **0** (typo ignored) | exit **2** `unknown flag: --nope` + usage |
+| `bench-ts-engine.mjs --engine tree-sitter` | exit **1** `target not found: --engine` (swallowed to target) | exit **2** unknown flag + usage |
+| `brief/coverage/stats … --nope` | exit 2 (bare usage, no diagnostic) | exit 2 `unknown flag: --nope` + usage |
+| `explain --json` / `diff --json` / all six `--help` | exit 0 | exit 0 (unchanged) |
+
+**Test.** `tests/cli-unknown-flags.test.mjs` (7 tests, zero skips). Against the unconverted tree it
+was **5 fail / 2 pass** (the 2 passing = the legit `--json`+positional smokes, proving the conversion
+never touched the accepted surface); after conversion **7/7**. Full `npm test`: **799 tests, 794
+pass, 0 fail, 5 env-skips** (pre-existing optional-dep gates — #39 adds none), ~70 s, porcelain clean.
+
+Sha: **fd4a560** (`refactor(cli): route the last hand-rolled flag loops through parseArgs — finding #39`).
