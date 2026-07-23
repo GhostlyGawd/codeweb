@@ -645,8 +645,9 @@ GitHub (**Watch → Custom → Releases**).
 Everything that runs on your machine is **free forever**. No accounts, no telemetry, no license
 keys.
 
-[Sponsorship](https://github.com/sponsors/GhostlyGawd) covers benchmark API costs and the work
-of adding new languages. Details on the [support page](https://ghostlygawd.github.io/codeweb/support.html).
+codeweb's claims are tested by running real AI agents against it, and those test runs cost
+money. [Sponsorship](https://github.com/sponsors/GhostlyGawd) pays for them, and for adding
+support for new languages. Details on the [support page](https://ghostlygawd.github.io/codeweb/support.html).
 
 **Enterprise support**: email support with an SLA, onboarding help, and priority on feature
 requests. **$3–6k/yr**, limited to a few customers. Contact via the GitHub profile.
