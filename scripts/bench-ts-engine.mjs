@@ -10,15 +10,18 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { parseArgs } from './lib/cli.mjs';
 
-const argvAll = process.argv.slice(2);
-let outPath = null;
-const positional = [];
-for (let i = 0; i < argvAll.length; i++) {
-  if (argvAll[i] === '--out') outPath = argvAll[++i];
-  else positional.push(argvAll[i]);
-}
-const target = positional[0] || 'bench/corpus/axios';
+// finding #39: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy (reject with usage,
+// exit 2; --help prints usage, exit 0). The prior hand-roll swallowed any unknown flag into the
+// positionals, so a stray `--engine` became the target path (the original #24 swallow shape).
+const USAGE = 'usage: bench-ts-engine.mjs [target-dir] [--out <file>]   (default target: bench/corpus/axios)';
+const { opts, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: { out: { type: 'string', default: null } },
+});
+const outPath = opts.out;
+const target = pos[0] || 'bench/corpus/axios';
 if (!existsSync(target)) { console.error(`[bench] target not found: ${target}`); process.exit(1); }
 const EXTRACT = resolve('scripts/extract-symbols.mjs');
 const REPS = 3;

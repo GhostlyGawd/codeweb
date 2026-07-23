@@ -51,6 +51,20 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li>**The last hand-rolled CLI flag loops now route through the shared <code>parseArgs(spec)</code> (lib/cli.mjs),</li>
+</ul>
+<p>  so every front door enforces the one #24 unknown-flag policy — reject with usage, exit 2, never a</p>
+<p>  silent positional.** <code>explain.mjs</code> and <code>diff.mjs</code> were the live bug: a no-else `for (const t of</p>
+<p>  argv) { if (t === '--json') … else if (!t.startsWith('-')) pos.push(t) }` swallowed a typo instead</p>
+<p>  of erroring, so <code>explain g.json sym --jsno</code> exited <strong>0</strong> as if the run were clean; both now exit</p>
+<p>  <strong>2</strong> with <code>unknown flag: --jsno</code> and the usage. <code>brief.mjs</code>/<code>coverage.mjs</code>/<code>stats.mjs</code> already</p>
+<p>  <code>die</code>d on an unknown flag but still hand-rolled the loop (now one spec apiece), and</p>
+<p>  <code>bench-ts-engine.mjs</code> swallowed an unknown flag into its target positional — a stray <code>--engine</code></p>
+<p>  became the path (exit 1 "target not found"), the original #24 shape — now exit <strong>2</strong> with usage.</p>
+<p>  Accepted flags, positionals, and <code>--help</code> (exit 0) are preserved exactly;</p>
+<p>  <code>tests/cli-unknown-flags.test.mjs</code> pins the failing→passing exit codes and the surviving legit</p>
+<p>  surface. (round 2, finding #39)</p>
+<ul>
 <li>**The post-edit structural-regression hook now extracts IN-PROCESS instead of spawning a child</li>
 </ul>
 <p>  node process — the last residual term of the hook fast-path floor.** Enabled by #40 making</p>

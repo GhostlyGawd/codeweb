@@ -18,15 +18,17 @@
 // hooks gate via graph-ops' structuralRegressions — the additive field breaks neither.
 
 import { basename } from 'node:path';
-import { die, emitJson, finish, sign, loadGraph } from './lib/cli.mjs';
+import { die, emitJson, finish, sign, loadGraph, parseArgs } from './lib/cli.mjs';
 import { diffGraphs } from './lib/diff-core.mjs';
 
 const USAGE = 'usage: diff.mjs <before.json> <after.json> [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
 
-const argv = process.argv.slice(2);
-let json = false; const paths = [];
-for (const t of argv) { if (t === '--json') json = true; else if (!t.startsWith('-')) paths.push(t); }
+// finding #39: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy (reject with usage,
+// exit 2; --help prints usage, exit 0). Replaces a no-else hand-roll that silently ignored typos.
+const { opts: { json }, pos: paths } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: { json: { type: 'bool', default: false } },
+});
 if (paths.length < 2) die(USAGE, 2);
 
 const before = loadGraph(paths[0]).graph; // Spec E: one truth with every other CLI (loadGraph normalizes + dies on IO)

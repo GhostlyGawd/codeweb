@@ -10,6 +10,18 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Changed
+- **The last hand-rolled CLI flag loops now route through the shared `parseArgs(spec)` (lib/cli.mjs),
+  so every front door enforces the one #24 unknown-flag policy — reject with usage, exit 2, never a
+  silent positional.** `explain.mjs` and `diff.mjs` were the live bug: a no-else `for (const t of
+  argv) { if (t === '--json') … else if (!t.startsWith('-')) pos.push(t) }` swallowed a typo instead
+  of erroring, so `explain g.json sym --jsno` exited **0** as if the run were clean; both now exit
+  **2** with `unknown flag: --jsno` and the usage. `brief.mjs`/`coverage.mjs`/`stats.mjs` already
+  `die`d on an unknown flag but still hand-rolled the loop (now one spec apiece), and
+  `bench-ts-engine.mjs` swallowed an unknown flag into its target positional — a stray `--engine`
+  became the path (exit 1 "target not found"), the original #24 shape — now exit **2** with usage.
+  Accepted flags, positionals, and `--help` (exit 0) are preserved exactly;
+  `tests/cli-unknown-flags.test.mjs` pins the failing→passing exit codes and the surviving legit
+  surface. (round 2, finding #39)
 - **The post-edit structural-regression hook now extracts IN-PROCESS instead of spawning a child
   node process — the last residual term of the hook fast-path floor.** Enabled by #40 making
   `extract-symbols` importable with a side-effect-free import, the hook lazily

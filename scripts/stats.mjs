@@ -5,14 +5,15 @@
 //
 //   node scripts/stats.mjs <graph.json> [--json]
 
-import { die, emitJson, emitText, loadGraph } from './lib/cli.mjs';
+import { emitJson, emitText, loadGraph, parseArgs } from './lib/cli.mjs';
 import { readStats, monthLine, receiptPayload } from './lib/stats.mjs';
 
 const USAGE = 'usage: stats.mjs <graph.json> [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-const argv = process.argv.slice(2);
-let json = false; const pos = [];
-for (const t of argv) { if (t === '--json') json = true; else if (!t.startsWith('-')) pos.push(t); else die(USAGE, 2); }
+// finding #39: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy (reject with usage, exit 2).
+const { opts: { json }, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: { json: { type: 'bool', default: false } },
+});
 
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
