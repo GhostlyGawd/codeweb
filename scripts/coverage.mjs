@@ -7,17 +7,18 @@
 // Optional and explicit (like --churn): never runs in the deterministic pipeline by default;
 // codeweb_refresh re-extracts nodes, so re-annotate after a refresh. Exit: 0 ok, 2 usage/IO.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseLcov, parseIstanbul, annotateCoverage } from './lib/coverage.mjs';
 
 const USAGE = 'usage: coverage.mjs <graph.json> <lcov.info|coverage-final.json> [more...] [--json]';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, emitText, finish, loadGraph, atomicWrite } from './lib/cli.mjs';
+import { die, emitJson, emitText, finish, loadGraph, atomicWrite, parseArgs } from './lib/cli.mjs';
 
-const argv = process.argv.slice(2);
-let json = false; const pos = [];
-for (const t of argv) { if (t === '--json') json = true; else if (!t.startsWith('-')) pos.push(t); else die(USAGE, 2); }
+// finding #39: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy (reject with usage, exit 2).
+const { opts: { json }, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: { json: { type: 'bool', default: false } },
+});
 if (pos.length < 2) die(USAGE, 2);
 
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
@@ -44,7 +45,7 @@ for (const reportPath of pos.slice(1)) {
 }
 
 const summary = annotateCoverage(graph, covFiles, labels.join('+'));
-atomicWrite(abs, JSON.stringify(graph, null, 2));
+atomicWrite(abs, JSON.stringify(graph)); // finding #42: compact (was the last pretty-printed graph.json — 20.6 → 13.0 MB)
 
 const line = `codeweb coverage: ${summary.filesMapped} file(s) mapped, ${summary.symbolsCovered}/${summary.symbolsSeen} instrumented symbol(s) covered — annotated ${abs}`;
 if (json) { emitJson({ ok: true, graph: abs, ...summary, note: 'explain/tests/context answers now carry measured-coverage facts; re-annotate after codeweb_refresh' }); }

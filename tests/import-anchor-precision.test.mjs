@@ -13,6 +13,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 const FILES = {
   // utils.mjs: `merge` is the file ANCHOR (largest symbol). `other` is a small sibling export.
@@ -46,36 +47,35 @@ let SRC, OUT;
 before(() => { SRC = tmpDir('codeweb-anchor-'); writeTree(SRC, FILES); OUT = join(SRC, 'fragment.json'); });
 after(() => cleanup(SRC));
 
-function extract() {
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'anchor-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  return readJSON(OUT);
+async function extract() {
+  const { fragment } = await runExtract({ path: SRC, target: 'anchor-x', ctags: false });
+  return fragment;
 }
 
-test('PRECISION: an importer that never touches the anchor is NOT a dependent of it', () => {
-  const frag = extract();
+test('PRECISION: an importer that never touches the anchor is NOT a dependent of it', async () => {
+  const frag = await extract();
   assert.ok(!hasEdge(frag.edges, 'consumerB.mjs:tweak', 'utils.mjs:merge'),
     'consumerB only uses utils.other() -> no edge to utils.mjs:merge (any kind)');
 });
 
-test('the coarse module-import edge is redirected to the target <module> node', () => {
-  const frag = extract();
+test('the coarse module-import edge is redirected to the target <module> node', async () => {
+  const frag = await extract();
   assert.ok(frag.nodes.some((n) => n.id === 'utils.mjs:<module>' && n.kind === 'module'),
     'a <module> node exists for the imported file');
   assert.ok(hasEdge(frag.edges, 'consumerB.mjs:tweak', 'utils.mjs:<module>', 'import'),
     'the namespace/default import edge lands on utils.mjs:<module>, not on a symbol');
 });
 
-test('RECALL: real member-access dependencies are still precise', () => {
-  const frag = extract();
+test('RECALL: real member-access dependencies are still precise', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'consumerA.mjs:build', 'utils.mjs:merge', 'call'),
     'build -> utils.mjs:merge via utils.merge()');
   assert.ok(hasEdge(frag.edges, 'consumerB.mjs:tweak', 'utils.mjs:other', 'call'),
     'tweak -> utils.mjs:other via utils.other()');
 });
 
-test('DEPENDENTS: --dependents of the anchor excludes the non-user, includes the real user', () => {
-  const frag = extract();
+test('DEPENDENTS: --dependents of the anchor excludes the non-user, includes the real user', async () => {
+  const frag = await extract();
   const GP = join(SRC, 'graph.json');
   writeTree(SRC, { 'graph.json': JSON.stringify(frag) });
   const dep = runNode(script('query.mjs'), [GP, '--dependents', 'utils.mjs:merge', '--json']);

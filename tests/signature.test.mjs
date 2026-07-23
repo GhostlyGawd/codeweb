@@ -7,6 +7,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, script, tmpDir, writeTree, cleanup } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 import { prng, int, pick } from './_proptest.mjs';
 
 const EXTRACT = script('extract-symbols.mjs');
@@ -60,22 +61,21 @@ function genPyDecl(rng, i) {
   return { line: `def pf${i}(${ps.join(', ')}):`, label: `pf${i}`, params: ps.map((_, j) => `p${j}`) };
 }
 
-function extractNodes(files) {
+async function extractNodes(files) {
   const dir = tmpDir('cw-sig-');
   writeTree(dir, files);
-  const r = runNode(EXTRACT, [dir]);
-  assert.equal(r.status, 0, r.stderr);
-  return { dir, nodes: JSON.parse(r.stdout).nodes };
+  const { fragment } = await runExtract({ path: dir });
+  return { dir, nodes: fragment.nodes };
 }
 
 // ★ANTI-CHEAT · SIG-FIDELITY
-test('SIG-FIDELITY: extracted params match an independent inline parser over random decls', () => {
+test('SIG-FIDELITY: extracted params match an independent inline parser over random decls', async () => {
   const rng = prng(0x516F1);
   for (let c = 0; c < 25; c++) {
     const N = int(rng, 3, 8);
     const js = Array.from({ length: N }, (_, i) => genJsDecl(rng, i));
     const py = Array.from({ length: N }, (_, i) => genPyDecl(rng, i));
-    const { dir, nodes } = extractNodes({ 'a.ts': js.map((d) => d.line).join('\n'), 'b.py': py.map((d) => d.line).join('\n') });
+    const { dir, nodes } = await extractNodes({ 'a.ts': js.map((d) => d.line).join('\n'), 'b.py': py.map((d) => d.line).join('\n') });
     try {
       const byLabel = new Map(nodes.map((n) => [n.label, n]));
       for (const d of [...js, ...py]) {
@@ -92,7 +92,7 @@ test('SIG-FIDELITY: extracted params match an independent inline parser over ran
 });
 
 // SIG-NULL-SAFE: unparseable / multi-line params -> null, never a throw.
-test('SIG-NULL-SAFE: multi-line + paren-less + no-paren decls yield signature null', () => {
+test('SIG-NULL-SAFE: multi-line + paren-less + no-paren decls yield signature null', async () => {
   const files = {
     'm.js': [
       'export function multi(',     // multi-line param list -> null
@@ -102,7 +102,7 @@ test('SIG-NULL-SAFE: multi-line + paren-less + no-paren decls yield signature nu
       'export const arrow = a => a * 2;',   // paren-less arrow -> null (best-effort)
     ].join('\n'),
   };
-  const { dir, nodes } = extractNodes(files);
+  const { dir, nodes } = await extractNodes(files);
   try {
     const multi = nodes.find((n) => n.label === 'multi');
     assert.ok(multi, 'multi node exists');
@@ -116,12 +116,12 @@ test('SIG-NULL-SAFE: multi-line + paren-less + no-paren decls yield signature nu
 });
 
 // SC2: returns annotation captured (TS and Python), best-effort.
-test('SC2: return annotation captured for TS and Python', () => {
+test('SC2: return annotation captured for TS and Python', async () => {
   const files = {
     'r.ts': 'export function ret(a: number): Promise<void> { return; }',
     's.py': 'def pyret(a) -> int:\n    return a',
   };
-  const { dir, nodes } = extractNodes(files);
+  const { dir, nodes } = await extractNodes(files);
   try {
     const ts = nodes.find((n) => n.label === 'ret');
     assert.ok(ts.signature && /Promise<void>/.test(ts.signature.returns || ''), `ts returns: ${ts.signature?.returns}`);
@@ -131,7 +131,7 @@ test('SC2: return annotation captured for TS and Python', () => {
 });
 
 // SC4 / SIG-CONTEXT-PACK: context-pack callees carry the same signature as the graph node.
-test('SIG-CONTEXT-PACK: context-pack callees include the node signature (no drift)', () => {
+test('SIG-CONTEXT-PACK: context-pack callees include the node signature (no drift)', async () => {
   const dir = tmpDir('cw-sig-cp-');
   try {
     // build a graph by hand: caller -> callee; callee has a known signature

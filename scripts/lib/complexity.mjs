@@ -19,52 +19,65 @@ const strip = (src, lang) => {
   } else {
     s = s.replace(/\/\/[^\n]*/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ');
   }
-  // template literals (whole, incl. ${…}) then double/single quoted strings
-  s = s.replace(/`(?:\\.|[^`\\])*`/g, ' ').replace(/"(?:\\.|[^"\\])*"/g, ' ').replace(/'(?:\\.|[^'\\])*'/g, ' ');
+  // template literals (whole, incl. ${…}) then double/single quoted strings. Round 2, finding #15:
+  // the alternation form /"(?:\\.|[^"\\])*"/ recursed per character in V8 (RangeError at ~8.4M chars,
+  // killing the whole extract on one big inlined string); the unrolled-loop form iterates the inner
+  // [^"\\]* without per-char recursion. The escape atom stays this site's `\\.` — swapping in `\\[^]`
+  // would silently change cyclomatic on files with backslash-newline in templates (the per-site
+  // equivalence property in tests/huge-line-crash.test.mjs pins the atom).
+  s = s.replace(/`[^`\\]*(?:\\.[^`\\]*)*`/g, ' ').replace(/"[^"\\]*(?:\\.[^"\\]*)*"/g, ' ').replace(/'[^'\\]*(?:\\.[^'\\]*)*'/g, ' ');
   return s;
 };
 const count = (s, re) => (s.match(re) || []).length;
 
 // Approximate cyclomatic complexity. lang: 'py' uses Python decision tokens; everything else (js/ts/
-// go/rust) uses the C-family set. Always >= 1.
+// go/rust) uses the C-family set. Always >= 1. Round 2, finding #15 (degradation belt): any internal
+// throw degrades to 1 instead of killing the caller — this covers every call site (both extractor
+// tiers, hooks, MCP refresh) without touching them; a pathological file costs one wrong number,
+// never the whole map.
 export function cyclomatic(src, lang = 'js') {
-  const s = strip(src || '', lang);
-  let decisions;
-  if (lang === 'py') {
-    // if / elif / for / while / except  +  boolean `and` / `or`  (else/try are not decisions)
-    decisions = count(s, /\b(?:if|elif|for|while|except)\b/g) + count(s, /\b(?:and|or)\b/g);
-  } else {
-    // if / for / while / case / catch  +  &&  ||  ??  +  ternary ? (not part of ?? or ?.)
-    const kw = count(s, /\b(?:if|for|while|case|catch)\b/g);
-    const and = count(s, /&&/g), or = count(s, /\|\|/g), nullish = count(s, /\?\?/g);
-    const ternary = count(s.replace(/\?\?/g, ' ').replace(/\?\./g, ' '), /\?/g);
-    decisions = kw + and + or + nullish + ternary;
-  }
-  return 1 + decisions;
+  try {
+    const s = strip(src || '', lang);
+    let decisions;
+    if (lang === 'py') {
+      // if / elif / for / while / except  +  boolean `and` / `or`  (else/try are not decisions)
+      decisions = count(s, /\b(?:if|elif|for|while|except)\b/g) + count(s, /\b(?:and|or)\b/g);
+    } else {
+      // if / for / while / case / catch  +  &&  ||  ??  +  ternary ? (not part of ?? or ?.)
+      const kw = count(s, /\b(?:if|for|while|case|catch)\b/g);
+      const and = count(s, /&&/g), or = count(s, /\|\|/g), nullish = count(s, /\?\?/g);
+      const ternary = count(s.replace(/\?\?/g, ' ').replace(/\?\./g, ' '), /\?/g);
+      decisions = kw + and + or + nullish + ternary;
+    }
+    return 1 + decisions;
+  } catch { return 1; } // finding #15: degrade this node, never the run
 }
 
 // Max nesting depth. Brace languages: deepest `{}` nesting (strings/comments stripped). Python:
-// deepest indentation level below the first line. Always >= 0.
+// deepest indentation level below the first line. Always >= 0. Belted like cyclomatic (finding #15):
+// any internal throw degrades to 0.
 export function nestingDepth(src, lang = 'js') {
-  if (lang === 'py') {
-    const lines = (src || '').split(/\r?\n/).filter((l) => l.trim() !== '');
-    if (!lines.length) return 0;
-    // one truth with bodyEnd's dedent measurement (lib/lang-rules.mjs)
-    const stack = [indentOf(lines[0])];
-    let max = 0;
-    for (const l of lines.slice(1)) {
-      const ind = indentOf(l);
-      while (stack.length > 1 && ind <= stack[stack.length - 1]) stack.pop();
-      if (ind > stack[stack.length - 1]) stack.push(ind);
-      max = Math.max(max, stack.length - 1);
+  try {
+    if (lang === 'py') {
+      const lines = (src || '').split(/\r?\n/).filter((l) => l.trim() !== '');
+      if (!lines.length) return 0;
+      // one truth with bodyEnd's dedent measurement (lib/lang-rules.mjs)
+      const stack = [indentOf(lines[0])];
+      let max = 0;
+      for (const l of lines.slice(1)) {
+        const ind = indentOf(l);
+        while (stack.length > 1 && ind <= stack[stack.length - 1]) stack.pop();
+        if (ind > stack[stack.length - 1]) stack.push(ind);
+        max = Math.max(max, stack.length - 1);
+      }
+      return max;
+    }
+    const s = strip(src || '', lang);
+    let depth = 0, max = 0;
+    for (const ch of s) {
+      if (ch === '{') { depth++; if (depth > max) max = depth; }
+      else if (ch === '}') { if (depth > 0) depth--; }
     }
     return max;
-  }
-  const s = strip(src || '', lang);
-  let depth = 0, max = 0;
-  for (const ch of s) {
-    if (ch === '{') { depth++; if (depth > max) max = depth; }
-    else if (ch === '}') { if (depth > 0) depth--; }
-  }
-  return max;
+  } catch { return 0; } // finding #15: degrade this node, never the run
 }

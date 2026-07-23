@@ -34,7 +34,7 @@ test('B1+B4: sections present, session valid, mirror byte-identical, corpus skip
     const { r, out, site } = runAll(dir);
     assert.equal(r.status, 0, r.stderr);
     const b = readJSON(out);
-    for (const k of ['pipeline', 'session', 'toolBudgets', 'advisors', 'loaded', 'tsEngine', 'budgets', 'ranAt']) assert.ok(b[k], `section ${k} present`);
+    for (const k of ['pipeline', 'session', 'toolBudgets', 'advisors', 'loaded', 'cyclic', 'tsEngine', 'budgets', 'ranAt']) assert.ok(b[k], `section ${k} present`);
     assert.equal(b.session.allValidJson, true, 'every MCP response parsed and succeeded');
     assert.equal(b.session.calls.length, 12, 'the representative session is 12 calls');
     assert.equal(b.pipeline.stagesReused, true, 'the no-change rerun reused stages');

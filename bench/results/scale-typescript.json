@@ -1,4 +1,5 @@
 {
+  "staleNote": "v0.9.0 pre-fix numbers; re-run deferred to WS-G #35's report-scale re-run",
   "bench": "monorepo scale test (Spec K, docs/specs/bench-scale-runnable.md — runnable via bench/experiments/scale.mjs)",
   "target": "microsoft/TypeScript src/ @ 637d5746b70257028fb95aad32ddec6b26ab0a14 (shallow clone)",
   "engine": { "version": "0.9.0" },

@@ -152,7 +152,9 @@ export async function loadTsEngine() {
     // Spec H helpers: statement normalization + FNV-1a hash for Type-3 fingerprints.
     const FN_LIKE = new Set(['function_declaration', 'generator_function_declaration', 'function_expression', 'arrow_function', 'method_definition']);
     const JS_KW = new Set(['if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'return', 'break', 'continue', 'throw', 'try', 'catch', 'finally', 'new', 'delete', 'typeof', 'instanceof', 'in', 'of', 'void', 'yield', 'await', 'async', 'function', 'class', 'extends', 'super', 'this', 'const', 'let', 'var', 'null', 'undefined', 'true', 'false']);
-    const TPL_STR_RE = /`(?:[^`\\]|\\[^])*`/g, SQ_STR_RE = /'(?:[^'\\]|\\[^])*'/g, DQ_STR_RE = /"(?:[^"\\]|\\[^])*"/g;
+    // Round 2, finding #15: unrolled-loop form (escape atom `\\[^]`) — the alternation form recursed
+    // per character in V8; a >=8.4MB single-line string in any statement RangeError'd stmtHash.
+    const TPL_STR_RE = /`[^`\\]*(?:\\[^][^`\\]*)*`/g, SQ_STR_RE = /'[^'\\]*(?:\\[^][^'\\]*)*'/g, DQ_STR_RE = /"[^"\\]*(?:\\[^][^"\\]*)*"/g;
     const stmtHash = (text) => {
       // one tokenizing pass: keywords keep identity (uppercased), identifiers -> I, numbers -> N,
       // string/template contents -> S, whitespace dropped. Statement STRUCTURE survives; naming
@@ -239,8 +241,16 @@ export async function loadTsEngine() {
               // methods etc. still attribute dispatch, but are not class methods)
               if (cls?.name && mname && parentIds.length && parentIds[parentIds.length - 1] === cls.bodyId) {
                 methodsByClass.get(cls.name)?.add(mname);
-                const mid = mkId(`${cls.name}.${mname}`);
-                if (!methodIds.has(mid)) { // overloads collapse to one node
+                let mid = mkId(`${cls.name}.${mname}`);
+                // Round 2, finding #12: a mid collision here is always TWO REAL BODIES (get/set
+                // pair, or static/instance same-name) — TS overload *signatures* are
+                // method_signature nodes, never framed by FN_LIKE. The second body was silently
+                // dropped; it now suffixes the method's 1-based start line (frame.row is already
+                // startPosition.row + 1 — do NOT add 1 again: the suffix must byte-match the regex
+                // tier's '@' + start for A/B id equality). First occurrence keeps the bare id, so
+                // existing queries/fingerprints don't churn.
+                if (methodIds.has(mid)) mid += '@' + frame.row;
+                if (!methodIds.has(mid)) { // same-line collision (minified pair) would still clash: ids must stay unique
                   methodIds.add(mid);
                   frame.methodRec = { id: mid, label: mname, line: frame.row, endLine: node.endPosition.row + 1, complexity: 1 };
                   methods.push(frame.methodRec);

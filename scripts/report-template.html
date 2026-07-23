@@ -225,7 +225,6 @@
     var n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
     return 'rgb(' + Math.round(r * f) + ',' + Math.round(g * f) + ',' + Math.round(b * f) + ')';
   }
-  var domSummary = {}; G.domains.forEach(function (d) { domSummary[d.name] = d; });
 
   // ---------- active scope + derived metrics (recomputed when the role filter toggles) ----------
   var AN = [], AE = [], activeIds = null, domainNames = [], duplicates = [], patterns = [], dupNodeIds = new Set(), hotspots = [], dead = [];
@@ -343,7 +342,7 @@
     roleBtn.onclick = function () {
       productOnly = !productOnly; syncRoleBtn();
       hashState.roles = productOnly ? null : 'all'; writeHash();
-      computeDerived(); renderMeta();
+      computeDerived(); refreshHits(); renderMeta(); // #37: AN changed — recompute the reused hit sets
       rendered = {}; // every view re-renders against the new scope
       var cur = document.querySelector('.tab[role="tab"].on').getAttribute('data-view');
       if (gInit) { gLayout(); syncToggle(); }
@@ -642,7 +641,7 @@
   // while the rest stay collapsed — the all-at-once hairball is structurally impossible unless
   // explicitly asked for ("Expand all"). Layout is deterministic (seeded spiral, no random), so
   // the same repo always draws the same map. Positions survive re-layout for continuity.
-  var gInit = false, expanded = new Set(), W = null, sim = null, selectedNode = null, searchTerm = '', lastLit = null;
+  var gInit = false, expanded = new Set(), W = null, sim = null, selectedNode = null, searchTerm = '', lastLit = null, settleDraws = 0;
   var lastPos = new Map(); // id -> {x,y} carried across layouts
   var cv = document.getElementById('cv'), ctx = cv.getContext('2d'), DPR = window.devicePixelRatio || 1, cam = { x: 0, y: 0, k: 1 };
   var UIFONT = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif'; // canvas needs a REAL stack (bare ui-sans-serif falls back to serif)
@@ -673,13 +672,26 @@
     if (W) W.nodes.forEach(function (nd) { lastPos.set(nd.id, { x: nd.x, y: nd.y }); });
     W = buildW();
     var n = W.nodes.length, R = Math.max(140, Math.sqrt(n) * 60);
+    // finding #35: golden-spiral hatch. New symbols seed at their area bubble's last position on a
+    // rad = SP·√k, angle k·2.39996 phyllotaxis spiral (k = per-domain sequence in W-node order) —
+    // near-equilibrium spacing that lands WITH the far-field monopole so the layout never has to
+    // explode to spread (the old radius-14 hatch packed every symbol onto its bubble, and 3×3-only
+    // repulsion could ONLY spread it by flinging nodes ±185k px). Positions are never persisted
+    // (lastPos is in-memory), so layout stays a pure function of (graph, interaction sequence): a
+    // symbol with its own lastPos replays continuity after a collapse; a genuinely new one hatches.
+    var SP = 38, domK = {};
     W.nodes.forEach(function (nd, i) {
-      var prev = lastPos.get(nd.id) || lastPos.get('d:' + nd.domain); // new symbols hatch from their area's bubble
-      if (prev) { nd.x = prev.x + (nd.sym ? Math.cos(i * 2.39996) * 14 : 0); nd.y = prev.y + (nd.sym ? Math.sin(i * 2.39996) * 14 : 0); }
-      else { var a = i * 2.39996, rad = R * Math.sqrt(i / Math.max(1, n)); nd.x = Math.cos(a) * rad; nd.y = Math.sin(a) * rad; }
+      var self = lastPos.get(nd.id);
+      if (self) { nd.x = self.x; nd.y = self.y; }                       // continuity: keep last known position
+      else if (nd.sym) {                                                // new symbol → spiral from its area bubble
+        var base = lastPos.get('d:' + nd.domain);
+        var k = (domK[nd.domain] = (domK[nd.domain] === undefined ? 0 : domK[nd.domain] + 1));
+        if (base) { var ang = k * 2.39996, rad = SP * Math.sqrt(k); nd.x = base.x + Math.cos(ang) * rad; nd.y = base.y + Math.sin(ang) * rad; }
+        else { var a = i * 2.39996, r0 = R * Math.sqrt(i / Math.max(1, n)); nd.x = Math.cos(a) * r0; nd.y = Math.sin(a) * r0; }
+      } else { var a2 = i * 2.39996, r2 = R * Math.sqrt(i / Math.max(1, n)); nd.x = Math.cos(a2) * r2; nd.y = Math.sin(a2) * r2; }
       nd.vx = 0; nd.vy = 0;
     });
-    sim = { alpha: 1, running: false }; gFit(); gStart();
+    sim = { alpha: 1, running: false, farCoarse: false }; gFit(); gStart();
   }
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var reducedSeq = 0;
@@ -693,10 +705,16 @@
       var seq = ++reducedSeq;
       var slice = function () {
         if (!sim || seq !== reducedSeq) return; // a newer layout superseded this settle
-        var t0 = performance.now();
-        while (sim.alpha > 0.02 && performance.now() - t0 < 12) { gStep(); sim.alpha *= 0.985; }
+        // #35: drive the chunker against a 12ms slice budget — the old single synchronous anneal
+        // blocked the main thread for the whole 260-step settle (a multi-minute freeze at 16.8k).
+        var deadline = performance.now() + 12;
+        while (sim.alpha > 0.02 && performance.now() < deadline) { gStepChunk(deadline); }
+        // T-35.5: motion-sensitive users get DISCRETE progress stills — a redraw at most once per ~1s
+        // wall (not animation) — plus the final draw; the seq guard already drops superseded settles.
+        var now = performance.now();
+        if (!sim._lastDraw || now - sim._lastDraw > 1000) { sim._lastDraw = now; settleDraws++; gFit(); gDraw(); }
         if (sim.alpha > 0.02) { setTimeout(slice, 0); return; }
-        gFit(); gDraw(); sim.running = false; // ONE draw at the end — no motion
+        settleDraws++; gFit(); gDraw(); sim.running = false; // ONE final draw at the end — no motion
       };
       slice(); return;
     }
@@ -704,63 +722,177 @@
   }
   function gTick() {
     if (!sim || !document.getElementById('view-graph').classList.contains('on')) { if (sim) sim.running = false; return; }
-    // as many sim steps as fit the frame budget (small graphs settle in a blink; huge graphs do
-    // at least one step and stay responsive), then one draw
-    var t0 = performance.now();
-    do { gStep(); sim.alpha *= 0.985; } while (sim.alpha > 0.02 && performance.now() - t0 < FRAME_BUDGET_MS);
+    // #35: drive the chunker against the frame budget — at most one budget slice of sim work per
+    // frame at any n, so the first post-expand frame never freezes; the chunker owns the alpha decay.
+    var deadline = performance.now() + FRAME_BUDGET_MS;
+    while (sim.alpha > 0.02 && performance.now() < deadline) { gStepChunk(deadline); }
     gDraw();
     if (sim.alpha > 0.02) requestAnimationFrame(gTick); else sim.running = false;
   }
-  function gStep() {
-    var ns = W.nodes, es = W.edges, a = sim.alpha, i, j;
-    for (i = 0; i < ns.length; i++) { ns[i].fx = 0; ns[i].fy = 0; }
-    // Repulsion via a uniform grid (finding 21): the all-pairs loop was O(n²) PER FRAME —
-    // measured 1,278ms/frame at 16.3k nodes, ≈5.5 minutes of sim CPU for one "Expand all"
-    // click. Beyond CUT the inverse-square force is sub-percent of the spring forces, so only
-    // pairs within the 3×3 cell neighborhood interact. Deterministic: cells keyed by floored
-    // coords, pairs visited in node-array order — same input, same layout.
-    var CUT = 220, CUT2 = CUT * CUT, grid = new Map(), gx, gy, cx, cy, cell;
-    for (i = 0; i < ns.length; i++) {
-      gx = Math.floor(ns[i].x / CUT); gy = Math.floor(ns[i].y / CUT);
-      cell = grid.get(gx + ':' + gy); if (!cell) grid.set(gx + ':' + gy, cell = []);
-      cell.push(i);
-    }
-    for (i = 0; i < ns.length; i++) {
-      var A = ns[i];
-      gx = Math.floor(A.x / CUT); gy = Math.floor(A.y / CUT);
-      for (cx = gx - 1; cx <= gx + 1; cx++) for (cy = gy - 1; cy <= gy + 1; cy++) {
-        cell = grid.get(cx + ':' + cy); if (!cell) continue;
-        for (var ci = 0; ci < cell.length; ci++) {
-          j = cell[ci]; if (j <= i) continue; // each pair once
-          var B = ns[j], dx = A.x - B.x, dy = A.y - B.y, d2 = dx * dx + dy * dy;
-          if (d2 > CUT2) continue;
-          d2 = d2 || 0.01;
-          var d = Math.sqrt(d2);
-          var repK = 900 + (A.r + B.r) * 55; // bigger bodies push harder — bubbles keep their space
-          var f = repK / d2;
-          A.fx += dx / d * f; A.fy += dy / d * f; B.fx -= dx / d * f; B.fy -= dy / d * f;
-        }
+  // finding #35 — CHUNKABLE force step. gStepChunk(deadline) advances ONE logical step across as many
+  // uninterruptible slices as the deadline allows, so no single task ever blows a frame budget (the
+  // old synchronous gStep froze the main thread for a whole 1.2s step at 16.8k). The cursor + the
+  // grid/aggregate snapshots live on `sim` (rebuilt by gLayout), and forces accumulate into fx/fy
+  // across slices; positions are FROZEN until the integrate phase, so slicing changes WHEN work runs,
+  // never the arithmetic (bitwise-equal to a budget-∞ step — pinned in report-sim.test.mjs). ONE
+  // integrate + ONE alpha decay per COMPLETED logical step; a partial pass is never integrated.
+  // Phases: 0 setup (zero+grid+far-aggregate, atomic O(n)) · 1 near-field pairs · 2 far-field ·
+  // 3 springs · 4 integrate+decay. Returns true when a logical step completed, false on a partial.
+  function gStepChunk(deadline) {
+    var ns = W.nodes, es = W.edges, i, j;
+    var cur = sim.cur || (sim.cur = { ph: 0, i: 0 });
+    var CUT = 220, CUT2 = CUT * CUT, BATCH = 256; // per-slice granularity: the far field is O(BATCH·C), so keep it small enough that one slice can't blow the frame budget at scale
+    if (cur.ph === 0) {
+      // setup — atomic: zero forces, build the fine 3×3 grid, aggregate the far-field monopoles.
+      for (i = 0; i < ns.length; i++) { ns[i].fx = 0; ns[i].fy = 0; }
+      var grid = new Map(), gx, gy;
+      for (i = 0; i < ns.length; i++) { gx = Math.floor(ns[i].x / CUT); gy = Math.floor(ns[i].y / CUT); var gk = gx + ':' + gy; var gc = grid.get(gk); if (!gc) grid.set(gk, gc = []); gc.push(i); }
+      sim.grid = grid;
+      // finding #35: the 3×3 near-field alone gave repulsion no long-range term, so the ONLY spreading
+      // mechanism was an accidental ±185k explosion (spiral seed + no far field measured 542ms/step).
+      // Aggregate each cell's mass (Σ 900/2 + r·55 — mirrors repK's terms) + center of mass, then push
+      // every node from every NON-adjacent cell's monopole. Deterministic: aggregate cells built in
+      // node-array order, forces summed in node-array order, no random, no wall-clock.
+      // Escape hatch: the far field is O(n·C) in live cells; when C exceeds 4096 the aggregation
+      // coarsens to 2×CUT. The choice LATCHES per anneal (held until the next gLayout rebuilds sim).
+      if (!sim.farCoarse && grid.size > 4096) sim.farCoarse = true;
+      var CO = sim.farCoarse ? CUT * 2 : CUT; sim.CO = CO;
+      var aggIdx = new Map(), aGX = [], aGY = [], aM = [], aX = [], aY = [], nagg = 0, acx, acy, ak, ai, mm;
+      for (i = 0; i < ns.length; i++) {
+        acx = Math.floor(ns[i].x / CO); acy = Math.floor(ns[i].y / CO); ak = acx + ':' + acy; ai = aggIdx.get(ak);
+        if (ai === undefined) { ai = nagg++; aggIdx.set(ak, ai); aGX.push(acx); aGY.push(acy); aM.push(0); aX.push(0); aY.push(0); }
+        mm = 450 + ns[i].r * 55; aM[ai] += mm; aX[ai] += mm * ns[i].x; aY[ai] += mm * ns[i].y;
       }
+      for (i = 0; i < nagg; i++) { aX[i] /= aM[i]; aY[i] /= aM[i]; } // mass → center of mass
+      sim.aGX = aGX; sim.aGY = aGY; sim.aM = aM; sim.aX = aX; sim.aY = aY; sim.nagg = nagg;
+      cur.ph = 1; cur.i = 0;
+      if (performance.now() >= deadline) return false;
     }
-    for (i = 0; i < es.length; i++) {
-      var e = es[i], P = W.idx.get(e.from), Q = W.idx.get(e.to); if (!P || !Q) continue;
-      var L = P.bubble && Q.bubble ? 180 : (P.bubble || Q.bubble) ? 120 : 52;
-      var ex = Q.x - P.x, ey = Q.y - P.y, ed = Math.sqrt(ex * ex + ey * ey) || 0.01, df = (ed - L) / ed * 0.03;
-      P.fx += ex * df; P.fy += ey * df; Q.fx -= ex * df; Q.fy -= ey * df;
+    if (cur.ph === 1) { // near-field repulsion, sliced by node
+      var grid1 = sim.grid, gx1, gy1, cx, cy, cell, ci;
+      while (cur.i < ns.length) {
+        var stop1 = cur.i + BATCH; if (stop1 > ns.length) stop1 = ns.length;
+        for (; cur.i < stop1; cur.i++) {
+          var A = ns[cur.i]; gx1 = Math.floor(A.x / CUT); gy1 = Math.floor(A.y / CUT);
+          for (cx = gx1 - 1; cx <= gx1 + 1; cx++) for (cy = gy1 - 1; cy <= gy1 + 1; cy++) {
+            cell = grid1.get(cx + ':' + cy); if (!cell) continue;
+            for (ci = 0; ci < cell.length; ci++) {
+              j = cell[ci]; if (j <= cur.i) continue; // each pair once
+              var B = ns[j], dx = A.x - B.x, dy = A.y - B.y, d2 = dx * dx + dy * dy;
+              if (d2 > CUT2) continue;
+              d2 = d2 || 0.01;
+              var d = Math.sqrt(d2), repK = 900 + (A.r + B.r) * 55, f = repK / d2;
+              A.fx += dx / d * f; A.fy += dy / d * f; B.fx -= dx / d * f; B.fy -= dy / d * f;
+            }
+          }
+        }
+        if (cur.i < ns.length && performance.now() >= deadline) return false;
+      }
+      cur.ph = 2; cur.i = 0;
+      if (performance.now() >= deadline) return false;
     }
+    if (cur.ph === 2) { // far-field monopole, sliced by node
+      var aGX = sim.aGX, aGY = sim.aGY, aM = sim.aM, aX = sim.aX, aY = sim.aY, nagg = sim.nagg, CO = sim.CO, K_FAR = 0.8;
+      while (cur.i < ns.length) {
+        var stop2 = cur.i + BATCH; if (stop2 > ns.length) stop2 = ns.length;
+        for (; cur.i < stop2; cur.i++) {
+          var N0 = ns[cur.i], acx0 = Math.floor(N0.x / CO), acy0 = Math.floor(N0.y / CO), ffx = 0, ffy = 0, c;
+          for (c = 0; c < nagg; c++) {
+            var ddx = aGX[c] - acx0, ddy = aGY[c] - acy0;
+            if (ddx <= 1 && ddx >= -1 && ddy <= 1 && ddy >= -1) continue; // adjacent → near-field owns it
+            var fx0 = N0.x - aX[c], fy0 = N0.y - aY[c], fd2 = fx0 * fx0 + fy0 * fy0; if (fd2 < 1) fd2 = 1;
+            var fd = Math.sqrt(fd2), ff = K_FAR * aM[c] / (fd2 > CUT2 ? fd2 : CUT2);
+            ffx += fx0 / fd * ff; ffy += fy0 / fd * ff;
+          }
+          N0.fx += ffx; N0.fy += ffy;
+        }
+        if (cur.i < ns.length && performance.now() >= deadline) return false;
+      }
+      cur.ph = 3; cur.i = 0;
+      if (performance.now() >= deadline) return false;
+    }
+    if (cur.ph === 3) { // springs, sliced by edge
+      while (cur.i < es.length) {
+        var stop3 = cur.i + BATCH; if (stop3 > es.length) stop3 = es.length;
+        for (; cur.i < stop3; cur.i++) {
+          var e = es[cur.i], P = W.idx.get(e.from), Q = W.idx.get(e.to); if (!P || !Q) continue;
+          var L = P.bubble && Q.bubble ? 180 : (P.bubble || Q.bubble) ? 120 : 52;
+          var ex = Q.x - P.x, ey = Q.y - P.y, ed = Math.sqrt(ex * ex + ey * ey) || 0.01, df = (ed - L) / ed * 0.03;
+          P.fx += ex * df; P.fy += ey * df; Q.fx -= ex * df; Q.fy -= ey * df;
+        }
+        if (cur.i < es.length && performance.now() >= deadline) return false;
+      }
+      cur.ph = 4; cur.i = 0;
+      if (performance.now() >= deadline) return false;
+    }
+    // phase 4 — integrate (atomic, cheap O(n)): centering + velocity + position, then ONE alpha decay
+    var a = sim.alpha;
     for (i = 0; i < ns.length; i++) { var nd = ns[i]; nd.fx += -nd.x * 0.015; nd.fy += -nd.y * 0.015; nd.vx = (nd.vx + nd.fx * a) * 0.86; nd.vy = (nd.vy + nd.fy * a) * 0.86; nd.x += nd.vx; nd.y += nd.vy; }
+    sim.alpha *= 0.985;
+    sim.cur = { ph: 0, i: 0 };
+    return true;
   }
+  // Run a whole logical step in one uninterruptible task (budget-∞). The lab drives gStepChunk
+  // directly; in-template callers that want a full step use this.
+  function gStep() { while (!gStepChunk(Infinity)) { /* setup→integrate in one pass */ } }
   function gFit() { var ns = W.nodes; if (!ns.length) return; var a = 1e9, b = 1e9, c = -1e9, d = -1e9; ns.forEach(function (n) { a = Math.min(a, n.x); b = Math.min(b, n.y); c = Math.max(c, n.x); d = Math.max(d, n.y); }); var w = cv.width / DPR, h = cv.height / DPR; cam.k = Math.max(0.05, Math.min((w - 70) / Math.max(1, c - a), (h - 70) / Math.max(1, d - b), 2.5)); cam.x = w / 2 - (a + c) / 2 * cam.k; cam.y = h / 2 - (b + d) / 2 * cam.k; }
   function X(x) { return x * cam.k + cam.x; } function Y(y) { return y * cam.k + cam.y; }
+  // ---------- draw helpers (pure; node-tested via extractFn in tests/report-draw.test.mjs) --------
+  // #37: labels are picked by a position-INDEPENDENT rank, so they never flicker across anneal
+  // frames at a fixed camera — rank is (bubble, hl membership, screen radius, id), never x/y. Capped
+  // per frame so a zoomed-in view never tries to paint thousands of labels.
+  function labelPick(nodes, cam, hl, cap) {
+    var scored = [];
+    for (var i = 0; i < nodes.length; i++) {
+      var nd = nodes[i];
+      var rank = nd.bubble ? 0 : (hl && hl.has(nd.id)) ? 1 : 2; // bubbles > selection/hits > the rest
+      scored.push({ nd: nd, rank: rank, sr: nd.r * cam.k });
+    }
+    scored.sort(function (a, b) {
+      if (a.rank !== b.rank) return a.rank - b.rank;
+      if (a.sr !== b.sr) return b.sr - a.sr;                     // larger screen radius first
+      return a.nd.id < b.nd.id ? -1 : a.nd.id > b.nd.id ? 1 : 0; // deterministic tie-break by id
+    });
+    var out = [];
+    for (var k = 0; k < scored.length && out.length < cap; k++) out.push(scored[k].nd);
+    return out;
+  }
+  // #37: edges batch by EXACT style bucket — one beginPath+stroke per (state, bubble-pair, weight)
+  // group instead of per edge. alpha saturates at w=29, width at w=72, so min(weight,72) keys both
+  // without losing a byte of the old per-edge style. ≤ 3·2·72 = 432 buckets at any n.
+  function edgeBucketKey(e, A, B, on) {
+    var pair = !!(A.bubble && B.bubble);
+    var state = !on ? 'dim' : (e.cross && !pair) ? 'tangle' : 'norm';
+    return state + '|' + (pair ? 1 : 0) + '|' + Math.min(e.weight, 72);
+  }
+  function edgeStyleFor(key) {
+    var p = key.split('|'), state = p[0], pair = p[1] === '1', w = +p[2];
+    var wgt = Math.min(1, Math.log(w + 1) / 3.4);
+    return {
+      stroke: state === 'dim' ? 'rgba(125,122,135,0.05)'
+        : state === 'tangle' ? 'rgba(236,131,90,' + (0.25 + wgt * 0.4) + ')'
+        : 'rgba(156,153,166,' + (0.14 + wgt * 0.34) + ')',
+      width: pair ? Math.max(0.8, Math.min(6, Math.log(w + 1) * 1.4)) : 1,
+    };
+  }
+  // #37: the search highlight set, computed ONCE per search/scope change (refreshHits stores it),
+  // not rescanned across the whole active node set every frame.
+  function hitScan(nodes, term) {
+    var t = (term || '').toLowerCase(), hits = [], ids = new Set(), doms = new Set();
+    if (t) for (var i = 0; i < nodes.length; i++) { var n = nodes[i]; if (n.label.toLowerCase().indexOf(t) >= 0) { hits.push(n); ids.add(n.id); doms.add(n.domain); } }
+    return { hits: hits, ids: ids, doms: doms };
+  }
+  var LABEL_CAP = 300; // #37: at most this many labels per frame, priority-ranked
   function gDraw() {
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
-    // highlight set: search matches, or the selected node + its neighbors (neighbors inside a
-    // collapsed bubble light the bubble — the connection is never invisible)
+    // #37: one getComputedStyle per draw (was one per labeled node → 16.8k/draw). Theme flips call
+    // applyTheme → setTimeout(gDraw), so a per-draw read stays in sync with the page.
+    var thc = cvColors();
+    // highlight set: search matches (reused from refreshHits), or the selected node + its neighbors
+    // (neighbors inside a collapsed bubble light the bubble — the connection is never invisible)
     var hl = null, hlDom = null;
     if (searchTerm) {
-      var t = searchTerm.toLowerCase();
-      hl = new Set(); hlDom = new Set();
-      AN.forEach(function (n) { if (n.label.toLowerCase().indexOf(t) >= 0) { hl.add(n.id); hlDom.add(n.domain); } });
+      hl = hitIds; hlDom = hitDomains; // #37: refreshHits already computed these — no per-frame AN rescan
     } else if (selectedNode) {
       hl = new Set([selectedNode]); hlDom = new Set();
       var lightUp = function (id) { var n = nodeById.get(id); if (!n) return; hl.add(mapEnd(n)); hlDom.add(n.domain); };
@@ -768,23 +900,32 @@
     }
     var lit = function (nd) { return !hl || hl.has(nd.id) || (nd.bubble && hlDom && hlDom.has(nd.domain)); };
     lastLit = hl ? new Set(W.nodes.filter(lit).map(function (n) { return n.id; })) : null;
-    // edges: quadratic curves, weight -> alpha/width; cross-area edges wear the tangle color
+    // edges: quadratic curves, weight -> alpha/width; cross-area edges wear the tangle color. Grouped
+    // into ≤432 exact style buckets, one beginPath+stroke each (was one stroke per edge — 104k at 16.8k).
+    var lowZoom = cam.k < 0.35; // intentional geometry LOD: weight-1 non-bubble edges draw straight
+    var buckets = new Map();
     W.edges.forEach(function (e) {
       var A = W.idx.get(e.from), B = W.idx.get(e.to); if (!A || !B) return;
       var on = !hl || (lit(A) && lit(B));
-      var wgt = Math.min(1, Math.log(e.weight + 1) / 3.4);
-      // between two collapsed bubbles EVERY edge is cross-area — orange would be noise there;
-      // the tangle color only means something once symbols are on screen
-      var tangle = e.cross && !(A.bubble && B.bubble);
-      ctx.strokeStyle = !on ? 'rgba(125,122,135,0.05)'
-        : tangle ? 'rgba(236,131,90,' + (0.25 + wgt * 0.4) + ')'
-        : 'rgba(156,153,166,' + (0.14 + wgt * 0.34) + ')';
-      ctx.lineWidth = A.bubble && B.bubble ? Math.max(0.8, Math.min(6, Math.log(e.weight + 1) * 1.4)) : 1;
-      var x1 = X(A.x), y1 = Y(A.y), x2 = X(B.x), y2 = Y(B.y);
-      var mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1;
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo(mx - dy * 0.09, my + dx * 0.09, x2, y2); ctx.stroke();
+      var key = edgeBucketKey(e, A, B, on);
+      var b = buckets.get(key); if (!b) buckets.set(key, b = []); b.push(e);
     });
-    // nodes: fill + darker ring of the same hue; selection wears the brand accent
+    buckets.forEach(function (list, key) {
+      var st = edgeStyleFor(key); ctx.strokeStyle = st.stroke; ctx.lineWidth = st.width;
+      var kp = key.split('|'), straight = lowZoom && kp[1] === '0' && kp[2] === '1';
+      ctx.beginPath();
+      for (var m = 0; m < list.length; m++) {
+        var e = list[m], A = W.idx.get(e.from), B = W.idx.get(e.to);
+        var x1 = X(A.x), y1 = Y(A.y), x2 = X(B.x), y2 = Y(B.y);
+        ctx.moveTo(x1, y1);
+        if (straight) ctx.lineTo(x2, y2);
+        else { var mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1; ctx.quadraticCurveTo(mx - dy * 0.09, my + dx * 0.09, x2, y2); }
+      }
+      ctx.stroke();
+    });
+    // nodes: fill + darker ring of the same hue; selection wears the brand accent. Labels are
+    // collected here (screen-space LOD) and drawn in a capped, priority-ranked second pass.
+    var labelCands = [];
     W.nodes.forEach(function (nd) {
       var vis = lit(nd);
       var c = colorOf(nd.domain);
@@ -793,18 +934,22 @@
       ctx.fillStyle = c; ctx.fill();
       ctx.lineWidth = nd.bubble ? 2 : 1.4; ctx.strokeStyle = shade(c, 0.5); ctx.stroke();
       if (selectedNode === nd.id) { ctx.lineWidth = 2.5; ctx.strokeStyle = '#C6F24E'; ctx.beginPath(); ctx.arc(X(nd.x), Y(nd.y), nd.r + 2.5, 0, 6.2832); ctx.stroke(); }
-      var showLabel = vis && (nd.bubble || nd.r > 7.5 || cam.k > 1.7 || (hl && hl.has(nd.id) && hl.size < 40));
-      if (showLabel) {
-        var lx = X(nd.x) + nd.r + 4, ly = Y(nd.y) + 3.5;
-        ctx.font = (nd.bubble ? '600 12px ' : '500 10.5px ') + UIFONT;
-        var thc = cvColors();
-        ctx.lineWidth = 3; ctx.strokeStyle = thc.halo; ctx.lineJoin = 'round';
-        var txt = nd.bubble ? nd.label + ' · ' + nd.count : nd.label;
-        ctx.strokeText(txt, lx, ly);
-        ctx.fillStyle = nd.bubble ? thc.label : thc.dim; ctx.fillText(txt, lx, ly);
-      }
       ctx.globalAlpha = 1;
+      // #37: screen-space gate (was world-space nd.r>7.5 — a big node lost its label when zoomed out).
+      var cand = vis && (nd.bubble || nd.r * cam.k > 7.5 || cam.k > 1.7 || (hl && hl.has(nd.id) && hl.size < 40));
+      if (cand) labelCands.push(nd);
     });
+    var toLabel = labelPick(labelCands, cam, hl, LABEL_CAP);
+    ctx.globalAlpha = 1; ctx.lineJoin = 'round';
+    for (var li = 0; li < toLabel.length; li++) {
+      var lnd = toLabel[li];
+      var lx = X(lnd.x) + lnd.r + 4, ly = Y(lnd.y) + 3.5;
+      ctx.font = (lnd.bubble ? '600 12px ' : '500 10.5px ') + UIFONT;
+      ctx.lineWidth = 3; ctx.strokeStyle = thc.halo;
+      var txt = lnd.bubble ? lnd.label + ' · ' + lnd.count : lnd.label;
+      ctx.strokeText(txt, lx, ly);
+      ctx.fillStyle = lnd.bubble ? thc.label : thc.dim; ctx.fillText(txt, lx, ly);
+    }
   }
   function gPick(mx, my) { var best = null, bd = 1e9; W.nodes.forEach(function (nd) { var dx = X(nd.x) - mx, dy = Y(nd.y) - my, d = Math.sqrt(dx * dx + dy * dy); if (d < nd.r + 4 && d < bd) { bd = d; best = nd; } }); return best; }
   var gdrag = null, gmoved = false;
@@ -819,13 +964,14 @@
   // Search NAVIGATES: live typing dims non-matches; Enter cycles matches (centering + selecting
   // each), Escape clears. The count chip narrates n/N for screen readers too.
   var gsearchEl = document.getElementById('gsearch'), gcountEl = document.getElementById('gcount');
-  var searchHits = [], searchIx = -1;
+  var searchHits = [], searchIx = -1, hitIds = new Set(), hitDomains = new Set();
   function centerOn(nd) { var w = cv.width / DPR, h = cv.height / DPR; cam.k = Math.max(cam.k, 0.9); cam.x = w / 2 - nd.x * cam.k; cam.y = h / 2 - nd.y * cam.k; }
   function refreshHits() {
     // search SYMBOLS (the active scope), not whatever bubbles the current view draws — a domain
-    // view must still find normalizePath and expand to it on Enter.
-    var t = searchTerm.toLowerCase();
-    searchHits = t ? AN.filter(function (n) { return n.label.toLowerCase().indexOf(t) >= 0; }) : [];
+    // view must still find normalizePath and expand to it on Enter. #37: this ALSO stores the id +
+    // domain Sets gDraw's search highlight reuses, so the draw loop stops rescanning AN per frame.
+    var r = hitScan(AN, searchTerm);
+    searchHits = r.hits; hitIds = r.ids; hitDomains = r.doms;
     searchIx = -1;
     gcountEl.textContent = searchTerm ? (searchHits.length ? searchHits.length + ' match(es) — Enter jumps' : 'no matches') : '';
   }
@@ -883,20 +1029,52 @@
       if (nd) { selectedNode = top.id; cam.k = Math.max(cam.k, 1.2); centerOn(nd); showNode(top.id); gDraw(); }
       return top.id;
     },
-    // finding 13(d)/21: the expand-all cliff, measurable — every symbol on canvas, N timed sim
-    // frames. simMsPerFrame is the number that was 1,278ms at 16.3k nodes under the all-pairs
-    // loop and must stay flat under the grid.
-    expandAll: function (frames) {
-      frames = frames || 10;
+    // finding #35 (T-35.6): the expand-all receipt, measured HONESTLY. The old 10-frame sample
+    // straddled the ±185k explosion (508→116→37ms across back-to-back calls — unusable). Now: every
+    // symbol on canvas, then run the PRODUCTION chunker to settle, timing each LOGICAL step AND each
+    // uninterruptible SLICE at the shipping frame budget. settledMsPerFrame = mean of the last 10
+    // logical steps (the true per-step cost); maxSingleStepMs = the worst single slice (the number the
+    // "no frame >250ms" gate reads — never a budget-∞ step, or the metric would be fiction). Wall-
+    // capped so this synchronous measurement can't freeze the page unbounded; `settled` says whether
+    // alpha actually reached the floor inside the cap.
+    expandAll: function () {
       activate('graph'); gResize(); if (!gInit) { gInit = true; syncToggle(); gLayout(); }
       domainNames.forEach(function (d) { expanded.add(d); });
       gLayout(); syncToggle();
-      var t0 = performance.now();
-      for (var i = 0; i < frames; i++) gStep();
-      var ms = (performance.now() - t0) / frames;
-      gDraw();
-      return { nodes: W.nodes.length, edges: W.edges.length, simMsPerFrame: Math.round(ms * 100) / 100 };
+      var stepTimes = [], maxSlice = 0, steps = 0, HARD_STEPS = 800, HARD_MS = 15000, t0 = performance.now();
+      while (sim.alpha > 0.02 && steps < HARD_STEPS && performance.now() - t0 < HARD_MS) {
+        var ts = performance.now(), done = false;
+        while (!done) {
+          var s0 = performance.now();
+          done = gStepChunk(s0 + FRAME_BUDGET_MS); // one uninterruptible slice at the shipping budget
+          var sliceMs = performance.now() - s0; if (sliceMs > maxSlice) maxSlice = sliceMs;
+        }
+        stepTimes.push(performance.now() - ts); steps++;
+      }
+      var totalSettleMs = performance.now() - t0;
+      var last10 = stepTimes.slice(-10), mean = last10.reduce(function (x, y) { return x + y; }, 0) / Math.max(1, last10.length);
+      gFit(); gDraw();
+      return { nodes: W.nodes.length, edges: W.edges.length,
+        settledMsPerFrame: Math.round(mean * 100) / 100,
+        maxSingleStepMs: Math.round(maxSlice * 100) / 100,
+        totalSettleMs: Math.round(totalSettleMs), steps: steps, settled: sim.alpha <= 0.02 };
     },
+    // finding #35 (T-35.5): count of discrete progress redraws during a reduced-motion settle (>1
+    // proves the motion-safe path shows progress, not one frozen frame at the end).
+    get _settleDraws() { return settleDraws; },
+    // finding #35 (T-35.5): the fallback's interaction-fps evidence needs a probe, not vibes —
+    // resolves with the rAF tick count over `windowMs` (≥30 in 2s ⇒ ≥15fps while the anneal runs).
+    fpsProbe: function (windowMs) {
+      return new Promise(function (resolve) {
+        var ticks = 0, t0 = performance.now();
+        var loop = function () { ticks++; if (performance.now() - t0 < windowMs) requestAnimationFrame(loop); else resolve(ticks); };
+        requestAnimationFrame(loop);
+      });
+    },
+    // finding #37: time ONE full gDraw at the current camera (ms). The draw-loop evidence probe —
+    // the batched edges + capped labels + hoisted cvColors must keep a fitted 16.8k draw well under
+    // a frame. Called after gFit() by the report-scale harness; pure measurement, no state change.
+    drawOnce: function () { var t0 = performance.now(); gDraw(); return performance.now() - t0; },
     // screen-space bounding box of the drawn graph (CSS px) — lets the screenshot pipeline crop
     // to content instead of shipping empty canvas
     graphBBox: function () {

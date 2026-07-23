@@ -226,6 +226,37 @@ test('CM-IMPORT-REPOINT: a consumer importing the loser ends up importing the ca
   } finally { cleanup(dir); }
 });
 
+// CM-IMPORT-REPOINT-MTS (round-2 WS-C review): finding #11 made `.mts/.cts` first-class TS
+// sources, so a consumer spelled `use.mts` can hold the same broken-after-merge import the
+// repoint loop exists to fix — but that loop's extension filter still skipped them (a rename's
+// import repoint silently left `.mts/.cts` importers pointing at the deleted file).
+test('CM-IMPORT-REPOINT-MTS: an .mts consumer importing the loser is repointed too', () => {
+  const dir = tmpDir('cw-cm-mts-');
+  try {
+    writeTree(dir, {
+      'dup1.mjs': 'export function fmtMoney(x) { return x; }\n',
+      'dup2.mjs': 'export function formatMoney(x) { return x; }\n',
+      'use.mts': "import { fmtMoney } from './dup1.mjs';\nexport function total(x: number) { return fmtMoney(x); }\n",
+    });
+    const g = {
+      meta: { root: dir.replace(/\\/g, '/') }, domains: [], overlaps: [],
+      nodes: [
+        { id: 'dup1.mjs:fmtMoney', label: 'fmtMoney', kind: 'function', file: 'dup1.mjs', line: 1, loc: 1, exports: true, domain: 'd' },
+        { id: 'dup2.mjs:formatMoney', label: 'formatMoney', kind: 'function', file: 'dup2.mjs', line: 1, loc: 1, exports: true, domain: 'd' },
+        { id: 'use.mts:total', label: 'total', kind: 'function', file: 'use.mts', line: 2, loc: 1, exports: true, domain: 'd' },
+      ],
+      edges: [{ from: 'use.mts:total', to: 'dup1.mjs:fmtMoney', kind: 'call' }],
+    };
+    const graphPath = join(dir, 'graph.json'); writeFileSync(graphPath, JSON.stringify(g));
+    const r = runNode(CODEMOD, [graphPath, '--merge', 'dup1.mjs:fmtMoney,dup2.mjs:formatMoney', '--into', 'dup2.mjs:formatMoney', '--write', '--json']);
+    assert.equal(r.status, 0, `cross-file --write should succeed:\n${r.stdout}\n${r.stderr}`);
+    assert.equal(JSON.parse(r.stdout).write.applied, true);
+    const use = readFileSync(join(dir, 'use.mts'), 'utf8');
+    assert.match(use, /import \{ formatMoney \} from '\.\/dup2\.mjs'/, '.mts import repointed to the canonical file');
+    assert.ok(!/dup1\.mjs/.test(use), 'no specifier still names the deleted file');
+  } finally { cleanup(dir); }
+});
+
 // CM-WRITE-SUCCESS: a safe same-file merge applies — loser removed, caller rewired, gate passes.
 test('CM-WRITE-SUCCESS: a safe same-file merge applies and the loser definition is gone', () => {
   const dir = tmpDir('cw-cm-ok-');

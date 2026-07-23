@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, script, tmpDir, cleanup, writeTree, readJSON, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 // Rust on the deterministic fast path: fn/struct/enum/trait become nodes, indented `fn` inside an
 // impl is a method, `pub` sets exports, and bare in-body calls wire by name with the same
@@ -33,17 +34,15 @@ impl Calculator {
 `,
 };
 
-function extract() {
+async function extract() {
   const dir = tmpDir('codeweb-rust-');
   writeTree(dir, FIXTURE);
-  const frag = join(dir, 'fragment.json');
-  const r = runNode(script('extract-symbols.mjs'), [dir, '--out', frag, '--no-ctags']);
-  assert.equal(r.status, 0, r.stderr);
-  return { dir, g: readJSON(frag) };
+  const { fragment } = await runExtract({ path: dir, ctags: false });
+  return { dir, g: fragment };
 }
 
-test('Rust: fn/struct/impl-method become nodes with the right kind and exports', () => {
-  const { dir, g } = extract();
+test('Rust: fn/struct/impl-method become nodes with the right kind and exports', async () => {
+  const { dir, g } = await extract();
   try {
     const byId = new Map(g.nodes.map((n) => [n.id, n]));
     const add = byId.get('math.rs:add');
@@ -66,8 +65,8 @@ test('Rust: fn/struct/impl-method become nodes with the right kind and exports',
   }
 });
 
-test('Rust: in-body calls wire by name (with ambiguity drop)', () => {
-  const { dir, g } = extract();
+test('Rust: in-body calls wire by name (with ambiguity drop)', async () => {
+  const { dir, g } = await extract();
   try {
     assert.ok(hasEdge(g.edges, 'math.rs:helper', 'math.rs:add', 'call'), 'helper() calls add()');
     assert.ok(hasEdge(g.edges, 'math.rs:Calculator.compute', 'math.rs:helper', 'call'), 'compute() calls helper()');
@@ -76,8 +75,8 @@ test('Rust: in-body calls wire by name (with ambiguity drop)', () => {
   }
 });
 
-test('Rust: meta.languages reports rust', () => {
-  const { dir, g } = extract();
+test('Rust: meta.languages reports rust', async () => {
+  const { dir, g } = await extract();
   try {
     assert.ok(g.meta.languages.includes('rust'), 'languages includes rust');
   } finally {

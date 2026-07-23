@@ -8,6 +8,10 @@
 // S2: touching a source file invalidates — stages re-run.
 // S3: a deleted output invalidates — stages re-run and the file is restored.
 // S4: a CODEWEB_* lever change invalidates — memoized outputs are never served across configs.
+// S5 (round 2, #19): a byte-tampered-but-PARSEABLE graph.json forces recompute — the memo's
+//     per-output content hashes replace the old graphParses() belt, which only caught unparseable
+//     truncation of graph.json alone.
+// S6 (round 2, #19): a tampered report.md forces recompute — the other four outputs had NO belt.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -87,5 +91,81 @@ test('S4: a CODEWEB_* lever change invalidates the memo', () => {
     runPipeline(dir, ws);
     const after = runPipeline(dir, ws, [], { CODEWEB_ALL_ROLES: '1' });
     assert.ok(!reused(after), 'a lever changes downstream behavior -> never serve the memo');
+  } finally { cleanup(dir); }
+});
+
+// Same-length byte tamper: swaps the LAST two differing adjacent chars it can find, keeping the
+// file parseable where relevant (a label swap inside a JSON string) — size checks alone must miss
+// it, only a content hash catches it.
+const sameLengthTamper = (p) => {
+  const s = readFileSync(p, 'utf8');
+  const i = s.lastIndexOf('ab'); // any 2-char window; fall back to swapping two known chars
+  const at = i !== -1 ? i : s.length - 4;
+  const t = s.slice(0, at) + s[at + 1] + s[at] + s.slice(at + 2);
+  assert.equal(t.length, s.length);
+  assert.notEqual(t, s, 'tamper changed bytes');
+  writeFileSync(p, t);
+};
+
+test('S5: byte-tampered-but-parseable graph.json forces recompute (content hash, not a parse)', () => {
+  const dir = tmpDir('codeweb-memo-');
+  try {
+    writeTree(dir, FIXTURE);
+    const ws = join(dir, 'ws');
+    runPipeline(dir, ws);
+    // tamper a node label inside the JSON — same byte length, still parses
+    const p = join(ws, 'graph.json');
+    const g = readFileSync(p, 'utf8');
+    const tampered = g.replace('"beta"', '"betb"');
+    assert.notEqual(tampered, g, 'fixture guarantees a beta label to tamper');
+    assert.equal(tampered.length, g.length);
+    JSON.parse(tampered); // parseable — the OLD belt (graphParses) would have reused this
+    writeFileSync(p, tampered);
+    const after = runPipeline(dir, ws);
+    assert.ok(!reused(after), 'tampered graph.json -> stages re-run');
+    assert.ok(readFileSync(p, 'utf8').includes('"beta"'), 'graph.json recomputed clean');
+  } finally { cleanup(dir); }
+});
+
+test('S6: a tampered report.md forces recompute (the four non-graph outputs are guarded too)', () => {
+  const dir = tmpDir('codeweb-memo-');
+  try {
+    writeTree(dir, FIXTURE);
+    const ws = join(dir, 'ws');
+    runPipeline(dir, ws);
+    sameLengthTamper(join(ws, 'report.md'));
+    const after = runPipeline(dir, ws);
+    assert.ok(!reused(after), 'tampered report.md -> stages re-run');
+  } finally { cleanup(dir); }
+});
+
+// Round 2, finding #42 (T-42.7): the trend fast path — a partial `--stages through-overlap` run.
+test('S7: --stages through-overlap computes through overlap, skips report + memo, never poisons a full run', () => {
+  const dir = tmpDir('codeweb-memo-');
+  try {
+    writeTree(dir, FIXTURE);
+    const ws = join(dir, 'ws');
+    const partial = runPipeline(dir, ws, ['--stages', 'through-overlap']);
+    assert.match(partial, /skipping optimize \+ report/, 'the partial run announces the skip');
+    assert.ok(existsSync(join(ws, 'graph.json')) && existsSync(join(ws, 'overlap.md')), 'extract+cluster+overlap ran');
+    for (const f of ['report.html', 'optimize.md', '.stages.json']) {
+      assert.ok(!existsSync(join(ws, f)), `${f} is NOT produced by a partial run (the memo is never written)`);
+    }
+    // a subsequent FULL run in the same ws must recompute EVERYTHING — the partial ws never satisfied a memo
+    const full = runPipeline(dir, ws);
+    assert.ok(!reused(full), 'full run after a partial recomputes (memo not poisoned by the partial ws)');
+    for (const f of OUTPUTS) assert.ok(existsSync(join(ws, f)), `${f} produced by the full run`);
+    assert.ok(existsSync(join(ws, '.stages.json')), 'the full run wrote the memo');
+    assert.ok(reused(runPipeline(dir, ws)), 'the memo is valid now — a second full run reuses');
+  } finally { cleanup(dir); }
+});
+
+test('S8: --stages with an unknown phase exits 2 (no silent typo path)', () => {
+  const dir = tmpDir('codeweb-memo-');
+  try {
+    writeTree(dir, FIXTURE);
+    const r = runNode(RUN, [join(dir, 'src'), '--out-dir', join(dir, 'ws'), '--stages', 'through-report']);
+    assert.equal(r.status, 2, 'an unknown --stages value dies with usage');
+    assert.match(r.stderr, /unknown --stages/);
   } finally { cleanup(dir); }
 });

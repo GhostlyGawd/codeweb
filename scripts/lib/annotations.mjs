@@ -6,8 +6,9 @@
 // `.codeweb` metadata, never to source. Pure except the two explicit IO helpers.
 
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { atomicWrite } from './cli.mjs'; // finding #42: crash-safe write (pretty-print bytes unchanged)
 
 const ANN_FILE = 'annotations.json';
 
@@ -46,6 +47,6 @@ export function addSuppression(dir, fp, { note = '', verdict = 'false-positive' 
   const ann = loadAnnotations(dir);
   if (!ann.suppressions.some((s) => s.fingerprint === fp)) ann.suppressions.push({ fingerprint: fp, verdict, note });
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, ANN_FILE), JSON.stringify(ann, null, 2));
+  atomicWrite(join(dir, ANN_FILE), JSON.stringify(ann, null, 2));
   return ann;
 }

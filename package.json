@@ -2,7 +2,7 @@
   "name": "@ghostlygawd/codeweb",
   "version": "0.9.0",
   "type": "module",
-  "description": "The living map of your codebase \u2014 deterministic call/import graph engine, 24 MCP tools for coding agents, and a self-contained interactive report.",
+  "description": "The living map of your codebase \u2014 deterministic call/import graph engine, 27 MCP tools for coding agents, and a self-contained interactive report.",
   "keywords": [
     "mcp",
     "code-analysis",
@@ -34,7 +34,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "publishConfig": {
     "access": "public"

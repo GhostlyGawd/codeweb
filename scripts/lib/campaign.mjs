@@ -14,8 +14,11 @@ import { normalizeGraph, fileCycles, buildIndex, chooseCanonical, createMergeSim
 
 const byRoiThenId = (a, b) => b.roi - a.roi || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
-export function planCampaign(graph, { optimize = { opportunities: [] }, deadcode = { safe: [] }, breakCycles = { cycles: [] }, budget = Infinity } = {}) {
-  const g0 = normalizeGraph(structuredClone(graph));
+export function planCampaign(graph, { optimize = { opportunities: [] }, deadcode = { safe: [] }, breakCycles = { cycles: [] }, budget = Infinity, clone = true } = {}) {
+  // finding #27: callers that OWN their graph pass clone:false to skip the structuredClone (−260 ms at
+  // 15.7k). normalizeGraph is idempotent additive default-filling and never touches `meta`, so an
+  // in-place normalize is safe for such callers; the safe default (clone:true) protects everyone else.
+  const g0 = normalizeGraph(clone ? structuredClone(graph) : graph);
   // "New coupling" is judged by CONTAINMENT, not by the cycle's sorted-file key: an after-cycle is new
   // only if its files were NOT all already mutually cyclic. (A merge/delete that contracts an existing
   // SCC changes its key but introduces no new coupling — the same subtlety apply-edit.test pins.)

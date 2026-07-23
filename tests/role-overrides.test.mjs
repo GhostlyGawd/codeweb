@@ -64,6 +64,39 @@ test('R3: an unknown role value fails loudly, naming the entry', () => {
   } finally { cleanup(dir); }
 });
 
+// R5 (round-2 WS-C review): edge derivation became role-DEPENDENT with finding #10 — the ref
+// role gate's verdicts are baked into cached per-file edges. A rules-file role flip changes no
+// node id (symbolSig is blind to it), so the edge cache must ALSO key on rulesSig, mirroring the
+// stamp tier ("a rules change invalidates the stamp tier wholesale"). Pre-fix, run 2 replayed
+// run 1's bench-scoped verdict and shipped a product->bench ref the gate now forbids.
+test('R5: a rules-file role flip with a warm cache re-derives edges (the #10 gate sees fresh roles)', () => {
+  const dir = tmpDir('codeweb-roles-');
+  try {
+    writeTree(dir, {
+      'src/lib/prod.js': 'export function useIt() {\n  return probe(helper);\n}\n',
+      'src/bench/helper.js': 'export function helper() { return 1; }\n',
+    });
+    const cache = join(dir, 'cache.json');
+    // run 1: lib/** demoted to bench -> the from-side is not product, the gate is off, the bare
+    // ref resolves via the unique-in-package fallback (positive control that the fallback fires).
+    writeFileSync(join(dir, 'src', 'codeweb.rules.json'),
+      JSON.stringify({ roles: [{ glob: 'lib/**', role: 'bench' }] }));
+    const out1 = join(dir, 'f1.json');
+    let r = runNode(EXTRACT, [join(dir, 'src'), '--no-ctags', '--cache', cache, '--out', out1]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(readJSON(out1).edges.some((e) => e.from === 'lib/prod.js:useIt' && e.to === 'bench/helper.js:helper' && e.kind === 'ref'),
+      'positive control: with lib/** demoted, the bench->bench ref resolves');
+    // run 2 (warm cache): rules file gone -> lib/prod.js is product again. Same node ids, same
+    // file hashes — only rulesSig moved. The #10 gate must reject the product->bench ref.
+    rmSync(join(dir, 'src', 'codeweb.rules.json'));
+    const out2 = join(dir, 'f2.json');
+    r = runNode(EXTRACT, [join(dir, 'src'), '--no-ctags', '--cache', cache, '--out', out2]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(!readJSON(out2).edges.some((e) => e.from === 'lib/prod.js:useIt' && e.to === 'bench/helper.js:helper'),
+      'the role flip must invalidate cached edges — product never ref-resolves into bench');
+  } finally { cleanup(dir); }
+});
+
 test('R4: absent roles section == absent rules file (byte-identical fragments)', () => {
   const dir = tmpDir('codeweb-roles-');
   try {

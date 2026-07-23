@@ -30,6 +30,18 @@ export const tokenize = (src) => src
 export const K = 3;
 export const BANDS = { high: 0.6, medium: 0.35, low: 0.15 }; // body-similarity mean: >=high confirmed · >=medium DRIFTED · >=low weak · below refuted
 
+// THE body-line cap (perf-quality finding 15/16, centralized in finding #26). overlap.mjs,
+// dup-check.mjs, find-similar's live path, buildSimilarIndex, and diff's rename detection all
+// shingle a body's FIRST BODY_LINE_CAP lines only — thousand-line bodies (TypeScript's checker.ts)
+// otherwise yield 10k+ element shingle sets, the pipeline wall. Kept HERE, imported by all five, so a
+// map-time sidecar and every live reader cap IDENTICALLY (finding #26: sidecar ≡ live for long bodies).
+// Deterministic, counted where surfaced (overlap.md), never silent.
+export const BODY_LINE_CAP = 400;
+// Cap a body string to its first BODY_LINE_CAP lines. Lossless vs a '\n'-joined bodyOf (the split
+// lines hold no embedded '\n', and slice's Math.min(loc,CAP) precedent picks the same prefix). null
+// passes through unchanged. THE shared cap idiom — one truth for the readers that consume whole bodies.
+export const capBody = (body) => (body == null ? body : body.split('\n').slice(0, BODY_LINE_CAP).join('\n'));
+
 // K-gram shingle set of the tokenized source (default: THE K above).
 export const shingles = (src, k = K) => {
   const t = tokenize(src);

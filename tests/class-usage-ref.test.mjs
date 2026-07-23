@@ -15,6 +15,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 const FILES = {
   'AxiosHeaders.mjs':
@@ -54,42 +55,41 @@ let SRC, OUT;
 before(() => { SRC = tmpDir('codeweb-ref-'); writeTree(SRC, FILES); OUT = join(SRC, 'fragment.json'); });
 after(() => cleanup(SRC));
 
-function extract() {
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'ref-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  return readJSON(OUT);
+async function extract() {
+  const { fragment } = await runExtract({ path: SRC, target: 'ref-x', ctags: false });
+  return fragment;
 }
 
-test('a static-method call on an imported class refs the CLASS (and still calls the method)', () => {
-  const frag = extract();
+test('a static-method call on an imported class refs the CLASS (and still calls the method)', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:build', 'AxiosHeaders.mjs:AxiosHeaders', 'ref'),
     'build -> AxiosHeaders (class) via AxiosHeaders.from()');
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:build', 'AxiosHeaders.mjs:AxiosHeaders.from', 'call'),
     'build -> AxiosHeaders.from (method, owner-qualified id) call edge preserved');
 });
 
-test('instanceof on an imported class refs the CLASS', () => {
-  const frag = extract();
+test('instanceof on an imported class refs the CLASS', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:check', 'AxiosHeaders.mjs:AxiosHeaders', 'ref'),
     'check -> AxiosHeaders via instanceof');
 });
 
-test('construction still produces a call edge to the class', () => {
-  const frag = extract();
+test('construction still produces a call edge to the class', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:make', 'AxiosHeaders.mjs:AxiosHeaders', 'call'),
     'make -> AxiosHeaders via new');
 });
 
-test('PRECISION: an object-default member access creates NO class ref', () => {
-  const frag = extract();
+test('PRECISION: an object-default member access creates NO class ref', async () => {
+  const frag = await extract();
   assert.ok(!frag.edges.some((e) => e.from === 'objConsumer.mjs:go' && e.kind === 'ref'),
     'utils is an object, not a class -> go emits no ref edge');
   assert.ok(hasEdge(frag.edges, 'objConsumer.mjs:go', 'utils.mjs:merge', 'call'),
     'utils.merge() is still a precise call to merge');
 });
 
-test('DEPENDENTS: --dependents of the class unions the ref users, with a ref byKind breakdown', () => {
-  const frag = extract();
+test('DEPENDENTS: --dependents of the class unions the ref users, with a ref byKind breakdown', async () => {
+  const frag = await extract();
   const GP = join(SRC, 'graph.json');
   writeTree(SRC, { 'graph.json': JSON.stringify(frag) });
   const dep = runNode(script('query.mjs'), [GP, '--dependents', 'AxiosHeaders.mjs:AxiosHeaders', '--json']);

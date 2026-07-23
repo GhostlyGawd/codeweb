@@ -7,18 +7,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runNode, script, tmpDir, cleanup, writeTree, readJSON } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 import { join } from 'node:path';
 
 const EXTRACT = script('extract-symbols.mjs');
 
-function extract(files) {
+async function extract(files) {
   const dir = tmpDir('codeweb-idc-');
   try {
     writeTree(dir, files);
-    const out = join(dir, 'fragment.json');
-    const r = runNode(EXTRACT, [dir, '--no-ctags', '--out', out]);
-    assert.equal(r.status, 0, r.stderr);
-    return readJSON(out);
+    const { fragment } = await runExtract({ path: dir, ctags: false });
+    return fragment;
   } finally {
     // fragment read into memory; the tree can go
     cleanup(dir);
@@ -31,8 +30,8 @@ const assertUnique = (frag) => {
   assert.equal(new Set(all).size, all.length, `duplicate ids: ${all.filter((x, i) => all.indexOf(x) !== i).join(', ')}`);
 };
 
-test('python: same-named methods across two classes get class-qualified, distinct ids', () => {
-  const frag = extract({
+test('python: same-named methods across two classes get class-qualified, distinct ids', async () => {
+  const frag = await extract({
     'm.py': [
       'class A:',
       '    def run(self):',
@@ -51,8 +50,8 @@ test('python: same-named methods across two classes get class-qualified, distinc
   for (const n of frag.nodes.filter((n) => n.id.endsWith('.run'))) assert.equal(n.label, 'run');
 });
 
-test('go: same-named methods across two receivers get receiver-qualified, distinct ids', () => {
-  const frag = extract({
+test('go: same-named methods across two receivers get receiver-qualified, distinct ids', async () => {
+  const frag = await extract({
     'm.go': [
       'package m',
       '',
@@ -74,8 +73,8 @@ test('go: same-named methods across two receivers get receiver-qualified, distin
   assert.deepEqual(doIds.sort(), ['m.go:A.Do', 'm.go:B.Do']);
 });
 
-test('rust: same-named fns across two impl blocks get impl-type-qualified, distinct ids', () => {
-  const frag = extract({
+test('rust: same-named fns across two impl blocks get impl-type-qualified, distinct ids', async () => {
+  const frag = await extract({
     'm.rs': [
       'pub struct A;',
       'pub struct B;',
@@ -99,8 +98,8 @@ test('rust: same-named fns across two impl blocks get impl-type-qualified, disti
   assert.deepEqual(newIds.sort(), ['m.rs:A.new', 'm.rs:B.new']);
 });
 
-test('js (regex tier): same-named methods across two classes get class-qualified, distinct ids', () => {
-  const frag = extract({
+test('js (regex tier): same-named methods across two classes get class-qualified, distinct ids', async () => {
+  const frag = await extract({
     'm.js': [
       'export class A {',
       '  render() {',
@@ -121,8 +120,8 @@ test('js (regex tier): same-named methods across two classes get class-qualified
   assert.deepEqual(renderIds.sort(), ['m.js:A.render', 'm.js:B.render']);
 });
 
-test('a call from inside a method is attributed FROM the qualified method id', () => {
-  const frag = extract({
+test('a call from inside a method is attributed FROM the qualified method id', async () => {
+  const frag = await extract({
     'm.js': [
       'function helper() {',
       '  return 1;',

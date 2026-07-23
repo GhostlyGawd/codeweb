@@ -7,11 +7,12 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { join, resolve } from 'node:path';
 import { scanSymbols, bodyEnd, parseSignature, KEYWORDS, langOf } from '../scripts/lib/lang-rules.mjs';
 import { createImportResolver, defaultExportOf } from '../scripts/lib/import-resolve.mjs';
 import { maskPy } from '../scripts/lib/masking.mjs';
 
-const noMask = () => { throw new Error('masked() must not be called for non-Python files'); };
+const noMask = () => { throw new Error('masked() must not be called for non-masked languages'); }; // .py and .rb scan masked text (finding #13); everything else raw
 
 test('LR1: scanSymbols — JS functions/classes/methods/field-arrows, in-process', () => {
   const text = [
@@ -91,17 +92,23 @@ test('LR6: shared tables — KEYWORDS filters control flow; langOf keys the meta
 
 // ---- import-resolve: a synthetic three-file JS universe + a Python package, no disk ----
 function makeUniverse() {
-  const root = '/r';
-  const filesAbs = ['/r/src/impl.js', '/r/src/barrel.js', '/r/app.js', '/r/pkg/__init__.py', '/r/pkg/core.py'];
-  const rel = (f) => f.startsWith(root + '/') ? f.slice(root.length + 1) : f;
+  // Platform-honest fake root: the resolver runs node:path.resolve() over these paths, so a POSIX
+  // '/r' literal re-anchors to the current drive on windows and every file silently leaves the
+  // universe (exactly how IR1/IR2 failed the windows CI leg). resolve('/r') is '/r' on POSIX and
+  // '<drive>:\r' on windows; rel ids stay '/'-separated, as the extractor's real rel() guarantees.
+  const root = resolve('/r');
+  const rootN = root.replace(/\\/g, '/');
+  const abs = (r) => join(root, r);
+  const rel = (f) => { const n = f.replace(/\\/g, '/'); return n.startsWith(rootN + '/') ? n.slice(rootN.length + 1) : n; };
+  const filesAbs = ['src/impl.js', 'src/barrel.js', 'app.js', 'pkg/__init__.py', 'pkg/core.py'].map(abs);
   const relSet = new Set(filesAbs.map(rel));
   const absByRel = new Map(filesAbs.map((f) => [rel(f), f]));
   const texts = new Map([
-    ['/r/src/impl.js', 'export function doWork() { return 1; }\n'],
-    ['/r/src/barrel.js', "export { doWork as work } from './impl.js';\n"],
-    ['/r/app.js', "import { work } from './src/barrel.js';\nexport function main() { work(); }\n"],
-    ['/r/pkg/__init__.py', 'from .core import render as render\n'],
-    ['/r/pkg/core.py', 'def render():\n    return 1\n'],
+    [abs('src/impl.js'), 'export function doWork() { return 1; }\n'],
+    [abs('src/barrel.js'), "export { doWork as work } from './impl.js';\n"],
+    [abs('app.js'), "import { work } from './src/barrel.js';\nexport function main() { work(); }\n"],
+    [abs('pkg/__init__.py'), 'from .core import render as render\n'],
+    [abs('pkg/core.py'), 'def render():\n    return 1\n'],
   ]);
   const fileSyms = new Map(filesAbs.map((f) => [f, { text: texts.get(f), ranges: [] }]));
   const nodes = [
@@ -116,22 +123,22 @@ function makeUniverse() {
     nodeIdSet: new Set(nodes.map((n) => n.id)),
     nodes,
   });
-  return { resolver, texts };
+  return { resolver, texts, abs };
 }
 
 test('IR1: re-export chain — renamed barrel export resolves to the real symbol, in-process', () => {
-  const { resolver, texts } = makeUniverse();
-  const { map } = resolver.scanJsReExports('/r/src/barrel.js', 'src/barrel.js', texts.get('/r/src/barrel.js'));
+  const { resolver, texts, abs } = makeUniverse();
+  const { map } = resolver.scanJsReExports(abs('src/barrel.js'), 'src/barrel.js', texts.get(abs('src/barrel.js')));
   assert.deepEqual(map.get('work'), { target: 'src/impl.js', orig: 'doWork' });
   assert.equal(resolver.resolveReExport('src/barrel.js', 'work'), 'src/impl.js:doWork');
   assert.equal(resolver.resolveReExport('src/barrel.js', 'missing'), null); // unknown name -> null, no phantom
 });
 
 test('IR2: bindFileImports — a named import through the barrel binds the alias and the edge', () => {
-  const { resolver, texts } = makeUniverse();
-  resolver.scanJsReExports('/r/src/barrel.js', 'src/barrel.js', texts.get('/r/src/barrel.js'));
+  const { resolver, texts, abs } = makeUniverse();
+  resolver.scanJsReExports(abs('src/barrel.js'), 'src/barrel.js', texts.get(abs('src/barrel.js')));
   const { amap, edges } = resolver.bindFileImports({
-    fAbs: '/r/app.js', r: 'app.js', isPy: false, text: texts.get('/r/app.js'),
+    fAbs: abs('app.js'), r: 'app.js', isPy: false, text: texts.get(abs('app.js')),
     aId: 'app.js:main', defaultExportByFile: new Map(), kindById: new Map(),
   });
   assert.equal(amap.get('work'), 'src/impl.js:doWork');

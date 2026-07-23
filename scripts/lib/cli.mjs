@@ -127,13 +127,6 @@ export function loadGraph(pathArg, { usage = null } = {}) {
   return { graph, abs };
 }
 
-/**
- * Cached, best-effort source access for a graph's target (meta.root) — THE body reader
- * (context-pack, find-similar, diff rename-matching all read node spans; the logic lives once).
- * bodyOf(node) = the exact source lines [line, line+loc-1], or null when unreadable.
- */
-
-
 // #6 (IMPROVEMENTS.md): manifest-declared entrypoints — files a HOST invokes without a code edge.
 // deadcode's "safe to delete" tier listed the VS Code extension's activate/deactivate (package.json
 // `main`) and hook scripts (hooks.json commands) on codeweb's own map; anything a manifest names is
@@ -191,16 +184,18 @@ export function findTarget(filePath) {
   return null;
 }
 
+/**
+ * Cached, best-effort source access for a graph's target (meta.root) — THE body reader
+ * (context-pack, find-similar, diff rename-matching all read node spans; the logic lives once).
+ * bodyOf(node) = the exact source lines [line, line+loc-1], or null when unreadable.
+ */
 export function sourceReader(root) {
   const available = !!root && existsSync(root);
   const cache = new Map();
-  // (Parameter deliberately NOT named `rel`: a bare identifier that uniquely matches a global
-  // symbol elsewhere wires a false ref edge — the gate caught `rel` here closing a cycle with
-  // the extractor the moment cli.mjs gained an importer there. Same lesson as graph-ops' score/cap.)
-  const linesOf = (relPath) => {
+  const linesOf = (rel) => {
     if (!available) return null;
-    if (!cache.has(relPath)) { try { cache.set(relPath, readFileSync(root + '/' + relPath, 'utf8').split(/\r?\n/)); } catch { cache.set(relPath, null); } }
-    return cache.get(relPath);
+    if (!cache.has(rel)) { try { cache.set(rel, readFileSync(root + '/' + rel, 'utf8').split(/\r?\n/)); } catch { cache.set(rel, null); } }
+    return cache.get(rel);
   };
   const bodyOf = (n) => {
     const lines = n && linesOf(n.file);

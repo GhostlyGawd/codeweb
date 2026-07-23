@@ -8,8 +8,9 @@
 // concurrent writers are last-write-wins (counters may undercount under races — acceptable
 // for a receipt, documented here).
 
-import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
+import { readFileSync, unlinkSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { atomicWrite } from './cli.mjs'; // finding #42: crash-safe writes for the local receipts (bytes unchanged)
 
 const statsPathOf = (graphPath) => join(dirname(graphPath), 'stats.json');
 const monthNow = () => new Date().toISOString().slice(0, 7);
@@ -17,6 +18,12 @@ const monthNow = () => new Date().toISOString().slice(0, 7);
 /** Read the ledger beside a graph.json, or null. Never throws. */
 export function readStats(graphPath) {
   try { return JSON.parse(readFileSync(statsPathOf(graphPath), 'utf8')); } catch { return null; }
+}
+
+/** The JSON receipt payload: the ledger, or the empty-note shape. THE one place the empty note lives
+ *  (finding #33: stats.mjs --json and the MCP codeweb_stats fast path both serve this, byte-identical). */
+export function receiptPayload(graphPath) {
+  return readStats(graphPath) || { empty: true, note: 'no activity recorded yet — counters accrue as the hooks and MCP server run (CODEWEB_NO_STATS=1 disables)' };
 }
 
 /** Increment a counter in the current month's bucket. Silent no-op on opt-out or any error. */
@@ -27,7 +34,7 @@ export function bump(graphPath, counter, n = 1) {
     const m = monthNow();
     if (!s.months[m]) s.months[m] = {};
     s.months[m][counter] = (s.months[m][counter] || 0) + n;
-    writeFileSync(statsPathOf(graphPath), JSON.stringify(s));
+    atomicWrite(statsPathOf(graphPath), JSON.stringify(s));
   } catch { /* a receipt must never break the tool */ }
 }
 
@@ -52,7 +59,7 @@ const pendingPathOf = (graphPath) => join(dirname(graphPath), 'pending-card.json
 /** Record the card's named caller files as the active pending set (replaces any previous). */
 export function recordPendingCard(graphPath, symbol, files) {
   if (process.env.CODEWEB_NO_STATS === '1' || !graphPath || !files || !files.length) return;
-  try { writeFileSync(pendingPathOf(graphPath), JSON.stringify({ t: Date.now(), symbol, files })); }
+  try { atomicWrite(pendingPathOf(graphPath), JSON.stringify({ t: Date.now(), symbol, files })); }
   catch { /* receipt only */ }
 }
 
@@ -70,7 +77,7 @@ export function correlateEdit(graphPath, editedRel) {
     if (ix === -1) return;
     card.files.splice(ix, 1);
     bump(graphPath, 'cardCallersFollowed');
-    if (card.files.length) writeFileSync(p, JSON.stringify(card));
+    if (card.files.length) atomicWrite(p, JSON.stringify(card));
     else { try { unlinkSync(p); } catch {} }
   } catch { /* no pending card / unreadable — fine */ }
 }

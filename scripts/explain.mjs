@@ -13,13 +13,16 @@ import { relianceLine } from './lib/reliance.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // Spec P: one truth for card assembly (CLI + sidecar)
 
 const USAGE = 'usage: explain.mjs <graph.json> <symbol> [--json]   (or set CODEWEB_WS)';
-if (process.argv.includes('--help') || process.argv.includes('-h')) { console.log(USAGE); process.exit(0); } // #5: every CLI answers --help
-import { die, emitJson, finish, loadGraph, checkStaleness, sourceReader } from './lib/cli.mjs';
+import { die, emitJson, finish, loadGraph, checkStaleness, sourceReader, parseArgs } from './lib/cli.mjs';
 import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
 
-const argv = process.argv.slice(2);
-let json = false; const pos = [];
-for (const t of argv) { if (t === '--json') json = true; else if (!t.startsWith('-')) pos.push(t); }
+// finding #39: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy (reject with usage,
+// exit 2; --help prints usage, exit 0). Replaces a no-else hand-roll that silently ignored typos
+// like `--jsno` instead of erroring.
+const { opts: { json }, pos } = parseArgs(process.argv.slice(2), {
+  usage: USAGE,
+  flags: { json: { type: 'bool', default: false } },
+});
 let graphArg = null, symbol = null;
 if (pos.length >= 2) { graphArg = pos[0]; symbol = pos[1]; }
 else if (pos.length === 1) { symbol = pos[0]; }

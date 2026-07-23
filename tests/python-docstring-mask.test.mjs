@@ -11,6 +11,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 const FILES = {
   'lib.py':
@@ -44,46 +45,45 @@ let SRC, OUT;
 before(() => { SRC = tmpDir('codeweb-pydoc-'); writeTree(SRC, FILES); OUT = join(SRC, 'fragment.json'); });
 after(() => cleanup(SRC));
 
-function extract() {
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'pydoc-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  return readJSON(OUT);
+async function extract() {
+  const { fragment } = await runExtract({ path: SRC, target: 'pydoc-x', ctags: false });
+  return fragment;
 }
 
-test('no phantom symbol is extracted from inside a docstring', () => {
-  const frag = extract();
+test('no phantom symbol is extracted from inside a docstring', async () => {
+  const frag = await extract();
   assert.ok(!frag.nodes.some((n) => n.id === 'app.py:index'),
     'the `def index()` inside make_response\'s docstring must not become a symbol');
 });
 
-test('no call edge is fabricated from inside a docstring', () => {
-  const frag = extract();
+test('no call edge is fabricated from inside a docstring', async () => {
+  const frag = await extract();
   assert.ok(!hasEdge(frag.edges, 'app.py:make_response', 'lib.py:render_template'),
     'the render_template() calls live in make_response\'s docstring -> no edge');
 });
 
-test('no call edge is fabricated from inside a # comment', () => {
-  const frag = extract();
+test('no call edge is fabricated from inside a # comment', async () => {
+  const frag = await extract();
   assert.ok(!hasEdge(frag.edges, 'app.py:commented', 'lib.py:render_template'),
     'the render_template() is only in a comment -> no edge');
 });
 
-test('a REAL call after the docstring is still extracted', () => {
-  const frag = extract();
+test('a REAL call after the docstring is still extracted', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'app.py:actual', 'lib.py:render_template', 'call'),
     'actual() really calls render_template -> edge preserved');
   assert.ok(hasEdge(frag.edges, 'app.py:make_response', 'app.py:real_helper', 'call'),
     'make_response really calls real_helper after the docstring -> edge preserved');
 });
 
-test('real symbols around the docstring are intact', () => {
-  const frag = extract();
+test('real symbols around the docstring are intact', async () => {
+  const frag = await extract();
   for (const id of ['app.py:make_response', 'app.py:real_helper', 'app.py:commented', 'app.py:actual', 'lib.py:render_template'])
     assert.ok(frag.nodes.some((n) => n.id === id), `real symbol ${id} present`);
 });
 
-test('DEPENDENTS: render_template no longer lists the docstring/comment false callers', () => {
-  const frag = extract();
+test('DEPENDENTS: render_template no longer lists the docstring/comment false callers', async () => {
+  const frag = await extract();
   const GP = join(SRC, 'graph.json');
   writeTree(SRC, { 'graph.json': JSON.stringify(frag) });
   const dep = runNode(script('query.mjs'), [GP, '--dependents', 'lib.py:render_template', '--json']);

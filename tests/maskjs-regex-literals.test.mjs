@@ -12,7 +12,8 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
-import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge } from './helpers.mjs';
+import { tmpDir, cleanup, writeTree, script, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 const FILES = {
   // Reproduced corruption #1: a quote inside a regex literal (the ubiquitous escaping-helper
@@ -61,16 +62,15 @@ before(() => { SRC = tmpDir('codeweb-jsregex-'); writeTree(SRC, FILES); OUT = jo
 after(() => cleanup(SRC));
 
 let frag = null;
-function extract() {
+async function extract() {
   if (frag) return frag;
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'jsregex-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  frag = readJSON(OUT);
+  const { fragment } = await runExtract({ path: SRC, target: 'jsregex-x', ctags: false });
+  frag = fragment;
   return frag;
 }
 
-test('a quote inside a regex literal does not desync the mask: extent stays tight, no fabricated edge', () => {
-  const f = extract();
+test('a quote inside a regex literal does not desync the mask: extent stays tight, no fabricated edge', async () => {
+  const f = await extract();
   const escapeIt = f.nodes.find((n) => n.id === 'a.mjs:escapeIt');
   assert.ok(escapeIt, 'escapeIt symbol exists');
   assert.ok(escapeIt.loc <= 3, `escapeIt body must end at its own brace, not EOF (loc=${escapeIt.loc})`);
@@ -79,23 +79,23 @@ test('a quote inside a regex literal does not desync the mask: extent stays tigh
   assert.ok(hasEdge(f.edges, 'a.mjs:after', 'a.mjs:helper'), 'the real after -> helper edge survives');
 });
 
-test('a backtick inside a regex literal does not flip template state: prose stays prose', () => {
-  const f = extract();
+test('a backtick inside a regex literal does not flip template state: prose stays prose', async () => {
+  const f = await extract();
   assert.ok(!hasEdge(f.edges, 'b.mjs:realWork', 'b.mjs:target'),
     '`calls target()` inside a template literal is prose, not an edge');
   assert.ok(hasEdge(f.edges, 'b.mjs:caller', 'b.mjs:target'), 'the real caller -> target edge survives');
 });
 
-test('division is not lexed as a regex opener; regex after `return` is', () => {
-  const f = extract();
+test('division is not lexed as a regex opener; regex after `return` is', async () => {
+  const f = await extract();
   assert.ok(hasEdge(f.edges, 'c.mjs:half', 'c.mjs:use'),
     'a / b / c is division — the use(ratio) call after it must survive');
   assert.ok(hasEdge(f.edges, 'c.mjs:kw', 'c.mjs:use'),
     'return /x/.test(s) ? use(s) : 0 — the regex closes and use(s) still edges');
 });
 
-test('a {n} quantifier in a regex inside ${} does not corrupt interpolation brace matching', () => {
-  const f = extract();
+test('a {n} quantifier in a regex inside ${} does not corrupt interpolation brace matching', async () => {
+  const f = await extract();
   assert.ok(hasEdge(f.edges, 'd.mjs:fmt', 'd.mjs:pad'),
     'the second ${pad(s)} interpolation stays live code');
 });
@@ -104,14 +104,11 @@ test('a {n} quantifier in a regex inside ${} does not corrupt interpolation brac
 // its strip() chain. Pre-fix it extracted as 5 nodes / 0 edges (the odd backtick count blanked the
 // rest of the file); its helpers were then listed as safe-to-delete dead code. Assert the known
 // same-file edges so the masker can never regress on codeweb's own source again.
-test('self-map: complexity.mjs yields its known same-file edges', () => {
+test('self-map: complexity.mjs yields its known same-file edges', async () => {
   const dir = tmpDir('codeweb-jsregex-self-');
   try {
     writeTree(dir, { 'complexity.mjs': readFileSync(script('lib/complexity.mjs'), 'utf8') });
-    const out = join(dir, 'fragment.json');
-    const res = runNode(script('extract-symbols.mjs'), [dir, '--target', 'self-cx', '--no-ctags', '--out', out]);
-    assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-    const f = readJSON(out);
+    const { fragment: f } = await runExtract({ path: dir, target: 'self-cx', ctags: false });
     for (const fn of ['strip', 'count', 'cyclomatic', 'nestingDepth']) {
       assert.ok(f.nodes.some((n) => n.id === `complexity.mjs:${fn}`), `node ${fn} extracted`);
     }

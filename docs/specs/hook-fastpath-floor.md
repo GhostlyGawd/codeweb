@@ -40,9 +40,14 @@ Three separable causes, three fixes:
 | **hook end-to-end (warm, after)** | **~800ms** | was ~4s-class at this scale (full re-extract + compare) |
 
 On codeweb's own map the same path now sits well under the pre-edit sidecar's documented ~52ms
-floor multiple: the dominant residual terms at scale are (a) the child-process boundary — node
+floor multiple: the dominant residual terms at scale were (a) the child-process boundary — node
 boot + cache JSON parse + fragment serialize/parse, and (b) `structuralRegressions`' two full
-`buildIndex` + `fileCycles` passes.
+`buildIndex` + `fileCycles` passes. **Round-2 update:** #18a removed the before-side recompute of
+(b) via the sidecar; #18b (WS-H, sha `851c0f2`) removed the child-process boundary of (a) by
+calling `runExtract` in-process — node boot and the cross-process fragment stringify/parse are gone
+(the cache JSON.parse remains, now in the hook process). The residual is the in-process
+`runExtract` wall itself (per-target file enumeration + one cache parse) plus the after-side
+`regressionsAgainstSummary`.
 
 ## Behavior (testable contract)
 
@@ -56,10 +61,21 @@ boot + cache JSON parse + fragment serialize/parse, and (b) `structuralRegressio
 
 ## Revisit triggers
 
-- Hook end-to-end > 1.5s at the 16k benchmark → implement in-process extraction (finding 25's
-  decomposition makes the extractor importable; kills node boot + cache parse + fragment
-  serialize/parse ≈ half the residual).
-- `structuralRegressions` > 500ms at scale → incremental regression check (persist the baseline's
-  file-pair table via `createMergeSimulator`'s shape and diff pairs, not graphs).
+- Hook end-to-end > 1.5s at the 16k benchmark → in-process extraction. **CONSUMED (round-2 #18b,
+  WS-H, sha `851c0f2`).** #40's decomposition made `extract-symbols` importable with a
+  side-effect-free import; the hook now lazily `import()`s `runExtract` and calls it directly,
+  killing the child node boot + the fragment stringify(child)+JSON.parse(hook) round-trip. Measured
+  floor at the 16.8k class (median-of-5, container): **no-change fire 698 ms in-process vs 1,089 ms
+  forced-spawn on the same corpus** (was #18a's 889 ms row); strace confirms **0 extractor child
+  processes** in-process vs 1 spawned. The `CODEWEB_HOOK_INPROC=0` env forces the old spawn path
+  (rollback lever), and any extraction throw falls back to one spawn attempt (bumped
+  `hookInprocFallbacks`). **Next trigger:** hook no-change fire > 1.0 s at the 16k class → profile
+  the residual (in-process `runExtract` wall — dominated by the per-target `rg`/`readdir` file
+  enumeration + the cache JSON.parse, NOT the extractor boot anymore) and consider a
+  stamp-tier-only fast path that skips full enumeration when the edited file's stamp is the only
+  change.
+- `structuralRegressions` > 500ms at scale → incremental regression check. Round-2 #18a landed
+  the map-time half: `baselineSummary`/`regressionsAgainstSummary` (graph-ops) persist the
+  before side at map/refresh, so the hook only computes the after side per edit.
 - Anything here regresses → `bench/all.mjs` stage factors (finding 13) catch extract; the hook
   path itself is exercised by `tests/post-edit-diff.test.mjs` + `tests/cache-unification.test.mjs`.

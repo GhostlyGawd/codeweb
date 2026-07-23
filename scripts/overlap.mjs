@@ -15,9 +15,9 @@
 // Confidence (with source):  body mean >=0.6 high(confirmed) · 0.35-0.6 medium(DRIFTED) ·
 //   0.15-0.35 low · <0.15 refuted (dismissed as coincidental).  Precision over recall.
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { shingles, jaccard, K, BANDS } from './lib/shingles.mjs'; // shared body-shingle primitives + THE thresholds (one truth, finding 27)
-import { signature, bandKeys } from './lib/minhash.mjs'; // Spec N: LSH candidate generation at scale
+import { readFileSync, existsSync } from 'node:fs';
+import { shingles, jaccard, K, BANDS, BODY_LINE_CAP } from './lib/shingles.mjs'; // shared body-shingle primitives + THE thresholds + body cap (one truth, findings 27 + 26)
+import { lshCandidatePairs } from './lib/minhash.mjs'; // Spec N + round 2 #24: LSH candidate generation at scale (one walk, both signals)
 import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
 import { sourceReader, atomicWrite } from './lib/cli.mjs'; // shared body access + rename-atomic artifact writes (one truth)
 
@@ -72,11 +72,11 @@ const reader = sourceReader(SOURCE_ROOT);
 // thousand-line bodies (TypeScript's checker.ts) that WAS the pipeline's wall. Pure caching,
 // zero semantics change.
 const _shingleMemo = new Map();
-// BODY_LINE_CAP (Spec B addendum): thousand-line bodies (TypeScript's checker.ts) yield 10k+
-// element shingle sets, and pairwise Jaccard over those made Signal A alone exceed 9 minutes on
-// a 28k-symbol graph. Bodies longer than the cap shingle their FIRST 400 lines — deterministic,
-// counted, and declared in the md header + affected findings' evidence. Never silent.
-const BODY_LINE_CAP = 400;
+// BODY_LINE_CAP (Spec B addendum; the constant now lives in lib/shingles.mjs, finding #26 — imported
+// above): thousand-line bodies (TypeScript's checker.ts) yield 10k+ element shingle sets, and pairwise
+// Jaccard over those made Signal A alone exceed 9 minutes on a 28k-symbol graph. Bodies longer than the
+// cap shingle their FIRST 400 lines — deterministic, counted, and declared in the md header + affected
+// findings' evidence. Never silent.
 let bodiesCapped = 0;
 const cappedIds = new Set();
 const bodyShingles = (n) => {
@@ -221,7 +221,14 @@ if (scaffoldCluster.length) {
 
 _mark('signal-A (same-name groups + body confirm)');
 // ---- Signal B: structural twins -----------------------------------------------------
-const cand = [...outLabels.entries()].filter(([, s]) => s.size >= TWIN_MIN_OUT);
+// Finding #16: `cand` was built from ALL-edge outLabels and the twin loop never consulted roles —
+// Signal B bypassed the product scope the header advertises (11 of 13 self-findings paired
+// tests/* helpers). Both members of every pair come from `cand`, so ONE caller-side filter covers
+// the twin loop, LSH and exact paths alike; considerPair/jaccard judging is untouched.
+// CODEWEB_ALL_ROLES=1 short-circuits before the byId lookup — candidates byte-identical to the
+// unfiltered build. (Callee-side is already covered upstream: real extracts relabel test->product
+// calls to kind `test`, which the outLabels build skips.)
+const cand = [...outLabels.entries()].filter(([id, s]) => s.size >= TWIN_MIN_OUT && (ALL_ROLES || (byId.get(id) && nodeRole(byId.get(id)) === 'product')));
 const seenPair = new Set();
 const flagged = new Set(overlaps.flatMap((o) => o.nodes));
 const twins = [];
@@ -245,22 +252,13 @@ if (lshOn(cand.length)) {
   // callee-label sets — a pair at the 0.5 confirm threshold is proposed with P≈0.9998. Mega-hub
   // co-callers share too little to collide, so no hub exclusion is needed on this path.
   console.error(`[overlap] LSH path engaged: ${cand.length} twin candidate(s)`); // finding 13: the bench asserts this fires at scale
-  const buckets = new Map();
-  for (const [id, s] of cand) {
-    for (const bk of bandKeys(signature(s, 192), 64, 3)) {
-      if (!buckets.has(bk)) buckets.set(bk, []);
-      buckets.get(bk).push(id);
-    }
-  }
-  let skippedBuckets = 0;
-  for (const bk of [...buckets.keys()].sort()) {
-    const ids = buckets.get(bk);
-    if (ids.length < 2) continue;
-    if (ids.length > LSH_BUCKET_CAP) { skippedBuckets++; continue; }
-    ids.sort();
-    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) considerPair(ids[i], ids[j]);
-  }
-  twinLsh = { buckets: buckets.size, skippedBuckets };
+  // Round 2, #24: THE banding/bucketing/pair-walk lives in lib/minhash.mjs (lshCandidatePairs) —
+  // pairs arrive pre-deduped IN THE LEGACY WALK ORDER (order is load-bearing: byLabelPair keeps
+  // the first twin per label pair at a slice rank where sim ties are routine), and considerPair
+  // judges each exactly as before.
+  const { pairs, buckets, skippedBuckets } = lshCandidatePairs(cand, { K: 192, bands: 64, rows: 3, bucketCap: LSH_BUCKET_CAP });
+  for (const [x, y] of pairs) considerPair(x, y);
+  twinLsh = { buckets, skippedBuckets };
 } else {
   // Historical exact path (kept bit-for-bit for small inputs): inverted caller index under the
   // declared caps. Deterministic global budget on twin-pair enumeration: smallest caller-groups
@@ -358,29 +356,20 @@ let t3Lsh = null; // { buckets, skippedBuckets } when LSH generated the near-mis
     // Spec N: multiset Jaccard reduces exactly to set Jaccard under occurrence-expansion
     // (`hash#k` for the k-th occurrence), so 32×4 banding at the 0.7 confirm threshold proposes
     // true pairs with P≈0.9998 — then sharedOf computes the exact count for each candidate.
-    const buckets = new Map();
-    for (const n of t3Nodes) {
+    // Round 2, #24: same lib walk as Signal B (occurrence-expanded items; 128 perms, 32x4 bands).
+    // Pairs arrive pre-deduped first-seen, so the shared>0 insertion order into pairShared equals
+    // today's — sharedOf computes the exact count per pair in sequence.
+    const entries = t3Nodes.map((n) => {
       const items = [];
       for (const [h, c] of countsOf.get(n.id)) for (let k = 1; k <= c; k++) items.push(h + '#' + k);
-      for (const bk of bandKeys(signature(items, 128), 32, 4)) {
-        if (!buckets.has(bk)) buckets.set(bk, []);
-        buckets.get(bk).push(n.id);
-      }
+      return [n.id, items];
+    });
+    const { pairs, buckets, skippedBuckets } = lshCandidatePairs(entries, { K: 128, bands: 32, rows: 4, bucketCap: LSH_BUCKET_CAP });
+    for (const [a, b] of pairs) {
+      const shared = sharedOf(a, b);
+      if (shared) pairShared.set(a + '|' + b, shared);
     }
-    let skippedBuckets = 0;
-    for (const bk of [...buckets.keys()].sort()) {
-      const ids = buckets.get(bk);
-      if (ids.length < 2) continue;
-      if (ids.length > LSH_BUCKET_CAP) { skippedBuckets++; continue; }
-      ids.sort();
-      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
-        const key = ids[i] + '|' + ids[j];
-        if (pairShared.has(key)) continue;
-        const shared = sharedOf(ids[i], ids[j]);
-        if (shared) pairShared.set(key, shared);
-      }
-    }
-    t3Lsh = { buckets: buckets.size, skippedBuckets };
+    t3Lsh = { buckets, skippedBuckets };
   } else {
     // Historical exact path (kept bit-for-bit for small inputs): owners index under the declared
     // owner cap.

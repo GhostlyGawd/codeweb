@@ -4,6 +4,15 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runNode, script, tmpDir, cleanup, readJSON, PLUGIN_ROOT as PLUGIN_ROOT2 } from './helpers.mjs';
 
+// Parse the embedded graph JSON out of a built report.html. Whole-file substring checks
+// false-positive on node/overlap "kind": tokens and summary text, so #36's assertions parse the
+// actual <script id="graph-data"> payload. JSON.parse decodes the "<"→< embed escaping natively.
+function parseEmbed(html) {
+  const m = html.match(/<script id="graph-data" type="application\/json">([\s\S]*?)<\/script>/);
+  assert.ok(m, 'report.html carries the graph-data script tag');
+  return JSON.parse(m[1]);
+}
+
 // The shipped report.html is self-contained and shareable (a teammate, a blog post, GitHub Pages),
 // so it must never embed the absolute LOCAL source path. meta.root is a private disk pointer the
 // query tools use to read bodies; graph.json on disk keeps it, but the report must not leak it.
@@ -61,7 +70,8 @@ test('two identical runs produce byte-identical report.html and (with SOURCE_DAT
         sources: { 'a.js': { s: 10, m: 123456789, h: 'f'.repeat(40) } },
         dirs: { '.': 123456789 },
       },
-      nodes: [{ id: 'a.js:foo', label: 'foo', kind: 'function', file: 'a.js', line: 1, loc: 3, domain: 'core' }],
+      nodes: [{ id: 'a.js:foo', label: 'foo', kind: 'function', file: 'a.js', line: 1, loc: 3, domain: 'core',
+        t3: 'FINGERPRINT_SENTINEL', signature: 'foo()', complexity: 5, maxDepth: 3 }],
       edges: [],
       domains: [{ name: 'core', nodes: 1, summary: '' }],
       overlaps: [],
@@ -79,12 +89,70 @@ test('two identical runs produce byte-identical report.html and (with SOURCE_DAT
     assert.equal(readJSON(graphPath).meta.generatedAt, '2025-07-21T00:00:00.000Z', 'generatedAt pinned by SOURCE_DATE_EPOCH');
     // the embed strips the nondeterministic/private fields; graph.json keeps them
     assert.ok(!html1.includes('generatedAt') && !html1.includes('123456789'), 'no timestamp/stamp bytes in the embed');
+    // #36: the unread per-node fingerprint fields never reach the shipped bytes (regression that
+    // re-embeds ~4 MB of t3 at scale fails here loudly) — graph.json below still keeps them.
+    assert.ok(!html1.includes('FINGERPRINT_SENTINEL'), 'no t3 fingerprint bytes in the embed (#36 strip holds)');
     const disk = readJSON(graphPath);
     assert.ok(disk.meta.sources && disk.meta.dirs && disk.meta.generatedAt, 'graph.json keeps stamps + generatedAt');
+    assert.equal(disk.nodes[0].t3, 'FINGERPRINT_SENTINEL', 'graph.json keeps the node t3 the embed strips (#36 is embed-only)');
     // and WITHOUT the epoch pin, report.html is still byte-identical (only graph.json's timestamp moves)
     writeFileSync(graphPath, JSON.stringify(graph));
     assert.equal(runNode(script('build-report.mjs'), [graphPath, '--no-md']).status, 0);
     assert.equal(readFileSync(join(dir, 'report.html'), 'utf8'), html1, 'report.html byte-identical without pinning too');
+  } finally {
+    cleanup(dir);
+  }
+});
+
+// finding #36: the embedded graph carries only what report-template.html reads. Per-node
+// t3/signature/complexity/maxDepth and per-edge kind are grep-verified unread by the template;
+// at 16.8k the t3 fingerprints alone are multiple MB the browser parses then discards. The strip
+// is EMBED-ONLY — graph.json on disk keeps every field for the editor lens, the MCP tools, and
+// hooks (they read the file, never the report's embed).
+test('report.html embed strips unread node/edge fields; graph.json keeps them (#36)', () => {
+  const dir = tmpDir('codeweb-embed-');
+  try {
+    const graph = {
+      meta: { target: 'strip', root: dir, engine: 'regex', languages: ['javascript'], symbols: 2 },
+      nodes: [
+        { id: 'a.js:foo', label: 'foo', kind: 'function', file: 'a.js', line: 1, loc: 3, domain: 'core',
+          t3: 'X'.repeat(4096), signature: 'foo(a,b)', complexity: 7, maxDepth: 4 },
+        { id: 'b.js:bar', label: 'bar', kind: 'method', file: 'b.js', line: 2, loc: 5, domain: 'core',
+          t3: 'Y'.repeat(4096), signature: 'bar()', complexity: 2, maxDepth: 1 },
+      ],
+      edges: [{ from: 'a.js:foo', to: 'b.js:bar', weight: 3, kind: 'call' }],
+      domains: [{ name: 'core', nodes: 2, summary: '' }],
+      overlaps: [],
+    };
+    const graphPath = join(dir, 'graph.json');
+    writeFileSync(graphPath, JSON.stringify(graph));
+    const r = runNode(script('build-report.mjs'), [graphPath, '--no-md']);
+    assert.equal(r.status, 0, r.stderr);
+
+    const html = readFileSync(join(dir, 'report.html'), 'utf8');
+    const embed = parseEmbed(html);
+    for (const n of embed.nodes) {
+      for (const dead of ['t3', 'signature', 'complexity', 'maxDepth']) {
+        assert.ok(!(dead in n), `embedded node must not carry ${dead} (unread by the template)`);
+      }
+      // the template DOES read node kind (:248/:269/:424/:427) — it must survive the strip
+      assert.ok('kind' in n, 'embedded node keeps kind (the template reads it)');
+    }
+    for (const e of embed.edges) {
+      assert.ok(!('kind' in e), 'embedded edge must not carry kind (unread by the template)');
+      assert.ok('from' in e && 'to' in e && 'weight' in e, 'embedded edge keeps from/to/weight');
+    }
+    // the heavy fingerprints are gone from the shipped bytes (the −≥40% win at scale)
+    assert.ok(!html.includes('X'.repeat(4096)) && !html.includes('Y'.repeat(4096)), 'no t3 fingerprint bytes reach report.html');
+
+    // graph.json on disk is the tools' full-fidelity artifact — every stripped field preserved
+    const disk = readJSON(graphPath);
+    for (const n of disk.nodes) {
+      for (const keep of ['t3', 'signature', 'complexity', 'maxDepth', 'kind']) {
+        assert.ok(keep in n, `graph.json node keeps ${keep} for the query tools`);
+      }
+    }
+    assert.ok('kind' in disk.edges[0], 'graph.json edge keeps kind');
   } finally {
     cleanup(dir);
   }

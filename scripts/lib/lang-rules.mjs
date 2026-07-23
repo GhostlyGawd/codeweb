@@ -13,11 +13,13 @@ export const indentOf = (s) => s.length - s.replace(/^\s+/, '').length;
 
 export const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
 
-// `masked(kind)` returns the column/line-preserving masked text for this file (the extractor's
-// per-file memo) — only the Python branch needs it here (def/class inside docstrings).
+// `masked(kind)` returns the masked text for this file (the extractor's per-file memo) — the
+// Python AND Ruby branches need it here (def/class inside docstrings; def/class inside heredoc
+// bodies — round 2, finding #13). maskPy is column-preserving; maskRuby preserves line count only,
+// which is all the line-anchored Ruby rules read.
 export function scanSymbols(file, text, masked) {
   const ext = extname(file).toLowerCase();
-  const lines = (ext === '.py' ? masked('py') : text).split(/\r?\n/); // hide def/class inside docstrings
+  const lines = (ext === '.py' ? masked('py') : ext === '.rb' ? masked('rb') : text).split(/\r?\n/); // hide def/class inside docstrings/heredocs
   const syms = [];
   const push = (name, line, kind, exported, owner) => { if (name && !KEYWORDS.has(name)) syms.push({ name, line: line + 1, kind, exports: !!exported, ...(owner ? { owner } : {}) }); };
   if (ext === '.py') {
@@ -159,9 +161,27 @@ export function scanSymbols(file, text, masked) {
     lines.forEach((ln, i) => {
       let m;
       if ((m = /^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s*\*?\s*([A-Za-z_$][\w$]*)/.exec(ln))) push(m[1], i, 'function', exported(ln));
-      else if ((m = /^\s*(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\*?\s*\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/.exec(ln))) push(m[1], i, 'function', exported(ln));
+      // Round 2, finding #9: `(?!\s*\(\()` rejects IIFE initializers — `const PERM_SEEDS = (() => {…})()`
+      // matched via the `\([^)]*\)\s*=>` alternative eating the inner paren, minting a function node
+      // for a VALUE (a guaranteed deadcode false positive). The lookahead is anchored AT the `=`
+      // with the whitespace inside it (a `=\s*(?!\(\()` form is defeated by `\s*` backtracking).
+      // The `= ((` prefix is the only line-local signal (the invoking `()` sits on a later line for
+      // multi-line IIFEs), so genuinely function-valued, non-invoked `const g = ((a) => a)` ALSO
+      // loses its node — accepted recall loss, pinned in tests/spread-iife-selfmap.test.mjs.
+      // Residuals: a space-separated `= ( (` IIFE and `= (async () => {…})()` still match;
+      // `= (function () {})()` never matched any alternative — arrow-IIFEs were the only false-node class.
+      else if ((m = /^\s*(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=(?!\s*\(\()\s*(?:async\s*)?(?:function\b|\*?\s*\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/.exec(ln))) push(m[1], i, 'function', exported(ln));
       else if ((m = /^\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)/.exec(ln))) push(m[1], i, 'class', exported(ln));
-      else if ((m = /^\s{2,}(?:public|private|protected|static|readonly|async|get|set|\*)?\s*([A-Za-z_$][\w$]*)\s*\([^;=]*\)\s*\{/.exec(ln))) push(m[1], i, 'method', false);
+      // Round 2, finding #12 (T-12.3): modifiers STACK (`public static run(`), the `*` sits outside
+      // the \s+-terminated group (or `*gen() {` — no space after `*` — regresses to invisible), the
+      // param interior is [^;]* — NOT [^;{}]* (that would regress destructured params `move({ x, y })`,
+      // matched today) — additionally admitting default params (`render(x = 1)`), and a `: Type`
+      // return annotation is allowed before the brace (`get value(): number {` was invisible, its
+      // body's calls re-attributed to the class). Methods actually NAMED get/set keep matching: the
+      // modifier group requires trailing \s+, so it backtracks to zero reps and the name capture
+      // takes the word. Known noise class (pre-existing, pinned in tests): `it('works', function () {`
+      // matches in all variants; `describe('x', () => {` matches in none; `if (…) {` dies in KEYWORDS.
+      else if ((m = /^\s{2,}(?:(?:public|private|protected|static|readonly|async|get|set)\s+)*(?:\*\s*)?([A-Za-z_$][\w$]*)\s*\([^;]*\)(?:\s*:\s*[^{;=]+)?\s*\{/.exec(ln))) push(m[1], i, 'method', false);
       // class-field arrow methods (`handleClick = () => {` / `run = async (x) => …`) — the standard
       // React/TS pattern the method regex (name + paren) can't see. Marked `field`: the node is only
       // kept when an ENCLOSING CLASS confirms it (a bare local `cb = () => {}` reassignment inside a
@@ -295,4 +315,4 @@ export function parseSignature(line, name, isPy) {
 export const DYNAMIC_RE = /\[[A-Za-z_$][\w$]*\]\s*\(|\bgetattr\s*\(|require\s*\(\s*[^'"`)\s]|\.emit\s*\(|globalThis\s*\[|window\s*\[/;
 
 /** Language of a repo-relative file path (extension-keyed; the meta.languages vocabulary). */
-export const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : /\.tsx?$/.test(f) ? 'typescript' : 'javascript');
+export const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : /\.(tsx?|mts|cts)$/.test(f) ? 'typescript' : 'javascript');

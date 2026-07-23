@@ -13,7 +13,7 @@ import { runNode, script, tmpDir, cleanup, writeTree } from './helpers.mjs';
 import { SCAN_CACHE_NAME } from '../scripts/lib/cli.mjs';
 import { check } from '../hooks/post-edit-diff.mjs';
 
-test('map + post-edit hook + refresh share ONE cache file, and warm runs ride it', () => {
+test('map + post-edit hook + refresh share ONE cache file, and warm runs ride it', async () => {
   const src = tmpDir('cw-unify-');
   try {
     writeTree(src, {
@@ -29,7 +29,7 @@ test('map + post-edit hook + refresh share ONE cache file, and warm runs ride it
 
     // the hook (imported check()) extracts via the SAME cache — no second file appears
     const payload = JSON.stringify({ tool_input: { file_path: join(src, 'a.mjs') } });
-    check(payload); // regression result irrelevant here; the cache side-effect is the assertion
+    await check(payload); // regression result irrelevant here; the cache side-effect is the assertion
     assert.deepEqual(caches(), [SCAN_CACHE_NAME], 'hook rode the shared cache (no scan-cache.json twin)');
 
     // refresh defaults to the same cache — and a no-change refresh scans zero files (stamp tier)

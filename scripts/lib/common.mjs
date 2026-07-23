@@ -6,7 +6,9 @@
 
 // One truth for "what counts as a mappable source file" — the extractor's SRC list, mirrored
 // here for the hooks (Spec E consolidation; the hooks previously trailed the extractor's list).
-export const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
+// finding #11: `.mts/.cts` join — the NodeNext ext-remap table maps `./h.mjs` specifiers to
+// `.mts` sources, which only means something if those files are enumerated in the first place.
+export const SRC_RE = /\.(js|mjs|cjs|jsx|ts|tsx|mts|cts|py|rs|go|java|cs|rb|php|kt|kts|swift)$/;
 
 // finding 17: THE scan-cache filename — run.mjs, the post-edit hook, and refresh.mjs previously
 // used three different names for the same workspace (the first hook fire after every map ran a

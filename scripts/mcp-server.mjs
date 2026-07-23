@@ -12,20 +12,24 @@
 //   - codeweb_map builds/rebuilds the graph so the loop never dead-ends on "graph not found".
 //
 // CRITICAL: stdout carries ONLY JSON-RPC messages (one per line). Any stray write to stdout
-// corrupts the stream for the client, so all diagnostics go to stderr (here: none).
+// corrupts the stream for the client, so stdout stays pure. stderr is SILENT by default; the opt-in
+// CODEWEB_MCP_TRACE=1 emits one NDJSON queue event per line on stderr (start/end/kill/skip-
+// autorefresh) for by-mechanism scenario assertions — free-form on stderr, so it cannot corrupt the
+// protocol, and every trace write is try/catch-guarded (a client may close stderr — the #29 lesson).
 
 import { createInterface } from 'node:readline';
-import { spawnSync, spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { readFileSync, existsSync, statSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols } from './lib/graph-ops.mjs';
+import { diffGraphs } from './lib/diff-core.mjs'; // #33: the codeweb_diff comparison, served in-process
 import { runQuery } from './lib/query-core.mjs';
 import { findSymbols } from './lib/find-core.mjs';
 import { buildBrief } from './lib/brief-core.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's card assembler, in-process
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
-import { bump, attachActivity } from './lib/stats.mjs';
+import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
 import { checkStaleness, sourceReader } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -55,10 +59,24 @@ const INSTRUCTIONS = [
   'Responses are budgeted (top-N + more.remaining). Pass full:true for the unabridged list, or limit/offset to page.',
 ].join('\n');
 
+// #29 (T-29.2c): this writes the SERVER's stdout. The mid-session "client closed its read end"
+// crash does NOT exist here — the process already inherits lib/cli.mjs:19's process.stdout
+// 'error' handler (EPIPE → exit 0) via the :29 import side effect. A second listener would be
+// dead code (cli's registers first and exits before a second could run for EPIPE; for non-EPIPE
+// errors cli's handler rethrows, masking any later listener). Non-EPIPE stdout errors stay
+// fail-fast by design. Scenario S1b pins this guard (and fails if the cli.mjs import is dropped).
 const send = (msg) => process.stdout.write(JSON.stringify(msg) + '\n');
 const reply = (id, result) => send({ jsonrpc: '2.0', id, result });
 const fail = (id, code, message) => send({ jsonrpc: '2.0', id, error: { code, message } });
 const errResult = (id, text) => reply(id, { content: [{ type: 'text', text }], isError: true });
+
+// #30/#31/#32 observability: opt-in NDJSON queue trace on stderr for BDD-by-mechanism assertions
+// (scenario tests assert event INTERLEAVINGS, not wall-clock). Default off with ZERO stderr writes.
+const TRACE = process.env.CODEWEB_MCP_TRACE === '1';
+function trace(ev, obj) {
+  if (!TRACE) return;
+  try { process.stderr.write(JSON.stringify({ ev, ...obj }) + '\n'); } catch { /* client closed stderr */ }
+}
 
 // ---- graph auto-discovery -------------------------------------------------------------------
 // Explicit arg > CODEWEB_WS workspace > nearest `.codeweb/graph.json` walking up from cwd.
@@ -118,28 +136,26 @@ function staleOnce(absPath, entry) {
 // stale answer WITH its stale annotation (never a dead end).
 const AUTOREFRESH_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_context', 'codeweb_explain', 'codeweb_find', 'codeweb_brief']);
 const refreshAttempt = new Map(); // abs graph path -> last attempt ms
-const refreshInFlight = new Set();
+// #31 (T-31.2): autoRefresh joins the workspace queue as a WRITER — SKIP when the workspace already
+// has a writer queued or in-flight (writersPending > 0, read race-free per I7, so an explicit
+// codeweb_refresh no longer races it into two concurrent extracts on one scan cache); else enqueue.
+// The triggering request ALWAYS serves its stale-but-annotated answer immediately (fire-and-forget,
+// never awaited); later requests keep the `stale` annotation until the enqueued writer lands and
+// cachedGraph's mtime+size stamp reloads. A queued READER never suppresses it (readers can't supply
+// freshness). refreshInFlight is gone (subsumed by writersPending).
 function autoRefresh(absGraph) {
   if (process.env.CODEWEB_NO_AUTOREFRESH === '1') return;
   try {
     const entry = cachedGraph(absGraph);
     if (!staleOnce(absGraph, entry)) return;
+    const key = dirname(absGraph); // workspace dir — the same key graph tools queue under
+    if (wsOf(key).writersPending > 0) { trace('skip-autorefresh', { id: null, tool: 'codeweb_refresh', ws: key, pid: null }); return; }
     const last = refreshAttempt.get(absGraph) || 0;
-    if (Date.now() - last < 15_000 || refreshInFlight.has(absGraph)) return; // one attempt per 15s per graph
+    if (Date.now() - last < 15_000) return; // one attempt per 15s per graph
     refreshAttempt.set(absGraph, Date.now());
-    refreshInFlight.add(absGraph);
-    // finding 19: fire-and-forget — the CURRENT call serves its stale-but-ANNOTATED answer
-    // immediately (the standing philosophy: stale-but-annotated beats broken) instead of stalling
-    // this call AND every queued request behind an inline synchronous refresh (807ms measured on
-    // a one-file touch; a 4–28s stall at the 16k benchmark). The refresh writes atomically, so
-    // the next cachedGraph() reloads and serves fresh.
-    pendingAsync++;
-    let settled = false;
-    const child = spawn(process.execPath, [scriptOf('refresh.mjs'), absGraph], { stdio: 'ignore' });
-    const timer = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, 60_000);
-    const done = (ok) => { if (settled) return; settled = true; clearTimeout(timer); refreshInFlight.delete(absGraph); if (ok) { try { bump(absGraph, 'autoRefreshes'); } catch { /* receipt only */ } } asyncDone(); };
-    child.on('error', () => done(false));
-    child.on('close', (code) => done(code === 0));
+    // id:null -> not client-cancellable; onSettle bumps the receipt on success. 60s kill headroom.
+    enqueueChild(null, { kind: 'writer', key, tool: 'codeweb_refresh', bin: scriptOf('refresh.mjs'), argv: [absGraph], stdio: 'ignore', timeoutMs: 60_000,
+      onSettle: ({ code }) => { if (code === 0) { try { bump(absGraph, 'autoRefreshes'); } catch { /* receipt only */ } } } });
   } catch { /* stale-but-annotated beats broken */ }
 }
 
@@ -167,7 +183,7 @@ const TOOLS = [
   { name: 'codeweb_tests', need: ['symbol'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 20 },
     argv: (a) => ['--tests', a.symbol],
     description: 'The tests that exercise a symbol (test-edge in-neighbors). Run the right subset after editing a symbol.' },
-  { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: scriptOf('diff.mjs'), graphless: true,
+  { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: scriptOf('diff.mjs'), graphless: true, queueFrom: (a) => a.after,
     argv: (a) => [a.before, a.after],
     description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression (new cycle, new duplication, a symbol that lost all callers). Call AFTER an edit to gate it.' },
   { name: 'codeweb_explain', need: ['symbol'], opt: ['graph'], bin: scriptOf('explain.mjs'),
@@ -287,34 +303,155 @@ const MAP_STAGES = ['extract', 'cluster', 'overlap', 'optimize', 'report'];
 let pendingAsync = 0;
 let stdinClosed = false;
 const asyncDone = () => { pendingAsync--; if (stdinClosed && pendingAsync <= 0) process.exit(0); };
-const spawnQueues = new Map(); // finding 19: workspace key -> tail promise (per-graph child serialization)
+// ---- per-workspace queue (#30/#31/#32) -------------------------------------------------------
+// spawnQueues was keyed by the graph FILE path, so refresh (keyed by its graph) and diff (keyed by
+// the shared '(graphless)' slot) never collided — the ordering the old comment promised did not
+// hold. State is now per-WORKSPACE-DIRECTORY: every graph tool, map, and keyed-graphless tool (diff)
+// normalizes to the dir that holds graph.json / the map out dir, so operations on ONE workspace order
+// correctly and different workspaces run concurrently. Draining rules = invariants I1–I7 (WS-F spec):
+//  I1 writers on one workspace never overlap, FIFO (chain on writerTail);
+//  I2 a reader never starts before an earlier-QUEUED writer (awaits the writerTail snapshot at enqueue);
+//  I3 a writer also waits for every reader ENQUEUED BEFORE it (join of writerTail + a readersInFlight
+//     snapshot) — the CONSERVATIVE rule: a spawned reader makes MULTIPLE workspace reads (graph.json
+//     then a sidecar), and a writer landing mid-read hands it a torn old/new state today's full
+//     serialization makes impossible; preserving that linearization is the contract;
+//  I4 readers run concurrently under a GLOBAL cap of READER_CAP children (FIFO waiters); a reader
+//     acquires its slot only AFTER its I2 writerTail wait resolves and holds it only while its child
+//     runs, so a reader blocked on a writer holds no slot (no cross-workspace starvation/deadlock);
+//  I5 every job settles exactly once and always releases slot + writersPending + inflight + asyncDone;
+//  I7 writersPending increments synchronously at enqueue so autoRefresh's same-drain skip is race-free.
+// #32's win is reader-reader overlap (two advisors ≈ max, not sum); the aggressive 'writers skip
+// readers' variant was reviewed and REJECTED (torn multi-artifact reads) — do not reintroduce it
+// without per-result graph-stamp labeling. READER_CAP=1 restores full serialization (the rollback lever).
+const workspaces = new Map(); // wsKey -> { writerTail: Promise, writersPending: int, readersInFlight: Set<Promise> }
+function wsOf(key) {
+  let w = workspaces.get(key);
+  if (!w) { w = { writerTail: Promise.resolve(), writersPending: 0, readersInFlight: new Set() }; workspaces.set(key, w); }
+  return w;
+}
+// I4: a global reader concurrency cap with a FIFO waiter queue. A released slot is handed DIRECTLY to
+// the next waiter (count unchanged) so ordering is preserved; only an unclaimed release grows the count.
+const READER_CAP = 3;
+let readerSlots = READER_CAP;
+const readerWaiters = [];
+const acquireReaderSlot = () => (readerSlots > 0 ? (readerSlots--, Promise.resolve()) : new Promise((res) => readerWaiters.push(res)));
+const releaseReaderSlot = () => { const next = readerWaiters.shift(); if (next) next(); else readerSlots++; };
+// writers = the tools that MUTATE a workspace (graph consumers must re-read after them) + the
+// internal autoRefresh + map; every other spawned tool and fast-path fallback spawn is a reader.
+const WRITER_TOOLS = new Set(['codeweb_refresh', 'codeweb_annotate', 'codeweb_map']);
+const inflight = new Map(); // request id -> { kill, cancelled } (#34: id→child; runChild owns it)
+
+// THE queue key: graph tools -> dir of graph.json; map -> resolve(out); keyed-graphless (diff) ->
+// dir of queueFrom(args). All normalize to one workspace-dir identity (T-30.1). '(graphless)' is a
+// defensive fallback, unreachable today (only diff+map are graphless; diff has queueFrom, map is
+// keyed by out above) — a unit pins that.
+function queueKeyFor(tool, args, graphPath) {
+  if (tool.map) return resolve(args.out || join(resolve(args.target || process.cwd()), '.codeweb'));
+  if (tool.graphless) {
+    const from = tool.queueFrom && tool.queueFrom(args);
+    return from ? dirname(resolve(from)) : '(graphless)';
+  }
+  return dirname(resolve(graphPath));
+}
+
+// THE one child wrapper (T-31.1): owns spawn/timeout/settle-once/trace/inflight for map, autoRefresh
+// AND every spawned tool — so the settle-once guard, the #34 cancel hook, and the trace hook plug in
+// ONCE. handleMap had no settle-once flag (I5: a spawn failure there double-replied + double-
+// decremented pendingAsync); routing it here fixes that. Guards the error+close DOUBLE-fire (Node:
+// 'close' may or may not follow 'error') with `settled`. onSettle shapes the reply and is NEVER
+// called on a cancel (a cancelled request gets no response, MCP). Resolves (never rejects) on settle.
+function runChild(id, entry, spec, releaseAll) {
+  return new Promise((resolve_) => {
+    const key = spec.key, tool = spec.tool;
+    if (entry && entry.cancelled) { // cancelled while still queued — never spawn (I5)
+      trace('kill', { id, tool, ws: key, pid: null, reason: 'cancel' });
+      releaseAll(); return resolve_();
+    }
+    let settled = false, timedOut = false, child = null, timer = null, out = '', errBuf = '';
+    const finish = (code) => {
+      if (settled) return; settled = true;
+      if (timer) clearTimeout(timer);
+      const pid = child ? child.pid : null;
+      if (entry && entry.cancelled) trace('kill', { id, tool, ws: key, pid, reason: 'cancel' });
+      else if (timedOut) trace('kill', { id, tool, ws: key, pid, reason: 'timeout' });
+      else trace('end', { id, tool, ws: key, pid });
+      if (!(entry && entry.cancelled)) spec.onSettle({ code, out, errBuf, timedOut }); // cancel suppresses the reply (I5)
+      releaseAll(); resolve_();
+    };
+    try { child = spawn(process.execPath, [spec.bin, ...spec.argv], { stdio: spec.stdio }); }
+    catch (e) { errBuf = (e && e.message) || 'spawn failed'; return finish(null); }
+    if (entry) entry.kill = () => { try { child.kill('SIGKILL'); } catch { /* raced exit */ } };
+    trace('start', { id, tool, ws: key, pid: child.pid });
+    timer = setTimeout(() => { timedOut = true; try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, spec.timeoutMs);
+    if (child.stdout) child.stdout.on('data', (d) => { out += d; });
+    if (child.stderr) child.stderr.on('data', (d) => { errBuf += d; if (errBuf.length > 65536) errBuf = errBuf.slice(-32768); if (spec.onStderr) spec.onStderr(String(d)); });
+    if (spec.input != null && child.stdin) {
+      // #29: guard the stdin flush (async EPIPE + sync ERR_STREAM_DESTROYED + null stdin).
+      try { child.stdin.on('error', () => {}); child.stdin.end(spec.input); }
+      catch { /* destroyed/absent — the close/error path settles */ }
+    }
+    child.on('error', () => finish(null)); // double-fire guarded by `settled`
+    child.on('close', (code) => finish(code));
+  });
+}
+
+// Enqueue a child on its workspace. writersPending increments SYNCHRONOUSLY here (I7), before any
+// await. WRITERS chain on the join of writerTail + an enqueue-time readersInFlight snapshot (I1 FIFO
+// + I3 conservative) and skip the slot gate. READERS capture writerTail at enqueue (I2), await it,
+// THEN acquire one global reader slot (I4) held only while the child runs; a reader is registered in
+// readersInFlight from enqueue until settle so a later writer (I3) waits for it. releaseAll runs
+// exactly once on every settle path (I5): releases the slot, deletes inflight, decrements
+// writersPending / removes from readersInFlight, calls asyncDone().
+function enqueueChild(id, spec) {
+  const w = wsOf(spec.key);
+  const entry = (id != null) ? { kill: () => {}, cancelled: false } : null;
+  if (entry) inflight.set(id, entry);
+  pendingAsync++;
+
+  if (spec.kind === 'writer') {
+    w.writersPending++; // I7: before any await
+    const readerSnapshot = [...w.readersInFlight]; // I3: readers enqueued before this writer
+    let released = false;
+    const releaseAll = () => { if (released) return; released = true; if (entry) inflight.delete(id); w.writersPending--; asyncDone(); };
+    const job = Promise.allSettled([w.writerTail, ...readerSnapshot]).then(() => runChild(id, entry, spec, releaseAll));
+    w.writerTail = job; // I1: the next writer chains after this one
+    return job;
+  }
+
+  // reader
+  let released = false, slotHeld = false, job;
+  const releaseAll = () => {
+    if (released) return; released = true;
+    if (slotHeld) { releaseReaderSlot(); slotHeld = false; }
+    if (entry) inflight.delete(id);
+    w.readersInFlight.delete(job);
+    asyncDone();
+  };
+  const tail = w.writerTail; // I2: snapshot the writer tail at enqueue
+  job = tail.then(async () => {
+    if (entry && entry.cancelled) return; // cancelled while queued behind a writer: acquire no slot
+    await acquireReaderSlot();            // I4: only AFTER the I2 wait — a blocked reader holds no slot
+    slotHeld = true;
+  }).then(() => runChild(id, entry, spec, releaseAll));
+  w.readersInFlight.add(job);
+  return job;
+}
+
+// ---- codeweb_map -----------------------------------------------------------------------------
 function handleMap(id, args, meta) {
   const target = resolve(args.target || process.cwd());
-  if (!existsSync(target)) return errResult(id, `target not found: ${target}`);
+  if (!existsSync(target)) return errResult(id, `target not found: ${target}`); // sync validation stays PRE-enqueue
   const out = resolve(args.out || join(target, '.codeweb'));
   const token = meta && meta.progressToken;
-  pendingAsync++;
-  const child = spawn(process.execPath, [scriptOf('run.mjs'), target, '--out-dir', out], { stdio: ['ignore', 'ignore', 'pipe'] });
-  let stderrBuf = '';
-  child.stderr.on('data', (d) => {
-    stderrBuf += d;
-    if (stderrBuf.length > 65536) stderrBuf = stderrBuf.slice(-32768);
+  const onStderr = (chunk) => {
     if (token === undefined || token === null) return;
-    for (const line of String(d).split('\n')) {
+    for (const line of chunk.split('\n')) {
       const m = /^\[run\] ([a-z-]+)$/.exec(line.trim());
-      if (m && MAP_STAGES.includes(m[1])) {
-        send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.indexOf(m[1]), total: MAP_STAGES.length, message: `stage: ${m[1]}` } });
-      }
+      if (m && MAP_STAGES.includes(m[1])) send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.indexOf(m[1]), total: MAP_STAGES.length, message: `stage: ${m[1]}` } });
     }
-  });
-  const timer = setTimeout(() => { try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, 300_000);
-  child.on('error', (e) => { clearTimeout(timer); errResult(id, `codeweb_map failed: ${e.message}`); asyncDone(); });
-  child.on('close', (code) => {
-    clearTimeout(timer);
-    if (code !== 0) {
-      errResult(id, `codeweb_map failed (exit ${code}): ${stderrBuf.trim().split('\n').slice(-3).join('\n')}`);
-      return asyncDone();
-    }
+  };
+  const onSettle = ({ code, errBuf }) => {
+    if (code !== 0) return errResult(id, `codeweb_map failed (exit ${code}): ${(errBuf || '').trim().split('\n').slice(-3).join('\n')}`);
     if (token !== undefined && token !== null) send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.length, total: MAP_STAGES.length, message: 'done' } });
     const graphPath = join(out, 'graph.json');
     let stats = '';
@@ -323,8 +460,57 @@ function handleMap(id, args, meta) {
       stats = `${(g.nodes || []).length} symbols, ${(g.edges || []).length} edges, ${(g.domains || []).length} domains, ${(g.overlaps || []).length} overlap findings`;
     } catch { stats = 'built (stats unreadable)'; }
     reply(id, { content: [{ type: 'text', text: JSON.stringify({ ok: true, graph: graphPath, summary: `mapped ${target}: ${stats}`, artifacts: { report: join(out, 'report.html'), optimize: join(out, 'optimize.md') } }) }] });
-    asyncDone();
-  });
+  };
+  // map is a WRITER keyed by resolve(out) — two maps on one out serialize; queued readers wait (I2).
+  enqueueChild(id, { kind: 'writer', key: out, tool: 'codeweb_map', bin: scriptOf('run.mjs'), argv: [target, '--out-dir', out], stdio: ['ignore', 'ignore', 'pipe'], timeoutMs: 300_000, onStderr, onSettle });
+}
+
+// THE spawned-tool reply shaper (shared by the generic tool path and the #33 diff spawn fallback):
+// exit 2 / null → errResult (graph-not-found gains the MCP next step); otherwise the child's JSON.
+const spawnedToolReply = (id) => ({ code, out, errBuf, timedOut }) => {
+  if (timedOut) return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
+  if (code === 2 || code == null) {
+    const text = (errBuf || 'query failed').trim() || 'query failed';
+    return errResult(id, /graph not found/.test(text) ? `${text}\n${NO_GRAPH}` : text);
+  }
+  // exit 0 (results) or 1 (found:false / gate-fail) both emit valid JSON on stdout — pass through.
+  reply(id, { content: [{ type: 'text', text: (out || '').trim() }] });
+};
+
+// ---- codeweb_diff fast path (#33) ------------------------------------------------------------
+// The prescribed refresh→diff loop's last child goes IN-PROCESS: the AFTER side comes from
+// cachedGraph (re-stat + reload on mtime/size change — disk truth by mechanism), reusing its cached
+// index; the BEFORE side is a fresh parse of the caller's snapshot, deliberately NOT inserted into
+// graphCache (its FIFO eviction would drop the hot live graph for a one-shot temp snapshot). I6: it
+// AWAITS the after-workspace writerTail first (else a concurrent refresh could hand it pre-refresh
+// bytes — reopening #30); it is NOT registered in readersInFlight (ONE live read, rename-atomic-
+// safe; the before side is a caller snapshot). It registers a SUPPRESS-ONLY inflight entry (T-34.1):
+// no child to kill, but a cancel while it awaits suppresses the reply. Any throw → the spawned
+// diff.mjs fallback (a reader job), whose stderr/exit-2 becomes the errResult — never invented text.
+function handleDiff(id, args, tool) {
+  const key = dirname(resolve(args.after)); // == queueKeyFor(diff) — the after-workspace
+  const entry = { kill: () => {}, cancelled: false };
+  inflight.set(id, entry);
+  pendingAsync++;
+  const spawnFallback = () => {
+    // hand off to the spawned reader path; keep the work COUNTED across the handoff — no asyncDone
+    // runs between this -- and enqueueChild's ++, so stdin-close cannot exit in the gap.
+    inflight.delete(id);
+    pendingAsync--;
+    enqueueChild(id, { kind: 'reader', key, tool: tool.name, bin: tool.bin, argv: [args.before, args.after, '--json'], stdio: ['ignore', 'pipe', 'pipe'], timeoutMs: SPAWN_TIMEOUT_MS, onSettle: spawnedToolReply(id) });
+  };
+  const attempt = () => {
+    if (entry.cancelled) { inflight.delete(id); asyncDone(); return; } // cancel while awaiting → suppress reply (I5)
+    let payload;
+    try {
+      const before = normalizeGraph(JSON.parse(readFileSync(resolve(args.before), 'utf8'))); // NOT cached (temp snapshot must not evict the live graph)
+      const afterEntry = cachedGraph(resolve(args.after)); // re-stats + reloads on mismatch
+      payload = diffGraphs(before, afterEntry.graph, { names: { before: basename(args.before), after: basename(args.after) }, aIx: afterEntry.index }).payload;
+    } catch { return spawnFallback(); }
+    reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
+    inflight.delete(id); asyncDone();
+  };
+  wsOf(key).writerTail.then(attempt, attempt); // I6: await the after-workspace writer tail first
 }
 
 // ---- tools/call ------------------------------------------------------------------------------
@@ -340,6 +526,7 @@ function handleToolCall(id, params) {
   }
   if (tool.valid) { const problem = tool.valid(args); if (problem) return errResult(id, problem); }
   if (tool.map) return handleMap(id, args, params && params._meta);
+  if (tool.name === 'codeweb_diff') return handleDiff(id, args, tool); // #33: in-process from cachedGraph, spawn fallback
 
   const cliArgs = [];
   let graphPath = null;
@@ -453,6 +640,16 @@ function handleToolCall(id, params) {
       }
     } catch { /* fall through to the spawned artifact */ }
   }
+  // Fast path (#33): the value receipt is a ~200-byte stats.json the server already has the reader
+  // for — spawning a child to read it cost 92–95 ms. cachedGraph(...) throws EXACTLY where the CLI's
+  // loadGraph dies (missing/invalid graph), and that throw falls through to the spawned CLI whose
+  // stderr/exit-2 becomes the errResult — so the fast path never invents its own error text.
+  if (tool.name === 'codeweb_stats') {
+    try {
+      cachedGraph(resolve(graphPath));
+      return reply(id, { content: [{ type: 'text', text: JSON.stringify(receiptPayload(resolve(graphPath))) }] });
+    } catch { /* fall through to the spawned artifact (identical graph-not-found errResult) */ }
+  }
   cliArgs.push(...tool.argv(args));
   // budget injection: default top-N unless the caller set the budget arg explicitly or asked full
   if (tool.budget) {
@@ -462,39 +659,21 @@ function handleToolCall(id, params) {
     if (args.offset != null && (tool.opt || []).includes('offset')) cliArgs.push('--offset', String(args.offset));
   }
   const bin = tool.bin || QUERY;
-  // finding 19: children are ASYNC — the handleMap pattern, generalized to every spawned tool.
-  // spawnSync blocked the readline loop, so ONE slow advisor head-of-line-blocked every queued
-  // request (a 2.5ms structural query measured at 527.6ms behind a concurrent campaign; a wedged
-  // child could freeze the whole server for 120s). Fast-path tools answer in-process ABOVE and
-  // never wait; spawned children serialize PER WORKSPACE so stateful sequences on one graph
-  // (annotate then list; refresh then diff) keep their order while other workspaces run
-  // concurrently. JSON-RPC replies may land out of order — the protocol (and every driver in
-  // this repo) correlates by id; pendingAsync keeps stdin-close from killing in-flight work.
-  const queueKey = graphPath ? resolve(graphPath) : '(graphless)';
-  pendingAsync++;
-  const prev = spawnQueues.get(queueKey) || Promise.resolve();
-  const job = prev.then(() => new Promise((release) => {
-    let settled = false;
-    const child = spawn(process.execPath, [bin, ...cliArgs, '--json'], { stdio: [tool.input ? 'pipe' : 'ignore', 'pipe', 'pipe'] });
-    let out = '', errBuf = '', timedOut = false;
-    const timer = setTimeout(() => { timedOut = true; try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, SPAWN_TIMEOUT_MS);
-    const settle = (fn) => { if (settled) return; settled = true; clearTimeout(timer); fn(); release(); asyncDone(); };
-    child.stdout.on('data', (d) => { out += d; });
-    child.stderr.on('data', (d) => { errBuf += d; if (errBuf.length > 65536) errBuf = errBuf.slice(-32768); });
-    if (tool.input) child.stdin.end(tool.input(args) || '');
-    child.on('error', (e) => settle(() => errResult(id, (e && e.message) || 'spawn failed')));
-    child.on('close', (code) => settle(() => {
-      if (timedOut) return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
-      if (code === 2 || code == null) {
-        const text = (errBuf || 'query failed').trim() || 'query failed';
-        // the CLIs' graph-not-found message gains the MCP-native next step
-        return errResult(id, /graph not found/.test(text) ? `${text}\n${NO_GRAPH}` : text);
-      }
-      // exit 0 (results) or 1 (found:false / gate-fail) both emit valid JSON on stdout — pass through.
-      reply(id, { content: [{ type: 'text', text: (out || '').trim() }] });
-    }));
-  }));
-  spawnQueues.set(queueKey, job);
+  // finding 19 + #30/#31/#32: spawned children are ASYNC and queue PER WORKSPACE (dir of graph.json /
+  // map out / diff's `after`). spawnSync once blocked the readline loop, head-of-line-blocking every
+  // queued request; fast-path tools answer in-process ABOVE and never queue. Readers on one workspace
+  // now run concurrently under READER_CAP (I4) while still ordering after any earlier-queued writer
+  // (I2); writers stay serialized (I1) and wait for earlier readers (I3). Replies may land out of
+  // order — clients correlate by id; pendingAsync keeps stdin-close from killing in-flight work.
+  enqueueChild(id, {
+    kind: WRITER_TOOLS.has(tool.name) ? 'writer' : 'reader',
+    key: queueKeyFor(tool, args, graphPath),
+    tool: tool.name, bin, argv: [...cliArgs, '--json'],
+    stdio: [tool.input ? 'pipe' : 'ignore', 'pipe', 'pipe'],
+    input: tool.input ? (tool.input(args) || '') : undefined,
+    timeoutMs: SPAWN_TIMEOUT_MS,
+    onSettle: spawnedToolReply(id),
+  });
 }
 
 function handle(line) {
@@ -502,8 +681,34 @@ function handle(line) {
   if (!s) return;
   let msg;
   try { msg = JSON.parse(s); } catch { return fail(null, -32700, 'Parse error'); }
+  // #34 (T-34.3): a JSON-RPC batch array — MINIMAL per-member fan-out. Each member is processed
+  // exactly as if it had arrived on its own line; responses are emitted as individual NDJSON lines
+  // in settle order, NOT collected into a response array (a documented deviation — a collector would
+  // have to thread through a dozen async settle sites, and a cancel-suppressed member gets NO response
+  // and would hold the array open forever). An EMPTY array is the JSON-RPC-mandated Invalid Request.
+  if (Array.isArray(msg)) {
+    if (msg.length === 0) return fail(null, -32600, 'Invalid Request');
+    for (const m of msg) handleMessage(m);
+    return;
+  }
+  handleMessage(msg);
+}
+
+function handleMessage(msg) {
+  // #34 (T-34.2): non-object frames (number/string/bool/null, and a nested array via fan-out) are
+  // Invalid Request, not a silent drop.
+  if (msg === null || typeof msg !== 'object' || Array.isArray(msg)) return fail(null, -32600, 'Invalid Request');
   const { id, method, params } = msg;
-  if (id === undefined || id === null) return; // JSON-RPC notification: never responded to
+  // #34 (T-34.1): cancellation is an id-less notification — handle it BEFORE the id-less drop. Kill
+  // the in-flight child (or mark a still-queued job so it never spawns) and SUPPRESS its reply; the
+  // job still releases its slot / writersPending / asyncDone (I5). Unknown or already-settled
+  // requestId → ignore (MCP: a server MAY ignore it).
+  if (method === 'notifications/cancelled') {
+    const j = inflight.get(params && params.requestId);
+    if (j) { j.cancelled = true; j.kill(); }
+    return;
+  }
+  if (id === undefined || id === null) return; // other JSON-RPC notifications: never responded to
   if (method === 'initialize') {
     const wanted = params && params.protocolVersion;
     return reply(id, {
@@ -519,6 +724,14 @@ function handle(line) {
   return fail(id, -32601, `method not found: ${method}`);
 }
 
-const rl = createInterface({ input: process.stdin });
-rl.on('line', handle);
-rl.on('close', () => { stdinClosed = true; if (pendingAsync <= 0) process.exit(0); });
+// Start the readline loop ONLY when run as the entry point (node mcp-server.mjs) — so tests can
+// import the pure helpers (queueKeyFor) without a server attaching to their own stdin.
+const isMain = !!process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+if (isMain) {
+  const rl = createInterface({ input: process.stdin });
+  rl.on('line', handle);
+  rl.on('close', () => { stdinClosed = true; if (pendingAsync <= 0) process.exit(0); });
+}
+
+// Exported for unit tests (the server side-effects are gated behind isMain above).
+export { queueKeyFor, TOOLS };

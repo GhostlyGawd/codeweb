@@ -13,6 +13,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { runNode, tmpDir, cleanup, writeTree, script, readJSON, PLUGIN_ROOT } from './helpers.mjs';
 
 const RUN = script('run.mjs');
@@ -20,7 +21,9 @@ const BENCH = join(PLUGIN_ROOT, 'bench', 'experiments', 'report-scale.mjs');
 
 let HAVE_PW = false;
 try {
-  const { resolvePlaywright } = await import(BENCH);
+  // file:// URL keeps this import working on windows (a D:\ path is an unsupported ESM scheme —
+  // the crash was swallowed by this catch and mis-reported as "playwright not resolvable")
+  const { resolvePlaywright } = await import(pathToFileURL(BENCH).href);
   HAVE_PW = !!resolvePlaywright();
 } catch { /* bench script missing/broken -> tests run and fail loudly */ }
 const SKIP = HAVE_PW ? false : 'playwright not resolvable';
@@ -48,10 +51,16 @@ test('L1: harness emits the full measurement schema on a fixture report', { skip
       assert.ok(Number.isFinite(j[k]) && j[k] >= 0, `${k} measured (${j[k]})`);
     }
     assert.ok(j.heapUsedBytes === null || j.heapUsedBytes > 0, 'heap recorded when the browser exposes it');
-    // finding 13(d)/21: the expand-all row exists and stays inside the per-frame budget
-    assert.ok(j.expandAll && Number.isFinite(j.expandAll.simMsPerFrame), `expand-all measured (${JSON.stringify(j.expandAll)})`);
+    // finding #35 (T-35.6): the expand-all row reports the settled per-step cost AND the worst single
+    // uninterruptible slice (deliberate schema change from the old straddle-the-explosion simMsPerFrame).
+    assert.ok(j.expandAll && Number.isFinite(j.expandAll.settledMsPerFrame), `expand-all settled measured (${JSON.stringify(j.expandAll)})`);
+    assert.ok(Number.isFinite(j.expandAll.maxSingleStepMs), 'worst single slice measured');
+    assert.ok(Number.isFinite(j.expandAll.totalSettleMs) && Number.isInteger(j.expandAll.steps), 'settle window recorded');
     assert.ok(j.expandAll.nodes > 0, 'expand-all actually put symbols on canvas');
-    assert.equal(typeof j.verdict.expandAllOk, 'boolean', 'the verdict judges expand-all too');
+    assert.equal(typeof j.verdict.expandAllOk, 'boolean', 'the verdict judges expand-all (settledMsPerFrame ≤ 50 && maxSingleStepMs ≤ 250)');
+    // finding #37: the fitted full-draw cost is measured and judged
+    assert.ok(j.drawOnceMs === null || Number.isFinite(j.drawOnceMs), `drawOnce measured (${j.drawOnceMs})`);
+    assert.equal(typeof j.verdict.drawOnceOk, 'boolean', 'the verdict judges the draw loop too');
     assert.ok(j.chromiumVersion, 'environment noted');
   } finally { cleanup(dir); }
 });

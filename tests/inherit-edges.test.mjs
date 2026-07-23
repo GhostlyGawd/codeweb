@@ -10,6 +10,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 import { normalizeGraph, buildIndex, impactOf, orphans } from '../scripts/lib/graph-ops.mjs';
 
 const FILES = {
@@ -29,32 +30,31 @@ const FILES = {
 let SRC, OUT;
 before(() => { SRC = tmpDir('codeweb-inherit-'); writeTree(SRC, FILES); OUT = join(SRC, 'fragment.json'); });
 after(() => cleanup(SRC));
-function extract() {
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'inh-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, res.stderr);
-  return readJSON(OUT);
+async function extract() {
+  const { fragment } = await runExtract({ path: SRC, target: 'inh-x', ctags: false });
+  return fragment;
 }
 
-test('JS: `class X extends Y` emits an inherit edge X -> Y (alias-resolved across files)', () => {
-  assert.ok(hasEdge(extract().edges, 'dog.mjs:Dog', 'animal.mjs:Animal', 'inherit'), 'Dog -> Animal');
+test('JS: `class X extends Y` emits an inherit edge X -> Y (alias-resolved across files)', async () => {
+  assert.ok(hasEdge((await extract()).edges, 'dog.mjs:Dog', 'animal.mjs:Animal', 'inherit'), 'Dog -> Animal');
 });
 
-test('JS: a same-file `extends` resolves', () => {
-  assert.ok(hasEdge(extract().edges, 'shapes.mjs:Circle', 'shapes.mjs:Shape', 'inherit'), 'Circle -> Shape');
+test('JS: a same-file `extends` resolves', async () => {
+  assert.ok(hasEdge((await extract()).edges, 'shapes.mjs:Circle', 'shapes.mjs:Shape', 'inherit'), 'Circle -> Shape');
 });
 
-test('Python: `class X(Y)` emits an inherit edge', () => {
-  assert.ok(hasEdge(extract().edges, 'zoo.py:Lion', 'zoo.py:Base', 'inherit'), 'Lion -> Base');
+test('Python: `class X(Y)` emits an inherit edge', async () => {
+  assert.ok(hasEdge((await extract()).edges, 'zoo.py:Lion', 'zoo.py:Base', 'inherit'), 'Lion -> Base');
 });
 
-test('an extended base class is NOT a dead-code orphan', () => {
-  const g = normalizeGraph(extract()), idx = buildIndex(g);
+test('an extended base class is NOT a dead-code orphan', async () => {
+  const g = normalizeGraph(await extract()), idx = buildIndex(g);
   const orphanIds = new Set(orphans(g, idx).map((o) => o.id));
   assert.ok(!orphanIds.has('shapes.mjs:Shape'), 'Shape is reached via inheritance, not dead code');
 });
 
-test('--impact of a base class includes its subclass (inherit reverse-reachability)', () => {
-  const g = normalizeGraph(extract()), idx = buildIndex(g);
+test('--impact of a base class includes its subclass (inherit reverse-reachability)', async () => {
+  const g = normalizeGraph(await extract()), idx = buildIndex(g);
   assert.ok(impactOf(idx, ['shapes.mjs:Shape']).includes('shapes.mjs:Circle'),
     'changing Shape impacts Circle');
 });

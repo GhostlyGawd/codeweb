@@ -190,6 +190,43 @@ test('CMP-CLI: campaign.mjs --json composes all three advisors — a delete AND 
   } finally { cleanup(dir); }
 });
 
+// ---- Round 2, finding #27 (T-27.1): concurrent advisors + clone opt-out stay byte-invariant ----
+// The CLI payload must be byte-identical through the spawnSync -> async-spawn switch (Promise.all
+// fixes composition order; child stderr is drained + DISCARDED, never interleaved into stdout) and
+// through the clone:false opt-out (planCampaign's in-place normalize must not perturb campaign's later
+// meta.target read). Fixture exercises all three advisors: a 2-file call cycle (break-cycles' verified
+// cut), a ready duplicate merge (optimize/overlaps), and a dead orphan (deadcode).
+test('CMP-CONCURRENT-STABLE: campaign --json is byte-stable + banner-clean on a cycles+dups+orphans fixture', () => {
+  const dir = tmpDir('codeweb-camp27-');
+  try {
+    const g = { meta: { target: 'camp27' }, domains: [],
+      nodes: [
+        { id: 'a.js:fa', label: 'fa', kind: 'function', file: 'a.js', line: 1, loc: 5, exports: true },
+        { id: 'b.js:fb', label: 'fb', kind: 'function', file: 'b.js', line: 1, loc: 5, exports: false },
+        { id: 'z.js:dead', label: 'dead', kind: 'function', file: 'z.js', line: 1, loc: 8, exports: false },
+        { id: 'c.js:dup', label: 'dup', kind: 'function', file: 'c.js', line: 1, loc: 6, exports: true },
+        { id: 'd.js:dup', label: 'dup', kind: 'function', file: 'd.js', line: 1, loc: 6, exports: true },
+      ],
+      edges: [
+        { from: 'a.js:fa', to: 'b.js:fb', kind: 'call' },
+        { from: 'b.js:fb', to: 'a.js:fa', kind: 'call' }, // a.js <-> b.js file cycle
+      ],
+      overlaps: [{ id: 'ov1', kind: 'duplicate-logic', confidence: 'high', severity: 'high', bodySim: 0.92, drifted: false, nodes: ['c.js:dup', 'd.js:dup'], title: '`dup` re-implemented', domains: ['c', 'd'], evidence: 'x', recommendation: 'merge' }],
+    };
+    const gp = join(dir, 'graph.json'); writeFileSync(gp, JSON.stringify(g));
+    const r1 = runNode(script('campaign.mjs'), [gp, '--json']);
+    const r2 = runNode(script('campaign.mjs'), [gp, '--json']);
+    assert.equal(r1.status, 0, r1.stderr);
+    assert.equal(r1.stdout.trimEnd().split('\n').length, 1, 'stdout is a single JSON line — no child advisor banner interleaved');
+    assert.equal(r1.stdout, r2.stdout, 'byte-stable across runs (concurrency adds no nondeterminism/interleaving)');
+    const p = JSON.parse(r1.stdout);
+    assert.deepEqual(p.steps.map((s) => s.type), ['cut', 'delete', 'merge'], 'phase-ordered worklist, composition-order-independent');
+    assert.equal(p.target, 'camp27', 'meta.target survives the clone:false in-place normalize');
+    assert.ok(p.steps.find((s) => s.type === 'delete').op.ids.includes('z.js:dead'), 'the dead orphan delete');
+    assert.ok(p.steps.find((s) => s.type === 'merge').op.ids.includes('c.js:dup'), 'the ready duplicate merge');
+  } finally { cleanup(dir); }
+});
+
 // CMP-DELETE-ROI: a delete step's ROI is the orphan's real span. deadcode.mjs emits `loc` on every
 // safe item (locSaved remains a legacy alias) — before this contract, campaign read a field the
 // producer never emitted, so every delete ranked roi 0 and contributed 0 to locReclaimed.

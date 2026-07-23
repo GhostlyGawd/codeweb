@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, script, tmpDir, cleanup, writeTree, readJSON, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 // Go on the deterministic fast path: func/type(struct|interface) become nodes; a func with a
 // receiver `func (r R) M()` is a method, a plain `func F()` is a function; Go visibility (an
@@ -36,17 +37,15 @@ type Shape interface {
 `,
 };
 
-function extract() {
+async function extract() {
   const dir = tmpDir('codeweb-go-');
   writeTree(dir, FIXTURE);
-  const frag = join(dir, 'fragment.json');
-  const r = runNode(script('extract-symbols.mjs'), [dir, '--out', frag, '--no-ctags']);
-  assert.equal(r.status, 0, r.stderr);
-  return { dir, g: readJSON(frag) };
+  const { fragment } = await runExtract({ path: dir, ctags: false });
+  return { dir, g: fragment };
 }
 
-test('Go: func/method/struct/interface become nodes with the right kind and Go visibility', () => {
-  const { dir, g } = extract();
+test('Go: func/method/struct/interface become nodes with the right kind and Go visibility', async () => {
+  const { dir, g } = await extract();
   try {
     const byId = new Map(g.nodes.map((n) => [n.id, n]));
     const add = byId.get('math.go:Add');
@@ -70,8 +69,8 @@ test('Go: func/method/struct/interface become nodes with the right kind and Go v
   }
 });
 
-test('Go: in-body calls wire by name (with ambiguity drop)', () => {
-  const { dir, g } = extract();
+test('Go: in-body calls wire by name (with ambiguity drop)', async () => {
+  const { dir, g } = await extract();
   try {
     assert.ok(hasEdge(g.edges, 'math.go:helper', 'math.go:Add', 'call'), 'helper() calls Add()');
     assert.ok(hasEdge(g.edges, 'math.go:Calculator.Compute', 'math.go:helper', 'call'), 'Compute() calls helper()');
@@ -80,8 +79,8 @@ test('Go: in-body calls wire by name (with ambiguity drop)', () => {
   }
 });
 
-test('Go: meta.languages reports go', () => {
-  const { dir, g } = extract();
+test('Go: meta.languages reports go', async () => {
+  const { dir, g } = await extract();
   try {
     assert.ok(g.meta.languages.includes('go'), 'languages includes go');
   } finally {

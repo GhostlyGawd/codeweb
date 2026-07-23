@@ -24,10 +24,33 @@ permissions:
   id-token: write   # npm publish --provenance mints an OIDC attestation; without this the gated publish step fails
 
 jobs:
-  publish:
+  # Round 2 finding #2: every publish path — tag push AND dispatch — flows through the full suite
+  # and the consistency gate first (both triggers reach publish only via needs: test below). A
+  # failing suite now blocks a release; that is the point.
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Install (optional tree-sitter tier)
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - name: Check consistency
+        run: node scripts/check-consistency.mjs
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The dispatch ancestor guard below needs history: merge-base fails at the default depth
+          # 1, and checkout@v4 at depth 0 fetches all refs/heads/* so origin/main materializes.
+          fetch-depth: 0
 
       - name: Resolve version
         id: ver
@@ -53,6 +76,15 @@ jobs:
             echo "::error::release version ${VERSION} does not match package.json version ${PKG} at this ref"
             exit 1
           fi
+
+      # Round 2 finding #2: a dispatched ref must already be on main — checked BEFORE tag creation,
+      # so a stray branch can never become a tagged release. A commit is its own ancestor, so
+      # dispatching main's tip passes; `a && b || c` also fails closed when the fetch itself fails.
+      # The tag-push trigger bypasses this by design: pushing a tag already requires repo write.
+      - name: Dispatch guard — ref must be an ancestor of main
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git fetch origin main && git merge-base --is-ancestor HEAD origin/main || { echo "::error::dispatched ref is not on main"; exit 1; }
 
       - name: Create tag (dispatch only)
         if: github.event_name == 'workflow_dispatch'
@@ -107,6 +139,7 @@ jobs:
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
 
       - name: Package VS Code extension (.vsix) and attach to the release
         env:
@@ -114,7 +147,8 @@ jobs:
         run: |
           TAG="v${{ steps.ver.outputs.version }}"
           cd editor/vscode-codeweb
-          npx --yes @vscode/vsce@latest package --no-dependencies --out "codeweb-lens.vsix"
+          # exact pin — bump deliberately (finding #2: @latest executed whatever npm served that day)
+          npx --yes @vscode/vsce@3.9.2 package --no-dependencies --out "codeweb-lens.vsix"
           gh release upload "$TAG" codeweb-lens.vsix --repo "$GITHUB_REPOSITORY" --clobber
 
       - name: Publish to npm (gated on NPM_TOKEN)
@@ -136,4 +170,5 @@ jobs:
             exit 0
           fi
           cd editor/vscode-codeweb
-          npx --yes @vscode/vsce@latest publish --no-dependencies -p "$VSCE_PAT"
+          # exact pin — bump deliberately (finding #2: @latest executed whatever npm served that day)
+          npx --yes @vscode/vsce@3.9.2 publish --no-dependencies -p "$VSCE_PAT"

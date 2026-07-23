@@ -8,7 +8,7 @@
 // Usage: node refresh.mjs <graph.json> [--cache <path>] [--json]
 // Exit: 0 ok, 2 usage / missing meta.root.
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -60,12 +60,34 @@ const updated = {
 // covered flag is worse than none) and say how to get it back.
 const hadCoverage = !!updated.meta.coverage;
 if (hadCoverage) delete updated.meta.coverage;
-atomicWrite(abs, JSON.stringify(updated)); // finding 3: a SIGTERM mid-write (MCP's 60s timeout) must not truncate the graph
+const updatedJson = JSON.stringify(updated);
+atomicWrite(abs, updatedJson); // finding 3: a SIGTERM mid-write (MCP's 60s timeout) must not truncate the graph
+// Round 2, finding #18a: refresh re-baselines the post-edit hook's sidecar — `h`/`s` from the
+// in-memory string just written (free), `m` from a post-rename stat. Best-effort by contract.
+try {
+  const { computeHookBaseline, writeHookBaselineBeside } = await import('./lib/hook-baseline.mjs');
+  const { statSync } = await import('node:fs');
+  writeHookBaselineBeside(abs, computeHookBaseline(updated, updatedJson, statSync(abs).mtimeMs));
+} catch { /* sidecar failure must never fail a refresh */ }
+
+// Round 2, finding #25: rebuild the map-time sidecar TRIO (brief/index-lite/similar-index) beside the
+// just-written graph so the prescribed post-edit refresh no longer kills the hook / find_similar fast
+// paths until the next full map. Write order is graph → hook-baseline (WS-D, above) → trio.
+// normalizeGraph runs POST-write so its mutation can't leak into the graph bytes; the sidecar content
+// then equals what each consumer's fallback computes from the on-disk graph (that parity is the
+// contract). writeSidecars is best-effort (never throws). Extraction stays spawned (in-process is #40).
+let sidecars = [];
+try {
+  const { writeSidecars } = await import('./lib/sidecars.mjs');
+  const { normalizeGraph } = await import('./lib/graph-ops.mjs');
+  sidecars = writeSidecars(abs, normalizeGraph(updated));
+} catch { /* sidecar failure must never fail a refresh */ }
 
 const payload = {
   graph: abs, root,
   before, after: { nodes: updated.nodes.length, edges: updated.edges.length },
   domainsReattached: reattached, scanned: /scanned (\d+)/.exec(r.stderr)?.[1] ?? null,
+  sidecars,
 };
 if (hadCoverage) payload.note = 'coverage annotations dropped (spans changed) — re-run scripts/coverage.mjs with a fresh report';
 if (json) { emitJson(payload); } else {

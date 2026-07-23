@@ -12,6 +12,12 @@ const byIdLt = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 // Canonical edge identity (from+to+kind) — was re-implemented in break-cycles/diff/shards (Spec E dogfood).
 export const edgeKey = (e) => [e.from, e.to, e.kind].join(String.fromCharCode(0)); // NUL-separated: ids can contain spaces
 
+// THE edge kinds that participate in file-level cycles — one truth for fileCycles, the merge
+// simulator, and break-cycles' witness accounting (round 2, #23: fileCycles and
+// createMergeSimulator each carried an inline copy of this set; a drift between them and a
+// STRUCTURAL-only witness table is exactly the ref-subtlety trap the cheapestCuts property pins).
+export const CYCLE_KINDS = new Set(['call', 'import', 'inherit', 'ref']);
+
 export const isTestFile = (file) =>
   /(?:^|\/)(?:tests?|__tests__|spec)\//.test(file || '') || /(?:\.test\.|\.spec\.|_test\.|_spec\.)/.test(file || '') ||
   /(?:^|\/)src\/test\//.test(file || '') ||                       // Maven/Gradle convention
@@ -382,7 +388,7 @@ export function fileCycles(graph) {
   const adj = new Map();
   const files = new Set();
   for (const e of graph.edges) {
-    if (e.kind !== 'call' && e.kind !== 'import' && e.kind !== 'inherit' && e.kind !== 'ref') continue;
+    if (!CYCLE_KINDS.has(e.kind)) continue;
     const f = fileOf.get(e.from), t = fileOf.get(e.to);
     if (!f || !t || f === t) continue;
     files.add(f); files.add(t);
@@ -424,6 +430,75 @@ export function fileCycles(graph) {
   return out.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
 }
 
+// Round 2, #23 (T-23.1 seam): break-cycles' per-cycle candidate/verify logic, hoisted verbatim so
+// the advisor keeps argv/IO/rendering only and the cut logic lives beside fileCycles (one truth).
+// STRUCTURAL is deliberately NOT CYCLE_KINDS: candidates must be SEVERABLE dependencies
+// (call/import/inherit — an edge you can invert, extract, or inject away), while `ref` is not
+// severable advice but still closes cycles — so candidate selection uses STRUCTURAL and cycle
+// verification counts ALL CYCLE_KINDS (a pair alive only via ref must survive a structural cut).
+const STRUCTURAL = new Set(['call', 'import', 'inherit']);
+
+/** For each file-level dependency cycle, the CHEAPEST verified file->file cut (or verified:false
+ *  with a note when no single-pair cut breaks it). Returns break-cycles' `cycles` payload array.
+ *
+ *  Round 2, #23 (T-23.3): verification runs on the SCC-induced file PSEUDO-GRAPH instead of
+ *  re-filtering all edges + full whole-graph Tarjan per candidate (measured 19.5s for one dense
+ *  60-file SCC inside a 93k-edge graph — per-candidate × whole-graph). Why the pseudo-graph
+ *  verdict is EXACT, not approximate: a candidate's removal only touches in-SCC pairs, so the
+ *  outside graph is unchanged; a post-removal cycle among SCC files routing through an outside
+ *  file is impossible — that router would reach and be reached by SCC members and would have been
+ *  IN the SCC pre-removal; and SCCs only shrink under edge removal, so no new outside coupling can
+ *  appear. Hence same-key survival on the pseudo-graph (one node per file, one edge per surviving
+ *  in-SCC pair — the createMergeSimulator.cyclesOfPairs precedent, same fileCycles code path)
+ *  ⇔ same-key survival on the whole graph, per candidate. Pinned by CB-PSEUDO-EQ against a frozen
+ *  whole-graph oracle, deep-equal (trial order, chosen cut, underlyingEdges order included). */
+export function cheapestCuts(graph) {
+  const fileOf = new Map(graph.nodes.map((n) => [n.id, n.file]));
+
+  return fileCycles(graph).map((cycle) => {
+    const inCycle = new Set(cycle);
+    const key = cycleKey(cycle);
+    // ONE pass over graph.edges in file order: candidates (STRUCTURAL only — severable deps, with
+    // their underlying symbol edges in today's byte order) and the pair-witness table (ALL
+    // CYCLE_KINDS — the subtlety: STRUCTURAL omits `ref` while fileCycles counts it, so witness
+    // counts must NOT reuse STRUCTURAL or a ref-alive pair would be counted dead). Duplicate
+    // (from,to,kind) edges each count on both sides: edgeKey-set removal removes every duplicate
+    // the candidate also collected, so removed-per-pair === candidate.weight exactly.
+    const fe = new Map();          // "from\x00to" -> [structural edges]  (candidates)
+    const pairWitness = new Map(); // "from\x00to" -> CYCLE_KINDS witness count
+    for (const e of graph.edges) {
+      if (!CYCLE_KINDS.has(e.kind)) continue;
+      const f = fileOf.get(e.from), t = fileOf.get(e.to);
+      if (!f || !t || f === t || !inCycle.has(f) || !inCycle.has(t)) continue;
+      const k = `${f}\x00${t}`;
+      pairWitness.set(k, (pairWitness.get(k) || 0) + 1);
+      if (STRUCTURAL.has(e.kind)) { if (!fe.has(k)) fe.set(k, []); fe.get(k).push(e); }
+    }
+    // (fromFile,toFile) is unique per candidate, so this comparator is a total order and the
+    // sorted trial order is Map-insertion-independent — today's exact comparator, kept verbatim.
+    const candidates = [...fe.entries()].map(([k, edges]) => { const [fromFile, toFile] = k.split('\x00'); return { fromFile, toFile, weight: edges.length, edges, pairKey: k }; })
+      .sort((a, b) => a.weight - b.weight || (a.fromFile < b.fromFile ? -1 : a.fromFile > b.fromFile ? 1 : 0) || (a.toFile < b.toFile ? -1 : a.toFile > b.toFile ? 1 : 0));
+    const meanWeight = candidates.length ? candidates.reduce((s, c) => s + c.weight, 0) / candidates.length : 0;
+    // trial order = the sorted order, first success wins (as today)
+    let chosen = null;
+    for (const cand of candidates) {
+      // surviving pairs = every pair whose witness count survives the cut (only the candidate's
+      // own pair loses witnesses, and it loses exactly candidate.weight of them)
+      const pfiles = new Set(); const pedges = [];
+      for (const [k, count] of pairWitness) {
+        if (count - (k === cand.pairKey ? cand.weight : 0) <= 0) continue;
+        const [f, t] = k.split('\x00');
+        pfiles.add(f); pfiles.add(t);
+        pedges.push({ from: f, to: t, kind: 'call' });
+      }
+      const surviving = fileCycles({ nodes: [...pfiles].map((f) => ({ id: f, file: f })), edges: pedges });
+      if (!surviving.some((c) => cycleKey(c) === key)) { chosen = cand; break; }
+    }
+    if (chosen) return { files: cycle, meanWeight, verified: true, cut: { fromFile: chosen.fromFile, toFile: chosen.toFile, weight: chosen.weight, underlyingEdges: chosen.edges.map((e) => ({ from: e.from, to: e.to, kind: e.kind })) } };
+    return { files: cycle, meanWeight, verified: false, cut: null, note: 'no single file->file edge cut breaks this cycle — needs a multi-edge cut or a restructure (extract a shared module)' };
+  });
+}
+
 // Dead-code candidates: no incoming call|import edge AND not exported. Sorted by id.
 export function orphans(graph, index) {
   return graph.nodes
@@ -437,18 +512,39 @@ export function orphans(graph, index) {
 // `after` but not `before`, and a symbol that EXISTS in both but lost ALL its callers (deleting a
 // symbol entirely is not a regression — only a surviving-but-orphaned one is). Duplication and
 // coupling deltas need the full pipeline; that stays diff.mjs.
-export function structuralRegressions(before, after) {
-  const b = normalizeGraph(before), a = normalizeGraph(after);
-  const cycleKey = (c) => c.join('|');
-  const beforeCycles = new Set(fileCycles(b).map(cycleKey));
+//
+// Round 2, finding #18a: split into the BEFORE-side summary (computable once, at map time — the
+// hook-baseline sidecar persists it) and the comparison against it, with structuralRegressions
+// as their composition — one truth, three entry points, existing callers untouched.
+const cycleKey = (c) => c.join('|');
+
+/** The before-side digest: cycle keys + per-id caller counts (only ids with >= 1 caller — all the
+ *  comparison consults). Computed on the normalizeGraph'd graph so cycle keys match composition. */
+export function baselineSummary(graph) {
+  const g = normalizeGraph(graph);
+  const cycles = fileCycles(g).map(cycleKey);
+  const bi = buildIndex(g);
+  const callIn = {};
+  for (const [id, callers] of bi.callIn) if (callers.size) callIn[id] = callers.size;
+  return { cycles, callIn };
+}
+
+/** The after-side comparison against a summary ({cycles: [key...], callIn: {id: count}}). */
+export function regressionsAgainstSummary(summary, after) {
+  const a = normalizeGraph(after);
+  const beforeCycles = new Set(summary.cycles);
   const newCycles = fileCycles(a).filter((c) => !beforeCycles.has(cycleKey(c)));
-  const bi = buildIndex(b), ai = buildIndex(a);
+  const ai = buildIndex(a);
   const afterIds = new Set(a.nodes.map((n) => n.id));
   const lostCallers = [];
-  for (const [id, callers] of bi.callIn) {
-    if (callers.size && afterIds.has(id) && !(ai.callIn.get(id)?.size)) lostCallers.push(id);
+  for (const id of Object.keys(summary.callIn)) {
+    if (afterIds.has(id) && !(ai.callIn.get(id)?.size)) lostCallers.push(id);
   }
   return { newCycles, lostCallers: lostCallers.sort() };
+}
+
+export function structuralRegressions(before, after) {
+  return regressionsAgainstSummary(baselineSummary(before), after);
 }
 
 // finding 14: the Spec O-1 delta simulator, hoisted from optimize.mjs so EVERY merge chain stops
@@ -460,8 +556,7 @@ export function structuralRegressions(before, after) {
 // byte-identical verdicts, no clone. commit()/commitDelete() advance the table so a cumulative
 // plan (campaign's delete-then-merge chain) stays O(edges touched) end to end.
 export function createMergeSimulator(graph) {
-  const CYCLE_KINDS = new Set(['call', 'import', 'inherit', 'ref']);
-  const SEP = '\0';
+  const SEP = '\0'; // CYCLE_KINDS: the module-level export (one truth, round 2 #23)
   const fileOfId = new Map(graph.nodes.map((n) => [n.id, n.file]));
   const alias = new Map(); // committed merges: loser -> canonical (resolved transitively)
   const followAlias = (id) => { let cur = id, hop; while ((hop = alias.get(cur)) !== undefined) cur = hop; if (cur !== id) alias.set(id, cur); return cur; };

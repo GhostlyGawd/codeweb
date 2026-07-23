@@ -148,7 +148,7 @@ if (doWrite) {
         const canonRe = new RegExp(`\\b${canonLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
         const specRe = /\bfrom\s+(['"])([^'"]+)\1/;
         for (const f of touched) {
-          if (!/\.(jsx?|mjs|cjs|tsx?)$/.test(f)) continue;
+          if (!/\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(f)) continue; // finding #11 (review): .mts/.cts importers repoint too
           const p = join(root, f); if (!existsSync(p)) continue;
           const raw = readFileSync(p, 'utf8');
           const eol = raw.includes('\r\n') ? '\r\n' : '\n';

@@ -49,7 +49,16 @@ const env = () => ({ PATH: SHIM + delimiter + process.env.PATH, CTAGS_LOG: LOG }
 const invocations = () => readFileSync(LOG, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l))
   .filter((a) => !a.includes('--version'));
 
-test('cold run: ONE batched ctags process (-L -) serves every file', () => {
+// The FAKE is unix-only, not the feature: the shim is a shebang node script, which windows cannot
+// spawn (CreateProcess runs .exe/.com only, and Node's CVE-2024-27980 hardening EINVALs .cmd/.bat
+// without a shell — which the extractor's execFileSync rightly doesn't use). A real ctags.exe on
+// PATH spawns fine there. Without the shim the extractor silently falls back to the regex tier,
+// so on windows these three would fail (or pass vacuously — the zero-spawn case). Named platform
+// skips, counted in ci.yml's windows skip ceiling (11 = shared census 7 + these 3 + 1 headroom).
+const CTAGS_SHIM_SKIP = process.platform === 'win32'
+  && 'ctags shim is a shebang script — unspawnable on windows (real ctags.exe works; the fake is unix-only)';
+
+test('cold run: ONE batched ctags process (-L -) serves every file', { skip: CTAGS_SHIM_SKIP }, () => {
   const r = runNode(script('extract-symbols.mjs'), [SRC, '--cache', CACHE, '--out', join(DIR, 'f1.json')], { env: env() });
   assert.equal(r.status, 0, r.stderr);
   const inv = invocations();
@@ -60,14 +69,14 @@ test('cold run: ONE batched ctags process (-L -) serves every file', () => {
   assert.equal(frag.meta.engine, 'ctags');
 });
 
-test('untouched warm run: zero ctags processes (stamp tier)', () => {
+test('untouched warm run: zero ctags processes (stamp tier)', { skip: CTAGS_SHIM_SKIP }, () => {
   const beforeCount = invocations().length;
   const r = runNode(script('extract-symbols.mjs'), [SRC, '--cache', CACHE, '--out', join(DIR, 'f2.json')], { env: env() });
   assert.equal(r.status, 0, r.stderr);
   assert.equal(invocations().length, beforeCount, 'no new tagging invocations on a no-change warm run');
 });
 
-test('warm run with one changed file: one PER-FILE spawn, not a whole-repo batch', () => {
+test('warm run with one changed file: one PER-FILE spawn, not a whole-repo batch', { skip: CTAGS_SHIM_SKIP }, () => {
   const beforeCount = invocations().length;
   writeFileSync(join(SRC, 'b.js'), 'export function fb() { return 22; }\n'); // content + mtime change
   const r = runNode(script('extract-symbols.mjs'), [SRC, '--cache', CACHE, '--out', join(DIR, 'f3.json')], { env: env() });

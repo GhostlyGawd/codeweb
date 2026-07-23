@@ -20,11 +20,17 @@ handles a monorepo; the report is the surface a human actually opens.
    - JS heap used after settle.
    Emits JSON via `--out`; takes `--report <path>`.
 2. **Thresholds (decided up front, so "red" is not vibes).** At the 16k-symbol report:
-   time-to-interactive-graph ≤ 10s, search ≤ 300ms, no tab crash/OOM. Within thresholds →
-   record the numbers, done: the receipt closes the gap. Any threshold red → implement the
-   smallest bounded fix (defer non-viewport node rendering, cap initial render to top-N
-   domains with drill-in, or move layout to a worker — whichever the measurement blames),
-   with its own regression test, then re-measure and record both before/after.
+   time-to-interactive-graph ≤ 10s, search ≤ 300ms, no tab crash/OOM. **Expand-all (finding
+   #35):** `settledMsPerFrame` ≤ 50 (the sim-cheap-per-frame primary target) AND
+   `maxSingleStepMs` ≤ 250 (no single uninterruptible task freezes a frame — the chunker
+   guarantees it); **fitted `drawOnceMs` ≤ 100 (finding #37).** Within thresholds → record the
+   numbers, done: the receipt closes the gap. Any threshold red → implement the smallest bounded
+   fix (defer non-viewport node rendering, cap initial render to top-N domains with drill-in, or
+   move layout to a worker — whichever the measurement blames), with its own regression test,
+   then re-measure and record both before/after. At 16.8k the settled per-step cost is a
+   documented **floor** (~270 ms): the far-field monopole is O(n·cells) and ≤50 ms/frame needs a
+   hierarchical Barnes-Hut tree — out of #35's frozen scope — so the fallback ships with
+   `maxSingleStepMs` ≤ 250 met and the honest number recorded (see report-scale.json's verdict).
 3. **Committed results: `bench/results/report-scale.json`** — small-fixture sanity row + the
    16k-symbol row, environment noted (headless Chromium version), linked from the scale
    results file.

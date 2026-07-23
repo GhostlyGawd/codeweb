@@ -9,6 +9,7 @@ import {
   runNode, tmpDir, cleanup, writeTree, readJSON, script,
   ambiguousDropped, hasEdge,
 } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 // A fixture that reproduces the pathology in miniature:
 //  - `log` is defined in TWO files (multi-def, bare-name) -> ambiguous
@@ -35,25 +36,25 @@ before(() => {
 });
 after(() => cleanup(SRC));
 
-function extract({ legacy = false, target = 'sample-x' } = {}) {
-  const out = join(SRC, legacy ? 'fragment.legacy.json' : 'fragment.json');
-  const res = runNode(script('extract-symbols.mjs'),
-    [SRC, '--target', target, '--no-ctags', '--out', out],
-    { env: legacy ? { CODEWEB_LEGACY_FALLBACK: '1' } : {} });
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  return { frag: readJSON(out), stderr: res.stderr };
+async function extract({ legacy = false, target = 'sample-x' } = {}) {
+  const saved = process.env.CODEWEB_LEGACY_FALLBACK;
+  if (legacy) process.env.CODEWEB_LEGACY_FALLBACK = '1'; else delete process.env.CODEWEB_LEGACY_FALLBACK;
+  try {
+    const { fragment, banner } = await runExtract({ path: SRC, target, ctags: false }); // banner carries "dropped N ambiguous" for ambiguousDropped()
+    return { frag: fragment, stderr: banner };
+  } finally { if (saved === undefined) delete process.env.CODEWEB_LEGACY_FALLBACK; else process.env.CODEWEB_LEGACY_FALLBACK = saved; }
 }
 
-test('discovers every symbol (9 across 8 files)', () => {
-  const { frag } = extract();
+test('discovers every symbol (9 across 8 files)', async () => {
+  const { frag } = await extract();
   assert.equal(frag.nodes.length, 9);
   const ids = new Set(frag.nodes.map((n) => n.id));
   assert.ok(ids.has('a.js:log') && ids.has('b.js:log'), 'both log defs present (multi-def)');
   assert.ok(ids.has('c.js:doC') && ids.has('m1.js:fetchData') && ids.has('m2.js:fetchData'));
 });
 
-test('FIX: ambiguous multi-def bare call is dropped, not wired to a global def', () => {
-  const { frag, stderr } = extract();
+test('FIX: ambiguous multi-def bare call is dropped, not wired to a global def', async () => {
+  const { frag, stderr } = await extract();
   // c.js calls bare `log()` with no import and two `log` defs -> unattributable -> dropped.
   assert.equal(ambiguousDropped(stderr), 1, 'exactly one ambiguous bare call dropped');
   assert.equal(frag.edges.filter((e) => e.from === 'c.js:doC').length, 0,
@@ -62,8 +63,8 @@ test('FIX: ambiguous multi-def bare call is dropped, not wired to a global def',
   assert.ok(!hasEdge(frag.edges, 'c.js:doC', 'b.js:log'));
 });
 
-test('LEGACY toggle restores the pre-fix byName[0] wiring (fix is load-bearing)', () => {
-  const { frag, stderr } = extract({ legacy: true });
+test('LEGACY toggle restores the pre-fix byName[0] wiring (fix is load-bearing)', async () => {
+  const { frag, stderr } = await extract({ legacy: true });
   // Same fixture, CODEWEB_LEGACY_FALLBACK=1: the dropped edge comes back, fabricated against the
   // first global def. WHICH def ([0]) depends on file-enumeration order, which `rg --files` does
   // not guarantee across process invocations — that order-dependence is precisely the fragility
@@ -75,28 +76,28 @@ test('LEGACY toggle restores the pre-fix byName[0] wiring (fix is load-bearing)'
   assert.match(fromDoC[0].to, /^[ab]\.js:log$/, 'wired to a (nondeterministic) log definition');
 });
 
-test('same-file definition resolves authoritatively', () => {
-  const { frag } = extract();
+test('same-file definition resolves authoritatively', async () => {
+  const { frag } = await extract();
   assert.ok(hasEdge(frag.edges, 'a.js:doA', 'a.js:log', 'call'),
     'doA -> log resolves within a.js even though log is also defined in b.js');
 });
 
-test('single-def bare name still falls back to the one global def', () => {
-  const { frag } = extract();
+test('single-def bare name still falls back to the one global def', async () => {
+  const { frag } = await extract();
   assert.ok(hasEdge(frag.edges, 'e.js:useIt', 'd.js:uniqueHelper', 'call'),
     'a name with exactly one definition is safe to wire');
 });
 
-test('imported symbol resolves to the imported target, beating both drop and byName[0]', () => {
-  const { frag } = extract();
+test('imported symbol resolves to the imported target, beating both drop and byName[0]', async () => {
+  const { frag } = await extract();
   assert.ok(hasEdge(frag.edges, 'consumer.js:run', 'm1.js:fetchData', 'call'),
     'alias resolves fetchData -> m1 (the imported one)');
   assert.ok(!hasEdge(frag.edges, 'consumer.js:run', 'm2.js:fetchData'),
     'must NOT bleed to the other fetchData def');
 });
 
-test('meta block is the single source of truth for the target', () => {
-  const { frag } = extract({ target: 'sample-x' });
+test('meta block is the single source of truth for the target', async () => {
+  const { frag } = await extract({ target: 'sample-x' });
   const m = frag.meta;
   assert.equal(m.target, 'sample-x', 'explicit --target label wins');
   assert.equal(m.engine, 'regex', '--no-ctags forces the regex engine');

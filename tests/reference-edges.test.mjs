@@ -13,6 +13,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge, indegree } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs'; // finding #40 (T-40.5): extractor in-process
 
 const FILES = {
   'ho.mjs':
@@ -36,14 +37,13 @@ let SRC, OUT;
 before(() => { SRC = tmpDir('codeweb-ref-'); writeTree(SRC, FILES); OUT = join(SRC, 'fragment.json'); });
 after(() => cleanup(SRC));
 
-function extract() {
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'ref-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  return readJSON(OUT);
+async function extract() {
+  const { fragment } = await runExtract({ path: SRC, target: 'ref-x', ctags: false });
+  return fragment;
 }
 
-test('RECALL: a function passed to .map(fn) is captured as a reference edge', () => {
-  const frag = extract();
+test('RECALL: a function passed to .map(fn) is captured as a reference edge', async () => {
+  const frag = await extract();
   // v7: a bare identifier ARGUMENT is a `ref` edge — the symbol is referenced (its signature is
   // load-bearing for the caller) but not invoked here. It still counts for dependents/orphans;
   // it no longer fabricates a call edge.
@@ -53,14 +53,14 @@ test('RECALL: a function passed to .map(fn) is captured as a reference edge', ()
     'passing score as an argument is not an invocation by setup');
 });
 
-test('RECALL: a function passed as a callback argument is captured', () => {
-  const frag = extract();
+test('RECALL: a function passed as a callback argument is captured', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'ho.mjs:setup', 'ho.mjs:handle', 'ref'),
     'setup -> handle via rl.on("line", handle)');
 });
 
-test('PRECISION: a method call obj.fn() does NOT resolve to a top-level fn()', () => {
-  const frag = extract();
+test('PRECISION: a method call obj.fn() does NOT resolve to a top-level fn()', async () => {
+  const frag = await extract();
   // format is only ever written as `data.format(...)` — a method on the `data` param, not the
   // module's top-level format. The leading-dot guard must keep this edge from being fabricated.
   assert.equal(indegree(frag.edges, 'ho.mjs:format', 'call'), 0,

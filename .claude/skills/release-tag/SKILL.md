@@ -30,7 +30,7 @@ release URL. Only hold off if the maintainer has said to batch, or main is red.
 ## 0. Preconditions
 
 - CI green on `main`; working tree clean.
-- `npm test` passes locally (expect ~400 tests; skips are fine — they're tree-sitter-absence tests).
+- `npm test` passes locally (~590 tests; up to ~5 environment skips are fine — golden-target-absence, optional typescript, engine-fallback inverse).
 - `node scripts/check-consistency.mjs` reports OK.
 - `CHANGELOG.md` has a meaningful `[Unreleased]` section — that text becomes the release notes.
 

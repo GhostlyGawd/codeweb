@@ -494,7 +494,7 @@ into a per-target workspace:
 4. **Render** (`build-report.mjs`) — turn `graph.json` into the self-contained `report.html`
    (and `report.md`).
 
-For languages the extractor can't parse (or with `--engine read`), codeweb **falls back** to the
+For languages the extractor can't parse (or when the deterministic engine is skipped entirely), codeweb **falls back** to the
 agent path: parallel `codeweb-dissector` agents extract nodes + edges per subsystem, the
 fragments merge into one graph by node id, and `codeweb-domain-mapper` tags domains and detects
 overlaps. Both paths emit the same `graph.json` schema, so clustering, overlap, and rendering are
@@ -545,7 +545,7 @@ codeweb/
 │       ├── campaign.mjs            # the ordered/gated/ROI campaign planner (pure)
 │       ├── reading-order.mjs       # foundations-first DAG linearization
 │       └── risk.mjs                # F7: the change-risk formula + weights (one truth)
-├── agents/                          # fallback path (unparseable langs / --engine read)
+├── agents/                          # fallback path (unparseable langs / no deterministic engine)
 │   ├── codeweb-dissector.md         # atomic dissection (parallel, read-only)
 │   └── codeweb-domain-mapper.md     # domain tagging + overlap detection
 ├── skills/codebase-anatomy/
