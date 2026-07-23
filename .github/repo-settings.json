@@ -1,0 +1,21 @@
+{
+  "description": "See what an edit breaks before you write it — deterministic call/import graph + 27 MCP tools for coding agents. Claude Code plugin & MCP server; zero deps, runs 100% locally.",
+  "homepage": "https://ghostlygawd.github.io/codeweb/",
+  "topics": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude-code",
+    "claude-code-plugin",
+    "call-graph",
+    "dependency-graph",
+    "code-analysis",
+    "static-analysis",
+    "code-visualization",
+    "codebase-map",
+    "dead-code",
+    "refactoring",
+    "developer-tools",
+    "ai-agents"
+  ]
+}
