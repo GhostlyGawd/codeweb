@@ -183,7 +183,9 @@ Cursor, Windsurf, or any other MCP client: point it at the same `codeweb-mcp` co
 **Or run the engine from a clone:**
 ```
 git clone https://github.com/GhostlyGawd/codeweb.git
-node codeweb/scripts/run.mjs /path/to/your/project --out-dir /path/to/your/project/.codeweb
+node codeweb/scripts/run.mjs /path/to/your/project   # map lands in /path/to/your/project/.codeweb
+# kick the tires on bundled sample code first (no stakes, ~2s):
+node codeweb/scripts/run.mjs codeweb/bench/corpus/flask --out-dir /tmp/flask-map
 ```
 
 Requires Node.js — the whole deterministic pipeline (extract → cluster → overlap → render) runs
@@ -614,6 +616,8 @@ welcome; see [`SECURITY.md`](SECURITY.md) for the security posture and reporting
 
 ## Handoffs
 
-codeweb's domain map and overlap list feed naturally into `refactor-cleaner` (act on the
-consolidation list), `codebase-onboarding` (use the domain map for a guide), and `code-tour`
-(anchor a tour to the symbol index).
+If you have them installed, codeweb's domain map and overlap list feed naturally into
+`refactor-cleaner` (act on the consolidation list), `codebase-onboarding` (use the domain map for
+a guide), and `code-tour` (anchor a tour to the symbol index). None are required — without them,
+the ideal second step is simply: apply the top **ready** merge from `optimize.md`, re-run
+codeweb, and watch the findings count drop.

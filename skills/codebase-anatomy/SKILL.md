@@ -47,9 +47,11 @@ Auto-detect: a URL or `owner/repo` ⇒ external; a path or `.` ⇒ internal. `--
   `meta`. Coverage gaps must be visible.
 - **One graph, one schema.** Everything conforms to `references/graph-schema.md`. The HTML
   renderer and all agents depend on it.
-- **Reuse, don't reinvent.** Hand off to `repo-scan` (file/library classification),
-  `codebase-onboarding` (guides), `refactor-cleaner` (acting on the list) rather than redoing
-  their jobs.
+- **Reuse, don't reinvent.** If they're installed, hand off to `repo-scan` (file/library
+  classification), `codebase-onboarding` (guides), `refactor-cleaner` (acting on the list) rather
+  than redoing their jobs. These are optional separate skills — when absent, do the step inline
+  (each Handoffs entry names its one-line alternative). Never search for or apologize about a
+  skill that isn't there.
 
 ## Outputs (under `<target>/.codeweb/`)
 
@@ -88,12 +90,13 @@ pipeline in a single command instead of dissecting by hand. It is faster, cheape
 reproducible, and emits the same `graph.json` schema:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs" "<target>" --target "<label>" --out-dir "<target>/.codeweb"
+node "${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs" "<target>" --target "<label>"
 ```
 
 It chains extract → cluster (directory-anchored domains) → overlap (body-confirmed duplication)
 → optimize (consolidation advisory) → render, writing `fragment.json`, `graph.json`, `overlap.md`, `optimize.md`, `report.html`, `report.md` into the
-workspace (defaults to `<plugin>/.codeweb/runs/<slug>/` when `--out-dir` is omitted). The script is
+workspace (default `<target>/.codeweb` — exactly where the MCP server and all three hooks
+discover it; `--out-dir` overrides). The script is
 read-only over the target and resolves its own paths, so it works from any cwd. **When it
 succeeds, skip steps 1–5 and go to step 6.** Use the agent-based passes below only as a
 **fallback** — for languages the extractor can't parse, an explicit `--engine read`, or to enrich
@@ -157,10 +160,17 @@ domain-aggregated view above ~600 nodes and lets the user expand.
 
 ## Handoffs
 
-- `refactor-cleaner` — execute the consolidation list.
-- `codebase-onboarding` — turn the domain map into an onboarding guide.
-- `code-tour` — anchor a guided tour to the symbol index.
-- `repo-scan` — deeper file-level / third-party classification.
+Each of these is a separate skill that may or may not be installed. When one is absent, the
+inline alternative **is** the step — do that instead of searching or apologizing:
+
+- `refactor-cleaner` (if installed) — execute the consolidation list. Else: apply the top
+  **ready** merge from `optimize.md` yourself, then re-run `/codeweb` to verify the delta.
+- `codebase-onboarding` (if installed) — turn the domain map into an onboarding guide. Else: a
+  short ONBOARDING.md from the brief (areas, load-bearing symbols, test dirs) covers it.
+- `code-tour` (if installed) — anchor a guided tour to the symbol index. Else: walk
+  `scripts/reading-order.mjs` output top to bottom — it is the tour, minus the narration.
+- `repo-scan` (if installed) — deeper file-level / third-party classification. Else: the roles
+  codeweb already stamps on every node (product / test / tooling / vendored) cover the common case.
 
 ## Output Format
 

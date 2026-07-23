@@ -20,10 +20,11 @@
   },
   "license": "MIT",
   "bin": {
-    "codeweb": "scripts/run.mjs",
-    "codeweb-mcp": "scripts/mcp-server.mjs"
+    "codeweb": "bin/codeweb.mjs",
+    "codeweb-mcp": "bin/codeweb-mcp.mjs"
   },
   "files": [
+    "bin",
     "scripts",
     "hooks",
     "skills",
@@ -31,7 +32,8 @@
     "commands",
     ".claude-plugin",
     "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE",
+    "SECURITY.md"
   ],
   "engines": {
     "node": ">=22"

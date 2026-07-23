@@ -689,3 +689,24 @@ export function applyEdit(graph, op) {
   }
   throw new Error(`applyEdit: unknown op kind '${op && op.kind}'`);
 }
+
+/**
+ * ACTIVATION A5 — ONE findings vocabulary. Every surface that summarizes graph.overlaps
+ * (overlap stage line, build-report line, run.mjs banner, report masthead mirrors this logic)
+ * buckets the same way: actionable = body-confirmed high/medium; needs-review = everything the
+ * pipeline kept but did not confirm (low / unverified / structural-only); dismissed = refuted.
+ */
+export function findingBuckets(overlaps) {
+  let actionable = 0, review = 0, dismissed = 0;
+  for (const o of overlaps || []) {
+    if (o.confidence === 'refuted') dismissed++;
+    else if (o.confidence === 'high' || o.confidence === 'medium') actionable++;
+    else review++;
+  }
+  return { actionable, review, dismissed };
+}
+
+/** The shared one-line rendering of findingBuckets — byte-identical on every surface. */
+export function bucketsLine(b) {
+  return `actionable ${b.actionable} · needs review ${b.review} · dismissed ${b.dismissed}`;
+}

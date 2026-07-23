@@ -23,10 +23,16 @@ test('F2 run.mjs rejects an unknown flag with usage, exit 2', () => {
   assert.match(r.stderr, /usage: run\.mjs/);
 });
 
-test('F3 run.mjs with no target prints usage, exit 2 (usage class, not not-found)', () => {
-  const r = runNode(script('run.mjs'), []);
-  assert.equal(r.status, 2);
-  assert.match(r.stderr, /usage: run\.mjs/);
+test('F3 run.mjs with no target maps the cwd — a sourceless cwd is refused by the guard, not usage', () => {
+  // FUNNEL #2 / FR2 (tests/first-run.test.mjs): <SRC> now defaults to the current directory, so
+  // the old bare-run-is-a-usage-error contract is gone. What keeps a WRONG cwd from producing a
+  // silent nonsense map is the extract empty-target guard (exit 1), tested here.
+  const bare = tmpDir('codeweb-front-');
+  try {
+    const r = runNode(script('run.mjs'), [], { cwd: bare });
+    assert.equal(r.status, 1, 'sourceless cwd refused (guard class, not usage)');
+    assert.match(r.stderr, /no supported source files/);
+  } finally { cleanup(bare); }
 });
 
 test('F4 every USAGE-bearing CLI answers --help with exit 0', () => {
@@ -90,7 +96,8 @@ test('F9 run.mjs success points the user at the report', () => {
     writeTree(dir, { 'a.js': 'export function alpha() { return 1; }\n' });
     const r = runNode(script('run.mjs'), [dir, '--out-dir', ws]);
     assert.equal(r.status, 0, r.stderr.slice(-400));
-    assert.match(r.stderr, /open .*report\.html in your browser/);
+    // First run: the next: block's step 1 names the report; returning users get the classic line.
+    assert.match(r.stderr, /see the map: .*report\.html|open .*report\.html in your browser/);
   } finally { cleanup(dir); cleanup(ws); }
 });
 

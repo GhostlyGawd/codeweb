@@ -26,7 +26,8 @@ runs:
     - name: Set up Node
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        # Must match package.json engines (>=22) — a 20.x runner would die inside the gate scripts.
+        node-version: '22'
     - name: Fetch codeweb
       shell: bash
       run: git clone --depth 1 --branch "${{ inputs.codeweb-ref }}" https://github.com/GhostlyGawd/codeweb.git "$RUNNER_TEMP/codeweb"

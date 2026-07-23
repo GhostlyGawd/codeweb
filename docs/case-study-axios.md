@@ -66,7 +66,7 @@ git clone https://github.com/axios/axios.git
 git -C axios checkout a209bfb1        # v1.18.1 — the pin these numbers were measured at
 git clone https://github.com/GhostlyGawd/codeweb.git
 node codeweb/scripts/run.mjs axios/lib --target axios
-# open codeweb/.codeweb/runs/axios/report.html · overlap.md · optimize.md
+# open axios/lib/.codeweb/report.html · overlap.md · optimize.md (the map lands inside the target)
 ```
 
 The full ranked advisory is in `optimize.md`; the body-confirmed overlap list (with the 12 dismissals)

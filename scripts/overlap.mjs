@@ -18,7 +18,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { shingles, jaccard, K, BANDS, BODY_LINE_CAP } from './lib/shingles.mjs'; // shared body-shingle primitives + THE thresholds + body cap (one truth, findings 27 + 26)
 import { lshCandidatePairs } from './lib/minhash.mjs'; // Spec N + round 2 #24: LSH candidate generation at scale (one walk, both signals)
-import { roleOf } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code
+import { roleOf, findingBuckets, bucketsLine } from './lib/graph-ops.mjs'; // v7: code roles — findings scope to product code; A5: one findings vocabulary
 import { sourceReader, atomicWrite } from './lib/cli.mjs'; // shared body access + rename-atomic artifact writes (one truth)
 
 const WS = process.env.CODEWEB_WS || '.live';   // per-target workspace dir (orchestrator sets this)
@@ -445,6 +445,7 @@ atomicWrite(OVERLAP_MD, md);
 // ---- console summary ----------------------------------------------------------------
 const drifted = findings.filter((o) => o.drifted).length;
 console.log(`source: ${HAVE_SOURCE ? 'FOUND — body-confirmed' : 'absent — structural fallback'}`);
-console.log(`findings ${findings.length} (incl. ${drifted} drifted) · unverified ${unverified.length} · dismissed ${dismissed.length}`);
+// A5: the ONE findings vocabulary — the same triple build-report and the banner print.
+console.log(`${bucketsLine(findingBuckets(graph.overlaps))}${drifted ? ` (${drifted} drifted)` : ''}`);
 console.log('--- top findings ---');
 for (const o of findings.slice(0, 14)) console.log(`[${o.severity.toUpperCase().padEnd(6)} ${o.confidence.padEnd(6)}${o.bodySim != null ? ' ' + (o.bodySim * 100).toFixed(0).padStart(3) + '%' : '     '}] ${o.title.replace(/`/g, '')}`);
