@@ -79,7 +79,13 @@
 <p>  parser engines stay memoized process-wide (the load *promise* is single-flighted, so concurrent</p>
 <p>  first-calls don't double-init). <code>import('extract-symbols.mjs')</code> now parses no argv, writes no</p>
 <p>  files, and never exits — the precondition for the in-process hook (#18b) and for running the</p>
-<p>  extractor under node:test's concurrent subtests. (round 2, finding #40)</p>
+<p>  extractor under node:test's concurrent subtests. Stage 4a: the starter trio of spawn→in-process</p>
+<p>  test conversions — <code>incremental-edges</code> (the IE-EQUIVALENCE property sweep, the suite's dominant</p>
+<p>  wall term: its ~330-490 child launches at CI depth become function calls, cutting the test's own</p>
+<p>  wall ~4.5×, 12.9 s → 2.85 s at 40 trials — every assertion identical, the <code>edged N/M</code> reads moved</p>
+<p>  from stderr to the returned banner, the fragment byte-compares to <code>JSON.stringify(fragment)</code>, and</p>
+<p>  a new IE-INPROC-PARITY spawn keeps the CLI surface pinned byte-for-byte), plus <code>call-apply-chain</code></p>
+<p>  and <code>test-edges</code> (extractor in-process, their <code>query.mjs</code> spawns untouched). (round 2, finding #40)</p>
 <ul>
 <li>**"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a</li>
 </ul>

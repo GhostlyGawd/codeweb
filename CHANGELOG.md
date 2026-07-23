@@ -37,7 +37,13 @@ notes so validated results, papers, and new tools never get lost in commit histo
   parser engines stay memoized process-wide (the load *promise* is single-flighted, so concurrent
   first-calls don't double-init). `import('extract-symbols.mjs')` now parses no argv, writes no
   files, and never exits — the precondition for the in-process hook (#18b) and for running the
-  extractor under node:test's concurrent subtests. (round 2, finding #40)
+  extractor under node:test's concurrent subtests. Stage 4a: the starter trio of spawn→in-process
+  test conversions — `incremental-edges` (the IE-EQUIVALENCE property sweep, the suite's dominant
+  wall term: its ~330-490 child launches at CI depth become function calls, cutting the test's own
+  wall ~4.5×, 12.9 s → 2.85 s at 40 trials — every assertion identical, the `edged N/M` reads moved
+  from stderr to the returned banner, the fragment byte-compares to `JSON.stringify(fragment)`, and
+  a new IE-INPROC-PARITY spawn keeps the CLI surface pinned byte-for-byte), plus `call-apply-chain`
+  and `test-edges` (extractor in-process, their `query.mjs` spawns untouched). (round 2, finding #40)
 - **"Expand all symbols" no longer freezes the main thread: the force sim now seeds compactly, has a
   real long-range term, and runs in interruptible slices so no single task blows a frame — plus the
   receipt that judges it is measured honestly.** The old anneal packed every symbol onto its area

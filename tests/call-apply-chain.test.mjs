@@ -6,10 +6,12 @@
 //
 // --no-ctags forces deterministic extraction regardless of host tooling.
 
+// Round 2, finding #40 (WS-H, T-40.4): pure edge-derivation semantics — runs IN-PROCESS via
+// runExtract (no spawn, no --out round-trip). Assertions unchanged; only the transport moved.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { join } from 'node:path';
-import { runNode, tmpDir, cleanup, writeTree, readJSON, script, hasEdge } from './helpers.mjs';
+import { tmpDir, cleanup, writeTree, hasEdge } from './helpers.mjs';
+import { runExtract } from '../scripts/extract-symbols.mjs';
 
 const FILES = {
   'utils.mjs':
@@ -30,30 +32,29 @@ const FILES = {
     '}\n',
 };
 
-let SRC, OUT;
-before(() => { SRC = tmpDir('codeweb-callchain-'); writeTree(SRC, FILES); OUT = join(SRC, 'fragment.json'); });
+let SRC;
+before(() => { SRC = tmpDir('codeweb-callchain-'); writeTree(SRC, FILES); });
 after(() => cleanup(SRC));
 
-function extract() {
-  const res = runNode(script('extract-symbols.mjs'), [SRC, '--target', 'callchain-x', '--no-ctags', '--out', OUT]);
-  assert.equal(res.status, 0, `extractor exited non-zero:\n${res.stderr}`);
-  return readJSON(OUT);
+async function extract() {
+  const { fragment } = await runExtract({ path: SRC, target: 'callchain-x', ctags: false });
+  return fragment;
 }
 
-test('X.member.call(...) resolves to the underlying function', () => {
-  const frag = extract();
+test('X.member.call(...) resolves to the underlying function', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:factory', 'utils.mjs:merge', 'call'),
     'factory -> utils.mjs:merge via utils.merge.call()');
 });
 
-test('X.member.apply(...) resolves to the underlying function', () => {
-  const frag = extract();
+test('X.member.apply(...) resolves to the underlying function', async () => {
+  const frag = await extract();
   assert.ok(hasEdge(frag.edges, 'consumer.mjs:shape', 'utils.mjs:merge', 'call'),
     'shape -> utils.mjs:merge via utils.merge.apply()');
 });
 
-test('PRECISION: a param obj.member.call() fabricates no edge', () => {
-  const frag = extract();
+test('PRECISION: a param obj.member.call() fabricates no edge', async () => {
+  const frag = await extract();
   assert.ok(!hasEdge(frag.edges, 'consumer.mjs:passthru', 'utils.mjs:merge'),
     'obj is a param, not an import alias -> no edge');
 });
