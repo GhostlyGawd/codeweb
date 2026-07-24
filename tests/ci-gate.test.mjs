@@ -101,7 +101,12 @@ test('the composite action ships the sticky-comment reviewer, opt-in and fork-sa
   assert.match(yml, /--md "\$RUNNER_TEMP\/codeweb-gate\.md"/, 'the digest is produced for the comment');
   assert.match(yml, /<!-- codeweb-gate -->/, 'sticky marker matches the self-repo workflow');
   assert.match(yml, /updateComment|createComment/, 'posts or updates in place');
-  assert.match(yml, /continue-on-error: true/, 'comment posts before the verdict enforces');
+  // ERRORS #3: the gate step always exits 0 and records ci-gate's REAL code as an output, so the
+  // comment still posts first AND the enforce step can tell exit 1 (regression) from exit 2 (setup).
+  assert.match(yml, /echo "code=\$\?" >> "\$GITHUB_OUTPUT"/, 'the real exit code is captured');
+  assert.match(yml, /steps\.gate\.outputs\.code != '0'/, 'comment posts before the verdict enforces');
   assert.match(yml, /Enforce gate verdict/, 'the verdict still fails the job');
+  assert.match(yml, /found structural regressions/, 'exit 1 keeps the regression message');
+  assert.match(yml, /setup problem, not a structural regression/, 'exit 2 names setup, never a false verdict');
   assert.match(yml, /pull-requests: write/, 'permission requirement documented in the input description');
 });

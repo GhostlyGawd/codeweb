@@ -9,6 +9,45 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+### Changed
+- **The regression gate is ONE verdict with a declared strictness knob.** `gateVerdict` (graph-ops)
+  now backs diff/CI, simulate, the post-edit hook, codemod, and `review --gate`; payloads carry
+  `verdict.check` (`orphan-gate` vs `call-caller-preflight`), exported symbols that lost every
+  in-edge are LISTED and flagged exempt instead of silently dropped, and every doc states the real
+  rule. simulate/codemod speak for their own check instead of borrowing the gate's.
+- **`run.mjs` joins the fleet's stream contract**: results (the done block, or the new `--json`
+  one-liner) on stdout, progress on stderr; wrong-path targets exit 2, not the stage-failure code.
+- **`codeweb_context`: `bodies: "windows"|"full"` replaces `full`'s second meaning** — `full` is
+  the unabridged-list switch only. Agents wanting whole caller bodies pass `bodies:"full"`.
+- **One pagination dialect over MCP**: `offset` honored on risk/hotspots/break_cycles,
+  `nextOffset` beside every `remaining`, reading_order surfaces its truncation, and the MCP layer
+  now rejects unknown argument names and non-boolean booleans the way the CLI always did.
+- The shared parser coaches: did-you-mean on unknown flags, `--flag=value` accepted, and the
+  no-map cause+remedy is APPENDED to a tool's usage instead of replaced by it.
+- One name per concept: "domain" everywhere the report/brief/og said "areas"; deadcode's heading
+  hedges up front and shows the `annotate --suppress` door; "blast radius" defined at the lens,
+  settings, and optimize surfaces.
+
+### Fixed
+- **`find_similar.count` is the true match total again** (it reported the capped length), with
+  `more.remaining` when capped.
+- Three product-page tool cards rendered the literal word "undefined" (data key drift); the site
+  build now fails on a desc-less tool.
+- The CI gate action stamped "structural regressions" over setup failures — exit 2 now names the
+  shallow-checkout cause and remedy, ci-gate forwards the child's stderr tail, and the quickstart
+  bins exit 2 (never the regression code) on old Node.
+- `codeweb_map` failures keep the extractor's escapes-first explanation instead of a beheaded
+  stderr tail recommending a flag the tool cannot pass.
+- The pre-edit hook no longer returns `permissionDecision: "allow"` — it is advisory context only.
+- The SessionStart hook says one line (once per workspace) on an unmapped repo with source,
+  instead of the silence that read as "the plugin doesn't work".
+- annotate refuses to invent a fresh `.codeweb/` in an unmapped cwd; refresh/fitness/placement/
+  codemod resolve graphs through the one loader.
+- Docs that lied outside the consistency sweep (README's gitignored "bundled sample", agent-tools'
+  stale tool count, tests/README's Node floor, the runbook's test count, marketplace.json's
+  version) — corrected and swept from now on; new `docs/cli.md` tables every bin, flag,
+  environment variable, and exit code; new `CONTRIBUTING.md`.
+
 _Nothing yet. Open work lands here before it ships in the next tagged release._
 
 ## [0.10.0] - 2026-07-23

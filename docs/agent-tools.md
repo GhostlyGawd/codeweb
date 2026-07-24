@@ -2,7 +2,7 @@
 
 > **Historical spec.** This documents the first two agent tools only. The current surface is the
 > full capability suite in [`agent-tools-v2.md`](agent-tools-v2.md) + [`tier0-3-spec.md`](tier0-3-spec.md),
-> all exposed over MCP (22 tools — see the README's "Use it as an MCP tool").
+> all exposed over MCP — see the README's "Use it as an MCP tool" for the current tool count.
 
 Two read-only, deterministic tools that move work out of the stochastic LLM and into the graph:
 `context-pack` answers *"what's the minimal context to safely change X?"* and `simulate-edit`
@@ -71,8 +71,11 @@ pipeline) and this is documented, not silently dropped.
 ### Success criteria
 - **SC1** Supports `--delete`, `--merge` (canonical via `--into`, default = smallest resolved id),
   and `--move … --to <file>`.
-- **SC2** Returns `projected: { newCycles, lostCallers, ok }` with the **same shape and semantics**
-  as the gate; `ok === (newCycles.length === 0 && lostCallers.length === 0)`.
+- **SC2** Returns `projected: { newCycles, lostCallers, ok }` plus the labeled `verdict`
+  (`check: call-caller-preflight`, `scope: edges-only`) — **stricter than the CI gate**: it flags
+  any surviving symbol losing its last call-caller, exported or not, while the gate
+  (`verdict.check: orphan-gate`) exempts exported symbols and also sees duplication;
+  `ok === (newCycles.length === 0 && lostCallers.length === 0)`.
 - **SC3** **Purely read-only**: the input `graph.json` and all source files are byte-identical after
   running. No mutation, no writes.
 - **SC4** Unknown symbol → exit **1**; bad usage → exit **2**; otherwise exit **0** (advisory — the

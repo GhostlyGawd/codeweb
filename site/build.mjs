@@ -33,6 +33,13 @@ const readSite = (...p) => read(join(SITE, ...p));
 
 const pkg = JSON.parse(read(join(ROOT, 'package.json')));
 const product = JSON.parse(readSite('data', 'product.json'));
+// COMPREHENSION C1: a tool card without a description once rendered the literal word
+// "undefined" on the live product page. Missing data fails the build, not the visitor.
+for (const phase of product.toolPhases) {
+  for (const t of phase.tools) {
+    if (!t.desc) throw new Error(`product.json: tool "${t.name}" has no desc`);
+  }
+}
 const VERSION = pkg.version;
 const YEAR = String(new Date().getFullYear());
 const BASE = product.pagesBase.replace(/\/?$/, '/');
@@ -365,12 +372,12 @@ function injectDemoNav() {
     .replace(/^<link rel="canonical"[^\n]*\n?/gm, '')
     .replace(/<title>[^<]*<\/title>/,
       `<!--cw-head--><title>Live demo — axios call graph, mapped by codeweb</title>
-<meta name="description" content="Click around a real codeweb map: axios (50M downloads/week), 274 product symbols across 8 areas — findings, force graph, treemap, and coupling matrix. Built read-only by the deterministic pipeline.">
+<meta name="description" content="Click around a real codeweb map: axios (50M downloads/week), 274 product symbols across 8 domains — findings, force graph, treemap, and coupling matrix. Built read-only by the deterministic pipeline.">
 <link rel="canonical" href="${BASE}demo/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="codeweb">
 <meta property="og:title" content="Live demo — axios, mapped by codeweb">
-<meta property="og:description" content="A real interactive codeweb map of axios: 274 product symbols, 8 areas, body-confirmed duplication findings. No mockups.">
+<meta property="og:description" content="A real interactive codeweb map of axios: 274 product symbols, 8 domains, body-confirmed duplication findings. No mockups.">
 <meta property="og:url" content="${BASE}demo/">
 <meta property="og:image" content="${BASE}assets/og.png">
 <meta property="og:image:width" content="1200">

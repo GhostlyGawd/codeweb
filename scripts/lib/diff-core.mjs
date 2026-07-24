@@ -7,7 +7,7 @@
 // optional prebuilt indexes (the after side's index is already cached) and names, and returns
 // { payload, code } — the exact payload/exit diff.mjs --json emits (0 ok / 1 regressions).
 
-import { buildIndex, fileCycles, orphans, edgeKey } from './graph-ops.mjs';
+import { buildIndex, fileCycles, orphans, edgeKey, gateVerdict } from './graph-ops.mjs';
 import { jaccard, capBody } from './shingles.mjs'; // finding #28: body cap for long-body rename shingling
 import { structuralShingles } from './skeleton.mjs'; // rename detection: a rename IS a Type-2 clone
 import { sourceReader } from './cli.mjs';
@@ -138,6 +138,8 @@ export function diffGraphs(before, after, { names = {}, bIx, aIx } = {}) {
     orphans: { added: orphansAdded, removed: orphansRemoved },
     regressions,
     ok: regressions.length === 0,
+    // API §5: the shared verdict object — same fields, same check label, on every presenter.
+    verdict: gateVerdict(before, after, { exemptExported: true, newDuplications: overlapsAdded, scope: 'full' }),
   };
   return { payload, code: payload.ok ? 0 : 1 };
 }

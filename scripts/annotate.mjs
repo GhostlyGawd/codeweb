@@ -7,13 +7,14 @@
 // Usage:
 //   node annotate.mjs --suppress <fingerprint> [--note "why"] [--dir <.codeweb>] [--json]
 //   node annotate.mjs --list [--dir <.codeweb>] [--json]
-// Exit: 0 ok, 2 usage.
+//   (or set CODEWEB_WS, or run from a mapped repo)
+// Exit: 0 ok, 2 usage / no mapped workspace.
 
-import { resolve } from 'node:path';
+import { resolve, join, dirname } from 'node:path';
 import { addSuppression, loadAnnotations } from './lib/annotations.mjs';
 
-const USAGE = 'usage: annotate.mjs (--suppress <fingerprint> [--note "..."] | --list) [--dir <.codeweb>] [--json]';
-import { die, emitJson, finish, parseArgs } from './lib/cli.mjs';
+const USAGE = 'usage: annotate.mjs (--suppress <fingerprint> [--note "..."] | --list) [--dir <.codeweb>] [--json]   (or set CODEWEB_WS, or run from a mapped repo)';
+import { die, emitJson, finish, findTarget, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
 const { opts } = parseArgs(process.argv.slice(2), {
@@ -23,11 +24,27 @@ const { opts } = parseArgs(process.argv.slice(2), {
     list: { type: 'bool', default: false },
     suppress: { type: 'string', default: null },
     note: { type: 'string', default: '' },
-    dir: { type: 'string', default: '.codeweb' },
+    dir: { type: 'string', default: null },
   },
 });
 const { json, list, note, dir } = opts, fp = opts.suppress;
-const annDir = resolve(dir);
+
+// API F7 (+ ERRORS.md #8): the ONLY sidecar-mutating CLI defaulted --dir to ./.codeweb RELATIVE
+// TO CWD and mkdir -p'd it — a suppression written from the wrong directory landed in a fresh,
+// orphaned .codeweb (with a success message) that no tool would ever read: annotations are read
+// beside the GRAPH. The default now follows the one graph-addressing contract (CODEWEB_WS ->
+// nearest .codeweb above cwd) and ERRORS instead of creating, when unmapped.
+let annDir;
+if (dir != null) annDir = resolve(dir);
+else if (process.env.CODEWEB_WS) annDir = resolve(process.env.CODEWEB_WS);
+else {
+  const near = findTarget(join(process.cwd(), 'x')); // findTarget walks up from a FILE's dir; anchor so the walk starts AT cwd
+  if (!near) {
+    die(`no mapped workspace found — checked CODEWEB_WS and every .codeweb above ${process.cwd()}. A suppression written to an unmapped directory would never be read: run from the mapped repo, pass --dir <target>/.codeweb, or set CODEWEB_WS.\n${USAGE}`, 2);
+  }
+  annDir = dirname(near.baseline);
+  console.error(`[codeweb] using ${annDir} (nearest .codeweb above cwd)`);
+}
 
 if (list) {
   const ann = loadAnnotations(annDir);

@@ -10,22 +10,27 @@
 
 import { cheapestCuts } from './lib/graph-ops.mjs';
 
-const USAGE = 'usage: break-cycles.mjs <graph.json> [--limit N] [--json]   (or set CODEWEB_WS)';
+const USAGE = 'usage: break-cycles.mjs <graph.json> [--limit N] [--offset N] [--json]   (or set CODEWEB_WS)';
 import { emitJson, finish, loadGraph, capList, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
 const { opts, pos } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
-  flags: { json: { type: 'bool', default: false }, limit: { type: 'number', default: null } },
+  flags: {
+    json: { type: 'bool', default: false },
+    limit: { type: 'number', default: null, min: 0 },  // API F3: one pagination dialect (limit/offset)
+    offset: { type: 'number', default: 0, min: 0 },
+  },
 });
-const { json, limit } = opts;
+const { json, limit, offset } = opts;
 const { graph } = loadGraph(pos[0], { usage: USAGE });
 
 const cycles = cheapestCuts(graph);
 
-const capped = capList(cycles, limit);
+// API F3: `count` stays the true total, `more` carries nextOffset so the remainder is reachable.
+const capped = capList(cycles, limit, offset);
 const payload = { target: graph.meta?.target || 'target', summary: `${cycles.length} file dependency cycle(s), ${cycles.filter((c) => c.verified).length} with a verified cheapest cut`, count: cycles.length, cycles: capped.items };
-if (capped.truncated) payload.more = { remaining: capped.remaining };
+if (capped.truncated) payload.more = { remaining: capped.remaining, nextOffset: capped.offset + capped.items.length };
 if (json) { emitJson(payload); } else {
 
 console.log(`codeweb break-cycles: ${cycles.length} file dependency cycle(s)`);

@@ -32,7 +32,7 @@ import { buildBrief } from './lib/brief-core.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's card assembler, in-process
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
 import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
-import { checkStaleness, sourceReader } from './lib/cli.mjs';
+import { checkStaleness, sourceReader, editDistance } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const scriptOf = (f) => join(HERE, f);
@@ -58,7 +58,10 @@ const INSTRUCTIONS = [
   'Before a refactor, codeweb_simulate pre-flights a delete/merge/move; after verifying a finding is wrong, codeweb_annotate suppresses it so it stops resurfacing.',
   'No symbol name yet? codeweb_find turns a concept ("retry backoff") into ranked starting symbols.',
   '`graph` is optional — the server finds the nearest .codeweb/graph.json from cwd. No graph yet? codeweb_map builds one (~3s for 3k symbols).',
-  'Responses are budgeted (top-N + more.remaining). Pass full:true for the unabridged list, or limit/offset to page.',
+  // API F3: this line used to promise limit/offset paging on EVERY budgeted tool while several
+  // silently dropped `offset` (an agent paging risk looped on page 0 forever). Offset is now
+  // end-to-end on every list-ranked tool; the exceptions are named instead of implied.
+  'Responses are budgeted (top-N + more:{remaining, nextOffset}). Pass full:true for the unabridged list, or limit/offset to page (campaign/reading_order take `budget` instead; deadcode/context cap per tier via limit only).',
 ].join('\n');
 
 // #29 (T-29.2c): this writes the SERVER's stdout. The mid-session "client closed its read end"
@@ -204,21 +207,25 @@ const TOOLS = [
     description: 'The tests that exercise a symbol (test-edge in-neighbors). Run the right subset after editing a symbol.' },
   { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: scriptOf('diff.mjs'), graphless: true, queueFrom: (a) => a.after,
     argv: (a) => [a.before, a.after],
-    description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression (new cycle, new duplication, a symbol that lost all callers). Call AFTER an edit to gate it.' },
+    description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression. The CI gate\'s exact semantics (verdict.check: orphan-gate): a new cycle, a new confirmed duplication, or a NON-EXPORTED symbol newly losing every in-edge — exported ones are listed in verdict, flagged exempt. Call AFTER an edit to gate it.' },
   { name: 'codeweb_explain', need: ['symbol'], opt: ['graph'], bin: scriptOf('explain.mjs'),
     argv: (a) => [a.symbol],
     description: '"Tell me about X before I touch it" in ONE ~1KB card: identity, role, signature, complexity, fan-in/out, tests, blast radius + domains, top-5 callers/callees, and any duplication/pattern findings it belongs to. Start here; drill down with impact/context/callers.' },
   { name: 'codeweb_brief', need: [], opt: ['graph'], bin: scriptOf('brief.mjs'),
     argv: () => [],
-    description: 'The day-one page for a mapped repo (~2KB): areas with summaries, the most depended-on symbols, entry points, test layout, and known issues (duplications/cycles/orphans). Call FIRST in a new session instead of exploring; then codeweb_find/explain to go deeper.' },
+    description: 'The day-one page for a mapped repo (~2KB): domains with summaries, the most depended-on symbols, entry points, test layout, and known issues (duplications/cycles/orphans). Call FIRST in a new session instead of exploring; then codeweb_find/explain to go deeper.' },
   { name: 'codeweb_find', need: ['query'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 },
     bin: scriptOf('find.mjs'),
     argv: (a) => [a.query],
     description: 'Concept search when you do NOT know the symbol name: free text ("retry handling") -> ranked symbols (identifier/file/domain token match, stemmed, weighted by exports/role/fan-in). Deterministic, no embeddings. Start here when orienting; feed the top id to codeweb_explain.' },
-  { name: 'codeweb_context', need: ['symbol'], opt: ['graph', 'limit', 'window', 'full'], budget: { arg: 'limit', flag: '--limit', value: 12 },
+  // API F5: `full` used to ALSO flip caller rendering to whole bodies (--full-bodies) — two
+  // meanings on one switch, so "all callers as windows" was unaskable. `bodies` owns the rendering
+  // now; `full` is only the unabridged-list switch, like everywhere else.
+  { name: 'codeweb_context', need: ['symbol'], opt: ['graph', 'limit', 'window', 'full', 'bodies'], budget: { arg: 'limit', flag: '--limit', value: 12 },
     bin: scriptOf('context-pack.mjs'),
-    argv: (a) => [a.symbol, ...(a.full ? ['--full-bodies'] : []), ...(a.window != null ? ['--window', String(a.window)] : [])],
-    description: 'Bounded edit window for a symbol in ONE call: its body, direct callers as CALL-SITE WINDOWS (±3 lines around each use — the lines that break if the contract changes), callees (location-only), and the impact set. Budgeted: 12 callers by default; full:true returns whole caller bodies (large).' },
+    valid: (a) => (a.bodies != null && a.bodies !== 'windows' && a.bodies !== 'full') ? `argument bodies must be "windows" or "full" (got ${JSON.stringify(a.bodies)})` : null,
+    argv: (a) => [a.symbol, ...(a.bodies === 'full' ? ['--full-bodies'] : []), ...(a.window != null ? ['--window', String(a.window)] : [])],
+    description: 'Bounded edit window for a symbol in ONE call: its body, direct callers as CALL-SITE WINDOWS (±3 lines around each use — the lines that break if the contract changes), callees (location-only), and the impact set. Budgeted: 12 callers by default (full:true for the unabridged lists); bodies:"full" switches callers to whole caller bodies (large).' },
   { name: 'codeweb_refresh', need: [], opt: ['graph'], bin: scriptOf('refresh.mjs'), argv: () => [],
     description: 'Re-extract the graph from disk (meta.root) so mid-task queries reflect your edits, not a stale snapshot. Incremental; preserves domains, drops stale overlaps. Call AFTER you edit source and BEFORE re-querying impact/callers/context.' },
   { name: 'codeweb_find_similar', need: [], opt: ['graph', 'signature', 'body', 'structural'], bin: scriptOf('find-similar.mjs'),
@@ -233,16 +240,19 @@ const TOOLS = [
   // flags) — a schema that lies teaches agents to distrust tools/list.
   { name: 'codeweb_review', need: ['changed'], opt: ['graph', 'before', 'gate'], bin: scriptOf('review.mjs'),
     argv: (a) => ['--changed', a.changed, ...(a.before ? ['--before', a.before] : []), ...(a.gate ? ['--gate'] : [])],
-    description: 'Structural review of a change: changed files (comma-separated, optionally file:start-end) -> changed symbols, blast radius, domains, fan-in-ranked review order. With `before` (a prior graph.json) + gate:true it FAILS on a structural regression — the full review gate, agent-reachable.' },
+    description: 'Structural review of a change: changed files (comma-separated, optionally file:start-end) -> changed symbols, blast radius, domains, fan-in-ranked review order. With gate:true it FAILS on new body-confirmed duplication even WITHOUT `before`; add `before` (a prior graph.json) to also fail on new cycles / lost call-callers — the full review gate, agent-reachable.' },
   // FORMS F12: `rules` demoted to optional — the CLI already discovers codeweb.rules.json beside
   // the graph or in cwd; requiring it here made the same call fail one transport over.
   { name: 'codeweb_fitness', need: [], opt: ['graph', 'rules'], bin: scriptOf('fitness.mjs'),
     argv: (a) => (a.rules ? ['--rules', a.rules] : []),
     description: 'Check the graph against architectural fitness rules (codeweb.rules.json): forbidden-dependency, layering, no-cycles, max-fan-in, max-symbol-loc. Reports violations. `rules` is optional — defaults to codeweb.rules.json beside the graph or in cwd.' },
-  { name: 'codeweb_risk', need: [], opt: ['graph', 'changed', 'limit', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('risk.mjs'),
+  // API F3: risk/break_cycles/hotspots advertised a remainder no offset could fetch — `offset`
+  // was silently dropped (the handler forwards it only when the opt list carries it), so a paging
+  // agent looped on page 0 forever. offset is now end-to-end (opt list here, --offset in the CLI).
+  { name: 'codeweb_risk', need: [], opt: ['graph', 'changed', 'limit', 'offset', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('risk.mjs'),
     argv: (a) => [...(a.changed ? ['--changed', a.changed] : []), ...(a.all ? ['--all'] : [])],
     description: 'Rank symbols by change-risk (fan-in, fan-out, loc, blast radius, churn); `changed` scopes to a comma-separated file list. Budgeted: top 15 by default.' },
-  { name: 'codeweb_break_cycles', need: [], opt: ['graph', 'limit', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 }, bin: scriptOf('break-cycles.mjs'), argv: () => [],
+  { name: 'codeweb_break_cycles', need: [], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 }, bin: scriptOf('break-cycles.mjs'), argv: () => [],
     description: 'For each file dependency cycle, the cheapest dependency edge to sever — verified to actually break the cycle. Budgeted: top 10 cycles by default.' },
   { name: 'codeweb_deadcode', need: [], opt: ['graph', 'limit', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 20 }, bin: scriptOf('deadcode.mjs'), argv: (a) => (a.all ? ['--all'] : []),
     description: 'Confidence-tiered dead-code: safe-to-delete vs review-first (test-guarded or entrypoint-like), each with its loc span. Budgeted: top 20 per tier by span (totals stay true; full:true for everything).' },
@@ -251,12 +261,22 @@ const TOOLS = [
   { name: 'codeweb_codemod', need: ['merge'], opt: ['graph', 'into'], bin: scriptOf('codemod.mjs'),
     argv: (a) => ['--merge', a.merge, ...(a.into ? ['--into', a.into] : [])],
     description: 'Plan a consolidation merge (report-only): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, and the projected regression-gate verdict. `into` is optional — omitted, the engine picks the canonical survivor. Read-only — does NOT modify source.' },
-  { name: 'codeweb_hotspots', need: [], opt: ['graph', 'limit', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('hotspots.mjs'), argv: (a) => (a.all ? ['--all'] : []),
+  { name: 'codeweb_hotspots', need: [], opt: ['graph', 'limit', 'offset', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('hotspots.mjs'), argv: (a) => (a.all ? ['--all'] : []),
     description: 'Rank symbols by refactoring priority (complexity x fan-in x churn): where to focus first. Budgeted: top 15 with raw components.' },
   { name: 'codeweb_campaign', need: [], opt: ['graph', 'budget', 'full', 'all'], budget: { arg: 'budget', flag: '--budget', value: 25 }, bin: scriptOf('campaign.mjs'), argv: (a) => (a.all ? ['--all'] : []),
     description: 'One ordered, gated optimization worklist (dead-code deletes + verified cycle cuts + duplicate merges), pre-flighted so applying in order never introduces a cycle. Budgeted: top 25 ROI steps by default (`budget` N or full:true for the whole plan).' },
   { name: 'codeweb_reading_order', need: [], opt: ['graph', 'scope', 'value', 'budget'], bin: scriptOf('reading-order.mjs'),
     budget: { arg: 'budget', flag: '--budget', value: 20 },
+    // API F4: `scope` without `value` used to be silently DROPPED by argv() — the tool answered
+    // the whole-repo question instead of the scoped one (the exact trap the CLI's --scope
+    // enumeration hardened against, FORMS F8, resurrected one transport over). The messages speak
+    // MCP param names, never CLI flags (API F6).
+    valid: (a) => {
+      if (a.scope != null && !['domain', 'file', 'symbol'].includes(a.scope)) return `unknown scope kind ${JSON.stringify(a.scope)} — valid: domain | file | symbol`;
+      if (a.scope != null && a.value == null) return 'scope needs `value` (the domain name, file path, or symbol) — without it the answer would cover the whole repo';
+      if (a.value != null && a.scope == null) return '`value` needs `scope` (domain | file | symbol) to say what kind of value it is';
+      return null;
+    },
     argv: (a) => (a.scope && a.value ? ['--scope', a.scope, a.value] : []),
     description: 'A foundations-first reading path (depended-upon leaves before orchestrators) to understand a codebase or one scope fast. scope: domain|file|symbol + value narrows it; budget bounds the list (default 20).' },
   { name: 'codeweb_simulate', need: [], opt: ['graph', 'delete', 'merge', 'into', 'move', 'to'], bin: scriptOf('simulate-edit.mjs'),
@@ -267,7 +287,7 @@ const TOOLS = [
       return null;
     },
     argv: (a) => a.delete ? ['--delete', a.delete] : a.merge ? ['--merge', a.merge, ...(a.into ? ['--into', a.into] : [])] : ['--move', a.move, '--to', a.to],
-    description: 'PRE-FLIGHT an edit without performing it: predicts the regression gate\'s structural verdict ({newCycles, lostCallers, ok}) for a hypothetical delete / merge / move. Call BEFORE committing to a refactor plan — a doomed edit is discarded for the cost of one call.' },
+    description: 'PRE-FLIGHT an edit without performing it: {newCycles, lostCallers, ok} for a hypothetical delete / merge / move. STRICTER than the CI gate (verdict.check: call-caller-preflight): flags ANY surviving symbol losing its last call-caller, exported or not, and cannot see duplication. Call BEFORE committing to a refactor plan — a doomed edit is discarded for the cost of one call.' },
   { name: 'codeweb_annotate', need: [], opt: ['graph', 'suppress', 'note', 'list'], bin: scriptOf('annotate.mjs'), dirFromGraph: true,
     valid: (a) => (a.suppress || a.list) ? null : 'pass `suppress` (a finding fingerprint, from codeweb_deadcode/overlap output) or list:true',
     argv: (a) => a.list ? ['--list'] : ['--suppress', a.suppress, ...(a.note ? ['--note', a.note] : [])],
@@ -297,6 +317,7 @@ const PROP = {
   offset: { type: 'number', description: 'Skip N items (page through a budgeted list via more.nextOffset)' },
   full: { type: 'boolean', description: 'Return the unabridged result (disables the default budget). Large on big repos.' },
   window: { type: 'number', description: 'Context lines around each call site (default 3)' },
+  bodies: { type: 'string', description: 'Caller rendering: "windows" (call-site windows, default) or "full" (whole caller bodies — large)' },
   scope: { type: 'string', description: 'Scope kind: domain | file | symbol' },
   value: { type: 'string', description: 'The scope value (domain name, file path, or symbol)' },
   budget: { type: 'number', description: 'Max steps/symbols to return' },
@@ -482,8 +503,24 @@ function handleMap(id, args, meta) {
       // the agent fallback instead of hitting the same wall. Best-effort.
       if (/no supported source files/.test(errBuf || '')) {
         try { atomicWriteJson(join(out, 'unsupported.json'), { at: new Date().toISOString(), reason: 'no supported source files', hint: 'use the /codeweb agent fallback (agent-based mapping); delete this file to retry codeweb_map' }); } catch { /* marker only */ }
+        // ERRORS.md #2/R2: this is the FIRST MCP error on any unsupported-language or wrong-root
+        // repo — say the marker path's own words now instead of a beheaded stderr tail whose only
+        // surviving hint was a flag this tool cannot even pass.
+        return errResult(id, `codeweb_map found no supported source under ${target} — wrong directory? pass target: <code root>. Non-native language? the /codeweb command's agent fallback maps it by reading. (marker written: codeweb_map will say this until ${join(out, 'unsupported.json')} is deleted.)`);
       }
-      return errResult(id, `codeweb_map failed (exit ${code}): ${(errBuf || '').trim().split('\n').slice(-3).join('\n')}`);
+      // Generic failure: forward stderr from the FIRST [extract]/error line (the extractor leads
+      // with its escapes), capped — never the last-3-lines beheading that kept only pipeline
+      // frames (ERRORS R2). API F6 rides on top: a child's remedy must be runnable in THIS
+      // transport, so the extractor's --allow-empty flag hints translate to MCP-reachable steps.
+      const lines = (errBuf || '').trim().split('\n');
+      const firstSignal = lines.findIndex((l) => /^\[(extract|run)\]|error/i.test(l.trim()));
+      const windowed = lines.slice(Math.max(0, firstSignal), firstSignal < 0 ? lines.length : firstSignal + 12).join('\n')
+        .replace(/\(Intentionally sparse target\? --allow-empty writes an empty map\.\)/g,
+          '(Intentionally sparse target? Re-map at the code root, or use the /codeweb agent fallback for non-native languages.)')
+        .replace(/Pass --allow-empty to proceed with an empty map\./g,
+          'Re-map at the code root, or use the /codeweb agent fallback.')
+        .replace(/--allow-empty/g, 'the /codeweb agent fallback'); // belt: never leak the flag
+      return errResult(id, `codeweb_map failed (exit ${code}):\n${windowed}`);
     }
     if (token !== undefined && token !== null) send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.length, total: MAP_STAGES.length, message: 'done' } });
     const graphPath = join(out, 'graph.json');
@@ -502,11 +539,15 @@ function handleMap(id, args, meta) {
 
 // THE spawned-tool reply shaper (shared by the generic tool path and the #33 diff spawn fallback):
 // exit 2 / null → errResult (graph-not-found gains the MCP next step); otherwise the child's JSON.
-const spawnedToolReply = (id) => ({ code, out, errBuf, timedOut }) => {
+// API F6: the NO_GRAPH remedy says "pass `graph`…" — a GRAPHLESS tool (diff) has no such param,
+// and an agent that obeyed got its argument rejected/ignored. The suffix rides only tools that
+// actually take `graph`; graphless children keep their own actionable stderr (which already names
+// the missing file and the rebuild command).
+const spawnedToolReply = (id, tool) => ({ code, out, errBuf, timedOut }) => {
   if (timedOut) return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
   if (code === 2 || code == null) {
     const text = (errBuf || 'query failed').trim() || 'query failed';
-    return errResult(id, /graph not found/.test(text) ? `${text}\n${NO_GRAPH}` : text);
+    return errResult(id, /graph not found/.test(text) && !(tool && tool.graphless) ? `${text}\n${NO_GRAPH}` : text);
   }
   // FORMS F1 (belt): an exit-1 child with EMPTY stdout is a die()-style miss, not a result — an
   // empty success here read as "no objections" right before a doomed refactor. Surface stderr.
@@ -535,7 +576,7 @@ function handleDiff(id, args, tool) {
     // runs between this -- and enqueueChild's ++, so stdin-close cannot exit in the gap.
     inflight.delete(id);
     pendingAsync--;
-    enqueueChild(id, { kind: 'reader', key, tool: tool.name, bin: tool.bin, argv: [args.before, args.after, '--json'], stdio: ['ignore', 'pipe', 'pipe'], timeoutMs: SPAWN_TIMEOUT_MS, onSettle: spawnedToolReply(id) });
+    enqueueChild(id, { kind: 'reader', key, tool: tool.name, bin: tool.bin, argv: [args.before, args.after, '--json'], stdio: ['ignore', 'pipe', 'pipe'], timeoutMs: SPAWN_TIMEOUT_MS, onSettle: spawnedToolReply(id, tool) });
   };
   const attempt = () => {
     if (entry.cancelled) { inflight.delete(id); asyncDone(); return; } // cancel while awaiting → suppress reply (I5)
@@ -552,11 +593,29 @@ function handleDiff(id, args, tool) {
 }
 
 // ---- tools/call ------------------------------------------------------------------------------
+// API F4: bounded edit distance for the unknown-argument near-miss — lib/cli.mjs's exported
+// implementation (codeweb's own gate flagged the drifted local copy this replaced).
+const nearestArg = (key, valid) => {
+  let best = null, bestD = 3; // suggest only within 2 edits — beyond that it is a different word
+  for (const v of valid) { const d = editDistance(key.toLowerCase(), v.toLowerCase()); if (d < bestD) { bestD = d; best = v; } }
+  return best;
+};
+
 function handleToolCall(id, params) {
   const name = params && params.name;
   const args = (params && params.arguments) || {};
   const tool = TOOLS.find((t) => t.name === name);
   if (!tool) return fail(id, -32602, `unknown tool: ${name}`);
+  // API F4: the CLI's one flag loop dies loudly on unknown flags; this transport ACCEPTED AND
+  // IGNORED unknown argument names — a typo'd optional param (offest, winow, ful) silently
+  // yielded default behavior instead of the correction the CLI would print.
+  const known = [...tool.need, ...(tool.opt || [])];
+  const knownSet = new Set(known);
+  for (const k of Object.keys(args)) {
+    if (knownSet.has(k)) continue;
+    const near = nearestArg(k, known);
+    return errResult(id, `unknown argument: ${k}${near ? ` — did you mean \`${near}\`?` : ''} (${name} accepts: ${known.join(', ') || 'no arguments'})`);
+  }
   // FORMS F2: three distinct verdicts — "missing" for a wrong TYPE invited the model to re-send
   // the same wrong shape (the argument was there all along).
   for (const k of tool.need) {
@@ -575,6 +634,16 @@ function handleToolCall(id, params) {
       return errResult(id, `argument ${k} must be a non-negative number (got ${JSON.stringify(args[k])})`);
     }
     args[k] = n;
+  }
+  // API F4: ONE boolean clamp beside the numeric one. Booleans were unvalidated truthiness —
+  // `full: "false"` (string) meant TRUE, silently disabling the budget (and, pre-F5, flipping
+  // context to whole bodies). Accept true/false/"true"/"false" (normalized in place), reject the
+  // rest naming the param.
+  for (const k of known) {
+    if (PROP[k]?.type !== 'boolean' || args[k] === undefined || args[k] === null) continue;
+    if (args[k] === 'true') args[k] = true;
+    else if (args[k] === 'false') args[k] = false;
+    else if (typeof args[k] !== 'boolean') return errResult(id, `argument ${k} must be a boolean (true/false, got ${JSON.stringify(args[k])})`);
   }
   if (tool.valid) { const problem = tool.valid(args); if (problem) return errResult(id, problem); }
   if (tool.map) return handleMap(id, args, params && params._meta);
@@ -689,7 +758,8 @@ function handleToolCall(id, params) {
       }
       const limit = args.limit != null ? Number(args.limit) : (args.full ? null : tool.budget.value);
       const windowN = args.window != null ? Math.max(0, parseInt(String(args.window), 10) || 3) : 3;
-      const payload = buildContextPack(graph, index, sourceReader(graph.meta?.root || null), ids, { symbol: args.symbol, windowN, fullBodies: !!args.full, limit, staleInfo: staleOnce(resolve(graphPath), entry) });
+      // API F5: whole-body rendering rides `bodies:"full"` — `full` only widens the lists.
+      const payload = buildContextPack(graph, index, sourceReader(graph.meta?.root || null), ids, { symbol: args.symbol, windowN, fullBodies: args.bodies === 'full', limit, staleInfo: staleOnce(resolve(graphPath), entry) });
       return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
     } catch { /* fall through to the spawned artifact */ }
   }
@@ -745,7 +815,7 @@ function handleToolCall(id, params) {
     stdio: [tool.input ? 'pipe' : 'ignore', 'pipe', 'pipe'],
     input: tool.input ? (tool.input(args) || '') : undefined,
     timeoutMs: SPAWN_TIMEOUT_MS,
-    onSettle: spawnedToolReply(id),
+    onSettle: spawnedToolReply(id, tool),
   });
 }
 

@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "codeweb — the living map of your codebase. Deterministic call/import graph, 27 read-only MCP tools, ambient pre/post-edit hooks, and a self-contained interactive report.",
-    "version": "1.0.0"
+    "version": "0.10.0"
   },
   "plugins": [
     {

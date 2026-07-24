@@ -64,6 +64,6 @@ test('deadcode text mode: >64KB piped output arrives complete', () => {
   const r = runNode(script('deadcode.mjs'), [g]);
   assert.equal(r.status, 0, r.stderr);
   assert.ok(r.stdout.length > PIPE_BUF, `text payload must exceed the pipe buffer (got ${r.stdout.length})`);
-  assert.match(r.stdout, /note: extraction drops ambiguous call edges/, 'the final line survived the flush');
+  assert.match(r.stdout, /false positive\? suppress it: node scripts\/annotate\.mjs --suppress/, 'the final line survived the flush'); // MICROCOPY A5 footer is the new last line
   } finally { rmSync(dir, { recursive: true, force: true }); } // finding 22: no tmp leaks
 });

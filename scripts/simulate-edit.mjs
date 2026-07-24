@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // codeweb simulate-edit — predict the regression gate's STRUCTURAL verdict for a hypothetical edit,
 // WITHOUT performing it. Lets an agent discard doomed edits for ~zero cost before generating a line.
-// Scoped to structuralRegressions (new file-cycles + symbols that lose all callers) — the same
+// Scoped to the call-caller preflight (gateVerdict exemptExported:false — new file-cycles +
+// surviving symbols that lose all call-callers, exports included) — the same
 // subset the post-edit hook enforces. Duplication delta needs the full body-confirmed pipeline and
 // is intentionally OUT OF SCOPE (documented, not silently dropped). Read-only; never writes.
 // Built on ./lib/graph-ops.mjs (shares applyEdit with optimize.mjs — one truth).
@@ -15,7 +16,7 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { normalizeGraph, resolveSymbol, suggestSymbols, applyEdit, structuralRegressions } from './lib/graph-ops.mjs';
+import { normalizeGraph, resolveSymbol, suggestSymbols, applyEdit, structuralRegressions, gateVerdict } from './lib/graph-ops.mjs';
 
 const USAGE = 'usage: simulate-edit.mjs <graph.json> (--delete <sym> | --merge <s1,s2,..> [--into <id>] | --move <sym> --to <file>) [--json]';
 import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
@@ -77,17 +78,21 @@ if (miss) {
   else { die(`symbol not found: ${miss.symbol}${miss.suggestions ? ` (near: ${miss.suggestions.join(', ')})` : ''}`, 1); }
 } else {
 
-const { newCycles, lostCallers } = structuralRegressions(graph, after);
-const projected = { newCycles, lostCallers, ok: newCycles.length === 0 && lostCallers.length === 0 };
-const payload = { op: opName, target, into: intoOut, to: toOut, projected };
+// F1/API §5: the shared gateVerdict is the oracle; `projected` keeps its legacy shape for
+// existing consumers, `verdict` carries the labeled check (call-caller preflight, edges-only).
+const verdict = gateVerdict(graph, after, { exemptExported: false, scope: 'edges-only' });
+const newCycles = verdict.checks.newCycles;
+const lostCallers = verdict.checks.lostCallers.map((l) => l.id);
+const projected = { newCycles, lostCallers, ok: verdict.ok };
+const payload = { op: opName, target, into: intoOut, to: toOut, projected, verdict };
 
 if (json) { emitJson(payload); } else {
 
 console.log(`simulate-edit: ${opName} ${target.join(', ')}${intoOut ? ` -> ${intoOut}` : ''}${toOut ? ` -> ${toOut}` : ''}`);
-console.log(`projected gate: ${projected.ok ? 'PASS — the gate would accept this edit (exit 0)' : 'BLOCK — the gate would reject this edit (exit 1)'}`);
+console.log(`projected: ${projected.ok ? 'PASS — no new cycles; no surviving symbol loses its last caller' : 'BLOCK — new cycle or a symbol losing its last caller (details below)'}`);
 if (newCycles.length) console.log(`  new file cycle(s): ${newCycles.map((c) => c.join(' -> ')).join(' | ')}`);
 if (lostCallers.length) console.log(`  symbol(s) left with no callers: ${lostCallers.join(', ')}`);
-console.log('  (structural pre-flight: duplication delta is out of scope — run the full pipeline for that.)');
+console.log('  (checks cycles + lost callers — stricter than the diff.mjs/CI gate, which exempts exported symbols; duplication delta needs the full pipeline.)');
 finish();
 }
 }

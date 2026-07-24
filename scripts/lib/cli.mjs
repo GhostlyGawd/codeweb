@@ -7,7 +7,7 @@
 // die() may still hard-exit.
 
 import { readFileSync, existsSync, statSync, writeFileSync, renameSync, rmSync } from 'node:fs';
-import { resolve, dirname, join } from 'node:path';
+import { resolve, dirname, join, basename } from 'node:path';
 import { normalizeGraph } from './graph-ops.mjs';
 import { sha1 } from './hash.mjs';
 // finding 24: the pure helpers live in lib/common.mjs (no EPIPE side effect); re-exported
@@ -36,31 +36,76 @@ export function die(msg, code = 2) {
  * 'pair' consumes TWO tokens (reading-order's `--scope <kind> <value>`) -> [v1, v2].
  * Returns { opts, pos } — opts keyed by the flag name (sans dashes), pos = positional tokens.
  */
+// CLI review "first fix": the parser coaches instead of walling. Levenshtein for did-you-mean —
+// tiny inputs (flag names/arg keys), plain DP. Exported: the MCP layer's unknown-argument
+// near-miss (API F4) uses the same tier — one implementation, per codeweb's own gate.
+export function editDistance(a, b) {
+  const m = a.length, n = b.length;
+  const row = Array.from({ length: n + 1 }, (_, j) => j);
+  for (let i = 1; i <= m; i++) {
+    let prev = row[0]; row[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cur = row[j];
+      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+  }
+  return row[n];
+}
+const nearestFlag = (name, flags) => {
+  const cands = [...Object.keys(flags), 'help'];
+  let best = null, bestD = Infinity;
+  for (const c of cands) {
+    const d = editDistance(name.toLowerCase(), c);
+    if (d < bestD) { best = c; bestD = d; }
+  }
+  return bestD <= 2 || (best && best.startsWith(name)) ? best : null;
+};
+// Usage strings name the script file; when invoked through a bin wrapper (codeweb-query,
+// codeweb-diff), say the name the user actually typed.
+const speakUsage = (usage) => {
+  const invoked = basename(process.argv[1] || '');
+  return invoked.startsWith('codeweb') ? String(usage).replace(/^usage: \S+\.mjs/, `usage: ${invoked.replace(/\.mjs$/, '')}`) : usage;
+};
+
 export function parseArgs(argv, spec) {
   const flags = spec.flags || {};
   const opts = {};
   for (const [k, f] of Object.entries(flags)) if (f.default !== undefined) opts[k] = f.default;
   const pos = [];
   for (let i = 0; i < argv.length; i++) {
-    const t = argv[i];
-    if (t === '--help' || t === '-h') { console.log(spec.usage); process.exit(0); }
+    let t = argv[i];
+    if (t === '--help' || t === '-h') { console.log(speakUsage(spec.usage)); process.exit(0); }
     if (t.startsWith('-') && t !== '-') {
+      // accept --flag=value (the convention every other CLI taught people)
+      let inline;
+      const eq = t.indexOf('=');
+      if (eq > 1) { inline = t.slice(eq + 1); t = t.slice(0, eq); }
       const name = t.replace(/^--?/, '');
       const f = flags[name];
-      if (!f) die(`unknown flag: ${t}\n${spec.usage}`, 2);
-      if (f.type === 'bool') { opts[name] = true; continue; }
-      const v = argv[++i];
-      if (v === undefined) die(`flag ${t} needs a value\n${spec.usage}`, 2);
+      if (!f) {
+        const near = nearestFlag(name, flags);
+        die(`unknown flag: ${t}${near ? ` (did you mean --${near}?)` : ''}\n${speakUsage(spec.usage)}`, 2);
+      }
+      if (f.type === 'bool') {
+        if (inline !== undefined) {
+          if (inline !== 'true' && inline !== 'false') die(`flag ${t} is a switch — use ${t} or ${t}=false\n${speakUsage(spec.usage)}`, 2);
+          opts[name] = inline === 'true';
+        } else opts[name] = true;
+        continue;
+      }
+      const v = inline !== undefined ? inline : argv[++i];
+      if (v === undefined) die(`flag ${t} needs a value\n${speakUsage(spec.usage)}`, 2);
       if (f.type === 'number' || f.type === 'float') {
         const n = f.type === 'float' ? parseFloat(v) : parseInt(v, 10);
-        if (Number.isNaN(n)) die(`flag ${t} needs a number (got "${v}")\n${spec.usage}`, 2);
+        if (Number.isNaN(n)) die(`flag ${t} needs a number (got "${v}")\n${speakUsage(spec.usage)}`, 2);
         // FORMS F14c: flags can declare a floor (min: 0 on limits/offsets) — a negative limit
         // silently minted empty pages with a nextOffset:0 loop instead of an error.
-        if (f.min !== undefined && n < f.min) die(`flag ${t} must be >= ${f.min} (got ${v})\n${spec.usage}`, 2);
+        if (f.min !== undefined && n < f.min) die(`flag ${t} must be >= ${f.min} (got ${v})\n${speakUsage(spec.usage)}`, 2);
         opts[name] = n;
       } else if (f.type === 'pair') {
         const v2 = argv[++i];
-        if (v2 === undefined) die(`flag ${t} needs two values\n${spec.usage}`, 2);
+        if (v2 === undefined) die(`flag ${t} needs two values\n${speakUsage(spec.usage)}`, 2);
         opts[name] = [v, v2];
       } else opts[name] = v;
     } else pos.push(t);
@@ -121,7 +166,15 @@ export function loadGraph(pathArg, { usage = null } = {}) {
       console.error(`[codeweb] using ${near.baseline} (nearest .codeweb above cwd)`);
     }
   }
-  if (!graphPath) die(usage || 'usage: <graph.json> required (or set CODEWEB_WS, or run from a mapped repo)', 2);
+  if (!graphPath) {
+    // ERRORS R1: 20 tools passed {usage} here and REPLACED the shared cause+remedy with a bare
+    // usage wall — syntax-blame for an environment problem. Append, never substitute.
+    die([
+      `no map found — checked the graph argument, CODEWEB_WS, and every .codeweb/ above ${process.cwd()}.`,
+      'map this repo first: npx -y @ghostlygawd/codeweb <repo root>   (in Claude Code: /codeweb)',
+      `then: ${speakUsage(usage || 'usage: <graph.json> [flags]')}`,
+    ].join('\n'), 2);
+  }
   const abs = resolve(graphPath);
   if (!existsSync(abs)) die(`graph not found: ${abs} — build it first (run /codeweb, or: node scripts/run.mjs <target> --out-dir <target>/.codeweb)`, 2);
   let graph;

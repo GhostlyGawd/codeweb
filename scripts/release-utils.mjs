@@ -48,6 +48,9 @@ const numOf = (s) => (/^\d+$/.test(s) ? Number(s) : WORD_NUM[s.toLowerCase()] ??
 /** Prose files the scans cover — hand-written surfaces where counts can rot. */
 export const PROSE_FILES = [
   'README.md',
+  'docs/agent-tools.md',
+  'tests/README.md',
+  '.claude-plugin/marketplace.json',
   'site/content/index.html',
   'site/content/product.html',
   'site/content/start.html',
@@ -117,6 +120,12 @@ export function syncTargets(version, count) {
     {
       file: 'skills/codebase-anatomy/SKILL.md',
       subs: [[/(^version:\s*).+$/m, `$1${version}`]],
+    },
+    {
+      // DOCS/COMPREHENSION: marketplace.json said 1.0.0 while every other surface said the real
+      // version — the one manifest the sync never touched.
+      file: '.claude-plugin/marketplace.json',
+      subs: [[/("version":\s*")[^"]+(")/, `$1${version}$2`]],
     },
     {
       // SEO F2: the MCP-registry manifest tracks the package version (top-level + the npm

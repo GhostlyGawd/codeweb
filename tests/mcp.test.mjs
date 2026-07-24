@@ -124,6 +124,10 @@ test('M2: tools/list exposes the full tool set with object schemas + correct req
   for (const n of ['codeweb_impact', 'codeweb_callers', 'codeweb_deadcode', 'codeweb_context', 'codeweb_risk', 'codeweb_hotspots']) {
     assert.ok(opt(n).includes('full'), `${n} exposes full`);
   }
+  // API F3: the dialect-B tools advertise offset end-to-end — their remainder is reachable
+  for (const n of ['codeweb_risk', 'codeweb_hotspots', 'codeweb_break_cycles']) {
+    assert.ok(opt(n).includes('offset'), `${n} exposes offset`);
+  }
 });
 
 test('M2b: initialize carries workflow instructions; unknown client protocol falls back to ours', () => {
@@ -256,6 +260,16 @@ test('MD4: codeweb_diff on a nonexistent graph file -> isError:true (IO), stdout
 	assert.match(r.result.content[0].text, /not found|no such|cannot/i);
 });
 
+// API F6: the NO_GRAPH remedy ("pass `graph`…") used to be appended to EVERY graph-not-found
+// stderr — including codeweb_diff's, which has no `graph` param; an agent that obeyed got its
+// argument rejected. Remedies stay in-transport: graphless tools keep the child's own next step.
+test('MD5 / API F6: diff remedies never say "pass `graph`" — codeweb_diff has no such param', () => {
+	const r = rpc([INIT, callTool(25, 'codeweb_diff', { before: join(WS, 'ghost.json'), after: DAP })]).byId.get(25);
+	assert.ok(r.result.isError, 'missing before -> isError');
+	assert.match(r.result.content[0].text, /not found/i, 'the child still names the missing file + rebuild step');
+	assert.doesNotMatch(r.result.content[0].text, /pass `graph`/, 'the NO_GRAPH remedy must not cross the graphless seam');
+});
+
 // --- Tier 0-3 new tools: context (F1), refresh (F2), hotspots (F4), campaign (F5), reading_order (F8) ---
 // context + refresh need a graph whose meta.root points at real source on disk.
 
@@ -361,6 +375,7 @@ test('codeweb_simulate pre-flights a delete and returns the gate verdict', () =>
   assert.equal(p.op, 'delete');
   // gate semantics: a pure removal passes; the verdict shape is the contract
   assert.ok(typeof p.projected.ok === 'boolean' && Array.isArray(p.projected.newCycles) && Array.isArray(p.projected.lostCallers), 'projected gate verdict shape');
+  assert.equal(p.verdict?.check, 'call-caller-preflight', 'F1: the labeled verdict rides the payload'); // API §5
 });
 
 test('codeweb_simulate validates its mode arguments', () => {

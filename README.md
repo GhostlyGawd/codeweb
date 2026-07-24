@@ -197,12 +197,14 @@ npx -y @ghostlygawd/codeweb .    # ~3 s for 3,000 symbols — then open .codeweb
 ```
 git clone https://github.com/GhostlyGawd/codeweb.git
 node codeweb/scripts/run.mjs /path/to/your/project   # map lands in /path/to/your/project/.codeweb
-# kick the tires on bundled sample code first (no stakes, ~2s):
-node codeweb/scripts/run.mjs codeweb/bench/corpus/flask --out-dir /tmp/flask-map
+# no-stakes test drive: point it at any repo you already have checked out (read-only, seconds):
+node codeweb/scripts/run.mjs /path/to/any/checkout --out-dir /tmp/test-map
+# (the bench corpus is NOT bundled — bench/corpus/clone-corpus.sh fetches it, for benchmark work)
 ```
 
 Requires **Node.js ≥ 22** — the whole deterministic pipeline (extract → cluster → overlap → render)
-runs on Node, no external dependencies. Static-analysis tools (universal-ctags, ripgrep, madge,
+runs on Node, no external dependencies. Every bin, flag, environment variable, and exit code is
+tabled in [`docs/cli.md`](docs/cli.md). Static-analysis tools (universal-ctags, ripgrep, madge,
 etc.) are *optional* — they only sharpen the agent fallback path; the default engine reads the code
 directly.
 
@@ -289,8 +291,9 @@ node is reported but does not trip the gate (agents add functions before wiring 
 ## Gate every PR (GitHub Action)
 
 `scripts/ci-gate.mjs` turns the `diff` gate into CI: it builds the graph for the PR base and head and
-**fails the build on a structural regression** (a new cycle, a new duplication, or a symbol that
-loses all its callers). Drop it into any repo (full spec: [`docs/ci-gate.md`](docs/ci-gate.md)):
+**fails the build on a structural regression** (a new cycle, a new duplication, or a non-exported
+symbol that loses every caller — the edit-time preflights are stricter and flag exported ones too).
+Drop it into any repo (full spec: [`docs/ci-gate.md`](docs/ci-gate.md)):
 
 ```yaml
 # .github/workflows/codeweb-gate.yml

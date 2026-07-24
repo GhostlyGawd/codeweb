@@ -75,7 +75,7 @@ export function renderBrief(b) {
   }
   L.push(`codeweb brief — ${b.target || b.root || 'mapped repo'}: ${b.size.symbols} symbols / ${b.size.files} files / ${b.size.domains} domains (${(b.languages || []).join(', ') || 'unknown languages'})`);
   if (b.domains.length) {
-    L.push('areas:');
+    L.push('domains:');
     for (const d of b.domains) {
       // AI-IDEAS Idea 3: the narration sidecar's one-liner says what the area is FOR — always
       // provenance-labeled, and absent (or stale) it simply isn't here.

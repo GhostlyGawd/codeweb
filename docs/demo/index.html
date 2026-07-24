@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!--cw-head--><title>Live demo — axios call graph, mapped by codeweb</title>
-<meta name="description" content="Click around a real codeweb map: axios (50M downloads/week), 274 product symbols across 8 areas — findings, force graph, treemap, and coupling matrix. Built read-only by the deterministic pipeline.">
+<meta name="description" content="Click around a real codeweb map: axios (50M downloads/week), 274 product symbols across 8 domains — findings, force graph, treemap, and coupling matrix. Built read-only by the deterministic pipeline.">
 <link rel="canonical" href="https://ghostlygawd.github.io/codeweb/demo/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="codeweb">
 <meta property="og:title" content="Live demo — axios, mapped by codeweb">
-<meta property="og:description" content="A real interactive codeweb map of axios: 274 product symbols, 8 areas, body-confirmed duplication findings. No mockups.">
+<meta property="og:description" content="A real interactive codeweb map of axios: 274 product symbols, 8 domains, body-confirmed duplication findings. No mockups.">
 <meta property="og:url" content="https://ghostlygawd.github.io/codeweb/demo/">
 <meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
 <meta property="og:image:width" content="1200">
@@ -255,7 +255,7 @@
     var el = document.getElementById('metaStats');
     el.textContent = [
       AN.length + ' symbols' + (productOnly && nonProduct ? ' (+' + nonProduct + ' hidden)' : ''),
-      AE.length + ' edges', domainNames.length + ' areas', duplicates.length + ' dup-groups'
+      AE.length + ' edges', domainNames.length + ' domains'
     ].filter(Boolean).join('  ·  ');
     el.title = G.meta.engine ? 'extraction engine: ' + G.meta.engine : ''; // internals live in the tooltip, not the masthead
   }

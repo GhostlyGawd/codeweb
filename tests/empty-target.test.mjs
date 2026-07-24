@@ -2,11 +2,13 @@
 // map. The extractor fails with an actionable message (path scanned, supported extensions, next
 // step); `--allow-empty` restores the old behavior for intentionally-sparse targets. E-tests are
 // BDD: given/when/then in the names, real subprocesses, no mocks.
+// E7 (API.md F2 / CLI.md 7.2): a NONEXISTENT target is an input error — exit 2 (distinct from
+// the stage-failure 1) and no workspace directory is ever created for it.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { runNode, script, tmpDir, cleanup, writeTree, readJSON } from './helpers.mjs';
 
 test('E1 given an empty directory, extract exits 1 and says no supported source was found', () => {
@@ -79,4 +81,17 @@ test('E6 given --allow-empty, run.mjs completes the pipeline on an empty target'
     assert.ok(existsSync(join(ws, 'graph.json')), 'graph exists');
     assert.equal(readJSON(join(ws, 'graph.json')).nodes.length, 0);
   } finally { cleanup(dir); cleanup(ws); }
+});
+
+test('E7 given a nonexistent target, run.mjs exits 2 and leaves NO .codeweb behind', () => {
+  const dir = tmpDir('codeweb-empty-');
+  try {
+    const missing = join(dir, 'no-such-dir');
+    const r = runNode(script('run.mjs'), [missing]);
+    assert.equal(r.status, 2, 'a wrong path is an input error (2), not a stage failure (1) — API.md F2');
+    assert.match(r.stderr, /target not found/, 'names the failure');
+    assert.ok(r.stderr.includes(missing), 'names the path');
+    assert.ok(!existsSync(missing), 'the missing target was not fabricated by the workspace mkdir');
+    assert.deepEqual(readdirSync(dir), [], 'the scratch dir is untouched — no .codeweb minted anywhere (CLI.md 7.2)');
+  } finally { cleanup(dir); }
 });

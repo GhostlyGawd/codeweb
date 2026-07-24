@@ -89,6 +89,20 @@ test('DC-FIXTURE: test-targeted/entrypoint/test-file-defined -> review, plain or
 });
 
 // DC-DETERMINISTIC
+// MICROCOPY A4/A5: the heading carries the hedge BEFORE the list (never "safe to delete" with
+// the doubt printed after), and the false-positive door — the suppress command — is visible in
+// the text output, not only in JSON.
+test('DC-COPY: text heading hedges up front and shows the suppress door', () => {
+  const g = makeGraph(prng(0xC0FFEE), 8);
+  const { dir, graphPath } = write(g);
+  try {
+    const out = runNode(DC, [graphPath]).stdout;
+    assert.match(out, /delete candidates \(no caller, not exported, no test — extraction can miss dynamic calls; cross-check before deleting\):/);
+    assert.ok(!/safe to delete/.test(out), 'the old safety-asserting heading is retired');
+    assert.match(out, /false positive\? suppress it: node scripts\/annotate\.mjs --suppress/);
+  } finally { cleanup(dir); }
+});
+
 test('DC-DETERMINISTIC: identical input -> identical stdout', () => {
   const rng = prng(0xD37);
   const { dir, graphPath } = write(makeGraph(rng, 9));

@@ -109,15 +109,20 @@ const payload = {
   note: CAVEAT,
   safe: capSafe.items, review: capReview.items, suppressed,
 };
-if (capSafe.truncated) payload.moreSafe = { remaining: capSafe.remaining };
-if (capReview.truncated) payload.moreReview = { remaining: capReview.remaining };
+// API F3 (§4 convention: nextOffset rides wherever `remaining` is emitted). A single --offset
+// paging BOTH tiers in lockstep would over-skip the shorter tier — genuinely ambiguous — so the
+// tiers carry nextOffset only (the page boundary), without an offset param.
+if (capSafe.truncated) payload.moreSafe = { remaining: capSafe.remaining, nextOffset: capSafe.offset + capSafe.items.length };
+if (capReview.truncated) payload.moreReview = { remaining: capReview.remaining, nextOffset: capReview.offset + capReview.items.length };
 
 if (json) { emitJson(payload); } else {
 
 const t = payload.totals;
 console.log(`codeweb deadcode: ${payload.target} — ${t.orphans} orphan(s): ${t.safe} safe, ${t.review} review${t.suppressed ? `, ${t.suppressed} suppressed` : ''}`);
 if (deadScope.excluded) console.log(`  scope: product — ${scopeNote(deadScope)}`); // #6: counted, never silent
-console.log(`\nsafe to delete (no caller, not exported, no test):`);
+// MICROCOPY A4: the heading is the label people act on — the hedge rides IN it, before the
+// list, not in a note after both lists. "safe to delete" asserted safety the caveat then undid.
+console.log(`\ndelete candidates (no caller, not exported, no test — extraction can miss dynamic calls; cross-check before deleting):`);
 for (const o of payload.safe) console.log(`  ${o.id}  [${o.domain}]  (${o.loc} loc)`);
 if (payload.moreSafe) console.log(`  … +${payload.moreSafe.remaining} more`);
 if (!safe.length) console.log('  (none)');
@@ -125,6 +130,7 @@ console.log(`\nreview first (tests reference it, or entrypoint-like):`);
 for (const o of payload.review) console.log(`  ${o.id}  — ${o.reason}`);
 if (payload.moreReview) console.log(`  … +${payload.moreReview.remaining} more`);
 if (!review.length) console.log('  (none)');
-console.log(`\nnote: ${CAVEAT}.`);
+// MICROCOPY A5: the false-positive door, visible where the false positive is staring at you.
+console.log(`\nfalse positive? suppress it: node scripts/annotate.mjs --suppress <fingerprint> --note "why"  (fingerprints: --json)`);
 finish();
 }

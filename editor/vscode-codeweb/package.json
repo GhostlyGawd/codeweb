@@ -41,7 +41,7 @@
         "codeweb.lens.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Show codeweb CodeLens (callers \u00b7 blast) above mapped symbols."
+          "description": "Show codeweb CodeLens above mapped symbols: direct callers \u00b7 blast radius (symbols affected if this changes)."
         },
         "codeweb.lens.minCallers": {
           "type": "number",

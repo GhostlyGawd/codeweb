@@ -97,7 +97,8 @@ test('F9 run.mjs success points the user at the report', () => {
     const r = runNode(script('run.mjs'), [dir, '--out-dir', ws]);
     assert.equal(r.status, 0, r.stderr.slice(-400));
     // First run: the next: block's step 1 names the report; returning users get the classic line.
-    assert.match(r.stderr, /see the map: .*report\.html|open .*report\.html in your browser/);
+    // CLI.md 6.1: guidance is part of the result page — stdout, not stderr.
+    assert.match(r.stdout, /see the map: .*report\.html|open .*report\.html in your browser/);
   } finally { cleanup(dir); cleanup(ws); }
 });
 
@@ -110,4 +111,57 @@ test('F10 context-pack works with a bare symbol from a mapped repo', () => {
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /context-pack: alpha/);
   } finally { cleanup(repo); }
+});
+
+// API F7: refresh/fitness/placement/codemod had opted out of the one graph loader — refresh
+// required a positional (no CODEWEB_WS, no walk-up), fitness skipped the walk-up, placement and
+// codemod died on usage before discovery could run. All four now resolve arg -> CODEWEB_WS ->
+// nearest .codeweb above cwd, exactly like every other graph tool.
+test('API F7: refresh, fitness, placement, codemod discover the graph via the walk-up', () => {
+  const repo = tmpDir('codeweb-f7-');
+  try {
+    writeTree(repo, { 'a.js': 'export function alpha() { return beta(); }\nexport function beta() { return 1; }\n' });
+    mkdirSync(join(repo, '.codeweb'), { recursive: true });
+    const G = {
+      meta: { target: 'f7', root: repo.replace(/\\/g, '/') },
+      domains: [], overlaps: [],
+      nodes: [
+        { id: 'a.js:alpha', label: 'alpha', kind: 'function', file: 'a.js', line: 1, loc: 1, exports: true, domain: 'd' },
+        { id: 'a.js:beta', label: 'beta', kind: 'function', file: 'a.js', line: 2, loc: 1, exports: true, domain: 'd' },
+      ],
+      edges: [{ from: 'a.js:alpha', to: 'a.js:beta', kind: 'call' }],
+    };
+    writeFileSync(join(repo, '.codeweb', 'graph.json'), JSON.stringify(G));
+    writeFileSync(join(repo, '.codeweb', 'codeweb.rules.json'), JSON.stringify({ rules: [] }));
+    const env = { CODEWEB_WS: '' };
+    const fit = runNode(script('fitness.mjs'), [], { cwd: repo, env });
+    assert.equal(fit.status, 0, `fitness discovers the graph: ${fit.stderr}`);
+    const pl = runNode(script('placement.mjs'), ['--calls', 'beta', '--json'], { cwd: repo, env });
+    assert.equal(pl.status, 0, `placement discovers the graph: ${pl.stderr}`);
+    assert.ok(JSON.parse(pl.stdout).calls.resolved.includes('a.js:beta'), 'a real placement answer came back');
+    const cm = runNode(script('codemod.mjs'), ['--merge', 'alpha,beta', '--json'], { cwd: repo, env });
+    assert.equal(cm.status, 0, `codemod discovers the graph: ${cm.stderr}`);
+    assert.ok(JSON.parse(cm.stdout).canonical, 'a real merge plan came back');
+    const rf = runNode(script('refresh.mjs'), [], { cwd: repo, env });
+    assert.equal(rf.status, 0, `refresh discovers the graph: ${rf.stderr}`);
+    assert.match(rf.stderr, /using .*graph\.json \(nearest \.codeweb above cwd\)/, 'discovery is announced');
+  } finally { cleanup(repo); }
+});
+
+test('API F7: unmapped, the four die with the shared usage naming CODEWEB_WS (exit 2)', () => {
+  const bare = tmpDir('codeweb-f7-bare-');
+  try {
+    const env = { CODEWEB_WS: '' };
+    const cases = [
+      ['refresh.mjs', []],
+      ['fitness.mjs', []],
+      ['placement.mjs', ['--calls', 'a']],
+      ['codemod.mjs', ['--merge', 'a,b']],
+    ];
+    for (const [s, args] of cases) {
+      const r = runNode(script(s), args, { cwd: bare, env });
+      assert.equal(r.status, 2, `${s} exits 2 when unmapped (got ${r.status}: ${r.stderr.slice(0, 120)})`);
+      assert.match(r.stderr, /CODEWEB_WS/, `${s} names the escape hatches`);
+    }
+  } finally { cleanup(bare); }
 });

@@ -7,9 +7,11 @@
 //
 // Usage: node diff.mjs <before.json> <after.json> [--json]
 //
-// Regression (exit 1) = a NEW dependency cycle, a NEW duplication finding, or an EXISTING symbol that
-// lost all its callers. A brand-new uncalled node is reported but is NOT a gate failure (agents
-// legitimately add functions before wiring them). Exit: 0 ok, 1 regressions, 2 usage/IO.
+// Regression (exit 1) = a NEW dependency cycle, a NEW confirmed duplication, or an EXISTING
+// non-exported symbol newly orphaned (exported symbols are exempt HERE — the edit-time preflights
+// flag those too; the payload's verdict.check names which semantics ran). A brand-new uncalled
+// node is reported but is NOT a gate failure (agents legitimately add functions before wiring
+// them). Exit: 0 ok, 1 regressions, 2 usage/IO.
 //
 // Schema note (finding #28): rename detection is O(removed × added), skipped when either side exceeds
 // RENAME_CAP nodes. When BOTH sides are non-empty AND one exceeds the cap, an additive

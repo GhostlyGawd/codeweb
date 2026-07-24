@@ -91,7 +91,21 @@ const root = graph.meta?.root;
 const newDuplications = (root && existsSync(root)) ? incrementalOverlap(graph, impact.changedSymbols, { root, similarIndex: loadSimilarIndex(abs) }) : [];
 if (newDuplications.length) hasRegression = true;
 
-const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural, newDuplications };
+// F1/API §5: the labeled verdict object — same fields as diff/simulate/codemod, so "the gate"
+// names one thing everywhere. Without --before this run can only see duplication; the check
+// label says so instead of implying the structural half ran.
+const expOf = new Map(graph.nodes.map((n) => [n.id, !!n.exports]));
+const verdict = {
+  ok: !hasRegression,
+  check: structural ? 'call-caller-preflight' : 'duplication-only',
+  scope: 'full',
+  checks: {
+    newCycles: structural?.newCycles ?? [],
+    lostCallers: (structural?.lostCallers ?? []).map((id) => ({ id, exported: expOf.get(id) || false, exempted: false })),
+    newDuplications,
+  },
+};
+const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural, newDuplications, verdict };
 const code = (gate && hasRegression) ? 1 : 0;
 
 if (json) { emitJson(payload, code); } else {

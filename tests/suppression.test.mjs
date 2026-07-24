@@ -6,7 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runNode, script, tmpDir, cleanup, readJSON } from './helpers.mjs';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 const GRAPH = {
@@ -47,6 +47,34 @@ test('F7-SUPPRESS: annotate a deadcode finding -> deadcode hides + counts it; --
     const shown = JSON.parse(runNode(script('deadcode.mjs'), [gp, '--annotations', dir, '--show-suppressed', '--json']).stdout);
     assert.ok(shown.safe.some((o) => o.id === 'b.js:dead'), '--show-suppressed reveals it again');
   } finally { cleanup(dir); }
+});
+
+// API F7 / ERRORS.md #8: annotate's default --dir was ./.codeweb RELATIVE TO CWD, mkdir -p'd —
+// a suppression from an unmapped directory landed in a fresh orphaned .codeweb (with a SUCCESS
+// message) that no tool would ever read: annotations are read beside the GRAPH. Unmapped now
+// errors and creates NOTHING; inside a mapped repo the default walks up to the real workspace.
+test('F7-DEST: annotate in an unmapped cwd exits 2 with the no-map message and creates nothing', () => {
+  const bare = tmpDir('codeweb-ann-bare-');
+  const repo = tmpDir('codeweb-ann-repo-');
+  try {
+    const r = runNode(script('annotate.mjs'), ['--suppress', 'deadbeef'], { cwd: bare, env: { CODEWEB_WS: '' } });
+    assert.equal(r.status, 2, `an unmapped suppression is refused, not misfiled (got ${r.status})`);
+    assert.match(r.stderr, /CODEWEB_WS/, 'names the env escape hatch');
+    assert.match(r.stderr, /--dir/, 'names the explicit destination flag');
+    assert.ok(!existsSync(join(bare, '.codeweb')), 'NO orphaned .codeweb is created');
+
+    mkdirSync(join(repo, '.codeweb'), { recursive: true });
+    mkdirSync(join(repo, 'src'), { recursive: true });
+    writeFileSync(join(repo, '.codeweb', 'graph.json'), JSON.stringify(GRAPH));
+    const ok = runNode(script('annotate.mjs'), ['--suppress', 'cafebabe', '--json'], { cwd: join(repo, 'src'), env: { CODEWEB_WS: '' } });
+    assert.equal(ok.status, 0, ok.stderr);
+    assert.ok(existsSync(join(repo, '.codeweb', 'annotations.json')), 'lands beside the graph via the walk-up');
+    assert.ok(!existsSync(join(repo, 'src', '.codeweb')), 'never a fresh .codeweb in the cwd');
+    // CODEWEB_WS still wins when set (the annotations lib reads/writes <dir>/annotations.json)
+    const viaEnv = runNode(script('annotate.mjs'), ['--list', '--json'], { cwd: bare, env: { CODEWEB_WS: join(repo, '.codeweb') } });
+    assert.equal(viaEnv.status, 0, viaEnv.stderr);
+    assert.ok(viaEnv.stdout.includes('cafebabe'), 'CODEWEB_WS routes to the same workspace');
+  } finally { cleanup(bare); cleanup(repo); }
 });
 
 test('F7-RESURFACE: changing the orphan id changes its fingerprint -> not silently suppressed', () => {

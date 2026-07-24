@@ -13,6 +13,10 @@
 //      languages to the agent fallback.
 // FR6: the bin wrappers guard the Node version and forward: `codeweb --help` exits 0 with
 //      usage; `codeweb-mcp` completes a JSON-RPC initialize handshake.
+// FR7-FR9 (CLI.md 5.1/6.1): the stream contract — the result block rides stdout (pipe- and
+//      `2>/dev/null`-surviving) while stage progress stays on stderr; `--json` emits exactly one
+//      machine-readable line; a memo-reuse run still puts its result on stdout and reports
+//      reused:true.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -70,12 +74,13 @@ test('FR3: the first-run banner leads with the result and a next: block — no f
     const ws = join(dir, 'ws');
     const r = runNode(RUN, [join(dir, 'src'), '--out-dir', ws]);
     assert.equal(r.status, 0, r.stderr);
+    // CLI.md 6.1: the result block is stdout; the fossil negatives sweep BOTH streams.
+    assert.match(r.stdout, /mapped \d+ symbols/, 'headline result line present');
+    assert.match(r.stdout, /actionable/, 'findings vocabulary reaches the banner');
+    assert.match(r.stdout, /next:/, 'the next: block exists on a first run');
+    assert.match(r.stdout, /claude mcp add codeweb/, 'the living-map bridge is named');
+    assert.match(r.stdout, /re-run/, 'the habit loop is named');
     const out = r.stderr + r.stdout;
-    assert.match(out, /mapped \d+ symbols/, 'headline result line present');
-    assert.match(out, /actionable/, 'findings vocabulary reaches the banner');
-    assert.match(out, /next:/, 'the next: block exists on a first run');
-    assert.match(out, /claude mcp add codeweb/, 'the living-map bridge is named');
-    assert.match(out, /re-run/, 'the habit loop is named');
     assert.ok(!/was 32/.test(out), 'fossil "(was 32)" is gone');
     assert.ok(!/top 18 domains/.test(out) || /--- top \d+ domains ---/.test(out.replace(/top 18 domains/g, '')), 'hardcoded "top 18" header is gone');
     assert.ok(!/NaN/.test(out), 'no NaN ever reaches the user');
@@ -136,4 +141,63 @@ test('FR6: bin wrappers guard the Node version and forward faithfully', async ()
     child.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 't', version: '0' } } }) + '\n');
   });
   assert.match(reply, /serverInfo/, 'codeweb-mcp bin boots the real server');
+});
+
+// ---- CLI.md 5.1/6.1 — the stream contract + machine mode --------------------------------------
+
+test('FR7: the result block rides stdout (2>/dev/null-surviving); stage progress stays off it', () => {
+  const dir = tmpDir('codeweb-firstrun-');
+  try {
+    writeTree(dir, DUP_FIXTURE);
+    const ws = join(dir, 'ws');
+    const r = runNode(RUN, [join(dir, 'src'), '--out-dir', ws]);
+    assert.equal(r.status, 0, r.stderr);
+    // stdout = the result page: done line, banner, artifact list, guidance.
+    assert.match(r.stdout, /\[run\] done -> /, 'the done line survives 2>/dev/null');
+    assert.match(r.stdout, /mapped \d+ symbols/, 'the banner survives 2>/dev/null (| grep mapped works)');
+    // stderr = progress: per-stage lines and children's chatter never pollute the result channel.
+    assert.match(r.stderr, /\[run\] extract/, 'stage progress is on stderr');
+    assert.match(r.stderr, /\[run\] extract done in \d+ms/, 'stage timings are on stderr');
+    assert.ok(!/\[run\] extract/.test(r.stdout), 'no stage lines on stdout');
+    assert.ok(!/done in \d+ms/.test(r.stdout), 'no stage timings on stdout');
+    assert.ok(!/\[extract\]|hubs stripped/.test(r.stdout), "children's chatter is stderr, not stdout");
+  } finally { cleanup(dir); }
+});
+
+test('FR8: --json emits exactly one parseable line on stdout with the five keys — no text block', () => {
+  const dir = tmpDir('codeweb-firstrun-');
+  try {
+    writeTree(dir, DUP_FIXTURE);
+    const ws = join(dir, 'ws');
+    const r = runNode(RUN, [join(dir, 'src'), '--out-dir', ws, '--json']);
+    assert.equal(r.status, 0, r.stderr);
+    const lines = r.stdout.split('\n').filter((l) => l.trim());
+    assert.equal(lines.length, 1, `exactly one stdout line (got ${lines.length}: ${r.stdout})`);
+    const j = JSON.parse(lines[0]);
+    assert.deepEqual(Object.keys(j).sort(), ['actionable', 'reused', 'symbols', 'version', 'ws'], 'the five keys, nothing else');
+    assert.equal(j.ws, ws, 'ws is the workspace path');
+    assert.ok(typeof j.symbols === 'number' && j.symbols > 0, 'symbols from the banner');
+    assert.ok(typeof j.actionable === 'number', 'actionable from the banner');
+    assert.equal(j.reused, false, 'a fresh map is not a reuse');
+    assert.match(j.version, /^\d+\.\d+\.\d+/, 'version = VERSION');
+    assert.ok(!/\[run\] /.test(r.stdout), 'none of the [run] text block on stdout');
+    assert.match(r.stderr, /\[run\] extract/, 'stage chatter still goes to stderr in --json mode');
+  } finally { cleanup(dir); }
+});
+
+test('FR9: a memo-reuse run still prints the done line on stdout, and --json says reused:true', () => {
+  const dir = tmpDir('codeweb-firstrun-');
+  try {
+    writeTree(dir, DUP_FIXTURE);
+    const ws = join(dir, 'ws');
+    assert.equal(runNode(RUN, [join(dir, 'src'), '--out-dir', ws]).status, 0);
+    const second = runNode(RUN, [join(dir, 'src'), '--out-dir', ws]);
+    assert.equal(second.status, 0, second.stderr);
+    assert.match(second.stderr, /stages reused/, 'precondition: the second run hit the memo');
+    assert.match(second.stdout, /\[run\] done -> /, 'a memo-hit run is no longer stdout-silent');
+    assert.match(second.stdout, /mapped \d+ symbols/, 'the banner rides the reuse path too');
+    const third = runNode(RUN, [join(dir, 'src'), '--out-dir', ws, '--json']);
+    assert.equal(third.status, 0, third.stderr);
+    assert.equal(JSON.parse(third.stdout.trim()).reused, true, '--json reports the memo hit');
+  } finally { cleanup(dir); }
 });

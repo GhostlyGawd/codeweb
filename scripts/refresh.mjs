@@ -5,17 +5,17 @@
 // node's domain by id, and drops overlaps (they need the full pipeline; not needed by the query
 // tools). meta is preserved. Read-only over the target source; never executes it.
 //
-// Usage: node refresh.mjs <graph.json> [--cache <path>] [--json]
+// Usage: node refresh.mjs [graph.json] [--cache <path>] [--json]   (or set CODEWEB_WS, or run from a mapped repo)
 // Exit: 0 ok, 2 usage / missing meta.root.
 
 import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { resolve, dirname, join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const USAGE = 'usage: refresh.mjs <graph.json> [--cache <path>] [--json]';
-import { die, emitJson, finish, atomicWrite, SCAN_CACHE_NAME, parseArgs } from './lib/cli.mjs';
+const USAGE = 'usage: refresh.mjs [graph.json] [--cache <path>] [--json]   (or set CODEWEB_WS, or run from a mapped repo)';
+import { die, emitJson, finish, atomicWrite, SCAN_CACHE_NAME, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
 const { opts, pos } = parseArgs(process.argv.slice(2), {
@@ -23,11 +23,13 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
   flags: { json: { type: 'bool', default: false }, cache: { type: 'string', default: null } },
 });
 const { json, cache } = opts;
-const graphPath = pos[0];
-if (!graphPath) die(USAGE, 2);
 
-const abs = resolve(graphPath);
-if (!existsSync(abs)) die(`graph not found: ${abs}`, 2);
+// API F7 (COPY.md #9): refresh required a positional and hand-rolled a weaker error — no
+// CODEWEB_WS, no walk-up. It now uses THE one loader (arg -> env -> nearest .codeweb above cwd,
+// shared errors). The graph is re-read RAW below: the written bytes must come from the on-disk
+// JSON + the fresh fragment, never from normalizeGraph's in-memory back-fills (its mutation runs
+// post-write for the sidecars — see the #25 note below).
+const { abs } = loadGraph(pos[0], { usage: USAGE });
 let graph;
 try { graph = JSON.parse(readFileSync(abs, 'utf8')); }
 catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }

@@ -115,7 +115,9 @@ const CALLS = [
 const reqs = [
   { jsonrpc: '2.0', id: 0, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'bench-all', version: '0' } } },
   { jsonrpc: '2.0', method: 'notifications/initialized' },
-  ...CALLS.map(([name, args], i) => ({ jsonrpc: '2.0', id: i + 1, method: 'tools/call', params: { name, arguments: { graph: gp, ...args } } })),
+  // API F4: unknown arguments are now REJECTED (the CLI's unknown-flag policy, MCP edition) — so
+  // `graph` rides only the graph-taking tools; codeweb_diff is graphless (before/after only).
+  ...CALLS.map(([name, args], i) => ({ jsonrpc: '2.0', id: i + 1, method: 'tools/call', params: { name, arguments: name === 'codeweb_diff' ? args : { graph: gp, ...args } } })),
 ];
 const srv = spawnSync(NODE, [S('mcp-server.mjs')], { encoding: 'utf8', maxBuffer: 1 << 28, env: ENV, input: reqs.map((m) => JSON.stringify(m)).join('\n') + '\n' });
 const lines = (srv.stdout || '').split('\n').filter(Boolean);

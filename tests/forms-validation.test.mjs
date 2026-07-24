@@ -292,3 +292,67 @@ test('F14c: CLI negative --limit dies at parse, matching the MCP clamp', () => {
   assert.equal(r.status, 2, 'a negative limit is nonsense, not an empty page with nextOffset:0');
   assert.match(r.stderr, /--limit/);
 });
+
+// ---- API F4 / F5 — the MCP transport rejects the mistakes the CLI rejects ---------------------
+
+test('API F4: an unknown argument key is rejected naming the near-miss, never silently ignored', () => {
+  const { byId } = rpc([INIT,
+    callTool(2, 'codeweb_callers', { graph: GP, symbol: 'helper', offest: 5 }),
+    callTool(3, 'codeweb_callers', { graph: GP, symbol: 'helper', bogus_arg: 1 }),
+    callTool(4, 'codeweb_diff', { before: GP, after: GP, graph: GP }),
+  ]);
+  assert.equal(byId.get(2).result.isError, true, 'a typo\'d param is an error, not default behavior');
+  assert.match(textOf(byId.get(2)), /offest/, 'names the unknown key');
+  assert.match(textOf(byId.get(2)), /offset/, 'names the nearest valid key');
+  assert.equal(byId.get(3).result.isError, true);
+  assert.match(textOf(byId.get(3)), /bogus_arg/);
+  assert.match(textOf(byId.get(3)), /symbol/, 'lists the valid arguments when nothing is near');
+  assert.equal(byId.get(4).result.isError, true, 'graph on the graphless diff is unknown, not ignored');
+  assert.match(textOf(byId.get(4)), /graph/);
+});
+
+test('API F4: boolean params validate like numerics — full:"false" means FALSE, garbage errors', () => {
+  const { byId } = rpc([INIT,
+    callTool(2, 'codeweb_context', { graph: GP, symbol: 'helper', full: 'false' }),
+    callTool(3, 'codeweb_callers', { graph: GP, symbol: 'helper', full: 'nope' }),
+    callTool(4, 'codeweb_callers', { graph: GP, symbol: 'helper', full: 'true' }),
+  ]);
+  const ctx = JSON.parse(textOf(byId.get(2)));
+  assert.match(ctx.mode, /windows/, '"false" (string) is FALSE — it used to be treated as true');
+  assert.equal(byId.get(3).result.isError, true, 'a non-boolean string is an error');
+  assert.match(textOf(byId.get(3)), /full/, 'the error names the param');
+  assert.ok(!byId.get(4).result.isError, '"true" clamps to true like the numeric clamp accepts "5"');
+});
+
+test('API F4: reading_order scope without value is a correction, not a silent whole-repo answer', () => {
+  const { byId } = rpc([INIT,
+    callTool(2, 'codeweb_reading_order', { graph: GP, scope: 'domain' }),
+    callTool(3, 'codeweb_reading_order', { graph: GP, scope: 'bogus', value: 'x' }),
+    callTool(4, 'codeweb_reading_order', { graph: GP, value: 'lib' }),
+    callTool(5, 'codeweb_reading_order', { graph: GP, scope: 'domain', value: 'lib' }),
+  ]);
+  assert.equal(byId.get(2).result.isError, true, 'scope alone must not answer the whole-repo question');
+  assert.match(textOf(byId.get(2)), /value/, 'says what is missing');
+  assert.equal(byId.get(3).result.isError, true, 'an invalid kind is rejected like the CLI enum');
+  assert.match(textOf(byId.get(3)), /domain.*file.*symbol/s, 'lists the valid kinds');
+  assert.doesNotMatch(textOf(byId.get(3)), /reading-order\.mjs|--scope/, 'no CLI usage leak (API F6)');
+  assert.equal(byId.get(4).result.isError, true, 'value alone is equally ambiguous');
+  assert.match(textOf(byId.get(4)), /scope/);
+  const scoped = JSON.parse(textOf(byId.get(5)));
+  assert.equal(scoped.scope.kind, 'domain', 'a complete scope still answers the scoped question');
+  assert.ok(scoped.order.every((o) => ['b.js:helper', 'c.js:helper2'].includes(o.id)), 'only lib symbols');
+});
+
+test('API F5: context `bodies` owns caller rendering; `full` stays the unabridged-list switch', () => {
+  const { byId } = rpc([INIT,
+    callTool(2, 'codeweb_context', { graph: GP, symbol: 'helper', bodies: 'full' }),
+    callTool(3, 'codeweb_context', { graph: GP, symbol: 'helper', full: true }),
+    callTool(4, 'codeweb_context', { graph: GP, symbol: 'helper', bodies: 'sideways' }),
+    callTool(5, 'codeweb_context', { graph: GP, symbol: 'helper', bodies: 'windows' }),
+  ]);
+  assert.equal(JSON.parse(textOf(byId.get(2))).mode, 'full-bodies', 'bodies:"full" flips the rendering');
+  assert.match(JSON.parse(textOf(byId.get(3))).mode, /windows/, 'full:true no longer implies whole bodies');
+  assert.equal(byId.get(4).result.isError, true, 'an unknown bodies value is rejected');
+  assert.match(textOf(byId.get(4)), /bodies/);
+  assert.match(JSON.parse(textOf(byId.get(5))).mode, /windows/, 'the explicit default works');
+});

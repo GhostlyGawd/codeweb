@@ -5,20 +5,20 @@
 // be rewritten unambiguously, backs up every touched file, applies the edits, RE-EXTRACTS, and
 // reverts byte-for-byte if the structural gate regresses. Source-rewriting is structural best-effort
 // (it never re-introduces the byName guessing the extractor refuses). Built on ./lib/graph-ops.mjs
-// (shares applyEdit / structuralRegressions / chooseCanonical — one truth with simulate-edit/optimize).
+// (shares applyEdit / gateVerdict / chooseCanonical — one truth with simulate-edit/optimize).
 //
-// Usage: node codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]
+// Usage: node codemod.mjs [graph.json] (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]   (or set CODEWEB_WS, or run from a mapped repo)
 // Exit: 0 ok, 1 predicted/actual regression (no net change), 2 usage/IO/ambiguous.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { resolve, dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalizeGraph, buildIndex, callersOf, importersOf, impactOf, applyEdit, structuralRegressions, chooseCanonical, resolveSymbol } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, callersOf, importersOf, impactOf, applyEdit, structuralRegressions, chooseCanonical, resolveSymbol, gateVerdict } from './lib/graph-ops.mjs';
 import { maskAligned } from './lib/masking.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const USAGE = 'usage: codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> [--into <id>]) [--json] [--write]'; // F14a: --into is optional (survivor inferred)
+const USAGE = 'usage: codemod.mjs [graph.json] (--opportunity <ovId> | --merge <ids> [--into <id>]) [--json] [--write]   (or set CODEWEB_WS, or run from a mapped repo)'; // F14a: --into is optional (survivor inferred)
 import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
@@ -33,10 +33,11 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
   },
 });
 const { json, merge, into } = opts, doWrite = opts.write, opp = opts.opportunity;
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath || (opp == null && merge == null)) die(USAGE, 2);
+if (opp == null && merge == null) die(USAGE, 2);
 
-const { graph, abs } = loadGraph(graphPath, { usage: USAGE });
+// API F7: codemod died on usage before loadGraph could discover — no walk-up. The graph
+// positional is optional now; THE one loader resolves arg -> CODEWEB_WS -> nearest .codeweb.
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const index = buildIndex(graph);
 
@@ -66,8 +67,8 @@ const byId = index.byId;
 
 // projected gate (the SAME oracle simulate-edit is pinned to — one truth)
 const after = applyEdit(graph, { kind: 'merge', ids, into: canonical });
-const sr = structuralRegressions(graph, after);
-const projectedGate = { newCycles: sr.newCycles, lostCallers: sr.lostCallers, ok: sr.newCycles.length === 0 && sr.lostCallers.length === 0 };
+const verdict = gateVerdict(graph, after, { exemptExported: false, scope: 'edges-only' });
+const projectedGate = { newCycles: verdict.checks.newCycles, lostCallers: verdict.checks.lostCallers.map((l) => l.id), ok: verdict.ok, check: verdict.check };
 
 const deletions = losers.map((id) => { const n = byId.get(id); return { id, file: n.file, range: [n.line, n.line + (n.loc || 1) - 1] }; });
 // callers AND importers: a file that only imports a loser still holds a specifier that must be
@@ -83,7 +84,7 @@ let writeResult = null, code = 0;
 if (doWrite) {
   const root = graph.meta?.root;
   if (!root || !existsSync(root)) die(`--write needs graph.meta.root on disk (got ${root || 'none'})`, 2);
-  if (!projectedGate.ok) { writeResult = { applied: false, reason: 'the gate predicts a regression — refusing to write', projectedGate }; code = 1; }
+  if (!projectedGate.ok) { writeResult = { applied: false, reason: 'the pre-flight predicts a regression (new cycle or lost caller) — refusing to write', projectedGate }; code = 1; }
   else {
     // a loser whose label differs from the canonical's must have a GLOBALLY-UNIQUE label to rewrite
     // safely (the token unambiguously refers to it); else refuse (never guess — the extractor's rule).
@@ -187,11 +188,13 @@ const payload = { ...plan, write: writeResult };
 if (json) { emitJson(payload, code); } else {
 
 console.log(`codeweb codemod: merge ${ids.length} -> keep ${canonical}`);
-console.log(`  removes ${losers.length} copy(ies), rewires ${rewrites.length} caller(s), ~${locReclaimed} LOC, blast ${plan.blastRadius}`);
-console.log(`  projected gate: ${projectedGate.ok ? 'PASS' : 'BLOCK'}${projectedGate.ok ? '' : ` (${projectedGate.newCycles.length} new cycle, ${projectedGate.lostCallers.length} lost-caller)`}`);
+console.log(`  removes ${losers.length} copy(ies) · ${rewrites.length} caller/importer site(s) to re-check · ~${locReclaimed} LOC · blast radius ${plan.blastRadius}`);
+console.log(`  projected: ${projectedGate.ok ? 'PASS — no new cycles; no surviving symbol loses its last caller' : `BLOCK — ${projectedGate.newCycles.length} new cycle(s), ${projectedGate.lostCallers.length} lost caller(s)`}`);
+console.log('  (checks cycles + lost callers — stricter than the diff.mjs/CI gate on exports; does not count duplication)');
 console.log('  deletions:'); for (const d of deletions) console.log(`    ${d.file}:${d.range[0]}-${d.range[1]}  (${d.id})`);
-console.log('  rewrites:'); for (const r of rewrites) console.log(`    ${r.file}:${r.line}  (${r.callerId})`);
-if (writeResult) console.log(`  write: ${writeResult.applied ? `APPLIED to ${writeResult.filesTouched.length} file(s)` : `NOT applied — ${writeResult.reason}`}`);
-else console.log('  (plan-only — pass --write to apply, gated + reversible)');
+console.log('  caller/importer sites to re-check (codemod renames tokens and repoints imports — it never ADDS an import):');
+for (const r of rewrites) console.log(`    ${r.file}:${r.line}  (${r.callerId})`);
+if (writeResult) console.log(`  write: ${writeResult.applied ? `applied — deleted ${losers.length} definition(s) in ${writeResult.filesTouched.length} file(s); re-extract gate ok (0 new cycles, 0 lost callers). Verify imports at the sites above.` : `NOT applied — ${writeResult.reason}`}`);
+else console.log('  (plan-only — --write applies it, and auto-reverts only if the post-edit re-extract regresses; after a successful apply, undo is git\'s job)');
 finish(code);
 }
