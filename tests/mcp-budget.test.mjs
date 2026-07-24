@@ -96,6 +96,20 @@ test('codeweb_map: builds a real graph over MCP and reports the path + stats', (
   } finally { cleanup(ws); }
 });
 
+// API F6: remedies stay in-transport — the extractor's no-source error suggests --allow-empty,
+// a run.mjs flag codeweb_map cannot pass (no such param). The MCP reply translates it to the
+// reachable next steps (re-map at the code root / the /codeweb agent fallback).
+test('API F6: codeweb_map failure never suggests --allow-empty (a flag the tool cannot pass)', () => {
+  const dir = tmpDir('codeweb-map-empty-');
+  try {
+    const res = rpc([INIT, call(2, 'codeweb_map', { target: dir })]).byId.get(2).result;
+    assert.ok(res.isError, 'no supported source -> the map fails');
+    const text = res.content[0].text;
+    assert.doesNotMatch(text, /--allow-empty/, 'the run.mjs flag is translated, not forwarded');
+    assert.match(text, /\/codeweb/, 'the MCP-reachable remedy (agent fallback) is named');
+  } finally { cleanup(dir); }
+});
+
 // ---- API F3 — one pagination dialect (limit/offset with nextOffset, true totals) --------------
 
 test('API F3: risk honors offset (offset:50 is not page 0) and more carries nextOffset', () => {

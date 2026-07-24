@@ -4,16 +4,16 @@
 // max-fan-in {limit}, max-symbol-loc {limit}, layer {order:[top..bottom]} (a domain may depend only
 // on domains at/below it). Read-only, deterministic. Built on ./lib/graph-ops.mjs.
 //
-// Usage: node fitness.mjs <graph.json> [--rules codeweb.rules.json] [--json]
+// Usage: node fitness.mjs [graph.json] [--rules codeweb.rules.json] [--json]   (or set CODEWEB_WS, or run from a mapped repo)
 //   rules file: { "rules": [ { "id", "type", "severity"?, ...params } ] }   (severity default "error")
 // Exit: 0 ok, 1 when >=1 error-severity violation, 2 usage/IO/unknown-rule.
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
-import { normalizeGraph, buildIndex, fileCycles } from './lib/graph-ops.mjs';
+import { buildIndex, fileCycles } from './lib/graph-ops.mjs';
 
-const USAGE = 'usage: fitness.mjs <graph.json> [--rules codeweb.rules.json] [--json]';
-import { die, emitJson, finish, parseArgs } from './lib/cli.mjs';
+const USAGE = 'usage: fitness.mjs [graph.json] [--rules codeweb.rules.json] [--json]   (or set CODEWEB_WS, or run from a mapped repo)';
+import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
 const { opts, pos } = parseArgs(process.argv.slice(2), {
@@ -21,14 +21,10 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
   flags: { json: { type: 'bool', default: false }, rules: { type: 'string', default: null } },
 });
 const { json } = opts, rulesArg = opts.rules;
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath) die(USAGE, 2);
 
-const gAbs = resolve(graphPath);
-if (!existsSync(gAbs)) die(`graph not found: ${gAbs}`, 2);
-let graph;
-try { graph = normalizeGraph(JSON.parse(readFileSync(gAbs, 'utf8'))); }
-catch (e) { die(`invalid JSON in ${gAbs}: ${e.message}`, 2); }
+// API F7: fitness honored CODEWEB_WS but not the walk-up, with hand-rolled load errors. THE one
+// loader now (arg -> env -> nearest .codeweb above cwd, shared not-found/corrupt messages).
+const { graph, abs: gAbs } = loadGraph(pos[0], { usage: USAGE });
 
 // locate rules: --rules, else codeweb.rules.json beside the graph, else in cwd
 const rulesPath = rulesArg ? resolve(rulesArg)

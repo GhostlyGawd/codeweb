@@ -5,7 +5,7 @@
 // symbol (by name, and — with --body — by body similarity via find-similar). Attacks sprawl +
 // duplication BEFORE a line is committed. Read-only, deterministic. Built on ./lib/graph-ops.mjs.
 //
-// Usage: node placement.mjs <graph.json> --calls <id|label,...> [--name <label>] [--body <file>] [--json]
+// Usage: node placement.mjs [graph.json] --calls <id|label,...> [--name <label>] [--body <file>] [--json]   (or set CODEWEB_WS, or run from a mapped repo)
 // Exit: 0 ok, 2 usage/IO.
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { normalizeGraph, buildIndex, resolveSymbol } from './lib/graph-ops.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const USAGE = 'usage: placement.mjs <graph.json> --calls <id|label,...> [--name <label>] [--body <file>] [--json]';
+const USAGE = 'usage: placement.mjs [graph.json] --calls <id|label,...> [--name <label>] [--body <file>] [--json]   (or set CODEWEB_WS, or run from a mapped repo)';
 import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
@@ -29,10 +29,11 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
   },
 });
 const { json, calls, name, body } = opts;
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath || calls == null) die(USAGE, 2);
+if (calls == null) die(USAGE, 2);
 
-const { graph, abs } = loadGraph(graphPath, { usage: USAGE });
+// API F7: placement died on usage before loadGraph could discover — no walk-up. The graph
+// positional is optional now; THE one loader resolves arg -> CODEWEB_WS -> nearest .codeweb.
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const index = buildIndex(graph);
 

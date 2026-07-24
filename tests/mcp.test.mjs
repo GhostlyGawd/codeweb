@@ -260,6 +260,16 @@ test('MD4: codeweb_diff on a nonexistent graph file -> isError:true (IO), stdout
 	assert.match(r.result.content[0].text, /not found|no such|cannot/i);
 });
 
+// API F6: the NO_GRAPH remedy ("pass `graph`…") used to be appended to EVERY graph-not-found
+// stderr — including codeweb_diff's, which has no `graph` param; an agent that obeyed got its
+// argument rejected. Remedies stay in-transport: graphless tools keep the child's own next step.
+test('MD5 / API F6: diff remedies never say "pass `graph`" — codeweb_diff has no such param', () => {
+	const r = rpc([INIT, callTool(25, 'codeweb_diff', { before: join(WS, 'ghost.json'), after: DAP })]).byId.get(25);
+	assert.ok(r.result.isError, 'missing before -> isError');
+	assert.match(r.result.content[0].text, /not found/i, 'the child still names the missing file + rebuild step');
+	assert.doesNotMatch(r.result.content[0].text, /pass `graph`/, 'the NO_GRAPH remedy must not cross the graphless seam');
+});
+
 // --- Tier 0-3 new tools: context (F1), refresh (F2), hotspots (F4), campaign (F5), reading_order (F8) ---
 // context + refresh need a graph whose meta.root points at real source on disk.
 

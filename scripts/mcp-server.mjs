@@ -509,10 +509,18 @@ function handleMap(id, args, meta) {
         return errResult(id, `codeweb_map found no supported source under ${target} — wrong directory? pass target: <code root>. Non-native language? the /codeweb command's agent fallback maps it by reading. (marker written: codeweb_map will say this until ${join(out, 'unsupported.json')} is deleted.)`);
       }
       // Generic failure: forward stderr from the FIRST [extract]/error line (the extractor leads
-      // with its escapes), capped — never the last-3-lines beheading that kept only pipeline frames.
+      // with its escapes), capped — never the last-3-lines beheading that kept only pipeline
+      // frames (ERRORS R2). API F6 rides on top: a child's remedy must be runnable in THIS
+      // transport, so the extractor's --allow-empty flag hints translate to MCP-reachable steps.
       const lines = (errBuf || '').trim().split('\n');
       const firstSignal = lines.findIndex((l) => /^\[(extract|run)\]|error/i.test(l.trim()));
-      return errResult(id, `codeweb_map failed (exit ${code}):\n${lines.slice(Math.max(0, firstSignal), firstSignal < 0 ? lines.length : firstSignal + 12).join('\n')}`);
+      const windowed = lines.slice(Math.max(0, firstSignal), firstSignal < 0 ? lines.length : firstSignal + 12).join('\n')
+        .replace(/\(Intentionally sparse target\? --allow-empty writes an empty map\.\)/g,
+          '(Intentionally sparse target? Re-map at the code root, or use the /codeweb agent fallback for non-native languages.)')
+        .replace(/Pass --allow-empty to proceed with an empty map\./g,
+          'Re-map at the code root, or use the /codeweb agent fallback.')
+        .replace(/--allow-empty/g, 'the /codeweb agent fallback'); // belt: never leak the flag
+      return errResult(id, `codeweb_map failed (exit ${code}):\n${windowed}`);
     }
     if (token !== undefined && token !== null) send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.length, total: MAP_STAGES.length, message: 'done' } });
     const graphPath = join(out, 'graph.json');
@@ -531,11 +539,15 @@ function handleMap(id, args, meta) {
 
 // THE spawned-tool reply shaper (shared by the generic tool path and the #33 diff spawn fallback):
 // exit 2 / null → errResult (graph-not-found gains the MCP next step); otherwise the child's JSON.
-const spawnedToolReply = (id) => ({ code, out, errBuf, timedOut }) => {
+// API F6: the NO_GRAPH remedy says "pass `graph`…" — a GRAPHLESS tool (diff) has no such param,
+// and an agent that obeyed got its argument rejected/ignored. The suffix rides only tools that
+// actually take `graph`; graphless children keep their own actionable stderr (which already names
+// the missing file and the rebuild command).
+const spawnedToolReply = (id, tool) => ({ code, out, errBuf, timedOut }) => {
   if (timedOut) return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
   if (code === 2 || code == null) {
     const text = (errBuf || 'query failed').trim() || 'query failed';
-    return errResult(id, /graph not found/.test(text) ? `${text}\n${NO_GRAPH}` : text);
+    return errResult(id, /graph not found/.test(text) && !(tool && tool.graphless) ? `${text}\n${NO_GRAPH}` : text);
   }
   // FORMS F1 (belt): an exit-1 child with EMPTY stdout is a die()-style miss, not a result — an
   // empty success here read as "no objections" right before a doomed refactor. Surface stderr.
@@ -564,7 +576,7 @@ function handleDiff(id, args, tool) {
     // runs between this -- and enqueueChild's ++, so stdin-close cannot exit in the gap.
     inflight.delete(id);
     pendingAsync--;
-    enqueueChild(id, { kind: 'reader', key, tool: tool.name, bin: tool.bin, argv: [args.before, args.after, '--json'], stdio: ['ignore', 'pipe', 'pipe'], timeoutMs: SPAWN_TIMEOUT_MS, onSettle: spawnedToolReply(id) });
+    enqueueChild(id, { kind: 'reader', key, tool: tool.name, bin: tool.bin, argv: [args.before, args.after, '--json'], stdio: ['ignore', 'pipe', 'pipe'], timeoutMs: SPAWN_TIMEOUT_MS, onSettle: spawnedToolReply(id, tool) });
   };
   const attempt = () => {
     if (entry.cancelled) { inflight.delete(id); asyncDone(); return; } // cancel while awaiting → suppress reply (I5)
@@ -812,7 +824,7 @@ function handleToolCall(id, params) {
     stdio: [tool.input ? 'pipe' : 'ignore', 'pipe', 'pipe'],
     input: tool.input ? (tool.input(args) || '') : undefined,
     timeoutMs: SPAWN_TIMEOUT_MS,
-    onSettle: spawnedToolReply(id),
+    onSettle: spawnedToolReply(id, tool),
   });
 }
 

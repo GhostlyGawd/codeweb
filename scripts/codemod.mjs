@@ -7,7 +7,7 @@
 // (it never re-introduces the byName guessing the extractor refuses). Built on ./lib/graph-ops.mjs
 // (shares applyEdit / gateVerdict / chooseCanonical — one truth with simulate-edit/optimize).
 //
-// Usage: node codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]
+// Usage: node codemod.mjs [graph.json] (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]   (or set CODEWEB_WS, or run from a mapped repo)
 // Exit: 0 ok, 1 predicted/actual regression (no net change), 2 usage/IO/ambiguous.
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -18,7 +18,7 @@ import { normalizeGraph, buildIndex, callersOf, importersOf, impactOf, applyEdit
 import { maskAligned } from './lib/masking.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const USAGE = 'usage: codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> [--into <id>]) [--json] [--write]'; // F14a: --into is optional (survivor inferred)
+const USAGE = 'usage: codemod.mjs [graph.json] (--opportunity <ovId> | --merge <ids> [--into <id>]) [--json] [--write]   (or set CODEWEB_WS, or run from a mapped repo)'; // F14a: --into is optional (survivor inferred)
 import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
@@ -33,10 +33,11 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
   },
 });
 const { json, merge, into } = opts, doWrite = opts.write, opp = opts.opportunity;
-const graphPath = pos[0] || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
-if (!graphPath || (opp == null && merge == null)) die(USAGE, 2);
+if (opp == null && merge == null) die(USAGE, 2);
 
-const { graph, abs } = loadGraph(graphPath, { usage: USAGE });
+// API F7: codemod died on usage before loadGraph could discover — no walk-up. The graph
+// positional is optional now; THE one loader resolves arg -> CODEWEB_WS -> nearest .codeweb.
+const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const index = buildIndex(graph);
 
