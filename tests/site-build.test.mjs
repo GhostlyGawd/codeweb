@@ -28,7 +28,7 @@ test('--out redirects the whole build', () => {
 test('builder runs and reports the expected page count', () => {
   const r = runNode(BUILD, ['--out', OUT]);
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /built 7 page\(s\)/); // +case-study (SEO F8) +support (REVENUE §4.3)
+  assert.match(r.stdout, /built 8 page\(s\)/); // +case-study (SEO F8) +support (REVENUE §4.3) +downloads (operator, unlisted)
 });
 
 test('emits every page in the information architecture', () => {
@@ -91,6 +91,10 @@ test('footer version is in lock-step with package.json', () => {
 
 test('pages are self-contained — no third-party network origins', () => {
   runNode(BUILD, ['--out', OUT]);
+  // Per-page fetch exemptions. The visitor-facing pages stay fully self-contained; the
+  // unlisted operator dashboard's whole purpose is live data from npm's public API. Scoped
+  // per page AND per origin so the exemption cannot silently widen.
+  const FETCH_EXEMPT = { 'downloads.html': ['https://api.npmjs.org/'] };
   for (const [f, html] of Object.entries(snapshot())) {
     // links to github.com are allowed (source/releases); no other external hosts or CDNs.
     // schema.org / opensource.org / npmjs.com are TEXT references (JSON-LD @context, license
@@ -104,7 +108,8 @@ test('pages are self-contained — no third-party network origins', () => {
       .filter((u) => !u.startsWith('http://www.w3.org/'))
       .filter((u) => !u.startsWith('https://schema.org'))
       .filter((u) => !u.startsWith('https://opensource.org/'))
-      .filter((u) => !u.startsWith('https://www.npmjs.com/'));
+      .filter((u) => !u.startsWith('https://www.npmjs.com/'))
+      .filter((u) => !(FETCH_EXEMPT[f] || []).some((origin) => u.startsWith(origin)));
     assert.deepEqual(externals, [], `${f} references unexpected external origins: ${externals.join(', ')}`);
   }
 });

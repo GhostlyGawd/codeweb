@@ -244,6 +244,9 @@ const PAGES = [
   // REVENUE §4.3: the funding-receipts page — what sponsorship pays for, in the same voice as
   // the bench receipts. The free-forever contract leads.
   { slug: 'support', nav: 'support', title: 'Support codeweb — what sponsorship funds — codeweb', ogTitle: 'Support codeweb', description: 'Everything local is free forever. Sponsoring funds the frontier-agent benchmark spend and grammar provenance work behind codeweb\'s receipts — plus enterprise support contracts for orgs.' },
+  // Operator dashboard: live npm download counts, drawn client-side from api.npmjs.org.
+  // Unlisted — built and served, but excluded from the sitemap and linked from nowhere.
+  { slug: 'downloads', nav: 'home', unlisted: true, title: 'npm downloads — codeweb', ogTitle: 'codeweb npm downloads', description: 'Daily npm downloads of @ghostlygawd/codeweb over time, live from the npm registry API.' },
 ];
 
 // SEO F10: one SoftwareApplication block, filled from the same derived vars as everything else —
@@ -286,7 +289,7 @@ function buildPage(page) {
 // SEO F6 + F8: the site's first crawl path in — robots.txt (allow all, exclude the internal
 // working markdown that shares the publish root) + sitemap.xml from the same PAGES table.
 function emitCrawlFiles() {
-  const urls = [BASE, ...PAGES.filter((p) => p.slug !== 'index').map((p) => `${BASE}${p.slug}.html`), `${BASE}demo/`];
+  const urls = [BASE, ...PAGES.filter((p) => p.slug !== 'index' && !p.unlisted).map((p) => `${BASE}${p.slug}.html`), `${BASE}demo/`];
   writeFileSync(join(DOCS, 'robots.txt'), [
     'User-agent: *',
     'Allow: /',

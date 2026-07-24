@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>npm downloads — codeweb</title>
+<meta name="description" content="Daily npm downloads of @ghostlygawd/codeweb over time, live from the npm registry API.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="codeweb npm downloads">
+<meta property="og:description" content="Daily npm downloads of @ghostlygawd/codeweb over time, live from the npm registry API.">
+<meta property="og:url" content="https://ghostlygawd.github.io/codeweb/downloads.html">
+<meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="codeweb — interactive call-graph map of a codebase">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
+<meta name="theme-color" content="#100e14">
+<link rel="canonical" href="https://ghostlygawd.github.io/codeweb/downloads.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.10.0","description":"Deterministic call/import graph of your codebase — 27 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header class="site-nav">
+  <a class="brand" href="index.html" aria-label="codeweb home">
+    <svg class="glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
+      <rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
+    </svg>
+    <span class="wm">code<span class="w">web</span></span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html" data-nav="home" aria-current="page">Home</a>
+    <a href="product.html" data-nav="product">Product</a>
+    <a href="research.html" data-nav="research">Research</a>
+    <a href="start.html" data-nav="start">Get Started</a>
+    <a href="changelog.html" data-nav="changelog">Changelog</a>
+  </nav>
+  <div class="nav-right">
+    <a class="nav-ghost" href="demo/">Live demo</a>
+    <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Operator</span>
+      <h1>npm downloads over time</h1>
+      <p class="lead"><code>@ghostlygawd/codeweb</code> — daily downloads from the npm registry, live. Unlisted page: it is not linked from the site or the sitemap.</p>
+    </div>
+    <div class="card">
+      <div id="dl-summary" class="muted" style="margin-bottom:.75rem">Loading download data from api.npmjs.org…</div>
+      <svg id="dl-chart" viewBox="0 0 720 240" width="100%" role="img" aria-label="Daily npm downloads of @ghostlygawd/codeweb over time"></svg>
+      <div id="dl-range" class="muted" style="font-size:.85em"></div>
+    </div>
+    <p class="muted" style="margin-top:1rem">Data: npm's public downloads API (per-day counts; mirrors and caches mean small lags are normal). The npm API serves at most 18 months per request — revisit this page's script when the package is older than that.</p>
+  </div>
+</section>
+<script>
+(function () {
+  var PKG = '@ghostlygawd/codeweb';
+  var FIRST_PUBLISH = '2026-07-23';
+  var end = new Date().toISOString().slice(0, 10);
+  var url = 'https://api.npmjs.org/downloads/range/' + FIRST_PUBLISH + ':' + end + '/' + encodeURIComponent(PKG);
+  var sum = document.getElementById('dl-summary');
+  var rangeEl = document.getElementById('dl-range');
+  var svg = document.getElementById('dl-chart');
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function el(name, attrs, text) {
+    var node = document.createElementNS(NS, name);
+    for (var k in attrs) node.setAttribute(k, attrs[k]);
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  fetch(url).then(function (r) {
+    if (!r.ok) throw new Error('npm API answered ' + r.status);
+    return r.json();
+  }).then(function (data) {
+    var days = (data && data.downloads) || [];
+    if (!days.length) { sum.textContent = 'No download data yet — npm publishes counts with about a day of lag.'; return; }
+
+    var total = 0, peak = 0, peakDay = '';
+    for (var i = 0; i < days.length; i++) {
+      total += days[i].downloads;
+      if (days[i].downloads > peak) { peak = days[i].downloads; peakDay = days[i].day; }
+    }
+    var last7 = 0;
+    for (var j = Math.max(0, days.length - 7); j < days.length; j++) last7 += days[j].downloads;
+    sum.textContent = total.toLocaleString() + ' all-time · ' + last7.toLocaleString()
+      + ' in the last 7 days · peak ' + peak.toLocaleString() + '/day (' + peakDay + ')';
+
+    var W = 720, H = 240, PAD = 30;
+    var n = days.length, max = Math.max(peak, 1);
+
+    // baseline + gridline at peak
+    svg.appendChild(el('line', { x1: PAD, y1: H - PAD, x2: W - PAD, y2: H - PAD, stroke: 'currentColor', opacity: '0.3' }));
+    svg.appendChild(el('line', { x1: PAD, y1: PAD, x2: W - PAD, y2: PAD, stroke: 'currentColor', opacity: '0.1', 'stroke-dasharray': '4 4' }));
+    svg.appendChild(el('text', { x: W - PAD, y: PAD - 6, fill: 'currentColor', opacity: '0.5', 'font-size': '11', 'text-anchor': 'end' }, peak.toLocaleString() + '/day'));
+
+    var pts = [];
+    for (var k = 0; k < n; k++) {
+      var x = n === 1 ? W / 2 : PAD + (W - 2 * PAD) * k / (n - 1);
+      var y = H - PAD - (H - 2 * PAD) * (days[k].downloads / max);
+      pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+    }
+
+    // area fill under the line, then the line itself
+    var first = pts[0].split(',')[0], last = pts[pts.length - 1].split(',')[0];
+    svg.appendChild(el('polygon', {
+      points: first + ',' + (H - PAD) + ' ' + pts.join(' ') + ' ' + last + ',' + (H - PAD),
+      fill: 'currentColor', opacity: '0.07',
+    }));
+    svg.appendChild(el('polyline', {
+      points: pts.join(' '), fill: 'none', stroke: '#c6f24e', 'stroke-width': '2',
+      'stroke-linejoin': 'round', 'stroke-linecap': 'round',
+    }));
+    if (n === 1) svg.appendChild(el('circle', { cx: W / 2, cy: pts[0].split(',')[1], r: '3', fill: '#c6f24e' }));
+
+    rangeEl.textContent = days[0].day + ' → ' + days[n - 1].day + ' · ' + n + ' day(s)';
+  }).catch(function (e) {
+    sum.textContent = 'Could not load download data (' + e.message + '). The npm API may be briefly unavailable — reload to retry.';
+  });
+})();
+</script>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <svg class="glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
+            <rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
+          </svg>
+          <span class="wm">code<span class="w">web</span></span>
+        </a>
+        <p>A deterministic map of your codebase — one graph, read by humans and the agents editing alongside them.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="product.html">Features</a>
+        <a href="demo/">Live demo</a>
+        <a href="start.html">Get started</a>
+        <a href="changelog.html">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Proof</h5>
+        <a href="research.html">Research</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">Benchmarks</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Raw results</a>
+      </div>
+      <div class="footer-col">
+        <h5>Project</h5>
+        <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
+        <a href="support.html">Sponsor</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>codeweb v0.10.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
+      <span>Deterministic build · zero third-party requests on this page</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/livemap.js" defer></script>
+</body>
+</html>

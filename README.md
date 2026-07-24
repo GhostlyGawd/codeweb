@@ -1,15 +1,12 @@
 <div align="center">
 
-<img src="assets/brand/hero.svg" alt="codeweb — the living map of your codebase" width="840">
+# codeweb
+
+**Your coding agents grep. codeweb knows.**
 
 [![CI](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml/badge.svg)](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/%40ghostlygawd%2Fcodeweb?style=flat-square&color=c6f24e)](https://www.npmjs.com/package/@ghostlygawd/codeweb)
 [![license: MIT](https://img.shields.io/npm/l/%40ghostlygawd%2Fcodeweb?style=flat-square&color=3fb950)](LICENSE)
-[![deterministic engine](https://img.shields.io/badge/engine-deterministic-c6f24e?style=flat-square)](#how-it-works)
-[![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
-[![sponsor](https://img.shields.io/badge/%E2%99%A5-sponsor-ea4aaa?style=flat-square)](https://github.com/sponsors/GhostlyGawd)
-
-**Your coding agents grep. codeweb knows.**
 
 **Free & MIT-licensed. Runs entirely on your machine — no account, no server, no telemetry. Reads your code; never executes it.**
 
@@ -37,17 +34,23 @@ hotspots, and tangled domains**.
 
 ---
 
+## Try it on your repo
+
+```
+cd your-project
+npx -y @ghostlygawd/codeweb .
+```
+
+Three seconds for 3,000 symbols. Open `.codeweb/report.html` — that's your map.
+
 ## See it in action
 
-One command builds the map: `<target>/.codeweb/report.html`.
+Every screenshot below is a real generated report of **axios** (274 symbols, 8 domains).
+No mockups.
 
-Every screenshot below is a real generated report. The target is **axios**: 274 symbols,
-8 domains. No mockups.
-
-> **▶ [Read the axios case study](docs/case-study-axios.md).** codeweb found **3 real
-> duplications** in axios — a library downloaded 50M times a week. It dismissed 12 false
-> positives. Each finding came with a safe merge plan.
-> Or **[explore the live map](https://ghostlygawd.github.io/codeweb/demo/)** yourself.
+codeweb found 3 real duplications in axios and dismissed 12 false positives —
+[the case study](docs/case-study-axios.md). Or
+[click around the live map](https://ghostlygawd.github.io/codeweb/demo/).
 
 ### Know what an edit breaks — before you write
 

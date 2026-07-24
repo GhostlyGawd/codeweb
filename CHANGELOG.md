@@ -9,7 +9,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+### Added
+- **An unlisted npm-downloads dashboard** at `/downloads.html`: daily download counts of
+  `@ghostlygawd/codeweb` over time, fetched client-side from npm's public API and drawn as a
+  dependency-free SVG. Built with the site but excluded from the sitemap and linked from nowhere.
+
 ### Changed
+- **The funnel leads with the trial.** A "Try it on your repo" section (the npx one-liner) sits
+  directly under the README hero, and the homepage hero carries the same command — seeing your
+  own repo mapped is the pitch. The axios case study is demoted from a bold callout to a plain
+  link under the screenshots. The README masthead drops the hero graphic and the decorative
+  engine/MCP/sponsor badges: a text wordmark, the tagline, and three badges (CI, npm, license).
 - **Plain-language pass over the whole marketing funnel.** The README, homepage, and plugin
   listing now state what codeweb is instead of performing the problem — the rhetorical-question
   opener and "Today…" windup are gone, and the proof bullets carry spec-sheet labels
