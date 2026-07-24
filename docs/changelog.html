@@ -56,6 +56,17 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li><strong>Plain-language pass over the whole marketing funnel.</strong> The README, homepage, and plugin</li>
+</ul>
+<p>  listing now lead with plain claims and keep the receipts one link deeper: shorter sentences,</p>
+<p>  translated stats ("+0.31 recall" reads as "31 points more of the true callers, at the same</p>
+<p>  token cost"), and the MCP tool list regrouped by when an agent meets each tool (which also</p>
+<p>  surfaces <code>codeweb_explain</code>, previously undocumented in the README). Two overclaims corrected:</p>
+<p>  the homepage no longer calls 16k+ graphs "measured green" (the expand-all receipt says</p>
+<p>  <code>green:false</code> at that scale), and the pre-registration page no longer says the full study</p>
+<p>  re-runs in CI (CI re-measures the standing budgets; the study re-runs via <code>bench/run-all.mjs</code>).</p>
+<p>  The stale "286-test suite" figure is dropped or time-qualified everywhere it appeared.</p>
+<ul>
 <li><strong>The regression gate is ONE verdict with a declared strictness knob.</strong> <code>gateVerdict</code> (graph-ops)</li>
 </ul>
 <p>  now backs diff/CI, simulate, the post-edit hook, codemod, and <code>review --gate</code>; payloads carry</p>
@@ -117,7 +128,11 @@
 <p>  stale tool count, tests/README's Node floor, the runbook's test count, marketplace.json's</p>
 <p>  version) — corrected and swept from now on; new <code>docs/cli.md</code> tables every bin, flag,</p>
 <p>  environment variable, and exit code; new <code>CONTRIBUTING.md</code>.</p>
-<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<ul>
+<li><code>site/data/product.json</code>'s (currently unrendered) <code>elevator</code> still said "24 deterministic MCP</li>
+</ul>
+<p>  query tools" — corrected to 27, and <code>check-consistency</code> now scans every prose string in the</p>
+<p>  site data file so this class self-catches.</p>
 <h2 class="cl-ver">[0.10.0] - 2026-07-23</h2>
 <h3 class="cl-grp">Changed</h3>
 <ul>

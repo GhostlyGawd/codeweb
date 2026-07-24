@@ -228,12 +228,24 @@ export function checkConsistency(root) {
   // The research-page claim ledger: an "N / N tools" parity metric must claim the shipped count.
   const productPath = join(root, 'site', 'data', 'product.json');
   if (existsSync(productPath)) {
-    for (const c of JSON.parse(readText(productPath)).claims || []) {
+    const productData = JSON.parse(readText(productPath));
+    for (const c of productData.claims || []) {
       const m = /(\d+)\s*\/\s*(\d+)\s+tools/.exec(c.metric || '');
       if (m && (Number(m[1]) !== count || Number(m[2]) !== count)) {
         problems.push(`product.json claim "${c.claim}" metric says ${m[0]}; ${count} tools ship`);
       }
     }
+    // The elevator carried "24 MCP query tools" for a release while 27 shipped: prose inside this
+    // DATA file feeds site templates, but lived outside both the PROSE_FILES sweep (content files
+    // only) and the structured checks above. Scan every string value, so a stale count anywhere
+    // in the site data fails the gate like any other prose surface.
+    const strings = [];
+    (function walk(v) {
+      if (typeof v === 'string') strings.push(v);
+      else if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === 'object') Object.values(v).forEach(walk);
+    })(productData);
+    problems.push(...scanProseCounts(strings.join('\n'), 'site/data/product.json (prose)', { toolCount: count, langCount }));
   }
 
   return { ok: problems.length === 0, version, count, problems };

@@ -119,6 +119,20 @@ test('scanProseCounts flags the live package.json description string against 27 
   assert.match(problems[0], /24 MCP tools/);
 });
 
+// The elevator drift: site/data/product.json's prose said "24 deterministic MCP query tools" a
+// full release after 27 shipped — data-file prose that feeds site templates, unscanned by both
+// PROSE_FILES (content files only) and the structured product.json checks. checkConsistency now
+// walks every string value in the file; the live-file case is covered by the aligned-repo test
+// above. This pins the exact phrase that slipped.
+test('checkConsistency scans site/data/product.json prose — the stale-elevator class', () => {
+  const stale = scanProseCounts(
+    'answers those questions exactly, for about a kilobyte each: 24 deterministic MCP query tools for your coding agent',
+    'site/data/product.json (prose)', { toolCount: 27, langCount: 11 },
+  );
+  assert.equal(stale.length, 1);
+  assert.match(stale[0], /24 deterministic MCP query tools/);
+});
+
 // #3 (IMPROVEMENTS.md): prose scans — hardcoded tool/language counts in public prose must match
 // the canonical facts. The v0.9.0 homepage said "20 tools" for a whole release; never again.
 test('scanProseCounts flags a stale tool count, in digits and words', async () => {

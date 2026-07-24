@@ -65,7 +65,7 @@
       </div>
       <div class="stat">
         <div class="num">+0.31 / equal cost</div>
-        <div class="label">agent caller-discovery recall at equal token cost (v0.9.0 pilot)</div>
+        <div class="label">more of the true callers found by an agent, at the same token cost (v0.9.0 pilot)</div>
         <div class="src">efficiency-pilot.reps5-v090.json</div>
       </div></div>
   </div>
@@ -279,7 +279,7 @@
     </div>
     <div class="callout">
       <h3>It found bugs its own test suite missed</h3>
-      <p>The study is credible partly because it failed first. It surfaced a determinism leak (file-enumeration order bleeding into domain assignment, plus an overlap stack-overflow on express) and a dead-code precision failure (test-file functions wrongly marked safe-to-delete, 0.52 precision). Both were fixed surgically behind A/B levers; re-runs establish the fixes. The 286-test suite had been green throughout.</p>
+      <p>The study is credible partly because it failed first. It surfaced a determinism leak (file-enumeration order bleeding into domain assignment, plus an overlap stack-overflow on express) and a dead-code precision failure (test-file functions wrongly marked safe-to-delete, 0.52 precision). Both were fixed surgically behind A/B levers; re-runs establish the fixes. The engine's test suite (286 tests at study time) had been green throughout.</p>
     </div>
   </div>
 </section>

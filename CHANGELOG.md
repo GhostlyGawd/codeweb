@@ -10,6 +10,15 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Changed
+- **Plain-language pass over the whole marketing funnel.** The README, homepage, and plugin
+  listing now lead with plain claims and keep the receipts one link deeper: shorter sentences,
+  translated stats ("+0.31 recall" reads as "31 points more of the true callers, at the same
+  token cost"), and the MCP tool list regrouped by when an agent meets each tool (which also
+  surfaces `codeweb_explain`, previously undocumented in the README). Two overclaims corrected:
+  the homepage no longer calls 16k+ graphs "measured green" (the expand-all receipt says
+  `green:false` at that scale), and the pre-registration page no longer says the full study
+  re-runs in CI (CI re-measures the standing budgets; the study re-runs via `bench/run-all.mjs`).
+  The stale "286-test suite" figure is dropped or time-qualified everywhere it appeared.
 - **The regression gate is ONE verdict with a declared strictness knob.** `gateVerdict` (graph-ops)
   now backs diff/CI, simulate, the post-edit hook, codemod, and `review --gate`; payloads carry
   `verdict.check` (`orphan-gate` vs `call-caller-preflight`), exported symbols that lost every
@@ -47,8 +56,9 @@ notes so validated results, papers, and new tools never get lost in commit histo
   stale tool count, tests/README's Node floor, the runbook's test count, marketplace.json's
   version) — corrected and swept from now on; new `docs/cli.md` tables every bin, flag,
   environment variable, and exit code; new `CONTRIBUTING.md`.
-
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+- `site/data/product.json`'s (currently unrendered) `elevator` still said "24 deterministic MCP
+  query tools" — corrected to 27, and `check-consistency` now scans every prose string in the
+  site data file so this class self-catches.
 
 ## [0.10.0] - 2026-07-23
 

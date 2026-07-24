@@ -15,7 +15,8 @@ git show v0.8.0:paper/paper.md              # the full study write-up
 
 Git history is the registry: the registration commit predates every result commit, and tags are
 immutable. The runnable harnesses and current result files live in this directory
-(`bench/experiments/`, `bench/results/`) and re-run in CI (`npm run bench:all -- --gate`).
+(`bench/experiments/`, `bench/results/`); the full study re-runs with `node bench/run-all.mjs`,
+and CI re-measures the standing performance budgets on every PR (`npm run bench:all -- --gate`).
 
 ## The 33 checks
 

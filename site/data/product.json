@@ -3,7 +3,7 @@
   "tagline": "The living map of your codebase.",
   "repo": "https://github.com/GhostlyGawd/codeweb",
   "pagesBase": "https://ghostlygawd.github.io/codeweb/",
-  "elevator": "Every serious change starts with the same questions: who uses this? what breaks if I change it? does this already exist? is this dead? An agent answers them today by grepping and reading whole files — thousands of tokens per question, and it still guesses. codeweb maps the repo's call/import graph once (~3s for 3,000 symbols), then answers those questions exactly, in milliseconds, for about a kilobyte each: 24 deterministic MCP query tools for your coding agent (no LLM in the loop), and a self-contained interactive map for you. Measured on vite with the TypeScript compiler as referee: 100% of compiler-verified dependents — at better precision than grep and a third of its context cost, and blast-radius answers at 1/126th the tokens of the recursive-grep loop. The byproduct is the map itself: duplication, dead code, hotspots, and tangled domains, made visible.",
+  "elevator": "Before you change code, you need answers: who calls this, what breaks, does this already exist? Your coding agent answers by grepping — thousands of tokens per question, and it still guesses. codeweb reads the repo once (~3s for 3,000 symbols) and builds the real call/import graph. After that, every answer is exact, instant, and about a kilobyte: 27 deterministic MCP tools for your agent (no LLM in the loop), and a self-contained interactive map for you. Measured against grep on vite with the TypeScript compiler as referee, codeweb found every compiler-verified dependent at a third of the context cost — and blast-radius answers cost 126× less. The map also shows what no single file can: duplication, dead code, hotspots, and tangled domains.",
   "philosophy": [
     "Deterministic — no LLM in the analysis loop; the same repo always yields the same graph.",
     "Zero runtime dependencies — the whole pipeline runs on an empty node_modules.",
@@ -49,7 +49,7 @@
       },
       {
         "num": "+0.31 / equal cost",
-        "label": "agent caller-discovery recall at equal token cost (v0.9.0 pilot)",
+        "label": "more of the true callers found by an agent, at the same token cost (v0.9.0 pilot)",
         "src": "efficiency-pilot.reps5-v090.json"
       }
     ]
