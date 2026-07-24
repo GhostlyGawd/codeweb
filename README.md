@@ -14,17 +14,21 @@
 **Free & MIT-licensed. Runs entirely on your machine — no account, no server, no telemetry. Reads your code; never executes it.**
 <br><sub>DETERMINISTIC · READ-ONLY · ZERO-DEPENDENCY</sub>
 
+**[Website](https://ghostlygawd.github.io/codeweb/)**&nbsp;·&nbsp;[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)&nbsp;·&nbsp;[Changelog](CHANGELOG.md)
+
+</div>
+
 Before you change code, you need answers. **Who calls this? What breaks if I touch it?
 Does this already exist? Is this dead?**
 
 Today your coding agents answer by grepping whole files. Thousands of tokens per question, and
-they still guess.
+they still guess. codeweb reads your repo once and builds the real call/import graph
+(~3 s for 3,000 symbols). After that:
 
-codeweb reads your repo once and builds the real call/import graph (~3 s for 3,000 symbols).
-After that, every answer is exact, instant, and about a kilobyte.
-
-Your agents get **27 deterministic tools** over MCP — the protocol Claude Code, Cursor, and
-Windsurf use to call tools. You get an **interactive map**. No LLM anywhere in codeweb's loop.
+- **Your agents** get 27 deterministic tools over MCP — the protocol coding agents use to call
+  tools. Works with Claude Code, Cursor, and Windsurf.
+- **You** get an interactive map of your codebase.
+- **Every answer** is exact, instant, and about a kilobyte. No LLM in codeweb's loop.
 
 The result: your agents break less code, and they stop rewriting functions you already have.
 
@@ -41,10 +45,6 @@ Run the same referee on your own repo: `npm run bench -- <path>/.codeweb/graph.j
 
 The map also shows things you can't see from inside one file: **duplicated logic, dead code,
 hotspots, and tangled domains**.
-
-**[Website](https://ghostlygawd.github.io/codeweb/)**&nbsp;·&nbsp;[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)&nbsp;·&nbsp;[Changelog](CHANGELOG.md)
-
-</div>
 
 ---
 
