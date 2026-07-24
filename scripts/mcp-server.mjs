@@ -215,10 +215,14 @@ const TOOLS = [
     bin: scriptOf('find.mjs'),
     argv: (a) => [a.query],
     description: 'Concept search when you do NOT know the symbol name: free text ("retry handling") -> ranked symbols (identifier/file/domain token match, stemmed, weighted by exports/role/fan-in). Deterministic, no embeddings. Start here when orienting; feed the top id to codeweb_explain.' },
-  { name: 'codeweb_context', need: ['symbol'], opt: ['graph', 'limit', 'window', 'full'], budget: { arg: 'limit', flag: '--limit', value: 12 },
+  // API F5: `full` used to ALSO flip caller rendering to whole bodies (--full-bodies) — two
+  // meanings on one switch, so "all callers as windows" was unaskable. `bodies` owns the rendering
+  // now; `full` is only the unabridged-list switch, like everywhere else.
+  { name: 'codeweb_context', need: ['symbol'], opt: ['graph', 'limit', 'window', 'full', 'bodies'], budget: { arg: 'limit', flag: '--limit', value: 12 },
     bin: scriptOf('context-pack.mjs'),
-    argv: (a) => [a.symbol, ...(a.full ? ['--full-bodies'] : []), ...(a.window != null ? ['--window', String(a.window)] : [])],
-    description: 'Bounded edit window for a symbol in ONE call: its body, direct callers as CALL-SITE WINDOWS (±3 lines around each use — the lines that break if the contract changes), callees (location-only), and the impact set. Budgeted: 12 callers by default; full:true returns whole caller bodies (large).' },
+    valid: (a) => (a.bodies != null && a.bodies !== 'windows' && a.bodies !== 'full') ? `argument bodies must be "windows" or "full" (got ${JSON.stringify(a.bodies)})` : null,
+    argv: (a) => [a.symbol, ...(a.bodies === 'full' ? ['--full-bodies'] : []), ...(a.window != null ? ['--window', String(a.window)] : [])],
+    description: 'Bounded edit window for a symbol in ONE call: its body, direct callers as CALL-SITE WINDOWS (±3 lines around each use — the lines that break if the contract changes), callees (location-only), and the impact set. Budgeted: 12 callers by default (full:true for the unabridged lists); bodies:"full" switches callers to whole caller bodies (large).' },
   { name: 'codeweb_refresh', need: [], opt: ['graph'], bin: scriptOf('refresh.mjs'), argv: () => [],
     description: 'Re-extract the graph from disk (meta.root) so mid-task queries reflect your edits, not a stale snapshot. Incremental; preserves domains, drops stale overlaps. Call AFTER you edit source and BEFORE re-querying impact/callers/context.' },
   { name: 'codeweb_find_similar', need: [], opt: ['graph', 'signature', 'body', 'structural'], bin: scriptOf('find-similar.mjs'),
@@ -257,6 +261,16 @@ const TOOLS = [
     description: 'One ordered, gated optimization worklist (dead-code deletes + verified cycle cuts + duplicate merges), pre-flighted so applying in order never introduces a cycle. Budgeted: top 25 ROI steps by default (`budget` N or full:true for the whole plan).' },
   { name: 'codeweb_reading_order', need: [], opt: ['graph', 'scope', 'value', 'budget'], bin: scriptOf('reading-order.mjs'),
     budget: { arg: 'budget', flag: '--budget', value: 20 },
+    // API F4: `scope` without `value` used to be silently DROPPED by argv() — the tool answered
+    // the whole-repo question instead of the scoped one (the exact trap the CLI's --scope
+    // enumeration hardened against, FORMS F8, resurrected one transport over). The messages speak
+    // MCP param names, never CLI flags (API F6).
+    valid: (a) => {
+      if (a.scope != null && !['domain', 'file', 'symbol'].includes(a.scope)) return `unknown scope kind ${JSON.stringify(a.scope)} — valid: domain | file | symbol`;
+      if (a.scope != null && a.value == null) return 'scope needs `value` (the domain name, file path, or symbol) — without it the answer would cover the whole repo';
+      if (a.value != null && a.scope == null) return '`value` needs `scope` (domain | file | symbol) to say what kind of value it is';
+      return null;
+    },
     argv: (a) => (a.scope && a.value ? ['--scope', a.scope, a.value] : []),
     description: 'A foundations-first reading path (depended-upon leaves before orchestrators) to understand a codebase or one scope fast. scope: domain|file|symbol + value narrows it; budget bounds the list (default 20).' },
   { name: 'codeweb_simulate', need: [], opt: ['graph', 'delete', 'merge', 'into', 'move', 'to'], bin: scriptOf('simulate-edit.mjs'),
@@ -297,6 +311,7 @@ const PROP = {
   offset: { type: 'number', description: 'Skip N items (page through a budgeted list via more.nextOffset)' },
   full: { type: 'boolean', description: 'Return the unabridged result (disables the default budget). Large on big repos.' },
   window: { type: 'number', description: 'Context lines around each call site (default 3)' },
+  bodies: { type: 'string', description: 'Caller rendering: "windows" (call-site windows, default) or "full" (whole caller bodies — large)' },
   scope: { type: 'string', description: 'Scope kind: domain | file | symbol' },
   value: { type: 'string', description: 'The scope value (domain name, file path, or symbol)' },
   budget: { type: 'number', description: 'Max steps/symbols to return' },
@@ -560,11 +575,38 @@ function handleDiff(id, args, tool) {
 }
 
 // ---- tools/call ------------------------------------------------------------------------------
+// API F4: bounded edit distance for the unknown-argument near-miss (same tier graph-ops'
+// suggestSymbols uses for symbol typos; that helper is module-local, so a small copy lives here).
+function editDistance(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+const nearestArg = (key, valid) => {
+  let best = null, bestD = 3; // suggest only within 2 edits — beyond that it is a different word
+  for (const v of valid) { const d = editDistance(key.toLowerCase(), v.toLowerCase()); if (d < bestD) { bestD = d; best = v; } }
+  return best;
+};
+
 function handleToolCall(id, params) {
   const name = params && params.name;
   const args = (params && params.arguments) || {};
   const tool = TOOLS.find((t) => t.name === name);
   if (!tool) return fail(id, -32602, `unknown tool: ${name}`);
+  // API F4: the CLI's one flag loop dies loudly on unknown flags; this transport ACCEPTED AND
+  // IGNORED unknown argument names — a typo'd optional param (offest, winow, ful) silently
+  // yielded default behavior instead of the correction the CLI would print.
+  const known = [...tool.need, ...(tool.opt || [])];
+  const knownSet = new Set(known);
+  for (const k of Object.keys(args)) {
+    if (knownSet.has(k)) continue;
+    const near = nearestArg(k, known);
+    return errResult(id, `unknown argument: ${k}${near ? ` — did you mean \`${near}\`?` : ''} (${name} accepts: ${known.join(', ') || 'no arguments'})`);
+  }
   // FORMS F2: three distinct verdicts — "missing" for a wrong TYPE invited the model to re-send
   // the same wrong shape (the argument was there all along).
   for (const k of tool.need) {
@@ -583,6 +625,16 @@ function handleToolCall(id, params) {
       return errResult(id, `argument ${k} must be a non-negative number (got ${JSON.stringify(args[k])})`);
     }
     args[k] = n;
+  }
+  // API F4: ONE boolean clamp beside the numeric one. Booleans were unvalidated truthiness —
+  // `full: "false"` (string) meant TRUE, silently disabling the budget (and, pre-F5, flipping
+  // context to whole bodies). Accept true/false/"true"/"false" (normalized in place), reject the
+  // rest naming the param.
+  for (const k of known) {
+    if (PROP[k]?.type !== 'boolean' || args[k] === undefined || args[k] === null) continue;
+    if (args[k] === 'true') args[k] = true;
+    else if (args[k] === 'false') args[k] = false;
+    else if (typeof args[k] !== 'boolean') return errResult(id, `argument ${k} must be a boolean (true/false, got ${JSON.stringify(args[k])})`);
   }
   if (tool.valid) { const problem = tool.valid(args); if (problem) return errResult(id, problem); }
   if (tool.map) return handleMap(id, args, params && params._meta);
@@ -697,7 +749,8 @@ function handleToolCall(id, params) {
       }
       const limit = args.limit != null ? Number(args.limit) : (args.full ? null : tool.budget.value);
       const windowN = args.window != null ? Math.max(0, parseInt(String(args.window), 10) || 3) : 3;
-      const payload = buildContextPack(graph, index, sourceReader(graph.meta?.root || null), ids, { symbol: args.symbol, windowN, fullBodies: !!args.full, limit, staleInfo: staleOnce(resolve(graphPath), entry) });
+      // API F5: whole-body rendering rides `bodies:"full"` — `full` only widens the lists.
+      const payload = buildContextPack(graph, index, sourceReader(graph.meta?.root || null), ids, { symbol: args.symbol, windowN, fullBodies: args.bodies === 'full', limit, staleInfo: staleOnce(resolve(graphPath), entry) });
       return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
     } catch { /* fall through to the spawned artifact */ }
   }
