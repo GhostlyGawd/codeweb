@@ -40,7 +40,9 @@ the extension · `tests/` (see `tests/README.md`) · `reports/` audit paper trai
 - Subject, verb, object. No mirror constructions ("what it misses is what it breaks").
 - Agents are plural and the reader's: "your agents … they", never "the agent … it".
 - Outcome first, number second, receipt link third. Stats vocabulary (recall, F1, MRR)
-  stays on the research page; everywhere else, translate it.
+  stays on the research page — and so does study apparatus (referees, corpora, A/B framing).
+  The pitch never explains how something was measured; it says what you get, then links.
+- Never link away from the funnel. No outbound links to other products inside the pitch.
 - Tool and language counts are gated by `check-consistency` — never hardcode a new one.
 
 ## Releases

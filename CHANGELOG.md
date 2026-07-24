@@ -13,7 +13,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 - **Plain-language pass over the whole marketing funnel.** The README, homepage, and plugin
   listing now state what codeweb is instead of performing the problem — the rhetorical-question
   opener and "Today…" windup are gone, and the proof bullets carry spec-sheet labels
-  (Correctness / Duplication / Speed at scale / Agent lift / Limits). Shorter sentences,
+  (Correctness / Duplication / Speed at scale / Agent lift / Limits). Study apparatus left the
+  pitch too: the hero's grep-vs-codeweb benchmark table, the "referee"/"oracle" framing, and
+  the outbound vite/axios repo links are gone or moved behind the evidence ledger — the pitch
+  says what you get; the research page says how it was measured. Shorter sentences,
   stats stated as outcomes ("+0.31 recall" now reads "with grep agents found 44% of a
   function's callers; with codeweb, 74%. Your agents break code they don't see"), and the
   MCP tool list regrouped by when agents meet each tool (which also

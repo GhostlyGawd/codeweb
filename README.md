@@ -22,27 +22,15 @@ codeweb reads your code and maps it: every function, and every call between them
 (~3 s for 3,000 symbols). It's static analysis — no LLM — so the same code always produces
 the same map.
 
-Your coding agents query the map instead of grepping. Grep misses more than half of a
-function's real callers ([measured](bench/experiments/efficiency-pilot.reps5-v090.json)).
-Agents break the code they can't see.
+Your coding agents query the map instead of grepping. With grep, agents miss more than half of
+a function's real callers ([measured](https://ghostlygawd.github.io/codeweb/research.html)).
+They break the code they can't see.
 
-- **Agents** get 27 deterministic tools over MCP — the protocol Claude Code, Cursor, and
-  Windsurf use to call tools.
+- **Agents** get 27 tools they can call mid-task. Works with Claude Code, Cursor, and Windsurf.
 - **You** get an interactive map of the whole codebase.
-- **Answers** are exact, instant, and about a kilobyte each.
+- **Answers** are exact, instant, and tiny. Your agents keep their context for the real work.
 
 The result: your agents break less code, and they stop rewriting functions you already have.
-
-Here's codeweb against grep on [vite](https://github.com/vitejs/vite) (3,000+ symbols), with the
-TypeScript compiler as an independent referee ([the receipt](bench/results/oracle-ab.json)):
-
-| The question | codeweb | grep |
-|---|---|---|
-| *"Who depends on X?"* | Every file the compiler confirms. Fewer wrong matches. **0.7 KB, one call.** | The same files at 3× the tokens — raw text agents must still read |
-| *"What breaks if I change X?"* | **One ~1 KB answer** | No transitive search exists: ~5 rounds of grepping, **126× the tokens** |
-| *"Does this already exist? Is this dead? Did my edit break structure?"* | One call each (`find_similar` / `deadcode` / `diff` gate) | Not answerable by search |
-
-Run the same referee on your own repo: `npm run bench -- <path>/.codeweb/graph.json`.
 
 The map also shows things you can't see from inside one file: **duplicated logic, dead code,
 hotspots, and tangled domains**.
@@ -53,8 +41,8 @@ hotspots, and tangled domains**.
 
 One command builds the map: `<target>/.codeweb/report.html`.
 
-Every screenshot below is a real generated report. The target is
-**[axios](https://github.com/axios/axios)**: 274 symbols, 8 domains. No mockups.
+Every screenshot below is a real generated report. The target is **axios**: 274 symbols,
+8 domains. No mockups.
 
 > **▶ [Read the axios case study](docs/case-study-axios.md).** codeweb found **3 real
 > duplications** in axios — a library downloaded 50M times a week. It dismissed 12 false
@@ -119,11 +107,11 @@ two *functions* are the same work, who calls each, and what merging them would b
 ## Proven effective — measured, not just claimed
 
 We wrote down 33 checks **before** testing, so we couldn't move the goalposts. Then we tested
-them against independent referees. **32 of 33 passed**
+them against independent checkers — including the TypeScript compiler. **32 of 33 passed**
 ([the check-by-check receipt](bench/preregistration.md)). The short version:
 
-- **Correctness** — compared to independent referees **490,000+ times: zero disagreements.**
-  All 20,000 edit-safety trials passed.
+- **Correctness** — checked against independent implementations **490,000+ times: zero
+  disagreements.** All 20,000 edit-safety trials passed.
 - **Duplication** — it caught **every planted clone, zero false alarms**. Renamed copies too —
   text-matching tools catch none of those. Receipts: F1 1.0, MRR 0.99.
 - **Speed at scale** — a repo **twice the size took ~26% longer** to map. Queries answer in
@@ -136,10 +124,10 @@ them against independent referees. **32 of 33 passed**
   fine without codeweb. Both results are published, not buried.
 
 > **▶ Every number above has a receipt — see the [evidence ledger](https://ghostlygawd.github.io/codeweb/research.html).**
-> Raw results live in [`bench/`](bench/); every number regenerates with `node bench/run-all.mjs`.
-> CI re-measures the standing performance budgets on every PR
-> ([`bench/budgets.json`](bench/budgets.json)) — a change that breaks a published number fails
-> the build.
+> Raw results live in [`bench/`](bench/); regenerate everything with `node bench/run-all.mjs`,
+> or benchmark codeweb on your own repo: `npm run bench -- <path>/.codeweb/graph.json`.
+> CI re-measures the performance budgets on every PR — a change that breaks a published number
+> fails the build.
 
 The value codeweb delivers during real work is counted where it accrues: a strictly-local outcome
 ledger (`npm run stats`, surfaced in every session brief) prints a receipt shaped like:

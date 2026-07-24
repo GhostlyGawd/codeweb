@@ -3,7 +3,7 @@
   "tagline": "The living map of your codebase.",
   "repo": "https://github.com/GhostlyGawd/codeweb",
   "pagesBase": "https://ghostlygawd.github.io/codeweb/",
-  "elevator": "codeweb reads your code and maps it: every function, and every call between them (~3s for 3,000 symbols). Static analysis, no LLM — the same code always produces the same map. Your coding agents query the map instead of grepping; grep misses more than half of a function's real callers, and agents break the code they can't see. Agents get 27 deterministic MCP tools. You get a self-contained interactive map. Measured against grep on vite with the TypeScript compiler as referee: every compiler-confirmed dependent found at a third of the context cost, and 'what breaks if I change this' answers cost 126× less. The map also shows what one file can't: duplicated logic, dead code, hotspots, and tangled domains.",
+  "elevator": "codeweb reads your code and maps it: every function, and every call between them (~3s for 3,000 symbols). Static analysis, no LLM — the same code always produces the same map. Your coding agents query the map instead of grepping; grep misses more than half of a function's real callers, and agents break the code they can't see. Agents get 27 deterministic MCP tools. You get a self-contained interactive map. In measured tests, agents found 74% of a function's real callers with the map and 44% with grep, at the same cost. The map also shows what one file can't: duplicated logic, dead code, hotspots, and tangled domains.",
   "philosophy": [
     "Deterministic — no LLM in the analysis loop; the same repo always yields the same graph.",
     "Zero runtime dependencies — the whole pipeline runs on an empty node_modules.",
@@ -44,7 +44,7 @@
       },
       {
         "num": "~490k",
-        "label": "checks against independent referees, 0 disagreements",
+        "label": "answers verified against independent implementations, 0 disagreements",
         "src": "correctness-query.json"
       },
       {
