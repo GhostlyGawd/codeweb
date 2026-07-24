@@ -23,8 +23,8 @@ the real call/import graph. After that, every answer is exact, instant, and abou
 
 Your agent gets **27 deterministic tools** it can call over MCP — the open protocol coding agents
 like Claude Code, Cursor, and Windsurf use to call tools. No LLM anywhere in codeweb's loop.
-You get a self-contained **interactive map** of your codebase. The payoff: edits stop breaking
-callers nobody saw, and your agent stops re-implementing code that already exists.
+You get a self-contained **interactive map** of your codebase. The result: your agent breaks less
+code, and it stops rewriting functions you already have.
 
 Here's codeweb against grep on [vite](https://github.com/vitejs/vite) (3,000+ symbols), with the
 TypeScript compiler as an independent referee ([the receipt](bench/results/oracle-ab.json)):
@@ -35,12 +35,10 @@ TypeScript compiler as an independent referee ([the receipt](bench/results/oracl
 | *"What breaks if I change X?"* | **One ~1 KB answer** | No transitive search exists: ~5 rounds of grepping, **126× the tokens** |
 | *"Does this already exist? Is this dead? Did my edit break structure?"* | One call each (`find_similar` / `deadcode` / `diff` gate) | Not answerable by search |
 
-Don't take vite's word for it — run the same referee on your own repo:
-`npm run bench -- <path>/.codeweb/graph.json`.
+Run the same referee on your own repo: `npm run bench -- <path>/.codeweb/graph.json`.
 
-And there's a bonus you can see: the map surfaces **duplication, dead code, hotspots, and tangled
-domains** — where your codebase does the same work twice, which nobody can see from inside a
-single file.
+The map also shows things you can't see from inside one file: **duplicated logic, dead code,
+hotspots, and tangled domains**.
 
 **[Website](https://ghostlygawd.github.io/codeweb/)**&nbsp;·&nbsp;[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)&nbsp;·&nbsp;[Changelog](CHANGELOG.md)
 
@@ -118,26 +116,25 @@ two *functions* are the same work, who calls each, and what merging them would b
 
 ## Proven effective — measured, not just claimed
 
-We didn't just assert codeweb works. We wrote down 33 specific things it should be able to do
-**before** testing — so we couldn't move the goalposts — then tested them against independent
-referees. **32 of 33 passed** ([the check-by-check receipt](bench/preregistration.md)). The
-short version:
+We wrote down 33 checks **before** testing, so we couldn't move the goalposts. Then we tested
+them against independent referees. **32 of 33 passed**
+([the check-by-check receipt](bench/preregistration.md)). The short version:
 
-- **Is it right?** We checked codeweb's answers — who calls what, what an edit breaks, where the
-  cycles are — against independent referees, **490,000+ times. It was never wrong.** Its
-  edit-safety checks held across another 20,000 trials, zero violations.
-- **Does it find real duplication?** On the labeled benchmark it found **every planted clone with
-  zero false alarms** (F1 1.0; name-matching scores 0.67). Rename the copies and it still finds
-  them all — text-matching tools find none. Asked *"what should I reuse here?"*, the right answer
-  ranked first almost every time (MRR 0.99).
-- **Does it scale?** In our corpus, mapping a repo **twice the size took only ~26% longer**
-  (measured exponent 0.33). On a 3,201-symbol graph, answers come back in **about a tenth of a
-  second**. And it runs on an empty `node_modules` — zero required dependencies.
-- **Does it actually help an agent?** Asked to find every place a function is used — the step
-  before changing it safely — an agent using grep found **44%** of them. The same agent using
-  codeweb found **74%**, on the same context budget, in all 5 runs
-  ([receipt](bench/experiments/efficiency-pilot.reps5-v090.json)). Every caller the agent misses
-  is a caller its edit can break. (An earlier run on a different base model also showed big token
+- **Is it right?** We compared codeweb's answers to independent referees **490,000+ times: zero
+  disagreements** (who calls what, what an edit breaks, where the cycles are). Its edit-safety
+  checks passed all 20,000 trials.
+- **Does it find real duplication?** It found **every planted clone with zero false alarms**
+  (F1 1.0; name-matching scored 0.67). It still finds clones after they've been renamed;
+  text-matching tools find none. Asked *"what should I reuse here?"*, it ranked the right answer
+  first almost every time (MRR 0.99).
+- **Does it scale?** Mapping a repo **twice the size took ~26% longer** (measured exponent 0.33).
+  Queries on a 3,201-symbol graph answer in **about a tenth of a second**. It has zero required
+  dependencies.
+- **Does it actually help an agent?** Before an agent changes a function, it must find the code
+  that uses it. With grep, the agent found **44%** of that code. With codeweb, it found **74%** —
+  same context budget, better in all 5 runs
+  ([receipt](bench/experiments/efficiency-pilot.reps5-v090.json)). This matters because the agent
+  breaks code it doesn't find. (An earlier run on a different base model also showed big token
   savings; that part did not replicate, and we say so rather than quoting the better number.)
 - **Where does it fall short?** Two honest results. Re-mapping after very heavy edits isn't as
   fast as we wanted (the measured curve is published). And on simple, clean tasks, agents edited
