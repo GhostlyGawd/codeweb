@@ -130,8 +130,12 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
       if (lastCardMeta) recordPendingCard(lastCardMeta.baseline, lastCardMeta.symbol, lastCardMeta.files);
     } catch { /* receipt only */ }
     try {
+      // API.md F10: this hook is ADVISORY — context only. permissionDecision:'allow' silently
+      // auto-approved edits to mapped load-bearing files, overriding whatever permission flow the
+      // user configured; no doc claimed that power. The card now ships alone and the host's own
+      // permission decision stands.
       process.stdout.write(JSON.stringify({
-        hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'allow', additionalContext: msg },
+        hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: msg },
       }) + '\n');
     } catch { /* ignore */ }
   }

@@ -111,3 +111,22 @@ test('ambient loop: MCP auto-refresh heals a stale graph in the BACKGROUND (find
     assert.equal(second.stale, undefined, 'and the second answer is fresh, unannotated');
   } finally { cleanup(dir); }
 });
+
+// API.md F10: the pre-edit hook is ADVISORY — it once shipped permissionDecision:'allow' with
+// every card, silently auto-approving edits to mapped load-bearing files. Context only now.
+import { join as joinP } from 'node:path';
+import { PLUGIN_ROOT } from './helpers.mjs';
+test('pre-edit hook envelope: additionalContext only — never a permissionDecision', () => {
+  const { dir } = buildMapped({
+    'core/util.js': 'export function used() {\n  return 1;\n}\n',
+    'app/main.js': 'import { used } from "../core/util.js";\nexport function go() {\n  return used();\n}\n',
+  });
+  try {
+    const input = JSON.stringify({ tool_input: { file_path: joinP(dir, 'core/util.js') } });
+    const r = spawnSync(process.execPath, [joinP(PLUGIN_ROOT, 'hooks', 'pre-edit-impact.mjs')], { encoding: 'utf8', input });
+    assert.equal(r.status, 0, 'always non-blocking');
+    const envelope = JSON.parse(r.stdout);
+    assert.ok(envelope.hookSpecificOutput.additionalContext, 'the card rides additionalContext');
+    assert.equal(envelope.hookSpecificOutput.permissionDecision, undefined, 'no permission verdict from an advisory surface');
+  } finally { cleanup(dir); }
+});
