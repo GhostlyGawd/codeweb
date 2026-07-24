@@ -54,6 +54,26 @@ test('no unfilled template placeholders remain', () => {
   }
 });
 
+// COMPREHENSION.md C1: three tool cards on the live product page rendered the literal word
+// "undefined" (blurb-vs-desc key drift in product.json). A missing field must fail the BUILD,
+// never reach a visitor.
+test('no "undefined" ever renders into a page, and every tool card has a description', () => {
+  runNode(BUILD, ['--out', OUT]);
+  for (const [f, html] of Object.entries(snapshot())) {
+    // changelog.html is exempt: its body quotes release history verbatim, which may legitimately
+    // name "undefined" (it documents old bugs). Every other page is template+data, where a bare
+    // "undefined" is always an interpolation hole.
+    if (f === 'changelog.html') continue;
+    assert.ok(!/>\s*undefined\s*</.test(html), `literal "undefined" rendered in ${f}`);
+  }
+  const product = JSON.parse(readFileSync(join(PLUGIN_ROOT, 'site', 'data', 'product.json'), 'utf8'));
+  for (const phase of product.toolPhases) {
+    for (const t of phase.tools) {
+      assert.ok(typeof t.desc === 'string' && t.desc.length > 0, `${t.name} has no desc`);
+    }
+  }
+});
+
 test('every page links the shared stylesheet and sets a canonical URL', () => {
   runNode(BUILD, ['--out', OUT]);
   for (const [f, html] of Object.entries(snapshot())) {

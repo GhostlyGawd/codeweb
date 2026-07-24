@@ -33,6 +33,13 @@ const readSite = (...p) => read(join(SITE, ...p));
 
 const pkg = JSON.parse(read(join(ROOT, 'package.json')));
 const product = JSON.parse(readSite('data', 'product.json'));
+// COMPREHENSION C1: a tool card without a description once rendered the literal word
+// "undefined" on the live product page. Missing data fails the build, not the visitor.
+for (const phase of product.toolPhases) {
+  for (const t of phase.tools) {
+    if (!t.desc) throw new Error(`product.json: tool "${t.name}" has no desc`);
+  }
+}
 const VERSION = pkg.version;
 const YEAR = String(new Date().getFullYear());
 const BASE = product.pagesBase.replace(/\/?$/, '/');

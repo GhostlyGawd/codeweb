@@ -147,7 +147,7 @@
         },
         {
           "name": "codeweb_annotate",
-          "blurb": "Record a verified false positive (suppression memory) so a dismissed finding stops resurfacing — never touches source."
+          "desc": "Record a verified false positive (suppression memory) so a dismissed finding stops resurfacing — never touches source."
         }
       ]
     },
@@ -171,7 +171,7 @@
         },
         {
           "name": "codeweb_simulate",
-          "blurb": "Pre-flight a delete/merge/move: the regression gate’s verdict for a hypothetical edit, before any code changes."
+          "desc": "Pre-flight a delete/merge/move: the regression gate’s verdict for a hypothetical edit, before any code changes."
         }
       ]
     },
@@ -191,7 +191,7 @@
         },
         {
           "name": "codeweb_stats",
-          "blurb": "The local value receipt: cards delivered, regressions flagged before landing, queries served — lifetime and per month."
+          "desc": "The local value receipt: cards delivered, regressions flagged before landing, queries served — lifetime and per month."
         }
       ]
     },

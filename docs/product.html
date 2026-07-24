@@ -124,7 +124,7 @@
             <div class="te-tool"><span class="te-name">codeweb_risk</span><span class="te-desc">Rank symbols by change-risk (fan-in, fan-out, LOC, blast radius, churn) for triage.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_break_cycles</span><span class="te-desc">For each file cycle, propose the cheapest edge to sever — verified to actually break it.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_deadcode</span><span class="te-desc">Confidence-tiered dead code: safe-to-delete vs review-first (test-guarded / entrypoint-like).</span></div>
-            <div class="te-tool"><span class="te-name">codeweb_annotate</span><span class="te-desc">undefined</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_annotate</span><span class="te-desc">Record a verified false positive (suppression memory) so a dismissed finding stops resurfacing — never touches source.</span></div>
           </div>
         </div>
       </div>
@@ -136,7 +136,7 @@
             <div class="te-tool"><span class="te-name">codeweb_codemod</span><span class="te-desc">Plan a consolidation merge (report-only over MCP): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, projected gate verdict.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_hotspots</span><span class="te-desc">Rank symbols by complexity × fan-in × churn — where to refactor first.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_campaign</span><span class="te-desc">An ordered, cumulatively pre-flighted ROI worklist (dead code + cycle cuts + merges). Read-only plan.</span></div>
-            <div class="te-tool"><span class="te-name">codeweb_simulate</span><span class="te-desc">undefined</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_simulate</span><span class="te-desc">Pre-flight a delete/merge/move: the regression gate’s verdict for a hypothetical edit, before any code changes.</span></div>
           </div>
         </div>
       </div>
@@ -147,7 +147,7 @@
           <div class="te-tools">
             <div class="te-tool"><span class="te-name">codeweb_context</span><span class="te-desc">Blast-radius-scoped context in one call: a symbol's body, direct callers (with bodies), callees (location-only), and transitive impact ids.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_refresh</span><span class="te-desc">Re-extract from disk so mid-task queries reflect edits, not a stale snapshot. Incremental; preserves domains.</span></div>
-            <div class="te-tool"><span class="te-name">codeweb_stats</span><span class="te-desc">undefined</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_stats</span><span class="te-desc">The local value receipt: cards delivered, regressions flagged before landing, queries served — lifetime and per month.</span></div>
           </div>
         </div>
       </div>
