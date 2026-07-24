@@ -40,6 +40,7 @@ the extension · `tests/` (see `tests/README.md`) · `reports/` audit paper trai
 - Don't perform credibility. No meta-talk about our own rigor ("measured, not just claimed",
   "we couldn't move the goalposts", "published, not buried"). State the number, link the data,
   and let readers draw the conclusion.
+- No "X, not Y" contrasts. The "not Y" half is posture. Say X.
 - Subject, verb, object. No mirror constructions ("what it misses is what it breaks").
 - Agents are plural and the reader's: "your agents … they", never "the agent … it".
 - Outcome first, number second, receipt link third. Stats vocabulary (recall, F1, MRR)

@@ -27,7 +27,7 @@ a function's real callers ([measured](https://ghostlygawd.github.io/codeweb/rese
 They break the code they can't see.
 
 - **For agents:** an MCP server with 27 tools — `codeweb_impact`, `codeweb_callers`,
-  `codeweb_find_similar`, and 24 more. Answers come from the graph, not another LLM call.
+  `codeweb_find_similar`, and 24 more.
 - **For you:** an interactive map of the whole codebase.
 - **Answers:** exact, instant, tiny. Your agents keep their context for the real work.
 
@@ -119,7 +119,7 @@ two *functions* are the same work, who calls each, and what merging them would b
 - **Speed** — first map in **~3 s** on a 3,000-symbol repo. Queries answer in **~0.1 s**.
   A repo twice the size maps in ~1.3× the time.
 - **Known limits** — re-mapping after huge edits is slower than we'd like. On simple tasks,
-  agents did fine without codeweb. Published with everything else.
+  agents did fine without codeweb.
 
 Methodology, raw data, and per-claim receipts:
 [the evidence ledger](https://ghostlygawd.github.io/codeweb/research.html). Benchmark your own
@@ -248,8 +248,8 @@ into a per-target workspace:
 
 1. **Extract** (`extract-symbols.mjs`) — parse every source file into atomic nodes (functions,
    classes, methods) and call/import edges. When a bare call could belong to several definitions,
-   codeweb drops the edge rather than fabricate a false hub — it prefers a missing edge to an
-   invented one. Per-file caching keeps re-extraction incremental, byte-identical to a full rebuild.
+   codeweb drops the edge rather than guess. Per-file caching keeps re-extraction incremental,
+   byte-identical to a full rebuild.
 2. **Cluster** (`cluster3.mjs`) — strip genuine utility hubs, then group nodes into
    directory-anchored semantic domains.
 3. **Overlap** (`overlap.mjs`) — detect duplicated logic and parallel implementations, then
