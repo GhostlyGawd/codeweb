@@ -26,9 +26,10 @@ Your coding agents query the map instead of grepping. With grep, agents miss mor
 a function's real callers ([measured](https://ghostlygawd.github.io/codeweb/research.html)).
 They break the code they can't see.
 
-- **Agents** get 27 tools they can call mid-task. Works with Claude Code, Cursor, and Windsurf.
-- **You** get an interactive map of the whole codebase.
-- **Answers** are exact, instant, and tiny. Your agents keep their context for the real work.
+- **For agents:** an MCP server with 27 tools — `codeweb_impact`, `codeweb_callers`,
+  `codeweb_find_similar`, and 24 more. Answers come from the graph, not another LLM call.
+- **For you:** an interactive map of the whole codebase.
+- **Answers:** exact, instant, tiny. Your agents keep their context for the real work.
 
 The result: your agents break less code, and they stop rewriting functions you already have.
 
