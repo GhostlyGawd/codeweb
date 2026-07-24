@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { runNode, script, tmpDir, cleanup, writeTree, readJSON } from './helpers.mjs';
+import { runNode, script, tmpDir, cleanup, writeTree, readJSON, PLUGIN_ROOT } from './helpers.mjs';
 import { preview } from '../hooks/session-brief.mjs';
 
 const FIXTURE = {
@@ -107,4 +107,25 @@ test('BR-SIDECAR: hook output identical with, without, and with a stale brief.js
     const stale = preview(payload);
     assert.equal(stale, withoutSidecar, 'stamp mismatch falls back to the parse path');
   } finally { cleanup(src); }
+});
+
+// COMPREHENSION #3: on an unmapped repo with source, the SessionStart hook says its one line —
+// once per workspace (home-dir stamp) — instead of the silence that taught "the plugin doesn't
+// work" right after install. No source, or a second session: quiet as before.
+import { spawnSync as spawnSyncNudge } from 'node:child_process';
+test('unmapped repo with source gets ONE nudge; stamped and source-less dirs stay silent', () => {
+  const dir = tmpDir('cw-nudge-src-');
+  const home = tmpDir('cw-nudge-home-');
+  const bare = tmpDir('cw-nudge-bare-');
+  try {
+    writeTree(dir, { 'a.js': 'export function x() {\n  return 1;\n}\n' });
+    const hook = join(PLUGIN_ROOT, 'hooks', 'session-brief.mjs');
+    const runHook = (cwd) => spawnSyncNudge(process.execPath, [hook], { encoding: 'utf8', input: JSON.stringify({ cwd }), env: { ...process.env, HOME: home, USERPROFILE: home } });
+    const first = runHook(dir);
+    assert.match(first.stdout, /isn't mapped yet — run \/codeweb \(or codeweb_map\)/, 'first session: the one-line nudge');
+    const second = runHook(dir);
+    assert.equal(second.stdout.trim(), '', 'second session: stamped, silent');
+    const none = runHook(bare);
+    assert.equal(none.stdout.trim(), '', 'no source to map: silent');
+  } finally { cleanup(dir); cleanup(home); cleanup(bare); }
 });
