@@ -126,7 +126,7 @@ if (outMd) {
   const t0 = payload.totals;
   const item = (o) => {
     const body = o.bodySim != null ? `  ·  **Body:** ${(o.bodySim * 100).toFixed(0)}%` : '';
-    const keep = o.canonical ? `\nKeep \`${o.canonical}\` · removes ${o.removesNodes} copy(ies) · rewires ${o.callersRewired} caller(s) · blast ${o.blastRadius} · ~${o.locSaved} LOC` : '';
+    const keep = o.canonical ? `\nKeep \`${o.canonical}\` · removes ${o.removesNodes} copy(ies) · rewires ${o.callersRewired} caller(s) · blast radius ${o.blastRadius} · ~${o.locSaved} LOC` : '';
     return [`### ${o.id} · [${o.severity.toUpperCase()}] ${o.title}`,
       `**Gate:** ${o.gate}${body}  ·  **Confidence:** ${o.confidence}`, keep, ``, `**→ ${o.recommendation}**`, ``].join('\n');
   };
@@ -159,7 +159,7 @@ const TAG = { ready: 'READY    ', blocked: 'BLOCKED  ', review: 'JUDGEMENT' };
 for (const o of opportunities) {
   console.log(`\n[${TAG[o.tier]} ${o.severity.toUpperCase().padEnd(6)} ${o.confidence.padEnd(6)}${o.bodySim != null ? ` ${(o.bodySim * 100).toFixed(0).padStart(3)}%` : '     '}] ${o.id} ${o.title.replace(/`/g, '')}`);
   console.log(`  gate: ${o.gate}`);
-  if (o.canonical) console.log(`  keep \`${o.canonical}\` · removes ${o.removesNodes} copy(ies) · rewires ${o.callersRewired} caller(s) · blast ${o.blastRadius} · ~${o.locSaved} LOC`);
+  if (o.canonical) console.log(`  keep \`${o.canonical}\` · removes ${o.removesNodes} copy(ies) · rewires ${o.callersRewired} caller(s) · blast radius ${o.blastRadius} · ~${o.locSaved} LOC`);
   console.log(`  -> ${o.recommendation}`);
 }
 finish();

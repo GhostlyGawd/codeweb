@@ -73,7 +73,7 @@ class CodewebLensProvider {
     return lensesForFile(index, rel, { minCallers: cfg.get('lens.minCallers', 0) }).map((l) =>
       new vscode.CodeLens(new vscode.Range(l.line - 1, 0, l.line - 1, 0), {
         title: `${l.callers} caller${l.callers === 1 ? '' : 's'} · blast ${l.blast}`,
-        tooltip: `codeweb: ${l.id}${mapped} — click to open in the interactive report (re-map: node scripts/run.mjs)`,
+        tooltip: `codeweb: ${l.id}${mapped} — blast = symbols affected if this changes. Click to open the report. Re-map: npx -y @ghostlygawd/codeweb .`,
         command: 'codeweb.openReport',
         arguments: [graphPath, l.id],
       })
@@ -99,6 +99,12 @@ function activate(context) {
     vscode.languages.registerCodeLensProvider(selector, provider),
     vscode.commands.registerCommand('codeweb.refreshLenses', () => provider.refresh()),
     vscode.commands.registerCommand('codeweb.openReport', (graphPath, id) => {
+      // MICROCOPY A8: from the Command Palette there are no arguments — say what supplies them
+      // instead of falling over on path.dirname(undefined).
+      if (!graphPath) {
+        vscode.window.showInformationMessage('codeweb: this command needs a symbol — open a mapped file and click a codeweb lens.');
+        return;
+      }
       const report = path.join(path.dirname(graphPath), 'report.html');
       if (!fs.existsSync(report)) {
         vscode.window.showInformationMessage(`codeweb: no report.html beside ${graphPath} — build one with the codeweb pipeline (run.mjs).`);
