@@ -204,7 +204,7 @@ const TOOLS = [
     description: 'The tests that exercise a symbol (test-edge in-neighbors). Run the right subset after editing a symbol.' },
   { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: scriptOf('diff.mjs'), graphless: true, queueFrom: (a) => a.after,
     argv: (a) => [a.before, a.after],
-    description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression (new cycle, new duplication, a symbol that lost all callers). Call AFTER an edit to gate it.' },
+    description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression. The CI gate\'s exact semantics (verdict.check: orphan-gate): a new cycle, a new confirmed duplication, or a NON-EXPORTED symbol newly losing every in-edge — exported ones are listed in verdict, flagged exempt. Call AFTER an edit to gate it.' },
   { name: 'codeweb_explain', need: ['symbol'], opt: ['graph'], bin: scriptOf('explain.mjs'),
     argv: (a) => [a.symbol],
     description: '"Tell me about X before I touch it" in ONE ~1KB card: identity, role, signature, complexity, fan-in/out, tests, blast radius + domains, top-5 callers/callees, and any duplication/pattern findings it belongs to. Start here; drill down with impact/context/callers.' },
@@ -233,7 +233,7 @@ const TOOLS = [
   // flags) — a schema that lies teaches agents to distrust tools/list.
   { name: 'codeweb_review', need: ['changed'], opt: ['graph', 'before', 'gate'], bin: scriptOf('review.mjs'),
     argv: (a) => ['--changed', a.changed, ...(a.before ? ['--before', a.before] : []), ...(a.gate ? ['--gate'] : [])],
-    description: 'Structural review of a change: changed files (comma-separated, optionally file:start-end) -> changed symbols, blast radius, domains, fan-in-ranked review order. With `before` (a prior graph.json) + gate:true it FAILS on a structural regression — the full review gate, agent-reachable.' },
+    description: 'Structural review of a change: changed files (comma-separated, optionally file:start-end) -> changed symbols, blast radius, domains, fan-in-ranked review order. With gate:true it FAILS on new body-confirmed duplication even WITHOUT `before`; add `before` (a prior graph.json) to also fail on new cycles / lost call-callers — the full review gate, agent-reachable.' },
   // FORMS F12: `rules` demoted to optional — the CLI already discovers codeweb.rules.json beside
   // the graph or in cwd; requiring it here made the same call fail one transport over.
   { name: 'codeweb_fitness', need: [], opt: ['graph', 'rules'], bin: scriptOf('fitness.mjs'),
@@ -267,7 +267,7 @@ const TOOLS = [
       return null;
     },
     argv: (a) => a.delete ? ['--delete', a.delete] : a.merge ? ['--merge', a.merge, ...(a.into ? ['--into', a.into] : [])] : ['--move', a.move, '--to', a.to],
-    description: 'PRE-FLIGHT an edit without performing it: predicts the regression gate\'s structural verdict ({newCycles, lostCallers, ok}) for a hypothetical delete / merge / move. Call BEFORE committing to a refactor plan — a doomed edit is discarded for the cost of one call.' },
+    description: 'PRE-FLIGHT an edit without performing it: {newCycles, lostCallers, ok} for a hypothetical delete / merge / move. STRICTER than the CI gate (verdict.check: call-caller-preflight): flags ANY surviving symbol losing its last call-caller, exported or not, and cannot see duplication. Call BEFORE committing to a refactor plan — a doomed edit is discarded for the cost of one call.' },
   { name: 'codeweb_annotate', need: [], opt: ['graph', 'suppress', 'note', 'list'], bin: scriptOf('annotate.mjs'), dirFromGraph: true,
     valid: (a) => (a.suppress || a.list) ? null : 'pass `suppress` (a finding fingerprint, from codeweb_deadcode/overlap output) or list:true',
     argv: (a) => a.list ? ['--list'] : ['--suppress', a.suppress, ...(a.note ? ['--note', a.note] : [])],

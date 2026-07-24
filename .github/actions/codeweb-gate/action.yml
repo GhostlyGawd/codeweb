@@ -1,5 +1,5 @@
 name: 'codeweb regression gate'
-description: 'Fail a pull request on a new dependency cycle, a new duplication finding, or a symbol that loses all its callers — optionally posting the structural review as a sticky PR comment.'
+description: 'Fail a pull request on a new dependency cycle, a new duplication finding, or a non-exported symbol that loses every caller — optionally posting the structural review as a sticky PR comment.'
 branding:
   icon: 'git-merge'
   color: 'purple'

@@ -289,8 +289,9 @@ node is reported but does not trip the gate (agents add functions before wiring 
 ## Gate every PR (GitHub Action)
 
 `scripts/ci-gate.mjs` turns the `diff` gate into CI: it builds the graph for the PR base and head and
-**fails the build on a structural regression** (a new cycle, a new duplication, or a symbol that
-loses all its callers). Drop it into any repo (full spec: [`docs/ci-gate.md`](docs/ci-gate.md)):
+**fails the build on a structural regression** (a new cycle, a new duplication, or a non-exported
+symbol that loses every caller — the edit-time preflights are stricter and flag exported ones too).
+Drop it into any repo (full spec: [`docs/ci-gate.md`](docs/ci-gate.md)):
 
 ```yaml
 # .github/workflows/codeweb-gate.yml

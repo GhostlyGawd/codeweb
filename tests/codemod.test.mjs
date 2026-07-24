@@ -40,7 +40,8 @@ test('CM-GATE-AGREE: plan.projectedGate == structuralRegressions(applyEdit(merge
       // oracle gate
       const after = applyEdit(g, { kind: 'merge', ids: pickIds, into });
       const sr = structuralRegressions(g, after);
-      const expGate = { newCycles: sr.newCycles, lostCallers: sr.lostCallers, ok: sr.newCycles.length === 0 && sr.lostCallers.length === 0 };
+      // F1: projectedGate now carries the check LABEL too (call-caller-preflight) — same oracle.
+      const expGate = { newCycles: sr.newCycles, lostCallers: sr.lostCallers, ok: sr.newCycles.length === 0 && sr.lostCallers.length === 0, check: 'call-caller-preflight' };
       assert.deepEqual(out.projectedGate, expGate, `case ${c}: gate`);
       // CM-DELETIONS-EXACT
       const losers = pickIds.filter((id) => id !== into);

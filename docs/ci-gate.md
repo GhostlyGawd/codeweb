@@ -1,8 +1,10 @@
 # CI regression gate
 
 Fail a pull request when an edit makes the structure worse — a **new dependency cycle**, a **new
-duplication finding**, or a **symbol that loses all its callers**. Same verdict as
-`scripts/diff.mjs`, run automatically on every PR.
+duplication finding**, or a **non-exported symbol that loses every caller** (exported symbols are
+exempt here; the edit-time preflights — simulate, the post-edit hook — are stricter and flag those
+too, as `check: call-caller-preflight`). Same verdict as `scripts/diff.mjs`, run automatically on
+every PR.
 
 ## Add it to your repo
 

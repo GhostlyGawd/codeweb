@@ -361,6 +361,7 @@ test('codeweb_simulate pre-flights a delete and returns the gate verdict', () =>
   assert.equal(p.op, 'delete');
   // gate semantics: a pure removal passes; the verdict shape is the contract
   assert.ok(typeof p.projected.ok === 'boolean' && Array.isArray(p.projected.newCycles) && Array.isArray(p.projected.lostCallers), 'projected gate verdict shape');
+  assert.equal(p.verdict?.check, 'call-caller-preflight', 'F1: the labeled verdict rides the payload'); // API §5
 });
 
 test('codeweb_simulate validates its mode arguments', () => {

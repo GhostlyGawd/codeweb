@@ -568,6 +568,53 @@ export function structuralRegressions(before, after) {
   return regressionsAgainstSummary(baselineSummary(before), after);
 }
 
+// API review F1/§5: ONE verdict, five presenters. "The gate" shipped as three predicates wearing
+// one name — diff.mjs/CI keyed on the orphan set (any in-edge kind, exported symbols exempt),
+// simulate/the post-edit hook/codemod on call-callers alone (exports count), review --gate on the
+// latter plus duplication. gateVerdict is the one place both semantics live, and the strictness
+// difference is a DECLARED parameter, not an undocumented fork:
+//   exemptExported: true  -> the orphan gate (diff.mjs / CI): blocks a surviving non-exported
+//                            symbol newly matching the orphan predicate. Exported symbols that
+//                            lost every in-edge are still LISTED, flagged exempted:true —
+//                            visible, never silently dropped.
+//   exemptExported: false -> the call-caller preflight (simulate / post-edit hook / codemod):
+//                            blocks any surviving symbol whose call-callers drop to zero.
+// Duplication belongs to the presenter's own pipeline (diff's confirmed-overlap delta, review's
+// incremental pass): pass the list via newDuplications, or null when this scope can't see it.
+export function gateVerdict(before, after, { exemptExported = false, newDuplications = null, scope = 'edges-only' } = {}) {
+  let newCycles, lostCallers;
+  if (exemptExported) {
+    const b = normalizeGraph(before), a = normalizeGraph(after);
+    const bIx = buildIndex(b), aIx = buildIndex(a);
+    const bIds = new Set(b.nodes.map((n) => n.id));
+    const bOrph = new Set(orphans(b, bIx).map((o) => o.id));
+    const aOrph = new Set(orphans(a, aIx).map((o) => o.id));
+    lostCallers = [...aOrph]
+      .filter((id) => bIds.has(id) && !bOrph.has(id))
+      .map((id) => ({ id, exported: false, exempted: false }));
+    for (const n of a.nodes) { // the exempt set, listed: exported survivors that lost every in-edge
+      if (n.exports && bIds.has(n.id) && !aIx.hasIncoming.has(n.id) && bIx.hasIncoming.has(n.id)) {
+        lostCallers.push({ id: n.id, exported: true, exempted: true });
+      }
+    }
+    lostCallers.sort((x, y) => (x.id < y.id ? -1 : x.id > y.id ? 1 : 0));
+    const bCycles = new Set(fileCycles(b).map((c) => c.join('|')));
+    newCycles = fileCycles(a).filter((c) => !bCycles.has(c.join('|')));
+  } else {
+    const sr = structuralRegressions(before, after);
+    const aExports = new Map(normalizeGraph(after).nodes.map((n) => [n.id, !!n.exports]));
+    newCycles = sr.newCycles;
+    lostCallers = sr.lostCallers.map((id) => ({ id, exported: aExports.get(id) || false, exempted: false }));
+  }
+  const blocking = lostCallers.filter((l) => !l.exempted);
+  return {
+    ok: newCycles.length === 0 && blocking.length === 0 && !(newDuplications && newDuplications.length),
+    check: exemptExported ? 'orphan-gate' : 'call-caller-preflight',
+    scope,
+    checks: { newCycles, lostCallers, ...(newDuplications !== null ? { newDuplications } : {}) },
+  };
+}
+
 // finding 14: the Spec O-1 delta simulator, hoisted from optimize.mjs so EVERY merge chain stops
 // cloning the whole graph + re-running full SCC per candidate (campaign measured 289ms/candidate
 // at 20k nodes — ~29s for 100 candidates — on the exact pattern optimize had already replaced).

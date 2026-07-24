@@ -119,7 +119,8 @@ function format(out) {
   const lines = [`[codeweb] ⚠ structural regression after edit (target: ${out.root}):`];
   for (const c of out.newCycles) lines.push(`  new dependency cycle: ${c.join(' <-> ')}`);
   for (const id of out.lostCallers) lines.push(`  ${id} lost all callers (now uncalled)`);
-  lines.push('  -> run `node scripts/diff.mjs` or re-run /codeweb for the full delta.');
+  lines.push('  (call-caller preflight — stricter than the CI gate, which exempts exported symbols)');
+  lines.push('  -> full verdict: codeweb_diff (agents) or node scripts/diff.mjs; /codeweb re-maps.');
   return lines.join('\n');
 }
 

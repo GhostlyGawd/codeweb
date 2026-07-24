@@ -5,7 +5,7 @@
 // be rewritten unambiguously, backs up every touched file, applies the edits, RE-EXTRACTS, and
 // reverts byte-for-byte if the structural gate regresses. Source-rewriting is structural best-effort
 // (it never re-introduces the byName guessing the extractor refuses). Built on ./lib/graph-ops.mjs
-// (shares applyEdit / structuralRegressions / chooseCanonical — one truth with simulate-edit/optimize).
+// (shares applyEdit / gateVerdict / chooseCanonical — one truth with simulate-edit/optimize).
 //
 // Usage: node codemod.mjs <graph.json> (--opportunity <ovId> | --merge <ids> --into <id>) [--json] [--write]
 // Exit: 0 ok, 1 predicted/actual regression (no net change), 2 usage/IO/ambiguous.
@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { resolve, dirname, join, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalizeGraph, buildIndex, callersOf, importersOf, impactOf, applyEdit, structuralRegressions, chooseCanonical, resolveSymbol } from './lib/graph-ops.mjs';
+import { normalizeGraph, buildIndex, callersOf, importersOf, impactOf, applyEdit, structuralRegressions, chooseCanonical, resolveSymbol, gateVerdict } from './lib/graph-ops.mjs';
 import { maskAligned } from './lib/masking.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -66,8 +66,8 @@ const byId = index.byId;
 
 // projected gate (the SAME oracle simulate-edit is pinned to — one truth)
 const after = applyEdit(graph, { kind: 'merge', ids, into: canonical });
-const sr = structuralRegressions(graph, after);
-const projectedGate = { newCycles: sr.newCycles, lostCallers: sr.lostCallers, ok: sr.newCycles.length === 0 && sr.lostCallers.length === 0 };
+const verdict = gateVerdict(graph, after, { exemptExported: false, scope: 'edges-only' });
+const projectedGate = { newCycles: verdict.checks.newCycles, lostCallers: verdict.checks.lostCallers.map((l) => l.id), ok: verdict.ok, check: verdict.check };
 
 const deletions = losers.map((id) => { const n = byId.get(id); return { id, file: n.file, range: [n.line, n.line + (n.loc || 1) - 1] }; });
 // callers AND importers: a file that only imports a loser still holds a specifier that must be
