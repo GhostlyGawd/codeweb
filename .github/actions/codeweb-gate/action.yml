@@ -34,8 +34,9 @@ runs:
     - name: Run regression gate
       id: gate
       # The comment (if enabled) must post BEFORE the verdict can fail the job, so reviewers always
-      # see the review; the verdict is enforced in the final step.
-      continue-on-error: true
+      # see the review; the verdict is enforced in the final step. The step itself always exits 0
+      # and records ci-gate's REAL exit code as an output — ERRORS.md #3: exit 1 (regression) and
+      # exit 2 (setup, e.g. shallow checkout) must never share one message.
       shell: bash
       # Requires the consumer to checkout with `fetch-depth: 0` so the PR base sha is present.
       # Pass inputs through env vars, NOT inline ${{ }}, so a consumer-supplied target can't inject
@@ -43,11 +44,14 @@ runs:
       env:
         CODEWEB_TARGET: ${{ inputs.target }}
         CODEWEB_BASE: ${{ github.event.pull_request.base.sha }}
-      run: >
-        node "$RUNNER_TEMP/codeweb/scripts/ci-gate.mjs"
-        --base "$CODEWEB_BASE"
-        --target "$CODEWEB_TARGET"
-        --md "$RUNNER_TEMP/codeweb-gate.md"
+      run: |
+        set +e
+        node "$RUNNER_TEMP/codeweb/scripts/ci-gate.mjs" \
+          --base "$CODEWEB_BASE" \
+          --target "$CODEWEB_TARGET" \
+          --md "$RUNNER_TEMP/codeweb-gate.md"
+        echo "code=$?" >> "$GITHUB_OUTPUT"
+        exit 0
     - name: Post structural review comment
       if: inputs.comment == 'true' && github.event_name == 'pull_request'
       uses: actions/github-script@v7
@@ -70,8 +74,14 @@ runs:
             core.warning(`codeweb gate comment skipped (${e.status || ''} ${e.message}) — grant 'pull-requests: write' to enable it`);
           }
     - name: Enforce gate verdict
-      if: steps.gate.outcome != 'success'
+      if: steps.gate.outputs.code != '0'
       shell: bash
+      env:
+        GATE_CODE: ${{ steps.gate.outputs.code }}
       run: |
-        echo "::error::codeweb gate reported structural regressions (see the PR comment / job log above)"
+        if [ "$GATE_CODE" = "1" ]; then
+          echo "::error::codeweb gate found structural regressions (see the PR comment / job log above)"
+        else
+          echo "::error::codeweb gate could not run (exit $GATE_CODE) — usually a shallow checkout; use actions/checkout with 'fetch-depth: 0'. This is a setup problem, not a structural regression."
+        fi
         exit 1

@@ -17,7 +17,7 @@ import { mkdtempSync, rmSync, writeFileSync, readFileSync, appendFileSync } from
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { gateComment } from './lib/gate-md.mjs';
 import { die, parseArgs } from './lib/cli.mjs';
 
@@ -41,7 +41,14 @@ if (!opts.base) die(USAGE, 2);
 const repo = resolve(opts.repo);
 const node = process.execPath;
 const buildGraph = (srcDir, label, ws) => {
-  execFileSync(node, [join(HERE, 'run.mjs'), srcDir, '--target', label, '--out-dir', ws], { stdio: 'ignore' });
+  // ERRORS.md #3: stdio:'ignore' reduced every pipeline failure to "gate error: Command failed:
+  // <argv>" — the child's own diagnosis (wrong root, no source, node version) never surfaced.
+  // Capture and forward the stderr tail; a build failure is a SETUP error (exit 2), never a verdict.
+  const r = spawnSync(node, [join(HERE, 'run.mjs'), srcDir, '--target', label, '--out-dir', ws], { encoding: 'utf8', maxBuffer: 1 << 26 });
+  if (r.status !== 0) {
+    const tail = (r.stderr || '').trim().split('\n').slice(-8).join('\n');
+    throw new Error(`graph build failed for "${label}" (exit ${r.status}):\n${tail || '(no stderr captured)'}`);
+  }
   return join(ws, 'graph.json');
 };
 
