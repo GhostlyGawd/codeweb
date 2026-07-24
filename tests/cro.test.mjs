@@ -44,10 +44,9 @@ test('C5: the one hard requirement (Node >= 22) is stated at the README install 
   assert.match(install, /Node(\.js)?\s*(≥|>=)\s*22/, 'no more unexplained first-try failures');
 });
 
-test('C7: MCP is expanded at first use, and the positioning line exists as real text', () => {
+test('C7: MCP is expanded at first use', () => {
   const readme = read('README.md');
   assert.match(readme, /MCP[^.]{0,120}(protocol|Model Context Protocol)/is, 'first use carries the expansion');
-  assert.match(readme, /DETERMINISTIC · READ-ONLY · ZERO-DEPENDENC/, 'the hero-SVG line is readable text too');
 });
 
 test('C8: start.html shows the payoff — the map, the ~3 s, and what success looks like', () => {

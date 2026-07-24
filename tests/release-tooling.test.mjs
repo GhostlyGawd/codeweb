@@ -68,10 +68,10 @@ test('rollChangelog refuses an empty Unreleased', () => {
 
 test('syncTargets rewrites version + tool count via backref-preserving subs', () => {
   const [plugin] = syncTargets('9.9.9', 42);
-  let s = '"version": "0.0.0",\n... exposes 15 deterministic read-only query tools over MCP ...';
+  let s = '"version": "0.0.0",\n... exposes 15 MCP tools for agents ...';
   for (const [re, rep] of plugin.subs) s = s.replace(re, rep);
   assert.match(s, /"version": "9\.9\.9"/);
-  assert.match(s, /42 deterministic read-only query tools/);
+  assert.match(s, /42 MCP tools/);
 });
 
 test('checkConsistency catches drift, applySync repairs it (round-trip)', () => {
@@ -82,7 +82,7 @@ test('checkConsistency catches drift, applySync repairs it (round-trip)', () => 
       'package.json': JSON.stringify({ version: '0.3.0', description: 'engine with 15 MCP tools' }),
       '.claude-plugin/plugin.json': JSON.stringify({
         version: '0.1.0',
-        description: 'exposes 15 deterministic read-only query tools over MCP for agents',
+        description: 'exposes 15 MCP tools for agents',
       }, null, 2),
       'skills/codebase-anatomy/SKILL.md': '---\nname: x\nversion: 0.1.0\n---\nbody\n',
       'scripts/mcp-server.mjs': "const TOOLS=[{ name: 'codeweb_a' },{ name: 'codeweb_b' },{ name: 'codeweb_c' }];\n",

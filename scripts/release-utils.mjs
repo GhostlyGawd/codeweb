@@ -115,7 +115,7 @@ export function syncTargets(version, count) {
       file: '.claude-plugin/plugin.json',
       subs: [
         [/("version":\s*")[^"]+(")/, `$1${version}$2`],
-        [/(\d+)(\s+deterministic read-only query tools)/, `${count}$2`],
+        [/(\d+)(\s+MCP tools)/, `${count}$2`],
       ],
     },
     {
@@ -176,7 +176,7 @@ export function checkConsistency(root) {
 
   const plugin = JSON.parse(readText(join(root, '.claude-plugin', 'plugin.json')));
   if (plugin.version !== version) problems.push(`plugin.json version ${plugin.version} != package.json ${version}`);
-  const advertised = (plugin.description.match(/(\d+)\s+deterministic read-only query tools/) || [])[1];
+  const advertised = (plugin.description.match(/(\d+)\s+MCP tools/) || [])[1];
   if (advertised && Number(advertised) !== count) problems.push(`plugin.json advertises ${advertised} tools; MCP server exposes ${count}`);
 
   const skill = readText(join(root, 'skills', 'codebase-anatomy', 'SKILL.md'));

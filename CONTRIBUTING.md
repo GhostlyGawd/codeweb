@@ -41,6 +41,10 @@ the extension · `tests/` (see `tests/README.md`) · `reports/` audit paper trai
   "we couldn't move the goalposts", "published, not buried"). State the number, link the data,
   and let readers draw the conclusion.
 - No "X, not Y" contrasts. The "not Y" half is posture. Say X.
+- Sell the outcome; place properties as answers. Read-only, deterministic, zero-dependency are
+  answers to specific worries (will it touch my code? will answers flake? is it heavy?) — they
+  live in install and trust copy, never as headline features. The headline is what the user
+  gets: agents that write better code, and a map.
 - Subject, verb, object. No mirror constructions ("what it misses is what it breaks").
 - Agents are plural and the reader's: "your agents … they", never "the agent … it".
 - Outcome first, number second, receipt link third. Stats vocabulary (recall, F1, MRR)

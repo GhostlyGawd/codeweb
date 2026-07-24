@@ -19,7 +19,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
   says what you get; the research page says how it was measured. The proof section is now
   "Benchmarks": benefit-first bullets (callers found 44%→74%, impact answers at 1/126th the
   tokens, renamed-duplicate detection text search can't do) with no meta-talk about our own
-  rigor — the 32/33 pre-registration story lives on the research page. Shorter sentences,
+  rigor — the 32/33 pre-registration story lives on the research page. Engineering properties
+  left the marquee: the DETERMINISTIC · READ-ONLY · ZERO-DEPENDENCY strip is gone from the hero
+  (README and hero.svg), and the plugin/marketplace listings say "27 MCP tools" — read-only and
+  zero-dep stay where the worry arises, in install and trust copy. Shorter sentences,
   stats stated as outcomes ("+0.31 recall" now reads "with grep agents found 44% of a
   function's callers; with codeweb, 74%. Your agents break code they don't see"), and the
   MCP tool list regrouped by when agents meet each tool (which also

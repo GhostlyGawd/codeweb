@@ -5,7 +5,7 @@
     "url": "https://github.com/GhostlyGawd"
   },
   "metadata": {
-    "description": "codeweb — the living map of your codebase. Deterministic call/import graph, 27 read-only MCP tools, ambient pre/post-edit hooks, and a self-contained interactive report.",
+    "description": "codeweb — the living map of your codebase. Deterministic call/import graph, 27 MCP tools, ambient pre/post-edit hooks, and a self-contained interactive report.",
     "version": "0.10.0"
   },
   "plugins": [
