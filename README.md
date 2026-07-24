@@ -18,17 +18,18 @@
 
 </div>
 
-Before you change code, you need answers. **Who calls this? What breaks if I touch it?
-Does this already exist? Is this dead?**
+codeweb reads your code and maps it: every function, and every call between them
+(~3 s for 3,000 symbols). It's static analysis — no LLM — so the same code always produces
+the same map.
 
-Today your coding agents answer by grepping whole files. Thousands of tokens per question, and
-they still guess. codeweb reads your repo once and builds the real call/import graph
-(~3 s for 3,000 symbols). After that:
+Your coding agents query the map instead of grepping. Grep misses more than half of a
+function's real callers ([measured](bench/experiments/efficiency-pilot.reps5-v090.json)).
+Agents break the code they can't see.
 
-- **Your agents** get 27 deterministic tools over MCP — the protocol coding agents use to call
-  tools. Works with Claude Code, Cursor, and Windsurf.
-- **You** get an interactive map of your codebase.
-- **Every answer** is exact, instant, and about a kilobyte. No LLM in codeweb's loop.
+- **Agents** get 27 deterministic tools over MCP — the protocol Claude Code, Cursor, and
+  Windsurf use to call tools.
+- **You** get an interactive map of the whole codebase.
+- **Answers** are exact, instant, and about a kilobyte each.
 
 The result: your agents break less code, and they stop rewriting functions you already have.
 
@@ -62,9 +63,8 @@ Every screenshot below is a real generated report. The target is
 
 ### Know what an edit breaks — before you write
 
-That's the whole point. Click any function in the
-[living map](https://ghostlygawd.github.io/codeweb/) and its **blast radius** lights up:
-everything your change would touch.
+Click any function in the [living map](https://ghostlygawd.github.io/codeweb/) and its
+**blast radius** lights up: everything your change would touch.
 
 Your agents get the same answer over MCP (`codeweb_impact`) — before they write a line.
 
@@ -122,20 +122,18 @@ We wrote down 33 checks **before** testing, so we couldn't move the goalposts. T
 them against independent referees. **32 of 33 passed**
 ([the check-by-check receipt](bench/preregistration.md)). The short version:
 
-- **Is it right?** We compared its answers to independent referees **490,000+ times.
-  Zero disagreements.** All 20,000 edit-safety trials passed.
-- **Does it find real duplication?** It caught **every planted clone, zero false alarms**.
-  Renamed copies too — text-matching tools catch none of those.
-  Receipts: F1 1.0, MRR 0.99.
-- **Does it scale?** A repo **twice the size took ~26% longer** to map.
-  Queries answer in **a tenth of a second** on 3,000+ symbols.
-- **Does it actually help agents?** Agents must find a function's callers before changing it.
-  With grep they found **44%**. With codeweb, **74%** — same context budget, all 5 runs
+- **Correctness** — compared to independent referees **490,000+ times: zero disagreements.**
+  All 20,000 edit-safety trials passed.
+- **Duplication** — it caught **every planted clone, zero false alarms**. Renamed copies too —
+  text-matching tools catch none of those. Receipts: F1 1.0, MRR 0.99.
+- **Speed at scale** — a repo **twice the size took ~26% longer** to map. Queries answer in
+  **a tenth of a second** on 3,000+ symbols.
+- **Agent lift** — agents must find a function's callers before changing it. With grep they
+  found **44%**. With codeweb, **74%** — same context budget, all 5 runs
   ([receipt](bench/experiments/efficiency-pilot.reps5-v090.json)).
   **Your agents break code they don't see.**
-- **Where does it fall short?** Re-mapping after heavy edits is slower than we want.
-  On simple tasks, agents did fine without codeweb.
-  Both results are published, not buried.
+- **Limits** — re-mapping after heavy edits is slower than we want. On simple tasks, agents did
+  fine without codeweb. Both results are published, not buried.
 
 > **▶ Every number above has a receipt — see the [evidence ledger](https://ghostlygawd.github.io/codeweb/research.html).**
 > Raw results live in [`bench/`](bench/); every number regenerates with `node bench/run-all.mjs`.

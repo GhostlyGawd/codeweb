@@ -34,6 +34,9 @@ the extension · `tests/` (see `tests/README.md`) · `reports/` audit paper trai
 
 - Max ~2 sentences per paragraph. Over ~55 words, the test fails the build.
 - Facts become bullets — one fact per line. Never a paragraph of eleven facts.
+- State facts; skip the theater. No rhetorical-question openers, no "Today…" scene-setting,
+  no drama fragments. The formula to avoid is problem-agitate-solve. The replacement: what it
+  is, what it does, the number.
 - Subject, verb, object. No mirror constructions ("what it misses is what it breaks").
 - Agents are plural and the reader's: "your agents … they", never "the agent … it".
 - Outcome first, number second, receipt link third. Stats vocabulary (recall, F1, MRR)
