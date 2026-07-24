@@ -104,33 +104,28 @@ codeweb works at **symbol resolution** — functions, classes, and methods, and 
 edges between them. File-level scanners can tell you two *modules* look alike; codeweb tells you
 two *functions* are the same work, who calls each, and what merging them would break.
 
-## Proven effective — measured, not just claimed
+## Benchmarks
 
-We wrote down 33 checks **before** testing, so we couldn't move the goalposts. Then we tested
-them against independent checkers — including the TypeScript compiler. **32 of 33 passed**
-([the check-by-check receipt](bench/preregistration.md)). The short version:
+- **Finding callers before an edit** — agents found **74%** of a function's real callers with
+  codeweb, **44%** with grep, at the same context spend. Missed callers are how edits break
+  working code.
+- **"What breaks if I change this?"** — one codeweb call, one small answer. Agents grepping
+  for the same answer needed ~5 rounds of search and **126× the tokens**, and still guessed.
+- **Duplicate detection** — codeweb caught **every planted duplicate with zero false alarms**,
+  including renamed copies. Text search catches renamed copies 0% of the time.
+- **Trust the answers** — checked against the TypeScript compiler and other independent
+  implementations **490,000+ times: zero disagreements**.
+- **Speed** — first map in **~3 s** on a 3,000-symbol repo. Queries answer in **~0.1 s**.
+  A repo twice the size maps in ~1.3× the time.
+- **Known limits** — re-mapping after huge edits is slower than we'd like. On simple tasks,
+  agents did fine without codeweb. Published with everything else.
 
-- **Correctness** — checked against independent implementations **490,000+ times: zero
-  disagreements.** All 20,000 edit-safety trials passed.
-- **Duplication** — it caught **every planted clone, zero false alarms**. Renamed copies too —
-  text-matching tools catch none of those. Receipts: F1 1.0, MRR 0.99.
-- **Speed at scale** — a repo **twice the size took ~26% longer** to map. Queries answer in
-  **a tenth of a second** on 3,000+ symbols.
-- **Agent lift** — agents must find a function's callers before changing it. With grep they
-  found **44%**. With codeweb, **74%** — same context budget, all 5 runs
-  ([receipt](bench/experiments/efficiency-pilot.reps5-v090.json)).
-  **Your agents break code they don't see.**
-- **Limits** — re-mapping after heavy edits is slower than we want. On simple tasks, agents did
-  fine without codeweb. Both results are published, not buried.
+Methodology, raw data, and per-claim receipts:
+[the evidence ledger](https://ghostlygawd.github.io/codeweb/research.html). Benchmark your own
+repo: `npm run bench -- <path>/.codeweb/graph.json`. CI re-runs the performance budgets on
+every PR; breaking a published number fails the build.
 
-> **▶ Every number above has a receipt — see the [evidence ledger](https://ghostlygawd.github.io/codeweb/research.html).**
-> Raw results live in [`bench/`](bench/); regenerate everything with `node bench/run-all.mjs`,
-> or benchmark codeweb on your own repo: `npm run bench -- <path>/.codeweb/graph.json`.
-> CI re-measures the performance budgets on every PR — a change that breaks a published number
-> fails the build.
-
-The value codeweb delivers during real work is counted where it accrues: a strictly-local outcome
-ledger (`npm run stats`, surfaced in every session brief) prints a receipt shaped like:
+codeweb also keeps a local tally of what it actually did for you — `npm run stats`:
 
 ```
 codeweb this month: 41 pre-edit card(s) · 5 card-named caller(s) followed · 2 regression(s) flagged · 120 queries served
@@ -186,10 +181,9 @@ Every bin, flag, and exit code is tabled in [`docs/cli.md`](docs/cli.md).
 **In your editor:** [`editor/vscode-codeweb`](editor/vscode-codeweb/) shows a
 **`N callers · blast M`** lens above every mapped symbol. Click through into the report.
 
-## What you can do — three jobs
+## What you can do
 
-Everything codeweb does serves one of three jobs. Each link lands on full docs, flags, and
-examples in **[the reference](docs/reference.md)**.
+Each link lands on full docs, flags, and examples in **[the reference](docs/reference.md)**.
 
 - **Know before you edit** — who calls this, what breaks, does this already exist.
   → [Query the graph](docs/reference.md#query-the-graph-for-agents--humans) ·

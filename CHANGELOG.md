@@ -16,7 +16,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
   (Correctness / Duplication / Speed at scale / Agent lift / Limits). Study apparatus left the
   pitch too: the hero's grep-vs-codeweb benchmark table, the "referee"/"oracle" framing, and
   the outbound vite/axios repo links are gone or moved behind the evidence ledger — the pitch
-  says what you get; the research page says how it was measured. Shorter sentences,
+  says what you get; the research page says how it was measured. The proof section is now
+  "Benchmarks": benefit-first bullets (callers found 44%→74%, impact answers at 1/126th the
+  tokens, renamed-duplicate detection text search can't do) with no meta-talk about our own
+  rigor — the 32/33 pre-registration story lives on the research page. Shorter sentences,
   stats stated as outcomes ("+0.31 recall" now reads "with grep agents found 44% of a
   function's callers; with codeweb, 74%. Your agents break code they don't see"), and the
   MCP tool list regrouped by when agents meet each tool (which also

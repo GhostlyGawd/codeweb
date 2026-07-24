@@ -38,9 +38,9 @@
   "proof": {
     "headline": [
       {
-        "num": "32 / 33",
-        "label": "checks committed to in advance passed when tested",
-        "src": "bench/preregistration.md"
+        "num": "126×",
+        "label": "cheaper 'what breaks if I change this' answers — one call vs grepping in rounds",
+        "src": "oracle-ab.json"
       },
       {
         "num": "~490k",
