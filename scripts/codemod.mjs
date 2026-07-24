@@ -83,7 +83,7 @@ let writeResult = null, code = 0;
 if (doWrite) {
   const root = graph.meta?.root;
   if (!root || !existsSync(root)) die(`--write needs graph.meta.root on disk (got ${root || 'none'})`, 2);
-  if (!projectedGate.ok) { writeResult = { applied: false, reason: 'the gate predicts a regression — refusing to write', projectedGate }; code = 1; }
+  if (!projectedGate.ok) { writeResult = { applied: false, reason: 'the pre-flight predicts a regression (new cycle or lost caller) — refusing to write', projectedGate }; code = 1; }
   else {
     // a loser whose label differs from the canonical's must have a GLOBALLY-UNIQUE label to rewrite
     // safely (the token unambiguously refers to it); else refuse (never guess — the extractor's rule).
@@ -187,11 +187,13 @@ const payload = { ...plan, write: writeResult };
 if (json) { emitJson(payload, code); } else {
 
 console.log(`codeweb codemod: merge ${ids.length} -> keep ${canonical}`);
-console.log(`  removes ${losers.length} copy(ies), rewires ${rewrites.length} caller(s), ~${locReclaimed} LOC, blast ${plan.blastRadius}`);
-console.log(`  projected gate: ${projectedGate.ok ? 'PASS' : 'BLOCK'}${projectedGate.ok ? '' : ` (${projectedGate.newCycles.length} new cycle, ${projectedGate.lostCallers.length} lost-caller)`}`);
+console.log(`  removes ${losers.length} copy(ies) · ${rewrites.length} caller/importer site(s) to re-check · ~${locReclaimed} LOC · blast radius ${plan.blastRadius}`);
+console.log(`  projected: ${projectedGate.ok ? 'PASS — no new cycles; no surviving symbol loses its last caller' : `BLOCK — ${projectedGate.newCycles.length} new cycle(s), ${projectedGate.lostCallers.length} lost caller(s)`}`);
+console.log('  (checks cycles + lost callers — stricter than the diff.mjs/CI gate on exports; does not count duplication)');
 console.log('  deletions:'); for (const d of deletions) console.log(`    ${d.file}:${d.range[0]}-${d.range[1]}  (${d.id})`);
-console.log('  rewrites:'); for (const r of rewrites) console.log(`    ${r.file}:${r.line}  (${r.callerId})`);
-if (writeResult) console.log(`  write: ${writeResult.applied ? `APPLIED to ${writeResult.filesTouched.length} file(s)` : `NOT applied — ${writeResult.reason}`}`);
-else console.log('  (plan-only — pass --write to apply, gated + reversible)');
+console.log('  caller/importer sites to re-check (codemod renames tokens and repoints imports — it never ADDS an import):');
+for (const r of rewrites) console.log(`    ${r.file}:${r.line}  (${r.callerId})`);
+if (writeResult) console.log(`  write: ${writeResult.applied ? `applied — deleted ${losers.length} definition(s) in ${writeResult.filesTouched.length} file(s); re-extract gate ok (0 new cycles, 0 lost callers). Verify imports at the sites above.` : `NOT applied — ${writeResult.reason}`}`);
+else console.log('  (plan-only — --write applies it, and auto-reverts only if the post-edit re-extract regresses; after a successful apply, undo is git\'s job)');
 finish(code);
 }

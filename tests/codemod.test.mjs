@@ -281,3 +281,22 @@ test('CM-WRITE-SUCCESS: a safe same-file merge applies and the loser definition 
     assert.ok(/return keep\(\)/.test(src), "user's call rewired to keep");
   } finally { cleanup(dir); }
 });
+
+// MICROCOPY A1/A2/A3: codemod's verdict speaks for its own check (never "the gate"), the summary
+// says sites are to RE-CHECK (it never adds an import), and "reversible" no longer implies an
+// undo that doesn't exist after a successful apply.
+test('CM-COPY: plan text owns its check, hedges the rewires, and is honest about undo', () => {
+  const rng = prng(0xC0FFEE);
+  const g = makeGraph(rng, 8);
+  const ids = g.nodes.map((n) => n.id).slice(0, 2);
+  const { dir, graphPath } = write(g);
+  try {
+    const out = runNode(CODEMOD, [graphPath, '--merge', ids.join(','), '--into', ids[0]]).stdout;
+    assert.match(out, /projected: (PASS — no new cycles; no surviving symbol loses its last caller|BLOCK — \d+ new cycle\(s\), \d+ lost caller\(s\))/);
+    assert.match(out, /stricter than the diff\.mjs\/CI gate on exports; does not count duplication/);
+    assert.match(out, /caller\/importer site\(s\) to re-check/);
+    assert.match(out, /it never ADDS an import/);
+    assert.match(out, /undo is git's job/);
+    assert.ok(!/projected gate:|gated \+ reversible|rewires \d+ caller/.test(out), 'the borrowed/overpromising strings are retired');
+  } finally { cleanup(dir); }
+});
