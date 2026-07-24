@@ -103,3 +103,38 @@ test('--help still prints usage and exits 0 on every converted front door', () =
     assert.match(r.stdout, /usage:/, `${s} --help prints usage`);
   }
 });
+
+// CLI review "first fix" (CLI.md §6) + ERRORS.md R1: the parser coaches. A near-miss typo names
+// the flag it probably meant; --flag=value parses; and a valid command in an UNMAPPED directory
+// gets the no-map cause + remedy with the usage APPENDED — never the bare usage wall.
+test('coach: did-you-mean on a near-miss flag, silence on a far one', () => {
+  withGraph((gp) => {
+    const near = runNode(script('query.mjs'), [gp, '--cyles']);
+    assert.equal(near.status, 2);
+    assert.match(near.stderr, /unknown flag: --cyles \(did you mean --cycles\?\)/);
+    const far = runNode(script('query.mjs'), [gp, '--zzqxwv']);
+    assert.equal(far.status, 2);
+    assert.ok(!/did you mean/.test(far.stderr), 'no guess when nothing is close');
+  });
+});
+
+test('coach: --flag=value parses for value flags and bool switches take =false', () => {
+  withGraph((gp) => {
+    const r = runNode(script('query.mjs'), [gp, '--orphans', '--limit=1']);
+    assert.equal(r.status, 0, r.stderr);
+    const b = runNode(script('query.mjs'), [gp, '--orphans', '--json=false']);
+    assert.equal(b.status, 0, b.stderr);
+    assert.ok(!b.stdout.trimStart().startsWith('{'), '--json=false stays in text mode');
+  });
+});
+
+test('coach: unmapped directory gets cause + remedy, usage appended (ERRORS R1)', () => {
+  const dir = tmpDir('codeweb-nomap-');
+  try {
+    const r = runNode(script('query.mjs'), ['--cycles'], { cwd: dir, env: { ...process.env, CODEWEB_WS: '' } });
+    assert.equal(r.status, 2);
+    assert.match(r.stderr, /no map found — checked the graph argument, CODEWEB_WS, and every \.codeweb\/ above/);
+    assert.match(r.stderr, /map this repo first: npx -y @ghostlygawd\/codeweb/);
+    assert.match(r.stderr, /then: usage: query\.mjs/, 'the usage still arrives — after the cause, not instead of it');
+  } finally { cleanup(dir); }
+});
