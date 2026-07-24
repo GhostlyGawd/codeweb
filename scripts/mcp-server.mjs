@@ -482,8 +482,16 @@ function handleMap(id, args, meta) {
       // the agent fallback instead of hitting the same wall. Best-effort.
       if (/no supported source files/.test(errBuf || '')) {
         try { atomicWriteJson(join(out, 'unsupported.json'), { at: new Date().toISOString(), reason: 'no supported source files', hint: 'use the /codeweb agent fallback (agent-based mapping); delete this file to retry codeweb_map' }); } catch { /* marker only */ }
+        // ERRORS.md #2/R2: this is the FIRST MCP error on any unsupported-language or wrong-root
+        // repo — say the marker path's own words now instead of a beheaded stderr tail whose only
+        // surviving hint was a flag this tool cannot even pass.
+        return errResult(id, `codeweb_map found no supported source under ${target} — wrong directory? pass target: <code root>. Non-native language? the /codeweb command's agent fallback maps it by reading. (marker written: codeweb_map will say this until ${join(out, 'unsupported.json')} is deleted.)`);
       }
-      return errResult(id, `codeweb_map failed (exit ${code}): ${(errBuf || '').trim().split('\n').slice(-3).join('\n')}`);
+      // Generic failure: forward stderr from the FIRST [extract]/error line (the extractor leads
+      // with its escapes), capped — never the last-3-lines beheading that kept only pipeline frames.
+      const lines = (errBuf || '').trim().split('\n');
+      const firstSignal = lines.findIndex((l) => /^\[(extract|run)\]|error/i.test(l.trim()));
+      return errResult(id, `codeweb_map failed (exit ${code}):\n${lines.slice(Math.max(0, firstSignal), firstSignal < 0 ? lines.length : firstSignal + 12).join('\n')}`);
     }
     if (token !== undefined && token !== null) send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.length, total: MAP_STAGES.length, message: 'done' } });
     const graphPath = join(out, 'graph.json');

@@ -60,3 +60,22 @@ test('I5: a failing codeweb_map settles ONCE (exactly one reply for its id) and 
     assert.ok(forId2[0].result && forId2[0].result.isError, 'the failure surfaces as an isError result');
   } finally { cleanup(dir); }
 });
+
+// ERRORS.md #2/R2: the first MCP error on an unsupported repo used to keep only the LAST 3 stderr
+// lines — the extractor's escapes-first message beheaded down to a flag codeweb_map cannot even
+// pass. The no-source case now speaks the marker path's own words.
+test('I5b: unsupported-repo map failure names the escapes, never the --allow-empty leak', () => {
+  const dir = tmpDir('codeweb-i5b-');
+  try {
+    const msgs = [
+      { jsonrpc: '2.0', id: 1, method: 'initialize', params: {} },
+      { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'codeweb_map', arguments: { target: dir, out: join(dir, '.codeweb') } } },
+    ];
+    const r = spawnSync(NODE, [script('mcp-server.mjs')], { encoding: 'utf8', maxBuffer: 1 << 28, input: msgs.map((m) => JSON.stringify(m)).join('\n') + '\n' });
+    const reply = (r.stdout || '').split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return {}; } }).find((m) => m.id === 2);
+    const text = reply?.result?.content?.[0]?.text || '';
+    assert.match(text, /no supported source under/, 'leads with the cause');
+    assert.match(text, /wrong directory\?.*agent fallback/s, 'both escapes present');
+    assert.ok(!/--allow-empty/.test(text), 'no flag this tool cannot pass');
+  } finally { cleanup(dir); }
+});
