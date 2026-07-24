@@ -2,7 +2,7 @@
 
 Everything below needs GhostlyGawd's credentials (GitHub settings, npm publish rights, search
 consoles); none of it is code, and none of it can be done from a PR. The growth audits
-(`SEO.md`, `FUNNEL.md`, `CRO.md`, `RETENTION.md`) rank the first item as worth more traffic than
+(`reports/SEO.md`, `reports/FUNNEL.md`, `reports/CRO.md`, `reports/RETENTION.md`) rank the first item as worth more traffic than
 every code change combined.
 
 ## 1. GitHub repo settings (SEO F1 · two browser steps, once · highest reach)
