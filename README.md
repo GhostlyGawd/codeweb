@@ -23,14 +23,15 @@ the real call/import graph. After that, every answer is exact, instant, and abou
 
 Your agent gets **27 deterministic tools** it can call over MCP — the open protocol coding agents
 like Claude Code, Cursor, and Windsurf use to call tools. No LLM anywhere in codeweb's loop.
-You get a self-contained **interactive map** of your codebase.
+You get a self-contained **interactive map** of your codebase. The payoff: edits stop breaking
+callers nobody saw, and your agent stops re-implementing code that already exists.
 
 Here's codeweb against grep on [vite](https://github.com/vitejs/vite) (3,000+ symbols), with the
 TypeScript compiler as an independent referee ([the receipt](bench/results/oracle-ab.json)):
 
 | The question | codeweb | grep |
 |---|---|---|
-| *"Who depends on X?"* | Every compiler-verified file. Higher precision. **0.7 KB, one call.** | The same files at 3× the tokens — raw text the agent must still read |
+| *"Who depends on X?"* | Every file the compiler confirms. Fewer wrong matches. **0.7 KB, one call.** | The same files at 3× the tokens — raw text the agent must still read |
 | *"What breaks if I change X?"* | **One ~1 KB answer** | No transitive search exists: ~5 rounds of grepping, **126× the tokens** |
 | *"Does this already exist? Is this dead? Did my edit break structure?"* | One call each (`find_similar` / `deadcode` / `diff` gate) | Not answerable by search |
 
@@ -117,25 +118,31 @@ two *functions* are the same work, who calls each, and what merging them would b
 
 ## Proven effective — measured, not just claimed
 
-We didn't just assert codeweb works. We pre-registered hypotheses, then measured them against
-independent referees on a pinned cross-language corpus. **32 of 33 pre-registered checks pass**
-([the check-by-check receipt](bench/preregistration.md)). The short version:
+We didn't just assert codeweb works. We wrote down 33 specific things it should be able to do
+**before** testing — so we couldn't move the goalposts — then tested them against independent
+referees. **32 of 33 passed** ([the check-by-check receipt](bench/preregistration.md)). The
+short version:
 
-- **Is it correct?** codeweb's answers were compared with independent reference implementations:
-  **490,000+ comparisons, zero disagreements**. Edit-safety held for 20,000 trials, zero violations.
-- **Does it find real duplication?** Exact clones: **F1 1.0**, where name-matching scores 0.67.
-  Renamed clones: structural detection finds **100%**, lexical tools find none. Asked "what should
-  I reuse here?", the right answer ranks first almost every time (**MRR 0.99**).
-- **Does it scale?** Runtime grows **sub-quadratically** (measured exponent 0.33). Structural
-  queries answer in **~95–120 ms** on a 3,201-symbol graph. Zero required dependencies.
-- **Does it help a real agent?** In the v0.9.0 pilot, an agent using codeweb found **31 points
-  more of the true callers than the same agent using grep, at the same token cost** — positive in
-  all 5 runs ([receipt](bench/experiments/efficiency-pilot.reps5-v090.json)). An earlier run on a
-  different base model also showed large token savings; that part did not replicate, and we say so
-  rather than quoting the better number.
-- **Where does it fall short?** Two honest results: incremental re-map speed at very high churn
-  missed its target (reported as a measured curve), and the edit-*quality* A/B was a null on clean
-  tasks. The study also found and fixed two real engine bugs the test suite had missed.
+- **Is it right?** We checked codeweb's answers — who calls what, what an edit breaks, where the
+  cycles are — against independent referees, **490,000+ times. It was never wrong.** Its
+  edit-safety checks held across another 20,000 trials, zero violations.
+- **Does it find real duplication?** On the labeled benchmark it found **every planted clone with
+  zero false alarms** (F1 1.0; name-matching scores 0.67). Rename the copies and it still finds
+  them all — text-matching tools find none. Asked *"what should I reuse here?"*, the right answer
+  ranked first almost every time (MRR 0.99).
+- **Does it scale?** In our corpus, mapping a repo **twice the size took only ~26% longer**
+  (measured exponent 0.33). On a 3,201-symbol graph, answers come back in **about a tenth of a
+  second**. And it runs on an empty `node_modules` — zero required dependencies.
+- **Does it actually help an agent?** Asked to find every place a function is used — the step
+  before changing it safely — an agent using grep found **44%** of them. The same agent using
+  codeweb found **74%**, on the same context budget, in all 5 runs
+  ([receipt](bench/experiments/efficiency-pilot.reps5-v090.json)). Every caller the agent misses
+  is a caller its edit can break. (An earlier run on a different base model also showed big token
+  savings; that part did not replicate, and we say so rather than quoting the better number.)
+- **Where does it fall short?** Two honest results. Re-mapping after very heavy edits isn't as
+  fast as we wanted (the measured curve is published). And on simple, clean tasks, agents edited
+  fine with or without codeweb — no measurable quality lift there. The study also found and fixed
+  two real engine bugs the test suite had missed.
 
 > **▶ Every number above has a receipt — see the [evidence ledger](https://ghostlygawd.github.io/codeweb/research.html).**
 > Raw results live in [`bench/`](bench/); every number regenerates with `node bench/run-all.mjs`.
@@ -264,8 +271,8 @@ $ node scripts/query.mjs .codeweb/graph.json --impact lib/state-store/index.js:g
 impact of lib/state-store/index.js:get: 120 functions across 12 domains
 ```
 
-> `--orphans` is a *candidate* list: extraction deliberately drops ambiguous call edges (precision
-> over recall), so genuinely-called functions and entrypoints can surface — cross-check before deleting.
+> `--orphans` is a *candidate* list: codeweb prefers a missing edge to an invented one, so
+> genuinely-called functions and entrypoints can surface here — cross-check before deleting.
 
 ## Guard agent edits (`diff`)
 
@@ -427,12 +434,13 @@ with their call sites, its callees, and the transitive impact set — so the age
 window instead of reading whole files. `simulate-edit` predicts the regression gate's verdict for a
 hypothetical delete, merge, or move **without performing it**, so doomed edits are discarded before
 any code is written. Both share the same graph primitives as `optimize.mjs` (one truth), pinned by
-property tests against an independent oracle.
+property tests against an independent reference implementation.
 
 ## Agent capability suite (write · review · optimize)
 
 A set of read-only, deterministic tools that make an agent better at the three jobs — each pinned by
-property tests against an independent oracle (full spec: [`docs/agent-tools-v2.md`](docs/agent-tools-v2.md)):
+property tests against an independent reference implementation
+(full spec: [`docs/agent-tools-v2.md`](docs/agent-tools-v2.md)):
 
 | Tool | Job | What it answers |
 |---|---|---|
@@ -509,8 +517,8 @@ into a per-target workspace:
 
 1. **Extract** (`extract-symbols.mjs`) — parse every source file into atomic nodes (functions,
    classes, methods) and call/import edges. When a bare call could belong to several definitions,
-   codeweb drops the edge rather than fabricate a false hub — precision over recall. Per-file
-   caching keeps re-extraction incremental, byte-identical to a full rebuild.
+   codeweb drops the edge rather than fabricate a false hub — it prefers a missing edge to an
+   invented one. Per-file caching keeps re-extraction incremental, byte-identical to a full rebuild.
 2. **Cluster** (`cluster3.mjs`) — strip genuine utility hubs, then group nodes into
    directory-anchored semantic domains.
 3. **Overlap** (`overlap.mjs`) — detect duplicated logic and parallel implementations, then

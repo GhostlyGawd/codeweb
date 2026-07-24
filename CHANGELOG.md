@@ -12,8 +12,9 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ### Changed
 - **Plain-language pass over the whole marketing funnel.** The README, homepage, and plugin
   listing now lead with plain claims and keep the receipts one link deeper: shorter sentences,
-  translated stats ("+0.31 recall" reads as "31 points more of the true callers, at the same
-  token cost"), and the MCP tool list regrouped by when an agent meets each tool (which also
+  stats stated as outcomes ("+0.31 recall" now reads "an agent with grep found 44% of a
+  function's callers; with codeweb, 74% — what it misses is what its edit can break"), and the
+  MCP tool list regrouped by when an agent meets each tool (which also
   surfaces `codeweb_explain`, previously undocumented in the README). Two overclaims corrected:
   the homepage no longer calls 16k+ graphs "measured green" (the expand-all receipt says
   `green:false` at that scale), and the pre-registration page no longer says the full study

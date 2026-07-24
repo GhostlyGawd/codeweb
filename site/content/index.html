@@ -8,7 +8,7 @@
         <a class="btn btn-primary btn-lg" href="start.html">Map your repo</a>
         <a class="btn btn-lg" href="demo/">See the live demo</a>
       </div>
-      <div class="hero-note">v{{version}} · runs on an empty node_modules · never executes the code it maps</div>
+      <div class="hero-note">v{{version}} · zero dependencies · never executes the code it maps</div>
     </div>
     <div class="hero-panel">
       <div class="hp-bar"><span class="dots"><i></i><i></i><i></i></span><span>live · axios call graph · 70 of 274 symbols</span><span class="hp-tag">codeweb</span></div>
@@ -131,9 +131,9 @@
       <p class="lead">codeweb is pre-registered and tested against independent oracles. We publish the nulls too — because trustworthy tooling shows its work.</p>
     </div>
     <div class="grid cols-3" data-reveal>
-      <div class="card"><h3>32 / 33</h3><p>pre-registered checks pass — and the study itself found and fixed two real engine bugs the test suite had missed.</p></div>
-      <div class="card"><h3>0 disagreements</h3><p>across ~490k comparisons of cycles, impact, and callers against independent reference implementations.</p></div>
-      <div class="card"><h3>+0.31 recall · equal cost</h3><p>an agent using codeweb found 31 points more of the true callers than the same agent using grep, at the same token cost — positive in all 5 runs (v0.9.0 pilot; preliminary, and labelled as such).</p></div>
+      <div class="card"><h3>32 / 33</h3><p>of the checks we committed to in advance passed when tested. The testing itself caught two real engine bugs — and the one miss is published, not buried.</p></div>
+      <div class="card"><h3>0 disagreements</h3><p>in ~490,000 checks of codeweb's answers — who calls what, what an edit breaks, where the cycles are — against independent referees.</p></div>
+      <div class="card"><h3>44% → 74%</h3><p>of a function's real callers found by an AI agent — grep vs codeweb, same context budget, better in all 5 runs (v0.9.0 pilot). A caller the agent misses is a caller its edit can break.</p></div>
     </div>
     <div class="btn-row" style="margin-top:var(--s-6)">
       <a class="btn" href="research.html">See the full evidence ledger</a>
