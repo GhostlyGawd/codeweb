@@ -155,7 +155,7 @@ console.log(`codeweb optimize: ${payload.target}`);
 // next to the findings triple's "needs review M" read as the same number disagreeing.
 console.log(`  ${t.findings} actionable findings · ${t.ready} ready · ${t.blocked} blocked · ${t.review} judgement call(s)`);
 console.log(`  if all ready merges applied: -${t.duplicationRemovable} duplication finding(s), ~${t.locReclaimable} LOC reclaimed (gate would stay green)`);
-const TAG = { ready: 'READY  ', blocked: 'BLOCKED', review: 'JUDGE  ' };
+const TAG = { ready: 'READY    ', blocked: 'BLOCKED  ', review: 'JUDGEMENT' };
 for (const o of opportunities) {
   console.log(`\n[${TAG[o.tier]} ${o.severity.toUpperCase().padEnd(6)} ${o.confidence.padEnd(6)}${o.bodySim != null ? ` ${(o.bodySim * 100).toFixed(0).padStart(3)}%` : '     '}] ${o.id} ${o.title.replace(/`/g, '')}`);
   console.log(`  gate: ${o.gate}`);

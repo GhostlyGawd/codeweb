@@ -210,7 +210,7 @@ const TOOLS = [
     description: '"Tell me about X before I touch it" in ONE ~1KB card: identity, role, signature, complexity, fan-in/out, tests, blast radius + domains, top-5 callers/callees, and any duplication/pattern findings it belongs to. Start here; drill down with impact/context/callers.' },
   { name: 'codeweb_brief', need: [], opt: ['graph'], bin: scriptOf('brief.mjs'),
     argv: () => [],
-    description: 'The day-one page for a mapped repo (~2KB): areas with summaries, the most depended-on symbols, entry points, test layout, and known issues (duplications/cycles/orphans). Call FIRST in a new session instead of exploring; then codeweb_find/explain to go deeper.' },
+    description: 'The day-one page for a mapped repo (~2KB): domains with summaries, the most depended-on symbols, entry points, test layout, and known issues (duplications/cycles/orphans). Call FIRST in a new session instead of exploring; then codeweb_find/explain to go deeper.' },
   { name: 'codeweb_find', need: ['query'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 },
     bin: scriptOf('find.mjs'),
     argv: (a) => [a.query],

@@ -169,7 +169,7 @@
       <input id="gsearch" placeholder="search symbols… (Enter jumps)" autocomplete="off" aria-label="Search symbols; press Enter to jump to the next match, Escape to clear">
       <span id="gcount" class="meta" style="position:absolute;top:16px;left:245px" aria-live="polite"></span>
       <div id="gctrl"><button id="gFit">Fit</button><button id="gToggle"></button></div>
-      <div id="gLegend">● area — size = symbols, click to expand it · ○ symbol — size = loc · scroll zooms</div>
+      <div id="gLegend">● domain — size = symbols, click to expand it · ○ symbol — size = loc · scroll zooms</div>
     </div>
   </div>
   <div id="detail"><div class="empty">Pick an item to inspect it.</div></div>
@@ -348,7 +348,7 @@
     } catch (e) { /* honesty is best-effort */ }
     el.textContent = [
       AN.length + ' symbols' + (productOnly && nonProduct ? ' (+' + nonProduct + ' hidden)' : ''),
-      AE.length + ' edges', domainNames.length + ' areas', findingsChip, mappedAgo
+      AE.length + ' edges', domainNames.length + ' domains', findingsChip, mappedAgo
     ].filter(Boolean).join('  ·  ');
     var gen = document.querySelector('meta[name="generator"]');
     el.title = 'findings: actionable ' + fb.actionable + ' · needs review ' + fb.review + ' · dismissed ' + fb.dismissed +
@@ -426,12 +426,12 @@
       return '<div class="kv"><span class="chip" style="background:' + colorOf(nm) + '"></span> ' + esc(nm) + ' <span class="dim">· ' + domCount(nm) + ' symbols</span></div>';
     }).join('');
     detail.innerHTML = '<h3>' + esc(G.meta.target || 'this repo') + '</h3>' +
-      '<div class="kv">' + AN.length + ' symbols · ' + AE.length + ' edges · ' + domainNames.length + ' areas</div>' +
-      '<div class="sec">largest areas</div>' + topDoms +
+      '<div class="kv">' + AN.length + ' symbols · ' + AE.length + ' edges · ' + domainNames.length + ' domains</div>' +
+      '<div class="sec">largest domains</div>' + topDoms +
       '<div class="sec">worth a look</div>' +
       '<div class="kv">' + duplicates.length + ' duplication group(s) · ' + hotspots.length + ' hotspot(s) · ' + dead.length + ' dead-code candidate(s)</div>' +
       '<div class="sec">how to read this</div>' +
-      '<div class="kv">Click any row, cell, or node to inspect it here. In the graph, click an area bubble to expand it; search + Enter jumps to a symbol. <code>#s=&lt;id&gt;</code> deep-links.</div>';
+      '<div class="kv">Click any row, cell, or node to inspect it here. In the graph, click a domain bubble to expand it; search + Enter jumps to a symbol. <code>#s=&lt;id&gt;</code> deep-links.</div>';
   }
   function nodeRow(id) { var t = nodeById.get(id); return '<div data-node="' + esc(id) + '">' + esc(t ? (t.label || id) : id) + ' <span class="dim mono">' + esc(t ? t.file : '') + '</span></div>'; }
   function bindNodeRows(scope) {
@@ -465,7 +465,7 @@
   function showDup(d) {
     announce('Inspecting duplication group ' + d.name);
     detail.innerHTML = '<h3>' + esc(d.name) + '()</h3>' +
-      '<div class="kv">defined in <b>' + d.files + ' files</b> · ' + d.domains.length + ' area(s)</div>' +
+      '<div class="kv">defined in <b>' + d.files + ' files</b> · ' + d.domains.length + ' domain(s)</div>' +
       '<div class="kv">' + esc(d.domains.join(', ')) + '</div>' +
       '<div class="sec">every definition</div><div class="lst" id="d_dup"></div>';
     document.getElementById('d_dup').innerHTML = d.nodes.map(function (n) { return nodeRow(n.id); }).join('');
@@ -570,9 +570,9 @@
       }).join('');
       return '<tr><th>' + esc(da) + '</th>' + cells + '</tr>';
     }).join('');
-    v.innerHTML = '<div class="fhead"><h2>Area coupling</h2><span class="sub">rows call columns</span></div>' +
+    v.innerHTML = '<div class="fhead"><h2>Domain coupling</h2><span class="sub">rows call columns</span></div>' +
       '<table class="m"><tr>' + head + '</tr>' + rows + '</table>' +
-      '<div class="legend"><span class="chip" style="background:rgba(57,135,229,.8)"></span> cross-area calls — tangling' +
+      '<div class="legend"><span class="chip" style="background:rgba(57,135,229,.8)"></span> cross-domain calls — tangling' +
       '<span class="chip" style="background:rgba(25,158,112,.8)"></span> diagonal — internal cohesion' +
       '<span>· big off-diagonal numbers = merge candidates or missing interface · click a cell for its edges</span></div>';
     v.querySelectorAll('td[data-a]').forEach(function (td) {
@@ -987,7 +987,7 @@
   cv.addEventListener('wheel', function (ev) { ev.preventDefault(); var r = cv.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top, f = ev.deltaY < 0 ? 1.12 : 0.89, nk = Math.max(0.05, Math.min(6, cam.k * f)); cam.x = mx - (mx - cam.x) * (nk / cam.k); cam.y = my - (my - cam.y) * (nk / cam.k); cam.k = nk; gDraw(); }, { passive: false });
   document.getElementById('gFit').onclick = function () { gFit(); gDraw(); };
   var gToggle = document.getElementById('gToggle');
-  function syncToggle() { gToggle.textContent = allExpanded() ? 'Collapse to areas' : (expanded.size ? 'Collapse (' + expanded.size + ' open)' : 'Expand all symbols'); }
+  function syncToggle() { gToggle.textContent = allExpanded() ? 'Collapse to domains' : (expanded.size ? 'Collapse ' + expanded.size + ' open domain' + (expanded.size === 1 ? '' : 's') : 'Expand all symbols'); }
   gToggle.onclick = function () { if (expanded.size) expanded = new Set(); else domainNames.forEach(function (d) { expanded.add(d); }); selectedNode = null; gLayout(); syncToggle(); };
   // Search NAVIGATES: live typing dims non-matches; Enter cycles matches (centering + selecting
   // each), Escape clears. The count chip narrates n/N for screen readers too.

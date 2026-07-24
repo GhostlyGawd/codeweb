@@ -11,7 +11,7 @@
             "timeout": 10
           }
         ],
-        "description": "codeweb: when the session starts in a .codeweb-mapped repo, inject the ~2KB day-one briefing (areas, load-bearing symbols, entry points, tests, known issues) so the agent starts oriented instead of exploring (fail-open; inert until /codeweb has mapped the repo)",
+        "description": "codeweb: when the session starts in a .codeweb-mapped repo, inject the ~2KB day-one briefing (domains, load-bearing symbols, entry points, tests, known issues) so the agent starts oriented instead of exploring (fail-open; inert until /codeweb has mapped the repo)",
         "id": "codeweb:session-brief"
       }
     ],
