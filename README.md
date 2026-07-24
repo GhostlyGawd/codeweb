@@ -9,7 +9,7 @@
 [![MCP server](https://img.shields.io/badge/MCP-server-a371f7?style=flat-square)](#use-it-as-an-mcp-tool)
 [![sponsor](https://img.shields.io/badge/%E2%99%A5-sponsor-ea4aaa?style=flat-square)](https://github.com/sponsors/GhostlyGawd)
 
-**Your coding agent greps. codeweb knows.**
+**Your coding agents grep. codeweb knows.**
 
 **Free & MIT-licensed. Runs entirely on your machine — no account, no server, no telemetry. Reads your code; never executes it.**
 <br><sub>DETERMINISTIC · READ-ONLY · ZERO-DEPENDENCY</sub>
@@ -17,21 +17,21 @@
 Before you change code, you need answers. **Who calls this? What breaks if I touch it?
 Does this already exist? Is this dead?**
 
-Today your coding agent answers by grepping and reading whole files — thousands of tokens per
-question, and it still guesses. codeweb reads your repo once (~3 s for 3,000 symbols) and builds
+Today your coding agents answer by grepping and reading whole files — thousands of tokens per
+question, and they still guess. codeweb reads your repo once (~3 s for 3,000 symbols) and builds
 the real call/import graph. After that, every answer is exact, instant, and about a kilobyte.
 
-Your agent gets **27 deterministic tools** it can call over MCP — the open protocol coding agents
-like Claude Code, Cursor, and Windsurf use to call tools. No LLM anywhere in codeweb's loop.
-You get a self-contained **interactive map** of your codebase. The result: your agent breaks less
-code, and it stops rewriting functions you already have.
+Your agents get **27 deterministic tools** they can call over MCP — the open protocol coding
+agents like Claude Code, Cursor, and Windsurf use to call tools. No LLM anywhere in codeweb's
+loop. You get a self-contained **interactive map** of your codebase. The result: your agents
+break less code, and they stop rewriting functions you already have.
 
 Here's codeweb against grep on [vite](https://github.com/vitejs/vite) (3,000+ symbols), with the
 TypeScript compiler as an independent referee ([the receipt](bench/results/oracle-ab.json)):
 
 | The question | codeweb | grep |
 |---|---|---|
-| *"Who depends on X?"* | Every file the compiler confirms. Fewer wrong matches. **0.7 KB, one call.** | The same files at 3× the tokens — raw text the agent must still read |
+| *"Who depends on X?"* | Every file the compiler confirms. Fewer wrong matches. **0.7 KB, one call.** | The same files at 3× the tokens — raw text agents must still read |
 | *"What breaks if I change X?"* | **One ~1 KB answer** | No transitive search exists: ~5 rounds of grepping, **126× the tokens** |
 | *"Does this already exist? Is this dead? Did my edit break structure?"* | One call each (`find_similar` / `deadcode` / `diff` gate) | Not answerable by search |
 
@@ -64,7 +64,7 @@ domains (tests and tooling hidden by default). No mockups; regenerate them any t
 That's the whole point. Ask *if I change this function, what else moves?* — and codeweb answers from
 structure, not a guess. Click any node in the [living map](https://ghostlygawd.github.io/codeweb/) and
 its **blast radius** lights up: every function transitively affected, and the domains it crosses. It's
-the `codeweb_impact` tool — the same answer an agent gets over MCP, before it writes a line.
+the `codeweb_impact` tool — the same answer your agents get over MCP, before they write a line.
 
 <div align="center">
 <img src="assets/screens/06-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — its domain expanded in place, 58 users listed in the inspector, cross-domain dependencies lit, neighboring domains highlighted" width="760">
@@ -130,12 +130,13 @@ them against independent referees. **32 of 33 passed**
 - **Does it scale?** Mapping a repo **twice the size took ~26% longer** (measured exponent 0.33).
   Queries on a 3,201-symbol graph answer in **about a tenth of a second**. It has zero required
   dependencies.
-- **Does it actually help an agent?** Before an agent changes a function, it must find the code
-  that uses it. With grep, the agent found **44%** of that code. With codeweb, it found **74%** —
-  same context budget, better in all 5 runs
-  ([receipt](bench/experiments/efficiency-pilot.reps5-v090.json)). This matters because the agent
-  breaks code it doesn't find. (An earlier run on a different base model also showed big token
-  savings; that part did not replicate, and we say so rather than quoting the better number.)
+- **Does it actually help agents?** Before agents change a function, they must find the code that
+  uses it. With grep, agents found **44%** of that code. With codeweb, they found **74%** — same
+  context budget, better in all 5 runs
+  ([receipt](bench/experiments/efficiency-pilot.reps5-v090.json)). This matters because your
+  agents break code they don't see. (An earlier run on a different base model also showed big
+  token savings; that part did not replicate, and we say so rather than quoting the better
+  number.)
 - **Where does it fall short?** Two honest results. Re-mapping after very heavy edits isn't as
   fast as we wanted (the measured curve is published). And on simple, clean tasks, agents edited
   fine with or without codeweb — no measurable quality lift there. The study also found and fixed
@@ -247,8 +248,8 @@ Flags: `--depth module|symbol|auto`, `--engine hybrid|read|tools`, `--focus <glo
 
 ## Query the graph (for agents & humans)
 
-Once `graph.json` exists, `scripts/query.mjs` answers the structural questions an agent needs
-before it edits — read-only, deterministic, no LLM in the loop:
+Once `graph.json` exists, `scripts/query.mjs` answers the structural questions agents need
+before they edit — read-only, deterministic, no LLM in the loop:
 
 ```
 node scripts/query.mjs <graph.json> --impact  <symbol>   # blast radius: transitive callers + domains touched
@@ -413,7 +414,7 @@ node scripts/coverage.mjs .codeweb/graph.json lcov.info                      # o
 
 Every instrumented symbol gets `covered`/`hits` facts. From then on, `explain`, `--tests`, and
 `context-pack` answers say `covered by the recorded run (peak N hits)` — or, the loud one,
-`⚠ NOT covered by the recorded test run` — before an agent edits an unguarded symbol. The whole
+`⚠ NOT covered by the recorded test run` — before agents edit an unguarded symbol. The whole
 feature is optional: without a coverage input, graphs are byte-identical to before.
 
 ## Agent tools — context & pre-flight (`context-pack`, `simulate-edit`)
@@ -426,8 +427,8 @@ node scripts/context-pack.mjs  <graph.json> <symbol> [--json]   # minimal contex
 node scripts/simulate-edit.mjs <graph.json> --delete <sym> | --merge <a,b> [--into <id>] | --move <sym> --to <file>
 ```
 
-`context-pack` returns everything an agent needs to edit one symbol — its body, its direct callers
-with their call sites, its callees, and the transitive impact set — so the agent works from a small
+`context-pack` returns everything agents need to edit one symbol — its body, its direct callers
+with their call sites, its callees, and the transitive impact set — so they work from a small
 window instead of reading whole files. `simulate-edit` predicts the regression gate's verdict for a
 hypothetical delete, merge, or move **without performing it**, so doomed edits are discarded before
 any code is written. Both share the same graph primitives as `optimize.mjs` (one truth), pinned by
@@ -435,7 +436,7 @@ property tests against an independent reference implementation.
 
 ## Agent capability suite (write · review · optimize)
 
-A set of read-only, deterministic tools that make an agent better at the three jobs — each pinned by
+A set of read-only, deterministic tools that make agents better at the three jobs — each pinned by
 property tests against an independent reference implementation
 (full spec: [`docs/agent-tools-v2.md`](docs/agent-tools-v2.md)):
 
@@ -460,7 +461,7 @@ production `--callers` answers exclude tests. All of the above are also exposed 
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency MCP (Model Context Protocol) stdio server exposing
-all **27** of codeweb's tools to any MCP client. In the order an agent meets them:
+all **27** of codeweb's tools to any MCP client. In the order your agents meet them:
 
 - **Orient** — `codeweb_map` builds the graph; `codeweb_brief` is the day-one repo page (call it
   first); `codeweb_find` turns free text like *"retry backoff"* into ranked starting symbols.

@@ -12,7 +12,7 @@
     {
       "name": "codeweb",
       "source": "./",
-      "description": "Map any repo in seconds: /codeweb builds the graph; hooks brief every session and impact-check every edit; 27 deterministic MCP tools answer impact, callers, duplication, dead code, and risk before the agent writes."
+      "description": "Map any repo in seconds: /codeweb builds the graph; hooks brief every session and impact-check every edit; 27 deterministic MCP tools answer impact, callers, duplication, dead code, and risk before your agents write."
     }
   ]
 }

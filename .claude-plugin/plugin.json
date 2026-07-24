@@ -1,7 +1,7 @@
 {
   "name": "codeweb",
   "version": "0.10.0",
-  "description": "See what an edit breaks before you write it. codeweb maps the repo into a deterministic call/import graph: an interactive HTML map for you, plus 27 deterministic read-only query tools over MCP (impact, callers, duplication, risk, dead code, …) for the agent editing alongside you. /codeweb builds the map; hooks brief every session and impact-check every edit. Works on this project or any repo you want to review before adopting.",
+  "description": "See what an edit breaks before you write it. codeweb maps the repo into a deterministic call/import graph: an interactive HTML map for you, plus 27 deterministic read-only query tools over MCP (impact, callers, duplication, risk, dead code, …) for the agents editing alongside you. /codeweb builds the map; hooks brief every session and impact-check every edit. Works on this project or any repo you want to review before adopting.",
   "author": {
     "name": "GhostlyGawd",
     "email": "141867403+GhostlyGawd@users.noreply.github.com"
