@@ -96,12 +96,16 @@ for (const n of graph.nodes) {
 matches.sort((a, b) => b.sim - a.sim || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 const top = matches.slice(0, k);
 
+// API F3 (behavior BUG FIX): `count` was the capped length (top.length after slice(0, k)) —
+// contradicting the fleet-wide "count is the true total" contract; the real match total was
+// discarded and truncation was invisible. `count` is now the TRUE total; `more` marks the cap.
 const payload = {
   candidate: { source: body != null ? 'body' : stdin ? 'stdin' : 'signature', shingles: candidate.size, mode: structural ? 'structural' : 'lexical' },
   index: simIndex ? 'sidecar' : 'live',
   bodyLineCap: BODY_LINE_CAP, // finding #26: existing bodies shingled on their first N lines (candidate uncapped)
-  matches: top, count: top.length, scanned,
+  matches: top, count: matches.length, scanned,
 };
+if (matches.length > top.length) payload.more = { remaining: matches.length - top.length };
 
 if (json) { emitJson(payload); } else {
   console.log(`find-similar: candidate (${payload.candidate.shingles} shingles) vs ${payload.scanned} existing symbols`);

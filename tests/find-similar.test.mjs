@@ -132,6 +132,41 @@ test('FS-BOUNDED-K: --k truncates to the top-K', () => {
   } finally { cleanup(dir); }
 });
 
+// API F3 (behavior bug fix) — `count` was the POST-cap length (top.length after slice(0, k)),
+// contradicting the fleet-wide "count is the true total" contract; the real total was discarded
+// and the cut was invisible. count is now the pre-cap total; `more` names the capped remainder.
+test('FS-TRUE-TOTAL: count is the pre-cap match total; more.remaining marks the k-cap', () => {
+  // Constructed fixture: candidate == body 0, so f0/f1 self-match at 1.0 and f2/f3 share the
+  // 'alpha beta gamma' shingle (J = 1/3 >= 0.15) — exactly 4 matches, verified by the oracle.
+  const dir = tmpDir('cw-fs-tt-');
+  try {
+    const bodies = [
+      'alpha beta gamma delta',
+      'alpha beta gamma delta',
+      'alpha beta gamma epsilon',
+      'beta gamma delta epsilon zeta',
+      'zeta eta theta zeta eta theta',
+    ];
+    writeTree(dir, { 'src.js': bodies.join('\n') });
+    const nodes = bodies.map((b, i) => ({ id: `src.js:f${i}`, label: `f${i}`, kind: 'function', file: 'src.js', line: i + 1, loc: 1, exports: false, domain: 'd' }));
+    const graphPath = join(dir, 'graph.json');
+    writeTree(dir, { 'graph.json': JSON.stringify({ meta: { root: dir.replace(/\\/g, '/'), target: 'fx' }, nodes, edges: [], domains: [], overlaps: [] }) });
+    const cand = bodies[0];
+    const candPath = join(dir, 'cand.txt'); writeFileSync(candPath, cand);
+    const ids = bodies.map((_, i) => `src.js:f${i}`);
+    const all = expectedMatches(cand, bodies, ids, Infinity);
+    assert.ok(all.length >= 2, `fixture yields multiple matches (got ${all.length})`);
+    const K = all.length - 1; // force a cap
+    const out = JSON.parse(runNode(FS, [graphPath, '--body', candPath, '--k', String(K), '--json']).stdout);
+    assert.equal(out.count, all.length, 'count is the TRUE total, not the capped length');
+    assert.equal(out.matches.length, K);
+    assert.deepEqual(out.more, { remaining: all.length - K }, 'the cap is visible');
+    const uncapped = JSON.parse(runNode(FS, [graphPath, '--body', candPath, '--k', '999', '--json']).stdout);
+    assert.equal(uncapped.count, all.length);
+    assert.equal(uncapped.more, undefined, 'no cap, no more');
+  } finally { cleanup(dir); }
+});
+
 // FS-DETERMINISTIC — identical inputs → identical stdout.
 test('FS-DETERMINISTIC: identical inputs → identical stdout', () => {
   const rng = prng(0xD17);

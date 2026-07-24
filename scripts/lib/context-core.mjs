@@ -68,7 +68,9 @@ export function buildContextPack(graph, index, reader, ids, { symbol, windowN = 
     callees: cappedCallees.items.map((id) => view(byId.get(id), false)),  // dependencies: location-only (bounded)
     blastRadius: { count: blast.length, ids: cappedBlast.items }, // transitive impact: ids only
   };
-  if (cappedCallers.truncated) payload.moreCallers = { remaining: cappedCallers.remaining };
+  // API F3 (§4 convention: nextOffset rides wherever `remaining` is emitted). One offset param
+  // paging callers AND callees in lockstep would be ambiguous, so the tiers carry nextOffset only.
+  if (cappedCallers.truncated) payload.moreCallers = { remaining: cappedCallers.remaining, nextOffset: cappedCallers.offset + cappedCallers.items.length };
   // finding 23: a caller that already swept staleness (the MCP server's per-burst memo) threads
   // the verdict in; the CLI leaves it undefined and computes here. Same function, same verdict.
   if (staleInfo === undefined) staleInfo = checkStaleness(graph);
@@ -78,6 +80,6 @@ export function buildContextPack(graph, index, reader, ids, { symbol, windowN = 
     const uncoveredTargets = ids.filter((id) => index.byId.get(id)?.covered === false);
     if (uncoveredTargets.length) { payload.coverage = uncoveredTargets.map((id) => `${id}: ${coverageNote(graph, index.byId.get(id))}`); payload.summary += ' — ⚠ target NOT covered by the recorded test run'; }
   }
-  if (cappedCallees.truncated) payload.moreCallees = { remaining: cappedCallees.remaining };
+  if (cappedCallees.truncated) payload.moreCallees = { remaining: cappedCallees.remaining, nextOffset: cappedCallees.offset + cappedCallees.items.length };
   return payload;
 }

@@ -124,6 +124,10 @@ test('M2: tools/list exposes the full tool set with object schemas + correct req
   for (const n of ['codeweb_impact', 'codeweb_callers', 'codeweb_deadcode', 'codeweb_context', 'codeweb_risk', 'codeweb_hotspots']) {
     assert.ok(opt(n).includes('full'), `${n} exposes full`);
   }
+  // API F3: the dialect-B tools advertise offset end-to-end — their remainder is reachable
+  for (const n of ['codeweb_risk', 'codeweb_hotspots', 'codeweb_break_cycles']) {
+    assert.ok(opt(n).includes('offset'), `${n} exposes offset`);
+  }
 });
 
 test('M2b: initialize carries workflow instructions; unknown client protocol falls back to ours', () => {

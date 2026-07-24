@@ -96,6 +96,65 @@ test('codeweb_map: builds a real graph over MCP and reports the path + stats', (
   } finally { cleanup(ws); }
 });
 
+// ---- API F3 — one pagination dialect (limit/offset with nextOffset, true totals) --------------
+
+test('API F3: risk honors offset (offset:50 is not page 0) and more carries nextOffset', () => {
+  const ws = tmpDir('codeweb-f3-');
+  try {
+    const gp = join(ws, 'graph.json');
+    writeFileSync(gp, JSON.stringify(fatGraph()));
+    const p0 = resultOf(rpc([INIT, call(2, 'codeweb_risk', { graph: gp, limit: 2 })]), 2);
+    assert.equal(p0.count, 61, 'count stays the TRUE total');
+    assert.equal(p0.ranked.length, 2);
+    assert.deepEqual(p0.more, { remaining: 59, nextOffset: 2 }, 'the advertised remainder is now reachable');
+    // the verified F3 probe: {limit:2, offset:50} used to return page 0, silently — a paging loop hazard
+    const p50 = resultOf(rpc([INIT, call(3, 'codeweb_risk', { graph: gp, limit: 2, offset: 50 })]), 3);
+    assert.equal(p50.ranked.length, 2);
+    assert.notEqual(p50.ranked[0].id, p0.ranked[0].id, 'offset:50 returns a different page, not page 0');
+    assert.deepEqual(p50.more, { remaining: 9, nextOffset: 52 });
+    const h = resultOf(rpc([INIT, call(4, 'codeweb_hotspots', { graph: gp, limit: 3, offset: 3 })]), 4);
+    assert.equal(h.ranked.length, 3);
+    assert.equal(h.more.nextOffset, 6, 'hotspots speaks the same dialect');
+  } finally { cleanup(ws); }
+});
+
+test('API F3: break_cycles pages by offset; deadcode/context tiers and reading_order mark truncation', () => {
+  const ws = tmpDir('codeweb-f3b-');
+  try {
+    // three 2-file cycles -> a pageable break_cycles list
+    const nodes = [], edges = [];
+    for (let i = 0; i < 3; i++) {
+      nodes.push({ id: `a${i}.js:x${i}`, label: `x${i}`, kind: 'function', file: `a${i}.js`, line: 1, loc: 2, exports: true, domain: 'd' });
+      nodes.push({ id: `b${i}.js:y${i}`, label: `y${i}`, kind: 'function', file: `b${i}.js`, line: 1, loc: 2, exports: true, domain: 'd' });
+      edges.push({ from: `a${i}.js:x${i}`, to: `b${i}.js:y${i}`, kind: 'call' });
+      edges.push({ from: `b${i}.js:y${i}`, to: `a${i}.js:x${i}`, kind: 'call' });
+    }
+    const cgp = join(ws, 'cycles.json');
+    writeFileSync(cgp, JSON.stringify({ meta: { target: 'cyc' }, nodes, edges, domains: [], overlaps: [] }));
+    const c0 = resultOf(rpc([INIT, call(2, 'codeweb_break_cycles', { graph: cgp, limit: 1 })]), 2);
+    assert.equal(c0.count, 3, 'count stays the true total');
+    assert.deepEqual(c0.more, { remaining: 2, nextOffset: 1 });
+    const c1 = resultOf(rpc([INIT, call(3, 'codeweb_break_cycles', { graph: cgp, limit: 1, offset: 1 })]), 3);
+    assert.notDeepEqual(c1.cycles[0].files, c0.cycles[0].files, 'offset pages the cycle list');
+    assert.deepEqual(c1.more, { remaining: 1, nextOffset: 2 });
+
+    const gp = join(ws, 'graph.json');
+    writeFileSync(gp, JSON.stringify(fatGraph()));
+    const dead = resultOf(rpc([INIT, call(4, 'codeweb_deadcode', { graph: gp })]), 4);
+    assert.equal(dead.totals.safe, 60, 'totals stay true');
+    assert.equal(dead.safe.length, 20, 'default per-tier budget');
+    assert.deepEqual(dead.moreSafe, { remaining: 40, nextOffset: 20 }, 'per-tier marker carries nextOffset');
+
+    const ctx = resultOf(rpc([INIT, call(5, 'codeweb_context', { graph: gp, symbol: 'hub' })]), 5);
+    assert.equal(ctx.callers.length, 12, 'default caller budget');
+    assert.deepEqual(ctx.moreCallers, { remaining: 48, nextOffset: 12 });
+
+    const ro = resultOf(rpc([INIT, call(6, 'codeweb_reading_order', { graph: gp })]), 6);
+    assert.equal(ro.order.length, 20, 'default budget 20');
+    assert.deepEqual(ro.more, { remaining: 41 }, 'truncation is visible (it used to be silent)');
+  } finally { cleanup(ws); }
+});
+
 test('find_similar accepts an inline body over MCP (stdin plumbing) + structural flag', () => {
   const ws = tmpDir('codeweb-fs-');
   try {

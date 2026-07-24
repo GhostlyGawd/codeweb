@@ -58,7 +58,10 @@ const INSTRUCTIONS = [
   'Before a refactor, codeweb_simulate pre-flights a delete/merge/move; after verifying a finding is wrong, codeweb_annotate suppresses it so it stops resurfacing.',
   'No symbol name yet? codeweb_find turns a concept ("retry backoff") into ranked starting symbols.',
   '`graph` is optional — the server finds the nearest .codeweb/graph.json from cwd. No graph yet? codeweb_map builds one (~3s for 3k symbols).',
-  'Responses are budgeted (top-N + more.remaining). Pass full:true for the unabridged list, or limit/offset to page.',
+  // API F3: this line used to promise limit/offset paging on EVERY budgeted tool while several
+  // silently dropped `offset` (an agent paging risk looped on page 0 forever). Offset is now
+  // end-to-end on every list-ranked tool; the exceptions are named instead of implied.
+  'Responses are budgeted (top-N + more:{remaining, nextOffset}). Pass full:true for the unabridged list, or limit/offset to page (campaign/reading_order take `budget` instead; deadcode/context cap per tier via limit only).',
 ].join('\n');
 
 // #29 (T-29.2c): this writes the SERVER's stdout. The mid-session "client closed its read end"
@@ -243,10 +246,13 @@ const TOOLS = [
   { name: 'codeweb_fitness', need: [], opt: ['graph', 'rules'], bin: scriptOf('fitness.mjs'),
     argv: (a) => (a.rules ? ['--rules', a.rules] : []),
     description: 'Check the graph against architectural fitness rules (codeweb.rules.json): forbidden-dependency, layering, no-cycles, max-fan-in, max-symbol-loc. Reports violations. `rules` is optional — defaults to codeweb.rules.json beside the graph or in cwd.' },
-  { name: 'codeweb_risk', need: [], opt: ['graph', 'changed', 'limit', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('risk.mjs'),
+  // API F3: risk/break_cycles/hotspots advertised a remainder no offset could fetch — `offset`
+  // was silently dropped (the handler forwards it only when the opt list carries it), so a paging
+  // agent looped on page 0 forever. offset is now end-to-end (opt list here, --offset in the CLI).
+  { name: 'codeweb_risk', need: [], opt: ['graph', 'changed', 'limit', 'offset', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('risk.mjs'),
     argv: (a) => [...(a.changed ? ['--changed', a.changed] : []), ...(a.all ? ['--all'] : [])],
     description: 'Rank symbols by change-risk (fan-in, fan-out, loc, blast radius, churn); `changed` scopes to a comma-separated file list. Budgeted: top 15 by default.' },
-  { name: 'codeweb_break_cycles', need: [], opt: ['graph', 'limit', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 }, bin: scriptOf('break-cycles.mjs'), argv: () => [],
+  { name: 'codeweb_break_cycles', need: [], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 }, bin: scriptOf('break-cycles.mjs'), argv: () => [],
     description: 'For each file dependency cycle, the cheapest dependency edge to sever — verified to actually break the cycle. Budgeted: top 10 cycles by default.' },
   { name: 'codeweb_deadcode', need: [], opt: ['graph', 'limit', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 20 }, bin: scriptOf('deadcode.mjs'), argv: (a) => (a.all ? ['--all'] : []),
     description: 'Confidence-tiered dead-code: safe-to-delete vs review-first (test-guarded or entrypoint-like), each with its loc span. Budgeted: top 20 per tier by span (totals stay true; full:true for everything).' },
@@ -255,7 +261,7 @@ const TOOLS = [
   { name: 'codeweb_codemod', need: ['merge'], opt: ['graph', 'into'], bin: scriptOf('codemod.mjs'),
     argv: (a) => ['--merge', a.merge, ...(a.into ? ['--into', a.into] : [])],
     description: 'Plan a consolidation merge (report-only): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, and the projected regression-gate verdict. `into` is optional — omitted, the engine picks the canonical survivor. Read-only — does NOT modify source.' },
-  { name: 'codeweb_hotspots', need: [], opt: ['graph', 'limit', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('hotspots.mjs'), argv: (a) => (a.all ? ['--all'] : []),
+  { name: 'codeweb_hotspots', need: [], opt: ['graph', 'limit', 'offset', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('hotspots.mjs'), argv: (a) => (a.all ? ['--all'] : []),
     description: 'Rank symbols by refactoring priority (complexity x fan-in x churn): where to focus first. Budgeted: top 15 with raw components.' },
   { name: 'codeweb_campaign', need: [], opt: ['graph', 'budget', 'full', 'all'], budget: { arg: 'budget', flag: '--budget', value: 25 }, bin: scriptOf('campaign.mjs'), argv: (a) => (a.all ? ['--all'] : []),
     description: 'One ordered, gated optimization worklist (dead-code deletes + verified cycle cuts + duplicate merges), pre-flighted so applying in order never introduces a cycle. Budgeted: top 25 ROI steps by default (`budget` N or full:true for the whole plan).' },

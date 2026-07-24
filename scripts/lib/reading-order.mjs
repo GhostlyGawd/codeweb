@@ -17,7 +17,10 @@
 
 import { buildIndex, resolveSymbol } from './graph-ops.mjs';
 
-function scopeIdsOf(graph, index, scope) {
+// API F3: exported so the CLI can report the TRUE in-scope total beside a truncated order (the
+// budget cut used to be invisible). `index` is consulted only for the `symbol` closure — callers
+// may pass null for the other kinds. readingOrder's return shape is oracle-pinned; do not widen it.
+export function scopeIdsOf(graph, index, scope) {
   const kind = (scope && scope.kind) || 'all';
   if (kind === 'domain') return graph.nodes.filter((n) => (n.domain || 'unassigned') === scope.value).map((n) => n.id);
   if (kind === 'file') return graph.nodes.filter((n) => n.file === scope.value).map((n) => n.id);

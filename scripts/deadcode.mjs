@@ -109,8 +109,11 @@ const payload = {
   note: CAVEAT,
   safe: capSafe.items, review: capReview.items, suppressed,
 };
-if (capSafe.truncated) payload.moreSafe = { remaining: capSafe.remaining };
-if (capReview.truncated) payload.moreReview = { remaining: capReview.remaining };
+// API F3 (§4 convention: nextOffset rides wherever `remaining` is emitted). A single --offset
+// paging BOTH tiers in lockstep would over-skip the shorter tier — genuinely ambiguous — so the
+// tiers carry nextOffset only (the page boundary), without an offset param.
+if (capSafe.truncated) payload.moreSafe = { remaining: capSafe.remaining, nextOffset: capSafe.offset + capSafe.items.length };
+if (capReview.truncated) payload.moreReview = { remaining: capReview.remaining, nextOffset: capReview.offset + capReview.items.length };
 
 if (json) { emitJson(payload); } else {
 

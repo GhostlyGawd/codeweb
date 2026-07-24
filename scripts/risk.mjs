@@ -14,7 +14,7 @@ import { normalizeGraph, buildIndex, allBlastCounts, productScope, scopeNote } f
 import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
 import { churnFromGit } from './lib/churn.mjs'; // finding 27: ONE bounded, HEAD-cached git-churn parser (shared with hotspots)
 
-const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--limit N] [--churn <map.json> | --git] [--all] [--json]'; // F10: --limit was real but hidden
+const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--limit N] [--offset N] [--churn <map.json> | --git] [--all] [--json]'; // F10: --limit was real but hidden
 import { die, emitJson, finish, capList, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
@@ -22,14 +22,15 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
   flags: {
     json: { type: 'bool', default: false },
-    limit: { type: 'number', default: null },
+    limit: { type: 'number', default: null, min: 0 },  // API F3: one pagination dialect (limit/offset)
+    offset: { type: 'number', default: 0, min: 0 },
     changed: { type: 'string', default: null },
     churn: { type: 'string', default: null },
     git: { type: 'bool', default: false },
     all: { type: 'bool', default: false }, // #6: include non-product roles
   },
 });
-const { json, limit, changed, all } = opts, churnPath = opts.churn, useGit = opts.git;
+const { json, limit, offset, changed, all } = opts, churnPath = opts.churn, useGit = opts.git;
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 // churn map: file -> commit count
@@ -64,19 +65,24 @@ if (changed != null) {
   ranked = ranked.filter((r) => files.has(r.file));
 }
 
-const capped = capList(ranked, limit);
+// API F3: one pagination dialect — `count` stays the true total, `more` carries nextOffset so the
+// advertised remainder is actually reachable (it used to name a remainder no offset could fetch).
+const capped = capList(ranked, limit, offset);
 const payload = { target: graph.meta?.target || 'target', summary: `${ranked.length} symbol(s) ranked by change-risk${changed != null ? ' (changed only)' : ''}`, weights: RISK_WEIGHTS, maxes, count: ranked.length, ranked: capped.items, excluded: riskScope.excluded, excludedByRole: riskScope.excludedByRole };
 if (riskScope.excluded) payload.summary += ` — ${scopeNote(riskScope)}`;
-if (capped.truncated) payload.more = { remaining: capped.remaining };
+if (capped.truncated) payload.more = { remaining: capped.remaining, nextOffset: capped.offset + capped.items.length };
 
 if (json) { emitJson(payload); } else {
 
 console.log(`codeweb risk: ${payload.target} — ${ranked.length} symbol(s) ranked by change-risk${changed != null ? ' (changed only)' : ''}`);
 console.log(`  weights: ${Object.entries(RISK_WEIGHTS).map(([k, v]) => `${k} ${v}`).join(', ')}`);
 if (riskScope.excluded) console.log(`  scope: product — ${scopeNote(riskScope)}`); // #6: counted, never silent
-for (const r of ranked.slice(0, 15)) {
+// CLI.md 5.2: text mode printed a hard-coded top-15 of the UNCAPPED list — --limit was accepted
+// and silently ignored. Render the capped page; the classic top-15 stays the no-flag default.
+for (const r of (limit != null ? payload.ranked : payload.ranked.slice(0, 15))) {
   const c = r.components;
   console.log(`  ${r.risk.toFixed(3)}  ${r.id}  [in ${c.fanIn} out ${c.fanOut} loc ${c.loc} blast ${c.blast} churn ${c.churn}]`);
 }
+if (payload.more) console.log(`  … +${payload.more.remaining} more (rerun with --offset ${payload.more.nextOffset})`);
 finish();
 }

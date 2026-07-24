@@ -86,6 +86,28 @@ test('--changed restricts ranked output to changed files', () => {
   } finally { cleanup(dir); }
 });
 
+// API F3 + CLI.md 5.2: --offset pages the ranked list (count stays the true total, more carries
+// nextOffset), and TEXT mode honors --limit — it used to print a hard-coded top-15 of the
+// UNCAPPED list, a flag accepted and silently ignored.
+test('RK-PAGING: --offset pages with nextOffset; text mode honors --limit', () => {
+  const rng = prng(0xF3F3);
+  const g = makeGraph(rng, 10);
+  const dir = tmpDir('cw-risk-pg-');
+  try {
+    writeTree(dir, { 'graph.json': JSON.stringify(g) });
+    const gp = join(dir, 'graph.json');
+    const all = JSON.parse(runNode(RISK, [gp, '--json']).stdout);
+    const page = JSON.parse(runNode(RISK, [gp, '--limit', '3', '--offset', '2', '--json']).stdout);
+    assert.equal(page.count, all.count, 'count stays the true total');
+    assert.deepEqual(page.ranked.map((r) => r.id), all.ranked.slice(2, 5).map((r) => r.id), 'offset shifts the same ordering');
+    assert.deepEqual(page.more, { remaining: all.count - 5, nextOffset: 5 }, 'the remainder names the next page');
+    const text = runNode(RISK, [gp, '--limit', '2']);
+    assert.equal(text.status, 0, text.stderr);
+    const rows = text.stdout.split('\n').filter((l) => /^ {2}\d\.\d{3} {2}/.test(l));
+    assert.equal(rows.length, 2, `text mode prints exactly --limit rows (got ${rows.length}):\n${text.stdout}`);
+  } finally { cleanup(dir); }
+});
+
 // RK-DETERMINISTIC
 test('RK-DETERMINISTIC: identical inputs -> identical stdout', () => {
   const rng = prng(0x2222);
