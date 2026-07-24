@@ -97,7 +97,8 @@ test('F9 run.mjs success points the user at the report', () => {
     const r = runNode(script('run.mjs'), [dir, '--out-dir', ws]);
     assert.equal(r.status, 0, r.stderr.slice(-400));
     // First run: the next: block's step 1 names the report; returning users get the classic line.
-    assert.match(r.stderr, /see the map: .*report\.html|open .*report\.html in your browser/);
+    // CLI.md 6.1: guidance is part of the result page — stdout, not stderr.
+    assert.match(r.stdout, /see the map: .*report\.html|open .*report\.html in your browser/);
   } finally { cleanup(dir); cleanup(ws); }
 });
 

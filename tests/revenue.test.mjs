@@ -42,9 +42,10 @@ test('RV4: the receipt-high-point ask fires on real value, once a month, local-o
     writeTree(dir, FIXTURE);
     const ws = join(dir, 'src', '.codeweb');
     // First map: no history, no receipt -> never an ask on first contact.
+    // CLI.md 6.1: the receipt/ask lines ride the RESULT block — stdout, not stderr.
     const first = runNode(script('run.mjs'), [join(dir, 'src'), '--out-dir', ws]);
     assert.equal(first.status, 0, first.stderr);
-    assert.ok(!first.stderr.includes(SPONSOR_URL), 'no ask before value is proven');
+    assert.ok(!first.stdout.includes(SPONSOR_URL), 'no ask before value is proven');
 
     // Seed a ledger that crosses the threshold (3 regressions flagged before landing).
     const stats = JSON.parse(readFileSync(join(ws, 'stats.json'), 'utf8'));
@@ -52,12 +53,12 @@ test('RV4: the receipt-high-point ask fires on real value, once a month, local-o
     writeFileSync(join(ws, 'stats.json'), JSON.stringify(stats));
     const second = runNode(script('run.mjs'), [join(dir, 'src'), '--out-dir', ws, '--full']);
     assert.equal(second.status, 0, second.stderr);
-    assert.ok(second.stderr.includes(SPONSOR_URL), 'the one honest in-product ask, at the receipt high point');
+    assert.ok(second.stdout.includes(SPONSOR_URL), 'the one honest in-product ask, at the receipt high point');
 
     // Throttle: the very next run must NOT ask again (lastSponsorAskAt stamped).
     const third = runNode(script('run.mjs'), [join(dir, 'src'), '--out-dir', ws, '--full']);
     assert.equal(third.status, 0, third.stderr);
-    assert.ok(!third.stderr.includes(SPONSOR_URL), 'asks are throttled to once a month — repetition is nagging');
+    assert.ok(!third.stdout.includes(SPONSOR_URL), 'asks are throttled to once a month — repetition is nagging');
   } finally { cleanup(dir); }
 });
 

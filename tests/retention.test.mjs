@@ -97,8 +97,9 @@ test('R1/R8: a re-map prints the since-last-map delta and appends history.jsonl'
     writeFileSync(join(dir, 'src', 'two.js'), TWO_V2); // the user FIXED the duplication
     const r2 = mapProject(dir, ws);
     assert.equal(r2.status, 0, r2.stderr);
-    assert.match(r2.stderr, /since last map/i, 'the re-map acknowledges the previous one');
-    assert.match(r2.stderr, /dups 1 -> 0/, 'the fixed duplication is CELEBRATED, not silent');
+    // CLI.md 6.1: the delta is part of the RESULT block — stdout, not stderr.
+    assert.match(r2.stdout, /since last map/i, 'the re-map acknowledges the previous one');
+    assert.match(r2.stdout, /dups 1 -> 0/, 'the fixed duplication is CELEBRATED, not silent');
 
     const hp = join(ws, 'history.jsonl');
     assert.ok(existsSync(hp), 'history.jsonl exists');
@@ -183,7 +184,8 @@ test('R10: the run banner names the version', () => {
     writeTree(dir, V1);
     const r = mapProject(dir, join(dir, 'src', '.codeweb'));
     assert.equal(r.status, 0);
-    assert.match(r.stderr, /codeweb v\d+\.\d+\.\d+/, 'users can self-diagnose being behind');
+    // CLI.md 6.1: the done banner is the RESULT — stdout, not stderr.
+    assert.match(r.stdout, /codeweb v\d+\.\d+\.\d+/, 'users can self-diagnose being behind');
   } finally { cleanup(dir); }
 });
 

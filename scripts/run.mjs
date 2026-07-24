@@ -12,6 +12,12 @@
 // Stages read their workspace from CODEWEB_WS (default '.live' when run standalone).
 // Outputs in the workspace: fragment.json, graph.json, overlap.md, report.html, report.md.
 // Read-only over the target; never executes target code.
+//
+// Stream contract (CLI.md 5.1/6.1 — the fleet convention this file predated): stderr carries
+// PROGRESS (the [run] stage lines, children's output, failure lines); stdout carries the RESULT
+// (everything from `[run] done -> …` on: banner, since-last delta, artifact list, receipt,
+// next steps — or, with --json, exactly one machine-readable line). So `codeweb . | grep mapped`
+// works and `codeweb . 2>/dev/null` shows the results, like every other tool in the fleet.
 
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, existsSync, readFileSync, statSync } from 'node:fs';
@@ -32,7 +38,7 @@ const VERSION = (() => { try { return JSON.parse(readFileSync(join(ROOT, 'packag
 // stage memo, so an old workspace can never serve outputs computed by an older pipeline.
 const MEMO_VERSION = 1;
 
-const USAGE = `usage: run.mjs [<SRC>] [--target <label>] [--out-dir <dir>] [--open] [--full] [--allow-empty]
+const USAGE = `usage: run.mjs [<SRC>] [--target <label>] [--out-dir <dir>] [--open] [--full] [--allow-empty] [--json]
   <SRC>            path to the codebase to map (default: current directory)
   --target <label> display label stamped into the map (default: last two path segments of <SRC>)
   --out-dir <dir>  where the artifacts go (default: <SRC>/.codeweb — where MCP + hooks find them)
@@ -40,6 +46,8 @@ const USAGE = `usage: run.mjs [<SRC>] [--target <label>] [--out-dir <dir>] [--op
   --serve          after the map, serve the workspace at http://127.0.0.1:<port> (localhost only)
   --full           recompute every stage (skip the fragment memo + edge cache)
   --allow-empty    permit a target with no supported source (writes an empty map)
+  --json           machine mode: one JSON result line on stdout ({ws, symbols, actionable,
+                   reused, version}); stage progress stays on stderr
   --stages <phase> partial pipeline; only 'through-overlap' (extract+cluster+overlap, skip
                    optimize+report) — the trend fast path; never writes the stage memo
   --coverage <p>   annotate the graph with a coverage report (lcov or c8 JSON) after mapping`;
@@ -56,12 +64,13 @@ const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
     'allow-empty': { type: 'bool', default: false }, // forwarded to extract: skip the empty-map guard
     stages: { type: 'string', default: null },       // finding #42: partial pipeline (trend fast path)
     coverage: { type: 'string', default: null },     // #13: measured-execution annotation after the map
+    json: { type: 'bool', default: false },          // CLI.md 5.1: the flagship's machine mode
   },
 });
 // FUNNEL #2 / FORMS cut #4: the main form has zero required fields. <SRC> defaults to the
 // current directory; the empty-target guard downstream keeps a wrong cwd from producing a
 // silent nonsense map.
-const opts = { src: pos[0] ?? '.', target: flags.target, outDir: flags['out-dir'], open: flags.open, serve: flags.serve, full: flags.full, allowEmpty: flags['allow-empty'], stages: flags.stages, coverage: flags.coverage };
+const opts = { src: pos[0] ?? '.', target: flags.target, outDir: flags['out-dir'], open: flags.open, serve: flags.serve, full: flags.full, allowEmpty: flags['allow-empty'], stages: flags.stages, coverage: flags.coverage, json: flags.json };
 // finding #42: --stages is a partial pipeline. Only 'through-overlap' is valid — any other value dies
 // with usage (exit 2), so a typo can never silently run a different phase set. A partial run computes
 // extract+cluster+overlap (graph.json's nodes/edges/domains/overlaps — all trend's metrics need),
@@ -113,10 +122,12 @@ const run = (label, file, args, useEnv) => {
   console.error(`\n[run] ${label}`);
   const t0 = Date.now();
   try {
-    execFileSync(node, [file, ...args], { stdio: 'inherit', env: useEnv ? env : process.env, cwd: ROOT });
+    // CLI.md 6.1: children's stdout is progress by definition — route it to OUR stderr so stdout
+    // stays the result channel (and --json stays one parseable line). Child stderr passes through.
+    execFileSync(node, [file, ...args], { stdio: ['ignore', 2, 'inherit'], env: useEnv ? env : process.env, cwd: ROOT });
   } catch (e) {
-    // The stage already printed its own diagnostics (stdio inherited) — add one clean line, not a
-    // raw execFileSync stack dump.
+    // The stage already printed its own diagnostics (stdout -> our stderr, stderr inherited) —
+    // add one clean line, not a raw execFileSync stack dump.
     console.error(`\n[run] stage '${label}' failed${typeof e?.status === 'number' ? ` (exit ${e.status})` : ''} — aborting`);
     process.exit(1);
   }
@@ -125,9 +136,10 @@ const run = (label, file, args, useEnv) => {
   console.error(`[run] ${label} done in ${Date.now() - t0}ms`);
 };
 // ACTIVATION A2: optimize's per-item advisory dump (~90 lines on a real repo) buried the result
-// under logistics. The stage runs CAPTURED: its headline lines still print (stdout, as before),
-// the dump lives in optimize.md with a one-line pointer here; CODEWEB_VERBOSE=1 restores the
-// firehose. Returns stdout so the banner can scrape the ready/LOC pair.
+// under logistics. The stage runs CAPTURED: its headline lines still print (on stderr — stage
+// chatter under the CLI.md 6.1 stream contract), the dump lives in optimize.md with a one-line
+// pointer here; CODEWEB_VERBOSE=1 restores the firehose. Returns stdout so the banner can scrape
+// the ready/LOC pair.
 const runCapture = (label, file, args) => {
   console.error(`\n[run] ${label}`);
   const t0 = Date.now();
@@ -142,8 +154,8 @@ const runCapture = (label, file, args) => {
   const lines = out.split('\n');
   const verbose = process.env.CODEWEB_VERBOSE === '1';
   const shown = (verbose ? out : lines.slice(0, 3).join('\n')).trimEnd();
-  if (shown) console.log(shown);
-  if (!verbose && lines.length > 4) console.log(`  full advisory: ${join(ws, 'optimize.md')}`);
+  if (shown) console.error(shown);
+  if (!verbose && lines.length > 4) console.error(`  full advisory: ${join(ws, 'optimize.md')}`);
   console.error(`[run] ${label} done in ${Date.now() - t0}ms`);
   return out;
 };
@@ -261,52 +273,67 @@ if (!partial) try {
 
 if (opts.coverage) run('coverage', S('scripts/coverage.mjs'), [join(ws, 'graph.json'), resolve(opts.coverage)], false); // #13
 
-console.error(`\n[run] done -> ${ws} · codeweb v${VERSION}`);
-if (partial) {
-  console.error(`[run]   ${ws}/graph.json · overlap.md · fragment.json (through-overlap: no report)`);
+// CLI.md 5.1/6.1: everything from here down is the RESULT — it prints on stdout so pipes and
+// `2>/dev/null` both work. --json replaces the whole text block with ONE machine-readable line
+// (symbols/actionable are null when no banner exists, e.g. a --stages through-overlap run;
+// reused mirrors the stage memo: true when the downstream stages did not execute this run).
+if (opts.json) {
+  console.log(JSON.stringify({
+    ws,
+    symbols: banner ? banner.symbols : null,
+    actionable: banner ? banner.actionable : null,
+    reused: reusable,
+    version: VERSION,
+  }));
 } else {
-  // ACTIVATION A3: the banner leads with the RESULT (what the map found), not logistics. Numbers
-  // come from the graph itself (memo-cached on reuse) + optimize's headline; never recomputed here.
-  if (banner) {
-    const ready = banner.ready > 0 ? ` · ${banner.ready} ready merge(s)` : '';
-    const loc = banner.loc > 0 ? ` (~${banner.loc} LOC reclaimable)` : '';
-    console.error(`[run] mapped ${banner.symbols} symbols -> ${banner.actionable} actionable finding(s)${ready}${loc} — details: optimize.md`);
-  }
-  // RETENTION R1: the re-map is a PROGRESS REPORT — measured deltas only, never projections.
-  if (sinceLast) {
-    const { prev, cur } = sinceLast;
-    const when = prev.at ? ` (${String(prev.at).slice(0, 10)})` : '';
-    console.error(`[run] since last map${when}: dups ${prev.confirmed} -> ${cur.confirmed} · cycles ${prev.cycles} -> ${cur.cycles} · symbols ${prev.symbols} -> ${cur.symbols}`);
-  }
-  console.error(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);
-  // #10: the value receipt shows up where the user already is — one line, only when non-empty.
-  let receipt = null;
-  try {
-    const { readStats, lifetimeTotals, monthLine } = await import('./lib/stats.mjs');
-    receipt = monthLine(lifetimeTotals(readStats(join(ws, 'graph.json'))));
-  } catch { /* receipt must never break the pipeline */ }
-  if (receipt) {
-    // Returning user (the hooks/MCP have accrued activity here): receipt instead of onboarding.
-    console.error(`[run]   codeweb here so far: ${receipt} (full receipt: scripts/stats.mjs)`);
-    if (!opts.open) console.error(`[run]   open ${join(ws, 'report.html')} in your browser (or re-run with --open)`);
-    // REVENUE §3.2: the ONE in-product ask, at the receipt high point only — local counters,
-    // 30-day throttle, never on first contact, never on agent/failure surfaces.
-    try {
-      const { sponsorAskDue, recordSponsorAsk } = await import('./lib/stats.mjs');
-      if (sponsorAskDue(join(ws, 'graph.json'))) {
-        console.error('[run]   codeweb is free — sponsoring pays for its benchmarks: https://github.com/sponsors/GhostlyGawd');
-        recordSponsorAsk(join(ws, 'graph.json'));
-      }
-    } catch { /* the ask must never break the pipeline */ }
+  console.log(`\n[run] done -> ${ws} · codeweb v${VERSION}`);
+  if (partial) {
+    console.log(`[run]   ${ws}/graph.json · overlap.md · fragment.json (through-overlap: no report)`);
   } else {
-    // ACTIVATION A5: first map of this repo — the three moves that turn one run into a habit.
-    // #5 still holds: the map's whole point is to be LOOKED AT, so seeing it is step 1.
-    const openCmd = process.platform === 'win32' ? 'start ""' : process.platform === 'darwin' ? 'open' : 'xdg-open';
-    console.error(`[run] next:`);
-    console.error(`[run]   1. ${opts.open ? 'the map is opening in your browser' : `see the map: ${openCmd} ${join(ws, 'report.html')}`}`);
-    console.error(`[run]   2. live queries in Claude Code: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp`);
-    console.error(`[run]   3. after edits: re-run codeweb here — the refresh is cache-warm (seconds, not a re-map)`);
+    // ACTIVATION A3: the banner leads with the RESULT (what the map found), not logistics. Numbers
+    // come from the graph itself (memo-cached on reuse) + optimize's headline; never recomputed here.
+    if (banner) {
+      const ready = banner.ready > 0 ? ` · ${banner.ready} ready merge(s)` : '';
+      const loc = banner.loc > 0 ? ` (~${banner.loc} LOC reclaimable)` : '';
+      console.log(`[run] mapped ${banner.symbols} symbols -> ${banner.actionable} actionable finding(s)${ready}${loc} — details: optimize.md`);
+    }
+    // RETENTION R1: the re-map is a PROGRESS REPORT — measured deltas only, never projections.
+    if (sinceLast) {
+      const { prev, cur } = sinceLast;
+      const when = prev.at ? ` (${String(prev.at).slice(0, 10)})` : '';
+      console.log(`[run] since last map${when}: dups ${prev.confirmed} -> ${cur.confirmed} · cycles ${prev.cycles} -> ${cur.cycles} · symbols ${prev.symbols} -> ${cur.symbols}`);
+    }
+    console.log(`[run]   ${ws}/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json`);
+    // #10: the value receipt shows up where the user already is — one line, only when non-empty.
+    let receipt = null;
+    try {
+      const { readStats, lifetimeTotals, monthLine } = await import('./lib/stats.mjs');
+      receipt = monthLine(lifetimeTotals(readStats(join(ws, 'graph.json'))));
+    } catch { /* receipt must never break the pipeline */ }
+    if (receipt) {
+      // Returning user (the hooks/MCP have accrued activity here): receipt instead of onboarding.
+      console.log(`[run]   codeweb here so far: ${receipt} (full receipt: scripts/stats.mjs)`);
+      if (!opts.open) console.log(`[run]   open ${join(ws, 'report.html')} in your browser (or re-run with --open)`);
+      // REVENUE §3.2: the ONE in-product ask, at the receipt high point only — local counters,
+      // 30-day throttle, never on first contact, never on agent/failure surfaces (--json included:
+      // the suppressed block never prints, so the throttle is never burned unseen).
+      try {
+        const { sponsorAskDue, recordSponsorAsk } = await import('./lib/stats.mjs');
+        if (sponsorAskDue(join(ws, 'graph.json'))) {
+          console.log('[run]   codeweb is free — sponsoring pays for its benchmarks: https://github.com/sponsors/GhostlyGawd');
+          recordSponsorAsk(join(ws, 'graph.json'));
+        }
+      } catch { /* the ask must never break the pipeline */ }
+    } else {
+      // ACTIVATION A5: first map of this repo — the three moves that turn one run into a habit.
+      // #5 still holds: the map's whole point is to be LOOKED AT, so seeing it is step 1.
+      const openCmd = process.platform === 'win32' ? 'start ""' : process.platform === 'darwin' ? 'open' : 'xdg-open';
+      console.log(`[run] next:`);
+      console.log(`[run]   1. ${opts.open ? 'the map is opening in your browser' : `see the map: ${openCmd} ${join(ws, 'report.html')}`}`);
+      console.log(`[run]   2. live queries in Claude Code: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp`);
+      console.log(`[run]   3. after edits: re-run codeweb here — the refresh is cache-warm (seconds, not a re-map)`);
+    }
   }
-  // reach: --serve keeps the process alive serving THIS workspace on localhost (Ctrl-C to stop).
-  if (opts.serve) run('serve', S('scripts/serve.mjs'), [ws], false);
 }
+// reach: --serve keeps the process alive serving THIS workspace on localhost (Ctrl-C to stop).
+if (!partial && opts.serve) run('serve', S('scripts/serve.mjs'), [ws], false);
