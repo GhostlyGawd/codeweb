@@ -17,7 +17,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
   MCP tool list regrouped by when agents meet each tool (which also
   surfaces `codeweb_explain`, previously undocumented in the README). Density is now gated:
   marketing paragraphs cap at ~55 words, enforced by `tests/copy-density.test.mjs`, with the
-  voice rules recorded in `CONTRIBUTING.md`. Two overclaims corrected:
+  voice rules recorded in `CONTRIBUTING.md`. And the README is a landing page again: its
+  reference half — outputs, per-tool docs, the capability table, the full MCP tool groups, the
+  component tree — moved to `docs/reference.md`, linked per-job from the README (which drops
+  from ~650 to ~330 lines). Two overclaims corrected:
   the homepage no longer calls 16k+ graphs "measured green" (the expand-all receipt says
   `green:false` at that scale), and the pre-registration page no longer says the full study
   re-runs in CI (CI re-measures the standing budgets; the study re-runs via `bench/run-all.mjs`).

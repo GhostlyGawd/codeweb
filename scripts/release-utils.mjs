@@ -48,6 +48,7 @@ const numOf = (s) => (/^\d+$/.test(s) ? Number(s) : WORD_NUM[s.toLowerCase()] ??
 /** Prose files the scans cover — hand-written surfaces where counts can rot. */
 export const PROSE_FILES = [
   'README.md',
+  'docs/reference.md',
   'docs/agent-tools.md',
   'tests/README.md',
   '.claude-plugin/marketplace.json',
