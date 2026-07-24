@@ -80,9 +80,13 @@ if (opts.stages !== null && opts.stages !== 'through-overlap') { console.error(`
 const partial = opts.stages === 'through-overlap';
 // Resolve the target against the CALLER's cwd (not the plugin root the stages run in) — a relative
 // <SRC> must mean the same thing as a relative --out-dir. Fail here with one clean line, not a
-// stage-level stack trace.
+// stage-level stack trace. API.md F2: a wrong path is an INPUT error — exit 2 like the sibling
+// input errors below (bad --stages, missing --coverage) and every loadGraph tool, never 1 (the
+// stage-failure code): a typo'd path and a real pipeline failure must be distinguishable to CI.
+// CLI.md 7.2: this validation runs BEFORE the workspace mkdir below, so a bad target never mints
+// a .codeweb directory on the way out.
 opts.src = resolve(opts.src);
-if (!existsSync(opts.src)) { console.error(`[run] target not found: ${opts.src}`); process.exit(1); }
+if (!existsSync(opts.src)) { console.error(`[run] target not found: ${opts.src}`); process.exit(2); }
 // FORMS F9: --coverage names a FILE — check it now, not after five stages of work on a large
 // repo (the map used to build fully, then die on an lcov typo with an "aborting" frame that
 // hid the map's success).
@@ -94,6 +98,8 @@ if (opts.coverage && !existsSync(resolve(opts.coverage))) {
 // FUNNEL #2: the default workspace lives INSIDE the target (<SRC>/.codeweb) — exactly where MCP
 // graph discovery and all three hooks walk up to. The old default (under the npx package root)
 // orphaned maps in the npx cache where nothing could ever find them.
+// CLI.md 7.2: created only AFTER the target validation above — mkdirSync({recursive}) on an
+// unvalidated <SRC> would fabricate the missing target directory itself just to die inside it.
 const ws = opts.outDir ? resolve(opts.outDir) : join(opts.src, '.codeweb');
 mkdirSync(ws, { recursive: true });
 // RETENTION R6: the workspace self-declares what is cache and what is MEMORY. `rm -rf .codeweb`
