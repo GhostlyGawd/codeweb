@@ -15,7 +15,9 @@ notes so validated results, papers, and new tools never get lost in commit histo
   stats stated as outcomes ("+0.31 recall" now reads "with grep agents found 44% of a
   function's callers; with codeweb, 74%. Your agents break code they don't see"), and the
   MCP tool list regrouped by when agents meet each tool (which also
-  surfaces `codeweb_explain`, previously undocumented in the README). Two overclaims corrected:
+  surfaces `codeweb_explain`, previously undocumented in the README). Density is now gated:
+  marketing paragraphs cap at ~55 words, enforced by `tests/copy-density.test.mjs`, with the
+  voice rules recorded in `CONTRIBUTING.md`. Two overclaims corrected:
   the homepage no longer calls 16k+ graphs "measured green" (the expand-all receipt says
   `green:false` at that scale), and the pre-registration page no longer says the full study
   re-runs in CI (CI re-measures the standing budgets; the study re-runs via `bench/run-all.mjs`).

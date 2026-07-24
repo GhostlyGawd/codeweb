@@ -28,6 +28,18 @@ own structural self-review on `scripts/`.
 the extension · `tests/` (see `tests/README.md`) · `reports/` audit paper trail ·
 `decisions/` + `specs/` design history.
 
+## Copy style (README, site, listings)
+
+`tests/copy-density.test.mjs` gates the density; the voice rules are convention:
+
+- Max ~2 sentences per paragraph. Over ~55 words, the test fails the build.
+- Facts become bullets — one fact per line. Never a paragraph of eleven facts.
+- Subject, verb, object. No mirror constructions ("what it misses is what it breaks").
+- Agents are plural and the reader's: "your agents … they", never "the agent … it".
+- Outcome first, number second, receipt link third. Stats vocabulary (recall, F1, MRR)
+  stays on the research page; everywhere else, translate it.
+- Tool and language counts are gated by `check-consistency` — never hardcode a new one.
+
 ## Releases
 
 Maintainer-run: `.claude/skills/release-tag/SKILL.md` is the runbook (version prep →

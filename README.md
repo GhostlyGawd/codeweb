@@ -17,14 +17,16 @@
 Before you change code, you need answers. **Who calls this? What breaks if I touch it?
 Does this already exist? Is this dead?**
 
-Today your coding agents answer by grepping and reading whole files — thousands of tokens per
-question, and they still guess. codeweb reads your repo once (~3 s for 3,000 symbols) and builds
-the real call/import graph. After that, every answer is exact, instant, and about a kilobyte.
+Today your coding agents answer by grepping whole files. Thousands of tokens per question, and
+they still guess.
 
-Your agents get **27 deterministic tools** they can call over MCP — the open protocol coding
-agents like Claude Code, Cursor, and Windsurf use to call tools. No LLM anywhere in codeweb's
-loop. You get a self-contained **interactive map** of your codebase. The result: your agents
-break less code, and they stop rewriting functions you already have.
+codeweb reads your repo once and builds the real call/import graph (~3 s for 3,000 symbols).
+After that, every answer is exact, instant, and about a kilobyte.
+
+Your agents get **27 deterministic tools** over MCP — the protocol Claude Code, Cursor, and
+Windsurf use to call tools. You get an **interactive map**. No LLM anywhere in codeweb's loop.
+
+The result: your agents break less code, and they stop rewriting functions you already have.
 
 Here's codeweb against grep on [vite](https://github.com/vitejs/vite) (3,000+ symbols), with the
 TypeScript compiler as an independent referee ([the receipt](bench/results/oracle-ab.json)):
@@ -48,23 +50,23 @@ hotspots, and tangled domains**.
 
 ## See it in action
 
-One command runs the whole deterministic pipeline and drops an interactive map at
-`<target>/.codeweb/report.html`. **Every screenshot below is that actual generated report**, codeweb
-pointed read-only at **[axios](https://github.com/axios/axios)** — 274 product symbols across 8
-domains (tests and tooling hidden by default). No mockups; regenerate them any time with
-`node scripts/screenshot.mjs`.
+One command builds the map: `<target>/.codeweb/report.html`.
 
-> **▶ Read the full [axios case study](docs/case-study-axios.md):** on a library downloaded ~50M
-> times a week, codeweb body-confirmed **3 real duplications** (two byte-identical across files),
-> dismissed 12 false positives, and produced a cycle-safe merge plan for each. Or **[click around
-> this exact map yourself](https://ghostlygawd.github.io/codeweb/demo/)** — it's live on GitHub Pages.
+Every screenshot below is a real generated report. The target is
+**[axios](https://github.com/axios/axios)**: 274 symbols, 8 domains. No mockups.
+
+> **▶ [Read the axios case study](docs/case-study-axios.md).** codeweb found **3 real
+> duplications** in axios — a library downloaded 50M times a week. It dismissed 12 false
+> positives. Each finding came with a safe merge plan.
+> Or **[explore the live map](https://ghostlygawd.github.io/codeweb/demo/)** yourself.
 
 ### Know what an edit breaks — before you write
 
-That's the whole point. Ask *if I change this function, what else moves?* — and codeweb answers from
-structure, not a guess. Click any node in the [living map](https://ghostlygawd.github.io/codeweb/) and
-its **blast radius** lights up: every function transitively affected, and the domains it crosses. It's
-the `codeweb_impact` tool — the same answer your agents get over MCP, before they write a line.
+That's the whole point. Click any function in the
+[living map](https://ghostlygawd.github.io/codeweb/) and its **blast radius** lights up:
+everything your change would touch.
+
+Your agents get the same answer over MCP (`codeweb_impact`) — before they write a line.
 
 <div align="center">
 <img src="assets/screens/06-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — its domain expanded in place, 58 users listed in the inspector, cross-domain dependencies lit, neighboring domains highlighted" width="760">
@@ -120,27 +122,20 @@ We wrote down 33 checks **before** testing, so we couldn't move the goalposts. T
 them against independent referees. **32 of 33 passed**
 ([the check-by-check receipt](bench/preregistration.md)). The short version:
 
-- **Is it right?** We compared codeweb's answers to independent referees **490,000+ times: zero
-  disagreements** (who calls what, what an edit breaks, where the cycles are). Its edit-safety
-  checks passed all 20,000 trials.
-- **Does it find real duplication?** It found **every planted clone with zero false alarms**
-  (F1 1.0; name-matching scored 0.67). It still finds clones after they've been renamed;
-  text-matching tools find none. Asked *"what should I reuse here?"*, it ranked the right answer
-  first almost every time (MRR 0.99).
-- **Does it scale?** Mapping a repo **twice the size took ~26% longer** (measured exponent 0.33).
-  Queries on a 3,201-symbol graph answer in **about a tenth of a second**. It has zero required
-  dependencies.
-- **Does it actually help agents?** Before agents change a function, they must find the code that
-  uses it. With grep, agents found **44%** of that code. With codeweb, they found **74%** — same
-  context budget, better in all 5 runs
-  ([receipt](bench/experiments/efficiency-pilot.reps5-v090.json)). This matters because your
-  agents break code they don't see. (An earlier run on a different base model also showed big
-  token savings; that part did not replicate, and we say so rather than quoting the better
-  number.)
-- **Where does it fall short?** Two honest results. Re-mapping after very heavy edits isn't as
-  fast as we wanted (the measured curve is published). And on simple, clean tasks, agents edited
-  fine with or without codeweb — no measurable quality lift there. The study also found and fixed
-  two real engine bugs the test suite had missed.
+- **Is it right?** We compared its answers to independent referees **490,000+ times.
+  Zero disagreements.** All 20,000 edit-safety trials passed.
+- **Does it find real duplication?** It caught **every planted clone, zero false alarms**.
+  Renamed copies too — text-matching tools catch none of those.
+  Receipts: F1 1.0, MRR 0.99.
+- **Does it scale?** A repo **twice the size took ~26% longer** to map.
+  Queries answer in **a tenth of a second** on 3,000+ symbols.
+- **Does it actually help agents?** Agents must find a function's callers before changing it.
+  With grep they found **44%**. With codeweb, **74%** — same context budget, all 5 runs
+  ([receipt](bench/experiments/efficiency-pilot.reps5-v090.json)).
+  **Your agents break code they don't see.**
+- **Where does it fall short?** Re-mapping after heavy edits is slower than we want.
+  On simple tasks, agents did fine without codeweb.
+  Both results are published, not buried.
 
 > **▶ Every number above has a receipt — see the [evidence ledger](https://ghostlygawd.github.io/codeweb/research.html).**
 > Raw results live in [`bench/`](bench/); every number regenerates with `node bench/run-all.mjs`.
@@ -165,10 +160,12 @@ codeweb this month: 41 pre-edit card(s) · 5 card-named caller(s) followed · 2 
 ## Install
 
 **Free & MIT-licensed. Runs entirely on your machine — no account, no server, no telemetry. Reads
-your code; never executes it.** Zero required dependencies — it runs on an empty `node_modules`
-(CI-verified); you need **Node.js ≥ 22**. One *optional* wasm grammar (`web-tree-sitter`) sharpens
-extraction when present and is never required. Releases are published from CI with **npm provenance**
-— verify any install with `npm audit signatures`.
+your code; never executes it.**
+
+- Requires **Node.js ≥ 22**. That's it.
+- Zero required dependencies — runs on an empty `node_modules`, CI-verified.
+- One *optional* wasm grammar (`web-tree-sitter`) sharpens extraction. Never required.
+- Releases publish from CI with **npm provenance**. Verify with `npm audit signatures`.
 
 **Using Claude Code?** The plugin adds the `/codeweb` command, ambient pre-edit impact cards, and
 all 27 tools:
@@ -201,11 +198,11 @@ node codeweb/scripts/run.mjs /path/to/any/checkout --out-dir /tmp/test-map
 # (the bench corpus is NOT bundled — bench/corpus/clone-corpus.sh fetches it, for benchmark work)
 ```
 
-Requires **Node.js ≥ 22** — the whole deterministic pipeline (extract → cluster → overlap → render)
-runs on Node, no external dependencies. Every bin, flag, environment variable, and exit code is
-tabled in [`docs/cli.md`](docs/cli.md). Static-analysis tools (universal-ctags, ripgrep, madge,
-etc.) are *optional* — they only sharpen the agent fallback path; the default engine reads the code
-directly.
+Requires **Node.js ≥ 22**. The whole pipeline runs on Node with no external dependencies.
+
+Every bin, flag, environment variable, and exit code is tabled in [`docs/cli.md`](docs/cli.md).
+Optional tools (ctags, ripgrep) only sharpen the agent fallback path — the default engine reads
+the code directly.
 
 **In your editor:** [`editor/vscode-codeweb`](editor/vscode-codeweb/) is a zero-dependency VS Code
 extension that shows **`N callers · blast M`** CodeLens above every mapped symbol (served from the
@@ -259,10 +256,10 @@ node scripts/query.mjs <graph.json> --cycles             # file-level dependency
 node scripts/query.mjs <graph.json> --orphans            # uncalled & unexported (dead-code candidates)
 ```
 
-`<symbol>` is a node id (`file:label`) or a bare label (a label matching several nodes operates on
-the union, reported in `matched`). Add `--json` for stable, machine-readable output. Exit codes:
-`0` success (even when empty), `1` symbol not found, `2` usage/IO error. Example — *"what could I
-break if I change the state store?"*:
+`<symbol>` is a node id (`file:label`) or a bare label. A label matching several nodes operates
+on the union. Add `--json` for machine-readable output.
+
+Exit codes: `0` success, `1` symbol not found, `2` usage/IO error. Example:
 
 ```
 $ node scripts/query.mjs .codeweb/graph.json --impact lib/state-store/index.js:get
@@ -281,16 +278,17 @@ structural **regressions**, so it can run as a PostToolUse hook or CI gate:
 node scripts/diff.mjs <before.json> <after.json> [--json]
 ```
 
-It **exits 1** when an edit introduces a new dependency cycle, a new duplication finding, or makes
-an existing symbol lose all its callers. It **exits 0** for pure removals — deleting code is an
-improvement, not a regression. A brand-new uncalled function is reported but doesn't trip the gate,
-because agents add functions before wiring them up.
+The verdict:
+
+- **Exits 1** on a new cycle, a new duplication, or a symbol that loses all its callers.
+- **Exits 0** on pure removals. Deleting code is an improvement, not a regression.
+- A brand-new uncalled function never trips it — agents add functions before wiring them up.
 
 ## Gate every PR (GitHub Action)
 
-`scripts/ci-gate.mjs` turns the `diff` gate into CI: it builds the graph for the PR base and head and
-**fails the build on a structural regression** (a new cycle, a new duplication, or a non-exported
-symbol that loses every caller — the edit-time preflights are stricter and flag exported ones too).
+`scripts/ci-gate.mjs` runs the same verdict on every pull request. It maps the PR base and head,
+then **fails the build on a structural regression**.
+
 Drop it into any repo (full spec: [`docs/ci-gate.md`](docs/ci-gate.md)):
 
 ```yaml
@@ -341,9 +339,8 @@ node scripts/trend.mjs --git <repo> --last 10 [--focus <subdir>] [--json]   # sn
 node scripts/trend.mjs a.json b.json c.json [--labels …] [--json]           # or chart pre-built snapshots
 ```
 
-The `--git` mode checks out each of the last N commits into an **ephemeral worktree** (read-only
-over your working tree), runs the deterministic pipeline, and records the metrics — so you can watch
-duplication trend down as you consolidate, or catch it creeping up in review.
+`--git` maps each of the last N commits in an ephemeral worktree. Your working tree stays
+untouched. Watch duplication trend down as you consolidate — or catch it creeping up in review.
 
 ## Find the hotspots — where to refactor first (`hotspots.mjs`)
 
@@ -366,11 +363,10 @@ for machine output; also surfaced as the `codeweb_hotspots` MCP tool.
 
 ## Plan a whole optimization campaign (`campaign.mjs`)
 
-`optimize` (ready merges), `deadcode` (safe deletes), and `break-cycles` (verified cuts) are three
-separate advisors. `campaign.mjs` composes them into **one ordered, ROI-ranked worklist**. Every
-step is pre-flighted, and the ordering matters: applying the steps in sequence never introduces a
-cycle that wasn't there before. The plan itself is read-only — codeweb never writes source; the
-agent (plus the gate) executes each step.
+`campaign.mjs` composes the three advisors — `optimize`, `deadcode`, `break-cycles` — into **one
+ordered, ROI-ranked worklist**. Applying the steps in order never introduces a new cycle.
+
+The plan is read-only. codeweb never writes source; your agents (plus the gate) execute each step.
 
 ```
 $ node scripts/campaign.mjs <graph.json>
@@ -412,10 +408,11 @@ node --test --experimental-test-coverage --test-reporter=lcov > lcov.info   # No
 node scripts/coverage.mjs .codeweb/graph.json lcov.info                      # or a c8/istanbul JSON
 ```
 
-Every instrumented symbol gets `covered`/`hits` facts. From then on, `explain`, `--tests`, and
-`context-pack` answers say `covered by the recorded run (peak N hits)` — or, the loud one,
-`⚠ NOT covered by the recorded test run` — before agents edit an unguarded symbol. The whole
-feature is optional: without a coverage input, graphs are byte-identical to before.
+Every instrumented symbol gets `covered`/`hits` facts. Query answers then say `covered by the
+recorded run` — or, the loud one, `⚠ NOT covered by the recorded test run` — before agents edit
+an unguarded symbol.
+
+The feature is optional. Without a coverage input, graphs are byte-identical to before.
 
 ## Agent tools — context & pre-flight (`context-pack`, `simulate-edit`)
 
@@ -427,12 +424,13 @@ node scripts/context-pack.mjs  <graph.json> <symbol> [--json]   # minimal contex
 node scripts/simulate-edit.mjs <graph.json> --delete <sym> | --merge <a,b> [--into <id>] | --move <sym> --to <file>
 ```
 
-`context-pack` returns everything agents need to edit one symbol — its body, its direct callers
-with their call sites, its callees, and the transitive impact set — so they work from a small
-window instead of reading whole files. `simulate-edit` predicts the regression gate's verdict for a
-hypothetical delete, merge, or move **without performing it**, so doomed edits are discarded before
-any code is written. Both share the same graph primitives as `optimize.mjs` (one truth), pinned by
-property tests against an independent reference implementation.
+`context-pack` returns everything agents need to edit one symbol: its body, its callers with call
+sites, its callees, and the impact set. Agents work from a small window instead of whole files.
+
+`simulate-edit` predicts the gate's verdict for a delete, merge, or move **without performing
+it**. Doomed edits get discarded before any code is written.
+
+Both share `optimize.mjs`'s graph primitives, pinned by property tests.
 
 ## Agent capability suite (write · review · optimize)
 
@@ -453,10 +451,11 @@ property tests against an independent reference implementation
 | `deadcode.mjs <graph>` | **optimize** | Tiers orphans into safe-to-delete vs review-first (test-guarded / entrypoint-like). |
 | `annotate.mjs --suppress <fingerprint> [--note …]` | **review** | Records a false-positive suppression in `.codeweb/annotations.json` (never touches source); `overlap`/`deadcode` then hide that finding and report a `suppressedCount`. Fingerprints are identity-based, so a genuinely *new* issue can't hide behind an old suppression. |
 
-Plus **graph freshness**: `refresh.mjs <graph>` re-extracts a graph from disk so mid-edit queries
-stay accurate, and the extractor's cache re-scans only changed files (a full rebuild is
-byte-identical to the incremental one). Edges from test files carry a distinct `test` kind, so
-production `--callers` answers exclude tests. All of the above are also exposed over MCP (below).
+Plus **graph freshness**: `refresh.mjs` re-extracts from disk, so mid-edit queries stay accurate.
+The cache re-scans only changed files. Test-file edges carry a distinct `test` kind, so
+production `--callers` answers exclude tests.
+
+All of the above is also exposed over MCP (below).
 
 ## Use it as an MCP tool
 
@@ -492,13 +491,11 @@ or in an `.mcp.json`:
 
 Built for agents, not just reachable by them:
 
-- **`graph` is optional everywhere** — the server resolves the nearest `.codeweb/graph.json` above
-  its cwd (or `CODEWEB_WS`). No graph yet? The error names `codeweb_map`, which builds one (~3s for
-  a 3k-symbol repo) without leaving MCP.
-- **Budgeted responses by default** — list-heavy tools answer with a one-line `summary`, the top-N
-  most relevant items, TRUE totals, and an explicit `more.remaining`; `full: true` (or
-  `limit`/`offset`) overrides. A `codeweb_context` that used to weigh ~300KB on a busy symbol now
-  answers in ~10KB of call-site windows.
+- **`graph` is optional everywhere** — the server finds the nearest `.codeweb/graph.json` on its
+  own. No graph yet? The error names `codeweb_map`, which builds one without leaving MCP.
+- **Budgeted responses by default** — a one-line summary, the top items, true totals, and
+  `more.remaining`. A context answer that weighed ~300 KB now weighs ~10 KB. `full: true`
+  overrides.
 - **Staleness awareness** — when the graph no longer matches disk, query results say so and point
   at `codeweb_refresh`.
 - The handshake carries `instructions` teaching the loop: *context → edit → refresh → diff-gate*.
@@ -526,11 +523,12 @@ into a per-target workspace:
 4. **Render** (`build-report.mjs`) — turn `graph.json` into the self-contained `report.html`
    (and `report.md`).
 
-For languages the extractor can't parse (or when the deterministic engine is skipped entirely), codeweb **falls back** to the
-agent path: parallel `codeweb-dissector` agents extract nodes + edges per subsystem, the
-fragments merge into one graph by node id, and `codeweb-domain-mapper` tags domains and detects
-overlaps. Both paths emit the same `graph.json` schema, so clustering, overlap, and rendering are
-shared. In **external** mode, either path appends an adoption verdict (risk, deps, architecture).
+For languages the extractor can't parse, codeweb **falls back** to the agent path:
+`codeweb-dissector` agents extract nodes and edges per subsystem, and `codeweb-domain-mapper`
+tags domains and overlaps.
+
+Both paths emit the same `graph.json` schema. In **external** mode, either path appends an
+adoption verdict.
 
 ## Components
 
@@ -619,10 +617,9 @@ npm run build:site          # regenerate the docs/ website (zero-dependency, det
 npm run release -- --minor  # roll the changelog, bump, sync, rebuild; prints the git/tag steps
 ```
 
-`check-consistency` runs in CI and applies codeweb's own "fail on regression" philosophy to its
-public copy. It gates version strings on every surface, every prose mention of the tool and
-language counts (README, site, skill, npm description), the CHANGELOG entry for the current
-version, and the existence of every evidence file the ledger cites.
+`check-consistency` runs in CI. It gates version strings on every surface, every prose mention of
+the tool and language counts, the CHANGELOG entry for the current version, and every evidence
+file the ledger cites.
 
 ## About
 
@@ -647,8 +644,8 @@ requests. **$3–6k/yr**, limited to a few customers. Contact via the GitHub pro
 
 ## Handoffs
 
-If you have them installed, codeweb's domain map and overlap list feed naturally into
-`refactor-cleaner` (act on the consolidation list), `codebase-onboarding` (use the domain map for
-a guide), and `code-tour` (anchor a tour to the symbol index). None are required — without them,
-the ideal second step is simply: apply the top **ready** merge from `optimize.md`, re-run
+codeweb's outputs feed naturally into `refactor-cleaner`, `codebase-onboarding`, and `code-tour`,
+if you have them. None are required.
+
+The ideal second step either way: apply the top **ready** merge from `optimize.md`, re-run
 codeweb, and watch the findings count drop.
