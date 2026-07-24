@@ -197,12 +197,14 @@ npx -y @ghostlygawd/codeweb .    # ~3 s for 3,000 symbols — then open .codeweb
 ```
 git clone https://github.com/GhostlyGawd/codeweb.git
 node codeweb/scripts/run.mjs /path/to/your/project   # map lands in /path/to/your/project/.codeweb
-# kick the tires on bundled sample code first (no stakes, ~2s):
-node codeweb/scripts/run.mjs codeweb/bench/corpus/flask --out-dir /tmp/flask-map
+# no-stakes test drive: point it at any repo you already have checked out (read-only, seconds):
+node codeweb/scripts/run.mjs /path/to/any/checkout --out-dir /tmp/test-map
+# (the bench corpus is NOT bundled — bench/corpus/clone-corpus.sh fetches it, for benchmark work)
 ```
 
 Requires **Node.js ≥ 22** — the whole deterministic pipeline (extract → cluster → overlap → render)
-runs on Node, no external dependencies. Static-analysis tools (universal-ctags, ripgrep, madge,
+runs on Node, no external dependencies. Every bin, flag, environment variable, and exit code is
+tabled in [`docs/cli.md`](docs/cli.md). Static-analysis tools (universal-ctags, ripgrep, madge,
 etc.) are *optional* — they only sharpen the agent fallback path; the default engine reads the code
 directly.
 

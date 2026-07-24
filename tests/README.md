@@ -13,7 +13,7 @@ npm test                          # = node --test "tests/**/*.test.mjs"
 node --test tests/overlap.test.mjs   # a single suite
 ```
 
-Requires Node 18+ (uses the built-in `node:test` runner). Zero dependencies. All extractor runs
+Requires Node 22+ (uses the built-in `node:test` runner). Zero dependencies. All extractor runs
 force `--no-ctags` so symbol discovery is deterministic regardless of the host.
 
 ## What each suite locks in
@@ -28,7 +28,7 @@ force `--no-ctags` so symbol discovery is deterministic regardless of the host.
 | `query.test.mjs` | **Structural query CLI** (`scripts/query.mjs`). `--callers`/`--callees` (direct call edges, import edges excluded), `--impact` (transitive reverse-call blast radius + domains; terminates on recursion/multi-seed), `--cycles` (file-level SCCs, deterministically ordered), `--orphans` (uncalled + unexported). Symbol resolves by id or bare label (multi-match → union); `--json` is byte-stable; exit codes 0/1/2 = success/not-found/usage; robust to missing fields + edgeless graphs. |
 | `graph-ops.test.mjs` | **Shared graph primitives** (`scripts/lib/graph-ops.mjs`, imported by query + diff). Direct unit tests (not subprocess) pinning the pure functions: normalize defaults, call-vs-any-incoming index, symbol resolution, callers/callees, recursion-safe `impactOf`, iterative-Tarjan `fileCycles`, `orphans`. |
 | `diff.test.mjs` | **Graph-delta / post-edit gate** (`scripts/diff.mjs`). nodes/edges/overlaps/cycles/orphans added+removed. Regression = new cycle ∨ new duplication ∨ existing-symbol-lost-all-callers (brand-new uncalled nodes are reported, not regressions; pure removals are not regressions). Overlap identity is content-keyed (stable across id/title churn). Exit 0/1/2. |
-| `mcp.test.mjs` | **MCP stdio server** (`scripts/mcp-server.mjs`). JSON-RPC 2.0 over newline-delimited stdio: `initialize`/`tools/list`/`tools/call` shapes, the 5 tools + required-arg schemas, stdout purity, notifications get no response, unknown tool → -32602, unknown method → -32601, malformed JSON → -32700 + recovery, missing-arg → `isError`, clean exit on stdin close. |
+| `mcp.test.mjs` | **MCP stdio server** (`scripts/mcp-server.mjs`). JSON-RPC 2.0 over newline-delimited stdio: `initialize`/`tools/list`/`tools/call` shapes, per-tool required-arg schemas, stdout purity, notifications get no response, unknown tool → -32602, unknown method → -32601, malformed JSON → -32700 + recovery, missing-arg → `isError`, clean exit on stdin close. |
 
 ## A/B regression levers (env toggles)
 
