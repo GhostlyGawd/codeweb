@@ -54,6 +54,69 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
+<h3 class="cl-grp">Changed</h3>
+<ul>
+<li><strong>The regression gate is ONE verdict with a declared strictness knob.</strong> <code>gateVerdict</code> (graph-ops)</li>
+</ul>
+<p>  now backs diff/CI, simulate, the post-edit hook, codemod, and <code>review --gate</code>; payloads carry</p>
+<p>  <code>verdict.check</code> (<code>orphan-gate</code> vs <code>call-caller-preflight</code>), exported symbols that lost every</p>
+<p>  in-edge are LISTED and flagged exempt instead of silently dropped, and every doc states the real</p>
+<p>  rule. simulate/codemod speak for their own check instead of borrowing the gate's.</p>
+<ul>
+<li><strong><code>run.mjs</code> joins the fleet's stream contract</strong>: results (the done block, or the new <code>--json</code></li>
+</ul>
+<p>  one-liner) on stdout, progress on stderr; wrong-path targets exit 2, not the stage-failure code.</p>
+<ul>
+<li><strong><code>codeweb_context</code>: <code>bodies: "windows"|"full"</code> replaces <code>full</code>'s second meaning</strong> — <code>full</code> is</li>
+</ul>
+<p>  the unabridged-list switch only. Agents wanting whole caller bodies pass <code>bodies:"full"</code>.</p>
+<ul>
+<li><strong>One pagination dialect over MCP</strong>: <code>offset</code> honored on risk/hotspots/break_cycles,</li>
+</ul>
+<p>  <code>nextOffset</code> beside every <code>remaining</code>, reading_order surfaces its truncation, and the MCP layer</p>
+<p>  now rejects unknown argument names and non-boolean booleans the way the CLI always did.</p>
+<ul>
+<li>The shared parser coaches: did-you-mean on unknown flags, <code>--flag=value</code> accepted, and the</li>
+</ul>
+<p>  no-map cause+remedy is APPENDED to a tool's usage instead of replaced by it.</p>
+<ul>
+<li>One name per concept: "domain" everywhere the report/brief/og said "areas"; deadcode's heading</li>
+</ul>
+<p>  hedges up front and shows the <code>annotate --suppress</code> door; "blast radius" defined at the lens,</p>
+<p>  settings, and optimize surfaces.</p>
+<h3 class="cl-grp">Fixed</h3>
+<ul>
+<li><strong><code>find_similar.count</code> is the true match total again</strong> (it reported the capped length), with</li>
+</ul>
+<p>  <code>more.remaining</code> when capped.</p>
+<ul>
+<li>Three product-page tool cards rendered the literal word "undefined" (data key drift); the site</li>
+</ul>
+<p>  build now fails on a desc-less tool.</p>
+<ul>
+<li>The CI gate action stamped "structural regressions" over setup failures — exit 2 now names the</li>
+</ul>
+<p>  shallow-checkout cause and remedy, ci-gate forwards the child's stderr tail, and the quickstart</p>
+<p>  bins exit 2 (never the regression code) on old Node.</p>
+<ul>
+<li><code>codeweb_map</code> failures keep the extractor's escapes-first explanation instead of a beheaded</li>
+</ul>
+<p>  stderr tail recommending a flag the tool cannot pass.</p>
+<ul>
+<li>The pre-edit hook no longer returns <code>permissionDecision: "allow"</code> — it is advisory context only.</li>
+<li>The SessionStart hook says one line (once per workspace) on an unmapped repo with source,</li>
+</ul>
+<p>  instead of the silence that read as "the plugin doesn't work".</p>
+<ul>
+<li>annotate refuses to invent a fresh <code>.codeweb/</code> in an unmapped cwd; refresh/fitness/placement/</li>
+</ul>
+<p>  codemod resolve graphs through the one loader.</p>
+<ul>
+<li>Docs that lied outside the consistency sweep (README's gitignored "bundled sample", agent-tools'</li>
+</ul>
+<p>  stale tool count, tests/README's Node floor, the runbook's test count, marketplace.json's</p>
+<p>  version) — corrected and swept from now on; new <code>docs/cli.md</code> tables every bin, flag,</p>
+<p>  environment variable, and exit code; new <code>CONTRIBUTING.md</code>.</p>
 <p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
 <h2 class="cl-ver">[0.10.0] - 2026-07-23</h2>
 <h3 class="cl-grp">Changed</h3>

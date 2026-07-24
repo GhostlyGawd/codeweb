@@ -37,8 +37,9 @@ export function die(msg, code = 2) {
  * Returns { opts, pos } — opts keyed by the flag name (sans dashes), pos = positional tokens.
  */
 // CLI review "first fix": the parser coaches instead of walling. Levenshtein for did-you-mean —
-// tiny inputs (flag names), plain DP.
-function editDistance(a, b) {
+// tiny inputs (flag names/arg keys), plain DP. Exported: the MCP layer's unknown-argument
+// near-miss (API F4) uses the same tier — one implementation, per codeweb's own gate.
+export function editDistance(a, b) {
   const m = a.length, n = b.length;
   const row = Array.from({ length: n + 1 }, (_, j) => j);
   for (let i = 1; i <= m; i++) {

@@ -32,7 +32,7 @@ import { buildBrief } from './lib/brief-core.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's card assembler, in-process
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
 import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
-import { checkStaleness, sourceReader } from './lib/cli.mjs';
+import { checkStaleness, sourceReader, editDistance } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const scriptOf = (f) => join(HERE, f);
@@ -593,17 +593,8 @@ function handleDiff(id, args, tool) {
 }
 
 // ---- tools/call ------------------------------------------------------------------------------
-// API F4: bounded edit distance for the unknown-argument near-miss (same tier graph-ops'
-// suggestSymbols uses for symbol typos; that helper is module-local, so a small copy lives here).
-function editDistance(a, b) {
-  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
-  for (let i = 1; i <= a.length; i++) {
-    const cur = [i];
-    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-    prev = cur;
-  }
-  return prev[b.length];
-}
+// API F4: bounded edit distance for the unknown-argument near-miss — lib/cli.mjs's exported
+// implementation (codeweb's own gate flagged the drifted local copy this replaced).
 const nearestArg = (key, valid) => {
   let best = null, bestD = 3; // suggest only within 2 edits — beyond that it is a different word
   for (const v of valid) { const d = editDistance(key.toLowerCase(), v.toLowerCase()); if (d < bestD) { bestD = d; best = v; } }
