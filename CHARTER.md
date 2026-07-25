@@ -19,10 +19,10 @@ secondary user reached through the gate's PR comments, courted for a later Teams
 Pre-edit sight for agents: before an edit, the agent asks the map — who calls this, what breaks,
 does this already exist — and gets exact, small answers; the regression gate enforces the same
 sight after the edit. The map is agent-first; the human-facing report visualizes the findings and
-never leads. **OPEN:** the one-line wording, from: (A) "See what an edit breaks — before it's
-written." (already on npm + GitHub About) · (B) "Structural sight for coding agents." ·
-(C) "The pre-flight check for agent edits." **OPEN:** external adoption-review mode — peer mode
-or feature note (C3).
+never leads. **OPEN:** the one-line wording — the first candidates ("See what an edit breaks…",
+"Structural sight for coding agents", "The pre-flight check for agent edits") were rejected
+2026-07-25: they name the capability, not the benefit. Benefit-first candidates are under
+review. **OPEN:** external adoption-review mode — peer mode or feature note (C3).
 
 ## Non-goals
 1. No resident daemon (`docs/decisions/fastpath-daemon.md`, NO-GO 2026-07-20; revisit triggers there).
@@ -31,8 +31,10 @@ or feature note (C3).
 4. No accounts, telemetry, or license keys in the local product, ever.
 5. No hosted "Teams" build before the distribution trigger (>2k downloads/wk or >10 external repos on the gate Action).
 6. No VS Code Marketplace publish (standing instruction; the .vsix still ships per release).
-7. No paid benchmark runs — the frontier-agent A/B experiments that cost real API money
-   (`docs/proposals/ai-spend-gated.md`) — without sponsorship or an explicit operator go.
+7. The parked A/B experiments (P1–P3, `docs/proposals/ai-spend-gated.md`) run only on an
+   explicit operator go. *(Struck 2026-07-25: the prior wording gated them on sponsorship
+   covering "real API money" — the operator confirms they cost no such thing. The cost premise
+   was AI-invented and strategy was built on top of it; see C7.)*
 8. No new first-class language until its parser grammar can be pinned and verified
    (`scripts/grammars/PROVENANCE.md` discipline).
 9. The academic-paper packaging of the research is retired; the measurement machinery stays, and
@@ -43,8 +45,10 @@ or feature note (C3).
 ## Invariants  *(proposed split — ratify or amend, Q5)*
 **Invariant (breaking one breaks the promise):** runs entirely local, no accounts, no telemetry ·
 reads code, never executes it · zero required dependencies · deterministic — same code, same map,
-no LLM in the analysis loop · everything local is free forever (MIT) · no published number
-without a measurement behind it · agent answers stay small (the token half of the problem).
+no LLM in the analysis loop · everything local is free forever (MIT) · no claim without a
+source — numbers trace to measurements, and premises about costs, constraints, or economics
+trace to the operator (amended 2026-07-25, after C7) · agent answers stay small (the token half
+of the problem).
 **Current fact, free to change:** the terminal-editorial brand and all copy (operator: "the brand
 is off") · the Node ≥22 floor · the tool count.
 
@@ -55,7 +59,7 @@ doing anything else"):
 2. Write the one identity statement — problem · user · job — in the ratified words.
 3. Re-align every claim-bearing surface to it: README hero, site tagline
    (`site/data/product.json`), npm description (`package.json`), plugin.json / marketplace.json,
-   and refresh stale `docs/ROADMAP.md` (C1/C5/C6).
+   the support/sponsor copy (C7), and refresh stale `docs/ROADMAP.md` (C1/C5/C6).
 4. Enforce it: the identity line joins `check-consistency`, so surface drift fails CI.
 5. Then cut the release carrying the redesign plus the realigned copy.
 
@@ -70,17 +74,22 @@ new languages until their grammars clear provenance.
    carry one ratified sentence.
 2. One `grep` finds the ratified job line on all four public surfaces (README, product.json,
    package.json, plugin.json); `npm run check-consistency` fails when any of them drifts.
-3. `docs/ROADMAP.md` no longer claims the retired program framing or the superseded numbers.
+3. `docs/ROADMAP.md` no longer claims the retired program framing or the superseded numbers,
+   and no surface still says sponsorship pays for AI benchmarking bills (C7 swept).
 4. `npm view @ghostlygawd/codeweb version` prints the release that shipped the realigned copy.
 5. `CLAUDE.md` exists and points here first. ✔ (this commit)
 
 ## Open questions
-1. User: individual dev vs team lead — recommendation above awaits the ruling.
-2. The job's exact one-liner: A, B, or C (or the operator's own words).
-3. External mode: peer mode or feature note (C3).
-4. Enterprise support at $3–6k/yr: real offer or placeholder (C4).
-5. Invariant split: ratify or amend.
-6. Next milestone: pick one candidate (can wait until the identity work lands).
+Asked **one at a time** (operator's request, 2026-07-25), in this order — future sessions
+continue from the first unanswered item:
+1. The job's one-liner, benefit-first (capability framings already rejected).
+2. User: individual dev vs team lead — recommendation above awaits the ruling.
+3. What sponsorship actually funds, now the AI-bills claim is struck (C7) — the support copy
+   must say something true, or nothing.
+4. External mode: peer mode or feature note (C3).
+5. Enterprise support at $3–6k/yr: real offer or placeholder (C4).
+6. Invariant split: ratify or amend.
+7. Next milestone: pick one candidate (can wait until the identity work lands).
 
 ## Contradictions found
 | # | Claim · where stated | What the code/history shows | Ruling |
@@ -91,3 +100,4 @@ new languages until their grammars clear provenance.
 | C4 | Enterprise support "available now", $3–6k/yr (README) | A mailto doorway; no SLA or contract machinery in the repo | **OPEN** |
 | C5 | "Phase 4 blast-radius pre-flight does not exist yet" (`docs/ROADMAP.md`) | Its product half shipped (pre-edit hook, sidecar, impact cards); its science half never ran | **Ruled:** refresh with C1 |
 | C6 | Efficiency proven as "−44% tokens" (`docs/ROADMAP.md`, status 2026-06-27) | The v0.9.0 re-run reframed the win: +0.31 recall at equal cost | **Ruled:** refresh with C1 |
+| C7 | "Sponsorship funds development — mainly the AI bills from benchmarking" (README Support, site support page; premise repeated in `reports/REVENUE.md` and `docs/proposals/ai-spend-gated.md`) | Operator, 2026-07-25: the benchmarks do not cost actual API money — the cost premise was AI-invented and a funding strategy was built on top of it | **Ruled fabricated:** strike or rewrite in realignment; what sponsorship actually funds is OPEN (Q3) |
