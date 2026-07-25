@@ -15,14 +15,13 @@ Receipts: 44%→74% caller recall vs grep; impact answers at a fraction of grep'
 every shipped feature is single-machine and every install path is individual — and (b) is the
 secondary user reached through the gate's PR comments, courted for a later Teams tier.
 
-## The job  *(direction ratified; exact wording OPEN)*
-Pre-edit sight for agents: before an edit, the agent asks the map — who calls this, what breaks,
-does this already exist — and gets exact, small answers; the regression gate enforces the same
-sight after the edit. The map is agent-first; the human-facing report visualizes the findings and
-never leads. **OPEN:** the one-line wording — the first candidates ("See what an edit breaks…",
-"Structural sight for coding agents", "The pre-flight check for agent edits") were rejected
-2026-07-25: they name the capability, not the benefit. Benefit-first candidates are under
-review. **OPEN:** external adoption-review mode — peer mode or feature note (C3).
+## The job  *(ratified)*
+**"Your agents break less code and burn fewer tokens."** — the one-liner, operator-picked
+2026-07-25; benefit-first and receipts-backed (callers found 44%→74%; impact answers at a
+fraction of grep's tokens). The mechanism: before an edit, the agent asks the map — who calls
+this, what breaks, does this already exist — and gets exact, small answers; the regression gate
+enforces the same sight after the edit. Agent-first: the human-facing report visualizes the
+findings and never leads. **OPEN:** external adoption-review mode — peer mode or feature note (C3).
 
 ## Non-goals
 1. No resident daemon (`docs/decisions/fastpath-daemon.md`, NO-GO 2026-07-20; revisit triggers there).
@@ -55,7 +54,7 @@ is off") · the Node ≥22 floor · the tool count.
 ## Now / Next / Not-now
 **Now — the identity milestone** (operator: "figure out the product's identity before we keep
 doing anything else"):
-1. Ratify this charter's OPEN items (user, job wording, C3, C4, invariant split).
+1. Ratify this charter's OPEN items (user, sponsorship copy, C3, C4, invariant split).
 2. Write the one identity statement — problem · user · job — in the ratified words.
 3. Re-align every claim-bearing surface to it: README hero, site tagline
    (`site/data/product.json`), npm description (`package.json`), plugin.json / marketplace.json,
@@ -72,8 +71,9 @@ new languages until their grammars clear provenance.
 ## Done looks like  *(one stranger-runnable check per Now outcome)*
 1. `CHARTER.md` has no unmarked gaps — every **OPEN** is deliberate, and Problem/User/Job each
    carry one ratified sentence.
-2. One `grep` finds the ratified job line on all four public surfaces (README, product.json,
-   package.json, plugin.json); `npm run check-consistency` fails when any of them drifts.
+2. One `grep` finds "Your agents break less code and burn fewer tokens." on all four public
+   surfaces (README, product.json, package.json, plugin.json); `npm run check-consistency`
+   fails when any of them drifts.
 3. `docs/ROADMAP.md` no longer claims the retired program framing or the superseded numbers,
    and no surface still says sponsorship pays for AI benchmarking bills (C7 swept).
 4. `npm view @ghostlygawd/codeweb version` prints the release that shipped the realigned copy.
@@ -82,14 +82,14 @@ new languages until their grammars clear provenance.
 ## Open questions
 Asked **one at a time** (operator's request, 2026-07-25), in this order — future sessions
 continue from the first unanswered item:
-1. The job's one-liner, benefit-first (capability framings already rejected).
-2. User: individual dev vs team lead — recommendation above awaits the ruling.
-3. What sponsorship actually funds, now the AI-bills claim is struck (C7) — the support copy
+1. User: individual dev vs team lead — recommendation above awaits the ruling.
+2. What sponsorship actually funds, now the AI-bills claim is struck (C7) — the support copy
    must say something true, or nothing.
-4. External mode: peer mode or feature note (C3).
-5. Enterprise support at $3–6k/yr: real offer or placeholder (C4).
-6. Invariant split: ratify or amend.
-7. Next milestone: pick one candidate (can wait until the identity work lands).
+3. External mode: peer mode or feature note (C3).
+4. Enterprise support at $3–6k/yr: real offer or placeholder (C4).
+5. Invariant split: ratify or amend.
+6. Next milestone: pick one candidate (can wait until the identity work lands).
+*(Answered: the job one-liner — "Your agents break less code and burn fewer tokens.", 2026-07-25.)*
 
 ## Contradictions found
 | # | Claim · where stated | What the code/history shows | Ruling |
