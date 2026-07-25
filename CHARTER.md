@@ -1,8 +1,9 @@
 # codeweb — Charter
 
-**Date:** 2026-07-25 · first ratification pass (operator interview, this date). Lines marked
-**OPEN** are unresolved and stay that way until the operator rules — they are never guessed.
-Agents: read this before changing product behavior, public copy, or claims (`CLAUDE.md`).
+**Date:** 2026-07-25 · **ratified** in the operator interview of this date; the one
+deliberately-open item (Next) is marked below. Anything this charter doesn't settle goes to
+Open questions and is asked to the operator — never guessed. Agents: read this before changing
+product behavior, public copy, or claims (`CLAUDE.md`).
 
 ## Problem  *(ratified)*
 Coding agents edit code they can't see: they miss real callers and break working code, and they
@@ -55,8 +56,8 @@ is off") · the Node ≥22 floor · the tool count.
 ## Now / Next / Not-now
 **Now — the identity milestone** (operator: "figure out the product's identity before we keep
 doing anything else"):
-1. Ratify this charter's OPEN items. ✔ (2026-07-25 — only the Next-milestone pick remains,
-   and it can wait until the identity work lands.)
+1. Ratify this charter's OPEN items. ✔ (2026-07-25 — complete; Next stays deliberately open
+   until this milestone lands.)
 2. Write the one identity statement — problem · user · job — in the ratified words.
 3. Re-align every claim-bearing surface to it: README hero, site tagline
    (`site/data/product.json`), npm description (`package.json`), plugin.json / marketplace.json,
@@ -64,15 +65,16 @@ doing anything else"):
 4. Enforce it: the identity line joins `check-consistency`, so surface drift fails CI.
 5. Then cut the release carrying the redesign plus the realigned copy.
 
-**Next:** **OPEN** — candidates: edit-quality science (H22) · the funded bench batch (P1+P3) ·
-the next language (C/C++ is the loudest gap) · publish the free-forever/Teams boundary statement.
+**Next:** deliberately open (ruled 2026-07-25) — picked after the identity milestone lands.
+Candidates on the table: the measurement batch (P1+P3) · edit-quality science (H22) · the next
+language (C/C++ is the loudest gap) · publish the free-forever/Teams boundary statement.
 
 **Not-now:** Teams build · VS Code Marketplace · daemon · embeddings · paper packaging ·
 new languages until their grammars clear provenance.
 
 ## Done looks like  *(one stranger-runnable check per Now outcome)*
-1. `CHARTER.md` has no unmarked gaps — every **OPEN** is deliberate, and Problem/User/Job each
-   carry one ratified sentence.
+1. `CHARTER.md` has no unmarked gaps — every open item is deliberate, and Problem/User/Job
+   each carry one ratified sentence. ✔ (this interview)
 2. One `grep` finds "Your agents break less code and burn fewer tokens." on all four public
    surfaces (README, product.json, package.json, plugin.json); `npm run check-consistency`
    fails when any of them drifts.
@@ -82,15 +84,14 @@ new languages until their grammars clear provenance.
 5. `CLAUDE.md` exists and points here first. ✔ (this commit)
 
 ## Open questions
-Asked **one at a time** (operator's request, 2026-07-25), in this order — future sessions
-continue from the first unanswered item:
-1. Next milestone: pick one candidate (can wait until the identity work lands).
+None unanswered. New questions are asked **one at a time** (operator's request, 2026-07-25).
+Next is deliberately open until the identity milestone lands.
 *(Answered 2026-07-25: the job one-liner — "Your agents break less code and burn fewer tokens." ·
 the user — the agent-heavy individual dev, the CI gate included in their surface · sponsorship —
 supports the project, and sponsors get featured README placement: logo tiers up top, a name
 list beneath; no cost claims · external mode — demoted to a feature note · enterprise support —
 softened to a one-line email doorway, no price, no SLA claim · the invariant split — ratified
-as written.)*
+as written · Next — deliberately left open until the identity milestone lands.)*
 
 ## Contradictions found
 | # | Claim · where stated | What the code/history shows | Ruling |
