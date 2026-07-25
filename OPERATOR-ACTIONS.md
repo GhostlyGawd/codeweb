@@ -30,8 +30,10 @@ for "mcp call graph codebase" carries 10–20 topics; codeweb currently has zero
 
 `.github/workflows/mcp-registry.yml` publishes `server.json` to the official registry using
 GitHub Actions OIDC (the workflow's identity proves the `io.github.GhostlyGawd` namespace — no
-browser login, no secret). It fires on every published release and on manual dispatch, so the
-listing tracks the released version with zero operator steps.
+browser login, no secret). It chains off every successful `release` workflow run
+(`workflow_run` — a plain `release:` trigger would never fire, since GITHUB_TOKEN-created
+events don't trigger workflows) and can be dispatched manually, so the listing tracks the
+released version with zero operator steps. First listed: v0.12.0, 2026-07-25.
 
 Manual fallback, if ever needed:
 

@@ -1,12 +1,16 @@
 # OPERATOR-ACTIONS #2, automated: publish server.json to the official MCP registry
 # (registry.modelcontextprotocol.io) so MCP clients can discover codeweb. Auth is GitHub
 # Actions OIDC — the workflow's identity proves the io.github.GhostlyGawd namespace; no
-# browser login, no stored secret. Fires on every published release (keeping the listing's
-# version current) and on manual dispatch.
+# browser login, no stored secret. Chained via workflow_run because a `release: published`
+# trigger would be dead wiring here: the release workflow publishes with GITHUB_TOKEN, and
+# GITHUB_TOKEN-created events never trigger other workflows (the same recursion guard the
+# release runbook documents for tags). workflow_run is exempt — it fires on the release
+# workflow's completion regardless of token, and the job gates on its success.
 name: mcp-registry
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: [release]
+    types: [completed]
   workflow_dispatch: {}
 permissions:
   id-token: write
@@ -14,6 +18,9 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # workflow_run fires on completion regardless of outcome — only republish after a
+    # successful release (manual dispatch always runs).
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v4
       - name: Install mcp-publisher
