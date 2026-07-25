@@ -9,11 +9,11 @@ Coding agents edit code they can't see: they miss real callers and break working
 burn outsized tokens grepping toward an understanding the repo could hand them directly.
 Receipts: 44%→74% caller recall vs grep; impact answers at a fraction of grep's tokens.
 
-## User
-**OPEN — two finalists:** (a) the agent-heavy individual developer on their own repo, or
-(b) the team lead gating agent-written PRs. Recommendation pending ratification: (a) is primary —
-every shipped feature is single-machine and every install path is individual — and (b) is the
-secondary user reached through the gate's PR comments, courted for a later Teams tier.
+## User  *(ratified)*
+The agent-heavy individual developer working their own repo. The whole surface is theirs —
+including the CI gate, rules, and the GitHub Action: they gate their own PRs, not just teams
+(operator, 2026-07-25). The team lead is the secondary audience, reached through the gate's
+PR comments and courted for a later Teams tier.
 
 ## The job  *(ratified)*
 **"Your agents break less code and burn fewer tokens."** — the one-liner, operator-picked
@@ -54,7 +54,7 @@ is off") · the Node ≥22 floor · the tool count.
 ## Now / Next / Not-now
 **Now — the identity milestone** (operator: "figure out the product's identity before we keep
 doing anything else"):
-1. Ratify this charter's OPEN items (user, sponsorship copy, C3, C4, invariant split).
+1. Ratify this charter's OPEN items (sponsorship copy, C3, C4, invariant split).
 2. Write the one identity statement — problem · user · job — in the ratified words.
 3. Re-align every claim-bearing surface to it: README hero, site tagline
    (`site/data/product.json`), npm description (`package.json`), plugin.json / marketplace.json,
@@ -82,14 +82,14 @@ new languages until their grammars clear provenance.
 ## Open questions
 Asked **one at a time** (operator's request, 2026-07-25), in this order — future sessions
 continue from the first unanswered item:
-1. User: individual dev vs team lead — recommendation above awaits the ruling.
-2. What sponsorship actually funds, now the AI-bills claim is struck (C7) — the support copy
+1. What sponsorship actually funds, now the AI-bills claim is struck (C7) — the support copy
    must say something true, or nothing.
-3. External mode: peer mode or feature note (C3).
-4. Enterprise support at $3–6k/yr: real offer or placeholder (C4).
-5. Invariant split: ratify or amend.
-6. Next milestone: pick one candidate (can wait until the identity work lands).
-*(Answered: the job one-liner — "Your agents break less code and burn fewer tokens.", 2026-07-25.)*
+2. External mode: peer mode or feature note (C3).
+3. Enterprise support at $3–6k/yr: real offer or placeholder (C4).
+4. Invariant split: ratify or amend.
+5. Next milestone: pick one candidate (can wait until the identity work lands).
+*(Answered 2026-07-25: the job one-liner — "Your agents break less code and burn fewer tokens." ·
+the user — the agent-heavy individual dev, the CI gate included in their surface.)*
 
 ## Contradictions found
 | # | Claim · where stated | What the code/history shows | Ruling |
