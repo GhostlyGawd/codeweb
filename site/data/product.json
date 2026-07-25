@@ -102,7 +102,7 @@
     {
       "key": "write",
       "title": "Write-time intelligence",
-      "color": "var(--teal)",
+      "color": "var(--muted)",
       "blurb": "Before you add code — reuse, don't reinvent.",
       "tools": [
         {
@@ -122,7 +122,7 @@
     {
       "key": "review",
       "title": "Review-time intelligence",
-      "color": "var(--med)",
+      "color": "var(--muted)",
       "blurb": "Assess impact and risk.",
       "tools": [
         {
@@ -154,7 +154,7 @@
     {
       "key": "optimize",
       "title": "Optimize-time intelligence",
-      "color": "var(--purple)",
+      "color": "var(--muted)",
       "blurb": "Act on findings — safely.",
       "tools": [
         {
@@ -178,7 +178,7 @@
     {
       "key": "freshness",
       "title": "Freshness & context",
-      "color": "var(--good)",
+      "color": "var(--muted)",
       "blurb": "Close the edit loop.",
       "tools": [
         {
@@ -198,7 +198,7 @@
     {
       "key": "meta",
       "title": "Comparison & onboarding",
-      "color": "var(--pink)",
+      "color": "var(--muted)",
       "blurb": "Meta-analysis across snapshots and time.",
       "tools": [
         {

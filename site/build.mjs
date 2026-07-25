@@ -314,9 +314,9 @@ function emitCrawlFiles() {
 
 // ---------------------------------------------------------------- assets
 const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-<rect width="32" height="32" rx="7" fill="#1a1820"/>
-<path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
-<rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
+<rect width="32" height="32" fill="#060608"/>
+<path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="square"/>
+<rect x="22.9" y="11.4" width="4.2" height="9.2" fill="#c6f24e"/>
 </svg>`;
 
 function copyDir(srcDir, pattern) {
@@ -330,7 +330,7 @@ function buildAssets() {
   // one same-origin stylesheet, cached across pages — design system in one place
   writeFileSync(join(ASSETS, 'site.css'), `${readSite('tokens.css')}\n${readSite('styles.css')}`);
   writeFileSync(join(ASSETS, 'favicon.svg'), FAVICON);
-  copyDir(join(SITE, 'assets'), /\.js$/);   // interactive engine (livemap.js) — same-origin, zero-dep
+  copyDir(join(SITE, 'assets'), /\.(js|woff2|ttf)$/);   // interactive engine + self-hosted fonts — same-origin, zero-dep
   copyDir(join(ROOT, 'assets', 'brand'), /\.(svg|png)$/);
   copyDir(join(ROOT, 'assets', 'screens'), /\.png$/);
   const og = join(ROOT, 'assets', 'brand', 'social-preview.png');

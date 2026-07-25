@@ -17,18 +17,16 @@
 <meta property="og:image:alt" content="codeweb — interactive call-graph map of a codebase">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
-<meta name="theme-color" content="#100e14">
+<meta name="theme-color" content="#060608">
 <link rel="canonical" href="https://ghostlygawd.github.io/codeweb/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.10.0","description":"Deterministic call/import graph of your codebase — 27 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
+<svg class="cw-grain" width="100%" height="100%" aria-hidden="true"><filter id="cwg"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/></filter><rect width="100%" height="100%" filter="url(#cwg)"/></svg>
+<i class="cw-fr tl"></i><i class="cw-fr tr"></i><i class="cw-fr bl"></i><i class="cw-fr br"></i>
 <header class="site-nav">
   <a class="brand" href="index.html" aria-label="codeweb home">
-    <svg class="glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
-      <rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
-    </svg>
     <span class="wm">code<span class="w">web</span></span>
   </a>
   <nav class="nav-links" aria-label="Primary">
@@ -45,49 +43,49 @@
 </header>
 
 <main id="main">
-<section class="hero">
-  <div class="wrap hero-inner">
-    <div class="hero-copy">
-      <span class="eyebrow">Deterministic code map</span>
-      <h1>The <span class="hl">living map</span> of your codebase.</h1>
-      <p class="hero-sub"><strong>Know what exists, and what an edit breaks — before you write.</strong> One deterministic graph, served two ways: an interactive map for you, and <strong>27 tools</strong> for the agents editing beside you.</p>
-      <div class="btn-row">
-        <a class="btn btn-primary btn-lg" href="start.html">Map your repo</a>
-        <a class="btn btn-lg" href="demo/">See the live demo</a>
-      </div>
-      <div class="hero-note"><code>npx -y @ghostlygawd/codeweb .</code> — your repo, mapped in ~3 s</div>
-      <div class="hero-note">v0.10.0 · zero dependencies · never executes the code it maps</div>
+<section class="hero hero2">
+  <div class="wrap">
+    <div class="mapbox">
+      <canvas id="cw-hero-map" aria-label="Interactive call graph of the axios codebase — live, 70 of 274 symbols. Click a function to see its blast radius."></canvas>
     </div>
-    <div class="hero-panel">
-      <div class="hp-bar"><span class="dots"><i></i><i></i><i></i></span><span>live · axios call graph · 70 of 274 symbols</span><span class="hp-tag">codeweb</span></div>
-      <div class="hp-map">
-        <canvas id="cw-hero-map" aria-label="Interactive call graph of the axios codebase. Click a function to see its blast radius."></canvas>
-        <div class="cw-legend" aria-hidden="true">
-          <span><i style="background:#c6f24e"></i>helpers</span><span><i style="background:#a78bfa"></i>core</span><span><i style="background:#4fd6c4"></i>adapters</span><span><i style="background:#f0b35a"></i>utils</span><span><i style="background:#f778ba"></i>cancel</span>
+    <div class="maphud">
+      <div id="cw-readout" class="cw-readout"><span class="cw-hint">LIVE · AXIOS CALL GRAPH · CLICK ANY FUNCTION TO TRACE ITS BLAST RADIUS</span></div>
+      <div class="cw-try"><span>Try:</span><button class="cw-chip" data-blast="merge">merge()</button><button class="cw-chip" data-blast="AxiosError">AxiosError()</button><button class="cw-chip" data-blast="httpAdapter">httpAdapter()</button></div>
+    </div>
+    <h1><span>Your coding agents grep.</span> <b>codeweb knows.</b></h1>
+    <div class="sub">Every function · every call between them · mapped in ~3 s · no LLM</div>
+    <div class="cmd">
+      <span class="l"><i></i><span><span class="p">$</span> npx -y @ghostlygawd/codeweb .</span></span>
+      <span class="r"><b>ready</b> · your repo in ~3 s</span>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn-primary btn-lg" href="start.html">Map your repo</a>
+      <a class="btn btn-lg" href="demo/">Live demo</a>
+    </div>
+    <div class="trust">Free &amp; MIT · v0.10.0 · runs on your machine · never executes your code</div>
+    <div class="meters">
+      <div>
+        <div class="k">Callers found before an edit</div>
+        <div class="slot">
+          <div class="bars">
+            <div class="brow grep"><span class="bl">GREP</span><span class="track"><span class="fill"></span></span><span class="pct">44%</span></div>
+            <div class="brow cw"><span class="bl">CODEWEB</span><span class="track"><span class="fill"></span></span><span class="pct">74%</span></div>
+          </div>
         </div>
+        <div class="s">Agents break code they can't see</div>
       </div>
-      <div class="hp-foot">
-        <div id="cw-readout" class="cw-readout"><span class="cw-hint">Click any function to trace its blast radius.</span></div>
-        <div class="cw-try"><span>Try:</span><button class="cw-chip" data-blast="merge">merge()</button><button class="cw-chip" data-blast="AxiosError">AxiosError()</button><button class="cw-chip" data-blast="httpAdapter">httpAdapter()</button></div>
+      <div>
+        <div class="k">"What breaks if I change this?"</div>
+        <div class="slot"><div class="mv">126<b>×</b></div></div>
+        <div class="s">Cheaper than grepping in rounds</div>
+      </div>
+      <div>
+        <div class="k">Independent checks</div>
+        <div class="slot"><div class="mv">490K<b>+</b></div></div>
+        <div class="s">0 disagreements</div>
       </div>
     </div>
   </div>
-  <div class="wrap"><div class="stat-strip">
-      <div class="stat">
-        <div class="num">126×</div>
-        <div class="label">cheaper 'what breaks if I change this' answers — one call vs grepping in rounds</div>
-        <div class="src">oracle-ab.json</div>
-      </div>
-      <div class="stat">
-        <div class="num">~490k</div>
-        <div class="label">answers verified against independent implementations, 0 disagreements</div>
-        <div class="src">correctness-query.json</div>
-      </div>
-      <div class="stat">
-        <div class="num">44% → 74%</div>
-        <div class="label">of a function's callers found by AI agents — grep vs codeweb, same context budget (v0.9.0 pilot)</div>
-        <div class="src">efficiency-pilot.reps5-v090.json</div>
-      </div></div></div>
 </section>
 
 <section class="section">
@@ -256,10 +254,6 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <a class="brand" href="index.html">
-          <svg class="glyph" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
-            <rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
-          </svg>
           <span class="wm">code<span class="w">web</span></span>
         </a>
         <p>A deterministic map of your codebase — one graph, read by humans and the agents editing alongside them.</p>

@@ -10,6 +10,14 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Added
+- **A terminal-editorial redesign of the whole site** (owner-approved mock). Near-black paper,
+  JetBrains Mono everywhere, a Doto dot-matrix wordmark and numerals, square corners, film
+  grain, viewfinder frame — and one accent, spent only on meaning. The homepage opens on the
+  live axios map with `merge()` pre-selected and its 56-function blast radius lit in
+  chartreuse; the map itself went dithered (pixel-square nodes, stippled edges, HUD crosshairs).
+  Benchmark stats render as pixel-block meters (grep 44% vs codeweb 74%). Fonts are
+  self-hosted, same-origin; the social-preview card matches. Report domain colors are
+  unchanged — in the tool they distinguish domains, which is function, not branding.
 - **An unlisted npm-downloads dashboard** at `/downloads.html`: daily download counts of
   `@ghostlygawd/codeweb` over time, fetched client-side from npm's public API and drawn as a
   dependency-free SVG. Built with the site but excluded from the sitemap and linked from nowhere.
