@@ -21,7 +21,8 @@ PR comments and courted for a later Teams tier.
 fraction of grep's tokens). The mechanism: before an edit, the agent asks the map — who calls
 this, what breaks, does this already exist — and gets exact, small answers; the regression gate
 enforces the same sight after the edit. Agent-first: the human-facing report visualizes the
-findings and never leads. **OPEN:** external adoption-review mode — peer mode or feature note (C3).
+findings and never leads. External review of a third-party repo stays as a feature note, not a second
+mode — the capability remains, the "two modes" billing goes (ruled 2026-07-25, C3).
 
 ## Non-goals
 1. No resident daemon (`docs/decisions/fastpath-daemon.md`, NO-GO 2026-07-20; revisit triggers there).
@@ -54,7 +55,7 @@ is off") · the Node ≥22 floor · the tool count.
 ## Now / Next / Not-now
 **Now — the identity milestone** (operator: "figure out the product's identity before we keep
 doing anything else"):
-1. Ratify this charter's OPEN items (C3, C4, invariant split).
+1. Ratify this charter's OPEN items (C4, invariant split).
 2. Write the one identity statement — problem · user · job — in the ratified words.
 3. Re-align every claim-bearing surface to it: README hero, site tagline
    (`site/data/product.json`), npm description (`package.json`), plugin.json / marketplace.json,
@@ -82,21 +83,20 @@ new languages until their grammars clear provenance.
 ## Open questions
 Asked **one at a time** (operator's request, 2026-07-25), in this order — future sessions
 continue from the first unanswered item:
-1. External mode: peer mode or feature note (C3).
-2. Enterprise support at $3–6k/yr: real offer or placeholder (C4).
-3. Invariant split: ratify or amend.
-4. Next milestone: pick one candidate (can wait until the identity work lands).
+1. Enterprise support at $3–6k/yr: real offer or placeholder (C4).
+2. Invariant split: ratify or amend.
+3. Next milestone: pick one candidate (can wait until the identity work lands).
 *(Answered 2026-07-25: the job one-liner — "Your agents break less code and burn fewer tokens." ·
 the user — the agent-heavy individual dev, the CI gate included in their surface · sponsorship —
 supports the project, and sponsors get featured README placement: logo tiers up top, a name
-list beneath; no cost claims.)*
+list beneath; no cost claims · external mode — demoted to a feature note.)*
 
 ## Contradictions found
 | # | Claim · where stated | What the code/history shows | Ruling |
 |---|---|---|---|
 | C1 | "The bar that does not move" — the four-phase science program (`docs/ROADMAP.md`) | Edit-quality leg still an open null; recent weeks all growth/brand work | **Ruled:** the program is retired as the governing plan; measurement stays as the receipts discipline; refresh the file (Now §3) |
 | C2 | "The living map of your codebase." (site) vs "See what an edit breaks before you write it" (npm) | Two lead jobs on two public surfaces | **Ruled:** agent-first leads; the map is demoted to supporting view; the tagline changes in realignment |
-| C3 | "Two modes" — external review as a peer of internal (README) | A skill step + verdict appendix no benchmark or audit touches | **OPEN** |
+| C3 | "Two modes" — external review as a peer of internal (README) | A skill step + verdict appendix no benchmark or audit touches | **Ruled:** demoted to a feature note; capability stays, mode billing goes in realignment (2026-07-25) |
 | C4 | Enterprise support "available now", $3–6k/yr (README) | A mailto doorway; no SLA or contract machinery in the repo | **OPEN** |
 | C5 | "Phase 4 blast-radius pre-flight does not exist yet" (`docs/ROADMAP.md`) | Its product half shipped (pre-edit hook, sidecar, impact cards); its science half never ran | **Ruled:** refresh with C1 |
 | C6 | Efficiency proven as "−44% tokens" (`docs/ROADMAP.md`, status 2026-06-27) | The v0.9.0 re-run reframed the win: +0.31 recall at equal cost | **Ruled:** refresh with C1 |
