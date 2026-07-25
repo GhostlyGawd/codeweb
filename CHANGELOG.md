@@ -9,12 +9,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+_Nothing yet. Open work lands here before it ships in the next tagged release._
+
+## [0.12.0] - 2026-07-25
+
 ### Added
 - **MCP-registry publishing is automated** (`.github/workflows/mcp-registry.yml`): every
   published release now submits `server.json` to registry.modelcontextprotocol.io via GitHub
   Actions OIDC — no browser login, no stored secret. The server name and the npm package's new
   `mcpName` field carry the canonical `io.github.GhostlyGawd/codeweb` identity (casing matched
-  to the namespace's existing registry listings).
+  to the namespace's existing registry listings); this release is the first whose npm tarball
+  ships the `mcpName` ownership handshake the registry requires.
 
 ## [0.11.0] - 2026-07-25
 
@@ -1728,7 +1733,8 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.8.0...v0.9.0
