@@ -59,10 +59,13 @@ doing anything else"):
 1. Ratify this charter's OPEN items. ✔ (2026-07-25 — complete; Next stays deliberately open
    until this milestone lands.)
 2. Write the one identity statement — problem · user · job — in the ratified words.
+   ✔ (2026-07-25 — the Problem/User/Job sections above.)
 3. Re-align every claim-bearing surface to it: README hero, site tagline
    (`site/data/product.json`), npm description (`package.json`), plugin.json / marketplace.json,
    the support/sponsor copy (C7), and refresh stale `docs/ROADMAP.md` (C1/C5/C6).
+   ✔ (2026-07-25 — plus server.json and the GitHub-About settings file.)
 4. Enforce it: the identity line joins `check-consistency`, so surface drift fails CI.
+   ✔ (2026-07-25 — the gate reads the line from this file.)
 5. Then cut the release carrying the redesign plus the realigned copy.
 
 **Next:** deliberately open (ruled 2026-07-25) — picked after the identity milestone lands.

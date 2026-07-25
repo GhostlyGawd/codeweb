@@ -179,6 +179,31 @@ export function checkConsistency(root) {
   const advertised = (plugin.description.match(/(\d+)\s+MCP tools/) || [])[1];
   if (advertised && Number(advertised) !== count) problems.push(`plugin.json advertises ${advertised} tools; MCP server exposes ${count}`);
 
+  // CHARTER.md "Done looks like" #2: the ratified job line is the one identity statement, read
+  // from the charter itself, and it must appear on every public listing surface. Identity drift
+  // fails the gate like a stale version string. (No CHARTER.md — e.g. test fixtures — no check.)
+  const charterPath = join(root, 'CHARTER.md');
+  if (existsSync(charterPath)) {
+    const jobLine = (readText(charterPath).match(/\*\*"([^"]+)"\*\*/) || [])[1];
+    if (!jobLine) {
+      problems.push('CHARTER.md has no bolded, quoted job line to enforce');
+    } else {
+      const productPath = join(root, 'site', 'data', 'product.json');
+      const surfaces = [
+        ['README.md', existsSync(join(root, 'README.md')) ? readText(join(root, 'README.md')) : null],
+        ['site/data/product.json (tagline)',
+          existsSync(productPath) ? (JSON.parse(readText(productPath)).tagline || '') : null],
+        ['package.json (description)', JSON.parse(readText(join(root, 'package.json'))).description || ''],
+        ['.claude-plugin/plugin.json (description)', plugin.description || ''],
+      ];
+      for (const [label, text] of surfaces) {
+        if (text !== null && !text.includes(jobLine)) {
+          problems.push(`${label} is missing the charter job line "${jobLine}"`);
+        }
+      }
+    }
+  }
+
   const skill = readText(join(root, 'skills', 'codebase-anatomy', 'SKILL.md'));
   const skillVer = (skill.match(/^version:\s*(.+)$/m) || [])[1];
   if (skillVer && skillVer.trim() !== version) problems.push(`SKILL.md version ${skillVer.trim()} != ${version}`);

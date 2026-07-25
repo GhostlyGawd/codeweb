@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.ghostlygawd/codeweb",
-  "description": "Deterministic call/import graph of your codebase — 27 MCP tools for coding agents plus a self-contained interactive map. Zero deps, runs 100% locally, reads code and never executes it.",
+  "description": "Your agents break less code and burn fewer tokens: a deterministic call/import graph of your codebase, queried over 27 MCP tools. Zero deps, runs 100% locally, reads code and never executes it.",
   "status": "active",
   "repository": {
     "url": "https://github.com/GhostlyGawd/codeweb",
