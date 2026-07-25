@@ -19,7 +19,7 @@
 <meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
 <meta name="theme-color" content="#060608">
 <link rel="canonical" href="https://ghostlygawd.github.io/codeweb/changelog.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.11.0","description":"Deterministic call/import graph of your codebase — 27 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.12.0","description":"Deterministic call/import graph of your codebase — 27 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
@@ -52,6 +52,8 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
+<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h2 class="cl-ver">[0.12.0] - 2026-07-25</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
 <li><strong>MCP-registry publishing is automated</strong> (<code>.github/workflows/mcp-registry.yml</code>): every</li>
@@ -59,7 +61,8 @@
 <p>  published release now submits <code>server.json</code> to registry.modelcontextprotocol.io via GitHub</p>
 <p>  Actions OIDC — no browser login, no stored secret. The server name and the npm package's new</p>
 <p>  <code>mcpName</code> field carry the canonical <code>io.github.GhostlyGawd/codeweb</code> identity (casing matched</p>
-<p>  to the namespace's existing registry listings).</p>
+<p>  to the namespace's existing registry listings); this release is the first whose npm tarball</p>
+<p>  ships the <code>mcpName</code> ownership handshake the registry requires.</p>
 <h2 class="cl-ver">[0.11.0] - 2026-07-25</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
@@ -2148,7 +2151,7 @@
       </div>
     </div>
     <div class="footer-base">
-      <span>codeweb v0.11.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
+      <span>codeweb v0.12.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
       <span>Deterministic build · zero third-party requests on this page</span>
     </div>
   </div>
