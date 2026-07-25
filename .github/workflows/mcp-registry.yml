@@ -1,0 +1,37 @@
+# OPERATOR-ACTIONS #2, automated: publish server.json to the official MCP registry
+# (registry.modelcontextprotocol.io) so MCP clients can discover codeweb. Auth is GitHub
+# Actions OIDC — the workflow's identity proves the io.github.GhostlyGawd namespace; no
+# browser login, no stored secret. Fires on every published release (keeping the listing's
+# version current) and on manual dispatch.
+name: mcp-registry
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install mcp-publisher
+        run: |
+          set -euo pipefail
+          OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+          for ARCH in "$(uname -m)" amd64; do
+            URL="https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_${OS}_${ARCH}.tar.gz"
+            if curl -sfL "$URL" | tar xz mcp-publisher 2>/dev/null; then break; fi
+          done
+          test -x mcp-publisher
+          ./mcp-publisher --version
+      - name: Login (GitHub OIDC)
+        run: ./mcp-publisher login github-oidc
+      - name: Publish server.json
+        run: ./mcp-publisher publish
+      - name: Verify the listing
+        run: |
+          sleep 10
+          curl -sf 'https://registry.modelcontextprotocol.io/v0/servers?search=codeweb' | tee /tmp/reg.json
+          grep -q '"codeweb"\|/codeweb' /tmp/reg.json

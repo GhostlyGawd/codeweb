@@ -9,7 +9,12 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Added
+- **MCP-registry publishing is automated** (`.github/workflows/mcp-registry.yml`): every
+  published release now submits `server.json` to registry.modelcontextprotocol.io via GitHub
+  Actions OIDC — no browser login, no stored secret. The server name and the npm package's new
+  `mcpName` field carry the canonical `io.github.GhostlyGawd/codeweb` identity (casing matched
+  to the namespace's existing registry listings).
 
 ## [0.11.0] - 2026-07-25
 

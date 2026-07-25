@@ -26,19 +26,21 @@ Zero-token alternative: the **About ⚙ gear** on the repo page edits descriptio
 topics in one dialog — paste the values from `.github/repo-settings.json`. (Every top-10 rival
 for "mcp call graph codebase" carries 10–20 topics; codeweb currently has zero.)
 
-## 2. MCP registry publish (SEO F2 · ~30 min once)
+## 2. MCP registry publish — automated (2026-07-25)
 
-`server.json` ships at the repo root (version is release-synced). Publish it:
+`.github/workflows/mcp-registry.yml` publishes `server.json` to the official registry using
+GitHub Actions OIDC (the workflow's identity proves the `io.github.GhostlyGawd` namespace — no
+browser login, no secret). It fires on every published release and on manual dispatch, so the
+listing tracks the released version with zero operator steps.
+
+Manual fallback, if ever needed:
 
 ```
 brew install mcp-publisher        # or the release binary from github.com/modelcontextprotocol/registry
-mcp-publisher login github        # interactive GitHub auth — proves io.github.ghostlygawd ownership
+mcp-publisher login github        # interactive GitHub auth — proves io.github.GhostlyGawd ownership
 mcp-publisher publish             # validates + submits server.json
 # verify: curl 'https://registry.modelcontextprotocol.io/v0/servers?search=codeweb'
 ```
-
-Re-run `mcp-publisher publish` after each release (the release checklist prints a reminder once
-this is wired; until then, it's manual).
 
 ## 3. Search engines (SEO F6 · Bing handled · Google needs 3 clicks)
 
