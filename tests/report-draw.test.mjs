@@ -41,19 +41,23 @@ test('T-37.1: gDraw reads cvColors() exactly once, before the edge/node passes (
   assert.ok(GDRAW_SRC.indexOf('cvColors()') < GDRAW_SRC.indexOf('W.edges.forEach'), 'hoisted above the draw passes');
 });
 
-// ---- T-37.3: exact-bucket edge batching, byte-identical to the old per-edge style ---------------
-// the OLD per-edge computation, verbatim from the pre-#37 template — the parity oracle.
-function oldEdgeStyle(e, A, B, on) {
-  const wgt = Math.min(1, Math.log(e.weight + 1) / 3.4);
-  const tangle = e.cross && !(A.bubble && B.bubble);
-  const stroke = !on ? 'rgba(125,122,135,0.05)'
-    : tangle ? 'rgba(236,131,90,' + (0.25 + wgt * 0.4) + ')'
-    : 'rgba(156,153,166,' + (0.14 + wgt * 0.34) + ')';
-  const width = A.bubble && B.bubble ? Math.max(0.8, Math.min(6, Math.log(e.weight + 1) * 1.4)) : 1;
-  return { stroke, width };
+// ---- T-37.3: exact-bucket edge batching, byte-identical to the per-edge style -------------------
+// the per-edge computation the buckets must reproduce, mirrored from the template's stipple
+// design (dim / hot / tangle / norm states, dash carries state) — the parity oracle.
+function perEdgeStyle(e, A, B, on, hot) {
+  const wgt = Math.min(1, Math.log(Math.min(e.weight, 72) + 1) / 3.4);
+  const pair = !!(A.bubble && B.bubble);
+  const state = !on ? 'dim' : hot ? 'hot' : (e.cross && !pair) ? 'tangle' : 'norm';
+  const stroke = state === 'dim' ? 'rgba(125,122,135,0.05)'
+    : state === 'hot' ? 'rgba(198,242,78,' + (0.3 + wgt * 0.4) + ')'
+    : state === 'tangle' ? 'rgba(236,234,241,' + (0.2 + wgt * 0.36) + ')'
+    : 'rgba(154,151,166,' + (0.14 + wgt * 0.34) + ')';
+  const width = pair ? Math.max(0.8, Math.min(6, Math.log(Math.min(e.weight, 72) + 1) * 1.4)) : 1;
+  const dash = state === 'hot' || state === 'tangle' ? [2, 2.6] : [1, 3];
+  return { stroke, width, dash };
 }
 
-test('T-37.3: every edge of a 50k set has old per-edge style === its bucket style (byte-exact)', () => {
+test('T-37.3: every edge of a 50k set has per-edge style === its bucket style (byte-exact)', () => {
   const rnd = lcg(0xED9E);
   const keys = new Set();
   const stateOfKey = (k) => k.split('|')[0];
@@ -62,29 +66,44 @@ test('T-37.3: every edge of a 50k set has old per-edge style === its bucket styl
     // integer weights incl. past both saturation points (29 alpha, 72 width)
     const e = { weight: 1 + Math.floor(rnd() * 150), cross: rnd() < 0.4 };
     const on = rnd() < 0.7;
-    const key = edgeBucketKey(e, A, B, on);
+    const hot = on && rnd() < 0.3; // hot implies lit — gDraw passes (hasHl && on)
+    const key = edgeBucketKey(e, A, B, on, hot);
     keys.add(key);
     const bucket = edgeStyleFor(key);
-    const old = oldEdgeStyle(e, A, B, on);
-    assert.equal(bucket.stroke, old.stroke, `stroke mismatch for ${key} (w=${e.weight})`);
-    assert.equal(bucket.width, old.width, `width mismatch for ${key} (w=${e.weight})`);
+    const perEdge = perEdgeStyle(e, A, B, on, hot);
+    assert.equal(bucket.stroke, perEdge.stroke, `stroke mismatch for ${key} (w=${e.weight})`);
+    assert.equal(bucket.width, perEdge.width, `width mismatch for ${key} (w=${e.weight})`);
+    assert.deepEqual(bucket.dash, perEdge.dash, `dash mismatch for ${key} (w=${e.weight})`);
   }
-  assert.ok(keys.size <= 432, `≤ 3·2·72 buckets (got ${keys.size})`);
-  // dim / tangle / norm are disjoint partitions — a bucket key is exactly one state
-  for (const k of keys) assert.ok(['dim', 'tangle', 'norm'].includes(stateOfKey(k)), `bucket state well-formed: ${k}`);
+  assert.ok(keys.size <= 576, `≤ 4·2·72 buckets (got ${keys.size})`);
+  // dim / hot / tangle / norm are disjoint partitions — a bucket key is exactly one state
+  for (const k of keys) assert.ok(['dim', 'hot', 'tangle', 'norm'].includes(stateOfKey(k)), `bucket state well-formed: ${k}`);
+});
+
+test('T-37.3: theme ink overrides swap the triplet, never the alpha/width/dash math', () => {
+  const key = edgeBucketKey({ weight: 5, cross: false }, { bubble: false }, { bubble: false }, true, true);
+  const dark = edgeStyleFor(key);
+  const light = edgeStyleFor(key, { acc: '92,122,0', hi: '33,31,39', mid: '110,106,120' });
+  assert.match(dark.stroke, /^rgba\(198,242,78,/, 'default hot ink is the dark-theme accent');
+  assert.match(light.stroke, /^rgba\(92,122,0,/, 'ink override lands in the stroke');
+  assert.equal(dark.stroke.split(',')[3], light.stroke.split(',')[3], 'same alpha either theme');
+  assert.deepEqual(dark.dash, light.dash, 'same dash either theme');
 });
 
 test('T-37.3: weight ≥ 72 collapses to one width bucket, weight ≥ 29 to one alpha, no over-merge across states', () => {
   const A = { bubble: true }, B = { bubble: true }; // bubble pair → width varies with weight
-  const w72 = edgeStyleFor(edgeBucketKey({ weight: 72, cross: false }, A, B, true));
-  const w200 = edgeStyleFor(edgeBucketKey({ weight: 200, cross: false }, A, B, true));
+  const w72 = edgeStyleFor(edgeBucketKey({ weight: 72, cross: false }, A, B, true, false));
+  const w200 = edgeStyleFor(edgeBucketKey({ weight: 200, cross: false }, A, B, true, false));
   assert.equal(w72.width, w200.width, 'width saturates at w=72');
   assert.equal(w72.width, 6, 'saturated bubble-pair width is 6');
-  // dim vs norm never share a bucket even at equal (pair,weight)
-  const dim = edgeBucketKey({ weight: 5, cross: false }, { bubble: false }, { bubble: false }, false);
-  const norm = edgeBucketKey({ weight: 5, cross: false }, { bubble: false }, { bubble: false }, true);
+  // dim vs norm vs hot never share a bucket even at equal (pair,weight)
+  const dim = edgeBucketKey({ weight: 5, cross: false }, { bubble: false }, { bubble: false }, false, false);
+  const norm = edgeBucketKey({ weight: 5, cross: false }, { bubble: false }, { bubble: false }, true, false);
+  const hot = edgeBucketKey({ weight: 5, cross: false }, { bubble: false }, { bubble: false }, true, true);
   assert.notEqual(dim, norm, 'dim and norm are different buckets');
+  assert.notEqual(norm, hot, 'norm and hot are different buckets');
   assert.notEqual(edgeStyleFor(dim).stroke, edgeStyleFor(norm).stroke, 'and different styles');
+  assert.notEqual(edgeStyleFor(norm).stroke, edgeStyleFor(hot).stroke, 'hot wears the accent');
 });
 
 // ---- T-37.2: label pick — cap, priority, determinism, position-independence --------------------

@@ -6,35 +6,53 @@
 <title>codeweb — system map</title>
 <style>
   :root{
-    /* Crafted Dark — warm ink + electric chartreuse; mirrors the site tokens + brand.json.
-       The ACCENT is brand/UI only (selection, focus, links) — never a data series.
-       Data colors are the validated 8-slot categorical set (fixed order, CVD-checked against
-       this surface: worst adjacent ΔE 8.4 protan / 19.3 normal, all ≥3:1) + reserved status
-       colors for severity. No web fonts; system stacks only. */
-    --bg:#100E14; --panel:#1A1820; --panel2:#232029; --line:#322E3A;
-    --fg:#ECECEE; --muted:#9C99A6; --accent:#C6F24E; --accentFg:#0A090D;
+    /* Terminal Editorial — near-black, mono, square; mirrors the site tokens + brand.json.
+       ONE accent (lime) for selection, focus, links and high-confidence findings — the
+       only saturated color on screen. Domains sit on an 8-step LUMINANCE ramp (assigned
+       by size rank, 9+ fold to neutral): identity = label + position + lightness step,
+       and lightness survives every CVD type by construction — a stronger guarantee than
+       the old hue palette's ΔE audit. Magnitudes (matrix, treemap) are lightness ramps
+       for the same reason. No web fonts; system mono only. */
+    color-scheme:dark;
+    --bg:#060608; --panel:#0D0D11; --panel2:#131318; --line:#26242C;
+    --fg:#E8E7EE; --muted:#8A8794; --accent:#C6F24E; --accentFg:#060608;
     --ring:rgba(255,255,255,.10);
-    /* categorical slots (fixed order — assigned to areas by size rank, 9+ fold to neutral) */
-    --s1:#3987e5; --s2:#008300; --s3:#d55181; --s4:#c98500;
-    --s5:#199e70; --s6:#d95926; --s7:#9085e9; --s8:#e66767; --sX:#7d7a87;
-    /* status (reserved for severity — never a series) */
-    --stWarn:#fab219; --stSerious:#ec835a; --stCritical:#d03b3b; --stGood:#0ca30c;
-    /* canvas-side theme reads these (labels + halo) so the graph follows the theme too (#9) */
-    --cvLabel:#ECECEE; --cvLabelDim:#D9D7E0; --cvHalo:rgba(16,14,20,0.85);
+    /* domain luminance ramp (size rank 0..7 light→dark; --nX = 9th+ fold) */
+    --n0:#ECEAF1; --n1:#CDCBD7; --n2:#B1AEBD; --n3:#96939F;
+    --n4:#7C7987; --n5:#646170; --n6:#4E4C59; --n7:#3B3944; --nX:#57545F;
+    /* canvas-side theme reads these so the graph follows the theme (#9) */
+    --cvLabel:#E8E7EE; --cvLabelDim:#C9C7D2; --cvHalo:rgba(6,6,8,0.85); --cvSel:#FFFFFF;
+    /* matrix cell ink (r,g,b — alpha carries magnitude) + treemap density ramp */
+    --cellInk:232,231,238;
+    --tmLo:24,24,30; --tmHi:198,242,78; --tmInk:#ECECEE; --tmInkShadow:rgba(0,0,0,.8);
+    /* canvas edge inks (r,g,b — alpha carries weight) */
+    --edgeAcc:198,242,78; --edgeHi:236,234,241; --edgeMid:154,151,166;
   }
-  /* #9: light theme — explicit choice via data-theme, else follows the OS preference. */
+  /* #9: dark is the product default; "paper" light is an explicit choice, "auto" follows the OS. */
   :root[data-theme="light"]{
-    --bg:#F6F5F1; --panel:#FFFFFF; --panel2:#ECEAE4; --line:#D8D4CB;
-    --fg:#211F27; --muted:#6E6A78; --accentFg:#1A2005;
+    color-scheme:light;
+    --bg:#F4F3EF; --panel:#FCFBF8; --panel2:#ECEAE4; --line:#D8D4CB;
+    --fg:#211F27; --muted:#6E6A78; --accent:#5C7A00; --accentFg:#FFFFFF;
     --ring:rgba(0,0,0,.14);
-    --cvLabel:#211F27; --cvLabelDim:#4A4754; --cvHalo:rgba(246,245,241,0.85);
+    --n0:#211F27; --n1:#3B3944; --n2:#54515E; --n3:#6D6A78;
+    --n4:#868392; --n5:#9F9CAB; --n6:#B8B5C2; --n7:#CFCCD8; --nX:#A8A5B2;
+    --cvLabel:#211F27; --cvLabelDim:#4A4754; --cvHalo:rgba(244,243,239,0.85); --cvSel:#0E0D12;
+    --cellInk:33,31,39;
+    --tmLo:228,226,218; --tmHi:157,186,30; --tmInk:#211F27; --tmInkShadow:rgba(255,255,255,.55);
+    --edgeAcc:92,122,0; --edgeHi:33,31,39; --edgeMid:110,106,120;
   }
   @media (prefers-color-scheme: light){
-    :root:not([data-theme]){
-      --bg:#F6F5F1; --panel:#FFFFFF; --panel2:#ECEAE4; --line:#D8D4CB;
-      --fg:#211F27; --muted:#6E6A78; --accentFg:#1A2005;
+    :root[data-theme="auto"]{
+      color-scheme:light;
+      --bg:#F4F3EF; --panel:#FCFBF8; --panel2:#ECEAE4; --line:#D8D4CB;
+      --fg:#211F27; --muted:#6E6A78; --accent:#5C7A00; --accentFg:#FFFFFF;
       --ring:rgba(0,0,0,.14);
-      --cvLabel:#211F27; --cvLabelDim:#4A4754; --cvHalo:rgba(246,245,241,0.85);
+      --n0:#211F27; --n1:#3B3944; --n2:#54515E; --n3:#6D6A78;
+      --n4:#868392; --n5:#9F9CAB; --n6:#B8B5C2; --n7:#CFCCD8; --nX:#A8A5B2;
+      --cvLabel:#211F27; --cvLabelDim:#4A4754; --cvHalo:rgba(244,243,239,0.85); --cvSel:#0E0D12;
+      --cellInk:33,31,39;
+      --tmLo:228,226,218; --tmHi:157,186,30; --tmInk:#211F27; --tmInkShadow:rgba(255,255,255,.55);
+      --edgeAcc:92,122,0; --edgeHi:33,31,39; --edgeMid:110,106,120;
     }
   }
   /* #9: keyboard parity — every hover affordance has a :focus-visible twin. */
@@ -53,74 +71,95 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
-    font:13px/1.5 ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+    font:12.5px/1.55 ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
+  ::selection{background:var(--accent);color:var(--accentFg)}
+  *{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--line);border:2px solid var(--bg)}
   #top{height:48px;display:flex;align-items:center;gap:6px;padding:0 14px;
     border-bottom:1px solid var(--line);background:var(--panel)}
-  #top b{font-size:15px;letter-spacing:.5px;margin-right:8px}
-  #top .meta{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+  #top b{font-size:14px;font-weight:700;letter-spacing:.05em;margin-right:10px}
+  #top .meta{color:var(--muted);font-size:11px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #metaTarget{flex:0 0 auto;max-width:220px;color:var(--fg);margin-right:4px}
+  #metaStats{flex:0 1 auto;min-width:60px;text-transform:uppercase}
   #top .spacer{flex:1}
-  .tab{background:transparent;color:var(--muted);border:1px solid transparent;border-radius:7px;
-    padding:6px 12px;cursor:pointer;font-size:13px}
-  .tab:hover{color:var(--fg)}
+  .vsep{width:1px;height:16px;background:var(--line);margin:0 5px;flex:none}
+  .tab{background:transparent;color:var(--muted);border:1px solid transparent;
+    padding:6px 8px;cursor:pointer;font:inherit;font-size:10px;font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+  .tab:hover{color:var(--fg);border-color:var(--line)}
   .tab.on{color:var(--fg);background:var(--panel2);border-color:var(--line)}
+  .tab.on::before{content:"";display:inline-block;width:5px;height:5px;background:var(--accent);margin-right:7px;vertical-align:1px}
   #wrap{display:flex;height:calc(100% - 48px)}
   #main{flex:1;position:relative;min-width:0;overflow:hidden}
   .view{position:absolute;inset:0;overflow:auto;padding:16px 18px;display:none}
   .view.on{display:block}
   #view-graph.on,#view-treemap.on{padding:0}
   #detail{width:340px;border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:14px}
-  #detail h3{margin:0 0 4px;font-size:14px;word-break:break-all}
+  #detail h3{margin:0 0 4px;font-size:13px;word-break:break-all}
   #detail .kv{color:var(--muted);font-size:12px;margin:3px 0}
-  #detail .sec{margin-top:14px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  #detail .sec{margin-top:16px;margin-bottom:4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);
+    padding-top:8px;border-top:1px solid var(--line)}
   #detail .lst div{padding:3px 0;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #detail .lst div:hover{color:var(--accent)}
+  #detail a{color:var(--accent)}
   .empty{color:var(--muted);padding:24px;text-align:center}
-  code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:11px}
+  code{background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);padding:1px 5px;font-size:11px}
   /* findings */
-  .fsec{margin-bottom:26px}
-  .fhead{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
-  .fhead h2{margin:0;font-size:15px}
-  .fhead .sub{color:var(--muted);font-size:12px}
-  table.f{width:100%;max-width:980px;border-collapse:collapse;font-size:13px}
+  .fsec{margin-bottom:30px}
+  .fhead{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:7px}
+  .fhead h2{margin:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.14em}
+  .fhead h2::before{content:"";display:inline-block;width:5px;height:5px;background:var(--accent);margin-right:8px;vertical-align:1px}
+  .fhead .sub{color:var(--muted);font-size:11px}
+  table.f{width:100%;max-width:980px;border-collapse:collapse;font-size:12.5px}
   table.f td{padding:6px 8px;border-bottom:1px solid var(--line);cursor:pointer}
   table.f td:first-child{width:44px}
   table.f tr:hover td{background:var(--panel2)}
-  .badge{display:inline-block;min-width:22px;text-align:center;padding:1px 7px;border-radius:11px;font-size:11px;font-weight:700;color:var(--accentFg);font-variant-numeric:tabular-nums}
-  .b-hi{background:var(--stCritical);color:#fff} .b-med{background:var(--stSerious)} .b-low{background:var(--stWarn)}
-  .b-acc{background:var(--panel2);color:var(--fg);box-shadow:inset 0 0 0 1px var(--ring)}
-  .mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+  .badge{display:inline-block;min-width:26px;text-align:center;padding:1px 6px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+  .b-hi{background:var(--accent);color:var(--accentFg)}
+  .b-med{background:var(--fg);color:var(--bg)}
+  .b-low{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+  .b-acc{background:var(--panel2);color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
+  .mono{font-family:inherit;font-size:12px}
   .dim{color:var(--muted)}
-  .pill{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 6px;margin-left:4px}
+  .pill{font-size:10px;color:var(--muted);border:1px solid var(--line);padding:0 6px;margin-left:4px;font-variant-numeric:tabular-nums}
   /* matrix */
   table.m{border-collapse:separate;border-spacing:2px;font-size:11px}
   table.m th{padding:4px 8px;color:var(--muted);font-weight:600;text-align:right;white-space:nowrap}
   table.m th.rot{height:104px;vertical-align:bottom;text-align:center}
   table.m th.rot span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap}
-  table.m td{width:36px;height:36px;text-align:center;border-radius:4px;cursor:pointer;color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums;background:var(--panel)}
+  table.m td{width:36px;height:36px;text-align:center;cursor:pointer;color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums;background:var(--panel)}
   table.m td:hover{box-shadow:inset 0 0 0 2px var(--accent)}
-  table.m td.diag{box-shadow:inset 0 0 0 1px var(--ring)}
+  table.m td.diag{box-shadow:inset 0 0 0 1px var(--line)}
   table.m td.zero{color:var(--line);background:var(--panel)!important;cursor:default;box-shadow:none}
-  .legend{color:var(--muted);font-size:12px;margin:12px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .chip{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;box-shadow:inset 0 0 0 1px var(--ring)}
+  .legend{color:var(--muted);font-size:11px;margin:12px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .chip{display:inline-block;width:10px;height:10px;vertical-align:-1px;box-shadow:inset 0 0 0 1px var(--ring)}
   /* treemap */
   #tm{position:absolute;inset:0;padding:6px}
-  .tmbox{position:absolute;overflow:hidden;border:2px solid var(--bg);border-radius:4px;cursor:pointer;font-size:10px}
+  .tmbox{position:absolute;overflow:hidden;border:1px solid var(--bg);cursor:pointer;font-size:10px}
   .tmbox:hover{outline:2px solid var(--accent);z-index:5}
-  .tmdom{border:1px solid var(--line);border-radius:6px;background:var(--panel);cursor:default}
-  .tmlabel{position:absolute;top:1px;left:4px;right:3px;color:#ECECEE;font-size:10px;text-shadow:0 1px 2px rgba(0,0,0,.8);pointer-events:none;white-space:nowrap;overflow:hidden}
-  .tmdomlabel{position:absolute;font-size:11px;font-weight:600;color:var(--fg);pointer-events:none;white-space:nowrap;overflow:hidden;display:flex;align-items:center;gap:5px}
-  #tmLegend{position:absolute;right:14px;bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 10px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:7px;z-index:6}
-  #tmLegend .bar{width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,#292331,#e66767)}
+  .tmdom{border:1px solid var(--line);background:var(--panel);cursor:default}
+  .tmlabel{position:absolute;top:1px;left:4px;right:3px;color:var(--tmInk);font-size:10px;text-shadow:0 1px 2px var(--tmInkShadow);pointer-events:none;white-space:nowrap;overflow:hidden}
+  .tmdomlabel{position:absolute;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg);pointer-events:none;white-space:nowrap;overflow:hidden;display:flex;align-items:center;gap:5px}
+  #tmLegend{position:absolute;right:14px;bottom:34px;background:var(--panel);border:1px solid var(--line);padding:6px 10px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px;z-index:6}
+  #tmLegend .bar{width:90px;height:8px;background:linear-gradient(90deg,rgb(var(--tmLo)),rgb(var(--tmHi)))}
   /* graph */
-  #cv{display:block;background:radial-gradient(circle at 50% 38%,#16131d,#100E14);touch-action:none}
-  #gsearch{position:absolute;top:10px;left:10px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:6px 9px;width:220px}
+  #cv{display:block;background:var(--bg);touch-action:none}
+  #gsearch{position:absolute;top:10px;left:10px;background:var(--panel);border:1px solid var(--line);color:var(--fg);padding:6px 9px;width:230px;font:inherit;font-size:11px}
+  #gsearch::placeholder{color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:10px}
   #gsearch:focus-visible{outline:2px solid var(--accent);border-color:var(--accent)}
   #gctrl{position:absolute;top:10px;right:10px;display:flex;gap:6px}
-  #gctrl button{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:12px}
-  #gctrl button:hover{border-color:var(--accent)}
-  #gLegend{position:absolute;left:12px;bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 10px;font-size:11px;color:var(--muted);z-index:6}
+  #gctrl button{background:var(--panel);color:var(--fg);border:1px solid var(--line);padding:5px 9px;cursor:pointer;font:inherit;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+  #gctrl button:hover{border-color:var(--accent);color:var(--accent)}
+  #gLegend{position:absolute;left:12px;bottom:12px;background:var(--panel);border:1px solid var(--line);padding:6px 10px;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);z-index:6}
   /* header brand */
-  #logo{width:20px;height:20px;flex:none;margin-right:2px}
+  #logo{width:14px;height:14px;flex:none;margin-right:4px;image-rendering:pixelated}
+  /* footer lead line */
+  #brandbar{position:fixed;bottom:0;right:0;z-index:5;font-size:11px;line-height:1;padding:6px 10px;
+    background:var(--panel);border-top:1px solid var(--line);border-left:1px solid var(--line);color:var(--muted)}
+  #brandbar a{color:var(--accent)}
+  #brandbar a.q{color:var(--muted)}
   /* mobile: the desktop app layout (fixed 340px sidebar, viewport-locked) becomes a vertical stack */
   @media (max-width: 760px){
     html,body{height:auto;min-height:100%}
@@ -129,7 +168,7 @@
     #top b{margin-right:4px}
     #top .meta{display:none}
     #top .spacer{display:none}
-    .tab{padding:6px 10px;font-size:12px}
+    .tab{padding:6px 8px}
     #wrap{flex-direction:column;height:auto}
     #main{flex:none;height:64vh;min-height:340px}
     #detail{width:auto;border-left:0;border-top:1px solid var(--line);max-height:none}
@@ -138,20 +177,23 @@
     #view-matrix.on{padding:12px;overflow:auto}
     table.m{font-size:10px}
     table.m td{width:24px;height:24px}
-    #gsearch{width:150px;font-size:12px}
+    #gsearch{width:150px}
   }
+  /* terminal skin: square corners everywhere (brand 2026-07) */
+  *{border-radius:0 !important}
 </style>
 </head>
 <body>
 <div id="top">
-  <svg id="logo" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#C6F24E" stroke-width="1.6"><path d="M6 8 L18 6 M6 8 L12 18 M18 6 L12 18" opacity=".55"/></g><circle cx="6" cy="8" r="3" fill="#C6F24E"/><circle cx="18" cy="6" r="2.4" fill="#9085e9"/><circle cx="12" cy="18" r="2.4" fill="#199e70"/></svg>
+  <svg id="logo" viewBox="0 0 12 12" aria-hidden="true"><rect x="0" y="0" width="5" height="5" fill="#C6F24E"/><rect x="7" y="0" width="5" height="5" fill="#57545F"/><rect x="0" y="7" width="5" height="5" fill="#57545F"/><rect x="7" y="7" width="5" height="5" fill="#8A8794"/></svg>
   <b><a href="https://github.com/GhostlyGawd/codeweb" style="color:inherit;text-decoration:none" title="codeweb on GitHub — free, MIT, runs locally">codeweb</a></b>
   <span class="meta" id="metaTarget"></span>
   <span class="meta" id="metaStats"></span>
   <span class="spacer"></span>
   <button id="roleFilter" title="Hide tests, fixtures, examples and generated code from every view" aria-pressed="true" hidden></button>
   <button id="copyLink" class="tab" title="Copy a link to this exact view (tab · filter · selection)">copy link</button>
-  <button id="themeToggle" class="tab" title="Theme: follows your OS by default — click to cycle auto → light → dark"></button>
+  <button id="themeToggle" class="tab" title="Theme: dark by default — click to cycle dark → light → auto (follows your OS)"></button>
+  <span class="vsep" aria-hidden="true"></span>
   <div role="tablist" aria-label="Report views" style="display:contents">
   <button class="tab on" role="tab" id="tab-findings" aria-controls="view-findings" aria-selected="true" data-view="findings">Findings</button>
   <button class="tab" role="tab" id="tab-matrix" aria-controls="view-matrix" aria-selected="false" data-view="matrix">Matrix</button>
@@ -166,10 +208,10 @@
     <div class="view" id="view-treemap" role="tabpanel" aria-labelledby="tab-treemap"><div id="tm"></div><div id="tmLegend"><span>duplication</span><span class="bar"></span><span>0 → 100%</span></div></div>
     <div class="view" id="view-graph" role="tabpanel" aria-labelledby="tab-graph">
       <canvas id="cv" role="img" aria-label="Force-directed dependency graph"></canvas>
-      <input id="gsearch" placeholder="search symbols… (Enter jumps)" autocomplete="off" aria-label="Search symbols; press Enter to jump to the next match, Escape to clear">
-      <span id="gcount" class="meta" style="position:absolute;top:16px;left:245px" aria-live="polite"></span>
+      <input id="gsearch" placeholder="search symbols — enter jumps" autocomplete="off" aria-label="Search symbols; press Enter to jump to the next match, Escape to clear">
+      <span id="gcount" class="meta" style="position:absolute;top:16px;left:254px" aria-live="polite"></span>
       <div id="gctrl"><button id="gFit">Fit</button><button id="gToggle"></button></div>
-      <div id="gLegend">● domain — size = symbols, click to expand it · ○ symbol — size = loc · scroll zooms</div>
+      <div id="gLegend">■ domain — size = symbols, click expands it · ▪ symbol — size = loc · scroll zooms</div>
     </div>
   </div>
   <div id="detail"><div class="empty">Pick an item to inspect it.</div></div>
@@ -214,17 +256,14 @@
     outDeg.set(e.from, outDeg.get(e.from) + 1); inDeg.set(e.to, inDeg.get(e.to) + 1);
   });
 
-  // The validated categorical set (fixed order — the ORDER is the CVD-safety mechanism).
-  // Areas get slots by size rank; a 9th+ area folds to neutral (labels still carry identity).
-  var domColor = {};
-  var DOMC = ['#3987e5', '#008300', '#d55181', '#c98500', '#199e70', '#d95926', '#9085e9', '#e66767'];
-  var NEUTRAL = '#7d7a87';
-  function colorOf(nm) { return domColor[nm] || NEUTRAL; }
-  // darker step of the same hue — node rings, treemap header chips
-  function shade(hex, f) {
-    var n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-    return 'rgb(' + Math.round(r * f) + ',' + Math.round(g * f) + ',' + Math.round(b * f) + ')';
-  }
+  // Domains sit on an 8-step LUMINANCE ramp — slots by size rank (biggest = lightest), 9th+
+  // folds to neutral, labels always carry identity. Lightness ordering survives every CVD type
+  // by construction. The ramp lives in CSS vars (--n0..--n7): DOM surfaces reference the var,
+  // the canvas resolves the same vars once per draw (cvColors) — both flip with the theme.
+  var domSlot = {};
+  var SLOTS = 8;
+  function slotOf(nm) { return nm in domSlot ? domSlot[nm] : -1; }
+  function colorOf(nm) { var i = slotOf(nm); return i >= 0 ? 'var(--n' + i + ')' : 'var(--nX)'; }
 
   // ---------- active scope + derived metrics (recomputed when the role filter toggles) ----------
   var AN = [], AE = [], activeIds = null, domainNames = [], duplicates = [], patterns = [], dupNodeIds = new Set(), hotspots = [], dead = [];
@@ -237,7 +276,7 @@
 
     domainNames = Array.from(new Set(AN.map(function (n) { return n.domain; })));
     domainNames = domainNames.filter(function (nm) { return domCount(nm) > 0; }).sort(function (a, b) { return domCount(b) - domCount(a); });
-    domainNames.forEach(function (nm, i) { if (!domColor[nm]) domColor[nm] = DOMC[i] || NEUTRAL; });
+    domainNames.forEach(function (nm, i) { if (!(nm in domSlot)) domSlot[nm] = i < SLOTS ? i : -1; });
 
     // duplicates: same symbol name defined in >=2 files — split off INTERFACE PATTERNS (many
     // same-named implementations that nothing in-repo calls: framework hooks/contracts like a
@@ -296,32 +335,43 @@
     else window.prompt('Copy this link:', url);
   };
 
-  // #9: theme — explicit choice persists; 'auto' follows the OS. Canvas surfaces re-read their
-  // colors from the computed tokens on the next draw, so the graph flips with the page.
+  // #9: theme — dark is the product default (brand); 'light' is an explicit paper mode, 'auto'
+  // follows the OS. Canvas surfaces re-read their colors from the computed tokens on the next
+  // draw, so the graph flips with the page. Legacy stored 'dark' collapses into the default.
   var themeBtn = document.getElementById('themeToggle');
   function applyTheme(mode) {
-    if (mode === 'light' || mode === 'dark') document.documentElement.setAttribute('data-theme', mode);
+    if (mode === 'light' || mode === 'auto') document.documentElement.setAttribute('data-theme', mode);
     else document.documentElement.removeAttribute('data-theme');
-    if (themeBtn) themeBtn.textContent = mode === 'light' ? 'light ☀' : mode === 'dark' ? 'dark ☾' : 'auto ◐';
+    if (themeBtn) themeBtn.textContent = mode === 'light' ? 'light' : mode === 'auto' ? 'auto' : 'dark';
     if (typeof gInit !== 'undefined' && gInit) setTimeout(function () { gDraw(); }, 0);
   }
   var themeMode = null;
   try { themeMode = localStorage.getItem('cwTheme'); } catch (e) { /* private mode */ }
+  if (themeMode !== 'light' && themeMode !== 'auto') themeMode = null;
   applyTheme(themeMode);
   if (themeBtn) themeBtn.onclick = function () {
-    themeMode = themeMode === 'light' ? 'dark' : themeMode === 'dark' ? null : 'light';
+    themeMode = themeMode === null ? 'light' : themeMode === 'light' ? 'auto' : null;
     try { themeMode ? localStorage.setItem('cwTheme', themeMode) : localStorage.removeItem('cwTheme'); } catch (e) { /* private mode */ }
     applyTheme(themeMode);
     if (document.getElementById('view-treemap').classList.contains('on')) renderTreemap();
   };
   function cvColors() {
     var cs = getComputedStyle(document.documentElement);
-    return { label: cs.getPropertyValue('--cvLabel').trim() || '#ECECEE', dim: cs.getPropertyValue('--cvLabelDim').trim() || '#D9D7E0', halo: cs.getPropertyValue('--cvHalo').trim() || 'rgba(16,14,20,0.85)' };
+    var v = function (name, fb) { var x = cs.getPropertyValue(name).trim(); return x || fb; };
+    var ramp = []; for (var i = 0; i < 8; i++) ramp.push(v('--n' + i, '#7C7987'));
+    return {
+      label: v('--cvLabel', '#ECECEE'), dim: v('--cvLabelDim', '#C9C7D2'), halo: v('--cvHalo', 'rgba(6,6,8,0.85)'),
+      sel: v('--cvSel', '#FFFFFF'), accent: v('--accent', '#C6F24E'), line: v('--line', '#26242C'),
+      ramp: ramp, neutral: v('--nX', '#57545F'),
+      edgeInk: { acc: v('--edgeAcc', '198,242,78'), hi: v('--edgeHi', '236,234,241'), mid: v('--edgeMid', '154,151,166') }
+    };
   }
 
   // ---------- meta bar + role filter ----------
   function renderMeta() {
-    document.getElementById('metaTarget').textContent = (G.meta.target || '') + (G.meta.mode ? ' · ' + G.meta.mode : '');
+    var mt = document.getElementById('metaTarget');
+    mt.textContent = G.meta.target || '';
+    if (G.meta.mode) mt.title = 'mode: ' + G.meta.mode; // the masthead shows the repo, not internals
     var el = document.getElementById('metaStats');
     // ACTIVATION A4: the masthead count is the SAME "actionable" number stdout and optimize.md
     // report (bucket rule mirrors lib/graph-ops.mjs findingBuckets). "dup-groups" was a
@@ -347,11 +397,11 @@
       }
     } catch (e) { /* honesty is best-effort */ }
     el.textContent = [
-      AN.length + ' symbols' + (productOnly && nonProduct ? ' (+' + nonProduct + ' hidden)' : ''),
-      AE.length + ' edges', domainNames.length + ' domains', findingsChip, mappedAgo
-    ].filter(Boolean).join('  ·  ');
+      AN.length + ' symbols', AE.length + ' edges', domainNames.length + ' domains', findingsChip, mappedAgo
+    ].filter(Boolean).join(' · ');
     var gen = document.querySelector('meta[name="generator"]');
-    el.title = 'findings: actionable ' + fb.actionable + ' · needs review ' + fb.review + ' · dismissed ' + fb.dismissed +
+    el.title = (productOnly && nonProduct ? nonProduct + ' non-product symbols hidden by the Product-only filter\n' : '') +
+      'findings: actionable ' + fb.actionable + ' · needs review ' + fb.review + ' · dismissed ' + fb.dismissed +
       (G.meta.overlapsDroppedAt ? '\nfindings were dropped by a refresh — re-run the pipeline to recount' : '') +
       (fileDate ? '\nreport file date: ' + fileDate + ' (rebuild: node scripts/run.mjs <src>)' : '') +
       (gen ? '\nbuilt by ' + gen.content : '') +
@@ -431,7 +481,7 @@
       '<div class="sec">worth a look</div>' +
       '<div class="kv">' + duplicates.length + ' duplication group(s) · ' + hotspots.length + ' hotspot(s) · ' + dead.length + ' dead-code candidate(s)</div>' +
       '<div class="sec">how to read this</div>' +
-      '<div class="kv">Click any row, cell, or node to inspect it here. In the graph, click a domain bubble to expand it; search + Enter jumps to a symbol. <code>#s=&lt;id&gt;</code> deep-links.</div>';
+      '<div class="kv">Click any row, cell, or node to inspect it here. In the graph, click a domain block to expand it; search + Enter jumps to a symbol. <code>#s=&lt;id&gt;</code> deep-links.</div>';
   }
   function nodeRow(id) { var t = nodeById.get(id); return '<div data-node="' + esc(id) + '">' + esc(t ? (t.label || id) : id) + ' <span class="dim mono">' + esc(t ? t.file : '') + '</span></div>'; }
   function bindNodeRows(scope) {
@@ -451,7 +501,7 @@
     announce('Inspecting ' + n.label + ', ' + (n.kind || 'symbol'));
     var outs = outAdj.get(id) || [], ins = inAdj.get(id) || [];
     detail.innerHTML = '<h3>' + esc(n.label) + '</h3>' +
-      '<div class="kv">' + esc(n.kind || '') + (n.role && n.role !== 'product' ? ' · ' + esc(n.role) : '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--stCritical)">duplicated</span>' : '') + '</div>' +
+      '<div class="kv">' + esc(n.kind || '') + (n.role && n.role !== 'product' ? ' · ' + esc(n.role) : '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--accent)">duplicated</span>' : '') + '</div>' +
       '<div class="kv"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:' + colorOf(n.domain) + '"></span> ' + esc(n.domain) + '</div>' +
       (n.file ? '<div class="kv"><code>' + esc(n.file) + (n.line ? ':' + n.line : '') + '</code>' + (n.loc ? ' · ' + n.loc + ' loc' : '') + '</div>' : '') +
       editorLink(n) +
@@ -528,10 +578,10 @@
     }).join('');
     v.innerHTML =
       section('Consolidation findings', 'body-confirmed by the overlap pipeline — optimize.md tiers these ready/blocked/review', ovLive.length,
-        (ovRows ? '<table class="f">' + ovRows + '</table>' : '<div class="empty">No pipeline findings 🎉</div>') +
+        (ovRows ? '<table class="f">' + ovRows + '</table>' : '<div class="empty">No pipeline findings — clean</div>') +
         (ovDismissed ? '<div class="empty">' + ovDismissed + ' candidate(s) dismissed (body-refuted) — full transparency list in overlap.md</div>' : '')) +
       section('Duplication', 'merge these — same function defined in many files', duplicates.length,
-        dupRows ? '<table class="f">' + dupRows + '</table>' : '<div class="empty">No duplication found 🎉</div>') +
+        dupRows ? '<table class="f">' + dupRows + '</table>' : '<div class="empty">No duplication found — clean</div>') +
       (patterns.length ? section('Interface patterns', 'same-name implementations of a framework contract (nothing in-repo calls them) — NOT copy-paste; don’t merge', patterns.length,
         '<table class="f">' + patRows + '</table>') : '') +
       section('Hotspots', 'most depended-on code — change with care', hotspots.length,
@@ -565,15 +615,19 @@
         var val = M[i][j];
         if (val === 0) return '<td class="zero' + (i === j ? ' diag' : '') + '">·</td>';
         var t = Math.min(1, Math.log(val + 1) / Math.log(max + 1));
-        var bg = i === j ? 'rgba(25,158,112,' + (0.28 + t * 0.55) + ')' : 'rgba(57,135,229,' + (0.2 + t * 0.72) + ')';
-        return '<td class="' + (i === j ? 'diag' : '') + '" style="background:' + bg + '" data-a="' + i + '" data-b="' + j + '">' + val + '</td>';
+        // magnitude = lightness (CVD-safe): off-diagonal tangling ramps the cell ink up; the
+        // diagonal (internal cohesion — expected) stays quiet. Ink flips for legibility at high t.
+        if (i === j) return '<td class="diag" style="background:var(--panel2);color:var(--muted)" data-a="' + i + '" data-b="' + j + '">' + val + '</td>';
+        var bg = 'rgba(var(--cellInk),' + (0.1 + t * 0.65).toFixed(3) + ')';
+        var ink = t > 0.55 ? 'var(--bg)' : 'var(--fg)';
+        return '<td style="background:' + bg + ';color:' + ink + '" data-a="' + i + '" data-b="' + j + '">' + val + '</td>';
       }).join('');
       return '<tr><th>' + esc(da) + '</th>' + cells + '</tr>';
     }).join('');
     v.innerHTML = '<div class="fhead"><h2>Domain coupling</h2><span class="sub">rows call columns</span></div>' +
       '<table class="m"><tr>' + head + '</tr>' + rows + '</table>' +
-      '<div class="legend"><span class="chip" style="background:rgba(57,135,229,.8)"></span> cross-domain calls — tangling' +
-      '<span class="chip" style="background:rgba(25,158,112,.8)"></span> diagonal — internal cohesion' +
+      '<div class="legend"><span class="chip" style="background:rgba(var(--cellInk),.75)"></span> cross-domain calls — tangling' +
+      '<span class="chip" style="background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line)"></span> diagonal — internal cohesion' +
       '<span>· big off-diagonal numbers = merge candidates or missing interface · click a cell for its edges</span></div>';
     v.querySelectorAll('td[data-a]').forEach(function (td) {
       td.onclick = function () { showCoupling(domainNames[+td.getAttribute('data-a')], domainNames[+td.getAttribute('data-b')]); };
@@ -605,16 +659,22 @@
     if (w >= h) { bisect(a, x, y, w * frac, h, out); bisect(b, x + w * frac, y, w * (1 - frac), h, out); }
     else { bisect(a, x, y, w, h * frac, out); bisect(b, x, y + h * frac, w, h * (1 - frac), out); }
   }
-  // Sequential single-hue ramp (dark slate -> risk red), lightness monotonic — density is a
-  // MAGNITUDE, so lightness carries it (CVD-safe by construction; the old green->red pair
-  // measured deutan ΔE 2.2 — invisible to red-green-deficient viewers).
-  function dupColor(density) {
-    var t = Math.max(0, Math.min(1, density));
-    var r = Math.round(41 + (230 - 41) * t), g = Math.round(35 + (103 - 35) * t), b = Math.round(49 + (103 - 49) * t);
-    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  // Sequential lightness ramp, panel → accent — density is a MAGNITUDE, so lightness carries it
+  // (CVD-safe by construction). Endpoints come from the theme tokens (--tmLo/--tmHi); the
+  // treemap re-renders on theme change, so the ramp flips with the page.
+  function tmRamp() {
+    var cs = getComputedStyle(document.documentElement);
+    var triplet = function (name, fb) { var s = (cs.getPropertyValue(name).trim() || fb).split(','); return [+s[0], +s[1], +s[2]]; };
+    var lo = triplet('--tmLo', '24,24,30'), hi = triplet('--tmHi', '198,242,78');
+    return function (density) {
+      var t = Math.max(0, Math.min(1, density));
+      var r = Math.round(lo[0] + (hi[0] - lo[0]) * t), g = Math.round(lo[1] + (hi[1] - lo[1]) * t), b = Math.round(lo[2] + (hi[2] - lo[2]) * t);
+      return 'rgb(' + r + ',' + g + ',' + b + ')';
+    };
   }
   function renderTreemap() {
     var tm = document.getElementById('tm'); tm.innerHTML = '';
+    var dupColor = tmRamp();
     var Wd = tm.clientWidth || 800, Hd = tm.clientHeight || 600;
     var doms = domainNames.map(function (d) {
       var ns = AN.filter(function (n) { return n.domain === d; });
@@ -659,7 +719,7 @@
       '<div class="kv">' + f.nodes.length + ' symbols · ' + f.value + ' loc · ' + Math.round(f.density * 100) + '% duplicated</div>' +
       '<div class="sec">symbols</div><div class="lst" id="d_f"></div>';
     document.getElementById('d_f').innerHTML = f.nodes.map(function (n) {
-      return '<div data-node="' + esc(n.id) + '">' + (dupNodeIds.has(n.id) ? '⚠ ' : '') + esc(n.label) + ' <span class="dim">' + (n.loc || 0) + ' loc</span></div>';
+      return '<div data-node="' + esc(n.id) + '">' + (dupNodeIds.has(n.id) ? '<span style="color:var(--accent)">▪</span> ' : '') + esc(n.label) + ' <span class="dim">' + (n.loc || 0) + ' loc</span></div>';
     }).join('');
     bindNodeRows();
   }
@@ -672,7 +732,7 @@
   var gInit = false, expanded = new Set(), W = null, sim = null, selectedNode = null, searchTerm = '', lastLit = null, settleDraws = 0;
   var lastPos = new Map(); // id -> {x,y} carried across layouts
   var cv = document.getElementById('cv'), ctx = cv.getContext('2d'), DPR = window.devicePixelRatio || 1, cam = { x: 0, y: 0, k: 1 };
-  var UIFONT = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif'; // canvas needs a REAL stack (bare ui-sans-serif falls back to serif)
+  var UIFONT = 'ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace'; // the map speaks mono like the rest of the HUD
   function allExpanded() { return domainNames.every(function (d) { return expanded.has(d); }); }
   function gResize() { var r = cv.parentElement.getBoundingClientRect(); cv.width = r.width * DPR; cv.height = r.height * DPR; cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px'; }
   function mapEnd(n) { return expanded.has(n.domain) ? n.id : 'd:' + n.domain; }
@@ -887,20 +947,26 @@
   }
   // #37: edges batch by EXACT style bucket — one beginPath+stroke per (state, bubble-pair, weight)
   // group instead of per edge. alpha saturates at w=29, width at w=72, so min(weight,72) keys both
-  // without losing a byte of the old per-edge style. ≤ 3·2·72 = 432 buckets at any n.
-  function edgeBucketKey(e, A, B, on) {
+  // without losing a byte of the per-edge style. ≤ 4·2·72 = 576 buckets at any n.
+  function edgeBucketKey(e, A, B, on, hot) {
     var pair = !!(A.bubble && B.bubble);
-    var state = !on ? 'dim' : (e.cross && !pair) ? 'tangle' : 'norm';
+    var state = !on ? 'dim' : hot ? 'hot' : (e.cross && !pair) ? 'tangle' : 'norm';
     return state + '|' + (pair ? 1 : 0) + '|' + Math.min(e.weight, 72);
   }
-  function edgeStyleFor(key) {
+  // Stippled strokes — the brand's dither language: quiet dust for structure, brighter denser
+  // dash for cross-domain tangling, accent dash for the lit blast around a selection/search.
+  // Inks are r,g,b triplets from the theme (cvColors.edgeInk); defaults are the dark theme.
+  function edgeStyleFor(key, ink) {
     var p = key.split('|'), state = p[0], pair = p[1] === '1', w = +p[2];
     var wgt = Math.min(1, Math.log(w + 1) / 3.4);
+    var acc = (ink && ink.acc) || '198,242,78', hi = (ink && ink.hi) || '236,234,241', mid = (ink && ink.mid) || '154,151,166';
     return {
       stroke: state === 'dim' ? 'rgba(125,122,135,0.05)'
-        : state === 'tangle' ? 'rgba(236,131,90,' + (0.25 + wgt * 0.4) + ')'
-        : 'rgba(156,153,166,' + (0.14 + wgt * 0.34) + ')',
+        : state === 'hot' ? 'rgba(' + acc + ',' + (0.3 + wgt * 0.4) + ')'
+        : state === 'tangle' ? 'rgba(' + hi + ',' + (0.2 + wgt * 0.36) + ')'
+        : 'rgba(' + mid + ',' + (0.14 + wgt * 0.34) + ')',
       width: pair ? Math.max(0.8, Math.min(6, Math.log(w + 1) * 1.4)) : 1,
+      dash: state === 'hot' || state === 'tangle' ? [2, 2.6] : [1, 3],
     };
   }
   // #37: the search highlight set, computed ONCE per search/scope change (refreshHits stores it),
@@ -911,6 +977,23 @@
     return { hits: hits, ids: ids, doms: doms };
   }
   var LABEL_CAP = 300; // #37: at most this many labels per frame, priority-ranked
+  // brand draw helpers: hex → rgba, and a cached 4px checker dither pattern per color — domain
+  // blocks fill with halftone dust instead of flat paint (the poster texture, not a UI card).
+  function hexA(hex, a) {
+    var n = parseInt(hex.slice(1), 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+  }
+  var patCache = new Map();
+  function ditherPat(color) {
+    var p = patCache.get(color);
+    if (!p) {
+      var pc = document.createElement('canvas'); pc.width = 4; pc.height = 4;
+      var px = pc.getContext('2d'); px.fillStyle = color;
+      px.fillRect(0, 0, 1, 1); px.fillRect(2, 2, 1, 1);
+      p = ctx.createPattern(pc, 'repeat'); patCache.set(color, p);
+    }
+    return p;
+  }
   function gDraw() {
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
     // #37: one getComputedStyle per draw (was one per labeled node → 16.8k/draw). Theme flips call
@@ -928,40 +1011,67 @@
     }
     var lit = function (nd) { return !hl || hl.has(nd.id) || (nd.bubble && hlDom && hlDom.has(nd.domain)); };
     lastLit = hl ? new Set(W.nodes.filter(lit).map(function (n) { return n.id; })) : null;
-    // edges: quadratic curves, weight -> alpha/width; cross-area edges wear the tangle color. Grouped
-    // into ≤432 exact style buckets, one beginPath+stroke each (was one stroke per edge — 104k at 16.8k).
-    var lowZoom = cam.k < 0.35; // intentional geometry LOD: weight-1 non-bubble edges draw straight
+    // edges: straight stippled strokes, weight -> alpha/width; the dash pattern carries state
+    // (see edgeStyleFor). Grouped into ≤576 exact style buckets, one beginPath+stroke each
+    // (was one stroke per edge — 104k at 16.8k). When a highlight context exists (selection or
+    // search), every lit edge wears the accent — the blast radius reads at a glance.
+    var hasHl = !!hl;
     var buckets = new Map();
     W.edges.forEach(function (e) {
       var A = W.idx.get(e.from), B = W.idx.get(e.to); if (!A || !B) return;
       var on = !hl || (lit(A) && lit(B));
-      var key = edgeBucketKey(e, A, B, on);
+      var key = edgeBucketKey(e, A, B, on, hasHl && on);
       var b = buckets.get(key); if (!b) buckets.set(key, b = []); b.push(e);
     });
     buckets.forEach(function (list, key) {
-      var st = edgeStyleFor(key); ctx.strokeStyle = st.stroke; ctx.lineWidth = st.width;
-      var kp = key.split('|'), straight = lowZoom && kp[1] === '0' && kp[2] === '1';
+      var st = edgeStyleFor(key, thc.edgeInk); ctx.strokeStyle = st.stroke; ctx.lineWidth = st.width; ctx.setLineDash(st.dash);
       ctx.beginPath();
       for (var m = 0; m < list.length; m++) {
         var e = list[m], A = W.idx.get(e.from), B = W.idx.get(e.to);
-        var x1 = X(A.x), y1 = Y(A.y), x2 = X(B.x), y2 = Y(B.y);
-        ctx.moveTo(x1, y1);
-        if (straight) ctx.lineTo(x2, y2);
-        else { var mx = (x1 + x2) / 2, my = (y1 + y2) / 2, dx = x2 - x1, dy = y2 - y1; ctx.quadraticCurveTo(mx - dy * 0.09, my + dx * 0.09, x2, y2); }
+        ctx.moveTo(X(A.x), Y(A.y)); ctx.lineTo(X(B.x), Y(B.y));
       }
       ctx.stroke();
     });
-    // nodes: fill + darker ring of the same hue; selection wears the brand accent. Labels are
-    // collected here (screen-space LOD) and drawn in a capped, priority-ranked second pass.
+    ctx.setLineDash([]);
+    // nodes: square pixels on the domain luminance ramp; search hits wear the accent, the
+    // selected node flips to the sel ink and gets the accent viewfinder (frame + crosshair
+    // ticks). Labels are collected here (screen-space LOD) and drawn in a capped second pass.
     var labelCands = [];
     W.nodes.forEach(function (nd) {
       var vis = lit(nd);
-      var c = colorOf(nd.domain);
-      ctx.globalAlpha = vis ? 1 : 0.14;
-      ctx.beginPath(); ctx.arc(X(nd.x), Y(nd.y), nd.r, 0, 6.2832);
-      ctx.fillStyle = c; ctx.fill();
-      ctx.lineWidth = nd.bubble ? 2 : 1.4; ctx.strokeStyle = shade(c, 0.5); ctx.stroke();
-      if (selectedNode === nd.id) { ctx.lineWidth = 2.5; ctx.strokeStyle = '#C6F24E'; ctx.beginPath(); ctx.arc(X(nd.x), Y(nd.y), nd.r + 2.5, 0, 6.2832); ctx.stroke(); }
+      var si = slotOf(nd.domain);
+      var c = si >= 0 ? thc.ramp[si] : thc.neutral;
+      // attention is always the accent: search hits and the selected node itself
+      if (searchTerm && hl && hl.has(nd.id)) c = thc.accent;
+      if (selectedNode === nd.id) c = thc.accent;
+      ctx.globalAlpha = vis ? 1 : 0.12;
+      var s = nd.r, x = X(nd.x), y = Y(nd.y);
+      if (nd.bubble) {
+        // domain block: halftone fill + hairline of its ramp step, count numeral inside
+        ctx.fillStyle = hexA(c, 0.14); ctx.fillRect(x - s, y - s, s * 2, s * 2);
+        ctx.fillStyle = ditherPat(c); ctx.fillRect(x - s, y - s, s * 2, s * 2);
+        ctx.lineWidth = 1; ctx.strokeStyle = c; ctx.strokeRect(x - s + 0.5, y - s + 0.5, s * 2 - 1, s * 2 - 1);
+        var fs = Math.max(10, Math.min(26, s * 0.55));
+        ctx.font = '700 ' + fs + 'px ' + UIFONT;
+        ctx.textAlign = 'center';
+        ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.strokeStyle = thc.halo;
+        ctx.strokeText(String(nd.count), x, y + fs * 0.36);
+        ctx.fillStyle = thc.label; ctx.fillText(String(nd.count), x, y + fs * 0.36);
+        ctx.textAlign = 'start';
+      } else {
+        ctx.fillStyle = c; ctx.fillRect(x - s, y - s, s * 2, s * 2);
+      }
+      if (selectedNode === nd.id) {
+        var o = Math.max(s + 3.5, 8);
+        ctx.lineWidth = 1; ctx.strokeStyle = thc.accent;
+        ctx.strokeRect(x - o, y - o, o * 2, o * 2);
+        ctx.beginPath();
+        ctx.moveTo(x, y - o - 6); ctx.lineTo(x, y - o);
+        ctx.moveTo(x, y + o); ctx.lineTo(x, y + o + 6);
+        ctx.moveTo(x - o - 6, y); ctx.lineTo(x - o, y);
+        ctx.moveTo(x + o, y); ctx.lineTo(x + o + 6, y);
+        ctx.stroke();
+      }
       ctx.globalAlpha = 1;
       // #37: screen-space gate (was world-space nd.r>7.5 — a big node lost its label when zoomed out).
       var cand = vis && (nd.bubble || nd.r * cam.k > 7.5 || cam.k > 1.7 || (hl && hl.has(nd.id) && hl.size < 40));
@@ -969,12 +1079,23 @@
     });
     var toLabel = labelPick(labelCands, cam, hl, LABEL_CAP);
     ctx.globalAlpha = 1; ctx.lineJoin = 'round';
+    // greedy screen-space cull on the ranked pick: a label that would sit on an already-drawn
+    // one is skipped (deterministic — same order, same positions → same culls; no mush piles).
+    var kept = [];
     for (var li = 0; li < toLabel.length; li++) {
       var lnd = toLabel[li];
-      var lx = X(lnd.x) + lnd.r + 4, ly = Y(lnd.y) + 3.5;
-      ctx.font = (lnd.bubble ? '600 12px ' : '500 10.5px ') + UIFONT;
+      var lx = X(lnd.x) + lnd.r + 5, ly = Y(lnd.y) + 3.5;
+      ctx.font = (lnd.bubble ? '700 10.5px ' : '500 10px ') + UIFONT;
+      var txt = lnd.bubble ? lnd.label.toUpperCase() : lnd.label;
+      var tw = ctx.measureText(txt).width;
+      var clash = false;
+      for (var kj = 0; kj < kept.length; kj++) {
+        var K = kept[kj];
+        if (Math.abs(K.y - ly) < 12 && lx < K.x + K.w + 8 && K.x < lx + tw + 8) { clash = true; break; }
+      }
+      if (clash) continue;
+      kept.push({ x: lx, y: ly, w: tw });
       ctx.lineWidth = 3; ctx.strokeStyle = thc.halo;
-      var txt = lnd.bubble ? lnd.label + ' · ' + lnd.count : lnd.label;
       ctx.strokeText(txt, lx, ly);
       ctx.fillStyle = lnd.bubble ? thc.label : thc.dim; ctx.fillText(txt, lx, ly);
     }
@@ -1142,8 +1263,8 @@
 </script>
 <!-- CRO C3: the shared report is the warmest lead this product generates — one discreet,
      keyboard-reachable line (no banners, no modals: this artifact gets pasted into PRs). -->
-<div style="position:fixed;bottom:0;right:0;z-index:5;font-size:11px;line-height:1;padding:5px 10px;background:rgba(16,14,20,.82);border-top-left-radius:8px;color:#9C99A6">
-  Mapped by codeweb — free, MIT, runs locally · <a href="https://github.com/GhostlyGawd/codeweb" style="color:#C6F24E">get it for your repo →</a> · <a href="https://github.com/sponsors/GhostlyGawd" style="color:#9C99A6" title="sponsoring funds the benchmarks">♥ sponsor</a>
+<div id="brandbar">
+  Mapped by codeweb — free, MIT, runs locally · <a href="https://github.com/GhostlyGawd/codeweb">get it for your repo →</a> · <a class="q" href="https://github.com/sponsors/GhostlyGawd" title="sponsoring funds the benchmarks">♥ sponsor</a>
 </div>
 </body>
 </html>
