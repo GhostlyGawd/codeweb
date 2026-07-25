@@ -16,8 +16,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
   live axios map with `merge()` pre-selected and its 56-function blast radius lit in
   chartreuse; the map itself went dithered (pixel-square nodes, stippled edges, HUD crosshairs).
   Benchmark stats render as pixel-block meters (grep 44% vs codeweb 74%). Fonts are
-  self-hosted, same-origin; the social-preview card matches. Report domain colors are
-  unchanged — in the tool they distinguish domains, which is function, not branding.
+  self-hosted, same-origin; the social-preview card matches.
+- **The report UI itself is redesigned to the same system.** Domain bubbles became dithered
+  square blocks with their symbol count set inside; edges are straight stippled strokes with an
+  accent "blast" state, so a selection's impact reads at a glance; the selected node wears the
+  accent with a viewfinder frame. The masthead is a mono-caps HUD (pixel glyph, boxed tabs,
+  square search and buttons), findings badges are monochrome (accent = high-confidence only),
+  and every place a hue used to carry data — domain slots, matrix cells, treemap density — now
+  uses a luminance ramp, which survives every kind of color-vision deficiency by construction.
+  Dark is the default; light is an explicit paper mode and `auto` follows the OS. Labels get a
+  deterministic screen-space collision cull, so dense graphs stop rendering as label mush.
+- **A README banner in the brand language** (`assets/brand/banner.png`): Doto wordmark, pixel
+  glyph, caps tagline, and a dithered mini-map with one accent-selected node. The pipeline
+  SVGs (`demo.svg`, `pipeline.svg`) and the homepage stage illustrations are redrawn in the
+  same square/stipple/single-accent language.
 - **An unlisted npm-downloads dashboard** at `/downloads.html`: daily download counts of
   `@ghostlygawd/codeweb` over time, fetched client-side from npm's public API and drawn as a
   dependency-free SVG. Built with the site but excluded from the sitemap and linked from nowhere.
@@ -28,6 +40,12 @@ notes so validated results, papers, and new tools never get lost in commit histo
   own repo mapped is the pitch. The axios case study is demoted from a bold callout to a plain
   link under the screenshots. The README masthead drops the hero graphic and the decorative
   engine/MCP/sponsor badges: a text wordmark, the tagline, and three badges (CI, npm, license).
+- **Every screenshot and the live demo now show the redesigned report.** The demo is the same
+  committed axios graph re-rendered through the new template (274 product symbols, 8 domains),
+  the five README/site screenshots are re-shot from it, the blast-radius caption now states
+  what the committed graph actually contains (27 call edges into `AxiosError` — the old "58
+  users" figure doesn't match this artifact), and the injected demo nav matches the HUD
+  (caps, square, no pills).
 - **Plain-language pass over the whole marketing funnel.** The README, homepage, and plugin
   listing now state what codeweb is instead of performing the problem — the rhetorical-question
   opener and "Today…" windup are gone, and the proof bullets carry spec-sheet labels

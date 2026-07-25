@@ -357,10 +357,11 @@ function injectDemoNav() {
   // CRO C3: the demo is the property's peak-conviction surface — it finally carries the one ask,
   // and (C10) a hint chip pointing at the promised Graph view (the report's hash router handles it).
   const wm = `${MARKER}<b><a href="../index.html" style="color:inherit;text-decoration:none">codeweb</a></b>`
-    + `<a href="../index.html" style="color:#9C99A6;text-decoration:none;font-size:12px;margin-left:10px">Home</a>`
-    + `<a href="../research.html" style="color:#9C99A6;text-decoration:none;font-size:12px;margin-left:10px">Research</a>`
-    + `<span style="color:#9C99A6;font-size:12px;margin-left:10px">this is <a href="https://github.com/axios/axios" style="color:#9C99A6">axios</a>, mapped · <a href="#tab=graph" style="color:#C6F24E;text-decoration:none" onclick="location.hash='tab=graph';location.reload();return false">see the Graph →</a></span>`
-    + `<a href="../start.html" style="background:#C6F24E;color:#0d0c11;font-weight:600;font-size:12px;padding:4px 12px;border-radius:999px;text-decoration:none;margin-left:14px">Map your repo →</a>`
+    + `<a href="../index.html" style="color:#8A8794;text-decoration:none;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-left:12px">Home</a>`
+    + `<a href="../research.html" style="color:#8A8794;text-decoration:none;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-left:12px">Research</a>`
+    + `<span style="color:#8A8794;font-size:11px;margin-left:12px;white-space:nowrap">this is <a href="https://github.com/axios/axios" style="color:#8A8794">axios</a>, mapped · <a href="#tab=graph" style="color:#C6F24E;text-decoration:none" onclick="location.hash='tab=graph';location.reload();return false">see the Graph →</a></span>`
+    + `<a href="../start.html" style="background:#C6F24E;color:#060608;font-weight:700;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;text-decoration:none;margin-left:14px;white-space:nowrap">Map your repo →</a>`
+    + `<style>#metaTarget{display:none}</style>` // the nav line already names the repo — free the masthead for the stats
     + `<!--/cw-nav-->`;
   if (!html.includes('<b>codeweb</b>')) return false;
   html = html.replace('<b>codeweb</b>', wm);

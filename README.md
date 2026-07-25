@@ -1,12 +1,10 @@
 <div align="center">
 
-# codeweb
-
-**Your coding agents grep. codeweb knows.**
+<img src="assets/brand/banner.png" alt="codeweb — your coding agents grep. codeweb knows." width="100%">
 
 [![CI](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml/badge.svg)](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/%40ghostlygawd%2Fcodeweb?style=flat-square&color=c6f24e)](https://www.npmjs.com/package/@ghostlygawd/codeweb)
-[![license: MIT](https://img.shields.io/npm/l/%40ghostlygawd%2Fcodeweb?style=flat-square&color=3fb950)](LICENSE)
+[![license: MIT](https://img.shields.io/npm/l/%40ghostlygawd%2Fcodeweb?style=flat-square&color=8a8794)](LICENSE)
 
 **Free & MIT-licensed. Runs entirely on your machine — no account, no server, no telemetry. Reads your code; never executes it.**
 
@@ -60,8 +58,8 @@ Click any function in the [living map](https://ghostlygawd.github.io/codeweb/) a
 Your agents get the same answer over MCP (`codeweb_impact`) — before they write a line.
 
 <div align="center">
-<img src="assets/screens/06-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — its domain expanded in place, 58 users listed in the inspector, cross-domain dependencies lit, neighboring domains highlighted" width="760">
-<br><sub>Selecting <code>AxiosError</code> in axios lights up its <b>58 users across the domains that depend on it</b> — try it yourself in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
+<img src="assets/screens/06-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — the selected block wears the accent with a viewfinder frame, blast edges lit across three domains, 27 callers listed in the inspector" width="760">
+<br><sub>Selecting <code>AxiosError</code> in axios lights up its <b>27 callers across the domains that depend on it</b> — try it yourself in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
 </div>
 
 ### Navigate the whole system
@@ -69,7 +67,7 @@ Your agents get the same answer over MCP (`codeweb_impact`) — before they writ
 A force-directed map of every symbol, collapsible to domains. Search, drag, zoom, and click any
 node to trace what depends on it and what it reaches.
 
-<img src="assets/screens/05-axios-graph.png" alt="codeweb Graph tab on axios: a force-directed domain map (adapters, helpers, core, cancel, defaults, platform) on a dark canvas" width="100%">
+<img src="assets/screens/05-axios-graph.png" alt="codeweb Graph tab on axios: eight domain blocks (helpers, core, adapters, cancel, defaults, platform) sized by symbol count and linked by stippled call edges" width="100%">
 
 ### Findings — stop guessing what to refactor
 
@@ -84,8 +82,8 @@ calls it and what it calls.
 <table>
 <tr>
 <td width="50%" valign="top">
-<img src="assets/screens/05-axios-treemap.png" alt="codeweb Treemap on axios: every file sized by lines of code, duplication density carried by a slate-to-red lightness ramp">
-<br><b>Treemap</b> — every file sized by lines of code; the brighter red a block, the more of it
+<img src="assets/screens/05-axios-treemap.png" alt="codeweb Treemap on axios: every file sized by lines of code, duplication density carried by a dark-to-lime lightness ramp">
+<br><b>Treemap</b> — every file sized by lines of code; the brighter a block, the more of it
 is duplicated. The bright blocks are your consolidation targets, at a glance.
 </td>
 <td width="50%" valign="top">
