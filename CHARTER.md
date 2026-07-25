@@ -42,7 +42,7 @@ mode — the capability remains, the "two modes" billing goes (ruled 2026-07-25,
 10. The human-facing map stays a supporting view of the findings — it does not lead the pitch and
     does not grow into a separate product (operator, this interview).
 
-## Invariants  *(proposed split — ratify or amend, Q5)*
+## Invariants  *(ratified 2026-07-25)*
 **Invariant (breaking one breaks the promise):** runs entirely local, no accounts, no telemetry ·
 reads code, never executes it · zero required dependencies · deterministic — same code, same map,
 no LLM in the analysis loop · everything local is free forever (MIT) · no claim without a
@@ -55,7 +55,8 @@ is off") · the Node ≥22 floor · the tool count.
 ## Now / Next / Not-now
 **Now — the identity milestone** (operator: "figure out the product's identity before we keep
 doing anything else"):
-1. Ratify this charter's OPEN items (invariant split).
+1. Ratify this charter's OPEN items. ✔ (2026-07-25 — only the Next-milestone pick remains,
+   and it can wait until the identity work lands.)
 2. Write the one identity statement — problem · user · job — in the ratified words.
 3. Re-align every claim-bearing surface to it: README hero, site tagline
    (`site/data/product.json`), npm description (`package.json`), plugin.json / marketplace.json,
@@ -83,13 +84,13 @@ new languages until their grammars clear provenance.
 ## Open questions
 Asked **one at a time** (operator's request, 2026-07-25), in this order — future sessions
 continue from the first unanswered item:
-1. Invariant split: ratify or amend.
-2. Next milestone: pick one candidate (can wait until the identity work lands).
+1. Next milestone: pick one candidate (can wait until the identity work lands).
 *(Answered 2026-07-25: the job one-liner — "Your agents break less code and burn fewer tokens." ·
 the user — the agent-heavy individual dev, the CI gate included in their surface · sponsorship —
 supports the project, and sponsors get featured README placement: logo tiers up top, a name
 list beneath; no cost claims · external mode — demoted to a feature note · enterprise support —
-softened to a one-line email doorway, no price, no SLA claim.)*
+softened to a one-line email doorway, no price, no SLA claim · the invariant split — ratified
+as written.)*
 
 ## Contradictions found
 | # | Claim · where stated | What the code/history shows | Ruling |
