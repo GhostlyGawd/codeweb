@@ -55,7 +55,7 @@ is off") · the Node ≥22 floor · the tool count.
 
 ## Now / Next / Not-now
 **Now — the identity milestone** (operator: "figure out the product's identity before we keep
-doing anything else"):
+doing anything else") — **complete 2026-07-25**, all five outcomes ✔; the operator picks Next:
 1. Ratify this charter's OPEN items. ✔ (2026-07-25 — complete; Next stays deliberately open
    until this milestone lands.)
 2. Write the one identity statement — problem · user · job — in the ratified words.
@@ -67,6 +67,7 @@ doing anything else"):
 4. Enforce it: the identity line joins `check-consistency`, so surface drift fails CI.
    ✔ (2026-07-25 — the gate reads the line from this file.)
 5. Then cut the release carrying the redesign plus the realigned copy.
+   ✔ (2026-07-25 — v0.11.0: tag + GitHub Release published, npm serving 0.11.0.)
 
 **Next:** deliberately open (ruled 2026-07-25) — picked after the identity milestone lands.
 Candidates on the table: the measurement batch (P1+P3) · edit-quality science (H22) · the next
