@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" width="720" height="200" font-family="ui-sans-serif,system-ui,'Segoe UI',Roboto,Arial,sans-serif">
-  <!-- codeweb primary logo: aperture monogram + wordmark. Self-contained dark surface so the -->
-  <!-- light wordmark reads on any theme (GitHub light/dark). "web" struck in the brand chartreuse. -->
-  <rect x="0.5" y="0.5" width="719" height="199" rx="18" fill="#100e14" stroke="#322e3a"/>
-  <g transform="translate(48,62) scale(2.4)">
-    <path d="M24.17 8.64 A11 11 0 1 0 24.17 23.36" fill="none" stroke="#c6f24e" stroke-width="4" stroke-linecap="round"/>
-    <rect x="22.9" y="11.4" width="4.2" height="9.2" rx="2.1" fill="#c6f24e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 96" width="420" height="96" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace">
+  <rect x="0.5" y="0.5" width="419" height="95" fill="#060608" stroke="#26242C"/>
+  <g shape-rendering="crispEdges">
+    <rect x="26" y="27" width="17" height="17" fill="#C6F24E"/>
+    <rect x="50" y="27" width="17" height="17" fill="#57545F"/>
+    <rect x="26" y="51" width="17" height="17" fill="#57545F"/>
+    <rect x="50" y="51" width="17" height="17" fill="#8A8794"/>
   </g>
-  <text x="150" y="112" font-size="62" font-weight="800" letter-spacing="-2.5" fill="#ececee">code<tspan fill="#c6f24e">web</tspan></text>
-  <text x="152" y="146" font-size="18" letter-spacing="0.3" fill="#9c99a6">Know what breaks before you write.</text>
+  <text x="92" y="61" font-size="40" font-weight="700" letter-spacing="1" fill="#E8E7EE">codeweb</text>
+  <rect x="286" y="52" width="9" height="9" fill="#C6F24E" shape-rendering="crispEdges"/>
 </svg>

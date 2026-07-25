@@ -43,15 +43,15 @@
   --teal: #8a8794;
   --pink: #8a8794;
 
-  /* ---- severity / status scale (functional, small doses) ---- */
-  --hi: #ff5d5d;
-  --med: #ffb14e;
-  --low: #e8c44e;
-  --good: #5bd17a;
+  /* ---- severity / status (brand law: accent = confirmed/act-here, muted = tentative) ---- */
+  --hi: var(--accent);
+  --med: var(--muted);
+  --low: var(--muted);
+  --good: var(--accent);
 
   /* ---- evidence-ledger semantics ---- */
-  --validated: #5bd17a;
-  --preliminary: #ffb14e;
+  --validated: var(--accent);
+  --preliminary: var(--muted);
   --null: #8a8794;
 
   /* ---- typography (mono-first; Doto for display numerals + wordmark) ---- */

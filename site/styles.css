@@ -478,8 +478,8 @@ strong { font-weight: 600; }
 .cw-line { font: 12px/1.45 var(--font-mono); color: var(--muted); animation: cwIn .3s var(--ease) both; }
 .cw-line .cw-pfx { color: var(--faint); }
 .cw-line .cw-tool { color: var(--teal); font-weight: 700; }
-.cw-line.cw-warn { color: #ffcf9e; } .cw-line.cw-warn .cw-pfx { color: var(--med); }
-.cw-line.cw-good { color: #b7e9c4; } .cw-line.cw-good .cw-pfx { color: var(--good); }
+.cw-line.cw-warn { color: var(--fg); } .cw-line.cw-warn .cw-pfx { color: var(--accent); }
+.cw-line.cw-good { color: var(--fg); } .cw-line.cw-good .cw-pfx { color: var(--accent); }
 .cw-line.cw-ok .cw-pfx { color: var(--accent); }
 @keyframes cwIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 

@@ -61,8 +61,24 @@
 <p>  live axios map with <code>merge()</code> pre-selected and its 56-function blast radius lit in</p>
 <p>  chartreuse; the map itself went dithered (pixel-square nodes, stippled edges, HUD crosshairs).</p>
 <p>  Benchmark stats render as pixel-block meters (grep 44% vs codeweb 74%). Fonts are</p>
-<p>  self-hosted, same-origin; the social-preview card matches. Report domain colors are</p>
-<p>  unchanged — in the tool they distinguish domains, which is function, not branding.</p>
+<p>  self-hosted, same-origin; the social-preview card matches.</p>
+<ul>
+<li><strong>The report UI itself is redesigned to the same system.</strong> Domain bubbles became dithered</li>
+</ul>
+<p>  square blocks with their symbol count set inside; edges are straight stippled strokes with an</p>
+<p>  accent "blast" state, so a selection's impact reads at a glance; the selected node wears the</p>
+<p>  accent with a viewfinder frame. The masthead is a mono-caps HUD (pixel glyph, boxed tabs,</p>
+<p>  square search and buttons), findings badges are monochrome (accent = high-confidence only),</p>
+<p>  and every place a hue used to carry data — domain slots, matrix cells, treemap density — now</p>
+<p>  uses a luminance ramp, which survives every kind of color-vision deficiency by construction.</p>
+<p>  Dark is the default; light is an explicit paper mode and <code>auto</code> follows the OS. Labels get a</p>
+<p>  deterministic screen-space collision cull, so dense graphs stop rendering as label mush.</p>
+<ul>
+<li><strong>A README banner in the brand language</strong> (<code>assets/brand/banner.png</code>): Doto wordmark, pixel</li>
+</ul>
+<p>  glyph, caps tagline, and a dithered mini-map with one accent-selected node. The pipeline</p>
+<p>  SVGs (<code>demo.svg</code>, <code>pipeline.svg</code>) and the homepage stage illustrations are redrawn in the</p>
+<p>  same square/stipple/single-accent language.</p>
 <ul>
 <li><strong>An unlisted npm-downloads dashboard</strong> at <code>/downloads.html</code>: daily download counts of</li>
 </ul>
@@ -76,6 +92,14 @@
 <p>  own repo mapped is the pitch. The axios case study is demoted from a bold callout to a plain</p>
 <p>  link under the screenshots. The README masthead drops the hero graphic and the decorative</p>
 <p>  engine/MCP/sponsor badges: a text wordmark, the tagline, and three badges (CI, npm, license).</p>
+<ul>
+<li><strong>Every screenshot and the live demo now show the redesigned report.</strong> The demo is the same</li>
+</ul>
+<p>  committed axios graph re-rendered through the new template (274 product symbols, 8 domains),</p>
+<p>  the five README/site screenshots are re-shot from it, the blast-radius caption now states</p>
+<p>  what the committed graph actually contains (27 call edges into <code>AxiosError</code> — the old "58</p>
+<p>  users" figure doesn't match this artifact), and the injected demo nav matches the HUD</p>
+<p>  (caps, square, no pills).</p>
 <ul>
 <li><strong>Plain-language pass over the whole marketing funnel.</strong> The README, homepage, and plugin</li>
 </ul>

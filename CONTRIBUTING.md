@@ -18,8 +18,9 @@ behavior change lands with the test that pins it), run the two commands above, o
 
 Every PR runs: the full suite on ubuntu (Node 22 + 24) and windows (22), a no-AST leg (proves
 the optional tier is optional), the benchmark smoke, `check-consistency` (which also rebuilds
-the site and fails on drift — run `node site/build.mjs` after touching `site/`), and codeweb's
-own structural self-review on `scripts/`.
+the site and fails on drift — run `node site/build.mjs` after touching `site/`), codeweb's
+own structural self-review on `scripts/`, and `tests/brand-sync.test.mjs` (visual surfaces —
+see "Brand sync" below).
 
 ## Where things live
 
@@ -52,6 +53,29 @@ the extension · `tests/` (see `tests/README.md`) · `reports/` audit paper trai
   The pitch never explains how something was measured; it says what you get, then links.
 - Never link away from the funnel. No outbound links to other products inside the pitch.
 - Tool and language counts are gated by `check-consistency` — never hardcode a new one.
+
+## Brand sync (visual surfaces)
+
+The report UI, the live demo, the screenshots, the README art, and the site are one visual
+system. `tests/brand-sync.test.mjs` fails the build when they drift:
+
+- **Tokens** — the report template and `site/tokens.css` must share the core palette; retired
+  palettes (the old categorical set, traffic-light severity, the GitHub-dark and crafted-dark
+  eras) are banned by hex on every authored surface. One accent (`#C6F24E`); data rides
+  luminance ramps, never a second hue.
+- **Shapes** — brand SVGs contain no circles, ellipses, or rounded rects; the injected demo
+  nav carries no pills.
+- **The demo is generated, not hand-kept.** After touching `scripts/report-template.html`,
+  regenerate it: `node scripts/build-report.mjs docs/demo/axios.graph.json --out
+  docs/demo/index.html --no-md && node site/build.mjs` (discard the `graph.json`
+  `meta.generatedAt` churn). The gate byte-compares the demo's embedded style/script against
+  the template.
+- **Screenshots are stamped.** `assets/screens/.template-stamp` records the template hash the
+  screenshots were shot from. A template change fails the gate until you re-shoot from
+  `docs/demo/` (and *look at every image*), then run `node scripts/stamp-screens.mjs`.
+- **Captions are receipts.** Every "N symbols … M domains" / "N callers" caption in the README
+  and site is checked against `docs/demo/axios.graph.json`. Never type a number the graph
+  doesn't contain.
 
 ## Releases
 

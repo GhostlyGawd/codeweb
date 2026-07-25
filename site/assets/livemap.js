@@ -150,7 +150,7 @@
         // labels: only where attention is — the hovered or selected function
         if (isHov || isSel) {
           ctx.font = '500 10px "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
-          ctx.fillStyle = isSel ? HOT : (isHov ? '#e7f6bf' : MUTED);
+          ctx.fillStyle = isSel ? HOT : (isHov ? '#eceaf1' : MUTED);
           ctx.textAlign = 'center';
           ctx.fillText(nd.l.toUpperCase() + '()', nd.x, nd.y - s2 - 8);
         }

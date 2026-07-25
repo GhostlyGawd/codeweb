@@ -1,40 +1,44 @@
 # codeweb brand kit
 
-All marks are hand-authored SVG in codeweb's own report palette, so the brand and the product
-look like one thing.
+Terminal editorial: near-black surfaces, mono type, square corners, dither texture, and one
+accent. Every mark here uses the same tokens as the product's report and the site, so the
+brand and the product look like one thing. `tests/brand-sync.test.mjs` enforces that.
 
 ## Files
 
 | File | Use |
 |---|---|
-| `logo.svg` | **Primary** lockup — node-web glyph + wordmark on a dark surface. Reads on any GitHub theme. |
-| `logomark.svg` | Square glyph only — favicon, social avatar, plugin-marketplace icon. |
-| `hero.svg` | Wide README header banner. |
-| `demo.svg` | Looping animated pipeline (`extract → cluster → overlap → render`). CSS + SMIL, so it plays inline via `<img>` on GitHub. |
+| `banner.png` | Wide README header (2100×450). Doto wordmark, pixel glyph, dithered mini-map. |
+| `logo.svg` | Horizontal lockup — pixel glyph + mono wordmark on a dark tile. |
+| `logomark.svg` | The 2×2 pixel glyph on a dark tile — favicon, avatars, marketplace icon. |
+| `demo.svg` | Looping animated pipeline (`extract → cluster → overlap → render`). CSS + SMIL, plays inline via `<img>` on GitHub. |
 | `pipeline.svg` | Static, labelled how-it-works diagram. |
 | `social-preview.png` | 1280×640 card for **repo Settings → Social preview** (upload manually). |
-| `logo-b-wordmark.svg`, `logo-c-badge.svg` | Alternate lockups kept for reference. |
 
 The screenshots in `../screens/` are the **actual generated `report.html`**, not mockups.
 
-## Palette (from `scripts/report-template.html`)
-
-Crafted Dark — warm ink + electric chartreuse. Red is reserved for risk / blast radius.
+## Palette (shared with `scripts/report-template.html` and `site/tokens.css`)
 
 | Token | Hex | |
 |---|---|---|
-| bg | `#100E14` | page (warm near-black) |
-| surface | `#1A1820` / `#232029` | panels |
-| line | `#322E3A` | borders, idle edges |
-| fg | `#ECECEE` | text |
-| muted | `#9C99A6` | secondary text |
-| accent | `#C6F24E` | primary / links / hub node (chartreuse) |
-| severity | `#FF5D5D` `#FFB14E` `#E8C44E` `#5BD17A` | high → good |
+| bg | `#060608` | page (near-black) |
+| panel | `#0D0D11` / `#131318` | surfaces |
+| line | `#26242C` | borders |
+| fg | `#E8E7EE` | text |
+| muted | `#8A8794` | secondary text |
+| accent | `#C6F24E` | the only saturated color — selection, links, "act here" |
 
-Domain node colours echo the report's ramp (chartreuse → purple → teal → amber → pink → green).
-Wordmark font is the system UI stack (`ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial`).
+Data never gets a second hue: domains, matrix cells, and treemap density ride luminance
+ramps (grays, or panel→accent), which survive every kind of color-vision deficiency.
+
+## Rules
+
+- Square everything. No rounded corners, no circles, no ellipses in brand art.
+- One accent, spent on meaning. Grays do the rest.
+- Type is mono (`ui-monospace` stack); display numerals and the wordmark use Doto where
+  fonts can be embedded (site, banner) and the mono stack where they can't (SVG marks).
+- Texture is dither/halftone (pixel checkers, stippled strokes), never gradients or glow.
 
 ## Positioning
 
-Tagline: **"the system map for your codebase."** Deliberately outcome-level, not a feature list —
-it stays true as features are added on top of the graph.
+Tagline: **"Your coding agents grep. codeweb knows."**
