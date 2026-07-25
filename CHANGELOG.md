@@ -9,7 +9,12 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Fixed
+- The mcp-registry workflow now chains off the release workflow via `workflow_run` (gated on
+  success) — its previous `release: published` trigger could never fire, because events created
+  with `GITHUB_TOKEN` don't trigger workflows. codeweb's first registry listing
+  (`io.github.GhostlyGawd/codeweb`, v0.12.0) was published by manual dispatch; future releases
+  republish automatically.
 
 ## [0.12.0] - 2026-07-25
 

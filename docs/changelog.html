@@ -52,7 +52,14 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
-<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h3 class="cl-grp">Fixed</h3>
+<ul>
+<li>The mcp-registry workflow now chains off the release workflow via <code>workflow_run</code> (gated on</li>
+</ul>
+<p>  success) — its previous <code>release: published</code> trigger could never fire, because events created</p>
+<p>  with <code>GITHUB_TOKEN</code> don't trigger workflows. codeweb's first registry listing</p>
+<p>  (<code>io.github.GhostlyGawd/codeweb</code>, v0.12.0) was published by manual dispatch; future releases</p>
+<p>  republish automatically.</p>
 <h2 class="cl-ver">[0.12.0] - 2026-07-25</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
