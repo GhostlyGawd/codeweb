@@ -52,7 +52,14 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
-<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>MCP-registry publishing is automated</strong> (<code>.github/workflows/mcp-registry.yml</code>): every</li>
+</ul>
+<p>  published release now submits <code>server.json</code> to registry.modelcontextprotocol.io via GitHub</p>
+<p>  Actions OIDC — no browser login, no stored secret. The server name and the npm package's new</p>
+<p>  <code>mcpName</code> field carry the canonical <code>io.github.GhostlyGawd/codeweb</code> identity (casing matched</p>
+<p>  to the namespace's existing registry listings).</p>
 <h2 class="cl-ver">[0.11.0] - 2026-07-25</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
