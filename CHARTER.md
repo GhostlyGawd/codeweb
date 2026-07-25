@@ -55,7 +55,7 @@ is off") · the Node ≥22 floor · the tool count.
 ## Now / Next / Not-now
 **Now — the identity milestone** (operator: "figure out the product's identity before we keep
 doing anything else"):
-1. Ratify this charter's OPEN items (C4, invariant split).
+1. Ratify this charter's OPEN items (invariant split).
 2. Write the one identity statement — problem · user · job — in the ratified words.
 3. Re-align every claim-bearing surface to it: README hero, site tagline
    (`site/data/product.json`), npm description (`package.json`), plugin.json / marketplace.json,
@@ -83,13 +83,13 @@ new languages until their grammars clear provenance.
 ## Open questions
 Asked **one at a time** (operator's request, 2026-07-25), in this order — future sessions
 continue from the first unanswered item:
-1. Enterprise support at $3–6k/yr: real offer or placeholder (C4).
-2. Invariant split: ratify or amend.
-3. Next milestone: pick one candidate (can wait until the identity work lands).
+1. Invariant split: ratify or amend.
+2. Next milestone: pick one candidate (can wait until the identity work lands).
 *(Answered 2026-07-25: the job one-liner — "Your agents break less code and burn fewer tokens." ·
 the user — the agent-heavy individual dev, the CI gate included in their surface · sponsorship —
 supports the project, and sponsors get featured README placement: logo tiers up top, a name
-list beneath; no cost claims · external mode — demoted to a feature note.)*
+list beneath; no cost claims · external mode — demoted to a feature note · enterprise support —
+softened to a one-line email doorway, no price, no SLA claim.)*
 
 ## Contradictions found
 | # | Claim · where stated | What the code/history shows | Ruling |
@@ -97,7 +97,7 @@ list beneath; no cost claims · external mode — demoted to a feature note.)*
 | C1 | "The bar that does not move" — the four-phase science program (`docs/ROADMAP.md`) | Edit-quality leg still an open null; recent weeks all growth/brand work | **Ruled:** the program is retired as the governing plan; measurement stays as the receipts discipline; refresh the file (Now §3) |
 | C2 | "The living map of your codebase." (site) vs "See what an edit breaks before you write it" (npm) | Two lead jobs on two public surfaces | **Ruled:** agent-first leads; the map is demoted to supporting view; the tagline changes in realignment |
 | C3 | "Two modes" — external review as a peer of internal (README) | A skill step + verdict appendix no benchmark or audit touches | **Ruled:** demoted to a feature note; capability stays, mode billing goes in realignment (2026-07-25) |
-| C4 | Enterprise support "available now", $3–6k/yr (README) | A mailto doorway; no SLA or contract machinery in the repo | **OPEN** |
+| C4 | Enterprise support "available now", $3–6k/yr (README) | A mailto doorway; no SLA or contract machinery in the repo | **Ruled:** softened — drop the price and the SLA claim; keep a one-line doorway ("Running codeweb at an org and want help? Email.") in realignment (2026-07-25) |
 | C5 | "Phase 4 blast-radius pre-flight does not exist yet" (`docs/ROADMAP.md`) | Its product half shipped (pre-edit hook, sidecar, impact cards); its science half never ran | **Ruled:** refresh with C1 |
 | C6 | Efficiency proven as "−44% tokens" (`docs/ROADMAP.md`, status 2026-06-27) | The v0.9.0 re-run reframed the win: +0.31 recall at equal cost | **Ruled:** refresh with C1 |
 | C7 | "Sponsorship funds development — mainly the AI bills from benchmarking" (README Support, site support page; premise repeated in `reports/REVENUE.md` and `docs/proposals/ai-spend-gated.md`) | Operator, 2026-07-25: the benchmarks do not cost actual API money — the cost premise was AI-invented and a funding strategy was built on top of it | **Ruled fabricated:** rewrite in realignment — sponsorship simply supports the project, and sponsors get featured README placement (big logos for big supporters, a name list beneath); no cost claims (operator, 2026-07-25) |
