@@ -1,9 +1,14 @@
-# Funded proposals — the spend-gated AI work (NOT run)
+# Proposals — the parked A/B work (NOT run)
 
-Three of AI-IDEAS.md's six ideas cost real benchmark tokens — the exact line item REVENUE.md
-aims sponsorship at ("heavy multi-agent spend", docs/ROADMAP.md). Per the standing constraint,
+> **Correction (2026-07-25, `CHARTER.md` C7):** this document's premise — that these runs "cost
+> real benchmark tokens" and wait on funding — was AI-invented; no such cost exists. The only
+> gate is an explicit operator go-ahead (charter non-goal 7). The harness descriptions below
+> remain accurate; do not quote the cost claims.
+
+Three of AI-IDEAS.md's six ideas were framed as costing real benchmark tokens (see the
+correction above). Per the standing constraint,
 **none of these has been run**; this document is the ready-to-execute proposal for each, so the
-moment budget exists the work starts from a plan instead of a blank page. Everything else in
+moment the operator says go the work starts from a plan instead of a blank page. Everything else in
 AI-IDEAS (ideas 1/3/4 — /codeweb-apply, the narration sidecar, /codeweb-pitch) shipped as
 prompt-only packaging with zero spend.
 

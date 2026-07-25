@@ -12,6 +12,8 @@
 
 </div>
 
+**Your agents break less code and burn fewer tokens.**
+
 codeweb reads your code and maps it: every function, and every call between them
 (~3 s for 3,000 symbols). It's static analysis — no LLM — so the same code always produces
 the same map.
@@ -22,10 +24,8 @@ They break the code they can't see.
 
 - **For agents:** an MCP server with 27 tools — `codeweb_impact`, `codeweb_callers`,
   `codeweb_find_similar`, and 24 more.
-- **For you:** an interactive map of the whole codebase.
 - **Answers:** exact, instant, tiny. Your agents keep their context for the real work.
-
-The result: your agents break less code, and they stop rewriting functions you already have.
+- **For you:** the supporting view — an interactive map of the whole codebase.
 
 The map also shows things you can't see from inside one file: **duplicated logic, dead code,
 hotspots, and tangled domains**.
@@ -132,12 +132,9 @@ codeweb also keeps a local tally of what it actually did for you — `npm run st
 codeweb this month: 41 pre-edit card(s) · 5 card-named caller(s) followed · 2 regression(s) flagged · 120 queries served
 ```
 
-## Two modes
-
-- **Internal** — map your own codebase and find consolidation opportunities to restructure.
-- **External** — clone a third-party repo *read-only* (e.g. a Claude Code plugin you found on
-  GitHub), fully map it, and get an adoption review before you commit to using it. codeweb
-  never executes target code.
+Considering a dependency? Point codeweb at any repo you don't own yet
+(`/codeweb https://github.com/owner/repo`): it clones *read-only*, maps it, and appends an
+adoption review. codeweb never executes target code.
 
 ## Install
 
@@ -316,12 +313,12 @@ GitHub (**Watch → Custom → Releases**).
 Everything that runs on your machine is **free forever**. No accounts, no telemetry, no license
 keys.
 
-[Sponsorship](https://github.com/sponsors/GhostlyGawd) funds development — mainly the AI bills
-from benchmarking, and new language support. Details on the
+[Sponsoring](https://github.com/sponsors/GhostlyGawd) supports the project — and it's
+advertising: top sponsors get their logo at the top of this README, and every sponsor joins
+the supporters list beneath it. Details on the
 [support page](https://ghostlygawd.github.io/codeweb/support.html).
 
-**Enterprise support**: email support with an SLA, onboarding help, and priority on feature
-requests. **$3–6k/yr**, limited to a few customers. Contact via the GitHub profile.
+Running codeweb at an org and want help? Email via the GitHub profile.
 
 ## Handoffs
 

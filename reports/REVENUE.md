@@ -1,5 +1,11 @@
 # Monetization Map — codeweb
 
+> **Correction (2026-07-25, `CHARTER.md` C7):** this audit's premise that the bench program has
+> "a real, recurring, currently unfunded dollar cost" was AI-invented — the operator confirms
+> the benchmarks cost no actual API money. The ratified sponsorship story is: support the
+> project; sponsors get featured README/site placement. Preserved below as a dated audit
+> record — do not treat its cost claims or the strategy built on them as fact.
+
 **Date:** 2026-07-23 · **Scope:** read-only pass over every surface money could touch — package.json, LICENSE, site/ (footer, product, start), README.md, .github/ (workflows, actions, no FUNDING.yml), scripts/ (ci-gate, trend, stats, gate-md, annotate, context-pack, run), hooks/, editor/, docs/ROADMAP.md — plus the two sibling audits (COMPETITIVE.md, FUNNEL.md) for market pricing and funnel evidence. This file is the only write. No prior REVENUE.md existed.
 
 **Framing constraint honored throughout:** codeweb is MIT (`LICENSE`, © 2026 GhostlyGawd), solo-maintained, local-first, no-accounts, no-telemetry ("STRICTLY LOCAL… never transmitted," `scripts/lib/stats.mjs:5-9`; "zero third-party requests on this page," `site/templates/footer.html`). Community trust is the principal asset and COMPETITIVE.md §1 shows the market norm is *free MIT core, paid only at the edges*. Every proposal below therefore monetizes things a fork of the MIT code cannot copy — maintainer time, SLAs, hosting, and cross-repo aggregated state — and never moves an existing local feature behind a gate.

@@ -1,7 +1,9 @@
-// Growth playbook Batch 7 — Revenue rails (REVENUE.md §3-§5 quick wins). The boundary rule under
-// test everywhere: anything that runs on your laptop against one repo is FREE FOREVER; money buys
-// maintainer attention and the bench spend. Asks appear only at success high points, computed
-// only from local counters, throttled, and NEVER on agent-facing or failure surfaces.
+// Growth playbook Batch 7 — Revenue rails, realigned to CHARTER.md (2026-07-25). The boundary
+// rule under test everywhere: anything that runs on your laptop against one repo is FREE
+// FOREVER; sponsoring supports the project and buys sponsors featured placement — no cost
+// claims (charter C7 ruled the old "bench spend" story fabricated). Asks appear only at
+// success high points, computed only from local counters, throttled, and NEVER on
+// agent-facing or failure surfaces.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -20,19 +22,21 @@ test('RV1: FUNDING.yml exists — payment friction drops from infinite to zero',
   assert.match(readFileSync(p, 'utf8'), /github:\s*\[?\s*GhostlyGawd/, 'GitHub Sponsors rail');
 });
 
-test('RV2: README states the free-forever contract and the enterprise doorway', () => {
+test('RV2: README states the free-forever contract and the ratified sponsor story', () => {
   const readme = read('README.md');
   assert.match(readme, /free forever/i, 'the still-generous contract is WRITTEN, not implied');
   assert.match(readme, /sponsors\/GhostlyGawd/, 'the sponsor rail is linked');
-  assert.match(readme, /support contract|enterprise support/i, 'the maintainer\'s time is priced, not given away in issues');
+  assert.match(readme, /supporters list|logo/i, 'sponsors get placement — the ratified exchange (charter C7)');
+  assert.match(readme, /Running codeweb at an org/i, 'the org doorway stays: one line, no price, no SLA claim (charter C4)');
+  assert.doesNotMatch(readme, /AI bills|\$3[–-]6k/i, 'the fabricated cost story and the struck price stay gone');
 });
 
-test('RV3: the support page states what money funds, as jobs — and rides the sitemap', () => {
+test('RV3: the support page tells the ratified story — placement for sponsors, no cost claims', () => {
   const page = read('site/content/support.html');
-  assert.match(page, /bench|benchmark/i, 'names the real fundable cost (the multi-agent bench spend)');
   assert.match(page, /free forever/i, 'the contract leads');
-  assert.match(page, /\$5|\$25|\$250/, 'tiers are jobs with prices, not naked numbers');
-  assert.match(page, /(\$|USD ?)3[,.]?0?0?0|3-6k|3–6k/i, 'the enterprise price anchor filters tire-kickers');
+  assert.match(page, /logo|supporters list/i, 'sponsors get seen — placement, not invented perks');
+  assert.match(page, /sponsors\/GhostlyGawd/, 'the rail is linked');
+  assert.doesNotMatch(page, /AI bills|bench|\$3[–-]6k|SLA/i, 'no fabricated costs, no struck price or SLA claim (charter C7/C4)');
   assert.match(read('docs/sitemap.xml'), /support\.html/, 'crawlable');
 });
 

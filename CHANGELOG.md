@@ -35,6 +35,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
   dependency-free SVG. Built with the site but excluded from the sitemap and linked from nowhere.
 
 ### Changed
+- **One ratified identity, on every surface** (`CHARTER.md`, new at the repo root, with a
+  `CLAUDE.md` pointer so agents read it first). The job line — "Your agents break less code
+  and burn fewer tokens." — now leads the README, the site homepage, tagline, and og titles,
+  and the npm / plugin / marketplace / MCP-registry / GitHub-About listings; `check-consistency`
+  reads the line from the charter and fails any of those surfaces if it drifts. External review
+  is billed as a feature note, not a second mode. The support copy drops the "AI bills from
+  benchmarking" story, ruled fabricated in the charter's interview (C7): sponsoring supports
+  the project and sponsors get featured README/site placement, and the enterprise offer
+  softens to an email doorway — no price, no SLA claim. `docs/ROADMAP.md` is rewritten to the
+  charter's Now/Next/Not-now with dated corrections, and the two strategy documents carrying
+  the fabricated cost premise now open with correction banners.
 - **The funnel leads with the trial.** A "Try it on your repo" section (the npx one-liner) sits
   directly under the README hero, and the homepage hero carries the same command — seeing your
   own repo mapped is the pitch. The axios case study is demoted from a bold callout to a plain
