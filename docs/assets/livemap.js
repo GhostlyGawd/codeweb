@@ -76,12 +76,16 @@
     function tick() {
       var ns = model.nodes, n = ns.length, i, j, a, b, dx, dy, d2, d, f;
       var cx = W / 2, cy = H / 2;
+      // repulsion scales with the canvas area: on a small/narrow canvas (the mobile mini-map)
+      // the desktop constant blows nodes into the walls, where the old hard clamp froze them
+      // into straight rows along the edges. Tuned so 760×480 keeps the approved hero look.
+      var repK = Math.min(2100, Math.max(380, W * H * 0.00575));
       for (i = 0; i < n; i++) {
         a = ns[i];
         for (j = i + 1; j < n; j++) {
           b = ns[j];
           dx = a.x - b.x; dy = a.y - b.y; d2 = dx * dx + dy * dy || 0.01;
-          if (d2 < 90000) { f = 2100 / d2; a.vx += dx * f * 0.0016; a.vy += dy * f * 0.0016; b.vx -= dx * f * 0.0016; b.vy -= dy * f * 0.0016; }
+          if (d2 < 90000) { f = repK / d2; a.vx += dx * f * 0.0016; a.vy += dy * f * 0.0016; b.vx -= dx * f * 0.0016; b.vy -= dy * f * 0.0016; }
         }
         a.vx += (cx - a.x) * 0.0007; a.vy += (cy - a.y) * 0.0007;   // gravity to center
       }
@@ -91,12 +95,15 @@
         f = (d - 96) * 0.0042;
         a.vx += dx / d * f; a.vy += dy / d * f; b.vx -= dx / d * f; b.vy -= dy / d * f;
       });
-      var pad = 16;
+      var pad = 20;
       for (i = 0; i < n; i++) {
         a = ns[i];
         a.vx *= 0.86; a.vy *= 0.86;
         a.x += a.vx * alpha; a.y += a.vy * alpha;
-        a.x = Math.max(pad, Math.min(W - pad, a.x)); a.y = Math.max(pad, Math.min(H - pad, a.y));
+        // soft walls — a spring back inside, so the boundary never collects a pinned row
+        if (a.x < pad) a.vx += (pad - a.x) * 0.045; else if (a.x > W - pad) a.vx -= (a.x - (W - pad)) * 0.045;
+        if (a.y < pad) a.vy += (pad - a.y) * 0.045; else if (a.y > H - pad) a.vy -= (a.y - (H - pad)) * 0.045;
+        a.x = Math.max(6, Math.min(W - 6, a.x)); a.y = Math.max(6, Math.min(H - 6, a.y));
       }
       if (alpha > 0.04) alpha *= 0.992;   // settle, then hold a low gentle floor
       else alpha = 0.04;
