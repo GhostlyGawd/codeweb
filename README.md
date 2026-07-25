@@ -58,7 +58,7 @@ Click any function in the [living map](https://ghostlygawd.github.io/codeweb/) a
 Your agents get the same answer over MCP (`codeweb_impact`) — before they write a line.
 
 <div align="center">
-<img src="assets/screens/06-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — the selected block wears the accent with a viewfinder frame, blast edges lit across three domains, 27 callers listed in the inspector" width="760">
+<img src="assets/screens/axios-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — the selected block wears the accent with a viewfinder frame, blast edges lit across three domains, 27 callers listed in the inspector" width="760">
 <br><sub>Selecting <code>AxiosError</code> in axios lights up its <b>27 callers across the domains that depend on it</b> — try it yourself in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
 </div>
 
@@ -67,7 +67,7 @@ Your agents get the same answer over MCP (`codeweb_impact`) — before they writ
 A force-directed map of every symbol, collapsible to domains. Search, drag, zoom, and click any
 node to trace what depends on it and what it reaches.
 
-<img src="assets/screens/05-axios-graph.png" alt="codeweb Graph tab on axios: eight domain blocks (helpers, core, adapters, cancel, defaults, platform) sized by symbol count and linked by stippled call edges" width="100%">
+<img src="assets/screens/axios-graph.png" alt="codeweb Graph tab on axios: eight domain blocks (helpers, core, adapters, cancel, defaults, platform) sized by symbol count and linked by stippled call edges" width="100%">
 
 ### Findings — stop guessing what to refactor
 
@@ -75,19 +75,19 @@ Ranked **duplication** (the same function defined across many files), the most d
 **hotspots** to change with care, and likely-**dead code** — every row clickable to inspect what
 calls it and what it calls.
 
-<img src="assets/screens/05-axios-findings.png" alt="codeweb Findings tab on axios: ranked duplication, hotspots, and likely-dead code, with a clickable detail panel" width="100%">
+<img src="assets/screens/axios-findings.png" alt="codeweb Findings tab on axios: ranked duplication, hotspots, and likely-dead code, with a clickable detail panel" width="100%">
 
 ### See duplication density, and where domains tangle
 
 <table>
 <tr>
 <td width="50%" valign="top">
-<img src="assets/screens/05-axios-treemap.png" alt="codeweb Treemap on axios: every file sized by lines of code, duplication density carried by a dark-to-lime lightness ramp">
+<img src="assets/screens/axios-treemap.png" alt="codeweb Treemap on axios: every file sized by lines of code, duplication density carried by a dark-to-lime lightness ramp">
 <br><b>Treemap</b> — every file sized by lines of code; the brighter a block, the more of it
 is duplicated. The bright blocks are your consolidation targets, at a glance.
 </td>
 <td width="50%" valign="top">
-<img src="assets/screens/05-axios-matrix.png" alt="codeweb Matrix on axios: a heatmap of call coupling between domains">
+<img src="assets/screens/axios-matrix.png" alt="codeweb Matrix on axios: a heatmap of call coupling between domains">
 <br><b>Matrix</b> — domain-to-domain coupling. A big off-diagonal cell means two domains are
 tangled: merge them, or put a clean interface between them.
 </td>

@@ -38,7 +38,7 @@ npx -y @ghostlygawd/codeweb .</code></pre>
     <!-- CRO C8: the page that asks for work finally shows the reward + what success looks like -->
     <div class="grid cols-2" style="margin-top:1.25rem">
       <div class="card">
-        <a href="demo/"><img src="assets/05-axios-graph.png" alt="The interactive map codeweb builds — axios, 274 product symbols across 8 domains" style="width:100%"></a>
+        <a href="demo/"><img src="assets/axios-graph.png" alt="The interactive map codeweb builds — axios, 274 product symbols across 8 domains" style="width:100%"></a>
         <p class="muted" style="margin-top:.5rem">~3 s for 3,000 symbols → this, for your repo. (Click it — that's the live axios demo.)</p>
       </div>
       <div class="card">
@@ -98,7 +98,7 @@ npx -y @ghostlygawd/codeweb .</code></pre>
       <div class="card"><h3>Overlap</h3><p>Two nodes that do the same work. codeweb confirms overlap by comparing bodies — same name with different bodies is dismissed, not flagged.</p></div>
       <div class="card"><h3>Blast radius</h3><p>Everything transitively affected by changing a symbol. Ask for it <em>before</em> editing so you know what an edit can break.</p></div>
       <div class="card"><h3>The gate</h3><p>A structural regression check: a change fails if it adds a cycle, adds a body-confirmed duplicate, or orphans a symbol. Pure removals always pass.</p></div>
-      <div class="card"><h3>Severity</h3><p>Findings carry a red → amber → green scale so attention goes where it matters first, the same scale used across the report and the brand.</p></div>
+      <div class="card"><h3>Severity</h3><p>Findings carry confidence tiers — high, medium, low. High-confidence rows wear the accent in the report, so attention goes to what's actionable first.</p></div>
     </div>
   </div>
 </section>

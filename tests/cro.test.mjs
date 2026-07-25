@@ -51,7 +51,7 @@ test('C7: MCP is expanded at first use', () => {
 
 test('C8: start.html shows the payoff — the map, the ~3 s, and what success looks like', () => {
   const start = read('site/content/start.html');
-  assert.match(start, /05-axios-graph\.png/, 'the reward is visible on the page that asks for work');
+  assert.match(start, /axios-graph\.png/, 'the reward is visible on the page that asks for work');
   assert.match(start, /~3\s?s/, 'the cost is named');
   assert.match(start, /\[run\] done/, 'success is recognizable before it happens');
 });
