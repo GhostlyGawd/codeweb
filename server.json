@@ -1,28 +1,29 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.GhostlyGawd/codeweb",
-  "description": "Your agents break less code and burn fewer tokens: a deterministic call/import graph of your codebase, queried over 27 MCP tools. Zero deps, runs 100% locally, reads code and never executes it.",
+  "description": "Your agents break less code and burn fewer tokens — a deterministic call graph over 27 MCP tools.",
   "status": "active",
   "repository": {
     "url": "https://github.com/GhostlyGawd/codeweb",
     "source": "github"
   },
   "version": "0.11.0",
+  "websiteUrl": "https://ghostlygawd.github.io/codeweb/",
   "packages": [
     {
-      "registry_type": "npm",
-      "registry_base_url": "https://registry.npmjs.org",
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@ghostlygawd/codeweb",
       "version": "0.11.0",
-      "runtime_hint": "npx",
+      "runtimeHint": "npx",
       "transport": {
         "type": "stdio"
       },
-      "runtime_arguments": [
-        { "type": "positional", "value": "-y", "is_required": true },
-        { "type": "positional", "value": "-p", "is_required": true },
-        { "type": "positional", "value": "@ghostlygawd/codeweb", "is_required": true },
-        { "type": "positional", "value": "codeweb-mcp", "is_required": true }
+      "runtimeArguments": [
+        { "type": "positional", "value": "-y", "isRequired": true },
+        { "type": "positional", "value": "-p", "isRequired": true },
+        { "type": "positional", "value": "@ghostlygawd/codeweb", "isRequired": true },
+        { "type": "positional", "value": "codeweb-mcp", "isRequired": true }
       ]
     }
   ]
