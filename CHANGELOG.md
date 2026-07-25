@@ -9,6 +9,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+_Nothing yet. Open work lands here before it ships in the next tagged release._
+
+## [0.11.0] - 2026-07-25
+
 ### Added
 - **A terminal-editorial redesign of the whole site** (owner-approved mock). Near-black paper,
   JetBrains Mono everywhere, a Doto dot-matrix wordmark and numerals, square corners, film
@@ -1719,7 +1723,8 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.7.1...v0.8.0
