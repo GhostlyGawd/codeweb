@@ -42,14 +42,14 @@ test('staleness: an edited source file annotates query results until refresh', (
   } finally { cleanup(dir); }
 });
 
-test('pre-edit hook: one-line advisory for a mapped, depended-on file; silent otherwise', () => {
+test('pre-edit hook: one-line advisory for a mapped, depended-on file; silent otherwise', async () => {
   const { dir } = buildMapped({
     'core/util.js': 'export function used() {\n  return 1;\n}\n',
     'app/main.js': 'import { used } from "../core/util.js";\nexport function go() {\n  return used();\n}\n',
   });
   try {
     const payloadFor = (fp) => JSON.stringify({ tool_input: { file_path: fp } });
-    const msg = preview(payloadFor(join(dir, 'core/util.js')));
+    const msg = await preview(payloadFor(join(dir, 'core/util.js')));
     assert.ok(msg, 'a mapped, depended-on file yields an advisory');
     assert.match(msg, /core\/util\.js/, 'names the file');
     assert.match(msg, /dependent edge/, 'counts dependents');
@@ -59,21 +59,21 @@ test('pre-edit hook: one-line advisory for a mapped, depended-on file; silent ot
     const other = tmpDir('codeweb-unmapped-');
     try {
       writeTree(other, { 'x.js': 'export function x() {\n  return 1;\n}\n' });
-      assert.equal(preview(payloadFor(join(other, 'x.js'))), null, 'unmapped target -> no output');
+      assert.equal(await preview(payloadFor(join(other, 'x.js'))), null, 'unmapped target -> no output');
     } finally { cleanup(other); }
 
     // non-source files stay silent
-    assert.equal(preview(payloadFor(join(dir, 'README.md'))), null);
+    assert.equal(await preview(payloadFor(join(dir, 'README.md'))), null);
   } finally { cleanup(dir); }
 });
 
-test('ambient loop: the pre-edit hook injects the explain card, not just a pointer', () => {
+test('ambient loop: the pre-edit hook injects the explain card, not just a pointer', async () => {
   const { dir } = buildMapped({
     'core/util.js': 'export function used() {\n  return 1;\n}\n',
     'app/main.js': 'import { used } from "../core/util.js";\nexport function go() {\n  return used();\n}\n',
   });
   try {
-    const msg = preview(JSON.stringify({ tool_input: { file_path: join(dir, 'core/util.js') } }));
+    const msg = await preview(JSON.stringify({ tool_input: { file_path: join(dir, 'core/util.js') } }));
     assert.ok(msg, 'advisory produced');
     assert.match(msg, /function used/, 'the explain card summary is embedded (identity)');
     assert.match(msg, /top callers: .*app\/main\.js:go/, 'top callers arrive without being asked for');

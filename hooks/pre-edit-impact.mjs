@@ -10,18 +10,16 @@
 // whole check is one JSON parse + an in-memory count (~50-100ms on a 3k-symbol graph).
 
 import { readFileSync, statSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve, relative } from 'node:path';
+import { resolve, relative } from 'node:path';
 import { bump, recordPendingCard } from '../scripts/lib/stats.mjs';
 
 // set by preview() when a card is embedded — the caller FILES the card warned about
 // (docs/specs/card-correlation.md: a later edit touching one = advice followed)
 let lastCardMeta = null;
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const EXPLAIN = join(HERE, '..', 'scripts', 'explain.mjs');
-import { SRC_RE, findTarget } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a duplicated walk + a trailing language list)
+import { SRC_RE, findTarget, sourceReader } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a duplicated walk + a trailing language list)
+import { buildIndex } from '../scripts/lib/graph-ops.mjs'; // already in the module graph via cli.mjs — free at boot
 import { loadStaleStamps } from '../scripts/lib/stale-stamps.mjs'; // RETENTION R3: per-file freshness for the card
 import { loadStamped } from '../scripts/lib/sidecar-stamp.mjs'; // D3a: THE stamp rule, one reader
 
@@ -40,9 +38,12 @@ function sidecarEntry(t, rel) {
   return lite ? (lite.files?.[rel] || null) : undefined;
 }
 
-// Graph-path lookup: the historical computation (full parse + explain subprocess), shaped like a
-// sidecar entry so preview() formats once.
-function graphEntry(t, rel) {
+// Graph-path lookup: the historical computation, shaped like a sidecar entry so preview()
+// formats once. #18b's motion, pre-edit edition: the explain.mjs subprocess re-parsed the
+// multi-MB graph THIS function had just parsed — buildCards now runs in-process against the
+// already-parsed graph (the same assembler the sidecar's cards came from, so parity holds by
+// construction). explain-core stays a lazy import so the sidecar fast path never loads it.
+async function graphEntry(t, rel) {
   let graph; try { graph = JSON.parse(readFileSync(t.baseline, 'utf8')); } catch { return null; }
   const nodes = (graph.nodes || []).filter((n) => n.file === rel && n.kind !== 'module');
   if (!nodes.length) return null;
@@ -62,8 +63,8 @@ function graphEntry(t, rel) {
   if (top && top.c > 0) {
     try {
       const topNode = nodes.slice().sort((a, b) => (inCount.get(b.id) || 0) - (inCount.get(a.id) || 0))[0];
-      const r = execFileSync(process.execPath, [EXPLAIN, t.baseline, topNode.id, '--json'], { encoding: 'utf8', timeout: 8000, maxBuffer: 1 << 22 });
-      const card = JSON.parse(r).cards?.[0];
+      const { buildCards } = await import('../scripts/lib/explain-core.mjs');
+      const card = buildCards(graph, buildIndex(graph), sourceReader(graph.meta?.root), [topNode.id])[0];
       if (card) {
         entry.card = { summary: card.summary, topCallers: card.topCallers, tests: card.tests };
         entry.topId = topNode.id;
@@ -78,7 +79,8 @@ function graphEntry(t, rel) {
 }
 
 // Returns the one-line advisory for an edit payload, or null (not mapped / not source / no signal).
-export function preview(raw) {
+// Async since the in-process fallback (#18b motion): the sidecar path never awaits anything real.
+export async function preview(raw) {
   let input; try { input = JSON.parse(raw); } catch { return null; }
   const fp = input?.tool_input?.file_path || input?.tool_input?.filePath;
   if (!fp || !SRC_RE.test(fp)) return null;
@@ -86,7 +88,7 @@ export function preview(raw) {
   if (!t) return null;
   const rel = relative(t.root, resolve(fp)).replace(/\\/g, '/');
   const side = sidecarEntry(t, rel);
-  const entry = side === undefined ? graphEntry(t, rel) : side;
+  const entry = side === undefined ? await graphEntry(t, rel) : side;
   if (!entry) return null;
   const { symbols, total, top, card, topId, cardFiles } = entry;
   // RETENTION R3: when THIS file's stamp no longer matches the map, the card says so — quoting
@@ -118,7 +120,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
   let raw = '';
   try { raw = readFileSync(0, 'utf8'); } catch { /* no stdin */ }
   let msg = null;
-  try { msg = preview(raw); } catch { /* fail-open */ }
+  try { msg = await preview(raw); } catch { /* fail-open */ }
   if (msg) {
     try {
       const fp = JSON.parse(raw)?.tool_input?.file_path || JSON.parse(raw)?.tool_input?.filePath;
