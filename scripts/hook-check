@@ -1,0 +1,9 @@
+#!/bin/sh
+# Claude Code PostToolUse hook: run the gate after every file edit.
+# Exit 2 blocks and feeds the failure back to the agent; anything the agent
+# just broke gets fixed or reverted before any further work.
+cd "$(dirname "$0")/.."
+out=$(sh scripts/check 2>&1) && exit 0
+echo "GATE RED — fix or revert before doing anything else:" >&2
+echo "$out" | tail -30 >&2
+exit 2

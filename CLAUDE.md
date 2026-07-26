@@ -9,3 +9,8 @@ questions section in the same change — never settle it silently.
 Drift audit (150 · Drift Audit): each release, re-check every claim-bearing
 surface — README, site copy, npm/plugin descriptions, `docs/ROADMAP.md` —
 against `CHARTER.md`, and fix or strike what drifted.
+
+The verification harness is operator-owned and agent-read-only — see
+`docs/harness.md` (the contract) and ADR-0001 in `DECISIONS.md` (the
+codeweb deviations). `sh scripts/check` is the one gate; if the gate itself
+seems wrong, stop and report — the fix belongs to the operator.

@@ -1,0 +1,6 @@
+{
+  "id": "example-upper",
+  "command": "python3 -c \"import sys; print(sys.stdin.read().strip().upper())\"",
+  "input": "ok",
+  "expect_equals": "OK"
+}

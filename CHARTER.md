@@ -96,6 +96,11 @@ supports the project, and sponsors get featured README placement: logo tiers up 
 list beneath; no cost claims · external mode — demoted to a feature note · enterprise support —
 softened to a one-line email doorway, no price, no SLA claim · the invariant split — ratified
 as written · Next — deliberately left open until the identity milestone lands.)*
+*(Answered 2026-07-26, at the 141 · Scaffold gate — operator go "Do everything" on
+`reports/SCAFFOLD.md`'s proposals. Two boundaries the charter was silent on, decided by the
+harness install and recorded in ADR-0001: the ADR split — root `DECISIONS.md` holds harness and
+dependency ADRs (the file `scripts/spec_lint.py` greps), `docs/decisions/` keeps product design
+history · the harness contract's landing spot — `docs/harness.md`, pointed to from `CLAUDE.md`.)*
 
 ## Contradictions found
 | # | Claim · where stated | What the code/history shows | Ruling |

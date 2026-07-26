@@ -1,0 +1,12 @@
+#!/bin/sh
+# Every commit passes the gate, or it does not happen.
+# Wired by: git config core.hooksPath .githooks   (scripts/init / brief 141)
+#
+# codeweb (ADR-0001, deviation e): unset the repo-state env vars git exports
+# to hooks. The product suite spawns git inside fixture repos (ci-gate,
+# history mining, trend --git), and a leaked GIT_INDEX_FILE / GIT_DIR /
+# GIT_WORK_TREE points those at THIS repo — 11 tests fail under the hook
+# that pass everywhere else. Sanitizing here keeps the gate identical at
+# all four enforcement moments.
+unset GIT_INDEX_FILE GIT_DIR GIT_WORK_TREE
+exec sh "$(git rev-parse --show-toplevel)/scripts/check"
