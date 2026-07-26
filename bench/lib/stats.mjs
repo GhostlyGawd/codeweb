@@ -33,11 +33,6 @@ export function quantile(xs, q) {
   return s[lo] + (s[hi] - s[lo]) * (pos - lo);
 }
 export const median = (xs) => quantile(xs, 0.5);
-export function stddev(xs) {
-  if (xs.length < 2) return 0;
-  const m = mean(xs);
-  return Math.sqrt(xs.reduce((s, x) => s + (x - m) ** 2, 0) / (xs.length - 1));
-}
 
 // ---- Wilson score interval for a binomial proportion (good at extremes, unlike normal approx) ---
 // Returns { p, lo, hi } at confidence 1-alpha (default 95%). k successes in n trials.
