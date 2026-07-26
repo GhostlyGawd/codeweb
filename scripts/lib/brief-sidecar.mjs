@@ -5,17 +5,11 @@
 // stat-checked, never parsed to validate); the hook serves it at the node-boot floor and falls
 // back to the parse path on any mismatch — fail toward correctness.
 
-import { readFileSync, statSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { loadStamped } from './sidecar-stamp.mjs'; // D3a: THE stamp rule, one reader
 
 export const BRIEF_SIDECAR = 'brief.json';
 
 /** Load the pre-rendered brief beside graphPath iff its stamp matches the graph bytes; else null. */
 export function loadBriefSidecar(graphPath) {
-  try {
-    const st = statSync(graphPath);
-    const b = JSON.parse(readFileSync(join(dirname(graphPath), BRIEF_SIDECAR), 'utf8'));
-    if (!b || b.version !== 1 || !b.stamp || b.stamp.graphMtimeMs !== st.mtimeMs || b.stamp.graphSize !== st.size) return null;
-    return b.brief;
-  } catch { return null; }
+  return loadStamped(graphPath, BRIEF_SIDECAR, 1)?.brief ?? null;
 }

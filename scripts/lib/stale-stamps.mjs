@@ -4,18 +4,12 @@
 // convention as the trio (lib/sidecars.mjs): one stat of the just-written graph.json; any
 // mismatch -> null -> the caller falls back to its live path (parsing the graph).
 
-import { readFileSync, statSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { loadStamped } from './sidecar-stamp.mjs'; // D3a: THE stamp rule, one reader
 
 export const STALE_SIDECAR = 'stale-stamps.json';
 
 /** Load the freshness stamps beside a graph, or null (absent / version or stamp mismatch). */
 export function loadStaleStamps(absGraphPath) {
-  try {
-    const doc = JSON.parse(readFileSync(join(dirname(absGraphPath), STALE_SIDECAR), 'utf8'));
-    if (doc.version !== 1) return null;
-    const st = statSync(absGraphPath);
-    if (doc.stamp?.graphMtimeMs !== st.mtimeMs || doc.stamp?.graphSize !== st.size) return null;
-    return { root: doc.root || null, sources: doc.sources || null, dirs: doc.dirs || null };
-  } catch { return null; }
+  const doc = loadStamped(absGraphPath, STALE_SIDECAR, 1);
+  return doc ? { root: doc.root || null, sources: doc.sources || null, dirs: doc.dirs || null } : null;
 }

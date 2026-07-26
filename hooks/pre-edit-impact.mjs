@@ -9,7 +9,7 @@
 // FAIL-OPEN and cheap: any parse/read problem exits 0 silently; unmapped targets are a no-op; the
 // whole check is one JSON parse + an in-memory count (~50-100ms on a 3k-symbol graph).
 
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, relative } from 'node:path';
@@ -23,6 +23,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const EXPLAIN = join(HERE, '..', 'scripts', 'explain.mjs');
 import { SRC_RE, findTarget } from '../scripts/lib/cli.mjs'; // Spec E: one truth (was a duplicated walk + a trailing language list)
 import { loadStaleStamps } from '../scripts/lib/stale-stamps.mjs'; // RETENTION R3: per-file freshness for the card
+import { loadStamped } from '../scripts/lib/sidecar-stamp.mjs'; // D3a: THE stamp rule, one reader
 
 // Spec P (docs/specs/fastpath-decision.md): two data sources, ONE format path. The sidecar
 // (index-lite.json, written at map time) serves in ~10ms; the graph path (13.5MB parse + explain
@@ -31,16 +32,12 @@ import { loadStaleStamps } from '../scripts/lib/stale-stamps.mjs'; // RETENTION 
 // built by the same underlying card assembler, so output is byte-identical either way.
 
 // Sidecar lookup: undefined = sidecar unusable (fall back); null = fresh sidecar says no-signal;
-// object = the file's entry.
+// object = the file's entry. Name + version 1 are owned by lib/index-lite.mjs (buildIndexLite);
+// the literals stay here so the hook's boot path keeps importing only fs-light modules
+// (index-lite.mjs pulls in graph-ops + explain-core).
 function sidecarEntry(t, rel) {
-  try {
-    const sidecarPath = join(dirname(t.baseline), 'index-lite.json');
-    if (!existsSync(sidecarPath)) return undefined;
-    const lite = JSON.parse(readFileSync(sidecarPath, 'utf8'));
-    const st = statSync(t.baseline);
-    if (!lite?.stamp || lite.stamp.graphMtimeMs !== st.mtimeMs || lite.stamp.graphSize !== st.size) return undefined;
-    return lite.files?.[rel] || null;
-  } catch { return undefined; }
+  const lite = loadStamped(t.baseline, 'index-lite.json', 1);
+  return lite ? (lite.files?.[rel] || null) : undefined;
 }
 
 // Graph-path lookup: the historical computation (full parse + explain subprocess), shaped like a
