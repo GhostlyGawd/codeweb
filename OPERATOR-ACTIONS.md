@@ -79,3 +79,21 @@ sections make it a minor per the release runbook.)
 Publishing `editor/vscode-codeweb` to the Marketplace stays **parked until you say go**
 (standing instruction). The `.vsix` builds in CI; publishing needs a personal Azure DevOps
 publisher token.
+
+## 7. Branch protection: make the `check` gate required (harness install, 2026-07-26)
+
+The goal-prompts harness is installed (ADR-0001 in `DECISIONS.md`; contract at
+`docs/harness.md`): `sh scripts/check` now runs after every agent edit, before every commit,
+and in CI (`.github/workflows/check.yml`). The one enforcement moment only you can wire is
+branch protection — without it, a red `check` can still merge:
+
+1. Repo → **Settings → Branches → Add branch ruleset** (or classic protection rule) for
+   `main`.
+2. Enable **Require status checks to pass** → search and add **`check`** (the job from
+   `check.yml`). Adding the existing `test` / `consistency` jobs too is your call.
+3. Optional, same dialog: **Require review from Code Owners** — `.github/CODEOWNERS` already
+   routes the harness layer (`scripts/check`, the hooks, `check.yml`, `tests/harness/`,
+   `evals/run.py`) to @GhostlyGawd.
+
+Note for fresh clones: `core.hooksPath` is per-clone — run
+`git config core.hooksPath .githooks` after cloning (CI backstops either way).

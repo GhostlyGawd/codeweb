@@ -1,7 +1,86 @@
-# SCAFFOLD — readiness audit for the goal-prompts harness (gate-stopped)
+# SCAFFOLD — the goal-prompts harness: audited, ratified, installed
 
 2026-07-26
 All Build Goal Prompts · stage 1/4 · brief 141
+
+Brief 141 installs the goal-prompts golden-path harness and proves the gate bites. This report
+now records the full arc in one file: the Phase 1–2 readiness audit ran first and gate-stopped
+(nothing installed, operator not present); the operator then answered the gate — **"Do
+everything"** — and Phase 3 executed the ratified plan the same day. The audit that the
+operator ratified is preserved verbatim below the install record, because its lens tables and
+exact lines are what ADR-0001 cites.
+
+## Install executed — 2026-07-26, operator go: "Do everything"
+
+**What was installed** — commits `670d678` (scaffold) and `b77ce7d` (packaging):
+
+- The 15-file graft, clobbering nothing: `scripts/check`, `scripts/spec_lint.py`,
+  `scripts/hook-check`, `scripts/hook-protect`, `.githooks/pre-commit`,
+  `.claude/settings.json`, `.github/workflows/check.yml`, `.github/CODEOWNERS`,
+  `tests/__init__.py`, `tests/harness/{__init__.py,test_harness.py}`, `SPEC.md` (skeleton;
+  142 fills it), `DECISIONS.md` (ADR-0001 filled), `evals/{run.py,cases/example-upper.json}`.
+- The ratified rewrites, recorded as ADR-0001 deviations: **(a)** the 5-step gate — spec lint,
+  harness tests, `npm test`, `node scripts/check-consistency.mjs`, evals; **(b)** PROTECTED
+  narrowed to the explicit harness manifest in `hook-protect` and CODEOWNERS (file entries
+  match exactly — prefix matching would have caught `scripts/check-consistency.mjs`);
+  **(c)** npm `files` negations for the four harness scripts; **(d)** Python 3 as dev tooling
+  only; **(e)** — discovered by the harness's own first bite, see proof 3 —
+  `.githooks/pre-commit` unsets `GIT_INDEX_FILE`/`GIT_DIR`/`GIT_WORK_TREE`.
+- Landing spots as ruled: the template contract verbatim at `docs/harness.md`; `CLAUDE.md`
+  points to it; both charter-silent rulings mirrored into `CHARTER.md` Open questions;
+  `.gitignore` gains `__pycache__/`; `git config core.hooksPath .githooks` set.
+- `package-shape.test.mjs` P1 learned negation semantics (a negated path must exist), and P2
+  pins the four harness files as absent from the tarball (verified: 117 files, zero harness).
+
+**Harness proof — green, then red, then a real catch:**
+
+1. **Green** — `sh scripts/check`, verbatim tail:
+   ```
+   == 4/5 consistency ==
+   check-consistency: OK — v0.12.0, 27 tools, all surfaces aligned.
+   == 5/5 evals ==
+   ok    example-upper
+   evals: all 1 case(s) passed
+   ALL CHECKS PASSED
+   ```
+   (step 3/5 product tests: 918 tests, 870 pass, 0 fail, 48 environment skips.)
+2. **Red** — delivered live through the real enforcement moment rather than the script's
+   internal loop: a canary test was planted and the PostToolUse hook itself blocked with
+   ```
+   GATE RED — fix or revert before doing anything else:
+   == 2/5 harness tests ==
+   FAIL: test_canary_must_fail (tests.test_canary_prove_red.TestCanaryProveRed...)
+   AssertionError: prove-red canary: the gate must catch this
+   ```
+   Canary reverted; gate back to `ALL CHECKS PASSED`. A gate that cannot fail is not a gate —
+   this one fails.
+3. **First real catch** — the pre-commit hook's very first run rejected the scaffold commit
+   itself: git exports `GIT_INDEX_FILE`/`GIT_DIR` to hooks, which leaked into the suite's
+   fixture-repo subprocesses and broke 11 git-spawning tests (ci-gate, history mining P1–P6,
+   `trend --git`) that pass everywhere else. Fixed in the hook (deviation e), not in the
+   tests. The same run also caught a broken `files` entry pattern in P1 after the negation
+   edit. Two genuine blocks in the first hour: the rails bite.
+
+**Operator TODOs — after the go:**
+
+- [x] Answer the gate question — answered "Do everything" (install as planned)
+- [x] Ratify the gate lines, PROTECTED/CODEOWNERS manifest, npm `files` exclusions — ratified
+      via the go; installed exactly as specified below (evals step retained per the plan's own
+      copy-justification, recorded in ADR-0001a)
+- [x] Rule the ADR boundary — root `DECISIONS.md` = harness + dependency ADRs;
+      `docs/decisions/` = design history (mirrored into CHARTER.md)
+- [x] Pick the contract landing spot — `docs/harness.md`; CLAUDE.md points to it
+- [x] Replace `@OPERATOR` in CODEOWNERS — installed as `@GhostlyGawd`
+- [ ] **Still yours, browser-only:** make the `check` workflow a required status check
+      (branch protection) so red can never merge — steps in `OPERATOR-ACTIONS.md` §7
+
+**Next:** 142 · Spec the Product writes the real, lint-clean `SPEC.md` at the root — running
+in this same session under the now-live gate; then 143 (implement to spec) and 144 (the
+adversarial ship gate re-run).
+
+---
+
+# The ratified plan — Phase 1–2 readiness audit (gate-stopped earlier the same day)
 
 Brief 141 installs the goal-prompts golden-path harness and proves the gate bites. This run
 executed Phase 1 (mandate + template) and Phase 2 (readiness audit) only; the operator was not
@@ -184,7 +263,7 @@ browser step — `.github/repo-settings.json` covers only description/homepage/t
 list above; rule the DECISIONS.md-vs-`docs/decisions/` boundary and the harness-contract
 landing spot.
 
-## What Phase 3 WOULD do on "install" (not run — gate-stopped)
+## What Phase 3 WOULD do on "install" (as ratified — executed above)
 
 1. Copy the 15 files in the lens-3 table from template commit `984266d`, preserving
    executable bits (`tests/harness/test_harness.py:59` asserts `pre-commit` is executable);
@@ -203,29 +282,10 @@ landing spot.
    `scaffold: harness from goal-prompts template`. (The PR will itself trigger
    `codeweb-gate.yml`'s structural self-review, since it touches `scripts/**` — expected.)
 
-## Operator TODOs
+## The gate question — answered
 
-- [ ] Answer the gate question below (this unblocks everything else)
-- [ ] Ratify the four `scripts/check` lines, the narrowed PROTECTED/CODEOWNERS manifest, and
-      the npm `files` exclusions — harness lines are operator-owned by contract
-- [ ] Rule the ADR boundary: root `DECISIONS.md` (harness + dependency ADRs; path hardcoded
-      in `spec_lint.py`) vs `docs/decisions/` (existing design history)
-- [ ] Pick the landing spot for the template contract in graft mode (proposal:
-      `docs/harness.md`) and whether `CLAUDE.md` gains a one-line pointer to it
-- [ ] Replace `@OPERATOR` in `.github/CODEOWNERS` with `@GhostlyGawd`
-- [ ] After merge: make the `check` workflow a required status check (browser; see
-      `OPERATOR-ACTIONS.md` for the pattern) — and mirror the two charter-silent rulings into
-      `CHARTER.md` Open questions in the install change
-
-## Next
-
-On "install": execute Phase 3 above, then run **142 · Spec the Product** to write the real
-`SPEC.md` (spec-lint-clean) before any product code lands under the new gate. 143 implements
-one AC per verified commit; 144 re-runs everything adversarially and rules ship or hold.
-
-## The gate question
-
-Operator: **install as planned** (the 15-file graft with ratified rewrites (a)–(d) exactly as
-specified above), **adjust** (say which lines — gate contents, PROTECTED manifest, packaging
-exclusions, ADR boundary, contract landing spot), or **abort**? Nothing has been written to
-the repo except this report, and nothing more happens until you answer.
+Asked: **install as planned** (the 15-file graft with ratified rewrites exactly as specified
+above), **adjust**, or **abort**? The operator answered **"Do everything"** (2026-07-26) —
+install as planned, plus fix every finding. Executed above; deviation (e) was added during
+install when the pre-commit hook's first run caught the git-env leak, and the evals step was
+retained in the gate per this plan's own lens-3 justification (both recorded in ADR-0001).
