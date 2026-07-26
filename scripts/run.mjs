@@ -326,7 +326,8 @@ if (opts.json) {
       try {
         const { sponsorAskDue, recordSponsorAsk } = await import('./lib/stats.mjs');
         if (sponsorAskDue(join(ws, 'graph.json'))) {
-          console.log('[run]   codeweb is free — sponsoring pays for its benchmarks: https://github.com/sponsors/GhostlyGawd');
+          const { SPONSOR_ASK } = await import('./lib/product-copy.mjs'); // D6: claim strings live where the gate looks
+          console.log(SPONSOR_ASK);
           recordSponsorAsk(join(ws, 'graph.json'));
         }
       } catch { /* the ask must never break the pipeline */ }

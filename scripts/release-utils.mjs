@@ -59,6 +59,7 @@ export const PROSE_FILES = [
   'commands/codeweb.md',
   'skills/codebase-anatomy/SKILL.md',
   'skills/codebase-anatomy/references/engine-detection.md',
+  'scripts/lib/product-copy.mjs', // D6: the stdout claim strings are prose too
 ];
 
 /** Scan one text for tool-count / language-count claims that disagree with the canonical facts. */
@@ -272,6 +273,16 @@ export function checkConsistency(root) {
       else if (v && typeof v === 'object') Object.values(v).forEach(walk);
     })(productData);
     problems.push(...scanProseCounts(strings.join('\n'), 'site/data/product.json (prose)', { toolCount: count, langCount }));
+  }
+
+  // D6 / CHARTER C7: claim-bearing stdout strings are hoisted to lib/product-copy.mjs so this
+  // gate can audit CLI output like any prose surface (the file also rides PROSE_FILES above).
+  // The C7 regression class — a sponsorship cost premise — fails the build outright; wording for
+  // that surface is ratified as "supports the project", never a cost story.
+  const stdoutCopyPath = join(root, 'scripts', 'lib', 'product-copy.mjs');
+  if (existsSync(stdoutCopyPath)) {
+    const m = readText(stdoutCopyPath).match(/\b(?:pays?|paying|paid)\s+for\b|\bfund(?:s|ing|ed)?\b|\bbills?\b/i);
+    if (m) problems.push(`scripts/lib/product-copy.mjs states a sponsorship cost premise ("${m[0]}") — CHARTER C7 ruled the class fabricated; no cost claims`);
   }
 
   return { ok: problems.length === 0, version, count, problems };
