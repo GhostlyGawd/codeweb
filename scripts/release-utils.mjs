@@ -19,10 +19,14 @@ export function getVersion(root) {
   return JSON.parse(readText(join(root, 'package.json'))).version;
 }
 
-/** Count the MCP tools at the source: the TOOLS table in scripts/mcp-server.mjs. */
+/** Count the MCP tools at the source: the TOOLS table in scripts/mcp-server.mjs plus the
+ *  manifest entries it spreads in from scripts/lib/tool-specs.mjs (D1). Deduped by name, so a
+ *  tool restated in both files can never double-count. */
 export function mcpToolCount(root) {
-  const src = readText(join(root, 'scripts', 'mcp-server.mjs'));
-  return (src.match(/name:\s*'codeweb_[a-z_]+'/g) || []).length;
+  let text = readText(join(root, 'scripts', 'mcp-server.mjs'));
+  const specsPath = join(root, 'scripts', 'lib', 'tool-specs.mjs');
+  if (existsSync(specsPath)) text += '\n' + readText(specsPath);
+  return new Set([...text.matchAll(/name:\s*'(codeweb_[a-z_]+)'/g)].map((m) => m[1])).size;
 }
 
 /** Count the tools the website advertises (sum of toolPhases in product.json). */

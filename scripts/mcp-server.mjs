@@ -33,6 +33,7 @@ import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's ca
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
 import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
 import { checkStaleness, sourceReader, editDistance, nearestWorkspace } from './lib/cli.mjs';
+import { QUERY_TOOL_SPECS } from './lib/tool-specs.mjs'; // D1: THE tool-interface manifest
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const scriptOf = (f) => join(HERE, f);
@@ -121,7 +122,9 @@ function cachedGraph(absPath) {
   if (graphCache.size > 8) graphCache.delete(graphCache.keys().next().value); // a session touches few graphs
   return entry;
 }
-const QUERY_KIND = { codeweb_callers: 'callers', codeweb_callees: 'callees', codeweb_tests: 'tests', codeweb_impact: 'impact', codeweb_cycles: 'cycles', codeweb_orphans: 'orphans' };
+// D1: the six query tools' interface lives in lib/tool-specs.mjs — one declaration, two
+// transports (query.mjs derives its mode flags from the same specs). Derived, never restated.
+const QUERY_KIND = Object.fromEntries(QUERY_TOOL_SPECS.map((s) => [s.name, s.kind]));
 // ACTIVATION A7: the tools whose answers are ABOUT structure — vacuous on a 0-symbol map.
 const STRUCTURAL_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_find', 'codeweb_explain', 'codeweb_context']);
 
@@ -174,25 +177,24 @@ function autoRefresh(absGraph) {
 // when the caller passes neither that arg nor full:true, `flag value` is injected (default top-N).
 // argv(a): CLI argv AFTER the graph path. bin defaults to query.mjs. input(a): child stdin.
 const QUERY = scriptOf('query.mjs');
+// Descriptions are MCP presentation, not interface — they stay here, but their budget numbers
+// come from the spec so the prose can't drift from the injected default (the old "top 20" copies
+// were a third restatement of budget.value).
+const QUERY_DESCRIPTION = {
+  codeweb_callers: (s) => `Direct callers (call-edge in-neighbors) of a symbol. Budgeted: top ${s.budget.value} by default (full:true for all).`,
+  codeweb_callees: (s) => `Direct callees (the functions a symbol calls). Budgeted: top ${s.budget.value} by default.`,
+  codeweb_impact: (s) => `Blast radius: every function transitively affected by changing a symbol, plus the domains touched. Call this BEFORE editing a symbol. Budgeted: summary + top ${s.budget.value} by fan-in (count is the true total; full:true for every id).`,
+  codeweb_cycles: (s) => `File-level dependency cycles (circular imports/calls). Budgeted: top ${s.budget.value} by default.`,
+  codeweb_orphans: (s) => `Uncalled and unexported symbols (dead-code candidates). Budgeted: top ${s.budget.value} by default; prefer codeweb_deadcode for a confidence-tiered plan.`,
+  codeweb_tests: () => 'The tests that exercise a symbol (test-edge in-neighbors). Run the right subset after editing a symbol.',
+};
 const TOOLS = [
-  { name: 'codeweb_callers', need: ['symbol'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 20 },
-    argv: (a) => ['--callers', a.symbol],
-    description: 'Direct callers (call-edge in-neighbors) of a symbol. Budgeted: top 20 by default (full:true for all).' },
-  { name: 'codeweb_callees', need: ['symbol'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 20 },
-    argv: (a) => ['--callees', a.symbol],
-    description: 'Direct callees (the functions a symbol calls). Budgeted: top 20 by default.' },
-  { name: 'codeweb_impact', need: ['symbol'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 20 },
-    argv: (a) => ['--impact', a.symbol],
-    description: 'Blast radius: every function transitively affected by changing a symbol, plus the domains touched. Call this BEFORE editing a symbol. Budgeted: summary + top 20 by fan-in (count is the true total; full:true for every id).' },
-  { name: 'codeweb_cycles', need: [], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 15 },
-    argv: () => ['--cycles'],
-    description: 'File-level dependency cycles (circular imports/calls). Budgeted: top 15 by default.' },
-  { name: 'codeweb_orphans', need: [], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 25 },
-    argv: () => ['--orphans'],
-    description: 'Uncalled and unexported symbols (dead-code candidates). Budgeted: top 25 by default; prefer codeweb_deadcode for a confidence-tiered plan.' },
-  { name: 'codeweb_tests', need: ['symbol'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 20 },
-    argv: (a) => ['--tests', a.symbol],
-    description: 'The tests that exercise a symbol (test-edge in-neighbors). Run the right subset after editing a symbol.' },
+  // D1: these entries are GENERATED from lib/tool-specs.mjs — the manifest both transports read.
+  ...QUERY_TOOL_SPECS.map((s) => ({
+    name: s.name, need: s.need, opt: s.opt, budget: s.budget,
+    argv: (a) => [`--${s.kind}`, ...(s.need.includes('symbol') ? [a.symbol] : [])],
+    description: QUERY_DESCRIPTION[s.name](s),
+  })),
   { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: scriptOf('diff.mjs'), graphless: true, queueFrom: (a) => a.after,
     argv: (a) => [a.before, a.after],
     description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression. The CI gate\'s exact semantics (verdict.check: orphan-gate): a new cycle, a new confirmed duplication, or a NON-EXPORTED symbol newly losing every in-edge — exported ones are listed in verdict, flagged exempt. Call AFTER an edit to gate it.' },
