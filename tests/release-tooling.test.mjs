@@ -136,6 +136,31 @@ test('checkConsistency fails a sponsorship cost premise in the stdout copy modul
   } finally { cleanup(root); }
 });
 
+// D1: the manifest discipline the gate enforces — no tool declared twice across the manifest and
+// the server (the triplication class behind the recorded parity fixes), and no prose surface
+// naming a tool that doesn't ship (the docs-lying class, 5c5d417 / the 0-of-13 anti-pair).
+test('checkConsistency enforces the D1 manifest discipline (restatement + phantom docs)', () => {
+  const root = tmpDir('codeweb-rel-');
+  try {
+    writeTree(root, {
+      'package.json': JSON.stringify({ version: '0.3.0', description: 'x' }),
+      '.claude-plugin/plugin.json': JSON.stringify({ version: '0.3.0', description: 'x' }, null, 2),
+      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nversion: 0.3.0\n---\nbody\n',
+      'scripts/mcp-server.mjs': "const TOOLS=[{ name: 'codeweb_a' },{ name: 'codeweb_b' }];\n",
+      'scripts/lib/tool-specs.mjs': "export const QUERY_TOOL_SPECS=[{ name: 'codeweb_b' }];\n",
+      'site/data/product.json': JSON.stringify({ toolPhases: [{ tools: [{}, {}] }] }),
+      'CHANGELOG.md': '## [0.3.0] - 2026-01-01\n### Added\n- x\n',
+      'README.md': 'query with codeweb_a, or try codeweb_ghost for glory\n',
+    });
+    const r = checkConsistency(root);
+    assert.ok(r.problems.some((p) => /codeweb_b is declared in BOTH/.test(p)),
+      `missing the restatement problem: ${r.problems.join('; ') || '(none)'}`);
+    assert.ok(r.problems.some((p) => /codeweb_ghost/.test(p) && /not a shipped tool/.test(p)),
+      `missing the phantom problem: ${r.problems.join('; ') || '(none)'}`);
+    assert.ok(!r.problems.some((p) => /codeweb_a/.test(p)), 'a shipped name in prose is fine');
+  } finally { cleanup(root); }
+});
+
 // Round 2, finding #4: the exact live drift the gate printed OK over — package.json's description
 // said "24 MCP tools" while 27 shipped (the npm listing, the most public surface). The existing
 // toolRe already matches the phrase; what was missing was scanning the file at all.
