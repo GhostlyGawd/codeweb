@@ -32,7 +32,7 @@ import { buildBrief } from './lib/brief-core.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's card assembler, in-process
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
 import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
-import { checkStaleness, sourceReader, editDistance } from './lib/cli.mjs';
+import { checkStaleness, sourceReader, editDistance, nearestWorkspace } from './lib/cli.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const scriptOf = (f) => join(HERE, f);
@@ -84,36 +84,24 @@ function trace(ev, obj) {
 }
 
 // ---- graph auto-discovery -------------------------------------------------------------------
-// Explicit arg > CODEWEB_WS workspace > nearest `.codeweb/graph.json` walking up from cwd.
+// Explicit arg > CODEWEB_WS workspace > nearest `.codeweb/graph.json` walking up from cwd
+// (nearestWorkspace — THE walk, lib/cli.mjs).
 function discoverGraph() {
   if (process.env.CODEWEB_WS) {
     const p = join(process.env.CODEWEB_WS, 'graph.json');
     if (existsSync(p)) return p;
   }
-  let dir = process.cwd();
-  for (let i = 0; i < 40; i++) {
-    const p = join(dir, '.codeweb', 'graph.json');
-    if (existsSync(p)) return p;
-    const up = dirname(dir);
-    if (up === dir) break;
-    dir = up;
-  }
-  return null;
+  return nearestWorkspace(process.cwd())?.path || null;
 }
 const NO_GRAPH = 'no graph found — pass `graph`, or build one for this repo with the codeweb_map tool (or /codeweb). The graph lives at <target>/.codeweb/graph.json.';
 // RETENTION R11a: the unsupported-language marker codeweb_map leaves on a no-source failure —
 // checked wherever NO_GRAPH would fire, so repeat sessions get routed instead of re-walled.
 function discoverUnsupported() {
-  const spots = [];
-  if (process.env.CODEWEB_WS) spots.push(join(process.env.CODEWEB_WS, 'unsupported.json'));
-  let dir = process.cwd();
-  for (let i = 0; i < 40; i++) {
-    spots.push(join(dir, '.codeweb', 'unsupported.json'));
-    const up = dirname(dir);
-    if (up === dir) break;
-    dir = up;
+  if (process.env.CODEWEB_WS) {
+    const p = join(process.env.CODEWEB_WS, 'unsupported.json');
+    if (existsSync(p)) return p;
   }
-  return spots.find(existsSync) || null;
+  return nearestWorkspace(process.cwd(), 'unsupported.json')?.path || null;
 }
 const atomicWriteJson = (p, obj) => writeFileSync(p, JSON.stringify(obj)); // marker-sized writes only
 

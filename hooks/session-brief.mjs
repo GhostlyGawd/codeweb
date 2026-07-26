@@ -5,30 +5,20 @@
 // load-bearing symbols, entry points, test layout, known issues) from the already-built graph.
 // FAIL-OPEN and cheap: unmapped cwd is a silent no-op; any error exits 0 with no output.
 
-import { readFileSync, existsSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { normalizeGraph, buildIndex } from '../scripts/lib/graph-ops.mjs';
 import { buildBrief, renderBrief } from '../scripts/lib/brief-core.mjs';
 import { loadBriefSidecar } from '../scripts/lib/brief-sidecar.mjs'; // finding 23: serve the map-time render at the boot floor
 import { bump, attachActivity } from '../scripts/lib/stats.mjs';
-import { checkStaleness, SRC_RE } from '../scripts/lib/cli.mjs';   // R3: the change-based nudge
+import { checkStaleness, SRC_RE, nearestWorkspace } from '../scripts/lib/cli.mjs'; // R3 nudge + THE walk (D3b)
 import { loadStaleStamps } from '../scripts/lib/stale-stamps.mjs'; // R3: stamps without the graph parse
 import { readHistory } from '../scripts/lib/history.mjs';          // R1/R8: the progression line
 import { loadNarration } from '../scripts/lib/narration.mjs';      // AI-IDEAS 3: agent-written notes, labeled
 
-function findGraph(startDir) {
-  let dir = resolve(startDir);
-  for (let i = 0; i < 40; i++) {
-    const cand = join(dir, '.codeweb', 'graph.json');
-    if (existsSync(cand)) return cand;
-    const parent = dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-  return null;
-}
+const findGraph = (startDir) => nearestWorkspace(startDir)?.path ?? null;
 
 // Returns the briefing text for a SessionStart payload, or null (unmapped / unreadable).
 // COMPREHENSION #3: the marketplace promises "hooks brief every session", but on an unmapped
