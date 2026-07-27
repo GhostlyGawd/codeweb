@@ -63,7 +63,7 @@ the `check:` commands above are what brief 144 runs verbatim.
 
 - **MCP server** — `codeweb-mcp` (stdio): 27 tools over the local graph (impact, callers,
   duplication, context packs …). The canonical tool list and count live in
-  `docs/reference.md` / `docs/agent-tools.md` and are locked to `package.json` by AC-2's
+  `docs/reference.md` and are locked to `package.json` by AC-2's
   consistency gate; unknown arguments are rejected, booleans are real booleans, pagination is
   one offset dialect with true totals (pinned in the suite).
 - **CLI bins** — `codeweb` (map a repo), `codeweb-mcp`, `codeweb-query`, `codeweb-diff`

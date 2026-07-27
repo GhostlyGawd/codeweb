@@ -202,8 +202,7 @@ The feature is optional. Without a coverage input, graphs are byte-identical to 
 
 ## Agent tools — context & pre-flight (`context-pack`, `simulate-edit`)
 
-Two read-only tools that move work off the LLM and into the graph (full spec:
-[`agent-tools.md`](agent-tools.md)):
+Two read-only tools that move work off the LLM and into the graph:
 
 ```
 node scripts/context-pack.mjs  <graph.json> <symbol> [--json]   # minimal context to edit <symbol>
