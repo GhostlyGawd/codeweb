@@ -64,6 +64,14 @@ class TestAcPins(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertIn("passed", proc.stdout)
 
+    def test_ac_8_json_tier_wired(self):
+        suite = ROOT / "tests" / "json-support.test.mjs"
+        self.assertTrue(suite.exists(), "AC-8's check target must exist")
+        extractor = (ROOT / "scripts" / "extract-symbols.mjs") \
+            .read_text(encoding="utf-8")
+        self.assertIn("jsonFiles", extractor,
+                      "the extractor enumerates .json into the resolution universe")
+
 
 if __name__ == "__main__":
     unittest.main()

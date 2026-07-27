@@ -41,6 +41,16 @@ grows either language (it added Ruby/PHP in the 0.3.x line) or a maintainer prod
 emscripten build. Until then their dispatch edges are absent, not guessed — the same honesty as
 every other gap.
 
+## JSON — no grammar, by design (2026-07-27)
+
+The JSON config tier maps imported `.json` files as file-level `<module>` nodes: membership in
+the import-resolution universe plus a stat/hash staleness stamp. File **content is never
+parsed** — no symbols are extracted, so there is no parser in the loop and nothing to vendor or
+pin; the determinism guarantee holds trivially. If per-key symbols ever become a goal, that
+upgrade re-enters this file's discipline (a pinned parser with recorded provenance) before it
+ships. (Charter note: whether data formats fall under non-goal 8 at all is an open operator
+question, recorded in `CHARTER.md` Open questions.)
+
 ## Refreshing a grammar
 
 ```sh

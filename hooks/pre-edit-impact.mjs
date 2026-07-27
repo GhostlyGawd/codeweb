@@ -47,7 +47,9 @@ function sidecarEntry(t, rel) {
 // sidecar entry so preview() formats once.
 function graphEntry(t, rel) {
   let graph; try { graph = JSON.parse(readFileSync(t.baseline, 'utf8')); } catch { return null; }
-  const nodes = (graph.nodes || []).filter((n) => n.file === rel && n.kind !== 'module');
+  // JSON tier: a json file's <module> node IS the file (no symbols exist) — include it, so config
+  // edits get their importer count. Must mirror buildIndexLite's aggregation (byte-parity contract).
+  const nodes = (graph.nodes || []).filter((n) => n.file === rel && (n.kind !== 'module' || rel.endsWith('.json')));
   if (!nodes.length) return null;
   const inCount = new Map();
   for (const e of graph.edges || []) {
@@ -62,6 +64,19 @@ function graphEntry(t, rel) {
   }
   if (total === 0) return null; // nothing depends on this file — stay quiet
   const entry = { symbols: nodes.length, total, top };
+  if (rel.endsWith('.json')) {
+    // JSON tier: no card (the card speaks caller-of-symbol; a json file's dependents are its
+    // importers) — ship the importer list, the from-ids of the in-edge set counted above.
+    // Mirrors buildIndexLite exactly (byte-parity contract).
+    const mid = nodes[0].id;
+    const importers = [];
+    for (const e of graph.edges || []) {
+      if (e.to !== mid || (e.kind !== 'call' && e.kind !== 'import' && e.kind !== 'ref')) continue;
+      if (!importers.includes(e.from)) importers.push(e.from);
+    }
+    if (importers.length) entry.importers = importers.slice(0, 4);
+    return entry;
+  }
   if (top && top.c > 0) {
     try {
       const topNode = nodes.slice().sort((a, b) => (inCount.get(b.id) || 0) - (inCount.get(a.id) || 0))[0];
@@ -84,7 +99,9 @@ function graphEntry(t, rel) {
 export function preview(raw) {
   let input; try { input = JSON.parse(raw); } catch { return null; }
   const fp = input?.tool_input?.file_path || input?.tool_input?.filePath;
-  if (!fp || !SRC_RE.test(fp)) return null;
+  // JSON tier: .json edits pass the gate too — an imported config file has real blast radius.
+  // (An unmapped/orphan json file yields no entry below, so the hook stays quiet for those.)
+  if (!fp || !(SRC_RE.test(fp) || fp.endsWith('.json'))) return null;
   const t = findTarget(fp);
   if (!t) return null;
   const rel = relative(t.root, resolve(fp)).replace(/\\/g, '/');
@@ -102,8 +119,14 @@ export function preview(raw) {
       if (cur.size !== st.s || Math.round(cur.mtimeMs) !== st.m) behind = ' — map behind for this file (numbers are from the last map; /codeweb re-maps in seconds)';
     }
   } catch { /* freshness note is best-effort */ }
-  let msg = `[codeweb] editing ${rel}: ${symbols} symbol(s), ${total} in-repo dependent edge(s)` +
-    (top && top.c > 0 ? ` (most depended-on: ${top.label} ×${top.c})` : '') + '.' + behind;
+  // A json file's one node is its <module> — "1 symbol(s), most depended-on: <module>" would read
+  // as noise, so the config-file line speaks in importers. Entry data is identical either way
+  // (the sidecar/graph byte-parity contract lives in the entry, and both paths format HERE).
+  let msg = rel.endsWith('.json')
+    ? `[codeweb] editing ${rel}: config file, ${total} in-repo importer(s).` + behind +
+      (entry.importers?.length ? `\n  importers: ${entry.importers.join(', ')}` : '')
+    : `[codeweb] editing ${rel}: ${symbols} symbol(s), ${total} in-repo dependent edge(s)` +
+      (top && top.c > 0 ? ` (most depended-on: ${top.label} ×${top.c})` : '') + '.' + behind;
   // AMBIENT context: the ~1KB explain card for the file's most-depended-on symbol, so the blast
   // radius arrives without the agent having to ask. Fail-open either path.
   if (card) {

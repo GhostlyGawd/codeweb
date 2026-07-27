@@ -81,7 +81,11 @@ renderer. All examples below use synthetic values.
   by the regex engine. Under `--engine tree-sitter`, dynamic-dispatch calls DO resolve: `this.m()`
   (within a class) and typed-receiver `x.m()` (where `x: T` is a known class) wire to the
   class-qualified method id (`<path>:T.m`); untyped/array/generic receivers are still dropped.
-- **`import`** — a module imports a symbol from another module.
+- **`import`** — a module imports a symbol from another module. Imported `.json` files appear as
+  file-level `<path>:<module>` nodes (the JSON config tier: no symbols are extracted, content is
+  never parsed); every JS/TS import form of a `.json` target — default, named, namespace,
+  `require`, extensionless `require` — lands one coarse `import` edge on that node (`test` when
+  the importer is a test file).
 - **`inherit`** — a class extends/subclasses another (`class X extends Y`, `class X(Y):`), resolved
   with the same precision gate as calls. Counts toward reachability: an extended base is not a
   dead-code orphan, and `--impact` of a base includes its subclasses.

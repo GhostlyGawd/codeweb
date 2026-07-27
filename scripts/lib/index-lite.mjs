@@ -28,7 +28,7 @@ export function buildIndexLite(graph, stamp, reader = () => null) {
   }
   const byFile = new Map();
   for (const n of graph.nodes || []) {
-    if (n.kind === 'module') continue;
+    if (n.kind === 'module' && !n.file.endsWith('.json')) continue; // JSON tier: a json file's <module> node IS the file — mirror graphEntry exactly
     if (!byFile.has(n.file)) byFile.set(n.file, []);
     byFile.get(n.file).push(n);
   }
@@ -43,6 +43,20 @@ export function buildIndexLite(graph, stamp, reader = () => null) {
     }
     if (total === 0) continue; // hook stays quiet for these — absence in a FRESH sidecar means "no signal"
     const entry = { symbols: nodes.length, total, top };
+    if (file.endsWith('.json')) {
+      // JSON tier: the card machinery speaks caller-of-symbol (call edges), which reads "0
+      // callers" for a file whose dependents are IMPORTERS. Ship the importer list itself —
+      // the from-ids of the same in-edge set `total` counts. Mirrors graphEntry exactly.
+      const mid = nodes[0].id;
+      const importers = [];
+      for (const e of graph.edges || []) {
+        if (e.to !== mid || (e.kind !== 'call' && e.kind !== 'import' && e.kind !== 'ref')) continue;
+        if (!importers.includes(e.from)) importers.push(e.from);
+      }
+      if (importers.length) entry.importers = importers.slice(0, 4);
+      files[file] = entry;
+      continue;
+    }
     if (top && top.c > 0) {
       // The card the hook would have fetched via the explain subprocess — same sort, same builder.
       const topNode = nodes.slice().sort((a, b) => (inCount.get(b.id) || 0) - (inCount.get(a.id) || 0))[0];

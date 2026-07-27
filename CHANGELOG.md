@@ -9,6 +9,17 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+### Added
+- **JSON config-file support (file-level).** Imported `.json` files are now first-class map
+  nodes: default imports, named imports (TS `resolveJsonModule`), namespace imports,
+  `require('./config.json')`, and extensionless `require('./config')` all resolve to a
+  `<path>:<module>` node — so impact/callers answers cover config edits, mapped json files
+  carry staleness stamps (edits and deletions get flagged), and the pre-edit hook cards
+  `.json` edits with the in-repo importer list. File-level by design: json content is never
+  parsed — no symbols, no grammar in the loop, determinism untouched — and an orphan json
+  file (nothing imports it) never becomes a node, so lock files add no noise. Scan-cache
+  format bumps to v18 (one cold re-extract per workspace on upgrade).
+
 ### Fixed
 - The mcp-registry workflow now chains off the release workflow via `workflow_run` (gated on
   success) — its previous `release: published` trigger could never fire, because events created

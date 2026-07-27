@@ -53,10 +53,13 @@ import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; //
 // v16: round-2 cache-format change (#19: edge tuples interned per entry as ids+[from,to,kind]
 // triples, `syms` dropped — nodes/ranges are the one stored copy) plus #17's additive name-delta
 // fields (cand/bindCand/bindDeps/pyrex, cache-top pkgSig).
-const SCANNER_VERSION = 17; // v17: derivation-semantics change (WS-D review) — the bare-name
-// fallback excludes closure-local targets (closureLocalIds), and symbolSig annotates eligibility
-// so a nesting flip invalidates cached edges. A previous-version cache is discarded at load (one
-// cold rebuild, never a crash) — the read gate below only accepts an exact version match.
+// v18: JSON config tier — .json files join the resolution universe (relSet + fileSig) and
+// imported ones become <module> nodes; import candidates gained .json/index.json, so v17 caches
+// embed pre-json resolution verdicts and must not replay.
+const SCANNER_VERSION = 18; // v18 (JSON tier) over v17: derivation-semantics change (WS-D review) —
+// the bare-name fallback excludes closure-local targets (closureLocalIds), and symbolSig annotates
+// eligibility so a nesting flip invalidates cached edges. A previous-version cache is discarded at
+// load (one cold rebuild, never a crash) — the read gate below only accepts an exact version match.
 
 // idFile (id -> file split) is defined+exported by lib/edge-derive.mjs and imported above — one
 // truth shared with the edge deriver that keys on it most.
@@ -119,6 +122,11 @@ function tryExec(cmd, args) { try { return execFileSync(cmd, args, { encoding: '
 function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
 
 // ---- enumerate source files ----
+// JSON config tier: .json files are enumerated from the SAME walk but kept OUT of the scanned
+// source list — they are never read or parsed. Their rel paths join relSet (so JS/TS imports of
+// `./config.json` resolve) and fileSig (so a json add/delete invalidates cached binds); a node
+// exists only for a json file something actually imports (created on demand with the barrels).
+const JSON_RE = /\.json$/;
 function listFiles() {
   const viaRg = tryExec('rg', ['--files', root]);
   let files;
@@ -133,7 +141,8 @@ function listFiles() {
   // nondeterministic order, which leaks into node-array order AND cluster3's domain-assignment
   // tie-breaks — making the pipeline non-reproducible. Sorting pins a stable order without changing
   // the file set. (Surfaced + verified by the determinism study, H1.)
-  return files.filter((f) => SRC.test(f) && !SKIP.test(f)).sort();
+  const kept = files.filter((f) => !SKIP.test(f));
+  return { src: kept.filter((f) => SRC.test(f)).sort(), json: kept.filter((f) => JSON_RE.test(f)).sort() };
 }
 
 const rel = (f) => relative(root, f).replace(/\\/g, '/');
@@ -232,7 +241,7 @@ function ctagsSymbols(file) {
 }
 
 const useCtags = opts.ctags && toolExists('ctags');
-const files = listFiles();
+const { src: files, json: jsonFiles } = listFiles();
 
 // #1 (IMPROVEMENTS.md): an empty scan must not masquerade as a successful map. If the target has
 // no supported source at all, say what was looked for and where, and stop — a green run over
@@ -303,7 +312,10 @@ const engineMode = (useCtags ? 'ctags' : 'regex') + (opts.engine !== 'regex' && 
 // (re-export targets, import bindings) are only reusable while the list is unchanged.
 let rulesSig = 'none';
 try { rulesSig = sha1(readFileSync(join(root, 'codeweb.rules.json'), 'utf8')); } catch { /* absent */ }
-const fileSig = sha1(files.map(rel).sort().join('\n'));
+// fileSig spans the WHOLE resolution universe (json included): a json file appearing or vanishing
+// changes what specifiers resolve to, so cached binds/edges must invalidate exactly like a source
+// file add/delete. (jsonFiles is already sorted; rel preserves order.)
+const fileSig = sha1([...files.map(rel), ...jsonFiles.map(rel)].sort().join('\n'));
 let oldCache = null;
 if (opts.cache) { try { const c = JSON.parse(readFileSync(opts.cache, 'utf8')); if (c && c.version === SCANNER_VERSION && c.engine === engineMode) oldCache = c; } catch { /* corrupt/absent -> cold */ } }
 const newCache = opts.cache ? { version: SCANNER_VERSION, engine: engineMode, rulesSig, fileSig, files: {} } : null;
@@ -624,7 +636,9 @@ const byName = new Map();
 for (const n of nodes) { if (!byName.has(n.label)) byName.set(n.label, []); byName.get(n.label).push(n.id); }
 
 // ---- resolve imports: aliases (for accurate cross-file calls) + import edges ----
-const relSet = new Set(files.map(rel));
+// relSet is the resolution universe: source files PLUS enumerated .json files (JSON tier —
+// membership only; nothing downstream ever reads a json file's content except the stamp pass).
+const relSet = new Set([...files.map(rel), ...jsonFiles.map(rel)]);
 const absByRel = new Map(files.map((f2) => [rel(f2), f2])); // Spec Q2: re-export resolution reads target modules
 const nodeIdSet = new Set(nodes.map((n) => n.id));
 const kindById = new Map(nodes.map((n) => [n.id, n.kind])); // for class-usage ref edges
@@ -991,6 +1005,30 @@ for (const [a, b] of [...importEdges, ...reExportEdges]) {
   if (ik === 'import') importEdgeCount++;
 }
 
+// ---- JSON config tier: stamp imported .json files into meta.sources -------------------------
+// Imported .json files got their <module> nodes above (created on demand — an orphan json file
+// never becomes a node). Stamp each mapped one into meta.sources so staleness tracking covers
+// config edits and deletions exactly like source files; `dirs` below inherits their directories.
+// This stamp pass is the ONLY place a json file's bytes are touched — hashed for the verify
+// tier, never parsed (file-level support: no symbols, no grammar).
+let jsonMappedCount = 0;
+for (const jf of jsonFiles) {
+  const r = rel(jf);
+  if (!nodeIdSet.has(r + ':<module>')) continue;
+  jsonMappedCount++;
+  let pre = null, text = null, post = null;
+  try { pre = statSync(jf); } catch { pre = null; }
+  try { text = readFileSync(jf, 'utf8'); } catch { text = null; }
+  try { post = statSync(jf); } catch { post = null; }
+  if (pre && post && text != null && pre.size === post.size && pre.mtimeMs === post.mtimeMs) {
+    sources[r] = { s: post.size, m: Math.round(post.mtimeMs), h: sha1(text) };
+  } else {
+    // fail-STALE, same contract as the source-file read path: a file that won't hold still (or
+    // can't be read) carries a never-fresh stamp so checkStaleness always flags it.
+    sources[r] = { s: -1, m: 0, ...(text != null ? { h: sha1(text) } : {}) };
+  }
+}
+
 // ---- append dynamic-dispatch call edges (tree-sitter engine: this.m() + typed-receiver x.m()) ----
 // The member-call edges the regex engine deliberately drops. Endpoints are guarded against the final
 // node set; deduped by (from,to,kind) so a dispatch `call` can coexist with a `ref`/`import` of the
@@ -1028,7 +1066,7 @@ const typedWired = _typed.wired, typedDropped = _typed.dropped;
 // body-reading, report header) read the target from here instead of re-hardcoding it.
 const rootFwd = root.replace(/\\/g, '/').replace(/\/+$/, '');
 const targetLabel = opts.target || rootFwd.split('/').slice(-2).join('/') || rootFwd;
-const languages = [...new Set(files.map(langOf))].sort();
+const languages = [...new Set([...files.map(langOf), ...(jsonMappedCount ? ['json'] : [])])].sort(); // 'json' only when the map holds json nodes
 const fragment = {
   meta: {
     root: rootFwd, target: targetLabel, engine: useCtags ? 'ctags' : 'regex',
@@ -1092,7 +1130,7 @@ const dispatchNote = astAvailable
   : '';
 const anyAstLoaded = astEngineLoadedThisRun;
 const astState = anyAstLoaded ? 'loaded' : (!astAvailable || astLoadFailed) ? 'off' : 'idle';
-const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges (${shortNameDropped} short-name)${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
+const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files${jsonMappedCount ? ` (+${jsonMappedCount} json)` : ''} (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges (${shortNameDropped} short-name)${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
   return { fragment, banner };
 }
 
