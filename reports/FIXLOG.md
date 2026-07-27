@@ -148,3 +148,49 @@ node scripts/annotate.mjs --suppress 1a0632a918197948 --note 'LANG_DISPATCH dyna
 node scripts/annotate.mjs --suppress 4f9f323a0b5a7296 --note 'LANG_DISPATCH dynamic dispatch (walkTree)'
 node scripts/annotate.mjs --suppress 8a469c8f605ad135 --note 'LANG_DISPATCH dynamic dispatch (walkTree@437)'
 ```
+
+## Session — 2026-07-26/27 · branch `claude/all-build-goal-prompts-08cn4y`
+
+Reports consumed: SCAFFOLD.md (the 5 ranked findings) plus the three nulls it explained
+(SPEC.md, BUILDLOG.md, SHIP-GATE.md — this directory). Scope chosen by the operator:
+**Everything** — "Do all fixes and findings. Do everything," which also answered SCAFFOLD's
+Phase 2 gate as *install as planned*. Branch note: house rules pin all work to the designated
+session branch, standing in for the brief's `fix/goal-<date>`.
+
+### Build plan (dependency-ordered, as executed)
+
+Install first (findings 1+2+3+5 are one act — the ratified graft), packaging negation second
+(finding 4 rides on the installed files), then the unblocked pipeline in brief order:
+142 spec → 143 build log → 144 ship gate. Every commit ran the full gate via the new
+pre-commit hook; the suite (918 tests) stayed 870 pass / 0 fail throughout.
+
+### Fixed — finding · commit · verified by
+
+| finding (report) | commit | verification |
+|---|---|---|
+| Verbatim install would lock agents out of `scripts/` (SCAFFOLD 1) | `670d678` | PROTECTED narrowed to the 10-entry manifest; harness self-tests probe block/allow both ways (incl. `scripts/check-consistency.mjs` allowed); 144 lens 4: delta maps to ADR-0001b |
+| Graft must clobber nothing (SCAFFOLD 2) | `670d678` | all 15 files landed as new (`git status` showed exactly the intended set); 8 of 13 harness files byte-identical to template `984266d` |
+| Zero local enforcement (SCAFFOLD 3) | `670d678` | enforcement went live mid-install and bit for real: PostToolUse caught the planted canary (GATE RED), pre-commit rejected its own first commit (the GIT_INDEX_FILE env leak → ADR-0001e), and `--prove-red` prints PROVE-RED OK |
+| Harness files would ship to npm (SCAFFOLD 4) | `b77ce7d` | `npm pack --dry-run`: 117 files, zero harness scripts; package-shape P2 now pins the exclusion; P1 taught negation semantics without weakening |
+| Stack deviation must be named (SCAFFOLD 5) | `670d678` | ADR-0001 records (a)–(e); 144 lens 4 found zero unmapped drift |
+| Pipeline blocked on the gate (the three nulls) | `6d69848` · `793149a` · `64f9b50` | root SPEC.md: "7 live AC(s), 7 built and test-pinned" (lint) · BUILDLOG session entry (zero open ACs — Next stays operator-open) · SHIP-GATE re-run rules **SHIP**, 6/6 lenses, sabotage 3/3 caught |
+
+Also in the trail: `b857deb` (SCAFFOLD.md rewritten as the install record with proofs and
+flipped TODOs; OPERATOR-ACTIONS.md §7 added for the branch-protection step).
+
+### Skipped / narrowed (logged, per the brief)
+
+- Nothing skipped. One deliberate non-action: no `status: next` ACs were invented for 143 to
+  build — `CHARTER.md` keeps **Next** operator-open, and settling it silently is forbidden.
+
+### Follow-ups surfaced by the fixes
+
+- **lens-core linear-scaling test (`#38`) flaked once** under back-to-back gate load
+  (markdown-only diff; passed unchanged on retry). In the SHIP-GATE vitals: recurs → operator
+  adds a load guard; never a silent skip.
+- **Tarball count is 117 vs the 116 measured on published v0.12.0** — one file of
+  pre-existing drift accumulated since the release (registry work era), unrelated to the
+  graft (harness exclusion verified). One-line check at the next release cut.
+- **Gate cost is real:** ~90 s per edit/commit in this environment (suite 85–90 s). Accepted
+  knowingly at the gate (ADR-0001); trimming the wiring is operator's-hand work if it drags.
+- **Operator, browser-only:** make `check` a required status check (`OPERATOR-ACTIONS.md` §7).

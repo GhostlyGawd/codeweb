@@ -1,0 +1,15 @@
+# The harness layer is operator-owned: any change here needs the operator's
+# review. Narrowed to the explicit harness manifest at instantiation
+# (ADR-0001, deviation b): in codeweb, scripts/, .github/, and .claude/ are
+# product surface, so the template's directory-wide ownership would route
+# every product change to the operator.
+/scripts/check                @GhostlyGawd
+/scripts/spec_lint.py         @GhostlyGawd
+/scripts/hook-check           @GhostlyGawd
+/scripts/hook-protect         @GhostlyGawd
+/.githooks/                   @GhostlyGawd
+/.github/workflows/check.yml  @GhostlyGawd
+/.github/CODEOWNERS           @GhostlyGawd
+/.claude/settings.json        @GhostlyGawd
+/tests/harness/               @GhostlyGawd
+/evals/run.py                 @GhostlyGawd

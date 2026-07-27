@@ -24,7 +24,12 @@ test('P1: manifest is publishable — bins, files, no runtime deps, not private'
     assert.match(readFileSync(p, 'utf8').slice(0, 30), /^#!\/usr\/bin\/env node/, `${rel} carries a shebang`);
   }
   assert.ok(Object.keys(pkg.bin || {}).includes('codeweb-mcp'), 'the MCP server ships as a bin for non-Claude clients');
-  for (const f of pkg.files || []) assert.ok(existsSync(join(PLUGIN_ROOT, f)), `files entry exists: ${f}`);
+  // Negation entries (ADR-0001c: "!scripts/check" keeps harness files out of the tarball)
+  // must point at a real path too — a negation for a ghost file is a manifest bug.
+  for (const f of pkg.files || []) {
+    const rel = f.startsWith('!') ? f.slice(1) : f;
+    assert.ok(existsSync(join(PLUGIN_ROOT, rel)), `files entry exists: ${f}`);
+  }
   assert.deepEqual(pkg.dependencies || {}, {}, 'zero runtime dependencies — the stance holds');
   assert.ok(pkg.optionalDependencies?.['web-tree-sitter'], 'the AST tier stays optional');
 });
@@ -41,5 +46,10 @@ test('P2: npm pack ships engine + plugin surfaces, excludes repo-only trees', ()
   }
   for (const banned of ['bench/', 'site/', 'docs/', 'tests/', 'assets/', 'spike/']) {
     assert.ok(!files.some((f) => f.startsWith(banned)), `tarball excludes ${banned}`);
+  }
+  // ADR-0001c: the harness layer is dev tooling — nothing shell/Python ships in the
+  // "zero deps, runs 100% locally" package.
+  for (const harness of ['scripts/check', 'scripts/spec_lint.py', 'scripts/hook-check', 'scripts/hook-protect']) {
+    assert.ok(!files.includes(harness), `tarball excludes harness file ${harness}`);
   }
 });

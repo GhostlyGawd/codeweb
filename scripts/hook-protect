@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""Claude Code PreToolUse hook: block edits to the harness layer.
+
+The verification layer is operator-owned. This hook makes that a blocked
+tool call (exit 2), not an instruction — the agent physically cannot weaken
+the gate it is judged by. If the gate is wrong, the agent's move is to stop
+and report; the fix belongs to the operator.
+
+Instantiated for codeweb (ADR-0001, deviation b): PROTECTED is the explicit
+harness manifest, not the template's directory prefixes — in this repo
+scripts/, .github/, and .claude/ are shipped product surface. Entries ending
+in "/" protect a directory; all other entries protect exactly one file
+(prefix matching would catch product files like scripts/check-consistency.mjs).
+"""
+import json
+import os
+import sys
+
+PROTECTED = (
+    "scripts/check",
+    "scripts/spec_lint.py",
+    "scripts/hook-check",
+    "scripts/hook-protect",
+    ".githooks/",
+    ".github/workflows/check.yml",
+    ".github/CODEOWNERS",
+    ".claude/settings.json",
+    "tests/harness/",
+    "evals/run.py",
+)
+
+
+def _blocked(rel: str) -> bool:
+    for p in PROTECTED:
+        if p.endswith("/"):
+            if rel == p.rstrip("/") or rel.startswith(p):
+                return True
+        elif rel == p:
+            return True
+    return False
+
+
+def main() -> int:
+    try:
+        data = json.load(sys.stdin)
+    except Exception:
+        return 0  # malformed input: never block blindly
+    tool_input = data.get("tool_input") or {}
+    path = tool_input.get("file_path") or tool_input.get("notebook_path") or ""
+    if not path:
+        return 0
+    root = os.path.abspath(os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd())
+    rel = os.path.relpath(os.path.abspath(path), root).replace(os.sep, "/")
+    if _blocked(rel):
+        print(f"BLOCKED: {rel} is the harness layer — operator-owned, "
+              f"agent-read-only. If the gate itself is wrong, stop and "
+              f"report it to the operator (see CLAUDE.md).", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

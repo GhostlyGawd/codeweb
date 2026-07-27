@@ -19,6 +19,10 @@ bench/results/*.tmp
 bench/results/_*
 bench/**/.cw/
 
+# Python bytecode from the harness gate (spec lint, harness tests, evals)
+__pycache__/
+*.pyc
+
 # OS / editor noise
 .DS_Store
 Thumbs.db
