@@ -30,7 +30,7 @@ function mapFixture(dir) {
 }
 const payloadFor = (fp) => JSON.stringify({ tool_input: { file_path: fp } });
 
-test('P1: map writes index-lite.json; hook output byte-identical from sidecar vs graph', () => {
+test('P1: map writes index-lite.json; hook output byte-identical from sidecar vs graph', async () => {
   const dir = tmpDir('codeweb-sidecar-');
   try {
     writeTree(dir, FIXTURE);
@@ -38,35 +38,35 @@ test('P1: map writes index-lite.json; hook output byte-identical from sidecar vs
     const sidecar = join(dir, '.codeweb', 'index-lite.json');
     assert.ok(existsSync(sidecar), 'the map wrote the sidecar next to graph.json');
 
-    const fromSidecar = preview(payloadFor(join(dir, 'core/util.js')));
+    const fromSidecar = await preview(payloadFor(join(dir, 'core/util.js')));
     assert.ok(fromSidecar, 'hook speaks for a load-bearing file');
     assert.match(fromSidecar, /editing core\/util\.js: \d+ symbol/, 'first line intact');
 
     rmSync(sidecar);
-    const fromGraph = preview(payloadFor(join(dir, 'core/util.js')));
+    const fromGraph = await preview(payloadFor(join(dir, 'core/util.js')));
     assert.equal(fromSidecar, fromGraph, 'sidecar path and graph path produce identical bytes');
   } finally { cleanup(dir); }
 });
 
-test('P2: stale or corrupt sidecar falls back to the graph path silently', () => {
+test('P2: stale or corrupt sidecar falls back to the graph path silently', async () => {
   const dir = tmpDir('codeweb-sidecar-');
   try {
     writeTree(dir, FIXTURE);
     mapFixture(dir);
     const graphPath = join(dir, '.codeweb', 'graph.json');
     const sidecar = join(dir, '.codeweb', 'index-lite.json');
-    const want = preview(payloadFor(join(dir, 'core/util.js')));
+    const want = await preview(payloadFor(join(dir, 'core/util.js')));
 
     // stale: graph.json regenerated after the sidecar (stamp mismatch) — poison the sidecar to
     // prove the fresh answer can only have come from the graph path
     writeFileSync(sidecar, JSON.stringify({ version: 1, stamp: { graphMtimeMs: 1, graphSize: 1 }, files: {} }));
     const g = readFileSync(graphPath, 'utf8');
     writeFileSync(graphPath, g); // fresh mtime
-    assert.equal(preview(payloadFor(join(dir, 'core/util.js'))), want, 'stale sidecar -> graph path, same output');
+    assert.equal(await preview(payloadFor(join(dir, 'core/util.js'))), want, 'stale sidecar -> graph path, same output');
 
     // corrupt: unparseable sidecar never breaks the hook
     writeFileSync(sidecar, '{nope');
-    assert.equal(preview(payloadFor(join(dir, 'core/util.js'))), want, 'corrupt sidecar -> graph path, same output');
+    assert.equal(await preview(payloadFor(join(dir, 'core/util.js'))), want, 'corrupt sidecar -> graph path, same output');
   } finally { cleanup(dir); }
 });
 

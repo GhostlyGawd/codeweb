@@ -8,10 +8,9 @@
 // correctness, results byte-identical either way (sets, not sketches: no probabilistic cut).
 // Lexical mode only (the default and the prescribed path); --structural stays live.
 
-import { readFileSync, statSync } from 'node:fs';
-import { dirname, join } from 'node:path';
 import { isTestFile } from './graph-ops.mjs';
 import { shingles, K, capBody } from './shingles.mjs';
+import { loadStamped } from './sidecar-stamp.mjs'; // D3a: THE stamp rule, one reader
 
 export const SIMILAR_SIDECAR = 'similar-index.json';
 export const SIMILAR_K = K; // THE shingle size (lib/shingles.mjs, finding 27)
@@ -39,11 +38,6 @@ export function buildSimilarIndex(graph, stamp, reader) {
 
 /** Load the sidecar beside graphPath iff its stamp matches the graph bytes on disk; else null. */
 export function loadSimilarIndex(graphPath) {
-  try {
-    const st = statSync(graphPath);
-    const idx = JSON.parse(readFileSync(join(dirname(graphPath), SIMILAR_SIDECAR), 'utf8'));
-    if (!idx || idx.version !== SIMILAR_VERSION || idx.k !== SIMILAR_K) return null; // stale uncapped v1 rejected, never served
-    if (!idx.stamp || idx.stamp.graphMtimeMs !== st.mtimeMs || idx.stamp.graphSize !== st.size) return null;
-    return idx;
-  } catch { return null; }
+  const idx = loadStamped(graphPath, SIMILAR_SIDECAR, SIMILAR_VERSION);
+  return idx && idx.k === SIMILAR_K ? idx : null; // stale uncapped v1 rejected, never served
 }

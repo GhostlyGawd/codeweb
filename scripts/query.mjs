@@ -18,10 +18,17 @@
 
 import { buildIndex } from './lib/graph-ops.mjs';
 import { runQuery } from './lib/query-core.mjs'; // payload assembly lives once (CLI + in-process MCP)
+import { QUERY_TOOL_SPECS } from './lib/tool-specs.mjs'; // D1: THE mode list, shared with the MCP server
 
 const USAGE = `usage: query.mjs [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--limit N] [--offset N] [--json]`;
 import { die, emitJson, finish, capList, checkStaleness, loadGraph, parseArgs } from './lib/cli.mjs';
 import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
+
+// D1: the mode flags derive from the manifest the MCP server also reads — a new query tool
+// declared there grows a CLI flag here with no edit. --dependents is CLI-only (no MCP tool yet),
+// so it joins the symbol-mode list explicitly.
+const SYMBOL_MODES = QUERY_TOOL_SPECS.filter((s) => s.need.includes('symbol')).map((s) => s.kind).concat('dependents');
+const BARE_MODES = QUERY_TOOL_SPECS.filter((s) => !s.need.includes('symbol')).map((s) => s.kind);
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs); the query-mode flags stay a thin post-pass —
 // exactly one of the mode flags must be present, and a symbol-taking mode needs a real symbol
@@ -32,18 +39,13 @@ const { opts: f, pos } = parseArgs(process.argv.slice(2), {
     json: { type: 'bool', default: false },
     limit: { type: 'number', default: null, min: 0 },  // F14c: a negative limit minted empty pages
     offset: { type: 'number', default: 0, min: 0 },
-    callers: { type: 'string', default: null },
-    callees: { type: 'string', default: null },
-    tests: { type: 'string', default: null },
-    dependents: { type: 'string', default: null },
-    impact: { type: 'string', default: null },
-    cycles: { type: 'bool', default: false },
-    orphans: { type: 'bool', default: false },
+    ...Object.fromEntries(SYMBOL_MODES.map((k) => [k, { type: 'string', default: null }])),
+    ...Object.fromEntries(BARE_MODES.map((k) => [k, { type: 'bool', default: false }])),
   },
 });
 const opts = { graph: pos[0] ?? null, json: f.json, limit: f.limit, offset: Math.max(0, f.offset), query: null, symbol: undefined, queries: 0 };
-for (const q of ['callers', 'callees', 'tests', 'dependents', 'impact']) if (f[q] != null) { opts.query = q; opts.symbol = f[q]; opts.queries++; }
-for (const q of ['cycles', 'orphans']) if (f[q]) { opts.query = q; opts.queries++; }
+for (const q of SYMBOL_MODES) if (f[q] != null) { opts.query = q; opts.symbol = f[q]; opts.queries++; }
+for (const q of BARE_MODES) if (f[q]) { opts.query = q; opts.queries++; }
 if (opts.queries !== 1 || (opts.symbol !== undefined && (!opts.symbol || opts.symbol.startsWith('-')))) die(USAGE, 2);
 
 // #5: one loader (arg -> CODEWEB_WS -> nearest .codeweb above cwd), one error message, one

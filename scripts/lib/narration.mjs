@@ -5,21 +5,16 @@
 // Same staleness discipline as the other sidecars: stamped against one stat of graph.json; a
 // mismatch returns null, so stale narration silently drops out rather than misleading anyone.
 
-import { readFileSync, statSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { loadStamped } from './sidecar-stamp.mjs'; // D3a: THE stamp rule, one reader
 
 export const NARRATION_SIDECAR = 'narration.json';
 
 /** Load fresh narration beside a graph, or null (absent / stale / malformed). Never throws. */
 export function loadNarration(absGraphPath) {
-  try {
-    const doc = JSON.parse(readFileSync(join(dirname(absGraphPath), NARRATION_SIDECAR), 'utf8'));
-    if (doc.version !== 1) return null;
-    const st = statSync(absGraphPath);
-    if (doc.stamp?.graphMtimeMs !== st.mtimeMs || doc.stamp?.graphSize !== st.size) return null;
-    return {
-      domains: doc.domains && typeof doc.domains === 'object' ? doc.domains : {},
-      symbols: doc.symbols && typeof doc.symbols === 'object' ? doc.symbols : {},
-    };
-  } catch { return null; }
+  const doc = loadStamped(absGraphPath, NARRATION_SIDECAR, 1);
+  if (!doc) return null;
+  return {
+    domains: doc.domains && typeof doc.domains === 'object' ? doc.domains : {},
+    symbols: doc.symbols && typeof doc.symbols === 'object' ? doc.symbols : {},
+  };
 }

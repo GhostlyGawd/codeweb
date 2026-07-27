@@ -19,10 +19,14 @@ export function getVersion(root) {
   return JSON.parse(readText(join(root, 'package.json'))).version;
 }
 
-/** Count the MCP tools at the source: the TOOLS table in scripts/mcp-server.mjs. */
+/** Count the MCP tools at the source: the TOOLS table in scripts/mcp-server.mjs plus the
+ *  manifest entries it spreads in from scripts/lib/tool-specs.mjs (D1). Deduped by name, so a
+ *  tool restated in both files can never double-count. */
 export function mcpToolCount(root) {
-  const src = readText(join(root, 'scripts', 'mcp-server.mjs'));
-  return (src.match(/name:\s*'codeweb_[a-z_]+'/g) || []).length;
+  let text = readText(join(root, 'scripts', 'mcp-server.mjs'));
+  const specsPath = join(root, 'scripts', 'lib', 'tool-specs.mjs');
+  if (existsSync(specsPath)) text += '\n' + readText(specsPath);
+  return new Set([...text.matchAll(/name:\s*'(codeweb_[a-z_]+)'/g)].map((m) => m[1])).size;
 }
 
 /** Count the tools the website advertises (sum of toolPhases in product.json). */
@@ -59,6 +63,8 @@ export const PROSE_FILES = [
   'commands/codeweb.md',
   'skills/codebase-anatomy/SKILL.md',
   'skills/codebase-anatomy/references/engine-detection.md',
+  'scripts/lib/product-copy.mjs', // D6: the stdout claim strings are prose too
+  'docs/cli.md', // D1: "--help wins and this file has a bug" — now its counts and tool names are gated
 ];
 
 /** Scan one text for tool-count / language-count claims that disagree with the canonical facts. */
@@ -272,6 +278,44 @@ export function checkConsistency(root) {
       else if (v && typeof v === 'object') Object.values(v).forEach(walk);
     })(productData);
     problems.push(...scanProseCounts(strings.join('\n'), 'site/data/product.json (prose)', { toolCount: count, langCount }));
+  }
+
+  // D6 / CHARTER C7: claim-bearing stdout strings are hoisted to lib/product-copy.mjs so this
+  // gate can audit CLI output like any prose surface (the file also rides PROSE_FILES above).
+  // The C7 regression class — a sponsorship cost premise — fails the build outright; wording for
+  // that surface is ratified as "supports the project", never a cost story.
+  const stdoutCopyPath = join(root, 'scripts', 'lib', 'product-copy.mjs');
+  if (existsSync(stdoutCopyPath)) {
+    const m = readText(stdoutCopyPath).match(/\b(?:pays?|paying|paid)\s+for\b|\bfund(?:s|ing|ed)?\b|\bbills?\b/i);
+    if (m) problems.push(`scripts/lib/product-copy.mjs states a sponsorship cost premise ("${m[0]}") — CHARTER C7 ruled the class fabricated; no cost claims`);
+  }
+
+  // D1: the tool-interface manifest discipline. (a) A tool declared in BOTH lib/tool-specs.mjs
+  // and mcp-server.mjs is the triplication coming back — the declaration drift behind the
+  // recorded CLI↔MCP parity fix class. (b) Any codeweb_* name a prose surface uses must ship:
+  // the docs-lying class (5c5d417) — the docs co-changed 0 of 13 times with the server, so this
+  // coupling is enforced by the gate, not hoped for.
+  const srvPath = join(root, 'scripts', 'mcp-server.mjs');
+  const toolSpecsPath = join(root, 'scripts', 'lib', 'tool-specs.mjs');
+  if (existsSync(srvPath) && existsSync(toolSpecsPath)) {
+    const nameRe = /name:\s*'(codeweb_[a-z_]+)'/g;
+    const srvNames = new Set([...readText(srvPath).matchAll(nameRe)].map((m) => m[1]));
+    const specNames = new Set([...readText(toolSpecsPath).matchAll(nameRe)].map((m) => m[1]));
+    for (const n of specNames) {
+      if (srvNames.has(n)) problems.push(`${n} is declared in BOTH lib/tool-specs.mjs and mcp-server.mjs — one interface, one declaration (D1)`);
+    }
+    const shipped = new Set([...srvNames, ...specNames]);
+    const flagged = new Set();
+    for (const rel of PROSE_FILES) {
+      const p = join(root, rel);
+      if (!existsSync(p)) continue;
+      for (const m of readText(p).matchAll(/\bcodeweb_[a-z_]+\b/g)) {
+        const key = `${rel}:${m[0]}`;
+        if (shipped.has(m[0]) || flagged.has(key)) continue;
+        flagged.add(key);
+        problems.push(`${rel} names ${m[0]}, which is not a shipped tool — docs must not outrun tools/list`);
+      }
+    }
   }
 
   return { ok: problems.length === 0, version, count, problems };

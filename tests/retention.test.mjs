@@ -308,10 +308,10 @@ test('R3: the pre-edit card marks a file whose stamps no longer match the map', 
     assert.equal(mapProject(dir, ws).status, 0);
     const { preview } = await import('../hooks/pre-edit-impact.mjs');
     const payload = JSON.stringify({ tool_input: { file_path: join(dir, 'src', 'a.js') } });
-    const current = preview(payload);
+    const current = await preview(payload);
     assert.ok(current && !/map behind/.test(current), 'a fresh map gets no warning');
     appendFileSync(join(dir, 'src', 'a.js'), '\nexport function gamma() {\n  return 7;\n}\n');
-    const behind = preview(payload);
+    const behind = await preview(payload);
     assert.ok(behind, 'card still speaks');
     assert.match(behind, /map behind for this file/i, 'the card admits its numbers are stale for this file');
   } finally { cleanup(dir); }

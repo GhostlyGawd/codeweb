@@ -160,10 +160,10 @@ export function emitText(text, code = 0) {
 export function loadGraph(pathArg, { usage = null } = {}) {
   let graphPath = pathArg || (process.env.CODEWEB_WS ? `${process.env.CODEWEB_WS}/graph.json` : null);
   if (!graphPath) {
-    const near = findTarget(join(process.cwd(), 'x')); // findTarget walks up from a FILE's dir; anchor so the walk starts AT cwd
+    const near = nearestWorkspace(process.cwd());
     if (near) {
-      graphPath = near.baseline;
-      console.error(`[codeweb] using ${near.baseline} (nearest .codeweb above cwd)`);
+      graphPath = near.path;
+      console.error(`[codeweb] using ${near.path} (nearest .codeweb above cwd)`);
     }
   }
   if (!graphPath) {
@@ -226,18 +226,26 @@ export function manifestEntryFiles(root, relFiles) {
   return entries;
 }
 
-// Walk up from a file to the nearest mapped workspace (.codeweb/graph.json). Previously
-// duplicated verbatim in both hooks — codeweb's own campaign flagged it (Spec E dogfood).
-export function findTarget(filePath) {
-  let dir = dirname(resolve(filePath));
+// THE .codeweb walk-up (Spec E, finished by D3b): walk from a directory toward the FS root
+// (≤40 levels) to the nearest workspace holding `.codeweb/<filename>`. Previously restated four
+// ways (findTarget here, twice in mcp-server, once in session-brief) — codeweb's own campaign
+// flagged the original pair; this is the one answer to "which graph am I talking to".
+export function nearestWorkspace(startDir, filename = 'graph.json') {
+  let dir = resolve(startDir);
   for (let i = 0; i < 40; i++) {
-    const baseline = join(dir, '.codeweb', 'graph.json');
-    if (existsSync(baseline)) return { root: dir, baseline };
+    const path = join(dir, '.codeweb', filename);
+    if (existsSync(path)) return { root: dir, path };
     const parent = dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
   return null;
+}
+
+// Walk up from a FILE to the nearest mapped workspace — the hooks' shape ({root, baseline}).
+export function findTarget(filePath) {
+  const ws = nearestWorkspace(dirname(resolve(filePath)));
+  return ws ? { root: ws.root, baseline: ws.path } : null;
 }
 
 /**

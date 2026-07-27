@@ -47,10 +47,10 @@ test('explain card reports fields, awaited fraction, and arg range from real cal
   } finally { cleanup(dir); }
 });
 
-test('the pre-edit hook delivers the reliance line without being asked', () => {
+test('the pre-edit hook delivers the reliance line without being asked', async () => {
   const { dir } = buildMapped();
   try {
-    const msg = preview(JSON.stringify({ tool_input: { file_path: join(dir, 'util.js') } }));
+    const msg = await preview(JSON.stringify({ tool_input: { file_path: join(dir, 'util.js') } }));
     assert.ok(msg, 'advisory produced for the depended-on file');
     assert.match(msg, /callers use \{port, retries, timeout\}/, 'the contract arrives ambiently at edit time');
   } finally { cleanup(dir); }
