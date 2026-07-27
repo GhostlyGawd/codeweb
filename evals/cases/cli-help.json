@@ -1,0 +1,5 @@
+{
+  "id": "cli-help",
+  "command": "node bin/codeweb.mjs --help",
+  "expect_contains": "usage: codeweb"
+}

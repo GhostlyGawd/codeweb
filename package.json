@@ -37,6 +37,10 @@
   "files": [
     "bin",
     "scripts",
+    "!scripts/check",
+    "!scripts/spec_lint.py",
+    "!scripts/hook-check",
+    "!scripts/hook-protect",
     "hooks",
     "skills",
     "agents",

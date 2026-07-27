@@ -1,0 +1,54 @@
+#!/bin/sh
+# The one gate. Spec lint -> harness tests -> product tests -> consistency
+# -> evals; any red exits non-zero. The PostToolUse hook, the pre-commit
+# hook, and CI all run exactly this, so passing here means passing
+# everywhere.
+#
+#   sh scripts/check              # the gate
+#   sh scripts/check --prove-red  # prove the gate can fail (141 and 144 run this)
+#
+# Instantiated for codeweb from the goal-prompts template — deviations are
+# recorded in ADR-0001 (DECISIONS.md). Deliberately NOT wired in: the bench
+# budgets (load-sensitive; CI-only) and the site build + docs freshness diff
+# (writes the tree; an every-edit gate must never dirty it).
+set -e
+cd "$(dirname "$0")/.."
+
+if [ "$1" = "--prove-red" ]; then
+  # Plant a failing canary test, assert the gate goes red, clean up.
+  # A gate that cannot fail is not a gate.
+  canary=tests/test_canary_prove_red.py
+  cat > "$canary" <<'EOF'
+import unittest
+
+
+class TestCanaryProveRed(unittest.TestCase):
+    def test_canary_must_fail(self):
+        self.fail("prove-red canary: the gate must catch this")
+EOF
+  if sh scripts/check >/dev/null 2>&1; then
+    rm -f "$canary"
+    echo "PROVE-RED FAILED: the gate passed with a failing test planted — the harness is broken" >&2
+    exit 1
+  fi
+  rm -f "$canary"
+  echo "PROVE-RED OK: the gate goes red when a test fails"
+  exit 0
+fi
+
+echo "== 1/5 spec lint =="
+python3 scripts/spec_lint.py
+
+echo "== 2/5 harness tests =="
+python3 -m unittest discover -s tests -t . -q
+
+echo "== 3/5 product tests =="
+npm test
+
+echo "== 4/5 consistency =="
+node scripts/check-consistency.mjs
+
+echo "== 5/5 evals =="
+python3 evals/run.py
+
+echo "ALL CHECKS PASSED"
