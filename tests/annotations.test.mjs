@@ -10,7 +10,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fingerprint, loadAnnotations, applySuppressions, addSuppression } from '../scripts/lib/annotations.mjs';
-import { tmpDir, cleanup } from './helpers.mjs';
+import { tmpDir, cleanup, runNode, script, writeTree } from './helpers.mjs';
 import { prng, int, pick } from './_proptest.mjs';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
@@ -105,5 +105,29 @@ test('ANN-PERSIST-IDEMPOTENT: addSuppression writes .codeweb/annotations.json; t
     assert.equal(ann.suppressions.filter((s) => s.fingerprint === fp).length, 1, 'idempotent on fingerprint');
     const onDisk = JSON.parse(readFileSync(join(dir, 'annotations.json'), 'utf8'));
     assert.ok(Array.isArray(onDisk.suppressions));
+  } finally { cleanup(dir); }
+});
+
+// D8 follow-through (Spring Cleaning W3): the WRITE side (annotate.mjs, --dir or discovery) and
+// the READ side (deadcode.mjs default) must address the SAME file — annotations.json beside the
+// graph. The old read default looked in <ws>/.codeweb/ (a second nesting no writer ever used),
+// so default-path suppressions were silently never applied. Roundtrip, end to end:
+test('ANN-E2E-ROUNDTRIP: annotate writes where deadcode reads by default', () => {
+  const dir = tmpDir('codeweb-ann-e2e-');
+  try {
+    writeTree(dir, {
+      'a.js': 'export function used() {\n  return 1;\n}\nfunction dead() {\n  return 2;\n}\n',
+      'b.js': "import { used } from './a.js';\nexport function go() {\n  return used();\n}\n",
+    });
+    const ws = join(dir, '.codeweb');
+    assert.equal(runNode(script('run.mjs'), [dir, '--out-dir', ws]).status, 0, 'fixture maps');
+    const graph = join(ws, 'graph.json');
+    const before = JSON.parse(runNode(script('deadcode.mjs'), [graph, '--json']).stdout);
+    const hit = before.safe.find((s) => s.id.endsWith(':dead'));
+    assert.ok(hit, `expected a safe orphan for dead(): ${JSON.stringify(before.safe)}`);
+    assert.equal(runNode(script('annotate.mjs'), ['--suppress', hit.fingerprint, '--note', 'e2e', '--dir', ws]).status, 0, 'suppression written');
+    const after = JSON.parse(runNode(script('deadcode.mjs'), [graph, '--json']).stdout);
+    assert.equal(after.totals.suppressed, 1, 'the DEFAULT read path (no --annotations flag) sees the suppression');
+    assert.ok(!after.safe.some((s) => s.fingerprint === hit.fingerprint), 'the suppressed finding leaves the safe tier');
   } finally { cleanup(dir); }
 });
