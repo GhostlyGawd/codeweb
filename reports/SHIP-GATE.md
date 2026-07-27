@@ -1,6 +1,58 @@
-# 144 · Ship Gate — null report (nothing to judge: no SPEC.md, no gate, no ACs on trial)
+# SHIP-GATE — adversarial go/no-go (re-run after the harness install)
 
-2026-07-26
-All Build Goal Prompts · stage 4/4 · brief 144
+2026-07-27
+All Build Goal Prompts · stage 4/4 · brief 144 (re-run; the first pass nulled)
 
-This is the stage's null report, not a ruling — brief 144's null rule ("No `SPEC.md`, or no implementation to judge at this root? Say so in a one-paragraph null report and stop") governs, because there is no `SPEC.md` at the repo root and no spec anywhere — `reports/SPEC.md` is stage 2's null report (titled as such, 2026-07-26) — so there are no bars to verify against, no ACs claiming `status: built` to put on trial, no `scripts/check` gate to run fresh or prove red, no `evals/run.py` to score against a floor, and no spec'd revenue path to walk end to end; the adversarial pass has nothing to judge, and the brief says say so and stop. Every absence was re-verified this run, not trusted: root `SPEC.md`, `DECISIONS.md`, `scripts/check`, and `evals/` are each absent, and no prior `SHIP-GATE.md` existed at the root or in `reports/` (this file starts it). The chain of blockage is now four links long and unbroken: stage 1's readiness audit (`reports/SCAFFOLD.md`, 2026-07-26) gate-stopped with the 15-file harness uninstalled and its install/adjust/abort question to the operator still unanswered; 142 then nulled on the missing `scripts/spec_lint.py`; 143 nulled on the missing root `SPEC.md`, `scripts/check`, and `DECISIONS.md`; and this report nulls on the same absent contract. The unblock path is unchanged and already written down: the operator answers SCAFFOLD.md's gate question; on "install", 141's Phase 3 grafts the harness and proves the gate green and red; 142 re-runs to write the ratified, lint-clean `SPEC.md` at the root; 143 re-runs to build its ACs with pinning tests; and only then does 144 re-run as the real adversarial gate with sabotage, eval floors, and the first-dollar walk. One clause so this null is not misread as "this repo cannot ship": codeweb has its own release discipline in place of the missing machinery — CI and tag-triggered publishing (`.github/workflows/ci.yml` and `release.yml`, both verified present), a consistency gate (`npm run check-consistency`, wired at `package.json:59`), and the release-tag process — and in the brief's verify-by-running spirit this run executed `node scripts/check-consistency.mjs`, which passed ("check-consistency: OK — v0.12.0, 27 tools, all surfaces aligned.", exit 0) with the working tree clean before and after. No ship/hold ruling is issued — a null is neither — and the pending question remains SCAFFOLD.md's install/adjust/abort gate.
+**What changed since the last run:** everything. The 2026-07-26 pass was a one-paragraph null
+— no `SPEC.md`, no gate, nothing to judge (preserved in git at commit `ed56d78`). Since then
+the operator answered the 141 gate ("Do everything"), the harness was installed and proven
+(commits `670d678`…`793149a`), 142 wrote the ratified root `SPEC.md` (7 built, pinned ACs),
+and 143 logged its zero-open-AC session. This re-run judged that state adversarially,
+verify-by-running. All sabotage was reverted; `git status --porcelain` is clean.
+
+## Scorecard
+
+| Lens | Result | Evidence (command-output tails) |
+|---|---|---|
+| 1 · The gate itself | **PASS** | Fresh `sh scripts/check`: `ALL CHECKS PASSED` (918 tests, 870 pass, 0 fail, 48 env skips; consistency OK; evals 2/2). `sh scripts/check --prove-red`: `PROVE-RED OK: the gate goes red when a test fails` |
+| 2 · AC truth | **PASS 7/7** | Every `check:` run verbatim: AC-1 `npm test` → 870 pass/0 fail · AC-2 consistency → exit 0, "OK — v0.12.0, 27 tools" · AC-3 zero-deps probe → exit 0 · AC-4 prove-red → `PROVE-RED OK` · AC-5 `node --test tests/package-shape.test.mjs` → 2/2 · AC-6 four-bin `--help` loop → exit 0 · AC-7 `python3 evals/run.py` → "all 2 case(s) passed" |
+| 3 · Test honesty | **PASS 3/3** | Sabotaged AC-2 (README "27 tools"→"26"): the live PostToolUse hook went red in ~5 s naming the lie (`README.md: says "26 tools" but 27 tools ship`), check exit 1; reverted → exit 0. Sabotaged AC-3 (injected `left-pad` runtime dep): pin red — "runtime dependencies must stay empty (charter invariant)", check exit 1; reverted → 0. Sabotaged AC-6 (`--help` → exit 2): caught by TWO independent layers — the ac_6 pin and the `cli-help` golden case — check exit 1; reverted → 0. No test survived sabotage. |
+| 4 · Harness integrity | **PASS** | 13-file diff vs template `984266d`: 8 byte-identical (`spec_lint.py`, `hook-check`, `settings.json`, `test_harness.py`, both `__init__.py`, `evals/run.py`, `example-upper.json`); 5 differ and each maps to a recorded ADR-0001 deviation — `check`→(a), `hook-protect`→(b), `pre-commit`→(e), `check.yml`→(a), `CODEOWNERS`→(b). Zero unmapped drift. |
+| 5 · Eval floor | **PASS** | `python3 evals/run.py`: `ok cli-help · ok example-upper · evals: all 2 case(s) passed` — the floor is "all cases pass"; it holds. |
+| 6 · First dollar | **PASS** (doorway) | `.github/FUNDING.yml` → `github: [GhostlyGawd]` (repo Sponsor button; GitHub Sponsors handles checkout/VAT/receipts into the operator's account) · README:316 links github.com/sponsors/GhostlyGawd · the site support page carries the same doorway. Copy is C7-honest on all three surfaces: support + placement, no cost claims, nothing paywalled. Per SPEC: a stranger's actual card cannot be verified from here, and the spec claims nothing more. |
+
+## The ruling
+
+**SHIP.** Every bar came from `SPEC.md`, written before this run; none was adjusted to fit
+the results. The gate is green and provably capable of red; all seven built ACs pass their
+checks verbatim; three sabotages were each caught (one by two independent layers) and no test
+survived; the harness layer carries zero drift beyond its five ADR-recorded deviations; the
+eval floor holds; and the money path is wired end-to-end to an operator-controlled account
+with charter-honest copy. The shipped local product is exactly what it claims to be. (Cutting
+an actual release remains the operator's move via the release-tag process — this ruling says
+the contract is met, not that a tag was pushed.)
+
+## Blockers
+
+None. Two named watch items, neither a blocker:
+
+- **Branch protection is still open** (the one unchecked operator TODO, `OPERATOR-ACTIONS.md`
+  §7): until `check` is a required status check, a red gate blocks agents at edit time,
+  commits locally, and CI — but GitHub will not physically stop a merge over it.
+- **Bench receipts run on main CI, not here** (`bench/corpus` is not clonable in this
+  sandbox): the recall/token kill-criteria tripwires are enforced by `ci.yml`'s bench gate —
+  watch them there.
+
+## Watch after ship — the first Weekly Vitals checklist (from SPEC.md kill criteria)
+
+- [ ] `sh scripts/check --prove-red` still prints `PROVE-RED OK` — a gate that cannot fail
+      proves nothing; anything else halts feature work.
+- [ ] The bench caller-recall receipt still clears the grep baseline (charter: 44%→74%), and
+      `npm run bench:all -- --gate` stays green on main — two consecutive reds = stop
+      shipping.
+- [ ] `node scripts/check-consistency.mjs` green on main — claim drift ships nothing.
+- [ ] MCP budget pins (`tests/mcp-budget.test.mjs`) green on main — answers staying small is
+      the token half of the promise.
+- [ ] The lens-core linear-scaling perf test (`#38`) flaked once under gate load this session
+      (passed unchanged on re-run) — if it recurs, it is operator's-hand work (a load guard),
+      never a silent skip.
