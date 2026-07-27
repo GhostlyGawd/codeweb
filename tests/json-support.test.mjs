@@ -17,13 +17,14 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { appendFileSync, rmSync, existsSync } from 'node:fs';
-import { runNode, tmpDir, cleanup, writeTree, script, hasEdge } from './helpers.mjs';
+import { runNode, tmpDir, cleanup, writeTree, script, hasEdge, PLUGIN_ROOT } from './helpers.mjs';
 import { runExtract } from '../scripts/extract-symbols.mjs';
 import { checkStaleness } from '../scripts/lib/cli.mjs';
-import { preview } from '../hooks/pre-edit-impact.mjs';
 
 const RUN = script('run.mjs');
+const HOOK = join(PLUGIN_ROOT, 'hooks', 'pre-edit-impact.mjs');
 
 const FILES = {
   'config.json': '{\n  "port": 8080\n}\n',
@@ -116,6 +117,19 @@ test('a json-only tree still refuses to masquerade as a map (json is a tier, not
 
 // ---- pre-edit hook: the config-file card, sidecar/graph byte-parity (Spec P) ----------------
 
+// The hook is exercised the way the host runs it — a child process fed the PreToolUse payload on
+// stdin, asserted on its stdout envelope (the harness's own philosophy: real shipped artifacts as
+// subprocesses, no in-process imports). stdout is '' when the hook stays silent; otherwise one
+// JSON line {hookSpecificOutput: {additionalContext}}.
+const runHook = (fp) => {
+  const r = spawnSync(process.execPath, [HOOK], {
+    input: JSON.stringify({ tool_input: { file_path: fp } }),
+    encoding: 'utf8', maxBuffer: 1 << 22,
+  });
+  assert.equal(r.status, 0, `hook must always exit 0 (advisory)\n${r.stderr}`);
+  return r.stdout;
+};
+
 test('pre-edit hook speaks for an imported json file, byte-identical sidecar vs graph', () => {
   const dir = tmpDir('codeweb-json-hook-');
   try {
@@ -127,19 +141,19 @@ test('pre-edit hook speaks for an imported json file, byte-identical sidecar vs 
     });
     const r = runNode(RUN, [dir, '--out-dir', join(dir, '.codeweb')]);
     assert.equal(r.status, 0, r.stderr);
-    const payloadFor = (fp) => JSON.stringify({ tool_input: { file_path: fp } });
 
-    const fromSidecar = preview(payloadFor(join(dir, 'config.json')));
+    const fromSidecar = runHook(join(dir, 'config.json'));
     assert.ok(fromSidecar, 'hook speaks for an imported config file');
-    assert.match(fromSidecar, /editing config\.json: config file, 2 in-repo importer\(s\)/);
-    assert.match(fromSidecar, /importers: /, 'card lists the importing modules');
+    const msg = JSON.parse(fromSidecar).hookSpecificOutput.additionalContext;
+    assert.match(msg, /editing config\.json: config file, 2 in-repo importer\(s\)/);
+    assert.match(msg, /importers: /, 'card lists the importing modules');
 
     const sidecar = join(dir, '.codeweb', 'index-lite.json');
     assert.ok(existsSync(sidecar));
     rmSync(sidecar);
-    const fromGraph = preview(payloadFor(join(dir, 'config.json')));
+    const fromGraph = runHook(join(dir, 'config.json'));
     assert.equal(fromSidecar, fromGraph, 'sidecar path and graph path produce identical bytes');
 
-    assert.equal(preview(payloadFor(join(dir, 'orphan.json'))), null, 'hook stays quiet for an orphan json');
+    assert.equal(runHook(join(dir, 'orphan.json')), '', 'hook stays quiet for an orphan json');
   } finally { cleanup(dir); }
 });
