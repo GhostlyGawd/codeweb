@@ -1,0 +1,6 @@
+# codeweb workspace — everything here is regenerable cache EXCEPT the whitelisted memory:
+# commit annotations.json (team judgement) and history.jsonl (progression); stats.json stays local.
+*
+!.gitignore
+!annotations.json
+!history.jsonl
