@@ -1,7 +1,8 @@
 // Spec C (docs/specs/bench-all-ci-gates.md): bench:all is the standing measurement behind every
 // published number, and --gate turns its budgets into CI promises. BDD:
-//   B1 given a mapped fixture, when bench:all runs, then benchmarks.json carries every section,
-//      all session responses are valid JSON, and the site mirror is byte-identical.
+//   B1 given a mapped fixture, when bench:all runs, then benchmarks.json carries every section
+//      and all session responses are valid JSON. (The site mirror was removed 2026-07-27,
+//      operator-ruled: write-only, no reader ever shipped.)
 //   B2 given a budget lowered below reality, when --gate runs, then exit 1 names the violation
 //      (and the real budgets pass).
 //   B3 given a ledger claim citing a missing source, then the claims audit fails naming it.
@@ -22,16 +23,16 @@ const FIXTURE = {
 };
 
 function runAll(dir, extra = []) {
-  const out = join(dir, 'benchmarks.json'), site = join(dir, 'site-mirror.json');
-  const r = runNode(ALL, ['--target', join(dir, 'src'), '--ws', join(dir, 'ws'), '--corpus', join(dir, 'no-such-corpus'), '--out', out, '--site', site, ...extra]);
-  return { r, out, site };
+  const out = join(dir, 'benchmarks.json');
+  const r = runNode(ALL, ['--target', join(dir, 'src'), '--ws', join(dir, 'ws'), '--corpus', join(dir, 'no-such-corpus'), '--out', out, ...extra]);
+  return { r, out };
 }
 
-test('B1+B4: sections present, session valid, mirror byte-identical, corpus skip explicit', () => {
+test('B1+B4: sections present, session valid, corpus skip explicit', () => {
   const dir = tmpDir('codeweb-benchall-');
   try {
     writeTree(dir, FIXTURE);
-    const { r, out, site } = runAll(dir);
+    const { r, out } = runAll(dir);
     assert.equal(r.status, 0, r.stderr);
     const b = readJSON(out);
     for (const k of ['pipeline', 'session', 'toolBudgets', 'advisors', 'loaded', 'cyclic', 'tsEngine', 'budgets', 'ranAt']) assert.ok(b[k], `section ${k} present`);
@@ -43,7 +44,6 @@ test('B1+B4: sections present, session valid, mirror byte-identical, corpus skip
     assert.equal(b.loaded.ok, true, 'loaded corpus mapped');
     assert.ok(b.loaded.overlapFindings >= 15, `loaded corpus triggers the machinery (${b.loaded.overlapFindings} findings; 15 clusters planted) (finding 13b)`);
     assert.equal(b.loaded.lshEngaged, true, 'the LSH path engages on its own at loaded-corpus scale');
-    assert.equal(readFileSync(out, 'utf8'), readFileSync(site, 'utf8'), 'site mirror is byte-identical');
     assert.match(b.tsEngine.skipped || '', /corpus absent/, 'B4: skip carries its reason');
   } finally { cleanup(dir); }
 });

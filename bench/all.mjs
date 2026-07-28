@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // Spec C (docs/specs/bench-all-ci-gates.md): the one-command benchmark suite behind every number
 // codeweb publishes. Runs the deterministic, agent-free benchmarks available in this environment,
-// writes bench/results/benchmarks.json (+ a byte-identical mirror for the site), and — with
-// --gate — FAILS when a measurement breaks a promise in bench/budgets.json. Skips are explicit,
-// never silent.
+// writes bench/results/benchmarks.json, and — with --gate — FAILS when a measurement breaks a
+// promise in bench/budgets.json. Skips are explicit, never silent. (Spec C's site mirror was
+// removed 2026-07-27, operator-ruled: it was write-only — nothing on the site ever read it.)
 //
 //   node bench/all.mjs [--target <dir>] [--ws <dir>] [--corpus <dir>] [--budgets <file>]
-//                      [--out <file>] [--site <file>] [--gate]
+//                      [--out <file>] [--gate]
 //
 // Sections: pipeline (cold map + no-change rerun + regex extraction baseline), session (a
 // representative 12-call MCP session — bytes, ≈tokens, JSON validity), toolBudgets (max response
@@ -20,7 +20,7 @@ import { tmpdir } from 'node:os';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
-const opt = { target: ROOT, ws: null, corpus: join(ROOT, 'bench', 'corpus', 'axios'), budgets: join(ROOT, 'bench', 'budgets.json'), out: join(ROOT, 'bench', 'results', 'benchmarks.json'), site: join(ROOT, 'site', 'data', 'benchmarks.json'), gate: false };
+const opt = { target: ROOT, ws: null, corpus: join(ROOT, 'bench', 'corpus', 'axios'), budgets: join(ROOT, 'bench', 'budgets.json'), out: join(ROOT, 'bench', 'results', 'benchmarks.json'), gate: false };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--target') opt.target = resolve(argv[++i]);
@@ -28,7 +28,6 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--corpus') opt.corpus = resolve(argv[++i]);
   else if (t === '--budgets') opt.budgets = resolve(argv[++i]);
   else if (t === '--out') opt.out = resolve(argv[++i]);
-  else if (t === '--site') opt.site = resolve(argv[++i]);
   else if (t === '--gate') opt.gate = true;
 }
 const ws = opt.ws || mkdtempSync(join(tmpdir(), 'codeweb-benchws-'));
@@ -214,9 +213,8 @@ else {
 const payload = { ranAt: new Date().toISOString(), node: process.version, budgets, pipeline, session, toolBudgets, advisors, loaded, cyclic, tsEngine };
 const json = JSON.stringify(payload, null, 2) + '\n';
 mkdirSync(dirname(opt.out), { recursive: true }); writeFileSync(opt.out, json);
-mkdirSync(dirname(opt.site), { recursive: true }); writeFileSync(opt.site, json);
 console.log(`[bench:all] pipeline cold ${pipeline.coldMs}ms / warm ${pipeline.warmMs}ms (reused: ${pipeline.stagesReused}) · session ${session.totalTokensApprox} tokens over ${calls.length} calls (valid: ${session.allValidJson}) · ts-engine ${tsEngine.skipped ? 'SKIPPED' : tsEngine.factor + 'x'}`);
-console.log(`[bench:all] wrote ${opt.out} (+ site mirror)`);
+console.log(`[bench:all] wrote ${opt.out}`);
 
 if (opt.gate) {
   const violations = [];

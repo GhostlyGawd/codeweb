@@ -1,0 +1,149 @@
+{
+  "suppressions": [
+    {
+      "fingerprint": "cfdbc5f71cf9ab99",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (callSite)"
+    },
+    {
+      "fingerprint": "bddfac53f441c473",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (callSite@473)"
+    },
+    {
+      "fingerprint": "40b65f6d6c154820",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (callSite@509)"
+    },
+    {
+      "fingerprint": "bfa1f7c54a99d7b3",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (callSite@545)"
+    },
+    {
+      "fingerprint": "bc28c3d99c64e2b7",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (callSite@585)"
+    },
+    {
+      "fingerprint": "6b0f91f01e713666",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (callSite@626)"
+    },
+    {
+      "fingerprint": "b066a3798c99f5ad",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (callSite@664)"
+    },
+    {
+      "fingerprint": "a95af3f8ae77c081",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (collectOwners)"
+    },
+    {
+      "fingerprint": "da4762987d411dc9",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (collectOwners@462)"
+    },
+    {
+      "fingerprint": "8933ff63e86e749d",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (collectOwners@497)"
+    },
+    {
+      "fingerprint": "0a7434e27da22258",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (collectOwners@533)"
+    },
+    {
+      "fingerprint": "671c36fb7ecb3138",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (collectOwners@573)"
+    },
+    {
+      "fingerprint": "7de5651c3e3e4adf",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (collectOwners@614)"
+    },
+    {
+      "fingerprint": "6a9e4b0469b5bf9a",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (collectOwners@652)"
+    },
+    {
+      "fingerprint": "47ee22a69a69a6fc",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (enclosingOf)"
+    },
+    {
+      "fingerprint": "af4d6b1b35ccef58",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (enclosingOf@480)"
+    },
+    {
+      "fingerprint": "51aaf4a89313904a",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (enclosingOf@517)"
+    },
+    {
+      "fingerprint": "3f47f19e98e23951",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (enclosingOf@553)"
+    },
+    {
+      "fingerprint": "efda843a4a3d827e",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (enclosingOf@593)"
+    },
+    {
+      "fingerprint": "9bae028a30410ad0",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (enclosingOf@633)"
+    },
+    {
+      "fingerprint": "f4e72efed9e4e071",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (enclosingOf@673)"
+    },
+    {
+      "fingerprint": "e074d1f0635e7d09",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (entry)"
+    },
+    {
+      "fingerprint": "d76354dca5745a25",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (entry@526)"
+    },
+    {
+      "fingerprint": "272bd8c45f810284",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (entry@563)"
+    },
+    {
+      "fingerprint": "c71399851f09ea8f",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (entry@603)"
+    },
+    {
+      "fingerprint": "a0ccaae7023c7416",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (entry@644)"
+    },
+    {
+      "fingerprint": "1a0632a918197948",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (entry@684)"
+    },
+    {
+      "fingerprint": "4f9f323a0b5a7296",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (walkTree)"
+    },
+    {
+      "fingerprint": "8a469c8f605ad135",
+      "verdict": "false-positive",
+      "note": "LANG_DISPATCH dynamic dispatch (walkTree@437)"
+    }
+  ]
+}

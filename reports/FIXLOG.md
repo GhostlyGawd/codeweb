@@ -194,3 +194,48 @@ flipped TODOs; OPERATOR-ACTIONS.md §7 added for the branch-protection step).
 - **Gate cost is real:** ~90 s per edit/commit in this environment (suite 85–90 s). Accepted
   knowingly at the gate (ADR-0001); trimming the wiring is operator's-hand work if it drags.
 - **Operator, browser-only:** make `check` a required status check (`OPERATOR-ACTIONS.md` §7).
+
+## Session — 2026-07-27 · branch `claude/spring-cleaning-conductor-bkzct1` (restarted from main after PR #81 merged)
+
+Scope: the operator's close-out ruling ("Do all of those please finish up so we can close this
+task") — the three pending PRUNE §3 rulings, D1's 21-tool long tail, and D2's mcp-server split.
+Every edit ran the full gate (`sh scripts/check`) via the PostToolUse hook #80 installed; the
+suite ended 879 pass / 0 fail.
+
+### Build plan (dependency-ordered, as executed)
+
+W1 benchmarks.json mirror out → W2 agent-tools.md retired → W3 durable suppressions (+ the
+read-path bug it exposed) → W4 D1 long tail (all 27 tools) → W5 D2 split (queued after the
+manifest per DEBT §4).
+
+### Fixed — finding · commit · verified by
+
+| finding (report) | commit | verification |
+|---|---|---|
+| Write-only `site/data/benchmarks.json` mirror removed: file + `--site` plumbing + byte-identical assert (PRUNE §3, ruled dead) | `149704a` | zero-reader grep re-confirmed; bench-all B1 retitled; full gate |
+| `docs/agent-tools.md` retired + 3 refs swept — reference.md link, PROSE_FILES, SPEC.md clause (new since the audit) (PRUNE §3, ruled retired) | `224fb70` | full gate; README/reference anchors survive (they name the section heading, not the file) |
+| The 29 LANG_DISPATCH suppressions made durable — and the bug they exposed: `deadcode.mjs`'s default annotations dir was `<ws>/.codeweb/` (a second nesting no writer used), so default-path suppressions were NEVER applied (D8) | `154a5ae` | new ANN-E2E-ROUNDTRIP pin (write→read through the real CLIs); self-map reads **0 safe, 18 review, 29 suppressed** by default |
+| Workspace deliberate-memory trio tracked — run.mjs already writes a workspace `.gitignore` whitelisting `annotations.json` + `history.jsonl` + itself; root `.gitignore` becomes the `.codeweb/*` fallback and defers to it | `1984df6` | `git status` clean after a fresh self-map; nested negations override by git precedence |
+| D1 long tail: all 27 tools' interface data in `lib/tool-specs.mjs`; mcp-server keeps behavior only (TOOL_BEHAVIOR) and composes; `find.mjs`'s `--limit 10` dual literal reads `budgetOf()` (DEBT D1) | `2736fb0` | the F10 gate rule caught the mid-change restatement (21 problems) then went green — the rule working as designed; mcp/mcp-budget/mcp-inprocess suites unchanged |
+| D2: `mcp-server.mjs` 865→689 — `lib/mcp-queue.mjs` (I1–I7 machinery, moved whole, lifecycle parameterized) + `lib/mcp-graphs.mjs` (discovery/cache/staleness) (DEBT D2) | `06a6a58` | mcp-queue + mcp-scenarios pins unchanged; queueKeyFor test seam re-exported; dead imports swept |
+
+### Found while fixing (the receipts)
+
+- The suppression feature's read side had never worked by default — masked because the unit
+  tests exercised `lib/annotations.mjs` pure functions, never the two CLIs' default paths
+  agreeing. The e2e pin closes that class.
+- The "deliberate memory" design already existed in the product (`run.mjs`'s workspace
+  `.gitignore` comment: "commit annotations.json … and history.jsonl"); nothing had ever
+  actually committed it. Now this repo does.
+
+### Follow-ups
+
+- `reading-order.mjs`: CLI `--budget` default 40 vs MCP-injected 20 — deliberate CLI/MCP
+  asymmetry or drift? Operator call; the manifest can carry a cli-default field if ruled
+  deliberate.
+- Two bench-experiment safe-tier orphans remain under `--all` (`edit-safety.mjs:fail`,
+  `efficiency-pilot.regrade.mjs:meanBlock`) — inside kept receipts machinery (charter §9);
+  suppress or delete at the next bench touch.
+- `docs/reference.md`'s tool prose could now GENERATE from `tool-specs.mjs` + the behavior
+  descriptions — the fully-generated docs future D1 imagined.
+- `annotate.mjs:41` still carries the `join(cwd,'x')` anchor (from session 2's list) — one line.

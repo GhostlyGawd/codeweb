@@ -11,6 +11,7 @@
 import { die, emitJson, emitText, loadGraph, capList, checkStaleness, parseArgs } from './lib/cli.mjs';
 import { buildIndex } from './lib/graph-ops.mjs';
 import { findSymbols } from './lib/find-core.mjs';
+import { budgetOf } from './lib/tool-specs.mjs'; // D1: the default top-N is THE spec budget, not a second literal
 
 const USAGE = 'usage: find.mjs <graph.json> <query words...> [--limit 10] [--offset N] [--full] [--json]'; // F10: --full was real but hidden
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
@@ -18,7 +19,7 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
   flags: {
     json: { type: 'bool', default: false },
-    limit: { type: 'number', default: 10, min: 0 },  // F14c: a negative limit minted empty pages
+    limit: { type: 'number', default: budgetOf('codeweb_find'), min: 0 },  // F14c guard; value = the manifest budget (D1)
     offset: { type: 'number', default: 0, min: 0 },
     full: { type: 'bool', default: false }, // everything (capList treats a null limit as "no cap")
   },

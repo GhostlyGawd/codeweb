@@ -11,7 +11,7 @@
 // Exit: 0 (advisory), 2 usage/IO.
 
 import { readFileSync, existsSync } from 'node:fs';
-import { resolve, dirname, join } from 'node:path';
+import { dirname } from 'node:path';
 import { normalizeGraph, buildIndex, orphans, isTestFile, productScope, scopeNote } from './lib/graph-ops.mjs';
 import { fingerprint, loadAnnotations } from './lib/annotations.mjs'; // F7: false-positive suppression memory
 
@@ -91,7 +91,11 @@ for (const o of deadScope.kept) {                  // orphans = no call|import|i
 // symbol id changes the fingerprint changes and it is NOT silently hidden.
 for (const o of safe) o.fingerprint = fingerprint({ kind: 'orphan', nodes: [o.id] });
 for (const o of review) o.fingerprint = fingerprint({ kind: 'orphan', nodes: [o.id] });
-const dir = annDir || join(dirname(abs), '.codeweb');
+// D8 follow-through: annotations live BESIDE the graph — exactly where annotate.mjs writes them
+// (annDir = the workspace dir). The old default joined another '.codeweb' onto the workspace
+// (<ws>/.codeweb/annotations.json), a path no writer ever used, so default-path suppressions
+// were never applied; tests/annotations.test.mjs now pins the write->read roundtrip.
+const dir = annDir || dirname(abs);
 const killed = new Set(loadAnnotations(dir).suppressions.filter((s) => s.verdict === 'false-positive').map((s) => s.fingerprint));
 const suppressed = safe.filter((o) => killed.has(o.fingerprint));
 const visibleSafe = showSuppressed ? safe : safe.filter((o) => !killed.has(o.fingerprint));

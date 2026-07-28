@@ -1,8 +1,13 @@
 # Dependencies
 node_modules/
 
-# Orchestrator output workspace (per-target runs; regenerable via scripts/run.mjs)
-.codeweb/
+# Orchestrator output workspace (per-target runs; regenerable via scripts/run.mjs). The
+# workspace writes its OWN .gitignore whitelisting the deliberate memory — annotations.json
+# (F7 suppression judgement), history.jsonl (progression), and itself — and those deeper
+# negations override this rule by git precedence (operator-ruled tracked, 2026-07-27, so the
+# deadcode self-gate reads clean on a fresh clone). This dir-content ignore is the fallback for
+# half-written workspaces; a dir-ignore (`.codeweb/`) would block the nested re-includes.
+.codeweb/*
 
 # Default run.mjs workspace target (.live/<slug>): generated analysis artifacts only —
 # regenerable, never tracked. The hand-written dev tools that used to live here were graduated

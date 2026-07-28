@@ -18,11 +18,10 @@
 // protocol, and every trace write is try/catch-guarded (a client may close stderr — the #29 lesson).
 
 import { createInterface } from 'node:readline';
-import { spawn } from 'node:child_process';
-import { readFileSync, existsSync, statSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { normalizeGraph, buildIndex, resolveSymbol, suggestSymbols, findingBuckets, bucketsLine } from './lib/graph-ops.mjs';
+import { normalizeGraph, resolveSymbol, suggestSymbols, findingBuckets, bucketsLine } from './lib/graph-ops.mjs';
 import { readHistory } from './lib/history.mjs'; // RETENTION R1/R8: the brief's progression tail
 import { loadNarration } from './lib/narration.mjs'; // AI-IDEAS 3: agent-written notes, provenance-labeled
 import { diffGraphs } from './lib/diff-core.mjs'; // #33: the codeweb_diff comparison, served in-process
@@ -32,8 +31,10 @@ import { buildBrief } from './lib/brief-core.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's card assembler, in-process
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
 import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
-import { checkStaleness, sourceReader, editDistance, nearestWorkspace } from './lib/cli.mjs';
-import { QUERY_TOOL_SPECS } from './lib/tool-specs.mjs'; // D1: THE tool-interface manifest
+import { sourceReader, editDistance } from './lib/cli.mjs';
+import { TOOL_SPECS, QUERY_TOOL_SPECS } from './lib/tool-specs.mjs'; // D1: THE tool-interface manifest
+import { discoverGraph, discoverUnsupported, NO_GRAPH, cachedGraph, staleOnce } from './lib/mcp-graphs.mjs'; // D2: graph serving state
+import { createWorkspaceQueue, queueKeyFor, WRITER_TOOLS } from './lib/mcp-queue.mjs'; // D2: the I1-I7 queue
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const scriptOf = (f) => join(HERE, f);
@@ -84,62 +85,13 @@ function trace(ev, obj) {
   try { process.stderr.write(JSON.stringify({ ev, ...obj }) + '\n'); } catch { /* client closed stderr */ }
 }
 
-// ---- graph auto-discovery -------------------------------------------------------------------
-// Explicit arg > CODEWEB_WS workspace > nearest `.codeweb/graph.json` walking up from cwd
-// (nearestWorkspace — THE walk, lib/cli.mjs).
-function discoverGraph() {
-  if (process.env.CODEWEB_WS) {
-    const p = join(process.env.CODEWEB_WS, 'graph.json');
-    if (existsSync(p)) return p;
-  }
-  return nearestWorkspace(process.cwd())?.path || null;
-}
-const NO_GRAPH = 'no graph found — pass `graph`, or build one for this repo with the codeweb_map tool (or /codeweb). The graph lives at <target>/.codeweb/graph.json.';
-// RETENTION R11a: the unsupported-language marker codeweb_map leaves on a no-source failure —
-// checked wherever NO_GRAPH would fire, so repeat sessions get routed instead of re-walled.
-function discoverUnsupported() {
-  if (process.env.CODEWEB_WS) {
-    const p = join(process.env.CODEWEB_WS, 'unsupported.json');
-    if (existsSync(p)) return p;
-  }
-  return nearestWorkspace(process.cwd(), 'unsupported.json')?.path || null;
-}
 const atomicWriteJson = (p, obj) => writeFileSync(p, JSON.stringify(obj)); // marker-sized writes only
 
-// ---- persistent graph cache (in-process serving) ---------------------------------------------
-// The stdio server lives for the whole session, so structural queries answer from a PARSED,
-// INDEXED graph kept in memory — sub-ms after the first call instead of spawn+parse (~100ms)
-// every time. Keyed by (path, mtime, size): a rebuilt/refreshed graph reloads transparently.
-// The payloads come from the same lib/query-core.mjs the CLI ships — one truth, two transports.
-const graphCache = new Map(); // abs path -> { m, s, graph, index }
-function cachedGraph(absPath) {
-  const st = statSync(absPath);
-  const hit = graphCache.get(absPath);
-  if (hit && hit.m === st.mtimeMs && hit.s === st.size) return hit;
-  const graph = normalizeGraph(JSON.parse(readFileSync(absPath, 'utf8')));
-  const entry = { m: st.mtimeMs, s: st.size, graph, index: buildIndex(graph) };
-  graphCache.set(absPath, entry);
-  if (graphCache.size > 8) graphCache.delete(graphCache.keys().next().value); // a session touches few graphs
-  return entry;
-}
 // D1: the six query tools' interface lives in lib/tool-specs.mjs — one declaration, two
 // transports (query.mjs derives its mode flags from the same specs). Derived, never restated.
 const QUERY_KIND = Object.fromEntries(QUERY_TOOL_SPECS.map((s) => [s.name, s.kind]));
 // ACTIVATION A7: the tools whose answers are ABOUT structure — vacuous on a 0-symbol map.
 const STRUCTURAL_TOOLS = new Set([...Object.keys(QUERY_KIND), 'codeweb_find', 'codeweb_explain', 'codeweb_context']);
-
-// finding 23: ONE staleness verdict per request burst. autoRefresh stat-swept every meta.sources
-// entry and the payload's stale annotation swept them all AGAIN — 2 x 12-17ms at 5k files against
-// answers that take 3-13ms. Memoized per (path, graph identity) with a 1s TTL: one sweep per
-// burst, and a refreshed graph (new mtime/size) re-checks immediately.
-const staleCache = new Map(); // abs -> { atMs, m, s, verdict }
-function staleOnce(absPath, entry) {
-  const hit = staleCache.get(absPath);
-  if (hit && hit.m === entry.m && hit.s === entry.s && Date.now() - hit.atMs < 1000) return hit.verdict;
-  const verdict = checkStaleness(entry.graph);
-  staleCache.set(absPath, { atMs: Date.now(), m: entry.m, s: entry.s, verdict });
-  return verdict;
-}
 
 // ---- self-healing freshness -------------------------------------------------------------------
 // Structural queries answered from a stale map are the trap an agent can't see; annotating helped,
@@ -175,92 +127,79 @@ function autoRefresh(absGraph) {
 // ---- tool table ------------------------------------------------------------------------------
 // need: required args (validated). opt: optional args (schema only). budget: {arg, flag, value} —
 // when the caller passes neither that arg nor full:true, `flag value` is injected (default top-N).
-// argv(a): CLI argv AFTER the graph path. bin defaults to query.mjs. input(a): child stdin.
+// D1: that INTERFACE data lives in lib/tool-specs.mjs — one declaration, both transports. What
+// stays here is BEHAVIOR per tool: argv(a) (CLI argv AFTER the graph path), valid(a), input(a)
+// (child stdin), queueFrom(a), and the human description — each entry is a function of its spec,
+// so budget numbers in the prose template from budget.value and can never drift from the
+// injected default. bin resolves from the spec's script name; kind tools default to query.mjs.
 const QUERY = scriptOf('query.mjs');
-// Descriptions are MCP presentation, not interface — they stay here, but their budget numbers
-// come from the spec so the prose can't drift from the injected default (the old "top 20" copies
-// were a third restatement of budget.value).
-const QUERY_DESCRIPTION = {
-  codeweb_callers: (s) => `Direct callers (call-edge in-neighbors) of a symbol. Budgeted: top ${s.budget.value} by default (full:true for all).`,
-  codeweb_callees: (s) => `Direct callees (the functions a symbol calls). Budgeted: top ${s.budget.value} by default.`,
-  codeweb_impact: (s) => `Blast radius: every function transitively affected by changing a symbol, plus the domains touched. Call this BEFORE editing a symbol. Budgeted: summary + top ${s.budget.value} by fan-in (count is the true total; full:true for every id).`,
-  codeweb_cycles: (s) => `File-level dependency cycles (circular imports/calls). Budgeted: top ${s.budget.value} by default.`,
-  codeweb_orphans: (s) => `Uncalled and unexported symbols (dead-code candidates). Budgeted: top ${s.budget.value} by default; prefer codeweb_deadcode for a confidence-tiered plan.`,
-  codeweb_tests: () => 'The tests that exercise a symbol (test-edge in-neighbors). Run the right subset after editing a symbol.',
-};
-const TOOLS = [
-  // D1: these entries are GENERATED from lib/tool-specs.mjs — the manifest both transports read.
-  ...QUERY_TOOL_SPECS.map((s) => ({
-    name: s.name, need: s.need, opt: s.opt, budget: s.budget,
-    argv: (a) => [`--${s.kind}`, ...(s.need.includes('symbol') ? [a.symbol] : [])],
-    description: QUERY_DESCRIPTION[s.name](s),
-  })),
-  { name: 'codeweb_diff', need: ['before', 'after'], opt: [], bin: scriptOf('diff.mjs'), graphless: true, queueFrom: (a) => a.after,
-    argv: (a) => [a.before, a.after],
-    description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression. The CI gate\'s exact semantics (verdict.check: orphan-gate): a new cycle, a new confirmed duplication, or a NON-EXPORTED symbol newly losing every in-edge — exported ones are listed in verdict, flagged exempt. Call AFTER an edit to gate it.' },
-  { name: 'codeweb_explain', need: ['symbol'], opt: ['graph'], bin: scriptOf('explain.mjs'),
-    argv: (a) => [a.symbol],
-    description: '"Tell me about X before I touch it" in ONE ~1KB card: identity, role, signature, complexity, fan-in/out, tests, blast radius + domains, top-5 callers/callees, and any duplication/pattern findings it belongs to. Start here; drill down with impact/context/callers.' },
-  { name: 'codeweb_brief', need: [], opt: ['graph'], bin: scriptOf('brief.mjs'),
-    argv: () => [],
-    description: 'The day-one page for a mapped repo (~2KB): domains with summaries, the most depended-on symbols, entry points, test layout, and known issues (duplications/cycles/orphans). Call FIRST in a new session instead of exploring; then codeweb_find/explain to go deeper.' },
-  { name: 'codeweb_find', need: ['query'], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 },
-    bin: scriptOf('find.mjs'),
-    argv: (a) => [a.query],
-    description: 'Concept search when you do NOT know the symbol name: free text ("retry handling") -> ranked symbols (identifier/file/domain token match, stemmed, weighted by exports/role/fan-in). Deterministic, no embeddings. Start here when orienting; feed the top id to codeweb_explain.' },
+const TOOL_BEHAVIOR = {
+  codeweb_callers: (s) => ({ argv: (a) => ['--callers', a.symbol],
+    description: `Direct callers (call-edge in-neighbors) of a symbol. Budgeted: top ${s.budget.value} by default (full:true for all).` }),
+  codeweb_callees: (s) => ({ argv: (a) => ['--callees', a.symbol],
+    description: `Direct callees (the functions a symbol calls). Budgeted: top ${s.budget.value} by default.` }),
+  codeweb_impact: (s) => ({ argv: (a) => ['--impact', a.symbol],
+    description: `Blast radius: every function transitively affected by changing a symbol, plus the domains touched. Call this BEFORE editing a symbol. Budgeted: summary + top ${s.budget.value} by fan-in (count is the true total; full:true for every id).` }),
+  codeweb_cycles: (s) => ({ argv: () => ['--cycles'],
+    description: `File-level dependency cycles (circular imports/calls). Budgeted: top ${s.budget.value} by default.` }),
+  codeweb_orphans: (s) => ({ argv: () => ['--orphans'],
+    description: `Uncalled and unexported symbols (dead-code candidates). Budgeted: top ${s.budget.value} by default; prefer codeweb_deadcode for a confidence-tiered plan.` }),
+  codeweb_tests: () => ({ argv: (a) => ['--tests', a.symbol],
+    description: 'The tests that exercise a symbol (test-edge in-neighbors). Run the right subset after editing a symbol.' }),
+  codeweb_diff: () => ({ queueFrom: (a) => a.after, argv: (a) => [a.before, a.after],
+    description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression. The CI gate\'s exact semantics (verdict.check: orphan-gate): a new cycle, a new confirmed duplication, or a NON-EXPORTED symbol newly losing every in-edge — exported ones are listed in verdict, flagged exempt. Call AFTER an edit to gate it.' }),
+  codeweb_explain: () => ({ argv: (a) => [a.symbol],
+    description: '"Tell me about X before I touch it" in ONE ~1KB card: identity, role, signature, complexity, fan-in/out, tests, blast radius + domains, top-5 callers/callees, and any duplication/pattern findings it belongs to. Start here; drill down with impact/context/callers.' }),
+  codeweb_brief: () => ({ argv: () => [],
+    description: 'The day-one page for a mapped repo (~2KB): domains with summaries, the most depended-on symbols, entry points, test layout, and known issues (duplications/cycles/orphans). Call FIRST in a new session instead of exploring; then codeweb_find/explain to go deeper.' }),
+  codeweb_find: () => ({ argv: (a) => [a.query],
+    description: 'Concept search when you do NOT know the symbol name: free text ("retry handling") -> ranked symbols (identifier/file/domain token match, stemmed, weighted by exports/role/fan-in). Deterministic, no embeddings. Start here when orienting; feed the top id to codeweb_explain.' }),
   // API F5: `full` used to ALSO flip caller rendering to whole bodies (--full-bodies) — two
   // meanings on one switch, so "all callers as windows" was unaskable. `bodies` owns the rendering
   // now; `full` is only the unabridged-list switch, like everywhere else.
-  { name: 'codeweb_context', need: ['symbol'], opt: ['graph', 'limit', 'window', 'full', 'bodies'], budget: { arg: 'limit', flag: '--limit', value: 12 },
-    bin: scriptOf('context-pack.mjs'),
+  codeweb_context: (s) => ({
     valid: (a) => (a.bodies != null && a.bodies !== 'windows' && a.bodies !== 'full') ? `argument bodies must be "windows" or "full" (got ${JSON.stringify(a.bodies)})` : null,
     argv: (a) => [a.symbol, ...(a.bodies === 'full' ? ['--full-bodies'] : []), ...(a.window != null ? ['--window', String(a.window)] : [])],
-    description: 'Bounded edit window for a symbol in ONE call: its body, direct callers as CALL-SITE WINDOWS (±3 lines around each use — the lines that break if the contract changes), callees (location-only), and the impact set. Budgeted: 12 callers by default (full:true for the unabridged lists); bodies:"full" switches callers to whole caller bodies (large).' },
-  { name: 'codeweb_refresh', need: [], opt: ['graph'], bin: scriptOf('refresh.mjs'), argv: () => [],
-    description: 'Re-extract the graph from disk (meta.root) so mid-task queries reflect your edits, not a stale snapshot. Incremental; preserves domains, drops stale overlaps. Call AFTER you edit source and BEFORE re-querying impact/callers/context.' },
-  { name: 'codeweb_find_similar', need: [], opt: ['graph', 'signature', 'body', 'structural'], bin: scriptOf('find-similar.mjs'),
+    description: `Bounded edit window for a symbol in ONE call: its body, direct callers as CALL-SITE WINDOWS (±3 lines around each use — the lines that break if the contract changes), callees (location-only), and the impact set. Budgeted: ${s.budget.value} callers by default (full:true for the unabridged lists); bodies:"full" switches callers to whole caller bodies (large).` }),
+  codeweb_refresh: () => ({ argv: () => [],
+    description: 'Re-extract the graph from disk (meta.root) so mid-task queries reflect your edits, not a stale snapshot. Incremental; preserves domains, drops stale overlaps. Call AFTER you edit source and BEFORE re-querying impact/callers/context.' }),
+  codeweb_find_similar: () => ({
     valid: (a) => (a.signature || a.body) ? null : 'pass `signature` (a candidate signature) or `body` (a code snippet)',
     argv: (a) => a.body ? ['--stdin', ...(a.structural ? ['--structural'] : [])] : ['--signature', a.signature, ...(a.structural ? ['--structural'] : [])],
     input: (a) => a.body || undefined,
-    description: 'Before writing a function, ask "does something already do this?": ranks existing bodies by similarity to a candidate `signature` or `body` snippet. structural:true matches identifier-renamed (Type-2) clones. Call to AVOID re-implementing existing logic.' },
-  { name: 'codeweb_placement', need: ['calls'], opt: ['graph'], bin: scriptOf('placement.mjs'),
-    argv: (a) => ['--calls', a.calls],
-    description: 'Where a NEW symbol belongs: given the comma-separated ids/labels it will call, suggests the domain + file by callee gravity, and warns if it duplicates an existing symbol.' },
+    description: 'Before writing a function, ask "does something already do this?": ranks existing bodies by similarity to a candidate `signature` or `body` snippet. structural:true matches identifier-renamed (Type-2) clones. Call to AVOID re-implementing existing logic.' }),
+  codeweb_placement: () => ({ argv: (a) => ['--calls', a.calls],
+    description: 'Where a NEW symbol belongs: given the comma-separated ids/labels it will call, suggests the domain + file by callee gravity, and warns if it duplicates an existing symbol.' }),
   // FORMS F11: limit/full were advertised here but wired to nothing (no budget entry, no CLI
   // flags) — a schema that lies teaches agents to distrust tools/list.
-  { name: 'codeweb_review', need: ['changed'], opt: ['graph', 'before', 'gate'], bin: scriptOf('review.mjs'),
-    argv: (a) => ['--changed', a.changed, ...(a.before ? ['--before', a.before] : []), ...(a.gate ? ['--gate'] : [])],
-    description: 'Structural review of a change: changed files (comma-separated, optionally file:start-end) -> changed symbols, blast radius, domains, fan-in-ranked review order. With gate:true it FAILS on new body-confirmed duplication even WITHOUT `before`; add `before` (a prior graph.json) to also fail on new cycles / lost call-callers — the full review gate, agent-reachable.' },
+  codeweb_review: () => ({ argv: (a) => ['--changed', a.changed, ...(a.before ? ['--before', a.before] : []), ...(a.gate ? ['--gate'] : [])],
+    description: 'Structural review of a change: changed files (comma-separated, optionally file:start-end) -> changed symbols, blast radius, domains, fan-in-ranked review order. With gate:true it FAILS on new body-confirmed duplication even WITHOUT `before`; add `before` (a prior graph.json) to also fail on new cycles / lost call-callers — the full review gate, agent-reachable.' }),
   // FORMS F12: `rules` demoted to optional — the CLI already discovers codeweb.rules.json beside
   // the graph or in cwd; requiring it here made the same call fail one transport over.
-  { name: 'codeweb_fitness', need: [], opt: ['graph', 'rules'], bin: scriptOf('fitness.mjs'),
-    argv: (a) => (a.rules ? ['--rules', a.rules] : []),
-    description: 'Check the graph against architectural fitness rules (codeweb.rules.json): forbidden-dependency, layering, no-cycles, max-fan-in, max-symbol-loc. Reports violations. `rules` is optional — defaults to codeweb.rules.json beside the graph or in cwd.' },
+  codeweb_fitness: () => ({ argv: (a) => (a.rules ? ['--rules', a.rules] : []),
+    description: 'Check the graph against architectural fitness rules (codeweb.rules.json): forbidden-dependency, layering, no-cycles, max-fan-in, max-symbol-loc. Reports violations. `rules` is optional — defaults to codeweb.rules.json beside the graph or in cwd.' }),
   // API F3: risk/break_cycles/hotspots advertised a remainder no offset could fetch — `offset`
   // was silently dropped (the handler forwards it only when the opt list carries it), so a paging
   // agent looped on page 0 forever. offset is now end-to-end (opt list here, --offset in the CLI).
-  { name: 'codeweb_risk', need: [], opt: ['graph', 'changed', 'limit', 'offset', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('risk.mjs'),
-    argv: (a) => [...(a.changed ? ['--changed', a.changed] : []), ...(a.all ? ['--all'] : [])],
-    description: 'Rank symbols by change-risk (fan-in, fan-out, loc, blast radius, churn); `changed` scopes to a comma-separated file list. Budgeted: top 15 by default.' },
-  { name: 'codeweb_break_cycles', need: [], opt: ['graph', 'limit', 'offset', 'full'], budget: { arg: 'limit', flag: '--limit', value: 10 }, bin: scriptOf('break-cycles.mjs'), argv: () => [],
-    description: 'For each file dependency cycle, the cheapest dependency edge to sever — verified to actually break the cycle. Budgeted: top 10 cycles by default.' },
-  { name: 'codeweb_deadcode', need: [], opt: ['graph', 'limit', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 20 }, bin: scriptOf('deadcode.mjs'), argv: (a) => (a.all ? ['--all'] : []),
-    description: 'Confidence-tiered dead-code: safe-to-delete vs review-first (test-guarded or entrypoint-like), each with its loc span. Budgeted: top 20 per tier by span (totals stay true; full:true for everything).' },
+  codeweb_risk: (s) => ({ argv: (a) => [...(a.changed ? ['--changed', a.changed] : []), ...(a.all ? ['--all'] : [])],
+    description: `Rank symbols by change-risk (fan-in, fan-out, loc, blast radius, churn); \`changed\` scopes to a comma-separated file list. Budgeted: top ${s.budget.value} by default.` }),
+  codeweb_break_cycles: (s) => ({ argv: () => [],
+    description: `For each file dependency cycle, the cheapest dependency edge to sever — verified to actually break the cycle. Budgeted: top ${s.budget.value} cycles by default.` }),
+  codeweb_deadcode: (s) => ({ argv: (a) => (a.all ? ['--all'] : []),
+    description: `Confidence-tiered dead-code: safe-to-delete vs review-first (test-guarded or entrypoint-like), each with its loc span. Budgeted: top ${s.budget.value} per tier by span (totals stay true; full:true for everything).` }),
   // FORMS F12: `into` demoted to optional — the CLI picks the canonical survivor itself when
   // --into is omitted; a required field the engine can infer is form friction.
-  { name: 'codeweb_codemod', need: ['merge'], opt: ['graph', 'into'], bin: scriptOf('codemod.mjs'),
-    argv: (a) => ['--merge', a.merge, ...(a.into ? ['--into', a.into] : [])],
-    description: 'Plan a consolidation merge (report-only): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, and the projected regression-gate verdict. `into` is optional — omitted, the engine picks the canonical survivor. Read-only — does NOT modify source.' },
-  { name: 'codeweb_hotspots', need: [], opt: ['graph', 'limit', 'offset', 'full', 'all'], budget: { arg: 'limit', flag: '--limit', value: 15 }, bin: scriptOf('hotspots.mjs'), argv: (a) => (a.all ? ['--all'] : []),
-    description: 'Rank symbols by refactoring priority (complexity x fan-in x churn): where to focus first. Budgeted: top 15 with raw components.' },
-  { name: 'codeweb_campaign', need: [], opt: ['graph', 'budget', 'full', 'all'], budget: { arg: 'budget', flag: '--budget', value: 25 }, bin: scriptOf('campaign.mjs'), argv: (a) => (a.all ? ['--all'] : []),
-    description: 'One ordered, gated optimization worklist (dead-code deletes + verified cycle cuts + duplicate merges), pre-flighted so applying in order never introduces a cycle. Budgeted: top 25 ROI steps by default (`budget` N or full:true for the whole plan).' },
-  { name: 'codeweb_reading_order', need: [], opt: ['graph', 'scope', 'value', 'budget'], bin: scriptOf('reading-order.mjs'),
-    budget: { arg: 'budget', flag: '--budget', value: 20 },
-    // API F4: `scope` without `value` used to be silently DROPPED by argv() — the tool answered
-    // the whole-repo question instead of the scoped one (the exact trap the CLI's --scope
-    // enumeration hardened against, FORMS F8, resurrected one transport over). The messages speak
-    // MCP param names, never CLI flags (API F6).
+  codeweb_codemod: () => ({ argv: (a) => ['--merge', a.merge, ...(a.into ? ['--into', a.into] : [])],
+    description: 'Plan a consolidation merge (report-only): canonical survivor, exact deletions + caller rewrites, LOC reclaimed, and the projected regression-gate verdict. `into` is optional — omitted, the engine picks the canonical survivor. Read-only — does NOT modify source.' }),
+  codeweb_hotspots: (s) => ({ argv: (a) => (a.all ? ['--all'] : []),
+    description: `Rank symbols by refactoring priority (complexity x fan-in x churn): where to focus first. Budgeted: top ${s.budget.value} with raw components.` }),
+  codeweb_campaign: (s) => ({ argv: (a) => (a.all ? ['--all'] : []),
+    description: `One ordered, gated optimization worklist (dead-code deletes + verified cycle cuts + duplicate merges), pre-flighted so applying in order never introduces a cycle. Budgeted: top ${s.budget.value} ROI steps by default (\`budget\` N or full:true for the whole plan).` }),
+  // API F4: `scope` without `value` used to be silently DROPPED by argv() — the tool answered
+  // the whole-repo question instead of the scoped one (the exact trap the CLI's --scope
+  // enumeration hardened against, FORMS F8, resurrected one transport over). The messages speak
+  // MCP param names, never CLI flags (API F6).
+  codeweb_reading_order: (s) => ({
     valid: (a) => {
       if (a.scope != null && !['domain', 'file', 'symbol'].includes(a.scope)) return `unknown scope kind ${JSON.stringify(a.scope)} — valid: domain | file | symbol`;
       if (a.scope != null && a.value == null) return 'scope needs `value` (the domain name, file path, or symbol) — without it the answer would cover the whole repo';
@@ -268,8 +207,8 @@ const TOOLS = [
       return null;
     },
     argv: (a) => (a.scope && a.value ? ['--scope', a.scope, a.value] : []),
-    description: 'A foundations-first reading path (depended-upon leaves before orchestrators) to understand a codebase or one scope fast. scope: domain|file|symbol + value narrows it; budget bounds the list (default 20).' },
-  { name: 'codeweb_simulate', need: [], opt: ['graph', 'delete', 'merge', 'into', 'move', 'to'], bin: scriptOf('simulate-edit.mjs'),
+    description: `A foundations-first reading path (depended-upon leaves before orchestrators) to understand a codebase or one scope fast. scope: domain|file|symbol + value narrows it; budget bounds the list (default ${s.budget.value}).` }),
+  codeweb_simulate: () => ({
     valid: (a) => {
       const modes = ['delete', 'merge', 'move'].filter((k) => a[k]);
       if (modes.length !== 1) return 'pass exactly one of `delete` (symbol), `merge` (id1,id2,…), or `move` (symbol, with `to`: target file)';
@@ -277,16 +216,21 @@ const TOOLS = [
       return null;
     },
     argv: (a) => a.delete ? ['--delete', a.delete] : a.merge ? ['--merge', a.merge, ...(a.into ? ['--into', a.into] : [])] : ['--move', a.move, '--to', a.to],
-    description: 'PRE-FLIGHT an edit without performing it: {newCycles, lostCallers, ok} for a hypothetical delete / merge / move. STRICTER than the CI gate (verdict.check: call-caller-preflight): flags ANY surviving symbol losing its last call-caller, exported or not, and cannot see duplication. Call BEFORE committing to a refactor plan — a doomed edit is discarded for the cost of one call.' },
-  { name: 'codeweb_annotate', need: [], opt: ['graph', 'suppress', 'note', 'list'], bin: scriptOf('annotate.mjs'), dirFromGraph: true,
+    description: 'PRE-FLIGHT an edit without performing it: {newCycles, lostCallers, ok} for a hypothetical delete / merge / move. STRICTER than the CI gate (verdict.check: call-caller-preflight): flags ANY surviving symbol losing its last call-caller, exported or not, and cannot see duplication. Call BEFORE committing to a refactor plan — a doomed edit is discarded for the cost of one call.' }),
+  codeweb_annotate: () => ({
     valid: (a) => (a.suppress || a.list) ? null : 'pass `suppress` (a finding fingerprint, from codeweb_deadcode/overlap output) or list:true',
     argv: (a) => a.list ? ['--list'] : ['--suppress', a.suppress, ...(a.note ? ['--note', a.note] : [])],
-    description: 'Record a FALSE-POSITIVE suppression for a finding (never touches source — writes .codeweb/annotations.json): after you verify a deadcode/duplication finding is wrong, suppress its fingerprint so it stops resurfacing; the finding count reports suppressed separately. list:true shows current suppressions.' },
-  { name: 'codeweb_stats', need: [], opt: ['graph'], bin: scriptOf('stats.mjs'), argv: () => [],
-    description: 'The local value receipt: what codeweb actually did in this workspace (pre-edit cards, regressions flagged before landing, queries served), month by month plus lifetime. Local-only counters; nothing leaves the machine.' },
-  { name: 'codeweb_map', need: [], opt: ['target', 'out'], graphless: true, map: true,
-    description: 'Build (or rebuild) the codeweb graph for a repo: runs the deterministic pipeline (extract -> cluster -> overlap -> optimize -> report) into <target>/.codeweb. ~3s for a 3k-symbol repo. Call when a query reports "no graph found", or after large changes. Returns the graph path + stats; artifacts include report.html and graph.json.' },
-];
+    description: 'Record a FALSE-POSITIVE suppression for a finding (never touches source — writes .codeweb/annotations.json): after you verify a deadcode/duplication finding is wrong, suppress its fingerprint so it stops resurfacing; the finding count reports suppressed separately. list:true shows current suppressions.' }),
+  codeweb_stats: () => ({ argv: () => [],
+    description: 'The local value receipt: what codeweb actually did in this workspace (pre-edit cards, regressions flagged before landing, queries served), month by month plus lifetime. Local-only counters; nothing leaves the machine.' }),
+  codeweb_map: () => ({
+    description: 'Build (or rebuild) the codeweb graph for a repo: runs the deterministic pipeline (extract -> cluster -> overlap -> optimize -> report) into <target>/.codeweb. ~3s for a 3k-symbol repo. Call when a query reports "no graph found", or after large changes. Returns the graph path + stats; artifacts include report.html and graph.json.' }),
+};
+const TOOLS = TOOL_SPECS.map((s) => ({
+  ...s,
+  bin: s.bin ? scriptOf(s.bin) : undefined,
+  ...TOOL_BEHAVIOR[s.name](s),
+}));
 
 const PROP = {
   graph: { type: 'string', description: 'Path to graph.json. OPTIONAL — defaults to CODEWEB_WS or the nearest .codeweb/graph.json above cwd' },
@@ -339,139 +283,11 @@ const MAP_STAGES = ['extract', 'cluster', 'overlap', 'optimize', 'report'];
 let pendingAsync = 0;
 let stdinClosed = false;
 const asyncDone = () => { pendingAsync--; if (stdinClosed && pendingAsync <= 0) process.exit(0); };
-// ---- per-workspace queue (#30/#31/#32) -------------------------------------------------------
-// spawnQueues was keyed by the graph FILE path, so refresh (keyed by its graph) and diff (keyed by
-// the shared '(graphless)' slot) never collided — the ordering the old comment promised did not
-// hold. State is now per-WORKSPACE-DIRECTORY: every graph tool, map, and keyed-graphless tool (diff)
-// normalizes to the dir that holds graph.json / the map out dir, so operations on ONE workspace order
-// correctly and different workspaces run concurrently. Draining rules = invariants I1–I7 (WS-F spec):
-//  I1 writers on one workspace never overlap, FIFO (chain on writerTail);
-//  I2 a reader never starts before an earlier-QUEUED writer (awaits the writerTail snapshot at enqueue);
-//  I3 a writer also waits for every reader ENQUEUED BEFORE it (join of writerTail + a readersInFlight
-//     snapshot) — the CONSERVATIVE rule: a spawned reader makes MULTIPLE workspace reads (graph.json
-//     then a sidecar), and a writer landing mid-read hands it a torn old/new state today's full
-//     serialization makes impossible; preserving that linearization is the contract;
-//  I4 readers run concurrently under a GLOBAL cap of READER_CAP children (FIFO waiters); a reader
-//     acquires its slot only AFTER its I2 writerTail wait resolves and holds it only while its child
-//     runs, so a reader blocked on a writer holds no slot (no cross-workspace starvation/deadlock);
-//  I5 every job settles exactly once and always releases slot + writersPending + inflight + asyncDone;
-//  I7 writersPending increments synchronously at enqueue so autoRefresh's same-drain skip is race-free.
-// #32's win is reader-reader overlap (two advisors ≈ max, not sum); the aggressive 'writers skip
-// readers' variant was reviewed and REJECTED (torn multi-artifact reads) — do not reintroduce it
-// without per-result graph-stamp labeling. READER_CAP=1 restores full serialization (the rollback lever).
-const workspaces = new Map(); // wsKey -> { writerTail: Promise, writersPending: int, readersInFlight: Set<Promise> }
-function wsOf(key) {
-  let w = workspaces.get(key);
-  if (!w) { w = { writerTail: Promise.resolve(), writersPending: 0, readersInFlight: new Set() }; workspaces.set(key, w); }
-  return w;
-}
-// I4: a global reader concurrency cap with a FIFO waiter queue. A released slot is handed DIRECTLY to
-// the next waiter (count unchanged) so ordering is preserved; only an unclaimed release grows the count.
-const READER_CAP = 3;
-let readerSlots = READER_CAP;
-const readerWaiters = [];
-const acquireReaderSlot = () => (readerSlots > 0 ? (readerSlots--, Promise.resolve()) : new Promise((res) => readerWaiters.push(res)));
-const releaseReaderSlot = () => { const next = readerWaiters.shift(); if (next) next(); else readerSlots++; };
-// writers = the tools that MUTATE a workspace (graph consumers must re-read after them) + the
-// internal autoRefresh + map; every other spawned tool and fast-path fallback spawn is a reader.
-const WRITER_TOOLS = new Set(['codeweb_refresh', 'codeweb_annotate', 'codeweb_map']);
-const inflight = new Map(); // request id -> { kill, cancelled } (#34: id→child; runChild owns it)
-
-// THE queue key: graph tools -> dir of graph.json; map -> resolve(out); keyed-graphless (diff) ->
-// dir of queueFrom(args). All normalize to one workspace-dir identity (T-30.1). '(graphless)' is a
-// defensive fallback, unreachable today (only diff+map are graphless; diff has queueFrom, map is
-// keyed by out above) — a unit pins that.
-function queueKeyFor(tool, args, graphPath) {
-  if (tool.map) return resolve(args.out || join(resolve(args.target || process.cwd()), '.codeweb'));
-  if (tool.graphless) {
-    const from = tool.queueFrom && tool.queueFrom(args);
-    return from ? dirname(resolve(from)) : '(graphless)';
-  }
-  return dirname(resolve(graphPath));
-}
-
-// THE one child wrapper (T-31.1): owns spawn/timeout/settle-once/trace/inflight for map, autoRefresh
-// AND every spawned tool — so the settle-once guard, the #34 cancel hook, and the trace hook plug in
-// ONCE. handleMap had no settle-once flag (I5: a spawn failure there double-replied + double-
-// decremented pendingAsync); routing it here fixes that. Guards the error+close DOUBLE-fire (Node:
-// 'close' may or may not follow 'error') with `settled`. onSettle shapes the reply and is NEVER
-// called on a cancel (a cancelled request gets no response, MCP). Resolves (never rejects) on settle.
-function runChild(id, entry, spec, releaseAll) {
-  return new Promise((resolve_) => {
-    const key = spec.key, tool = spec.tool;
-    if (entry && entry.cancelled) { // cancelled while still queued — never spawn (I5)
-      trace('kill', { id, tool, ws: key, pid: null, reason: 'cancel' });
-      releaseAll(); return resolve_();
-    }
-    let settled = false, timedOut = false, child = null, timer = null, out = '', errBuf = '';
-    const finish = (code) => {
-      if (settled) return; settled = true;
-      if (timer) clearTimeout(timer);
-      const pid = child ? child.pid : null;
-      if (entry && entry.cancelled) trace('kill', { id, tool, ws: key, pid, reason: 'cancel' });
-      else if (timedOut) trace('kill', { id, tool, ws: key, pid, reason: 'timeout' });
-      else trace('end', { id, tool, ws: key, pid });
-      if (!(entry && entry.cancelled)) spec.onSettle({ code, out, errBuf, timedOut }); // cancel suppresses the reply (I5)
-      releaseAll(); resolve_();
-    };
-    try { child = spawn(process.execPath, [spec.bin, ...spec.argv], { stdio: spec.stdio }); }
-    catch (e) { errBuf = (e && e.message) || 'spawn failed'; return finish(null); }
-    if (entry) entry.kill = () => { try { child.kill('SIGKILL'); } catch { /* raced exit */ } };
-    trace('start', { id, tool, ws: key, pid: child.pid });
-    timer = setTimeout(() => { timedOut = true; try { child.kill('SIGKILL'); } catch { /* raced exit */ } }, spec.timeoutMs);
-    if (child.stdout) child.stdout.on('data', (d) => { out += d; });
-    if (child.stderr) child.stderr.on('data', (d) => { errBuf += d; if (errBuf.length > 65536) errBuf = errBuf.slice(-32768); if (spec.onStderr) spec.onStderr(String(d)); });
-    if (spec.input != null && child.stdin) {
-      // #29: guard the stdin flush (async EPIPE + sync ERR_STREAM_DESTROYED + null stdin).
-      try { child.stdin.on('error', () => {}); child.stdin.end(spec.input); }
-      catch { /* destroyed/absent — the close/error path settles */ }
-    }
-    child.on('error', () => finish(null)); // double-fire guarded by `settled`
-    child.on('close', (code) => finish(code));
-  });
-}
-
-// Enqueue a child on its workspace. writersPending increments SYNCHRONOUSLY here (I7), before any
-// await. WRITERS chain on the join of writerTail + an enqueue-time readersInFlight snapshot (I1 FIFO
-// + I3 conservative) and skip the slot gate. READERS capture writerTail at enqueue (I2), await it,
-// THEN acquire one global reader slot (I4) held only while the child runs; a reader is registered in
-// readersInFlight from enqueue until settle so a later writer (I3) waits for it. releaseAll runs
-// exactly once on every settle path (I5): releases the slot, deletes inflight, decrements
-// writersPending / removes from readersInFlight, calls asyncDone().
-function enqueueChild(id, spec) {
-  const w = wsOf(spec.key);
-  const entry = (id != null) ? { kill: () => {}, cancelled: false } : null;
-  if (entry) inflight.set(id, entry);
-  pendingAsync++;
-
-  if (spec.kind === 'writer') {
-    w.writersPending++; // I7: before any await
-    const readerSnapshot = [...w.readersInFlight]; // I3: readers enqueued before this writer
-    let released = false;
-    const releaseAll = () => { if (released) return; released = true; if (entry) inflight.delete(id); w.writersPending--; asyncDone(); };
-    const job = Promise.allSettled([w.writerTail, ...readerSnapshot]).then(() => runChild(id, entry, spec, releaseAll));
-    w.writerTail = job; // I1: the next writer chains after this one
-    return job;
-  }
-
-  // reader
-  let released = false, slotHeld = false, job;
-  const releaseAll = () => {
-    if (released) return; released = true;
-    if (slotHeld) { releaseReaderSlot(); slotHeld = false; }
-    if (entry) inflight.delete(id);
-    w.readersInFlight.delete(job);
-    asyncDone();
-  };
-  const tail = w.writerTail; // I2: snapshot the writer tail at enqueue
-  job = tail.then(async () => {
-    if (entry && entry.cancelled) return; // cancelled while queued behind a writer: acquire no slot
-    await acquireReaderSlot();            // I4: only AFTER the I2 wait — a blocked reader holds no slot
-    slotHeld = true;
-  }).then(() => runChild(id, entry, spec, releaseAll));
-  w.readersInFlight.add(job);
-  return job;
-}
+// ---- per-workspace queue (#30/#31/#32) — lib/mcp-queue.mjs owns the I1-I7 machinery; the
+// server wires its lifecycle in: begin() counts pending async work, end() drains toward the
+// stdin-close exit. queueKeyFor/WRITER_TOOLS ride the same module (queueKeyFor re-exported
+// below for the unit pins).
+const { enqueueChild, wsOf, inflight } = createWorkspaceQueue({ trace, begin: () => { pendingAsync++; }, end: asyncDone });
 
 // ---- codeweb_map -----------------------------------------------------------------------------
 function handleMap(id, args, meta) {
