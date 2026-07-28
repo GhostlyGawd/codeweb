@@ -1,10 +1,12 @@
 # codeweb engine — regression suite
 
-Characterization tests that lock in the hard-won invariants of the deterministic engine
-(`scripts/extract-symbols.mjs` → `cluster3.mjs` → `overlap.mjs` → `build-report.mjs`, wrapped by
-`run.mjs`). The engine scripts are monolithic run-on-import CLIs, so each suite runs the **real
-shipped artifact** as a child process against a crafted fixture and asserts on its output — no
-mocks, no engine refactor. What ships is exactly what's tested.
+These characterization tests protect the deterministic engine invariants. `run.mjs` wraps
+`scripts/extract-symbols.mjs` → `cluster3.mjs` → `overlap.mjs` →
+`build-report.mjs`.
+
+The engine scripts are monolithic run-on-import CLIs. Each suite runs the **shipped artifact** as
+a child process against a controlled fixture and checks its output. The engine tests do not use
+mocks or a separate test implementation.
 
 ## Run
 

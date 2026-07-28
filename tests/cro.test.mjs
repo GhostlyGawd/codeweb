@@ -34,8 +34,8 @@ test('C4: the install chooser is labeled by situation, and the npx form is the c
   assert.match(readme, /Cursor, Windsurf/, 'the MCP path routes the non-Claude agent user');
   assert.match(readme, /npx -y @ghostlygawd\/codeweb \./, 'the short from-your-project-dir form is the displayed one');
   const start = read('site/content/start.html');
-  assert.match(start, /Using Claude Code\?/);
-  assert.match(start, /Not sure\?/, 'one routing line for the undecided');
+  assert.match(start, /Claude Code plugin/);
+  assert.match(start, /temporary evaluation/, 'the temporary path is explicit');
 });
 
 test('C5: the one hard requirement (Node >= 22) is stated at the README install decision', () => {

@@ -125,7 +125,7 @@ export function syncTargets(version, count) {
     },
     {
       file: 'skills/codebase-anatomy/SKILL.md',
-      subs: [[/(^version:\s*).+$/m, `$1${version}`]],
+      subs: [[/(^  version:\s*).+$/m, `$1${version}`]],
     },
     {
       // DOCS/COMPREHENSION: marketplace.json said 1.0.0 while every other surface said the real
@@ -210,7 +210,7 @@ export function checkConsistency(root) {
   }
 
   const skill = readText(join(root, 'skills', 'codebase-anatomy', 'SKILL.md'));
-  const skillVer = (skill.match(/^version:\s*(.+)$/m) || [])[1];
+  const skillVer = (skill.match(/^  version:\s*(.+)$/m) || [])[1];
   if (skillVer && skillVer.trim() !== version) problems.push(`SKILL.md version ${skillVer.trim()} != ${version}`);
 
   const pc = productToolCount(root);

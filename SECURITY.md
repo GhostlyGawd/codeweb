@@ -1,24 +1,35 @@
 # Security
 
-codeweb is a local, read-only code-analysis tool. The security posture, in full:
+codeweb is a local, read-only code-analysis tool.
 
-**What it reads:** source files under the target you point it at, plus its own workspace
-(`<target>/.codeweb/`). Optional configs it honors: `codeweb.rules.json`, an lcov file you pass
-explicitly.
+## Data access
 
-**What it writes:** only the workspace — `graph.json`, `report.html`, findings markdown, caches,
-and sidecars, all under `.codeweb/`. It never modifies your source (`codemod --write` is an
-explicit, separate CLI opt-in and is deliberately not exposed over MCP).
+codeweb reads source files under the selected target and files in `<target>/.codeweb/`. codeweb
+also reads `codeweb.rules.json` and an lcov file when you supply them.
 
-**What it never does:** execute target code · make network calls · send telemetry (the local
-outcome ledger in `.codeweb/stats.json` is documented in-file as strictly local and never
-transmitted — set `CODEWEB_NO_STATS=1` to disable even that) · require dependencies (it runs on
-an empty `node_modules`; one *optional* wasm grammar sharpens extraction).
+codeweb writes `graph.json`, `report.html`, findings Markdown, caches, and sidecars under
+`<target>/.codeweb/`. codeweb does not modify source files. `codemod --write` is a separate,
+explicit CLI option and is not available through MCP.
 
-**Supply chain:** releases are published from CI with **npm provenance attestation** (SLSA) —
-verify any install with `npm audit signatures`. The vendored tree-sitter grammars are pinned with
-provenance notes in `scripts/grammars/PROVENANCE.md`.
+codeweb does not:
 
-**Reporting:** open a GitHub issue for non-sensitive reports, or email the maintainer
-(address in `package.json`) for anything you'd rather not post publicly. No bounty program;
-reports are triaged with priority.
+- execute target code
+- make network requests
+- send telemetry
+- require dependencies
+
+The local activity ledger remains in `.codeweb/stats.json` and is never transmitted. Set
+`CODEWEB_NO_STATS=1` to disable the ledger. codeweb runs with an empty `node_modules` directory.
+The optional wasm grammar improves extraction.
+
+## Supply chain
+
+CI publishes releases with **npm provenance attestation** (SLSA). Run `npm audit signatures` to
+verify an installation. The repository pins each vendored tree-sitter grammar and records its
+provenance in `scripts/grammars/PROVENANCE.md`.
+
+## Report a security issue
+
+Open a GitHub issue for a non-sensitive report. For sensitive information, use the maintainer
+email address in `package.json`. The project does not have a bounty program. The maintainer gives
+security reports priority.

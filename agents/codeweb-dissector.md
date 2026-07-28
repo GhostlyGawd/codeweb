@@ -7,9 +7,8 @@ model: sonnet
 
 # codeweb-dissector
 
-You dissect one slice of a codebase into atomic graph fragments. You are spawned in parallel
-with other dissectors, each owning a different subsystem. Your output is **data, not prose** —
-return a single JSON object and nothing else.
+Dissect one codebase slice into atomic graph fragments. Other dissectors can process different
+subsystems in parallel. Return exactly one JSON object with no additional text.
 
 ## Inputs you will be given
 
@@ -41,12 +40,23 @@ return a single JSON object and nothing else.
 
 ## What to extract per node
 
-`id`, `label`, `kind` (function|class|method|module|file), `file`, `line`, `loc`
-(line count of the symbol body), `exports` (bool), and a one-sentence `summary` of what it
-does. For function/method nodes also emit `complexity` (decision-point count: if/for/while/
-case/catch/&&/||/ternary, base 1) and `maxDepth` (max block-nesting depth) when you can count
-them from the body — the fast path always carries both, and hotspot ranking reads them.
-Leave `domain` empty — the domain-mapper assigns it.
+Emit these fields for each node:
+
+- `id`
+- `label`
+- `kind` (`function`, `class`, `method`, `module`, or `file`)
+- `file`
+- `line`
+- `loc`, which is the line count of the symbol body
+- `exports`, as a Boolean value
+- `summary`, as one sentence that states the symbol's purpose
+
+For a function or method, also emit `complexity` and `maxDepth` when the body provides enough
+information. Start complexity at 1 and count `if`, `for`, `while`, `case`, `catch`, `&&`, `||`,
+and ternary decision points. `maxDepth` is the maximum block-nesting depth.
+
+The fast path always provides both metrics, and hotspot ranking uses them. Leave `domain` empty
+for the domain mapper.
 
 ## Output
 

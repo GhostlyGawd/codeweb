@@ -3,9 +3,9 @@
 **Measured at axios v1.18.1 (`a209bfb1`), 2026-07.** axios moves; at HEAD your counts will differ —
 the pinned command below reproduces these numbers exactly.
 
-We pointed codeweb at [**axios**](https://github.com/axios/axios) — the HTTP client downloaded
-~50M times a week — read-only, no setup, one command. It never executes target code; it reads the
-source, builds the graph, and reports. Here is exactly what it found in `lib/`.
+We pointed codeweb at [**axios**](https://github.com/axios/axios), the HTTP client downloaded
+approximately 50 million times each week. codeweb read the source, built the graph, and produced
+the report with one command. codeweb did not execute the target code.
 
 > **▶ Explore the result yourself:** the interactive map below is the unedited generated report —
 > [open the live demo](https://ghostlygawd.github.io/codeweb/demo/). *(Published from
@@ -49,15 +49,18 @@ That 12-of-17 dismissal rate is the point: the tool spends its credibility caref
 | `decodeURIComponentSafe` | `adapters/fetch.js` (+ helpers chain) | **100%** | ⚠️ **Blocked** — naive merge creates a file cycle |
 | `setFormDataHeaders` | `adapters/http.js` + `helpers/resolveConfig.js` | 91% | ✅ **Ready** — merge stays acyclic, gate passes, duplication −1 |
 
-Two of these are **byte-for-byte identical** across files. But codeweb doesn't just say "merge them."
-It *simulates* each merge against its own regression gate and reports that two of the three would
-**introduce a new dependency cycle** — so the advice is specific: *host the canonical copy in a neutral
-module that neither side imports, then route both there.* The one that's safe (`setFormDataHeaders`)
-is marked **ready**: applying it removes a duplication finding and reclaims ~12 LOC with the gate
-staying green.
+Two functions are **byte-for-byte identical** across files. codeweb simulates each proposed merge
+against the regression gate. The simulation shows that two of the three merges would
+**introduce a new dependency cycle**.
 
-That is the difference between a linter and codeweb: it tells you **what's really duplicated**, and
-**which fix is safe to apply** — before anyone edits a line.
+For each blocked merge, codeweb gives a specific correction. Put the canonical function in a
+neutral module that neither side imports. Then route both callers to that module.
+
+codeweb marks `setFormDataHeaders` as **ready**. This merge removes one duplication finding,
+reclaims approximately 12 lines of code, and keeps the gate green.
+
+codeweb identifies the confirmed duplication and the safe correction before an agent edits the
+code.
 
 ## Reproduce it
 

@@ -68,17 +68,18 @@
 <section class="section section-tint">
   <div class="wrap">
     <div class="section-head">
-      <h2>Precision, not noise: 17 candidates → 3 real duplications</h2>
-      <p class="lead">Anyone can grep for same-named functions. codeweb confirms each overlap against the <strong>actual function bodies</strong> (token-shingle similarity), so the 17 raw candidates resolve honestly:</p>
+      <h2>17 candidates produced 3 confirmed duplications</h2>
+      <p class="lead">codeweb compares each candidate with the <strong>actual function bodies</strong> by using token-shingle similarity. The check classified the 17 candidates as follows:</p>
     </div>
     <div class="grid cols-3">
-      <div class="card"><h3>3 body-confirmed</h3><p>Genuinely the same logic in two places — two of them <strong>byte-for-byte identical</strong> across files.</p></div>
-      <div class="card"><h3>12 dismissed</h3><p>Same name, <em>different bodies</em>. Refuted so you don't chase them — that 12-of-17 dismissal rate is the point.</p></div>
-      <div class="card"><h3>2 unverified</h3><p>Left for a human to judge, not asserted.</p></div>
+      <div class="card"><h3>3 body-confirmed</h3><p>The functions contain the same logic in two locations. Two pairs are <strong>byte-for-byte identical</strong> across files.</p></div>
+      <div class="card"><h3>12 dismissed</h3><p>The functions have the same name and different bodies. codeweb removed these candidates from the findings.</p></div>
+      <div class="card"><h3>2 unverified</h3><p>codeweb leaves these candidates for human review.</p></div>
     </div>
     <div class="card" style="margin-top:1.25rem">
-      <h3>And the safety call that a linter can't make</h3>
-      <p>codeweb <em>simulates</em> each merge against its own regression gate: two of the three merges would introduce a <strong>new dependency cycle</strong> (verdict: blocked, with the fix — host the canonical in a neutral module). The safe one (<code>setFormDataHeaders</code>, 91% body match) is marked <strong>ready</strong>: the gate stays green and the duplication count drops by one.</p>
+      <h3>Simulate each merge before the edit</h3>
+      <p>codeweb simulates each merge against the regression gate. Two of the three merges would introduce a <strong>new dependency cycle</strong>. codeweb blocks those merges and recommends a canonical function in a neutral module.</p>
+      <p>codeweb marks <code>setFormDataHeaders</code>, with a 91% body match, as <strong>ready</strong>. The gate stays green, and the duplication count decreases by one.</p>
     </div>
     <div class="btn-row" style="margin-top:1.25rem">
       <a class="btn btn-primary" href="demo/">Explore the live map →</a>

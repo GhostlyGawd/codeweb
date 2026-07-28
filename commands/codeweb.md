@@ -5,8 +5,8 @@ description: Dissect a codebase into atomic nodes, wire the system web, tag doma
 
 # /codeweb
 
-Invoke the **codebase-anatomy** skill to build a "biological web" of a codebase and an
-overlap graph for restructuring.
+Use the **codebase-anatomy** skill to build a symbol relationship map and an overlap graph.
+Use the results to plan restructuring work.
 
 ## Usage
 
@@ -41,20 +41,25 @@ overlap graph for restructuring.
 
 ## Instructions for Claude
 
-Activate the `codebase-anatomy` skill and follow its workflow. Parse the arguments above from
-`$ARGUMENTS`. If `target` is a git URL or `owner/repo`, treat it as **external mode** unless
-overridden. For the **eleven native languages** — JavaScript, TypeScript, Python, Rust, Go, Java,
-C#, Ruby, PHP, Kotlin, Swift — prefer the skill's **fast path** — a single deterministic command:
+Activate the `codebase-anatomy` skill and follow its workflow. Parse the options above from
+`$ARGUMENTS`. Use **external mode** when `target` is a Git URL or `owner/repo`, unless the user
+selects a different mode.
+
+Use the deterministic **fast path** for the eleven native languages: JavaScript, TypeScript,
+Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, and Swift. Run this command:
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs" "<target>" --target "<label>" --out-dir "<target>/.codeweb"
 ```
 
-which runs extract → cluster → overlap → optimize → render in one shot (`--open` and
-`--allow-empty` pass straight through); fall back to the agent-based dissection **only** for
-languages outside that list or an explicit `--engine read`. `--depth`, `--focus`, and `--engine`
-steer the agent-based fallback — the fast path is always full-target, symbol-level, and
-deterministic. Write all outputs under
-`<target>/.codeweb/` (or a temp dir for cloned external repos) and finish by reporting the artifact
-paths and the top consolidation opportunities — lead with the **ready** tier from `optimize.md`
-(merges the regression gate would accept), then call out anything **blocked** by a projected cycle.
+The command runs extract → cluster → overlap → optimize → render. Pass `--open` and
+`--allow-empty` through to the command.
+
+Use agent-based dissection for a language outside the native list or when the user selects
+`--engine read`. The `--depth`, `--focus`, and `--engine` options control this fallback. The fast
+path always maps the complete target at symbol depth and produces deterministic output.
+
+Write outputs under `<target>/.codeweb/`. Use a temporary directory for a cloned external
+repository. Report each artifact path and the highest-ranked consolidation opportunities. Report
+the **ready** tier from `optimize.md` first, and then report each item that a projected cycle
+**blocked**.
