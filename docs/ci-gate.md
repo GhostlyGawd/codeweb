@@ -1,10 +1,14 @@
 # CI regression gate
 
-Fail a pull request when an edit makes the structure worse — a **new dependency cycle**, a **new
-duplication finding**, or a **non-exported symbol that loses every caller** (exported symbols are
-exempt here; the edit-time preflights — simulate, the post-edit hook — are stricter and flag those
-too, as `check: call-caller-preflight`). Same verdict as `scripts/diff.mjs`, run automatically on
-every PR.
+The gate fails a pull request when an edit introduces one of these structural regressions:
+
+- a **new dependency cycle**
+- a **new duplication finding**
+- a **non-exported symbol that loses every caller**
+
+Exported symbols are exempt from the pull-request gate. The edit simulation and post-edit hook
+also flag exported symbols as `check: call-caller-preflight`. The gate runs the same verdict as
+`scripts/diff.mjs` on each pull request.
 
 ## Add it to your repo
 
@@ -34,11 +38,12 @@ graph, so the full history must be present.
 
 ## The gate as a reviewer (`comment: true`)
 
-With `comment: true` the action posts (and keeps updated, via a sticky marker) the same
-**structural review digest** codeweb's own PRs get: the before→after delta (nodes, edges,
-renames, cross-domain coupling, cycles, duplication findings), what blocked (if anything), and
-the local reproduce command. Reviewers who never installed codeweb see the blast radius of every
-gated PR where they already look. Notes:
+With `comment: true`, the action posts a **structural review digest** and updates the same sticky
+comment after each run. The digest shows changes to nodes, edges, names, cross-domain coupling,
+cycles, and duplication findings.
+
+The digest also identifies each blocker and gives the local reproduction command. Reviewers can
+inspect the pull request's blast radius without installing codeweb.
 
 - Requires `permissions: pull-requests: write` in the calling workflow (shown above) and a
   `pull_request` event. Without either, the comment is skipped with a warning and the **check
