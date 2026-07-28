@@ -84,7 +84,7 @@ test('checkConsistency catches drift, applySync repairs it (round-trip)', () => 
         version: '0.1.0',
         description: 'exposes 15 MCP tools for agents',
       }, null, 2),
-      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nversion: 0.1.0\n---\nbody\n',
+      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nmetadata:\n  version: 0.1.0\n---\nbody\n',
       'scripts/mcp-server.mjs': "const TOOLS=[{ name: 'codeweb_a' },{ name: 'codeweb_b' },{ name: 'codeweb_c' }];\n",
       'site/data/product.json': JSON.stringify({ toolPhases: [{ tools: [{}, {}, {}] }] }),
       'CHANGELOG.md': '## [0.3.0] - 2026-01-01\n### Added\n- x\n',
@@ -118,7 +118,7 @@ test('checkConsistency fails a sponsorship cost premise in the stdout copy modul
     writeTree(root, {
       'package.json': JSON.stringify({ version: '0.3.0', description: 'x' }),
       '.claude-plugin/plugin.json': JSON.stringify({ version: '0.3.0', description: 'x' }, null, 2),
-      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nversion: 0.3.0\n---\nbody\n',
+      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nmetadata:\n  version: 0.3.0\n---\nbody\n',
       'scripts/mcp-server.mjs': "const TOOLS=[{ name: 'codeweb_a' }];\n",
       'site/data/product.json': JSON.stringify({ toolPhases: [{ tools: [{}] }] }),
       'CHANGELOG.md': '## [0.3.0] - 2026-01-01\n### Added\n- x\n',
@@ -145,7 +145,7 @@ test('checkConsistency enforces the D1 manifest discipline (restatement + phanto
     writeTree(root, {
       'package.json': JSON.stringify({ version: '0.3.0', description: 'x' }),
       '.claude-plugin/plugin.json': JSON.stringify({ version: '0.3.0', description: 'x' }, null, 2),
-      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nversion: 0.3.0\n---\nbody\n',
+      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nmetadata:\n  version: 0.3.0\n---\nbody\n',
       'scripts/mcp-server.mjs': "const TOOLS=[{ name: 'codeweb_a' },{ name: 'codeweb_b' }];\n",
       'scripts/lib/tool-specs.mjs': "export const QUERY_TOOL_SPECS=[{ name: 'codeweb_b' }];\n",
       'site/data/product.json': JSON.stringify({ toolPhases: [{ tools: [{}, {}] }] }),
