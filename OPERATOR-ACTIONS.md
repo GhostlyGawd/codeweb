@@ -28,12 +28,13 @@ for "mcp call graph codebase" carries 10–20 topics; codeweb currently has zero
 
 ## 2. MCP registry publish — automated (2026-07-25)
 
-`.github/workflows/mcp-registry.yml` publishes `server.json` to the official registry using
-GitHub Actions OIDC (the workflow's identity proves the `io.github.GhostlyGawd` namespace — no
-browser login, no secret). It chains off every successful `release` workflow run
-(`workflow_run` — a plain `release:` trigger would never fire, since GITHUB_TOKEN-created
-events don't trigger workflows) and can be dispatched manually, so the listing tracks the
-released version with zero operator steps. First listed: v0.12.0, 2026-07-25.
+`.github/workflows/mcp-registry.yml` publishes `server.json` to the official registry. GitHub
+Actions OIDC proves control of the `io.github.GhostlyGawd` namespace, so the workflow does not
+need a browser login or secret.
+
+The workflow starts after each successful `release` workflow run. It uses `workflow_run` because
+events created with `GITHUB_TOKEN` do not start another workflow. You can also start the workflow
+manually. The registry first listed version 0.12.0 on 2026-07-25.
 
 Manual fallback, if ever needed:
 
@@ -46,12 +47,13 @@ mcp-publisher publish             # validates + submits server.json
 
 ## 3. Search engines (SEO F6 · Bing handled · Google needs 3 clicks)
 
-Bing, Yandex, and the other IndexNow engines are handled: every site deploy pings them with the
-sitemap's URLs (`.github/workflows/indexnow.yml` — no account, no secret; the ownership proof is
-the key file the build emits). Google doesn't take IndexNow pings; it finds the sitemap through
-`robots.txt` on its own schedule, so indexing happens either way. Search Console only adds the
-dashboard (queries, impressions, index status) — and it needs your Google sign-in, which an
-agent can't do for you:
+Each site deployment sends the sitemap URLs to Bing, Yandex, and the other IndexNow engines.
+`.github/workflows/indexnow.yml` performs this action without an account or secret. The key file
+that the build creates proves ownership.
+
+Google does not accept IndexNow requests. Google finds the sitemap through `robots.txt` on its own
+schedule. Search Console adds a dashboard for queries, impressions, and index status. You must use
+your Google account to enable the dashboard:
 
 1. https://search.google.com/search-console → **Add property** → *URL prefix* →
    `https://ghostlygawd.github.io/codeweb/`
@@ -64,11 +66,12 @@ property in one click.
 
 ## 4. npm republish — nothing left to do
 
-`NPM_TOKEN` is configured and working: the 0.9.0 publish came from the release workflow's npm
-step, not a laptop. Cutting a release republishes npm automatically; v0.10.0 carries the
-corrected registry doc (27 tools, category keywords) plus the site as the package homepage.
-(Planned as "0.9.1" before Batches 7–8 landed feature work — the changelog's `### Added`
-sections make it a minor per the release runbook.)
+`NPM_TOKEN` is configured and working. The release workflow published version 0.9.0 to npm.
+The workflow publishes each new release automatically.
+
+Version 0.10.0 added the corrected registry document, category keywords, and the site as the
+package homepage. The original plan called this release 0.9.1. Batches 7 and 8 added features, so
+the release runbook required a minor version.
 
 ## 5. Personal email in plugin.json — resolved
 

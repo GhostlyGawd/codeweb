@@ -11,16 +11,24 @@ npm test                  # the full suite, node:test, zero test dependencies
 node scripts/check-consistency.mjs   # version/count/docs alignment — must say OK
 ```
 
-Branch, change, add tests beside the behavior you changed (this repo is tests-first — every
-behavior change lands with the test that pins it), run the two commands above, open a PR.
+Create a branch and make the change. Add tests beside the changed behavior. This repository is
+tests-first, so each behavior change must include a test that fixes the behavior in place. Run the
+two commands above, and then open a pull request.
 
 ## What CI gates
 
-Every PR runs: the full suite on ubuntu (Node 22 + 24) and windows (22), a no-AST leg (proves
-the optional tier is optional), the benchmark smoke, `check-consistency` (which also rebuilds
-the site and fails on drift — run `node site/build.mjs` after touching `site/`), codeweb's
-own structural self-review on `scripts/`, and `tests/brand-sync.test.mjs` (visual surfaces —
-see "Brand sync" below).
+Each pull request runs these checks:
+
+- the complete suite on Ubuntu with Node 22 and Node 24
+- the complete suite on Windows with Node 22
+- a no-AST job that verifies the optional tier is optional
+- the benchmark smoke test
+- `check-consistency`, which rebuilds the site and fails on drift
+- codeweb's structural self-review of `scripts/`
+- `tests/brand-sync.test.mjs`, which checks the visual surfaces
+
+Run `node site/build.mjs` after you change a file under `site/`. See **Brand sync** below for the
+visual-surface workflow.
 
 ## Where things live
 
@@ -29,30 +37,28 @@ see "Brand sync" below).
 the extension · `tests/` (see `tests/README.md`) · `reports/` audit paper trail ·
 `decisions/` + `specs/` design history.
 
-## Copy style (README, site, listings)
+## Writing style
 
-`tests/copy-density.test.mjs` gates the density; the voice rules are convention:
+`tests/copy-density.test.mjs` checks current product, operator, contributor, agent, and site
+writing. Use these rules for new and revised prose:
 
-- Max ~2 sentences per paragraph. Over ~55 words, the test fails the build.
-- Facts become bullets — one fact per line. Never a paragraph of eleven facts.
-- State facts; skip the theater. No rhetorical-question openers, no "Today…" scene-setting,
-  no drama fragments. The formula to avoid is problem-agitate-solve. The replacement: what it
-  is, what it does, the number.
-- Don't perform credibility. No meta-talk about our own rigor ("measured, not just claimed",
-  "we couldn't move the goalposts", "published, not buried"). State the number, link the data,
-  and let readers draw the conclusion.
-- No "X, not Y" contrasts. The "not Y" half is posture. Say X.
-- Sell the outcome; place properties as answers. Read-only, deterministic, zero-dependency are
-  answers to specific worries (will it touch my code? will answers flake? is it heavy?) — they
-  live in install and trust copy, never as headline features. The headline is what the user
-  gets: agents that write better code, and a map.
-- Subject, verb, object. No mirror constructions ("what it misses is what it breaks").
-- Agents are plural and the reader's: "your agents … they", never "the agent … it".
-- Outcome first, number second, receipt link third. Stats vocabulary (recall, F1, MRR)
-  stays on the research page — and so does study apparatus (referees, corpora, A/B framing).
-  The pitch never explains how something was measured; it says what you get, then links.
-- Never link away from the funnel. No outbound links to other products inside the pitch.
-- Tool and language counts are gated by `check-consistency` — never hardcode a new one.
+- Keep a paragraph to approximately two sentences and no more than 55 words.
+- Put independent facts in a list. Put one fact in each list item.
+- Use consistent terms, direct sentences, active voice, and explicit subjects.
+- Preserve technical meaning, values, units, conditions, requirements, and safety intent.
+- Remove ambiguous pronouns, unnecessary synonyms, vague modifiers, and omitted information.
+- State what the product is, what it does, and the measured result. Do not use theatrical
+  scene-setting or problem-agitate-solve copy.
+- State evidence directly. Link to the data instead of describing the writer's rigor.
+- State the intended fact instead of using an “X, not Y” contrast.
+- Lead with the outcome. Use read-only, deterministic, and zero-dependency properties where they
+  answer a user concern.
+- Refer to agents as the reader's plural agents: “your agents … they.”
+- Put the outcome first, the number second, and the evidence link third. Keep study terminology
+  and study design on the research page.
+- Keep external product links out of the conversion path.
+- Let `check-consistency` supply and verify tool and language counts.
+- Do not claim ASD-STE100 compliance unless the formal compliance workflow passes every gate.
 
 ## Brand sync (visual surfaces)
 

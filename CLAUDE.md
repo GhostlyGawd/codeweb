@@ -1,16 +1,20 @@
 # CLAUDE.md
 
 **Read `CHARTER.md` before changing product behavior, public copy, or claims.**
-It is the contract: problem, user, job, non-goals, invariants, and the current
-milestone. If a change contradicts it, stop and ask the operator. If the charter
-is silent on something a change decides, add the question to the charter's Open
-questions section in the same change — never settle it silently.
+The charter defines the problem, user, job, non-goals, invariants, and current
+milestone.
 
-Drift audit (150 · Drift Audit): each release, re-check every claim-bearing
-surface — README, site copy, npm/plugin descriptions, `docs/ROADMAP.md` —
-against `CHARTER.md`, and fix or strike what drifted.
+Stop and ask the operator if a change conflicts with the charter. If the charter
+does not cover a decision, add the question to the charter's **Open questions**
+section in the same change. Do not make the decision silently.
 
-The verification harness is operator-owned and agent-read-only — see
-`docs/harness.md` (the contract) and ADR-0001 in `DECISIONS.md` (the
-codeweb deviations). `sh scripts/check` is the one gate; if the gate itself
-seems wrong, stop and report — the fix belongs to the operator.
+For each release, run the `150 · Drift Audit`. Compare each claim-bearing
+surface with `CHARTER.md`. Check the README, site copy, npm and plugin
+descriptions, and `docs/ROADMAP.md`. Correct or remove each claim that drifted.
+
+The operator owns the verification harness, and agents must not change it.
+`docs/harness.md` contains the contract. ADR-0001 in `DECISIONS.md` records the
+Codeweb deviations.
+
+Run `sh scripts/check` as the single gate. If the gate appears incorrect, stop
+and report the problem. The operator must authorize a gate change.
