@@ -7,11 +7,13 @@ every code change combined.
 
 ## 1. GitHub repo settings (SEO F1 · two browser steps, once · highest reach)
 
-No session credential can write repo settings — the remote proxy refuses with 403, and
-Actions' `GITHUB_TOKEN` has no administration permission. So the settings are code now:
-`.github/repo-settings.json` holds the description, homepage, and topics (`mcp`, `mcp-server`,
-`model-context-protocol`, and twelve more), and `.github/workflows/repo-settings.yml` applies
-it. It only needs a credential you mint in the browser:
+Session credentials cannot write repository settings. The remote proxy returns HTTP 403, and
+the Actions `GITHUB_TOKEN` does not have administration permission.
+
+`.github/repo-settings.json` stores the description, homepage, and topics. The topics include
+`mcp`, `mcp-server`, `model-context-protocol`, and twelve more.
+`.github/workflows/repo-settings.yml` applies the settings. The workflow needs one credential
+that you create in the browser:
 
 1. https://github.com/settings/personal-access-tokens/new → **Fine-grained token** →
    Repository access: *Only select repositories* → `codeweb` → Permissions → Repository →
@@ -32,7 +34,7 @@ for "mcp call graph codebase" carries 10–20 topics; codeweb currently has zero
 Actions OIDC proves control of the `io.github.GhostlyGawd` namespace, so the workflow does not
 need a browser login or secret.
 
-The workflow starts after each successful `release` workflow run. It uses `workflow_run` because
+The registry workflow starts after each successful `release` workflow run. It uses `workflow_run` because
 events created with `GITHUB_TOKEN` do not start another workflow. You can also start the workflow
 manually. The registry first listed version 0.12.0 on 2026-07-25.
 

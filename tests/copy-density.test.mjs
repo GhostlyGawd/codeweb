@@ -3,8 +3,9 @@
 // A ~45-character mobile line means a 55-word paragraph renders as ~5 lines — a wall.
 // The 2026-07 readability pass broke fourteen such walls in the README (worst: 84 words,
 // twelve rendered lines at the Install decision). This test keeps them broken: any prose
-// paragraph on a funnel surface that exceeds the cap fails the build, same as a drifted
-// tool count. Reference material (docs/, research.html, reports/) is deliberately not gated.
+// paragraph on a current writing surface that exceeds the cap fails the build, same as a drifted
+// tool count. Historical records, normative specifications, generated output, and research
+// evidence are deliberately not gated.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -13,6 +14,44 @@ import { readFileSync } from 'node:fs';
 import { PLUGIN_ROOT } from './helpers.mjs';
 
 const CAP = 55;
+
+const CURRENT_MARKDOWN = [
+  'README.md',
+  'CONTRIBUTING.md',
+  'OPERATOR-ACTIONS.md',
+  'SECURITY.md',
+  'CLAUDE.md',
+  'docs/case-study-axios.md',
+  'docs/ci-gate.md',
+  'docs/cli.md',
+  'docs/reference.md',
+  'docs/ROADMAP.md',
+  'commands/apply.md',
+  'commands/codeweb.md',
+  'commands/narrate.md',
+  'commands/pitch.md',
+  'agents/codeweb-dissector.md',
+  'agents/codeweb-domain-mapper.md',
+  'skills/codebase-anatomy/SKILL.md',
+  'skills/codebase-anatomy/references/engine-detection.md',
+  'skills/codebase-anatomy/references/graph-schema.md',
+  'skills/codebase-anatomy/references/overlap-heuristics.md',
+  'assets/brand/README.md',
+  'editor/vscode-codeweb/README.md',
+  'tests/README.md',
+];
+
+const CURRENT_HTML = [
+  'site/content/index.html',
+  'site/content/product.html',
+  'site/content/start.html',
+  'site/content/support.html',
+  'site/content/downloads.html',
+  'site/content/case-study.html',
+  'site/templates/base.html',
+  'site/templates/footer.html',
+  'site/templates/nav.html',
+];
 
 const read = (p) => readFileSync(join(PLUGIN_ROOT, p), 'utf8');
 const words = (s) => s.split(/\s+/).filter(Boolean).length;
@@ -41,14 +80,13 @@ function htmlParagraphs(html) {
     .filter(Boolean);
 }
 
-test(`README prose paragraphs stay under ${CAP} words`, () => {
-  const bad = overlong(mdParagraphs(read('README.md')), 'README.md');
+test(`current Markdown prose stays under ${CAP} words per paragraph`, () => {
+  const bad = CURRENT_MARKDOWN.flatMap((file) => overlong(mdParagraphs(read(file)), file));
   assert.deepEqual(bad, [], `walls: ${bad.map((b) => `${b.words}w "${b.head}…"`).join('; ')}`);
 });
 
-test(`site funnel pages (index/product/start) stay under ${CAP} words per paragraph`, () => {
-  const bad = ['index', 'product', 'start'].flatMap((slug) =>
-    overlong(htmlParagraphs(read(`site/content/${slug}.html`)), `site/content/${slug}.html`));
+test(`current authored HTML prose stays under ${CAP} words per paragraph`, () => {
+  const bad = CURRENT_HTML.flatMap((file) => overlong(htmlParagraphs(read(file)), file));
   assert.deepEqual(bad, [], `walls: ${bad.map((b) => `${b.file} ${b.words}w "${b.head}…"`).join('; ')}`);
 });
 

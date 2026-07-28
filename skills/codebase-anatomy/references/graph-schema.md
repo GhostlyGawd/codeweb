@@ -119,6 +119,6 @@ renderer. All examples below use synthetic values.
 
 ## Minimum viable graph
 
-A graph is renderable with just `nodes` and `edges`. `domains` and `overlaps` enrich the
+A graph is renderable with only `nodes` and `edges`. `domains` and `overlaps` enrich the
 report; if absent, the renderer treats every node as domain `"unassigned"` and shows an empty
 overlap tab.

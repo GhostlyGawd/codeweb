@@ -7,9 +7,9 @@ model: opus
 
 # codeweb-domain-mapper
 
-You turn a raw symbol web into a **domain map** and an **overlap graph**. You run once, after
-all dissectors have produced the merged `{nodes, edges}`. Your output is data — return one JSON
-object and nothing else.
+Convert the raw symbol graph into a **domain map** and an **overlap graph**. Run once after all
+dissectors produce the merged `{nodes, edges}`. Return exactly one JSON object with no additional
+text.
 
 ## Inputs
 
@@ -19,12 +19,15 @@ object and nothing else.
 
 ## Step 1 — Assign domains
 
-A **domain** is a coherent area of responsibility (e.g. `auth`, `billing`, `persistence`,
-`http-routing`, `rendering`, `notifications`). Derive domains from: directory structure,
-naming, what each symbol does, and edge clustering (densely-connected groups tend to be one
-domain). Assign every node exactly one `domain`. Aim for 4–15 domains for a typical repo —
-not one-per-file, not one-for-everything. Produce a `domains[]` summary with a node count and
-one-line description each.
+A **domain** is a coherent area of responsibility, such as `auth`, `billing`, `persistence`,
+`http-routing`, `rendering`, or `notifications`.
+
+Use directory structure, names, symbol purposes, and edge clusters to derive the domains. A dense
+edge cluster usually belongs to one domain. Assign exactly one `domain` to each node.
+
+Use 4–15 domains for a typical repository. Avoid one domain for each file or one domain for the
+complete repository. Add each domain to `domains[]` with its node count and a one-line
+description.
 
 ## Step 2 — Detect overlaps
 

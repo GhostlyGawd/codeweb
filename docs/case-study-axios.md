@@ -3,9 +3,9 @@
 **Measured at axios v1.18.1 (`a209bfb1`), 2026-07.** axios moves; at HEAD your counts will differ —
 the pinned command below reproduces these numbers exactly.
 
-We pointed codeweb at [**axios**](https://github.com/axios/axios) — the HTTP client downloaded
-~50M times a week — read-only, no setup, one command. It never executes target code; it reads the
-source, builds the graph, and reports. Here is exactly what it found in `lib/`.
+We pointed codeweb at [**axios**](https://github.com/axios/axios), the HTTP client downloaded
+approximately 50 million times each week. codeweb read the source, built the graph, and produced
+the report with one command. codeweb did not execute the target code.
 
 > **▶ Explore the result yourself:** the interactive map below is the unedited generated report —
 > [open the live demo](https://ghostlygawd.github.io/codeweb/demo/). *(Published from

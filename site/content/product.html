@@ -69,7 +69,8 @@
       <div>
         <span class="eyebrow">Keep structure honest</span>
         <h2>A CI gate that fails the PR when an edit makes structure worse</h2>
-        <p>The same regression verdict as <code>codeweb_diff</code>, run on every pull request. It builds the graph before and after, and fails on a new dependency cycle, a new body-confirmed duplication, or a symbol that loses all its callers. Pure removals never trip it — deleting code is an improvement, not a regression.</p>
+        <p>The gate runs the same regression verdict as <code>codeweb_diff</code> on each pull request. It builds the graph before and after the change.</p>
+        <p>The gate fails on a new dependency cycle, a new body-confirmed duplication, or a symbol that loses all callers. A change that only removes code passes.</p>
         <p class="muted">codeweb dogfoods its own gate: PRs that touch the engine run it, and it stays green.</p>
       </div>
       <div>

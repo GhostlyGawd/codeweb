@@ -8,18 +8,19 @@ metadata:
 
 # Codebase Anatomy (codeweb)
 
-Build a "biological web" of a system: every atomic part (function, class, method, exported
-symbol) is a node; calls/imports/inheritance are the edges; each node belongs to a domain; and
-an **overlap graph** shows where separate parts do the same work — the simplification targets.
+Build a structural map of the system. Each function, class, method, or exported symbol is a node.
+Calls, imports, and inheritance relationships are edges. Each node belongs to a domain. An
+**overlap graph** identifies separate parts that do the same work.
 
-The goal is not a pretty picture. It is an **evidence-backed restructure plan**: which
-duplicated logic should collapse into one well-defined system, and who should depend on it.
+The result is an **evidence-backed restructuring plan**. It identifies the duplicated logic that
+can move into one defined system and the symbols that must depend on that system.
 
 ## When to Use
 
 - Restructuring your own codebase and you need to *see* the real dependency web and where it's
   duplicative before moving code.
-- Onboarding to a large/legacy system at symbol resolution, not just folder-level.
+- Onboarding to a large or legacy system at symbol resolution, including relationships across
+  folders.
 - Reviewing an **external** repo (a plugin, library, or template you found on GitHub) end-to-end
   before adopting it — what it does, how it's wired, and whether it's worth committing to.
 - Hunting cross-cutting duplication that file/module tools miss (the same check coded N times in
@@ -93,14 +94,22 @@ reproducible, and emits the same `graph.json` schema:
 node "${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs" "<target>" --target "<label>"
 ```
 
-It chains extract → cluster (directory-anchored domains) → overlap (body-confirmed duplication)
-→ optimize (consolidation advisory) → render, writing `fragment.json`, `graph.json`, `overlap.md`, `optimize.md`, `report.html`, `report.md` into the
-workspace (default `<target>/.codeweb` — exactly where the MCP server and all three hooks
-discover it; `--out-dir` overrides). The script is
-read-only over the target and resolves its own paths, so it works from any cwd. **When it
-succeeds, skip steps 1–5 and go to step 6.** Use the agent-based passes below only as a
-**fallback** — for languages the extractor can't parse, an explicit `--engine read`, or to enrich
-findings the scripts left `low`-confidence.
+The command runs these stages:
+
+1. extract symbols and edges
+2. cluster directory-anchored domains
+3. confirm duplication from function bodies
+4. create consolidation advice
+5. render the reports
+
+The command writes `fragment.json`, `graph.json`, `overlap.md`, `optimize.md`, `report.html`, and
+`report.md` to `<target>/.codeweb` by default. The MCP server and all three hooks use this
+location. Use `--out-dir` to select a different location.
+
+The script reads the target and resolves its own paths, so you can run it from any current
+directory. When the command succeeds, skip steps 1–5 and continue at step 6. Use the agent-based
+passes for an unsupported language, an explicit `--engine read`, or a low-confidence finding that
+needs more evidence.
 
 ### 1 — Survey & partition (agent-based fallback; skip if the fast path ran)
 
@@ -160,11 +169,15 @@ domain-aggregated view above ~600 nodes and lets the user expand.
 
 ## Execute the campaign (`/codeweb-apply`)
 
-When the user asks to ACT on the consolidation plan (not just see it), follow `commands/apply.md`
-verbatim: **ready-tier merges only**, per step simulate → apply (`codemod.mjs --write`) →
-refresh → diff-gate → run the mapped test subset → commit, or **revert and record blocked with
-the gate's reason**. The deterministic gate owns every verdict — never overrule a red diff or a
-failing test. End with the receipt line (`applied N merge(s) · −L LOC · blocked B · gate green`).
+When the user asks you to apply the consolidation plan, follow `commands/apply.md` exactly. Apply
+only **ready-tier merges**.
+
+For each merge, simulate → apply with `codemod.mjs --write` → refresh → run the diff gate → run
+the mapped test subset → commit. If a gate fails, revert the merge and record the gate's reason.
+Do not override a failed diff or test.
+
+End with this receipt:
+`applied N merge(s) · −L LOC · blocked B · gate green`.
 
 ## Handoffs
 

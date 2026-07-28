@@ -4,11 +4,11 @@ codeweb is a local, read-only code-analysis tool.
 
 ## Data access
 
-codeweb reads source files under the selected target and files in `<target>/.codeweb/`. It also
-reads `codeweb.rules.json` and an lcov file when you supply them.
+codeweb reads source files under the selected target and files in `<target>/.codeweb/`. codeweb
+also reads `codeweb.rules.json` and an lcov file when you supply them.
 
 codeweb writes `graph.json`, `report.html`, findings Markdown, caches, and sidecars under
-`<target>/.codeweb/`. It does not modify source files. `codemod --write` is a separate,
+`<target>/.codeweb/`. codeweb does not modify source files. `codemod --write` is a separate,
 explicit CLI option and is not available through MCP.
 
 codeweb does not:

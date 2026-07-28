@@ -4,16 +4,21 @@ codeweb prefers **precise edges from static-analysis tools** when they are insta
 back to **agent reading** otherwise. Per subsystem, detect what's available, use it, and record
 the chosen engine in `meta.engine`.
 
-> **Native fast path (no tools required):** eleven languages — JavaScript, TypeScript, Python,
-> Rust, Go, Java, C#, Ruby, PHP, Kotlin, and Swift — are parsed directly by the bundled extractor
-> (`scripts/extract-symbols.mjs`). When the optional `web-tree-sitter` dependency is installed, a
-> **bundled AST tier** (vendored grammars under `scripts/grammars/`) additionally resolves
-> dynamic-dispatch call edges for Java, C#, Python, Go, Rust, Ruby, and PHP — plus exact
-> complexity and class-qualified methods for JS/TS (Kotlin/Swift await a trusted wasm grammar —
-> see `scripts/grammars/PROVENANCE.md`) —
-> default-on, per-file regex fallback, byte-identical nodes either way. The table below is the
-> *optional* sharpening / agent-fallback path — for native languages it only refines edges, and
-> for everything else it is the primary route.
+## Native fast path
+
+The bundled extractor (`scripts/extract-symbols.mjs`) directly parses JavaScript, TypeScript,
+Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, and Swift. The fast path does not require an
+external analysis tool.
+
+When `web-tree-sitter` is installed, the bundled AST tier resolves dynamic-dispatch call edges
+for Java, C#, Python, Go, Rust, Ruby, and PHP. It also gives JS and TS exact complexity values
+and class-qualified methods.
+
+Kotlin and Swift require a trusted wasm grammar. See `scripts/grammars/PROVENANCE.md`.
+
+The AST tier is on by default and uses a per-file regex fallback. Both paths produce
+byte-identical nodes. The table below describes optional edge refinement for native languages
+and the primary agent fallback for other languages.
 
 ## Detection order (per language)
 
