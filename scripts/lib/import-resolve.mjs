@@ -15,8 +15,12 @@ import { dirname, resolve } from 'node:path';
 // (extract-symbols already imports this module), so the two lists provably cannot drift — the
 // pub-walk copy had already lost `.tsx/.jsx//index.mjs`.
 export const EXT_REMAP = { '.js': ['.ts', '.tsx'], '.mjs': ['.mts'], '.cjs': ['.cts'], '.jsx': ['.tsx'] };
-const DIRECT_EXTS = ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx'];
-const INDEX_CANDS = ['/index.js', '/index.ts', '/index.mjs', '/index.tsx', '/index.jsx', '/index.cjs', '/index.mts', '/index.cts'];
+// JSON config tier: `.json` probes LAST in both lists — Node's own require() order (.js before
+// .json), so no code specifier that resolved before can flip target; a `.json` hit is a pure
+// recall addition. Membership stays caller-owned: candidates only land when the extractor
+// enumerated the file into relSet.
+const DIRECT_EXTS = ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.json'];
+const INDEX_CANDS = ['/index.js', '/index.ts', '/index.mjs', '/index.tsx', '/index.jsx', '/index.cjs', '/index.mts', '/index.cts', '/index.json'];
 
 /**
  * Ordered resolution candidates for a relative-import base path. Candidate STRINGS only —
@@ -272,6 +276,10 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
     let m;
     const addNamed = (namesStr, spec) => {
       const target = addDep(resolveImport(fAbs, spec)); if (!target) return;
+      // A named import FROM a .json target (`import { version } from './package.json'`, TS
+      // resolveJsonModule) has no symbol nodes to bind to — a JSON file is file-level in the map.
+      // Emit the coarse module edge so the file dependency survives instead of vanishing.
+      if (target.endsWith('.json')) { if (aId) edges.push([aId, target + ':<module>']); return; }
       for (const part of namesStr.split(',')) {
         const seg = part.trim().split(/\s+as\s+/);
         const orig = seg[0].trim(), local = seg[seg.length - 1].trim();

@@ -246,7 +246,9 @@ into a per-target workspace:
 1. **Extract** (`extract-symbols.mjs`) — parse every source file into atomic nodes (functions,
    classes, methods) and call/import edges. When a bare call could belong to several definitions,
    codeweb drops the edge rather than guess. Per-file caching keeps re-extraction incremental,
-   byte-identical to a full rebuild.
+   byte-identical to a full rebuild. Imported `.json` files join the map as file-level nodes —
+   "who imports this config?" gets an exact answer — without ever being parsed (an orphan
+   `.json` nothing imports stays out, so lock files add no noise).
 2. **Cluster** (`cluster3.mjs`) — strip genuine utility hubs, then group nodes into
    directory-anchored semantic domains.
 3. **Overlap** (`overlap.mjs`) — detect duplicated logic and parallel implementations, then

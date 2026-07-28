@@ -88,7 +88,14 @@ new languages until their grammars clear provenance.
 5. `CLAUDE.md` exists and points here first. ✔ (this commit)
 
 ## Open questions
-None unanswered. New questions are asked **one at a time** (operator's request, 2026-07-25).
+One open (2026-07-27, raised by the JSON-support change): non-goal 8 gates new first-class
+*languages* on pinned-grammar provenance, and is silent on data formats. JSON shipped as a
+**config-file tier** — imported `.json` files become file-level `<module>` nodes; content is
+never parsed, so there is no grammar to pin (`scripts/grammars/PROVENANCE.md` records the
+no-parser fact). Does the operator ratify that data formats sit outside non-goal 8's bar, or
+should the tier be held to it? To be answered before any second data format (YAML/TOML) is
+considered.
+New questions are asked **one at a time** (operator's request, 2026-07-25).
 Next is deliberately open until the identity milestone lands.
 *(Answered 2026-07-25: the job one-liner — "Your agents break less code and burn fewer tokens." ·
 the user — the agent-heavy individual dev, the CI gate included in their surface · sponsorship —
