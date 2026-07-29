@@ -17,7 +17,8 @@ export const script = (name) => join(SCRIPTS, name);
 
 // Synthetic repositories must stay hermetic without disabling user-level Git hooks. Reuse the
 // current checkout's approved identity when one exists; CI has no local identity guard and uses
-// the non-personal fallback. Never print or persist the resolved checkout identity.
+// the non-personal fallback. Never print the resolved identity or write it to a tracked file.
+// Fixture commits contain it only until cleanup removes the temporary repository.
 export function fixtureGitIdentity() {
   const options = { cwd: PLUGIN_ROOT, encoding: 'utf8' };
   const name = spawnSync('git', ['config', '--get', 'user.name'], options);
