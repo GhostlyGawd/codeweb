@@ -10,10 +10,19 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { churnFromGit } from '../scripts/lib/churn.mjs';
+import { fixtureGitIdentity } from './helpers.mjs';
 
+const fixtureIdentity = fixtureGitIdentity();
 const git = (dir, ...args) => execFileSync('git', ['-C', dir, ...args], {
   encoding: 'utf8',
-  env: { ...process.env, GIT_AUTHOR_NAME: 'x', GIT_AUTHOR_EMAIL: 'x@x', GIT_COMMITTER_NAME: 'x', GIT_COMMITTER_EMAIL: 'x@x' },
+  // Keep inherited identity hooks active for commits in the synthetic repository.
+  env: {
+    ...process.env,
+    GIT_AUTHOR_NAME: fixtureIdentity.name,
+    GIT_AUTHOR_EMAIL: fixtureIdentity.email,
+    GIT_COMMITTER_NAME: fixtureIdentity.name,
+    GIT_COMMITTER_EMAIL: fixtureIdentity.email,
+  },
 });
 
 test('CH1: counts commits per file, window-bounded, cached by HEAD', () => {

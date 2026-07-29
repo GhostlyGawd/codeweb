@@ -1,0 +1,541 @@
+title: Codeweb product requirements
+language_profile: shall
+lifecycle_profile: general
+objective: >-
+  Define traceable and objectively verifiable requirement records for the built
+  acceptance criteria in SPEC.md without changing the controlling product
+  intent.
+system_boundary: >-
+  The Codeweb product suite, consistency gate, package manifest, prove-red
+  check, npm package contents, shipped command-line binaries, evaluation
+  runner, JSON import mapping, and pre-edit importer card are in scope. Roadmap
+  candidates, hosted services, and new product behavior are out of scope.
+intended_readers:
+  - Codeweb maintainers
+  - Codeweb contributors
+  - requirements reviewers
+  - verification reviewers
+lifecycle_scope:
+  product_layer: product
+  lifecycle_phase: operations-and-sustainment
+  included_processes:
+    - technical_requirements_definition
+    - requirements_management
+    - verification_planning
+  excluded_processes:
+    - new_product_definition
+    - roadmap_selection
+source_authorities:
+  - id: SRC-CHARTER
+    title: CHARTER.md
+    precedence: 1
+  - id: SRC-SPEC
+    title: SPEC.md
+    precedence: 2
+  - id: SRC-SHIPPED
+    title: Shipped implementation and tests at the reviewed commit
+    precedence: 3
+controlled_terms:
+  - term: Codeweb product suite
+    definition: The test suite invoked by the package.json npm test script.
+    source: SRC-SPEC
+    approved: true
+  - term: public claim surface
+    definition: A claim-bearing file that scripts/check-consistency.mjs enumerates.
+    source: SRC-SHIPPED
+    approved: true
+  - term: repository-only path
+    definition: A path that tests/package-shape.test.mjs classifies as excluded repository content.
+    source: SRC-SHIPPED
+    approved: true
+  - term: harness file
+    definition: A path that tests/package-shape.test.mjs classifies as excluded harness content.
+    source: SRC-SHIPPED
+    approved: true
+protected_values: []
+approval_authority:
+  - approver_id: codeweb-operator
+    role: baseline_approver
+    authority_source: CHARTER.md introduction and Open questions
+requirements:
+  - id: CW-PR-001
+    type: quality
+    level: product
+    owner: codeweb-operator
+    text: >-
+      The Codeweb product suite shall pass when an operator runs `npm test`
+      from a checkout that has no installed project dependencies.
+    source:
+      - SRC-SPEC
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-1
+    source_excerpt: >-
+      the full product suite passes from a bare, dependency-free checkout
+    rationale: >-
+      Preserve the source requirement that the complete product suite works
+      without installed project dependencies.
+    assumptions:
+      - The checkout has the declared Node.js and Python runtime versions.
+    parents: []
+    derived: false
+    allocated_to:
+      - Codeweb product suite
+    verification:
+      method: test
+      success_criteria: >-
+        `npm test` returns exit code 0 from a clean worktree that has no
+        node_modules directory.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: supported local runtime
+      phase: regression
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - command:npm test
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-002
+    type: quality
+    level: product
+    owner: codeweb-operator
+    text: >-
+      The Codeweb consistency gate shall return exit code 0 only when all
+      enumerated public claim surfaces match their canonical values.
+    source:
+      - SRC-SPEC
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-2
+    source_excerpt: >-
+      every public claim surface agrees with package.json and the charter
+      identity line
+    rationale: Prevent drift between public claims and canonical product facts.
+    assumptions: []
+    parents: []
+    derived: false
+    allocated_to:
+      - scripts/check-consistency.mjs
+    verification:
+      method: test
+      success_criteria: >-
+        `node scripts/check-consistency.mjs` returns exit code 0 for the
+        reviewed commit, and its regression tests reject each supported drift
+        class.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: supported local runtime
+      phase: regression
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - command:node scripts/check-consistency.mjs
+        - test:tests/test_ac_pins.py::TestAcPins::test_ac_2_consistency_gate_green
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-003A
+    type: constraint
+    level: product
+    owner: codeweb-operator
+    text: The Codeweb package manifest shall declare zero required dependencies.
+    source:
+      - SRC-SPEC
+      - SRC-CHARTER
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-3
+    source_excerpt: >-
+      the product installs and runs with zero required dependencies
+    rationale: Preserve the zero-required-dependency charter invariant.
+    assumptions: []
+    parents: []
+    derived: false
+    allocated_to:
+      - package.json
+    verification:
+      method: inspection
+      success_criteria: >-
+        The package.json dependencies field is absent or contains no entries.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: repository checkout
+      phase: regression
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - test:tests/test_ac_pins.py::TestAcPins::test_ac_3_zero_runtime_dependencies
+        - test:tests/package-shape.test.mjs
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-003B
+    type: operational
+    level: product
+    owner: codeweb-operator
+    text: >-
+      The Codeweb npm package shall install without resolving a required
+      runtime dependency.
+    source:
+      - SRC-SPEC
+      - SRC-CHARTER
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-3
+    source_excerpt: >-
+      the product installs and runs with zero required dependencies
+    rationale: Preserve the installation part of the source requirement.
+    assumptions:
+      - The package installation uses a supported Node.js runtime.
+    parents: []
+    derived: false
+    allocated_to:
+      - Codeweb npm package
+    verification:
+      method: test
+      success_criteria: >-
+        An installation from the packed artifact returns exit code 0 without a
+        required runtime dependency fetch.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: isolated temporary npm prefix
+      phase: package acceptance
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - test:tests/package-shape.test.mjs::P3
+        - command:node --test tests/package-shape.test.mjs
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-004
+    type: quality
+    level: product
+    owner: codeweb-operator
+    text: >-
+      The Codeweb prove-red check shall return exit code 0 only after its
+      failing canary causes the gate to fail.
+    source:
+      - SRC-SPEC
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-4
+    source_excerpt: >-
+      the gate can go red: prove-red plants a failing canary and the gate
+      catches it
+    rationale: Prove that the regression gate detects a known failure.
+    assumptions: []
+    parents: []
+    derived: false
+    allocated_to:
+      - scripts/check
+    verification:
+      method: test
+      success_criteria: >-
+        `sh scripts/check --prove-red` observes the expected canary failure,
+        prints `PROVE-RED OK`, and returns exit code 0.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: supported local runtime
+      phase: regression
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - command:sh scripts/check --prove-red
+        - test:tests/test_ac_pins.py::TestAcPins::test_ac_4_prove_red_and_hooks_wired
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-005A
+    type: constraint
+    level: product
+    owner: codeweb-operator
+    text: >-
+      The Codeweb npm tarball shall exclude each repository-only path
+      identified by `tests/package-shape.test.mjs`.
+    source:
+      - SRC-SPEC
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-5
+    source_excerpt: >-
+      the npm tarball ships the product only: no repo-only trees, no harness
+      files
+    rationale: Exclude repository content that is not part of the shipped product.
+    assumptions: []
+    parents: []
+    derived: false
+    allocated_to:
+      - Codeweb npm package
+    verification:
+      method: test
+      success_criteria: >-
+        `node --test tests/package-shape.test.mjs` returns exit code 0 and its
+        packed-file assertions find no prohibited repository-only path.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: supported local runtime
+      phase: package acceptance
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - command:node --test tests/package-shape.test.mjs
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-005B
+    type: constraint
+    level: product
+    owner: codeweb-operator
+    text: >-
+      The Codeweb npm tarball shall exclude each harness file identified by
+      `tests/package-shape.test.mjs`.
+    source:
+      - SRC-SPEC
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-5
+    source_excerpt: >-
+      the npm tarball ships the product only: no repo-only trees, no harness
+      files
+    rationale: Exclude development harness files from the shipped product.
+    assumptions: []
+    parents: []
+    derived: false
+    allocated_to:
+      - Codeweb npm package
+    verification:
+      method: test
+      success_criteria: >-
+        `node --test tests/package-shape.test.mjs` returns exit code 0 and its
+        packed-file assertions find no prohibited harness file.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: supported local runtime
+      phase: package acceptance
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - command:node --test tests/package-shape.test.mjs
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-006
+    type: operational
+    level: product
+    owner: codeweb-operator
+    text: >-
+      Each shipped Codeweb binary shall return exit code 0 for the `--help`
+      option.
+    source:
+      - SRC-SPEC
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-6
+    source_excerpt: every shipped bin answers --help with exit 0
+    rationale: Keep the command-line help entry point available for each binary.
+    assumptions:
+      - The operator uses a supported Node.js runtime.
+    parents: []
+    derived: false
+    allocated_to:
+      - bin directory
+    verification:
+      method: test
+      success_criteria: >-
+        Each `bin/*.mjs` file returns exit code 0 when invoked with `--help`.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: supported local runtime
+      phase: regression
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - "command:sh -c 'for b in bin/*.mjs; do node \"$b\" --help >/dev/null || exit 1; done'"
+        - test:tests/test_ac_pins.py::TestAcPins::test_ac_6_cli_front_door_answers_help
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-007
+    type: quality
+    level: product
+    owner: codeweb-operator
+    text: >-
+      The Codeweb evaluation runner shall return exit code 0 only when all
+      golden evaluation cases pass.
+    source:
+      - SRC-SPEC
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-7
+    source_excerpt: all golden eval cases pass
+    rationale: Preserve the source acceptance floor for golden evaluation cases.
+    assumptions:
+      - The evaluation fixtures are available in the checkout.
+    parents: []
+    derived: false
+    allocated_to:
+      - evals/run.py
+    verification:
+      method: test
+      success_criteria: >-
+        `python3 evals/run.py` executes every discovered golden case, reports
+        no failed case, and returns exit code 0.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: supported local runtime
+      phase: regression
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - command:python3 evals/run.py
+        - test:tests/test_ac_pins.py::TestAcPins::test_ac_7_evals_floor_holds
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-008A
+    type: functional
+    level: product
+    owner: codeweb-operator
+    text: >-
+      The Codeweb mapper shall represent each imported `.json` file as a
+      file-level map node.
+    source:
+      - SRC-SPEC
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-8
+    source_excerpt: >-
+      imported JSON files are file-level map nodes: JS/TS imports of .json
+      resolve, stamp staleness, and feed the pre-edit importer card
+    rationale: Make imported JSON files visible in the deterministic map.
+    assumptions: []
+    parents: []
+    derived: false
+    allocated_to:
+      - Codeweb mapper
+    verification:
+      method: test
+      success_criteria: >-
+        `node --test tests/json-support.test.mjs` confirms that every supported
+        imported JSON fixture has one `<module>` node and that an orphan JSON
+        fixture has no node.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: supported local runtime
+      phase: regression
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - command:node --test tests/json-support.test.mjs
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-008B
+    type: functional
+    level: product
+    owner: codeweb-operator
+    text: >-
+      The Codeweb mapper shall mark an imported `.json` file as stale after the
+      file changes.
+    source:
+      - SRC-SPEC
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-8
+    source_excerpt: >-
+      imported JSON files are file-level map nodes: JS/TS imports of .json
+      resolve, stamp staleness, and feed the pre-edit importer card
+    rationale: Make a mapped JSON file change observable as stale map data.
+    assumptions: []
+    parents: []
+    derived: false
+    allocated_to:
+      - Codeweb mapper
+      - staleness checker
+    verification:
+      method: test
+      success_criteria: >-
+        `node --test tests/json-support.test.mjs` confirms that the staleness
+        check names an imported JSON file after its mapped bytes change.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: supported local runtime
+      phase: regression
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - command:node --test tests/json-support.test.mjs
+      discrepancies: []
+      configuration: reviewed commit
+
+  - id: CW-PR-008C
+    type: functional
+    level: product
+    owner: codeweb-operator
+    text: >-
+      The Codeweb pre-edit hook shall report the in-repository importers of an
+      imported `.json` file.
+    source:
+      - SRC-SPEC
+    source_document: SPEC.md
+    source_paragraph: Acceptance criteria, AC-8
+    source_excerpt: >-
+      imported JSON files are file-level map nodes: JS/TS imports of .json
+      resolve, stamp staleness, and feed the pre-edit importer card
+    rationale: Show the affected importer context before an imported JSON edit.
+    assumptions:
+      - A current Codeweb graph exists for the target repository.
+    parents: []
+    derived: false
+    allocated_to:
+      - hooks/pre-edit-impact.mjs
+    verification:
+      method: test
+      success_criteria: >-
+        `node --test tests/json-support.test.mjs` confirms that the pre-edit
+        hook names the imported JSON file, reports the importer count, and
+        lists the importers.
+      verification_level: product
+      verification_lead: codeweb-maintainer
+      facility: supported local runtime
+      phase: regression
+      acceptance_requirement: true
+      preflight_acceptance: false
+      performing_organization: Codeweb project
+      results_state: PASS
+      evidence:
+        - command:node --test tests/json-support.test.mjs
+      discrepancies: []
+      configuration: reviewed commit
+unresolved:
+  - id: DEC-AC3-001
+    statement: >-
+      AC-3 claims that the product installs and runs with zero required
+      dependencies, but its current check only inspects the package.json
+      dependencies field.
+    decision_needed: >-
+      Approve an isolated packed-package installation test and its success
+      criteria, or narrow the controlling AC-3 source claim.
+    owner: codeweb-operator
+    due_date: "2026-07-29"
+    status: CLOSED
+    resolution: >-
+      tests/package-shape.test.mjs P3 packs the real artifact, installs it in an
+      isolated prefix with offline mode and optional dependencies omitted, and
+      verifies that each installed binary returns exit code 0 for `--help`.
+reviews: []
+approvals: []

@@ -21,6 +21,9 @@ packaging isn't.
    `@vscode/vsce package` (dev-time tool, not a runtime dep) and attaches the `.vsix` to the
    GitHub Release; marketplace publish likewise exists but gates on `VSCE_PAT`.
 4. **Zero-dependency stance intact:** runtime `dependencies` stay empty; vsce runs only in CI.
+5. **Offline package execution.** The real packed npm artifact installs into an empty prefix
+   with offline mode, install scripts disabled, and optional dependencies omitted. Each installed
+   bin returns exit code 0 for `--help`.
 
 ## Tests (BDD — tests/report-editor-link.test.mjs + tests/package-shape.test.mjs)
 - **E1 given** a built report for a fixture **when** a node is selected (template function
@@ -31,7 +34,9 @@ packaging isn't.
   every `files` entry exists, no runtime deps.
 - **P2** `npm pack --dry-run` (offline) succeeds and the tarball file list contains the engine
   + plugin surfaces and excludes bench/site/docs.
+- **P3** the real tarball installs offline without optional dependencies; every installed bin
+  returns exit code 0 for `--help`.
 
 ## Done when
-Tests pass; suite green; a locally produced `.vsix` and `npm pack` tarball verified in the PR;
-release workflow carries both gated publish steps.
+Tests pass; suite green; the real tarball installs and runs offline; a locally produced `.vsix`
+and `npm pack` tarball are verified in the PR; release workflow carries both gated publish steps.

@@ -17,7 +17,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { runNode, tmpDir, cleanup, writeTree, readJSON, PLUGIN_ROOT } from './helpers.mjs';
+import {
+  runNode,
+  tmpDir,
+  cleanup,
+  writeTree,
+  readJSON,
+  PLUGIN_ROOT,
+  fixtureGitIdentity,
+} from './helpers.mjs';
 
 const MINER = join(PLUGIN_ROOT, 'bench', 'experiments', 'replay-mine.mjs');
 const hasGit = spawnSync('git', ['--version'], { encoding: 'utf8' }).status === 0;
@@ -33,8 +41,9 @@ function gitRepo() {
     return r.stdout.trim();
   };
   g('init', '-q');
-  g('config', 'user.email', 't@example.com');
-  g('config', 'user.name', 'Test');
+  const identity = fixtureGitIdentity();
+  g('config', 'user.email', identity.email);
+  g('config', 'user.name', identity.name);
   g('config', 'commit.gpgsign', 'false');
   return { repo, g };
 }

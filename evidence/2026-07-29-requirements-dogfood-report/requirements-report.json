@@ -1,0 +1,605 @@
+{
+  "status": "DRAFT — SOURCE OR DECISIONS INCOMPLETE",
+  "content_digest": "sha256:ef6faa2ef30fecc63fb7c2428c5b647266d26ab210efec245d0d979302634ecf",
+  "summary": {
+    "PASS": 34,
+    "FAIL": 0,
+    "REVIEW_REQUIRED": 1,
+    "NOT_APPLICABLE": 0
+  },
+  "release_gates": {
+    "deterministic_checks": true,
+    "human_semantic_reviews": false,
+    "lifecycle_evidence": true,
+    "npr_authority_evidence": true,
+    "authorized_baseline_approval": false,
+    "clean_output_permitted": false
+  },
+  "issues": [
+    {
+      "location": "document.title",
+      "check": "REQ-CTX-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "title is present.",
+      "evidence": ""
+    },
+    {
+      "location": "document.objective",
+      "check": "REQ-CTX-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "objective is present.",
+      "evidence": ""
+    },
+    {
+      "location": "document.system_boundary",
+      "check": "REQ-CTX-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "system_boundary is present.",
+      "evidence": ""
+    },
+    {
+      "location": "document.intended_readers",
+      "check": "REQ-CTX-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "Intended readers are identified.",
+      "evidence": ""
+    },
+    {
+      "location": "document.lifecycle_scope",
+      "check": "REQ-CTX-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 1.2 and 3",
+      "message": "Product layer, lifecycle phase, and process scope are declared.",
+      "evidence": ""
+    },
+    {
+      "location": "source_authorities[0]",
+      "check": "REQ-SRC-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "Source authority SRC-CHARTER is defined.",
+      "evidence": ""
+    },
+    {
+      "location": "source_authorities[1]",
+      "check": "REQ-SRC-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "Source authority SRC-SPEC is defined.",
+      "evidence": ""
+    },
+    {
+      "location": "source_authorities[2]",
+      "check": "REQ-SRC-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "Source authority SRC-SHIPPED is defined.",
+      "evidence": ""
+    },
+    {
+      "location": "document.language_profile",
+      "check": "PROFILE-001",
+      "result": "PASS",
+      "basis": "requirements-rules.yaml",
+      "message": "Selected language profile: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "document.lifecycle_profile",
+      "check": "PROFILE-001",
+      "result": "PASS",
+      "basis": "requirements-rules.yaml",
+      "message": "Selected lifecycle profile: general.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-001",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-001",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-002",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-002",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-003A",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-003A",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-003B",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-003B",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-004",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-004",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-005A",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-005A",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-005B",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-005B",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-006",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-006",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-007",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-007",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-008A",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-008A",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-008B",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-008B",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-008C",
+      "check": "VRF-PLAN-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D",
+      "message": "The requirement has a separate verification plan.",
+      "evidence": ""
+    },
+    {
+      "location": "CW-PR-008C",
+      "check": "LANG-SHALL-001",
+      "result": "PASS",
+      "basis": "NASA-SEH-REV2 Appendix C",
+      "message": "One profile keyword is present: shall.",
+      "evidence": ""
+    },
+    {
+      "location": "document.reviews",
+      "check": "REVIEW-001",
+      "result": "REVIEW_REQUIRED",
+      "basis": "requirements-schema.md",
+      "message": "Required human semantic reviews are incomplete.",
+      "evidence": "conflicts, coverage, feasibility, source_fidelity, verification_adequacy"
+    }
+  ],
+  "traceability_matrix": [
+    {
+      "requirement_id": "CW-PR-001",
+      "requirement": "The Codeweb product suite shall pass when an operator runs `npm test` from a checkout that has no installed project dependencies.",
+      "sources": [
+        "SRC-SPEC"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-1",
+      "verification_method": "test",
+      "success_criteria": "`npm test` returns exit code 0 from a clean worktree that has no node_modules directory.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "supported local runtime",
+      "phase": "regression",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "command:npm test"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-002",
+      "requirement": "The Codeweb consistency gate shall return exit code 0 only when all enumerated public claim surfaces match their canonical values.",
+      "sources": [
+        "SRC-SPEC"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-2",
+      "verification_method": "test",
+      "success_criteria": "`node scripts/check-consistency.mjs` returns exit code 0 for the reviewed commit, and its regression tests reject each supported drift class.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "supported local runtime",
+      "phase": "regression",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "command:node scripts/check-consistency.mjs",
+        "test:tests/test_ac_pins.py::TestAcPins::test_ac_2_consistency_gate_green"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-003A",
+      "requirement": "The Codeweb package manifest shall declare zero required dependencies.",
+      "sources": [
+        "SRC-SPEC",
+        "SRC-CHARTER"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-3",
+      "verification_method": "inspection",
+      "success_criteria": "The package.json dependencies field is absent or contains no entries.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "repository checkout",
+      "phase": "regression",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "test:tests/test_ac_pins.py::TestAcPins::test_ac_3_zero_runtime_dependencies",
+        "test:tests/package-shape.test.mjs"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-003B",
+      "requirement": "The Codeweb npm package shall install without resolving a required runtime dependency.",
+      "sources": [
+        "SRC-SPEC",
+        "SRC-CHARTER"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-3",
+      "verification_method": "test",
+      "success_criteria": "An installation from the packed artifact returns exit code 0 without a required runtime dependency fetch.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "isolated temporary npm prefix",
+      "phase": "package acceptance",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "test:tests/package-shape.test.mjs::P3",
+        "command:node --test tests/package-shape.test.mjs"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-004",
+      "requirement": "The Codeweb prove-red check shall return exit code 0 only after its failing canary causes the gate to fail.",
+      "sources": [
+        "SRC-SPEC"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-4",
+      "verification_method": "test",
+      "success_criteria": "`sh scripts/check --prove-red` observes the expected canary failure, prints `PROVE-RED OK`, and returns exit code 0.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "supported local runtime",
+      "phase": "regression",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "command:sh scripts/check --prove-red",
+        "test:tests/test_ac_pins.py::TestAcPins::test_ac_4_prove_red_and_hooks_wired"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-005A",
+      "requirement": "The Codeweb npm tarball shall exclude each repository-only path identified by `tests/package-shape.test.mjs`.",
+      "sources": [
+        "SRC-SPEC"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-5",
+      "verification_method": "test",
+      "success_criteria": "`node --test tests/package-shape.test.mjs` returns exit code 0 and its packed-file assertions find no prohibited repository-only path.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "supported local runtime",
+      "phase": "package acceptance",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "command:node --test tests/package-shape.test.mjs"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-005B",
+      "requirement": "The Codeweb npm tarball shall exclude each harness file identified by `tests/package-shape.test.mjs`.",
+      "sources": [
+        "SRC-SPEC"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-5",
+      "verification_method": "test",
+      "success_criteria": "`node --test tests/package-shape.test.mjs` returns exit code 0 and its packed-file assertions find no prohibited harness file.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "supported local runtime",
+      "phase": "package acceptance",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "command:node --test tests/package-shape.test.mjs"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-006",
+      "requirement": "Each shipped Codeweb binary shall return exit code 0 for the `--help` option.",
+      "sources": [
+        "SRC-SPEC"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-6",
+      "verification_method": "test",
+      "success_criteria": "Each `bin/*.mjs` file returns exit code 0 when invoked with `--help`.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "supported local runtime",
+      "phase": "regression",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "command:sh -c 'for b in bin/*.mjs; do node \"$b\" --help >/dev/null || exit 1; done'",
+        "test:tests/test_ac_pins.py::TestAcPins::test_ac_6_cli_front_door_answers_help"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-007",
+      "requirement": "The Codeweb evaluation runner shall return exit code 0 only when all golden evaluation cases pass.",
+      "sources": [
+        "SRC-SPEC"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-7",
+      "verification_method": "test",
+      "success_criteria": "`python3 evals/run.py` executes every discovered golden case, reports no failed case, and returns exit code 0.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "supported local runtime",
+      "phase": "regression",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "command:python3 evals/run.py",
+        "test:tests/test_ac_pins.py::TestAcPins::test_ac_7_evals_floor_holds"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-008A",
+      "requirement": "The Codeweb mapper shall represent each imported `.json` file as a file-level map node.",
+      "sources": [
+        "SRC-SPEC"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-8",
+      "verification_method": "test",
+      "success_criteria": "`node --test tests/json-support.test.mjs` confirms that every supported imported JSON fixture has one `<module>` node and that an orphan JSON fixture has no node.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "supported local runtime",
+      "phase": "regression",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "command:node --test tests/json-support.test.mjs"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-008B",
+      "requirement": "The Codeweb mapper shall mark an imported `.json` file as stale after the file changes.",
+      "sources": [
+        "SRC-SPEC"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-8",
+      "verification_method": "test",
+      "success_criteria": "`node --test tests/json-support.test.mjs` confirms that the staleness check names an imported JSON file after its mapped bytes change.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "supported local runtime",
+      "phase": "regression",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "command:node --test tests/json-support.test.mjs"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    },
+    {
+      "requirement_id": "CW-PR-008C",
+      "requirement": "The Codeweb pre-edit hook shall report the in-repository importers of an imported `.json` file.",
+      "sources": [
+        "SRC-SPEC"
+      ],
+      "source_document": "SPEC.md",
+      "source_paragraph": "Acceptance criteria, AC-8",
+      "verification_method": "test",
+      "success_criteria": "`node --test tests/json-support.test.mjs` confirms that the pre-edit hook names the imported JSON file, reports the importer count, and lists the importers.",
+      "verification_level": "product",
+      "verification_lead": "codeweb-maintainer",
+      "facility": "supported local runtime",
+      "phase": "regression",
+      "acceptance_requirement": true,
+      "preflight_acceptance": false,
+      "performing_organization": "Codeweb project",
+      "results_state": "PASS",
+      "evidence": [
+        "command:node --test tests/json-support.test.mjs"
+      ],
+      "configuration": "reviewed commit",
+      "discrepancies": []
+    }
+  ],
+  "validation_matrix": [],
+  "claim_boundary": "Artifact readiness only. This report is not NASA certification or organizational process compliance.",
+  "limitations": [
+    "Pattern checks do not prove semantic correctness, completeness, feasibility, safety, or conflict freedom.",
+    "Human reviewers must compare the requirements with authoritative sources.",
+    "NASA process compliance requires authorized applicability, tailoring, SEMP, ETA, and complete compliance-matrix decisions outside this checker."
+  ]
+}

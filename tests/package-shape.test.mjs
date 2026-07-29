@@ -5,13 +5,15 @@
 //     zero runtime dependencies (the standing stance).
 // P2: `npm pack --dry-run` (offline) ships the engine + plugin surfaces and none of the
 //     repo-only trees (bench/site/docs/tests).
+// P3: the real packed artifact installs offline without optional dependencies, and every
+//     installed bin answers --help.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
-import { PLUGIN_ROOT } from './helpers.mjs';
+import { PLUGIN_ROOT, cleanup, tmpDir } from './helpers.mjs';
 
 const pkg = JSON.parse(readFileSync(join(PLUGIN_ROOT, 'package.json'), 'utf8'));
 
@@ -51,5 +53,71 @@ test('P2: npm pack ships engine + plugin surfaces, excludes repo-only trees', ()
   // "zero deps, runs 100% locally" package.
   for (const harness of ['scripts/check', 'scripts/spec_lint.py', 'scripts/hook-check', 'scripts/hook-protect']) {
     assert.ok(!files.includes(harness), `tarball excludes harness file ${harness}`);
+  }
+});
+
+test('P3: packed release installs offline and each installed bin answers --help', () => {
+  const packDir = tmpDir('codeweb-pack-');
+  const prefix = tmpDir('codeweb-install-');
+  const WIN = process.platform === 'win32';
+  const npm = WIN ? 'npm.cmd' : 'npm';
+  const spawnOptions = {
+    cwd: PLUGIN_ROOT,
+    encoding: 'utf8',
+    maxBuffer: 1 << 26,
+    shell: WIN,
+    env: {
+      ...process.env,
+      npm_config_audit: 'false',
+      npm_config_fund: 'false',
+    },
+  };
+
+  try {
+    const packed = spawnSync(
+      npm,
+      ['pack', '--json', '--pack-destination', packDir],
+      spawnOptions,
+    );
+    assert.equal(packed.status, 0, packed.stderr);
+    const tarball = join(packDir, JSON.parse(packed.stdout)[0].filename);
+
+    const installed = spawnSync(
+      npm,
+      [
+        'install',
+        '--offline',
+        '--ignore-scripts',
+        '--omit=optional',
+        '--no-audit',
+        '--no-fund',
+        '--prefix',
+        prefix,
+        tarball,
+      ],
+      spawnOptions,
+    );
+    assert.equal(installed.status, 0, installed.stderr);
+
+    for (const name of Object.keys(pkg.bin || {})) {
+      const installedBin = join(
+        prefix,
+        'node_modules',
+        '.bin',
+        WIN ? `${name}.cmd` : name,
+      );
+      const help = spawnSync(installedBin, ['--help'], {
+        ...spawnOptions,
+        cwd: prefix,
+      });
+      assert.equal(
+        help.status,
+        0,
+        `${name} --help failed after offline installation\n${help.stderr}`,
+      );
+    }
+  } finally {
+    cleanup(packDir);
+    cleanup(prefix);
   }
 });

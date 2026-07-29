@@ -48,6 +48,10 @@ resolves; it cannot verify a stranger's card, and this spec claims nothing more.
 Grammar (parsed by `scripts/spec_lint.py` — one line per AC):
 `- **AC-n** — <criterion> | check: ` `` `<command>` `` ` | status: next|built|dropped`
 
+The structured trace and verification companion is
+`docs/requirements/codeweb-product-requirements.yaml`. `SPEC.md` remains the
+controlling product specification.
+
 - **AC-1** — the full product suite passes from a bare, dependency-free checkout | check: `npm test` | status: built
 - **AC-2** — every public claim surface agrees with package.json and the charter identity line | check: `node scripts/check-consistency.mjs` | status: built
 - **AC-3** — the product installs and runs with zero required dependencies | check: `node -e "const p=JSON.parse(require('fs').readFileSync('package.json','utf8'));process.exit(p.dependencies&&Object.keys(p.dependencies).length?1:0)"` | status: built
