@@ -30,6 +30,8 @@ notes so validated results, papers, and new tools never get lost in commit histo
   format bumps to v18 (one cold re-extract per workspace on upgrade).
 
 ### Fixed
+- The social-preview source is now a center-safe 1280×640 JPEG. Important copy remains visible
+  in narrow mobile crops, and the generated site publishes matching JPEG Open Graph metadata.
 - The npm downloads dashboard now starts at the package's actual first publication date
   (2026-07-19), excludes the newest three incomplete UTC days, identifies its cutoff, and calls
   downloads package retrievals instead of users.

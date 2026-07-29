@@ -23,6 +23,12 @@ test('--out redirects the whole build', () => {
   const r = runNode(BUILD, ['--out', OUT]);
   assert.equal(r.status, 0, r.stderr);
   for (const p of PAGES) assert.ok(existsSync(join(OUT, p)), `missing ${p} in --out dir`);
+  const og = readFileSync(join(OUT, 'assets', 'og.jpg'));
+  assert.deepEqual([...og.subarray(0, 3)], [0xff, 0xd8, 0xff], 'Open Graph asset must be a JPEG');
+  const home = readFileSync(join(OUT, 'index.html'), 'utf8');
+  assert.match(home, /<meta property="og:image" content="[^"]+\/assets\/og\.jpg">/);
+  assert.match(home, /<meta property="og:image:width" content="1280">/);
+  assert.match(home, /<meta property="og:image:height" content="640">/);
 });
 
 test('builder runs and reports the expected page count', () => {

@@ -15,7 +15,7 @@ brand and the product look like one thing. `tests/brand-sync.test.mjs` enforces 
 | `pipeline.svg` | Static, labelled how-it-works diagram. |
 | `proof-strip.svg` | README benchmark proof strip. Its embedded metadata names the dated evidence sources. |
 | `../screens/zod-terminal-run.svg` | Condensed animated replay of a real npm-package run against pinned Zod source. |
-| `social-preview.png` | 1200×630 card configured as the repository **Social preview** on 2026-07-29. |
+| `social-preview.jpg` | 1280×640 center-safe card for the repository **Social preview** and site Open Graph metadata. |
 
 The screenshots in `../screens/` are the **actual generated `report.html`**, not mockups.
 `zod-terminal-run.svg` is a condensed replay of real CLI output captured on 2026-07-29 from

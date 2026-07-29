@@ -276,7 +276,7 @@ function buildPage(page) {
     description: esc(page.description),
     ogTitle: esc(page.ogTitle),
     canonical,
-    ogImage: `${BASE}assets/og.png`,
+    ogImage: `${BASE}assets/og.jpg`,
     jsonld: JSONLD,
     nav: nav(page.nav),
     footer: fill(footerTpl, blocks()),
@@ -331,10 +331,10 @@ function buildAssets() {
   writeFileSync(join(ASSETS, 'site.css'), `${readSite('tokens.css')}\n${readSite('styles.css')}`);
   writeFileSync(join(ASSETS, 'favicon.svg'), FAVICON);
   copyDir(join(SITE, 'assets'), /\.(js|woff2|ttf)$/);   // interactive engine + self-hosted fonts — same-origin, zero-dep
-  copyDir(join(ROOT, 'assets', 'brand'), /\.(svg|png)$/);
+  copyDir(join(ROOT, 'assets', 'brand'), /\.(svg|png|jpg)$/);
   copyDir(join(ROOT, 'assets', 'screens'), /\.png$/);
-  const og = join(ROOT, 'assets', 'brand', 'social-preview.png');
-  if (existsSync(og)) copyFileSync(og, join(ASSETS, 'og.png'));
+  const og = join(ROOT, 'assets', 'brand', 'social-preview.jpg');
+  if (existsSync(og)) copyFileSync(og, join(ASSETS, 'og.jpg'));
 }
 
 // ---------------------------------------------------------------- wrap demo
@@ -383,9 +383,9 @@ function injectDemoNav() {
 <meta property="og:title" content="Live demo — axios, mapped by codeweb">
 <meta property="og:description" content="A real interactive codeweb map of axios: 274 product symbols, 8 domains, body-confirmed duplication findings. No mockups.">
 <meta property="og:url" content="${BASE}demo/">
-<meta property="og:image" content="${BASE}assets/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image" content="${BASE}assets/og.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
 <meta property="og:image:alt" content="codeweb — interactive call-graph map of a codebase">
 <meta name="twitter:card" content="summary_large_image"><!--/cw-head-->`);
   writeFileSync(p, html);
