@@ -117,8 +117,8 @@ export function renderAcquisitionSvg(rows, { capturedAt = new Date().toISOString
   <rect width="${width}" height="${height}" fill="#060608"/>
   <rect x="1" y="1" width="${width - 2}" height="${height - 2}" fill="none" stroke="#26242C"/>
   <text x="52" y="50" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="17" font-weight="700" letter-spacing="3">PUBLIC NPM SIGNAL</text>
-  <text x="52" y="102" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="42" font-weight="800">daily downloads</text>
-  <text x="52" y="138" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="20">@ghostlygawd/codeweb · completed days</text>
+  <text x="52" y="102" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="42" font-weight="800">weekly downloads</text>
+  <text x="52" y="138" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="20">@ghostlygawd/codeweb · daily trend</text>
   <text x="${width - 52}" y="92" text-anchor="end" fill="#C6F24E" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="58" font-weight="800">${xml(weeklyValue)}</text>
   <text x="${width - 52}" y="128" text-anchor="end" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="17">${xml(weeklyLabel)}</text>
   ${grid}

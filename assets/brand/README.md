@@ -14,9 +14,13 @@ brand and the product look like one thing. `tests/brand-sync.test.mjs` enforces 
 | `demo.svg` | Looping animated pipeline (`extract → cluster → overlap → render`). CSS + SMIL, plays inline via `<img>` on GitHub. |
 | `pipeline.svg` | Static, labelled how-it-works diagram. |
 | `proof-strip.svg` | README benchmark proof strip. Its embedded metadata names the dated evidence sources. |
+| `../screens/zod-terminal-run.svg` | Condensed animated replay of a real npm-package run against pinned Zod source. |
 | `social-preview.png` | 1280×640 card for **repo Settings → Social preview** (upload manually). |
 
 The screenshots in `../screens/` are the **actual generated `report.html`**, not mockups.
+`zod-terminal-run.svg` is a condensed replay of real CLI output captured on 2026-07-29 from
+`@ghostlygawd/codeweb` 0.12.0 against Zod commit `912f0f5`. Its metadata records the full source
+commit and the one sanitization: the absolute local workspace path is displayed as `.codeweb`.
 
 ## Palette (shared with `scripts/report-template.html` and `site/tokens.css`)
 

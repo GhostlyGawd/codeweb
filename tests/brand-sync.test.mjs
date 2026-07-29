@@ -149,3 +149,27 @@ test('B8: no dead image references in README or site content', () => {
     }
   }
 });
+
+// ---- B9: the terminal conversion visual stays real, attributable, and sanitized ---------------
+test('B9: terminal replay is evidence-backed, sanitized, and placed in the quickstart', () => {
+  const terminal = read('assets', 'screens', 'zod-terminal-run.svg');
+  assert.match(terminal, /@ghostlygawd\/codeweb 0\.12\.0/);
+  assert.match(terminal, /912f0f51b0ced654d0069741e7160834dca742ee/);
+  assert.match(terminal, /Captured 2026-07-29/);
+  assert.match(terminal, /1388 symbols, 1616 edges from 409 files/);
+  assert.match(terminal, /actionable 66 · needs review 39 · dismissed 22/);
+  assert.doesNotMatch(terminal, /\/home\/|[A-Z]:\\|rhenm|scratch/i);
+  assert.doesNotMatch(terminal, /<circle|<ellipse|\brx="/);
+
+  const readme = read('README.md');
+  const openingCommand = readme.indexOf('npx -y @ghostlygawd/codeweb .');
+  const downloadChart = readme.indexOf('assets/metrics/npm-downloads.svg');
+  const quickstart = readme.indexOf('## Try it on your repo');
+  const terminalReplay = readme.indexOf('assets/screens/zod-terminal-run.svg');
+  const productDemo = readme.indexOf('## See it in action');
+  assert.ok(openingCommand > -1 && openingCommand < downloadChart, 'copyable npx command must precede the download chart');
+  assert.ok(
+    quickstart < terminalReplay && terminalReplay < productDemo,
+    'real terminal replay must support the quickstart without displacing the opening download chart',
+  );
+});
