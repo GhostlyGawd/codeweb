@@ -1,6 +1,6 @@
 # Requirements artifact report
 
-Status: `DRAFT — SOURCE OR DECISIONS INCOMPLETE`
+Status: `BASELINED — AUTHORIZED APPROVAL RECORDED`
 
 Content digest: `sha256:ef6faa2ef30fecc63fb7c2428c5b647266d26ab210efec245d0d979302634ecf`
 
@@ -11,11 +11,11 @@ Claim boundary: Artifact readiness only. This report is not NASA certification o
 | Gate | Result |
 |---|---|
 | deterministic_checks | PASS |
-| human_semantic_reviews | OPEN |
+| human_semantic_reviews | PASS |
 | lifecycle_evidence | PASS |
 | npr_authority_evidence | PASS |
-| authorized_baseline_approval | OPEN |
-| clean_output_permitted | OPEN |
+| authorized_baseline_approval | PASS |
+| clean_output_permitted | PASS |
 
 ## Findings
 
@@ -55,7 +55,12 @@ Claim boundary: Artifact readiness only. This report is not NASA certification o
 | CW-PR-008B | LANG-SHALL-001 | PASS | NASA-SEH-REV2 Appendix C | One profile keyword is present: shall. |  |
 | CW-PR-008C | VRF-PLAN-001 | PASS | NASA-SEH-REV2 sections 5.3 and 6.1; Appendix D | The requirement has a separate verification plan. |  |
 | CW-PR-008C | LANG-SHALL-001 | PASS | NASA-SEH-REV2 Appendix C | One profile keyword is present: shall. |  |
-| document.reviews | REVIEW-001 | REVIEW_REQUIRED | requirements-schema.md | Required human semantic reviews are incomplete. | conflicts, coverage, feasibility, source_fidelity, verification_adequacy |
+| reviews[0] | REVIEW-001 | PASS | requirements-schema.md | Human review passed for source_fidelity. | The operator explicitly approved source fidelity for PR #85 in the Codex review thread after the requirements handoff. |
+| reviews[1] | REVIEW-001 | PASS | requirements-schema.md | Human review passed for coverage. | The operator explicitly approved coverage for PR #85 in the Codex review thread after the requirements handoff. |
+| reviews[2] | REVIEW-001 | PASS | requirements-schema.md | Human review passed for conflicts. | The operator explicitly approved conflict resolution for PR #85 in the Codex review thread after the requirements handoff. |
+| reviews[3] | REVIEW-001 | PASS | requirements-schema.md | Human review passed for feasibility. | The operator explicitly approved feasibility for PR #85 in the Codex review thread after the requirements handoff. |
+| reviews[4] | REVIEW-001 | PASS | requirements-schema.md | Human review passed for verification_adequacy. | The operator explicitly approved verification adequacy for PR #85 in the Codex review thread after the requirements handoff. |
+| approvals[0] | APPROVAL-001 | PASS | requirements-schema.md | Authorized baseline approval matches the current content digest. |  |
 
 ## Traceability and verification matrix
 

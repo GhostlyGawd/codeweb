@@ -537,5 +537,58 @@ unresolved:
       tests/package-shape.test.mjs P3 packs the real artifact, installs it in an
       isolated prefix with offline mode and optional dependencies omitted, and
       verifies that each installed binary returns exit code 0 for `--help`.
-reviews: []
-approvals: []
+reviews:
+  - dimension: source_fidelity
+    reviewer_id: codeweb-operator
+    role: operator-requirements-reviewer
+    date: "2026-07-29"
+    result: PASS
+    evidence: >-
+      The operator explicitly approved source fidelity for PR #85 in the Codex
+      review thread after the requirements handoff.
+    content_digest: sha256:ef6faa2ef30fecc63fb7c2428c5b647266d26ab210efec245d0d979302634ecf
+  - dimension: coverage
+    reviewer_id: codeweb-operator
+    role: operator-requirements-reviewer
+    date: "2026-07-29"
+    result: PASS
+    evidence: >-
+      The operator explicitly approved coverage for PR #85 in the Codex review
+      thread after the requirements handoff.
+    content_digest: sha256:ef6faa2ef30fecc63fb7c2428c5b647266d26ab210efec245d0d979302634ecf
+  - dimension: conflicts
+    reviewer_id: codeweb-operator
+    role: operator-requirements-reviewer
+    date: "2026-07-29"
+    result: PASS
+    evidence: >-
+      The operator explicitly approved conflict resolution for PR #85 in the
+      Codex review thread after the requirements handoff.
+    content_digest: sha256:ef6faa2ef30fecc63fb7c2428c5b647266d26ab210efec245d0d979302634ecf
+  - dimension: feasibility
+    reviewer_id: codeweb-operator
+    role: operator-requirements-reviewer
+    date: "2026-07-29"
+    result: PASS
+    evidence: >-
+      The operator explicitly approved feasibility for PR #85 in the Codex
+      review thread after the requirements handoff.
+    content_digest: sha256:ef6faa2ef30fecc63fb7c2428c5b647266d26ab210efec245d0d979302634ecf
+  - dimension: verification_adequacy
+    reviewer_id: codeweb-operator
+    role: operator-requirements-reviewer
+    date: "2026-07-29"
+    result: PASS
+    evidence: >-
+      The operator explicitly approved verification adequacy for PR #85 in the
+      Codex review thread after the requirements handoff.
+    content_digest: sha256:ef6faa2ef30fecc63fb7c2428c5b647266d26ab210efec245d0d979302634ecf
+approvals:
+  - approver_id: codeweb-operator
+    role: baseline_approver
+    date: "2026-07-29"
+    result: APPROVED
+    evidence: >-
+      The operator explicitly approved the requirements baseline for PR #85 in
+      the Codex review thread after the five required review dimensions.
+    content_digest: sha256:ef6faa2ef30fecc63fb7c2428c5b647266d26ab210efec245d0d979302634ecf

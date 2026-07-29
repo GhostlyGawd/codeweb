@@ -1,19 +1,19 @@
 {
-  "status": "DRAFT — SOURCE OR DECISIONS INCOMPLETE",
+  "status": "BASELINED — AUTHORIZED APPROVAL RECORDED",
   "content_digest": "sha256:ef6faa2ef30fecc63fb7c2428c5b647266d26ab210efec245d0d979302634ecf",
   "summary": {
-    "PASS": 34,
+    "PASS": 40,
     "FAIL": 0,
-    "REVIEW_REQUIRED": 1,
+    "REVIEW_REQUIRED": 0,
     "NOT_APPLICABLE": 0
   },
   "release_gates": {
     "deterministic_checks": true,
-    "human_semantic_reviews": false,
+    "human_semantic_reviews": true,
     "lifecycle_evidence": true,
     "npr_authority_evidence": true,
-    "authorized_baseline_approval": false,
-    "clean_output_permitted": false
+    "authorized_baseline_approval": true,
+    "clean_output_permitted": true
   },
   "issues": [
     {
@@ -289,12 +289,52 @@
       "evidence": ""
     },
     {
-      "location": "document.reviews",
+      "location": "reviews[0]",
       "check": "REVIEW-001",
-      "result": "REVIEW_REQUIRED",
+      "result": "PASS",
       "basis": "requirements-schema.md",
-      "message": "Required human semantic reviews are incomplete.",
-      "evidence": "conflicts, coverage, feasibility, source_fidelity, verification_adequacy"
+      "message": "Human review passed for source_fidelity.",
+      "evidence": "The operator explicitly approved source fidelity for PR #85 in the Codex review thread after the requirements handoff."
+    },
+    {
+      "location": "reviews[1]",
+      "check": "REVIEW-001",
+      "result": "PASS",
+      "basis": "requirements-schema.md",
+      "message": "Human review passed for coverage.",
+      "evidence": "The operator explicitly approved coverage for PR #85 in the Codex review thread after the requirements handoff."
+    },
+    {
+      "location": "reviews[2]",
+      "check": "REVIEW-001",
+      "result": "PASS",
+      "basis": "requirements-schema.md",
+      "message": "Human review passed for conflicts.",
+      "evidence": "The operator explicitly approved conflict resolution for PR #85 in the Codex review thread after the requirements handoff."
+    },
+    {
+      "location": "reviews[3]",
+      "check": "REVIEW-001",
+      "result": "PASS",
+      "basis": "requirements-schema.md",
+      "message": "Human review passed for feasibility.",
+      "evidence": "The operator explicitly approved feasibility for PR #85 in the Codex review thread after the requirements handoff."
+    },
+    {
+      "location": "reviews[4]",
+      "check": "REVIEW-001",
+      "result": "PASS",
+      "basis": "requirements-schema.md",
+      "message": "Human review passed for verification_adequacy.",
+      "evidence": "The operator explicitly approved verification adequacy for PR #85 in the Codex review thread after the requirements handoff."
+    },
+    {
+      "location": "approvals[0]",
+      "check": "APPROVAL-001",
+      "result": "PASS",
+      "basis": "requirements-schema.md",
+      "message": "Authorized baseline approval matches the current content digest.",
+      "evidence": ""
     }
   ],
   "traceability_matrix": [
