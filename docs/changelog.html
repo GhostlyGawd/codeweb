@@ -54,6 +54,14 @@
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
+<li><strong>Evidence-backed README proof and acquisition visuals.</strong> A compact benchmark strip links its</li>
+</ul>
+<p>  three claims to the existing research ledger, three conversion badges lead to the npx trial,</p>
+<p>  live demo, and Claude Code install, and a zero-dependency renderer turns completed daily npm</p>
+<p>  data into an accessible, mobile-readable line chart near the top of the README. The scheduled</p>
+<p>  acquisition workflow retains the weekly counter ledger and refreshes the chart without a new</p>
+<p>  service, secret, or user-level data.</p>
+<ul>
 <li><strong>JSON config-file support (file-level).</strong> Imported <code>.json</code> files are now first-class map</li>
 </ul>
 <p>  nodes: default imports, named imports (TS <code>resolveJsonModule</code>), namespace imports,</p>
@@ -65,6 +73,11 @@
 <p>  file (nothing imports it) never becomes a node, so lock files add no noise. Scan-cache</p>
 <p>  format bumps to v18 (one cold re-extract per workspace on upgrade).</p>
 <h3 class="cl-grp">Fixed</h3>
+<ul>
+<li>The npm downloads dashboard now starts at the package's actual first publication date</li>
+</ul>
+<p>  (2026-07-19), excludes the newest three incomplete UTC days, identifies its cutoff, and calls</p>
+<p>  downloads package retrievals instead of users.</p>
 <ul>
 <li>The mcp-registry workflow now chains off the release workflow via <code>workflow_run</code> (gated on</li>
 </ul>

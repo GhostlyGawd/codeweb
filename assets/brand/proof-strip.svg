@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 230" width="1040" height="230" role="img" aria-labelledby="title desc">
+  <title id="title">Measured codeweb results</title>
+  <desc id="desc">Agents found 74 percent of real callers with codeweb and 44 percent with grep at the same context spend. Impact analysis used 126 times fewer tokens. More than 490,000 deterministic comparisons had zero disagreements.</desc>
+  <metadata>Captured 2026-07-28. Sources: bench/experiments/efficiency-pilot.reps5-v090.json, bench/results/oracle-ab.json, and bench/results/correctness-query.json. Repository-authored visual; MIT license.</metadata>
+  <rect width="1040" height="230" fill="#060608"/>
+  <rect x="1" y="1" width="1038" height="228" fill="none" stroke="#26242C"/>
+  <text x="36" y="38" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="12" font-weight="700" letter-spacing="2">MEASURED, NOT CLAIMED</text>
+  <g transform="translate(36 64)">
+    <rect width="300" height="128" fill="#0D0D11" stroke="#26242C"/>
+    <text x="22" y="49" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="34" font-weight="800">44% → <tspan fill="#C6F24E">74%</tspan></text>
+    <text x="22" y="80" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14" font-weight="700">real callers found</text>
+    <text x="22" y="104" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="11">grep → codeweb · same context spend</text>
+  </g>
+  <g transform="translate(370 64)">
+    <rect width="300" height="128" fill="#0D0D11" stroke="#26242C"/>
+    <text x="22" y="49" fill="#C6F24E" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="34" font-weight="800">126×</text>
+    <text x="22" y="80" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14" font-weight="700">fewer tokens for impact</text>
+    <text x="22" y="104" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="11">one structural query vs repeated grep</text>
+  </g>
+  <g transform="translate(704 64)">
+    <rect width="300" height="128" fill="#0D0D11" stroke="#26242C"/>
+    <text x="22" y="49" fill="#C6F24E" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="34" font-weight="800">&gt;490k</text>
+    <text x="22" y="80" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="14" font-weight="700">deterministic comparisons</text>
+    <text x="22" y="104" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="11">0 disagreements with independent oracles</text>
+  </g>
+</svg>

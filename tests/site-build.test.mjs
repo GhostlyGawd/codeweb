@@ -113,3 +113,15 @@ test('pages are self-contained — no third-party network origins', () => {
     assert.deepEqual(externals, [], `${f} references unexpected external origins: ${externals.join(', ')}`);
   }
 });
+
+test('downloads dashboard uses the full package history and excludes incomplete recent days', () => {
+  runNode(BUILD, ['--out', OUT]);
+  const downloads = readFileSync(join(OUT, 'downloads.html'), 'utf8');
+  assert.match(downloads, /FIRST_PUBLISH = '2026-07-19'/);
+  assert.match(downloads, /setUTCDate\(cutoff\.getUTCDate\(\) - 3\)/);
+  assert.match(downloads, /completed day\(s\) · cutoff/);
+  assert.match(downloads, /downloads through/);
+  assert.match(downloads, /last 7 completed days/);
+  assert.doesNotMatch(downloads, /all-time/);
+  assert.match(downloads, /Downloads are package retrievals, not a count of users/);
+});

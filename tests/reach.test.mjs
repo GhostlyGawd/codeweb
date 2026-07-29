@@ -113,6 +113,12 @@ test('RE6: the acquisition ledger runs on a schedule and appends where the docs 
   assert.match(wf, /cron:/, 'cron-scheduled');
   assert.match(wf, /acquisition-ledger\.jsonl/, 'appends the JSONL series');
   assert.match(wf, /api\.npmjs\.org\/downloads|npmjs\.org/, 'snapshots npm downloads (the 14-day-expiry problem)');
+  assert.match(wf, /npmPeriodStart/, 'preserves the npm reporting-window start');
+  assert.match(wf, /npmPeriodEnd/, 'preserves the npm reporting-window cutoff');
+  assert.match(wf, /downloads\/range\/2026-07-19:\$\{CUTOFF\}/, 'fetches the completed daily npm range');
+  assert.match(wf, /3 days ago/, 'excludes incomplete recent daily counts');
+  assert.match(wf, /render-acquisition\.mjs/, 'regenerates the README trend visual');
+  assert.match(wf, /assets\/metrics\/npm-downloads\.svg/, 'commits the generated trend visual');
 });
 
 test('RE7: the spend-gated AI work is documented as funded proposals, not silently run', () => {

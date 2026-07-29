@@ -24,6 +24,8 @@ jobs:
             const row = {
               at: new Date().toISOString().slice(0, 10),
               npmWeeklyDownloads: npm.downloads ?? null,
+              npmPeriodStart: npm.start ?? null,
+              npmPeriodEnd: npm.end ?? null,
               stars: repo.stargazers_count ?? null,
               forks: repo.forks_count ?? null,
               openIssues: repo.open_issues_count ?? null,
@@ -31,10 +33,17 @@ jobs:
             require("fs").appendFileSync("bench/acquisition-ledger.jsonl", JSON.stringify(row) + "\n");
             console.log("appended:", JSON.stringify(row));
           ' "$NPM" "$REPO"
+      - name: Render the public npm trend
+        run: |
+          set -euo pipefail
+          CUTOFF=$(date -u -d '3 days ago' +%F)
+          NPM_RANGE="${RUNNER_TEMP}/npm-downloads-range.json"
+          curl -fsSL "https://api.npmjs.org/downloads/range/2026-07-19:${CUTOFF}/%40ghostlygawd%2Fcodeweb" -o "$NPM_RANGE"
+          node scripts/render-acquisition.mjs "$NPM_RANGE"
       - name: Commit the row
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add bench/acquisition-ledger.jsonl
+          git add bench/acquisition-ledger.jsonl assets/metrics/npm-downloads.svg
           git diff --cached --quiet || git commit -m 'ledger: weekly acquisition snapshot [skip ci]'
           git push

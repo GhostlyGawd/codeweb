@@ -10,6 +10,12 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Added
+- **Evidence-backed README proof and acquisition visuals.** A compact benchmark strip links its
+  three claims to the existing research ledger, three conversion badges lead to the npx trial,
+  live demo, and Claude Code install, and a zero-dependency renderer turns completed daily npm
+  data into an accessible, mobile-readable line chart near the top of the README. The scheduled
+  acquisition workflow retains the weekly counter ledger and refreshes the chart without a new
+  service, secret, or user-level data.
 - **JSON config-file support (file-level).** Imported `.json` files are now first-class map
   nodes: default imports, named imports (TS `resolveJsonModule`), namespace imports,
   `require('./config.json')`, and extensionless `require('./config')` all resolve to a
@@ -21,6 +27,9 @@ notes so validated results, papers, and new tools never get lost in commit histo
   format bumps to v18 (one cold re-extract per workspace on upgrade).
 
 ### Fixed
+- The npm downloads dashboard now starts at the package's actual first publication date
+  (2026-07-19), excludes the newest three incomplete UTC days, identifies its cutoff, and calls
+  downloads package retrievals instead of users.
 - The mcp-registry workflow now chains off the release workflow via `workflow_run` (gated on
   success) — its previous `release: published` trigger could never fire, because events created
   with `GITHUB_TOKEN` don't trigger workflows. codeweb's first registry listing

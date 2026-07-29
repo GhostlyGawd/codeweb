@@ -10,9 +10,18 @@
 
 **[Website](https://ghostlygawd.github.io/codeweb/)**&nbsp;·&nbsp;[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP: Model Context Protocol)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)&nbsp;·&nbsp;[Changelog](CHANGELOG.md)
 
+[![Try it with npx](https://img.shields.io/badge/Try_it_with_npx-060608?style=for-the-badge&logo=npm&logoColor=c6f24e)](#try-it-on-your-repo)
+[![Open the live demo](https://img.shields.io/badge/Open_the_live_demo-060608?style=for-the-badge&logoColor=c6f24e)](https://ghostlygawd.github.io/codeweb/demo/)
+[![Install the Claude Code plugin](https://img.shields.io/badge/Install_the_Claude_Code_plugin-060608?style=for-the-badge&logoColor=c6f24e)](#install)
+
 </div>
 
 **Your agents break less code and burn fewer tokens.**
+
+<div align="center">
+<a href="https://ghostlygawd.github.io/codeweb/downloads.html"><img src="assets/metrics/npm-downloads.svg" alt="Line chart of completed daily npm package downloads for @ghostlygawd/codeweb, generated from the public npm downloads API" width="100%"></a>
+<br><sub>Completed daily downloads from npm's public API. Package downloads are retrievals, not a count of users. Select the chart for the live data and reporting cutoff.</sub>
+</div>
 
 codeweb reads your code. It maps each function and the calls between functions. It maps
 3,000 symbols in approximately 3 seconds. Static analysis produces the same map from the
@@ -31,6 +40,11 @@ list can cause an agent to break code that it did not inspect.
 
 The map also shows relationships that are not visible in one file. These relationships include
 **duplicated logic, dead code, hotspots, and tangled domains**.
+
+<div align="center">
+<a href="https://ghostlygawd.github.io/codeweb/research.html"><img src="assets/brand/proof-strip.svg" alt="Measured codeweb results: agents found 74% of real callers with codeweb and 44% with grep at the same context spend; impact analysis used 126 times fewer tokens; more than 490,000 deterministic comparisons had zero disagreements" width="100%"></a>
+<br><sub>Measured against fixed tasks and independent oracles. Select the proof strip for the methodology and receipts.</sub>
+</div>
 
 ---
 

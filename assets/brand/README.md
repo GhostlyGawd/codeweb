@@ -13,6 +13,7 @@ brand and the product look like one thing. `tests/brand-sync.test.mjs` enforces 
 | `logomark.svg` | The 2×2 pixel glyph on a dark tile — favicon, avatars, marketplace icon. |
 | `demo.svg` | Looping animated pipeline (`extract → cluster → overlap → render`). CSS + SMIL, plays inline via `<img>` on GitHub. |
 | `pipeline.svg` | Static, labelled how-it-works diagram. |
+| `proof-strip.svg` | README benchmark proof strip. Its embedded metadata names the dated evidence sources. |
 | `social-preview.png` | 1280×640 card for **repo Settings → Social preview** (upload manually). |
 
 The screenshots in `../screens/` are the **actual generated `report.html`**, not mockups.

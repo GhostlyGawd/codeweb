@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>npm downloads — codeweb</title>
-<meta name="description" content="Daily npm downloads of @ghostlygawd/codeweb over time, live from the npm registry API.">
+<meta name="description" content="Completed daily npm downloads of @ghostlygawd/codeweb, with a three-day lag guard for incomplete registry data.">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="codeweb">
 <meta property="og:title" content="codeweb npm downloads">
-<meta property="og:description" content="Daily npm downloads of @ghostlygawd/codeweb over time, live from the npm registry API.">
+<meta property="og:description" content="Completed daily npm downloads of @ghostlygawd/codeweb, with a three-day lag guard for incomplete registry data.">
 <meta property="og:url" content="https://ghostlygawd.github.io/codeweb/downloads.html">
 <meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.png">
 <meta property="og:image:width" content="1200">
@@ -48,21 +48,23 @@
     <div class="section-head">
       <span class="eyebrow">Operator</span>
       <h1>npm downloads over time</h1>
-      <p class="lead"><code>@ghostlygawd/codeweb</code> — daily downloads from the npm registry, live. Unlisted page: it is not linked from the site or the sitemap.</p>
+      <p class="lead"><code>@ghostlygawd/codeweb</code> — completed daily download counts from the npm registry. Unlisted page: it is not linked from the site or the sitemap.</p>
     </div>
     <div class="card">
       <div id="dl-summary" class="muted" style="margin-bottom:.75rem">Loading download data from api.npmjs.org…</div>
       <svg id="dl-chart" viewBox="0 0 720 240" width="100%" role="img" aria-label="Daily npm downloads of @ghostlygawd/codeweb over time"></svg>
       <div id="dl-range" class="muted" style="font-size:.85em"></div>
     </div>
-    <p class="muted" style="margin-top:1rem">Data: npm's public downloads API (per-day counts; mirrors and caches mean small lags are normal). The npm API serves at most 18 months per request — revisit this page's script when the package is older than that.</p>
+    <p class="muted" style="margin-top:1rem">Data: npm's public downloads API. The chart stops three days before the current UTC date because recent counts can still change. Downloads are package retrievals, not a count of users. The npm API serves at most 18 months per request — revisit this page's script when the package is older than that.</p>
   </div>
 </section>
 <script>
 (function () {
   var PKG = '@ghostlygawd/codeweb';
-  var FIRST_PUBLISH = '2026-07-23';
-  var end = new Date().toISOString().slice(0, 10);
+  var FIRST_PUBLISH = '2026-07-19';
+  var cutoff = new Date();
+  cutoff.setUTCDate(cutoff.getUTCDate() - 3);
+  var end = cutoff.toISOString().slice(0, 10);
   var url = 'https://api.npmjs.org/downloads/range/' + FIRST_PUBLISH + ':' + end + '/' + encodeURIComponent(PKG);
   var sum = document.getElementById('dl-summary');
   var rangeEl = document.getElementById('dl-range');
@@ -81,7 +83,7 @@
     return r.json();
   }).then(function (data) {
     var days = (data && data.downloads) || [];
-    if (!days.length) { sum.textContent = 'No download data yet — npm publishes counts with about a day of lag.'; return; }
+    if (!days.length) { sum.textContent = 'No completed download data is available for this range yet.'; return; }
 
     var total = 0, peak = 0, peakDay = '';
     for (var i = 0; i < days.length; i++) {
@@ -90,8 +92,8 @@
     }
     var last7 = 0;
     for (var j = Math.max(0, days.length - 7); j < days.length; j++) last7 += days[j].downloads;
-    sum.textContent = total.toLocaleString() + ' all-time · ' + last7.toLocaleString()
-      + ' in the last 7 days · peak ' + peak.toLocaleString() + '/day (' + peakDay + ')';
+    sum.textContent = total.toLocaleString() + ' downloads through ' + end + ' · ' + last7.toLocaleString()
+      + ' in the last 7 completed days · peak ' + peak.toLocaleString() + '/day (' + peakDay + ')';
 
     var W = 720, H = 240, PAD = 30;
     var n = days.length, max = Math.max(peak, 1);
@@ -120,7 +122,7 @@
     }));
     if (n === 1) svg.appendChild(el('circle', { cx: W / 2, cy: pts[0].split(',')[1], r: '3', fill: '#c6f24e' }));
 
-    rangeEl.textContent = days[0].day + ' → ' + days[n - 1].day + ' · ' + n + ' day(s)';
+    rangeEl.textContent = days[0].day + ' → ' + days[n - 1].day + ' · ' + n + ' completed day(s) · cutoff ' + end;
   }).catch(function (e) {
     sum.textContent = 'Could not load download data (' + e.message + '). The npm API may be briefly unavailable — reload to retry.';
   });

@@ -244,9 +244,9 @@ const PAGES = [
   // The support page. Free-forever contract first; sponsors get featured placement — no cost
   // claims (CHARTER.md C7 ruled the old "funds the benchmark spend" story fabricated).
   { slug: 'support', nav: 'support', title: 'Support codeweb — sponsorship & org support — codeweb', ogTitle: 'Support codeweb', description: 'Everything local is free forever. Sponsoring supports the project, and sponsors get featured placement in the README and on the site. Org support by email.' },
-  // Operator dashboard: live npm download counts, drawn client-side from api.npmjs.org.
-  // Unlisted — built and served, but excluded from the sitemap and linked from nowhere.
-  { slug: 'downloads', nav: 'home', unlisted: true, title: 'npm downloads — codeweb', ogTitle: 'codeweb npm downloads', description: 'Daily npm downloads of @ghostlygawd/codeweb over time, live from the npm registry API.' },
+  // Operator dashboard: completed npm download counts, drawn client-side from api.npmjs.org.
+  // Built and served for the README chart, but excluded from site navigation and the sitemap.
+  { slug: 'downloads', nav: 'home', unlisted: true, title: 'npm downloads — codeweb', ogTitle: 'codeweb npm downloads', description: 'Completed daily npm downloads of @ghostlygawd/codeweb, with a three-day lag guard for incomplete registry data.' },
 ];
 
 // SEO F10: one SoftwareApplication block, filled from the same derived vars as everything else —
