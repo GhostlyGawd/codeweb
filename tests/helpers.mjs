@@ -15,6 +15,20 @@ export const PLUGIN_ROOT = resolve(TESTS_DIR, '..');
 export const SCRIPTS = join(PLUGIN_ROOT, 'scripts');
 export const script = (name) => join(SCRIPTS, name);
 
+// Synthetic repositories must stay hermetic without disabling user-level Git hooks. Reuse the
+// current checkout's approved identity when one exists; CI has no local identity guard and uses
+// the non-personal fallback. Never print the resolved identity or write it to a tracked file.
+// Fixture commits contain it only until cleanup removes the temporary repository.
+export function fixtureGitIdentity() {
+  const options = { cwd: PLUGIN_ROOT, encoding: 'utf8' };
+  const name = spawnSync('git', ['config', '--get', 'user.name'], options);
+  const email = spawnSync('git', ['config', '--get', 'user.email'], options);
+  if (name.status === 0 && email.status === 0 && name.stdout.trim() && email.stdout.trim()) {
+    return { name: name.stdout.trim(), email: email.stdout.trim() };
+  }
+  return { name: 'Codeweb Test', email: 'codeweb-test@example.invalid' };
+}
+
 // Run a node script as a child process. Never throws on non-zero exit — returns the full result
 // so tests can assert on status/stdout/stderr explicitly.
 export function runNode(scriptPath, args = [], { env = {}, cwd = PLUGIN_ROOT } = {}) {

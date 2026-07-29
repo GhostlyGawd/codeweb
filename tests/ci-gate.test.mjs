@@ -3,7 +3,15 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { runNode, script, tmpDir, cleanup, writeTree, PLUGIN_ROOT } from './helpers.mjs';
+import {
+  runNode,
+  script,
+  tmpDir,
+  cleanup,
+  writeTree,
+  PLUGIN_ROOT,
+  fixtureGitIdentity,
+} from './helpers.mjs';
 
 const hasGit = spawnSync('git', ['--version'], { encoding: 'utf8' }).status === 0;
 
@@ -26,8 +34,9 @@ function repoWithBase() {
     return r;
   };
   gitC('init', '-q');
-  gitC('config', 'user.email', 't@example.com');
-  gitC('config', 'user.name', 'Test');
+  const identity = fixtureGitIdentity();
+  gitC('config', 'user.email', identity.email);
+  gitC('config', 'user.name', identity.name);
   gitC('config', 'commit.gpgsign', 'false');
   writeTree(repo, { 'src/a.js': COMPUTE });
   gitC('add', '-A'); gitC('commit', '-q', '-m', 'base');

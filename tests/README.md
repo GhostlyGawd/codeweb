@@ -31,6 +31,7 @@ force `--no-ctags` so symbol discovery is deterministic regardless of the host.
 | `graph-ops.test.mjs` | **Shared graph primitives** (`scripts/lib/graph-ops.mjs`, imported by query + diff). Direct unit tests (not subprocess) pinning the pure functions: normalize defaults, call-vs-any-incoming index, symbol resolution, callers/callees, recursion-safe `impactOf`, iterative-Tarjan `fileCycles`, `orphans`. |
 | `diff.test.mjs` | **Graph-delta / post-edit gate** (`scripts/diff.mjs`). nodes/edges/overlaps/cycles/orphans added+removed. Regression = new cycle ∨ new duplication ∨ existing-symbol-lost-all-callers (brand-new uncalled nodes are reported, not regressions; pure removals are not regressions). Overlap identity is content-keyed (stable across id/title churn). Exit 0/1/2. |
 | `mcp.test.mjs` | **MCP stdio server** (`scripts/mcp-server.mjs`). JSON-RPC 2.0 over newline-delimited stdio: `initialize`/`tools/list`/`tools/call` shapes, per-tool required-arg schemas, stdout purity, notifications get no response, unknown tool → -32602, unknown method → -32601, malformed JSON → -32700 + recovery, missing-arg → `isError`, clean exit on stdin close. |
+| `package-shape.test.mjs` | **Package boundary and offline execution.** The manifest has no required runtime dependency, the tarball excludes repository and harness content, the real tarball installs offline without optional dependencies, and each installed bin answers `--help`. |
 
 ## A/B regression levers (env toggles)
 

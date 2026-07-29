@@ -3,7 +3,14 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { runNode, script, tmpDir, cleanup, writeTree } from './helpers.mjs';
+import {
+  runNode,
+  script,
+  tmpDir,
+  cleanup,
+  writeTree,
+  fixtureGitIdentity,
+} from './helpers.mjs';
 
 const hasGit = spawnSync('git', ['--version'], { encoding: 'utf8' }).status === 0;
 
@@ -94,8 +101,9 @@ test('trend --git charts duplication rising across real commits', { skip: hasGit
   };
   try {
     gitC('init', '-q');
-    gitC('config', 'user.email', 't@example.com');
-    gitC('config', 'user.name', 'Test');
+    const identity = fixtureGitIdentity();
+    gitC('config', 'user.email', identity.email);
+    gitC('config', 'user.name', identity.name);
     gitC('config', 'commit.gpgsign', 'false');
 
     // commit 1: a single definition — no duplication
@@ -130,8 +138,9 @@ test('trend --git reused-ws belt: a failed middle commit is zeroed; neighbors st
   };
   try {
     gitC('init', '-q');
-    gitC('config', 'user.email', 't@example.com');
-    gitC('config', 'user.name', 'Test');
+    const identity = fixtureGitIdentity();
+    gitC('config', 'user.email', identity.email);
+    gitC('config', 'user.name', identity.name);
     gitC('config', 'commit.gpgsign', 'false');
     // c1: real source -> a real graph (nodes > 0)
     writeTree(repo, { 'src/a.js': SAME });
