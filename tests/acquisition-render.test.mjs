@@ -55,6 +55,9 @@ test('acquisition SVG is a mobile-readable line chart with honest source and cut
   assert.match(svg, /viewBox="0 0 840 600"/);
   assert.match(svg, /<polyline/);
   assert.match(svg, />576<\/text>/, 'the large value is the latest seven completed days');
+  assert.match(svg, />weekly downloads<\/text>/);
+  assert.match(svg, /@ghostlygawd\/codeweb · daily trend/);
+  assert.doesNotMatch(svg, />daily downloads<\/text>/);
   assert.match(svg, /downloads · last 7 completed days/);
   assert.match(svg, /676 downloads across 8 completed days shown/);
   assert.match(svg, /Data period: 2026-07-18 to 2026-07-25/);
