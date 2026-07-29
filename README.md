@@ -18,6 +18,10 @@
 
 **Your agents break less code and burn fewer tokens.**
 
+```bash
+npx -y @ghostlygawd/codeweb .
+```
+
 <div align="center">
 <a href="https://ghostlygawd.github.io/codeweb/downloads.html"><img src="assets/metrics/npm-downloads.svg" alt="Latest seven-day npm download total with a line chart of completed daily downloads for @ghostlygawd/codeweb, generated from the public npm downloads API" width="100%"></a>
 <br><sub>The large number is the latest seven completed days; the line shows daily downloads. Package downloads are retrievals, not a count of users. Select the chart for the live data and reporting cutoff.</sub>
@@ -57,6 +61,11 @@ npx -y @ghostlygawd/codeweb .
 
 For a repository with 3,000 symbols, the first map takes approximately 3 seconds. Open
 `.codeweb/report.html` to inspect the map.
+
+<div align="center">
+<img src="assets/screens/zod-terminal-run.svg" alt="Condensed real terminal run of codeweb 0.12.0 on Zod commit 912f0f5: 1,388 symbols and 1,616 edges from 409 files, followed by 66 actionable findings" width="840">
+<br><sub>Real run against <a href="https://github.com/colinhacks/zod/tree/912f0f51b0ced654d0069741e7160834dca742ee">Zod at commit <code>912f0f5</code></a>, captured 2026-07-29. The replay shortens the absolute local path to <code>.codeweb</code>; the displayed values are unchanged.</sub>
+</div>
 
 ## See it in action
 

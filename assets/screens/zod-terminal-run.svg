@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 530" width="840" height="530" role="img" aria-labelledby="title desc">
+  <title id="title">Real codeweb terminal run on the Zod repository</title>
+  <desc id="desc">A condensed animated replay of codeweb version 0.12.0 mapping 1,388 symbols and 1,616 edges from 409 Zod files, then reporting 66 actionable findings.</desc>
+  <metadata>Generated from a real run of @ghostlygawd/codeweb 0.12.0 against colinhacks/zod commit 912f0f51b0ced654d0069741e7160834dca742ee. Captured 2026-07-29. The visible excerpt preserves the reported values and replaces the absolute local workspace path with .codeweb.</metadata>
+  <rect width="840" height="530" fill="#060608"/>
+  <rect x="1" y="1" width="838" height="528" fill="none" stroke="#26242C" stroke-width="2"/>
+  <rect x="1" y="1" width="838" height="54" fill="#0D0D11"/>
+  <line x1="1" y1="55" x2="839" y2="55" stroke="#26242C" stroke-width="2"/>
+  <text x="32" y="36" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="17" font-weight="800" letter-spacing="3">REAL TERMINAL RUN</text>
+  <text x="808" y="36" text-anchor="end" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="16">ZOD 912F0F5 · CODEWEB 0.12.0</text>
+
+  <g opacity="1">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.05;0.06;0.95;1" dur="8s" repeatCount="indefinite"/>
+    <text x="34" y="104" fill="#C6F24E" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="26" font-weight="800">$</text>
+    <text x="66" y="104" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="26" font-weight="700">npx -y @ghostlygawd/codeweb .</text>
+  </g>
+
+  <g opacity="1">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.20;0.21;0.95;1" dur="8s" repeatCount="indefinite"/>
+    <text x="34" y="166" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="22">[run] extract</text>
+    <text x="34" y="204" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="22">[extract] 1388 symbols, 1616 edges from 409 files</text>
+  </g>
+
+  <g opacity="1">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.38;0.39;0.95;1" dur="8s" repeatCount="indefinite"/>
+    <text x="34" y="266" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="22">[run] overlap</text>
+    <text x="34" y="304" fill="#C6F24E" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="22" font-weight="800">actionable 66 · needs review 39 · dismissed 22</text>
+  </g>
+
+  <g opacity="1">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.56;0.57;0.95;1" dur="8s" repeatCount="indefinite"/>
+    <text x="34" y="366" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="22">[run] report</text>
+    <text x="34" y="404" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="22">[codeweb] 1388 nodes, 1616 edges, 8 domains</text>
+  </g>
+
+  <g opacity="1">
+    <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.74;0.75;0.95;1" dur="8s" repeatCount="indefinite"/>
+    <text x="34" y="466" fill="#8A8794" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="22">[run] done -&gt; .codeweb · codeweb v0.12.0</text>
+    <text x="34" y="504" fill="#E8E7EE" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="22" font-weight="800">[run] mapped 1388 symbols -&gt; 66 actionable finding(s)</text>
+  </g>
+</svg>

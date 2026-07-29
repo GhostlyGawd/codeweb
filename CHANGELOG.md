@@ -16,7 +16,9 @@ notes so validated results, papers, and new tools never get lost in commit histo
   data into an accessible, mobile-readable line chart near the top of the README. Its large
   headline shows the latest seven completed days while the line preserves the daily trend. The
   scheduled acquisition workflow retains the weekly counter ledger and refreshes the chart
-  without a new service, secret, or user-level data.
+  without a new service, secret, or user-level data. The opening section now exposes the copyable
+  `npx` command, and the quickstart includes a sanitized terminal replay captured from a real
+  0.12.0 run against pinned Zod source.
 - **JSON config-file support (file-level).** Imported `.json` files are now first-class map
   nodes: default imports, named imports (TS `resolveJsonModule`), namespace imports,
   `require('./config.json')`, and extensionless `require('./config')` all resolve to a
