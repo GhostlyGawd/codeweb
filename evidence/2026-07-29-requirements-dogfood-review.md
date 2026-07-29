@@ -72,7 +72,7 @@ compliance claim.
 
 ## Verification evidence
 
-- `npm test`: 942 tests; 892 passed; 50 skipped; 0 failed.
+- `npm test`: 943 tests; 893 passed; 50 skipped; 0 failed.
 - Git-fixture regression set: 19 tests passed.
 - `tests/package-shape.test.mjs`: 3 tests passed, including the real offline
   package installation and installed-bin execution test.
