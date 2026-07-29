@@ -19,8 +19,8 @@
 **Your agents break less code and burn fewer tokens.**
 
 <div align="center">
-<a href="https://ghostlygawd.github.io/codeweb/downloads.html"><img src="assets/metrics/npm-downloads.svg" alt="Line chart of completed daily npm package downloads for @ghostlygawd/codeweb, generated from the public npm downloads API" width="100%"></a>
-<br><sub>Completed daily downloads from npm's public API. Package downloads are retrievals, not a count of users. Select the chart for the live data and reporting cutoff.</sub>
+<a href="https://ghostlygawd.github.io/codeweb/downloads.html"><img src="assets/metrics/npm-downloads.svg" alt="Latest seven-day npm download total with a line chart of completed daily downloads for @ghostlygawd/codeweb, generated from the public npm downloads API" width="100%"></a>
+<br><sub>The large number is the latest seven completed days; the line shows daily downloads. Package downloads are retrievals, not a count of users. Select the chart for the live data and reporting cutoff.</sub>
 </div>
 
 codeweb reads your code. It maps each function and the calls between functions. It maps

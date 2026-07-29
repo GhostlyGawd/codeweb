@@ -42,6 +42,7 @@ test('npm range parser keeps valid daily values, de-duplicates dates, and skips 
 
 test('acquisition SVG is a mobile-readable line chart with honest source and cutoff metadata', () => {
   const svg = renderAcquisitionSvg([
+    { day: '2026-07-18', downloads: 100 },
     { day: '2026-07-19', downloads: 143 },
     { day: '2026-07-20', downloads: 8 },
     { day: '2026-07-21', downloads: 4 },
@@ -53,9 +54,10 @@ test('acquisition SVG is a mobile-readable line chart with honest source and cut
   assert.match(svg, /aria-labelledby="title desc"/);
   assert.match(svg, /viewBox="0 0 840 600"/);
   assert.match(svg, /<polyline/);
-  assert.match(svg, /266/);
-  assert.match(svg, /576 downloads in the displayed range/);
-  assert.match(svg, /Data period: 2026-07-19 to 2026-07-25/);
+  assert.match(svg, />576<\/text>/, 'the large value is the latest seven completed days');
+  assert.match(svg, /downloads · last 7 completed days/);
+  assert.match(svg, /676 downloads across 8 completed days shown/);
+  assert.match(svg, /Data period: 2026-07-18 to 2026-07-25/);
   assert.match(svg, /Captured 2026-07-28/);
   assert.match(svg, /package retrievals, not users/);
   assert.match(svg, /npm's public downloads range API/);
@@ -67,6 +69,7 @@ test('README puts the generated npm trend in the opening proof section', () => {
   assert.match(readme, /assets\/brand\/proof-strip\.svg/);
   assert.match(readme, /Try_it_with_npx/);
   assert.match(readme, /assets\/metrics\/npm-downloads\.svg/);
+  assert.match(readme, /large number is the latest seven completed days/i);
   assert.match(readme, /package downloads are retrievals, not a count of users/i);
   assert.ok(
     readme.indexOf('assets/metrics/npm-downloads.svg') < readme.indexOf('codeweb reads your code'),

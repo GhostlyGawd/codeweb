@@ -13,9 +13,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 - **Evidence-backed README proof and acquisition visuals.** A compact benchmark strip links its
   three claims to the existing research ledger, three conversion badges lead to the npx trial,
   live demo, and Claude Code install, and a zero-dependency renderer turns completed daily npm
-  data into an accessible, mobile-readable line chart near the top of the README. The scheduled
-  acquisition workflow retains the weekly counter ledger and refreshes the chart without a new
-  service, secret, or user-level data.
+  data into an accessible, mobile-readable line chart near the top of the README. Its large
+  headline shows the latest seven completed days while the line preserves the daily trend. The
+  scheduled acquisition workflow retains the weekly counter ledger and refreshes the chart
+  without a new service, secret, or user-level data.
 - **JSON config-file support (file-level).** Imported `.json` files are now first-class map
   nodes: default imports, named imports (TS `resolveJsonModule`), namespace imports,
   `require('./config.json')`, and extensionless `require('./config')` all resolve to a
