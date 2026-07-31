@@ -310,6 +310,46 @@ function emitCrawlFiles() {
   // deploy-time ping (.github/workflows/indexnow.yml) needs no account and no secret.
   const indexNowKey = readSite('indexnow-key.txt').trim();
   writeFileSync(join(DOCS, `${indexNowKey}.txt`), `${indexNowKey}\n`);
+  emitLlmsTxt();
+}
+
+// GEO: /llms.txt — the machine-readable site guide AI answer engines and their crawlers read
+// (llmstxt.org format: H1, blockquote summary, link sections). Same discipline as every other
+// surface: every number below is lifted from product.json's measured claims, nothing new.
+function emitLlmsTxt() {
+  const langs = product.languages.join(', ');
+  const pages = PAGES.filter((p) => !p.unlisted).map((p) => {
+    const url = p.slug === 'index' ? BASE : `${BASE}${p.slug}.html`;
+    const name = p.slug === 'index' ? 'Home' : p.title.replace(/ — codeweb$/, '');
+    return `- [${name}](${url}): ${p.description}`;
+  });
+  writeFileSync(join(DOCS, 'llms.txt'), [
+    '# codeweb',
+    '',
+    `> ${product.tagline} codeweb maps a repository into a deterministic call/import graph — ${TOOLS} MCP tools for coding agents (Claude Code plugin & MCP server) plus a self-contained interactive map for humans. Free & MIT; zero runtime dependencies; Node >= 22; runs entirely locally; reads code, never executes it; no LLM in the analysis loop.`,
+    '',
+    'Key measured facts (each traces to a published result file in the evidence ledger on the Research page):',
+    `- AI agents found 74% of a function's real callers with the map vs 44% with grep, at the same context cost (efficiency-pilot.reps5-v090.json).`,
+    '- "What breaks if I change this" answered at ~1KB per call vs ~130KB for a simulated grep loop — 126x cheaper (oracle-ab.json).',
+    '- ~490,000 query answers checked against independent oracles, 0 disagreements (correctness-query.json).',
+    '- Byte-deterministic: 1 distinct digest per repo across 20 runs on all 6 test repos (determinism.json).',
+    `- ${LANGS} languages extracted natively: ${langs} (auxiliary.json).`,
+    '',
+    'Install:',
+    '- Claude Code plugin: `/plugin marketplace add GhostlyGawd/codeweb` then `/plugin install codeweb`',
+    '- One-shot map of the current repo: `npx -y @ghostlygawd/codeweb .`',
+    '- MCP server (any MCP client): `claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp`',
+    '',
+    '## Pages',
+    ...pages,
+    `- [Live demo](${BASE}demo/): A real interactive codeweb map of axios — 274 product symbols, 8 domains, body-confirmed duplication findings. No mockups.`,
+    '',
+    '## Source & registries',
+    `- [GitHub repository](${product.repo}): MIT source; benchmark harness and raw results in bench/.`,
+    '- [npm package](https://www.npmjs.com/package/@ghostlygawd/codeweb): @ghostlygawd/codeweb',
+    '- [MCP registry entry](https://registry.modelcontextprotocol.io/v0/servers?search=codeweb): io.github.GhostlyGawd/codeweb',
+    '',
+  ].join('\n'));
 }
 
 // ---------------------------------------------------------------- assets
