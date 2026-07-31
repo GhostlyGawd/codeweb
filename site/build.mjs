@@ -221,6 +221,7 @@ const blocks = () => ({
   philosophy: renderPhilosophy(),
   pipeline: renderPipeline(),
   changelog_body: renderChangelogBody(),
+  faq: renderFaq(),
 });
 
 const baseTpl = readSite('templates', 'base.html');
@@ -266,6 +267,38 @@ const JSONLD = JSON.stringify({
   sameAs: ['https://github.com/GhostlyGawd/codeweb', 'https://www.npmjs.com/package/@ghostlygawd/codeweb'],
 });
 
+// GEO: answer-first content. One FAQ table renders both the homepage section and the FAQPage
+// JSON-LD, so page and schema can't drift. Every answer reuses ratified copy and measured
+// numbers (product.json, CHARTER.md invariants, start-page install commands) — nothing new.
+const FAQ = [
+  { q: 'What is codeweb?',
+    a: `codeweb is an MCP server and Claude Code plugin that reads your code and maps it: every function, and every call between them (~3s for 3,000 symbols). Static analysis, no LLM — the same code always produces the same map. Coding agents query the map over ${TOOLS} deterministic MCP tools; you get a self-contained interactive map. Free &amp; MIT.` },
+  { q: 'What breaks if I change this function?',
+    a: `The question codeweb exists to answer: <code>codeweb_impact</code> returns the blast radius — every function transitively affected by a change — before the edit is written. Measured on 30 vite symbols, one ~1KB codeweb call replaced a ~130KB grep loop: 126× cheaper.` },
+  { q: 'Why do coding agents need a call graph instead of grep?',
+    a: `grep misses more than half of a function's real callers, and agents break the code they can't see. In measured tests, agents found 74% of a function's real callers with the map and 44% with grep, at the same context cost (v0.9.0 pilot, better in all 5 runs).` },
+  { q: 'Does codeweb send my code anywhere or execute it?',
+    a: `No. codeweb runs entirely on your machine: no accounts, no telemetry, zero runtime dependencies — and it reads code, never executes it. No LLM in the analysis loop, so the same repo always yields the same graph.` },
+  { q: 'Which languages does codeweb support?',
+    a: `${LANGS} languages natively — ${renderLanguagesInline()} — with an agent fallback for everything else.` },
+  { q: 'How do I install codeweb?',
+    a: `Three ways: the Claude Code plugin (<code>/plugin marketplace add GhostlyGawd/codeweb</code>, then <code>/plugin install codeweb</code>), a one-shot map of the current repo (<code>npx -y @ghostlygawd/codeweb .</code>), or the MCP server for any MCP client (<code>claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp</code>). Node ≥ 22.` },
+];
+function renderFaq() {
+  return `<div class="grid cols-2">${FAQ.map((f) => `
+    <div class="card"><h3>${f.q}</h3><p>${f.a}</p></div>`).join('')}</div>`;
+}
+const stripTags = (s) => s.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&');
+const FAQ_LD = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: stripTags(f.a) },
+  })),
+});
+
 function buildPage(page) {
   const contentFile = join(SITE, 'content', `${page.slug}.html`);
   if (!existsSync(contentFile)) return false;
@@ -277,7 +310,8 @@ function buildPage(page) {
     ogTitle: esc(page.ogTitle),
     canonical,
     ogImage: `${BASE}assets/og.jpg`,
-    jsonld: JSONLD,
+    // The homepage carries the FAQ section, so it also carries the FAQPage schema.
+    jsonld: page.slug === 'index' ? `[${JSONLD},${FAQ_LD}]` : JSONLD,
     nav: nav(page.nav),
     footer: fill(footerTpl, blocks()),
     content,
