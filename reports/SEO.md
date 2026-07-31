@@ -129,3 +129,26 @@ Ranked by traffic at stake (channel findings first — that's where this product
 ## Next
 
 Top candidates, in order of traffic at stake: **(1) F1 GitHub topics/description/homepage** (minutes, unlocks the largest existing search channel), **(2) F2 + F3 registry + marketplace manifests** (the two missing shelf files), **(3) F5 + F6 demo unfurl + sitemap/robots in build.mjs** (one small deterministic build change covering both). F7/F9/F10 (titles, h1s, JSON-LD) bundle naturally into the same build.mjs/content pass if a third work item fits the week.
+
+---
+
+## Iteration log — SEO/GEO audit loop
+
+### 2026-07-31 · iteration 1
+
+**State re-check (live):** F1 GitHub topics/description/homepage ✔ fixed (15 topics live) · F2 MCP registry ✔ listed (io.github.GhostlyGawd/codeweb 0.12.0) · F3 marketplace.json ✔ · F4 npm ✔ (0.12.0, 16 keywords, current description) · F5 demo head ✔ · F6 robots+sitemap ✔ live, IndexNow wired · F7/F9/F10/F11 ✔ in the deployed build. Pending operator-only: Google Search Console verification (OPERATOR-ACTIONS.md §3) · branch protection (§7).
+
+**Target-query benchmark** (rerun this exact set each iteration; engine = web search, US):
+| # | Query | Class | Result |
+|---|---|---|---|
+| B1 | `codeweb MCP server call graph` | brand+category | **absent** — code-graph-mcp, CodeGraphContext, CartographAI own top 10 |
+| B2 | `"codeweb" claude code plugin ghostlygawd` | brand+channel | **absent** — not indexed for its own name+owner |
+| B3 | `codebase map MCP tools coding agents impact analysis` | job/category | **absent** — codebase-memory-mcp dominates via ~9 third-party citing articles |
+
+AI-answer-engine proxy: rivals win through third-party content AI engines cite; codeweb had zero GEO artifacts (`/llms.txt` → 404).
+
+**Gap ranking:** (1) no llms.txt — GEO, code-side, S · (2) no answer-first Q&A content (no FAQ block/FAQPage schema on any page) — M · (3) Google indexation — operator-blocked (Search Console) · (4) off-site citations — outside the repo.
+
+**Fixed this iteration:** (1) — `site/build.mjs` now emits `/llms.txt` (llmstxt.org format) from the PAGES table + product.json measured claims; gate green.
+
+**Next candidate:** (2) answer-first content — a Q&A section answering the queries B1–B3 map to ("what breaks if I edit this function", "MCP server that maps call graphs", "how do agents burn fewer tokens"), with FAQPage JSON-LD, sourced only from ratified copy.
