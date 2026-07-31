@@ -152,3 +152,16 @@ AI-answer-engine proxy: rivals win through third-party content AI engines cite; 
 **Fixed this iteration:** (1) — `site/build.mjs` now emits `/llms.txt` (llmstxt.org format) from the PAGES table + product.json measured claims; gate green.
 
 **Next candidate:** (2) answer-first content — a Q&A section answering the queries B1–B3 map to ("what breaks if I edit this function", "MCP server that maps call graphs", "how do agents burn fewer tokens"), with FAQPage JSON-LD, sourced only from ratified copy.
+
+### 2026-07-31 · iteration 2
+
+**Fixed this iteration:** gap (2) answer-first content — the homepage now carries a six-question FAQ section (what is codeweb · what breaks if I change this · call graph vs grep · local/read-only guarantees · languages · install) rendered from one table in `site/build.mjs` that also emits FAQPage JSON-LD, so the visible answers and the schema cannot drift. All answers reuse ratified copy and measured numbers. Gate green.
+
+**Benchmark rerun (B1–B3):** unchanged — codeweb absent from all three; rivals hold via MCP directories (LobeHub, mcpservers.org, glama.ai) and third-party articles. Expected: iterations 1–2 are unmerged/undeployed, and rankings move on crawler timescales, not minutes.
+
+**Loop verdict — stopping.** The stop conditions are met to the limit of what the repo controls:
+1. *Critical technical issues:* none remain code-side — crawl files, titles, h1s, canonical/OG, SoftwareApplication + FAQPage schema, llms.txt, internal links, and per-claim source citations are all implemented.
+2. *Priority query → answer-ready page:* brand queries → homepage; "what breaks if I change this" / impact analysis → homepage FAQ + product page; category ("MCP server call graph") → homepage title + FAQ; install intent → start page.
+3. *Remaining high-impact gaps are not repo-fixable:* (a) this branch must merge to main for the fixes to deploy; (b) Google Search Console verification is operator-only (OPERATOR-ACTIONS.md §3); (c) rivals win the category through third-party citations and directory presence — earned coverage, not code; (d) crawl/index latency on a 0-star, 40-day-old subpath.
+
+**Re-audit trigger:** after this branch merges + Pages deploys + ~1–2 weeks of crawl time, rerun B1–B3 and verify `https://ghostlygawd.github.io/codeweb/llms.txt` serves 200.
