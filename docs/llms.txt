@@ -1,0 +1,30 @@
+# codeweb
+
+> Your agents break less code and burn fewer tokens. codeweb maps a repository into a deterministic call/import graph — 27 MCP tools for coding agents (Claude Code plugin & MCP server) plus a self-contained interactive map for humans. Free & MIT; zero runtime dependencies; Node >= 22; runs entirely locally; reads code, never executes it; no LLM in the analysis loop.
+
+Key measured facts (each traces to a published result file in the evidence ledger on the Research page):
+- AI agents found 74% of a function's real callers with the map vs 44% with grep, at the same context cost (efficiency-pilot.reps5-v090.json).
+- "What breaks if I change this" answered at ~1KB per call vs ~130KB for a simulated grep loop — 126x cheaper (oracle-ab.json).
+- ~490,000 query answers checked against independent oracles, 0 disagreements (correctness-query.json).
+- Byte-deterministic: 1 distinct digest per repo across 20 runs on all 6 test repos (determinism.json).
+- 11 languages extracted natively: JavaScript, TypeScript, Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, Swift (auxiliary.json).
+
+Install:
+- Claude Code plugin: `/plugin marketplace add GhostlyGawd/codeweb` then `/plugin install codeweb`
+- One-shot map of the current repo: `npx -y @ghostlygawd/codeweb .`
+- MCP server (any MCP client): `claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp`
+
+## Pages
+- [Home](https://ghostlygawd.github.io/codeweb/): Your agents break less code and burn fewer tokens: codeweb maps your codebase into a deterministic call/import graph, queried by coding agents over 27 MCP tools (Claude Code plugin & MCP server), with an interactive map for you. Know what an edit breaks before it's written.
+- [27 MCP tools & the CI structural gate](https://ghostlygawd.github.io/codeweb/product.html): The 27 deterministic MCP tools, the Tier 0–3 feature map, 11-language call/import graph extraction, and the CI gate that fails a PR when an edit makes the structure worse.
+- [Research, benchmarks & the honest claim ledger](https://ghostlygawd.github.io/codeweb/research.html): A pre-registered effectiveness study (32/33 checks), an efficiency pilot, and an honest claim ledger: what is validated, what is preliminary, and what is a null result.
+- [Get started — install the codebase-map plugin, npx, or MCP server](https://ghostlygawd.github.io/codeweb/start.html): Install codeweb as a Claude Code plugin, run the npx one-liner, or register the MCP server for Cursor/Windsurf. Free & MIT; runs entirely on your machine; Node ≥ 22.
+- [Changelog](https://ghostlygawd.github.io/codeweb/changelog.html): Every release, capability, benchmark, and fix — kept in lock-step with the product under Keep a Changelog and Semantic Versioning.
+- [Case study: mapping axios — 3 confirmed duplications in a 50M-download library](https://ghostlygawd.github.io/codeweb/case-study.html): codeweb pointed read-only at axios v1.18.1: 3 body-confirmed duplications (two byte-identical), 12 false positives dismissed, and a cycle-safe merge plan for each — reproducible byte-for-byte.
+- [Support codeweb — sponsorship & org support](https://ghostlygawd.github.io/codeweb/support.html): Everything local is free forever. Sponsoring supports the project, and sponsors get featured placement in the README and on the site. Org support by email.
+- [Live demo](https://ghostlygawd.github.io/codeweb/demo/): A real interactive codeweb map of axios — 274 product symbols, 8 domains, body-confirmed duplication findings. No mockups.
+
+## Source & registries
+- [GitHub repository](https://github.com/GhostlyGawd/codeweb): MIT source; benchmark harness and raw results in bench/.
+- [npm package](https://www.npmjs.com/package/@ghostlygawd/codeweb): @ghostlygawd/codeweb
+- [MCP registry entry](https://registry.modelcontextprotocol.io/v0/servers?search=codeweb): io.github.GhostlyGawd/codeweb
