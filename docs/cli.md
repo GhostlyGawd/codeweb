@@ -8,7 +8,7 @@ wins and this file has a bug — please report it.
 | bin | what it runs | typical call |
 |---|---|---|
 | `codeweb` | the full pipeline (`scripts/run.mjs`) | `codeweb .` — map the current repo into `./.codeweb/` |
-| `codeweb-mcp` | the MCP stdio server (27 read-only tools) | `claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp` |
+| `codeweb-mcp` | the MCP stdio server (28 read-only tools) | `claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp` |
 | `codeweb-query` | graph queries (`scripts/query.mjs`) | `codeweb-query --impact <symbol>` from a mapped repo |
 | `codeweb-diff` | the regression gate (`scripts/diff.mjs`) | `codeweb-diff before.json after.json` — exit 1 on a regression |
 

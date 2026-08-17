@@ -29,6 +29,28 @@ notes so validated results, papers, and new tools never get lost in commit histo
   file (nothing imports it) never becomes a node, so lock files add no noise. Scan-cache
   format bumps to v18 (one cold re-extract per workspace on upgrade).
 
+### Added
+- **The after-edit gate loop is completable by any MCP client (AC-9).** `codeweb_refresh`
+  gains `snapshot:true` (also `refresh.mjs --snapshot`): the pre-refresh graph is preserved as
+  `graph.prev.json`, and `codeweb_diff`'s two arguments are now optional — `after` defaults to
+  the discovered graph and `before` defaults to that snapshot — so the prescribed
+  refresh-then-diff loop no longer needs the plugin's shell copy step. A missing snapshot gets
+  an actionable remedy naming the exact call.
+- **`codeweb_dependents` — the 28th tool (AC-10).** The complete "who do I break?" union
+  (call + import + inherit + test + ref edges, tagged by kind) was CLI-only; it is now a
+  first-class MCP tool derived from the same manifest entry, budgeted with true totals, and
+  `codeweb_callers` points at it for the full-union question.
+- **Staleness honesty reaches the advisors (AC-11).** Every spawned graph-consuming reply now
+  carries the call-time staleness verdict (previously only the orient family was annotated —
+  `codeweb_simulate` could pre-flight a refactor from a week-old map with full confidence), and
+  the overlap-independent advisors (deadcode, risk, hotspots, break_cycles, reading_order,
+  simulate, placement, fitness) joined the auto-refresh set. Overlap-consuming advisors stay
+  out by design: refresh drops overlaps, so they get the annotation, never a silent refresh.
+- **Agent-fallback maps carry their provenance (AC-12).** The codebase-anatomy skill's
+  `meta.engine` stamp (hybrid | tools | read) is now read downstream: the briefing payload and
+  the session-start injection caveat agent-extracted maps as unverified, instead of answering
+  with deterministic-tier authority.
+
 ### Fixed
 - **C7 truth sweep (2026-08-16 drift audit).** The charter-ruled-fabricated sponsorship cost
   premise still shipped through surfaces the claims gate never read: the report and demo footer

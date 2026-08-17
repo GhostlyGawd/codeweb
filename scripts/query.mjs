@@ -25,9 +25,9 @@ import { die, emitJson, finish, capList, checkStaleness, loadGraph, parseArgs } 
 import { bump } from './lib/stats.mjs'; // #10: CLI queries count toward the receipt too
 
 // D1: the mode flags derive from the manifest the MCP server also reads — a new query tool
-// declared there grows a CLI flag here with no edit. --dependents is CLI-only (no MCP tool yet),
-// so it joins the symbol-mode list explicitly.
-const SYMBOL_MODES = QUERY_TOOL_SPECS.filter((s) => s.need.includes('symbol')).map((s) => s.kind).concat('dependents');
+// declared there grows a CLI flag here with no edit (AC-10 closed the dependents gap: the union
+// answer is now a first-class tool on both transports, derived from the one manifest entry).
+const SYMBOL_MODES = QUERY_TOOL_SPECS.filter((s) => s.need.includes('symbol')).map((s) => s.kind);
 const BARE_MODES = QUERY_TOOL_SPECS.filter((s) => !s.need.includes('symbol')).map((s) => s.kind);
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs); the query-mode flags stay a thin post-pass —

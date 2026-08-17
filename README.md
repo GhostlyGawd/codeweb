@@ -36,7 +36,7 @@ missed more than half of a function's real callers
 ([see the measurements](https://ghostlygawd.github.io/codeweb/research.html)). An incomplete caller
 list can cause an agent to break code that it did not inspect.
 
-- **Give agents structural data:** The Model Context Protocol (MCP) server provides 27 tools,
+- **Give agents structural data:** The Model Context Protocol (MCP) server provides 28 tools,
   including `codeweb_impact`, `codeweb_callers`, and `codeweb_find_similar`.
 - **Keep answers small:** Each query returns a bounded structural answer. Your agents can use
   their remaining context for implementation work.
@@ -176,7 +176,7 @@ your code; never executes it.**
 - CI publishes releases with **npm provenance**. Run `npm audit signatures` to verify a release.
 
 **Using Claude Code?** Install the plugin to add the `/codeweb` command, automatic pre-edit
-impact cards, and all 27 tools:
+impact cards, and all 28 tools:
 ```
 /plugin marketplace add GhostlyGawd/codeweb
 /plugin install codeweb
@@ -247,7 +247,7 @@ You can open `report.html`. codeweb also creates Markdown versions.
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency Model Context Protocol (MCP) stdio server. It gives
-each MCP client access to all **27 tools**. The tools help the client orient, read the structure,
+each MCP client access to all **28 tools**. The tools help the client orient, read the structure,
 check before writing, gate an edit, and plan cleanup.
 
 **The plugin registers the server automatically.** To register the standalone server, run:
@@ -265,7 +265,7 @@ The server includes these agent-specific features:
 - **Staleness information:** A stale result identifies its state and directs the agent to
   `codeweb_refresh`.
 
-[All 27 tools, grouped and explained →](docs/reference.md#the-mcp-server-tool-by-tool)
+[All 28 tools, grouped and explained →](docs/reference.md#the-mcp-server-tool-by-tool)
 
 ## How it works
 
@@ -318,7 +318,7 @@ _Recent releases added the agent-intelligence suite (**hotspots**, **campaign**,
 **reading-order**, Type-2 clone detection, and suppression memory), a
 **[live interactive demo](https://ghostlygawd.github.io/codeweb/demo/)**, Go and Rust on the fast
 path, duplication trend data, and the one-command CI regression gate with a GitHub Action.
-codeweb currently provides 27 tools._
+codeweb currently provides 28 tools._
 
 ## Versioning & releases
 

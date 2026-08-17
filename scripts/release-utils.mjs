@@ -46,7 +46,7 @@ export function productLanguageCount(root) {
 // close that class: any hardcoded tool-count or native-language-count in the public prose must
 // equal the canonical number, or the build fails. Numbers written as words count too ("Twenty
 // tools" was one of the rotted instances).
-const WORD_NUM = { three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, twenty: 20, 'twenty-four': 24, 'twenty-seven': 27 };
+const WORD_NUM = { three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, twenty: 20, 'twenty-four': 24, 'twenty-seven': 27, 'twenty-eight': 28 };
 const numOf = (s) => (/^\d+$/.test(s) ? Number(s) : WORD_NUM[s.toLowerCase()] ?? null);
 
 /** Prose files the scans cover — hand-written surfaces where counts can rot. */

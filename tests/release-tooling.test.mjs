@@ -19,9 +19,9 @@ test('bumpVersion follows SemVer', () => {
   assert.throws(() => bumpVersion('0.2.0', 'nope'));
 });
 
-test('the real repo derives 27 MCP tools from the source', () => {
-  assert.equal(mcpToolCount(PLUGIN_ROOT), 27);
-  assert.equal(productToolCount(PLUGIN_ROOT), 27, 'product.json must list exactly the MCP tools');
+test('the real repo derives 28 MCP tools from the source', () => {
+  assert.equal(mcpToolCount(PLUGIN_ROOT), 28);
+  assert.equal(productToolCount(PLUGIN_ROOT), 28, 'product.json must list exactly the MCP tools');
 });
 
 // Round 2, finding #3: engines must claim only what CI actually tests. Node 20's `npm test` glob
@@ -34,7 +34,7 @@ test('engines.node claims exactly the tested floor (>=22)', () => {
 test('the real repo is consistent (versions + tool count aligned)', () => {
   const r = checkConsistency(PLUGIN_ROOT);
   assert.equal(r.ok, true, `expected aligned, got: ${r.problems.join('; ')}`);
-  assert.equal(r.count, 27);
+  assert.equal(r.count, 28);
 });
 
 test('check-consistency CLI exits 0 on the aligned repo', () => {

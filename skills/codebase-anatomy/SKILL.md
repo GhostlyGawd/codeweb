@@ -82,7 +82,10 @@ Auto-detect: a URL or `owner/repo` ⇒ external; a path or `.` ⇒ internal. `--
   dir (e.g. `${TMPDIR}/codeweb-<repo>`); **do not** run anything inside it.
 - Detect languages, package managers, and repo size (`rg --files | wc -l`). Choose effective
   depth: `auto` ⇒ module-level overview, then symbol-level on the densest/most-overlapping
-  subsystems. Probe for analysis tools per `engine-detection.md`; record the engine.
+  subsystems. Probe for analysis tools per `engine-detection.md`; record the engine — the
+  `meta.engine` value (hybrid | tools | read) is the map's provenance label: downstream
+  surfaces (codeweb_brief, the session brief) caveat agent-built maps as unverified, so
+  always stamp it (AC-12).
 
 ### Fast path (default) — one-command deterministic engine
 

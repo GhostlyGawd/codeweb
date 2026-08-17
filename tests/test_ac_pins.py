@@ -72,6 +72,39 @@ class TestAcPins(unittest.TestCase):
         self.assertIn("jsonFiles", extractor,
                       "the extractor enumerates .json into the resolution universe")
 
+    def test_ac_9_snapshot_diff_loop_wired(self):
+        suite = ROOT / "tests" / "mcp-snapshot-diff.test.mjs"
+        self.assertTrue(suite.exists(), "AC-9's check target must exist")
+        refresh = (ROOT / "scripts" / "refresh.mjs").read_text(encoding="utf-8")
+        self.assertIn("graph.prev.json", refresh,
+                      "refresh --snapshot preserves the pre-refresh graph")
+        server = (ROOT / "scripts" / "mcp-server.mjs").read_text(encoding="utf-8")
+        self.assertIn("graph.prev.json", server,
+                      "codeweb_diff defaults its before side to the snapshot")
+
+    def test_ac_10_dependents_tool_wired(self):
+        suite = ROOT / "tests" / "mcp-dependents.test.mjs"
+        self.assertTrue(suite.exists(), "AC-10's check target must exist")
+        specs = (ROOT / "scripts" / "lib" / "tool-specs.mjs") \
+            .read_text(encoding="utf-8")
+        self.assertIn("codeweb_dependents", specs,
+                      "the union answer is declared once, in the D1 manifest")
+
+    def test_ac_11_staleness_parity_wired(self):
+        suite = ROOT / "tests" / "mcp-staleness-parity.test.mjs"
+        self.assertTrue(suite.exists(), "AC-11's check target must exist")
+        server = (ROOT / "scripts" / "mcp-server.mjs").read_text(encoding="utf-8")
+        self.assertIn("staleForReply", server,
+                      "spawned advisor replies carry the call-time verdict")
+
+    def test_ac_12_agent_provenance_wired(self):
+        suite = ROOT / "tests" / "agent-graph-label.test.mjs"
+        self.assertTrue(suite.exists(), "AC-12's check target must exist")
+        brief = (ROOT / "scripts" / "lib" / "brief-core.mjs") \
+            .read_text(encoding="utf-8")
+        self.assertIn("AGENT_ENGINES", brief,
+                      "the briefing reads the fallback's provenance stamp")
+
 
 if __name__ == "__main__":
     unittest.main()

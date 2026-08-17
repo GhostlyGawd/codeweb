@@ -14,15 +14,15 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const USAGE = 'usage: refresh.mjs [graph.json] [--cache <path>] [--json]   (or set CODEWEB_WS, or run from a mapped repo)';
+const USAGE = 'usage: refresh.mjs [graph.json] [--cache <path>] [--snapshot] [--json]   (or set CODEWEB_WS, or run from a mapped repo)';
 import { die, emitJson, finish, atomicWrite, SCAN_CACHE_NAME, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
 const { opts, pos } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
-  flags: { json: { type: 'bool', default: false }, cache: { type: 'string', default: null } },
+  flags: { json: { type: 'bool', default: false }, cache: { type: 'string', default: null }, snapshot: { type: 'bool', default: false } },
 });
-const { json, cache } = opts;
+const { json, cache, snapshot } = opts;
 
 // API F7 (COPY.md #9): refresh required a positional and hand-rolled a weaker error — no
 // CODEWEB_WS, no walk-up. It now uses THE one loader (arg -> env -> nearest .codeweb above cwd,
@@ -30,9 +30,15 @@ const { json, cache } = opts;
 // JSON + the fresh fragment, never from normalizeGraph's in-memory back-fills (its mutation runs
 // post-write for the sidecars — see the #25 note below).
 const { abs } = loadGraph(pos[0], { usage: USAGE });
-let graph;
-try { graph = JSON.parse(readFileSync(abs, 'utf8')); }
+let graph, rawBefore;
+try { rawBefore = readFileSync(abs, 'utf8'); graph = JSON.parse(rawBefore); }
 catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+
+// AC-9: --snapshot preserves the pre-refresh graph as graph.prev.json beside the live one, so an
+// MCP-only client can complete the prescribed loop (refresh {snapshot:true} → diff {before:"prev"})
+// without a shell copy step. Written first (atomic), from the exact bytes just read.
+const prevPath = join(dirname(abs), 'graph.prev.json');
+if (snapshot) atomicWrite(prevPath, rawBefore);
 
 const root = graph.meta && graph.meta.root;
 if (!root || !existsSync(root)) die(`cannot refresh: graph.meta.root is missing or not on disk (got ${root || 'none'}) — refresh re-extracts from the recorded target root`, 2);
@@ -94,6 +100,7 @@ const payload = {
   domainsReattached: reattached, scanned: /scanned (\d+)/.exec(r.stderr)?.[1] ?? null,
   sidecars,
 };
+if (snapshot) payload.snapshot = prevPath;
 if (hadCoverage) payload.note = 'coverage annotations dropped (spans changed) — re-run scripts/coverage.mjs with a fresh report';
 if (json) { emitJson(payload); } else {
 console.log(`codeweb refresh: ${root}`);

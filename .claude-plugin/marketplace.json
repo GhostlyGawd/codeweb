@@ -5,14 +5,14 @@
     "url": "https://github.com/GhostlyGawd"
   },
   "metadata": {
-    "description": "codeweb — your agents break less code and burn fewer tokens. Deterministic call/import graph, 27 MCP tools, ambient pre/post-edit hooks, and a self-contained interactive report.",
+    "description": "codeweb — your agents break less code and burn fewer tokens. Deterministic call/import graph, 28 MCP tools, ambient pre/post-edit hooks, and a self-contained interactive report.",
     "version": "0.12.0"
   },
   "plugins": [
     {
       "name": "codeweb",
       "source": "./",
-      "description": "Your agents break less code and burn fewer tokens. /codeweb maps any repo in seconds. Hooks brief every session and impact-check every edit. 27 deterministic MCP tools answer impact, callers, duplication, dead code, and risk before your agents write."
+      "description": "Your agents break less code and burn fewer tokens. /codeweb maps any repo in seconds. Hooks brief every session and impact-check every edit. 28 deterministic MCP tools answer impact, callers, duplication, dead code, and risk before your agents write."
     }
   ]
 }
