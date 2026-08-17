@@ -1,5 +1,11 @@
 # PLAN — Product deep-dive & sequenced improvement plan
 
+**Execution status (2026-08-17):** Phases 0–3 are **built** on this branch (operator go
+"Start executing the full plan"; session record in `reports/BUILDLOG.md`, one commit per
+phase). Still open, by design: the Next decision pack below (operator pick), Phase 4 (rides
+that pick), the release train (cut = operator), the launch (`reports/LAUNCH-KIT.md`), and the
+operator console items.
+
 **Run date:** 2026-08-16 · **Method:** six parallel read-only area audits (core engine ·
 agent surface · verification & evidence · growth surfaces · backlog & decision history ·
 languages & integrations), synthesized into one combined report and one sequenced plan.
