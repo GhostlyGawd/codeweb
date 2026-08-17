@@ -75,6 +75,67 @@
 <p>  parsed — no symbols, no grammar in the loop, determinism untouched — and an orphan json</p>
 <p>  file (nothing imports it) never becomes a node, so lock files add no noise. Scan-cache</p>
 <p>  format bumps to v18 (one cold re-extract per workspace on upgrade).</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>The after-edit gate loop is completable by any MCP client (AC-9).</strong> <code>codeweb_refresh</code></li>
+</ul>
+<p>  gains <code>snapshot:true</code> (also <code>refresh.mjs --snapshot</code>): the pre-refresh graph is preserved as</p>
+<p>  <code>graph.prev.json</code>, and <code>codeweb_diff</code>'s two arguments are now optional — <code>after</code> defaults to</p>
+<p>  the discovered graph and <code>before</code> defaults to that snapshot — so the prescribed</p>
+<p>  refresh-then-diff loop no longer needs the plugin's shell copy step. A missing snapshot gets</p>
+<p>  an actionable remedy naming the exact call.</p>
+<ul>
+<li><strong><code>codeweb_dependents</code> — the 28th tool (AC-10).</strong> The complete "who do I break?" union</li>
+</ul>
+<p>  (call + import + inherit + test + ref edges, tagged by kind) was CLI-only; it is now a</p>
+<p>  first-class MCP tool derived from the same manifest entry, budgeted with true totals, and</p>
+<p>  <code>codeweb_callers</code> points at it for the full-union question.</p>
+<ul>
+<li><strong>Staleness honesty reaches the advisors (AC-11).</strong> Every spawned graph-consuming reply now</li>
+</ul>
+<p>  carries the call-time staleness verdict (previously only the orient family was annotated —</p>
+<p>  <code>codeweb_simulate</code> could pre-flight a refactor from a week-old map with full confidence), and</p>
+<p>  the overlap-independent advisors (deadcode, risk, hotspots, break_cycles, reading_order,</p>
+<p>  simulate, placement, fitness) joined the auto-refresh set. Overlap-consuming advisors stay</p>
+<p>  out by design: refresh drops overlaps, so they get the annotation, never a silent refresh.</p>
+<ul>
+<li><strong>Agent-fallback maps carry their provenance (AC-12).</strong> The codebase-anatomy skill's</li>
+</ul>
+<p>  <code>meta.engine</code> stamp (hybrid | tools | read) is now read downstream: the briefing payload and</p>
+<p>  the session-start injection caveat agent-extracted maps as unverified, instead of answering</p>
+<p>  with deterministic-tier authority.</p>
+<h3 class="cl-grp">Changed</h3>
+<ul>
+<li><strong>Non-Claude MCP clients get the full loop, documented.</strong> The start page now carries</li>
+</ul>
+<p>  per-client registration blocks (Cursor, Windsurf, Codex CLI, Gemini CLI, plugin-less Claude</p>
+<p>  Code) and a paste-ready rules snippet that teaches the before/after edit loop — the ambient</p>
+<p>  behavior the Claude plugin's hooks provide, for clients that surface neither hooks nor the</p>
+<p>  server's built-in instructions. The README names the loop's entry tools and links both.</p>
+<ul>
+<li><strong>D4 closed — the last Spring-Cleaning debt item.</strong> <code>codeweb_risk</code>'s ranking assembly moved</li>
+</ul>
+<p>  into <code>lib/risk.mjs</code> (<code>rankRisk</code> — one truth for the CLI and a future MCP fast path), and</p>
+<p>  <code>run.mjs</code>'s banner now reads optimize's <code>--json</code> totals instead of scraping its prose (a</p>
+<p>  wording tweak used to silently blank the ready/LOC fields; humans keep a rendered headline</p>
+<p>  and <code>CODEWEB_VERBOSE=1</code> shows the full advisory from <code>optimize.md</code>).</p>
+<ul>
+<li><strong>D1 residue closed.</strong> <code>reading-order</code>'s CLI budget default now derives from the tool</li>
+</ul>
+<p>  manifest via <code>budgetOf()</code> (the 40-vs-20 two-literal pair is gone — the manifest is the one</p>
+<p>  truth); <code>campaign</code>'s deliberate CLI/MCP budget divergence is documented at the site; and the</p>
+<p>  release gate now flags a <code>TOOL_BEHAVIOR</code> entry whose manifest spec was removed (dead</p>
+<p>  behavior — the reverse already threw at startup).</p>
+<ul>
+<li><strong>The post-edit hook warns once, on one channel.</strong> The structural warning rides the</li>
+</ul>
+<p>  structured <code>additionalContext</code> only; stderr is the fallback when that write fails — the same</p>
+<p>  warning used to arrive twice.</p>
+<ul>
+<li><strong>External-review verdicts now record the reviewed commit</strong> (<code>git rev-parse HEAD</code> of the</li>
+</ul>
+<p>  clone, first line of the verdict) — an adopt/avoid ruling without the commit it judged was a</p>
+<p>  claim without a source.</p>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
 <li><strong>C7 truth sweep (2026-08-16 drift audit).</strong> The charter-ruled-fabricated sponsorship cost</li>

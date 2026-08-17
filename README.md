@@ -183,8 +183,10 @@ impact cards, and all 28 tools:
 ```
 Restart Claude Code to register the `/codeweb` command, agents, and skill.
 
-**Cursor, Windsurf, or another MCP agent:** Register the zero-dependency stdio server. The example
-uses Claude Code syntax. Use the equivalent server-registration command for your client:
+**Cursor, Windsurf, Codex CLI, or another MCP agent:** Register the zero-dependency stdio server.
+The example uses Claude Code syntax; per-client configuration blocks (Cursor, Windsurf, Codex CLI,
+Gemini CLI) and a paste-ready rules snippet that teaches your agent the before/after loop are on
+[the start page](https://ghostlygawd.github.io/codeweb/start.html#other-clients):
 ```
 claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
 ```
@@ -256,6 +258,12 @@ check before writing, gate an edit, and plan cleanup.
 claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
 ```
 
+The loop an agent runs: `codeweb_brief` once per session (or `codeweb_find` when no symbol name
+is known) → `codeweb_explain` before touching a symbol → `codeweb_context`, `codeweb_impact`, or
+`codeweb_dependents` before the edit → `codeweb_refresh` with `snapshot:true`, then `codeweb_diff`
+after it. Clients that hide the server's built-in instructions can paste
+[the rules snippet](https://ghostlygawd.github.io/codeweb/start.html#rules-snippet) instead.
+
 The server includes these agent-specific features:
 
 - **Optional `graph` argument:** The server finds the nearest map when you omit `graph`. If no map
@@ -263,7 +271,7 @@ The server includes these agent-specific features:
 - **Budgeted responses:** Responses include the highest-ranked items and the true totals. A context
   response that was approximately 300 KB is now approximately 10 KB.
 - **Staleness information:** A stale result identifies its state and directs the agent to
-  `codeweb_refresh`.
+  `codeweb_refresh` — on the orient tools and on every spawned advisor answer.
 
 [All 28 tools, grouped and explained →](docs/reference.md#the-mcp-server-tool-by-tool)
 

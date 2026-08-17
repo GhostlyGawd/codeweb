@@ -52,6 +52,11 @@ notes so validated results, papers, and new tools never get lost in commit histo
   with deterministic-tier authority.
 
 ### Changed
+- **Non-Claude MCP clients get the full loop, documented.** The start page now carries
+  per-client registration blocks (Cursor, Windsurf, Codex CLI, Gemini CLI, plugin-less Claude
+  Code) and a paste-ready rules snippet that teaches the before/after edit loop — the ambient
+  behavior the Claude plugin's hooks provide, for clients that surface neither hooks nor the
+  server's built-in instructions. The README names the loop's entry tools and links both.
 - **D4 closed — the last Spring-Cleaning debt item.** `codeweb_risk`'s ranking assembly moved
   into `lib/risk.mjs` (`rankRisk` — one truth for the CLI and a future MCP fast path), and
   `run.mjs`'s banner now reads optimize's `--json` totals instead of scraping its prose (a

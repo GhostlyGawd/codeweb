@@ -65,11 +65,22 @@
         <p class="muted">Restart Claude Code, then run <code>/codeweb</code> on any project.</p>
       </div>
       <div class="card">
-        <h3>Cursor, Windsurf, or another MCP client</h3>
+        <h3 id="other-clients">Cursor, Windsurf, or another MCP client</h3>
         <p>Register the zero-dependency stdio server to use all 28 tools without the plugin.</p>
-<pre><code>claude mcp add codeweb -- \
-  npx -y -p @ghostlygawd/codeweb codeweb-mcp</code></pre>
-        <p class="muted">The example uses Claude Code syntax. Use your client's equivalent server-registration command.</p>
+<pre><code># Cursor — .cursor/mcp.json (project) or ~/.cursor/mcp.json
+# Windsurf — ~/.codeium/windsurf/mcp_config.json (same shape)
+# Gemini CLI — ~/.gemini/settings.json (same shape)
+{ "mcpServers": { "codeweb": { "command": "npx",
+  "args": ["-y", "-p", "@ghostlygawd/codeweb", "codeweb-mcp"] } } }
+
+# Codex CLI — ~/.codex/config.toml
+[mcp_servers.codeweb]
+command = "npx"
+args = ["-y", "-p", "@ghostlygawd/codeweb", "codeweb-mcp"]
+
+# Claude Code without the plugin
+claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp</code></pre>
+        <p class="muted">All 28 tools work in every MCP client. Some clients don't surface the server's built-in instructions — paste the loop below into your rules file so your agent actually uses the map.</p>
       </div>
       <div class="card">
         <h3>Map without an AI agent</h3>
@@ -78,6 +89,20 @@
 npx -y @ghostlygawd/codeweb .</code></pre>
         <p class="muted">~3 s for 3,000 symbols — open <code>.codeweb/report.html</code> when it finishes.</p>
       </div>
+    </div>
+    <!-- AGT-F4: the plugin's hooks teach Claude the loop ambiently; every other client needs it
+         in a rules file. One paste-ready block, kept in step with the server's instructions. -->
+    <div class="card" style="margin-top:1.25rem">
+      <h3 id="rules-snippet">Teach your agent the loop — paste into <code>.cursor/rules</code>, <code>AGENTS.md</code>, or <code>GEMINI.md</code></h3>
+<pre><code>## codeweb — ask the map before and after every edit
+This repo is mapped by codeweb (a deterministic call/import graph; 28 read-only MCP tools).
+- Orient once per session: codeweb_brief. No symbol name yet? codeweb_find "&lt;concept&gt;".
+- BEFORE touching a symbol: codeweb_explain (one card), then codeweb_context (edit window)
+  or codeweb_impact (blast radius); codeweb_dependents lists EVERY user of it.
+- Before writing a new function: codeweb_find_similar (does this exist?) and codeweb_placement.
+- AFTER editing: codeweb_refresh {snapshot:true}, then codeweb_diff {} — fix any regression
+  it reports before moving on.
+- A stale answer names codeweb_refresh; "no graph found" names codeweb_map. Follow the remedy.</code></pre>
     </div>
     <p class="muted" style="margin-top:1rem"><em>For a temporary evaluation, run the <code>npx</code> command and open the generated map.</em></p>
     <!-- CRO C8: the page that asks for work finally shows the reward + what success looks like -->
