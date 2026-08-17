@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/brand/banner.png" alt="codeweb — your coding agents grep. codeweb knows." width="100%">
+<img src="assets/brand/banner.png" alt="codeweb — your agents break less code and burn fewer tokens." width="100%">
 
 [![CI](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml/badge.svg)](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/%40ghostlygawd%2Fcodeweb?style=flat-square&color=c6f24e)](https://www.npmjs.com/package/@ghostlygawd/codeweb)
@@ -133,11 +133,11 @@ a merge.
 
 ## Benchmarks
 
-- **Find callers before an edit:** Agents found **74%** of a function's real callers with
-  codeweb and **44%** with grep at the same context spend. A missed caller can cause an edit to
-  break working code.
-- **Calculate the effect of a change:** One codeweb call returned one small answer. Agents that
-  used grep needed approximately 5 search rounds and **126 times the tokens**. They still had to
+- **Find callers before an edit:** In the v0.9.0 efficiency pilot, agents found **74%** of a
+  function's real callers with codeweb and **44%** with grep at the same context spend. A missed
+  caller can cause an edit to break working code.
+- **Calculate the effect of a change:** One codeweb call returned one small answer. A simulated
+  grep search loop needed approximately 5 rounds and **126 times the tokens** — and still had to
   guess.
 - **Detect duplicate code:** codeweb found **every planted duplicate with zero false alarms**,
   including renamed copies. Text search found 0% of the renamed copies.

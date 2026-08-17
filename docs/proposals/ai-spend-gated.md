@@ -16,7 +16,7 @@ prompt-only packaging with zero spend.
 
 - **Claim to test:** the 27 MCP tool descriptions + the handshake INSTRUCTIONS are prompts;
   variants change how often a frontier agent picks `codeweb_callers` over grep mid-task.
-- **Harness (exists):** `bench/replay-ab.workflow.js` + `bench/replay-mine.mjs` ground-truth
+- **Harness (exists):** `bench/experiments/replay-ab.workflow.js` + `bench/replay-mine.mjs` ground-truth
   tasks; usage accounting from `bench/efficiency-pilot.usage.mjs`; engine frozen, descriptions
   varied; publish routing-rate + recall deltas per variant.
 - **Gate:** a variant ships only if routing improves at non-inferior recall; numbers pinned in
@@ -44,6 +44,7 @@ prompt-only packaging with zero spend.
 
 ## Trigger
 
-Run P1+P3 as one funded batch when sponsorship or an explicit operator go-ahead covers the
-bench line item; P2 waits for its benchmark. Until then: proposals only — nothing here has
+Run P1+P3 as one batch on an explicit operator go-ahead — that is the only gate (C7 struck
+the funding premise: these experiments cost no real API money, and no funding precondition
+may be cited). P2 waits for its benchmark. Until then: proposals only — nothing here has
 been executed, and no number from this document may be quoted as measured.

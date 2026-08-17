@@ -171,5 +171,6 @@ console.log(renderTrend(rows, { json: opts.json }));
 // REVENUE §3.4: someone graphing structural health over 5+ snapshots is doing by hand the job a
 // hosted rollup would do — the team-lead surface gets the one-line rail (text mode only).
 if (!opts.json && rows.length >= 5) {
-  console.log('\ncodeweb is free — sponsoring pays for its benchmarks: https://github.com/sponsors/GhostlyGawd');
+  const { SPONSOR_LINE } = await import('./lib/product-copy.mjs'); // D6/C7: claim strings live where the gate looks
+  console.log('\n' + SPONSOR_LINE);
 }

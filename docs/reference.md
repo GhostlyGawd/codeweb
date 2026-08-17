@@ -282,7 +282,7 @@ codeweb/
 ├── commands/codeweb.md              # /codeweb trigger
 ├── scripts/                         # the deterministic engine (default fast path)
 │   ├── run.mjs                      # orchestrator — one command, runs all stages per target
-│   ├── extract-symbols.mjs         # stage 1: source -> atomic nodes + edges (JS/TS/Python/Rust/Go)
+│   ├── extract-symbols.mjs         # stage 1: source -> atomic nodes + edges (all 11 native languages)
 │   ├── cluster3.mjs                # stage 2: hub-strip + directory-anchored domains
 │   ├── overlap.mjs                 # stage 3: body-confirmed duplication/overlap detection
 │   ├── build-report.mjs            # stage 4: graph.json -> interactive report.html + report.md

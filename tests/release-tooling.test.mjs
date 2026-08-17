@@ -136,6 +136,56 @@ test('checkConsistency fails a sponsorship cost premise in the stdout copy modul
   } finally { cleanup(root); }
 });
 
+// 2026-08-16 drift audit: the C7 class shipped AGAIN through surfaces the product-copy check
+// never read (report/demo footer tooltips, trend.mjs, FUNDING.yml). The sweep now covers every
+// prose surface, proximity-gated on sponsor-adjacent wording.
+test('checkConsistency fails a sponsorship cost premise on any prose surface, not just product-copy', () => {
+  const root = tmpDir('codeweb-rel-');
+  try {
+    writeTree(root, {
+      'package.json': JSON.stringify({ version: '0.3.0', description: 'x' }),
+      '.claude-plugin/plugin.json': JSON.stringify({ version: '0.3.0', description: 'x' }, null, 2),
+      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nmetadata:\n  version: 0.3.0\n---\nbody\n',
+      'scripts/mcp-server.mjs': "const TOOLS=[{ name: 'codeweb_a' }];\n",
+      'site/data/product.json': JSON.stringify({ toolPhases: [{ tools: [{}] }] }),
+      'CHANGELOG.md': '## [0.3.0] - 2026-01-01\n### Added\n- x\n',
+      'README.md': 'sponsoring funds the benchmarks\n',
+    });
+    const r = checkConsistency(root);
+    assert.ok(r.problems.some((p) => /README\.md/.test(p) && /C7/.test(p) && /cost premise/.test(p)),
+      `missing the widened C7 problem: ${r.problems.join('; ') || '(none)'}`);
+
+    writeTree(root, { 'README.md': 'sponsoring supports the project, and sponsors get seen\n' });
+    const clean = checkConsistency(root);
+    assert.ok(!clean.problems.some((p) => /C7/.test(p)), 'the ratified wording passes everywhere');
+  } finally { cleanup(root); }
+});
+
+// D6's structural cause, closed the rest of the way: a numeric public claim hardcoded in any
+// script's string literal (outside product-copy.mjs) fails the gate — claim strings live where
+// the gate looks.
+test('checkConsistency fails a numeric claim literal in a script outside product-copy.mjs', () => {
+  const root = tmpDir('codeweb-rel-');
+  try {
+    writeTree(root, {
+      'package.json': JSON.stringify({ version: '0.3.0', description: 'x' }),
+      '.claude-plugin/plugin.json': JSON.stringify({ version: '0.3.0', description: 'x' }, null, 2),
+      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nmetadata:\n  version: 0.3.0\n---\nbody\n',
+      'scripts/mcp-server.mjs': "const TOOLS=[{ name: 'codeweb_a' }];\n",
+      'site/data/product.json': JSON.stringify({ toolPhases: [{ tools: [{}] }] }),
+      'CHANGELOG.md': '## [0.3.0] - 2026-01-01\n### Added\n- x\n',
+      'scripts/stats-banner.mjs': "console.log('found 74% of real callers vs grep');\n",
+    });
+    const r = checkConsistency(root);
+    assert.ok(r.problems.some((p) => /stats-banner\.mjs/.test(p) && /numeric claim/.test(p) && /D6/.test(p)),
+      `missing the numeric-claim problem: ${r.problems.join('; ') || '(none)'}`);
+
+    writeTree(root, { 'scripts/stats-banner.mjs': "console.log('map built');\n" });
+    const clean = checkConsistency(root);
+    assert.ok(!clean.problems.some((p) => /numeric claim/.test(p)), 'plain output passes');
+  } finally { cleanup(root); }
+});
+
 // D1: the manifest discipline the gate enforces — no tool declared twice across the manifest and
 // the server (the triplication class behind the recorded parity fixes), and no prose surface
 // naming a tool that doesn't ship (the docs-lying class, 5c5d417 / the 0-of-13 anti-pair).

@@ -30,6 +30,20 @@ notes so validated results, papers, and new tools never get lost in commit histo
   format bumps to v18 (one cold re-extract per workspace on upgrade).
 
 ### Fixed
+- **C7 truth sweep (2026-08-16 drift audit).** The charter-ruled-fabricated sponsorship cost
+  premise still shipped through surfaces the claims gate never read: the report and demo footer
+  tooltips, `trend.mjs`'s five-snapshot rail, and the FUNDING.yml comment. All now carry the
+  ratified support framing, single-sourced from `product-copy.mjs` (`SPONSOR_LINE`), and the
+  gate closes the class — the cost-premise scan now sweeps every prose surface plus
+  FUNDING.yml, trend, and the gate comment; the generated artifacts (report template, live
+  demo) and the remaining site pages joined `PROSE_FILES`; and a numeric public claim hardcoded
+  in any script outside `product-copy.mjs` fails the build. Also corrected in the same sweep:
+  the README's 126× claim is attributed to the simulated grep loop its receipt actually
+  describes, the 74%/44% line carries its v0.9.0-pilot qualifier, the research page dates its
+  frozen receipts, the downloads page footer no longer claims "zero third-party requests" while
+  reading the public npm API, the README banner alt carries the ratified job line, and four
+  stale doc facts were fixed (two `cli.md` env rows, the `reference.md` extractor language
+  note, and the AST decision-record header).
 - The social-preview source is now a center-safe 1280×640 JPEG. Important copy remains visible
   in narrow mobile crops, and the generated site publishes matching JPEG Open Graph metadata.
 - The npm downloads dashboard now starts at the package's actual first publication date

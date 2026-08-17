@@ -8,7 +8,7 @@
  * Pure functions are exported for unit testing (bumpVersion, rollChangelog,
  * syncTargets); the file-touching helpers are thin wrappers over them.
  */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 export const readText = (p) => readFileSync(p, 'utf8');
@@ -64,6 +64,17 @@ export const PROSE_FILES = [
   'skills/codebase-anatomy/references/engine-detection.md',
   'scripts/lib/product-copy.mjs', // D6: the stdout claim strings are prose too
   'docs/cli.md', // D1: "--help wins and this file has a bug" — now its counts and tool names are gated
+  // 2026-08-16 (PLAN Phase 0): the surfaces the C7 tooltip class shipped through — generated
+  // artifacts and the remaining site pages are prose too, and the editor lens carries a
+  // language-count comment that must track the shipped list.
+  'scripts/report-template.html',
+  'docs/demo/index.html',
+  'site/content/support.html',
+  'site/content/case-study.html',
+  'site/content/downloads.html',
+  'site/content/changelog.html',
+  'editor/vscode-codeweb/README.md',
+  'editor/vscode-codeweb/extension.js',
 ];
 
 /** Scan one text for tool-count / language-count claims that disagree with the canonical facts. */
@@ -287,6 +298,40 @@ export function checkConsistency(root) {
   if (existsSync(stdoutCopyPath)) {
     const m = readText(stdoutCopyPath).match(/\b(?:pays?|paying|paid)\s+for\b|\bfund(?:s|ing|ed)?\b|\bbills?\b/i);
     if (m) problems.push(`scripts/lib/product-copy.mjs states a sponsorship cost premise ("${m[0]}") — CHARTER C7 ruled the class fabricated; no cost claims`);
+  }
+  // The same C7 class shipped again through surfaces this gate never read (the report/demo
+  // footer tooltips, trend.mjs's rail, FUNDING.yml — found by the 2026-08-16 drift audit):
+  // sweep every prose surface for sponsor-adjacent cost wording. Proximity-gated so unrelated
+  // uses of "funds"/"bills" in ordinary prose can never false-positive.
+  const costNear = /\bsponsor\w*\b[^\n]{0,80}\b(?:pays?|paying|paid|funds?|funding|funded|bills?)\b|\b(?:pays?|paying|paid|funds?|funding|funded|bills?)\b[^\n]{0,80}\bsponsor\w*\b/i;
+  for (const rel of [...PROSE_FILES, '.github/FUNDING.yml', 'scripts/trend.mjs', 'scripts/lib/gate-md.mjs']) {
+    const p = join(root, rel);
+    if (!existsSync(p)) continue;
+    const m = readText(p).match(costNear);
+    if (m) problems.push(`${rel} states a sponsorship cost premise ("${m[0].trim()}") — CHARTER C7 ruled the class fabricated; no cost claims`);
+  }
+  // D6's structural cause, closed the rest of the way: a numeric public claim inside any
+  // script's string literal (outside product-copy.mjs) is invisible to the prose sweeps.
+  // Zero instances existed at adoption (2026-08-16); this exists so the next one cannot ship.
+  // Word-gated to the claim vocabulary so ordinary numeric formatting never trips it.
+  const scriptsDir = join(root, 'scripts');
+  if (existsSync(scriptsDir)) {
+    const scriptFiles = [];
+    for (const d of [scriptsDir, join(scriptsDir, 'lib')]) {
+      if (!existsSync(d)) continue;
+      for (const f of readdirSync(d)) {
+        if (f.endsWith('.mjs') && f !== 'product-copy.mjs') scriptFiles.push([`${d === scriptsDir ? 'scripts' : 'scripts/lib'}/${f}`, join(d, f)]);
+      }
+    }
+    const litRe = /(['"`])((?:(?!\1)[^\\\n]|\\.)*)\1/g;
+    for (const [rel, p] of scriptFiles) {
+      for (const m of readText(p).matchAll(litRe)) {
+        const s = m[2];
+        if (/\b\d+(?:\.\d+)?\s*[%×]/.test(s) && /caller|token|recall|benchmark|disagree|vs grep/i.test(s)) {
+          problems.push(`${rel} hardcodes a numeric claim ("${s.slice(0, 60)}") outside product-copy.mjs — claim strings live where the gate looks (D6)`);
+        }
+      }
+    }
   }
 
   // D1: the tool-interface manifest discipline. (a) A tool declared in BOTH lib/tool-specs.mjs
