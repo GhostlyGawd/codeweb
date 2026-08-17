@@ -1,0 +1,7 @@
+{
+  "id": "mcp-tools-list",
+  "command": "node scripts/mcp-server.mjs",
+  "input": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{},\"clientInfo\":{\"name\":\"eval\",\"version\":\"0\"}}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}\n",
+  "expect_regex": "codeweb_dependents.*codeweb_diff|codeweb_diff.*codeweb_dependents",
+  "timeout": 30
+}

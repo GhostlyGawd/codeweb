@@ -29,3 +29,49 @@ This is the stage's null report, not a build session — brief 143's null rule (
 - **Next build session:** starts when the operator picks Next — its ACs join SPEC.md as
   `status: next`, and the loop (failing `test_ac_<n>` first, least code to green, one AC per
   verified commit) runs under the now-live gate.
+
+---
+
+## Session — 2026-08-16/17 · branch `claude/codex-improvement-plan-cw4n5b` · reports/PLAN.md Phases 0–3
+
+- **Session:** scope = the operator's "Start executing the full plan" on `reports/PLAN.md`
+  (itself built from six read-only area audits, 2026-08-16). Gate green at start and at every
+  commit; the PostToolUse hook ran the full gate after each edit throughout.
+- **Built (Phase 0 — truth sweep):** the C7 cost premise removed from its last four shipped
+  surfaces and single-sourced (`SPONSOR_LINE`); the claims gate widened (PROSE_FILES + the
+  sponsor-proximity sweep + the numeric-claim-literal lint, all test-pinned); receipt framing
+  aligned (126× = simulated grep loop; 74/44 carries the v0.9.0-pilot qualifier; research page
+  dates its frozen receipts); the small-truth batch (downloads footer, cli.md env rows,
+  reference language note, banner alt, AST record header, proposal path cite).
+- **Built (Phase 1 — the loop, ACs 9–12):** snapshot diff (`refresh --snapshot` +
+  `codeweb_diff` defaults) · `codeweb_dependents` (28th tool, one manifest entry, every count
+  surface resynced) · staleness parity on spawned advisors + overlap-independent auto-refresh ·
+  agent-fallback provenance read downstream. All four ACs `built` + pinned. Residues: D4
+  closed (rankRisk in lib; optimize `--json` banner), D1 residue closed (manifest-derived
+  reading-order default — BKL-L3 resolved to the manifest, operator may override; behavior-
+  without-spec gate check), one-channel post-edit hook, verdict SHAs, per-client registration +
+  the rules snippet for non-Claude clients.
+- **Built (Phase 2 — trigger & doorway):** `gateReposExternal` ledger column (arm 2 of the
+  distribution trigger observable); Action sha-refs fixed + `history` trend via Actions cache
+  (self-gate dogfoods it) + tag-pinning and monorepo docs; the gate in the product loop (4th
+  `next:` line, report/demo footer); the LSP answer on the deciding surfaces; the Marketplace
+  auto-publish step deleted per non-goal 6 (test-pinned); grammar sha256 provenance
+  machine-verified; release prep inventories the trusted wasm source; `reports/LAUNCH-KIT.md`
+  drafted (posting is the operator's).
+- **Built (Phase 3 — receipts freshness):** `auditClaimValues` (values trace to receipts —
+  the C6 class closed, pinned both ways); requirements one-way parity; `weekly-vitals.yml`
+  drafted (adoption = operator merge); evals floor ×4; release-CLI smoke tests;
+  `toolsListBytes` measured; `trend --json` one-line; impact closure semantics in the payload;
+  dead bench helper removed; schema-versioning stance recorded; `docs/extractor-invariants.md`.
+- **Skipped, with reasons:** hook-latency budget entry (no bench instrument measures the hook
+  path yet — a budget nothing measures is dead config; needs an instrument first) ·
+  BKL-L4's `meanBlock` half (it has live call sites — the deadcode flag is a scoping false
+  positive; a suppression needs a mapped workspace session) · screenshot re-shoot (deferred to
+  the release cut per the new release-prep checklist line; stamp consciously re-verified twice,
+  all five images inspected) · AC-9..12 trace records in the requirements YAML (digest-
+  baselined 2026-07-29 — re-baselining is the operator's requirements process).
+- **Not started, by design:** Phase 4 (the recall bet) and the P1+P3/H22/C-C++ runs — the
+  charter holds **Next** open for the operator; the plan's decision pack is the ask.
+- **Next build session:** the operator picks Next (`reports/PLAN.md` decision pack), appends
+  its ACs, and the loop runs under the live gate. The release train (cut v0.13.0, then the
+  launch) is ready when the operator is.

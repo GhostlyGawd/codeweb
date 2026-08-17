@@ -31,9 +31,13 @@ test('release.yml: dispatched refs must be ancestors of origin/main, checked bef
   assert.ok(guardAt !== -1 && tagAt !== -1 && guardAt < tagAt, 'ancestor guard must sit before tag creation');
 });
 
-test('release.yml: vsce is exact-pinned at both call sites, never @latest', () => {
-  assert.equal((release.match(/@vscode\/vsce@3\.9\.2/g) || []).length, 2, 'both npx call sites carry the exact pin');
+test('release.yml: vsce is exact-pinned, never @latest, and no Marketplace publish exists', () => {
+  assert.equal((release.match(/@vscode\/vsce@3\.9\.2/g) || []).length, 1, 'the .vsix package call site carries the exact pin');
   assert.ok(!release.includes('vsce@latest'), 'no call site may float on @latest');
+  // CHARTER non-goal 6: the auto-publish step (keyed on VSCE_PAT presence) is gone — a secret
+  // must not be able to override a standing instruction. The .vsix package step remains.
+  assert.ok(!/vsce[^\n]*\bpublish\b/.test(release), 'no vsce publish call site (non-goal 6)');
+  assert.match(release, /non-goal 6/, 'the removal is recorded where the step lived');
 });
 
 // ---- finding #3: CI breadth (matrix), AST tier can't silently un-test itself, gate sees deps ---

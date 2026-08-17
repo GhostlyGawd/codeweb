@@ -9,8 +9,26 @@ import { readFileSync } from 'node:fs';
 import { PLUGIN_ROOT, runNode, script, tmpDir, cleanup, writeTree } from './helpers.mjs';
 import {
   bumpVersion, rollChangelog, mcpToolCount, productToolCount, checkConsistency, applySync, syncTargets,
-  scanProseCounts,
+  scanProseCounts, auditClaimValues,
 } from '../scripts/release-utils.mjs';
+
+// VER-F4: claim VALUES trace to receipts. A moved receipt must break the build on every
+// surface that still states the old number (the C6 class) — and the real repo must be clean.
+test('auditClaimValues: a stated stat that disagrees with its receipt fails; the real repo is clean', () => {
+  const root = tmpDir('codeweb-val-');
+  try {
+    writeTree(root, {
+      'bench/experiments/efficiency-pilot.reps5-v090.json': JSON.stringify({ means: { treatment: { recall: 0.71 }, control: { recall: 0.44 } } }),
+      'README.md': 'agents found 74% of real callers with codeweb and 44% with grep\n',
+    });
+    const problems = auditClaimValues(root);
+    assert.ok(problems.some((p) => /README\.md/.test(p) && /74\/44/.test(p) && /71%/.test(p)),
+      `the drifted pair is flagged with the receipt truth: ${problems.join('; ') || '(none)'}`);
+    writeTree(root, { 'README.md': 'agents found 71% of real callers with codeweb and 44% with grep\n' });
+    assert.equal(auditClaimValues(root).length, 0, 'the receipt-matching restatement passes');
+  } finally { cleanup(root); }
+  assert.deepEqual(auditClaimValues(PLUGIN_ROOT), [], 'every published stat matches its committed receipt at HEAD');
+});
 
 test('bumpVersion follows SemVer', () => {
   assert.equal(bumpVersion('0.2.0', 'patch'), '0.2.1');
@@ -19,9 +37,9 @@ test('bumpVersion follows SemVer', () => {
   assert.throws(() => bumpVersion('0.2.0', 'nope'));
 });
 
-test('the real repo derives 27 MCP tools from the source', () => {
-  assert.equal(mcpToolCount(PLUGIN_ROOT), 27);
-  assert.equal(productToolCount(PLUGIN_ROOT), 27, 'product.json must list exactly the MCP tools');
+test('the real repo derives 28 MCP tools from the source', () => {
+  assert.equal(mcpToolCount(PLUGIN_ROOT), 28);
+  assert.equal(productToolCount(PLUGIN_ROOT), 28, 'product.json must list exactly the MCP tools');
 });
 
 // Round 2, finding #3: engines must claim only what CI actually tests. Node 20's `npm test` glob
@@ -34,7 +52,7 @@ test('engines.node claims exactly the tested floor (>=22)', () => {
 test('the real repo is consistent (versions + tool count aligned)', () => {
   const r = checkConsistency(PLUGIN_ROOT);
   assert.equal(r.ok, true, `expected aligned, got: ${r.problems.join('; ')}`);
-  assert.equal(r.count, 27);
+  assert.equal(r.count, 28);
 });
 
 test('check-consistency CLI exits 0 on the aligned repo', () => {
@@ -133,6 +151,56 @@ test('checkConsistency fails a sponsorship cost premise in the stdout copy modul
     });
     const clean = checkConsistency(root);
     assert.ok(!clean.problems.some((p) => /C7/.test(p)), 'the ratified wording passes');
+  } finally { cleanup(root); }
+});
+
+// 2026-08-16 drift audit: the C7 class shipped AGAIN through surfaces the product-copy check
+// never read (report/demo footer tooltips, trend.mjs, FUNDING.yml). The sweep now covers every
+// prose surface, proximity-gated on sponsor-adjacent wording.
+test('checkConsistency fails a sponsorship cost premise on any prose surface, not just product-copy', () => {
+  const root = tmpDir('codeweb-rel-');
+  try {
+    writeTree(root, {
+      'package.json': JSON.stringify({ version: '0.3.0', description: 'x' }),
+      '.claude-plugin/plugin.json': JSON.stringify({ version: '0.3.0', description: 'x' }, null, 2),
+      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nmetadata:\n  version: 0.3.0\n---\nbody\n',
+      'scripts/mcp-server.mjs': "const TOOLS=[{ name: 'codeweb_a' }];\n",
+      'site/data/product.json': JSON.stringify({ toolPhases: [{ tools: [{}] }] }),
+      'CHANGELOG.md': '## [0.3.0] - 2026-01-01\n### Added\n- x\n',
+      'README.md': 'sponsoring funds the benchmarks\n',
+    });
+    const r = checkConsistency(root);
+    assert.ok(r.problems.some((p) => /README\.md/.test(p) && /C7/.test(p) && /cost premise/.test(p)),
+      `missing the widened C7 problem: ${r.problems.join('; ') || '(none)'}`);
+
+    writeTree(root, { 'README.md': 'sponsoring supports the project, and sponsors get seen\n' });
+    const clean = checkConsistency(root);
+    assert.ok(!clean.problems.some((p) => /C7/.test(p)), 'the ratified wording passes everywhere');
+  } finally { cleanup(root); }
+});
+
+// D6's structural cause, closed the rest of the way: a numeric public claim hardcoded in any
+// script's string literal (outside product-copy.mjs) fails the gate — claim strings live where
+// the gate looks.
+test('checkConsistency fails a numeric claim literal in a script outside product-copy.mjs', () => {
+  const root = tmpDir('codeweb-rel-');
+  try {
+    writeTree(root, {
+      'package.json': JSON.stringify({ version: '0.3.0', description: 'x' }),
+      '.claude-plugin/plugin.json': JSON.stringify({ version: '0.3.0', description: 'x' }, null, 2),
+      'skills/codebase-anatomy/SKILL.md': '---\nname: x\nmetadata:\n  version: 0.3.0\n---\nbody\n',
+      'scripts/mcp-server.mjs': "const TOOLS=[{ name: 'codeweb_a' }];\n",
+      'site/data/product.json': JSON.stringify({ toolPhases: [{ tools: [{}] }] }),
+      'CHANGELOG.md': '## [0.3.0] - 2026-01-01\n### Added\n- x\n',
+      'scripts/stats-banner.mjs': "console.log('found 74% of real callers vs grep');\n",
+    });
+    const r = checkConsistency(root);
+    assert.ok(r.problems.some((p) => /stats-banner\.mjs/.test(p) && /numeric claim/.test(p) && /D6/.test(p)),
+      `missing the numeric-claim problem: ${r.problems.join('; ') || '(none)'}`);
+
+    writeTree(root, { 'scripts/stats-banner.mjs': "console.log('map built');\n" });
+    const clean = checkConsistency(root);
+    assert.ok(!clean.problems.some((p) => /numeric claim/.test(p)), 'plain output passes');
   } finally { cleanup(root); }
 });
 

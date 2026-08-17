@@ -147,12 +147,14 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     } catch { /* receipt only */ }
     if (out) {
       const msg = format(out);
-      process.stderr.write(msg + '\n');
+      // API F10 (AGT-F9a): ONE channel. The structured additionalContext is what Claude Code
+      // renders; stderr is only the fallback when that write fails — the same warning used to
+      // arrive twice (stderr + context), reading as two findings.
       try {
         process.stdout.write(JSON.stringify({
           hookSpecificOutput: { hookEventName: 'PostToolUse', additionalContext: msg },
         }) + '\n');
-      } catch { /* ignore */ }
+      } catch { try { process.stderr.write(msg + '\n'); } catch { /* ignore */ } }
     }
     process.exit(0); // ALWAYS non-blocking
   })();

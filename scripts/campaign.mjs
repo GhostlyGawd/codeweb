@@ -23,6 +23,9 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
   flags: {
     json: { type: 'bool', default: false },
+    // DELIBERATE divergence from the manifest's MCP budget (25): the CLI renders the whole
+    // gated plan by default (a human reads the file once); the MCP transport injects the
+    // budget for token-bounded replies. Not drift — two audiences (AGT-F7c).
     budget: { type: 'number', default: Infinity },
     git: { type: 'bool', default: false },
     all: { type: 'bool', default: false }, // #6: advisors include non-product roles

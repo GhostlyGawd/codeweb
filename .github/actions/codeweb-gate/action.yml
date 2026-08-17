@@ -9,9 +9,18 @@ inputs:
     required: false
     default: '.'
   codeweb-ref:
-    description: 'The codeweb ref (branch/tag/sha) to run the gate with.'
+    description: >-
+      The codeweb ref (branch/tag/sha) to run the gate with. Pin a release tag (e.g. v0.12.0)
+      in production — the default tracks main, which moves under you.
     required: false
     default: 'main'
+  history:
+    description: >-
+      Keep a small cross-PR metrics ledger (via actions/cache) and render the structural trend
+      line in the comment — the gate accrues a trajectory instead of one-shot verdicts
+      (RETENTION R7). No data leaves the repo's own Actions cache.
+    required: false
+    default: 'false'
   comment:
     description: >-
       Post the structural review (delta, renames, findings) as a sticky PR comment — the gate
@@ -30,7 +39,24 @@ runs:
         node-version: '22'
     - name: Fetch codeweb
       shell: bash
-      run: git clone --depth 1 --branch "${{ inputs.codeweb-ref }}" https://github.com/GhostlyGawd/codeweb.git "$RUNNER_TEMP/codeweb"
+      # LNG-F3b: `git clone --branch <sha>` fails — the input CLAIMED branch/tag/sha but shas
+      # were broken as documented. Branch/tag keep the cheap shallow clone; a sha (no ref to
+      # --branch on) falls back to clone + checkout. Env-passed, never inline-interpolated.
+      env:
+        CODEWEB_REF: ${{ inputs.codeweb-ref }}
+      run: |
+        if ! git clone --depth 1 --branch "$CODEWEB_REF" https://github.com/GhostlyGawd/codeweb.git "$RUNNER_TEMP/codeweb" 2>/dev/null; then
+          git clone https://github.com/GhostlyGawd/codeweb.git "$RUNNER_TEMP/codeweb"
+          git -C "$RUNNER_TEMP/codeweb" checkout --quiet "$CODEWEB_REF"
+        fi
+    - name: Restore gate history
+      if: inputs.history == 'true'
+      uses: actions/cache/restore@v4
+      with:
+        path: codeweb-gate-history.jsonl
+        key: codeweb-gate-history-${{ inputs.target }}-${{ github.run_id }}
+        restore-keys: |
+          codeweb-gate-history-${{ inputs.target }}-
     - name: Run regression gate
       id: gate
       # The comment (if enabled) must post BEFORE the verdict can fail the job, so reviewers always
@@ -44,14 +70,24 @@ runs:
       env:
         CODEWEB_TARGET: ${{ inputs.target }}
         CODEWEB_BASE: ${{ github.event.pull_request.base.sha }}
+        CODEWEB_HISTORY: ${{ inputs.history }}
       run: |
         set +e
+        HISTORY_ARGS=""
+        if [ "$CODEWEB_HISTORY" = "true" ]; then HISTORY_ARGS="--history codeweb-gate-history.jsonl"; fi
         node "$RUNNER_TEMP/codeweb/scripts/ci-gate.mjs" \
           --base "$CODEWEB_BASE" \
           --target "$CODEWEB_TARGET" \
-          --md "$RUNNER_TEMP/codeweb-gate.md"
+          --md "$RUNNER_TEMP/codeweb-gate.md" \
+          $HISTORY_ARGS
         echo "code=$?" >> "$GITHUB_OUTPUT"
         exit 0
+    - name: Save gate history
+      if: inputs.history == 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: codeweb-gate-history.jsonl
+        key: codeweb-gate-history-${{ inputs.target }}-${{ github.run_id }}
     - name: Post structural review comment
       if: inputs.comment == 'true' && github.event_name == 'pull_request'
       uses: actions/github-script@v7

@@ -22,7 +22,7 @@ Bins, flags, environment variables, and exit codes are tabled separately in [`cl
 
 | File | What it is |
 |---|---|
-| `graph.json` | The machine-readable web: `nodes`, `edges`, `domains`, `overlaps`, plus `meta` (target root, engine, languages, stats). |
+| `graph.json` | The machine-readable web: `nodes`, `edges`, `domains`, `overlaps`, plus `meta` (target root, engine, languages, stats). Schema versioning (BKL-L2, recorded design): the schema is deliberately unversioned and changes **additively only** — consumers must tolerate unknown fields; a `meta.schemaVersion` field ships with the first breaking change, not before (a version nobody checks is noise). |
 | `report.html` | Self-contained interactive map — force-directed graph, domain tree, clickable node details, ranked overlap tab. No network/CDN required. |
 | `report.md` | The same map as plain markdown — domains, top nodes, ranked overlaps. |
 | `overlap.md` | The ranked consolidation opportunities in plain markdown. |
@@ -282,7 +282,7 @@ codeweb/
 ├── commands/codeweb.md              # /codeweb trigger
 ├── scripts/                         # the deterministic engine (default fast path)
 │   ├── run.mjs                      # orchestrator — one command, runs all stages per target
-│   ├── extract-symbols.mjs         # stage 1: source -> atomic nodes + edges (JS/TS/Python/Rust/Go)
+│   ├── extract-symbols.mjs         # stage 1: source -> atomic nodes + edges (all 11 native languages)
 │   ├── cluster3.mjs                # stage 2: hub-strip + directory-anchored domains
 │   ├── overlap.mjs                 # stage 3: body-confirmed duplication/overlap detection
 │   ├── build-report.mjs            # stage 4: graph.json -> interactive report.html + report.md

@@ -1,0 +1,39 @@
+# VER-F1 (PLAN finding 7): the Weekly Vitals, mechanized. SPEC.md's kill criteria assume main
+# is continuously watched ("red on main twice in a row"), but between pushes NOTHING executed —
+# an 18-day quiet stretch (2026-07-29 → 08-16) ran zero CI of any kind, so no tripwire could
+# trip. This runs the SHIP-GATE vitals on a schedule: the full gate, prove-red (a harness that
+# cannot fail proves nothing), and the bench budget gate. A failed run notifies the repo owner
+# through GitHub's own workflow-failure notification — no new channel, no telemetry.
+#
+# Adoption note (operator): merging this file IS the adoption decision — it adds a scheduled
+# enforcement moment beyond the four in docs/harness.md, which is why it arrived as a proposal
+# PR (CLAUDE.md: the operator owns the verification harness; this workflow only RUNS the
+# gate, it does not change it).
+name: weekly vitals
+on:
+  schedule:
+    - cron: '30 6 * * 1'   # Mondays 06:30 UTC — right after the acquisition snapshot
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  vitals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      # the AST tier installs so the vitals measure what users with the optional tier run;
+      # the gate itself needs no dependencies (check.yml proves that on every push)
+      - run: npm ci
+      - name: The gate, fresh on main
+        run: sh scripts/check
+      - name: The gate can still fail (prove-red)
+        run: sh scripts/check --prove-red
+      - name: Bench budgets hold (SPEC kill criterion sensor)
+        run: npm run bench:all -- --gate

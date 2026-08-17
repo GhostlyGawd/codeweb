@@ -82,7 +82,7 @@ test('M2: tools/list exposes the full tool set with object schemas + correct req
   const tools = rpc([INIT, { jsonrpc: '2.0', id: 2, method: 'tools/list' }]).byId.get(2).result.tools;
   assert.deepEqual(tools.map((t) => t.name).sort(),
     ['codeweb_annotate', 'codeweb_break_cycles', 'codeweb_brief', 'codeweb_callees', 'codeweb_callers', 'codeweb_campaign', 'codeweb_codemod',
-      'codeweb_context', 'codeweb_cycles', 'codeweb_deadcode', 'codeweb_diff', 'codeweb_explain', 'codeweb_find',
+      'codeweb_context', 'codeweb_cycles', 'codeweb_deadcode', 'codeweb_dependents', 'codeweb_diff', 'codeweb_explain', 'codeweb_find',
       'codeweb_find_similar', 'codeweb_fitness', 'codeweb_hotspots', 'codeweb_impact', 'codeweb_map',
       'codeweb_orphans', 'codeweb_placement', 'codeweb_reading_order', 'codeweb_refresh', 'codeweb_review',
       'codeweb_risk', 'codeweb_simulate', 'codeweb_stats', 'codeweb_tests']);
@@ -95,11 +95,12 @@ test('M2: tools/list exposes the full tool set with object schemas + correct req
   const req = (n) => tools.find((t) => t.name === n).inputSchema.required;
   const opt = (n) => Object.keys(tools.find((t) => t.name === n).inputSchema.properties);
   assert.deepEqual(req('codeweb_callers'), ['symbol']);
+  assert.deepEqual(req('codeweb_dependents'), ['symbol']);
   assert.deepEqual(req('codeweb_callees'), ['symbol']);
   assert.deepEqual(req('codeweb_impact'), ['symbol']);
   assert.deepEqual(req('codeweb_cycles'), []);
   assert.deepEqual(req('codeweb_orphans'), []);
-  assert.deepEqual(req('codeweb_diff'), ['before', 'after']);
+  assert.deepEqual(req('codeweb_diff'), [], 'AC-9: before/after both optional — defaults close the MCP-only loop');
   assert.deepEqual(req('codeweb_tests'), ['symbol']);
   assert.deepEqual(req('codeweb_find_similar'), [], 'signature|body validated at call time');
   assert.deepEqual(req('codeweb_placement'), ['calls']);
@@ -246,11 +247,13 @@ test('MD2b: adding a brand-new uncalled node is reported but NOT a regression (o
 	assert.ok(payload.orphans.added.includes('d.js:fnew'), 'new node appears in orphans.added');
 });
 
-test('MD3: codeweb_diff missing the "after" arg -> isError:true tool result naming the arg', () => {
+test('MD3: codeweb_diff args are optional (AC-9) — no discoverable graph for the default `after` fails actionably', () => {
+	// The test runner's cwd has no .codeweb/graph.json, so the omitted `after` cannot resolve:
+	// the reply must be the NO_GRAPH remedy, never a silent default or a JSON-RPC error.
 	const r = rpc([INIT, callTool(22, 'codeweb_diff', { before: DBP })]).byId.get(22);
 	assert.ok(!r.error, 'still a tools/call result, not a JSON-RPC error');
-	assert.ok(r.result.isError, 'a missing required arg surfaces as isError:true');
-	assert.match(r.result.content[0].text, /after/, 'names the missing argument');
+	assert.ok(r.result.isError, 'no discoverable graph -> isError:true');
+	assert.match(r.result.content[0].text, /no graph found/, 'the NO_GRAPH remedy');
 });
 
 test('MD4: codeweb_diff on a nonexistent graph file -> isError:true (IO), stdout stays pure JSON-RPC', () => {

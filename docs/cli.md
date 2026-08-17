@@ -8,7 +8,7 @@ wins and this file has a bug — please report it.
 | bin | what it runs | typical call |
 |---|---|---|
 | `codeweb` | the full pipeline (`scripts/run.mjs`) | `codeweb .` — map the current repo into `./.codeweb/` |
-| `codeweb-mcp` | the MCP stdio server (27 read-only tools) | `claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp` |
+| `codeweb-mcp` | the MCP stdio server (28 read-only tools) | `claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp` |
 | `codeweb-query` | graph queries (`scripts/query.mjs`) | `codeweb-query --impact <symbol>` from a mapped repo |
 | `codeweb-diff` | the regression gate (`scripts/diff.mjs`) | `codeweb-diff before.json after.json` — exit 1 on a regression |
 
@@ -52,7 +52,7 @@ here (or anywhere else in codeweb) transmits anything.
 | `CODEWEB_NO_STATS=1` | disable the local outcome ledger (`.codeweb/stats.json`) entirely — the privacy lever |
 | `CODEWEB_ENGINE` | pin the extraction engine (`ts` \| `regex`) instead of auto-detection |
 | `CODEWEB_NO_AUTOREFRESH=1` | MCP server stops auto-refreshing stale graphs before answering |
-| `CODEWEB_MCP_TRACE=1` | MCP server logs every JSON-RPC frame to stderr |
+| `CODEWEB_MCP_TRACE=1` | MCP server logs queue lifecycle events (start/end/kill/skip-autorefresh) as NDJSON to stderr |
 | `CODEWEB_HOOK_INPROC=0` | post-edit hook falls back to the child-process extraction path (rollback lever) |
 | `CODEWEB_VERIFY_FRESHNESS=1` | re-verify stage-memo reuse against the sources instead of trusting stamps |
 | `CODEWEB_LSH=0` | overlap candidate generation falls back to the pre-LSH exhaustive path |
@@ -64,6 +64,6 @@ here (or anywhere else in codeweb) transmits anything.
 | `CODEWEB_DEADCODE_LEGACY=1` | deadcode reverts to the pre-H13 tiering (test-file-defined symbols not protected) |
 | `CODEWEB_VERBOSE=1` | run.mjs restores optimize's full advisory dump instead of the 3-line headline |
 | `CODEWEB_TIMING=1` | print per-phase timings in the extractor |
-| `CODEWEB_BIN` | editor-link binary the report's "open in editor" uses (default `code`) |
+| `CODEWEB_BIN` | set to `1` by the `bin/` shims so the server's main-guard fires when invoked through a bin entry (internal signal — not an editor setting) |
 | `CODEWEB_CHROMIUM` | Chromium executable for `screenshot.mjs` |
 | `TS_MODULE` | path to a `typescript` module for the bench's token grading |

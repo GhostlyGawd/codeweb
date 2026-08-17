@@ -146,7 +146,7 @@ const run = (label, file, args, useEnv) => {
 // chatter under the CLI.md 6.1 stream contract), the dump lives in optimize.md with a one-line
 // pointer here; CODEWEB_VERBOSE=1 restores the firehose. Returns stdout so the banner can scrape
 // the ready/LOC pair.
-const runCapture = (label, file, args) => {
+const runCapture = (label, file, args, render) => {
   console.error(`\n[run] ${label}`);
   const t0 = Date.now();
   let out = '';
@@ -159,9 +159,11 @@ const runCapture = (label, file, args) => {
   }
   const lines = out.split('\n');
   const verbose = process.env.CODEWEB_VERBOSE === '1';
-  const shown = (verbose ? out : lines.slice(0, 3).join('\n')).trimEnd();
+  // D4b: a caller that consumes --json output supplies `render` (the human lines to show);
+  // the default stays the classic 3-line prose peek.
+  const shown = (render ? render(out, verbose) : (verbose ? out : lines.slice(0, 3).join('\n'))).trimEnd();
   if (shown) console.error(shown);
-  if (!verbose && lines.length > 4) console.error(`  full advisory: ${join(ws, 'optimize.md')}`);
+  if (!render && !verbose && lines.length > 4) console.error(`  full advisory: ${join(ws, 'optimize.md')}`);
   console.error(`[run] ${label} done in ${Date.now() - t0}ms`);
   return out;
 };
@@ -237,16 +239,26 @@ if (reusable) {
     // partial workspace lacks optimize.md/report.* so it must never satisfy a later full run's memo.
     console.error('\n[run] --stages through-overlap: skipping optimize + report (memo not written)');
   } else {
-    const optOut = runCapture('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--out', join(ws, 'optimize.md')]);
+    // D4b (SIMPLIFY §2.5): optimize emits --json and the banner reads payload.totals — a prose
+    // wording tweak can no longer silently blank the ready/LOC fields. Humans keep a headline
+    // (rendered here from the same payload); CODEWEB_VERBOSE=1 shows the full advisory from
+    // optimize.md, where the dump already lives.
+    const optOut = runCapture('optimize', S('scripts/optimize.mjs'), [join(ws, 'graph.json'), '--json', '--out', join(ws, 'optimize.md')], (out, verbose) => {
+      if (verbose) { try { return readFileSync(join(ws, 'optimize.md'), 'utf8'); } catch { return out; } }
+      try {
+        const t = JSON.parse(out).totals;
+        return `codeweb optimize: ${t.findings} actionable finding(s) · ${t.ready} ready · ${t.blocked} blocked · ${t.review} judgement · ~${t.locReclaimable} LOC reclaimable\n  full advisory: ${join(ws, 'optimize.md')}`;
+      } catch { return ''; }
+    });
     run('report', S('scripts/build-report.mjs'), [join(ws, 'graph.json'), ...(opts.open ? ['--open'] : [])], false);
-    const headline = optOut.match(/(\d+) actionable findings · (\d+) ready · (\d+) blocked · (\d+) judgement/);
-    const locM = optOut.match(/~(\d+) LOC reclaimed/);
+    let optTotals = null;
+    try { optTotals = JSON.parse(optOut).totals; } catch { /* banner degrades to graph buckets */ }
     // ONE parse of the final graph feeds the banner, the history row, and the delta.
     let freshGraph = null;
     try { freshGraph = JSON.parse(readFileSync(join(ws, 'graph.json'), 'utf8')); } catch { /* banner/delta degrade */ }
     if (freshGraph) {
       banner = { symbols: freshGraph.meta?.stats?.nodes ?? (freshGraph.nodes || []).length, ...findingBuckets(freshGraph.overlaps) };
-      if (headline) { banner.ready = Number(headline[2]); if (locM) banner.loc = Number(locM[1]); }
+      if (optTotals) { banner.ready = optTotals.ready; if (optTotals.locReclaimable) banner.loc = optTotals.locReclaimable; }
       // R1/R8: one appended row per FULL map — brief/trend/report read the series; reused
       // (memo-hit) runs never reach here, so the ledger records real recomputes only.
       const freshRow = metricsRow(freshGraph);
@@ -339,6 +351,14 @@ if (opts.json) {
       console.log(`[run]   1. ${opts.open ? 'the map is opening in your browser' : `see the map: ${openCmd} ${join(ws, 'report.html')}`}`);
       console.log(`[run]   2. live queries in Claude Code: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp`);
       console.log(`[run]   3. after edits: re-run codeweb here — the refresh is cache-warm (seconds, not a re-map)`);
+      // GRW-F4: the CI gate is the team-lead doorway (and the one surface with a distribution
+      // trigger defined on it), yet no in-product moment ever said it exists. Say it exactly
+      // where an activated user with a CI setup is already looking.
+      try {
+        if (existsSync(join(resolve(opts.src), '.github'))) {
+          console.log(`[run]   4. gate your PRs on this structure: https://ghostlygawd.github.io/codeweb/product.html#ci-gate`);
+        }
+      } catch { /* the nudge must never break the pipeline */ }
     }
   }
 }

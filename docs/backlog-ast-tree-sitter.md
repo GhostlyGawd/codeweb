@@ -1,12 +1,13 @@
 # Backlog — a parser-backed (tree-sitter) intelligence tier
 
-Status: **SHIPPED.** The GO recommendation below was executed: the AST tier lives in
-`scripts/lib/ts-engine.mjs` with six vendored grammars under `scripts/grammars/`
+Status: **SHIPPED** (header refreshed 2026-08-16 to HEAD facts; the body below is the frozen
+decision record). The GO recommendation below was executed: the AST tier lives in
+`scripts/lib/ts-engine.mjs` with eight vendored grammars under `scripts/grammars/`
 (provenance + the ABI lesson in `scripts/grammars/PROVENANCE.md`), default-on when the optional
 `web-tree-sitter` is installed, per-file regex fallback otherwise. Dispatch tiers cover JS/TS,
-Java, C#, Python, Go, and Rust. This document and
-[`spike/tree-sitter/GO-NO-GO.md`](../spike/tree-sitter/GO-NO-GO.md) remain as the decision record
-([`spike/tree-sitter/`](../spike/tree-sitter/) is the quarantined proof). Headline evidence on a TypeScript fixture: exact McCabe complexity diverges
+Java, C#, Python, Go, Rust, Ruby, and PHP. This document remains the decision record; the
+original spike tree (`spike/tree-sitter/`) was pruned after shipping and survives in git
+history (`scripts/grammars/PROVENANCE.md` notes the removal). Headline evidence on a TypeScript fixture: exact McCabe complexity diverges
 from the regex on **60% of symbols** (errors in *both* directions, so per-symbol ranking is corrupted,
 not merely noisy); **3** dynamic-dispatch call edges resolved (`this.m()` + typed receiver) vs **0**
 from the regex with the precision contract intact; output **byte-identical** across runs on a pinned

@@ -4,16 +4,21 @@ These `.wasm` grammar files are **vendored on purpose** (committed to the repo) 
 tree-sitter engine is offline-reproducible and **determinism is pinned to an exact grammar version** —
 the same input always yields the same graph. Recorded in `meta.engine` when the tree-sitter engine runs.
 
-| File | Language | Source package | Version | ABI |
-|------|----------|----------------|---------|-----|
-| `tree-sitter-typescript.wasm` | TypeScript / TSX-free TS | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
-| `tree-sitter-java.wasm` | Java (dispatch tier) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
-| `tree-sitter-c-sharp.wasm` | C# (dispatch tier) | `@vscode/tree-sitter-wasm` | 0.3.1 | 15 |
-| `tree-sitter-python.wasm` | Python (dispatch tier, Spec F) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
-| `tree-sitter-go.wasm` | Go (dispatch tier, Spec F) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
-| `tree-sitter-rust.wasm` | Rust (dispatch tier, Spec F) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
-| `tree-sitter-ruby.wasm` | Ruby (dispatch tier, IMPROVEMENTS.md #14) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 |
-| `tree-sitter-php.wasm` | PHP (dispatch tier, IMPROVEMENTS.md #14) | `@vscode/tree-sitter-wasm` | 0.3.1 | 15 |
+| File | Language | Source package | Version | ABI | sha256 |
+|------|----------|----------------|---------|-----|--------|
+| `tree-sitter-typescript.wasm` | TypeScript / TSX-free TS | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `778025db5a8be0e70f8ccc3671e486dfeddd048c25d9e8a70c26de2e1bf6f97d` |
+| `tree-sitter-java.wasm` | Java (dispatch tier) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `4fdeac4ca6ca089f06c6f7e562abcac1733cd465728cc7031ebb73c2019122c4` |
+| `tree-sitter-c-sharp.wasm` | C# (dispatch tier) | `@vscode/tree-sitter-wasm` | 0.3.1 | 15 | `d12d85996c25957b4c1b71e26db2d7cc8a294997b60642e9c2a3b031b2c66dd3` |
+| `tree-sitter-python.wasm` | Python (dispatch tier, Spec F) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `16108b50df4ee9a30168794252ab55e7c93bfc5765d7fa0aa3e335752c515f47` |
+| `tree-sitter-go.wasm` | Go (dispatch tier, Spec F) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `9504573f352b20be7f2f1911754d710622aedc15afff16d5ed8fb5645681aee7` |
+| `tree-sitter-rust.wasm` | Rust (dispatch tier, Spec F) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `0dac14947cb04d94466e3df659f80a4e264c216a60b3eda175eae4cf12ed7a8d` |
+| `tree-sitter-ruby.wasm` | Ruby (dispatch tier, IMPROVEMENTS.md #14) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `09a96427d7c72f0613ed470cd9812223fc4a91d6a9c025c0235cc6bd59ff96f4` |
+| `tree-sitter-php.wasm` | PHP (dispatch tier, IMPROVEMENTS.md #14) | `@vscode/tree-sitter-wasm` | 0.3.1 | 15 | `d4df6a6ff08c87c3ec4f9cbb785fe09998a0cb570e03f57d7b19b3acfb146aa7` |
+
+The digests are load-bearing, not decorative: `tests/grammar-provenance.test.mjs` recomputes each
+file's sha256 against this table, so a swapped or tampered grammar fails the gate — "pinned and
+verified" is machine-checked, never a claim on faith (LNG-F2; the determinism suite proves
+same-input-same-output, which says nothing about grammar identity).
 
 ## Runtime
 
@@ -56,5 +61,13 @@ question, recorded in `CHARTER.md` Open questions.)
 ```sh
 npm i -D @vscode/tree-sitter-wasm@<version>
 cp node_modules/@vscode/tree-sitter-wasm/wasm/tree-sitter-typescript.wasm scripts/grammars/
-# update the version/ABI row above, bump web-tree-sitter if the ABI moved, re-run the determinism test
+# 1. update the version/ABI/sha256 row above (sha256sum scripts/grammars/*.wasm)
+# 2. update the meta.engine version stamp in scripts/lib/ts-engine.mjs (it names the grammar
+#    package version + ABI — a bump without this stamps a lie into every graph)
+# 3. bump web-tree-sitter if the ABI moved; re-run the determinism + grammar-provenance tests
 ```
+
+Each release, the prep checklist re-inventories `@vscode/tree-sitter-wasm@latest`'s wasm list —
+the recorded Kotlin/Swift blocker (above) and the C/C++ readiness question (charter Next
+candidate) both resolve the moment the trusted source ships those grammars, and a checklist
+line is what notices (LNG-F7).

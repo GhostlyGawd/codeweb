@@ -1,0 +1,6 @@
+{
+  "id": "query-help",
+  "command": "node scripts/query.mjs --help",
+  "expect_contains": "usage: query.mjs",
+  "timeout": 30
+}

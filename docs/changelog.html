@@ -19,7 +19,7 @@
 <meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
 <meta name="theme-color" content="#060608">
 <link rel="canonical" href="https://ghostlygawd.github.io/codeweb/changelog.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.12.0","description":"Deterministic call/import graph of your codebase — 27 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.12.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
@@ -75,7 +75,124 @@
 <p>  parsed — no symbols, no grammar in the loop, determinism untouched — and an orphan json</p>
 <p>  file (nothing imports it) never becomes a node, so lock files add no noise. Scan-cache</p>
 <p>  format bumps to v18 (one cold re-extract per workspace on upgrade).</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>The after-edit gate loop is completable by any MCP client (AC-9).</strong> <code>codeweb_refresh</code></li>
+</ul>
+<p>  gains <code>snapshot:true</code> (also <code>refresh.mjs --snapshot</code>): the pre-refresh graph is preserved as</p>
+<p>  <code>graph.prev.json</code>, and <code>codeweb_diff</code>'s two arguments are now optional — <code>after</code> defaults to</p>
+<p>  the discovered graph and <code>before</code> defaults to that snapshot — so the prescribed</p>
+<p>  refresh-then-diff loop no longer needs the plugin's shell copy step. A missing snapshot gets</p>
+<p>  an actionable remedy naming the exact call.</p>
+<ul>
+<li><strong><code>codeweb_dependents</code> — the 28th tool (AC-10).</strong> The complete "who do I break?" union</li>
+</ul>
+<p>  (call + import + inherit + test + ref edges, tagged by kind) was CLI-only; it is now a</p>
+<p>  first-class MCP tool derived from the same manifest entry, budgeted with true totals, and</p>
+<p>  <code>codeweb_callers</code> points at it for the full-union question.</p>
+<ul>
+<li><strong>Staleness honesty reaches the advisors (AC-11).</strong> Every spawned graph-consuming reply now</li>
+</ul>
+<p>  carries the call-time staleness verdict (previously only the orient family was annotated —</p>
+<p>  <code>codeweb_simulate</code> could pre-flight a refactor from a week-old map with full confidence), and</p>
+<p>  the overlap-independent advisors (deadcode, risk, hotspots, break_cycles, reading_order,</p>
+<p>  simulate, placement, fitness) joined the auto-refresh set. Overlap-consuming advisors stay</p>
+<p>  out by design: refresh drops overlaps, so they get the annotation, never a silent refresh.</p>
+<ul>
+<li><strong>Agent-fallback maps carry their provenance (AC-12).</strong> The codebase-anatomy skill's</li>
+</ul>
+<p>  <code>meta.engine</code> stamp (hybrid | tools | read) is now read downstream: the briefing payload and</p>
+<p>  the session-start injection caveat agent-extracted maps as unverified, instead of answering</p>
+<p>  with deterministic-tier authority.</p>
+<h3 class="cl-grp">Changed</h3>
+<ul>
+<li><strong>The distribution trigger's second arm is finally measurable.</strong> The weekly acquisition</li>
+</ul>
+<p>  ledger now records <code>gateReposExternal</code> (unique external repos referencing the gate Action in</p>
+<p>  a workflow file, via public GitHub code search — same no-telemetry ethics as every counter).</p>
+<p>  The parked Teams tier's own trigger ("&gt;10 external repos on the gate Action") could never be</p>
+<p>  observed firing before.</p>
+<ul>
+<li><strong>The gate Action is stranger-ready.</strong> <code>codeweb-ref</code> now really accepts a commit sha (clone</li>
+</ul>
+<p>  <code>--branch</code> fails on shas — branch/tag keep the shallow clone, shas fall back to</p>
+<p>  clone+checkout); a new <code>history</code> input persists a small cross-PR metrics ledger via the</p>
+<p>  Actions cache and renders the structural trend line in the sticky comment (previously the</p>
+<p>  trajectory feature was unreachable by adopters); the docs pin the action and <code>codeweb-ref</code></p>
+<p>  to release tags instead of <code>@main</code> and show the monorepo matrix pattern. The self-gate</p>
+<p>  dogfoods <code>history</code>.</p>
+<ul>
+<li><strong>The gate joined the product loop.</strong> A first map of a repo with <code>.github/</code> now prints a</li>
+</ul>
+<p>  fourth <code>next:</code> line pointing at the CI gate, and every report/demo footer carries a</p>
+<p>  "gate your PRs" link — the team-lead doorway existed only in docs before.</p>
+<ul>
+<li><strong>The Marketplace-publish step is gone (charter non-goal 6).</strong> Publishing auto-triggered</li>
+</ul>
+<p>  whenever a <code>VSCE_PAT</code> secret existed — a secret must not be able to override a standing</p>
+<p>  instruction. The <code>.vsix</code> still builds and attaches to every release; the removal is recorded</p>
+<p>  in place and pinned by the workflow test.</p>
+<ul>
+<li><strong>Grammar provenance is machine-verified.</strong> <code>PROVENANCE.md</code> records a sha256 per vendored</li>
+</ul>
+<p>  wasm and <code>tests/grammar-provenance.test.mjs</code> recomputes them (both directions: no digest-less</p>
+<p>  wasm, no phantom rows) plus the runtime-pin pairing; the refresh recipe now names the</p>
+<p>  <code>ts-engine.mjs</code> version stamp, and release prep inventories <code>@vscode/tree-sitter-wasm@latest</code></p>
+<p>  so the recorded Kotlin/Swift/C/C++ blockers resolve the moment upstream ships them.</p>
+<ul>
+<li><strong>The LSP question is answered on the deciding surfaces</strong> (product page + README): an LSP</li>
+</ul>
+<p>  answers one hop on demand in an editor session; codeweb builds one deterministic whole-graph</p>
+<p>  artifact agents query over MCP and CI diffs to gate a PR. Capability comparison only — no</p>
+<p>  invented numbers.</p>
+<ul>
+<li><strong>Non-Claude MCP clients get the full loop, documented.</strong> The start page now carries</li>
+</ul>
+<p>  per-client registration blocks (Cursor, Windsurf, Codex CLI, Gemini CLI, plugin-less Claude</p>
+<p>  Code) and a paste-ready rules snippet that teaches the before/after edit loop — the ambient</p>
+<p>  behavior the Claude plugin's hooks provide, for clients that surface neither hooks nor the</p>
+<p>  server's built-in instructions. The README names the loop's entry tools and links both.</p>
+<ul>
+<li><strong>D4 closed — the last Spring-Cleaning debt item.</strong> <code>codeweb_risk</code>'s ranking assembly moved</li>
+</ul>
+<p>  into <code>lib/risk.mjs</code> (<code>rankRisk</code> — one truth for the CLI and a future MCP fast path), and</p>
+<p>  <code>run.mjs</code>'s banner now reads optimize's <code>--json</code> totals instead of scraping its prose (a</p>
+<p>  wording tweak used to silently blank the ready/LOC fields; humans keep a rendered headline</p>
+<p>  and <code>CODEWEB_VERBOSE=1</code> shows the full advisory from <code>optimize.md</code>).</p>
+<ul>
+<li><strong>D1 residue closed.</strong> <code>reading-order</code>'s CLI budget default now derives from the tool</li>
+</ul>
+<p>  manifest via <code>budgetOf()</code> (the 40-vs-20 two-literal pair is gone — the manifest is the one</p>
+<p>  truth); <code>campaign</code>'s deliberate CLI/MCP budget divergence is documented at the site; and the</p>
+<p>  release gate now flags a <code>TOOL_BEHAVIOR</code> entry whose manifest spec was removed (dead</p>
+<p>  behavior — the reverse already threw at startup).</p>
+<ul>
+<li><strong>The post-edit hook warns once, on one channel.</strong> The structural warning rides the</li>
+</ul>
+<p>  structured <code>additionalContext</code> only; stderr is the fallback when that write fails — the same</p>
+<p>  warning used to arrive twice.</p>
+<ul>
+<li><strong>External-review verdicts now record the reviewed commit</strong> (<code>git rev-parse HEAD</code> of the</li>
+</ul>
+<p>  clone, first line of the verdict) — an adopt/avoid ruling without the commit it judged was a</p>
+<p>  claim without a source.</p>
 <h3 class="cl-grp">Fixed</h3>
+<ul>
+<li><strong>C7 truth sweep (2026-08-16 drift audit).</strong> The charter-ruled-fabricated sponsorship cost</li>
+</ul>
+<p>  premise still shipped through surfaces the claims gate never read: the report and demo footer</p>
+<p>  tooltips, <code>trend.mjs</code>'s five-snapshot rail, and the FUNDING.yml comment. All now carry the</p>
+<p>  ratified support framing, single-sourced from <code>product-copy.mjs</code> (<code>SPONSOR_LINE</code>), and the</p>
+<p>  gate closes the class — the cost-premise scan now sweeps every prose surface plus</p>
+<p>  FUNDING.yml, trend, and the gate comment; the generated artifacts (report template, live</p>
+<p>  demo) and the remaining site pages joined <code>PROSE_FILES</code>; and a numeric public claim hardcoded</p>
+<p>  in any script outside <code>product-copy.mjs</code> fails the build. Also corrected in the same sweep:</p>
+<p>  the README's 126× claim is attributed to the simulated grep loop its receipt actually</p>
+<p>  describes, the 74%/44% line carries its v0.9.0-pilot qualifier, the research page dates its</p>
+<p>  frozen receipts, the downloads page footer no longer claims "zero third-party requests" while</p>
+<p>  reading the public npm API, the README banner alt carries the ratified job line, and four</p>
+<p>  stale doc facts were fixed (two <code>cli.md</code> env rows, the <code>reference.md</code> extractor language</p>
+<p>  note, and the AST decision-record header).</p>
 <ul>
 <li>The social-preview source is now a center-safe 1280×640 JPEG. Important copy remains visible</li>
 </ul>

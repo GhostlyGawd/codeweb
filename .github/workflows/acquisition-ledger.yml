@@ -19,8 +19,14 @@ jobs:
           set -euo pipefail
           NPM=$(curl -sf 'https://api.npmjs.org/downloads/point/last-week/@ghostlygawd/codeweb' || echo '{}')
           REPO=$(curl -sf -H "Authorization: Bearer ${{ github.token }}" 'https://api.github.com/repos/${{ github.repository }}' || echo '{}')
+          # CHARTER non-goal 5, trigger arm 2 (">10 external repos on the gate Action") was
+          # UNMEASURED — the parked Teams tier's own trigger could never be observed firing
+          # (PLAN finding 6; REVENUE §2 defined it as countable via public code search).
+          # Public API only, same ethics as every other counter. Fail-soft: null on API error.
+          GATE=$(curl -sf -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
+            'https://api.github.com/search/code?q=%22codeweb-gate%22+path%3A.github%2Fworkflows+-repo%3AGhostlyGawd%2Fcodeweb&per_page=100' || echo '{}')
           node -e '
-            const npm = JSON.parse(process.argv[1] || "{}"), repo = JSON.parse(process.argv[2] || "{}");
+            const npm = JSON.parse(process.argv[1] || "{}"), repo = JSON.parse(process.argv[2] || "{}"), gate = JSON.parse(process.argv[3] || "{}");
             const row = {
               at: new Date().toISOString().slice(0, 10),
               npmWeeklyDownloads: npm.downloads ?? null,
@@ -29,10 +35,15 @@ jobs:
               stars: repo.stargazers_count ?? null,
               forks: repo.forks_count ?? null,
               openIssues: repo.open_issues_count ?? null,
+              // unique external repos referencing the gate in a workflow file (first page of 100
+              // matches — exact until adoption far exceeds the >10 trigger it exists to watch)
+              gateReposExternal: gate.total_count != null
+                ? new Set((gate.items || []).map((i) => i.repository && i.repository.full_name).filter(Boolean)).size
+                : null,
             };
             require("fs").appendFileSync("bench/acquisition-ledger.jsonl", JSON.stringify(row) + "\n");
             console.log("appended:", JSON.stringify(row));
-          ' "$NPM" "$REPO"
+          ' "$NPM" "$REPO" "$GATE"
       - name: Render the public npm trend
         run: |
           set -euo pipefail

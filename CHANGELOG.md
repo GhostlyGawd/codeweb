@@ -29,7 +29,116 @@ notes so validated results, papers, and new tools never get lost in commit histo
   file (nothing imports it) never becomes a node, so lock files add no noise. Scan-cache
   format bumps to v18 (one cold re-extract per workspace on upgrade).
 
+### Added
+- **The after-edit gate loop is completable by any MCP client (AC-9).** `codeweb_refresh`
+  gains `snapshot:true` (also `refresh.mjs --snapshot`): the pre-refresh graph is preserved as
+  `graph.prev.json`, and `codeweb_diff`'s two arguments are now optional — `after` defaults to
+  the discovered graph and `before` defaults to that snapshot — so the prescribed
+  refresh-then-diff loop no longer needs the plugin's shell copy step. A missing snapshot gets
+  an actionable remedy naming the exact call.
+- **`codeweb_dependents` — the 28th tool (AC-10).** The complete "who do I break?" union
+  (call + import + inherit + test + ref edges, tagged by kind) was CLI-only; it is now a
+  first-class MCP tool derived from the same manifest entry, budgeted with true totals, and
+  `codeweb_callers` points at it for the full-union question.
+- **Staleness honesty reaches the advisors (AC-11).** Every spawned graph-consuming reply now
+  carries the call-time staleness verdict (previously only the orient family was annotated —
+  `codeweb_simulate` could pre-flight a refactor from a week-old map with full confidence), and
+  the overlap-independent advisors (deadcode, risk, hotspots, break_cycles, reading_order,
+  simulate, placement, fitness) joined the auto-refresh set. Overlap-consuming advisors stay
+  out by design: refresh drops overlaps, so they get the annotation, never a silent refresh.
+- **Agent-fallback maps carry their provenance (AC-12).** The codebase-anatomy skill's
+  `meta.engine` stamp (hybrid | tools | read) is now read downstream: the briefing payload and
+  the session-start injection caveat agent-extracted maps as unverified, instead of answering
+  with deterministic-tier authority.
+
+### Changed
+- **Claim values now trace to receipts, mechanically.** `check-consistency` gained
+  `auditClaimValues`: the published headline stats (the 74%/44% recall pair, the ~126×
+  impact-cost ratio, the "more than N comparisons" floor) are recomputed from their committed
+  receipt files and every surface restating a different value fails the build — closing the
+  drift class behind charter C6, where a re-run moved a receipt and every surface silently kept
+  the old number. Deliberately out of scope: the ±-form deltas (three legitimate values from
+  two receipts share one textual form). The requirements companion gained a one-way parity
+  check (a YAML-traced AC id must still exist in SPEC.md); the reverse — new ACs needing trace
+  records — is a re-baseline, which stays the operator's requirements process.
+- **A weekly-vitals workflow is drafted** (`weekly-vitals.yml`): the full gate, prove-red, and
+  the bench budget gate on a Monday schedule, so SPEC's kill-criteria tripwires can trip
+  between pushes (nothing executed for 18 days straight in August). Merging it is the
+  operator's adoption decision, recorded in the file header.
+- **The evals floor grew from one product case to four** (MCP initialize, tools/list carries
+  the new tool, query --help), release tooling gained CLI smoke tests (`version-sync` no-op on
+  an aligned repo; `screenshot` usage-not-stacktrace), `bench:all` now measures the tools/list
+  definitions surface (`toolsListBytes` — measured, not gated: the descriptions are P1's
+  experimental subject), `trend --json` emits one line (NDJSON-appendable), the impact answer
+  states its closure semantics (`call+inherit`; ref/import/test users via dependents), a dead
+  bench helper was removed, the graph schema's additive-only versioning stance is recorded in
+  the reference, and the extractor's cache-invariant map got its one page
+  (`docs/extractor-invariants.md`) — measurement over refactoring, per the hotspot ruling.
+- **The distribution trigger's second arm is finally measurable.** The weekly acquisition
+  ledger now records `gateReposExternal` (unique external repos referencing the gate Action in
+  a workflow file, via public GitHub code search — same no-telemetry ethics as every counter).
+  The parked Teams tier's own trigger (">10 external repos on the gate Action") could never be
+  observed firing before.
+- **The gate Action is stranger-ready.** `codeweb-ref` now really accepts a commit sha (clone
+  `--branch` fails on shas — branch/tag keep the shallow clone, shas fall back to
+  clone+checkout); a new `history` input persists a small cross-PR metrics ledger via the
+  Actions cache and renders the structural trend line in the sticky comment (previously the
+  trajectory feature was unreachable by adopters); the docs pin the action and `codeweb-ref`
+  to release tags instead of `@main` and show the monorepo matrix pattern. The self-gate
+  dogfoods `history`.
+- **The gate joined the product loop.** A first map of a repo with `.github/` now prints a
+  fourth `next:` line pointing at the CI gate, and every report/demo footer carries a
+  "gate your PRs" link — the team-lead doorway existed only in docs before.
+- **The Marketplace-publish step is gone (charter non-goal 6).** Publishing auto-triggered
+  whenever a `VSCE_PAT` secret existed — a secret must not be able to override a standing
+  instruction. The `.vsix` still builds and attaches to every release; the removal is recorded
+  in place and pinned by the workflow test.
+- **Grammar provenance is machine-verified.** `PROVENANCE.md` records a sha256 per vendored
+  wasm and `tests/grammar-provenance.test.mjs` recomputes them (both directions: no digest-less
+  wasm, no phantom rows) plus the runtime-pin pairing; the refresh recipe now names the
+  `ts-engine.mjs` version stamp, and release prep inventories `@vscode/tree-sitter-wasm@latest`
+  so the recorded Kotlin/Swift/C/C++ blockers resolve the moment upstream ships them.
+- **The LSP question is answered on the deciding surfaces** (product page + README): an LSP
+  answers one hop on demand in an editor session; codeweb builds one deterministic whole-graph
+  artifact agents query over MCP and CI diffs to gate a PR. Capability comparison only — no
+  invented numbers.
+- **Non-Claude MCP clients get the full loop, documented.** The start page now carries
+  per-client registration blocks (Cursor, Windsurf, Codex CLI, Gemini CLI, plugin-less Claude
+  Code) and a paste-ready rules snippet that teaches the before/after edit loop — the ambient
+  behavior the Claude plugin's hooks provide, for clients that surface neither hooks nor the
+  server's built-in instructions. The README names the loop's entry tools and links both.
+- **D4 closed — the last Spring-Cleaning debt item.** `codeweb_risk`'s ranking assembly moved
+  into `lib/risk.mjs` (`rankRisk` — one truth for the CLI and a future MCP fast path), and
+  `run.mjs`'s banner now reads optimize's `--json` totals instead of scraping its prose (a
+  wording tweak used to silently blank the ready/LOC fields; humans keep a rendered headline
+  and `CODEWEB_VERBOSE=1` shows the full advisory from `optimize.md`).
+- **D1 residue closed.** `reading-order`'s CLI budget default now derives from the tool
+  manifest via `budgetOf()` (the 40-vs-20 two-literal pair is gone — the manifest is the one
+  truth); `campaign`'s deliberate CLI/MCP budget divergence is documented at the site; and the
+  release gate now flags a `TOOL_BEHAVIOR` entry whose manifest spec was removed (dead
+  behavior — the reverse already threw at startup).
+- **The post-edit hook warns once, on one channel.** The structural warning rides the
+  structured `additionalContext` only; stderr is the fallback when that write fails — the same
+  warning used to arrive twice.
+- **External-review verdicts now record the reviewed commit** (`git rev-parse HEAD` of the
+  clone, first line of the verdict) — an adopt/avoid ruling without the commit it judged was a
+  claim without a source.
+
 ### Fixed
+- **C7 truth sweep (2026-08-16 drift audit).** The charter-ruled-fabricated sponsorship cost
+  premise still shipped through surfaces the claims gate never read: the report and demo footer
+  tooltips, `trend.mjs`'s five-snapshot rail, and the FUNDING.yml comment. All now carry the
+  ratified support framing, single-sourced from `product-copy.mjs` (`SPONSOR_LINE`), and the
+  gate closes the class — the cost-premise scan now sweeps every prose surface plus
+  FUNDING.yml, trend, and the gate comment; the generated artifacts (report template, live
+  demo) and the remaining site pages joined `PROSE_FILES`; and a numeric public claim hardcoded
+  in any script outside `product-copy.mjs` fails the build. Also corrected in the same sweep:
+  the README's 126× claim is attributed to the simulated grep loop its receipt actually
+  describes, the 74%/44% line carries its v0.9.0-pilot qualifier, the research page dates its
+  frozen receipts, the downloads page footer no longer claims "zero third-party requests" while
+  reading the public npm API, the README banner alt carries the ratified job line, and four
+  stale doc facts were fixed (two `cli.md` env rows, the `reference.md` extractor language
+  note, and the AST decision-record header).
 - The social-preview source is now a center-safe 1280×640 JPEG. Important copy remains visible
   in narrow mobile crops, and the generated site publishes matching JPEG Open Graph metadata.
 - The npm downloads dashboard now starts at the package's actual first publication date

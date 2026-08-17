@@ -60,6 +60,10 @@ controlling product specification.
 - **AC-6** — every shipped bin answers --help with exit 0 | check: `sh -c 'for b in bin/*.mjs; do node "$b" --help >/dev/null || exit 1; done'` | status: built
 - **AC-7** — all golden eval cases pass | check: `python3 evals/run.py` | status: built
 - **AC-8** — imported JSON files are file-level map nodes: JS/TS imports of .json resolve, stamp staleness, and feed the pre-edit importer card | check: `node --test tests/json-support.test.mjs` | status: built
+- **AC-9** — after an edit, an MCP-only client can complete the gate loop: refresh with snapshot:true preserves the prior graph as graph.prev.json and diff defaults before:"prev", after: the discovered graph | check: `node --test tests/mcp-snapshot-diff.test.mjs` | status: built
+- **AC-10** — codeweb_dependents returns the union answer (call, import, inherit, test, ref) over MCP with true totals within budget | check: `node --test tests/mcp-dependents.test.mjs` | status: built
+- **AC-11** — spawned advisor answers carry the call-time staleness verdict, and overlap-independent advisors auto-refresh like the orient family | check: `node --test tests/mcp-staleness-parity.test.mjs` | status: built
+- **AC-12** — agent-fallback graphs carry their meta.engine provenance and the brief caveats agent-built maps | check: `node --test tests/agent-graph-label.test.mjs` | status: built
 
 Pins live in `tests/test_ac_pins.py` (`test_ac_<n>_...`); pins are cheap wiring witnesses —
 the `check:` commands above are what brief 144 runs verbatim.

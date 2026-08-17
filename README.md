@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/brand/banner.png" alt="codeweb — your coding agents grep. codeweb knows." width="100%">
+<img src="assets/brand/banner.png" alt="codeweb — your agents break less code and burn fewer tokens." width="100%">
 
 [![CI](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml/badge.svg)](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/%40ghostlygawd%2Fcodeweb?style=flat-square&color=c6f24e)](https://www.npmjs.com/package/@ghostlygawd/codeweb)
@@ -36,7 +36,7 @@ missed more than half of a function's real callers
 ([see the measurements](https://ghostlygawd.github.io/codeweb/research.html)). An incomplete caller
 list can cause an agent to break code that it did not inspect.
 
-- **Give agents structural data:** The Model Context Protocol (MCP) server provides 27 tools,
+- **Give agents structural data:** The Model Context Protocol (MCP) server provides 28 tools,
   including `codeweb_impact`, `codeweb_callers`, and `codeweb_find_similar`.
 - **Keep answers small:** Each query returns a bounded structural answer. Your agents can use
   their remaining context for implementation work.
@@ -133,11 +133,11 @@ a merge.
 
 ## Benchmarks
 
-- **Find callers before an edit:** Agents found **74%** of a function's real callers with
-  codeweb and **44%** with grep at the same context spend. A missed caller can cause an edit to
-  break working code.
-- **Calculate the effect of a change:** One codeweb call returned one small answer. Agents that
-  used grep needed approximately 5 search rounds and **126 times the tokens**. They still had to
+- **Find callers before an edit:** In the v0.9.0 efficiency pilot, agents found **74%** of a
+  function's real callers with codeweb and **44%** with grep at the same context spend. A missed
+  caller can cause an edit to break working code.
+- **Calculate the effect of a change:** One codeweb call returned one small answer. A simulated
+  grep search loop needed approximately 5 rounds and **126 times the tokens** — and still had to
   guess.
 - **Detect duplicate code:** codeweb found **every planted duplicate with zero false alarms**,
   including renamed copies. Text search found 0% of the renamed copies.
@@ -176,15 +176,17 @@ your code; never executes it.**
 - CI publishes releases with **npm provenance**. Run `npm audit signatures` to verify a release.
 
 **Using Claude Code?** Install the plugin to add the `/codeweb` command, automatic pre-edit
-impact cards, and all 27 tools:
+impact cards, and all 28 tools:
 ```
 /plugin marketplace add GhostlyGawd/codeweb
 /plugin install codeweb
 ```
 Restart Claude Code to register the `/codeweb` command, agents, and skill.
 
-**Cursor, Windsurf, or another MCP agent:** Register the zero-dependency stdio server. The example
-uses Claude Code syntax. Use the equivalent server-registration command for your client:
+**Cursor, Windsurf, Codex CLI, or another MCP agent:** Register the zero-dependency stdio server.
+The example uses Claude Code syntax; per-client configuration blocks (Cursor, Windsurf, Codex CLI,
+Gemini CLI) and a paste-ready rules snippet that teaches your agent the before/after loop are on
+[the start page](https://ghostlygawd.github.io/codeweb/start.html#other-clients):
 ```
 claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
 ```
@@ -247,7 +249,7 @@ You can open `report.html`. codeweb also creates Markdown versions.
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency Model Context Protocol (MCP) stdio server. It gives
-each MCP client access to all **27 tools**. The tools help the client orient, read the structure,
+each MCP client access to all **28 tools**. The tools help the client orient, read the structure,
 check before writing, gate an edit, and plan cleanup.
 
 **The plugin registers the server automatically.** To register the standalone server, run:
@@ -256,6 +258,12 @@ check before writing, gate an edit, and plan cleanup.
 claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
 ```
 
+The loop an agent runs: `codeweb_brief` once per session (or `codeweb_find` when no symbol name
+is known) → `codeweb_explain` before touching a symbol → `codeweb_context`, `codeweb_impact`, or
+`codeweb_dependents` before the edit → `codeweb_refresh` with `snapshot:true`, then `codeweb_diff`
+after it. Clients that hide the server's built-in instructions can paste
+[the rules snippet](https://ghostlygawd.github.io/codeweb/start.html#rules-snippet) instead.
+
 The server includes these agent-specific features:
 
 - **Optional `graph` argument:** The server finds the nearest map when you omit `graph`. If no map
@@ -263,9 +271,9 @@ The server includes these agent-specific features:
 - **Budgeted responses:** Responses include the highest-ranked items and the true totals. A context
   response that was approximately 300 KB is now approximately 10 KB.
 - **Staleness information:** A stale result identifies its state and directs the agent to
-  `codeweb_refresh`.
+  `codeweb_refresh` — on the orient tools and on every spawned advisor answer.
 
-[All 27 tools, grouped and explained →](docs/reference.md#the-mcp-server-tool-by-tool)
+[All 28 tools, grouped and explained →](docs/reference.md#the-mcp-server-tool-by-tool)
 
 ## How it works
 
@@ -303,6 +311,13 @@ then assigns domains and overlaps.
 Both paths produce the same `graph.json` schema. In **external** mode, each path also adds an
 adoption verdict.
 
+**Versus a language server (LSP):** an LSP answers one hop on demand — definitions, direct
+references — inside an editor session. codeweb builds one deterministic whole-graph artifact:
+transitive impact, duplication with body evidence, dead code, and domain coupling.
+
+Agents query that artifact over MCP, and CI diffs it to gate a PR. The two compose — codeweb
+replaces the grep loop, not your language server.
+
 Curious how the repo is laid out? [The component map lives in the
 reference.](docs/reference.md#components)
 
@@ -318,7 +333,7 @@ _Recent releases added the agent-intelligence suite (**hotspots**, **campaign**,
 **reading-order**, Type-2 clone detection, and suppression memory), a
 **[live interactive demo](https://ghostlygawd.github.io/codeweb/demo/)**, Go and Rust on the fast
 path, duplication trend data, and the one-command CI regression gate with a GitHub Action.
-codeweb currently provides 27 tools._
+codeweb currently provides 28 tools._
 
 ## Versioning & releases
 

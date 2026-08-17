@@ -270,6 +270,16 @@ function buildPage(page) {
   const contentFile = join(SITE, 'content', `${page.slug}.html`);
   if (!existsSync(contentFile)) return false;
   const content = fill(read(contentFile), blocks());
+  // GRW-F9 (2026-08-16): the shared footer claims "zero third-party requests", but the downloads
+  // page's whole point is a client-side read of the public npm API — its footer tells that truth
+  // instead. Still no tracking anywhere; the claim just has to be literally accurate per page.
+  let footer = fill(footerTpl, blocks());
+  if (page.slug === 'downloads') {
+    footer = footer.replace(
+      'Deterministic build · zero third-party requests on this page',
+      'Deterministic build · this page reads the public npm downloads API — no other third-party requests, nothing tracked',
+    );
+  }
   const canonical = BASE + (page.slug === 'index' ? '' : `${page.slug}.html`);
   const html = fill(baseTpl, {
     title: esc(page.title),
@@ -279,7 +289,7 @@ function buildPage(page) {
     ogImage: `${BASE}assets/og.jpg`,
     jsonld: JSONLD,
     nav: nav(page.nav),
-    footer: fill(footerTpl, blocks()),
+    footer,
     content,
   });
   writeFileSync(join(DOCS, `${page.slug}.html`), html);

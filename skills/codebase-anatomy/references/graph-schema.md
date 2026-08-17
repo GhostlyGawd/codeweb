@@ -8,7 +8,11 @@ renderer. All examples below use synthetic values.
   "meta": {
     "target": "src/ or https://github.com/owner/repo",
     "mode": "internal | external",
-    "engine": "hybrid | tools | read",
+    "engine": "hybrid | tools | read",       // ALSO the map's provenance label (AC-12): these three
+                                             // values mark an AGENT-extracted map, and downstream
+                                             // surfaces (codeweb_brief, the session brief) caveat it
+                                             // as unverified; the deterministic pipeline writes
+                                             // ctags|regex here instead. Always stamp it.
     "complexityEngine": "tree-sitter(...)",  // present ONLY under --engine tree-sitter; signals exact
                                              // complexity + class-qualified method ids + dispatch edges
     "depth": "module | symbol | auto",

@@ -10,8 +10,8 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
-import { normalizeGraph, buildIndex, allBlastCounts, productScope, scopeNote } from './lib/graph-ops.mjs';
-import { RISK_WEIGHTS, riskScore } from './lib/risk.mjs';
+import { buildIndex, scopeNote } from './lib/graph-ops.mjs';
+import { RISK_WEIGHTS, rankRisk } from './lib/risk.mjs';
 import { churnFromGit } from './lib/churn.mjs'; // finding 27: ONE bounded, HEAD-cached git-churn parser (shared with hotspots)
 
 const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--limit N] [--offset N] [--churn <map.json> | --git] [--all] [--json]'; // F10: --limit was real but hidden
@@ -39,31 +39,10 @@ if (churnPath) { try { churn = JSON.parse(readFileSync(resolve(churnPath), 'utf8
 else if (useGit) churn = churnFromGit(graph.meta?.root, { cacheDir: dirname(abs) }); // finding 27: bounded window + HEAD-keyed cache beside the graph
 
 const index = buildIndex(graph);
-// #6: rank product code by default — triage lists led by test scaffolding are unactionable.
-const riskScope = productScope(graph.nodes, all);
-// finding 9: ALL blast radii in one SCC pass — the previous impactOf-per-node loop was
-// ~quadratic (measured 82.2s at 15k nodes; identical sums now in well under a second).
-const blastByNode = allBlastCounts(index);
-// components per node (raw structural metrics + churn-by-file)
-const comp = riskScope.kept.map((n) => ({
-  id: n.id, file: n.file, domain: n.domain,
-  fanIn: index.callIn.get(n.id)?.size || 0,
-  fanOut: index.callOut.get(n.id)?.size || 0,
-  loc: n.loc || 0,
-  blast: blastByNode.get(n.id) ?? 0,
-  churn: churn[n.file] || 0,
-}));
-// graph-max per component (normalization denominator)
-const maxes = { fanIn: 0, fanOut: 0, loc: 0, blast: 0, churn: 0 };
-for (const c of comp) for (const k of Object.keys(maxes)) maxes[k] = Math.max(maxes[k], c[k]);
-
-let ranked = comp.map((c) => ({ id: c.id, file: c.file, domain: c.domain, risk: riskScore(c, maxes), components: { fanIn: c.fanIn, fanOut: c.fanOut, loc: c.loc, blast: c.blast, churn: c.churn } }))
-  .sort((a, b) => b.risk - a.risk || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-
-if (changed != null) {
-  const files = new Set(changed.split(',').map((s) => s.trim()).filter(Boolean));
-  ranked = ranked.filter((r) => files.has(r.file));
-}
+// D4a (SIMPLIFY §2.4): the assembly lives in lib/risk.mjs (rankRisk) — one truth shared with
+// the (future) MCP fast path; this file keeps IO, flags, and churn sourcing. The #6 product
+// scope, the finding-9 single-SCC blast pass, and the changed-filter all ride along unchanged.
+const { ranked, maxes, scope: riskScope } = rankRisk(graph, index, { churn, all, changed });
 
 // API F3: one pagination dialect — `count` stays the true total, `more` carries nextOffset so the
 // advertised remainder is actually reachable (it used to name a remainder no offset could fetch).

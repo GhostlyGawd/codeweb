@@ -6,6 +6,10 @@
 // placement). checkConsistency (scripts/release-utils.mjs) fails the build on any cost-premise
 // wording in this file, and the PROSE_FILES sweep covers its strings like any public surface.
 
+/** The one ratified sponsor sentence (C7: support framing, never a cost story). Every surface
+ *  that prints a sponsor line derives from this string, so the wording cannot fork. */
+export const SPONSOR_LINE = 'codeweb is free — sponsoring supports the project, and sponsors get seen: https://github.com/sponsors/GhostlyGawd';
+
 /** The one in-product sponsor ask (REVENUE §3.2: receipt high point only, 30-day throttle),
  *  printed by run.mjs. Wording mirrors the ratified README / support-page copy. */
-export const SPONSOR_ASK = '[run]   codeweb is free — sponsoring supports the project, and sponsors get seen: https://github.com/sponsors/GhostlyGawd';
+export const SPONSOR_ASK = '[run]   ' + SPONSOR_LINE;

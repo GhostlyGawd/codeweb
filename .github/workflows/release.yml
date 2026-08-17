@@ -172,14 +172,9 @@ jobs:
           fi
           npm publish --provenance --access public
 
-      - name: Publish to VS Code Marketplace (gated on VSCE_PAT)
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: |
-          if [ -z "$VSCE_PAT" ]; then
-            echo "::notice::VSCE_PAT not configured — Marketplace publish skipped (prep only)"
-            exit 0
-          fi
-          cd editor/vscode-codeweb
-          # exact pin — bump deliberately (finding #2: @latest executed whatever npm served that day)
-          npx --yes @vscode/vsce@3.9.2 publish --no-dependencies -p "$VSCE_PAT"
+      # CHARTER non-goal 6 (standing instruction): NO VS Code Marketplace publish. The step that
+      # auto-published whenever a VSCE_PAT secret existed is removed — a secret's presence must
+      # not be able to override a charter non-goal (PLAN finding 18; the .vsix above still builds
+      # and attaches to every release). If the operator ever unparks Marketplace publishing,
+      # restore a publish step deliberately (git history has it) — never keyed on secret
+      # presence alone.
