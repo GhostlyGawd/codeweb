@@ -89,7 +89,10 @@ test('hook flags a NEW cycle introduced by an edit (vs the baseline)', () => {
   writeFileSync(join(SRC, 'b.mjs'), 'import { a } from "./a.mjs";\nexport function b() { return a(); }\n');
   const res = runHook(join(SRC, 'b.mjs'));
   assert.equal(res.status, 0, 'fail-open exit 0 even when warning');
-  assert.match(res.stderr || '', /cycle/i, 'warns about the new dependency cycle');
+  // API F10: ONE channel — the structured additionalContext (stdout), never stderr+context twice.
+  assert.match(res.stdout || '', /additionalContext/, 'the warning rides the structured channel');
+  assert.match(res.stdout || '', /cycle/i, 'warns about the new dependency cycle');
+  assert.ok(!/cycle/i.test(res.stderr || ''), 'no duplicate stderr copy of the same warning');
 });
 
 // ---- Round 2, finding #18a — the hook-baseline sidecar (BDD) --------------------------------

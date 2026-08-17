@@ -161,7 +161,11 @@ needs more evidence.
 Append an adoption verdict: what the repo is and does (from the domain map), notable
 dependencies and risk surface (lean on `security-review` / `repo-scan` signals), architecture
 quality (cohesion vs the overlap graph), and a clear **adopt / adapt / avoid** recommendation
-with reasons. Then clean up the temp clone.
+with reasons.
+
+**Record the reviewed commit**: run `git rev-parse HEAD` in the clone and put the SHA in the
+verdict's first line — a ruling without the commit it judged is a claim without a source.
+Then clean up the temp clone.
 
 ## Scaling
 

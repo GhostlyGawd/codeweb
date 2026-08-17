@@ -9,6 +9,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { normalizeGraph, buildIndex } from './lib/graph-ops.mjs';
 import { readingOrder, scopeIdsOf } from './lib/reading-order.mjs';
+import { budgetOf } from './lib/tool-specs.mjs'; // BKL-L3: the manifest is the one budget truth
 
 const USAGE = 'usage: reading-order.mjs <graph.json> [--scope domain|file|symbol <value>] [--budget N] [--json]';
 import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
@@ -18,7 +19,9 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
   flags: {
     json: { type: 'bool', default: false },
-    budget: { type: 'number', default: 40 },
+    // BKL-L3 resolved to the manifest: the CLI default and the MCP-injected budget were two
+    // literals (40 vs 20) with no recorded reason — the D1 manifest is the one truth for both.
+    budget: { type: 'number', default: budgetOf('codeweb_reading_order') },
     scope: { type: 'pair', default: null },
   },
 });

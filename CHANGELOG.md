@@ -51,6 +51,24 @@ notes so validated results, papers, and new tools never get lost in commit histo
   the session-start injection caveat agent-extracted maps as unverified, instead of answering
   with deterministic-tier authority.
 
+### Changed
+- **D4 closed — the last Spring-Cleaning debt item.** `codeweb_risk`'s ranking assembly moved
+  into `lib/risk.mjs` (`rankRisk` — one truth for the CLI and a future MCP fast path), and
+  `run.mjs`'s banner now reads optimize's `--json` totals instead of scraping its prose (a
+  wording tweak used to silently blank the ready/LOC fields; humans keep a rendered headline
+  and `CODEWEB_VERBOSE=1` shows the full advisory from `optimize.md`).
+- **D1 residue closed.** `reading-order`'s CLI budget default now derives from the tool
+  manifest via `budgetOf()` (the 40-vs-20 two-literal pair is gone — the manifest is the one
+  truth); `campaign`'s deliberate CLI/MCP budget divergence is documented at the site; and the
+  release gate now flags a `TOOL_BEHAVIOR` entry whose manifest spec was removed (dead
+  behavior — the reverse already threw at startup).
+- **The post-edit hook warns once, on one channel.** The structural warning rides the
+  structured `additionalContext` only; stderr is the fallback when that write fails — the same
+  warning used to arrive twice.
+- **External-review verdicts now record the reviewed commit** (`git rev-parse HEAD` of the
+  clone, first line of the verdict) — an adopt/avoid ruling without the commit it judged was a
+  claim without a source.
+
 ### Fixed
 - **C7 truth sweep (2026-08-16 drift audit).** The charter-ruled-fabricated sponsorship cost
   premise still shipped through surfaces the claims gate never read: the report and demo footer

@@ -348,6 +348,14 @@ export function checkConsistency(root) {
     for (const n of specNames) {
       if (srvNames.has(n)) problems.push(`${n} is declared in BOTH lib/tool-specs.mjs and mcp-server.mjs — one interface, one declaration (D1)`);
     }
+    // (c) the reverse asymmetry (AGT-F7b): a spec without behavior throws at server startup,
+    // but a TOOL_BEHAVIOR entry whose spec was removed is silently dead — gate it.
+    const behaviorKeys = [...readText(srvPath).matchAll(/^  (codeweb_[a-z_]+): \(/gm)].map((m) => m[1]);
+    for (const k of behaviorKeys) {
+      if (!specNames.has(k) && !srvNames.has(k)) {
+        problems.push(`${k} has a TOOL_BEHAVIOR entry but no lib/tool-specs.mjs declaration — dead behavior (D1)`);
+      }
+    }
     const shipped = new Set([...srvNames, ...specNames]);
     const flagged = new Set();
     for (const rel of PROSE_FILES) {
