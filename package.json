@@ -1,6 +1,6 @@
 {
   "name": "@ghostlygawd/codeweb",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "mcpName": "io.github.GhostlyGawd/codeweb",
   "type": "module",
   "description": "Your agents break less code and burn fewer tokens. codeweb maps your repo into a deterministic call/import graph; 28 MCP tools answer impact, callers, and duplication before agents write. Claude Code plugin & MCP server; zero deps, runs 100% locally.",

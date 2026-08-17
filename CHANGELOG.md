@@ -9,6 +9,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+_Nothing yet. Open work lands here before it ships in the next tagged release._
+
+## [0.13.0] - 2026-08-17
+
 ### Added
 - **Evidence-backed README proof and acquisition visuals.** A compact benchmark strip links its
   three claims to the existing research ledger, three conversion badges lead to the npx trial,
@@ -1872,7 +1876,8 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.9.0...v0.10.0
