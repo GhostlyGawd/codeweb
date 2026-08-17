@@ -80,6 +80,19 @@ console.log(audit.ok ? 'consistency: OK' : `consistency: ${audit.problems.length
 // Round 2, finding #7: a failed audit must fail the prep — exit BEFORE the gated git commands
 // print (files are already written; exit 1 says "do not commit", matching the printed problems).
 if (!audit.ok) process.exit(1);
+// LNG-F7: the two "revisit when upstream ships it" blockers (Kotlin/Swift dispatch, C/C++
+// readiness) had no owner — a release-prep line is what notices. Best-effort: registry down
+// -> skip, never block a release prep.
+try {
+  const { execFileSync: run } = await import('node:child_process');
+  const wasms = JSON.parse(run('npm', ['view', '@vscode/tree-sitter-wasm@latest', 'files', '--json'], { encoding: 'utf8', timeout: 15_000 }) || '[]');
+  const list = (Array.isArray(wasms) ? wasms : []).filter((f) => /tree-sitter-.*\.wasm$/.test(f)).map((f) => f.replace(/^wasm\//, ''));
+  const watched = ['kotlin', 'swift', 'c.wasm', 'cpp'].filter((w) => list.some((f) => f.includes(w)));
+  console.log(`\n@vscode/tree-sitter-wasm@latest wasm inventory: ${list.length} grammar(s)${watched.length ? ` — WATCHED LANGUAGE NOW AVAILABLE: ${watched.join(', ')} (see PROVENANCE.md blockers)` : ' (kotlin/swift/c/cpp still absent — blockers stand)'}`);
+} catch { console.log('\n(@vscode/tree-sitter-wasm inventory check skipped — registry unreachable)'); }
+console.log('\nRelease-prep checks (operator eyes):');
+console.log('  - screenshots: if report-template.html changed since the last shoot, re-shoot assets/screens (scripts/screenshot.mjs) and re-stamp (scripts/stamp-screens.mjs)');
+console.log('  - run the 150 · Drift Audit over claim-bearing surfaces (CLAUDE.md duty)');
 console.log('\nNext (gated — run when ready):');
 console.log(`  git add -A && git commit -m "release: v${next}"`);
 console.log(`  git tag -a v${next} -m "codeweb v${next}"`);

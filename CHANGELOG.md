@@ -52,6 +52,34 @@ notes so validated results, papers, and new tools never get lost in commit histo
   with deterministic-tier authority.
 
 ### Changed
+- **The distribution trigger's second arm is finally measurable.** The weekly acquisition
+  ledger now records `gateReposExternal` (unique external repos referencing the gate Action in
+  a workflow file, via public GitHub code search — same no-telemetry ethics as every counter).
+  The parked Teams tier's own trigger (">10 external repos on the gate Action") could never be
+  observed firing before.
+- **The gate Action is stranger-ready.** `codeweb-ref` now really accepts a commit sha (clone
+  `--branch` fails on shas — branch/tag keep the shallow clone, shas fall back to
+  clone+checkout); a new `history` input persists a small cross-PR metrics ledger via the
+  Actions cache and renders the structural trend line in the sticky comment (previously the
+  trajectory feature was unreachable by adopters); the docs pin the action and `codeweb-ref`
+  to release tags instead of `@main` and show the monorepo matrix pattern. The self-gate
+  dogfoods `history`.
+- **The gate joined the product loop.** A first map of a repo with `.github/` now prints a
+  fourth `next:` line pointing at the CI gate, and every report/demo footer carries a
+  "gate your PRs" link — the team-lead doorway existed only in docs before.
+- **The Marketplace-publish step is gone (charter non-goal 6).** Publishing auto-triggered
+  whenever a `VSCE_PAT` secret existed — a secret must not be able to override a standing
+  instruction. The `.vsix` still builds and attaches to every release; the removal is recorded
+  in place and pinned by the workflow test.
+- **Grammar provenance is machine-verified.** `PROVENANCE.md` records a sha256 per vendored
+  wasm and `tests/grammar-provenance.test.mjs` recomputes them (both directions: no digest-less
+  wasm, no phantom rows) plus the runtime-pin pairing; the refresh recipe now names the
+  `ts-engine.mjs` version stamp, and release prep inventories `@vscode/tree-sitter-wasm@latest`
+  so the recorded Kotlin/Swift/C/C++ blockers resolve the moment upstream ships them.
+- **The LSP question is answered on the deciding surfaces** (product page + README): an LSP
+  answers one hop on demand in an editor session; codeweb builds one deterministic whole-graph
+  artifact agents query over MCP and CI diffs to gate a PR. Capability comparison only — no
+  invented numbers.
 - **Non-Claude MCP clients get the full loop, documented.** The start page now carries
   per-client registration blocks (Cursor, Windsurf, Codex CLI, Gemini CLI, plugin-less Claude
   Code) and a paste-ready rules snippet that teaches the before/after edit loop — the ambient

@@ -28,10 +28,24 @@ jobs:
       # AST-dispatch regressions in scripts/**, the exact class it exists to catch.
       - name: Install (optional tree-sitter tier)
         run: npm ci
+      # LNG-F6: the self-gate dogfoods the trajectory ledger the composite Action now offers —
+      # the cross-PR trend line renders in our own gate comments first.
+      - name: Restore gate history
+        uses: actions/cache/restore@v4
+        with:
+          path: codeweb-gate-history.jsonl
+          key: codeweb-gate-history-scripts-${{ github.run_id }}
+          restore-keys: |
+            codeweb-gate-history-scripts-
       - name: codeweb regression gate (self)
         id: gate
         continue-on-error: true # verdict enforced after the comment posts
-        run: node scripts/ci-gate.mjs --base "${{ github.event.pull_request.base.sha }}" --target scripts --md "$RUNNER_TEMP/codeweb-gate.md"
+        run: node scripts/ci-gate.mjs --base "${{ github.event.pull_request.base.sha }}" --target scripts --md "$RUNNER_TEMP/codeweb-gate.md" --history codeweb-gate-history.jsonl
+      - name: Save gate history
+        uses: actions/cache/save@v4
+        with:
+          path: codeweb-gate-history.jsonl
+          key: codeweb-gate-history-scripts-${{ github.run_id }}
       - name: Post structural review comment
         uses: actions/github-script@v7
         with:

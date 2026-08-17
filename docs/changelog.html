@@ -106,6 +106,46 @@
 <p>  with deterministic-tier authority.</p>
 <h3 class="cl-grp">Changed</h3>
 <ul>
+<li><strong>The distribution trigger's second arm is finally measurable.</strong> The weekly acquisition</li>
+</ul>
+<p>  ledger now records <code>gateReposExternal</code> (unique external repos referencing the gate Action in</p>
+<p>  a workflow file, via public GitHub code search — same no-telemetry ethics as every counter).</p>
+<p>  The parked Teams tier's own trigger ("&gt;10 external repos on the gate Action") could never be</p>
+<p>  observed firing before.</p>
+<ul>
+<li><strong>The gate Action is stranger-ready.</strong> <code>codeweb-ref</code> now really accepts a commit sha (clone</li>
+</ul>
+<p>  <code>--branch</code> fails on shas — branch/tag keep the shallow clone, shas fall back to</p>
+<p>  clone+checkout); a new <code>history</code> input persists a small cross-PR metrics ledger via the</p>
+<p>  Actions cache and renders the structural trend line in the sticky comment (previously the</p>
+<p>  trajectory feature was unreachable by adopters); the docs pin the action and <code>codeweb-ref</code></p>
+<p>  to release tags instead of <code>@main</code> and show the monorepo matrix pattern. The self-gate</p>
+<p>  dogfoods <code>history</code>.</p>
+<ul>
+<li><strong>The gate joined the product loop.</strong> A first map of a repo with <code>.github/</code> now prints a</li>
+</ul>
+<p>  fourth <code>next:</code> line pointing at the CI gate, and every report/demo footer carries a</p>
+<p>  "gate your PRs" link — the team-lead doorway existed only in docs before.</p>
+<ul>
+<li><strong>The Marketplace-publish step is gone (charter non-goal 6).</strong> Publishing auto-triggered</li>
+</ul>
+<p>  whenever a <code>VSCE_PAT</code> secret existed — a secret must not be able to override a standing</p>
+<p>  instruction. The <code>.vsix</code> still builds and attaches to every release; the removal is recorded</p>
+<p>  in place and pinned by the workflow test.</p>
+<ul>
+<li><strong>Grammar provenance is machine-verified.</strong> <code>PROVENANCE.md</code> records a sha256 per vendored</li>
+</ul>
+<p>  wasm and <code>tests/grammar-provenance.test.mjs</code> recomputes them (both directions: no digest-less</p>
+<p>  wasm, no phantom rows) plus the runtime-pin pairing; the refresh recipe now names the</p>
+<p>  <code>ts-engine.mjs</code> version stamp, and release prep inventories <code>@vscode/tree-sitter-wasm@latest</code></p>
+<p>  so the recorded Kotlin/Swift/C/C++ blockers resolve the moment upstream ships them.</p>
+<ul>
+<li><strong>The LSP question is answered on the deciding surfaces</strong> (product page + README): an LSP</li>
+</ul>
+<p>  answers one hop on demand in an editor session; codeweb builds one deterministic whole-graph</p>
+<p>  artifact agents query over MCP and CI diffs to gate a PR. Capability comparison only — no</p>
+<p>  invented numbers.</p>
+<ul>
 <li><strong>Non-Claude MCP clients get the full loop, documented.</strong> The start page now carries</li>
 </ul>
 <p>  per-client registration blocks (Cursor, Windsurf, Codex CLI, Gemini CLI, plugin-less Claude</p>

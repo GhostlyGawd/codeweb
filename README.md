@@ -311,6 +311,13 @@ then assigns domains and overlaps.
 Both paths produce the same `graph.json` schema. In **external** mode, each path also adds an
 adoption verdict.
 
+**Versus a language server (LSP):** an LSP answers one hop on demand — definitions, direct
+references — inside an editor session. codeweb builds one deterministic whole-graph artifact:
+transitive impact, duplication with body evidence, dead code, and domain coupling.
+
+Agents query that artifact over MCP, and CI diffs it to gate a PR. The two compose — codeweb
+replaces the grep loop, not your language server.
+
 Curious how the repo is laid out? [The component map lives in the
 reference.](docs/reference.md#components)
 

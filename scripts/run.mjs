@@ -351,6 +351,14 @@ if (opts.json) {
       console.log(`[run]   1. ${opts.open ? 'the map is opening in your browser' : `see the map: ${openCmd} ${join(ws, 'report.html')}`}`);
       console.log(`[run]   2. live queries in Claude Code: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp`);
       console.log(`[run]   3. after edits: re-run codeweb here — the refresh is cache-warm (seconds, not a re-map)`);
+      // GRW-F4: the CI gate is the team-lead doorway (and the one surface with a distribution
+      // trigger defined on it), yet no in-product moment ever said it exists. Say it exactly
+      // where an activated user with a CI setup is already looking.
+      try {
+        if (existsSync(join(resolve(opts.src), '.github'))) {
+          console.log(`[run]   4. gate your PRs on this structure: https://ghostlygawd.github.io/codeweb/product.html#ci-gate`);
+        }
+      } catch { /* the nudge must never break the pipeline */ }
     }
   }
 }
