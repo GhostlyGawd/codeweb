@@ -88,7 +88,11 @@ try {
   const wasms = JSON.parse(run('npm', ['view', '@vscode/tree-sitter-wasm@latest', 'files', '--json'], { encoding: 'utf8', timeout: 15_000 }) || '[]');
   const list = (Array.isArray(wasms) ? wasms : []).filter((f) => /tree-sitter-.*\.wasm$/.test(f)).map((f) => f.replace(/^wasm\//, ''));
   const watched = ['kotlin', 'swift', 'c.wasm', 'cpp'].filter((w) => list.some((f) => f.includes(w)));
-  console.log(`\n@vscode/tree-sitter-wasm@latest wasm inventory: ${list.length} grammar(s)${watched.length ? ` — WATCHED LANGUAGE NOW AVAILABLE: ${watched.join(', ')} (see PROVENANCE.md blockers)` : ' (kotlin/swift/c/cpp still absent — blockers stand)'}`);
+  // An empty list means the package's `files` METADATA doesn't enumerate the wasm dir — that is
+  // "inventory unavailable", never "language absent" (no claim without a source).
+  console.log(`\n@vscode/tree-sitter-wasm@latest wasm inventory: ${list.length === 0
+    ? 'unavailable from files metadata — check the package contents by hand for kotlin/swift/c/cpp (PROVENANCE.md blockers)'
+    : `${list.length} grammar(s)${watched.length ? ` — WATCHED LANGUAGE NOW AVAILABLE: ${watched.join(', ')} (see PROVENANCE.md blockers)` : ' (kotlin/swift/c/cpp still absent — blockers stand)'}`}`);
 } catch { console.log('\n(@vscode/tree-sitter-wasm inventory check skipped — registry unreachable)'); }
 console.log('\nRelease-prep checks (operator eyes):');
 console.log('  - screenshots: if report-template.html changed since the last shoot, re-shoot assets/screens (scripts/screenshot.mjs) and re-stamp (scripts/stamp-screens.mjs)');

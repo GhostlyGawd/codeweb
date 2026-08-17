@@ -19,7 +19,7 @@
 <meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
 <meta name="theme-color" content="#060608">
 <link rel="canonical" href="https://ghostlygawd.github.io/codeweb/changelog.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.12.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.13.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
@@ -52,6 +52,8 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
+<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h2 class="cl-ver">[0.13.0] - 2026-08-17</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
 <li><strong>Evidence-backed README proof and acquisition visuals.</strong> A compact benchmark strip links its</li>
@@ -105,6 +107,34 @@
 <p>  the session-start injection caveat agent-extracted maps as unverified, instead of answering</p>
 <p>  with deterministic-tier authority.</p>
 <h3 class="cl-grp">Changed</h3>
+<ul>
+<li><strong>Claim values now trace to receipts, mechanically.</strong> <code>check-consistency</code> gained</li>
+</ul>
+<p>  <code>auditClaimValues</code>: the published headline stats (the 74%/44% recall pair, the ~126×</p>
+<p>  impact-cost ratio, the "more than N comparisons" floor) are recomputed from their committed</p>
+<p>  receipt files and every surface restating a different value fails the build — closing the</p>
+<p>  drift class behind charter C6, where a re-run moved a receipt and every surface silently kept</p>
+<p>  the old number. Deliberately out of scope: the ±-form deltas (three legitimate values from</p>
+<p>  two receipts share one textual form). The requirements companion gained a one-way parity</p>
+<p>  check (a YAML-traced AC id must still exist in SPEC.md); the reverse — new ACs needing trace</p>
+<p>  records — is a re-baseline, which stays the operator's requirements process.</p>
+<ul>
+<li><strong>A weekly-vitals workflow is drafted</strong> (<code>weekly-vitals.yml</code>): the full gate, prove-red, and</li>
+</ul>
+<p>  the bench budget gate on a Monday schedule, so SPEC's kill-criteria tripwires can trip</p>
+<p>  between pushes (nothing executed for 18 days straight in August). Merging it is the</p>
+<p>  operator's adoption decision, recorded in the file header.</p>
+<ul>
+<li><strong>The evals floor grew from one product case to four</strong> (MCP initialize, tools/list carries</li>
+</ul>
+<p>  the new tool, query --help), release tooling gained CLI smoke tests (<code>version-sync</code> no-op on</p>
+<p>  an aligned repo; <code>screenshot</code> usage-not-stacktrace), <code>bench:all</code> now measures the tools/list</p>
+<p>  definitions surface (<code>toolsListBytes</code> — measured, not gated: the descriptions are P1's</p>
+<p>  experimental subject), <code>trend --json</code> emits one line (NDJSON-appendable), the impact answer</p>
+<p>  states its closure semantics (<code>call+inherit</code>; ref/import/test users via dependents), a dead</p>
+<p>  bench helper was removed, the graph schema's additive-only versioning stance is recorded in</p>
+<p>  the reference, and the extractor's cache-invariant map got its one page</p>
+<p>  (<code>docs/extractor-invariants.md</code>) — measurement over refactoring, per the hotspot ruling.</p>
 <ul>
 <li><strong>The distribution trigger's second arm is finally measurable.</strong> The weekly acquisition</li>
 </ul>
@@ -2307,7 +2337,7 @@
       </div>
     </div>
     <div class="footer-base">
-      <span>codeweb v0.12.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
+      <span>codeweb v0.13.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
       <span>Deterministic build · zero third-party requests on this page</span>
     </div>
   </div>
