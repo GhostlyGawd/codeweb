@@ -184,6 +184,72 @@ export function applySync(root, version, count) {
   return changed;
 }
 
+/** VER-F4 (PLAN finding 8): claim VALUES trace to receipts, mechanically. The gate verified
+ *  that receipt files exist and that counts matched — but the published numbers themselves
+ *  were hand-restated on every surface, so a receipt re-run would move the truth while every
+ *  surface silently kept the old number (the exact class behind charter C6). Scope: the
+ *  headline stats with one canonical committed receipt each. A surface that does not state a
+ *  stat is fine; a surface that states a DIFFERENT value than the receipt fails the build.
+ *  Skipped entirely when the receipts are absent (fixture repos). */
+export function auditClaimValues(root) {
+  const problems = [];
+  const readJson = (rel) => { try { return JSON.parse(readText(join(root, rel))); } catch { return null; } };
+  const pilot = readJson('bench/experiments/efficiency-pilot.reps5-v090.json');
+  const oracle = readJson('bench/results/oracle-ab.json');
+  if (!pilot && !oracle) return problems; // fixtures: nothing to audit against
+  const surfaces = ['README.md', 'site/content/research.html', 'site/data/product.json', 'assets/brand/proof-strip.svg'];
+  // Deliberately OUT of scope: the "±"-form deltas (+0.310 recall, +0.234 precision, and the
+  // labeled-history +0.265 from the reps8 run) — three legitimate values from two receipts
+  // share one textual form, so a regex cannot bind a stated delta to its receipt without
+  // false positives. The distinctively-phrased stats below are the C6 class this closes.
+  const t = pilot ? Math.round((pilot.means?.treatment?.recall ?? NaN) * 100) : null;   // 74
+  const c = pilot ? Math.round((pilot.means?.control?.recall ?? NaN) * 100) : null;     // 44
+  const ratio = oracle && typeof oracle.impact?.costRatio === 'number' ? Math.round(oracle.impact.costRatio) : null; // 126
+  // the "N deterministic comparisons" claim is a floor across every committed result file
+  let comparisonSum = 0;
+  const resultsDir = join(root, 'bench', 'results');
+  if (existsSync(resultsDir)) {
+    for (const f of readdirSync(resultsDir)) {
+      if (!f.endsWith('.json')) continue;
+      const d = readJson(`bench/results/${f}`);
+      (function walk(v) {
+        if (Array.isArray(v)) return v.forEach(walk);
+        if (v && typeof v === 'object') {
+          for (const [k, x] of Object.entries(v)) {
+            if (typeof x === 'number' && /comparison|trial/i.test(k)) comparisonSum += x;
+            else walk(x);
+          }
+        }
+      })(d);
+    }
+  }
+  for (const rel of surfaces) {
+    const p = join(root, rel);
+    if (!existsSync(p)) continue;
+    const text = readText(p);
+    if (t != null && c != null && Number.isFinite(t) && Number.isFinite(c)) {
+      for (const m of text.matchAll(/\b(\d{2})(?:%| percent)[\s\S]{0,160}?\b(\d{2})(?:%| percent)\s+with\s+grep/gi)) {
+        if (Number(m[1]) !== t || Number(m[2]) !== c) problems.push(`${rel} states a recall pair "${m[1]}/${m[2]}" but the pilot receipt says ${t}% codeweb / ${c}% grep (efficiency-pilot.reps5-v090.json)`);
+      }
+      for (const m of text.matchAll(/\b(\d{2})%\s*(?:→|->)\s*(\d{2})%/g)) {
+        if (Number(m[1]) !== c || Number(m[2]) !== t) problems.push(`${rel} states "${m[0]}" but the pilot receipt says ${c}% → ${t}%`);
+      }
+    }
+    if (ratio != null) {
+      for (const m of text.matchAll(/\b(\d{2,4})\s*(?:×|times)\s+(?:the\s+|fewer\s+)tokens/gi)) {
+        if (Number(m[1]) !== ratio) problems.push(`${rel} states "${m[0].trim()}" but the oracle receipt's cost ratio is ~${ratio}× (oracle-ab.json)`);
+      }
+    }
+    if (comparisonSum > 0) {
+      for (const m of text.matchAll(/(?:more than|[>~])\s*\*{0,2}([\d,]{4,}|\d{3}k)\*{0,2}\s*(?:deterministic\s+comparisons|comparisons|times)/gi)) {
+        const stated = m[1].endsWith('k') ? Number(m[1].slice(0, -1)) * 1000 : Number(m[1].replace(/,/g, ''));
+        if (Number.isFinite(stated) && stated > comparisonSum) problems.push(`${rel} claims "${m[0].trim()}" but the committed results sum to ${comparisonSum} comparisons/trials — the claim overstates its receipts`);
+      }
+    }
+  }
+  return problems;
+}
+
 /** Read-only consistency audit across the public-comms surface. */
 export function checkConsistency(root) {
   const version = getVersion(root);
@@ -288,6 +354,24 @@ export function checkConsistency(root) {
       else if (v && typeof v === 'object') Object.values(v).forEach(walk);
     })(productData);
     problems.push(...scanProseCounts(strings.join('\n'), 'site/data/product.json (prose)', { toolCount: count, langCount }));
+  }
+
+  // VER-F4: the values themselves, not just existence/counts (the C6 drift class).
+  problems.push(...auditClaimValues(root));
+
+  // VER-F7: the requirements companion (docs/requirements/*.yaml, digest-baselined 2026-07-29)
+  // references SPEC ACs by id; a renumbered or dropped AC would silently orphan its trace
+  // records. One-way by design: the YAML's references must exist in SPEC.md — the reverse
+  // (new ACs needing trace records) is a re-baseline, which is the operator's requirements
+  // process, not a gate rule.
+  const reqYaml = join(root, 'docs', 'requirements', 'codeweb-product-requirements.yaml');
+  const specPath = join(root, 'SPEC.md');
+  if (existsSync(reqYaml) && existsSync(specPath)) {
+    const spec = readText(specPath);
+    const specIds = new Set([...spec.matchAll(/\*\*AC-(\d+)\*\*/g)].map((m) => m[1]));
+    for (const m of readText(reqYaml).matchAll(/Acceptance criteria, AC-(\d+)/g)) {
+      if (!specIds.has(m[1])) problems.push(`docs/requirements/codeweb-product-requirements.yaml traces AC-${m[1]}, which no longer exists in SPEC.md — re-baseline the companion`);
+    }
   }
 
   // D6 / CHARTER C7: claim-bearing stdout strings are hoisted to lib/product-copy.mjs so this

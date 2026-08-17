@@ -133,6 +133,19 @@ const session = {
   totalTokensApprox: calls.reduce((a, c) => a + c.tokensApprox, 0),
   allValidJson: calls.every((c) => c.ok) && lines.length >= CALLS.length + 1,
 };
+// AGT-F5 (PLAN finding 22): tools/list loads into EVERY session of every inlining client, but
+// only the ANSWERS were measured — the definitions surface was invisible. Measured, not gated:
+// the descriptions are P1's experimental subject, and trimming un-measured burns the experiment.
+{
+  const drive = [
+    JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'bench', version: '0' } } }),
+    JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list' }),
+  ].join('\n') + '\n';
+  const r = sh(S('mcp-server.mjs'), [], { input: drive });
+  const line = (r.stdout || '').split('\n').find((l) => l.includes('"id":2'));
+  session.toolsListBytes = line ? Buffer.byteLength(line, 'utf8') : null;
+  session.toolsListTokensApprox = line ? Math.round(Buffer.byteLength(line, 'utf8') / 4) : null;
+}
 
 // ---------------------------------------------------------------- toolBudgets
 const perTool = {};

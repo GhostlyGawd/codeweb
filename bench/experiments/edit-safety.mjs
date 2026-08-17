@@ -931,8 +931,6 @@ const SEEDS = {
 const T_H5 = 10000, T_H6 = 2000, T_H7 = 2000, T_H8 = 2000, T_ACUT = 2000, T_AREAD = 2000;
 const N_H5_CLI = 120;
 
-function fail(line) { console.log(line); }
-
 console.log('codeweb C3 — edit safety. seeded, independent oracles (inline Kosaraju + naiveApply), able-to-fail.\n');
 
 // Non-vacuity FIRST: if the harness can't fail, every "0 violations" below is meaningless.

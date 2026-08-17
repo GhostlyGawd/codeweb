@@ -53,7 +53,7 @@ function line(label, seq) {
   return `${label.padEnd(22)} ${sparkline(seq)}  ${seq.join(' → ')}  (${arrow(seq)})`;
 }
 function renderTrend(rows, { json } = {}) {
-  if (json) return JSON.stringify({ snapshots: rows }, null, 2);
+  if (json) return JSON.stringify({ snapshots: rows }); // BKL-L1: one line — NDJSON consumers append this to ledgers
   const confirmed = rows.map((r) => r.confirmed);
   const coupling = rows.map((r) => r.coupling);
   const symbols = rows.map((r) => r.nodes);

@@ -22,7 +22,7 @@ Bins, flags, environment variables, and exit codes are tabled separately in [`cl
 
 | File | What it is |
 |---|---|
-| `graph.json` | The machine-readable web: `nodes`, `edges`, `domains`, `overlaps`, plus `meta` (target root, engine, languages, stats). |
+| `graph.json` | The machine-readable web: `nodes`, `edges`, `domains`, `overlaps`, plus `meta` (target root, engine, languages, stats). Schema versioning (BKL-L2, recorded design): the schema is deliberately unversioned and changes **additively only** — consumers must tolerate unknown fields; a `meta.schemaVersion` field ships with the first breaking change, not before (a version nobody checks is noise). |
 | `report.html` | Self-contained interactive map — force-directed graph, domain tree, clickable node details, ranked overlap tab. No network/CDN required. |
 | `report.md` | The same map as plain markdown — domains, top nodes, ranked overlaps. |
 | `overlap.md` | The ranked consolidation opportunities in plain markdown. |

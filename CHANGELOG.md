@@ -52,6 +52,28 @@ notes so validated results, papers, and new tools never get lost in commit histo
   with deterministic-tier authority.
 
 ### Changed
+- **Claim values now trace to receipts, mechanically.** `check-consistency` gained
+  `auditClaimValues`: the published headline stats (the 74%/44% recall pair, the ~126×
+  impact-cost ratio, the "more than N comparisons" floor) are recomputed from their committed
+  receipt files and every surface restating a different value fails the build — closing the
+  drift class behind charter C6, where a re-run moved a receipt and every surface silently kept
+  the old number. Deliberately out of scope: the ±-form deltas (three legitimate values from
+  two receipts share one textual form). The requirements companion gained a one-way parity
+  check (a YAML-traced AC id must still exist in SPEC.md); the reverse — new ACs needing trace
+  records — is a re-baseline, which stays the operator's requirements process.
+- **A weekly-vitals workflow is drafted** (`weekly-vitals.yml`): the full gate, prove-red, and
+  the bench budget gate on a Monday schedule, so SPEC's kill-criteria tripwires can trip
+  between pushes (nothing executed for 18 days straight in August). Merging it is the
+  operator's adoption decision, recorded in the file header.
+- **The evals floor grew from one product case to four** (MCP initialize, tools/list carries
+  the new tool, query --help), release tooling gained CLI smoke tests (`version-sync` no-op on
+  an aligned repo; `screenshot` usage-not-stacktrace), `bench:all` now measures the tools/list
+  definitions surface (`toolsListBytes` — measured, not gated: the descriptions are P1's
+  experimental subject), `trend --json` emits one line (NDJSON-appendable), the impact answer
+  states its closure semantics (`call+inherit`; ref/import/test users via dependents), a dead
+  bench helper was removed, the graph schema's additive-only versioning stance is recorded in
+  the reference, and the extractor's cache-invariant map got its one page
+  (`docs/extractor-invariants.md`) — measurement over refactoring, per the hotspot ruling.
 - **The distribution trigger's second arm is finally measurable.** The weekly acquisition
   ledger now records `gateReposExternal` (unique external repos referencing the gate Action in
   a workflow file, via public GitHub code search — same no-telemetry ethics as every counter).

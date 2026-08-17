@@ -93,7 +93,9 @@ export function runQuery(graph, index, opts) {
       const ranked = limit != null
         ? results.slice().sort((a, b) => (index.callIn.get(b)?.size || 0) - (index.callIn.get(a)?.size || 0) || (a < b ? -1 : 1))
         : results;
-      payload = budget({ query: 'impact', symbol, summary: `editing ${symbol} touches ${results.length} function(s) across ${domains.length} domain(s)`, matched, results: ranked, domains, count: results.length }, 'results', limit, offset);
+      // ENG-F8: the closure's semantics ride the answer — impact walks call+inherit edges
+      // (the precision trade); ref/import/test users are one hop away in `dependents`.
+      payload = budget({ query: 'impact', symbol, summary: `editing ${symbol} touches ${results.length} function(s) across ${domains.length} domain(s)`, closure: 'transitive callers via call+inherit edges — ref/import/test users are listed by the dependents query', matched, results: ranked, domains, count: results.length }, 'results', limit, offset);
     }
   } else if (query === 'cycles') {
     const cycles = fileCycles(graph);

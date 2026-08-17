@@ -9,8 +9,26 @@ import { readFileSync } from 'node:fs';
 import { PLUGIN_ROOT, runNode, script, tmpDir, cleanup, writeTree } from './helpers.mjs';
 import {
   bumpVersion, rollChangelog, mcpToolCount, productToolCount, checkConsistency, applySync, syncTargets,
-  scanProseCounts,
+  scanProseCounts, auditClaimValues,
 } from '../scripts/release-utils.mjs';
+
+// VER-F4: claim VALUES trace to receipts. A moved receipt must break the build on every
+// surface that still states the old number (the C6 class) — and the real repo must be clean.
+test('auditClaimValues: a stated stat that disagrees with its receipt fails; the real repo is clean', () => {
+  const root = tmpDir('codeweb-val-');
+  try {
+    writeTree(root, {
+      'bench/experiments/efficiency-pilot.reps5-v090.json': JSON.stringify({ means: { treatment: { recall: 0.71 }, control: { recall: 0.44 } } }),
+      'README.md': 'agents found 74% of real callers with codeweb and 44% with grep\n',
+    });
+    const problems = auditClaimValues(root);
+    assert.ok(problems.some((p) => /README\.md/.test(p) && /74\/44/.test(p) && /71%/.test(p)),
+      `the drifted pair is flagged with the receipt truth: ${problems.join('; ') || '(none)'}`);
+    writeTree(root, { 'README.md': 'agents found 71% of real callers with codeweb and 44% with grep\n' });
+    assert.equal(auditClaimValues(root).length, 0, 'the receipt-matching restatement passes');
+  } finally { cleanup(root); }
+  assert.deepEqual(auditClaimValues(PLUGIN_ROOT), [], 'every published stat matches its committed receipt at HEAD');
+});
 
 test('bumpVersion follows SemVer', () => {
   assert.equal(bumpVersion('0.2.0', 'patch'), '0.2.1');
