@@ -358,6 +358,6 @@ export function maskAligned(relPath, text, opts = {}) {
   const r = String(relPath);
   if (r.endsWith('.py')) return maskPy(text, opts);
   if (r.endsWith('.php')) return maskJs(text, { ...opts, hashComment: true }); // PHP `#` comments (finding #13)
-  if (/\.(jsx?|mjs|cjs|tsx?|mts|cts|java|cs|kt|kts|swift)$/.test(r)) return maskJs(text, opts); // finding #11 (review): .mts/.cts are TS files here too
+  if (/\.(jsx?|mjs|cjs|tsx?|mts|cts|java|cs|kt|kts|swift|cpp|cc|cxx|hpp|hh|hxx)$/.test(r)) return maskJs(text, opts); // finding #11 (review): .mts/.cts are TS files here too; C++ shares the //, /* */ and "…" lexis
   return null;
 }

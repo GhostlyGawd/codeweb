@@ -13,7 +13,7 @@
 // orchestrator (one truth for the id->file split). #17's per-file `cand` collection and return
 // field move WITH the body; #19 edge interning + #17 delta/dirty-label logic stay orchestration.
 
-import { KEYWORDS, parseSignature } from './lang-rules.mjs';
+import { KEYWORDS, parseSignature, CPP_RE } from './lang-rules.mjs';
 import { isTestFile } from './graph-ops.mjs';
 import { buildInnermostIndex } from './enclosing.mjs';
 import { importCandidates } from './import-resolve.mjs'; // finding #11: the ONE entry-candidate list (pub walk shares it)
@@ -195,6 +195,16 @@ export function createEdgeDeriver(ctx) {
     const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g;
     const csBaseRe = /\b(?:class|struct|record)\s+[A-Za-z_]\w*(?:<[^>]*>)?\s*:\s*([A-Za-z_][\w.]*)/g; // C# `class A : Base, IFace` -> Base
     const isCs = r.endsWith('.cs');
+    const isCpp = CPP_RE.test(r);
+    // A C++ PROTOTYPE IS A DECLARATION, NOT A CALL. `double area() const;` is the same call shape
+    // as `area();`, so without this every header prototype fabricates an edge FROM whatever encloses
+    // it TO the real definition — a class node "calling" its own methods, and a free prototype at
+    // namespace scope hanging its edge on <module>. STUB_LINE_RE can't cover it: that gate requires
+    // a class enclosing (C++ prototypes sit at namespace scope too) and its optional-modifier
+    // prefix doesn't admit a return TYPE. The distinguishing evidence is the return type: a call
+    // statement has no bare identifier before the callee, a declaration always does. Leading
+    // keywords that can precede a call (`return foo(x);`) are excluded so real calls still wire.
+    const CPP_PROTO_RE = /^\s*(?!(?:return|throw|delete|new|case|else|co_return|co_await|co_yield)\b)(?:[A-Za-z_~][\w:<>,*&]*\s+)+[*&\s]*(?:~?[A-Za-z_]\w*)\s*\([^;{}=]*\)\s*(?:const|volatile|noexcept\s*\([^)]*\)|noexcept|override|final|&&|&|=\s*(?:0|default|delete)|\s)*;\s*$/;
     const instanceofRe = /\binstanceof\s+([A-Za-z_$][\w$]*)/g; // `x instanceof X` -> ref to class X
     const pyBasesRe = /^\s*class\s+[A-Za-z_]\w*\s*\(([^)]*)\)/;
     // finding #10 (T-10.2): >0 while inside a spilled multi-line signature; the ranges it belongs to
@@ -238,6 +248,7 @@ export function createEdgeDeriver(ctx) {
         }
       }
       if (STUB_LINE_RE.test(ln) && enclosing(i + 1)?.kind === 'class') continue; // overload-stub line (finding #12): no calls, no refs
+      if (isCpp && CPP_PROTO_RE.test(ln)) continue; // a prototype declares; it does not call (and its params are bindings, not refs)
       callRe.lastIndex = 0; let m;
       while ((m = callRe.exec(ln))) {
         // Round 2, finding #9: `...fn(` (the char before the `.` is another `.`) is a SPREAD call,
@@ -247,6 +258,14 @@ export function createEdgeDeriver(ctx) {
         // unchanged); `...obj.fn(` matches at `fn` with [idx-2]==='j' (member branch, correct).
         // Accepted noise: `1..toString(` and the syntax error `x...y(` now reach addEdge — both
         // resolve only if the name is a repo symbol; harmless.
+        // C++ `p->m()` is a call THROUGH A RECEIVER, exactly like `p.m()` — and must be gated the
+        // same way. Without this it fell through to addEdge and resolved by NAME ALONE, which is
+        // the magnet the `.` gate exists to close (`logger->info()` wiring to any repo `info`).
+        // The receiver's type is evidence only the dispatch tier holds, so the edge is its job.
+        // `::` is deliberately NOT gated: it qualifies a SCOPE, not a receiver, and its tail is a
+        // real declared name — `geo::make_shape()` resolves by name like any other free call, and
+        // a genuine collision still drops through the ordinary ambiguity gate.
+        if (isCpp && ln[m.index - 1] === '>' && ln[m.index - 2] === '-') continue;
         if (ln[m.index - 1] === '.' && ln[m.index - 2] !== '.') {
           // member call obj.fn(): resolve ONLY when obj is a namespace/default import alias (a param or
           // local obj.method() must stay unresolved — see reference-edges PRECISION). This recovers the
@@ -367,9 +386,20 @@ export function resolveTypedIntents({ intentsByFile, nodeIdSet, existingTriKeys 
   for (const relFile of [...intentsByFile.keys()].sort()) {
     for (const it of intentsByFile.get(relFile)) {
       const defFiles = classFiles.get(it.recvType);
-      if (!defFiles || defFiles.size !== 1) { dropped++; continue; } // unknown or ambiguous class -> never guess
-      const toId = [...defFiles][0] + ':' + it.recvType + '.' + it.method;
-      if (!nodeIdSet.has(toId) || !nodeIdSet.has(it.from) || it.from === toId) { dropped++; continue; }
+      if (!defFiles) { dropped++; continue; } // unknown class -> never guess
+      let toId = null;
+      if (defFiles.size === 1) toId = [...defFiles][0] + ':' + it.recvType + '.' + it.method;
+      else if ([...defFiles].every((f) => CPP_RE.test(f))) {
+        // A C++ class is DEFINED ACROSS FILES by construction: inline members in the header,
+        // the rest out of line in the .cpp. "Defined in exactly one file" therefore answers NO
+        // for essentially every real C++ class, which would make this tier dead code on the
+        // language. The precision question is really about the METHOD being dispatched, so ask
+        // it there: exactly one `Type.method` node in the repo is a fact, and two still drop
+        // (a second class of the same name that also defines the method is a genuine ambiguity).
+        const cands = [...defFiles].map((f) => f + ':' + it.recvType + '.' + it.method).filter((id) => nodeIdSet.has(id));
+        if (cands.length === 1) toId = cands[0];
+      }
+      if (!toId || !nodeIdSet.has(toId) || !nodeIdSet.has(it.from) || it.from === toId) { dropped++; continue; }
       const kind = (isTestFile(idFile(it.from)) && !isTestFile(idFile(toId))) ? 'test' : 'call';
       const key = it.from + '\t' + toId + '\t' + kind;
       if (existingTriKeys.has(key)) continue;

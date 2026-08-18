@@ -68,6 +68,29 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
     for (const c of importCandidates(r)) if (relSet.has(c)) return c;
     return null;
   }
+  // C++ `#include "…"`: the quoted form is the project-local one (the angle-bracket form is the
+  // system/search-path one and is never resolved here — a guess is worse than an absent edge).
+  // Unlike a JS specifier it is NOT dot-relative, and it resolves against the includer's directory
+  // FIRST and the target root second (the two cases `-I.` covers in every real build), so it needs
+  // its own resolver rather than a prefix bolted onto resolveImport.
+  function resolveInclude(fromAbs, spec) {
+    if (/^[\\/]/.test(spec) || /^[A-Za-z]:/.test(spec)) return null; // absolute include -> outside the repo universe
+    const here = rel(resolve(dirname(fromAbs), spec)).replace(/\\/g, '/');
+    if (relSet.has(here)) return here;
+    const fromRoot = spec.replace(/\\/g, '/').replace(/^\.\//, '');
+    if (relSet.has(fromRoot)) return fromRoot;
+    // The `include/` + `src/` split — C++'s dominant layout — resolves by NEITHER rule: the spec is
+    // relative to a `-I` search path that lives in a build file codeweb does not read. Fall back to
+    // a UNIQUE path-suffix match, the same evidence rule resolvePyModule uses for absolute imports:
+    // exactly one candidate is a fact about the repo, two or more is a guess and drops.
+    let best = null;
+    for (const rp of relSet) {
+      if (!rp.endsWith('/' + fromRoot)) continue;
+      if (best) return null; // ambiguous -> never guess
+      best = rp;
+    }
+    return best;
+  }
   // Resolve a Python module spec to a repo-relative file (`x.py` or a package's `x/__init__.py`).
   //   level > 0 -> RELATIVE: climb `level` package dirs from the importing file, then append the dotted
   //               path. Anchored to the file's real location, so it can't collide with stdlib.
@@ -253,6 +276,9 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
   // Python (line-oriented, `m` flag): `from [.]*MODULE import NAMES` and `import MODULE [as A][, ...]`.
   const pyFrom = /^[ \t]*from\s+(\.*)([\w.]*)\s+import\s+(.+)$/gm;
   const pyImport = /^[ \t]*import\s+([\w][\w.]*(?:\s+as\s+\w+)?(?:\s*,\s*[\w][\w.]*(?:\s+as\s+\w+)?)*)/gm;
+  // C++ `#include "path"` — quoted form only (see resolveInclude). Line-anchored so an `#include`
+  // written inside a macro body or a raw string can't bind.
+  const cppInclude = /^[ \t]*#[ \t]*include[ \t]*"([^"]+)"/gm;
 
   /**
    * Bind one file's imports: precise local-name aliases (amap), namespace/default module
@@ -265,7 +291,7 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
    * included) — and `bindCand`, the ORIGINAL imported names. Together they are the name-delta
    * replay rule's per-file inputs.
    */
-  function bindFileImports({ fAbs, r, isPy, text, aId, defaultExportByFile, kindById }) {
+  function bindFileImports({ fAbs, r, isPy, isCpp, text, aId, defaultExportByFile, kindById }) {
     const amap = new Map(), nsmap = new Map(), classmap = new Map(), edges = [];
     const deps = new Set(), bindCand = new Set();
     // Record-and-return: every resolved target joins `deps` (finding #17's bindDeps). The name is
@@ -350,7 +376,18 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
       if (aId && aId !== edgeTarget) edges.push([aId, edgeTarget]);
     };
     const addSide = (spec) => { const t = addDep(resolveImport(fAbs, spec)); if (!t) return; if (aId) edges.push([aId, t + ':<module>']); };
-    if (isPy) {
+    if (isCpp) {
+      // A header contributes NAMES, not a module object: C++ has no import alias to bind, so the
+      // edge is the file-level "includes this header" dependency — the same coarse `<module>`
+      // edge a JS side-effect import gets. Bare-name resolution (edge-derive) then wires the calls
+      // those names stand for, which is exactly how the header/implementation split maps.
+      const cppText = maskedOnce(r, 'cppinc', text); // comments blanked, string VALUES kept: the path is inside the quotes
+      cppInclude.lastIndex = 0;
+      while ((m = cppInclude.exec(cppText))) {
+        const t = addDep(resolveInclude(fAbs, m[1]));
+        if (t && aId) edges.push([aId, t + ':<module>']);
+      }
+    } else if (isPy) {
       const pyText = maskedOnce(r, 'py', text); // don't bind imports that live in a docstring/comment
       while ((m = pyFrom.exec(pyText))) addPyFrom(m[1].length, m[2], m[3]);
       while ((m = pyImport.exec(pyText))) addPyImports(m[1]);
@@ -366,7 +403,7 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
   }
 
   return {
-    resolveImport, resolvePyModule,
+    resolveImport, resolvePyModule, resolveInclude,
     reExportByFile, starReExportByFile, scanJsReExports, loadJsReExports, resolveReExport,
     pyReExportResolve, pyReExportTableOf, resolveFileMember, bindFileImports,
   };

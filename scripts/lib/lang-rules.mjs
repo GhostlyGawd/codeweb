@@ -13,14 +13,22 @@ export const indentOf = (s) => s.length - s.replace(/^\s+/, '').length;
 
 export const KEYWORDS = new Set(['if','for','while','switch','catch','return','function','typeof','await','new','super','constructor','else','do','try','finally','class','import','export','const','let','var','async','yield','case','in','of','instanceof','delete','void','throw','with','print']);
 
+/** The C++ extension family (`CPP_RE` in Set form — the scanner keys on extname()). */
+const CPP_EXTS = new Set(['.cpp', '.cc', '.cxx', '.hpp', '.hh', '.hxx']);
+
 // `masked(kind)` returns the masked text for this file (the extractor's per-file memo) — the
 // Python AND Ruby branches need it here (def/class inside docstrings; def/class inside heredoc
 // bodies — round 2, finding #13). maskPy is column-preserving; maskRuby preserves line count only,
 // which is all the line-anchored Ruby rules read.
 export function scanSymbols(file, text, masked) {
   const ext = extname(file).toLowerCase();
-  const lines = (ext === '.py' ? masked('py') : ext === '.rb' ? masked('rb') : text).split(/\r?\n/); // hide def/class inside docstrings/heredocs
+  // C++ scans MASKED text: its definition rule matches a bare `name(params) {` shape, which a
+  // commented-out definition satisfies exactly — and doc comments carrying example code are
+  // idiomatic in headers. maskJs blanks `//`, `/* */` and string interiors while preserving
+  // columns and line count, so the line-anchored rules below read the same coordinates.
+  const lines = (ext === '.py' ? masked('py') : ext === '.rb' ? masked('rb') : CPP_EXTS.has(ext) ? masked('js') : text).split(/\r?\n/); // hide def/class inside docstrings/heredocs/comments
   const syms = [];
+  const accessByLine = {}; // C++ only: 1-based line -> the access section governing it
   const push = (name, line, kind, exported, owner) => { if (name && !KEYWORDS.has(name)) syms.push({ name, line: line + 1, kind, exports: !!exported, ...(owner ? { owner } : {}) }); };
   if (ext === '.py') {
     lines.forEach((ln, i) => {
@@ -144,6 +152,71 @@ export function scanSymbols(file, text, masked) {
         const recv = m[2] ? m[2].split('.').pop() : undefined;
         push(m[3], i, m[1].length || recv ? 'method' : 'function', !/\b(?:private|internal)\b/.test(ln), recv);
       }
+    });
+  } else if (CPP_EXTS.has(ext)) {
+    // C++ (charter non-goal 8 as amended by A2). Two structural facts drive every rule here:
+    //   1. A PROTOTYPE IS NOT A SYMBOL. `double area() const;` in a header and
+    //      `double Shape::area() const { … }` in the .cpp are ONE function. Minting both would
+    //      make every call to `area` ambiguous, and the ambiguity gate would then drop the edge —
+    //      the header/implementation split, i.e. the language's most ordinary shape, would be
+    //      unmappable. Only DEFINITIONS (a body follows) become nodes.
+    //   2. A NAMESPACE IS SCOPE, NOT OWNERSHIP. `geo::make_shape` stays `make_shape` so a call
+    //      written `geo::make_shape(…)` resolves by its bare tail like every other language here,
+    //      and a namespace never becomes a symbol that would own every type in the file.
+    // Owner comes from the enclosing class range for in-class definitions, and from the
+    // definition's own `Type::` qualifier for out-of-line ones (a .cpp has no class range to sit
+    // inside). Known gap, deliberate: `operator==` and friends have no identifier before the
+    // paren, so they are not extracted — absent, not guessed.
+    const nsNames = new Set();
+    for (const ln of lines) { const nm = /^\s*(?:inline\s+)?namespace\s+([A-Za-z_]\w*)/.exec(ln); if (nm) nsNames.add(nm[1]); }
+    // class/struct/union/enum DEFINITIONS. A line ending in `;` is a forward declaration
+    // (`class Shape;`) or a variable declaration (`struct Point p;`) — neither defines anything.
+    const TYPE = /^\s*(?:template\s*<[^>]*>\s*)?(?:typedef\s+)?(class|struct|union|enum)(?:\s+(?:class|struct))?(?:\s+[A-Z_][A-Z0-9_]*)?\s+([A-Za-z_]\w*)/;
+    const typeRanges = [];
+    lines.forEach((ln, i) => {
+      const m = TYPE.exec(ln);
+      if (!m || /;\s*$/.test(ln)) return;
+      typeRanges.push({ name: m[2], start: i + 1, end: bodyEnd(lines, i, false) + 1 });
+      // Access sections decide member visibility; a `class` starts private, a `struct`/`union`
+      // public. Ranges are recorded in line order, so a nested type overwrites its enclosing
+      // type's access for its own lines below — which is exactly right.
+      let acc = m[1] === 'class' ? 'private' : 'public';
+      for (let l = i + 1; l <= typeRanges[typeRanges.length - 1].end && l <= lines.length; l++) {
+        const am = /^\s*(public|private|protected)\s*:/.exec(lines[l - 1]);
+        if (am) acc = am[1];
+        accessByLine[l] = acc;
+      }
+      push(m[2], i, 'class', true);
+    });
+    const ownerAt = (lineNo) => { let best = null; for (const t of typeRanges) if (lineNo > t.start && lineNo <= t.end && (!best || t.start > best.start)) best = t; return best ? best.name : undefined; };
+    // `[ret-type ]name(params)[ qualifiers][ : ctor-init]{` — the DEFINITION shape. The head
+    // forbids `=`, which is what keeps lambdas (`auto f = [](int v) { … }`) and aggregate
+    // initializers out; params forbid `;`, which is what keeps `for (…;…;…)` out.
+    const DEF = /^(\s*)([^;=(){}]*?)(~?[A-Za-z_]\w*(?:\s*::\s*~?[A-Za-z_]\w*)*)\s*\(([^;{}]*)\)\s*((?:const|volatile|noexcept|override|final|mutable|&{1,2}|\s)*)(?:->\s*[^;{}]*)?(?::[^;{}]*)?(\{|$)/;
+    // Words that reach the name slot but are never functions. KEYWORDS already filters the shared
+    // control-flow set (if/for/while/switch/catch/try/else/do/return/new/delete/case/const/class).
+    const CTRL = new Set(['sizeof', 'alignof', 'alignas', 'static_assert', 'assert', 'decltype', 'noexcept', 'operator', 'namespace', 'struct', 'union', 'enum', 'template', 'typename', 'using', 'friend', 'virtual', 'explicit', 'constexpr', 'consteval', 'constinit', 'co_await', 'co_return', 'co_yield', 'requires', 'concept', 'goto', 'elif', 'define', 'defined']);
+    lines.forEach((ln, i) => {
+      const m = DEF.exec(ln);
+      if (!m) return;
+      // No brace on this line -> Allman only. Requiring the next non-blank line to open the body
+      // (or continue a ctor-init list) is what stops a wrapped call (`foo(a, b)` then `.bar();`)
+      // from minting a phantom function.
+      if (!m[6]) {
+        let opens = false;
+        for (let j = i + 1; j < lines.length; j++) { const t = lines[j].trim(); if (!t) continue; opens = t.startsWith('{') || t.startsWith(':'); break; }
+        if (!opens) return;
+      }
+      const parts = m[3].replace(/\s+/g, '').split('::');
+      while (parts.length > 1 && nsNames.has(parts[0])) parts.shift(); // namespace qualification is not ownership
+      const name = parts[parts.length - 1];
+      if (CTRL.has(name)) return;
+      const owner = parts.length > 1 ? parts[parts.length - 2] : ownerAt(i + 1);
+      const access = accessByLine[i + 1];
+      // In-class: the access section decides. Out-of-line (a .cpp body, where the declaration's
+      // access lives in the header): externally visible unless `static` gives internal linkage.
+      const exported = access ? access === 'public' : !/\bstatic\b/.test(m[2]);
+      push(name, i, owner ? 'method' : 'function', exported, owner);
     });
   } else if (ext === '.swift') {
     // Swift (Spec I): class/struct/enum/protocol/actor/extension + func members. Default access
@@ -314,5 +387,8 @@ export function parseSignature(line, name, isPy) {
 // emitters) hide call edges no static map can see — recorded per file for answer-time calibration.
 export const DYNAMIC_RE = /\[[A-Za-z_$][\w$]*\]\s*\(|\bgetattr\s*\(|require\s*\(\s*[^'"`)\s]|\.emit\s*\(|globalThis\s*\[|window\s*\[/;
 
+/** The C++ extension family — one truth, shared by langOf and the extractor's tier dispatch. */
+export const CPP_RE = /\.(cpp|cc|cxx|hpp|hh|hxx)$/;
+
 /** Language of a repo-relative file path (extension-keyed; the meta.languages vocabulary). */
-export const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : f.endsWith('.json') ? 'json' : /\.(tsx?|mts|cts)$/.test(f) ? 'typescript' : 'javascript');
+export const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : CPP_RE.test(f) ? 'cpp' : f.endsWith('.json') ? 'json' : /\.(tsx?|mts|cts)$/.test(f) ? 'typescript' : 'javascript');

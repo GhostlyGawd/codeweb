@@ -14,6 +14,7 @@ the same input always yields the same graph. Recorded in `meta.engine` when the 
 | `tree-sitter-rust.wasm` | Rust (dispatch tier, Spec F) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `0dac14947cb04d94466e3df659f80a4e264c216a60b3eda175eae4cf12ed7a8d` |
 | `tree-sitter-ruby.wasm` | Ruby (dispatch tier, IMPROVEMENTS.md #14) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `09a96427d7c72f0613ed470cd9812223fc4a91d6a9c025c0235cc6bd59ff96f4` |
 | `tree-sitter-php.wasm` | PHP (dispatch tier, IMPROVEMENTS.md #14) | `@vscode/tree-sitter-wasm` | 0.3.1 | 15 | `d4df6a6ff08c87c3ec4f9cbb785fe09998a0cb570e03f57d7b19b3acfb146aa7` |
+| `tree-sitter-cpp.wasm` | C++ (dispatch tier, charter amendment A2) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `77a65bd42f43c2dcd69af40c12a6c32d6ed81d360c025e9feb28911f8339fd69` |
 
 The digests are load-bearing, not decorative: `tests/grammar-provenance.test.mjs` recomputes each
 file's sha256 against this table, so a swapped or tampered grammar fails the gate — "pinned and
@@ -68,6 +69,7 @@ cp node_modules/@vscode/tree-sitter-wasm/wasm/tree-sitter-typescript.wasm script
 ```
 
 Each release, the prep checklist re-inventories `@vscode/tree-sitter-wasm@latest`'s wasm list —
-the recorded Kotlin/Swift blocker (above) and the C/C++ readiness question (charter Next
-candidate) both resolve the moment the trusted source ships those grammars, and a checklist
-line is what notices (LNG-F7).
+the recorded Kotlin/Swift blocker (above) resolves the moment the trusted source ships those
+grammars, and a checklist line is what notices (LNG-F7). The C/C++ half of that question is
+closed for C++: `@vscode/tree-sitter-wasm` already shipped `tree-sitter-cpp.wasm`, so it
+vendored from the existing trusted source under the ordinary bar (row above, 2026-08-18).
