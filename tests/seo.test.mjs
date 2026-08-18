@@ -33,6 +33,18 @@ const BASE = readJSON(join(PLUGIN_ROOT, 'site', 'data', 'product.json')).pagesBa
 // element id. Scoped per file and per prefix so the exemption cannot silently widen to real pages.
 const HASH_ROUTES = { 'demo/index.html': ['tab='] };
 
+// A browser only resolves a fragment against a real element's id attribute. Matching `id="..."`
+// anywhere would also accept ids that exist solely as text inside inline scripts (the demo builds
+// its detail panel from HTML strings; the changelog quotes `<script id="graph-data">` in prose),
+// so a link could "resolve" against markup no page ever renders. Drop script/style BODIES, then
+// take ids only from an element start tag.
+function elementIds(html) {
+  const markup = html.replace(/(<(script|style)\b[^>]*>)[\s\S]*?<\/\2>/gi, '$1');
+  const ids = new Set();
+  for (const m of markup.matchAll(/<[a-zA-Z][a-zA-Z0-9-]*(?:\s[^<>]*?)?\sid=["']([^"']+)["'][^<>]*>/g)) ids.add(m[1]);
+  return ids;
+}
+
 function builtPages(dir = 'docs', out = []) {
   for (const entry of readdirSync(join(PLUGIN_ROOT, dir), { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
     const rel = posix.join(dir, entry.name);
@@ -49,9 +61,7 @@ test('F12: every same-site fragment link in the built site resolves to an elemen
     const cache = new Map();
     return (rel) => {
       if (!cache.has(rel)) {
-        cache.set(rel, existsSync(join(PLUGIN_ROOT, rel))
-          ? new Set([...read(rel).matchAll(/\sid=["']([^"']+)["']/g)].map((m) => m[1]))
-          : null);
+        cache.set(rel, existsSync(join(PLUGIN_ROOT, rel)) ? elementIds(read(rel)) : null);
       }
       return cache.get(rel);
     };

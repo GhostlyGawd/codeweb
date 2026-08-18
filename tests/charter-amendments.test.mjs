@@ -72,7 +72,8 @@ test('A3: the boundary section states the rule, where billing lives, and the pri
   assert.match(boundary, /one laptop against one repo is free forever/i, 'the rule, in the ratified words');
   assert.match(boundary, /hosting, multi-repo aggregation, and human attention/i, 'what money buys');
   assert.match(boundary, /only in the hosted service/i, 'billing lives in the service, never in this repo');
-  assert.match(boundary, /never\*{0,2}\s*\n?breaks local tooling|never breaks local tooling/i,
+  // \s+ spans the markdown hard wrap that falls between "never" and "breaks" in the ratified text.
+  assert.match(boundary, /never\s+breaks local tooling/i,
     'payment failure must never break local tooling — the invariant the boundary protects');
   assert.match(boundary, /€10/, 'the Teams price intent');
   assert.match(boundary, /90 day|trailing 90/i, 'the active-author definition the price is per');

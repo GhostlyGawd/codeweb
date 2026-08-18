@@ -1,7 +1,7 @@
 {
   "cluster": "C4-detection-accuracy",
-  "generatedAt": "2026-06-22T21:40:44.571Z",
-  "node": "v24.14.1",
+  "generatedAt": "2026-08-18T14:51:06.022Z",
+  "node": "v26.7.0",
   "seedScheme": "committed integer seeds per hypothesis (see source); re-running reproduces byte-for-byte",
   "perHypothesis": [
     {
@@ -10,8 +10,8 @@
       "value": {
         "codewebF1": 1,
         "baselineF1": 0.6667,
-        "axiosCodewebPrecision": 0.9792,
-        "axiosBaselinePrecision": 0.6667
+        "axiosCodewebPrecision": 1,
+        "axiosBaselinePrecision": 0.7059
       },
       "ci": {
         "codewebF1": {
@@ -92,7 +92,7 @@
     "H10": true,
     "H11": true,
     "H12": true,
-    "H13": true
+    "H13": false
   },
   "details": {
     "H9": {
@@ -144,27 +144,27 @@
         "available": true,
         "disclosure": "External validity, NOT exact truth: labels are body-confirmed human-style judgments (labels-axios.json). Real-repo recall is unknowable exactly; precision is the reportable real-world number. The headline statistical PASS for H9 is the SYNTHETIC F1 contrast.",
         "codeweb": {
-          "precision": 0.9792,
-          "tp": 47,
-          "fp": 1,
-          "findings": 48,
+          "precision": 1,
+          "tp": 3,
+          "fp": 0,
+          "findings": 3,
           "precisionCI": {
-            "lo": 0.891,
-            "hi": 0.9963
+            "lo": 0.4385,
+            "hi": 1
           },
           "unlabeled": []
         },
         "baseline": {
-          "precision": 0.6667,
-          "tp": 50,
-          "fp": 25,
-          "flagged": 75,
+          "precision": 0.7059,
+          "tp": 12,
+          "fp": 5,
+          "flagged": 17,
           "precisionCI": {
-            "lo": 0.5542,
-            "hi": 0.7629
+            "lo": 0.4687,
+            "hi": 0.8672
           }
         },
-        "precisionGain": 0.3125
+        "precisionGain": 0.2941
       },
       "probe": {
         "coincidentalHighMedFindings": 0,
@@ -442,24 +442,24 @@
       "safeFP": 0,
       "totalTrulyDead": 164,
       "deadCoveredBySafe": 164,
-      "legacySafePrecision": 0.519,
+      "legacySafePrecision": 1,
       "legacySafePrecisionCI": {
-        "lo": 0.464,
-        "hi": 0.5735
+        "lo": 0.9771,
+        "hi": 1
       },
       "legacySafeTP": 164,
-      "legacySafeFP": 152,
+      "legacySafeFP": 0,
       "abTest": {
         "note": "A/B on the SAME seeded synthetic corpus: fixed (shipped, test-file defns -> review) vs CODEWEB_DEADCODE_LEGACY=1 (pre-fix, test-file defns -> safe). The legacy precision is the real-world failure the fix removes.",
         "fixedSafePrecision": 1,
-        "legacySafePrecision": 0.519,
+        "legacySafePrecision": 1,
         "fixedSafePrecisionCI": {
           "lo": 0.9771,
           "hi": 1
         },
         "legacySafePrecisionCI": {
-          "lo": 0.464,
-          "hi": 0.5735
+          "lo": 0.9771,
+          "hi": 1
         }
       },
       "falsePositiveBreakdown": {
@@ -480,17 +480,17 @@
       "realRepoSpotCheck": {
         "axios": {
           "available": true,
-          "totalSafe": 76,
+          "totalSafe": 3,
           "safeInTestFiles": 0,
-          "safeInProduction": 76,
+          "safeInProduction": 3,
           "testFilePollutionRate": 0,
           "sampleTestFileSafe": []
         },
         "express": {
           "available": true,
-          "totalSafe": 4,
+          "totalSafe": 2,
           "safeInTestFiles": 0,
-          "safeInProduction": 4,
+          "safeInProduction": 2,
           "testFilePollutionRate": 0,
           "sampleTestFileSafe": []
         },
@@ -504,9 +504,9 @@
         },
         "gorilla-mux": {
           "available": true,
-          "totalSafe": 17,
+          "totalSafe": 11,
           "safeInTestFiles": 0,
-          "safeInProduction": 17,
+          "safeInProduction": 11,
           "testFilePollutionRate": 0,
           "sampleTestFileSafe": []
         }
@@ -515,13 +515,13 @@
       "findingSummary": "H13 PASSES on the fixed engine: safe-tier precision 1.0 (CI lo >= 0.95), recall 1.0. The pre-fix behavior — restorable via CODEWEB_DEADCODE_LEGACY=1 — filed functions DEFINED IN test files (helpers/mocks/`it` registrations) as \"safe\" (precision ~0.52; on express 928/932 safe items were test-file fns). Such functions have no incoming code edge, are not exported, and are not entrypoint-named, so the legacy path filed them as safe — but a test runner invokes them, so the independent reachability oracle (correctly) counts them reachable. The fix routes them to \"review\". The lever makes the fix reproducibly falsifiable: the legacy A/B precision and the known-failing probe both reproduce the pre-fix miss on demand. The deliberate precision-over-recall design holds for PRODUCTION symbols (see exploratory cut).",
       "probe": {
         "oracleSaysReachable": true,
-        "fixedRoutesToReview": true,
-        "legacyRoutesToSafe": true,
-        "harnessWouldCountAsFalsePositive": true,
-        "ableToFail": true
+        "fixedRoutesToReview": false,
+        "legacyRoutesToSafe": false,
+        "harnessWouldCountAsFalsePositive": false,
+        "ableToFail": false
       },
       "pass": true
     }
   },
-  "elapsedMs": 112074
+  "elapsedMs": 37492
 }

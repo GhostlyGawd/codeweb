@@ -1,37 +1,48 @@
 {
-  "staleNote": "v0.9.0 pre-fix numbers; re-run deferred to WS-G #35's report-scale re-run",
   "bench": "monorepo scale test (Spec K, docs/specs/bench-scale-runnable.md — runnable via bench/experiments/scale.mjs)",
   "target": "microsoft/TypeScript src/ @ 637d5746b70257028fb95aad32ddec6b26ab0a14 (shallow clone)",
-  "engine": { "version": "0.9.0" },
+  "generatedAt": "2026-08-18T15:05:52.000Z",
+  "engine": { "version": "0.13.0" },
+  "host": "darwin arm64, 12x Apple M4 Pro, 25.8GB, node v26.7.0",
   "graph": {
-    "symbols": 16286,
-    "edges": 44640,
-    "filesWithSymbols": 544,
+    "symbols": 16468,
+    "edges": 56378,
+    "filesWithSymbols": 635,
     "domains": 21,
-    "overlaps": 815,
-    "graphJsonBytes": 13568563,
-    "note": "nodes/edges/domains/overlaps byte-match the pre-refresh graph at the same pin — the engine's output on this corpus is unchanged since the 0.8.x measurement; earlier 'files: 709' counted scanned files, filesWithSymbols counts files that own nodes"
+    "overlaps": 837,
+    "graphJsonBytes": 15332530,
+    "note": "same corpus pin as the superseded 0.9.0 measurement below; symbols +182 and edges +11,738 come from extractor work landed since (dispatch/ref edge recall), not from a corpus change"
   },
   "pipeline": {
     "cold": {
-      "totalMs": 79127,
-      "stagesMs": { "extract": 47412, "cluster": 712, "overlap": 1213, "optimize": 28826, "report": 805 }
+      "totalMs": 6871,
+      "stagesMs": { "extract": 4777, "cluster": 136, "overlap": 392, "optimize": 304, "report": 1040 }
     },
-    "noChange": { "totalMs": 6898, "stagesReused": true },
+    "noChange": { "totalMs": 389, "stagesReused": true },
     "oneFileEdit": {
-      "totalMs": 73321,
-      "stagesMs": { "extract": 8211, "cluster": 575, "overlap": 1172, "optimize": 60484, "report": 2217 },
-      "editedFile": "compiler/binder.ts",
+      "totalMs": 2686,
+      "stagesMs": { "extract": 511, "cluster": 135, "overlap": 395, "optimize": 322, "report": 1045 },
+      "editedFile": "compiler/_namespaces/ts.moduleSpecifiers.ts",
       "editKind": "append-function",
-      "changedFragment": true,
-      "note": "the re-map-after-an-agent-edit cost Spec O exists to cut; optimize's 60.5s here vs 28.8s cold is allocation/GC churn on the same work, not different work"
+      "changedFragment": true
     },
     "queries": {
-      "symbol": "services/services.ts:SymbolObject.name",
-      "fanIn": 694,
-      "impactMs": 337, "callersMs": 359, "cyclesMs": 382, "orphansMs": 363,
-      "note": "per-call subprocess incl. 13.5MB graph parse; in-process MCP serves from cache"
+      "symbol": "compiler/factory/nodeTests.ts:isIdentifier",
+      "fanIn": 463,
+      "impactMs": 116, "callersMs": 103, "cyclesMs": 114, "orphansMs": 112,
+      "note": "per-call subprocess incl. 15.3MB graph parse; in-process MCP serves from cache"
     }
+  },
+  "supersededPreOptimization": {
+    "note": "the 0.9.0 pre-fix run this file used to lead with, kept for the receipt trail (cross-version totals on a different host are not directly comparable)",
+    "engine": { "version": "0.9.0" },
+    "graph": { "symbols": 16286, "edges": 44640, "filesWithSymbols": 544, "domains": 21, "overlaps": 815, "graphJsonBytes": 13568563 },
+    "pipeline": {
+      "cold": { "totalMs": 79127, "stagesMs": { "extract": 47412, "cluster": 712, "overlap": 1213, "optimize": 28826, "report": 805 } },
+      "noChange": { "totalMs": 6898, "stagesReused": true },
+      "oneFileEdit": { "totalMs": 73321, "stagesMs": { "extract": 8211, "cluster": 575, "overlap": 1172, "optimize": 60484, "report": 2217 }, "editedFile": "compiler/binder.ts", "editKind": "append-function", "changedFragment": true }
+    },
+    "queries": { "symbol": "services/services.ts:SymbolObject.name", "fanIn": 694, "impactMs": 337, "callersMs": 359, "cyclesMs": 382, "orphansMs": 363 }
   },
   "reportAtScale": "bench/results/report-scale.json — 16k-symbol report GREEN in headless Chromium: graph interactive 217ms, layout settled 4.8s, search 22ms, heap 31MB, no errors (Spec L)",
   "postOptimization": {
@@ -48,6 +59,7 @@
     "coldExtractVariance": "cold extract measured 28.7-47.4s across runs on this host (page-cache/CPU-frequency sensitive); parse-dominated either way — the remaining cold-build lever is extract-side"
   },
   "theWall": {
+    "note": "diagnosis of the SUPERSEDED 0.9.0 pre-optimization profile above; on the 0.13.0 run at the top of this file extract is 70% of a 6.9s cold build and optimize is 304ms, so this wall no longer stands — kept because it records why the Spec N/O work happened",
     "verdict": "optimize.mjs — 36% of cold, 83% of the one-file-edit re-map",
     "mechanism": "112 duplicate-logic candidates each run applyEdit (clones the 16k-node graph) + fileCycles (full file-graph SCC on the clone) + impactOf — O(candidates x graph) with heavy allocation; ~260ms per candidate at this scale",
     "downstreamSplit": "cluster 0.7s + overlap 1.2s + report 0.8-2.2s — the caps landed in Spec B hold; overlap is no longer the wall",
