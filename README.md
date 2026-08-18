@@ -90,7 +90,8 @@ a sticky structural review comment either way, so reviewers see the blast radius
 installing anything.
 
 **Pin the Action to a release tag**, not a moving branch: a floating ref can change your gate's
-verdict semantics under you. The workflow YAML, the monorepo matrix form, and every input live in
+verdict semantics under you. Pin `codeweb-ref` to the same tag so the engine is fixed too. The
+workflow YAML, the monorepo matrix form, and every input live in
 [`docs/ci-gate.md`](docs/ci-gate.md).
 
 Want the gate hosted — no workflow YAML, cached base graphs, and history across every repo in the

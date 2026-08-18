@@ -10,7 +10,7 @@ inputs:
     default: '.'
   codeweb-ref:
     description: >-
-      The codeweb ref (branch/tag/sha) to run the gate with. Pin a release tag (e.g. v0.12.0)
+      The codeweb ref (branch/tag/sha) to run the gate with. Pin a release tag (e.g. v0.13.0)
       in production — the default tracks main, which moves under you.
     required: false
     default: 'main'

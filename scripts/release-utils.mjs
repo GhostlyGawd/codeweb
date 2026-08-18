@@ -171,6 +171,23 @@ export function syncTargets(version, count) {
       file: 'package.json',
       subs: [[/(\d+)(\s+MCP tools)/, `${count}$2`]],
     },
+    // The gate Action's copy-paste surfaces. Docs told adopters to pin a release tag, then rotted
+    // on v0.12.0 across the whole v0.13.0 release — the guidance aged into a stale pointer, which
+    // is the failure it exists to prevent. Rolling the pins here makes every example name the
+    // version that actually shipped. The action's own input default stays 'main' (the zero-config
+    // path) and carries no version literal, so only its example tag rolls.
+    ...['docs/ci-gate.md', 'docs/reference.md', 'site/content/product.html'].map((file) => ({
+      file,
+      subs: [
+        [/(codeweb-gate@v)\d+\.\d+\.\d+/g, `$1${version}`],
+        [/(codeweb-ref:\s*v)\d+\.\d+\.\d+/g, `$1${version}`],
+        [/(@v)\d+\.\d+\.\d+(-style)/g, `$1${version}$2`],
+      ],
+    })),
+    {
+      file: '.github/actions/codeweb-gate/action.yml',
+      subs: [[/(release tag \(e\.g\. v)\d+\.\d+\.\d+/, `$1${version}`]],
+    },
   ];
 }
 

@@ -27,9 +27,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0          # required — the gate diffs against the PR base sha
-      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.12.0
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.13.0
         with:
           target: src             # subdirectory to analyze (default: .)
+          codeweb-ref: v0.13.0    # pin the engine too — see below
           comment: true           # post the structural review as a sticky PR comment
           history: true           # keep a cross-PR trend line in the comment (Actions cache)
 ```
@@ -37,9 +38,12 @@ jobs:
 `fetch-depth: 0` is **required**: the gate materializes the PR base commit to build the "before"
 graph, so the full history must be present.
 
-**Pin the action to a release tag** (`@v0.12.0`-style, as above), not `@main` — a moving ref can
-change your gate's verdict semantics under you. The `codeweb-ref` input (which version of the
-engine runs) accepts a branch, tag, or commit sha and deserves the same pinning in production.
+**Pin the action to a release tag** (`@v0.13.0`-style, as above), not `@main` — a moving ref can
+change your gate's verdict semantics under you. Pin the engine as well: `codeweb-ref` accepts a
+branch, tag, or commit sha, and it defaults to `main` so the zero-config path keeps working.
+
+Pin both to the same tag. The Action ref selects the workflow steps; `codeweb-ref` selects the
+engine those steps clone and run. Left unpinned, either one can move under a green build.
 
 **Monorepos:** the gate analyzes one `target` per invocation. Gate several packages with a
 matrix — each package gets its own verdict, comment, and (with `history: true`) its own trend:
@@ -51,9 +55,10 @@ matrix — each package gets its own verdict, comment, and (with `history: true`
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.12.0
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.13.0
         with:
           target: ${{ matrix.target }}
+          codeweb-ref: v0.13.0
 ```
 
 ## The gate as a reviewer (`comment: true`)

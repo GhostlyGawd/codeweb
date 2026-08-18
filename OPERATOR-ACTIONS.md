@@ -102,3 +102,26 @@ branch protection — without it, a red `check` can still merge:
 
 Note for fresh clones: `core.hooksPath` is per-clone — run
 `git config core.hooksPath .githooks` after cloning (CI backstops either way).
+
+## 8. Gate-adoption counter needs a search token (`CODE_SEARCH_TOKEN`, 2026-08-18)
+
+The weekly acquisition ledger records `gateReposExternal` — how many external repos run the gate
+Action — because that is charter trigger arm 2, and it is the demand signal for the hosted tier.
+
+The built-in Actions `GITHUB_TOKEN` has not worked for this search. Run 32143218144 recorded
+`null`, while the identical query answers 200 from a user token — so the blocker is the
+credential, not the query.
+
+The old code hid that: `curl -sf` swallowed the status, making "search refused us" and "zero
+adoption" identical silent nulls. The workflow now logs a `::warning::` naming the HTTP status,
+but it still cannot record a real number until a usable credential exists:
+
+1. https://github.com/settings/personal-access-tokens/new → **Fine-grained token**. Code search
+   needs **no permissions at all** — public repos only, so leave every scope unset.
+2. Repo → **Settings → Secrets and variables → Actions → New repository secret** → name it
+   `CODE_SEARCH_TOKEN`, paste the token.
+3. Actions → *acquisition ledger* → **Run workflow** to record a real count immediately.
+
+Until then the series stays honest — `null` means "not measured", never "zero adoption". The
+current true value is 0 external repos (verified by hand on 2026-08-18 with an authenticated
+search).
