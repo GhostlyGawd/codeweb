@@ -5,8 +5,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { join } from 'node:path';
-import { readFileSync, existsSync } from 'node:fs';
+import { join, posix } from 'node:path';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { PLUGIN_ROOT, readJSON } from './helpers.mjs';
 
 const read = (p) => readFileSync(join(PLUGIN_ROOT, p), 'utf8');
@@ -21,6 +21,65 @@ test('F6: robots.txt + sitemap.xml exist, and internal markdown is excluded from
   for (const path of ['product.html', 'research.html', 'start.html', 'changelog.html', 'demo/', 'case-study.html', 'pricing.html', 'boundary.html']) {
     assert.ok(sitemap.includes(path), `sitemap lists ${path}`);
   }
+});
+
+// Every same-site `#fragment` link must land on a real element. A cross-page anchor is invisible
+// to the F6/F7 presence pins above — `product.html#ci-gate` (the homepage's "How the gate works"
+// route) resolves only because product.html happens to carry `id="ci-gate"`, and renaming that
+// heading would silently dump visitors at the top of the page instead of the gate section.
+// Absolute pagesBase URLs count as same-site: the demo links the gate section that way.
+const BASE = readJSON(join(PLUGIN_ROOT, 'site', 'data', 'product.json')).pagesBase;
+// The demo is a generated single-page report whose hash is a ROUTER state (`#tab=graph`), not an
+// element id. Scoped per file and per prefix so the exemption cannot silently widen to real pages.
+const HASH_ROUTES = { 'demo/index.html': ['tab='] };
+
+function builtPages(dir = 'docs', out = []) {
+  for (const entry of readdirSync(join(PLUGIN_ROOT, dir), { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    const rel = posix.join(dir, entry.name);
+    if (entry.isDirectory()) builtPages(rel, out);
+    else if (entry.name.endsWith('.html')) out.push(rel);
+  }
+  return out;
+}
+
+test('F12: every same-site fragment link in the built site resolves to an element with that id', () => {
+  const pages = builtPages();
+  assert.ok(pages.length >= 10, `expected the built site's pages, found ${pages.length}`);
+  const idsOf = (() => {
+    const cache = new Map();
+    return (rel) => {
+      if (!cache.has(rel)) {
+        cache.set(rel, existsSync(join(PLUGIN_ROOT, rel))
+          ? new Set([...read(rel).matchAll(/\sid=["']([^"']+)["']/g)].map((m) => m[1]))
+          : null);
+      }
+      return cache.get(rel);
+    };
+  })();
+
+  let checked = 0;
+  for (const page of pages) {
+    const pageKey = page.slice('docs/'.length);
+    for (const m of read(page).matchAll(/href=["']([^"']*#[^"']*)["']/g)) {
+      let href = m[1];
+      // An absolute pagesBase URL resolves against the SITE ROOT, not the linking page's
+      // directory — docs/demo/index.html links the gate section that way.
+      let root = false;
+      if (href.startsWith(BASE)) { href = href.slice(BASE.length); root = true; }
+      else if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith('//')) continue; // another origin
+      const hash = href.indexOf('#');
+      const [path, frag] = [href.slice(0, hash), href.slice(hash + 1)];
+      if (!frag) continue; // `href="#"` — a deliberate no-op, not a link to an element
+      if ((HASH_ROUTES[pageKey] || []).some((prefix) => frag.startsWith(prefix))) continue;
+      const from = root ? 'docs' : posix.dirname(page);
+      const target = path === '' ? page : posix.normalize(posix.join(from, path));
+      const ids = idsOf(target);
+      assert.ok(ids, `${page} links ${m[1]}, but ${target} does not exist in the built site`);
+      assert.ok(ids.has(frag), `${page} links ${m[1]}, but ${target} has no element with id="${frag}"`);
+      checked++;
+    }
+  }
+  assert.ok(checked >= 3, `expected the site's fragment links to be covered, only checked ${checked}`);
 });
 
 test('F6b: the IndexNow key deploys with the site and matches the committed key', () => {
