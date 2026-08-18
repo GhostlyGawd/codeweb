@@ -47,24 +47,38 @@
 <main id="main">
 <section class="hero hero2">
   <div class="wrap">
-    <div class="mapbox">
-      <canvas id="cw-hero-map" aria-label="Interactive call graph of the axios codebase — live, 70 of 274 symbols. Click a function to see its blast radius."></canvas>
-    </div>
-    <div class="maphud">
-      <div id="cw-readout" class="cw-readout"><span class="cw-hint">LIVE · AXIOS CALL GRAPH · CLICK ANY FUNCTION TO TRACE ITS BLAST RADIUS</span></div>
-      <div class="cw-try"><span>Try:</span><button class="cw-chip" data-blast="merge">merge()</button><button class="cw-chip" data-blast="AxiosError">AxiosError()</button><button class="cw-chip" data-blast="httpAdapter">httpAdapter()</button></div>
-    </div>
+    <!-- CHARTER C2 / non-goal 10: the regression gate leads the story; the live map is the
+         supporting view beneath it, not the first thing the page says. -->
     <h1><span>Your agents break less code</span> <b>and burn fewer tokens.</b></h1>
-    <div class="sub">Every function · every call between them · mapped in ~3 s · no LLM</div>
+    <div class="sub">A deterministic guardrail for agent-written code · zero tokens per PR</div>
+    <div class="gatecard">
+      <div class="gc-head"><span class="gc-tag">The gate</span><span class="gc-run">fails a pull request on</span></div>
+      <div class="gc-body">
+        <div class="gc-row gc-fail"><span class="gc-mark">✗</span><span>New dependency cycle</span></div>
+        <div class="gc-row gc-fail"><span class="gc-mark">✗</span><span>New body-confirmed duplication</span></div>
+        <div class="gc-row gc-fail"><span class="gc-mark">✗</span><span>Symbol lost every caller</span></div>
+        <div class="gc-row gc-pass"><span class="gc-mark">✓</span><span>Anything else — including pure removals</span></div>
+      </div>
+      <div class="gc-foot">Static analysis, not a model. It never hallucinates, and it costs zero tokens however many pull requests you open.</div>
+    </div>
     <div class="cmd">
       <span class="l"><i></i><span><span class="p">$</span> npx -y @ghostlygawd/codeweb .</span></span>
       <span class="r"><b>ready</b> · your repo in ~3 s</span>
     </div>
     <div class="btn-row">
       <a class="btn btn-primary btn-lg" href="start.html">Map your repo</a>
-      <a class="btn btn-lg" href="demo/">Live demo</a>
+      <a class="btn btn-lg" href="product.html#ci-gate">How the gate works</a>
+      <a class="btn btn-lg" href="pricing.html">Gate a whole org</a>
     </div>
     <div class="trust">Free &amp; MIT · v0.13.0 · runs on your machine · never executes your code</div>
+    <div class="mapbox">
+      <canvas id="cw-hero-map" aria-label="Interactive call graph of the axios codebase — live, 70 of 274 symbols. Click a function to see its blast radius."></canvas>
+    </div>
+    <div class="maphud">
+      <div id="cw-readout" class="cw-readout"><span class="cw-hint">THE MAP THE GATE COMPARES · AXIOS · CLICK ANY FUNCTION TO TRACE ITS BLAST RADIUS</span></div>
+      <div class="cw-try"><span>Try:</span><button class="cw-chip" data-blast="merge">merge()</button><button class="cw-chip" data-blast="AxiosError">AxiosError()</button><button class="cw-chip" data-blast="httpAdapter">httpAdapter()</button></div>
+    </div>
+    <div class="btn-row"><a class="btn" href="demo/">Open the live demo</a></div>
     <div class="meters">
       <div>
         <div class="k">Callers found before an edit</div>

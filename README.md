@@ -8,7 +8,7 @@
 
 **Free & MIT-licensed. Runs entirely on your machine — no account, no server, no telemetry. Reads your code; never executes it.**
 
-**[Website](https://ghostlygawd.github.io/codeweb/)**&nbsp;·&nbsp;[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP: Model Context Protocol)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)&nbsp;·&nbsp;[Changelog](CHANGELOG.md)
+**[Website](https://ghostlygawd.github.io/codeweb/)**&nbsp;·&nbsp;[Gate every PR](#gate-every-pull-request)&nbsp;·&nbsp;[See it in action](#see-it-in-action)&nbsp;·&nbsp;[Install](#install)&nbsp;·&nbsp;[Use](#use)&nbsp;·&nbsp;[For agents (MCP: Model Context Protocol)](#use-it-as-an-mcp-tool)&nbsp;·&nbsp;[How it works](#how-it-works)&nbsp;·&nbsp;[Free forever](#free-forever-and-where-the-paid-line-sits)&nbsp;·&nbsp;[Changelog](CHANGELOG.md)
 
 [![Try it with npx](https://img.shields.io/badge/Try_it_with_npx-060608?style=for-the-badge&logo=npm&logoColor=c6f24e)](#try-it-on-your-repo)
 [![Open the live demo](https://img.shields.io/badge/Open_the_live_demo-060608?style=for-the-badge&logoColor=c6f24e)](https://ghostlygawd.github.io/codeweb/demo/)
@@ -26,6 +26,16 @@ npx -y @ghostlygawd/codeweb .
 <a href="https://ghostlygawd.github.io/codeweb/downloads.html"><img src="assets/metrics/npm-downloads.svg" alt="Latest seven-day npm download total with a line chart of completed daily downloads for @ghostlygawd/codeweb, generated from the public npm downloads API" width="100%"></a>
 <br><sub>The large number is the latest seven completed days; the line shows daily downloads. Package downloads are retrievals, not a count of users. Select the chart for the live data and reporting cutoff.</sub>
 </div>
+
+**A deterministic guardrail for agent-written code — zero tokens per PR.** codeweb's gate builds
+the call graph before and after a change, then fails the pull request on three regressions: a new
+dependency cycle, a new body-confirmed duplication, or a symbol that lost every caller.
+
+The verdict is static analysis, not a model: it never hallucinates, and it costs zero tokens
+however many pull requests you open. Pure removals always pass.
+[Put it on your PRs →](#gate-every-pull-request)
+
+The gate needs a map to compare, and that map is worth reading on its own.
 
 codeweb reads your code. It maps each function and the calls between functions. It maps
 3,000 symbols in approximately 3 seconds. Static analysis produces the same map from the
@@ -66,6 +76,26 @@ For a repository with 3,000 symbols, the first map takes approximately 3 seconds
 <img src="assets/screens/zod-terminal-run.svg" alt="Condensed real terminal run of codeweb 0.12.0 on Zod commit 912f0f5: 1,388 symbols and 1,616 edges from 409 files, followed by 66 actionable findings" width="840">
 <br><sub>Real run against <a href="https://github.com/colinhacks/zod/tree/912f0f51b0ced654d0069741e7160834dca742ee">Zod at commit <code>912f0f5</code></a>, captured 2026-07-29. The replay shortens the absolute local path to <code>.codeweb</code>; the displayed values are unchanged.</sub>
 </div>
+
+## Gate every pull request
+
+Run the same verdict locally, or as a GitHub Action on every pull request:
+
+```
+node scripts/ci-gate.mjs --base origin/main --target src   # exit 1 on a structural regression
+```
+
+The gate builds the graph from the pull request base and from its head, then diffs them. It posts
+a sticky structural review comment either way, so reviewers see the blast radius without
+installing anything.
+
+**Pin the Action to a release tag**, not a moving branch: a floating ref can change your gate's
+verdict semantics under you. The workflow YAML, the monorepo matrix form, and every input live in
+[`docs/ci-gate.md`](docs/ci-gate.md).
+
+Want the gate hosted — no workflow YAML, cached base graphs, and history across every repo in the
+org? That is [codeweb Teams](https://ghostlygawd.github.io/codeweb/pricing.html), the paid half of
+[the boundary](#free-forever-and-where-the-paid-line-sits). Running it yourself stays free forever.
 
 ## See it in action
 
@@ -366,10 +396,24 @@ problems. Use [`SECURITY.md`](SECURITY.md) to report a security issue.
 **Stay current:** codeweb does not contact an update service. To receive release notifications,
 select **Watch → Custom → Releases** on GitHub.
 
-## Support the project
+## Free forever, and where the paid line sits
 
-Everything that runs locally is **free forever**. It does not require an account, telemetry, or a
-license key.
+The rule, ratified in [`CHARTER.md`](CHARTER.md): **anything that runs on one laptop against one
+repo is free forever; money buys hosting, multi-repo aggregation, and human attention.**
+
+Everything in this repository is that free half — the map, the MCP tools, the hooks, the report,
+the CLI, the self-hosted gate Action, and every language codeweb learns. MIT, no accounts, no
+telemetry, no license keys. Nothing here moves behind a payment later.
+
+The paid half is a separate hosted service, **codeweb Teams**: the gate run for you, and history
+held across every repo in an org. Billing lives only in that service, so a payment problem
+degrades the hosted tier and **never breaks** your local tooling or your CI.
+
+Read the full contract on
+[the boundary page](https://ghostlygawd.github.io/codeweb/boundary.html), and the planned Teams
+price on [the pricing page](https://ghostlygawd.github.io/codeweb/pricing.html).
+
+## Support the project
 
 [Sponsoring](https://github.com/sponsors/GhostlyGawd) supports the project. Sponsorship also
 provides advertising. Top sponsors can put their logo at the top of this README, and each sponsor

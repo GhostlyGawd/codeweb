@@ -384,18 +384,35 @@ strong { font-weight: 600; }
 .card.bench h3 { font-family: var(--font-display); font-weight: 900; font-size: 32px; line-height: 1.1;
   letter-spacing: .02em; color: #fff; margin-bottom: var(--s-3); }
 
-/* ---- index hero (map-first, approved mock) ---- */
-.hero2 { text-align: center; padding: var(--s-4) 0 0; }
-.hero2 .mapbox { max-width: 760px; margin: 0 auto; position: relative; }
+/* ---- index hero (gate-led; the map is the supporting view beneath it) ---- */
+.hero2 { text-align: center; padding: var(--s-7) 0 0; }
+.hero2 .mapbox { max-width: 760px; margin: var(--s-7) auto 0; position: relative; }
 #cw-hero-map { display: block; width: 100%; height: 480px; }
 .maphud { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
   max-width: 760px; margin: 0 auto; padding: 10px 2px 0; border-top: 1px solid var(--line-soft); }
 .maphud .cw-readout { min-height: 0; text-align: left; font-size: 11px; letter-spacing: .04em; flex: 1; }
 .maphud .cw-try { margin: 0; flex: none; }
 .maphud .cw-chip { font-size: 10.5px; padding: 4px 8px; border-radius: 0; background: transparent; }
-.hero2 h1 { font-size: var(--fs-display); letter-spacing: .1em; margin: var(--s-6) 0 0; max-width: none; line-height: 1.5; }
+.hero2 h1 { font-size: var(--fs-display); letter-spacing: .1em; margin: 0; max-width: none; line-height: 1.5; }
 .hero2 h1 b { color: var(--accent); font-weight: 500; }
 .hero2 .sub { margin-top: var(--s-3); font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+
+/* the gate verdict card — the lead capability, shown as the artifact it produces */
+.gatecard { max-width: 640px; margin: var(--s-6) auto 0; background: var(--panel);
+  border: 1px solid var(--line); text-align: left; }
+.gc-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
+  padding: 11px 16px; border-bottom: 1px solid var(--line); background: var(--bg-deep); }
+.gc-tag { font: 700 10px/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+.gc-run { font: 500 10.5px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+.gc-body { padding: var(--s-3) 16px; display: grid; gap: 9px; }
+.gc-row { display: flex; align-items: baseline; gap: 11px; font-size: 13px; color: var(--fg); }
+.gc-mark { font-family: var(--font-mono); font-weight: 700; flex: none; width: 12px; }
+/* Brand law: one accent, spent where the meaning is. The three blockers ARE the gate's meaning;
+   the everything-else row is context, so it reads muted rather than borrowing a second hue. */
+.gc-fail .gc-mark { color: var(--accent); }
+.gc-pass, .gc-pass .gc-mark { color: var(--faint); }
+.gc-foot { padding: 11px 16px; border-top: 1px solid var(--line-soft); font-size: var(--fs-sm);
+  color: var(--muted); line-height: 1.6; }
 .cmd { display: flex; align-items: center; gap: var(--s-4); justify-content: space-between; max-width: 640px;
   margin: var(--s-6) auto 0; background: var(--panel); border: 1px solid var(--line); padding: 14px 18px; text-align: left; }
 .cmd .l { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--fg); white-space: nowrap; }
@@ -429,9 +446,12 @@ strong { font-weight: 600; }
   .brand .wm { font-size: 18px; }
   #cw-hero-map { height: 340px; }
   .maphud { flex-direction: column; align-items: flex-start; gap: var(--s-2); }
-  .hero2 h1 { font-size: 15px; letter-spacing: .09em; line-height: 1.7; margin-top: var(--s-5); }
+  .hero2 h1 { font-size: 15px; letter-spacing: .09em; line-height: 1.7; margin-top: 0; }
   .hero2 h1 b { display: block; }
   .hero2 .sub { font-size: 9.5px; letter-spacing: .12em; }
+  .gatecard { margin-top: var(--s-5); }
+  .gc-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .gc-row { font-size: 12px; }
   .cmd { flex-direction: column; align-items: flex-start; gap: 9px; padding: 12px 14px; margin-top: var(--s-5); }
   .cmd .l { font-size: 11px; white-space: normal; }
   .meters { grid-template-columns: 1fr; gap: 0; padding: 0 0 var(--s-5); }
