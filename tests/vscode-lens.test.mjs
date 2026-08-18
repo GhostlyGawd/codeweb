@@ -174,14 +174,47 @@ test('lens-core: memo carry reuses untouched ids and drops affected ones (#38 co
   assert.equal(blastOf(carried, 'b0'), 999, 'b0 still returns the carried (poisoned) value — proof of reuse');
 });
 
-// #7 (IMPROVEMENTS.md): the extension's manifest + wiring stay truthful — all 11 native
+// #7 (IMPROVEMENTS.md): the extension's manifest + wiring stay truthful — all 13 native
 // languages get lenses, the graph is WATCHED (the README's re-read promise), and a manual
 // refresh command exists. String-level pins (the vscode API itself isn't available here).
-test('extension: selector covers all 11 native languages and wires the watcher + refresh', () => {
+//
+// The selector is keyed by VS CODE language id, not by codeweb's `langOf` name, and the two
+// vocabularies differ where the editor splits or renames a language: `csharp` (codeweb: csharp,
+// but `cpp` is the id for C++ files whichever extension they carry), and the JSX/TSX ids that
+// codeweb folds into javascript/typescript. LANG_IDS is therefore the explicit mapping from the
+// canonical product.json list to the ids VS Code will actually hand the provider — the count
+// assertion below binds it to that list so a fourteenth language cannot ship unlensed.
+const LANG_IDS = {
+  JavaScript: ['javascript', 'javascriptreact'],
+  TypeScript: ['typescript', 'typescriptreact'],
+  Python: ['python'],
+  Rust: ['rust'],
+  Go: ['go'],
+  Java: ['java'],
+  'C#': ['csharp'],
+  Ruby: ['ruby'],
+  PHP: ['php'],
+  Kotlin: ['kotlin'],
+  Swift: ['swift'],
+  C: ['c'],
+  'C++': ['cpp'],
+};
+
+test('extension: selector covers all 13 native languages and wires the watcher + refresh', () => {
   const src = readFileSync(join(PLUGIN_ROOT, 'editor', 'vscode-codeweb', 'extension.js'), 'utf8');
-  for (const lang of ['javascript', 'typescript', 'python', 'rust', 'go', 'java', 'csharp', 'ruby', 'php', 'kotlin', 'swift']) {
-    assert.ok(src.includes(`'${lang}'`), `selector includes ${lang}`);
+  const languages = JSON.parse(readFileSync(join(PLUGIN_ROOT, 'site', 'data', 'product.json'), 'utf8')).languages;
+  assert.equal(languages.length, 13, 'the canonical list is thirteen languages');
+  assert.deepEqual(Object.keys(LANG_IDS).sort(), [...languages].sort(),
+    'every canonical language needs its VS Code id(s) mapped here');
+  // The selector literal itself, so an id that exists elsewhere in the file (a comment, a helper)
+  // cannot pass for a registered one.
+  const selector = src.slice(src.indexOf('const selector ='), src.indexOf('.map((language)'));
+  for (const [lang, ids] of Object.entries(LANG_IDS)) {
+    for (const id of ids) assert.ok(selector.includes(`'${id}'`), `selector includes ${id} (${lang})`);
   }
+  const declared = [...selector.matchAll(/'([a-z]+)'/g)].map((m) => m[1]);
+  assert.deepEqual(declared, Object.values(LANG_IDS).flat(),
+    'the selector lists exactly the mapped ids, in canonical order — no extras, no omissions');
   assert.ok(src.includes('onDidChangeCodeLenses'), 'provider exposes the change event');
   assert.ok(src.includes("createFileSystemWatcher('**/.codeweb/graph.json')"), 'graph watcher exists');
   assert.ok(src.includes('codeweb.refreshLenses'), 'manual refresh command registered');

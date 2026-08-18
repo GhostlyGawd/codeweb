@@ -21,7 +21,9 @@
     "Ruby",
     "PHP",
     "Kotlin",
-    "Swift"
+    "Swift",
+    "C",
+    "C++"
   ],
   "modes": [
     {
@@ -380,8 +382,8 @@
     {
       "claim": "Multi-language extraction parity",
       "tag": "validated",
-      "metric": "11 native languages (JS/TS/Py/Rust/Go receipts; Java/C#/Ruby/PHP/Kotlin/Swift pinned by per-language suites)",
-      "sample": "per-language fixtures (JS/TS/Py/Rust/Go receipts; the rest pinned by tests/lang-*.test.mjs)",
+      "metric": "13 native languages (JS/TS/Py/Rust/Go receipts; Java/C#/Ruby/PHP/Kotlin/Swift/C/C++ pinned by per-language suites)",
+      "sample": "per-language fixtures (JS/TS/Py/Rust/Go receipts; the rest pinned by tests/lang-*.test.mjs and tests/extract-c*.test.mjs)",
       "source": "auxiliary.json"
     },
     {

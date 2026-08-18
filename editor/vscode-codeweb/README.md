@@ -9,8 +9,9 @@ Click a lens to open the symbol in the interactive `report.html` (`#s=<id>` deep
 
 Zero dependencies, no build step, read-only. The extension watches `.codeweb/graph.json` and
 re-renders lenses when the map is rebuilt (`codeweb_refresh`, the pipeline, or the post-edit
-hook); `codeweb: Refresh CodeLens from the graph` forces it manually. Lenses cover all 11
-native engine languages (JS/TS/JSX/TSX, Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, Swift).
+hook); `codeweb: Refresh CodeLens from the graph` forces it manually. Lenses cover all 13
+native engine languages (JS/TS/JSX/TSX, Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, Swift,
+C, C++).
 
 ## Requirements
 

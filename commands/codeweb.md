@@ -45,8 +45,8 @@ Activate the `codebase-anatomy` skill and follow its workflow. Parse the options
 `$ARGUMENTS`. Use **external mode** when `target` is a Git URL or `owner/repo`, unless the user
 selects a different mode.
 
-Use the deterministic **fast path** for the eleven native languages: JavaScript, TypeScript,
-Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, and Swift. Run this command:
+Use the deterministic **fast path** for the thirteen native languages: JavaScript, TypeScript,
+Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, Swift, C, and C++. Run this command:
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/run.mjs" "<target>" --target "<label>" --out-dir "<target>/.codeweb"

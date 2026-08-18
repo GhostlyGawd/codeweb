@@ -307,9 +307,9 @@ The server includes these agent-specific features:
 
 ## How it works
 
-For JavaScript, TypeScript, Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, and Swift, codeweb uses
-a **deterministic Node pipeline** by default. One command creates the map. No LLM is in the
-pipeline, and the same input produces the same bytes.
+For JavaScript, TypeScript, Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, Swift, C, and C++,
+codeweb uses a **deterministic Node pipeline** by default. One command creates the map. No LLM is
+in the pipeline, and the same input produces the same bytes.
 
 The map pipeline has the four stages in the following diagram. `scripts/run.mjs` also creates
 `optimize.md` after overlap analysis and before report rendering.
@@ -353,11 +353,11 @@ reference.](docs/reference.md#components)
 
 ## Roadmap
 
-- **Support more first-class languages:** codeweb currently supports eleven native languages:
+- **Support more first-class languages:** codeweb currently supports thirteen native languages:
   JavaScript, TypeScript, Python, **Rust**, **Go**, **Java**, **C#**, **Ruby**, **PHP**, **Kotlin**,
-  and **Swift**. Other languages use the agent fallback. Dynamic-dispatch AST tiers cover JS/TS,
-  Java, C#, Python, Go, Rust, **Ruby**, and **PHP**. Kotlin and Swift dispatch requires a trusted
-  wasm grammar at the pinned ABI. See `scripts/grammars/PROVENANCE.md`.
+  **Swift**, **C**, and **C++**. Other languages use the agent fallback. Dynamic-dispatch AST tiers
+  cover JS/TS, Java, C#, Python, Go, Rust, **Ruby**, **PHP**, **C**, and **C++**. Kotlin and Swift
+  dispatch requires a trusted wasm grammar at the pinned ABI. See `scripts/grammars/PROVENANCE.md`.
 
 _Recent releases added the agent-intelligence suite (**hotspots**, **campaign**,
 **reading-order**, Type-2 clone detection, and suppression memory), a

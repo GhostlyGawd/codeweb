@@ -82,9 +82,11 @@ class CodewebLensProvider {
 }
 
 function activate(context) {
-  // All 11 native engine languages (extract-symbols SRC list) — the selector previously stopped at
-  // nine, so Ruby/PHP/Kotlin/Swift symbols in the graph never got lenses (#7).
-  const selector = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'python', 'rust', 'go', 'java', 'csharp', 'ruby', 'php', 'kotlin', 'swift']
+  // All 13 native engine languages (extract-symbols SRC list) — the selector previously stopped at
+  // nine, so Ruby/PHP/Kotlin/Swift symbols in the graph never got lenses (#7). These are VS Code
+  // language IDs, not codeweb's `langOf` names: `cpp` is the id for every C++ extension, and the
+  // editor splits JS/TS into their react variants where codeweb folds them into one language.
+  const selector = ['javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'python', 'rust', 'go', 'java', 'csharp', 'ruby', 'php', 'kotlin', 'swift', 'c', 'cpp']
     .map((language) => ({ language, scheme: 'file' }));
   const provider = new CodewebLensProvider();
   // Re-render lenses whenever any mapped graph is rebuilt (pipeline, codeweb_refresh, post-edit

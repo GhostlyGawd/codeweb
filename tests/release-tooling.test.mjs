@@ -315,6 +315,14 @@ test('product.json languages match the extractor: one file per extension, counte
       'n.kt': 'fun fkt(): Int = 1\n',
       'o.kts': 'fun fkts(): Int = 1\n',
       'p.swift': 'func fswift() -> Int { return 1 }\n',
+      'q.c': 'int fc(void) {\n  return 1;\n}\n',
+      'r.h': 'int fh(void);\n',
+      's.cpp': 'int fcpp() { return 1; }\n',
+      't.cc': 'int fcc() { return 1; }\n',
+      'u.cxx': 'int fcxx() { return 1; }\n',
+      'v.hpp': 'inline int fhpp() { return 1; }\n',
+      'w.hh': 'inline int fhh() { return 1; }\n',
+      'x.hxx': 'inline int fhxx() { return 1; }\n',
     });
     const r = runNode(script('extract-symbols.mjs'), [dir, '--out', join(dir, 'f.json')]);
     assert.equal(r.status, 0, r.stderr);

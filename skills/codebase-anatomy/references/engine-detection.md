@@ -7,12 +7,15 @@ the chosen engine in `meta.engine`.
 ## Native fast path
 
 The bundled extractor (`scripts/extract-symbols.mjs`) directly parses JavaScript, TypeScript,
-Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, and Swift. The fast path does not require an
-external analysis tool.
+Python, Rust, Go, Java, C#, Ruby, PHP, Kotlin, Swift, C, and C++. The fast path does not require
+an external analysis tool.
 
 When `web-tree-sitter` is installed, the bundled AST tier resolves dynamic-dispatch call edges
-for Java, C#, Python, Go, Rust, Ruby, and PHP. It also gives JS and TS exact complexity values
-and class-qualified methods.
+for Java, C#, Python, Go, Rust, Ruby, PHP, C++, and C. It also gives JS and TS exact complexity
+values and class-qualified methods.
+
+C++ dispatch resolves typed receivers (`r.m()`, `p->m()`). C has no receivers, so its tier
+resolves function-pointer tables bound by a designated initializer.
 
 Kotlin and Swift require a trusted wasm grammar. See `scripts/grammars/PROVENANCE.md`.
 
