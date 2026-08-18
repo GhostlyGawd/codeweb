@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>codeweb Teams pricing — €10 per active author, flat and unlimited — codeweb</title>
+<meta name="description" content="Planned codeweb Teams pricing: €10 per active author per month, flat — unlimited repos, PRs, and gate runs, with no credits or per-review metering. An active author committed on a gated default branch in the trailing 90 days.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="codeweb Teams — €10 per active author per month">
+<meta property="og:description" content="Planned codeweb Teams pricing: €10 per active author per month, flat — unlimited repos, PRs, and gate runs, with no credits or per-review metering. An active author committed on a gated default branch in the trailing 90 days.">
+<meta property="og:url" content="https://ghostlygawd.github.io/codeweb/pricing.html">
+<meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:image:alt" content="codeweb — interactive call-graph map of a codebase">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
+<meta name="theme-color" content="#060608">
+<link rel="canonical" href="https://ghostlygawd.github.io/codeweb/pricing.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.13.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<svg class="cw-grain" width="100%" height="100%" aria-hidden="true"><filter id="cwg"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/></filter><rect width="100%" height="100%" filter="url(#cwg)"/></svg>
+<i class="cw-fr tl"></i><i class="cw-fr tr"></i><i class="cw-fr bl"></i><i class="cw-fr br"></i>
+<header class="site-nav">
+  <a class="brand" href="index.html" aria-label="codeweb home">
+    <span class="wm">code<span class="w">web</span></span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html" data-nav="home">Home</a>
+    <a href="product.html" data-nav="product">Product</a>
+    <a href="research.html" data-nav="research">Research</a>
+    <a href="pricing.html" data-nav="pricing" aria-current="page">Pricing</a>
+    <a href="boundary.html" data-nav="boundary">Free forever</a>
+    <a href="start.html" data-nav="start">Get Started</a>
+    <a href="changelog.html" data-nav="changelog">Changelog</a>
+  </nav>
+  <div class="nav-right">
+    <a class="nav-ghost" href="demo/">Live demo</a>
+    <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">codeweb Teams</span>
+      <h1>€10 per active author, per month</h1>
+      <p class="lead"><strong>Flat. Unlimited repositories, unlimited pull requests, unlimited gate runs, unlimited queries.</strong> You pay for the people writing code, not for how often the gate runs.</p>
+      <p class="muted">Planned pricing, ratified as intent in the project charter — not a live offer. codeweb Teams is still being built, and nothing on this page is for sale yet.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="eyebrow">Free forever · MIT</div>
+        <h3>codeweb</h3>
+        <p>Everything that runs on your machine against your repo: the map, the MCP tools, the hooks, the report, the CLI, and the self-hosted CI gate Action.</p>
+        <p class="muted">No accounts, no telemetry, no license keys. This half never becomes paid — see <a href="boundary.html">the boundary</a>.</p>
+        <div class="btn-row"><a class="btn" href="start.html">Get started — free</a></div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Planned · hosted</div>
+        <h3>codeweb Teams</h3>
+        <p>The hosted PR gate as a GitHub App, plus the cross-repo dashboard: gate history, trends, and org-shared suppressions your local maps cannot see.</p>
+        <p class="muted">Priced per active author, per month. Billing lives only in the hosted service; a lapsed subscription never breaks your local tooling or your CI.</p>
+        <div class="btn-row"><a class="btn btn-primary" data-cta="teams-install" href="#teams-install">Install the GitHub App — coming soon</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The seat definition</span>
+      <h2>What counts as an active author</h2>
+      <p class="lead">One definition, stated once, computed the same way everywhere.</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card">
+        <h3>Who</h3>
+        <p>A person who authored a commit on the default branch of a repository where the gate is enabled. Reviewers, readers, and bots are not seats.</p>
+      </div>
+      <div class="card">
+        <h3>When</h3>
+        <p>In the trailing 90 days. Stop committing and the seat drops off on its own; nobody has to file a ticket to remove a leaver.</p>
+      </div>
+      <div class="card">
+        <h3>Counted once</h3>
+        <p>Distinct authors, deduplicated by commit email and account login together. The same human committing from a laptop and a CI box is one seat.</p>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:1rem">The equivalent hand check on any repository: <code>git log --since=90.days</code> on the default branch, distinct authors. Nothing is inferred, and nothing is estimated.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Flat, not metered</span>
+      <h2>The gate costs us nothing per run, so it costs you nothing per run</h2>
+      <p class="lead">codeweb's verdict is a deterministic graph diff. No model is called, so a busy week is not an expensive week.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Usage-metered pricing, the category norm</h3>
+        <p>Review tools built on model calls carry per-use cost, so their pricing tends to follow it: credits, per-review quotas, overage on top of the seat price.</p>
+        <p class="muted">The budgeting cost is real too — someone has to watch the meter and decide which pull requests deserve a review.</p>
+      </div>
+      <div class="card">
+        <h3>What flat-unlimited means here</h3>
+        <p>One price per active author. Every repository, every pull request, every gate run, every dashboard query — no credits, no quota, no overage line.</p>
+        <p class="muted">Gate the noisy refactor branch as readily as the release branch. The bill is the same either way.</p>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:1rem">For category context: the competitive scan committed in this repository (<a href="https://github.com/GhostlyGawd/codeweb/blob/main/reports/COMPETITIVE.md" rel="noopener"><code>reports/COMPETITIVE.md</code></a>) recorded commercial code-analysis gates priced at €18–27 per active author per month. We deliberately price under the category we are entering; no claim here describes any specific competitor.</p>
+  </div>
+</section>
+
+<section class="section section-tint" id="teams-install">
+  <div class="wrap center">
+    <div class="section-head center">
+      <span class="eyebrow">Sign up</span>
+      <h2>Installation opens when the service does</h2>
+      <p class="lead">codeweb Teams installs as a GitHub App on the organization you choose. This rail becomes that install link the day it opens — until then it is honestly labelled.</p>
+    </div>
+    <div class="btn-row" style="justify-content:center">
+      <a class="btn btn-primary btn-lg" data-cta="teams-install" href="#teams-install" aria-disabled="true">Install the GitHub App — coming soon</a>
+      <a class="btn btn-lg" href="start.html">Use codeweb free today</a>
+    </div>
+    <p class="muted" style="text-align:center;margin-top:.75rem">To hear when it opens, select <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">Watch&nbsp;→&nbsp;Custom&nbsp;→&nbsp;Releases</a> on GitHub. Release notes are the only announcement channel.</p>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <span class="wm">code<span class="w">web</span></span>
+        </a>
+        <p>A deterministic map of your codebase — one graph, read by humans and the agents editing alongside them.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="product.html">Features</a>
+        <a href="demo/">Live demo</a>
+        <a href="start.html">Get started</a>
+        <a href="changelog.html">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Proof</h5>
+        <a href="research.html">Research</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">Benchmarks</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Raw results</a>
+      </div>
+      <div class="footer-col">
+        <h5>Project</h5>
+        <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
+        <a href="support.html">Sponsor</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>codeweb v0.13.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
+      <span>Deterministic build · zero third-party requests on this page</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/livemap.js" defer></script>
+</body>
+</html>

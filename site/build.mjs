@@ -244,6 +244,11 @@ const PAGES = [
   // The support page. Free-forever contract first; sponsors get featured placement — no cost
   // claims (CHARTER.md C7 ruled the old "funds the benchmark spend" story fabricated).
   { slug: 'support', nav: 'support', title: 'Support codeweb — sponsorship & org support — codeweb', ogTitle: 'Support codeweb', description: 'Everything local is free forever. Sponsoring supports the project, and sponsors get featured placement in the README and on the site. Org support by email.' },
+  // The two commercial surfaces, quoting CHARTER.md § "The boundary: free forever / Teams"
+  // (ratified 2026-08-17). The boundary page is the contract; pricing states the intent the
+  // charter ratified. Both are the receipt for the other — keep them linked, never contradictory.
+  { slug: 'boundary', nav: 'boundary', title: 'Free forever / Teams — where the paid line sits — codeweb', ogTitle: 'codeweb — free forever, and where the paid line sits', description: 'The ratified boundary: anything that runs on one laptop against one repo is free forever (MIT, no accounts, no telemetry, no license keys); money buys hosting, multi-repo aggregation, and human attention.' },
+  { slug: 'pricing', nav: 'pricing', title: 'codeweb Teams pricing — €10 per active author, flat and unlimited — codeweb', ogTitle: 'codeweb Teams — €10 per active author per month', description: 'Planned codeweb Teams pricing: €10 per active author per month, flat — unlimited repos, PRs, and gate runs, with no credits or per-review metering. An active author committed on a gated default branch in the trailing 90 days.' },
   // Operator dashboard: completed npm download counts, drawn client-side from api.npmjs.org.
   // Built and served for the README chart, but excluded from site navigation and the sitemap.
   { slug: 'downloads', nav: 'home', unlisted: true, title: 'npm downloads — codeweb', ogTitle: 'codeweb npm downloads', description: 'Completed daily npm downloads of @ghostlygawd/codeweb, with a three-day lag guard for incomplete registry data.' },

@@ -48,6 +48,8 @@ const CURRENT_HTML = [
   'site/content/support.html',
   'site/content/downloads.html',
   'site/content/case-study.html',
+  'site/content/boundary.html',
+  'site/content/pricing.html',
   'site/templates/base.html',
   'site/templates/footer.html',
   'site/templates/nav.html',

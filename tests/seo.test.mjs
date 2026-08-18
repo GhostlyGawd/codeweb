@@ -18,7 +18,7 @@ test('F6: robots.txt + sitemap.xml exist, and internal markdown is excluded from
   assert.match(robots, /Disallow: \/\*\.md\$/, 'internal working documents are not crawl bait');
   assert.match(robots, /Disallow: \/(decisions|specs)\//, 'spec dirs excluded');
   const sitemap = read('docs/sitemap.xml');
-  for (const path of ['product.html', 'research.html', 'start.html', 'changelog.html', 'demo/', 'case-study.html']) {
+  for (const path of ['product.html', 'research.html', 'start.html', 'changelog.html', 'demo/', 'case-study.html', 'pricing.html', 'boundary.html']) {
     assert.ok(sitemap.includes(path), `sitemap lists ${path}`);
   }
 });
@@ -47,7 +47,7 @@ test('F5: the demo — the most-shared URL — finally unfurls', () => {
 
 test('F7/F9: built pages carry search vocabulary and every page has an h1', () => {
   assert.match(read('docs/index.html'), /<title>[^<]*(call graph|codebase map)[^<]*<\/title>/i, 'the homepage title carries a searched phrase');
-  for (const p of ['start', 'product', 'research', 'changelog', 'case-study']) {
+  for (const p of ['start', 'product', 'research', 'changelog', 'case-study', 'pricing', 'boundary']) {
     assert.match(read(`docs/${p}.html`), /<h1[\s>]/, `${p}.html has an h1`);
   }
 });

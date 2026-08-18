@@ -73,6 +73,10 @@ export const PROSE_FILES = [
   'site/content/case-study.html',
   'site/content/downloads.html',
   'site/content/changelog.html',
+  // The commercial surfaces (2026-08-18): the boundary contract and the Teams price intent are
+  // the most claim-dense copy on the site — they ride every prose sweep, C7 included.
+  'site/content/boundary.html',
+  'site/content/pricing.html',
   'editor/vscode-codeweb/README.md',
   'editor/vscode-codeweb/extension.js',
 ];

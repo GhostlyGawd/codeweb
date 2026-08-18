@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free forever / Teams — where the paid line sits — codeweb</title>
+<meta name="description" content="The ratified boundary: anything that runs on one laptop against one repo is free forever (MIT, no accounts, no telemetry, no license keys); money buys hosting, multi-repo aggregation, and human attention.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="codeweb — free forever, and where the paid line sits">
+<meta property="og:description" content="The ratified boundary: anything that runs on one laptop against one repo is free forever (MIT, no accounts, no telemetry, no license keys); money buys hosting, multi-repo aggregation, and human attention.">
+<meta property="og:url" content="https://ghostlygawd.github.io/codeweb/boundary.html">
+<meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:image:alt" content="codeweb — interactive call-graph map of a codebase">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
+<meta name="theme-color" content="#060608">
+<link rel="canonical" href="https://ghostlygawd.github.io/codeweb/boundary.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.13.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<svg class="cw-grain" width="100%" height="100%" aria-hidden="true"><filter id="cwg"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/></filter><rect width="100%" height="100%" filter="url(#cwg)"/></svg>
+<i class="cw-fr tl"></i><i class="cw-fr tr"></i><i class="cw-fr bl"></i><i class="cw-fr br"></i>
+<header class="site-nav">
+  <a class="brand" href="index.html" aria-label="codeweb home">
+    <span class="wm">code<span class="w">web</span></span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html" data-nav="home">Home</a>
+    <a href="product.html" data-nav="product">Product</a>
+    <a href="research.html" data-nav="research">Research</a>
+    <a href="pricing.html" data-nav="pricing">Pricing</a>
+    <a href="boundary.html" data-nav="boundary" aria-current="page">Free forever</a>
+    <a href="start.html" data-nav="start">Get Started</a>
+    <a href="changelog.html" data-nav="changelog">Changelog</a>
+  </nav>
+  <div class="nav-right">
+    <a class="nav-ghost" href="demo/">Live demo</a>
+    <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The boundary</span>
+      <h1>Free forever, and exactly where the paid line sits</h1>
+      <p class="lead"><strong>The rule, ratified in the project charter: anything that runs on one laptop against one repo is free forever; money buys hosting, multi-repo aggregation, and human attention.</strong></p>
+      <p>The paywall sits where the architecture already draws the line — state that leaves your laptop. codeweb Teams is not a withheld feature. It is a different thing: a service.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="eyebrow">Free forever · MIT</div>
+        <h3>Everything that runs on your machine</h3>
+        <p>The map, the MCP tools, the hooks, the interactive report, the CLI, the self-hosted CI gate Action, and every language codeweb ever learns.</p>
+        <ul class="kicker-list">
+          <li><span class="dot"></span><span><strong>No accounts.</strong> Nothing to sign up for, nothing to log into.</span></li>
+          <li><span class="dot"></span><span><strong>No telemetry.</strong> codeweb never phones home, and never has.</span></li>
+          <li><span class="dot"></span><span><strong>No license keys.</strong> No trial clock, no seat check, no gated flags.</span></li>
+          <li><span class="dot"></span><span><strong>MIT-licensed.</strong> Fork it, vendor it, ship it inside your own tooling.</span></li>
+        </ul>
+        <div class="btn-row"><a class="btn btn-primary" href="start.html">Get started — free</a></div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Paid · hosted</div>
+        <h3>codeweb Teams — the service half</h3>
+        <p>What one laptop structurally cannot do for a whole organization: run the gate for you, and hold the history across every repo.</p>
+        <ul class="kicker-list">
+          <li><span class="dot"></span><span><strong>Hosting.</strong> The PR gate as a GitHub App — no workflow YAML, cached base graphs, checks that do not spend your CI minutes.</span></li>
+          <li><span class="dot"></span><span><strong>Multi-repo aggregation.</strong> Cross-repo trends, gate-outcome history, and suppressions shared across the org.</span></li>
+          <li><span class="dot"></span><span><strong>Human attention.</strong> Someone whose job is keeping the gate running for you.</span></li>
+        </ul>
+        <div class="btn-row"><a class="btn" href="pricing.html">See Teams pricing →</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The promises behind the line</span>
+      <h2>What this contract commits us to</h2>
+    </div>
+    <div class="grid cols-3">
+      <div class="card">
+        <h3>Billing lives only in the hosted service</h3>
+        <p>Accounts, entitlements, seats, and payment state never enter this repository. That is a charter invariant, not a preference, and Teams is a separate hosted service precisely so it survives.</p>
+      </div>
+      <div class="card">
+        <h3>A payment failure degrades one thing</h3>
+        <p>If a subscription lapses, the hosted tier steps down — a grace period, then a return to free behavior with the dashboard read-only. It never breaks your local tooling, and it never breaks your CI.</p>
+      </div>
+      <div class="card">
+        <h3>Nothing free becomes paid later</h3>
+        <p>No local capability moves behind a payment. Everything shipped today stays MIT and free for one person and their agent on their machine — including every language and every fix that lands after this.</p>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:1rem">The rule and the price intent are ratified in <a href="https://github.com/GhostlyGawd/codeweb/blob/main/CHARTER.md" rel="noopener">CHARTER.md</a>, under <em>The boundary: free forever / Teams</em>. Teams is planned at ~€10 per active author per month — <a href="pricing.html">the pricing page</a> has the details.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap center">
+    <div class="section-head center">
+      <span class="eyebrow">Right now</span>
+      <h2>The free half is the whole product today</h2>
+      <p class="lead">codeweb Teams is still being built. Everything on this site that you can install and run is free, MIT, and yours.</p>
+    </div>
+    <div class="btn-row" style="justify-content:center">
+      <a class="btn btn-primary btn-lg" href="start.html">Map your repo</a>
+      <a class="btn btn-lg" href="pricing.html">Teams pricing</a>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <span class="wm">code<span class="w">web</span></span>
+        </a>
+        <p>A deterministic map of your codebase — one graph, read by humans and the agents editing alongside them.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="product.html">Features</a>
+        <a href="demo/">Live demo</a>
+        <a href="start.html">Get started</a>
+        <a href="changelog.html">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Proof</h5>
+        <a href="research.html">Research</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">Benchmarks</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Raw results</a>
+      </div>
+      <div class="footer-col">
+        <h5>Project</h5>
+        <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
+        <a href="support.html">Sponsor</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>codeweb v0.13.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
+      <span>Deterministic build · zero third-party requests on this page</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/livemap.js" defer></script>
+</body>
+</html>

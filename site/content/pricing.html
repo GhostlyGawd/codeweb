@@ -1,0 +1,89 @@
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">codeweb Teams</span>
+      <h1>€10 per active author, per month</h1>
+      <p class="lead"><strong>Flat. Unlimited repositories, unlimited pull requests, unlimited gate runs, unlimited queries.</strong> You pay for the people writing code, not for how often the gate runs.</p>
+      <p class="muted">Planned pricing, ratified as intent in the project charter — not a live offer. codeweb Teams is still being built, and nothing on this page is for sale yet.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="eyebrow">Free forever · MIT</div>
+        <h3>codeweb</h3>
+        <p>Everything that runs on your machine against your repo: the map, the MCP tools, the hooks, the report, the CLI, and the self-hosted CI gate Action.</p>
+        <p class="muted">No accounts, no telemetry, no license keys. This half never becomes paid — see <a href="boundary.html">the boundary</a>.</p>
+        <div class="btn-row"><a class="btn" href="start.html">Get started — free</a></div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Planned · hosted</div>
+        <h3>codeweb Teams</h3>
+        <p>The hosted PR gate as a GitHub App, plus the cross-repo dashboard: gate history, trends, and org-shared suppressions your local maps cannot see.</p>
+        <p class="muted">Priced per active author, per month. Billing lives only in the hosted service; a lapsed subscription never breaks your local tooling or your CI.</p>
+        <div class="btn-row"><a class="btn btn-primary" data-cta="teams-install" href="#teams-install">Install the GitHub App — coming soon</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The seat definition</span>
+      <h2>What counts as an active author</h2>
+      <p class="lead">One definition, stated once, computed the same way everywhere.</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card">
+        <h3>Who</h3>
+        <p>A person who authored a commit on the default branch of a repository where the gate is enabled. Reviewers, readers, and bots are not seats.</p>
+      </div>
+      <div class="card">
+        <h3>When</h3>
+        <p>In the trailing 90 days. Stop committing and the seat drops off on its own; nobody has to file a ticket to remove a leaver.</p>
+      </div>
+      <div class="card">
+        <h3>Counted once</h3>
+        <p>Distinct authors, deduplicated by commit email and account login together. The same human committing from a laptop and a CI box is one seat.</p>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:1rem">The equivalent hand check on any repository: <code>git log --since=90.days</code> on the default branch, distinct authors. Nothing is inferred, and nothing is estimated.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Flat, not metered</span>
+      <h2>The gate costs us nothing per run, so it costs you nothing per run</h2>
+      <p class="lead">codeweb's verdict is a deterministic graph diff. No model is called, so a busy week is not an expensive week.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Usage-metered pricing, the category norm</h3>
+        <p>Review tools built on model calls carry per-use cost, so their pricing tends to follow it: credits, per-review quotas, overage on top of the seat price.</p>
+        <p class="muted">The budgeting cost is real too — someone has to watch the meter and decide which pull requests deserve a review.</p>
+      </div>
+      <div class="card">
+        <h3>What flat-unlimited means here</h3>
+        <p>One price per active author. Every repository, every pull request, every gate run, every dashboard query — no credits, no quota, no overage line.</p>
+        <p class="muted">Gate the noisy refactor branch as readily as the release branch. The bill is the same either way.</p>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:1rem">For category context: the competitive scan committed in this repository (<a href="https://github.com/GhostlyGawd/codeweb/blob/main/reports/COMPETITIVE.md" rel="noopener"><code>reports/COMPETITIVE.md</code></a>) recorded commercial code-analysis gates priced at €18–27 per active author per month. We deliberately price under the category we are entering; no claim here describes any specific competitor.</p>
+  </div>
+</section>
+
+<section class="section section-tint" id="teams-install">
+  <div class="wrap center">
+    <div class="section-head center">
+      <span class="eyebrow">Sign up</span>
+      <h2>Installation opens when the service does</h2>
+      <p class="lead">codeweb Teams installs as a GitHub App on the organization you choose. This rail becomes that install link the day it opens — until then it is honestly labelled.</p>
+    </div>
+    <div class="btn-row" style="justify-content:center">
+      <a class="btn btn-primary btn-lg" data-cta="teams-install" href="#teams-install" aria-disabled="true">Install the GitHub App — coming soon</a>
+      <a class="btn btn-lg" href="start.html">Use codeweb free today</a>
+    </div>
+    <p class="muted" style="text-align:center;margin-top:.75rem">To hear when it opens, select <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">Watch&nbsp;→&nbsp;Custom&nbsp;→&nbsp;Releases</a> on GitHub. Release notes are the only announcement channel.</p>
+  </div>
+</section>

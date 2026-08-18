@@ -25,8 +25,9 @@ From the charter's ratified list — scope creep dies here:
 - No embeddings or vector search — `find` stays deterministic-lexical.
 - No LLM inside the runtime analysis path.
 - No accounts, telemetry, or license keys in the local product, ever.
-- No hosted "Teams" build before the distribution trigger; no VS Code Marketplace publish
-  (the .vsix still builds per release).
+- No VS Code Marketplace publish (the .vsix still builds per release). *(Amendment A1,
+  2026-08-17: the hosted "Teams" build is green-lit and its distribution trigger superseded,
+  so that half of this line is gone; non-goal 6 was re-examined the same day and stands.)*
 - No new first-class language until its parser grammar clears
   `scripts/grammars/PROVENANCE.md` provenance.
 - The human-facing map stays a supporting view of the findings — never the lead.
@@ -39,8 +40,11 @@ free forever (MIT — charter invariant). There is deliberately no paywall and n
 the wired money path is **GitHub Sponsors** (the README Support section and the site support
 page link it), sponsorship simply supports the project, and sponsors get featured README
 placement — no cost claims (charter C7 ruling). The team lead is the secondary audience,
-reached through the gate's PR comments; a paid Teams tier waits behind the distribution
-trigger (Non-goals). Brief 144's first-dollar lens verifies the sponsor doorway exists and
+reached through the gate's PR comments; the paid tier they are offered is **codeweb Teams**,
+a separate hosted service green-lit on 2026-08-17 (amendment A1) and priced as intent at ~€10
+per active author per month. The boundary holds either way: billing lives only in that
+service, never in this repo, so the local product keeps taking no accounts, no telemetry, and
+no license keys. Brief 144's first-dollar lens verifies the sponsor doorway exists and
 resolves; it cannot verify a stranger's card, and this spec claims nothing more.
 
 ## Acceptance criteria
