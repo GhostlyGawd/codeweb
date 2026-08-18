@@ -128,6 +128,10 @@ test('the ledger records gateReposExternal and surfaces WHY when it cannot', () 
   assert.match(wf, /%\{http_code\}/, 'the search response status must be captured, not swallowed');
   assert.match(wf, /::warning::/, 'a failed search must announce itself in the run log');
   assert.doesNotMatch(wf, /curl -sf[^\n]*search\/code/, 'the -f swallow-the-status form must be gone');
+  // curl -w already prints 000 on a transport failure, so an `|| echo '000'` fallback concatenates
+  // a second one and the warning reads "HTTP 000000" — a status that does not exist.
+  assert.doesNotMatch(wf, /\|\|\s*echo\s*'000'/,
+    'the transport-failure fallback must replace the status, not append a second one');
 });
 
 test('the ledger accepts an operator-supplied search credential, gated like every other secret', () => {
