@@ -15,6 +15,7 @@ the same input always yields the same graph. Recorded in `meta.engine` when the 
 | `tree-sitter-ruby.wasm` | Ruby (dispatch tier, IMPROVEMENTS.md #14) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `09a96427d7c72f0613ed470cd9812223fc4a91d6a9c025c0235cc6bd59ff96f4` |
 | `tree-sitter-php.wasm` | PHP (dispatch tier, IMPROVEMENTS.md #14) | `@vscode/tree-sitter-wasm` | 0.3.1 | 15 | `d4df6a6ff08c87c3ec4f9cbb785fe09998a0cb570e03f57d7b19b3acfb146aa7` |
 | `tree-sitter-cpp.wasm` | C++ (dispatch tier, charter amendment A2) | `@vscode/tree-sitter-wasm` | 0.3.1 | 14 | `77a65bd42f43c2dcd69af40c12a6c32d6ed81d360c025e9feb28911f8339fd69` |
+| `tree-sitter-c.wasm` | C (dispatch tier, charter amendment A2) | [tree-sitter org release](https://github.com/tree-sitter/tree-sitter-c/releases/download/v0.24.2/tree-sitter-c.wasm) | v0.24.2 | 15 | `83e8d7902b9d7f8c7c5cd4bd9acb5c7eb5faf42c09f85546b183964d3b5f48f9` |
 
 The digests are load-bearing, not decorative: `tests/grammar-provenance.test.mjs` recomputes each
 file's sha256 against this table, so a swapped or tampered grammar fails the gate — "pinned and
@@ -35,6 +36,26 @@ grammars (built with `tree-sitter-cli@0.20.x`) that **fail to load** against `we
 with a `dylink` metadata error. Always vendor a grammar whose ABI matches the pinned runtime, and bump
 both together. The spike that established this was `spike/tree-sitter/` (PR #17; the graduated
 prototype was removed from the tree in the perf-quality round — git history keeps it).
+
+## The second trusted source — official tree-sitter org releases (2026-08-18)
+
+`tree-sitter-c.wasm` is the first grammar here that did **not** come from
+`@vscode/tree-sitter-wasm`: that package ships no C grammar, and C is the language C++ support is
+incomplete without. Charter non-goal 8, as amended by A2, admits a second source under a bar that
+is narrower than "any wasm on the internet" and identical in what it guarantees:
+
+1. **The publisher is the grammar's own maintainer** — the `tree-sitter` GitHub org, which is also
+   the runtime's publisher. Not a repackager, not a mirror.
+2. **The artifact is an immutable release asset**, cited by its exact download URL and tag in the
+   table above (a release asset is content-addressed by this file's sha256 either way).
+3. **The bytes are pinned and machine-checked** by `tests/grammar-provenance.test.mjs`, exactly
+   like every `@vscode/tree-sitter-wasm` row — the digest is what makes the source's identity
+   load-bearing rather than a claim on faith.
+4. **The ABI is verified against the pinned runtime before vendoring** (ABI 15, loaded under
+   `web-tree-sitter@0.26.9` — see the ABI rule above).
+
+What has NOT changed: an unpinned, unverified, or third-party-repackaged wasm is still out. The
+Kotlin/Swift blocker below is unaffected — no upstream tree-sitter org release ships their wasm.
 
 ## Kotlin / Swift — recorded blocker (2026-07-21)
 
@@ -68,8 +89,19 @@ cp node_modules/@vscode/tree-sitter-wasm/wasm/tree-sitter-typescript.wasm script
 # 3. bump web-tree-sitter if the ABI moved; re-run the determinism + grammar-provenance tests
 ```
 
+From the second source (an official tree-sitter org release), the same three steps apply — only
+the fetch differs, and the digest is verified BEFORE the file enters the tree, never after:
+
+```sh
+curl -fsSL -o /tmp/tree-sitter-c.wasm \
+  https://github.com/tree-sitter/tree-sitter-c/releases/download/v0.24.2/tree-sitter-c.wasm
+shasum -a 256 /tmp/tree-sitter-c.wasm   # must equal the row above before copying
+cp /tmp/tree-sitter-c.wasm scripts/grammars/
+```
+
 Each release, the prep checklist re-inventories `@vscode/tree-sitter-wasm@latest`'s wasm list —
 the recorded Kotlin/Swift blocker (above) resolves the moment the trusted source ships those
-grammars, and a checklist line is what notices (LNG-F7). The C/C++ half of that question is
-closed for C++: `@vscode/tree-sitter-wasm` already shipped `tree-sitter-cpp.wasm`, so it
-vendored from the existing trusted source under the ordinary bar (row above, 2026-08-18).
+grammars, and a checklist line is what notices (LNG-F7). The C/C++ question is now closed on both
+halves (2026-08-18): C++ vendored from `@vscode/tree-sitter-wasm`, which already shipped
+`tree-sitter-cpp.wasm`, under the ordinary bar; C vendored from the tree-sitter org release under
+the second-source bar above, because that package ships no C grammar at all.

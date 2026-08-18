@@ -13,7 +13,7 @@
 // orchestrator (one truth for the id->file split). #17's per-file `cand` collection and return
 // field move WITH the body; #19 edge interning + #17 delta/dirty-label logic stay orchestration.
 
-import { KEYWORDS, parseSignature, CPP_RE } from './lang-rules.mjs';
+import { KEYWORDS, parseSignature, CPP_RE, C_FAMILY_RE } from './lang-rules.mjs';
 import { isTestFile } from './graph-ops.mjs';
 import { buildInnermostIndex } from './enclosing.mjs';
 import { importCandidates } from './import-resolve.mjs'; // finding #11: the ONE entry-candidate list (pub walk shares it)
@@ -195,7 +195,9 @@ export function createEdgeDeriver(ctx) {
     const extendsRe = /\bclass\s+[A-Za-z_$][\w$]*\s+extends\s+([A-Za-z_$][\w$]*)/g;
     const csBaseRe = /\b(?:class|struct|record)\s+[A-Za-z_]\w*(?:<[^>]*>)?\s*:\s*([A-Za-z_][\w.]*)/g; // C# `class A : Base, IFace` -> Base
     const isCs = r.endsWith('.cs');
-    const isCpp = CPP_RE.test(r);
+    // C and C++ share both gates below verbatim: a prototype is a declaration in either language,
+    // and `p->m()` reaches its target through a pointer in either.
+    const isCpp = C_FAMILY_RE.test(r);
     // A C++ PROTOTYPE IS A DECLARATION, NOT A CALL. `double area() const;` is the same call shape
     // as `area();`, so without this every header prototype fabricates an edge FROM whatever encloses
     // it TO the real definition — a class node "calling" its own methods, and a free prototype at

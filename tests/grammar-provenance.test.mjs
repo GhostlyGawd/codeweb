@@ -21,7 +21,10 @@ const recorded = new Map(
 
 test('every vendored grammar matches its recorded sha256', () => {
   const files = readdirSync(DIR).filter((f) => f.endsWith('.wasm'));
-  assert.ok(files.length >= 8, `expected the vendored grammar set, found ${files.length}`);
+  // The floor rises with the set (8 -> 10: C++ and C, charter amendment A2). It is what forces the
+  // NEW grammars through the loop below — a scan that silently found fewer files would otherwise
+  // "pass" by hashing nothing.
+  assert.ok(files.length >= 10, `expected the vendored grammar set, found ${files.length}`);
   for (const f of files) {
     const want = recorded.get(f);
     assert.ok(want, `${f} has no sha256 row in PROVENANCE.md — record its provenance before vendoring`);

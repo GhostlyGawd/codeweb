@@ -15,6 +15,8 @@ export const KEYWORDS = new Set(['if','for','while','switch','catch','return','f
 
 /** The C++ extension family (`CPP_RE` in Set form — the scanner keys on extname()). */
 const CPP_EXTS = new Set(['.cpp', '.cc', '.cxx', '.hpp', '.hh', '.hxx']);
+/** The C extension family (`C_RE` in Set form). C reuses the C++ branch — see the rules below. */
+const C_EXTS = new Set(['.c', '.h']);
 
 // `masked(kind)` returns the masked text for this file (the extractor's per-file memo) — the
 // Python AND Ruby branches need it here (def/class inside docstrings; def/class inside heredoc
@@ -26,7 +28,7 @@ export function scanSymbols(file, text, masked) {
   // commented-out definition satisfies exactly — and doc comments carrying example code are
   // idiomatic in headers. maskJs blanks `//`, `/* */` and string interiors while preserving
   // columns and line count, so the line-anchored rules below read the same coordinates.
-  const lines = (ext === '.py' ? masked('py') : ext === '.rb' ? masked('rb') : CPP_EXTS.has(ext) ? masked('js') : text).split(/\r?\n/); // hide def/class inside docstrings/heredocs/comments
+  const lines = (ext === '.py' ? masked('py') : ext === '.rb' ? masked('rb') : CPP_EXTS.has(ext) || C_EXTS.has(ext) ? masked('js') : text).split(/\r?\n/); // hide def/class inside docstrings/heredocs/comments
   const syms = [];
   const accessByLine = {}; // C++ only: 1-based line -> the access section governing it
   const push = (name, line, kind, exported, owner) => { if (name && !KEYWORDS.has(name)) syms.push({ name, line: line + 1, kind, exports: !!exported, ...(owner ? { owner } : {}) }); };
@@ -153,7 +155,13 @@ export function scanSymbols(file, text, masked) {
         push(m[3], i, m[1].length || recv ? 'method' : 'function', !/\b(?:private|internal)\b/.test(ln), recv);
       }
     });
-  } else if (CPP_EXTS.has(ext)) {
+  } else if (CPP_EXTS.has(ext) || C_EXTS.has(ext)) {
+    // C and C++ share this branch: one lexis, one definition shape, one `#include` rule — so the
+    // two languages cannot silently drift apart. What C does NOT share is OWNERSHIP. C has no
+    // classes and no member functions; a `struct` is an aggregate whose members are DATA, so a C
+    // function is always a bare function and a struct range never qualifies one. `isC` below is
+    // exactly that difference, and nothing more.
+    const isC = C_EXTS.has(ext);
     // C++ (charter non-goal 8 as amended by A2). Two structural facts drive every rule here:
     //   1. A PROTOTYPE IS NOT A SYMBOL. `double area() const;` in a header and
     //      `double Shape::area() const { … }` in the .cpp are ONE function. Minting both would
@@ -188,7 +196,10 @@ export function scanSymbols(file, text, masked) {
       }
       push(m[2], i, 'class', true);
     });
-    const ownerAt = (lineNo) => { let best = null; for (const t of typeRanges) if (lineNo > t.start && lineNo <= t.end && (!best || t.start > best.start)) best = t; return best ? best.name : undefined; };
+    // In C a struct range owns nothing — its members are data — so the enclosing-range lookup is
+    // C++'s alone. Without this gate a `.c` file's every top-level definition after a struct that
+    // failed to close would silently acquire an owner it cannot have.
+    const ownerAt = isC ? () => undefined : (lineNo) => { let best = null; for (const t of typeRanges) if (lineNo > t.start && lineNo <= t.end && (!best || t.start > best.start)) best = t; return best ? best.name : undefined; };
     // `[ret-type ]name(params)[ qualifiers][ : ctor-init]{` — the DEFINITION shape. The head
     // forbids `=`, which is what keeps lambdas (`auto f = [](int v) { … }`) and aggregate
     // initializers out; params forbid `;`, which is what keeps `for (…;…;…)` out.
@@ -389,6 +400,11 @@ export const DYNAMIC_RE = /\[[A-Za-z_$][\w$]*\]\s*\(|\bgetattr\s*\(|require\s*\(
 
 /** The C++ extension family — one truth, shared by langOf and the extractor's tier dispatch. */
 export const CPP_RE = /\.(cpp|cc|cxx|hpp|hh|hxx)$/;
+/** The C extension family. `.h` is C's: it is BOTH languages' header extension, and extension is
+ *  the only evidence a static reader has, so it goes to the language it unambiguously names. */
+export const C_RE = /\.(c|h)$/;
+/** Either language — they share one scanner branch, one mask lexis, and one include rule. */
+export const C_FAMILY_RE = /\.(c|h|cpp|cc|cxx|hpp|hh|hxx)$/;
 
 /** Language of a repo-relative file path (extension-keyed; the meta.languages vocabulary). */
-export const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : CPP_RE.test(f) ? 'cpp' : f.endsWith('.json') ? 'json' : /\.(tsx?|mts|cts)$/.test(f) ? 'typescript' : 'javascript');
+export const langOf = (f) => (f.endsWith('.py') ? 'python' : f.endsWith('.rs') ? 'rust' : f.endsWith('.go') ? 'go' : f.endsWith('.java') ? 'java' : f.endsWith('.cs') ? 'csharp' : f.endsWith('.rb') ? 'ruby' : f.endsWith('.php') ? 'php' : /\.kts?$/.test(f) ? 'kotlin' : f.endsWith('.swift') ? 'swift' : CPP_RE.test(f) ? 'cpp' : C_RE.test(f) ? 'c' : f.endsWith('.json') ? 'json' : /\.(tsx?|mts|cts)$/.test(f) ? 'typescript' : 'javascript');

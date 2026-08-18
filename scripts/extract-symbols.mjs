@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url'; // finding #40 (T-40.3): main-guard id
 import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
 import { atomicWrite, parseArgs } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
 import { SRC_RE } from './lib/common.mjs'; // finding 25: one truth for the mappable-source list (the copy here could drift)
-import { scanSymbols, bodyEnd, parseSignature, DYNAMIC_RE, langOf, CPP_RE } from './lib/lang-rules.mjs'; // finding 25: pure per-language rules
+import { scanSymbols, bodyEnd, parseSignature, DYNAMIC_RE, langOf, CPP_RE, C_RE, C_FAMILY_RE } from './lib/lang-rules.mjs'; // finding 25: pure per-language rules
 import { createImportResolver, defaultExportOf, importCandidates } from './lib/import-resolve.mjs'; // finding 25: cross-file name binding, one place; finding #11: shared specifier-candidate list
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { maskJs, maskPy, maskRuby } from './lib/masking.mjs'; // comment/string/regex-literal blanking (one truth, shared with codemod's rewrite gate)
@@ -61,7 +61,10 @@ import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; //
 // file; its cached binds/edges embed resolution verdicts taken without them. Derivation moved too
 // (a C++ `p->m()` is now gated as a member call instead of resolving by bare name), which is
 // exactly the class of change the ladder exists to invalidate.
-const SCANNER_VERSION = 19; // v18 (JSON tier) over v17: derivation-semantics change (WS-D review) —
+// v20: C joins on the same rule (second grammar source, amendment A2). SRC_RE gained `.c`/`.h`, so
+// a v19 cache's fileSig again spans a file set that excluded them — and `.h` in particular changes
+// what EXISTING C++ files resolve to, because a quoted `#include "x.h"` had no candidate before.
+const SCANNER_VERSION = 20; // v18 (JSON tier) over v17: derivation-semantics change (WS-D review) —
 // the bare-name fallback excludes closure-local targets (closureLocalIds), and symbolSig annotates
 // eligibility so a nesting flip invalidates cached edges. A previous-version cache is discarded at
 // load (one cold rebuild, never a crash) — the read gate below only accepts an exact version match.
@@ -371,11 +374,11 @@ for (const f of files) {
   const r = rel(f);
   const isPy = r.endsWith('.py');
   const isJsTs = /\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(r); // finding #11: .mts/.cts are TS files
-  const isBraceLang = isJsTs || /\.(java|cs|php|kt|kts|swift)$/.test(r) || CPP_RE.test(r); // maskJs handles //, /* */ and "…" for all of them
+  const isBraceLang = isJsTs || /\.(java|cs|php|kt|kts|swift)$/.test(r) || C_FAMILY_RE.test(r); // maskJs handles //, /* */ and "…" for all of them
   const isIndentLang = isPy || r.endsWith('.rb'); // extents by dedent (Python) / end-at-indent (Ruby)
   const langKey = r.endsWith('.java') ? 'java' : r.endsWith('.cs') ? 'csharp'
     : r.endsWith('.py') ? 'python' : r.endsWith('.go') ? 'go' : r.endsWith('.rs') ? 'rust'
-    : r.endsWith('.rb') ? 'ruby' : r.endsWith('.php') ? 'php' : CPP_RE.test(r) ? 'cpp' : null; // #14: Ruby/PHP join the dispatch tier; C++ follows (non-goal 8 / A2)
+    : r.endsWith('.rb') ? 'ruby' : r.endsWith('.php') ? 'php' : CPP_RE.test(r) ? 'cpp' : C_RE.test(r) ? 'c' : null; // #14: Ruby/PHP join the dispatch tier; C++ then C follow (non-goal 8 / A2)
   // Does the AST tier owe this file products (methods/dispatch/complexity)? Drives cache-hit
   // validity — a hit without them must re-scan — and the lazy engine load below (Spec A).
   const needsAst = opts.engine !== 'regex' && ((isJsTs && astProbe.ts) || (langKey && astProbe[langKey]));
@@ -914,7 +917,7 @@ for (const f of files) {
     continue;
   }
   const { amap, nsmap, classmap, edges: bindEdges, deps, bindCand } = resolver.bindFileImports({
-    fAbs: f, r, isPy, isCpp: CPP_RE.test(r), text: textOf(f, fsRec), aId: anchorId(r), defaultExportByFile, kindById,
+    fAbs: f, r, isPy, isCpp: C_FAMILY_RE.test(r), text: textOf(f, fsRec), aId: anchorId(r), defaultExportByFile, kindById,
   });
   for (const pair of bindEdges) importEdges.push(pair);
   if (amap.size) aliasByFile.set(f, amap);
@@ -973,7 +976,7 @@ for (const f of edgeFiles) {
   } else {
     // finding 10: text + mask only on the derive path — an edge-cache hit never touches the file
     const text = textOf(f, rec);
-    const lines = (r.endsWith('.py') ? maskedOnce(r, 'py', text) : r.endsWith('.rb') ? maskedOnce(r, 'rb', text) : /\.(jsx?|mjs|cjs|tsx?|mts|cts|java|cs|php|kt|kts|swift|cpp|cc|cxx|hpp|hh|hxx)$/.test(r) ? maskedOnce(r, 'js', text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
+    const lines = (r.endsWith('.py') ? maskedOnce(r, 'py', text) : r.endsWith('.rb') ? maskedOnce(r, 'rb', text) : /\.(jsx?|mjs|cjs|tsx?|mts|cts|java|cs|php|kt|kts|swift|c|h|cpp|cc|cxx|hpp|hh|hxx)$/.test(r) ? maskedOnce(r, 'js', text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
     result = deriveFileEdges(r, lines, rec.ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f));
     edgedCount++;
   }
@@ -1131,7 +1134,7 @@ if (newCache && !astLoadFailed && cacheDirty) {
 // `ast: loaded` (initialized this run) / `ast: idle` (available, nothing needed a parse — the warm
 // path Spec A exists for) / `ast: off` (regex opt-out, unavailable, or load failure).
 const astAvailable = opts.engine !== 'regex' && Object.entries(astProbe).some(([k, v]) => k !== 'tsVersion' && v === true);
-const typedLangs = ['java', 'csharp', 'python', 'go', 'rust', 'php', 'cpp'].filter((k) => typedLangsSeen.has(k)); // ruby has no static types — self/implicit dispatch only
+const typedLangs = ['java', 'csharp', 'python', 'go', 'rust', 'php', 'cpp'].filter((k) => typedLangsSeen.has(k)); // ruby has no static types — self/implicit dispatch only; C has no receivers at all (its tier resolves function-pointer tables, counted as dispatch edges)
 const dispatchNote = astAvailable
   ? `; wired ${dispatchEdgeCount} dispatch edge(s)${dispatchDropped ? `, dropped ${dispatchDropped} (missing endpoint)` : ''}` +
     (typedLangs.length ? `; typed-dispatch (${typedLangs.join('+')}) ${typedWired} wired${typedDropped ? `, ${typedDropped} dropped (ambiguous/absent)` : ''}` : '')
