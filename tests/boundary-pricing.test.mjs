@@ -15,6 +15,8 @@ import { join } from 'node:path';
 import { PLUGIN_ROOT } from './helpers.mjs';
 
 const read = (p) => readFileSync(join(PLUGIN_ROOT, p), 'utf8');
+/** The registered GitHub App's install flow — the one destination every Teams CTA must reach. */
+const INSTALL_URL = 'https://github.com/apps/codeweb-teams-dev/installations/new';
 const src = { boundary: () => read('site/content/boundary.html'), pricing: () => read('site/content/pricing.html') };
 const built = { boundary: () => read('docs/boundary.html'), pricing: () => read('docs/pricing.html') };
 // Authored copy with markup and comments removed — what a reader actually sees.
@@ -72,12 +74,34 @@ test('the price is published as ratified INTENT, not as a live offer', () => {
   assert.match(page, /not (a live offer|for sale)|nothing is for sale/i, 'and says nothing is on sale yet');
 });
 
-test('the pricing page carries a Teams sign-up rail the install URL can land in', () => {
+test('the pricing page carries a Teams sign-up rail pointing at the real App install flow', () => {
+  // M1 shipped this as a labelled "coming soon" placeholder because the App did not exist yet.
+  // It does now (`codeweb-teams-dev`), so the rail is the live acquisition path: every CTA must
+  // reach GitHub's own install flow, and none may still advertise itself as unavailable.
   const page = built.pricing();
-  const cta = /<a[^>]*data-cta="teams-install"[^>]*>([\s\S]*?)<\/a>/.exec(page);
-  assert.ok(cta, 'the sign-up/install CTA element must exist and be identifiable by data-cta="teams-install"');
-  assert.match(cta[1], /coming soon/i, 'at M1 the target is a labelled placeholder — never a silent dead link');
+  const ctas = [...page.matchAll(/<a[^>]*data-cta="teams-install"[^>]*>([\s\S]*?)<\/a>/g)];
+  assert.ok(ctas.length >= 1, 'the sign-up/install CTA element must exist and be identifiable by data-cta="teams-install"');
+
+  for (const cta of ctas) {
+    const href = /href="([^"]*)"/.exec(cta[0])?.[1] ?? '';
+    assert.equal(
+      href,
+      INSTALL_URL,
+      'a Teams CTA must land on the App install flow — a fragment or placeholder href is a dead end',
+    );
+    // The anchors are live and focusable, so aria-disabled would lie to assistive technology.
+    assert.doesNotMatch(cta[0], /aria-disabled/, 'a live CTA must not claim to be disabled');
+    assert.doesNotMatch(cta[1], /coming soon/i, 'the install is open — the placeholder wording must go');
+  }
   assert.match(page, /github app/i, 'the rail says what installing will mean');
+});
+
+test('the pricing page still separates the live install from the not-yet-live price', () => {
+  // The honesty risk of opening the CTA: a reader could take an installable App as a live offer.
+  // The price stays intent (VAL-GOV-007's ratified framing) even though the App is installable.
+  const page = textOf(built.pricing());
+  assert.match(page, /not a live offer|nothing (on this page )?is for sale/i, 'the price is still not an offer');
+  assert.doesNotMatch(page, /Installation opens when the service does/i, 'the pre-launch rail heading is superseded');
 });
 
 // ---- no fabricated rival claims -------------------------------------------------------------
