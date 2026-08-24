@@ -1,11 +1,10 @@
 {
   "cluster": "C3-edit-safety",
-  "generatedAt": "2026-06-22T17:35:14.672Z",
+  "generatedAt": "2026-08-24T21:35:43.725Z",
   "seeds": {
     "H5": "0x05FA17",
     "H5_cli": "0x5C111",
     "H6": "0x06CA3F",
-    "H7": "0x075A2D",
     "H8": "0x08C0DE",
     "A_CUT": "0x0AC07C",
     "A_READ": "0x0AEAD0"
@@ -13,7 +12,6 @@
   "T": {
     "H5": 10000,
     "H6": 2000,
-    "H7": 2000,
     "H8": 2000,
     "A-CUT": 2000,
     "A-READ": 2000,
@@ -87,9 +85,35 @@
       {
         "name": "self-loop collapse is genuinely non-reversible (scope is real; clean graph reverses)",
         "pass": true
+      },
+      {
+        "name": "cycle oracle walks the shipped CYCLE_KINDS (ref-only cycle seen by BOTH; absent without the ref)",
+        "pass": true,
+        "detail": {
+          "here": [
+            "call",
+            "import",
+            "inherit",
+            "ref"
+          ],
+          "shipped": [
+            "call",
+            "import",
+            "inherit",
+            "ref"
+          ]
+        }
       }
     ]
   },
+  "retiredHypotheses": [
+    {
+      "id": "H7",
+      "metric": "shard-query vs whole-graph (oracle) disagreements",
+      "reason": "scripts/lib/shards.mjs was deliberately deleted; the subject of the hypothesis no longer ships",
+      "decisionSource": "bench/results/scale-typescript.json -> previous.shardsDecision (\"DELETE lib/shards.mjs\")"
+    }
+  ],
   "perHypothesis": [
     {
       "id": "H5",
@@ -143,29 +167,6 @@
         "prefixesChecked": 2831,
         "mutatingStepsSeen": 2831,
         "plansWithMutations": 1873,
-        "examples": []
-      }
-    },
-    {
-      "id": "H7",
-      "metric": "shard-query vs whole-graph (oracle) disagreements",
-      "value": 0,
-      "ci": {
-        "method": "exact-zero-failure",
-        "note": "0 violations is the pre-registered bar; no interval needed for an exact count"
-      },
-      "passed": true,
-      "criterion": "0 over T>=2000 x every symbol x {callers,callees,impact}",
-      "detail": {
-        "T": 2000,
-        "id": "H7",
-        "metric": "shard-query vs whole-graph (oracle) disagreements",
-        "value": 0,
-        "passed": true,
-        "criterion": "0 over T>=2000 x every symbol x {callers,callees,impact}",
-        "symbolsChecked": 11009,
-        "multiShardTrials": 1907,
-        "boundaryEdgesSeen": 7700,
         "examples": []
       }
     },
@@ -267,50 +268,50 @@
     "repos": [
       {
         "name": "axios",
-        "nodes": 859,
-        "edges": 814,
+        "nodes": 831,
+        "edges": 1029,
         "toolCycles": 2,
         "oracleCycles": 2,
         "agree": true
       },
       {
         "name": "express",
-        "nodes": 1882,
-        "edges": 296,
-        "toolCycles": 2,
-        "oracleCycles": 2,
+        "nodes": 238,
+        "edges": 130,
+        "toolCycles": 1,
+        "oracleCycles": 1,
         "agree": true
       },
       {
         "name": "zod",
-        "nodes": 1408,
-        "edges": 838,
-        "toolCycles": 3,
-        "oracleCycles": 3,
+        "nodes": 1388,
+        "edges": 1616,
+        "toolCycles": 1,
+        "oracleCycles": 1,
         "agree": true
       },
       {
         "name": "flask",
-        "nodes": 1656,
-        "edges": 607,
-        "toolCycles": 2,
-        "oracleCycles": 2,
+        "nodes": 1668,
+        "edges": 1074,
+        "toolCycles": 1,
+        "oracleCycles": 1,
         "agree": true
       },
       {
         "name": "ripgrep",
-        "nodes": 3201,
-        "edges": 1752,
-        "toolCycles": 1,
-        "oracleCycles": 1,
+        "nodes": 3215,
+        "edges": 1810,
+        "toolCycles": 6,
+        "oracleCycles": 6,
         "agree": true
       },
       {
         "name": "gorilla-mux",
         "nodes": 261,
-        "edges": 280,
-        "toolCycles": 1,
-        "oracleCycles": 1,
+        "edges": 282,
+        "toolCycles": 0,
+        "oracleCycles": 0,
         "agree": true
       }
     ]

@@ -13,7 +13,7 @@
 // Usage:
 //   node extract-symbols.mjs <path> [--out fragment.json] [--no-ctags]
 
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, realpathSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { relative, resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url'; // finding #40 (T-40.3): main-guard idiom (the hooks' verbatim compare)
@@ -1181,10 +1181,15 @@ async function main() {
 }
 
 // Execute the CLI ONLY when run directly — the repo's proven guard idiom (post-edit-diff.mjs:79,
-// pre-edit-impact.mjs, session-brief.mjs use it verbatim). LEXICAL compare (path.resolve, no
-// realpath): safe here because extract-symbols is NOT a package.json `bin` entry (only run.mjs /
-// mcp-server.mjs are) and every in-repo caller spawns it by real absolute path — do NOT expose it
-// via `bin` without realpathSync on both sides (a symlinked argv[1] would skip main()).
-if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
+// pre-edit-impact.mjs, session-brief.mjs use it verbatim). Both sides are resolved through
+// realpath: a LEXICAL compare silently skips main() whenever the caller reaches this script through
+// a symlink (macOS `/tmp` -> `/private/tmp` is the everyday case), so the process exits 0 having
+// written nothing. Falls back to the lexical form when a path cannot be realpath'd (deleted or
+// unreadable), which is the pre-existing behavior.
+const sameFile = (a, b) => {
+  const real = (p) => { try { return realpathSync(p); } catch { return resolve(p); } };
+  return real(a) === real(b);
+};
+if (process.argv[1] && sameFile(process.argv[1], fileURLToPath(import.meta.url))) {
   main();
 }

@@ -1,7 +1,7 @@
 {
   "cluster": "C6-auxiliary",
-  "generatedAt": "2026-07-21T05:11:24.182Z",
-  "elapsedMs": 40335,
+  "generatedAt": "2026-08-24T21:36:07.691Z",
+  "elapsedMs": 23907,
   "seeds": {
     "place": 641553,
     "fit": 3863,
@@ -11,10 +11,11 @@
     "mcpGraph": 969,
     "treemap": 30702
   },
-  "node": "v22.22.2",
+  "node": "v26.7.0",
   "realCorpus": {
-    "available": false,
-    "reason": "corpus/gorilla-mux not present"
+    "repo": "gorilla-mux",
+    "nodes": 261,
+    "edges": 282
   },
   "hasGit": true,
   "oracleNotes": {
@@ -42,11 +43,11 @@
     },
     {
       "id": "A-SELFCONTAINED",
-      "metric": "external network references in shipped report.html",
+      "metric": "network-fetching references in shipped report.html",
       "value": 0,
       "ci": null,
       "passed": true,
-      "criterion": "zero external http(s)/CDN refs on synthetic+real reports; detector trips on a doctored page",
+      "criterion": "zero fetching refs (src/href on fetching elements, @import/url(), script-initiated requests) on synthetic+real reports; detector trips on a doctored page AND ignores plain hyperlinks",
       "notes": ""
     },
     {
@@ -128,10 +129,10 @@
     {
       "id": "A-MCP",
       "metric": "tools at CLI parity / protocol conformance",
-      "value": "26/26 parity; conformance=true; toolsList=27",
+      "value": "27/27 parity; conformance=true; toolsList=28",
       "ci": null,
       "passed": true,
-      "criterion": "all 26 parity tools == CLI on same input (codeweb_map covered by mcp.test.mjs); initialize/tools.list/tools.call + error codes (-32602/-32601/-32700, isError) conform; probe trips",
+      "criterion": "all 27 parity tools == CLI on same input (codeweb_map covered by mcp.test.mjs); initialize/tools.list/tools.call + error codes (-32602/-32601/-32700, isError) conform; probe trips",
       "notes": ""
     }
   ],
@@ -195,11 +196,22 @@
       "perCase": {
         "synthetic": {
           "built": true,
-          "bytes": 61569,
+          "bytes": 86897,
+          "offenders": []
+        },
+        "real": {
+          "built": true,
+          "bytes": 161783,
           "offenders": []
         }
       },
-      "canFail": true
+      "canFail": true,
+      "probe": {
+        "catchesFetches": true,
+        "detectedOnDoctored": 7,
+        "ignoresHyperlinks": true,
+        "hyperlinkOffenders": []
+      }
     },
     "aTreemap": {
       "per": {
@@ -321,15 +333,17 @@
       "canFail": true
     },
     "aMcp": {
-      "parityOk": 26,
-      "totalTools": 26,
+      "parityOk": 27,
+      "totalTools": 27,
       "parityFail": [],
       "conf": {
         "pureStdout": true,
         "initialize": true,
         "exitsClean": true,
-        "toolsListCount": 27,
+        "toolsListCount": 28,
         "toolsListMatches": true,
+        "toolsListMissing": [],
+        "toolsListUnexpected": [],
         "allHaveObjectSchema": true,
         "unknownTool": true,
         "unknownMethod": true,

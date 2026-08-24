@@ -23,6 +23,10 @@ in PRODUCT-REVIEW.md were one-off. Receipts that can rot are not receipts.
    any MCP response exceeds its budget, the session total exceeds 20k tokens, any response
    fails to parse, or warm refresh exceeds 2× the regex-extraction baseline. Thresholds live in
    `bench/budgets.json` — changing a promise is a reviewed diff, not drift.
+   `--check` is `--gate` without the write: the same enforcement, but `benchmarks.json` is left
+   untouched. Every run stamps fresh wall-clock timings, so a verification re-run of `--gate`
+   dirties the tracked receipt — which then gets committed as noise or discarded by hand, and both
+   are how a stale receipt slips through. Verification uses `--check`; publishing uses `--gate`.
 3. **Claims audit.** `check-consistency` gains a claims section: every `source` named in
    `site/data/product.json`'s ledger must exist under `bench/results/`, and the README's
    headline numbers block must cite files that exist. Missing source → consistency failure.
@@ -38,6 +42,9 @@ in PRODUCT-REVIEW.md were one-off. Receipts that can rot are not receipts.
 - **B3 given** a ledger claim whose source file is missing **when** `check-consistency` runs
   **then** it fails naming the claim (and passes on the real tree).
 - **B4 skip honesty:** with the corpus absent, the ts-engine section says skipped+reason.
+- **B5 given** `--check` **then** the budgets are enforced exactly as `--gate` (a lowered budget
+  still exits 1 naming it) **and** `benchmarks.json` is byte-identical afterwards, on both the
+  passing and the failing path; plain `--gate` demonstrably rewrites it.
 
 ## Done when
 Tests pass; suite + consistency green; the CI `bench` job passes on this branch; committed

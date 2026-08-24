@@ -7,10 +7,12 @@
 //      (and the real budgets pass).
 //   B3 given a ledger claim citing a missing source, then the claims audit fails naming it.
 //   B4 given no corpus, then the tsEngine section says skipped — with the reason, never silently.
+//   B5 given --check, then the budgets are still enforced but benchmarks.json is not rewritten
+//      (a verification re-run must not dirty the tracked receipt with fresh wall-clock timings).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runNode, tmpDir, cleanup, writeTree, readJSON, PLUGIN_ROOT } from './helpers.mjs';
 import { auditClaims, sourceExists } from '../scripts/lib/claims-check.mjs';
@@ -60,6 +62,37 @@ test('B2: a lowered budget fails the gate by name; real budgets pass', () => {
     assert.match(bad.r.stderr, /loadedOverlapFindingsMin/, 'loaded-corpus violation named too (finding 13b)');
     const good = runAll(dir, ['--gate']);
     assert.equal(good.r.status, 0, `real budgets hold (${good.r.stderr})`);
+  } finally { cleanup(dir); }
+});
+
+test('B5: --check enforces the budgets without rewriting the receipt', () => {
+  const dir = tmpDir('codeweb-benchall-');
+  try {
+    writeTree(dir, FIXTURE);
+    // A committed receipt stands in for bench/results/benchmarks.json; --check must leave it byte-identical.
+    const out = join(dir, 'benchmarks.json');
+    const sentinel = JSON.stringify({ ranAt: 'committed-receipt', pipeline: {} }, null, 2) + '\n';
+    writeFileSync(out, sentinel);
+    const run = (extra) => runNode(ALL, ['--target', join(dir, 'src'), '--ws', join(dir, 'ws'), '--corpus', join(dir, 'no-such-corpus'), '--out', out, ...extra]);
+
+    const checked = run(['--check']);
+    assert.equal(checked.r === undefined ? checked.status : checked.r.status, 0, checked.stderr);
+    assert.equal(readFileSync(out, 'utf8'), sentinel, '--check must not overwrite the committed receipt');
+    assert.match(checked.stdout, /did NOT write/, 'the no-write decision is stated, never silent');
+
+    // ...and it is a real gate: a budget lowered below reality still fails, and still writes nothing.
+    const tight = join(dir, 'tight.json');
+    writeFileSync(tight, JSON.stringify({ sessionTokensMax: 20000, perToolBytesMax: 10, warmRefreshFactorMax: 2.0, loadedOverlapFindingsMin: 99999 }));
+    const bad = runNode(ALL, ['--target', join(dir, 'src'), '--ws', join(dir, 'ws'), '--corpus', join(dir, 'no-such-corpus'), '--out', out, '--budgets', tight, '--check']);
+    assert.equal(bad.status, 1, '--check gates like --gate');
+    assert.match(bad.stderr, /perToolBytesMax/, 'violation named');
+    assert.equal(readFileSync(out, 'utf8'), sentinel, 'a failing --check writes nothing either');
+
+    // Contrast: plain --gate DOES publish, which is why verification uses --check.
+    const wrote = run(['--gate']);
+    assert.equal(wrote.status, 0, wrote.stderr);
+    assert.notEqual(readFileSync(out, 'utf8'), sentinel, '--gate rewrites the receipt with fresh timings');
+    assert.ok(existsSync(out));
   } finally { cleanup(dir); }
 });
 

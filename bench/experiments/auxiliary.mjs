@@ -200,11 +200,19 @@ function checkALang() {
 }
 
 // ============================================================================================
-// A-SELFCONTAINED — report.html embeds no external http(s)/CDN references.
-// Independent oracle: a from-scratch regex scan for network-fetching constructs over the SHIPPED
-// report.html (built from a real corpus graph AND a synthetic graph). We scan for: absolute
-// http(s):// URLs, protocol-relative //host refs in src/href, and known CDN hosts. Mirrors the
-// spirit of build-report.test.mjs (which proves no local-path leak); this proves no NET leak.
+// A-SELFCONTAINED — report.html FETCHES nothing from the network when opened.
+// Independent oracle: a from-scratch regex scan over the SHIPPED report.html (built from a real
+// corpus graph AND a synthetic graph). Mirrors the spirit of build-report.test.mjs (which proves no
+// local-path leak); this proves no NET leak.
+//
+// SCOPE — the claim is "the report renders offline", i.e. the browser issues no network request to
+// display it. That is a property of FETCHING constructs: src/href on script/link/img/iframe (and
+// friends), CSS @import, and the url() references a stylesheet resolves. It is NOT a property of
+// hyperlinks: an <a href="https://github.com/..."> is inert until a human clicks it, and the report
+// footer legitimately links the project, the gate docs, and sponsors. The earlier detector flagged
+// ANY absolute URL anywhere in the document, so it counted those footer links as "external refs"
+// and reported 6 offenders on a report that fetches nothing — measuring hyperlink presence while
+// claiming to measure network self-containment.
 // ============================================================================================
 function buildReportFrom(graphObj) {
   const dir = tmp('cw-aux-report-');
@@ -214,19 +222,28 @@ function buildReportFrom(graphObj) {
   const htmlPath = join(dir, 'report.html');
   return { dir, gp, htmlPath, ok: r.status === 0 && existsSync(htmlPath), r };
 }
-// Independent network-reference detector. Returns the list of offending matches.
+// Independent network-FETCH detector. Returns the list of offending constructs — each one a thing
+// the browser would request on load. A remote URL that is only a hyperlink target is not one.
+const REMOTE = String.raw`(?:https?:)?\/\/[^"'\s>]+`;
+// Elements whose src/href the browser resolves without any user action. `href` fetches for <link>
+// (stylesheets, fonts, preloads) but NOT for <a>, so the two are matched separately.
+const FETCHING_SRC_TAGS = 'script|img|iframe|frame|embed|source|track|audio|video|input';
 function externalRefs(html) {
   const offenders = [];
-  // 1) any absolute http/https URL anywhere
-  for (const m of html.matchAll(/https?:\/\/[^\s"'<>)]+/gi)) offenders.push(m[0]);
-  // 2) src=/href= pointing at a protocol-relative or absolute remote
-  for (const m of html.matchAll(/(?:src|href)\s*=\s*["']\s*(\/\/[^"']+|https?:[^"']+)["']/gi)) offenders.push(m[1]);
-  // 3) common CDN hostnames even if matched defensively
-  for (const m of html.matchAll(/\b(?:cdnjs\.cloudflare\.com|unpkg\.com|cdn\.jsdelivr\.net|fonts\.googleapis\.com|ajax\.googleapis\.com|code\.jquery\.com)\b/gi)) offenders.push(m[0]);
-  // 4) <link rel=...> to a remote stylesheet / font
-  for (const m of html.matchAll(/<link\b[^>]*\bhref\s*=\s*["'](https?:[^"']+|\/\/[^"']+)["'][^>]*>/gi)) offenders.push(m[1]);
-  // 5) @import url(remote)
-  for (const m of html.matchAll(/@import\s+url\(\s*["']?(https?:[^)"']+|\/\/[^)"']+)/gi)) offenders.push(m[1]);
+  const push = (v) => { if (v) offenders.push(v.trim()); };
+  // 1) src= on any element the browser fetches automatically
+  for (const m of html.matchAll(new RegExp(String.raw`<(?:${FETCHING_SRC_TAGS})\b[^>]*?\bsrc\s*=\s*["'](${REMOTE})["']`, 'gi'))) push(m[1]);
+  // 2) <link href> — stylesheets, fonts, icons, preload/prefetch: all fetched on load
+  for (const m of html.matchAll(new RegExp(String.raw`<link\b[^>]*?\bhref\s*=\s*["'](${REMOTE})["']`, 'gi'))) push(m[1]);
+  // 3) srcset / data-src / poster / xlink:href — the same fetch by another attribute name
+  for (const m of html.matchAll(new RegExp(String.raw`\b(?:srcset|data-src|poster|xlink:href)\s*=\s*["']\s*(${REMOTE})`, 'gi'))) push(m[1]);
+  // 4) CSS @import and url() — a stylesheet resolving a remote asset
+  for (const m of html.matchAll(new RegExp(String.raw`@import\s+(?:url\(\s*)?["']?(${REMOTE})`, 'gi'))) push(m[1]);
+  for (const m of html.matchAll(new RegExp(String.raw`url\(\s*["']?(${REMOTE})`, 'gi'))) push(m[1]);
+  // 5) script-initiated network calls — fetch()/XHR/EventSource/WebSocket/importScripts to a remote
+  for (const m of html.matchAll(new RegExp(String.raw`(?:fetch|importScripts)\s*\(\s*["'\`](${REMOTE})`, 'gi'))) push(m[1]);
+  for (const m of html.matchAll(new RegExp(String.raw`\.open\s*\(\s*["'][A-Z]+["']\s*,\s*["'\`](${REMOTE})`, 'gi'))) push(m[1]);
+  for (const m of html.matchAll(new RegExp(String.raw`new\s+(?:WebSocket|EventSource|Worker)\s*\(\s*["'\`]((?:wss?:|https?:)?\/\/[^"'\`\s]+)`, 'gi'))) push(m[1]);
   return [...new Set(offenders)];
 }
 
@@ -256,20 +273,34 @@ function checkASelfContained(realGraph) {
     } finally { rmrf(built.dir); }
   }
 
-  // ABLE-TO-FAIL probe: run the detector on a doctored HTML that DOES contain a CDN <script>.
+  // ABLE-TO-FAIL probe: a doctored page carrying every fetch shape must trip the detector...
   const dirty = '<html><head><script src="https://cdn.jsdelivr.net/npm/chart.js"></script>' +
-    '<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Inter"></head><body>x</body></html>';
+    '<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Inter">' +
+    '<style>@import url("https://unpkg.com/x.css"); body { background: url(//cdn.example.com/bg.png); }</style>' +
+    '</head><body><img src="https://cdnjs.cloudflare.com/a.png">' +
+    '<script>fetch("https://api.example.com/x"); new WebSocket("wss://example.com/s");</script></body></html>';
   const detected = externalRefs(dirty);
-  const canFail = detected.length >= 2; // the detector catches the planted refs
+  const FETCH_SHAPES = 7; // script src, link href, @import, css url(), img src, fetch(), WebSocket
+  const catchesFetches = detected.length >= FETCH_SHAPES;
+
+  // ...and a page whose ONLY remote URLs are hyperlinks must NOT trip it. Without this half the
+  // detector could pass by flagging everything, which is the defect being repaired: the report
+  // footer's project/docs/sponsor links are inert until clicked and are not network references.
+  const linksOnly = '<html><body><p>See <a href="https://github.com/GhostlyGawd/codeweb">codeweb</a> ' +
+    'and <a href="https://example.com/docs" target="_blank">the gate docs</a>. ' +
+    'Plain text mentioning https://example.org/ too.</p></body></html>';
+  const linkOffenders = externalRefs(linksOnly);
+  const ignoresHyperlinks = linkOffenders.length === 0;
+  const canFail = catchesFetches && ignoresHyperlinks;
 
   record('A-SELFCONTAINED', {
-    metric: 'external network references in shipped report.html',
+    metric: 'network-fetching references in shipped report.html',
     value: Object.values(perCase).reduce((s, v) => s + (v.offenders ? v.offenders.length : 0), 0),
     passed: allClean && canFail,
-    criterion: 'zero external http(s)/CDN refs on synthetic+real reports; detector trips on a doctored page',
-    notes: canFail ? '' : 'ABLE-TO-FAIL probe did not trip — detector is vacuous',
+    criterion: 'zero fetching refs (src/href on fetching elements, @import/url(), script-initiated requests) on synthetic+real reports; detector trips on a doctored page AND ignores plain hyperlinks',
+    notes: canFail ? '' : `ABLE-TO-FAIL probe did not trip — detector is ${catchesFetches ? 'over-broad (flagged a hyperlink-only page)' : 'vacuous (missed a planted fetch)'}`,
   });
-  return { perCase, canFail };
+  return { perCase, canFail, probe: { catchesFetches, detectedOnDoctored: detected.length, ignoresHyperlinks, hyperlinkOffenders: linkOffenders } };
 }
 
 // ============================================================================================
@@ -902,8 +933,16 @@ function checkASupp() {
 // compare the server's content[0].text to the SHIPPED CLI invocation on the same graph+args.
 // DISCLOSURE: both sides are codeweb surfaces, so this is a cross-INTERFACE parity + protocol check,
 // not an external-oracle correctness check. Mirrors tests/mcp.test.mjs (which pins the parity for a
-// subset); here we cover ALL 20 tools. The mapping (tool -> CLI argv) is re-derived INDEPENDENTLY
-// below from each tool's documented contract — we do NOT import mcp-server's TOOLS table.
+// subset); here we cover EVERY shipped tool. The mapping (tool -> CLI argv) is re-derived
+// INDEPENDENTLY below from each tool's documented contract — we do NOT import mcp-server's TOOLS
+// table, because a table copied from the thing under test cannot detect that thing drifting.
+//
+// The cost of that independence is that the table is HAND-MAINTAINED and goes stale when a tool
+// ships: `toolsListMatches` compares the server's tools/list against this table plus NON_PARITY_
+// TOOLS, so a missing entry reads as a conformance failure. `conf.toolsListMissing` /
+// `toolsListUnexpected` below name the difference so the next reader sees "the table is short one
+// tool", not a bare false. (This is exactly how the 27-vs-28 gap presented after codeweb_dependents
+// shipped.)
 // ============================================================================================
 function rpc(messages) {
   const input = messages.map((m) => JSON.stringify(m)).join('\n') + '\n';
@@ -919,6 +958,7 @@ const callTool = (id, name, args) => ({ jsonrpc: '2.0', id, method: 'tools/call'
 function cliEquivalents() {
   return {
     codeweb_callers: ['query.mjs', (a) => [a.graph, '--callers', a.symbol]],
+    codeweb_dependents: ['query.mjs', (a) => [a.graph, '--dependents', a.symbol, ...(a.limit ? ['--limit', String(a.limit)] : [])]],
     codeweb_callees: ['query.mjs', (a) => [a.graph, '--callees', a.symbol]],
     codeweb_impact: ['query.mjs', (a) => [a.graph, '--impact', a.symbol]],
     codeweb_cycles: ['query.mjs', (a) => [a.graph, '--cycles']],
@@ -982,6 +1022,9 @@ function checkAMcp(realGraphForRefresh) {
   const copyGraph = (tag) => { const p = join(ws, `g-${tag}.json`); writeFileSync(p, JSON.stringify(G)); return p; };
   const argsFor = {
     codeweb_callers: { graph: GP, symbol: 'util.js:helper' },
+    // explicit on BOTH surfaces: MCP injects limit 20, and under a budget `dependents` deliberately
+    // collapses byKind to counts, so an unbudgeted CLI call would compare two different shapes
+    codeweb_dependents: { graph: GP, symbol: 'util.js:helper', limit: 20 },
     codeweb_callees: { graph: GP, symbol: 'main.js:main' },
     codeweb_impact: { graph: GP, symbol: 'util.js:helper' },
     codeweb_cycles: { graph: GP },
@@ -1025,7 +1068,12 @@ function checkAMcp(realGraphForRefresh) {
       const list = rpc([INIT, { jsonrpc: '2.0', id: 2, method: 'tools/list' }]).byId.get(2)?.result?.tools || [];
       const listed = list.map((t) => t.name).sort();
       conf.toolsListCount = listed.length;
-      conf.toolsListMatches = setEq(listed, [...toolNames, ...NON_PARITY_TOOLS]) && listed.length === toolNames.length + NON_PARITY_TOOLS.length;
+      const expectedTools = [...toolNames, ...NON_PARITY_TOOLS];
+      conf.toolsListMatches = setEq(listed, expectedTools) && listed.length === expectedTools.length;
+      // Name the difference, so a stale hand-maintained table is legible as a table problem rather
+      // than an unexplained conformance failure.
+      conf.toolsListMissing = listed.filter((n) => !expectedTools.includes(n));      // shipped, absent from the table
+      conf.toolsListUnexpected = expectedTools.filter((n) => !listed.includes(n));   // in the table, no longer shipped
       conf.allHaveObjectSchema = list.every((t) => t.inputSchema?.type === 'object' && t.description);
 
       // error codes: unknown tool -> -32602; unknown method -> -32601; bad JSON -> -32700; missing arg -> isError
@@ -1044,7 +1092,9 @@ function checkAMcp(realGraphForRefresh) {
       const note = rpc([INIT, { jsonrpc: '2.0', method: 'notifications/initialized' }, { jsonrpc: '2.0', id: 9, method: 'tools/list' }]);
       conf.notificationNoReply = !!note.byId.get(9) && note.responses.length === 2 && note.responses.every((r) => r.id !== undefined && r.id !== null);
     }
-    const confOk = Object.values(conf).every((v) => v === true || typeof v === 'number');
+    // Every recorded conformance value must be affirmative: booleans true, counts numeric, and the
+    // two drift-diagnostic lists empty.
+    const confOk = Object.values(conf).every((v) => (Array.isArray(v) ? v.length === 0 : v === true || typeof v === 'number'));
     const confAllTrue = ['pureStdout', 'initialize', 'exitsClean', 'toolsListMatches', 'allHaveObjectSchema', 'unknownTool', 'unknownMethod', 'parseError', 'missingArgIsError', 'notificationNoReply'].every((k) => conf[k] === true);
 
     // ---- per-tool parity ----

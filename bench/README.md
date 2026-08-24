@@ -10,10 +10,11 @@ and the README's numbers.
 | Path | What it is |
 |---|---|
 | `run-all.mjs` | Re-runs every deterministic harness and re-derives every number (`node bench/run-all.mjs`) |
+| `all.mjs` | The standing budget gate behind the published promises (`npm run bench:all -- --gate` to publish new timings, `-- --check` to enforce them without rewriting the receipt) |
 | `experiments/` | The instruments: oracle A/B, determinism, detection accuracy, edit safety, performance, the efficiency pilot, the agent A/Bs, and the replay benchmark (`replay-mine.mjs` → `replay-ab.workflow.js` → `replay-analyze.mjs`) |
 | `results/` | Frozen outputs, committed verbatim — including the nulls and one discarded pilot (`replay-ab-pilot.json`, kept with its flaws documented) |
 | `lib/` | Shared oracles + statistics used by the harnesses (self-contained; no runtime deps) |
-| `corpus/` + `corpus.manifest.json` | SHA-pinned real-repo corpus, cloned by `corpus/clone-corpus.sh` (large; git-ignored) |
+| `corpus/` + `corpus.manifest.json` | SHA-pinned real-repo corpus, cloned by `corpus/clone-corpus.sh` (large; git-ignored). The manifest is the source of truth: the script checks out the recorded SHAs and only rewrites it when pinning a new repo or when passed `--repin` |
 
 The user-facing one-command benchmark (`npm run bench -- <graph.json>`) lives in
 `scripts/bench.mjs` and shares its arms/oracle/scoring with the frozen oracle A/B here —

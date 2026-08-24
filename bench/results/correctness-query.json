@@ -1,6 +1,6 @@
 {
   "cluster": "C2-query-correctness",
-  "commit": "46cf41d31a1857b0db7829d7f9cabda162b9a931",
+  "commit": "fcc685002fae3c9a3540603d4066be85fe8b0ddc",
   "seed": 12639938,
   "cliSeed": 20759,
   "T": 10000,
@@ -8,7 +8,7 @@
   "counts": {
     "inProcessRandomGraphs": 10000,
     "inProcessRealRepoGraphs": 6,
-    "inProcessPerSymbolComparisons": 119782,
+    "inProcessPerSymbolComparisons": 121241,
     "cliGraphComparisons": 206,
     "cliPerSymbolComparisons": 672,
     "cliCalls": 3566,
@@ -24,8 +24,8 @@
     {
       "name": "axios",
       "extracted": true,
-      "nodes": 859,
-      "edges": 814,
+      "nodes": 831,
+      "edges": 1029,
       "cyclesLib": 2,
       "cyclesOracle": 2,
       "newDisagreements": {
@@ -39,10 +39,10 @@
     {
       "name": "express",
       "extracted": true,
-      "nodes": 1882,
-      "edges": 296,
-      "cyclesLib": 2,
-      "cyclesOracle": 2,
+      "nodes": 238,
+      "edges": 130,
+      "cyclesLib": 1,
+      "cyclesOracle": 1,
       "newDisagreements": {
         "H3": 0,
         "H4": 0,
@@ -54,10 +54,10 @@
     {
       "name": "zod",
       "extracted": true,
-      "nodes": 1408,
-      "edges": 838,
-      "cyclesLib": 3,
-      "cyclesOracle": 3,
+      "nodes": 1388,
+      "edges": 1616,
+      "cyclesLib": 1,
+      "cyclesOracle": 1,
       "newDisagreements": {
         "H3": 0,
         "H4": 0,
@@ -69,10 +69,10 @@
     {
       "name": "flask",
       "extracted": true,
-      "nodes": 1656,
-      "edges": 607,
-      "cyclesLib": 2,
-      "cyclesOracle": 2,
+      "nodes": 1668,
+      "edges": 1074,
+      "cyclesLib": 1,
+      "cyclesOracle": 1,
       "newDisagreements": {
         "H3": 0,
         "H4": 0,
@@ -84,10 +84,10 @@
     {
       "name": "ripgrep",
       "extracted": true,
-      "nodes": 3201,
-      "edges": 1752,
-      "cyclesLib": 1,
-      "cyclesOracle": 1,
+      "nodes": 3215,
+      "edges": 1810,
+      "cyclesLib": 6,
+      "cyclesOracle": 6,
       "newDisagreements": {
         "H3": 0,
         "H4": 0,
@@ -100,9 +100,9 @@
       "name": "gorilla-mux",
       "extracted": true,
       "nodes": 261,
-      "edges": 280,
-      "cyclesLib": 1,
-      "cyclesOracle": 1,
+      "edges": 282,
+      "cyclesLib": 0,
+      "cyclesOracle": 0,
       "newDisagreements": {
         "H3": 0,
         "H4": 0,
@@ -145,9 +145,9 @@
       "metric": "impact == independent reverse-reachability BFS (call+inherit)",
       "scope": "symbol",
       "value": 0,
-      "comparisons": 120454,
+      "comparisons": 121913,
       "ci": {
-        "ruleOfThreeUpper95": 0.00002491,
+        "ruleOfThreeUpper95": 0.00002461,
         "note": "95% upper bound on true disagreement rate given 0 observed (Rule of Three: 3/n)"
       },
       "passed": true,
@@ -164,9 +164,9 @@
       "metric": "callers/callees == independent raw call-edge neighbor sets",
       "scope": "symbol",
       "value": 0,
-      "comparisons": 120454,
+      "comparisons": 121913,
       "ci": {
-        "ruleOfThreeUpper95": 0.00002491,
+        "ruleOfThreeUpper95": 0.00002461,
         "note": "95% upper bound on true disagreement rate given 0 observed (Rule of Three: 3/n)"
       },
       "passed": true,
@@ -183,9 +183,9 @@
       "metric": "query --tests == independent test-edge in-neighbor scan",
       "scope": "symbol",
       "value": 0,
-      "comparisons": 120454,
+      "comparisons": 121913,
       "ci": {
-        "ruleOfThreeUpper95": 0.00002491,
+        "ruleOfThreeUpper95": 0.00002461,
         "note": "95% upper bound on true disagreement rate given 0 observed (Rule of Three: 3/n)"
       },
       "passed": true,
@@ -202,9 +202,9 @@
       "metric": "context-pack window == exact H4 impact set (no omissions)",
       "scope": "symbol",
       "value": 0,
-      "comparisons": 120454,
+      "comparisons": 121913,
       "ci": {
-        "ruleOfThreeUpper95": 0.00002491,
+        "ruleOfThreeUpper95": 0.00002461,
         "note": "95% upper bound on true disagreement rate given 0 observed (Rule of Three: 3/n)"
       },
       "passed": true,

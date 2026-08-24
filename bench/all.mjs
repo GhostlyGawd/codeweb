@@ -6,7 +6,14 @@
 // removed 2026-07-27, operator-ruled: it was write-only — nothing on the site ever read it.)
 //
 //   node bench/all.mjs [--target <dir>] [--ws <dir>] [--corpus <dir>] [--budgets <file>]
-//                      [--out <file>] [--gate]
+//                      [--out <file>] [--gate] [--check]
+//
+// --check = --gate WITHOUT the write: every promise is still measured and enforced, but
+// benchmarks.json is left alone. Every run records fresh wall-clock timings, so a verification
+// re-run of a plain `--gate` leaves the tracked receipt modified and the tree dirty — which either
+// gets committed as timing noise or discarded by hand, and both are how a stale receipt slips
+// through. Use --check when the question is "do the promises still hold", --gate when the intent is
+// to publish new numbers.
 //
 // Sections: pipeline (cold map + no-change rerun + regex extraction baseline), session (a
 // representative 12-call MCP session — bytes, ≈tokens, JSON validity), toolBudgets (max response
@@ -20,7 +27,7 @@ import { tmpdir } from 'node:os';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
-const opt = { target: ROOT, ws: null, corpus: join(ROOT, 'bench', 'corpus', 'axios'), budgets: join(ROOT, 'bench', 'budgets.json'), out: join(ROOT, 'bench', 'results', 'benchmarks.json'), gate: false };
+const opt = { target: ROOT, ws: null, corpus: join(ROOT, 'bench', 'corpus', 'axios'), budgets: join(ROOT, 'bench', 'budgets.json'), out: join(ROOT, 'bench', 'results', 'benchmarks.json'), gate: false, check: false };
 for (let i = 0; i < argv.length; i++) {
   const t = argv[i];
   if (t === '--target') opt.target = resolve(argv[++i]);
@@ -29,6 +36,7 @@ for (let i = 0; i < argv.length; i++) {
   else if (t === '--budgets') opt.budgets = resolve(argv[++i]);
   else if (t === '--out') opt.out = resolve(argv[++i]);
   else if (t === '--gate') opt.gate = true;
+  else if (t === '--check') { opt.check = true; opt.gate = true; }
 }
 const ws = opt.ws || mkdtempSync(join(tmpdir(), 'codeweb-benchws-'));
 const budgets = JSON.parse(readFileSync(opt.budgets, 'utf8'));
@@ -225,9 +233,13 @@ else {
 // ---------------------------------------------------------------- write + gate
 const payload = { ranAt: new Date().toISOString(), node: process.version, budgets, pipeline, session, toolBudgets, advisors, loaded, cyclic, tsEngine };
 const json = JSON.stringify(payload, null, 2) + '\n';
-mkdirSync(dirname(opt.out), { recursive: true }); writeFileSync(opt.out, json);
+if (opt.check) {
+  console.log(`[bench:all] --check: measured but did NOT write ${opt.out}`);
+} else {
+  mkdirSync(dirname(opt.out), { recursive: true }); writeFileSync(opt.out, json);
+}
 console.log(`[bench:all] pipeline cold ${pipeline.coldMs}ms / warm ${pipeline.warmMs}ms (reused: ${pipeline.stagesReused}) · session ${session.totalTokensApprox} tokens over ${calls.length} calls (valid: ${session.allValidJson}) · ts-engine ${tsEngine.skipped ? 'SKIPPED' : tsEngine.factor + 'x'}`);
-console.log(`[bench:all] wrote ${opt.out}`);
+if (!opt.check) console.log(`[bench:all] wrote ${opt.out}`);
 
 if (opt.gate) {
   const violations = [];

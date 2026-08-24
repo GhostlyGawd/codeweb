@@ -13,8 +13,14 @@ import { resolve } from 'node:path';
 //
 // Definitions, read off the graph-ops SOURCE (not its stale "call+import" comments):
 //   * file-level cycle  = strongly-connected component of size >= 2 in the FILE graph whose directed
-//     edges are { fileOf(e.from) -> fileOf(e.to) } for every edge of kind call | import | inherit,
-//     dropping intra-file edges (fileOf(from) === fileOf(to)). (graph-ops.fileCycles, lines ~134-179.)
+//     edges are { fileOf(e.from) -> fileOf(e.to) } for every edge whose kind is in the shipped
+//     CYCLE_KINDS set — call | import | inherit | ref — dropping intra-file edges
+//     (fileOf(from) === fileOf(to)). (graph-ops.fileCycles + the CYCLE_KINDS export it reads.)
+//     `ref` belongs in the set by DELIBERATE product decision (graph-ops.mjs, commit bfc6b92): a
+//     file pair coupled only by a type/class reference is still a real file-level dependency cycle,
+//     and break-cycles' witness accounting counts the same kinds. Replicating the definition is the
+//     oracle's job; an oracle that walks a NARROWER edge set does not find codeweb wrong, it just
+//     measures a different question and reports the gap as a false disagreement.
 //   * impact(seeds)     = transitive REVERSE reachability over call-in AND inherit-in edges
 //     (changing a node affects what CALLS it and what INHERITS from it), excluding the seeds
 //     themselves. (graph-ops.impactOf, lines ~89-103.)
@@ -24,6 +30,12 @@ import { resolve } from 'node:path';
 // non-zero on any mismatch — the oracle cannot silently drift.
 
 const asArray = (x) => (Array.isArray(x) ? x : []);
+
+// The file-cycle edge kinds, re-stated here from the shipped DEFINITION rather than imported from
+// graph-ops.CYCLE_KINDS — importing the constant would let a drift in it move the oracle's answer
+// in lockstep, which is precisely what the oracle exists to catch. The self-test below pins the two
+// sets equal, so a deliberate product change fails loudly here instead of drifting silently.
+const CYCLE_EDGE_KINDS = new Set(['call', 'import', 'inherit', 'ref']);
 
 // File of a node, from its `file` field (matches graph-ops, which keys on n.file, NOT the id prefix).
 function fileOfMap(graph) {
@@ -46,7 +58,7 @@ export function oracleFileCycles(graph) {
   const files = new Set();
   const addEdge = (adj, a, b) => { if (!adj.has(a)) adj.set(a, new Set()); adj.get(a).add(b); };
   for (const e of asArray(graph.edges)) {
-    if (e.kind !== 'call' && e.kind !== 'import' && e.kind !== 'inherit') continue;
+    if (!CYCLE_EDGE_KINDS.has(e.kind)) continue;
     const f = fileOf.get(e.from), t = fileOf.get(e.to);
     if (!f || !t || f === t) continue; // intra-file and edges to unknown nodes are ignored
     files.add(f); files.add(t);
@@ -192,6 +204,33 @@ if (isMain) {
     ],
   };
   eq(oracleFileCycles(g2), [['x.js', 'y.js']], 'cycle2 self-file edge ignored, x<->y kept');
+
+  // --- Tiny graph 2b: a cycle closed ONLY by a `ref` edge counts (the kind that used to be
+  // dropped here while the shipped fileCycles walked it). Falsifiable control: removing the ref
+  // leaves no cycle, so this case cannot pass vacuously.
+  const g2ref = {
+    nodes: [
+      { id: 'u.js:fu', label: 'fu', file: 'u.js' },
+      { id: 'v.js:Cv', label: 'Cv', file: 'v.js' },
+    ],
+    edges: [
+      { from: 'u.js:fu', to: 'v.js:Cv', kind: 'call' },
+      { from: 'v.js:Cv', to: 'u.js:fu', kind: 'ref' }, // closes the cycle via a type/class reference
+    ],
+  };
+  eq(oracleFileCycles(g2ref), [['u.js', 'v.js']], 'cycle2b ref edge closes a file cycle (shipped CYCLE_KINDS)');
+  eq(oracleFileCycles({ nodes: g2ref.nodes, edges: g2ref.edges.filter((e) => e.kind !== 'ref') }), [],
+    'cycle2b-broken: without the ref edge there is NO cycle (falsifiable)');
+
+  // The oracle re-states the shipped edge set rather than importing it; pin the two equal so a
+  // deliberate CYCLE_KINDS change fails HERE (a visible, decided update) instead of silently
+  // re-opening the scope gap that made H3 report false disagreements.
+  {
+    const { CYCLE_KINDS } = await import('../../scripts/lib/graph-ops.mjs');
+    const shipped = [...CYCLE_KINDS].sort();
+    const here = [...CYCLE_EDGE_KINDS].sort();
+    eq(here, shipped, 'oracle cycle-edge kinds match the shipped CYCLE_KINDS definition');
+  }
 
   // --- Tiny graph 3: a self-CALL (recursion) must not hang impact BFS, and the seed is excluded. -
   const g3 = {

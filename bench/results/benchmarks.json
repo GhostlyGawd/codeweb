@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-08-18T14:46:05.002Z",
+  "ranAt": "2026-08-24T21:41:54.703Z",
   "node": "v26.7.0",
   "budgets": {
     "comment": "Spec C (docs/specs/bench-all-ci-gates.md): the promises CI holds bench:all --gate to. Changing a number here is changing a public promise — it belongs in a reviewed diff, never in drift. Factors are vs the regex-extract baseline on the same runner (portable across machine speeds); observed self-map values at set-time are noted so headroom stays honest.",
@@ -29,18 +29,18 @@
   },
   "pipeline": {
     "target": "codeweb (self)",
-    "symbols": 1570,
-    "edges": 4996,
-    "coldMs": 1197,
-    "warmMs": 147,
+    "symbols": 1573,
+    "edges": 5001,
+    "coldMs": 1178,
+    "warmMs": 143,
     "stagesReused": true,
-    "regexExtractBaselineMs": 248,
+    "regexExtractBaselineMs": 244,
     "stageMs": {
-      "extract": 811,
+      "extract": 801,
       "cluster": 48,
-      "overlap": 54,
-      "optimize": 44,
-      "report": 177
+      "overlap": 55,
+      "optimize": 47,
+      "report": 169
     },
     "stageFactorsVsRegexBaseline": {
       "extract": null,
@@ -50,7 +50,7 @@
       "report": null
     },
     "warmFactorVsRegexBaseline": null,
-    "warmFactorNote": "target too small to measure (baseline 248ms < 300ms floor) — the factor gates only at repo scale"
+    "warmFactorNote": "target too small to measure (baseline 244ms < 300ms floor) — the factor gates only at repo scale"
   },
   "session": {
     "calls": [
@@ -74,14 +74,14 @@
       },
       {
         "tool": "codeweb_context",
-        "bytes": 9425,
-        "tokensApprox": 2356,
+        "bytes": 8941,
+        "tokensApprox": 2235,
         "ok": true
       },
       {
         "tool": "codeweb_impact",
-        "bytes": 1490,
-        "tokensApprox": 373,
+        "bytes": 1503,
+        "tokensApprox": 376,
         "ok": true
       },
       {
@@ -92,7 +92,7 @@
       },
       {
         "tool": "codeweb_callers",
-        "bytes": 1154,
+        "bytes": 1156,
         "tokensApprox": 289,
         "ok": true
       },
@@ -127,8 +127,8 @@
         "ok": true
       }
     ],
-    "totalBytes": 25664,
-    "totalTokensApprox": 6418,
+    "totalBytes": 25195,
+    "totalTokensApprox": 6300,
     "allValidJson": true,
     "toolsListBytes": 22898,
     "toolsListTokensApprox": 5725
@@ -138,9 +138,9 @@
       "codeweb_brief": 2691,
       "codeweb_find": 2517,
       "codeweb_explain": 1472,
-      "codeweb_context": 9425,
-      "codeweb_impact": 1490,
-      "codeweb_callers": 1154,
+      "codeweb_context": 8941,
+      "codeweb_impact": 1503,
+      "codeweb_callers": 1156,
       "codeweb_cycles": 170,
       "codeweb_hotspots": 3467,
       "codeweb_refresh": 429,
@@ -150,32 +150,32 @@
   },
   "advisors": {
     "risk": {
-      "ms": 47,
+      "ms": 49,
       "ok": true,
       "factorVsRegexBaseline": null
     },
     "deadcode": {
-      "ms": 42,
+      "ms": 45,
       "ok": true,
       "factorVsRegexBaseline": null
     },
     "hotspots": {
-      "ms": 42,
+      "ms": 45,
       "ok": true,
       "factorVsRegexBaseline": null
     },
     "campaign": {
-      "ms": 93,
+      "ms": 99,
       "ok": true,
       "factorVsRegexBaseline": null
     },
     "readingOrder": {
-      "ms": 46,
+      "ms": 44,
       "ok": true,
       "factorVsRegexBaseline": null
     },
     "breakCycles": {
-      "ms": 42,
+      "ms": 41,
       "ok": true,
       "factorVsRegexBaseline": null
     }
@@ -190,13 +190,13 @@
     "overlapFindings": 31,
     "lshEngaged": true,
     "stageMs": {
-      "extract": 243,
-      "cluster": 44,
-      "overlap": 109,
-      "optimize": 46,
-      "report": 106
+      "extract": 247,
+      "cluster": 48,
+      "overlap": 103,
+      "optimize": 49,
+      "report": 107
     },
-    "mapMs": 605,
+    "mapMs": 611,
     "readingOrderMs": 47
   },
   "cyclic": {
@@ -205,10 +205,10 @@
     "extraPairDeps": 240,
     "fns": 2460,
     "cycles": 1,
-    "breakCyclesMs": 80,
+    "breakCyclesMs": 76,
     "breakCyclesFactorVsRegexBaseline": null,
-    "campaignMs": 128,
-    "factorNote": "baseline 248ms < 300ms floor — factor gates only at repo scale"
+    "campaignMs": 132,
+    "factorNote": "baseline 244ms < 300ms floor — factor gates only at repo scale"
   },
   "tsEngine": {
     "bench": "ts-engine (cold extraction, regex vs tree-sitter tier)",
@@ -216,11 +216,11 @@
     "reps": 3,
     "symbols": 942,
     "withComplexity": 739,
-    "regexMs": 149,
-    "treeSitterMs": 408,
-    "overheadMs": 259,
-    "factor": 2.74,
-    "perSymbolMs": 0.407,
+    "regexMs": 152,
+    "treeSitterMs": 411,
+    "overheadMs": 260,
+    "factor": 2.71,
+    "perSymbolMs": 0.408,
     "engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)"
   }
 }

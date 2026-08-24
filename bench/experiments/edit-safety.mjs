@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// C3 — EDIT SAFETY. Pre-registered hypotheses H5, H6, H7, H8 + auxiliary A-CUT, A-READ.
+// C3 — EDIT SAFETY. Pre-registered hypotheses H5, H6, H8 + auxiliary A-CUT, A-READ.
+// (H7 — shard answer-preservation — is RETIRED with the feature it measured; see H7_RETIRED below.)
 // Standalone: `node bench/experiments/edit-safety.mjs` runs every hypothesis end-to-end, prints one
 // PASS/FAIL line per hypothesis, writes bench/results/edit-safety.json, and exits non-zero if ANY
 // hypothesis misses its pre-registered criterion (so bench/run-all.mjs can gate on it).
@@ -20,7 +21,7 @@
 //     the pre-registered pass bar for all six. We never tune to pass.
 //
 // CORRECTNESS MASS runs IN-PROCESS against the shipped lib functions (graph-ops.applyEdit /
-// structuralRegressions, lib/campaign.planCampaign, lib/shards, lib/reading-order, break-cycles'
+// structuralRegressions, lib/campaign.planCampaign, lib/reading-order, break-cycles'
 // verified cuts) at the pre-registered T. We SEPARATELY confirm the shipped CLIs (simulate-edit.mjs,
 // codemod.mjs --write) agree on a smaller spawned sample, so the proof still covers the real artifact
 // (§8: spawning a CLI 10000x is too slow). The lib functions ARE what the CLIs call (one truth — see
@@ -35,10 +36,8 @@ import { fileURLToPath } from 'node:url';
 // ---- shipped lib under test (the code the CLIs call — "one truth", per each script's header) -------
 import {
   normalizeGraph, applyEdit, structuralRegressions, buildIndex,
-  callersOf, calleesOf, impactOf, resolveSymbol,
 } from '../../scripts/lib/graph-ops.mjs';
 import { planCampaign } from '../../scripts/lib/campaign.mjs';
-import { splitGraph, mergeShards, shardCallersOf, shardCalleesOf, shardImpactOf } from '../../scripts/lib/shards.mjs';
 import { readingOrder } from '../../scripts/lib/reading-order.mjs';
 // second-opinion namespace import of codeweb's OWN cycle impl — used ONLY in the real-corpus
 // cross-check to triangulate the inline Kosaraju oracle; NEVER the oracle for H5-H8 (those use the
@@ -59,18 +58,28 @@ const RESULTS = resolve(HERE, '..', 'results', 'edit-safety.json');
 // INDEPENDENT ORACLES (inline; written here; import nothing from codeweb's algorithms)
 // =================================================================================================
 
-// The edge kinds that constitute a file-level structural dependency. Matches codeweb's DEFINITION
-// (call|import|inherit) — re-stated here in our own code so the oracle is independent of fileCycles.
+// The edge kinds that build the FILE-CYCLE graph. Matches codeweb's shipped definition — the
+// CYCLE_KINDS set in scripts/lib/graph-ops.mjs, call|import|inherit|ref — re-stated here in our own
+// code so the oracle stays independent of fileCycles. `ref` is in the set by deliberate product
+// decision (bfc6b92): a pair of files coupled only by a type/class reference is still a real file
+// dependency cycle. Walking a narrower set here does not catch codeweb being wrong; it measures a
+// different question and reports the difference as a false disagreement (that is exactly what the
+// real-corpus cross-check below did while this harness was unrunnable).
+const CYCLE_EDGE_KINDS = new Set(['call', 'import', 'inherit', 'ref']);
+
+// Reachability kinds for the ORPHAN heuristic that feeds synthAdvisors — a separate question from
+// cycles: "does anything structurally depend on this symbol". Deliberately excludes `ref`, matching
+// how the shipped deadcode advisor decides a symbol is unreferenced.
 const STRUCTURAL_KINDS = new Set(['call', 'import', 'inherit']);
 
-// Build the file-level dependency digraph: an edge file F -> file G iff some structural symbol edge
+// Build the file-level dependency digraph: an edge file F -> file G iff some cycle-kind symbol edge
 // goes from a symbol in F to a symbol in G (F != G). Returns { nodes:Set<file>, adj:Map<file,Set> }.
 function fileDigraph(graph) {
   const fileOf = new Map(graph.nodes.map((n) => [n.id, n.file]));
   const nodes = new Set();
   const adj = new Map();
   for (const e of graph.edges) {
-    if (!STRUCTURAL_KINDS.has(e.kind)) continue;
+    if (!CYCLE_EDGE_KINDS.has(e.kind)) continue;
     const f = fileOf.get(e.from), t = fileOf.get(e.to);
     if (f == null || t == null || f === t) continue;
     nodes.add(f); nodes.add(t);
@@ -167,26 +176,9 @@ function oracleVerdict(before, op) {
   return { newCycles, lostCallers, ok: newCycles.length === 0 && lostCallers.length === 0 };
 }
 
-// INDEPENDENT direct caller / callee / transitive-impact oracles over raw edges (for H7 parity).
-function rawCallersOf(graph, id) {
-  return [...new Set(graph.edges.filter((e) => e.kind === 'call' && e.to === id).map((e) => e.from))].sort();
-}
-function rawCalleesOf(graph, id) {
-  return [...new Set(graph.edges.filter((e) => e.kind === 'call' && e.from === id).map((e) => e.to))].sort();
-}
-// Transitive reverse-reachability over call + inherit edges (codeweb's impact DEFINITION), as a plain
-// BFS over an independently-built reverse adjacency. Excludes the seed itself.
-function impactOracle(graph, id) {
-  const rev = new Map(); // node -> set of upstream (callers + subclasses)
-  for (const e of graph.edges) {
-    if (e.kind !== 'call' && e.kind !== 'inherit') continue;
-    if (!rev.has(e.to)) rev.set(e.to, new Set());
-    rev.get(e.to).add(e.from);
-  }
-  const seen = new Set([id]); const q = [id];
-  while (q.length) { const cur = q.shift(); for (const up of (rev.get(cur) || [])) if (!seen.has(up)) { seen.add(up); q.push(up); } }
-  return [...seen].filter((x) => x !== id).sort();
-}
+// (The raw caller/callee/impact oracles that lived here served H7 only, and went with it. The
+// equivalent independent derivations for the query surfaces live in bench/lib/oracles.mjs, which
+// the C2 correctness-query harness runs at full scale.)
 
 // =================================================================================================
 // deep-equality helper (order-insensitive structural compare via JSON of sorted forms)
@@ -337,47 +329,26 @@ function H6(T) {
   return { violations, examples, T, prefixesChecked, mutatingStepsSeen, plansWithMutations };
 }
 
-// ---- H7 — shard answer-preservation -------------------------------------------------------------
-// A query over sharded sub-graphs (lib/shards) == the same query over the whole graph. We compare the
-// SHARD answer against an INDEPENDENT raw-edge oracle (NOT codeweb's callersOf/impactOf), for
-// callers/callees/impact of every symbol, over T >= 2000 random graphs. (We additionally record that
-// the monolith graph-ops agrees with the oracle, so the lock is anchored on both sides.)
+// ---- H7 — RETIRED with the feature it measured --------------------------------------------------
+// H7 was "a query over sharded sub-graphs (lib/shards) == the same query over the whole graph".
+// `scripts/lib/shards.mjs` was DELETED by an operator-recorded decision — bench/results/
+// scale-typescript.json -> previous.shardsDecision, "DELETE lib/shards.mjs": at 16k symbols the
+// monolithic graph loads in ~200ms and the answer-preserving sharding contract was never wired to a
+// CLI or MCP surface, so the measured need did not exist. The harness kept importing the deleted
+// module and crashed on load, taking the other five hypotheses down with it.
 //
-// randomGraph spreads nodes over d0..d3/m.js, so sharding-by-dir yields several shards + boundary edges.
-function H7(T) {
-  const rng = prng(0x07_5A_2D >>> 0); // "H7 SHARD"
-  let violations = 0; const examples = [];
-  let symbolsChecked = 0, multiShardTrials = 0, boundaryEdgesSeen = 0;
-  for (let i = 0; i < T; i++) {
-    const g = normalizeGraph(randomGraph(rng));
-    const idx = buildIndex(g);
-    const split = splitGraph(g, 'dir');
-    if (split.shards.length > 1) multiShardTrials++;
-    boundaryEdgesSeen += split.boundary.length;
-    for (const n of g.nodes) {
-      const id = n.id;
-      symbolsChecked++;
-      const shardCallers = shardCallersOf(split, id);
-      const shardCallees = shardCalleesOf(split, id);
-      const shardImpact = shardImpactOf(split, id);
-      // INDEPENDENT oracle (raw edges + inline BFS)
-      const oCallers = rawCallersOf(g, id);
-      const oCallees = rawCalleesOf(g, id);
-      const oImpact = impactOracle(g, id);
-      // also confirm the monolith lib agrees (anchors the lock on the lib side too)
-      const mCallers = callersOf(idx, [id]);
-      const mCallees = calleesOf(idx, [id]);
-      const mImpact = impactOf(idx, [id]);
-      const bad = !eqJSON(shardCallers, oCallers) || !eqJSON(shardCallees, oCallees) || !eqJSON(shardImpact, oImpact)
-        || !eqJSON(mCallers, oCallers) || !eqJSON(mCallees, oCallees) || !eqJSON(mImpact, oImpact);
-      if (bad) {
-        violations++;
-        if (examples.length < 5) examples.push({ trial: i, id, shardCallers, oCallers, shardCallees, oCallees, shardImpact, oImpact, mCallers, mImpact });
-      }
-    }
-  }
-  return { violations, examples, T, symbolsChecked, multiShardTrials, boundaryEdgesSeen };
-}
+// A hypothesis about a feature that no longer ships cannot be re-run, and rewriting it against some
+// other subject would silently change what the receipt attests. It is retired here and RECORDED in
+// the results JSON (see `retiredHypotheses`) rather than deleted quietly — the published claim
+// ("0 violations / 10,000 ops + 120 CLI trials", edit-safety.json) rests on H5+H5_cli, which are
+// unaffected. Git history holds both the implementation and this harness's H7 body if the 100k+
+// symbol case ever materializes.
+const H7_RETIRED = {
+  id: 'H7',
+  metric: 'shard-query vs whole-graph (oracle) disagreements',
+  reason: 'scripts/lib/shards.mjs was deliberately deleted; the subject of the hypothesis no longer ships',
+  decisionSource: 'bench/results/scale-typescript.json -> previous.shardsDecision ("DELETE lib/shards.mjs")',
+};
 
 // ---- H8 — codemod reversibility + gate-consistency ----------------------------------------------
 // (a) gate-consistency: the plan's projected gate verdict == the actual post-apply verdict computed by
@@ -889,6 +860,37 @@ function proveNonVacuity() {
     checks.push({ name: 'self-loop collapse is genuinely non-reversible (scope is real; clean graph reverses)', pass: stillHasSelfLoop === false && notReversible === true && reversibleClean === true });
   }
 
+  // 8) The inline cycle oracle must walk the SAME edge kinds the product does. It re-states the set
+  //    rather than importing it (an imported constant would drift in lockstep and hide the bug this
+  //    oracle exists to catch), so pin the two equal here: a deliberate CYCLE_KINDS change then
+  //    fails visibly instead of silently reappearing as "codeweb disagrees with the oracle".
+  //    Teeth: a ref-only file cycle is a cycle for BOTH sides, and dropping the ref removes it.
+  {
+    const shipped = [...graphOpsSecondOpinion.CYCLE_KINDS].sort();
+    const here = [...CYCLE_EDGE_KINDS].sort();
+    const setsMatch = eqJSON(here, shipped);
+    const g = normalizeGraph({
+      meta: {}, domains: [], overlaps: [],
+      nodes: [
+        { id: 'u.js:fu', label: 'fu', kind: 'function', file: 'u.js', line: 1, loc: 1, exports: true, domain: 'd' },
+        { id: 'v.js:Cv', label: 'Cv', kind: 'class', file: 'v.js', line: 1, loc: 1, exports: true, domain: 'd' },
+      ],
+      edges: [
+        { from: 'u.js:fu', to: 'v.js:Cv', kind: 'call' },
+        { from: 'v.js:Cv', to: 'u.js:fu', kind: 'ref' }, // closes the cycle via a type reference
+      ],
+    });
+    const oracleSees = kosarajuCycles(g).some((c) => cycleKey(c) === 'u.js|v.js');
+    const toolSees = graphOpsSecondOpinion.fileCycles(g).some((c) => cycleKey([...c].sort()) === 'u.js|v.js');
+    const withoutRef = normalizeGraph({ ...g, edges: g.edges.filter((e) => e.kind !== 'ref') });
+    const bothDropIt = kosarajuCycles(withoutRef).length === 0 && graphOpsSecondOpinion.fileCycles(withoutRef).length === 0;
+    checks.push({
+      name: 'cycle oracle walks the shipped CYCLE_KINDS (ref-only cycle seen by BOTH; absent without the ref)',
+      pass: setsMatch && oracleSees === true && toolSees === true && bothDropIt === true,
+      detail: { here, shipped },
+    });
+  }
+
   const allPass = checks.every((c) => c.pass);
   return { allPass, checks };
 }
@@ -926,9 +928,9 @@ function realCorpusCycleCrossCheck() {
 // RUN
 // =================================================================================================
 const SEEDS = {
-  H5: '0x05FA17', H5_cli: '0x5C111', H6: '0x06CA3F', H7: '0x075A2D', H8: '0x08C0DE', A_CUT: '0x0AC07C', A_READ: '0x0AEAD0',
+  H5: '0x05FA17', H5_cli: '0x5C111', H6: '0x06CA3F', H8: '0x08C0DE', A_CUT: '0x0AC07C', A_READ: '0x0AEAD0',
 };
-const T_H5 = 10000, T_H6 = 2000, T_H7 = 2000, T_H8 = 2000, T_ACUT = 2000, T_AREAD = 2000;
+const T_H5 = 10000, T_H6 = 2000, T_H8 = 2000, T_ACUT = 2000, T_AREAD = 2000;
 const N_H5_CLI = 120;
 
 console.log('codeweb C3 — edit safety. seeded, independent oracles (inline Kosaraju + naiveApply), able-to-fail.\n');
@@ -942,7 +944,6 @@ console.log('');
 const h5 = H5(T_H5);
 const h5cli = H5_cli(N_H5_CLI);
 const h6 = H6(T_H6);
-const h7 = H7(T_H7);
 const h8 = H8(T_H8);
 const h8cli = H8_cli();
 const acut = A_CUT(T_ACUT);
@@ -962,11 +963,6 @@ const h6pass = h6.violations === 0;
 add('H6', 'campaign prefixes that introduce a new file cycle', h6.violations, h6pass,
   '0 over T>=2000 (every cumulative prefix vs base)',
   { T: h6.T, prefixesChecked: h6.prefixesChecked, mutatingStepsSeen: h6.mutatingStepsSeen, plansWithMutations: h6.plansWithMutations, examples: h6.examples });
-
-const h7pass = h7.violations === 0;
-add('H7', 'shard-query vs whole-graph (oracle) disagreements', h7.violations, h7pass,
-  '0 over T>=2000 x every symbol x {callers,callees,impact}',
-  { T: h7.T, symbolsChecked: h7.symbolsChecked, multiShardTrials: h7.multiShardTrials, boundaryEdgesSeen: h7.boundaryEdgesSeen, examples: h7.examples });
 
 const h8pass = h8.gateViolations === 0 && h8.reversibilityViolations === 0 && h8cli.mismatches === 0 && h8.reversibilityMerges > 0;
 add('H8', 'codemod gate-consistency + reversibility violations (+ CLI)', h8.gateViolations + h8.reversibilityViolations + h8cli.mismatches, h8pass,
@@ -1006,8 +1002,11 @@ const out = {
   cluster: 'C3-edit-safety',
   generatedAt: new Date().toISOString(),
   seeds: SEEDS,
-  T: { H5: T_H5, H6: T_H6, H7: T_H7, H8: T_H8, 'A-CUT': T_ACUT, 'A-READ': T_AREAD, H5_cli: N_H5_CLI },
+  T: { H5: T_H5, H6: T_H6, H8: T_H8, 'A-CUT': T_ACUT, 'A-READ': T_AREAD, H5_cli: N_H5_CLI },
   nonVacuity: nv,
+  // Recorded, not silently dropped: a pre-registered hypothesis whose SUBJECT was removed from the
+  // product. Readers comparing this receipt with an older one must be able to see why H7 is absent.
+  retiredHypotheses: [H7_RETIRED],
   perHypothesis: results.map((r) => ({
     id: r.id, metric: r.metric, value: r.value,
     ci: r.id === 'H5' ? { method: 'ruleOfThree95', upperBound: r.ruleOfThree95UpperBound } : { method: 'exact-zero-failure', note: '0 violations is the pre-registered bar; no interval needed for an exact count' },
