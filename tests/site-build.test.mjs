@@ -34,7 +34,7 @@ test('--out redirects the whole build', () => {
 test('builder runs and reports the expected page count', () => {
   const r = runNode(BUILD, ['--out', OUT]);
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /built 10 page\(s\)/); // +case-study (SEO F8) +support (REVENUE §4.3) +downloads (operator, unlisted) +boundary/pricing (CHARTER, the boundary)
+  assert.match(r.stdout, /built 12 page\(s\)/); // +case-study (SEO F8) +support (REVENUE §4.3) +downloads (operator, unlisted) +boundary/pricing (CHARTER, the boundary) +lsp/compare (COMPETITIVE §3.2 stake #2, §4 Bet 1)
 });
 
 test('emits every page in the information architecture', () => {

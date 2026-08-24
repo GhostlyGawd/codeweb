@@ -178,7 +178,15 @@ pre code { background: none; border: 0; padding: 0; font-size: 13px; line-height
 .brand { display: inline-flex; align-items: center; gap: var(--s-3); font-weight: 700; color: var(--fg); font-size: 16px; letter-spacing: .2px; }
 .brand:hover { text-decoration: none; }
 .brand .glyph { width: 22px; height: 22px; display: block; }
-.nav-links { display: flex; align-items: center; gap: var(--s-2); margin-left: var(--s-4); flex: 1; }
+/* min-width:0 is load-bearing: a flex item defaults to min-width:auto, so without it the link row
+   refuses to shrink below its content and shoves .nav-right past the viewport edge, scrolling the
+   whole page sideways. Overflow keeps every link reachable when the row does run out of room. */
+.nav-links {
+  display: flex; align-items: center; gap: var(--s-2); margin-left: var(--s-4); flex: 1;
+  min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-links a { flex: none; }
 .nav-links a {
   color: var(--muted); font-size: var(--fs-sm); font-weight: 550;
   padding: 7px 11px; border-radius: var(--r-sm); border: 1px solid transparent;

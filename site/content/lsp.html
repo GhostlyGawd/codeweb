@@ -1,0 +1,117 @@
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The first objection</span>
+      <h1>"My agent already has a language server. Why a map?"</h1>
+      <p class="lead"><strong>Because a language server answers one hop, on demand, inside a session — and the questions that stop an agent breaking your code are whole-graph questions, asked before the edit and diffed after it.</strong></p>
+      <p>This page answers the objection properly, and every number on it points at a file you can regenerate. Nothing here is a criticism of language servers: codeweb runs beside yours and asks different questions.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="eyebrow">What a language server is for</div>
+        <h3>The editor loop, one symbol at a time</h3>
+        <p>Definitions, direct references, rename, hover — computed per request against a live session, tuned to answer in milliseconds while you type.</p>
+        <p class="muted">It is very good at that. It is not trying to be a whole-program artifact, because the editor loop never needs one.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">What codeweb is for</div>
+        <h3>The edit loop, one graph at a time</h3>
+        <p>A deterministic call/import graph written to a single file: transitive impact, duplication with body evidence, dead code, hotspots, domain coupling.</p>
+        <p class="muted">Agents query it over MCP before they write. CI diffs two of them to decide whether a pull request made the structure worse.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The substance</span>
+      <h2 id="what-lsp-cannot">Four questions a one-hop lookup is not built to answer</h2>
+      <p class="lead">Each answer below is checked against an independent implementation, and each names the committed file that produced its number.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3 id="transitive-impact">Transitive impact — "what breaks two hops away?"</h3>
+        <p>Direct references stop at the first hop. An agent editing a function needs the closure: every symbol transitively affected, plus the domains they sit in.</p>
+        <p><code>codeweb_impact</code> returns it in one call. Graded against an independent reverse-reachability walk over 121,913 symbol comparisons, it disagreed 0 times.</p>
+        <p class="muted">On sampled targets the mean blast radius was 21 symbols. One call injects 1,214 bytes of context; a graph-assisted grep loop needed 7.2 rounds and 153,274 bytes to reach the same answer — a factor of 126.</p>
+        <p class="muted">Receipts: <code>bench/results/correctness-query.json</code> · <code>bench/results/oracle-ab.json</code></p>
+      </div>
+      <div class="card">
+        <h3 id="duplication">Duplication — "does this already exist here?"</h3>
+        <p>A reference lookup can only find code you already named. It cannot tell you the function you are about to write was written twice already, in two other domains.</p>
+        <p>codeweb body-confirms every candidate before reporting it. Against a name-matching baseline on planted clones, F1 was 1.0 (lower confidence bound 0.9977) versus 0.6667.</p>
+        <p class="muted">Renamed clones — identifiers changed, structure identical — are found by an identifier-normalized skeleton pass: recall 1.0 against 0.0 for a lexical baseline over 30 planted pairs.</p>
+        <p class="muted">Receipt: <code>bench/results/detection-accuracy.json</code></p>
+      </div>
+      <div class="card">
+        <h3 id="dead-code">Dead code — "is anything still using this?"</h3>
+        <p>"Find references, see none" is a per-symbol question you have to know to ask. The graph inverts it: every uncalled, unexported symbol falls out of the same artifact at once.</p>
+        <p>Findings are confidence-tiered, because deleting something a test or an entry point still reaches is worse than missing it. The safe tier scored precision 1.0, lower bound 0.9771, against an independent reachability oracle.</p>
+        <p class="muted">Receipt: <code>bench/results/detection-accuracy.json</code></p>
+      </div>
+      <div class="card">
+        <h3 id="gating">Gating a pull request on the structure</h3>
+        <p>This is the one a language server structurally cannot absorb, and it is the reason codeweb exists in CI.</p>
+        <p>A gate compares two states of the whole codebase. That needs a <strong>diffable snapshot</strong> — an artifact you can produce for the base commit, produce again for the head commit, and subtract.</p>
+        <p class="muted">A per-request lookup produces answers, not artifacts. There is nothing to diff, so there is nothing to fail a pull request on.</p>
+        <p class="muted">Receipt: <code>bench/results/auxiliary.json</code> (the gate's exit codes on a regression, a clean change, and a pure removal)</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <span class="eyebrow">Why the diff can be trusted</span>
+        <h2 id="diffable">A snapshot is only diffable if it is deterministic</h2>
+        <p>If the same code produced a slightly different graph each run, every gate verdict would be noise, and the whole approach would collapse into flaky CI.</p>
+        <p>It does not. Across 20 runs of each of the 6 pinned corpus repositories, the pipeline emitted one structural digest per repository — nodes, edges, domains, and overlaps identical every time. No model sits in the analysis path, so nothing drifts.</p>
+        <p>The pre-flight that predicts a verdict was checked the same way: 0 violations over 10,000 in-process operations plus 120 command-line trials.</p>
+        <p class="muted">Receipts: <code>bench/results/determinism.json</code> · <code>bench/results/edit-safety.json</code></p>
+      </div>
+      <div class="callout callout-good">
+        <h3>What the gate actually fails on</h3>
+        <ul class="kicker-list">
+          <li><span class="dot"></span><span>A new dependency cycle.</span></li>
+          <li><span class="dot"></span><span>A new body-confirmed duplication.</span></li>
+          <li><span class="dot"></span><span>A symbol that lost every caller.</span></li>
+        </ul>
+        <p>Anything else passes, including pure removals. It is static analysis, not a model, so it never hallucinates a finding and costs zero tokens however many pull requests you open.</p>
+        <p class="muted" style="margin-bottom:0"><a href="product.html#ci-gate">How the gate works →</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Where the answers came from</span>
+      <h2>Verified against independent implementations, not against ourselves</h2>
+      <p class="lead">Cycles, impact, callers, callees, and context windows are each graded against a separate implementation written for the purpose — a Kosaraju SCC pass, a reverse-reachability walk, raw edge-set scans.</p>
+    </div>
+    <div class="callout">
+      <p>Across all five families that is 497,864 comparisons with 0 disagreements. The oracles are deliberately written to restate the rules rather than import them, so a change to the engine's definitions fails the oracle instead of moving in lock-step with it.</p>
+      <p class="muted" style="margin-bottom:0">Receipt: <code>bench/results/correctness-query.json</code> · harness: <code>bench/experiments/correctness-query.mjs</code> · <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">browse the raw data →</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap center">
+    <div class="section-head center">
+      <span class="eyebrow">The honest answer</span>
+      <h2>The two compose</h2>
+      <p class="lead">Keep your language server for the editor loop. codeweb replaces the grep loop, not your language server — it is the artifact your agent consults before it writes, and the one CI diffs after.</p>
+    </div>
+    <div class="btn-row" style="justify-content:center">
+      <a class="btn btn-primary btn-lg" href="start.html">Map your repo</a>
+      <a class="btn btn-lg" href="compare.html">See the full comparison</a>
+      <a class="btn btn-lg" href="research.html">Read the evidence ledger</a>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>codeweb vs grep and one-hop lookups — every number regenerable — codeweb</title>
+<meta name="description" content="A comparison where every number traces to a committed, re-runnable benchmark: +0.31 caller recall at equal token cost, 126x cheaper blast-radius answers, 0 disagreements over 497,864 independent checks — and the results that did not replicate, dropped.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="codeweb">
+<meta property="og:title" content="codeweb vs the way agents find code today">
+<meta property="og:description" content="A comparison where every number traces to a committed, re-runnable benchmark: +0.31 caller recall at equal token cost, 126x cheaper blast-radius answers, 0 disagreements over 497,864 independent checks — and the results that did not replicate, dropped.">
+<meta property="og:url" content="https://ghostlygawd.github.io/codeweb/compare.html">
+<meta property="og:image" content="https://ghostlygawd.github.io/codeweb/assets/og.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta property="og:image:alt" content="codeweb — interactive call-graph map of a codebase">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
+<meta name="theme-color" content="#060608">
+<link rel="canonical" href="https://ghostlygawd.github.io/codeweb/compare.html">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.13.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<svg class="cw-grain" width="100%" height="100%" aria-hidden="true"><filter id="cwg"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/></filter><rect width="100%" height="100%" filter="url(#cwg)"/></svg>
+<i class="cw-fr tl"></i><i class="cw-fr tr"></i><i class="cw-fr bl"></i><i class="cw-fr br"></i>
+<header class="site-nav">
+  <a class="brand" href="index.html" aria-label="codeweb home">
+    <span class="wm">code<span class="w">web</span></span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="index.html" data-nav="home">Home</a>
+    <a href="product.html" data-nav="product">Product</a>
+    <a href="compare.html" data-nav="compare" aria-current="page">Compare</a>
+    <a href="lsp.html" data-nav="lsp">vs LSP</a>
+    <a href="research.html" data-nav="research">Research</a>
+    <a href="pricing.html" data-nav="pricing">Pricing</a>
+    <a href="boundary.html" data-nav="boundary">Free forever</a>
+    <a href="start.html" data-nav="start">Get Started</a>
+    <a href="changelog.html" data-nav="changelog">Changelog</a>
+  </nav>
+  <div class="nav-right">
+    <a class="nav-ghost" href="demo/">Live demo</a>
+    <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The comparison</span>
+      <h1>codeweb vs the way agents find code today</h1>
+      <p class="lead"><strong>Every number on this page comes out of a file committed in this repository, produced by a harness you can re-run.</strong> Where a result did not replicate, this page says so and drops the claim.</p>
+      <p>The honest comparison is against what an agent does <em>without</em> a graph: it greps, reads what it found, and greps again. That baseline is measurable, so it is the one measured here.</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card bench">
+        <h3>0.44 → 0.74</h3>
+        <p>of a function's real callers found by a frontier agent — grep baseline versus codeweb, same context budget.</p>
+        <p class="muted"><code>bench/experiments/efficiency-pilot.reps5-v090.json</code></p>
+      </div>
+      <div class="card bench">
+        <h3>126×</h3>
+        <p>cheaper "what breaks if I change this?" answers — one call versus a graph-assisted grep loop.</p>
+        <p class="muted"><code>bench/results/oracle-ab.json</code></p>
+      </div>
+      <div class="card bench">
+        <h3>0 disagreements</h3>
+        <p>across 497,864 comparisons of codeweb's answers against independent implementations.</p>
+        <p class="muted"><code>bench/results/correctness-query.json</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The replicated result</span>
+      <h2 id="recall">More of the callers, at the same cost</h2>
+      <p class="lead">A paired A/B on a caller-discovery benchmark, engine frozen, the treatment arm reading the same budgeted responses agents actually receive over MCP.</p>
+    </div>
+    <div class="split">
+      <div>
+        <p>Recall improved by <strong>+0.310 ± 0.039</strong>, with all 5 repetitions positive — roughly eight times the run-to-run noise. In absolute terms the grep arm found 0.44 of the real callers and the codeweb arm found 0.74.</p>
+        <p>Precision moved with it, <strong>+0.234 ± 0.080</strong>: fewer wrong callers, not more. The mechanism is deterministic rather than persuasive — fixing import-alias and member-access resolution is what surfaced the callers, and no model was involved in finding them.</p>
+        <p class="muted">Labelled preliminary, because grading is strict at the symbol level and one target (a Python import-edge gap) was an honest per-task loss. Both facts are in the receipt.</p>
+        <p class="muted">Receipt: <code>bench/experiments/efficiency-pilot.reps5-v090.json</code> · engine v0.9.0</p>
+      </div>
+      <div class="callout callout-warn">
+        <h3>The null published beside it</h3>
+        <p>Token spend and tool calls were a <strong>wash</strong>: total tokens −84k ± 381k and tool calls +0.95 ± 3.6, both swamped by their own variance.</p>
+        <p>So the claim is completeness, not savings: <em>the same spend buys more of the callers</em>. An earlier run on a different base model did show large token and step savings; on the current, more frugal agent those did not replicate, so they are not claimed here.</p>
+        <p class="muted" style="margin-bottom:0">Receipt: <code>bench/experiments/efficiency-pilot.usage-v090.json</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The cost contrast</span>
+      <h2 id="cost">One call, or a loop of reads</h2>
+      <p class="lead">"What breaks if I change this?" is the question that decides whether an agent's edit is safe, and it is the most expensive one to answer without a graph.</p>
+    </div>
+    <table class="ledger">
+      <thead><tr><th>Answering "what breaks if I change this?"</th><th>Grep loop</th><th>codeweb</th><th>Receipt</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="claim">Rounds of tool calls</td>
+          <td class="num">7.2</td>
+          <td class="num">1</td>
+          <td class="src">oracle-ab.json</td>
+        </tr>
+        <tr>
+          <td class="claim">Bytes injected into the agent's context</td>
+          <td class="num">153,274</td>
+          <td class="num">1,214</td>
+          <td class="src">oracle-ab.json</td>
+        </tr>
+        <tr>
+          <td class="claim">Mean blast radius on the sampled targets</td>
+          <td class="num">21</td>
+          <td class="num">21</td>
+          <td class="src">oracle-ab.json</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted" style="margin-top:1rem">The grep loop is simulated generously — it is handed the graph's own frontier to expand, which a real one would have to discover. Even so, the context cost differs by a factor of 126.</p>
+    <p class="muted">Tokens are approximated as bytes over four. The cost being compared is what each channel injects into the agent's context.</p>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Against approaches, not products</span>
+      <h2 id="approaches">Where each approach stops</h2>
+      <p class="lead">Three ways to give an agent structural context. The rows are capabilities, and the codeweb column is the only one this repository can produce receipts for.</p>
+    </div>
+    <table class="ledger">
+      <thead><tr><th>Question</th><th>Grep / text search</th><th>One-hop symbol lookup</th><th>codeweb</th></tr></thead>
+      <tbody>
+        <tr><td class="claim">Direct callers of a symbol</td><td class="muted">Partial — name collisions and misses</td><td>Yes</td><td>Yes, graded against raw edge sets</td></tr>
+        <tr><td class="claim">Transitive impact of an edit</td><td class="muted">Only by looping</td><td class="muted">Only by looping</td><td>One call, 0 disagreements vs an independent walk</td></tr>
+        <tr><td class="claim">Duplicated logic across domains</td><td class="muted">No</td><td class="muted">No</td><td>Body-confirmed, plus renamed clones</td></tr>
+        <tr><td class="claim">Dead code, ranked by confidence</td><td class="muted">No</td><td class="muted">Per symbol, if you know to ask</td><td>Whole-graph, safe tier precision 1.0</td></tr>
+        <tr><td class="claim">A verdict CI can fail a pull request on</td><td class="muted">No</td><td class="muted">No — nothing to diff</td><td>Yes, from two graph snapshots</td></tr>
+        <tr><td class="claim">Same input, same answer</td><td>Yes</td><td>Yes</td><td>Yes — 1 digest per repo over 20 runs</td></tr>
+      </tbody>
+    </table>
+    <p class="muted" style="margin-top:1rem">The "one-hop symbol lookup" column describes the capability class, not any particular implementation. <a href="lsp.html">The LSP FAQ</a> covers that comparison in full. Receipts for the codeweb column: <code>bench/results/correctness-query.json</code>, <code>bench/results/detection-accuracy.json</code>, <code>bench/results/determinism.json</code>, <code>bench/results/auxiliary.json</code>.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The other axis</span>
+      <h2 id="price">What a hosted gate costs</h2>
+      <p class="lead">The verdict is a deterministic graph diff, so a busy week is not an expensive week — for us or for you.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Flat, per active author</h3>
+        <p>codeweb Teams is planned at €10 per active author per month, flat: unlimited repositories, pull requests, and gate runs. It is an intent ratified in the charter, not a live offer.</p>
+        <p class="muted">Everything that runs on one laptop against one repo stays free forever — <a href="boundary.html">the boundary</a> says exactly where the line sits.</p>
+      </div>
+      <div class="card">
+        <h3>The category anchor</h3>
+        <p>The competitive scan committed in this repository recorded commercial code-analysis gates priced at €18–27 per active author per month. Pricing under the category we are entering is deliberate.</p>
+        <p class="muted">Receipt: <code>reports/COMPETITIVE.md</code>. No claim here describes any specific competitor.</p>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:var(--s-6)"><a class="btn" href="pricing.html">See Teams pricing →</a></div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Calibrated, not inflated</span>
+      <h2 id="dont-claim">What we deliberately don't claim</h2>
+      <p class="lead">This list is the same one the research page publishes, rendered from the project's claim ledger — including the rule that governs this very page.</p>
+    </div>
+    <div class="callout honesty"><ul><li><strong>"Finds all clones / 100% recall"</strong> → High-precision, body-confirmed overlap on the clones it surfaces (F1 1.0 synthetic, 0.98 on real axios) — it deliberately drops ambiguous edges because a false positive costs more than a miss.</li><li><strong>"Replaces human review"</strong> → It produces candidate lists and shows which merges are cycle-safe to apply — a structural pre-flight, not a semantic verdict.</li><li><strong>"Agents provably edit better"</strong> → It improves caller-discovery recall (+0.31, all reps positive) at equal token cost on the budgeted responses agents receive (v0.9.0). An earlier run on a different base model also showed ~34% fewer steps; that savings did not replicate, and we say so. The full edit-quality A/B (H18) was a null on clean tasks — a floor effect, reported honestly.</li><li><strong>"100% deterministic"</strong> → Byte-deterministic, set-valued output — one digest across 20 runs per repo for nodes, edges, domains, and overlaps.</li><li><strong>"Sub-second every time"</strong> → Typical query ~95–120 ms; worst-case p95 264 ms on 3,201 symbols, where Node startup (~63 ms) dominates.</li><li><strong>"Beats commercial tools"</strong> → We compare only to stated, reproducible baselines (name-matching, lexical, random, the legacy fallback) — no head-to-head against tools we can't reproduce.</li></ul></div>
+    <div class="btn-row" style="margin-top:var(--s-6)">
+      <a class="btn btn-primary" href="research.html">The full evidence ledger</a>
+      <a class="btn" href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Inspect the raw results</a>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="index.html">
+          <span class="wm">code<span class="w">web</span></span>
+        </a>
+        <p>A deterministic map of your codebase — one graph, read by humans and the agents editing alongside them.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="product.html">Features</a>
+        <a href="demo/">Live demo</a>
+        <a href="start.html">Get started</a>
+        <a href="changelog.html">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Proof</h5>
+        <a href="research.html">Research</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">Benchmarks</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Raw results</a>
+      </div>
+      <div class="footer-col">
+        <h5>Project</h5>
+        <a href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
+        <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
+        <a href="support.html">Sponsor</a>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>codeweb v0.13.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
+      <span>Deterministic build · zero third-party requests on this page</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/livemap.js" defer></script>
+</body>
+</html>

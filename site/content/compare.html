@@ -1,0 +1,146 @@
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The comparison</span>
+      <h1>codeweb vs the way agents find code today</h1>
+      <p class="lead"><strong>Every number on this page comes out of a file committed in this repository, produced by a harness you can re-run.</strong> Where a result did not replicate, this page says so and drops the claim.</p>
+      <p>The honest comparison is against what an agent does <em>without</em> a graph: it greps, reads what it found, and greps again. That baseline is measurable, so it is the one measured here.</p>
+    </div>
+    <div class="grid cols-3">
+      <div class="card bench">
+        <h3>0.44 → 0.74</h3>
+        <p>of a function's real callers found by a frontier agent — grep baseline versus codeweb, same context budget.</p>
+        <p class="muted"><code>bench/experiments/efficiency-pilot.reps5-v090.json</code></p>
+      </div>
+      <div class="card bench">
+        <h3>126×</h3>
+        <p>cheaper "what breaks if I change this?" answers — one call versus a graph-assisted grep loop.</p>
+        <p class="muted"><code>bench/results/oracle-ab.json</code></p>
+      </div>
+      <div class="card bench">
+        <h3>0 disagreements</h3>
+        <p>across 497,864 comparisons of codeweb's answers against independent implementations.</p>
+        <p class="muted"><code>bench/results/correctness-query.json</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The replicated result</span>
+      <h2 id="recall">More of the callers, at the same cost</h2>
+      <p class="lead">A paired A/B on a caller-discovery benchmark, engine frozen, the treatment arm reading the same budgeted responses agents actually receive over MCP.</p>
+    </div>
+    <div class="split">
+      <div>
+        <p>Recall improved by <strong>+0.310 ± 0.039</strong>, with all 5 repetitions positive — roughly eight times the run-to-run noise. In absolute terms the grep arm found 0.44 of the real callers and the codeweb arm found 0.74.</p>
+        <p>Precision moved with it, <strong>+0.234 ± 0.080</strong>: fewer wrong callers, not more. The mechanism is deterministic rather than persuasive — fixing import-alias and member-access resolution is what surfaced the callers, and no model was involved in finding them.</p>
+        <p class="muted">Labelled preliminary, because grading is strict at the symbol level and one target (a Python import-edge gap) was an honest per-task loss. Both facts are in the receipt.</p>
+        <p class="muted">Receipt: <code>bench/experiments/efficiency-pilot.reps5-v090.json</code> · engine v0.9.0</p>
+      </div>
+      <div class="callout callout-warn">
+        <h3>The null published beside it</h3>
+        <p>Token spend and tool calls were a <strong>wash</strong>: total tokens −84k ± 381k and tool calls +0.95 ± 3.6, both swamped by their own variance.</p>
+        <p>So the claim is completeness, not savings: <em>the same spend buys more of the callers</em>. An earlier run on a different base model did show large token and step savings; on the current, more frugal agent those did not replicate, so they are not claimed here.</p>
+        <p class="muted" style="margin-bottom:0">Receipt: <code>bench/experiments/efficiency-pilot.usage-v090.json</code></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The cost contrast</span>
+      <h2 id="cost">One call, or a loop of reads</h2>
+      <p class="lead">"What breaks if I change this?" is the question that decides whether an agent's edit is safe, and it is the most expensive one to answer without a graph.</p>
+    </div>
+    <table class="ledger">
+      <thead><tr><th>Answering "what breaks if I change this?"</th><th>Grep loop</th><th>codeweb</th><th>Receipt</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="claim">Rounds of tool calls</td>
+          <td class="num">7.2</td>
+          <td class="num">1</td>
+          <td class="src">oracle-ab.json</td>
+        </tr>
+        <tr>
+          <td class="claim">Bytes injected into the agent's context</td>
+          <td class="num">153,274</td>
+          <td class="num">1,214</td>
+          <td class="src">oracle-ab.json</td>
+        </tr>
+        <tr>
+          <td class="claim">Mean blast radius on the sampled targets</td>
+          <td class="num">21</td>
+          <td class="num">21</td>
+          <td class="src">oracle-ab.json</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted" style="margin-top:1rem">The grep loop is simulated generously — it is handed the graph's own frontier to expand, which a real one would have to discover. Even so, the context cost differs by a factor of 126.</p>
+    <p class="muted">Tokens are approximated as bytes over four. The cost being compared is what each channel injects into the agent's context.</p>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Against approaches, not products</span>
+      <h2 id="approaches">Where each approach stops</h2>
+      <p class="lead">Three ways to give an agent structural context. The rows are capabilities, and the codeweb column is the only one this repository can produce receipts for.</p>
+    </div>
+    <table class="ledger">
+      <thead><tr><th>Question</th><th>Grep / text search</th><th>One-hop symbol lookup</th><th>codeweb</th></tr></thead>
+      <tbody>
+        <tr><td class="claim">Direct callers of a symbol</td><td class="muted">Partial — name collisions and misses</td><td>Yes</td><td>Yes, graded against raw edge sets</td></tr>
+        <tr><td class="claim">Transitive impact of an edit</td><td class="muted">Only by looping</td><td class="muted">Only by looping</td><td>One call, 0 disagreements vs an independent walk</td></tr>
+        <tr><td class="claim">Duplicated logic across domains</td><td class="muted">No</td><td class="muted">No</td><td>Body-confirmed, plus renamed clones</td></tr>
+        <tr><td class="claim">Dead code, ranked by confidence</td><td class="muted">No</td><td class="muted">Per symbol, if you know to ask</td><td>Whole-graph, safe tier precision 1.0</td></tr>
+        <tr><td class="claim">A verdict CI can fail a pull request on</td><td class="muted">No</td><td class="muted">No — nothing to diff</td><td>Yes, from two graph snapshots</td></tr>
+        <tr><td class="claim">Same input, same answer</td><td>Yes</td><td>Yes</td><td>Yes — 1 digest per repo over 20 runs</td></tr>
+      </tbody>
+    </table>
+    <p class="muted" style="margin-top:1rem">The "one-hop symbol lookup" column describes the capability class, not any particular implementation. <a href="lsp.html">The LSP FAQ</a> covers that comparison in full. Receipts for the codeweb column: <code>bench/results/correctness-query.json</code>, <code>bench/results/detection-accuracy.json</code>, <code>bench/results/determinism.json</code>, <code>bench/results/auxiliary.json</code>.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The other axis</span>
+      <h2 id="price">What a hosted gate costs</h2>
+      <p class="lead">The verdict is a deterministic graph diff, so a busy week is not an expensive week — for us or for you.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Flat, per active author</h3>
+        <p>codeweb Teams is planned at €10 per active author per month, flat: unlimited repositories, pull requests, and gate runs. It is an intent ratified in the charter, not a live offer.</p>
+        <p class="muted">Everything that runs on one laptop against one repo stays free forever — <a href="boundary.html">the boundary</a> says exactly where the line sits.</p>
+      </div>
+      <div class="card">
+        <h3>The category anchor</h3>
+        <p>The competitive scan committed in this repository recorded commercial code-analysis gates priced at €18–27 per active author per month. Pricing under the category we are entering is deliberate.</p>
+        <p class="muted">Receipt: <code>reports/COMPETITIVE.md</code>. No claim here describes any specific competitor.</p>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:var(--s-6)"><a class="btn" href="pricing.html">See Teams pricing →</a></div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Calibrated, not inflated</span>
+      <h2 id="dont-claim">What we deliberately don't claim</h2>
+      <p class="lead">This list is the same one the research page publishes, rendered from the project's claim ledger — including the rule that governs this very page.</p>
+    </div>
+    <div class="callout honesty">{{dont_claim}}</div>
+    <div class="btn-row" style="margin-top:var(--s-6)">
+      <a class="btn btn-primary" href="research.html">The full evidence ledger</a>
+      <a class="btn" href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Inspect the raw results</a>
+    </div>
+  </div>
+</section>

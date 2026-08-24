@@ -77,6 +77,10 @@ export const PROSE_FILES = [
   // the most claim-dense copy on the site — they ride every prose sweep, C7 included.
   'site/content/boundary.html',
   'site/content/pricing.html',
+  // The launch surfaces (2026-08-24): the LSP FAQ and the comparison page restate more benchmark
+  // values than any other copy in the repo, so they ride every prose sweep.
+  'site/content/lsp.html',
+  'site/content/compare.html',
   'editor/vscode-codeweb/README.md',
   'editor/vscode-codeweb/extension.js',
 ];

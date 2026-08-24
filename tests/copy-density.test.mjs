@@ -50,6 +50,8 @@ const CURRENT_HTML = [
   'site/content/case-study.html',
   'site/content/boundary.html',
   'site/content/pricing.html',
+  'site/content/lsp.html',
+  'site/content/compare.html',
   'site/templates/base.html',
   'site/templates/footer.html',
   'site/templates/nav.html',
