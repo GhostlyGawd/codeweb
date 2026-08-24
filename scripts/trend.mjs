@@ -168,9 +168,10 @@ if (opts.history) {
 }
 if (!rows.length) { console.error('[codeweb] no snapshots to chart'); process.exit(1); }
 console.log(renderTrend(rows, { json: opts.json }));
-// REVENUE §3.4: someone graphing structural health over 5+ snapshots is doing by hand the job a
-// hosted rollup would do — the team-lead surface gets the one-line rail (text mode only).
+// REVENUE §3 row 4: someone graphing structural health over 5+ snapshots is doing by hand the job
+// a hosted rollup would do — the team-lead surface gets the one-line rail. Text mode only: --json
+// feeds NDJSON ledgers, and a consumer parsing this stdout must never meet prose.
 if (!opts.json && rows.length >= 5) {
-  const { SPONSOR_LINE } = await import('./lib/product-copy.mjs'); // D6/C7: claim strings live where the gate looks
-  console.log('\n' + SPONSOR_LINE);
+  const { TEAMS_TREND_NUDGE, placementsSuppressed } = await import('./lib/product-copy.mjs'); // D6/C7: claim strings live where the gate looks
+  if (!placementsSuppressed()) console.log('\n' + TEAMS_TREND_NUDGE);
 }

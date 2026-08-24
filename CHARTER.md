@@ -100,6 +100,20 @@ one who committed in the trailing 90 days. Intent, not a live offer — it becom
 only when the service is real. Anchor: the category is priced at €18–27/active author/mo
 (`reports/COMPETITIVE.md`, `reports/REVENUE.md` §2); undercutting it deliberately is the wedge.
 
+**How the free product may point at the paid one** *(ratified 2026-08-24, operator — the
+productize-and-launch mission).* The boundary above says what money buys; this says what the free
+product is allowed to say about it, because a free tool that nags is a worse tool. Three surfaces
+may carry one upgrade line each, and no others: the gate comment's footer (below its attribution,
+never in the verdict or the findings), `trend.mjs`'s text rail at five or more snapshots, and the
+receipt high point `run.mjs` already throttles. Every line is computed from local counters only —
+no accounts, no telemetry, no network, non-goal 4 untouched — and all of them answer
+`CODEWEB_NO_PROMO=1` (and the existing `CODEWEB_NO_STATS=1`). Three surfaces are ask-free zones
+outright: MCP tool responses (agent-consumed and budgeted — an ask there burns the tokens this
+product exists to save), hook cards (mid-work trust surfaces), and every error path (upselling on
+a failure reads as ransom). Attribution footers are not upgrade lines: they stay unconditional.
+The list is exhaustive by design — a fourth placement is a new ruling, not an extension of this
+one. Prior art and the moment-by-moment reasoning: `reports/REVENUE.md` §3.
+
 ## Now / Next / Not-now
 **Now — the identity milestone** (operator: "figure out the product's identity before we keep
 doing anything else") — **complete 2026-07-25**, all five outcomes ✔; the operator picks Next:

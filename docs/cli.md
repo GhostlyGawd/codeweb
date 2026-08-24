@@ -49,7 +49,8 @@ here (or anywhere else in codeweb) transmits anything.
 | variable | effect |
 |---|---|
 | `CODEWEB_WS` | workspace override: tools read `$CODEWEB_WS/graph.json` instead of walking up to the nearest `.codeweb/` |
-| `CODEWEB_NO_STATS=1` | disable the local outcome ledger (`.codeweb/stats.json`) entirely — the privacy lever |
+| `CODEWEB_NO_STATS=1` | disable the local outcome ledger (`.codeweb/stats.json`) entirely — the privacy lever (also suppresses the upgrade lines below) |
+| `CODEWEB_NO_PROMO=1` | suppress every upgrade placement: the gate comment's org-dashboard line, the trend nudge at 5+ snapshots, and the sponsor ask. Attribution footers stay |
 | `CODEWEB_ENGINE` | pin the extraction engine (`ts` \| `regex`) instead of auto-detection |
 | `CODEWEB_NO_AUTOREFRESH=1` | MCP server stops auto-refreshing stale graphs before answering |
 | `CODEWEB_MCP_TRACE=1` | MCP server logs queue lifecycle events (start/end/kill/skip-autorefresh) as NDJSON to stderr |

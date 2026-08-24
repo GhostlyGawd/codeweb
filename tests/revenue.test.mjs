@@ -66,19 +66,25 @@ test('RV4: the receipt-high-point ask fires on real value, once a month, local-o
   } finally { cleanup(dir); }
 });
 
-test('RV5: trend (the team-lead surface) carries the ask only with a real series', () => {
+// REVENUE §3 row 4 wrote this rail in two halves: "Now: sponsor line. Post-Teams: tracking this
+// across every repo, continuously, is what codeweb Teams does → url". The Teams surface exists,
+// so the rail carries the second half; the trigger it hangs on is unchanged. The threshold,
+// one-line budget, JSON purity, and suppression are pinned in tests/upgrade-placements.test.mjs.
+test('RV5: trend (the team-lead surface) carries the ask only with a real series', async () => {
+  const { TEAMS_URL } = await import('../scripts/lib/product-copy.mjs');
   const dir = tmpDir('codeweb-rev-');
   try {
     const hp = join(dir, 'history.jsonl');
     const row = (i, c) => JSON.stringify({ at: `2026-07-${String(10 + i).padStart(2, '0')}T00:00:00Z`, symbols: 100 + i, files: 10, confirmed: c, candidates: c, coupling: 5, cycles: 0 });
     writeFileSync(hp, [row(1, 5), row(2, 4)].join('\n') + '\n');
     const short = runNode(script('trend.mjs'), ['--history', hp]);
-    assert.ok(!short.stdout.includes(SPONSOR_URL), 'two snapshots is not a habit — no ask');
+    assert.ok(!short.stdout.includes(TEAMS_URL), 'two snapshots is not a habit — no ask');
 
     writeFileSync(hp, [row(1, 5), row(2, 4), row(3, 4), row(4, 3), row(5, 2)].join('\n') + '\n');
     const long = runNode(script('trend.mjs'), ['--history', hp]);
     assert.equal(long.status, 0, long.stderr);
-    assert.ok(long.stdout.includes(SPONSOR_URL), 'five snapshots = the codeweb-Teams buyer, doing the job by hand');
+    assert.ok(long.stdout.includes(TEAMS_URL), 'five snapshots = the codeweb-Teams buyer, doing the job by hand');
+    assert.ok(!long.stdout.includes(SPONSOR_URL), 'the rail carries ONE ask — the Teams nudge replaced the sponsor line here');
   } finally { cleanup(dir); }
 });
 

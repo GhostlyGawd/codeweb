@@ -11,6 +11,7 @@
 import { readFileSync, unlinkSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { atomicWrite } from './cli.mjs'; // finding #42: crash-safe writes for the local receipts (bytes unchanged)
+import { placementsSuppressed } from './product-copy.mjs'; // D6: the placement levers live with the claim strings
 
 const statsPathOf = (graphPath) => join(dirname(graphPath), 'stats.json');
 const monthNow = () => new Date().toISOString().slice(0, 7);
@@ -60,10 +61,12 @@ export function bump(graphPath, counter, n = 1) {
 // REVENUE §3.2: the one honest in-product ask — computed ONLY from local counters, at a success
 // high point, throttled hard. Due when codeweb has demonstrably delivered (3+ regressions caught
 // before landing, or 200+ queries served) and no ask has fired in 30 days. Fail-open to FALSE:
-// any doubt means silence, never a nag. CODEWEB_NO_STATS=1 disables (no ledger -> no ask).
+// any doubt means silence, never a nag. The opt-out levers answer here rather than at the print
+// site, so the throttle stamp is never burned by an ask the user opted out of seeing.
 const ASK_INTERVAL_MS = 30 * 24 * 60 * 60 * 1000;
 export function sponsorAskDue(graphPath) {
   try {
+    if (placementsSuppressed()) return false;
     const s = readStats(graphPath);
     if (!s) return false;
     if (s.lastSponsorAskAt && Date.now() - Date.parse(s.lastSponsorAskAt) < ASK_INTERVAL_MS) return false;

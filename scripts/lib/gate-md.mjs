@@ -4,6 +4,7 @@
 // "+N more", never an unbounded dump).
 
 import { sign } from './cli.mjs';
+import { TEAMS_DASHBOARD_LINE, placementsSuppressed } from './product-copy.mjs';
 
 const MARKER = '<!-- codeweb-gate -->';
 
@@ -15,8 +16,11 @@ const cap = (arr, n) => ({ head: arr.slice(0, n), more: Math.max(0, arr.length -
  * opts.history (RETENTION R7): metric rows from prior gated runs ({confirmed} each, oldest ->
  * newest) — renders the cross-PR trajectory line, the thing that keeps a team's gate installed
  * through its first annoying red X.
+ * opts.upgrade (REVENUE §3 row 1): set false when the caller renders its own dashboard link — the
+ * hosted service appends a footer pointing at the customer's real dashboard, and two dashboard
+ * links in one comment, one of them marketing, is worse than either alone.
  */
-export function gateComment(p, { history = null } = {}) {
+export function gateComment(p, { history = null, upgrade = true } = {}) {
   const L = [];
   L.push(MARKER);
   L.push(`## codeweb gate — ${p.ok ? '✅ no structural regressions' : `❌ ${p.regressions.length} regression type(s)`}`);
@@ -56,5 +60,8 @@ export function gateComment(p, { history = null } = {}) {
   // R7: the footer finally links home — this comment is codeweb's highest-frequency impression
   // on people who never installed it.
   L.push('<sub>codeweb structural review (same verdict as the gate). Reproduce locally: `node scripts/ci-gate.mjs --base <base-sha> --target <dir>` · [map your own repo with codeweb →](https://github.com/GhostlyGawd/codeweb) · free & local · [support the project](https://github.com/sponsors/GhostlyGawd)</sub>');
+  // REVENUE §3 row 1: the attribution above is unconditional; this one line is the upgrade moment,
+  // and it answers the suppression lever. Footer region only — never the verdict or the findings.
+  if (upgrade && !placementsSuppressed()) L.push(TEAMS_DASHBOARD_LINE);
   return L.join('\n') + '\n';
 }
