@@ -125,3 +125,25 @@ but it still cannot record a real number until a usable credential exists:
 Until then the series stays honest — `null` means "not measured", never "zero adoption". The
 current true value is 0 external repos (verified by hand on 2026-08-18 with an authenticated
 search).
+
+Update 2026-09-02: the built-in token now answers this search — the dispatch at `d3bc53c`
+(run 33674790253) recorded `gateReposExternal: 0` as a real integer, no `::warning::`. A
+`CODE_SEARCH_TOKEN` is therefore no longer required to keep the series measured, though it stays
+the documented fallback if the built-in token starts refusing the query again.
+
+## 9. Directory submissions that need your login (2026-09-02)
+
+Three distribution targets cannot be completed without an account, and one is closed for good:
+
+- **glama.ai** — codeweb is auto-indexed and rendering correctly, but the listing is unclaimed,
+  which Glama flags as limiting discoverability. Claiming needs a Glama sign-in.
+- **hesreallyhim/awesome-claude-code** — recommendations go through a web-UI issue form only; its
+  CONTRIBUTING forbids PRs and the `gh` CLI, and requires a human submitter.
+- **Anthropic community plugin directory** — both submission forms sit behind an authenticated
+  account. `claude plugin validate .` already passes, so the manifest will not bounce.
+- **appcypher/awesome-mcp-servers** — archived upstream; GitHub refuses new PRs. Nothing to do.
+
+Everything is already written: field-by-field values and copy-paste descriptions are in
+`reports/submissions/README.md`, which also records the targets that are already done
+(mcp.directory submitted, punkpeye/awesome-mcp-servers PR #13510 open, official MCP registry
+current). Roughly 12 minutes of pasting in total.
