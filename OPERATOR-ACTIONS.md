@@ -171,10 +171,13 @@ The draft also carries prepared answers for the three questions the post is most
 artifact, and if a number does not re-derive, fix the receipt rather than defend the number.
 
 **One thing to know before you post.** The drafts say **32 pre-registered checks, all 32 pass** —
-not the "32 / 33" the research page still shows. The 33rd (H7, sharded-subgraph query
-equivalence) measured a feature deliberately deleted in July, and the repaired harness now
-records it under `retiredHypotheses`; the six regenerated receipts enumerate 32 checks and all 32
-pass. The research page and `bench/preregistration.md` still carry the older framing. That is a
-copy correction across two claim-bearing surfaces, tracked separately — the posts simply do not
+not the "32 / 33" the research page still shows.
+
+The 33rd check (H7, sharded-subgraph query equivalence) measured a feature deliberately deleted
+in July. The repaired harness now records it under `retiredHypotheses`, and the six regenerated
+receipts enumerate 32 checks with all 32 passing.
+
+`site/content/research.html` and `bench/preregistration.md` still carry the older framing. That
+correction spans two claim-bearing surfaces and is tracked separately; the posts simply do not
 restate the stale number. If someone in the thread notices the mismatch, the honest answer is
-exactly the above.
+exactly the paragraph above.

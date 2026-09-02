@@ -1,7 +1,12 @@
 # GitHub Discussion draft — v0.14.0 announcement
 
-Posted autonomously to the repo's own Announcements category (no third-party account needed).
-URL recorded in the mission growth ledger and in the row below once posted.
+**Posted 2026-09-02: https://github.com/GhostlyGawd/codeweb/discussions/89**
+
+The repo's own Announcements category, so no third-party account is involved — this is the one
+launch channel completable under mission credentials. (Discussions were off; enabling them was a
+repo-settings change made for this post.) Verified anonymously after posting: the page is served
+to an unauthenticated request, both tables and the install block render, and the receipt values
+and honesty statements are present in the served HTML.
 
 - **Repository:** GhostlyGawd/codeweb
 - **Category:** Announcements

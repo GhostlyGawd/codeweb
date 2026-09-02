@@ -57,6 +57,9 @@ const URL_RE = /https?:\/\/\S+/g;
 // sha256 is not a claim of 256 of anything. Kept deliberately short and explicit — a broad
 // "digits glued to letters" rule would swallow real claims like "28 tools".
 const IDENTIFIER_RE = /\bsha256\b|\bType-2\b|\bMCP\b|\bC\+\+\b/gi;
+// An ISO date stamps WHEN something happened; it asserts nothing about the product. Anchored to
+// the full YYYY-MM-DD shape so a bare year, which could be a claim, still has to be receipted.
+const DATE_RE = /\b\d{4}-\d{2}-\d{2}\b/g;
 
 // ---- the receipts: token in the drafts -> value re-derived from the committed artifact --------
 
@@ -186,8 +189,9 @@ test('no unreceipted number appears in the launch drafts', () => {
     const prose = textOf(draft(f))
       .replace(URL_RE, ' ')       // URLs carry version and issue digits
       .replace(PATH_RE, ' ')      // a cited filename's digits are part of the citation
-      .replace(VERSION_RE, ' ')   // v0.14.0 / 0.9.0 identify an engine, they do not claim anything
-      .replace(IDENTIFIER_RE, ' '); // sha256, Type-2: digits belonging to a name
+      .replace(VERSION_RE, ' ')     // v0.14.0 / 0.9.0 identify an engine, they do not claim anything
+      .replace(IDENTIFIER_RE, ' ')  // sha256, Type-2: digits belonging to a name
+      .replace(DATE_RE, ' ');       // a posting date is metadata, not a claim
     for (const m of prose.matchAll(/\d+(?:[.,]\d+)*/g)) {
       assert.ok(Object.hasOwn(RECEIPTS, m[0]),
         `${DRAFT_DIR}/${f} states "${m[0]}" with no receipt — every launch number traces to a committed artifact`);

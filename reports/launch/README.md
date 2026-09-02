@@ -8,7 +8,7 @@ Written 2026-09-02, against the released tag `v0.14.0` (`2e97e29`). The LAUNCH-K
 | File | Channel | Status |
 |---|---|---|
 | `show-hn.md` | Show HN (news.ycombinator.com) | **Operator-owed** — submission requires an account; see §Operator actions |
-| `github-release-discussion.md` | GitHub Discussions, Announcements | **POSTED** — see the ledger row for the URL |
+| `github-release-discussion.md` | GitHub Discussions, Announcements | **POSTED** — https://github.com/GhostlyGawd/codeweb/discussions/89 |
 | `receipts.md` | — | The claim→receipt table both drafts are bound to |
 
 ## The rule these drafts follow
