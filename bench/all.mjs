@@ -62,7 +62,25 @@ const graph = JSON.parse(readFileSync(join(ws, 'graph.json'), 'utf8'));
 // noise; on tiny fixture targets both terms are ~100ms of node spawns and the ratio is jitter
 // (a CI runner measured 2.17x on a two-file fixture). Below the floor it reports null with the
 // reason, and the gate skips it — explicitly, never silently.
+//
+// The floor is applied to the baseline's WORK component (wall time minus this machine's own
+// process-startup cost), not to its raw wall time. A raw-ms floor conflates "the target is big
+// enough to measure" with "this machine is slow": on a shared windows runner a node spawn alone
+// costs ~300ms, so a two-file fixture cleared a raw 300ms floor on startup overhead alone and
+// repo-scale stage budgets were then applied to a 3-symbol graph — reporting jitter as
+// `stage optimize: 1.29x regex baseline > 1.2x`. Subtracting the measured spawn cost makes the
+// predicate mean what its comment always said, and cancels machine speed instead of encoding it.
 const BASELINE_FLOOR_MS = 300;
+// Median of a few bare `node -e ''` spawns: the irreducible cost every timed sample here pays.
+const spawnFloorMs = (() => {
+  const s = [];
+  for (let i = 0; i < 5; i++) {
+    const t0 = performance.now();
+    spawnSync(NODE, ['-e', ''], { encoding: 'utf8', env: ENV });
+    s.push(performance.now() - t0);
+  }
+  return Math.round(s.sort((a, b) => a - b)[Math.floor(s.length / 2)]);
+})();
 // finding 13(a): per-stage wall times from run.mjs's own `[run] <stage> done in Xms` stderr lines,
 // each gated as a factor of the regex-extract baseline. The previous only-timing-gate measured the
 // stage-REUSE path (which skips overlap/optimize entirely) — a 10x regression in any post-graph
@@ -73,17 +91,20 @@ const stageTimesOf = (stderr) => {
   return out;
 };
 const coldStages = stageTimesOf(cold.stderr);
-const measurable = regexBase.ms >= BASELINE_FLOOR_MS;
+const baselineWorkMs = Math.max(0, regexBase.ms - spawnFloorMs);
+const measurable = baselineWorkMs >= BASELINE_FLOOR_MS;
 const factorOf = (ms) => (measurable && ms != null ? +(ms / regexBase.ms).toFixed(2) : null);
 const pipeline = {
   target: opt.target === ROOT ? 'codeweb (self)' : opt.target,
   symbols: graph.nodes.length, edges: graph.edges.length,
   coldMs: cold.ms, warmMs: warm.ms, stagesReused,
   regexExtractBaselineMs: regexBase.ms,
+  spawnFloorMs,
+  baselineWorkMs,
   stageMs: coldStages,
   stageFactorsVsRegexBaseline: Object.fromEntries(Object.entries(coldStages).map(([k, v]) => [k, factorOf(v)])),
   warmFactorVsRegexBaseline: measurable ? +(warm.ms / regexBase.ms).toFixed(2) : null,
-  ...(measurable ? {} : { warmFactorNote: `target too small to measure (baseline ${regexBase.ms}ms < ${BASELINE_FLOOR_MS}ms floor) — the factor gates only at repo scale` }),
+  ...(measurable ? {} : { warmFactorNote: `target too small to measure (baseline ${regexBase.ms}ms − ${spawnFloorMs}ms spawn = ${baselineWorkMs}ms work < ${BASELINE_FLOOR_MS}ms floor) — the factor gates only at repo scale` }),
 };
 
 // ---------------------------------------------------------------- advisors (finding 13(c))
@@ -226,7 +247,7 @@ else {
     breakCyclesMs: bc.ms,
     breakCyclesFactorVsRegexBaseline: factorOf(bc.ms),
     campaignMs: camp.status === 0 ? camp.ms : null,
-    ...(measurable ? {} : { factorNote: `baseline ${regexBase.ms}ms < ${BASELINE_FLOOR_MS}ms floor — factor gates only at repo scale` }),
+    ...(measurable ? {} : { factorNote: `baseline ${regexBase.ms}ms − ${spawnFloorMs}ms spawn = ${baselineWorkMs}ms work < ${BASELINE_FLOOR_MS}ms floor — factor gates only at repo scale` }),
   };
 }
 
@@ -243,6 +264,10 @@ if (!opt.check) console.log(`[bench:all] wrote ${opt.out}`);
 
 if (opt.gate) {
   const violations = [];
+  // A skipped promise is not a kept one. The factor gates go quiet below the measurement floor by
+  // design, so say which target was too small to judge — otherwise "all promises hold" reads
+  // identically whether the factor budgets were enforced or silently inapplicable.
+  if (!measurable) console.log(`[bench:all] factor budgets NOT enforced: ${pipeline.target} baseline ${regexBase.ms}ms − ${spawnFloorMs}ms spawn = ${baselineWorkMs}ms work < ${BASELINE_FLOOR_MS}ms floor`);
   if (!session.allValidJson) violations.push('session: a response failed to parse or errored');
   if (session.totalTokensApprox > budgets.sessionTokensMax) violations.push(`session: ${session.totalTokensApprox} tokens > sessionTokensMax ${budgets.sessionTokensMax}`);
   for (const [tool, bytes] of Object.entries(perTool)) if (bytes > budgets.perToolBytesMax) violations.push(`tool ${tool}: ${bytes}B > perToolBytesMax ${budgets.perToolBytesMax}`);

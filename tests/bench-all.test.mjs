@@ -65,6 +65,30 @@ test('B2: a lowered budget fails the gate by name; real budgets pass', () => {
   } finally { cleanup(dir); }
 });
 
+// The measurability predicate is what stands between a toy fixture and the repo-scale stage
+// budgets. It went wrong by measuring the WRONG QUANTITY: a raw-ms floor on the baseline's wall
+// time reads a slow machine as a big target, because a bare node spawn on a shared windows runner
+// costs about as much as the floor itself. ci.yml's windows leg then gated a 3-symbol graph on
+// budgets set from a 1,573-symbol self-map and reported jitter as a broken promise.
+test('B2b: a toy fixture is unmeasurable however slow the machine is (the stage budgets stay off)', () => {
+  const dir = tmpDir('codeweb-benchall-');
+  try {
+    writeTree(dir, FIXTURE);
+    const { r, out } = runAll(dir);
+    assert.equal(r.status, 0, r.stderr);
+    const p = readJSON(out).pipeline;
+    assert.ok(p.spawnFloorMs > 0, 'the run measures this machine\'s own process-startup cost');
+    assert.equal(p.baselineWorkMs, Math.max(0, p.regexExtractBaselineMs - p.spawnFloorMs),
+      'work = baseline wall time minus spawn cost');
+    // Two files and three symbols: no machine, however slow, makes this a measurable target.
+    assert.equal(p.warmFactorVsRegexBaseline, null, 'the warm factor is skipped on a toy fixture');
+    for (const [stage, factor] of Object.entries(p.stageFactorsVsRegexBaseline)) {
+      assert.equal(factor, null, `stage ${stage} must not carry a factor on an unmeasurable target`);
+    }
+    assert.match(p.warmFactorNote, /spawn|work/, 'the skip states which quantity fell below the floor');
+  } finally { cleanup(dir); }
+});
+
 test('B5: --check enforces the budgets without rewriting the receipt', () => {
   const dir = tmpDir('codeweb-benchall-');
   try {

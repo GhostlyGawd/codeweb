@@ -12,7 +12,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, sep } from 'node:path';
 import { PLUGIN_ROOT } from './helpers.mjs';
 
 const read = (p) => readFileSync(join(PLUGIN_ROOT, p), 'utf8');
@@ -95,9 +95,15 @@ const HISTORICAL = {
   'docs/product-review-2026-07-20.md': /\*\*Date:\*\* 2026-07-20/,
 };
 
+// `join` yields `docs\changelog.html` on Windows, so every key in HISTORICAL and every expected
+// path in the non-vacuity list missed — the exemption silently stopped applying and the sweep
+// reported four dated changelog entries as live regressions on every windows leg of ci.yml.
+// Paths are compared as data here, so they are normalized to one separator at the boundary.
+const toPosix = (p) => p.split(sep).join('/');
+
 function walk(rel, out = []) {
   const abs = join(PLUGIN_ROOT, rel);
-  if (statSync(abs).isFile()) { if (TEXT_EXT.test(rel)) out.push(rel); return out; }
+  if (statSync(abs).isFile()) { if (TEXT_EXT.test(rel)) out.push(toPosix(rel)); return out; }
   for (const entry of readdirSync(abs)) walk(join(rel, entry), out);
   return out;
 }
@@ -112,7 +118,7 @@ test('no live surface still claims eleven languages (historical records exempt, 
         .map((line, i) => (STALE_COUNT_RE.test(line) ? `${rel}:${i + 1}: ${line.trim()}` : null))
         .filter(Boolean);
       if (!hits.length) continue;
-      const evidence = HISTORICAL[rel.split('/').join('/')];
+      const evidence = HISTORICAL[rel];
       if (!evidence) { live.push(...hits); continue; }
       assert.match(text, evidence, `${rel} is exempt as a historical record — it must carry its date`);
       historicalSeen.add(rel);
@@ -132,8 +138,8 @@ test('the sweep actually reads the surfaces it claims to (non-vacuity)', () => {
     'commands/codeweb.md',
     'skills/codebase-anatomy/references/engine-detection.md',
     'editor/vscode-codeweb/extension.js',
-    join('site', 'content', 'product.html'),
-    join('docs', 'reference.md'),
+    'site/content/product.html',
+    'docs/reference.md',
   ]) {
     assert.ok(files.includes(expected), `the sweep must cover ${expected}`);
   }
@@ -143,6 +149,22 @@ test('the sweep actually reads the surfaces it claims to (non-vacuity)', () => {
   assert.ok(STALE_COUNT_RE.test('all 11 native languages'), 'digit form matches');
   assert.ok(STALE_COUNT_RE.test('the 11-language regex scan'), 'hyphenated singular matches');
   assert.ok(!STALE_COUNT_RE.test('thirteen native languages'), 'the current count is not a hit');
+});
+
+// The sweep's exemption lookup and its non-vacuity list are both keyed by PATH STRING, so the
+// separator the walk emits is load-bearing. Under `join`, both keys missed on Windows: the dated
+// changelog entries read as live regressions and the whole windows leg of ci.yml went red while
+// ubuntu stayed green. Asserted as a property of the emitted paths rather than of the platform,
+// so it fails on the posix runners too if the normalization is ever dropped.
+test('the walk emits separator-independent keys, so the exemptions apply on every platform', () => {
+  const files = SWEEP_ROOTS.flatMap((r) => walk(r));
+  const backslashed = files.filter((f) => f.includes('\\'));
+  assert.deepEqual(backslashed, [], 'walk() must emit posix-separated paths on every platform');
+  // Every exemption key must be a path the walk can actually produce, or it silently stops
+  // exempting the moment the separator changes — which is precisely how this regressed.
+  for (const key of Object.keys(HISTORICAL)) {
+    assert.ok(files.includes(key), `HISTORICAL key ${key} is not a path the walk emits`);
+  }
 });
 
 // The homepage lead and the product page chips both render from product.languages, so the built
