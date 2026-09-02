@@ -147,3 +147,34 @@ Everything is already written: field-by-field values and copy-paste descriptions
 `reports/submissions/README.md`, which also records the targets that are already done
 (mcp.directory submitted, punkpeye/awesome-mcp-servers PR #13510 open, official MCP registry
 current). Roughly 12 minutes of pasting in total.
+
+## 10. The Show HN post needs your account (2026-09-02)
+
+The v0.14.0 launch posts are written, receipt-bound, and committed in `reports/launch/`. One of
+the two channels is already live and one needs you:
+
+- **GitHub Discussions (Announcements)** — **posted**, no action needed. The announcement is on
+  the repo itself; the URL is in the discussion list.
+- **Show HN** — **needs your login.** https://news.ycombinator.com/submit answers "You have to be
+  logged in to submit", there is no API route, and HN's guidelines expect the submitter to be the
+  person behind the project (the same reason the awesome-claude-code form above is yours).
+
+**Steps (~3 min).** Everything to paste is in `reports/launch/show-hn.md`:
+
+1. Sign in at https://news.ycombinator.com/login
+2. Open https://news.ycombinator.com/submit
+3. Title and URL from the draft's front matter, then post the draft's "First comment" as the
+   first comment on your own submission.
+
+The draft also carries prepared answers for the three questions the post is most likely to draw
+(LSP, grep, business model), and the thread discipline: answer with the receipt, link the
+artifact, and if a number does not re-derive, fix the receipt rather than defend the number.
+
+**One thing to know before you post.** The drafts say **32 pre-registered checks, all 32 pass** —
+not the "32 / 33" the research page still shows. The 33rd (H7, sharded-subgraph query
+equivalence) measured a feature deliberately deleted in July, and the repaired harness now
+records it under `retiredHypotheses`; the six regenerated receipts enumerate 32 checks and all 32
+pass. The research page and `bench/preregistration.md` still carry the older framing. That is a
+copy correction across two claim-bearing surfaces, tracked separately — the posts simply do not
+restate the stale number. If someone in the thread notices the mismatch, the honest answer is
+exactly the above.
