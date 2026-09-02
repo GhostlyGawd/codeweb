@@ -173,23 +173,27 @@ test('every artifact the drafts draw numbers from was regenerated inside the mis
 });
 
 test('the unstamped correctness receipt belongs to the same fresh run as the stamped ones', () => {
-  // correctness-query.json records no timestamp, only the engine commit it ran against. Its
-  // freshness is established structurally instead: bench/run-all.mjs writes all six receipts in
-  // one run, and the five that DO carry stamps are all inside the window, so a correctness
-  // receipt from an older run would have to disagree with them about the engine commit.
+  // correctness-query.json records no timestamp of its own, only the engine commit it ran
+  // against. bench/run-all.mjs writes all six receipts in a single run, so its freshness is
+  // established by cohort rather than by a clock: it must carry the repaired oracle's signature,
+  // and it must still hold the values the drafts quote.
+  //
+  // Deliberately NOT done by resolving `commit` through git: the gate runs on a shallow clone
+  // (actions/checkout defaults to depth 1), where `git log <sha>` fails with "bad object" for
+  // any commit but the one fetched. A freshness check that needs history only works on a full
+  // clone — which is how this suite went red on the protected gate while passing locally.
   const correctness = bench('bench/results/correctness-query.json');
   assert.match(correctness.commit, /^[0-9a-f]{40}$/, 'correctness-query.json must record the engine commit it ran against');
 
-  // The cohort check: the commit it names must be an ancestor of HEAD and no older than the
-  // mission window's start, which is what "this run happened during the mission" means for a
-  // receipt with no clock of its own.
-  const stamped = execFileSync('git', ['log', '-1', '--format=%cI', correctness.commit],
-    { cwd: PLUGIN_ROOT, encoding: 'utf8' }).trim();
-  assert.ok(Date.parse(stamped) >= FRESH_AFTER,
-    `correctness-query.json ran against ${correctness.commit.slice(0, 7)} (${stamped}), before the mission window`);
+  // The repair (5bca205) taught the oracle to walk `ref` edges, which is what took H3 from 10
+  // disagreements to 0 and is the signature of a post-repair run. A pre-repair receipt cannot
+  // show every family at zero.
+  const notZero = correctness.perHypothesis.filter((h) => h.value !== 0 || h.passed !== true);
+  assert.deepEqual(notZero.map((h) => h.id), [],
+    'correctness-query.json records a non-zero family — this is not a post-repair run');
 
-  // And it must still be the run the other receipts came from: all six are written together, so
-  // the summed comparison count the drafts quote has to match what this file records right now.
+  // And it must still hold the total the drafts print. All six receipts are written together, so
+  // a correctness file from an older run would disagree here.
   const total = correctness.perHypothesis.reduce((n, h) => n + h.comparisons, 0);
   assert.equal(total, 497864, 'the correctness receipt no longer sums to the figure the drafts quote — re-run bench/run-all.mjs');
 });
