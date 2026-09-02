@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "codeweb — your agents break less code and burn fewer tokens. Deterministic call/import graph, 28 MCP tools, ambient pre/post-edit hooks, and a self-contained interactive report.",
-    "version": "0.13.0"
+    "version": "0.14.0"
   },
   "plugins": [
     {

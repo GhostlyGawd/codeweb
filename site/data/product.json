@@ -285,11 +285,6 @@
           "id": "F9",
           "name": "Incremental edges",
           "desc": "Per-file edge cache — byte-identical to a full extract, re-derived only for changed files."
-        },
-        {
-          "id": "F10",
-          "name": "Sharded subgraphs",
-          "desc": "Answer queries from one shard + a boundary index, same result as the monolith."
         }
       ]
     }
@@ -368,8 +363,8 @@
     {
       "claim": "Sub-quadratic scaling",
       "tag": "validated",
-      "metric": "exponent b=0.33, CI [0.13, 0.53]",
-      "sample": "100–3,201 symbols",
+      "metric": "exponent b=0.34, CI [0.11, 0.57]",
+      "sample": "100–3,215 symbols",
       "source": "performance.json"
     },
     {
@@ -455,7 +450,7 @@
     },
     {
       "instead_of": "\"Sub-second every time\"",
-      "we_say": "Typical query ~95–120 ms; worst-case p95 264 ms on 3,201 symbols, where Node startup (~63 ms) dominates."
+      "we_say": "Typical query ~43–50 ms; worst-case p95 51.9 ms on 3,215 symbols, where Node startup (~29 ms) dominates."
     },
     {
       "instead_of": "\"Beats commercial tools\"",

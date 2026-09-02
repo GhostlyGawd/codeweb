@@ -86,8 +86,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }   # required — the gate diffs against the PR base
-      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.13.0
-        with: { target: src, comment: true, codeweb-ref: v0.13.0 }   # comment posts the review on the PR
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.14.0
+        with: { target: src, comment: true, codeweb-ref: v0.14.0 }   # comment posts the review on the PR
 ```
 
 Locally: `node scripts/ci-gate.mjs --base <ref> [--target <subdir>]`. Pure removals never trip the

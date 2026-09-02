@@ -19,7 +19,7 @@
 <meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
 <meta name="theme-color" content="#060608">
 <link rel="canonical" href="https://ghostlygawd.github.io/codeweb/changelog.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.13.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.14.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
@@ -57,6 +57,82 @@
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
 <p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h2 class="cl-ver">[0.14.0] - 2026-09-02</h2>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li><strong>C and C++ join as first-class languages — 13 native languages ship.</strong> Both follow the</li>
+</ul>
+<p>  existing per-language contract (<code>langOf</code> + rules, grammar dispatch, regex-tier fallback so the</p>
+<p>  AST tier stays optional, fixture-backed extractor suites). <code>tree-sitter-cpp.wasm</code> comes from</p>
+<p>  the already-pinned <code>@vscode/tree-sitter-wasm@0.3.1</code> (ABI 14); <code>tree-sitter-c.wasm</code> comes from</p>
+<p>  the tree-sitter org's own GitHub release v0.24.2 (ABI 15) — a second trusted grammar source</p>
+<p>  ratified by charter amendment A2, with <code>PROVENANCE.md</code> gaining a source column and a sha256</p>
+<p>  per wasm. The language count now propagates to every surface by NAME, gated by</p>
+<p>  <code>tests/lang-surfaces.test.mjs</code>, which encodes the live-versus-historical distinction so dated</p>
+<p>  records stay untouched.</p>
+<ul>
+<li><strong>The free-forever boundary and the Teams price intent are published.</strong> New site pages state</li>
+</ul>
+<p>  the ratified contract — anything that runs on one laptop against one repo is free forever;</p>
+<p>  money buys hosting, multi-repo aggregation, and human attention — alongside the hosted tier's</p>
+<p>  price intent (€10 per active author per month, active author = committed in the last 90 days,</p>
+<p>  flat and unlimited). Both pages ride every prose sweep via <code>PROSE_FILES</code>, and</p>
+<p>  <code>tests/boundary-pricing.test.mjs</code> pins the wording on both sides of the boundary.</p>
+<ul>
+<li><strong>Two launch pages that argue on re-derivable numbers.</strong> An LSP FAQ ("why not just an LSP")</li>
+</ul>
+<p>  and a comparison page, both first-class in the site's page table, the sitemap, and</p>
+<p>  <code>PROSE_FILES</code>, and both reachable by clicking from the homepage. Every number on them traces</p>
+<p>  to a committed receipt; the honesty ledger renders straight from <code>product.json</code>'s don't-claim</p>
+<p>  list, so a receipt re-run moves the page.</p>
+<ul>
+<li><strong>Three upgrade moments, and the zones that stay ask-free.</strong> The gate comment's footer carries</li>
+</ul>
+<p>  an org-dashboard line, the trend rail nudges at five or more snapshots in text mode only, and</p>
+<p>  the report footer keeps its attribution. The anti-placements are hard rules with tests: never</p>
+<p>  in an MCP tool response, never in a hook card, never on an error path, computed only from</p>
+<p>  local counters, one line, and suppressible via <code>CODEWEB_NO_PROMO=1</code>.</p>
+<h3 class="cl-grp">Changed</h3>
+<ul>
+<li><strong>The site and README lead with the deterministic regression gate.</strong> The gate is the story;</li>
+</ul>
+<p>  the map and graph support it. The ratified identity line is unchanged and still enforced</p>
+<p>  verbatim on all four surfaces.</p>
+<ul>
+<li><strong>The gate Action's examples pin a release tag, and gate adoption is observable.</strong> Copy-paste</li>
+</ul>
+<p>  surfaces name the shipped version instead of <code>@main</code> (the release roll now keeps them</p>
+<p>  current), and the weekly acquisition ledger reports the real status of its adoption search</p>
+<p>  instead of silently recording a null when the search cannot connect.</p>
+<h3 class="cl-grp">Fixed</h3>
+<ul>
+<li><strong>Four benchmark instruments repaired, so every number re-derives.</strong> <code>node bench/run-all.mjs</code></li>
+</ul>
+<p>  exits 0 again. Every failure was in the instrument, not the product, and all four reproduce at</p>
+<p>  pre-release HEAD: the correctness-query oracle dropped <code>ref</code> edges the shipped cycle walk has</p>
+<p>  always followed (all five families now measure 0 disagreements over 497,864 comparisons);</p>
+<p>  edit-safety imported a module deleted in July and crashed at import, taking six hypotheses</p>
+<p>  down with it; the auxiliary harness flagged the footer's hyperlink as a network fetch and</p>
+<p>  carried a stale tool-count table; and the performance harness tripped over a <code>/tmp</code> symlink.</p>
+<p>  No published number moved as a consequence of the repairs.</p>
+<ul>
+<li><strong>Release drift audit (<code>CLAUDE.md</code>, 150 · Drift Audit) — two claim-bearing corrections.</strong></li>
+</ul>
+<p>  <code>product.json</code>'s F10 "Sharded subgraphs" (mirrored to the product page) advertised a</p>
+<p>  capability whose implementation was deleted on 2026-07-19 by a measured decision recorded in</p>
+<p>  <code>bench/results/scale-typescript.json</code> → <code>previous.shardsDecision</code>: the monolithic graph loads</p>
+<p>  fast enough at 16k symbols, and the answer-preserving shard contract was never wired to a CLI</p>
+<p>  or MCP surface. The feature line is withdrawn rather than restored — the code is gone, and git</p>
+<p>  history holds it if a 100k-symbol case ever appears. This resolves charter row C9 the way C8</p>
+<p>  was resolved: claim-bearing copy does not ship a feature that does not exist. In the same</p>
+<p>  pass, the latency and scaling figures on the honesty ledger and the claim table were refreshed</p>
+<p>  from the regenerated <code>bench/results/performance.json</code> — they had been stale in the pessimistic</p>
+<p>  direction (worst-case p95 51.9 ms on 3,215 symbols, not 264 ms on 3,201).</p>
+<ul>
+<li><strong>The MCP registry manifest's description said 27 tools while 28 ship.</strong> <code>server.json</code>'s</li>
+</ul>
+<p>  description was the one tool-count surface no sweep read; it now self-heals through the</p>
+<p>  release roll like every other mirrored count.</p>
 <h2 class="cl-ver">[0.13.0] - 2026-08-17</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
@@ -2341,7 +2417,7 @@
       </div>
     </div>
     <div class="footer-base">
-      <span>codeweb v0.13.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
+      <span>codeweb v0.14.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
       <span>Deterministic build · zero third-party requests on this page</span>
     </div>
   </div>

@@ -11,6 +11,68 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 _Nothing yet. Open work lands here before it ships in the next tagged release._
 
+## [0.14.0] - 2026-09-02
+
+### Added
+- **C and C++ join as first-class languages — 13 native languages ship.** Both follow the
+  existing per-language contract (`langOf` + rules, grammar dispatch, regex-tier fallback so the
+  AST tier stays optional, fixture-backed extractor suites). `tree-sitter-cpp.wasm` comes from
+  the already-pinned `@vscode/tree-sitter-wasm@0.3.1` (ABI 14); `tree-sitter-c.wasm` comes from
+  the tree-sitter org's own GitHub release v0.24.2 (ABI 15) — a second trusted grammar source
+  ratified by charter amendment A2, with `PROVENANCE.md` gaining a source column and a sha256
+  per wasm. The language count now propagates to every surface by NAME, gated by
+  `tests/lang-surfaces.test.mjs`, which encodes the live-versus-historical distinction so dated
+  records stay untouched.
+- **The free-forever boundary and the Teams price intent are published.** New site pages state
+  the ratified contract — anything that runs on one laptop against one repo is free forever;
+  money buys hosting, multi-repo aggregation, and human attention — alongside the hosted tier's
+  price intent (€10 per active author per month, active author = committed in the last 90 days,
+  flat and unlimited). Both pages ride every prose sweep via `PROSE_FILES`, and
+  `tests/boundary-pricing.test.mjs` pins the wording on both sides of the boundary.
+- **Two launch pages that argue on re-derivable numbers.** An LSP FAQ ("why not just an LSP")
+  and a comparison page, both first-class in the site's page table, the sitemap, and
+  `PROSE_FILES`, and both reachable by clicking from the homepage. Every number on them traces
+  to a committed receipt; the honesty ledger renders straight from `product.json`'s don't-claim
+  list, so a receipt re-run moves the page.
+- **Three upgrade moments, and the zones that stay ask-free.** The gate comment's footer carries
+  an org-dashboard line, the trend rail nudges at five or more snapshots in text mode only, and
+  the report footer keeps its attribution. The anti-placements are hard rules with tests: never
+  in an MCP tool response, never in a hook card, never on an error path, computed only from
+  local counters, one line, and suppressible via `CODEWEB_NO_PROMO=1`.
+
+### Changed
+- **The site and README lead with the deterministic regression gate.** The gate is the story;
+  the map and graph support it. The ratified identity line is unchanged and still enforced
+  verbatim on all four surfaces.
+- **The gate Action's examples pin a release tag, and gate adoption is observable.** Copy-paste
+  surfaces name the shipped version instead of `@main` (the release roll now keeps them
+  current), and the weekly acquisition ledger reports the real status of its adoption search
+  instead of silently recording a null when the search cannot connect.
+
+### Fixed
+- **Four benchmark instruments repaired, so every number re-derives.** `node bench/run-all.mjs`
+  exits 0 again. Every failure was in the instrument, not the product, and all four reproduce at
+  pre-release HEAD: the correctness-query oracle dropped `ref` edges the shipped cycle walk has
+  always followed (all five families now measure 0 disagreements over 497,864 comparisons);
+  edit-safety imported a module deleted in July and crashed at import, taking six hypotheses
+  down with it; the auxiliary harness flagged the footer's hyperlink as a network fetch and
+  carried a stale tool-count table; and the performance harness tripped over a `/tmp` symlink.
+  No published number moved as a consequence of the repairs.
+- **Release drift audit (`CLAUDE.md`, 150 · Drift Audit) — two claim-bearing corrections.**
+  `product.json`'s F10 "Sharded subgraphs" (mirrored to the product page) advertised a
+  capability whose implementation was deleted on 2026-07-19 by a measured decision recorded in
+  `bench/results/scale-typescript.json` → `previous.shardsDecision`: the monolithic graph loads
+  fast enough at 16k symbols, and the answer-preserving shard contract was never wired to a CLI
+  or MCP surface. The feature line is withdrawn rather than restored — the code is gone, and git
+  history holds it if a 100k-symbol case ever appears. This resolves charter row C9 the way C8
+  was resolved: claim-bearing copy does not ship a feature that does not exist. In the same
+  pass, the latency and scaling figures on the honesty ledger and the claim table were refreshed
+  from the regenerated `bench/results/performance.json` — they had been stale in the pessimistic
+  direction (worst-case p95 51.9 ms on 3,215 symbols, not 264 ms on 3,201).
+- **The MCP registry manifest's description said 27 tools while 28 ship.** `server.json`'s
+  description was the one tool-count surface no sweep read; it now self-heals through the
+  release roll like every other mirrored count.
+
 ## [0.13.0] - 2026-08-17
 
 ### Added
@@ -1876,7 +1938,8 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.10.0...v0.11.0

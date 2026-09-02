@@ -27,10 +27,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0          # required — the gate diffs against the PR base sha
-      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.13.0
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.14.0
         with:
           target: src             # subdirectory to analyze (default: .)
-          codeweb-ref: v0.13.0    # pin the engine too — see below
+          codeweb-ref: v0.14.0    # pin the engine too — see below
           comment: true           # post the structural review as a sticky PR comment
           history: true           # keep a cross-PR trend line in the comment (Actions cache)
 ```
@@ -55,10 +55,10 @@ matrix — each package gets its own verdict, comment, and (with `history: true`
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.13.0
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.14.0
         with:
           target: ${{ matrix.target }}
-          codeweb-ref: v0.13.0
+          codeweb-ref: v0.14.0
 ```
 
 ## The gate as a reviewer (`comment: true`)

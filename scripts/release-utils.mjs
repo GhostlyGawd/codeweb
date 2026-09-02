@@ -154,9 +154,15 @@ export function syncTargets(version, count) {
     },
     {
       // SEO F2: the MCP-registry manifest tracks the package version (top-level + the npm
-      // package entry) so a release republish never ships a stale shelf listing.
+      // package entry) so a release republish never ships a stale shelf listing. Its
+      // description is a tool-count surface too — it shipped "27 MCP tools" through the whole
+      // of 0.13.0 because no sweep reads this file, the same failure package.json's sub below
+      // was added for.
       file: 'server.json',
-      subs: [[/("version":\s*")[^"]+(")/g, `$1${version}$2`]],
+      subs: [
+        [/("version":\s*")[^"]+(")/g, `$1${version}$2`],
+        [/(\d+)(\s+MCP tools)/, `${count}$2`],
+      ],
     },
     {
       file: 'README.md',
