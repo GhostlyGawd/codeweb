@@ -3,7 +3,7 @@
     <div class="section-head">
       <span class="eyebrow">Research</span>
       <h1>Does codeweb work? We pre-registered the answer.</h1>
-      <p class="lead">Before collecting any data, we wrote down 33 pass/fail checks across determinism, correctness, detection accuracy, performance, and agent outcomes — then ran them against six real repositories pinned by SHA and independent reference implementations. The raw data is committed in the repo.</p>
+      <p class="lead">Before collecting any data, we wrote down pass/fail checks across determinism, correctness, detection accuracy, performance, and agent outcomes — then ran them against six real repositories pinned by SHA and independent reference implementations. 32 checks measure code that still ships, and all 32 pass. The raw data is committed in the repo.</p>
     </div>
     <div class="stat-strip">{{headline_stats}}</div>
     <p class="figcap" style="margin-top:var(--s-3)">Receipts are frozen files, not live counters: the ledger below was last re-baselined 2026-07-23, and the efficiency pilot ran on v0.9.0. Every claim links its committed source.</p>
@@ -17,7 +17,7 @@
       <h2>Designed to resist reward hacking</h2>
     </div>
     <div class="grid cols-2">
-      <div class="card"><h3>Pre-registered</h3><p>The 33 checks and their pass criteria were fixed in writing before data collection — so the bar couldn't move to fit the result.</p></div>
+      <div class="card"><h3>Pre-registered</h3><p>The checks and their pass criteria were fixed in writing before data collection — so the bar couldn't move to fit the result. One check was retired when the feature it measured was deleted; the remaining 32 all pass.</p></div>
       <div class="card"><h3>Independent oracles</h3><p>Cycles, impact, and callers are checked against separate implementations (Kosaraju SCC, reverse-BFS, an edit applier) — not against codeweb's own logic.</p></div>
       <div class="card"><h3>Frozen truth</h3><p>The efficiency pilot grades agents against a hand-verified caller set, reconciled with an exhaustive independent grep. Coverage gaps count against codeweb, honestly.</p></div>
       <div class="card"><h3>A/B levers</h3><p>Every bug fix sits behind a reproducible legacy lever, so re-running proves the fix is load-bearing rather than coincidental.</p></div>

@@ -15,6 +15,15 @@ Create a branch and make the change. Add tests beside the changed behavior. This
 tests-first, so each behavior change must include a test that fixes the behavior in place. Run the
 two commands above, and then open a pull request.
 
+## Where to post
+
+- **A bug or a concrete change** goes in [Issues](https://github.com/GhostlyGawd/codeweb/issues).
+  Include the command you ran, the output you got, and the output you expected.
+- **A question, an idea, or a report you want to share** goes in
+  [Discussions](https://github.com/GhostlyGawd/codeweb/discussions). Release announcements are
+  posted there too.
+- **A security problem** goes through [`SECURITY.md`](SECURITY.md), never a public issue.
+
 ## What CI gates
 
 Each pull request runs these checks:

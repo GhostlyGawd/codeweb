@@ -38,7 +38,7 @@ re-verified every claim surface this week.
 
 | Claim in the post | Receipt | Where |
 |---|---|---|
-| 33 pre-registered checks, independent oracles | pre-registration + results | `bench/preregistration.md`, `bench/results/`, research page |
+| 32 pre-registered checks, all 32 passing, independent oracles | pre-registration + results | `bench/preregistration.md`, `bench/results/`, research page |
 | 490k+ comparisons, zero disagreements | correctness suite | `bench/results/correctness-query.json` (frozen 2026-07-23) |
 | +0.31 recall at equal cost (v0.9.0 pilot) | efficiency pilot, 5 reps | `bench/experiments/efficiency-pilot.reps5-v090.json` |
 | The null, published | H18 + non-replicating token savings | research page "what didn't replicate" section |
