@@ -15,6 +15,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { PLUGIN_ROOT, readJSON } from './helpers.mjs';
 
@@ -29,10 +30,11 @@ const draft = (f) => read(`${DRAFT_DIR}/${f}`);
 // from a launch draft.
 const FRESH_AFTER = Date.parse('2026-08-17T00:00:00Z');
 
-// The six study receipts + the standing budget receipt. Each must carry a stamp inside the
-// window, or a number sourced from it must not appear in a draft.
+// The study + budget receipts, and the field carrying each one's own timestamp. Every entry here
+// is TRACKED and self-stamping, so the freshness gate works in a fresh clone (CI) exactly as it
+// does locally. `correctness-query.json` is deliberately absent: it carries no timestamp of its
+// own — see the run-cohort check below for how its freshness is established instead.
 const FRESH_ARTIFACTS = {
-  'bench/results/correctness-query.json': null, // stamped via the run summary, see below
   'bench/results/edit-safety.json': 'generatedAt',
   'bench/results/auxiliary.json': 'generatedAt',
   'bench/results/detection-accuracy.json': 'generatedAt',
@@ -40,6 +42,12 @@ const FRESH_ARTIFACTS = {
   'bench/results/determinism.json': 'generatedAt',
   'bench/results/benchmarks.json': 'ranAt',
 };
+
+// bench/run-all.mjs writes a `_summary.json` recording the run, but `bench/results/_*` is
+// gitignored (a reproduction output, not a receipt). It is therefore present locally and absent
+// in CI, and the gate must not depend on it: an assertion that silently vanishes in the
+// environment that matters is not an assertion.
+const RUN_SUMMARY = 'bench/results/_summary.json';
 
 const dig = (obj, path) => path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
 
@@ -155,19 +163,49 @@ test('every artifact the drafts draw numbers from was regenerated inside the mis
   // The receipts table's whole premise. A pre-mission artifact can be perfectly true and still be
   // the wrong thing to quote in a launch post, because nothing around the number says how old the
   // engine behind it is.
-  const summary = bench('bench/results/_summary.json');
-  const runStamp = Date.parse(summary.env.date);
-  assert.ok(runStamp >= FRESH_AFTER,
-    `bench/results/_summary.json records a run at ${summary.env.date}, before the mission window`);
-
   for (const [path, stampField] of Object.entries(FRESH_ARTIFACTS)) {
     assert.ok(existsSync(join(PLUGIN_ROOT, path)), `${path} is cited by the drafts but missing`);
-    if (!stampField) continue; // correctness-query carries no own stamp; the run summary above covers it
     const stamp = dig(bench(path), stampField);
     assert.ok(stamp, `${path} has no ${stampField} stamp — freshness cannot be established`);
     assert.ok(Date.parse(stamp) >= FRESH_AFTER,
       `${path} was generated at ${stamp}, before the mission window — a launch draft must not quote it`);
   }
+});
+
+test('the unstamped correctness receipt belongs to the same fresh run as the stamped ones', () => {
+  // correctness-query.json records no timestamp, only the engine commit it ran against. Its
+  // freshness is established structurally instead: bench/run-all.mjs writes all six receipts in
+  // one run, and the five that DO carry stamps are all inside the window, so a correctness
+  // receipt from an older run would have to disagree with them about the engine commit.
+  const correctness = bench('bench/results/correctness-query.json');
+  assert.match(correctness.commit, /^[0-9a-f]{40}$/, 'correctness-query.json must record the engine commit it ran against');
+
+  // The cohort check: the commit it names must be an ancestor of HEAD and no older than the
+  // mission window's start, which is what "this run happened during the mission" means for a
+  // receipt with no clock of its own.
+  const stamped = execFileSync('git', ['log', '-1', '--format=%cI', correctness.commit],
+    { cwd: PLUGIN_ROOT, encoding: 'utf8' }).trim();
+  assert.ok(Date.parse(stamped) >= FRESH_AFTER,
+    `correctness-query.json ran against ${correctness.commit.slice(0, 7)} (${stamped}), before the mission window`);
+
+  // And it must still be the run the other receipts came from: all six are written together, so
+  // the summed comparison count the drafts quote has to match what this file records right now.
+  const total = correctness.perHypothesis.reduce((n, h) => n + h.comparisons, 0);
+  assert.equal(total, 497864, 'the correctness receipt no longer sums to the figure the drafts quote — re-run bench/run-all.mjs');
+});
+
+test('the freshness gate does not depend on a gitignored file', () => {
+  // The specific way this suite first went red in CI: it asserted against bench/results/_summary.json,
+  // which bench/run-all.mjs writes but .gitignore excludes (`bench/results/_*`). Present locally,
+  // absent in a fresh clone — so the gate passed on the machine that wrote it and failed on the
+  // one that matters. Every artifact the freshness check reads must be tracked.
+  const tracked = execFileSync('git', ['ls-files', 'bench/results'], { cwd: PLUGIN_ROOT, encoding: 'utf8' })
+    .split('\n').filter(Boolean);
+  for (const path of Object.keys(FRESH_ARTIFACTS)) {
+    assert.ok(tracked.includes(path), `${path} is not tracked — the freshness gate would vanish in a fresh clone`);
+  }
+  assert.ok(!tracked.includes(RUN_SUMMARY),
+    `${RUN_SUMMARY} is tracked now; if it became a receipt, the freshness gate may read it — until then it must not`);
 });
 
 test('the receipts table names only artifacts that exist in the tree', () => {
