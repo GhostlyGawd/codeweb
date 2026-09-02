@@ -7,17 +7,22 @@ A target is **done** when it has a live listing, an open PR, or a confirmed subm
 A target is **operator-owed** when the submission route is behind a login or a human-only form —
 those carry prepared content below, so the remaining work is paste-and-send, not authoring.
 
-Last swept: 2026-09-02.
+Last swept: 2026-09-02 (end-of-mission sweep — every row re-checked live).
+
+**Four items are owed to the operator and total roughly 12 minutes of pasting.** They are §1
+(glama claim, ~3 min), §2 (awesome-claude-code issue form, ~4 min), §4 (Anthropic community
+plugin directory, ~5 min), plus watching the mcp.directory review land. Nothing else is blocked
+on them.
 
 | Target | Status | Evidence / what is owed |
 |---|---|---|
-| Official MCP registry | **Live** | `io.github.GhostlyGawd/codeweb` v0.13.0 — published by `.github/workflows/mcp-registry.yml` (OIDC, no secret). Verify: `curl 'https://registry.modelcontextprotocol.io/v0/servers?search=codeweb'` |
-| glama.ai | **Live (auto-indexed), claim owed** | Listed at https://glama.ai/mcp/servers/GhostlyGawd/codeweb. Claiming the listing needs a Glama account — see §1 |
-| mcp.directory | **Submitted 2026-09-02** | `POST /api/submit-server` → 200 `{"ok":true,"message":"Server submitted for review!"}`. Publishes within 24 h |
-| punkpeye/awesome-mcp-servers | **PR open** | https://github.com/punkpeye/awesome-mcp-servers/pull/13510 |
+| Official MCP registry | **Live** | `io.github.GhostlyGawd/codeweb` at **0.14.0** — published by `.github/workflows/mcp-registry.yml` (OIDC, no secret). Verify: `curl 'https://registry.modelcontextprotocol.io/v0/servers?search=codeweb'` |
+| glama.ai | **Live (auto-indexed), claim owed** | Listed at https://glama.ai/mcp/servers/GhostlyGawd/codeweb. Re-checked 2026-09-02: still renders "Unclaimed" and "limited discoverability". Claiming needs a Glama account — see §1 |
+| mcp.directory | **Submitted 2026-09-02, review still pending** | `POST /api/submit-server` → 200 `{"ok":true,"message":"Server submitted for review!"}`. Their policy says within 24 h; `https://mcp.directory/servers/codeweb` was **still 404** at the end-of-mission sweep. No further action is possible from our side — it is their queue |
+| punkpeye/awesome-mcp-servers | **PR open, mergeable** | https://github.com/punkpeye/awesome-mcp-servers/pull/13510 — re-checked 2026-09-02: `state=OPEN`, `mergeable=MERGEABLE`, not a draft. Waiting on their maintainer |
 | appcypher/awesome-mcp-servers | **Not possible** | Repository is archived — GitHub refuses new PRs. Entry text kept in §3 if it is ever unarchived |
-| hesreallyhim/awesome-claude-code | **Operator owed** | Web-UI issue form only; CONTRIBUTING forbids PRs and `gh`, and requires a human submitter — see §2 |
-| Anthropic plugin directory | **Operator owed** | Both submission forms are behind an authenticated account — see §4 |
+| hesreallyhim/awesome-claude-code | **Operator owed** | Web-UI issue form only; CONTRIBUTING forbids PRs and `gh`, and requires a human submitter — see §2. Re-checked 2026-09-02: no codeweb issue exists on that repo, so nothing has been filed by anyone |
+| Anthropic plugin directory | **Operator owed** | Both submission forms are behind an authenticated account — see §4. Re-checked 2026-09-02: codeweb is absent from `anthropics/claude-plugins-community`'s `marketplace.json`, so the submission has not happened |
 
 ---
 
@@ -120,7 +125,8 @@ Both forms sit behind an authenticated account and neither exposes a public API:
 The Console form is the right route for an individual author (no Team/Enterprise org required).
 
 **Pre-flight already passed:** `claude plugin validate .` → `✔ Validation passed` (exit 0) at
-commit `d3bc53c`. The review pipeline runs this same check, so the manifest will not bounce.
+commit `d3bc53c`, and re-run at the end-of-mission sweep on the post-release HEAD — still
+`✔ Validation passed`. The review pipeline runs this same check, so the manifest will not bounce.
 
 **Operator steps (~5 min):** sign in at https://platform.claude.com/plugins/submit and submit
 with these values.
@@ -130,7 +136,7 @@ with these values.
 | Plugin name | `codeweb` |
 | Repository | `https://github.com/GhostlyGawd/codeweb` |
 | Marketplace manifest | `.claude-plugin/marketplace.json` (repo root) |
-| Version | `0.13.0` |
+| Version | `0.14.0` (the released tag; `npm view @ghostlygawd/codeweb version` is the source of truth) |
 | License | MIT |
 | Homepage | `https://ghostlygawd.github.io/codeweb/` |
 

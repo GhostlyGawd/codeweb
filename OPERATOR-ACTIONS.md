@@ -170,14 +170,18 @@ The draft also carries prepared answers for the three questions the post is most
 (LSP, grep, business model), and the thread discipline: answer with the receipt, link the
 artifact, and if a number does not re-derive, fix the receipt rather than defend the number.
 
-**One thing to know before you post.** The drafts say **32 pre-registered checks, all 32 pass** —
-not the "32 / 33" the research page still shows.
+**One thing to know before you post.** The story is **32 pre-registered checks, all 32 pass**, and
+every surface now says so — the drafts, the research page, the pre-registration receipt and the
+launch kit. The older "32 / 33" framing is gone (corrected 2026-09-02).
 
-The 33rd check (H7, sharded-subgraph query equivalence) measured a feature deliberately deleted
-in July. The repaired harness now records it under `retiredHypotheses`, and the six regenerated
-receipts enumerate 32 checks with all 32 passing.
+The 33rd check (H7, sharded-subgraph query equivalence) measured a feature deliberately deleted in
+July (`8b6cfd4`). It is recorded as retired in `bench/results/edit-safety.json` →
+`retiredHypotheses`, with its decision source, rather than dropped.
 
-`site/content/research.html` and `bench/preregistration.md` still carry the older framing. That
-correction spans two claim-bearing surfaces and is tracked separately; the posts simply do not
-restate the stale number. If someone in the thread notices the mismatch, the honest answer is
-exactly the paragraph above.
+H15, the study's published miss, now passes against its original criterion on the repaired
+harness. If someone asks why the number moved, that is the answer, and `bench/preregistration.md`
+states it on the page.
+
+The count is now derived from the six receipts by `tests/preregistration-count.test.mjs` on every
+gate run, so retiring or adding a hypothesis moves the published surfaces or fails the build —
+which is the mechanism whose absence let "33" outlive H7 for six weeks.

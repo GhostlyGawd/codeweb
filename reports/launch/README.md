@@ -37,18 +37,17 @@ context. Three figures the site legitimately publishes are therefore **absent fr
   say that, and only that. (See "A note on 32/33" below — this is a live inconsistency in the
   published copy, not something these drafts introduced.)
 
-## A note on 32/33 (pre-existing, flagged not fixed)
+## A note on 32/33 (flagged here, fixed 2026-09-02)
 
-`site/content/research.html` and `bench/preregistration.md` say "33 pre-registered checks, 32
-pass". Both predate this mission. Since then the instrument repair (`5bca205`) retired H7 with
-the feature it measured, so the six fresh receipts enumerate 32 checks and all 32 pass. The
-honest statement today is **32 of 32**, with H7 recorded as retired and H15 (the historical
-"miss") now passing on the repaired harness.
+`site/content/research.html` and `bench/preregistration.md` used to say "33 pre-registered checks,
+32 pass". Both predated this mission. The instrument repair (`5bca205`) retired H7 with the feature
+it measured, so the six fresh receipts enumerate 32 checks and all 32 pass.
 
-Reconciling the research page and the pre-registration page is a copy change across two
-claim-bearing surfaces with its own test surface, and it is not this feature's scope — the
-drafts simply refuse to restate the stale framing. Recorded for the operator in
-`OPERATOR-ACTIONS.md` §10.
+The published surfaces were reconciled in the end-of-mission sweep: the research page, its meta
+description, the pre-registration receipt and the launch kit all state **32 of 32**, with H7
+recorded as retired (with its decision source) and H15, the historical "miss", now passing against
+its original criterion. `tests/preregistration-count.test.mjs` derives the count from the receipts
+on every run, so the number cannot go stale that way again.
 
 ## Operator actions
 
