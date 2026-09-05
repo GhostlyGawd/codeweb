@@ -55,7 +55,7 @@ The existing scheduled comparison remains unchanged. No new accounts, telemetry,
 - Independent final review found three defects: report-only could suppress a crashed diff, baseline stamps could imply complete analysis, and new review details were unbounded. Regression tests reproduce all three; fixes passed independent review.
 - Independent review passed gate (6 tests), change review (9 tests), and the runnable evidence workflow (5 tests).
 - The first integrated product run passed the packed offline installation, including all four installed subcommands. Its remaining failures identified caption/navigation drift, pending regenerated screenshots, and missing local Chromium. Caption/navigation fixes are applied.
-- The new read-only product UI workflow runs the existing browser checks with an explicitly installed development browser, then captures setup, report, and change-review evidence. Final CI and image inspection are pending.
+- The new read-only product UI workflow runs the existing browser checks with an explicitly installed development browser, then captures setup, report, and change-review evidence. Final CI and the final browser rerun are pending.
 - The human pilot and maintainer case study are supplied as protocols, not claimed results.
 
 ## Final review and merge
