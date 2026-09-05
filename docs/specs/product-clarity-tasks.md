@@ -14,11 +14,11 @@ The controlling acceptance criteria are AC-13 through AC-20 in `SPEC.md`.
 | T4 | Add package setup, local diagnostics, and gate entry; add explicit report-only policy | 15, 19 | T2 | Setup and gate agent | Implemented; focused tests pass |
 | T5 | Expose change review through the package and add supporting HTML and analysis-state evidence | 16 | T2 | Change review agent | Implemented; focused tests pass |
 | T6 | Improve finding decisions, source/task actions, and exception guidance in the existing report | 17 | T2 | Report agent | Implemented; focused tests pass |
-| T7 | Refresh pinned demo, inspect screenshots, and regenerate site assets | 18 | T3, T5, T6 | Orchestrator | Pending |
+| T7 | Refresh pinned demo, inspect screenshots, and regenerate site assets | 18 | T3, T5, T6 | Orchestrator | Complete; five real frames inspected and stamped |
 | T8 | Add dated comparison, reproducible demo, recording script, and honest pilot/case-study protocols | 20 | T2 | Evidence agent or orchestrator | Implemented; focused tests pass |
-| T9 | Run focused checks, all acceptance commands, full harness, and browser checks; fix findings | All | T3–T8 | Orchestrator and reviewers | Pending |
-| T10 | Independently review final diff and acceptance coverage; resolve all blocking findings | All | T9 | Independent reviewers | Pending |
-| T11 | Create PR, verify required checks on its final commit, merge, and verify merge result | All | T10 | Orchestrator | Pending |
+| T9 | Run focused checks, all acceptance commands, full harness, and browser checks; fix findings | All | T3–T8 | Orchestrator and reviewers | Focused and browser checks pass; final CI pending |
+| T10 | Independently review final diff and acceptance coverage; resolve all blocking findings | All | T9 | Independent reviewers | Code approved; all reported blockers resolved |
+| T11 | Create PR, verify required checks on its final commit, merge, and verify merge result | All | T10 | Orchestrator | In progress; final CI and merge pending |
 
 ## Validation rules
 
@@ -60,4 +60,14 @@ The existing scheduled comparison remains unchanged. No new accounts, telemetry,
 
 ## Final review and merge
 
-Pending.
+Independent architecture review approved all code after the source-pin edge case was fixed. Protected harness paths have no changes.
+Draft PR: https://github.com/GhostlyGawd/codeweb/pull/91. Final head checks and merge are recorded in the PR, so this document does not claim a merge before GitHub confirms it.
+
+## Browser and demo evidence
+
+- Browser run https://github.com/GhostlyGawd/codeweb/actions/runs/33937357302 passed the existing report-scale checks and all 19 UI checks. It tested five client clipboard round trips, copy-failure selection, keyboard navigation, home/setup/review at 1440 and 375 pixels, finding task copying, and five real report captures.
+- The orchestrator inspected the five report captures and the desktop/narrow review and finding views. `assets/screens/capture-receipt.json` records the template, source, CI run, and image hashes. The screenshot stamp was written only after inspection.
+- Image review found a selected-client command mismatch on setup. Both setup and doctor examples now follow all five client choices; regression tests cover the exact commands and paths. A final browser run checks that correction.
+- Two pinned-source extractions produced byte-identical graph and standalone HTML, including with conflicting local experiment settings. The helper explicitly disables ctags, clears experiment overrides, validates all untracked source files, and publishes only graph and HTML.
+- Rebuild the demo with `node scripts/refresh-demo.mjs --source <checkout-at-the-manifest-Axios-commit>`, then `node site/build.mjs`. Re-capture and inspect report screenshots before stamping any future template change.
+- Current brand raster art was inspected after the old headline, tool count, and numerical performance claims were removed.

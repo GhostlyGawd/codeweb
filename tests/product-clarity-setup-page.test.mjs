@@ -17,6 +17,7 @@ test('AC-14 built setup offers a labeled selector and canonical full-width recip
   for (const recipe of clientRecipes) {
     assert.ok(html.includes(`value="${recipe.id}"`));
     assert.ok(html.includes(esc(recipe.content)),recipe.id);
+    assert.ok(html.includes(`data-config-path="${recipe.configPath}"`),`${recipe.id}: canonical config path`);
   }
   assert.match(html,/class="setup-recipe"/);
   assert.match(html,/aria-live="polite"/);
@@ -43,14 +44,16 @@ test('AC-14 client selection and copy feedback work with clipboard success and f
   const { runInNewContext } = await import('node:vm');
   let clipboardText, selectedText, focused = false;
   const selector = {value:'claude',addEventListener(type,fn){this[type]=fn;}};
-  const panels=['claude','cursor','windsurf','gemini','codex'].map(id=>{
+  const {clientRecipes}=await import('../scripts/lib/client-setup.mjs');
+  const setupCommand={textContent:''}, doctorCommand={textContent:''};
+  const panels=clientRecipes.map(({id,configPath})=>{
     const code={textContent:`recipe for ${id}`,parentElement:{focus(){focused=true;}}};
     const button={hidden:true,addEventListener(type,fn){this[type]=fn;}};
     const status={textContent:''};
-    return {dataset:{setupClient:id},button,code,status,querySelector(selector){return selector==='pre code'?code:selector==='[role="status"]'?status:button;}};
+    return {dataset:{setupClient:id,configPath},button,code,status,querySelector(selector){return selector==='pre code'?code:selector==='[role="status"]'?status:button;}};
   });
   const sandbox={
-    document:{getElementById:()=>selector,querySelectorAll:()=>panels,createRange:()=>({selectNodeContents(code){selectedText=code.textContent;}})},
+    document:{getElementById:id=>({'setup-client':selector,'setup-command':setupCommand,'doctor-command':doctorCommand}[id]),querySelectorAll:()=>panels,createRange:()=>({selectNodeContents(code){selectedText=code.textContent;}})},
     navigator:{clipboard:{async writeText(text){clipboardText=text;}}},
     window:{getSelection:()=>({removeAllRanges(){},addRange(){}})},
   };
@@ -62,6 +65,8 @@ test('AC-14 client selection and copy feedback work with clipboard success and f
     assert.equal(panels.filter(p=>!p.hidden).length,1);
     assert.equal(panel.hidden,false);
     assert.equal(panel.button.hidden,false);
+    assert.equal(setupCommand.textContent,`npx -y @ghostlygawd/codeweb setup --client ${panel.dataset.setupClient}`);
+    assert.equal(doctorCommand.textContent,`npx -y @ghostlygawd/codeweb doctor --client ${panel.dataset.setupClient} --config ${panel.dataset.configPath}`);
     await panel.button.click();
     assert.equal(clipboardText,panel.code.textContent);
     assert.match(panel.status.textContent,/Copied/);

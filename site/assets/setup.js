@@ -5,6 +5,11 @@
   const panels = [...document.querySelectorAll('[data-setup-client]')];
   const select = () => {
     for (const panel of panels) panel.hidden = panel.dataset.setupClient !== selector.value;
+    const selected = panels.find(panel => !panel.hidden);
+    if (selected) {
+      document.getElementById('setup-command').textContent = `npx -y @ghostlygawd/codeweb setup --client ${selected.dataset.setupClient}`;
+      document.getElementById('doctor-command').textContent = `npx -y @ghostlygawd/codeweb doctor --client ${selected.dataset.setupClient} --config ${selected.dataset.configPath}`;
+    }
   };
   selector.addEventListener('change', select);
   select();

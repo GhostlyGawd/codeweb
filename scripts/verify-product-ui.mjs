@@ -68,6 +68,11 @@ const server = createServer((request, response) => {
 });
 let browser, context, page;
 const pageErrors = [];
+const capture = async name => {
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
+  await page.waitForFunction(() => window.scrollY === 0);
+  await page.screenshot({ path: join(shots, name), fullPage: true });
+};
 try {
   await command('site/build.mjs', ['--out', site]);
   await command('scripts/product-demo.mjs', ['--out', fixture]);
@@ -95,12 +100,14 @@ try {
     const panel = page.locator(`[data-setup-client="${recipe.id}"]`);
     assert.equal(await page.locator('[data-setup-client]:visible').count(), 1);
     assert.equal(await panel.locator('pre code').textContent(), recipe.content);
+    assert.equal(await page.locator('#setup-command').textContent(), `npx -y @ghostlygawd/codeweb setup --client ${recipe.id}`);
+    assert.equal(await page.locator('#doctor-command').textContent(), `npx -y @ghostlygawd/codeweb doctor --client ${recipe.id} --config ${recipe.configPath}`);
     await panel.getByRole('button', { name: 'Copy recipe' }).click();
     await panel.getByRole('status').filter({ hasText: 'Copied.' }).waitFor();
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), recipe.content);
     log('client recipe selected and copied', { client: recipe.id });
   }
-  await page.screenshot({ path: join(shots, 'setup-desktop.png'), fullPage: true });
+  await capture('setup-desktop.png');
   await page.locator('.nav-more summary').focus();
   await page.keyboard.press('Enter');
   assert.equal(await page.locator('.nav-menu a:visible').count(), 2);
@@ -119,7 +126,7 @@ try {
     for (const [path, name] of [['/site/index.html','home'], ['/site/start.html','setup'], ['/review/review.html','change-review']]) {
       await visit(path);
       await noOverflow(`${name}-${width}`);
-      await page.screenshot({ path: join(shots, `${name}-${width}.png`), fullPage: true });
+      await capture(`${name}-${width}.png`);
     }
   }
   await visit('/review/review.html');
@@ -150,11 +157,11 @@ try {
   await page.locator('#agentTaskStatus').filter({ hasText: 'Agent task copied' }).waitFor();
   assert.equal(await page.evaluate(() => navigator.clipboard.readText()), task);
   log('finding keyboard action and agent-task clipboard round trip');
-  await page.screenshot({ path: join(shots, 'finding-action-desktop.png'), fullPage: true });
+  await capture('finding-action-desktop.png');
   await noOverflow('report-desktop');
   await page.setViewportSize({ width: 375, height: 1000 });
   await noOverflow('report-375');
-  await page.screenshot({ path: join(shots, 'finding-action-375.png'), fullPage: true });
+  await capture('finding-action-375.png');
   assert.deepEqual(pageErrors, [], 'browser page errors');
   await browser.close(); browser = null;
   await new Promise(resolvePromise => server.close(resolvePromise));
@@ -165,7 +172,7 @@ try {
   log('five report screenshot frames captured');
   writeFileSync(join(out, 'verification.json'), JSON.stringify({ verified: true, commit: process.env.GITHUB_SHA || null, browser: await chromium.executablePath(), checks, technicalDemo: receipt }, null, 2) + '\n');
 } catch (error) {
-  if (page && !page.isClosed()) await page.screenshot({ path: join(shots, 'failure.png'), fullPage: true }).catch(() => {});
+  if (page && !page.isClosed()) await capture('failure.png').catch(() => {});
   writeFileSync(join(out, 'failure.json'), JSON.stringify({ verified: false, error: error.message, pageErrors, checks }, null, 2) + '\n');
   console.error(`product-ui: FAIL: ${error.message}`);
   process.exitCode = 1;

@@ -62,7 +62,7 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 function renderSetupRecipes() {
   return `<label for="setup-client">MCP client</label>
     <select id="setup-client">${clientRecipes.map(r => `<option value="${esc(r.id)}">${esc(r.label)}</option>`).join('')}</select>
-    ${clientRecipes.map(r => `<div class="setup-recipe" data-setup-client="${esc(r.id)}">
+    ${clientRecipes.map(r => `<div class="setup-recipe" data-setup-client="${esc(r.id)}" data-config-path="${esc(r.configPath).replace(/"/g, '&quot;')}">
       <h3>${esc(r.label)}</h3>
       <p>Add the ${esc(r.format)} entry to <code>${esc(r.configPath)}</code>. Merge it with existing settings.</p>
       <pre tabindex="0" aria-label="${esc(r.label)} recipe"><code>${esc(r.content)}</code></pre>
@@ -223,6 +223,8 @@ const blocks = () => ({
   tagline: product.tagline,
   descriptor: product.descriptor,
   setup_recipes: renderSetupRecipes(),
+  setup_command: `npx -y @ghostlygawd/codeweb setup --client ${clientRecipes[0].id}`,
+  doctor_command: `npx -y @ghostlygawd/codeweb doctor --client ${clientRecipes[0].id} --config ${clientRecipes[0].configPath}`,
   elevator: product.elevator,
   repo: product.repo,
   headline_stats: renderStats(),

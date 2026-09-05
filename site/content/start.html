@@ -13,7 +13,7 @@
     <h2 id="other-clients">2. Choose your client</h2>
     <p>Select the client that your agents use. Add the displayed entry to its configuration; preserve your other server entries.</p>
     {{setup_recipes}}
-    <p>You can print the same recipe locally with <code>npx -y @ghostlygawd/codeweb setup --client cursor</code>. The setup command does not write or replace configuration.</p>
+    <p>You can print the same recipe locally with <code id="setup-command">{{setup_command}}</code>. The setup command does not write or replace configuration.</p>
     <details class="card"><summary>Claude Code plugin alternative</summary>
       <p>The plugin adds the <code>/codeweb</code> command, automatic pre-edit impact cards, and all {{toolCount}} tools.</p>
 <pre><code>/plugin marketplace add GhostlyGawd/codeweb
@@ -24,7 +24,7 @@
 <pre><code>npx -y @ghostlygawd/codeweb doctor</code></pre>
     <p><strong>Local success:</strong> Node is compatible, the local MCP server initializes, and the graph is present and fresh. The check does not confirm an editor connection.</p>
     <p>For an explicit configuration check, supply the selected client and file. This inspects the entry without running commands from that file.</p>
-<pre><code>npx -y @ghostlygawd/codeweb doctor --client cursor --config .cursor/mcp.json</code></pre>
+<pre><code id="doctor-command">{{doctor_command}}</code></pre>
     <p>If the graph is missing or stale, repeat step 1. If a required check fails, follow the named remedy and run doctor again.</p>
     <h2>4. Ask your agents one caller question</h2>
     <p>Restart your client or reload its MCP servers. In that client, ask:</p>
