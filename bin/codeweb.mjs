@@ -8,4 +8,4 @@ if (major < 22) {
   console.error('codeweb needs Node >= 22 (you have ' + process.version + '). Install the current LTS: https://nodejs.org');
   process.exit(2); // setup error — never 1, which codeweb-diff reserves for "regression found" (API F2)
 }
-import('../scripts/run.mjs');
+import('../scripts/entry.mjs');

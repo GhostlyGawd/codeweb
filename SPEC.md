@@ -1,21 +1,18 @@
 # SPEC — codeweb
 
-Date: 2026-07-26
+Date: 2026-07-26; product clarity implementation added 2026-09-05.
 Written by 142 · Spec the Product (All Build Goal Prompts, stage 2/4 re-run after the
 harness install; supersedes the null report preserved at `reports/SPEC.md`). Sources: the
 ratified `CHARTER.md` (2026-07-25) and shipped behavior only — v1 codifies what the product
 already promises publicly, so every AC below is `built` and pinned (`tests/test_ac_pins.py`).
-Nothing here invents roadmap: the charter keeps **Next** deliberately open for the operator,
-so no AC carries `status: next` yet; when the operator picks Next, its ACs are appended here
-(ids never renumber — retirement is `status: dropped`).
+The operator selected the product clarity work on 2026-09-05 after the product and brand
+review. Its acceptance criteria are appended below; existing identifiers remain stable.
 
 ## Job
 
-**"Your agents break less code and burn fewer tokens."** Before an edit, the agent asks the
-map — who calls this, what breaks, does this already exist — and gets exact, small answers
-(27 MCP tools over a deterministic call/import graph, built locally, no LLM in the loop);
-the regression gate enforces the same sight after the edit. Receipts: callers found 44%→74%
-vs grep; impact answers at a fraction of grep's tokens (`CHARTER.md`, Problem/Job).
+**"See what your AI edits affect."** Your agents inspect callers and dependencies before an edit,
+then check new structural findings afterward. The local graph supplies bounded answers through
+MCP; the tool list is defined in `scripts/mcp-server.mjs`. The supporting report explains those results.
 
 ## Non-goals
 
@@ -68,13 +65,80 @@ controlling product specification.
 - **AC-10** — codeweb_dependents returns the union answer (call, import, inherit, test, ref) over MCP with true totals within budget | check: `node --test tests/mcp-dependents.test.mjs` | status: built
 - **AC-11** — spawned advisor answers carry the call-time staleness verdict, and overlap-independent advisors auto-refresh like the orient family | check: `node --test tests/mcp-staleness-parity.test.mjs` | status: built
 - **AC-12** — agent-fallback graphs carry their meta.engine provenance and the brief caveats agent-built maps | check: `node --test tests/agent-graph-label.test.mjs` | status: built
+- **AC-13** — current public identity uses a shared evidence-scoped headline and descriptor; token-cost claims identify the measured context-size comparison and gate copy states its limits | check: `node --test tests/product-clarity-copy.test.mjs` | status: built
+- **AC-14** — setup presents one client-specific full-width recipe with copy feedback, a package-first workflow, and an explicit source-checkout alternative | check: `node --test tests/product-clarity-setup-page.test.mjs` | status: built
+- **AC-15** — package setup and diagnostics provide a reversible client recipe, verify the local server and graph state, and distinguish configuration evidence from an editor connection | check: `node --test tests/product-clarity-setup.test.mjs` | status: built
+- **AC-16** — a package change-review command combines changed symbols, affected callers, structural findings, recorded coverage, and analysis limits in JSON and a supporting HTML report | check: `node --test tests/product-clarity-review.test.mjs` | status: built
+- **AC-17** — report findings distinguish confidence from action priority, caution on trivial duplicates, expose source and an agent task, and reuse existing exception records | check: `node --test tests/product-clarity-findings.test.mjs` | status: built
+- **AC-18** — the public demo records a pinned source commit and current engine, generated report and screenshots match the template, and visual identity remains consistent | check: `node --test tests/product-clarity-demo.test.mjs tests/brand-sync.test.mjs` | status: next
+- **AC-19** — the package PR gate and Action support explicit report-only use that retains a failing finding verdict while still failing setup or analysis errors | check: `node --test tests/product-clarity-gate.test.mjs` | status: built
+- **AC-20** — a dated qualitative Graphify comparison and reproducible demonstration and pilot protocols distinguish existing evidence from unmeasured outcomes | check: `node --test tests/product-clarity-evidence.test.mjs` | status: built
 
 Pins live in `tests/test_ac_pins.py` (`test_ac_<n>_...`); pins are cheap wiring witnesses —
 the `check:` commands above are what brief 144 runs verbatim.
 
 ## Interfaces
 
-- **MCP server** — `codeweb-mcp` (stdio): 27 tools over the local graph (impact, callers,
+### Product clarity release contract — 2026-09-05
+
+The implementation tasks and validation record are in `docs/specs/product-clarity-tasks.md`.
+The user requested independent specification review, implementation, verification, and PR merge.
+
+- Preserve local operation, MIT licensing, no telemetry, no target-code execution, and zero required dependencies.
+- Preserve existing MCP tools and mapping flags. Reserve bare `setup`, `doctor`, `review`, and `gate` as CLI subcommands.
+- Map directories with reserved names through `./review`, an absolute path, or `codeweb -- review`; document and test this disambiguation.
+- Use `See what your AI edits affect.` as the shared headline and `Structural checks for AI code changes.` as the descriptor.
+- Keep individual developers as the primary audience. Small teams remain secondary; the graph supports the agent workflow.
+- Keep the square shapes and lime accent. Improve text size, sentence case, navigation, and supporting-text contrast within that system.
+- Keep historical research and decisions intact. Label historical claims and scope new claims to their evidence.
+- Do not modify the protected verification harness, release credentials, branch protections, billing, or marketplace publication.
+
+#### Setup and diagnostics
+
+- `codeweb setup --client <client>` prints a project recipe; it does not overwrite existing user configuration.
+- Support Claude Code, Cursor, Windsurf, Gemini CLI, and Codex with one canonical recipe definition used by setup and diagnostics.
+- `codeweb doctor` checks Node compatibility, a local MCP initialization exchange, graph presence and freshness, and supplied client configuration when requested.
+- `--client <client> --config <file>` requests an explicit config check. Never search unrelated client profiles or print config contents.
+- JSON reports `ok`, `checks` with named `pass|fail|unknown` states, and an explicit unverified editor connection. Required setup failures return 2; a successful local check returns 0.
+- Diagnostics must say that a local server check does not establish an editor connection. Missing or invalid required setup returns exit 2.
+- JSON is machine-readable on stdout. Diagnostics do not read secrets into output or contact external services.
+- A documented first query proves the map can answer a caller question on a small source fixture.
+
+#### Change review
+
+- `codeweb review` exposes the existing review capability through the package. Preserve existing review JSON fields and flags.
+- Support optional HTML output with one view of changed symbols, affected callers, new findings, available recorded coverage, and analysis limits.
+- Reuse existing graph traversal, comparison, freshness, and coverage data. Do not invent a second graph schema or change gate semantics.
+- Distinguish unchecked, stale, or incomplete analysis from a clean result. State when no baseline or source bodies are available.
+- Report analysis as `complete`, `incomplete`, or `stale` relative to the named checks, with reasons. Missing baseline, unavailable source/stamps, dynamic gaps, or changed files without mapped symbols prevent a complete label.
+- Malformed supplied baselines are errors. Preserve existing advisory versus `--gate` behavior; uncertainty never becomes a runtime-safety claim.
+- Report source provenance and only measured coverage. Unknown coverage must remain unknown.
+- Escape source-derived text in HTML and generated tasks. Never execute a generated task automatically.
+
+#### Finding decisions
+
+- Label body-match confidence explicitly. A high-confidence duplicate may have low action priority.
+- Treat very short duplicates as review candidates; explain that new coupling can outweigh a small reduction in repeated lines.
+- Keep the confirmed-finding list separate from name matches. Show source locations, relevant caller context, and a copyable agent task.
+- Use existing annotation/exception semantics and fingerprints. Provide an actionable existing command rather than adding a second persistence store.
+
+#### Gate rollout
+
+- `codeweb gate` runs the existing base-versus-working-tree gate through the package.
+- An explicit `--report-only` option and Action input report findings without blocking. Preserve the underlying verdict in output.
+- Report-only must never turn usage errors, missing refs, failed graph builds, or interrupted analysis into success.
+- Existing blocking behavior remains the default. A passing check means only that the named structural rules found no regression.
+
+#### Evidence and public demo
+
+- Rebuild the demo from a recorded public source SHA with the current engine. Record the reproduction command and engine version.
+- Rebuild generated site content, inspect every recaptured screenshot, and refresh the template stamp only after visual inspection.
+- Publish a dated qualitative comparison with links to primary sources; no unmeasured speed, accuracy, adoption, or cost superiority.
+- Provide a reproducible technical demo and a short recording script. Label technical examples separately from maintainer-approved case studies.
+- Provide a five-participant pilot protocol and a case-study template with acceptance/rejection fields. Do not fabricate participants, retention, acceptance, or comparative performance.
+- Human pilot execution, external maintainer decisions, and an independently measured performance comparison remain external follow-up work. This release is complete when the scoped code and evidence tooling pass their checks.
+
+- **MCP server** — `codeweb-mcp` (stdio): tools over the local graph (impact, callers,
   duplication, context packs …). The canonical tool list and count live in
   `docs/reference.md` and are locked to `package.json` by AC-2's
   consistency gate; unknown arguments are rejected, booleans are real booleans, pagination is

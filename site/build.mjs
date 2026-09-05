@@ -15,6 +15,7 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mcpToolCount } from '../scripts/release-utils.mjs';
 import { parseArgs } from '../scripts/lib/cli.mjs';
+import { clientRecipes } from '../scripts/lib/client-setup.mjs';
 
 const SITE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(SITE, '..');
@@ -57,6 +58,18 @@ function fill(tpl, vars) {
   return out;
 }
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+function renderSetupRecipes() {
+  return `<label for="setup-client">MCP client</label>
+    <select id="setup-client">${clientRecipes.map(r => `<option value="${esc(r.id)}">${esc(r.label)}</option>`).join('')}</select>
+    ${clientRecipes.map(r => `<div class="setup-recipe" data-setup-client="${esc(r.id)}">
+      <h3>${esc(r.label)}</h3>
+      <p>Add the ${esc(r.format)} entry to <code>${esc(r.configPath)}</code>. Merge it with existing settings.</p>
+      <pre tabindex="0" aria-label="${esc(r.label)} recipe"><code>${esc(r.content)}</code></pre>
+      <button type="button" class="btn" data-copy-recipe hidden>Copy recipe</button>
+      <p role="status" aria-live="polite"></p>
+    </div>`).join('')}`;
+}
 
 // ---------------------------------------------------------------- renderers (product.json -> HTML)
 function renderStats() {
@@ -208,6 +221,8 @@ const blocks = () => ({
   toolCount: String(TOOLS),
   langCount: String(LANGS),
   tagline: product.tagline,
+  descriptor: product.descriptor,
+  setup_recipes: renderSetupRecipes(),
   elevator: product.elevator,
   repo: product.repo,
   headline_stats: renderStats(),
@@ -234,13 +249,13 @@ function nav(active) {
 // SEO F7: keep the brand, append the CATEGORY — nobody searches "living map"; they search
 // "codebase map", "call graph", "MCP server". Titles/descriptions carry both vocabularies.
 const PAGES = [
-  { slug: 'index', nav: 'home', title: 'codeweb — interactive codebase map & call graph MCP tools for coding agents', ogTitle: 'codeweb — your agents break less code and burn fewer tokens', description: `Your agents break less code and burn fewer tokens: codeweb maps your codebase into a deterministic call/import graph, queried by coding agents over ${TOOLS} MCP tools (Claude Code plugin & MCP server), with an interactive map for you. Know what an edit breaks before it's written.` },
+  { slug: 'index', nav: 'home', title: 'codeweb — structural checks and call graph MCP tools for AI code changes', ogTitle: `codeweb — ${product.tagline}`, description: product.elevator },
   { slug: 'product', nav: 'product', title: `${TOOLS} MCP tools & the CI structural gate — codeweb`, ogTitle: 'codeweb — one graph, two interfaces', description: `The ${TOOLS} deterministic MCP tools, the Tier 0–3 feature map, ${LANGS}-language call/import graph extraction, and the CI gate that fails a PR when an edit makes the structure worse.` },
   { slug: 'research', nav: 'research', title: 'Research, benchmarks & the honest claim ledger — codeweb', ogTitle: 'codeweb — the evidence', description: 'A pre-registered effectiveness study (32 checks, all 32 passing), an efficiency pilot, and an honest claim ledger: what is validated, what is preliminary, and what is a null result.' },
   { slug: 'start', nav: 'start', title: 'Get started — install the codebase-map plugin, npx, or MCP server — codeweb', ogTitle: 'Get started with codeweb', description: 'Install codeweb as a Claude Code plugin, run the npx one-liner, or register the MCP server for Cursor/Windsurf. Free & MIT; runs entirely on your machine; Node ≥ 22.' },
   { slug: 'changelog', nav: 'changelog', title: 'Changelog — codeweb', ogTitle: 'codeweb changelog', description: 'Every release, capability, benchmark, and fix — kept in lock-step with the product under Keep a Changelog and Semantic Versioning.' },
   // SEO F8: the one genuinely link-worthy story, promoted from stranded raw markdown to a page.
-  { slug: 'case-study', nav: 'research', title: 'Case study: mapping axios — 3 confirmed duplications in a 50M-download library — codeweb', ogTitle: 'Case study: codeweb maps axios', description: 'codeweb pointed read-only at axios v1.18.1: 3 body-confirmed duplications (two byte-identical), 12 false positives dismissed, and a cycle-safe merge plan for each — reproducible byte-for-byte.' },
+  { slug: 'case-study', nav: 'research', title: 'Historical technical example: mapping axios — codeweb', ogTitle: 'Case study: codeweb maps axios', description: 'July 2026 technical record of axios v1.18.1: three body-confirmed duplication findings. Historical counts differ from the current demo; no maintainer acceptance is recorded.' },
   // The support page. Free-forever contract first; sponsors get featured placement — no cost
   // claims (CHARTER.md C7 ruled the old "funds the benchmark spend" story fabricated).
   { slug: 'support', nav: 'support', title: 'Support codeweb — sponsorship & org support — codeweb', ogTitle: 'Support codeweb', description: 'Everything local is free forever. Sponsoring supports the project, and sponsors get featured placement in the README and on the site. Org support by email.' },
@@ -252,7 +267,7 @@ const PAGES = [
   // The two launch surfaces (COMPETITIVE.md §3.2 stake #2 and §4 Bet 1). Both are claim-dense by
   // design, so both ride PROSE_FILES and are pinned value-by-value in tests/launch-pages.test.mjs.
   { slug: 'lsp', nav: 'lsp', title: 'codeweb vs a language server (LSP) — why a whole-graph map — codeweb', ogTitle: 'codeweb vs LSP — one hop, or the whole graph', description: 'A language server answers one hop on demand; codeweb builds one deterministic whole-graph artifact. Transitive impact, duplication, dead code, and the diffable snapshot a CI gate needs — each with the committed benchmark that produced its number.' },
-  { slug: 'compare', nav: 'compare', title: 'codeweb vs grep and one-hop lookups — every number regenerable — codeweb', ogTitle: 'codeweb vs the way agents find code today', description: 'A comparison where every number traces to a committed, re-runnable benchmark: +0.31 caller recall at equal token cost, 126x cheaper blast-radius answers, 0 disagreements over 497,864 independent checks — and the results that did not replicate, dropped.' },
+  { slug: 'compare', nav: 'compare', title: 'codeweb vs grep and one-hop lookups — every number regenerable — codeweb', ogTitle: 'codeweb vs the way agents find code today', description: 'A comparison where every number traces to a committed, re-runnable benchmark: +0.31 caller recall at equal token cost, 126x smaller measured context size than a simulated grep loop, 0 disagreements over 497,864 independent checks — and the results that did not replicate, dropped.' },
   // Operator dashboard: completed npm download counts, drawn client-side from api.npmjs.org.
   // Built and served for the README chart, but excluded from site navigation and the sitemap.
   { slug: 'downloads', nav: 'home', unlisted: true, title: 'npm downloads — codeweb', ogTitle: 'codeweb npm downloads', description: 'Completed daily npm downloads of @ghostlygawd/codeweb, with a three-day lag guard for incomplete registry data.' },
@@ -345,11 +360,38 @@ function copyDir(srcDir, pattern) {
   }
 }
 
+function liveMapData(graph) {
+  const degree = new Map(graph.nodes.map(n => [n.id, 0]));
+  for (const edge of graph.edges) {
+    if (degree.has(edge.from)) degree.set(edge.from, degree.get(edge.from) + 1);
+    if (degree.has(edge.to)) degree.set(edge.to, degree.get(edge.to) + 1);
+  }
+  const featured = new Set(['utils.js:merge', 'core/AxiosError.js:AxiosError', 'adapters/http.js:httpAdapter']);
+  const selected = [...graph.nodes].sort((a, b) =>
+    Number(featured.has(b.id)) - Number(featured.has(a.id)) ||
+    degree.get(b.id) - degree.get(a.id) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+  ).slice(0, 70);
+  const domains = [...new Set(selected.map(n => n.domain))].sort();
+  const indices = new Map(selected.map((n, i) => [n.id, i]));
+  const seen = new Set();
+  const edges = [];
+  for (const edge of graph.edges) {
+    if (!indices.has(edge.from) || !indices.has(edge.to)) continue;
+    const pair = [indices.get(edge.from), indices.get(edge.to)];
+    const key = pair.join(':');
+    if (!seen.has(key)) { seen.add(key); edges.push(pair); }
+  }
+  return { domains, nodes: selected.map(n => ({id: n.id, l: n.label, f: n.file, d: domains.indexOf(n.domain), loc: n.loc})), edges };
+}
+
 function buildAssets() {
   // one same-origin stylesheet, cached across pages — design system in one place
   writeFileSync(join(ASSETS, 'site.css'), `${readSite('tokens.css')}\n${readSite('styles.css')}`);
   writeFileSync(join(ASSETS, 'favicon.svg'), FAVICON);
   copyDir(join(SITE, 'assets'), /\.(js|woff2|ttf)$/);   // interactive engine + self-hosted fonts — same-origin, zero-dep
+  const demoGraph = JSON.parse(read(join(ROOT, 'docs', 'demo', 'axios.graph.json')));
+  const liveScript = readSite('assets', 'livemap.js').replace('/* CODEWEB_LIVE_DATA */ null', JSON.stringify(liveMapData(demoGraph)));
+  writeFileSync(join(ASSETS, 'livemap.js'), liveScript);
   copyDir(join(ROOT, 'assets', 'brand'), /\.(svg|png|jpg)$/);
   copyDir(join(ROOT, 'assets', 'screens'), /\.png$/);
   const og = join(ROOT, 'assets', 'brand', 'social-preview.jpg');
@@ -395,12 +437,12 @@ function injectDemoNav() {
     .replace(/^<link rel="canonical"[^\n]*\n?/gm, '')
     .replace(/<title>[^<]*<\/title>/,
       `<!--cw-head--><title>Live demo — axios call graph, mapped by codeweb</title>
-<meta name="description" content="Click around a real codeweb map: axios (50M downloads/week), 274 product symbols across 8 domains — findings, force graph, treemap, and coupling matrix. Built read-only by the deterministic pipeline.">
+<meta name="description" content="Click around a real codeweb map: axios, 278 product symbols across 7 domains — findings, force graph, treemap, and coupling matrix. Built read-only by the deterministic pipeline.">
 <link rel="canonical" href="${BASE}demo/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="codeweb">
 <meta property="og:title" content="Live demo — axios, mapped by codeweb">
-<meta property="og:description" content="A real interactive codeweb map of axios: 274 product symbols, 8 domains, body-confirmed duplication findings. No mockups.">
+<meta property="og:description" content="A real interactive codeweb map of axios: 278 product symbols, 7 domains, body-confirmed duplication findings. No mockups.">
 <meta property="og:url" content="${BASE}demo/">
 <meta property="og:image" content="${BASE}assets/og.jpg">
 <meta property="og:image:width" content="1280">

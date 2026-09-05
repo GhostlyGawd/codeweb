@@ -30,17 +30,18 @@
     <span class="wm">code<span class="w">web</span></span>
   </a>
   <nav class="nav-links" aria-label="Primary">
-    <a href="index.html" data-nav="home">Home</a>
     <a href="product.html" data-nav="product">Product</a>
-    <a href="compare.html" data-nav="compare">Compare</a>
-    <a href="lsp.html" data-nav="lsp">vs LSP</a>
-    <a href="research.html" data-nav="research" aria-current="page">Research</a>
-    <a href="pricing.html" data-nav="pricing">Pricing</a>
-    <a href="boundary.html" data-nav="boundary">Free forever</a>
-    <a href="start.html" data-nav="start">Get Started</a>
-    <a href="changelog.html" data-nav="changelog">Changelog</a>
+    <a href="research.html" data-nav="research" aria-current="page">Evidence</a>
+    <a href="start.html" data-nav="start">Get started</a>
   </nav>
   <div class="nav-right">
+    <details class="nav-more">
+      <summary>Plans</summary>
+      <div class="nav-menu">
+        <a href="boundary.html" data-nav="boundary">Free forever</a>
+        <a href="pricing.html" data-nav="pricing">Teams pricing intent</a>
+      </div>
+    </details>
     <a class="nav-ghost" href="demo/">Live demo</a>
     <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
   </div>
@@ -57,7 +58,7 @@
     <div class="stat-strip">
       <div class="stat">
         <div class="num">126×</div>
-        <div class="label">cheaper 'what breaks if I change this' answers — one call vs grepping in rounds</div>
+        <div class="label">smaller measured context size than a simulated graph-assisted grep loop; not total session savings</div>
         <div class="src">oracle-ab.json</div>
       </div>
       <div class="stat">
@@ -107,7 +108,7 @@
         <td><span class="chip chip-validated">Validated</span></td>
       </tr>
       <tr>
-        <td class="claim">Blast-radius context cost vs recursive grep</td>
+        <td class="claim">Blast-radius context-size comparison with simulated recursive grep</td>
         <td class="num">~1KB/call vs ~130KB (126x), grep loop simulated generously (graph-assisted frontier)</td>
         <td class="muted">30 vite symbols, mean impact 18 symbols</td>
         <td class="src">oracle-ab.json</td>
@@ -302,6 +303,20 @@
   </div>
 </section>
 
+<section class="section">
+  <div class="wrap">
+    <h2>Reproduce the checks</h2>
+    <p>The qualitative Graphify comparison is dated and cites primary sources. It makes no measured performance claim.</p>
+    <ul>
+      <li><a href="https://github.com/GhostlyGawd/codeweb/blob/main/docs/graphify-comparison.md">Compare CodeWeb and Graphify</a></li>
+      <li><a href="https://github.com/GhostlyGawd/codeweb/blob/main/docs/guides/product-clarity-demo.md">Run the technical demo and recording script</a></li>
+      <li><a href="https://github.com/GhostlyGawd/codeweb/blob/main/docs/guides/product-clarity-pilot.md">Run the five-participant pilot</a></li>
+      <li><a href="https://github.com/GhostlyGawd/codeweb/blob/main/docs/guides/product-clarity-case-study.md">Record a maintainer decision</a></li>
+    </ul>
+    <p>These protocols support future research. They do not establish participant results, repeat use, or accepted maintainer findings.</p>
+  </div>
+</section>
+
 </main>
 <footer class="site-footer">
   <div class="wrap">
@@ -310,7 +325,7 @@
         <a class="brand" href="index.html">
           <span class="wm">code<span class="w">web</span></span>
         </a>
-        <p>A deterministic map of your codebase — one graph, read by humans and the agents editing alongside them.</p>
+        <p>Structural checks for AI code changes.</p>
       </div>
       <div class="footer-col">
         <h5>Product</h5>
@@ -322,6 +337,8 @@
       <div class="footer-col">
         <h5>Proof</h5>
         <a href="research.html">Research</a>
+        <a href="compare.html">Compare with grep</a>
+        <a href="lsp.html">Compare with LSP</a>
         <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">Benchmarks</a>
         <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Raw results</a>
       </div>
@@ -331,6 +348,8 @@
         <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
         <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
         <a href="support.html">Sponsor</a>
+        <a href="boundary.html">Free forever</a>
+        <a href="pricing.html">Teams pricing intent</a>
       </div>
     </div>
     <div class="footer-base">

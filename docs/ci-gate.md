@@ -89,8 +89,59 @@ wiring them).
 
 ## Run it locally
 
-```
-node scripts/ci-gate.mjs --base <ref> [--repo <path>] [--target <subdir>]
+From the project directory, use the installed package:
+
+```sh
+npx -y @ghostlygawd/codeweb gate --base origin/main --target src
 ```
 
 `--base` is any git ref (a branch, tag, or sha) to compare the current working tree against.
+
+
+A source checkout can run `node scripts/ci-gate.mjs` with the same options.
+A passing gate means only that the named structural rules found no regression. It does not prove runtime correctness or complete analysis of dynamic calls.
+
+## Start with report-only checks
+
+Use report-only mode to inspect findings before you enable blocking:
+
+```sh
+npx -y @ghostlygawd/codeweb gate --base origin/main --target src --report-only
+```
+
+The structural verdict and Markdown digest keep the regression finding. Only a completed regression changes from exit 1 to exit 0 in report-only mode.
+Missing refs, failed graph builds, usage errors, and interrupted analysis still fail. Blocking remains the default.
+
+For the Action, add `report-only: true` under `with:`. Use an Action ref and matching engine ref that contain this option; earlier releases do not support it.
+The Action keeps the original gate exit code in its `verdict-code` output: 0 for clean, 1 for regression, and 2 for setup or analysis error.
+
+## Check setup before the first query
+
+Run these commands from your project directory:
+
+```sh
+npx -y @ghostlygawd/codeweb setup --client cursor
+npx -y @ghostlygawd/codeweb .
+npx -y @ghostlygawd/codeweb doctor --client cursor --config .cursor/mcp.json --json
+```
+
+`setup` prints a recipe without writing configuration. Choose `claude`, `cursor`, `windsurf`, `gemini`, or `codex`; merge the printed server entry into the named file and keep existing entries.
+To remove the setup, remove only the `codeweb` server entry that you added.
+
+`doctor` checks Node, the installed local MCP server, graph presence, and recorded source freshness. Its JSON lists named `pass`, `fail`, or `unknown` checks and an `ok` result.
+Required failures or unverified freshness return exit 2. A successful local check returns exit 0; editor connection always remains unverified.
+
+The optional `--client` and `--config` flags must be used together. Diagnostics inspect only that supplied file, never execute its command, and never print its values.
+The Codex check supports the basic TOML recipe from `setup`. Other TOML forms can return `unknown`; this means the check cannot verify that syntax.
+
+### Prove a caller query
+
+Use a small source file, such as `src/example.js`:
+
+```js
+export function add(a, b) { return a + b; }
+export function twice(x) { return add(x, x); }
+```
+
+Build its map with `npx -y @ghostlygawd/codeweb src --out-dir .codeweb`, then ask your connected agent to call `codeweb_callers` with `{"symbol":"add"}`.
+The result must name `twice` as a caller. This query checks the editor connection and the map answer; the local doctor handshake alone cannot check the editor connection.

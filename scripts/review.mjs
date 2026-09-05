@@ -8,21 +8,22 @@
 // Usage:
 //   node review.mjs <graph.json> --changed <file[:s-e],...>   # explicit hunks (file = whole file)
 //   node review.mjs <graph.json> --range <gitref>             # derive hunks via git diff --unified=0
-//   ... [--before <graph.json>] [--gate] [--json]
+//   ... [--before <graph.json>] [--gate] [--json] [--html <file>]
 // Exit: 0 ok (advisory), 1 with --gate when a structural regression is present, 2 usage/IO.
 //
 // NOTE: changed-symbol selection uses the extractor's recorded [line, line+loc-1] span, which is
 // best-effort (loc is clamped/brace-matched); it can under-select on truncated bodies. --range path
-// assumes the graph's file paths match git's (graph mapped at the repo root).
+// maps git paths to the graph root and keeps old-side spans for deletion evidence.
 
-import { readFileSync, existsSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
-import { resolve } from 'node:path';
-import { normalizeGraph, reviewImpact, structuralRegressions } from './lib/graph-ops.mjs';
+import { writeFileSync, existsSync } from 'node:fs';
+import { reviewImpact, structuralRegressions } from './lib/graph-ops.mjs';
 import { incrementalOverlap } from './lib/dup-check.mjs'; // F3: duplication-delta in the edit gate
 import { loadSimilarIndex } from './lib/similar-index.mjs'; // finding #26: serve the dup-check pool from the map-time sidecar
 
-const USAGE = 'usage: review.mjs <graph.json> (--changed <file[:s-e],...> | --range <gitref>) [--before <graph.json>] [--gate] [--json]';
+import { loadReviewBaseline, reviewGitHunks, changeReviewEvidence, boundedReviewEvidence } from './lib/change-review.mjs';
+import { changeReviewHtml } from './lib/change-review-html.mjs';
+
+const USAGE = 'usage: review.mjs <graph.json> (--changed <file[:s-e],...> | --range <gitref>) [--before <graph.json>] [--gate] [--json] [--html <file>]';
 import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
@@ -34,13 +35,13 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
     changed: { type: 'string', default: null },
     range: { type: 'string', default: null },
     before: { type: 'string', default: null },
+    html: { type: 'string', default: null },
   },
 });
-const { json, gate, changed, range, before } = opts;
+const { json, gate, changed, range, before, html } = opts;
 const graphPath = pos[0];
 if (!graphPath || (changed == null && range == null)) die(USAGE, 2);
 
-const load = (p) => loadGraph(p).graph; // Spec E: one truth with every other CLI (was a duplicated pre-loadGraph copy)
 const { graph, abs } = loadGraph(graphPath); // abs feeds loadSimilarIndex (finding #26)
 
 // build hunks from --changed (explicit) or --range (git)
@@ -57,26 +58,16 @@ function parseChanged(csv) {
   }
   return [...fileRanges].map(([file, v]) => ({ file, ranges: v === 'whole' ? null : v }));
 }
-function hunksFromGit(ref) {
-  const r = spawnSync('git', ['diff', '--unified=0', ref], { encoding: 'utf8', maxBuffer: 1 << 28 });
-  if (r.status !== 0) die(`git diff failed: ${(r.stderr || '').trim()}`, 2);
-  const byFile = new Map(); let cur = null;
-  for (const line of r.stdout.split(/\r?\n/)) {
-    let m;
-    if ((m = /^\+\+\+ b\/(.+)$/.exec(line))) { cur = m[1] === '/dev/null' ? null : m[1]; if (cur && !byFile.has(cur)) byFile.set(cur, []); }
-    else if (cur && (m = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/.exec(line))) {
-      const start = +m[1], len = m[2] === undefined ? 1 : +m[2];
-      byFile.get(cur).push([start, start + Math.max(len, 1) - 1]);
-    }
-  }
-  return [...byFile].map(([file, ranges]) => ({ file, ranges }));
-}
-const hunks = range != null ? hunksFromGit(range) : parseChanged(changed);
+let hunks, baseline = null;
+try {
+  hunks = range != null ? reviewGitHunks(range, graph.meta?.root) : parseChanged(changed);
+  if (before != null) baseline = loadReviewBaseline(before);
+} catch (error) { die(error.message, 2); }
 
 const impact = reviewImpact(graph, hunks);
 let structural = null, hasRegression = false;
 if (before != null) {
-  const sr = structuralRegressions(load(before), graph);
+  const sr = structuralRegressions(baseline, graph);
   structural = sr;
   hasRegression = sr.newCycles.length > 0 || sr.lostCallers.length > 0;
 }
@@ -105,12 +96,19 @@ const verdict = {
     newDuplications,
   },
 };
-const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural, newDuplications, verdict };
+const evidence = changeReviewEvidence(graph, baseline, hunks, impact);
+const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural, newDuplications, verdict, ...boundedReviewEvidence(evidence) };
 const code = (gate && hasRegression) ? 1 : 0;
 
+if (html) {
+  try { writeFileSync(html, changeReviewHtml({ ...payload, ...evidence })); }
+  catch (error) { die(`cannot write HTML review: ${error.message}`, 2); }
+}
 if (json) { emitJson(payload, code); } else {
 
 console.log(`codeweb review: ${impact.changedSymbols.length} changed symbol(s) across ${payload.filesChanged.length} file(s)`);
+console.log(`  analysis: ${payload.analysis.status} — ${payload.analysis.scope}`);
+for (const reason of payload.analysis.reasons) console.log(`    ${reason}`);
 console.log(`  domains touched: ${impact.domainsTouched.join(', ') || '(none)'}`);
 console.log(`  blast radius: ${impact.blastRadius.count} transitive dependent(s)`);
 if (impact.callerCounts.length) {
