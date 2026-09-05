@@ -110,7 +110,8 @@ try {
   await page.evaluate(() => { Object.defineProperty(navigator.clipboard, 'writeText', { configurable: true, value: () => Promise.reject(new Error('permission denied for test')) }); });
   await page.locator('[data-setup-client]:visible').getByRole('button', { name: 'Copy recipe' }).click();
   await page.getByRole('status').filter({ hasText: 'copy it manually' }).waitFor();
-  assert.equal(await page.evaluate(() => getSelection().toString()), clientRecipes.at(-1).content);
+  // Native Selection omits the terminal line break in a preformatted code block.
+  assert.equal((await page.evaluate(() => getSelection().toString())).trimEnd(), clientRecipes.at(-1).content.trimEnd());
   log('copy failure offers selected recipe text');
 
   for (const width of [1440, 375]) {
