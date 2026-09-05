@@ -12,8 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      CODEWEB_PLAYWRIGHT_DIR: ${{ runner.temp }}/codeweb-ui-deps
-      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/codeweb-ui-browsers
       CODEWEB_NO_STATS: '1'
       CODEWEB_NO_PROMO: '1'
     steps:
@@ -23,6 +21,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Set isolated browser paths
+        shell: bash
+        run: |
+          echo "CODEWEB_PLAYWRIGHT_DIR=$RUNNER_TEMP/codeweb-ui-deps" >> "$GITHUB_ENV"
+          echo "PLAYWRIGHT_BROWSERS_PATH=$RUNNER_TEMP/codeweb-ui-browsers" >> "$GITHUB_ENV"
       - name: Install optional parser
         run: npm ci
       - name: Install isolated development browser tools

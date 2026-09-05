@@ -24,3 +24,13 @@ test('UI workflow has read-only permission and runs browser gates before uploadi
   assert.match(workflow,/verify-product-ui\.mjs/);
   assert.match(workflow,/actions\/upload-artifact@v4/);
 });
+
+test('UI workflow initializes runner paths in a step, after runner context becomes available', () => {
+  const workflow=readFileSync(join(PLUGIN_ROOT,'.github/workflows/product-ui.yml'),'utf8');
+  const jobEnv=workflow.slice(workflow.indexOf('    env:'),workflow.indexOf('    steps:'));
+  assert.doesNotMatch(jobEnv,/\$\{\{\s*runner\./,'GitHub rejects runner context in job-level env');
+  assert.match(workflow,/CODEWEB_PLAYWRIGHT_DIR=.*RUNNER_TEMP/);
+  assert.match(workflow,/PLAYWRIGHT_BROWSERS_PATH=.*RUNNER_TEMP/);
+  assert.match(workflow,/GITHUB_ENV/);
+  assert.ok(workflow.indexOf('GITHUB_ENV') < workflow.indexOf('Install isolated development browser tools'));
+});
