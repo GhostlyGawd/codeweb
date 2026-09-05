@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, statSync, rmSync } from 'node:fs';
+import { readFileSync, statSync, rmSync, symlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { boundedReviewEvidence } from '../scripts/lib/change-review.mjs';
@@ -116,7 +116,7 @@ test('ac_16: git range uses mapped root from another cwd and retains deleted sym
 test('ac_16: range includes binary and empty files, preserves quoted paths, and excludes files outside mapped root', () => {
   const f = fixture();
   try {
-    const oddFile = 'strange "& name.js';
+    const oddFile = process.platform === 'win32' ? 'strange café & name.js' : 'strange café "& name.js';
     writeTree(f.root, { [oddFile]: 'export function odd() { return 1; }\n', 'empty.js': '', 'binary.bin': '\0before' });
     writeTree(f.dir, { 'outside.js': 'before\n' });
     const git = (...args) => { const r = spawnSync('git', args, { cwd: f.dir, encoding: 'utf8' }); assert.equal(r.status, 0, r.stderr); };
@@ -171,4 +171,24 @@ test('ac_16: every new list has a byte budget and reports omitted oversized rows
     }
   }
   assert.equal(evidence.review.removed.length, 100, 'full internal evidence is not mutated');
+});
+
+
+test('ac_16: git range maps deleted files through a directory alias', () => {
+  const f = fixture();
+  try {
+    const git = (...args) => { const r = spawnSync('git', args, { cwd: f.dir, encoding: 'utf8' }); assert.equal(r.status, 0, r.stderr); };
+    const identity = fixtureGitIdentity(); git('init'); git('config', 'user.name', identity.name); git('config', 'user.email', identity.email);
+    git('add', 'src'); git('commit', '-m', 'fixture alias baseline');
+    const alias = join(f.dir, 'mapped-alias');
+    symlinkSync(f.root, alias, 'junction');
+    rmSync(join(f.root, 'a.js'));
+    const after = structuredClone(f.graph); after.meta.root = alias; after.nodes = after.nodes.slice(1); after.edges = [];
+    delete after.meta.sources['a.js']; after.meta.dirs['.'] = Math.round(statSync(f.root).mtimeMs); f.save(after, f.graph);
+    const r = runNode(REVIEW, [f.args[0], '--range', 'HEAD', '--before', f.args[4], '--json']);
+    assert.equal(r.status, 0, r.stderr); const p = JSON.parse(r.stdout);
+    assert.deepEqual(p.filesChanged, ['a.js']);
+    assert.deepEqual(p.review.removed.map(n => n.id), ['a.js:alpha']);
+    assert.deepEqual(p.review.baselineAffectedCallers.map(n => n.id), ['b.js:beta']);
+  } finally { cleanup(f.dir); }
 });

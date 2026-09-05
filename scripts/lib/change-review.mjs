@@ -1,6 +1,5 @@
 // Additive evidence for the existing structural review. Gate rules stay in graph-ops.
 import { readFileSync, existsSync } from 'node:fs';
-import { isAbsolute, relative, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { normalizeGraph, reviewImpact } from './graph-ops.mjs';
 import { checkStaleness, sourceReader } from './cli.mjs';
@@ -26,14 +25,14 @@ export function reviewGitHunks(ref, root) {
     if (r.status !== 0) throw new Error(`git diff failed: ${(r.stderr || r.error?.message || '').trim()}`);
     return r.stdout;
   };
-  const gitRoot = git(['rev-parse', '--show-toplevel']).trim();
+  // Ask Git for its own repository-relative prefix. OS paths can name the same
+  // directory through Windows short names, junctions, or symlinks. Deleted files
+  // cannot be realpathed, so keep all subsequent path mapping in Git's namespace.
+  const prefix = git(['rev-parse', '--show-prefix']).replace(/\r?\n$/, '');
   // External diff drivers and textconv can execute code from the target. Disable both.
   const diff = git(['-c', 'core.quotePath=false', 'diff', '--no-ext-diff', '--no-textconv', '--no-renames', '--no-relative', '--unified=0', ref, '--']);
   const records = []; let record = null;
-  const relativePath = path => {
-    const rel = relative(resolve(root), resolve(gitRoot, path)).replace(/\\/g, '/');
-    return rel === '..' || rel.startsWith('../') || isAbsolute(rel) ? null : rel;
-  };
+  const relativePath = path => path.startsWith(prefix) ? path.slice(prefix.length) : null;
   const pathOf = raw => {
     let path = raw.split('\t')[0];
     if (path.startsWith('"')) { try { path = JSON.parse(raw); } catch { throw new Error('cannot decode git path'); } }
