@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/brand/banner.png" alt="codeweb — your agents break less code and burn fewer tokens." width="100%">
+<img src="assets/brand/banner.png" alt="codeweb — See what your AI edits affect." width="100%">
 
 [![CI](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml/badge.svg)](https://github.com/GhostlyGawd/codeweb/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/%40ghostlygawd%2Fcodeweb?style=flat-square&color=c6f24e)](https://www.npmjs.com/package/@ghostlygawd/codeweb)
@@ -16,7 +16,7 @@
 
 </div>
 
-**Your agents break less code and burn fewer tokens.**
+**See what your AI edits affect.**
 
 ```bash
 npx -y @ghostlygawd/codeweb .
@@ -27,12 +27,13 @@ npx -y @ghostlygawd/codeweb .
 <br><sub>The large number is the latest seven completed days; the line shows daily downloads. Package downloads are retrievals, not a count of users. Select the chart for the live data and reporting cutoff.</sub>
 </div>
 
-**A deterministic guardrail for agent-written code — zero tokens per PR.** codeweb's gate builds
+**Structural checks for AI code changes.** codeweb's gate builds
 the call graph before and after a change, then fails the pull request on three regressions: a new
 dependency cycle, a new body-confirmed duplication, or a symbol that lost every caller.
 
-The verdict is static analysis, not a model: it never hallucinates, and it costs zero tokens
-however many pull requests you open. Pure removals always pass.
+No LLM is in the checks. The gate uses zero model tokens for its static analysis.
+A passing check does not prove the program works. Analysis can miss dynamic relationships;
+inspect unresolved results and run the relevant tests. Pure removals pass the structural rules.
 [Put it on your PRs →](#gate-every-pull-request)
 
 The gate needs a map to compare, and that map is worth reading on its own.
@@ -56,7 +57,7 @@ The map also shows relationships that are not visible in one file. These relatio
 **duplicated logic, dead code, hotspots, and tangled domains**.
 
 <div align="center">
-<a href="https://ghostlygawd.github.io/codeweb/research.html"><img src="assets/brand/proof-strip.svg" alt="Measured codeweb results: agents found 74% of real callers with codeweb and 44% with grep at the same context spend; impact analysis used 126 times fewer tokens; more than 490,000 deterministic comparisons had zero disagreements" width="100%"></a>
+<a href="https://ghostlygawd.github.io/codeweb/research.html"><img src="assets/brand/proof-strip.svg" alt="Measured codeweb results: agents found 74% of real callers with codeweb and 44% with grep at the same context spend; impact answers had 126 times smaller context size than a simulated graph-assisted grep loop; more than 490,000 deterministic comparisons had zero disagreements" width="100%"></a>
 <br><sub>Measured against fixed tasks and independent oracles. Select the proof strip for the methodology and receipts.</sub>
 </div>
 
@@ -100,7 +101,7 @@ org? That is [codeweb Teams](https://ghostlygawd.github.io/codeweb/pricing.html)
 
 ## See it in action
 
-Each screenshot below shows a generated report for **axios** (274 symbols and 8 domains).
+Each screenshot below shows a generated report for **axios** (278 symbols, 7 domains).
 The screenshots are not mockups.
 
 codeweb found 3 real duplications in axios and rejected 12 false positives. Read
@@ -116,7 +117,7 @@ Your agents can get the same answer from the `codeweb_impact` MCP tool before th
 
 <div align="center">
 <img src="assets/screens/axios-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — the selected block wears the accent with a viewfinder frame, blast edges lit across three domains, 27 callers listed in the inspector" width="760">
-<br><sub>Selecting <code>AxiosError</code> in axios lights up its <b>27 callers across the domains that depend on it</b> — try it yourself in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
+<br><sub>Selecting <code>AxiosError</code> in axios lights up its <b>31 callers across the domains that depend on it</b> — try it yourself in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
 </div>
 
 ### Navigate the whole system
@@ -168,8 +169,8 @@ a merge.
   function's real callers with codeweb and **44%** with grep at the same context spend. A missed
   caller can cause an edit to break working code.
 - **Calculate the effect of a change:** One codeweb call returned one small answer. A simulated
-  grep search loop needed approximately 5 rounds and **126 times the tokens** — and still had to
-  guess.
+  graph-assisted grep loop used **126 times the context size** in the recorded comparison.
+  This measures context-size differences, not total agent-session token savings.
 - **Detect duplicate code:** codeweb found **every planted duplicate with zero false alarms**,
   including renamed copies. Text search found 0% of the renamed copies.
 - **Check deterministic results:** Tests compared codeweb with the TypeScript compiler and other
@@ -214,13 +215,18 @@ impact cards, and all 28 tools:
 ```
 Restart Claude Code to register the `/codeweb` command, agents, and skill.
 
-**Cursor, Windsurf, Codex CLI, or another MCP agent:** Register the zero-dependency stdio server.
-The example uses Claude Code syntax; per-client configuration blocks (Cursor, Windsurf, Codex CLI,
-Gemini CLI) and a paste-ready rules snippet that teaches your agent the before/after loop are on
-[the start page](https://ghostlygawd.github.io/codeweb/start.html#other-clients):
+**Choose your MCP client:** [The setup page](https://ghostlygawd.github.io/codeweb/start.html#other-clients)
+provides one recipe for Claude Code, Cursor, Windsurf, Gemini CLI, or Codex. Print a recipe
+and check local setup from your project:
+
+```bash
+npx -y @ghostlygawd/codeweb setup --client cursor
+npx -y @ghostlygawd/codeweb doctor
 ```
-claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
-```
+
+Setup prints configuration without replacing files. Doctor checks the local server and graph;
+a successful local check does not prove an editor connection. Restart your client, ask your
+agents to run `codeweb_callers`, and check a returned source location.
 
 **Map a repository without an AI agent:** Run one command from your project directory:
 ```

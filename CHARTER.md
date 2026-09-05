@@ -19,13 +19,16 @@ including the CI gate, rules, and the GitHub Action: they gate their own PRs, no
 PR comments and courted for a later Teams tier.
 
 ## The job  *(ratified)*
-**"Your agents break less code and burn fewer tokens."** — the one-liner, operator-picked
-2026-07-25; benefit-first and receipts-backed (callers found 44%→74%; impact answers at a
-fraction of grep's tokens). The mechanism: before an edit, the agent asks the map — who calls
-this, what breaks, does this already exist — and gets exact, small answers; the regression gate
-enforces the same sight after the edit. Agent-first: the human-facing report visualizes the
-findings and never leads. External review of a third-party repo stays as a feature note, not a second
-mode — the capability remains, the "two modes" billing goes (ruled 2026-07-25, C3).
+**"See what your AI edits affect."** — current headline, user-authorized 2026-09-05.
+**Descriptor:** Structural checks for AI code changes.
+Before an edit, your agents query mapped callers and impact. After an edit, the gate checks
+for new dependency cycles, body-confirmed duplication, and lost callers. A passing structural
+check does not prove the program works. The human report remains a supporting view.
+
+The earlier headline, “Your agents break less code and burn fewer tokens.”, is historical.
+The current pilot supports improved caller discovery at similar total token cost. The 126×
+result measures context size against a simulated graph-assisted grep loop, not total session
+savings; the edit-quality experiment did not measure an improvement.
 
 ## Non-goals
 1. No resident daemon (`docs/decisions/fastpath-daemon.md`, NO-GO 2026-07-20; revisit triggers there).
@@ -147,6 +150,17 @@ new languages until their grammars clear provenance *(the bar itself is unchange
 sources gained the tree-sitter org releases, 2026-08-18 — non-goal 8)*.
 
 ## Amendments
+
+### 2026-09-05 — product clarity implementation *(user-authorized)*
+The user requested a specification, task list, independent validation, implementation,
+verification, and PR merge for the product and branding review. This authorizes the scoped
+headline correction above and a dated qualitative Graphify comparison with primary sources.
+
+The active identity is now “See what your AI edits affect.” with the descriptor “Structural
+checks for AI code changes.” Claims must state measured limits. This supersedes the prior
+headline only; the individual developer audience, local privacy invariants, agent-first
+workflow, existing gate rules, free product boundary, and parked research gates remain.
+
 The ledger of changes to ratified sections. Every entry is dated and attributed; nothing here
 was decided silently, and an amendment that only *adds* to a bar says so explicitly.
 
@@ -169,7 +183,7 @@ contradiction rulings · the 2026-07-27 open question, which stays open (see Ope
 ## Done looks like  *(one stranger-runnable check per Now outcome)*
 1. `CHARTER.md` has no unmarked gaps — every open item is deliberate, and Problem/User/Job
    each carry one ratified sentence. ✔ (this interview)
-2. One `grep` finds "Your agents break less code and burn fewer tokens." on all four public
+2. One `grep` finds "See what your AI edits affect." on all four public
    surfaces (README, product.json, package.json, plugin.json); `npm run check-consistency`
    fails when any of them drifts.
 3. `docs/ROADMAP.md` no longer claims the retired program framing or the superseded numbers,

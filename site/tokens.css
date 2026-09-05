@@ -59,13 +59,13 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-display: "Doto", "JetBrains Mono", monospace;
   --fs-display: clamp(19px, 2.2vw, 23px);   /* caps tagline, not a billboard */
-  --fs-h1: clamp(17px, 2vw, 21px);
-  --fs-h2: clamp(14px, 1.6vw, 16px);
-  --fs-h3: 13px;
-  --fs-h4: 12px;
-  --fs-body: 14px;
-  --fs-sm: 12.5px;
-  --fs-xs: 10.5px;
+  --fs-h1: clamp(26px, 3vw, 36px);
+  --fs-h2: clamp(22px, 2.4vw, 28px);
+  --fs-h3: 18px;
+  --fs-h4: 16px;
+  --fs-body: 16px;
+  --fs-sm: 14px;
+  --fs-xs: 12px;
   --lh-tight: 1.35;
   --lh-snug: 1.5;
   --lh-prose: 1.75;

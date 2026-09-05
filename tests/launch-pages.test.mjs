@@ -285,8 +285,12 @@ test('both pages are one click from the live homepage, and the links resolve in 
   const home = built('index');
   const navBlock = /<header class="site-nav">[\s\S]*?<\/header>/.exec(home);
   assert.ok(navBlock, 'the built homepage must carry the shared nav');
+  const primary = /<nav[^>]*>[\s\S]*?<\/nav>/.exec(navBlock[0])[0];
+  assert.equal((primary.match(/<a /g) || []).length, 3, 'primary navigation keeps three task routes');
   for (const slug of SLUGS) {
-    assert.match(navBlock[0], new RegExp(`href="${slug}\\.html"`), `the homepage nav does not reach ${slug}.html`);
+    const footer = /<footer class="site-footer">[\s\S]*?<\/footer>/.exec(home);
+    assert.ok(footer, 'the shared footer provides secondary navigation');
+    assert.match(footer[0], new RegExp(`href="${slug}\\.html"`), `the footer does not reach ${slug}.html`);
     // The nav collapses under 620px (styles.css), so a body link is what a phone visitor gets.
     const body = home.slice(navBlock[0].length);
     assert.match(body, new RegExp(`href="${slug}\\.html"`), `${slug}.html is nav-only — a phone visitor cannot reach it`);

@@ -1,140 +1,72 @@
 <section class="section">
-  <div class="wrap">
+  <div class="wrap setup-flow">
     <div class="section-head">
       <span class="eyebrow">Get started</span>
-      <h1>Get started with codeweb — plugin, npx one-liner, or MCP server</h1>
-      <p class="lead"><strong>Free &amp; MIT-licensed. Runs entirely on your machine — no account, no server, no telemetry. Reads your code; never executes it.</strong></p>
-      <ul class="kicker-list">
-        <li><span class="dot"></span><span>Requires Node.js ≥ 22.</span></li>
-        <li><span class="dot"></span><span>Zero required dependencies — an empty <code>node_modules</code> works.</span></li>
-        <li><span class="dot"></span><span>A wasm grammar, ctags, and ripgrep are optional and can improve extraction.</span></li>
-      </ul>
+      <h1>Connect your agents. Check one change.</h1>
+      <p class="lead">Free &amp; MIT-licensed. Runs entirely on your machine. No account or telemetry. Reads your code; never executes it.</p>
+      <p>Requires Node.js ≥ 22. Zero required dependencies; optional parsers can improve extraction.</p>
     </div>
-    <div class="grid cols-3">
-      <div class="card">
-        <div class="eyebrow">Recommended</div>
-        <h3>Claude Code plugin</h3>
-        <p>The plugin adds the <code>/codeweb</code> command, automatic pre-edit impact cards, and all {{toolCount}} tools.</p>
+    <h2>1. Map your project</h2>
+    <p>Run this package command from the project directory. It creates <code>.codeweb/graph.json</code> and a supporting <code>.codeweb/report.html</code>.</p>
+<pre><code>npx -y @ghostlygawd/codeweb .</code></pre>
+    <p>For a temporary evaluation, use this npx command without a permanent installation.</p>
+    <h2 id="other-clients">2. Choose your client</h2>
+    <p>Select the client that your agents use. Add the displayed entry to its configuration; preserve your other server entries.</p>
+    {{setup_recipes}}
+    <p>You can print the same recipe locally with <code id="setup-command">{{setup_command}}</code>. The setup command does not write or replace configuration.</p>
+    <details class="card"><summary>Claude Code plugin alternative</summary>
+      <p>The plugin adds the <code>/codeweb</code> command, automatic pre-edit impact cards, and all {{toolCount}} tools.</p>
 <pre><code>/plugin marketplace add GhostlyGawd/codeweb
 /plugin install codeweb</code></pre>
-        <p class="muted">Restart Claude Code, then run <code>/codeweb</code> on any project.</p>
-      </div>
-      <div class="card">
-        <h3 id="other-clients">Cursor, Windsurf, or another MCP client</h3>
-        <p>Register the zero-dependency stdio server to use all {{toolCount}} tools without the plugin.</p>
-<pre><code># Cursor — .cursor/mcp.json (project) or ~/.cursor/mcp.json
-# Windsurf — ~/.codeium/windsurf/mcp_config.json (same shape)
-# Gemini CLI — ~/.gemini/settings.json (same shape)
-{ "mcpServers": { "codeweb": { "command": "npx",
-  "args": ["-y", "-p", "@ghostlygawd/codeweb", "codeweb-mcp"] } } }
-
-# Codex CLI — ~/.codex/config.toml
-[mcp_servers.codeweb]
-command = "npx"
-args = ["-y", "-p", "@ghostlygawd/codeweb", "codeweb-mcp"]
-
-# Claude Code without the plugin
-claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp</code></pre>
-        <p class="muted">All {{toolCount}} tools work in every MCP client. Some clients don't surface the server's built-in instructions — paste the loop below into your rules file so your agent actually uses the map.</p>
-      </div>
-      <div class="card">
-        <h3>Map without an AI agent</h3>
-        <p>Run one command from your project directory. The <code>npx</code> command does not create a permanent installation.</p>
-<pre><code>cd your-project
-npx -y @ghostlygawd/codeweb .</code></pre>
-        <p class="muted">~3 s for 3,000 symbols — open <code>.codeweb/report.html</code> when it finishes.</p>
-      </div>
-    </div>
-    <!-- AGT-F4: the plugin's hooks teach Claude the loop ambiently; every other client needs it
-         in a rules file. One paste-ready block, kept in step with the server's instructions. -->
-    <div class="card" style="margin-top:1.25rem">
-      <h3 id="rules-snippet">Teach your agent the loop — paste into <code>.cursor/rules</code>, <code>AGENTS.md</code>, or <code>GEMINI.md</code></h3>
+      <p>Restart Claude Code, then run <code>/codeweb</code> in the project.</p>
+    </details>
+    <h2>3. Check local setup</h2>
+<pre><code>npx -y @ghostlygawd/codeweb doctor</code></pre>
+    <p><strong>Local success:</strong> Node is compatible, the local MCP server initializes, and the graph is present and fresh. The check does not confirm an editor connection.</p>
+    <p>For an explicit configuration check, supply the selected client and file. This inspects the entry without running commands from that file.</p>
+<pre><code id="doctor-command">{{doctor_command}}</code></pre>
+    <p>If the graph is missing or stale, repeat step 1. If a required check fails, follow the named remedy and run doctor again.</p>
+    <h2>4. Ask your agents one caller question</h2>
+    <p>Restart your client or reload its MCP servers. In that client, ask:</p>
+<pre><code>Use codeweb_brief to inspect this project. Choose a function with callers.
+Use codeweb_callers to list its callers with source locations.</code></pre>
+    <p><strong>Connection success:</strong> your client shows a successful <code>codeweb_callers</code> tool result with real source locations. Check one location against your source; a local doctor result alone cannot establish this connection.</p>
+    <p>For a controlled first query, create a temporary <code>caller-check.mjs</code> in an empty directory with this content, map that directory, and ask for the callers of <code>greet</code>.</p>
+<pre><code>export function greet(name) { return 'Hello ' + name; }
+export function welcome() { return greet('Ada'); }</code></pre>
+    <p>The expected caller is <code>welcome</code>. No target code is executed.</p>
+    <figure>
+      <a class="shot" href="demo/"><img src="assets/axios-graph.png" alt="The supporting call graph in the generated CodeWeb report" loading="lazy"></a>
+      <figcaption>A supporting map of the source relationships. Select the image to inspect the live demo.</figcaption>
+    </figure>
+    <h2>5. Review your change</h2>
+    <p>From your Git project, use the package commands to inspect changed symbols and callers, then run the structural gate against a base ref that exists locally.</p>
+<pre><code>npx -y @ghostlygawd/codeweb .
+npx -y @ghostlygawd/codeweb review .codeweb/graph.json --range origin/main --html .codeweb/review.html
+npx -y @ghostlygawd/codeweb gate --base origin/main --target . --report-only</code></pre>
+    <p>Open <code>.codeweb/review.html</code> to inspect the result. Without a prior graph supplied with <code>--before</code>, the review marks structural delta analysis as incomplete. The gate builds both snapshots from the Git base and working tree.</p>
+    <p>Report-only records the finding verdict without blocking on findings. Setup and analysis errors still fail; remove <code>--report-only</code> to block on structural regressions.</p>
+    <p>A passing check does not prove the program works. Inspect analysis limits and run the relevant tests. See <a href="product.html#ci-gate">gate setup</a>.</p>
+    <div class="card">
+      <h2 id="rules-snippet">Teach your agents the edit loop</h2>
+      <p>Paste this into <code>AGENTS.md</code>, <code>GEMINI.md</code>, or your client's rules file.</p>
 <pre><code>## codeweb — ask the map before and after every edit
 This repo is mapped by codeweb (a deterministic call/import graph; {{toolCount}} read-only MCP tools).
 - Orient once per session: codeweb_brief. No symbol name yet? codeweb_find "&lt;concept&gt;".
-- BEFORE touching a symbol: codeweb_explain (one card), then codeweb_context (edit window)
-  or codeweb_impact (blast radius); codeweb_dependents lists EVERY user of it.
-- Before writing a new function: codeweb_find_similar (does this exist?) and codeweb_placement.
-- AFTER editing: codeweb_refresh {snapshot:true}, then codeweb_diff {} — fix any regression
-  it reports before moving on.
+- BEFORE touching a symbol: codeweb_explain, then codeweb_context or codeweb_impact.
+  Use codeweb_dependents to inspect mapped users across edge types.
+- Before writing a new function: codeweb_find_similar and codeweb_placement.
+- AFTER editing: codeweb_refresh {snapshot:true}, then codeweb_diff {}.
+  Inspect new findings and incomplete analysis before you continue.
 - A stale answer names codeweb_refresh; "no graph found" names codeweb_map. Follow the remedy.</code></pre>
     </div>
-    <p class="muted" style="margin-top:1rem"><em>For a temporary evaluation, run the <code>npx</code> command and open the generated map.</em></p>
-    <!-- CRO C8: the page that asks for work finally shows the reward + what success looks like -->
-    <div class="grid cols-2" style="margin-top:1.25rem">
-      <div class="card">
-        <a href="demo/"><img src="assets/axios-graph.png" alt="The interactive map codeweb builds — axios, 274 product symbols across 8 domains" style="width:100%"></a>
-        <p class="muted" style="margin-top:.5rem">A repository with 3,000 symbols maps in approximately 3 seconds. Select the image to open the live axios demo.</p>
-      </div>
-      <div class="card">
-        <p><strong>What success looks like</strong> — the run ends with a result, not a log:</p>
-<pre><code>[run] mapped 1668 symbols -> 14 actionable finding(s) · 6 ready merge(s)
-[run] done -> your-project/.codeweb · codeweb v{{version}}
-[run] next:  1. see the map: open .codeweb/report.html</code></pre>
-      </div>
-    </div>
+    <details class="card source-checkout">
+      <summary>Source checkout alternative</summary>
+      <p>For contributors who work from this repository, clone CodeWeb and run its engine with an explicit target path.</p>
+<pre><code>git clone https://github.com/GhostlyGawd/codeweb.git
+node codeweb/scripts/run.mjs /path/to/your/project</code></pre>
+      <p>Package users can use the commands above. To map a directory named <code>review</code>, <code>setup</code>, <code>doctor</code>, or <code>gate</code>, use <code>./review</code>, an absolute path, or <code>codeweb -- review</code>.</p>
+    </details>
   </div>
 </section>
-
-<section class="section section-tint">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Five-minute quickstart</span>
-      <h2>From a cold repo to a queryable map</h2>
-    </div>
-    <div class="grid cols-2">
-      <div class="card">
-        <div class="eyebrow">1 · Map it</div>
-        <p>Build the graph and the interactive report for a target.</p>
-<pre><code>node scripts/run.mjs ./my-app --out-dir ./my-app/.codeweb
-# open ./my-app/.codeweb/report.html</code></pre>
-      </div>
-      <div class="card">
-        <div class="eyebrow">2 · Query the graph</div>
-        <p>Ask what a change touches before you make it.</p>
-<pre><code>node scripts/query.mjs ./my-app/.codeweb/graph.json \
-  --impact myFunction --json</code></pre>
-      </div>
-      <div class="card">
-        <div class="eyebrow">3 · Guard the edit</div>
-        <p>Diff two snapshots and get a regression verdict.</p>
-<pre><code>node scripts/diff.mjs before.json after.json
-# exit 1 on a new cycle, new duplication, or lost callers</code></pre>
-      </div>
-      <div class="card">
-        <div class="eyebrow">4 · Gate the PR</div>
-        <p>Run the same verdict automatically on every pull request.</p>
-<pre><code>node scripts/ci-gate.mjs --base origin/main --target src</code></pre>
-        <p class="muted">Or drop in the GitHub Action — see <a href="product.html">the CI gate</a>.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Concepts</span>
-      <h2>Five ideas that make the rest click</h2>
-    </div>
-    <div class="grid cols-2">
-      <div class="card"><h3>Node &amp; edge</h3><p>Every function, class, and method is a <strong>node</strong>; calls, imports, inheritance, and test links are <strong>edges</strong>. That graph is the substrate for every query.</p></div>
-      <div class="card"><h3>Domain</h3><p>codeweb clusters nodes into semantic <strong>domains</strong>. Use the domains to reason about subsystems across files. Cross-domain overlap identifies consolidation opportunities.</p></div>
-      <div class="card"><h3>Overlap</h3><p>Two nodes overlap when they do the same work. codeweb confirms overlap by comparing bodies and dismisses same-name functions with different bodies.</p></div>
-      <div class="card"><h3>Blast radius</h3><p>Everything transitively affected by changing a symbol. Ask for it <em>before</em> editing so you know what an edit can break.</p></div>
-      <div class="card"><h3>The gate</h3><p>A structural regression check: a change fails if it adds a cycle, adds a body-confirmed duplicate, or orphans a symbol. Pure removals always pass.</p></div>
-      <div class="card"><h3>Severity</h3><p>Each finding has a high, medium, or low confidence tier. The report highlights high-confidence rows so you can inspect actionable findings first.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="section section-tint">
-  <div class="wrap center">
-    <div class="section-head center">
-      <span class="eyebrow">Next</span>
-      <h2>Drive it from your agents</h2>
-      <p class="lead">Wire it into the loop: your agents call <code>codeweb_find_similar</code> before they write, <code>codeweb_impact</code> before they edit, and <code>codeweb_review</code> before they open a PR.</p>
-    </div>
-    <div class="btn-row" style="justify-content:center"><a class="btn btn-primary btn-lg" href="product.html">See all {{toolCount}} tools</a><a class="btn btn-lg" href="research.html">Read the evidence</a></div>
-  </div>
-</section>
+<script src="assets/setup.js" defer></script>

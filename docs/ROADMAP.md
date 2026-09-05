@@ -1,18 +1,26 @@
 # codeweb — Roadmap
 
-**Refreshed 2026-08-17 against `CHARTER.md` (the ratified contract), after the 2026-08-17/18
-amendment interview. Previously refreshed 2026-07-25.**
+**Refreshed 2026-09-05 against `CHARTER.md` and the user-authorized product clarity
+implementation. Earlier amendments remain recorded in the charter.**
 
 The four-phase "north-star science program" that previously lived here is retired as the
 governing plan (charter C1). Measurement continues as the receipts discipline behind public
 claims — not as the roadmap. The archived program, instruments, and results live in `bench/`
 and git history.
 
-## Now — the identity milestone
+## Now — product clarity and change review
 
-Align every claim-bearing surface to the ratified identity — problem, user, and the job line
-("Your agents break less code and burn fewer tokens.") — enforce that line in
-`check-consistency`, then cut the release. Details and done-checks: `CHARTER.md`.
+Use **“See what your AI edits affect.”** and **“Structural checks for AI code changes.”**
+on current public surfaces. Scope the claims to the evidence and preserve historical results.
+
+- Make setup client-specific, with package commands and separate local and editor checks.
+- Show changed symbols, affected callers, findings, and analysis limits in one review.
+- Separate finding confidence from action priority and explain small-duplicate tradeoffs.
+- Refresh the pinned demo and provide reproducible comparison and pilot protocols.
+- Verify the implementation against AC-13 through AC-20 in `SPEC.md` before merge.
+
+Real participant studies and maintainer decisions remain follow-up work. The implementation
+does not claim those outcomes or run parked experiments.
 
 ## Next — picked 2026-08-17 (operator): productize and launch
 
@@ -21,7 +29,7 @@ The item left deliberately open on 2026-07-25 now has a pick. In scope:
 - **The free-forever / Teams boundary statement** — published, not parked: the contract page
   and the Teams price intent ship on the site (charter, *The boundary: free forever / Teams*).
 - **Gate-led repositioning** — the deterministic regression gate leads the story; the map is
-  the supporting view. The ratified job line is untouched.
+  the supporting view. The 2026-09-05 amendment updates the headline and scopes its evidence.
 - **C/C++ support** — the most-requested missing language, unblocked by amendment A2, which
   ratified official tree-sitter org releases as a second trusted source. The provenance bar
   itself is unchanged (`scripts/grammars/PROVENANCE.md`).

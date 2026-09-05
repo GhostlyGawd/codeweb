@@ -36,7 +36,7 @@ const VERSION = (() => { try { return JSON.parse(readFileSync(join(ROOT, 'packag
 
 // Bump when ANY downstream stage (cluster/overlap/optimize/report) changes behavior — it keys the
 // stage memo, so an old workspace can never serve outputs computed by an older pipeline.
-const MEMO_VERSION = 1;
+const MEMO_VERSION = 2;
 
 const USAGE = `usage: run.mjs [<SRC>] [--target <label>] [--out-dir <dir>] [--open] [--full] [--allow-empty] [--json]
   <SRC>            path to the codebase to map (default: current directory)
@@ -50,7 +50,14 @@ const USAGE = `usage: run.mjs [<SRC>] [--target <label>] [--out-dir <dir>] [--op
                    reused, version}); stage progress stays on stderr
   --stages <phase> partial pipeline; only 'through-overlap' (extract+cluster+overlap, skip
                    optimize+report) — the trend fast path; never writes the stage memo
-  --coverage <p>   annotate the graph with a coverage report (lcov or c8 JSON) after mapping`;
+  --coverage <p>   annotate the graph with a coverage report (lcov or c8 JSON) after mapping
+
+Package commands:
+  codeweb setup --client <client>  print a project setup recipe
+  codeweb doctor                  check local setup and graph state
+  codeweb review <graph>           review a change; add --help for options
+  codeweb gate --base <ref>        check structural changes against a git ref
+  codeweb -- review               map a directory named review (or use ./review)`;
 // finding 24: THE flag loop (lib/cli.mjs parseArgs). This file pioneered the unknown-flag
 // rejection (#5: `--help` once became the target path); the shared loop carries that policy now.
 const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
