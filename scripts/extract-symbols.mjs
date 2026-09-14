@@ -23,6 +23,7 @@ import { SRC_RE } from './lib/common.mjs'; // finding 25: one truth for the mapp
 import { scanSymbols, bodyEnd, parseSignature, DYNAMIC_RE, langOf, CPP_RE, C_RE, C_FAMILY_RE } from './lib/lang-rules.mjs'; // finding 25: pure per-language rules
 import { createImportResolver, defaultExportOf, importCandidates } from './lib/import-resolve.mjs'; // finding 25: cross-file name binding, one place; finding #11: shared specifier-candidate list
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
+import { sameLineDeclarations, extractionAnalysis } from './lib/analysis-completeness.mjs';
 import { maskJs, maskPy, maskRuby } from './lib/masking.mjs'; // comment/string/regex-literal blanking (one truth, shared with codemod's rewrite gate)
 import { createOwnerStack } from './lib/enclosing.mjs'; // finding #21: live open-class stack (property-pinned identical to the linear scan)
 import { createEdgeDeriver, idFile, markPublicApi, resolveTypedIntents } from './lib/edge-derive.mjs'; // finding #40: per-file derivation factory + pub-API walk + typed-intent resolution; idFile (id->file split) is its one truth, imported back
@@ -64,7 +65,9 @@ import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; //
 // v20: C joins on the same rule (second grammar source, amendment A2). SRC_RE gained `.c`/`.h`, so
 // a v19 cache's fileSig again spans a file set that excluded them — and `.h` in particular changes
 // what EXISTING C++ files resolve to, because a quoted `#include "x.h"` had no candidate before.
-const SCANNER_VERSION = 20; // v18 (JSON tier) over v17: derivation-semantics change (WS-D review) —
+// v21: COD-9 cached declaration diagnostics; invalidate unqualified old caches.
+// v22: multiline control-head regex masking in diagnostic scanning.
+const SCANNER_VERSION = 22; // v18 (JSON tier) over v17: derivation-semantics change (WS-D review) —
 // the bare-name fallback excludes closure-local targets (closureLocalIds), and symbolSig annotates
 // eligibility so a nesting flip invalidates cached edges. A previous-version cache is discarded at
 // load (one cold rebuild, never a crash) — the read gate below only accepts an exact version match.
@@ -370,6 +373,7 @@ const sources = {};
 // answer-time tools can say "0 callers, but this repo routes calls dynamically in N file(s) —
 // absence of callers is weaker evidence" instead of sounding equally sure everywhere.
 const dynamicFiles = [];
+const analysisParts = [];
 for (const f of files) {
   const r = rel(f);
   const isPy = r.endsWith('.py');
@@ -391,6 +395,7 @@ for (const f of files) {
     if (stq && stq.size === oldHit.stamp.s && Math.round(stq.mtimeMs) === oldHit.stamp.m) {
       sources[r] = { s: oldHit.stamp.s, m: oldHit.stamp.m, h: oldHit.hash };
       if (oldHit.dyn) dynamicFiles.push(r);
+      if (oldHit.analysis) analysisParts.push(oldHit.analysis);
       for (const n of oldHit.nodes) nodes.push(n); // this-run-private objects (the cache is JSON.parse'd fresh per run)
       fileSyms.set(f, { text: null, ranges: oldHit.ranges }); // text pulled lazily IF a landscape change needs it
       if (needsAst && isJsTs) {
@@ -430,6 +435,8 @@ for (const f of files) {
   sources[r] = st
     ? { s: st.size, m: Math.round(st.mtimeMs), h: contentHash }
     : { s: -1, m: 0, h: contentHash }; // never-fresh stamp for a file that kept changing
+  const fileAnalysis = isJsTs ? sameLineDeclarations(maskJs(text, { statementRegex: true }), r) : { count: 0, diagnostics: [] };
+  analysisParts.push(fileAnalysis);
   const isDyn = DYNAMIC_RE.test(text);
   if (isDyn) dynamicFiles.push(r);
   let syms;
@@ -629,6 +636,7 @@ for (const f of files) {
     const entry = newCache.files[r];
     entry.stamp = st ? { s: st.size, m: Math.round(st.mtimeMs) } : null;
     entry.dyn = isDyn ? 1 : 0;
+    entry.analysis = fileAnalysis;
     entry.nodes = nodes.slice(fileNodesStart);
     entry.ranges = ranges;
   }
@@ -1087,6 +1095,7 @@ const fragment = {
     // warm run that never initializes the engine emits the same meta as a cold one (Spec A).
     ...(opts.engine !== 'regex' && astProbe.ts && !astLoadFailed ? { complexityEngine: astProbe.tsVersion } : {}),
     languages, symbols: nodes.length,
+    analysis: extractionAnalysis(analysisParts),
     sources, // per-file {s: size, m: mtimeMs, h: sha1} staleness stamps (h powers the verify tier — finding 4)
     // files with dynamic-dispatch patterns — the honest asterisk on every "0 callers" answer
     ...(dynamicFiles.length ? { dynamic: { files: dynamicFiles.length, sample: dynamicFiles.slice(0, 3) } } : {}),
@@ -1103,7 +1112,8 @@ const fragment = {
 // trees can land here.) Guarded before any artifact/cache write so a failed run leaves nothing.
 if (nodes.length === 0 && !opts.allowEmpty) {
   throw new ExtractError(1, `[extract] 0 symbols found in ${files.length} supported file(s) under ${root} — the files parsed but defined no functions, classes, or methods.\n` +
-    '[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.');
+    '[extract]   is this the right directory? Pass --allow-empty to proceed with an empty map.' +
+    (fragment.meta.analysis.status === 'incomplete' ? `\n[extract] analysis incomplete: ${JSON.stringify(fragment.meta.analysis)}` : ''));
 }
 if (newCache && !astLoadFailed && cacheDirty) {
   try {
@@ -1142,7 +1152,9 @@ const dispatchNote = astAvailable
 const anyAstLoaded = astEngineLoadedThisRun;
 const astState = anyAstLoaded ? 'loaded' : (!astAvailable || astLoadFailed) ? 'off' : 'idle';
 const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files${jsonMappedCount ? ` (+${jsonMappedCount} json)` : ''} (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges (${shortNameDropped} short-name)${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
-  return { fragment, banner };
+  const diagnosticBanner = fragment.meta.analysis.status === 'incomplete'
+    ? `\n[extract] analysis incomplete: ${fragment.meta.analysis.diagnosticCount} unsupported same-line declaration(s); inspect meta.analysis.diagnostics (file/line/column/evidence).` : '';
+  return { fragment, banner: banner + diagnosticBanner };
 }
 
 // ---- CLI front door: argv parse, --out/stdout write, exit codes (the ONLY process-lifecycle owner) ----

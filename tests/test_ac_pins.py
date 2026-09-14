@@ -170,6 +170,10 @@ class TestAcPins(unittest.TestCase):
         proc = _run(["node", "--test", "tests/hooks-config.test.mjs"])
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
 
+    def test_ac_27_incomplete_analysis_containment(self):
+        proc = _run(["node", "--test", "tests/analysis-completeness.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

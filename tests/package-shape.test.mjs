@@ -30,7 +30,9 @@ test('P1: manifest is publishable — bins, files, no runtime deps, not private'
   // must point at a real path too — a negation for a ghost file is a manifest bug.
   for (const f of pkg.files || []) {
     const rel = f.startsWith('!') ? f.slice(1) : f;
-    assert.ok(existsSync(join(PLUGIN_ROOT, rel)), `files entry exists: ${f}`);
+    if (/[?*\[\]{}]/.test(rel)) {
+      assert.ok(f.startsWith('!'), 'glob exclusions are verified by the packed-artifact tests');
+    } else assert.ok(existsSync(join(PLUGIN_ROOT, rel)), `files entry exists: ${f}`);
   }
   assert.deepEqual(pkg.dependencies || {}, {}, 'zero runtime dependencies — the stance holds');
   assert.ok(pkg.optionalDependencies?.['web-tree-sitter'], 'the AST tier stays optional');
@@ -49,6 +51,7 @@ test('P2: npm pack ships engine + plugin surfaces, excludes repo-only trees', ()
   for (const banned of ['bench/', 'site/', 'docs/', 'tests/', 'assets/', 'spike/']) {
     assert.ok(!files.some((f) => f.startsWith(banned)), `tarball excludes ${banned}`);
   }
+  assert.ok(!files.some((f) => f.includes('/__pycache__/') || f.endsWith('.pyc')), 'compiled harness caches must not ship');
   // ADR-0001c: the harness layer is dev tooling — nothing shell/Python ships in the
   // "zero deps, runs 100% locally" package.
   for (const harness of ['scripts/check', 'scripts/spec_lint.py', 'scripts/hook-check', 'scripts/hook-protect']) {
@@ -172,4 +175,27 @@ test('P3: packed release installs offline and each installed bin answers --help'
     cleanup(packDir);
     cleanup(prefix);
   }
+});
+
+
+test('P4: package exclusions reject generated Python bytecode even when caches exist', () => {
+  const dir = tmpDir('cw-pack-caches-');
+  const WIN = process.platform === 'win32';
+  try {
+    writeTree(dir, {
+      'package.json': JSON.stringify({ name: 'codeweb-package-fixture', version: '0.0.0', files: pkg.files }),
+      'scripts/engine.mjs': 'export const runtime = true;\n',
+      'scripts/__pycache__/spec_lint.cpython-314.pyc': 'compiled harness sentinel',
+      'scripts/nested/__pycache__/helper.pyc': 'nested compiled sentinel',
+      'scripts/loose.pyc': 'loose compiled sentinel',
+    });
+    const r = spawnSync(WIN ? 'npm.cmd' : 'npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
+      cwd: dir, encoding: 'utf8', shell: WIN, maxBuffer: 1 << 26,
+      env: { ...process.env, npm_config_cache: join(dir, 'npm-cache'), npm_config_audit: 'false', npm_config_fund: 'false' },
+    });
+    assert.equal(r.status, 0, r.stderr);
+    const files = JSON.parse(r.stdout)[0].files.map((f) => f.path);
+    assert.ok(files.includes('scripts/engine.mjs'), 'runtime control stays packaged');
+    assert.ok(!files.some((f) => f.includes('/__pycache__/') || f.endsWith('.pyc')), files.join('\n'));
+  } finally { cleanup(dir); }
 });

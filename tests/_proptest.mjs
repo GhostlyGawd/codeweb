@@ -72,7 +72,8 @@ export function naiveApply(graph, op) {
     return { ...graph, nodes: graph.nodes.map((n) => (n.id === op.id ? { ...n, file: op.to } : n)) };
   }
   // merge
-  const s = new Set(op.ids); const map = (id) => (s.has(id) ? op.into : id);
+  const s = new Set(op.ids);
+  const map = (id) => (s.has(id) ? op.into : id);
   const nodes = graph.nodes.filter((n) => !(s.has(n.id) && n.id !== op.into));
   const seen = new Set(); const edges = [];
   for (const e of graph.edges) {

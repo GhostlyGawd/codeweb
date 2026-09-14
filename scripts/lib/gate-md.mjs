@@ -56,7 +56,7 @@ export function gateComment(p, { history = null, upgrade = true, graph = null, s
   };
   const L = [];
   L.push(MARKER);
-  L.push(`## codeweb gate — ${p.ok ? '✅ no structural regressions' : `❌ ${p.regressions.length} regression type(s)`}`);
+  L.push(`## codeweb gate — ${p.status === 'inconclusive' ? '⚠ analysis incomplete — gate inconclusive' : p.ok ? '✅ no structural regressions' : `❌ ${p.regressions.length} regression type(s)`}`);
   L.push('');
   const rn = p.nodes.renamed.length;
   L.push(
@@ -67,6 +67,7 @@ export function gateComment(p, { history = null, upgrade = true, graph = null, s
   if (!p.ok) {
     L.push('');
     L.push('**Blocking:**');
+    if (p.status === 'inconclusive') L.push('- Analysis incomplete: missing declarations or incorrect call ownership prevent a clean verdict.');
     for (const r of p.regressions) L.push(`- ❌ ${plain(r)}`);
   }
   // existing symbols that lost their last caller (brand-new and renamed-to nodes are not "lost")
@@ -80,6 +81,7 @@ export function gateComment(p, { history = null, upgrade = true, graph = null, s
     for (const it of c.head) L.push(render(it));
     if (c.more) L.push(`- …+${c.more} more`);
   };
+  section('Incomplete analysis locations', p.analysis?.completeness?.diagnostics || [], (d) => `- ${plain(d.snapshot)}: ${sourceLocation(d.file, d.line, d.snapshot === 'after' ? source : null)} — ${plain(d.evidence)}`, 5);
   section('New dependency cycles', p.cycles.added, (c) => {
     const sites = cap(c, 8);
     return `- ${sites.head.map((f) => sourceLocation(f, null, source)).join(' → ')}${sites.more ? ` → …+${sites.more} more files` : ''}`;

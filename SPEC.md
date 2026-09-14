@@ -80,6 +80,8 @@ controlling product specification.
 - **AC-25** — first-run CLI, README and start-page guidance capture an explicit pre-edit baseline and preserve it through repair; the published tiny cycle walkthrough finds a caller, goes red then green, and discloses skipped analysis and behavioral limits | check: `node --test tests/first-run.test.mjs tests/first-use-cycle.test.mjs` | status: built
 - **AC-26** — shipped hook metadata omits settings schema and matcher-level metadata, preserves adjacent descriptions and all three handler commands, and passes fixture-driven handler checks | check: `node --test tests/hooks-config.test.mjs tests/brief.test.mjs tests/awareness.test.mjs tests/post-edit-diff.test.mjs` | status: built
 
+- **AC-27** — known unsupported JS/TS same-line function, arrow and class declaration layouts carry bounded masked-source diagnostics through extraction, cache, graph and refresh/baseline; either incomplete snapshot makes CLI/MCP diff and review inconclusive (exit 2, false verdict), while supported green and regression controls retain exit 0/1 | check: `node --test tests/analysis-completeness.test.mjs tests/ci-gate.test.mjs` | status: built
+
 Pins live in `tests/test_ac_pins.py` (`test_ac_<n>_...`); pins are cheap wiring witnesses —
 the `check:` commands above are what brief 144 runs verbatim.
 

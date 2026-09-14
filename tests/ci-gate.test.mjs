@@ -155,6 +155,26 @@ test('the composite action ships the sticky-comment reviewer, opt-in and fork-sa
   assert.match(yml, /steps\.gate\.outputs\.code != '0'/, 'comment posts before the verdict enforces');
   assert.match(yml, /Enforce gate verdict/, 'the verdict still fails the job');
   assert.match(yml, /found structural regressions/, 'exit 1 keeps the regression message');
-  assert.match(yml, /setup problem, not a structural regression/, 'exit 2 names setup, never a false verdict');
+  assert.match(yml, /incomplete analysis or a setup problem/, 'exit 2 names both inconclusive causes');
+  assert.match(yml, /See the diagnostics/, 'inconclusive results direct users to evidence');
   assert.match(yml, /pull-requests: write/, 'permission requirement documented in the input description');
+});
+
+test('ac_27: CI gate contains a nonempty partial graph and renders diagnostic locations', { skip: hasGit ? false : 'git not available' }, () => {
+  const { repo, base } = repoWithBase();
+  try {
+    writeTree(repo, { 'src/a.js': 'function helper() {} export function compute(x) { return x; }\n' });
+    const md = join(repo, 'gate.md');
+    const r = runNode(script('ci-gate.mjs'), ['--base', base, '--repo', repo, '--target', 'src', '--md', md]);
+    assert.equal(r.status, 2, r.stdout + r.stderr);
+    assert.match(r.stdout, /gate inconclusive/);
+    assert.doesNotMatch(r.stdout, /ok — no structural regressions/);
+    const advisory = runNode(script('ci-gate.mjs'), ['--base', base, '--repo', repo, '--target', 'src', '--report-only']);
+    assert.equal(advisory.status, 2, advisory.stdout + advisory.stderr);
+    assert.match(advisory.stdout, /gate inconclusive/);
+    const text = readFileSync(md, 'utf8');
+    assert.match(text, /gate inconclusive/);
+    assert.match(text, /src\/a\.js:1/);
+    assert.match(text, /export function compute/);
+  } finally { cleanup(repo); }
 });

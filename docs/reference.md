@@ -74,23 +74,24 @@ node scripts/diff.mjs <before.json> <after.json> [--json]
 The verdict:
 
 - **Exits 1** on a new dependency cycle, a new body-confirmed duplication finding, or an
-  existing non-exported symbol that becomes an orphan. Exported symbols are exempt here.
-- **Exits 0** on pure removals. Deleting code is an improvement, not a regression.
+  existing non-exported symbol that becomes an orphan. Exported symbols are exempt here. These checks cover the mapped graph; unresolved
+  dependencies can be absent.
+- Pure removals do not count as structural regressions; this says nothing about their behavioral safety.
 - A brand-new uncalled function never trips it — agents add functions before wiring them up.
 
 The edit preflight (`codeweb_simulate` and the post-edit hook) also flags exported symbols
 that lose their last mapped call-caller. It is a separate check from the diff’s orphan gate.
 See [the gate contract](ci-gate.md).
 
-For npm v0.14.0, copy the full map to `before.json` **before** editing. Rebuild the full
+For the installed-binary snapshot workflow, copy the full map to `before.json` **before** editing. Rebuild the full
 map after each edit or repair and compare it with that same saved file. Keep the baseline
 outside the regenerated workspace; the [quickstart](https://ghostlygawd.github.io/codeweb/start.html#npm-quickstart) supplies every command.
 
-**Unreleased checkout:** follow [the explicit-baseline workflow](cli.md#before-and-after-an-edit):
+**Codeweb 0.15.0 and later:** follow [the explicit-baseline workflow](cli.md#before-and-after-an-edit):
 `codeweb_refresh {baseline:true}` before editing, then
 `codeweb_diff {before:"baseline",refresh:true}` after editing and each repair.
 
-Inspect `analysis.checks` in checkout responses. Refresh drops overlap evidence, so its
+Inspect `analysis.checks` in responses. Refresh drops overlap evidence, so its
 diff does not evaluate duplication. `ok:true` means no regressions were found by the
 checks performed; it does not prove behavior or complete runtime dependency coverage.
 Run the project’s tests too.
@@ -111,12 +112,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }   # required — the gate diffs against the PR base
-      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.14.0
-        with: { target: src, comment: true, codeweb-ref: v0.14.0 }   # comment posts the review on the PR
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.15.0
+        with: { target: src, comment: true, codeweb-ref: v0.15.0 }   # comment posts the review on the PR
 ```
 
-Locally: `node scripts/ci-gate.mjs --base <ref> [--target <subdir>]`. Pure removals never trip the
-gate; a brand-new uncalled function is reported but doesn't fail the build.
+Locally: `node scripts/ci-gate.mjs --base <ref> [--target <subdir>]`. Pure removals do not count as structural regressions; a brand-new uncalled function is reported but doesn't fail the build.
 
 ## Advise consolidations (`optimize.mjs`)
 
@@ -234,8 +234,8 @@ node scripts/context-pack.mjs  <graph.json> <symbol> [--json]   # minimal contex
 node scripts/simulate-edit.mjs <graph.json> --delete <sym> | --merge <a,b> [--into <id>] | --move <sym> --to <file>
 ```
 
-`context-pack` returns everything agents need to edit one symbol: its body, its callers with call
-sites, its callees, and the impact set. Agents work from a small window instead of whole files.
+`context-pack` returns a bounded source window for one mapped symbol: its body, mapped callers
+with lexical source windows, its callees, and the mapped impact set. Agents work from a small window instead of whole files.
 
 `simulate-edit` predicts the gate's verdict for a delete, merge, or move **without performing
 it**. Doomed edits get discarded before any code is written.
@@ -267,7 +267,9 @@ production `--callers` answers exclude tests.
 
 ## The MCP server, tool by tool
 
-`scripts/mcp-server.mjs` exposes all **28** of codeweb's tools to any MCP client. In the order
+`scripts/mcp-server.mjs` exposes **28** tools over MCP. The September 14 packaged assessment exercised the
+baseline loop with Codex CLI 0.154.0; it did not test Claude runtime compatibility or
+certify all tools across clients. See [assessment scope](../reports/paperclip-pilot/readiness-01/PACKAGED-ACCEPTANCE.md). In the order
 your agents meet them:
 
 - **Orient** — `codeweb_map` builds the graph; `codeweb_brief` is the day-one repo page (call it
@@ -297,8 +299,8 @@ or in an `.mcp.json`:
 { "mcpServers": { "codeweb": { "command": "node", "args": ["/abs/path/to/codeweb/scripts/mcp-server.mjs"] } } }
 ```
 
-The checkout handshake teaches the unreleased explicit-baseline loop. npm v0.14.0 users
-should save a full map before editing and compare full rebuilt snapshots, as described
+The server handshake teaches the explicit-baseline loop. Installed binaries can also
+compare a saved full map against rebuilt snapshots, as described
 [above](#guard-agent-edits-diff). Query results describe mapped dependencies; dynamic or
 unresolved callers can be absent.
 
@@ -359,3 +361,8 @@ codeweb/
 ├── assets/                          # brand art (logo, hero, animated demo) + report screenshots
 └── README.md
 ```
+
+
+Known unsupported same-line JS/TS declarations make gate comparisons inconclusive,
+with `ok:false`, diagnostic locations, and CLI exit 2. See [incomplete extraction](cli.md#known-incomplete-extraction).
+An unflagged graph does not prove full extraction coverage.

@@ -14,7 +14,7 @@ inputs:
     default: '.'
   codeweb-ref:
     description: >-
-      The codeweb ref (branch/tag/sha) to run the gate with. Pin a release tag (e.g. v0.14.0)
+      The codeweb ref (branch/tag/sha) to run the gate with. Pin a release tag (e.g. v0.15.0)
       in production — the default tracks main, which moves under you.
     required: false
     default: 'main'
@@ -131,6 +131,6 @@ runs:
         if [ "$GATE_CODE" = "1" ]; then
           echo "::error::codeweb gate found structural regressions (see the PR comment / job log above)"
         else
-          echo "::error::codeweb gate could not run (exit $GATE_CODE) — usually a shallow checkout; use actions/checkout with 'fetch-depth: 0'. This is a setup problem, not a structural regression."
+          echo "::error::codeweb gate is inconclusive (exit $GATE_CODE): incomplete analysis or a setup problem. See the diagnostics in the PR comment / job log. For shallow history, use actions/checkout with 'fetch-depth: 0'."
         fi
         exit 1

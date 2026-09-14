@@ -82,6 +82,7 @@ if (json) { emitJson(payload, code); } else {
   if (n.renameCheck) console.log(`  rename detection skipped: ${n.renameCheck.removed} removed / ${n.renameCheck.added} added exceed the ${n.renameCheck.cap}-node cap`);
   console.log(`  cycles +${payload.cycles.added.length} -${payload.cycles.removed.length}   overlaps +${payload.overlaps.added.length} -${payload.overlaps.removed.length}   orphans +${payload.orphans.added.length} -${payload.orphans.removed.length}`);
   if (payload.regressions.length) { console.log('REGRESSIONS (a gate would block):'); for (const r of payload.regressions) console.log(`  x ${r}`); }
+  else if (payload.status === 'inconclusive') console.log('  INCONCLUSIVE — analysis incomplete; a clean gate cannot be established');
   else console.log('  ok — no structural regressions');
   for (const step of payload.analysis.nextSteps) console.log(`  analysis: ${step}`);
   finish(code);

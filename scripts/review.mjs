@@ -15,6 +15,7 @@
 // best-effort (loc is clamped/brace-matched); it can under-select on truncated bodies. --range path
 // maps git paths to the graph root and keeps old-side spans for deletion evidence.
 
+import { incompleteAnalysis, INCOMPLETE_STEP } from './lib/analysis-completeness.mjs';
 import { writeFileSync, existsSync } from 'node:fs';
 import { reviewImpact, structuralRegressions } from './lib/graph-ops.mjs';
 import { incrementalOverlap } from './lib/dup-check.mjs'; // F3: duplication-delta in the edit gate
@@ -65,6 +66,8 @@ try {
 } catch (error) { die(error.message, 2); }
 
 const impact = reviewImpact(graph, hunks);
+const beforeGraph = baseline;
+const incomplete = beforeGraph ? incompleteAnalysis(beforeGraph, graph) : incompleteAnalysis(graph);
 let structural = null, hasRegression = false;
 if (before != null) {
   const sr = structuralRegressions(baseline, graph);
@@ -87,7 +90,8 @@ if (newDuplications.length) hasRegression = true;
 // label says so instead of implying the structural half ran.
 const expOf = new Map(graph.nodes.map((n) => [n.id, !!n.exports]));
 const verdict = {
-  ok: !hasRegression,
+  ok: !incomplete && !hasRegression,
+  ...(incomplete ? { status: 'inconclusive', analysis: incomplete } : {}),
   check: structural ? 'call-caller-preflight' : 'duplication-only',
   scope: 'full',
   checks: {
@@ -99,19 +103,25 @@ const verdict = {
 const evidence = changeReviewEvidence(graph, baseline, hunks, impact);
 const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural, newDuplications, verdict, ...boundedReviewEvidence(evidence) };
 payload.analysis.checkStatus = {
-  cycles: structural ? 'evaluated' : 'not-evaluated',
-  lostCallers: structural ? 'evaluated' : 'not-evaluated',
+  cycles: incomplete ? 'incomplete' : structural ? 'evaluated' : 'not-evaluated',
+  lostCallers: incomplete ? 'incomplete' : structural ? 'evaluated' : 'not-evaluated',
   duplication: root && existsSync(root) ? 'bounded-source-check' : 'not-evaluated',
   behavior: 'not-evaluated',
 };
+if (incomplete) {
+  payload.analysis.completeness = incomplete;
+  payload.analysis.status = 'incomplete';
+  payload.analysis.reasons.push(INCOMPLETE_STEP);
+}
 payload.analysis.nextSteps = [
+  ...(incomplete ? [INCOMPLETE_STEP] : []),
   ...(!structural ? ['Pass before (CLI: --before) with a pre-edit graph to check cycles and lost callers.'] : []),
   'Duplication uses capped mapped bodies; inspect unavailable source and run relevant tests.',
 ];
-const code = (gate && hasRegression) ? 1 : 0;
+const code = incomplete ? 2 : (gate && hasRegression) ? 1 : 0;
 
 if (html) {
-  try { writeFileSync(html, changeReviewHtml({ ...payload, ...evidence })); }
+  try { writeFileSync(html, changeReviewHtml({ ...payload, ...evidence, analysis: { ...payload.analysis, unavailableFiles: evidence.analysis.unavailableFiles, unmappedFiles: evidence.analysis.unmappedFiles } })); }
   catch (error) { die(`cannot write HTML review: ${error.message}`, 2); }
 }
 if (json) { emitJson(payload, code); } else {
@@ -130,7 +140,7 @@ if (structural) {
     console.log('  STRUCTURAL REGRESSIONS:');
     if (structural.newCycles.length) console.log(`    x ${structural.newCycles.length} new file cycle(s): ${structural.newCycles.map((c) => c.join('+')).join(', ')}`);
     if (structural.lostCallers.length) console.log(`    x ${structural.lostCallers.length} symbol(s) lost all callers: ${structural.lostCallers.join(', ')}`);
-  } else console.log('  structural: ok — no new cycles or lost-caller regressions vs --before');
+  } else if (!incomplete) console.log('  structural: ok — no new cycles or lost-caller regressions vs --before');
 }
 if (newDuplications.length) {
   console.log(`  NEW DUPLICATION (body-confirmed) — ${newDuplications.length}:`);

@@ -1,3 +1,4 @@
+import { incompleteAnalysis, INCOMPLETE_STEP } from './analysis-completeness.mjs';
 // lib/diff-core.mjs — the structural delta + regression verdict between two PARSED graph snapshots.
 // Lifted from diff.mjs (finding #33) so the MCP codeweb_diff fast path can serve it IN-PROCESS from
 // cachedGraph (the after side) instead of booting node + parsing two graphs per call (131–136 ms
@@ -136,6 +137,7 @@ export function diffGraphs(before, after, { names = {}, bIx, aIx } = {}) {
   if (overlapsAdded.length) regressions.push(`${overlapsAdded.length} new duplication finding(s)`);
   if (regressedOrphans.length) regressions.push(`${regressedOrphans.length} symbol(s) lost all callers`);
 
+  const incomplete = incompleteAnalysis(before, after);
   const cdBefore = crossCount(before, bIx), cdAfter = crossCount(after, aIx);
   const payload = {
     before: before.meta.target || names.before,
@@ -148,17 +150,20 @@ export function diffGraphs(before, after, { names = {}, bIx, aIx } = {}) {
     cycles: { added: cyclesAdded, removed: cyclesRemoved },
     orphans: { added: orphansAdded, removed: orphansRemoved },
     regressions,
-    ok: regressions.length === 0,
+    ok: !incomplete && regressions.length === 0,
+    ...(incomplete ? { status: 'inconclusive' } : {}),
     // API §5: the shared verdict object — same fields, same check label, on every presenter.
     verdict: gateVerdict(before, after, { exemptExported: true, newDuplications: overlapsAdded, scope: 'full' }),
     analysis: {
       scope: 'mapped-graph-delta',
-      checks: { cycles: 'evaluated', lostCallers: 'evaluated', duplication: duplicationEvaluated ? 'evaluated' : 'not-evaluated', behavior: 'not-evaluated' },
+      ...(incomplete ? { completeness: incomplete } : {}),
+      checks: { cycles: incomplete ? 'incomplete' : 'evaluated', lostCallers: incomplete ? 'incomplete' : 'evaluated', duplication: duplicationEvaluated ? 'evaluated' : 'not-evaluated', behavior: 'not-evaluated' },
       nextSteps: [
+        ...(incomplete ? [INCOMPLETE_STEP] : []),
         ...(!duplicationEvaluated ? ['Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.'] : []),
         'Mapped structural checks do not establish behavioral correctness; run the relevant tests.',
       ],
     },
   };
-  return { payload, code: payload.ok ? 0 : 1 };
+  return { payload, code: incomplete ? 2 : payload.ok ? 0 : 1 };
 }

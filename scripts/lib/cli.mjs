@@ -180,6 +180,7 @@ export function loadGraph(pathArg, { usage = null } = {}) {
   let graph;
   try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
   catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+  if (graph.meta?.analysis?.status === 'incomplete') console.error('[codeweb] analysis incomplete — inspect graph.meta.analysis.diagnostics; mapped results cannot establish a clean gate.');
   return { graph, abs };
 }
 

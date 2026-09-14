@@ -22,9 +22,9 @@ on current public surfaces. Scope the claims to the evidence and preserve histor
 Real participant studies and maintainer decisions remain follow-up work. The implementation
 does not claim those outcomes or run parked experiments.
 
-## Next — picked 2026-08-17 (operator): productize and launch
+## Now — productize and launch (operator pick, 2026-08-17)
 
-The item left deliberately open on 2026-07-25 now has a pick. In scope:
+Current status within that pick:
 
 - **The free-forever / Teams boundary statement** — published, not parked: the contract page
   and the Teams price intent ship on the site (charter, *The boundary: free forever / Teams*).
@@ -34,7 +34,13 @@ The item left deliberately open on 2026-07-25 now has a pick. In scope:
   ratified official tree-sitter org releases as a second trusted source. The provenance bar
   itself is unchanged (`scripts/grammars/PROVENANCE.md`).
 - **The hosted Teams build** — green-lit by amendment A1; it lives in a separate repository so
-  the local product keeps taking no accounts, no telemetry, and no license keys.
+  the local product keeps taking no accounts, no telemetry, and no license keys. Hosted
+  availability is not verified by this repository’s readiness evidence; pricing remains intent.
+
+**0.15.0 release preparation.** Known unsupported same-line JS/TS declarations now
+produce bounded diagnostics and an inconclusive gate result. This contains the reported
+false-clean case without claiming complete parser coverage. Baseline, context, doctor,
+and product-clarity work are integrated; the release checks cover their combined behavior.
 
 Still parked, still gated on an explicit operator go (charter non-goal 7):
 

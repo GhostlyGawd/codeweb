@@ -71,7 +71,7 @@ codeweb -- review
 |---|---|
 | 0 | success — for `simulate-edit` this includes a BLOCK prediction (the verdict is in the payload, it's a pre-flight) |
 | 1 | the tool's finding fired: `diff`/`ci-gate`/`review --gate`/`fitness` found a regression; `query`-family symbol not found; a pipeline stage failed |
-| 2 | usage, IO, or setup: bad flag, missing file, unmapped directory, wrong-path target, Node < 22 |
+| 2 | usage, IO, setup, or inconclusive analysis: inspect the error or structured diagnostics; never treat it as a clean gate |
 
 ## Environment variables
 
@@ -137,10 +137,9 @@ confidence or whole-repository completeness score is inferred from these signals
 
 ## Before and after an edit
 
-**Unreleased checkout workflow:** `baseline:true`, `--baseline`, diff `refresh:true` /
-`--refresh`, and the analysis fields below require the current development checkout.
-The v0.14.0 npm package can compare explicit snapshot files; use the
-[snapshot quickstart](https://ghostlygawd.github.io/codeweb/start.html#npm-quickstart).
+**Available in Codeweb 0.15.0 and later:** `baseline:true`, `--baseline`, diff
+`refresh:true` / `--refresh`, and the analysis fields below. For an installed-binary
+example, use the [npm quickstart](https://ghostlygawd.github.io/codeweb/start.html#npm-quickstart).
 
 CLI examples in this section run from the Codeweb checkout. For another target, pass
 its absolute `.codeweb/graph.json` path instead of the relative example.
@@ -213,3 +212,26 @@ The package subcommand `codeweb doctor` additionally checks the local MCP handsh
 and optional explicit client configuration. Its required freshness checks can fail when
 source stamps are unavailable. The `codeweb --doctor` flag and explicit-target script
 form provide lightweight installation/map diagnostics; they do not verify a client connection.
+
+## Known incomplete extraction
+
+Known unsupported same-line JS/TS declarations are recorded in `graph.meta.analysis`.
+An `incomplete` status includes an exact diagnostic count and at most 20 samples with
+file, line, column, and masked-source evidence. Strings and comments are not copied
+into those samples. An unflagged graph does not prove complete syntax coverage.
+
+Diff and review comparisons involving a diagnosed incomplete snapshot return
+`ok:false`, `status:"inconclusive"`, diagnostics in `analysis.completeness`, and exit 2.
+Inspect the locations and callers in source; this result cannot establish a clean gate.
+MCP preserves structured inconclusive results. Existing complete-baseline regressions
+return exit 1; a comparison with no detected regression or incompleteness returns 0.
+
+Diagnostics survive caches and refreshes. Both comparison snapshots matter: repairing
+the current source does not validate an incomplete baseline. Recover and inspect the
+pre-edit source before starting a new baseline; never replace it merely to turn a
+failed comparison green. Skipped duplication checks and behavioral limits still apply.
+
+
+Graphs saved by older versions are not retroactively audited for these diagnostics.
+Refresh or remap before relying on them. To audit an old baseline, restore its pre-edit
+source revision and remap that revision; do not overwrite it from edited source.
