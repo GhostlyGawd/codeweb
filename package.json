@@ -1,6 +1,6 @@
 {
   "name": "@ghostlygawd/codeweb",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "mcpName": "io.github.GhostlyGawd/codeweb",
   "type": "module",
   "description": "See what your AI edits affect. Structural checks for AI code changes. Local call/import graphs and 28 MCP tools for impact, callers, and duplication. No LLM in the checks.",
@@ -44,6 +44,8 @@
     "!scripts/spec_lint.py",
     "!scripts/hook-check",
     "!scripts/hook-protect",
+    "!scripts/**/__pycache__/**",
+    "!scripts/**/*.pyc",
     "hooks",
     "skills",
     "agents",

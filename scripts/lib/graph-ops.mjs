@@ -1,3 +1,4 @@
+import { incompleteAnalysis } from './analysis-completeness.mjs';
 // codeweb shared graph primitives — pure functions over a graph.json object (see graph-schema.md).
 // Imported by scripts/query.mjs and scripts/diff.mjs so the call/cycle/orphan logic lives ONCE
 // (codeweb dogfooding its own anti-duplication mission). No I/O, no process.exit — callers own
@@ -606,9 +607,11 @@ export function gateVerdict(before, after, { exemptExported = false, newDuplicat
     newCycles = sr.newCycles;
     lostCallers = sr.lostCallers.map((id) => ({ id, exported: aExports.get(id) || false, exempted: false }));
   }
+  const incomplete = incompleteAnalysis(before, after);
   const blocking = lostCallers.filter((l) => !l.exempted);
   return {
-    ok: newCycles.length === 0 && blocking.length === 0 && !(newDuplications && newDuplications.length),
+    ok: !incomplete && newCycles.length === 0 && blocking.length === 0 && !(newDuplications && newDuplications.length),
+    ...(incomplete ? { status: 'inconclusive', analysis: incomplete } : {}),
     check: exemptExported ? 'orphan-gate' : 'call-caller-preflight',
     scope,
     checks: { newCycles, lostCallers, ...(newDuplications !== null ? { newDuplications } : {}) },

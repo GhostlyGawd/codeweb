@@ -103,6 +103,7 @@ try {
 
 const payload = {
   graph: abs, root,
+  analysis: updated.meta.analysis,
   before, after: { nodes: updated.nodes.length, edges: updated.edges.length },
   domainsReattached: reattached, scanned: /scanned (\d+)/.exec(r.stderr)?.[1] ?? null,
   sidecars,
@@ -115,5 +116,6 @@ console.log(`codeweb refresh: ${root}`);
 if (baseline) console.log(`  baseline saved: ${baselinePath} — edit, then run diff.mjs baseline ${abs} --refresh`);
 console.log(`  nodes ${before.nodes} -> ${updated.nodes.length}   edges ${before.edges} -> ${updated.edges.length}   domains re-attached ${reattached}`);
 console.log(`  overlaps dropped (run the full pipeline to recompute). scanned ${payload.scanned ?? '?'} file(s).`);
+if (payload.analysis?.status === 'incomplete') console.log('  analysis incomplete — inspect graph.meta.analysis.diagnostics; this map cannot establish a clean gate.');
 finish();
 }

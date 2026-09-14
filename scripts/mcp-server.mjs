@@ -343,14 +343,15 @@ function handleMap(id, args, meta) {
     }
     if (token !== undefined && token !== null) send({ jsonrpc: '2.0', method: 'notifications/progress', params: { progressToken: token, progress: MAP_STAGES.length, total: MAP_STAGES.length, message: 'done' } });
     const graphPath = join(out, 'graph.json');
-    let stats = '';
+    let stats = '', analysis;
     try {
       const g = JSON.parse(readFileSync(graphPath, 'utf8'));
+      analysis = g.meta?.analysis;
       // ACTIVATION A4: same findings vocabulary as every other surface (raw overlap count read
       // as a contradiction next to the triple).
       stats = `${(g.nodes || []).length} symbols, ${(g.edges || []).length} edges, ${(g.domains || []).length} domains — ${bucketsLine(findingBuckets(g.overlaps))}`;
     } catch { stats = 'built (stats unreadable)'; }
-    reply(id, { content: [{ type: 'text', text: JSON.stringify({ ok: true, graph: graphPath, summary: `mapped ${target}: ${stats}`, artifacts: { report: join(out, 'report.html'), optimize: join(out, 'optimize.md') } }) }] });
+    reply(id, { content: [{ type: 'text', text: JSON.stringify({ ok: analysis?.status !== 'incomplete', ...(analysis ? { analysis } : {}), graph: graphPath, summary: `mapped ${target}: ${stats}`, artifacts: { report: join(out, 'report.html'), optimize: join(out, 'optimize.md') } }) }] });
   };
   // map is a WRITER keyed by resolve(out) — two maps on one out serialize; queued readers wait (I2).
   enqueueChild(id, { kind: 'writer', key: out, tool: 'codeweb_map', bin: scriptOf('run.mjs'), argv: [target, '--out-dir', out], stdio: ['ignore', 'ignore', 'pipe'], timeoutMs: 300_000, onStderr, onSettle });
@@ -364,7 +365,11 @@ function handleMap(id, args, meta) {
 // the missing file and the rebuild command).
 const spawnedToolReply = (id, tool, staleInfo) => ({ code, out, errBuf, timedOut }) => {
   if (timedOut) return errResult(id, `tool timed out after ${SPAWN_TIMEOUT_MS / 1000}s`);
-  if (code === 2 || code == null) {
+  let incompleteResult = false;
+  if (code === 2 && out) {
+    try { const p = JSON.parse(out); incompleteResult = p.status === 'inconclusive' || p.verdict?.status === 'inconclusive' || p.analysis?.status === 'incomplete'; } catch { /* usage/IO path */ }
+  }
+  if ((code === 2 && !incompleteResult) || code == null) {
     const text = (errBuf || 'query failed').trim() || 'query failed';
     return errResult(id, /graph not found/.test(text) && !(tool && tool.graphless) ? `${text}\n${NO_GRAPH}` : text);
   }
@@ -529,7 +534,11 @@ function handleToolCall(id, params) {
   // renders the empty verdict itself, and refresh/map are how the void gets filled.
   if (graphPath && STRUCTURAL_TOOLS.has(tool.name)) {
     try {
-      if (cachedGraph(resolve(graphPath)).graph.nodes.length === 0) {
+      const checkedGraph = cachedGraph(resolve(graphPath)).graph;
+      if (checkedGraph.meta?.analysis?.status === 'incomplete' && !QUERY_KIND[tool.name]) {
+        return errResult(id, JSON.stringify({ status: 'inconclusive', analysis: checkedGraph.meta.analysis, hint: 'Analysis incomplete: inspect diagnostic source locations and callers; this partial graph cannot establish a clean result.' }));
+      }
+      if (checkedGraph.nodes.length === 0) {
         return errResult(id, `the map at ${graphPath} is EMPTY (built with --allow-empty; no supported source found) — structural answers would be vacuous, not "0 findings". Re-map at the code root, or use the /codeweb agent fallback for non-native languages.`);
       }
     } catch { /* unreadable graph: each tool's own path reports it */ }

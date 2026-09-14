@@ -76,14 +76,19 @@ try {
   // Accept a verdict only after one completed JSON response matches the diff contract.
   const d = spawnSync(node, [join(HERE, 'diff.mjs'), beforeGraph, afterGraph, '--json'], { encoding: 'utf8', maxBuffer: 1 << 26 });
   if (d.stderr) process.stderr.write(d.stderr);
-  if (d.error || d.signal || ![0, 1].includes(d.status)) {
+  if (d.error || d.signal || ![0, 1, 2].includes(d.status)) {
     throw new Error(`diff analysis did not complete (exit ${d.status}${d.signal ? `, signal ${d.signal}` : ''})`);
   }
   let payload;
   try { payload = JSON.parse(d.stdout); } catch { throw new Error('diff analysis returned no valid JSON verdict'); }
+  const inconclusive = d.status === 2 && payload?.status === 'inconclusive'
+    && payload?.ok === false && payload.verdict?.status === 'inconclusive'
+    && payload.analysis?.completeness?.status === 'incomplete'
+    && payload.analysis.completeness.diagnosticCount > 0
+    && Array.isArray(payload.analysis.completeness.diagnostics);
   const valid = typeof payload?.ok === 'boolean'
     && Array.isArray(payload.regressions) && payload.regressions.every(r => typeof r === 'string')
-    && payload.ok === (payload.regressions.length === 0) && d.status === (payload.ok ? 0 : 1)
+    && (inconclusive || (payload.ok === (payload.regressions.length === 0) && d.status === (payload.ok ? 0 : 1)))
     && payload.verdict?.ok === payload.ok && payload.verdict?.check === 'orphan-gate' && payload.verdict?.scope === 'full'
     && ['newCycles', 'lostCallers', 'newDuplications'].every(key => Array.isArray(payload.verdict?.checks?.[key]))
     && ['nodes', 'cycles', 'overlaps', 'orphans'].every(key => Array.isArray(payload[key]?.added) && Array.isArray(payload[key]?.removed))

@@ -35,13 +35,23 @@ becomes an orphan with no mapped callers. [Gate conditions and limits](docs/ci-g
 No LLM is in the checks. The gate uses zero model tokens for its static analysis.
 A passing check does not prove the program works. Analysis can miss dynamic relationships;
 inspect unresolved results and run the relevant tests. Pure removals pass the structural rules.
+
+The verdict uses the mapped graph, not a model, and costs zero LLM tokens. Exported symbols are exempt
+from the diff’s orphan check. Inspect `analysis.checks`: skipped
+checks are not passes, and refresh drops the evidence needed to evaluate duplication.
+
+A green result does not establish complete dependency coverage or behavioral correctness.
+Pure removals do not count as structural regressions.
 [Put it on your PRs →](#gate-every-pull-request)
 
 The gate needs a map to compare, and that map is worth reading on its own.
 
-codeweb reads your code. It maps each function and the calls between functions. It maps
+codeweb reads your code. It maps supported functions and the calls it can resolve between them. It maps
 3,000 symbols in approximately 3 seconds. Static analysis produces the same map from the
 same code. No LLM is in the mapping loop.
+
+Static extraction can omit unsupported layouts,
+ambiguous calls, and runtime dispatch; the map is not a completeness guarantee.
 
 Your coding agents query the map instead of using grep. In measured tests, agents that used grep
 missed more than half of a function's real callers
@@ -52,7 +62,7 @@ list can cause an agent to break code that it did not inspect.
   including `codeweb_impact`, `codeweb_callers`, and `codeweb_find_similar`.
 - **Keep answers small:** Each query returns a bounded structural answer. Your agents can use
   their remaining context for implementation work.
-- **Inspect the same data:** The interactive report shows the complete codebase map.
+- **Inspect the same data:** The interactive report shows the extracted codebase map.
 
 The map also shows relationships that are not visible in one file. These relationships include
 **duplicated logic, dead code, hotspots, and tangled domains**.
@@ -81,7 +91,7 @@ For a repository with 3,000 symbols, the first map takes approximately 3 seconds
 
 ## Gate every pull request
 
-Run the same verdict locally, or as a GitHub Action on every pull request:
+From a Codeweb source checkout, run the verdict locally; the GitHub Action can run it on every pull request:
 
 ```
 node scripts/ci-gate.mjs --base origin/main --target src   # exit 1 on a structural regression
@@ -97,7 +107,7 @@ workflow YAML, the monorepo matrix form, and every input live in
 [`docs/ci-gate.md`](docs/ci-gate.md).
 
 Want the gate hosted — no workflow YAML, cached base graphs, and history across every repo in the
-org? That is [codeweb Teams](https://ghostlygawd.github.io/codeweb/pricing.html), the paid half of
+org? That is the planned scope of [codeweb Teams](https://ghostlygawd.github.io/codeweb/pricing.html), the paid half of
 [the boundary](#free-forever-and-where-the-paid-line-sits). Running it yourself stays free forever.
 
 ## See it in action
@@ -123,7 +133,7 @@ Your agents can get the same answer from the `codeweb_impact` MCP tool before th
 
 ### Navigate the whole system
 
-The force-directed map shows every symbol. You can collapse symbols into domains. Search, drag,
+The force-directed map shows the extracted symbols. You can collapse symbols into domains. Search, drag,
 zoom, or select a node to trace its callers and dependencies.
 
 <img src="assets/screens/axios-graph.png" alt="codeweb Graph tab on axios: eight domain blocks (helpers, core, adapters, cancel, defaults, platform) sized by symbol count and linked by stippled call edges" width="100%">
@@ -184,10 +194,10 @@ a merge.
 
 Methodology, raw data, and per-claim receipts:
 [the evidence ledger](https://ghostlygawd.github.io/codeweb/research.html). Benchmark your own
-repo: `npm run bench -- <path>/.codeweb/graph.json`. CI re-runs the performance budgets on
+repo from a Codeweb source checkout: `npm run bench -- <path>/.codeweb/graph.json`. CI re-runs the performance budgets on
 every PR; breaking a published number fails the build.
 
-codeweb also keeps a local activity tally. Run `npm run stats` to see it:
+codeweb also keeps a local activity tally. From a Codeweb source checkout, run `npm run stats` to see it:
 
 ```
 codeweb this month: 41 pre-edit card(s) · 5 card-named caller(s) followed · 2 regression(s) flagged · 120 queries served
@@ -287,8 +297,13 @@ You can open `report.html`. codeweb also creates Markdown versions.
 ## Use it as an MCP tool
 
 `scripts/mcp-server.mjs` is a zero-dependency Model Context Protocol (MCP) stdio server. It gives
-each MCP client access to all **28 tools**. The tools help the client orient, read the structure,
+MCP clients access to **28 tools**. The tools help the client orient, read the structure,
 check before writing, gate an edit, and plan cleanup.
+
+The September 14 packaged assessment
+exercised the baseline loop with Codex CLI 0.154.0; it did not certify every tool in every
+client. Claude runtime compatibility and other clients were not tested in that assessment.
+See [the recorded scope](reports/paperclip-pilot/readiness-01/PACKAGED-ACCEPTANCE.md).
 
 **The plugin registers the server automatically.** To register the standalone server, run:
 
@@ -296,9 +311,8 @@ check before writing, gate an edit, and plan cleanup.
 claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
 ```
 
-**Unreleased checkout workflow.** The baseline calls below require the current development
-checkout; they are not available in the v0.14.0 npm package. Register that checkout’s MCP
-server using its absolute path, as shown in the [reference](docs/reference.md#the-mcp-server-tool-by-tool).
+**Requires Codeweb 0.15.0 or later.** Use the installed MCP server, or register a source
+checkout using its absolute path as shown in the [reference](docs/reference.md#the-mcp-server-tool-by-tool).
 
 The loop an agent runs:
 
@@ -310,6 +324,10 @@ The loop an agent runs:
 4. If red, repair the code and repeat that same diff against the **same baseline**.
    Do not capture another baseline during repair: `baseline:true` replaces the original.
    Ordinary and automatic refreshes preserve it. Start a new baseline for the next task.
+
+Known unsupported same-line JS/TS declarations produce `status: "inconclusive"` and
+`ok:false` instead of a clean gate. Inspect the diagnostic locations and callers in source.
+The detector covers known layouts; no diagnostic does not prove complete extraction.
 
 Read `analysis.checks`: a skipped check is not a pass. Refresh drops overlap evidence, so
 this loop does not evaluate duplication; structural green does not prove behavioral
@@ -394,6 +412,8 @@ codeweb currently provides 28 tools._
 
 ## Versioning & releases
 
+The maintenance commands below require a Codeweb source checkout.
+
 codeweb follows [Semantic Versioning](https://semver.org/). It records changes in
 [`CHANGELOG.md`](CHANGELOG.md), which uses the
 [Keep a Changelog](https://keepachangelog.com/) format. Each capability, benchmark, and fix ships
@@ -410,7 +430,7 @@ npm run build:site          # regenerate the docs/ website (zero-dependency, det
 npm run release -- --minor  # roll the changelog, bump, sync, rebuild; prints the git/tag steps
 ```
 
-`check-consistency` runs in CI. It gates version strings on every surface, every prose mention of
+`check-consistency` runs in CI. It gates version strings on every surface, recognized prose patterns for
 the tool and language counts, the CHANGELOG entry for the current version, and every evidence
 file the ledger cites.
 
@@ -432,9 +452,12 @@ Everything in this repository is that free half — the map, the MCP tools, the 
 the CLI, the self-hosted gate Action, and every language codeweb learns. MIT, no accounts, no
 telemetry, no license keys. Nothing here moves behind a payment later.
 
-The paid half is a separate hosted service, **codeweb Teams**: the gate run for you, and history
+The planned paid half is a separate hosted service, **codeweb Teams**: the gate run for you, and history
 held across every repo in an org. Billing lives only in that service, so a payment problem
 degrades the hosted tier and **never breaks** your local tooling or your CI.
+
+Hosted availability is not established by this repository’s local checks. The pricing page
+retains the sign-up doorway.
 
 Read the full contract on
 [the boundary page](https://ghostlygawd.github.io/codeweb/boundary.html), and the planned Teams

@@ -19,7 +19,7 @@
 <meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
 <meta name="theme-color" content="#060608">
 <link rel="canonical" href="https://ghostlygawd.github.io/codeweb/product.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.14.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.15.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
@@ -99,9 +99,9 @@
             <div class="te-tool"><span class="te-name">codeweb_explain</span><span class="te-desc">One ~1KB card: identity, contract, dependents, blast radius, findings — "tell me about X" in a single call.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_find</span><span class="te-desc">Concept search when you do not know the name: free text ("retry backoff") ranked over identifiers/files/domains — stemmed token match weighted by exports, role, and fan-in. Deterministic, no embeddings.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_callers</span><span class="te-desc">Direct callers of a symbol (call-edge in-neighbors).</span></div>
-            <div class="te-tool"><span class="te-name">codeweb_dependents</span><span class="te-desc">every user of a symbol — call, import, inherit, test, and ref edges in one answer ("who do I break?")</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_dependents</span><span class="te-desc">mapped users of a symbol — call, import, inherit, test, and ref edges in one answer ("who do I break?")</span></div>
             <div class="te-tool"><span class="te-name">codeweb_callees</span><span class="te-desc">The functions a symbol calls.</span></div>
-            <div class="te-tool"><span class="te-name">codeweb_impact</span><span class="te-desc">Blast radius: every function transitively affected by a change, plus domains touched. Call before editing.</span></div>
+            <div class="te-tool"><span class="te-name">codeweb_impact</span><span class="te-desc">Blast radius: mapped transitive callers and inheritance dependents, plus domains touched. Call before editing.</span></div>
             <div class="te-tool"><span class="te-name">codeweb_cycles</span><span class="te-desc">File-level dependency cycles (circular imports/calls).</span></div>
             <div class="te-tool"><span class="te-name">codeweb_orphans</span><span class="te-desc">Uncalled, unexported symbols — dead-code candidates.</span></div>
           </div>
@@ -274,10 +274,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.14.0
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.15.0
         with:
           target: src
-          codeweb-ref: v0.14.0</code></pre>
+          codeweb-ref: v0.15.0</code></pre>
       </div>
     </div>
   </div>
@@ -309,7 +309,7 @@ jobs:
     <div class="section-head" style="margin-top:2rem">
       <h2>Why it can be trusted in the loop</h2>
     </div>
-    <div class="prose"><ul class="kicker-list"><li><span class="dot"></span><span>Deterministic — no LLM in the analysis loop; the same repo always yields the same graph.</span></li><li><span class="dot"></span><span>Zero runtime dependencies — the whole pipeline runs on an empty node_modules.</span></li><li><span class="dot"></span><span>Read-only by default — codeweb never executes the code it maps.</span></li><li><span class="dot"></span><span>Evidence with limits — inspect findings and unresolved relationships before acting.</span></li></ul></div>
+    <div class="prose"><ul class="kicker-list"><li><span class="dot"></span><span>Deterministic — no LLM in the analysis loop; the same repo always yields the same graph.</span></li><li><span class="dot"></span><span>Zero required dependencies — the whole pipeline runs on an empty node_modules.</span></li><li><span class="dot"></span><span>Read-only by default — codeweb never executes the code it maps.</span></li><li><span class="dot"></span><span>Evidence with limits — inspect findings and unresolved relationships before acting.</span></li></ul></div>
     <div class="btn-row" style="justify-content:center;margin-top:var(--s-6)"><a class="btn btn-primary" href="start.html">Install codeweb</a><a class="btn" href="research.html">See the evidence</a></div>
   </div>
 </section>
@@ -350,7 +350,7 @@ jobs:
       </div>
     </div>
     <div class="footer-base">
-      <span>codeweb v0.14.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
+      <span>codeweb v0.15.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
       <span>Deterministic build · zero third-party requests on this page</span>
     </div>
   </div>

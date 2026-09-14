@@ -1,3 +1,4 @@
+import { incompleteAnalysis, INCOMPLETE_STEP } from './analysis-completeness.mjs';
 // brief-core — the day-one briefing: everything an agent burns its first 20-50k tokens
 // discovering, pre-computed from the graph into one ~2KB page. Where things live, what the
 // repo hangs off, where the tests are, what's already known to be wrong. Injected at session
@@ -53,6 +54,7 @@ export function buildBrief(graph, index) {
   const orph = orphans(graph, index).length;
 
   return {
+    ...(incompleteAnalysis(graph) ? { analysis: incompleteAnalysis(graph) } : {}),
     target: graph.meta?.target || null,
     root: graph.meta?.root || null,
     generatedAt: graph.meta?.generatedAt || null,
@@ -74,6 +76,7 @@ export function buildBrief(graph, index) {
 /** One-page text rendering (the session-start injection format). */
 export function renderBrief(b) {
   const L = [];
+  if (b.analysis?.status === 'incomplete') L.push(INCOMPLETE_STEP);
   // ACTIVATION A7: an --allow-empty map has zero symbols. Say THAT — the normal render
   // ("0 symbols … ask codeweb before guessing") would point agents at a map that knows nothing.
   if (!b.size || b.size.symbols === 0) {

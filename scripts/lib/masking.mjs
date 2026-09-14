@@ -197,7 +197,7 @@ const REGEX_PREV_KW = new Set(['return', 'typeof', 'instanceof', 'in', 'of', 'ne
 // regex .test() per character on the hottest path in the repo (masking runs on every cold/changed
 // file and, pre-#17, on the whole repo after any symbol-set change).
 const isWordCode = (c) => (c >= 97 && c <= 122) || (c >= 65 && c <= 90) || (c >= 48 && c <= 57) || c === 36 || c === 95;
-export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
+export function maskJs(text, { keepValues = false, hashComment = false, statementRegex = false } = {}) {
   const lines = text.split(/\r?\n/);
   const out = [];
   let inBlock = false;   // inside /* */ spanning lines
@@ -212,9 +212,48 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
   // backtick — open, close, nested push from expr — emits keepValues ? '`' : ' ' (a verbatim
   // backtick in default-mode output would flip state on re-mask, breaking idempotence).
   const tpl = [];
+  // Diagnostic-only token tracking survives whitespace/comments/newlines and
+  // distinguishes control parentheses from calls. Literal contents never feed it.
+  const controlParens = [];
+  let controlWord = '', controlWordEligible = true;
+  let controlToken = '', priorControlToken = '', controlTokenEligible = false;
+  let closedControlHead = false;
+  const finishControlWord = () => {
+    if (!controlWord) return;
+    priorControlToken = controlToken;
+    controlToken = controlWord;
+    controlTokenEligible = controlWordEligible;
+    controlWord = '';
+  };
+  const noteControl = (ch) => {
+    if (isWordCode(ch.charCodeAt(0))) {
+      if (!controlWord) controlWordEligible = controlToken !== '.';
+      controlWord += ch;
+      closedControlHead = false;
+      return;
+    }
+    finishControlWord();
+    if (/\s/.test(ch)) return;
+    if (ch === '(') {
+      controlParens.push(controlTokenEligible &&
+        (/^(?:if|while|for|with)$/.test(controlToken) ||
+          (controlToken === 'await' && priorControlToken === 'for')));
+      closedControlHead = false;
+    } else if (ch === ')') closedControlHead = controlParens.pop() === true;
+    else closedControlHead = false;
+    priorControlToken = controlToken;
+    controlToken = ch;
+    controlTokenEligible = false;
+  };
+  const noteControlValue = () => {
+    finishControlWord();
+    controlToken = 'value';
+    controlTokenEligible = false;
+    closedControlHead = false;
+  };
   let lastSig = null;     // last significant real-code char emitted (null = nothing yet)
   let lastWord = '';      // trailing identifier run ending at lastSig (for keyword detection)
-  const note = (ch) => { if (ch !== ' ' && ch !== '\t') { lastWord = isWordCode(ch.charCodeAt(0)) ? lastWord + ch : ''; lastSig = ch; } };
+  const note = (ch) => { if (statementRegex) noteControl(ch); if (ch !== ' ' && ch !== '\t') { lastWord = isWordCode(ch.charCodeAt(0)) ? lastWord + ch : ''; lastSig = ch; } };
   // Round 2, finding #20 (T-20.2): fold a whole span of plain code into lastSig/lastWord in ONE
   // backward walk, reproducing note()'s per-char accumulation exactly — including its
   // across-spaces quirk (`foo bar` accumulates lastWord `foobar`: spaces/tabs are skipped, they
@@ -224,6 +263,7 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
   // prefix the INCOMING lastWord iff the walk exhausted the run (note()'s invariant guarantees
   // lastWord is '' whenever lastSig is non-word, so the unconditional prefix is exact).
   const noteRun = (line, from, to) => {
+    if (statementRegex) for (let k = from; k < to; k++) noteControl(line[k]);
     let end = to;
     while (end > from) { const c = line.charCodeAt(end - 1); if (c === 32 || c === 9) end--; else break; }
     if (end === from) return;
@@ -240,7 +280,10 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
     }
     lastWord = exhausted ? lastWord + word : word;
   };
-  const noteValue = () => { lastSig = ')'; lastWord = ''; };  // a string/template/regex just closed: a value — `/` after it is division
+  const noteValue = () => { if (statementRegex) noteControlValue(); lastSig = ')'; lastWord = ''; };  // a string/template/regex just closed: a value — `/` after it is division
+  // A regex can be the statement after a control head, unlike division after a
+  // call. Opt-in for declaration diagnostics; existing mask consumers stay stable.
+  const afterControlHead = () => closedControlHead;
   const regexCanFollow = () =>
     lastSig === null ? true
       : isWordCode(lastSig.charCodeAt(0)) ? REGEX_PREV_KW.has(lastWord)
@@ -313,7 +356,7 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
           let k = i + 1; while (k < n && line[k] !== ch) { if (line[k] === '\\') k++; k++; }
           const stop = Math.min(k + 1, n); res += value(line.slice(i, stop)); i = stop; noteValue(); continue;
         }
-        if (ch === '/' && regexCanFollow()) {         // regex literal in the interpolation — blank it so a
+        if (ch === '/' && (regexCanFollow() || (statementRegex && afterControlHead()))) {         // regex literal in the interpolation — blank it so a
           const m = scanRegex(line, i);               // quote or {n} quantifier can't desync brace matching
           if (m) { res += '/' + value(line.slice(i + 1, m.close)) + '/' + value(line.slice(m.close + 1, m.end)); i = m.end; noteValue(); continue; }
         }
@@ -335,7 +378,7 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
         else { res += ' '.repeat(end + 2 - i); i = end + 2; }
         continue;
       }
-      if (ch === '/' && regexCanFollow()) {                                                  // regex literal
+      if (ch === '/' && (regexCanFollow() || (statementRegex && afterControlHead()))) {                                                  // regex literal
         const m = scanRegex(line, i);
         if (m) { res += '/' + value(line.slice(i + 1, m.close)) + '/' + value(line.slice(m.close + 1, m.end)); i = m.end; noteValue(); continue; }
       }
@@ -346,6 +389,7 @@ export function maskJs(text, { keepValues = false, hashComment = false } = {}) {
       if (ch === '`') { res += keepValues ? '`' : ' '; i++; tpl.push({ depth: 0 }); continue; } // open template literal (push a frame)
       note(ch); res += ch; i++;                                                               // division `/` falls through here
     }
+    if (statementRegex) finishControlWord();
     out.push(res);
   }
   return out.join('\n');

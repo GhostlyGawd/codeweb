@@ -19,7 +19,7 @@
 <meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
 <meta name="theme-color" content="#060608">
 <link rel="canonical" href="https://ghostlygawd.github.io/codeweb/changelog.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.14.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.15.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
@@ -57,52 +57,79 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
+<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h2 class="cl-ver">[0.15.0] - 2026-09-14</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>
-<li>Explicit pre-edit baselines: refresh with <code>baseline:true</code> / <code>--baseline</code>, then verify</li>
+<li>Explicit pre-edit baselines survive ordinary and automatic graph refreshes. Agents can</li>
 </ul>
-<p>  with <code>codeweb_diff {before:"baseline", refresh:true}</code> or CLI <code>diff --refresh</code>.</p>
-<p>  Ordinary and automatic refreshes preserve the saved baseline through repair.</p>
+<p>  refresh and verify an edit in one diff call, then check repairs against the same baseline.</p>
 <ul>
-<li><code>codeweb --doctor</code> reports the running installation, graph discovery, source freshness</li>
+<li>Context responses distinguish list/source-evidence limits from graph uncertainty, with</li>
 </ul>
-<p>  and parser availability, with local repair commands and no workspace changes.</p>
+<p>  actionable freshness and recovery information. Local setup diagnostics report installation,</p>
+<p>  graph discovery, source freshness and optional-parser availability without changing source.</p>
 <ul>
-<li>Context responses distinguish list completeness, source evidence and graph uncertainty.</li>
+<li>First-use instructions include a tested installed-package cycle walkthrough and a</li>
 </ul>
-<p>  Diff and review responses identify skipped checks and behavioral limits.</p>
-<ul>
-<li>Gate comments include bounded source locations, duplication evidence and investigation</li>
-</ul>
-<p>  guidance. Commit links require a clean, unchanged checkout; dirty locations remain text.</p>
+<p>  baseline-preserving MCP workflow.</p>
 <h3 class="cl-grp">Fixed</h3>
 <ul>
-<li>Refreshing verification rejects baselines without node and edge arrays before changing</li>
+<li>Diagnostic masking recognizes regex statements after multiline control heads while</li>
 </ul>
-<p>  the live graph. The regression check covers missing and incorrectly typed arrays.</p>
+<p>  preserving division expressions, avoiding false incomplete-analysis reports.</p>
 <ul>
-<li>Refreshed graphs no longer make dropped overlap evidence appear to be removed duplication.</li>
-<li>Plugin hook configuration omits settings-schema and matcher metadata; handler descriptions</li>
+<li>Package exclusions keep generated Python bytecode and verification-harness caches out</li>
 </ul>
-<p>  remain in the adjacent guide, with the same commands, matchers and timeouts.</p>
+<p>  of the npm artifact, even after the verification suite has run.</p>
 <ul>
-<li>Current documentation count checks include SPEC and recognize Markdown/HTML emphasis</li>
+<li>Refreshing verification rejects baselines without valid node and edge arrays before</li>
 </ul>
-<p>  and possessive Codeweb phrasing. Historical audit and release counts stay dated.</p>
+<p>  changing the live graph. Baseline parsing and fingerprinting use the same bytes.</p>
+<ul>
+<li>Current documentation count checks include SPEC and recognize formatted counts and</li>
+</ul>
+<p>  Codeweb possessive phrasing while leaving dated audit and release records historical.</p>
+<ul>
+<li>Known unsupported same-line JavaScript/TypeScript declaration layouts now carry bounded</li>
+</ul>
+<p>  source diagnostics. Gates refuse an unqualified clean verdict when either snapshot has</p>
+<p>  detected incomplete analysis. This contains the reported false-clean result; it does not</p>
+<p>  claim complete syntax coverage or repair every omitted declaration.</p>
+<ul>
+<li>Gate comments use commit links only when the checkout is clean before and after analysis</li>
+</ul>
+<p>  and HEAD is unchanged; otherwise locations remain plain text. Comments include bounded</p>
+<p>  evidence and investigation guidance.</p>
+<ul>
+<li>Removed unsupported metadata keys from the shipped hook configuration while retaining</li>
+</ul>
+<p>  all three handlers and moving their descriptions into adjacent documentation.</p>
+<h3 class="cl-grp">Changed</h3>
+<ul>
+<li>Prominent guidance describes mapped-graph limits, exported-symbol exemptions, skipped</li>
+</ul>
+<p>  checks, and tested-client scope. Teams availability copy now reflects restricted GitHub</p>
+<p>  App access while preserving the ratified planned price and free-local boundary.</p>
+<ul>
+<li>Inconclusive analysis is a non-success result distinct from detected regressions; callers</li>
+</ul>
+<p>  must inspect diagnostics rather than interpreting an incomplete comparison as clean.</p>
 <h3 class="cl-grp">Documentation</h3>
 <ul>
-<li>Separate npm snapshot and unreleased-checkout baseline walkthroughs, each verified through</li>
+<li>Updated contributor guidance, operational graph-schema notes, and a documentation index</li>
 </ul>
-<p>  cycle detection and repair. Verdict summaries identify exported-symbol exceptions and</p>
-<p>  skipped analysis; section links land below the sticky header.</p>
+<p>  describe the required gate, ownership, provenance, freshness and missing data. Audit</p>
+<p>  indexes connect historical findings to implementation and verification records.</p>
+<h3 class="cl-grp">Verification scope</h3>
 <ul>
-<li>Contributor guidance names the required gate, prerequisites and harness ownership.</li>
+<li>Runtime analysis remains deterministic, local and free of required third-party dependencies.</li>
 </ul>
-<p>  The graph schema explains operational fields, provenance, freshness and missing data.</p>
+<p>  Optional parser installation is not a substitute for the incomplete-analysis checks.</p>
 <ul>
-<li>A documentation entry point maps reading paths and repository ownership. Audit indexes</li>
+<li>Structural results do not establish behavioral correctness. Run the relevant product tests.</li>
 </ul>
-<p>  connect dated findings to implementation and verification receipts.</p>
+<p>  Release-candidate test results and artifact hashes are recorded in the accompanying review.</p>
 <h3 class="cl-grp">Also added in product clarity</h3>
 <ul>
 <li>Package commands for client setup, local diagnostics, change review, and the existing CI gate.</li>
@@ -2482,7 +2509,7 @@
       </div>
     </div>
     <div class="footer-base">
-      <span>codeweb v0.14.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
+      <span>codeweb v0.15.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
       <span>Deterministic build · zero third-party requests on this page</span>
     </div>
   </div>

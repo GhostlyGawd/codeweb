@@ -1,3 +1,4 @@
+import { incompleteAnalysis } from './analysis-completeness.mjs';
 // codeweb query core — the payload assembly behind query.mjs, extracted so the MCP server can
 // answer structural queries IN-PROCESS against a cached parsed graph (sub-ms after the first call)
 // while the CLI keeps shipping the exact same payloads (one truth, two transports).
@@ -103,6 +104,12 @@ export function runQuery(graph, index, opts) {
   } else if (query === 'orphans') {
     const results = orphans(graph, index);
     payload = budget({ query: 'orphans', summary: `${results.length} orphan(s) — no callers and not exported`, results, count: results.length }, 'results', limit, offset);
+  }
+  const incomplete = incompleteAnalysis(graph);
+  if (incomplete && payload) {
+    payload.analysis = incomplete;
+    if (payload.summary) payload.summary += ' — analysis incomplete; mapped results only';
+    code = 2;
   }
   return { payload, code };
 }

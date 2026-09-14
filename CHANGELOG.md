@@ -9,37 +9,55 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-### Added
+_Nothing yet. Open work lands here before it ships in the next tagged release._
 
-- Explicit pre-edit baselines: refresh with `baseline:true` / `--baseline`, then verify
-  with `codeweb_diff {before:"baseline", refresh:true}` or CLI `diff --refresh`.
-  Ordinary and automatic refreshes preserve the saved baseline through repair.
-- `codeweb --doctor` reports the running installation, graph discovery, source freshness
-  and parser availability, with local repair commands and no workspace changes.
-- Context responses distinguish list completeness, source evidence and graph uncertainty.
-  Diff and review responses identify skipped checks and behavioral limits.
-- Gate comments include bounded source locations, duplication evidence and investigation
-  guidance. Commit links require a clean, unchanged checkout; dirty locations remain text.
+## [0.15.0] - 2026-09-14
+
+### Added
+- Explicit pre-edit baselines survive ordinary and automatic graph refreshes. Agents can
+  refresh and verify an edit in one diff call, then check repairs against the same baseline.
+- Context responses distinguish list/source-evidence limits from graph uncertainty, with
+  actionable freshness and recovery information. Local setup diagnostics report installation,
+  graph discovery, source freshness and optional-parser availability without changing source.
+- First-use instructions include a tested installed-package cycle walkthrough and a
+  baseline-preserving MCP workflow.
 
 ### Fixed
+- Diagnostic masking recognizes regex statements after multiline control heads while
+  preserving division expressions, avoiding false incomplete-analysis reports.
+- Package exclusions keep generated Python bytecode and verification-harness caches out
+  of the npm artifact, even after the verification suite has run.
+- Refreshing verification rejects baselines without valid node and edge arrays before
+  changing the live graph. Baseline parsing and fingerprinting use the same bytes.
+- Current documentation count checks include SPEC and recognize formatted counts and
+  Codeweb possessive phrasing while leaving dated audit and release records historical.
+- Known unsupported same-line JavaScript/TypeScript declaration layouts now carry bounded
+  source diagnostics. Gates refuse an unqualified clean verdict when either snapshot has
+  detected incomplete analysis. This contains the reported false-clean result; it does not
+  claim complete syntax coverage or repair every omitted declaration.
+- Gate comments use commit links only when the checkout is clean before and after analysis
+  and HEAD is unchanged; otherwise locations remain plain text. Comments include bounded
+  evidence and investigation guidance.
+- Removed unsupported metadata keys from the shipped hook configuration while retaining
+  all three handlers and moving their descriptions into adjacent documentation.
 
-- Refreshing verification rejects baselines without node and edge arrays before changing
-  the live graph. The regression check covers missing and incorrectly typed arrays.
-- Refreshed graphs no longer make dropped overlap evidence appear to be removed duplication.
-- Plugin hook configuration omits settings-schema and matcher metadata; handler descriptions
-  remain in the adjacent guide, with the same commands, matchers and timeouts.
-- Current documentation count checks include SPEC and recognize Markdown/HTML emphasis
-  and possessive Codeweb phrasing. Historical audit and release counts stay dated.
+### Changed
+- Prominent guidance describes mapped-graph limits, exported-symbol exemptions, skipped
+  checks, and tested-client scope. Teams availability copy now reflects restricted GitHub
+  App access while preserving the ratified planned price and free-local boundary.
+- Inconclusive analysis is a non-success result distinct from detected regressions; callers
+  must inspect diagnostics rather than interpreting an incomplete comparison as clean.
 
 ### Documentation
+- Updated contributor guidance, operational graph-schema notes, and a documentation index
+  describe the required gate, ownership, provenance, freshness and missing data. Audit
+  indexes connect historical findings to implementation and verification records.
 
-- Separate npm snapshot and unreleased-checkout baseline walkthroughs, each verified through
-  cycle detection and repair. Verdict summaries identify exported-symbol exceptions and
-  skipped analysis; section links land below the sticky header.
-- Contributor guidance names the required gate, prerequisites and harness ownership.
-  The graph schema explains operational fields, provenance, freshness and missing data.
-- A documentation entry point maps reading paths and repository ownership. Audit indexes
-  connect dated findings to implementation and verification receipts.
+### Verification scope
+- Runtime analysis remains deterministic, local and free of required third-party dependencies.
+  Optional parser installation is not a substitute for the incomplete-analysis checks.
+- Structural results do not establish behavioral correctness. Run the relevant product tests.
+  Release-candidate test results and artifact hashes are recorded in the accompanying review.
 
 ### Also added in product clarity
 - Package commands for client setup, local diagnostics, change review, and the existing CI gate.
@@ -1981,7 +1999,8 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.11.0...v0.12.0

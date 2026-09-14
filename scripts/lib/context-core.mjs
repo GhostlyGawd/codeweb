@@ -1,3 +1,4 @@
+import { incompleteAnalysis, INCOMPLETE_STEP } from './analysis-completeness.mjs';
 // codeweb context-pack core — the one payload assembler behind BOTH transports (finding 20).
 // The MCP server's INSTRUCTIONS prescribe codeweb_context before every symbol edit, yet the tool
 // took the spawn path: node boot + a fresh multi-MB graph parse per call (~256ms measured on a
@@ -123,5 +124,10 @@ export function buildContextPack(graph, index, reader, ids, { symbol, windowN = 
     freshness: staleInfo ? 'stale' : stamped ? 'unchanged-stamps' : 'unknown',
     listsComplete, sourceEvidenceComplete, limitations, nextSteps,
   };
+  const incomplete = incompleteAnalysis(graph);
+  if (incomplete) {
+    payload.analysis.completeness = incomplete;
+    payload.analysis.nextSteps = [...(payload.analysis.nextSteps || []), INCOMPLETE_STEP];
+  }
   return payload;
 }

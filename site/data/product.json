@@ -6,7 +6,7 @@
   "elevator": "See what your AI edits affect. Structural checks for AI code changes. Trace callers before an edit. Check changes for new dependency cycles, body-confirmed duplication, and lost callers. Local static analysis supplies 28 MCP tools and a supporting report. No LLM in the checks. A passing result does not prove the program works.",
   "philosophy": [
     "Deterministic — no LLM in the analysis loop; the same repo always yields the same graph.",
-    "Zero runtime dependencies — the whole pipeline runs on an empty node_modules.",
+    "Zero required dependencies — the whole pipeline runs on an empty node_modules.",
     "Read-only by default — codeweb never executes the code it maps.",
     "Evidence with limits — inspect findings and unresolved relationships before acting."
   ],
@@ -34,7 +34,7 @@
     {
       "key": "external",
       "title": "Review before you adopt",
-      "desc": "Clone a third-party repo read-only, fully map it, and get an adoption review before you commit to depending on it. codeweb never runs the target."
+      "desc": "Clone a third-party repo read-only, map its supported source, and get an adoption review before you commit to depending on it. codeweb never runs the target."
     }
   ],
   "proof": {
@@ -85,7 +85,7 @@
         },
         {
           "name": "codeweb_dependents",
-          "desc": "every user of a symbol — call, import, inherit, test, and ref edges in one answer (\"who do I break?\")"
+          "desc": "mapped users of a symbol — call, import, inherit, test, and ref edges in one answer (\"who do I break?\")"
         },
         {
           "name": "codeweb_callees",
@@ -93,7 +93,7 @@
         },
         {
           "name": "codeweb_impact",
-          "desc": "Blast radius: every function transitively affected by a change, plus domains touched. Call before editing."
+          "desc": "Blast radius: mapped transitive callers and inheritance dependents, plus domains touched. Call before editing."
         },
         {
           "name": "codeweb_cycles",
@@ -368,7 +368,7 @@
       "source": "performance.json"
     },
     {
-      "claim": "Zero runtime dependencies",
+      "claim": "Zero required dependencies",
       "tag": "validated",
       "metric": "full pipeline runs on empty node_modules",
       "sample": "non-vacuity control passes",

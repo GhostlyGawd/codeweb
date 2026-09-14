@@ -4,11 +4,21 @@ The gate fails a pull request when an edit introduces one of these structural re
 
 - a **new dependency cycle**
 - a **new duplication finding**
-- a **non-exported symbol that loses every caller**
+- an **existing non-exported symbol that becomes an orphan with no mapped callers**
 
 Exported symbols are exempt from the pull-request gate. The edit simulation and post-edit hook
 also flag exported symbols as `check: call-caller-preflight`. The gate runs the same verdict as
 `scripts/diff.mjs` on each pull request.
+
+These checks cover the mapped graph, not all runtime
+dependencies. Diff responses report `analysis.checks`: a skipped check is not a
+pass. Refresh drops overlap evidence and leaves duplication unevaluated; a full pipeline
+rebuild includes overlap analysis. Structural green does not establish behavioral correctness.
+
+Known unsupported same-line JS/TS declarations make the gate inconclusive (exit 2).
+The comment names diagnostic source locations instead of reporting a clean result.
+Both snapshots matter: repair does not make an incomplete baseline trustworthy.
+See [analysis completeness](cli.md#known-incomplete-extraction).
 
 ## Add it to your repo
 
@@ -27,10 +37,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0          # required — the gate diffs against the PR base sha
-      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.14.0
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.15.0
         with:
           target: src             # subdirectory to analyze (default: .)
-          codeweb-ref: v0.14.0    # pin the engine too — see below
+          codeweb-ref: v0.15.0    # pin the engine too — see below
           comment: true           # post the structural review as a sticky PR comment
           history: true           # keep a cross-PR trend line in the comment (Actions cache)
 ```
@@ -38,7 +48,7 @@ jobs:
 `fetch-depth: 0` is **required**: the gate materializes the PR base commit to build the "before"
 graph, so the full history must be present.
 
-**Pin the action to a release tag** (`@v0.13.0`-style, as above), not `@main` — a moving ref can
+**Pin the action to a release tag** (`@v0.14.0`-style, as above), not `@main` — a moving ref can
 change your gate's verdict semantics under you. Pin the engine as well: `codeweb-ref` accepts a
 branch, tag, or commit sha, and it defaults to `main` so the zero-config path keeps working.
 
@@ -55,10 +65,10 @@ matrix — each package gets its own verdict, comment, and (with `history: true`
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.14.0
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.15.0
         with:
           target: ${{ matrix.target }}
-          codeweb-ref: v0.14.0
+          codeweb-ref: v0.15.0
 ```
 
 ## The gate as a reviewer (`comment: true`)
