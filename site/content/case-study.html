@@ -1,17 +1,17 @@
 <section class="section">
   <div class="wrap">
     <div class="section-head">
-      <span class="eyebrow">Case study</span>
-      <h1>Mapping axios: 3 confirmed duplications in a 50M-download library</h1>
-      <p class="lead">We pointed codeweb at <a href="https://github.com/axios/axios" rel="noopener">axios</a> — the HTTP client downloaded ~50M times a week — read-only, no setup, one command. Measured at axios v1.18.1 (<code>a209bfb1</code>); the pinned command below reproduces these numbers exactly.</p>
+      <span class="eyebrow">Historical technical example · July 2026</span>
+      <h1>Mapping axios: three recorded duplication findings</h1>
+      <p class="lead">This July 2026 record describes <a href="https://github.com/axios/axios" rel="noopener">axios</a> v1.18.1 (<code>a209bfb1</code>). Counts and findings below are historical; the current engine and live demo produce different results. This is a technical example, with no recorded maintainer acceptance.</p>
     </div>
     <div class="grid cols-2">
       <div class="card">
-        <a href="demo/"><img src="assets/axios-graph.png" alt="codeweb's domain view of axios — eight auto-detected domains sized by symbol count and linked by call/import coupling" style="width:100%" loading="lazy"></a>
-        <p class="muted" style="margin-top:.5rem">The unedited generated report — <a href="demo/">click around it live</a>.</p>
+        <a href="demo/"><img src="assets/axios-graph.png" alt="Current CodeWeb domain view of axios" style="width:100%" loading="lazy"></a>
+        <p class="muted" style="margin-top:.5rem">The current generated report, updated separately from this historical example — <a href="demo/">click around it live</a>.</p>
       </div>
       <div class="card">
-        <h3>The map, in one command</h3>
+        <h3>Recorded source-checkout command</h3>
 <pre><code>node scripts/run.mjs path/to/axios/lib --target axios
 # 274 symbols · 374 edges · 8 domains · 17 overlap candidates</code></pre>
         <p>Domains auto-clustered from the code's own structure: <code>helpers</code>, <code>core</code>, <code>adapters</code>, <code>cancel</code>, <code>defaults</code>, <code>platform/node</code>, <code>platform/common</code>, root.</p>

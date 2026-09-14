@@ -56,7 +56,7 @@ test('gate-md: lost-callers excludes brand-new and renamed-to symbols; renames s
   assert.match(body, /`a\.js:old` → `a\.js:neu` \(body 92%\)/, 'renames render with body similarity');
 });
 
-test('ac_13: evidence links use graph lines, analyzed commit and target; guidance distinguishes unknown callers', () => {
+test('ac_21: evidence links use graph lines, analyzed commit and target; guidance distinguishes unknown callers', () => {
   const ref = 'a'.repeat(40);
   const body = gateComment(payload({
     ok: false, regressions: ['1 new duplication finding(s)'],
@@ -78,7 +78,7 @@ test('ac_13: evidence links use graph lines, analyzed commit and target; guidanc
   assert.match(body, /does not establish behavioral correctness/);
 });
 
-test('ac_13: evidence is bounded and escaped; unsafe paths and link contexts stay plain text', () => {
+test('ac_21: evidence is bounded and escaped; unsafe paths and link contexts stay plain text', () => {
   const nodes = Array.from({ length: 9 }, (_, i) => `n${i}`);
   const graph = { nodes: nodes.map((id) => ({ id, file: '../outside.js', line: 2 })) };
   const body = gateComment(payload({ overlaps: { added: [{
@@ -92,7 +92,7 @@ test('ac_13: evidence is bounded and escaped; unsafe paths and link contexts sta
   assert.doesNotMatch(body, /\/blob\//);
 });
 
-test('ac_13: local comments use file:line and missing evidence never invents a confidence', () => {
+test('ac_21: local comments use file:line and missing evidence never invents a confidence', () => {
   const body = gateComment(payload({ overlaps: { added: [{ kind: 'duplicate-logic', title: 'copy', nodes: ['a:f'] }], removed: [] } }), {
     graph: { nodes: [{ id: 'a:f', file: 'a.js', line: 3 }] },
   });

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { PLUGIN_ROOT } from './helpers.mjs';
 
-test('ac_18: shipped hooks use the documented configuration shape and retain all handlers', () => {
+test('ac_26: shipped hooks use the documented configuration shape and retain all handlers', () => {
   const config = JSON.parse(readFileSync(join(PLUGIN_ROOT, 'hooks/hooks.json'), 'utf8'));
   assert.deepEqual(Object.keys(config), ['hooks']);
   const expected = {

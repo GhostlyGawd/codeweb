@@ -1,14 +1,14 @@
 {
   "name": "codeweb",
-  "tagline": "Your agents break less code and burn fewer tokens.",
+  "tagline": "See what your AI edits affect.",
   "repo": "https://github.com/GhostlyGawd/codeweb",
   "pagesBase": "https://ghostlygawd.github.io/codeweb/",
-  "elevator": "Your agents break less code and burn fewer tokens. codeweb reads your code and maps it: every function, and every call between them (~3s for 3,000 symbols). Static analysis, no LLM — the same code always produces the same map. Your coding agents query the map over 28 deterministic MCP tools instead of grepping; grep misses more than half of a function's real callers, and agents break the code they can't see. In measured tests, agents found 74% of a function's real callers with the map and 44% with grep, at the same cost. The supporting view for you: a self-contained interactive map showing what one file can't — duplicated logic, dead code, hotspots, and tangled domains.",
+  "elevator": "See what your AI edits affect. Structural checks for AI code changes. Trace callers before an edit. Check changes for new dependency cycles, body-confirmed duplication, and lost callers. Local static analysis supplies 28 MCP tools and a supporting report. No LLM in the checks. A passing result does not prove the program works.",
   "philosophy": [
     "Deterministic — no LLM in the analysis loop; the same repo always yields the same graph.",
     "Zero runtime dependencies — the whole pipeline runs on an empty node_modules.",
     "Read-only by default — codeweb never executes the code it maps.",
-    "Evidence over guesswork — every finding is body-confirmed and pre-flighted against a regression gate."
+    "Evidence with limits — inspect findings and unresolved relationships before acting."
   ],
   "languages": [
     "JavaScript",
@@ -41,7 +41,7 @@
     "headline": [
       {
         "num": "126×",
-        "label": "cheaper 'what breaks if I change this' answers — one call vs grepping in rounds",
+        "label": "smaller measured context size than a simulated graph-assisted grep loop; not total session savings",
         "src": "oracle-ab.json"
       },
       {
@@ -298,7 +298,7 @@
       "source": "oracle-ab.json"
     },
     {
-      "claim": "Blast-radius context cost vs recursive grep",
+      "claim": "Blast-radius context-size comparison with simulated recursive grep",
       "tag": "validated",
       "metric": "~1KB/call vs ~130KB (126x), grep loop simulated generously (graph-assisted frontier)",
       "sample": "30 vite symbols, mean impact 18 symbols",
@@ -456,5 +456,6 @@
       "instead_of": "\"Beats commercial tools\"",
       "we_say": "We compare only to stated, reproducible baselines (name-matching, lexical, random, the legacy fallback) — no head-to-head against tools we can't reproduce."
     }
-  ]
+  ],
+  "descriptor": "Structural checks for AI code changes."
 }

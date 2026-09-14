@@ -7,7 +7,7 @@ wins and this file has a bug — please report it.
 
 | bin | what it runs | typical call |
 |---|---|---|
-| `codeweb` | the full pipeline (`scripts/run.mjs`) | `codeweb .` — map the current repo into `./.codeweb/` |
+| `codeweb` | map, setup, diagnostics, review, or PR gate | `codeweb .` — map the current repo into `./.codeweb/` |
 | `codeweb-mcp` | the MCP stdio server (28 read-only tools) | `claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp` |
 | `codeweb-query` | graph queries (`scripts/query.mjs`) | `codeweb-query --impact <symbol>` from a mapped repo |
 | `codeweb-diff` | the regression gate (`scripts/diff.mjs`) | `codeweb-diff before.json after.json` — exit 1 on a regression |
@@ -32,6 +32,38 @@ for "regression found").
 
 Streams: results (the `done ->` block, or the `--json` line) are **stdout**; stage progress and
 children's output are **stderr** — `codeweb . | grep mapped` and `codeweb . 2>/dev/null` both work.
+
+## Package subcommands
+
+Run these commands through an installed `codeweb` bin or replace `codeweb` with `npx -y @ghostlygawd/codeweb`.
+Each subcommand supports `--help`.
+
+| Command | Required input | Result |
+|---|---|---|
+| `codeweb setup --client cursor` | `claude`, `cursor`, `windsurf`, `gemini`, or `codex` | Prints one client recipe without changing configuration; `--json` returns the recipe and steps |
+| `codeweb doctor --json` | A local map; optional `--graph <file>` | Checks runtime, local MCP initialization, graph presence, and recorded freshness |
+| `codeweb doctor --client cursor --config .cursor/mcp.json` | Both flags for an explicit configuration check | Inspects only that file; does not execute its command or print its values |
+| `codeweb review .codeweb/graph.json --changed a.js --json --html review.html` | A graph and `--changed <file[:start-end],...>` or `--range <gitref>` | Reports changed symbols, affected callers, findings, coverage, and analysis limits |
+| `codeweb gate --base origin/main --target src` | A base git ref; full local history | Compares the base with the working tree and reports structural regressions |
+
+`review` accepts `--before <graph.json>` for a baseline and `--gate` to block on findings. Analysis states are `complete`, `incomplete`, or `stale` for the checks named in the report.
+A clean structural verdict does not prove runtime correctness. Unknown coverage stays unknown.
+
+`doctor --json` returns `ok`, named `pass`, `fail`, or `unknown` checks, and an unverified editor connection. Required failures or unknown freshness return exit 2.
+Successful local diagnostics return exit 0. Use a caller query inside your client to check its connection.
+
+`gate --report-only` retains the regression verdict but returns exit 0 for a completed, validated finding. Usage errors, failed analysis, missing refs, and interruptions still fail.
+Blocking is the default. See [the gate guide](ci-gate.md) for Action inputs and output codes.
+
+### Directories with a reserved name
+
+Bare `setup`, `doctor`, `review`, and `gate` select subcommands. To map a directory with one of these names, use an explicit path or the `--` delimiter:
+
+```sh
+codeweb ./review
+codeweb /absolute/path/to/review
+codeweb -- review
+```
 
 ## Exit codes
 
@@ -146,7 +178,10 @@ mid-edit queries. Without `refresh:true`, diff still compares stored snapshots o
 Refresh drops overlap findings, so diff reports duplication as `not-evaluated`
 and does not claim that old findings disappeared. Run the full pipeline for both
 snapshots or use `codeweb_review` with `gate:true` for a bounded scan of changed
-symbols. Review also labels checks it could not run.
+symbols.
+
+Review preserves its boolean `analysis.checks` fields and labels per-check scope in
+`analysis.checkStatus`.
 
 `ok:true` means no regressions were found by the checks performed. It does not
 mean every check ran or that behavior is correct. Inspect `analysis` and run the
@@ -173,3 +208,8 @@ unstamped graphs produce warnings with repair guidance.
 Repair commands use explicit argument arrays in `issues[].command`, avoiding
 ambiguous quoting. Diagnostics never install dependencies, remap code, modify
 workspace artifacts, or contact a package registry.
+
+The package subcommand `codeweb doctor` additionally checks the local MCP handshake
+and optional explicit client configuration. Its required freshness checks can fail when
+source stamps are unavailable. The `codeweb --doctor` flag and explicit-target script
+form provide lightweight installation/map diagnostics; they do not verify a client connection.

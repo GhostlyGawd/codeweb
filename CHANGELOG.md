@@ -41,6 +41,19 @@ notes so validated results, papers, and new tools never get lost in commit histo
 - A documentation entry point maps reading paths and repository ownership. Audit indexes
   connect dated findings to implementation and verification receipts.
 
+### Also added in product clarity
+- Package commands for client setup, local diagnostics, change review, and the existing CI gate.
+- Portable change-review HTML with caller evidence, baseline provenance, and explicit analysis limits.
+- Report-only gate mode that preserves regression verdicts and still fails on analysis errors.
+- A reproducible edit-review demo, a dated Graphify comparison, and pilot and case-study protocols.
+
+### Changed
+- Public identity: “See what your AI edits affect.” and “Structural checks for AI code changes.”
+- Setup uses shared recipes for five clients and shows an observable caller-query check.
+- Findings separate body confidence from priority and provide source evidence and an agent task.
+- The public Axios demo is re-extracted from a pinned commit with current engine provenance.
+- Agent review details are bounded and report omitted counts; supporting HTML retains full evidence.
+
 ## [0.14.0] - 2026-09-02
 
 ### Added

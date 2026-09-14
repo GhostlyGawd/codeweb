@@ -35,7 +35,7 @@
         <h3 id="transitive-impact">Transitive impact — "what breaks two hops away?"</h3>
         <p>Direct references stop at the first hop. An agent editing a function needs the closure: every symbol transitively affected, plus the domains they sit in.</p>
         <p><code>codeweb_impact</code> returns it in one call. Graded against an independent reverse-reachability walk over 121,913 symbol comparisons, it disagreed 0 times.</p>
-        <p class="muted">On sampled targets the mean blast radius was 21 symbols. One call injects 1,214 bytes of context; a graph-assisted grep loop needed 7.2 rounds and 153,274 bytes to reach the same answer — a factor of 126.</p>
+        <p class="muted">On sampled targets the mean blast radius was 21 symbols. One call injects 1,214 bytes of context; a simulated graph-assisted grep loop needed 7.2 rounds and 153,274 bytes to reach the same answer — a factor of 126.</p>
         <p class="muted">Receipts: <code>bench/results/correctness-query.json</code> · <code>bench/results/oracle-ab.json</code></p>
       </div>
       <div class="card">
@@ -80,7 +80,7 @@
           <li><span class="dot"></span><span>A new body-confirmed duplication.</span></li>
           <li><span class="dot"></span><span>A symbol that lost every caller.</span></li>
         </ul>
-        <p>Anything else passes, including pure removals. It is static analysis, not a model, so it never hallucinates a finding and costs zero tokens however many pull requests you open.</p>
+        <p>Pure removals pass these structural rules. No LLM is in the checks. A passing check does not prove the program works; unresolved dynamic relationships can remain.</p>
         <p class="muted" style="margin-bottom:0"><a href="product.html#ci-gate">How the gate works →</a></p>
       </div>
     </div>

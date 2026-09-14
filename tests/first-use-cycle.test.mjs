@@ -7,7 +7,7 @@ import { PLUGIN_ROOT, tmpDir, cleanup } from './helpers.mjs';
 
 const read = (path) => readFileSync(join(PLUGIN_ROOT, path), 'utf8');
 
-test('ac_17: README and agent rules preserve the baseline through repair', () => {
+test('ac_25: README and agent rules preserve the baseline through repair', () => {
   for (const path of ['README.md', 'site/content/start.html']) {
     const copy = read(path);
     assert.ok(copy.includes('codeweb_refresh {baseline:true}'), path);
@@ -19,7 +19,7 @@ test('ac_17: README and agent rules preserve the baseline through repair', () =>
   }
 });
 
-test('ac_17: the published cycle commands find the caller, go red, then repair to green', { skip: process.platform === 'win32' ? 'walkthrough requires a POSIX shell' : false }, () => {
+test('ac_25: the published cycle commands find the caller, go red, then repair to green', { skip: process.platform === 'win32' ? 'walkthrough requires a POSIX shell' : false }, () => {
   const temp = tmpDir('cw-walkthrough-');
   try {
     const html = read('site/content/start.html');

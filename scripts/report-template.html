@@ -104,6 +104,10 @@
   #detail .lst div{padding:3px 0;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #detail .lst div:hover{color:var(--accent)}
   #detail a{color:var(--accent)}
+  #detail button:focus-visible,#detail textarea:focus-visible,#detail summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  #detail .kv,#detail code{overflow-wrap:anywhere}
+  .finding-action{font:inherit;padding:7px 10px;border:1px solid var(--accent);background:var(--panel2);color:var(--fg);cursor:pointer}
+  #agentTaskText{display:block;width:100%;min-height:140px;margin:8px 0;padding:8px;resize:vertical;font:inherit;color:var(--fg);background:var(--panel2);border:1px solid var(--line)}
   .empty{color:var(--muted);padding:24px;text-align:center}
   code{background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line);padding:1px 5px;font-size:11px}
   /* findings */
@@ -114,6 +118,17 @@
   .fhead .sub{color:var(--muted);font-size:11px}
   table.f{width:100%;max-width:980px;border-collapse:collapse;font-size:12.5px}
   table.f td{padding:6px 8px;border-bottom:1px solid var(--line);cursor:pointer}
+  table.f th{padding:6px 8px;text-align:left;font-size:11px;font-weight:600;color:var(--muted)}
+  table.f td{overflow-wrap:anywhere}
+  .fhead{flex-wrap:wrap}
+  @media(max-width:720px){
+    #top{height:auto;min-height:48px;flex-wrap:wrap;padding:8px}
+    #wrap{display:flex;flex-direction:column;height:calc(100% - 90px)}
+    #main{min-height:45vh;flex:1 0 45vh}
+    #detail{width:100%;flex:1 0 40vh;border-left:0;border-top:1px solid var(--line)}
+    .view{padding:12px 8px} table.f{font-size:12px}
+    table.f td,table.f th{padding:6px 4px}
+  }
   table.f td:first-child{width:44px}
   table.f tr:hover td{background:var(--panel2)}
   .badge{display:inline-block;min-width:26px;text-align:center;padding:1px 6px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-variant-numeric:tabular-nums}
@@ -384,7 +399,7 @@
     });
     // RETENTION R2: a refresh drops findings and stamps the drop — never render that as "0".
     var findingsChip = (G.meta.overlapsDroppedAt && !(G.overlaps || []).length)
-      ? 'findings not recounted' : fb.actionable + ' actionable';
+      ? 'findings not recounted' : fb.actionable + ' pipeline candidates';
     // RETENTION R9: the report's own age, computed at VIEW time from the file's modified date —
     // the embedded bytes stay deterministic (no timestamp travels in the HTML itself).
     var mappedAgo = '', fileDate = '';
@@ -401,11 +416,15 @@
     ].filter(Boolean).join(' · ');
     var gen = document.querySelector('meta[name="generator"]');
     el.title = (productOnly && nonProduct ? nonProduct + ' non-product symbols hidden by the Product-only filter\n' : '') +
-      'findings: actionable ' + fb.actionable + ' · needs review ' + fb.review + ' · dismissed ' + fb.dismissed +
+      'pipeline confidence buckets: high/medium ' + fb.actionable + ' · needs review ' + fb.review + ' · dismissed ' + fb.dismissed +
       (G.meta.overlapsDroppedAt ? '\nfindings were dropped by a refresh — re-run the pipeline to recount' : '') +
       (fileDate ? '\nreport file date: ' + fileDate + ' (rebuild: node scripts/run.mjs <src>)' : '') +
       (gen ? '\nbuilt by ' + gen.content : '') +
-      (G.meta.engine ? '\nextraction engine: ' + G.meta.engine : ''); // breakdown + internals live in the tooltip
+      (G.meta.engine ? '\nextraction engine: ' + G.meta.engine : '') +
+      (G.meta.sourceCommit ? '\nsource commit: ' + G.meta.sourceCommit : '') +
+      (G.meta.sourceUrl ? '\nsource: ' + G.meta.sourceUrl : '') +
+      (G.meta.extractorVersion ? '\nextractor version: ' + G.meta.extractorVersion : '') +
+      (G.meta.rendererVersion ? '\nrenderer version: ' + G.meta.rendererVersion : '');
   }
   renderMeta();
   var roleBtn = document.getElementById('roleFilter');
@@ -479,11 +498,14 @@
       '<div class="kv">' + AN.length + ' symbols · ' + AE.length + ' edges · ' + domainNames.length + ' domains</div>' +
       '<div class="sec">largest domains</div>' + topDoms +
       '<div class="sec">worth a look</div>' +
-      '<div class="kv">' + duplicates.length + ' duplication group(s) · ' + hotspots.length + ' hotspot(s) · ' + dead.length + ' dead-code candidate(s)</div>' +
+      '<div class="kv">' + duplicates.length + ' name-match group(s) · ' + hotspots.length + ' hotspot(s) · ' + dead.length + ' dead-code candidate(s)</div>' +
+      (G.meta.sourceCommit ? '<div class="sec">report source</div><div class="kv">Commit <code>' + esc(G.meta.sourceCommit) + '</code></div>' : '') +
+      (G.meta.extractorVersion ? '<div class="kv">Extractor ' + esc(G.meta.extractorVersion) + '</div>' : '') +
+      (G.meta.rendererVersion ? '<div class="kv">Renderer ' + esc(G.meta.rendererVersion) + '</div>' : '') +
       '<div class="sec">how to read this</div>' +
       '<div class="kv">Click any row, cell, or node to inspect it here. In the graph, click a domain block to expand it; search + Enter jumps to a symbol. <code>#s=&lt;id&gt;</code> deep-links.</div>';
   }
-  function nodeRow(id) { var t = nodeById.get(id); return '<div data-node="' + esc(id) + '">' + esc(t ? (t.label || id) : id) + ' <span class="dim mono">' + esc(t ? t.file : '') + '</span></div>'; }
+  function nodeRow(id) { var t = nodeById.get(id); return '<div data-node="' + esc(id) + '">' + esc(t ? (t.label || id) : id) + ' <span class="dim mono">' + esc(t ? t.file + (t.line ? ':' + t.line : '') : '') + '</span></div>'; }
   function bindNodeRows(scope) {
     (scope || detail).querySelectorAll('[data-node]').forEach(function (el) {
       var go = function () { showNode(el.getAttribute('data-node')); };
@@ -501,7 +523,7 @@
     announce('Inspecting ' + n.label + ', ' + (n.kind || 'symbol'));
     var outs = outAdj.get(id) || [], ins = inAdj.get(id) || [];
     detail.innerHTML = '<h3>' + esc(n.label) + '</h3>' +
-      '<div class="kv">' + esc(n.kind || '') + (n.role && n.role !== 'product' ? ' · ' + esc(n.role) : '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--accent)">duplicated</span>' : '') + '</div>' +
+      '<div class="kv">' + esc(n.kind || '') + (n.role && n.role !== 'product' ? ' · ' + esc(n.role) : '') + (n.exports ? ' · exported' : '') + (dupNodeIds.has(id) ? ' · <span style="color:var(--accent)">name match</span>' : '') + '</div>' +
       '<div class="kv"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:' + colorOf(n.domain) + '"></span> ' + esc(n.domain) + '</div>' +
       (n.file ? '<div class="kv"><code>' + esc(n.file) + (n.line ? ':' + n.line : '') + '</code>' + (n.loc ? ' · ' + n.loc + ' loc' : '') + '</div>' : '') +
       editorLink(n) +
@@ -513,10 +535,11 @@
     bindNodeRows();
   }
   function showDup(d) {
-    announce('Inspecting duplication group ' + d.name);
+    announce('Inspecting name-match group ' + d.name);
     detail.innerHTML = '<h3>' + esc(d.name) + '()</h3>' +
       '<div class="kv">defined in <b>' + d.files + ' files</b> · ' + d.domains.length + ' domain(s)</div>' +
       '<div class="kv">' + esc(d.domains.join(', ')) + '</div>' +
+      '<div class="kv">A shared name does not confirm duplicate logic. Compare the source before choosing an action.</div>' +
       '<div class="sec">every definition</div><div class="lst" id="d_dup"></div>';
     document.getElementById('d_dup').innerHTML = d.nodes.map(function (n) { return nodeRow(n.id); }).join('');
     bindNodeRows();
@@ -533,15 +556,44 @@
       return (r[a.confidence] !== undefined ? r[a.confidence] : 3) - (r[b.confidence] !== undefined ? r[b.confidence] : 3) || String(a.title).localeCompare(String(b.title));
     });
   var ovDismissed = G.overlaps.length - ovLive.length;
+  function findingDecisionFor(o) {
+    return o.decision || { confidence: 'unverified', priority: 'review', effort: 'unknown',
+      reason: 'Review guidance is not available. Rebuild this report with the current renderer.', nextStep: 'Review the source before choosing an action.',
+      callers: [], sourcesOmitted: 0, callersOmitted: 0, callerLimit: 'Caller context is not available.',
+      agentTask: 'Review this finding in the mapped workspace. Do not change source or record an exception without user approval.',
+      exceptionGuidance: 'Rebuild the report to obtain the existing annotation action and fingerprint.' };
+  }
+  function bindAgentTask(task) {
+    var button = document.getElementById('copyAgentTask');
+    var field = document.getElementById('agentTaskText');
+    var status = document.getElementById('agentTaskStatus');
+    field.value = task;
+    var fallback = function () { field.focus(); field.select(); status.textContent = 'Copy is unavailable. The task text is selected; use your copy command.'; };
+    button.onclick = function () {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) { fallback(); return; }
+      navigator.clipboard.writeText(task).then(function () { status.textContent = 'Agent task copied. Paste it into your agent to review.'; }, fallback);
+    };
+  }
   function showOverlap(o) {
-    announce('Inspecting finding: ' + o.title);
-    detail.innerHTML = '<h3>' + esc(o.title) + '</h3>' +
-      '<div class="kv"><span class="badge b-' + (confClass[o.confidence] || 'low') + '">' + esc(o.confidence) + '</span> · ' + esc(o.kind) + (o.drifted ? ' · drifted copies' : '') + (o.bodySim != null ? ' · body ' + Math.round(o.bodySim * 100) + '%' : '') + '</div>' +
-      (o.evidence ? '<div class="kv">' + esc(o.evidence) + '</div>' : '') +
-      (o.recommendation ? '<div class="sec">recommendation</div><div class="kv">' + esc(o.recommendation) + '</div>' : '') +
-      '<div class="sec">symbols (' + (o.nodes || []).length + ')</div><div class="lst" id="d_ov"></div>';
+    var d = findingDecisionFor(o);
+    announce('Inspecting finding: ' + String(o.title).slice(0, 500));
+    detail.innerHTML = '<h3>' + esc(String(o.title).slice(0, 500)) + '</h3>' +
+      '<div class="kv">Body-match confidence: <span class="badge b-' + (confClass[d.confidence] || 'low') + '">' + esc(d.confidence) + '</span>' + (Number.isFinite(o.bodySim) ? ' · similarity ' + Math.round(o.bodySim * 100) + '%' : '') + '</div>' +
+      '<div class="kv">Action priority: <b>' + esc(d.priority) + '</b> · effort: ' + esc(d.effort) + ' until review</div>' +
+      '<div class="sec">reason to act</div><div class="kv">' + esc(d.reason) + '</div>' +
+      (o.evidence ? '<div class="sec">detection evidence</div><div class="kv">' + esc(String(o.evidence).slice(0, 1000)) + '</div>' : '') +
+      '<div class="sec">next step</div><div class="kv">' + esc(d.nextStep) + '</div>' +
+      '<div class="sec">source locations (' + (o.nodes || []).length + ')</div><div class="lst" id="d_ov"></div>' +
+      '<div class="sec">recorded callers</div><div class="lst" id="d_ov_callers"></div><div class="kv">' + esc(d.callerLimit) + (d.callersOmitted ? ' ' + d.callersOmitted + ' more callers omitted.' : '') + '</div>' +
+      '<div class="sec">agent task</div><button class="finding-action" id="copyAgentTask" type="button">Copy agent task</button>' +
+      '<label class="visually-hidden" for="agentTaskText">Review task text</label><textarea id="agentTaskText" readonly></textarea><div class="kv" id="agentTaskStatus" role="status"></div>' +
+      '<details><summary>Record a verified false positive</summary><div class="kv">' + esc(d.exceptionGuidance) + '</div>' +
+      (d.exceptionCommand ? '<div class="kv"><code>' + esc(d.exceptionCommand) + '</code></div>' : '') + '</details>';
     document.getElementById('d_ov').innerHTML = (o.nodes || []).slice(0, 60).map(function (id) { return nodeById.has(id) ? nodeRow(id) : '<div class="dim mono">' + esc(id) + '</div>'; }).join('') || '<div class="empty">—</div>';
+    if ((o.nodes || []).length > 60) document.getElementById('d_ov').innerHTML += '<div class="dim">More symbols are recorded in graph.json.</div>';
+    document.getElementById('d_ov_callers').innerHTML = d.callers.map(function (caller) { return nodeRow(caller.id); }).join('') || '<div class="kv">No resolved callers recorded.</div>';
     bindNodeRows();
+    bindAgentTask(d.agentTask);
   }
   function section(title, sub, n, body) {
     return '<div class="fsec"><div class="fhead"><h2>' + esc(title) + '</h2><span class="sub">' + esc(sub) + '</span><span class="pill">' + n + '</span></div>' + body + '</div>';
@@ -571,18 +623,20 @@
         '<td class="dim">' + d.files + ' implementations, none called in-repo</td></tr>';
     }).join('');
     var ovRows = ovLive.slice(0, 40).map(function (o, i) {
-      return '<tr data-ov="' + i + '"><td><span class="badge b-' + (confClass[o.confidence] || 'low') + '">' + esc(o.confidence) + '</span></td>' +
-        '<td>' + esc(o.title) + '</td>' +
-        '<td class="dim">' + esc(o.kind) + (o.drifted ? ' · drifted' : '') + '</td>' +
-        '<td class="dim">' + esc((o.domains || []).slice(0, 3).join(', ')) + '</td></tr>';
+      var d = findingDecisionFor(o);
+      return '<tr data-ov="' + i + '"><td><span class="badge b-' + (confClass[d.confidence] || 'low') + '">' + esc(d.confidence) + '</span></td>' +
+        '<td>' + esc(String(o.title).slice(0, 500)) + '</td>' +
+        '<td>' + esc(d.priority) + '</td><td class="dim">' + esc(d.effort) + '</td></tr>';
     }).join('');
     v.innerHTML =
-      section('Consolidation findings', 'body-confirmed by the overlap pipeline — optimize.md tiers these ready/blocked/review', ovLive.length,
-        (ovRows ? '<table class="f">' + ovRows + '</table>' : '<div class="empty">No pipeline findings — clean</div>') +
+      section('Pipeline findings', 'Review similarity, action priority and effort separately', ovLive.length,
+        '<div class="kv">' + esc(G.findingState ? G.findingState.message : 'Analysis status is not available. Rebuild the report to check findings.') + '</div>' +
+        (ovRows ? '<table class="f"><thead><tr><th scope="col">Body confidence</th><th scope="col">Finding</th><th scope="col">Priority</th><th scope="col">Effort</th></tr></thead><tbody>' + ovRows + '</tbody></table>' : '') +
+        (ovLive.length > 40 ? '<div class="empty">First 40 findings shown; inspect graph.json for all findings.</div>' : '') +
         (ovDismissed ? '<div class="empty">' + ovDismissed + ' candidate(s) dismissed (body-refuted) — full transparency list in overlap.md</div>' : '')) +
-      section('Duplication', 'merge these — same function defined in many files', duplicates.length,
-        dupRows ? '<table class="f">' + dupRows + '</table>' : '<div class="empty">No duplication found — clean</div>') +
-      (patterns.length ? section('Interface patterns', 'same-name implementations of a framework contract (nothing in-repo calls them) — NOT copy-paste; don’t merge', patterns.length,
+      section('Name matches', 'Shared names are review candidates; source comparison must confirm duplicate logic', duplicates.length,
+        dupRows ? '<table class="f">' + dupRows + '</table>' : '<div class="empty">No name matches recorded in this view.</div>') +
+      (patterns.length ? section('Possible interface patterns', 'Shared names with few recorded callers; inspect the contract before choosing an action', patterns.length,
         '<table class="f">' + patRows + '</table>') : '') +
       section('Hotspots', 'most depended-on code — change with care', hotspots.length,
         hotRows ? '<table class="f">' + hotRows + '</table>' : '<div class="empty">—</div>') +

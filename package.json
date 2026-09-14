@@ -3,7 +3,7 @@
   "version": "0.14.0",
   "mcpName": "io.github.GhostlyGawd/codeweb",
   "type": "module",
-  "description": "Your agents break less code and burn fewer tokens. codeweb maps your repo into a deterministic call/import graph; 28 MCP tools answer impact, callers, and duplication before agents write. Claude Code plugin & MCP server; zero deps, runs 100% locally.",
+  "description": "See what your AI edits affect. Structural checks for AI code changes. Local call/import graphs and 28 MCP tools for impact, callers, and duplication. No LLM in the checks.",
   "keywords": [
     "mcp",
     "mcp-server",
@@ -37,6 +37,9 @@
   "files": [
     "bin",
     "scripts",
+    "!scripts/product-demo.mjs",
+    "!scripts/refresh-demo.mjs",
+    "!scripts/verify-product-ui.mjs",
     "!scripts/check",
     "!scripts/spec_lint.py",
     "!scripts/hook-check",

@@ -67,7 +67,7 @@ test('ci-gate passes (exit 0) when the working tree matches base', { skip: hasGi
   }
 });
 
-test('ac_13: ci-gate --md carries real duplication evidence and commit-pinned subdirectory links without changing the verdict', { skip: hasGit ? false : 'git not available' }, () => {
+test('ac_21: ci-gate --md carries real duplication evidence and commit-pinned subdirectory links without changing the verdict', { skip: hasGit ? false : 'git not available' }, () => {
   const { repo, base } = repoWithBase();
   try {
     writeTree(repo, { 'src/b.js': COMPUTE }); // duplication -> failing gate
@@ -95,7 +95,7 @@ test('ac_13: ci-gate --md carries real duplication evidence and commit-pinned su
   }
 });
 
-test('ac_13: dirty source locations stay plain text for untracked, modified and staged files', { skip: hasGit ? false : 'git not available' }, () => {
+test('ac_21: dirty source locations stay plain text for untracked, modified and staged files', { skip: hasGit ? false : 'git not available' }, () => {
   for (const state of ['untracked', 'modified', 'staged']) {
     const { repo, base } = repoWithBase();
     const git = (...args) => {

@@ -117,14 +117,14 @@ test('the open-questions discipline survives the amendment', () => {
   assert.match(open, /one at a time/i, "the operator's one-question-at-a-time rule survives");
 });
 
-test('the ratified job line is untouched by the amendment', () => {
-  // check-consistency reads this line out of the charter and enforces it on four surfaces; an
-  // amendment that disturbed it would take every public surface red with it.
-  assert.match(charter, /\*\*"Your agents break less code and burn fewer tokens\."\*\*/,
-    'the identity line stays verbatim and stays the first bolded quote the gate reads');
+test('the active job line follows the dated product clarity amendment and preserves history', () => {
+  assert.match(charter, /2026-09-05 — product clarity implementation/);
+  assert.match(charter, /user-authorized/);
+  assert.match(charter, /earlier headline, “Your agents break less code and burn fewer tokens\.”, is historical/);
   assert.equal(
     (charter.match(/\*\*"([^"]+)"\*\*/) || [])[1],
-    'Your agents break less code and burn fewer tokens.',
-    'the gate takes the FIRST bolded quote — no amendment may introduce an earlier one',
+    'See what your AI edits affect.',
+    'the consistency check reads the current user-authorized headline',
   );
+  assert.match(charter, /Structural checks for AI code changes/);
 });

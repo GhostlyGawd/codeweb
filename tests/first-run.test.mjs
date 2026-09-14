@@ -67,7 +67,7 @@ test('FR2: bare run maps the current directory into ./.codeweb; usage states bot
   } finally { cleanup(dir); }
 });
 
-test('ac_17 FR3: the first-run banner leads with the result and a next: block — no fossil strings', () => {
+test('ac_25 FR3: the first-run banner leads with the result and a next: block — no fossil strings', () => {
   const dir = tmpDir('codeweb-firstrun-');
   try {
     writeTree(dir, DUP_FIXTURE);

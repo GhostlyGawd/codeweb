@@ -14,10 +14,10 @@ import { join } from 'node:path';
 import { PLUGIN_ROOT } from './helpers.mjs';
 
 const read = (p) => readFileSync(join(PLUGIN_ROOT, p), 'utf8');
-const IDENTITY = 'Your agents break less code and burn fewer tokens.';
+const IDENTITY = 'See what your AI edits affect.';
 // The mission's ratified positioning line. Case-insensitive: the site sets it in caps via CSS,
 // the README writes it in sentence case.
-const GATE_LEAD = /deterministic guardrail for agent-written code/i;
+const GATE_LEAD = /Structural checks for AI code changes/i;
 const BOUNDARY_URL = 'https://ghostlygawd.github.io/codeweb/boundary.html';
 
 /** Index of a marker, asserting presence first so a failure names what is missing. */
@@ -50,11 +50,12 @@ test('the README gate lead states the verdict, its three blockers, and its token
   const readme = read('README.md');
   // The lead paragraph runs from the gate line to the first map sentence.
   const lead = reflow(readme.slice(at(readme, GATE_LEAD, 'README.md'), at(readme, 'codeweb reads your code', 'README.md')));
-  assert.match(lead, /zero tokens/i, 'the zero-marginal-cost property is the wedge — it leads with the gate');
+  assert.match(lead, /zero model tokens/i, 'the zero-marginal-cost property is the wedge — it leads with the gate');
   assert.match(lead, /cycle/i, 'blocker 1: a new dependency cycle');
   assert.match(lead, /duplicat/i, 'blocker 2: a new body-confirmed duplication');
   assert.match(lead, /caller/i, 'blocker 3: a symbol that lost every caller');
-  assert.match(lead, /no model|never hallucinat|not a model/i, 'why the verdict costs nothing and cannot drift');
+  assert.match(lead, /no LLM/i, 'checks do not use an LLM');
+  assert.match(lead, /does not prove the program works/i, 'structural verdict states its runtime limit');
 });
 
 test('README gates every pull request before it explains the graph internals', () => {
@@ -101,7 +102,7 @@ test('the built homepage hero renders the identity line verbatim', () => {
 test('the homepage leads with the gate and demotes the live map below it', () => {
   for (const page of ['site/content/index.html', 'docs/index.html']) {
     const html = read(page);
-    const gate = at(html, GATE_LEAD, page);
+    const gate = at(html, page.startsWith('site/') ? '{{descriptor}}' : GATE_LEAD, page);
     assert.ok(gate < at(html, 'id="cw-hero-map"', page), `${page}: the gate story must precede the live map canvas`);
     assert.ok(gate < at(html, 'class="duo"', page), `${page}: the gate story must precede the one-graph-two-interfaces section`);
   }
@@ -110,7 +111,7 @@ test('the homepage leads with the gate and demotes the live map below it', () =>
 test('the homepage gate story states its blockers, its cost, and where it runs', () => {
   const html = read('docs/index.html');
   const story = html.slice(at(html, GATE_LEAD, 'docs/index.html'), at(html, 'class="duo"', 'docs/index.html'));
-  assert.match(story, /zero tokens/i, 'the zero-marginal-cost wedge');
+  assert.match(story, /zero model tokens/i, 'the zero-marginal-cost wedge');
   assert.match(story, /cycle/i, 'blocker 1');
   assert.match(story, /duplicat/i, 'blocker 2');
   assert.match(story, /caller/i, 'blocker 3');

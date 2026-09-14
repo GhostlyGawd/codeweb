@@ -407,7 +407,7 @@ function handleDiff(id, args, tool) {
   const afterAbs = resolve(afterPath);
   const beforeArg = args.before || 'prev';
   const beforeAbs = ['prev', 'baseline'].includes(beforeArg) ? join(dirname(afterAbs), `graph.${beforeArg}.json`) : resolve(beforeArg);
-  // AC-15: refresh+diff is ONE writer job; another workspace writer cannot land
+  // AC-23: refresh+diff is ONE writer job; another workspace writer cannot land
   // between extraction and comparison. Validate/load the baseline in the child after waiting.
   if (args.refresh) return enqueueChild(id, {
     kind: 'writer', key: dirname(afterAbs), tool: tool.name, bin: tool.bin,

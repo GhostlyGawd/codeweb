@@ -1,23 +1,17 @@
 # SPEC — codeweb
 
-Created 2026-07-26 by the spec program after harness installation; supersedes the initial
-null report at `reports/SPEC.md`. Current authority is `CHARTER.md`, including its
-2026-08-17/18 amendments and later ratified decisions.
+Created 2026-07-26; product clarity added 2026-09-05; baseline and documentation work
+integrated 2026-09-14. CHARTER.md records the ratified direction and later amendments.
+A built criterion records implementation and test pins, not release or deployment.
 
-The operator selected **productize and launch** as Next on 2026-08-17. New work enters
-acceptance criteria under that scope; IDs remain stable and retirement uses `status: dropped`.
-A `built` criterion records implementation and test pins, not a release or deployment.
-
-AC-13–18 currently describe unreleased working-tree implementation. The tests in
-`tests/test_ac_pins.py` connect criteria to their verification commands.
+Main's AC-13–20 retain their identities. The independently developed baseline/documentation
+criteria are appended as AC-21–26 to avoid identifier collisions during integration.
 
 ## Job
 
-**"Your agents break less code and burn fewer tokens."** Before an edit, the agent asks the
-map — who calls this, what breaks, does this already exist — and gets exact, small answers
-(28 MCP tools over a deterministic call/import graph, built locally, no LLM in the loop);
-the regression gate enforces the same sight after the edit. Receipts: callers found 44%→74%
-vs grep; impact answers at a fraction of grep's tokens (`CHARTER.md`, Problem/Job).
+**"See what your AI edits affect."** Your agents inspect callers and dependencies before an edit,
+then check new structural findings afterward. The local graph supplies bounded answers through
+MCP; interfaces are defined in `scripts/lib/tool-specs.mjs` and behavior in `scripts/mcp-server.mjs`. The supporting report explains those results.
 
 ## Non-goals
 
@@ -70,19 +64,85 @@ controlling product specification.
 - **AC-10** — codeweb_dependents returns the union answer (call, import, inherit, test, ref) over MCP with true totals within budget | check: `node --test tests/mcp-dependents.test.mjs` | status: built
 - **AC-11** — spawned advisor answers carry the call-time staleness verdict, and overlap-independent advisors auto-refresh like the orient family | check: `node --test tests/mcp-staleness-parity.test.mjs` | status: built
 - **AC-12** — agent-fallback graphs carry their meta.engine provenance and the brief caveats agent-built maps | check: `node --test tests/agent-graph-label.test.mjs` | status: built
-- **AC-13** — PR gate comments show bounded source locations, duplication evidence, investigation steps, and analysis limits; GitHub links use the analyzed commit and preserve subdirectory targets without changing verdicts | check: `node --test tests/gate-md.test.mjs tests/ci-gate.test.mjs` | status: built
-- **AC-14** — context JSON distinguishes list and source-evidence completeness from graph uncertainty, reports unknown freshness without stamps, and gives actionable recovery steps identically through CLI and MCP | check: `node --test tests/context-analysis.test.mjs` | status: built
+- **AC-13** — current public identity uses a shared evidence-scoped headline and descriptor; token-cost claims identify the measured context-size comparison and gate copy states its limits | check: `node --test tests/product-clarity-copy.test.mjs` | status: built
+- **AC-14** — setup presents one client-specific full-width recipe with copy feedback, a package-first workflow, and an explicit source-checkout alternative | check: `node --test tests/product-clarity-setup-page.test.mjs` | status: built
+- **AC-15** — package setup and diagnostics provide a reversible client recipe, verify the local server and graph state, and distinguish configuration evidence from an editor connection | check: `node --test tests/product-clarity-setup.test.mjs` | status: built
+- **AC-16** — a package change-review command combines changed symbols, affected callers, structural findings, recorded coverage, and analysis limits in JSON and a supporting HTML report | check: `node --test tests/product-clarity-review.test.mjs` | status: built
+- **AC-17** — report findings distinguish confidence from action priority, caution on trivial duplicates, expose source and an agent task, and reuse existing exception records | check: `node --test tests/product-clarity-findings.test.mjs` | status: built
+- **AC-18** — the public demo records a pinned source commit and current engine, generated report and screenshots match the template, and visual identity remains consistent | check: `node --test tests/product-clarity-demo.test.mjs tests/brand-sync.test.mjs` | status: built
+- **AC-19** — the package PR gate and Action support explicit report-only use that retains a failing finding verdict while still failing setup or analysis errors | check: `node --test tests/product-clarity-gate.test.mjs` | status: built
+- **AC-20** — a dated qualitative Graphify comparison and reproducible demonstration and pilot protocols distinguish existing evidence from unmeasured outcomes | check: `node --test tests/product-clarity-evidence.test.mjs` | status: built
 
-- **AC-15** — an explicit pre-edit baseline survives ordinary and automatic refreshes; one diff refreshes and compares against it, reports skipped checks, and fails actionably without a valid baseline | check: `node --test tests/edit-baseline.test.mjs` | status: built
-- **AC-16** — setup diagnostics report the running installation, discovered graph, source freshness, parser availability, and local repair commands without modifying the workspace | check: `node --test tests/doctor.test.mjs` | status: built
-
-- **AC-17** — first-run CLI, README and start-page guidance capture an explicit pre-edit baseline and preserve it through repair; the published tiny cycle walkthrough finds a caller, goes red then green, and discloses skipped analysis and behavioral limits | check: `node --test tests/first-run.test.mjs tests/first-use-cycle.test.mjs` | status: built
-- **AC-18** — shipped hook metadata omits settings schema and matcher-level metadata, preserves adjacent descriptions and all three handler commands, and passes fixture-driven handler checks | check: `node --test tests/hooks-config.test.mjs tests/brief.test.mjs tests/awareness.test.mjs tests/post-edit-diff.test.mjs` | status: built
+- **AC-21** — PR gate comments show bounded source locations, duplication evidence, investigation steps, and analysis limits; GitHub links use the analyzed commit and preserve subdirectory targets without changing verdicts | check: `node --test tests/gate-md.test.mjs tests/ci-gate.test.mjs` | status: built
+- **AC-22** — context JSON distinguishes list and source-evidence completeness from graph uncertainty, reports unknown freshness without stamps, and gives actionable recovery steps identically through CLI and MCP | check: `node --test tests/context-analysis.test.mjs` | status: built
+- **AC-23** — an explicit pre-edit baseline survives ordinary and automatic refreshes; one diff refreshes and compares against it, reports skipped checks, and fails actionably without a valid baseline | check: `node --test tests/edit-baseline.test.mjs` | status: built
+- **AC-24** — setup diagnostics report the running installation, discovered graph, source freshness, parser availability, and local repair commands without modifying the workspace | check: `node --test tests/doctor.test.mjs` | status: built
+- **AC-25** — first-run CLI, README and start-page guidance capture an explicit pre-edit baseline and preserve it through repair; the published tiny cycle walkthrough finds a caller, goes red then green, and discloses skipped analysis and behavioral limits | check: `node --test tests/first-run.test.mjs tests/first-use-cycle.test.mjs` | status: built
+- **AC-26** — shipped hook metadata omits settings schema and matcher-level metadata, preserves adjacent descriptions and all three handler commands, and passes fixture-driven handler checks | check: `node --test tests/hooks-config.test.mjs tests/brief.test.mjs tests/awareness.test.mjs tests/post-edit-diff.test.mjs` | status: built
 
 Pins live in `tests/test_ac_pins.py` (`test_ac_<n>_...`); pins are cheap wiring witnesses —
 the `check:` commands above are what brief 144 runs verbatim.
 
 ## Interfaces
+
+### Product clarity release contract — 2026-09-05
+
+The implementation tasks and validation record are in `docs/specs/product-clarity-tasks.md`.
+The user requested independent specification review, implementation, verification, and PR merge.
+
+- Preserve local operation, MIT licensing, no telemetry, no target-code execution, and zero required dependencies.
+- Preserve existing MCP tools and mapping flags. Reserve bare `setup`, `doctor`, `review`, and `gate` as CLI subcommands.
+- Map directories with reserved names through `./review`, an absolute path, or `codeweb -- review`; document and test this disambiguation.
+- Use `See what your AI edits affect.` as the shared headline and `Structural checks for AI code changes.` as the descriptor.
+- Keep individual developers as the primary audience. Small teams remain secondary; the graph supports the agent workflow.
+- Keep the square shapes and lime accent. Improve text size, sentence case, navigation, and supporting-text contrast within that system.
+- Keep historical research and decisions intact. Label historical claims and scope new claims to their evidence.
+- Do not modify the protected verification harness, release credentials, branch protections, billing, or marketplace publication.
+
+#### Setup and diagnostics
+
+- `codeweb setup --client <client>` prints a project recipe; it does not overwrite existing user configuration.
+- Support Claude Code, Cursor, Windsurf, Gemini CLI, and Codex with one canonical recipe definition used by setup and diagnostics.
+- `codeweb doctor` checks Node compatibility, a local MCP initialization exchange, graph presence and freshness, and supplied client configuration when requested.
+- `--client <client> --config <file>` requests an explicit config check. Never search unrelated client profiles or print config contents.
+- JSON reports `ok`, `checks` with named `pass|fail|unknown` states, and an explicit unverified editor connection. Required setup failures return 2; a successful local check returns 0.
+- Diagnostics must say that a local server check does not establish an editor connection. Missing or invalid required setup returns exit 2.
+- JSON is machine-readable on stdout. Diagnostics do not read secrets into output or contact external services.
+- A documented first query proves the map can answer a caller question on a small source fixture.
+
+#### Change review
+
+- `codeweb review` exposes the existing review capability through the package. Preserve existing review JSON fields and flags.
+- Support optional HTML output with one view of changed symbols, affected callers, new findings, available recorded coverage, and analysis limits.
+- Reuse existing graph traversal, comparison, freshness, and coverage data. Do not invent a second graph schema or change gate semantics.
+- Distinguish unchecked, stale, or incomplete analysis from a clean result. State when no baseline or source bodies are available.
+- Report analysis as `complete`, `incomplete`, or `stale` relative to the named checks, with reasons. Missing baseline, unavailable source/stamps, dynamic gaps, or changed files without mapped symbols prevent a complete label.
+- Malformed supplied baselines are errors. Preserve existing advisory versus `--gate` behavior; uncertainty never becomes a runtime-safety claim.
+- Report source provenance and only measured coverage. Unknown coverage must remain unknown.
+- Escape source-derived text in HTML and generated tasks. Never execute a generated task automatically.
+
+#### Finding decisions
+
+- Label body-match confidence explicitly. A high-confidence duplicate may have low action priority.
+- Treat very short duplicates as review candidates; explain that new coupling can outweigh a small reduction in repeated lines.
+- Keep the confirmed-finding list separate from name matches. Show source locations, relevant caller context, and a copyable agent task.
+- Use existing annotation/exception semantics and fingerprints. Provide an actionable existing command rather than adding a second persistence store.
+
+#### Gate rollout
+
+- `codeweb gate` runs the existing base-versus-working-tree gate through the package.
+- An explicit `--report-only` option and Action input report findings without blocking. Preserve the underlying verdict in output.
+- Report-only must never turn usage errors, missing refs, failed graph builds, or interrupted analysis into success.
+- Existing blocking behavior remains the default. A passing check means only that the named structural rules found no regression.
+
+#### Evidence and public demo
+
+- Rebuild the demo from a recorded public source SHA with the current engine. Record the reproduction command and engine version.
+- Rebuild generated site content, inspect every recaptured screenshot, and refresh the template stamp only after visual inspection.
+- Publish a dated qualitative comparison with links to primary sources; no unmeasured speed, accuracy, adoption, or cost superiority.
+- Provide a reproducible technical demo and a short recording script. Label technical examples separately from maintainer-approved case studies.
+- Provide a five-participant pilot protocol and a case-study template with acceptance/rejection fields. Do not fabricate participants, retention, acceptance, or comparative performance.
+- Human pilot execution, external maintainer decisions, and an independently measured performance comparison remain external follow-up work. This release is complete when the scoped code and evidence tooling pass their checks.
 
 - **MCP server** — `codeweb-mcp` (stdio): 28 tools over the local graph (impact, callers,
   duplication, context packs …). Interfaces live in `scripts/lib/tool-specs.mjs`; server
@@ -103,8 +163,7 @@ the `check:` commands above are what brief 144 runs verbatim.
 ## Evals
 
 Golden cases in `evals/cases/` (`python3 evals/run.py`, gate step 5/5 — AC-7):
-`example-upper`, `cli-help`, `mcp-initialize`, `mcp-tools-list` and `query-help`.
-Floor: **all cases pass** — the runner exits non-zero on any failure.
+`example-upper`, `cli-help`, `mcp-initialize`, `mcp-tools-list` and `query-help`. Floor: **all cases pass** — the runner exits non-zero on any failure.
 Judgment-shaped product output (review verdicts, gate rulings) is floored inside the suite
 itself: golden-file and property tests (`tests/golden-ecc-scripts.test.mjs`,
 `tests/gate-verdict.test.mjs`, FPR-STABLE determinism pins) run under AC-1.

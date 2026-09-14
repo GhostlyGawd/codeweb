@@ -1,3 +1,12 @@
+# Brand identity
+
+**See what your AI edits affect.**
+
+Structural checks for AI code changes.
+
+Current identity amendment: 2026-09-05. Keep the square shapes and lime accent.
+Use sentence case and readable body text; use the display font for the wordmark and short numbers.
+
 # codeweb brand kit
 
 Terminal editorial: near-black surfaces, mono type, square corners, dither texture, and one
@@ -8,14 +17,14 @@ brand and the product look like one thing. `tests/brand-sync.test.mjs` enforces 
 
 | File | Use |
 |---|---|
-| `banner.png` | Wide README header (2100×450). Doto wordmark, pixel glyph, dithered mini-map. |
+| `banner.png` | Wide README header (2172×724). Doto wordmark, pixel glyph, dithered mini-map. |
 | `logo.svg` | Horizontal lockup — pixel glyph + mono wordmark on a dark tile. |
 | `logomark.svg` | The 2×2 pixel glyph on a dark tile — favicon, avatars, marketplace icon. |
 | `demo.svg` | Looping animated pipeline (`extract → cluster → overlap → render`). CSS + SMIL, plays inline via `<img>` on GitHub. |
 | `pipeline.svg` | Static, labelled how-it-works diagram. |
 | `proof-strip.svg` | README benchmark proof strip. Its embedded metadata names the dated evidence sources. |
 | `../screens/zod-terminal-run.svg` | Condensed animated replay of a real npm-package run against pinned Zod source. |
-| `social-preview.jpg` | 1280×640 center-safe card for the repository **Social preview** and site Open Graph metadata. |
+| `social-preview.jpg` | 1774×887 center-safe card for the repository **Social preview** and site Open Graph metadata. |
 
 The screenshots in `../screens/` are the **actual generated `report.html`**, not mockups.
 `zod-terminal-run.svg` is a condensed replay of real CLI output captured on 2026-07-29 from
@@ -46,4 +55,8 @@ ramps (grays, or panel→accent), which survive every kind of color-vision defic
 
 ## Positioning
 
-Tagline: **"Your coding agents grep. codeweb knows."**
+Headline: **"See what your AI edits affect."**
+
+Descriptor: **Structural checks for AI code changes.**
+
+The current raster art uses the September 2026 identity text. AI-assisted edits remove old tool counts and performance claims. Source graph shapes are decorative, not analysis evidence.

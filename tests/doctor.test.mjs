@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { diagnoseSetup } from '../scripts/doctor.mjs';
 import { tmpDir, cleanup, runNode, script, PLUGIN_ROOT } from './helpers.mjs';
 
-test('ac_16: diagnostics from the installed front door are read-only and name exact missing-map repair arguments', () => {
+test('ac_24: diagnostics from the installed front door are read-only and name exact missing-map repair arguments', () => {
   const root = tmpDir('cw-doctor-');
   try {
     const r = runNode(join(PLUGIN_ROOT, 'bin/codeweb.mjs'), [root, '--doctor', '--json'], { env: { CODEWEB_WS: '' } });
@@ -22,7 +22,7 @@ test('ac_16: diagnostics from the installed front door are read-only and name ex
   } finally { cleanup(root); }
 });
 
-test('ac_16: diagnostics distinguish stale, unstamped, invalid, and unavailable-source graphs without changing them', () => {
+test('ac_24: diagnostics distinguish stale, unstamped, invalid, and unavailable-source graphs without changing them', () => {
   const root = tmpDir('cw-doctor-states-');
   try {
     const path = join(root, 'graph.json'), file = join(root, 'a.js');
@@ -47,7 +47,7 @@ test('ac_16: diagnostics distinguish stale, unstamped, invalid, and unavailable-
   } finally { cleanup(root); }
 });
 
-test('ac_16: directory discovery and explicit workspace override are visible', () => {
+test('ac_24: directory discovery and explicit workspace override are visible', () => {
   const root = tmpDir('cw-doctor-discovery-');
   try {
     const ws = join(root, '.codeweb'); mkdirSync(ws);

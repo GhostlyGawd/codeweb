@@ -30,17 +30,18 @@
     <span class="wm">code<span class="w">web</span></span>
   </a>
   <nav class="nav-links" aria-label="Primary">
-    <a href="index.html" data-nav="home">Home</a>
     <a href="product.html" data-nav="product">Product</a>
-    <a href="compare.html" data-nav="compare">Compare</a>
-    <a href="lsp.html" data-nav="lsp" aria-current="page">vs LSP</a>
-    <a href="research.html" data-nav="research">Research</a>
-    <a href="pricing.html" data-nav="pricing">Pricing</a>
-    <a href="boundary.html" data-nav="boundary">Free forever</a>
-    <a href="start.html" data-nav="start">Get Started</a>
-    <a href="changelog.html" data-nav="changelog">Changelog</a>
+    <a href="research.html" data-nav="research">Evidence</a>
+    <a href="start.html" data-nav="start">Get started</a>
   </nav>
   <div class="nav-right">
+    <details class="nav-more">
+      <summary>Plans</summary>
+      <div class="nav-menu">
+        <a href="boundary.html" data-nav="boundary">Free forever</a>
+        <a href="pricing.html" data-nav="pricing">Teams pricing intent</a>
+      </div>
+    </details>
     <a class="nav-ghost" href="demo/">Live demo</a>
     <a class="btn" href="https://github.com/GhostlyGawd/codeweb" rel="noopener">GitHub</a>
   </div>
@@ -84,7 +85,7 @@
         <h3 id="transitive-impact">Transitive impact — "what breaks two hops away?"</h3>
         <p>Direct references stop at the first hop. An agent editing a function needs the closure: every symbol transitively affected, plus the domains they sit in.</p>
         <p><code>codeweb_impact</code> returns it in one call. Graded against an independent reverse-reachability walk over 121,913 symbol comparisons, it disagreed 0 times.</p>
-        <p class="muted">On sampled targets the mean blast radius was 21 symbols. One call injects 1,214 bytes of context; a graph-assisted grep loop needed 7.2 rounds and 153,274 bytes to reach the same answer — a factor of 126.</p>
+        <p class="muted">On sampled targets the mean blast radius was 21 symbols. One call injects 1,214 bytes of context; a simulated graph-assisted grep loop needed 7.2 rounds and 153,274 bytes to reach the same answer — a factor of 126.</p>
         <p class="muted">Receipts: <code>bench/results/correctness-query.json</code> · <code>bench/results/oracle-ab.json</code></p>
       </div>
       <div class="card">
@@ -129,7 +130,7 @@
           <li><span class="dot"></span><span>A new body-confirmed duplication.</span></li>
           <li><span class="dot"></span><span>A symbol that lost every caller.</span></li>
         </ul>
-        <p>Anything else passes, including pure removals. It is static analysis, not a model, so it never hallucinates a finding and costs zero tokens however many pull requests you open.</p>
+        <p>Pure removals pass these structural rules. No LLM is in the checks. A passing check does not prove the program works; unresolved dynamic relationships can remain.</p>
         <p class="muted" style="margin-bottom:0"><a href="product.html#ci-gate">How the gate works →</a></p>
       </div>
     </div>
@@ -173,7 +174,7 @@
         <a class="brand" href="index.html">
           <span class="wm">code<span class="w">web</span></span>
         </a>
-        <p>A deterministic map of your codebase — one graph, read by humans and the agents editing alongside them.</p>
+        <p>Structural checks for AI code changes.</p>
       </div>
       <div class="footer-col">
         <h5>Product</h5>
@@ -185,6 +186,8 @@
       <div class="footer-col">
         <h5>Proof</h5>
         <a href="research.html">Research</a>
+        <a href="compare.html">Compare with grep</a>
+        <a href="lsp.html">Compare with LSP</a>
         <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench" rel="noopener">Benchmarks</a>
         <a href="https://github.com/GhostlyGawd/codeweb/tree/main/bench/results" rel="noopener">Raw results</a>
       </div>
@@ -194,6 +197,8 @@
         <a href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">Releases</a>
         <a href="https://github.com/GhostlyGawd/codeweb/blob/main/LICENSE" rel="noopener">MIT License</a>
         <a href="support.html">Sponsor</a>
+        <a href="boundary.html">Free forever</a>
+        <a href="pricing.html">Teams pricing intent</a>
       </div>
     </div>
     <div class="footer-base">

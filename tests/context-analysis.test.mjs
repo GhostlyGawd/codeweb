@@ -20,7 +20,7 @@ const graphOf = (root) => normalizeGraph({
 });
 const pack = (g, opts = {}) => buildContextPack(g, buildIndex(g), sourceReader(g.meta.root), ['target.js:target'], { symbol: 'target', ...opts });
 
-test('ac_14: context reports capped, unmatched, and unavailable source evidence independently of neighbor lists', () => {
+test('ac_22: context reports capped, unmatched, and unavailable source evidence independently of neighbor lists', () => {
   const root = tmpDir('cw-analysis-');
   try {
     writeFileSync(join(root, 'target.js'), 'function target() {}');
@@ -45,7 +45,7 @@ test('ac_14: context reports capped, unmatched, and unavailable source evidence 
   } finally { cleanup(root); }
 });
 
-test('ac_14: list budgets report blast omissions; complete lists never promise complete analysis', () => {
+test('ac_22: list budgets report blast omissions; complete lists never promise complete analysis', () => {
   const g = graphOf(null);
   for (let i = 0; i < 30; i++) {
     const id = `c${i}.js:c${i}`;
@@ -63,7 +63,7 @@ test('ac_14: list budgets report blast omissions; complete lists never promise c
   assert.ok(full.analysis.limitations.includes('unmapped-calls'));
 });
 
-test('ac_14: freshness distinguishes unchanged stamps, stale data, and missing stamps', () => {
+test('ac_22: freshness distinguishes unchanged stamps, stale data, and missing stamps', () => {
   const root = tmpDir('cw-analysis-fresh-');
   try {
     const file = join(root, 'target.js');
@@ -84,7 +84,7 @@ test('ac_14: freshness distinguishes unchanged stamps, stale data, and missing s
   } finally { cleanup(root); }
 });
 
-test('ac_14: CLI and MCP emit identical context analysis and evidence', () => {
+test('ac_22: CLI and MCP emit identical context analysis and evidence', () => {
   const root = tmpDir('cw-analysis-parity-');
   try {
     const path = join(root, 'graph.json');

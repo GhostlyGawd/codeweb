@@ -90,7 +90,7 @@ export function buildContextPack(graph, index, reader, ids, { symbol, windowN = 
   if (cappedCallees.truncated) payload.moreCallees = { remaining: cappedCallees.remaining, nextOffset: cappedCallees.offset + cappedCallees.items.length };
   if (cappedBlast.truncated) payload.blastRadius.more = { remaining: cappedBlast.remaining, nextOffset: cappedBlast.items.length };
 
-  // AC-14: response completeness describes only the mapped evidence. No graph-wide
+  // AC-22: response completeness describes only the mapped evidence. No graph-wide
   // recall percentage can be inferred from a fresh map or an unabridged neighbor list.
   const stamped = sourceAvailable && Object.keys(graph.meta?.sources || {}).length > 0;
   const limitations = ['unmapped-calls'];

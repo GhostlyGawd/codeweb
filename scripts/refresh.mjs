@@ -75,7 +75,7 @@ const hadCoverage = !!updated.meta.coverage;
 if (hadCoverage) delete updated.meta.coverage;
 const updatedJson = JSON.stringify(updated);
 atomicWrite(abs, updatedJson); // finding 3: a SIGTERM mid-write (MCP's 60s timeout) must not truncate the graph
-// AC-15: save the freshly extracted PRE-EDIT map only on an explicit baseline request.
+// AC-23: save the freshly extracted PRE-EDIT map only on an explicit baseline request.
 // Ordinary/automatic refreshes and legacy --snapshot never touch this separate file.
 const baselinePath = join(dirname(abs), 'graph.baseline.json');
 if (baseline) atomicWrite(baselinePath, updatedJson);

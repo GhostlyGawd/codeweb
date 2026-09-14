@@ -2,17 +2,17 @@
   <div class="wrap">
     <!-- CHARTER C2 / non-goal 10: the regression gate leads the story; the live map is the
          supporting view beneath it, not the first thing the page says. -->
-    <h1><span>Your agents break less code</span> <b>and burn fewer tokens.</b></h1>
-    <div class="sub">A deterministic guardrail for agent-written code — zero tokens per PR</div>
+    <h1>{{tagline}}</h1>
+    <div class="sub">{{descriptor}}</div>
     <div class="gatecard">
       <div class="gc-head"><span class="gc-tag">The gate</span><span class="gc-run">fails a pull request on</span></div>
       <div class="gc-body">
         <div class="gc-row gc-fail"><span class="gc-mark">✗</span><span>New dependency cycle</span></div>
         <div class="gc-row gc-fail"><span class="gc-mark">✗</span><span>New body-confirmed duplication</span></div>
         <div class="gc-row gc-fail"><span class="gc-mark">✗</span><span>Symbol lost every caller</span></div>
-        <div class="gc-row gc-pass"><span class="gc-mark">✓</span><span>Anything else — including pure removals</span></div>
+        <div class="gc-row gc-pass"><span class="gc-mark">✓</span><span>No named structural regression found</span></div>
       </div>
-      <div class="gc-foot">Static analysis, not a model. It never hallucinates, and it costs zero tokens however many pull requests you open.</div>
+      <div class="gc-foot">No LLM in the checks. Static analysis uses zero model tokens. A passing check does not prove the program works; inspect analysis limits and run tests.</div>
     </div>
     <div class="cmd">
       <span class="l"><i></i><span><span class="p">$</span> npx -y @ghostlygawd/codeweb .</span></span>
@@ -25,13 +25,14 @@
     </div>
     <div class="trust">Free &amp; MIT · v{{version}} · runs on your machine · never executes your code</div>
     <div class="mapbox">
-      <canvas id="cw-hero-map" aria-label="Interactive call graph of the axios codebase — live, 70 of 274 symbols. Click a function to see its blast radius."></canvas>
+      <canvas id="cw-hero-map" aria-label="Interactive call graph of the axios codebase — live, 70 of 278 symbols. Click a function to see its blast radius."></canvas>
     </div>
     <div class="maphud">
-      <div id="cw-readout" class="cw-readout"><span class="cw-hint">THE MAP THE GATE COMPARES · AXIOS · CLICK ANY FUNCTION TO TRACE ITS BLAST RADIUS</span></div>
+      <div id="cw-readout" class="cw-readout"><span class="cw-hint">AXIOS · SELECT A FUNCTION TO TRACE RELATIONSHIPS IN THIS SUBSET</span></div>
       <div class="cw-try"><span>Try:</span><button class="cw-chip" data-blast="merge">merge()</button><button class="cw-chip" data-blast="AxiosError">AxiosError()</button><button class="cw-chip" data-blast="httpAdapter">httpAdapter()</button></div>
     </div>
     <div class="btn-row"><a class="btn" href="demo/">Open the live demo</a></div>
+    <p class="evidence-note">The 126× context-size result compares a simulated graph-assisted grep loop. It does not measure total agent-session token savings. <a href="research.html">Read the measured results and limits</a>.</p>
     <div class="meters">
       <div>
         <div class="k">Callers found before an edit</div>
@@ -41,12 +42,12 @@
             <div class="brow cw"><span class="bl">CODEWEB</span><span class="track"><span class="fill"></span></span><span class="pct">74%</span></div>
           </div>
         </div>
-        <div class="s">Agents break code they can't see</div>
+        <div class="s">v0.9.0 pilot · similar total token cost</div>
       </div>
       <div>
         <div class="k">"What breaks if I change this?"</div>
         <div class="slot"><div class="mv">126<b>×</b></div></div>
-        <div class="s">Cheaper than grepping in rounds</div>
+        <div class="s">Smaller measured context size</div>
       </div>
       <div>
         <div class="k">Independent checks</div>
@@ -162,9 +163,9 @@
       <p class="lead">Tested against independent checkers. The failures are published alongside the wins.</p>
     </div>
     <div class="grid cols-3" data-reveal>
-      <div class="card bench"><h3>126×</h3><p>cheaper "what breaks if I change this?" answers — one codeweb call vs an agent grepping in rounds (measured).</p></div>
+      <div class="card bench"><h3>126×</h3><p>smaller context size than a simulated graph-assisted grep loop. This is a context-size comparison, not total agent-session token savings.</p></div>
       <div class="card bench"><h3>0 disagreements</h3><p>across ~490,000 checks of codeweb's answers against independent implementations: who calls what, what an edit breaks, where the cycles are.</p></div>
-      <div class="card bench"><h3>44% → 74%</h3><p>of a function's callers found by AI agents: grep vs codeweb, same context budget, better in all 5 runs (v0.9.0 pilot). Your agents break code they don't see.</p></div>
+      <div class="card bench"><h3>44% → 74%</h3><p>of a function's callers found by AI agents: grep vs codeweb, same context budget, better in all 5 runs (v0.9.0 pilot).</p></div>
     </div>
     <div class="btn-row" style="margin-top:var(--s-6)">
       <a class="btn" href="research.html">See the full evidence ledger</a>
@@ -189,7 +190,7 @@
       </div>
       <div>
         <a class="shot" href="demo/"><img src="assets/axios-graph.png" alt="codeweb interactive report: a force-directed domain graph of the axios codebase" loading="lazy"></a>
-        <p class="figcap">The live report — a real map of axios (274 symbols, 8 domains). <a href="demo/">Open the interactive demo →</a></p>
+        <p class="figcap">The live report — a real map of axios (278 symbols, 7 domains). <a href="demo/">Open the interactive demo →</a></p>
       </div>
     </div>
   </div>

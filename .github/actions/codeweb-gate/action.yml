@@ -4,6 +4,10 @@ branding:
   icon: 'git-merge'
   color: 'purple'
 inputs:
+  report-only:
+    description: 'Report completed structural regressions without blocking. Setup or analysis errors still fail.'
+    required: false
+    default: 'false'
   target:
     description: 'Subdirectory to analyze, relative to the repo root.'
     required: false
@@ -29,6 +33,10 @@ inputs:
       read-only token skip the comment gracefully and keep the check verdict.
     required: false
     default: 'false'
+outputs:
+  verdict-code:
+    description: 'Original gate exit code: 0 clean, 1 regression, 2 setup or analysis error.'
+    value: ${{ steps.gate.outputs.code }}
 runs:
   using: 'composite'
   steps:
@@ -114,7 +122,12 @@ runs:
       shell: bash
       env:
         GATE_CODE: ${{ steps.gate.outputs.code }}
+        CODEWEB_REPORT_ONLY: ${{ inputs.report-only }}
       run: |
+        if [ "$GATE_CODE" = "1" ] && [ "$CODEWEB_REPORT_ONLY" = "true" ]; then
+          echo "::warning::codeweb report-only: structural regression verdict retained; this completed finding does not block."
+          exit 0
+        fi
         if [ "$GATE_CODE" = "1" ]; then
           echo "::error::codeweb gate found structural regressions (see the PR comment / job log above)"
         else

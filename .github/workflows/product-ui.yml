@@ -1,0 +1,49 @@
+name: product-ui
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CODEWEB_NO_STATS: '1'
+      CODEWEB_NO_PROMO: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Set isolated browser paths
+        shell: bash
+        run: |
+          echo "CODEWEB_PLAYWRIGHT_DIR=$RUNNER_TEMP/codeweb-ui-deps" >> "$GITHUB_ENV"
+          echo "PLAYWRIGHT_BROWSERS_PATH=$RUNNER_TEMP/codeweb-ui-browsers" >> "$GITHUB_ENV"
+      - name: Install optional parser
+        run: npm ci
+      - name: Install isolated development browser tools
+        run: |
+          npm install --prefix "$CODEWEB_PLAYWRIGHT_DIR" --no-save --package-lock=false playwright@1.55.0
+          node "$CODEWEB_PLAYWRIGHT_DIR/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Require browser module resolution
+        run: |
+          node --input-type=module -e "const {resolvePlaywright}=await import('./bench/experiments/report-scale.mjs');if(!resolvePlaywright())throw new Error('Playwright must resolve; browser tests must not skip')"
+      - name: Run existing report browser checks
+        run: node --test tests/report-scale-bench.test.mjs
+      - name: Verify public setup, report actions, and change review
+        run: node scripts/verify-product-ui.mjs --out "${{ runner.temp }}/codeweb-product-ui"
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeweb-product-ui-${{ github.sha }}
+          path: ${{ runner.temp }}/codeweb-product-ui
+          if-no-files-found: error
+          retention-days: 14

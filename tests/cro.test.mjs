@@ -49,11 +49,13 @@ test('C7: MCP is expanded at first use', () => {
   assert.match(readme, /MCP[^.]{0,120}(protocol|Model Context Protocol)/is, 'first use carries the expansion');
 });
 
-test('C8: start.html shows the payoff — the map, the ~3 s, and what success looks like', () => {
+test('C8: start.html shows the map and separate local and editor success evidence', () => {
   const start = read('site/content/start.html');
   assert.match(start, /axios-graph\.png/, 'the reward is visible on the page that asks for work');
-  assert.match(start, /~3\s?s/, 'the cost is named');
-  assert.match(start, /\[run\] done/, 'success is recognizable before it happens');
+  assert.match(start, /Local success/, 'local setup success is named');
+  assert.match(start, /does not confirm an editor connection/, 'local check cannot imply editor success');
+  assert.match(start, /Connection success/, 'editor success has a separate observable result');
+  assert.match(start, /codeweb_callers/, 'the first query tests a useful answer');
 });
 
 test('C9: the closing sells the human, in plain words, without a 0-star star-beg', () => {

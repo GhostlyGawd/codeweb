@@ -184,7 +184,7 @@ test('report carries og metadata, the pipeline-findings renderer, and the sharea
     assert.match(html, /<meta property="og:title" content="codeweb — acme\/web map">/, 'og:title from the target label');
     assert.match(html, /<meta property="og:description" content="2 symbols · 0 edges/, 'og:description from counts');
     assert.ok(!html.includes('secret-person'), 'meta.root never reaches the shipped HTML (privacy invariant)');
-    assert.ok(html.includes('Consolidation findings'), 'pipeline findings section exists');
+    assert.ok(html.includes('Pipeline findings'), 'pipeline findings section exists');
     assert.ok(html.includes('showOverlap'), 'pipeline finding detail view wired');
     assert.ok(html.includes('x duplicated across a and b'), 'the finding itself is embedded via graph data');
     for (const marker of ['parseHash', 'writeHash', 'copyLink', "roles === 'all'"]) {

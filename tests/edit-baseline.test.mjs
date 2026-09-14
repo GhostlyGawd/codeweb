@@ -20,7 +20,7 @@ function fixture() {
 const call = (id, name, args) => ({ jsonrpc: '2.0', id, method: 'tools/call', params: { name, arguments: args } });
 const payload = (r) => { assert.ok(!r.result.isError, r.result.content?.[0]?.text); return JSON.parse(r.result.content[0].text); };
 
-test('ac_15: baseline captures refreshed source and survives refresh/snapshot; verification sees later edits', () => {
+test('ac_23: baseline captures refreshed source and survives refresh/snapshot; verification sees later edits', () => {
   const f = fixture();
   try {
     const begin = runNode(script('refresh.mjs'), [f.gp, '--baseline', '--json']);
@@ -46,7 +46,7 @@ test('ac_15: baseline captures refreshed source and survives refresh/snapshot; v
   } finally { cleanup(f.root); }
 });
 
-test('ac_15: invalid baselines fail before mutation; failed extraction preserves a previous baseline', () => {
+test('ac_23: invalid baselines fail before mutation; failed extraction preserves a previous baseline', () => {
   const f = fixture();
   try {
     const original = readFileSync(f.gp, 'utf8');
@@ -70,7 +70,7 @@ test('ac_15: invalid baselines fail before mutation; failed extraction preserves
   } finally { cleanup(f.root); }
 });
 
-test('ac_15: structurally invalid baseline JSON fails before refreshing the live graph', () => {
+test('ac_23: structurally invalid baseline JSON fails before refreshing the live graph', () => {
   const f = fixture();
   try {
     const original = readFileSync(f.gp, 'utf8');
@@ -89,7 +89,7 @@ test('ac_15: structurally invalid baseline JSON fails before refreshing the live
   } finally { cleanup(f.root); }
 });
 
-test('ac_15: queued MCP begin/verify is ordered; background refresh preserves baseline and verification finds a regression', async () => {
+test('ac_23: queued MCP begin/verify is ordered; background refresh preserves baseline and verification finds a regression', async () => {
   const f = fixture();
   const h = startServer({ cwd: f.root, env: { CODEWEB_WS: f.ws, CODEWEB_NO_STATS: '1', CODEWEB_MCP_TRACE: '1', CODEWEB_NO_AUTOREFRESH: '0' } });
   try {
@@ -122,7 +122,7 @@ test('ac_15: queued MCP begin/verify is ordered; background refresh preserves ba
   } finally { h.close(); await h.exited; cleanup(f.root); }
 });
 
-test('ac_15: a dropped overlap set is not a clean duplication check or a claimed fix', () => {
+test('ac_23: a dropped overlap set is not a clean duplication check or a claimed fix', () => {
   const before = normalizeGraph({ meta: {}, nodes: [], edges: [], overlaps: [{ kind: 'duplicate-logic', confidence: 'high', nodes: ['a', 'b'] }] });
   const after = normalizeGraph({ meta: { overlapsDroppedAt: 'now' }, nodes: [], edges: [], overlaps: [] });
   const p = diffGraphs(before, after).payload;
@@ -132,7 +132,7 @@ test('ac_15: a dropped overlap set is not a clean duplication check or a claimed
   assert.equal(p.analysis.checks.behavior, 'not-evaluated');
 });
 
-test('ac_15: review identifies unevaluated structure and unavailable duplication evidence', () => {
+test('ac_23: review identifies unevaluated structure and unavailable duplication evidence', () => {
   const f = fixture();
   try {
     const g = { meta: { root: join(f.root, 'missing') }, nodes: [{ id: 'a.js:alpha', label: 'alpha', kind: 'function', file: 'a.js', line: 1, loc: 1 }], edges: [], overlaps: [] };
@@ -140,8 +140,8 @@ test('ac_15: review identifies unevaluated structure and unavailable duplication
     const r = runNode(script('review.mjs'), [f.gp, '--changed', 'a.js', '--json']);
     assert.equal(r.status, 0, r.stderr);
     const p = JSON.parse(r.stdout);
-    assert.equal(p.analysis.checks.duplication, 'not-evaluated');
-    assert.equal(p.analysis.checks.cycles, 'not-evaluated');
-    assert.equal(p.analysis.checks.behavior, 'not-evaluated');
+    assert.equal(p.analysis.checkStatus.duplication, 'not-evaluated');
+    assert.equal(p.analysis.checkStatus.cycles, 'not-evaluated');
+    assert.equal(p.analysis.checkStatus.behavior, 'not-evaluated');
   } finally { cleanup(f.root); }
 });

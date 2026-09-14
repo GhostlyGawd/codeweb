@@ -71,7 +71,8 @@
         <h2 id="ci-gate">A CI gate that fails the PR when an edit makes structure worse</h2>
         <p>The gate runs the same regression verdict as <code>codeweb_diff</code> on each pull request. It builds the graph before and after the change.</p>
         <p>The gate fails on a new dependency cycle, a new body-confirmed duplication, or a symbol that loses all callers. A change that only removes code passes.</p>
-        <p class="muted">codeweb dogfoods its own gate: PRs that touch the engine run it, and it stays green.</p>
+        <p>No LLM is in the checks. A passing check does not prove the program works. Inspect unresolved analysis and run the relevant tests.</p>
+        <p>Use the package gate with <code>--report-only</code> during rollout. Findings retain their verdict; setup and analysis errors still fail.</p>
       </div>
       <div>
 <pre><code>name: codeweb gate
