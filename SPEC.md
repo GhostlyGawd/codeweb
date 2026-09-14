@@ -1,19 +1,21 @@
 # SPEC — codeweb
 
-Date: 2026-07-26
-Written by 142 · Spec the Product (All Build Goal Prompts, stage 2/4 re-run after the
-harness install; supersedes the null report preserved at `reports/SPEC.md`). Sources: the
-ratified `CHARTER.md` (2026-07-25) and shipped behavior only — v1 codifies what the product
-already promises publicly, so every AC below is `built` and pinned (`tests/test_ac_pins.py`).
-Nothing here invents roadmap: the charter keeps **Next** deliberately open for the operator,
-so no AC carries `status: next` yet; when the operator picks Next, its ACs are appended here
-(ids never renumber — retirement is `status: dropped`).
+Created 2026-07-26 by the spec program after harness installation; supersedes the initial
+null report at `reports/SPEC.md`. Current authority is `CHARTER.md`, including its
+2026-08-17/18 amendments and later ratified decisions.
+
+The operator selected **productize and launch** as Next on 2026-08-17. New work enters
+acceptance criteria under that scope; IDs remain stable and retirement uses `status: dropped`.
+A `built` criterion records implementation and test pins, not a release or deployment.
+
+AC-13–18 currently describe unreleased working-tree implementation. The tests in
+`tests/test_ac_pins.py` connect criteria to their verification commands.
 
 ## Job
 
 **"Your agents break less code and burn fewer tokens."** Before an edit, the agent asks the
 map — who calls this, what breaks, does this already exist — and gets exact, small answers
-(27 MCP tools over a deterministic call/import graph, built locally, no LLM in the loop);
+(28 MCP tools over a deterministic call/import graph, built locally, no LLM in the loop);
 the regression gate enforces the same sight after the edit. Receipts: callers found 44%→74%
 vs grep; impact answers at a fraction of grep's tokens (`CHARTER.md`, Problem/Job).
 
@@ -68,17 +70,25 @@ controlling product specification.
 - **AC-10** — codeweb_dependents returns the union answer (call, import, inherit, test, ref) over MCP with true totals within budget | check: `node --test tests/mcp-dependents.test.mjs` | status: built
 - **AC-11** — spawned advisor answers carry the call-time staleness verdict, and overlap-independent advisors auto-refresh like the orient family | check: `node --test tests/mcp-staleness-parity.test.mjs` | status: built
 - **AC-12** — agent-fallback graphs carry their meta.engine provenance and the brief caveats agent-built maps | check: `node --test tests/agent-graph-label.test.mjs` | status: built
+- **AC-13** — PR gate comments show bounded source locations, duplication evidence, investigation steps, and analysis limits; GitHub links use the analyzed commit and preserve subdirectory targets without changing verdicts | check: `node --test tests/gate-md.test.mjs tests/ci-gate.test.mjs` | status: built
+- **AC-14** — context JSON distinguishes list and source-evidence completeness from graph uncertainty, reports unknown freshness without stamps, and gives actionable recovery steps identically through CLI and MCP | check: `node --test tests/context-analysis.test.mjs` | status: built
+
+- **AC-15** — an explicit pre-edit baseline survives ordinary and automatic refreshes; one diff refreshes and compares against it, reports skipped checks, and fails actionably without a valid baseline | check: `node --test tests/edit-baseline.test.mjs` | status: built
+- **AC-16** — setup diagnostics report the running installation, discovered graph, source freshness, parser availability, and local repair commands without modifying the workspace | check: `node --test tests/doctor.test.mjs` | status: built
+
+- **AC-17** — first-run CLI, README and start-page guidance capture an explicit pre-edit baseline and preserve it through repair; the published tiny cycle walkthrough finds a caller, goes red then green, and discloses skipped analysis and behavioral limits | check: `node --test tests/first-run.test.mjs tests/first-use-cycle.test.mjs` | status: built
+- **AC-18** — shipped hook metadata omits settings schema and matcher-level metadata, preserves adjacent descriptions and all three handler commands, and passes fixture-driven handler checks | check: `node --test tests/hooks-config.test.mjs tests/brief.test.mjs tests/awareness.test.mjs tests/post-edit-diff.test.mjs` | status: built
 
 Pins live in `tests/test_ac_pins.py` (`test_ac_<n>_...`); pins are cheap wiring witnesses —
 the `check:` commands above are what brief 144 runs verbatim.
 
 ## Interfaces
 
-- **MCP server** — `codeweb-mcp` (stdio): 27 tools over the local graph (impact, callers,
-  duplication, context packs …). The canonical tool list and count live in
-  `docs/reference.md` and are locked to `package.json` by AC-2's
-  consistency gate; unknown arguments are rejected, booleans are real booleans, pagination is
-  one offset dialect with true totals (pinned in the suite).
+- **MCP server** — `codeweb-mcp` (stdio): 28 tools over the local graph (impact, callers,
+  duplication, context packs …). Interfaces live in `scripts/lib/tool-specs.mjs`; server
+  behavior lives in `scripts/mcp-server.mjs`. The consistency checker derives the tool count
+  from those sources and checks current prose and package metadata. Unknown arguments are
+  rejected; booleans and pagination follow the tested transport contracts.
 - **CLI bins** — `codeweb` (map a repo), `codeweb-mcp`, `codeweb-query`, `codeweb-diff`
   (`package.json` `bin`). Contract: `--help` exits 0 (AC-6); unknown flags die with usage,
   exit 2; IO/setup failures exit 2, real findings exit 1, clean exit 0; `--json` modes emit
@@ -93,8 +103,8 @@ the `check:` commands above are what brief 144 runs verbatim.
 ## Evals
 
 Golden cases in `evals/cases/` (`python3 evals/run.py`, gate step 5/5 — AC-7):
-`example-upper` (the runner's own mechanics, from the template) and `cli-help` (the CLI
-front door). Floor: **all cases pass** — the runner exits non-zero on any failure.
+`example-upper`, `cli-help`, `mcp-initialize`, `mcp-tools-list` and `query-help`.
+Floor: **all cases pass** — the runner exits non-zero on any failure.
 Judgment-shaped product output (review verdicts, gate rulings) is floored inside the suite
 itself: golden-file and property tests (`tests/golden-ecc-scripts.test.mjs`,
 `tests/gate-verdict.test.mjs`, FPR-STABLE determinism pins) run under AC-1.

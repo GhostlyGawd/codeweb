@@ -1,0 +1,154 @@
+{
+  "operationalScript": "schema_demo=$(mktemp -d \"${TMPDIR:-/tmp}/codeweb-schema.XXXXXX\") || exit 1\nprintf 'export function greet(name) { return name; }\\n' > \"$schema_demo/greet.js\"\nnode scripts/run.mjs \"$schema_demo\" --json\nnode scripts/context-pack.mjs \"$schema_demo/.codeweb/graph.json\" greet --full-bodies --json\nnode scripts/refresh.mjs \"$schema_demo/.codeweb/graph.json\" --json\n",
+  "exit": 0,
+  "stdout": [
+    {
+      "ws": "$SCHEMA_DEMO/.codeweb",
+      "symbols": 1,
+      "actionable": 0,
+      "reused": false,
+      "version": "0.14.0"
+    },
+    {
+      "symbol": "greet",
+      "matched": [
+        "greet.js:greet"
+      ],
+      "sourceAvailable": true,
+      "summary": "greet: 0 caller(s), 0 callee(s), blast radius 0",
+      "mode": "full-bodies",
+      "target": [
+        {
+          "id": "greet.js:greet",
+          "label": "greet",
+          "kind": "function",
+          "file": "greet.js",
+          "line": 1,
+          "loc": 1,
+          "domain": "CLI scripts (root)",
+          "exports": true,
+          "signature": {
+            "params": [
+              "name"
+            ],
+            "returns": null,
+            "raw": "name"
+          },
+          "body": "export function greet(name) { return name; }"
+        }
+      ],
+      "callers": [],
+      "callees": [],
+      "blastRadius": {
+        "count": 0,
+        "ids": []
+      },
+      "analysis": {
+        "scope": "mapped-call-graph",
+        "freshness": "unchanged-stamps",
+        "listsComplete": true,
+        "sourceEvidenceComplete": true,
+        "limitations": [
+          "unmapped-calls",
+          "external-callers"
+        ],
+        "nextSteps": [
+          "Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.",
+          "Check package consumers before changing an exported contract."
+        ]
+      }
+    },
+    {
+      "graph": "$SCHEMA_DEMO/.codeweb/graph.json",
+      "root": "$SCHEMA_DEMO",
+      "before": {
+        "nodes": 1,
+        "edges": 0
+      },
+      "after": {
+        "nodes": 1,
+        "edges": 0
+      },
+      "domainsReattached": 1,
+      "scanned": "0",
+      "sidecars": [
+        "brief",
+        "index-lite",
+        "stale-stamps",
+        "similar-index"
+      ]
+    }
+  ],
+  "stderr": "\n[run] extract\n/Library/Developer/CommandLineTools/usr/bin/ctags: illegal option -- -\nusage: ctags [-BFTaduwvx] [-f tagsfile] file ...\n[extract] 1 symbols, 0 edges (0 call + 0 import) from 1 files (regex engine); dropped 0 ambiguous bare-call edges (0 short-name); scanned 1/1 file(s); edged 1/1 (cache on); ast: off -> $SCHEMA_DEMO/.codeweb/fragment.json\n[run] extract done in 97ms\n\n[run] cluster\nhubs stripped (indeg>=12): 0\ndomains: 1 (hub-named)\nisolated-after-dehub: 1 (100%)\n--- top 1 domain ---\n   1 CLI scripts (root)\n[run] cluster done in 38ms\n\n[run] overlap\nsource: FOUND \u2014 body-confirmed\nactionable 0 \u00b7 needs review 0 \u00b7 dismissed 0\n--- top findings ---\n[run] overlap done in 36ms\n\n[run] optimize\ncodeweb optimize: 0 actionable finding(s) \u00b7 0 ready \u00b7 0 blocked \u00b7 0 judgement \u00b7 ~0 LOC reclaimable\n  full advisory: $SCHEMA_DEMO/.codeweb/optimize.md\n[run] optimize done in 38ms\n\n[run] report\n[codeweb] wrote $SCHEMA_DEMO/.codeweb/report.html\n[codeweb] 1 nodes, 0 edges, 1 domains \u2014 actionable 0 \u00b7 needs review 0 \u00b7 dismissed 0\n[codeweb] updated $SCHEMA_DEMO/.codeweb/graph.json (meta.generatedAt + meta.stats persisted)\n[codeweb] wrote $SCHEMA_DEMO/.codeweb/report.md\n[run] report done in 45ms\n",
+  "node": {
+    "id": "greet.js:greet",
+    "label": "greet",
+    "kind": "function",
+    "file": "greet.js",
+    "line": 1,
+    "loc": 1,
+    "exports": true,
+    "domain": "CLI scripts (root)",
+    "summary": "",
+    "role": "product",
+    "signature": {
+      "params": [
+        "name"
+      ],
+      "returns": null,
+      "raw": "name"
+    },
+    "complexity": 1,
+    "maxDepth": 1
+  },
+  "meta": {
+    "root": "$SCHEMA_DEMO",
+    "target": "T/codeweb-schema.OgRneu",
+    "engine": "regex",
+    "languages": [
+      "javascript"
+    ],
+    "symbols": 1,
+    "sources": {
+      "greet.js": {
+        "s": 45,
+        "m": 1789416465237,
+        "h": "b3fbb2b37dfd8799d2a0003f785cea1e9ca61da6"
+      }
+    },
+    "dirs": {
+      ".": 1789416465279
+    },
+    "mode": "internal",
+    "depth": "symbol",
+    "generatedAt": "2026-09-14T20:07:45.529Z",
+    "stats": {
+      "files": 1,
+      "nodes": 1,
+      "edges": 0,
+      "domains": 1,
+      "overlaps": 0
+    },
+    "overlapsDroppedAt": "2026-09-14T20:07:45.700Z"
+  },
+  "minimumGraphChecks": [
+    {
+      "check": "render",
+      "exit": 0,
+      "stdout": "[codeweb] wrote $MINIMAL_DEMO/report.html\n[codeweb] 1 nodes, 0 edges, 1 domains \u2014 actionable 0 \u00b7 needs review 0 \u00b7 dismissed 0\n[codeweb] updated $MINIMAL_DEMO/minimal.json (meta.generatedAt + meta.stats persisted)\n",
+      "stderr": ""
+    },
+    {
+      "check": "context",
+      "exit": 0,
+      "stdout": "{\"symbol\":\"greet\",\"matched\":[\"greet.js:greet\"],\"sourceAvailable\":false,\"summary\":\"greet: 0 caller(s), 0 callee(s), blast radius 0\",\"mode\":\"call-site windows (\u00b13 lines)\",\"target\":[{\"id\":\"greet.js:greet\",\"label\":\"greet\",\"kind\":\"function\",\"file\":\"greet.js\",\"line\":1,\"loc\":1,\"domain\":\"unassigned\",\"exports\":false,\"signature\":null,\"body\":null}],\"callers\":[],\"callees\":[],\"blastRadius\":{\"count\":0,\"ids\":[]},\"analysis\":{\"scope\":\"mapped-call-graph\",\"freshness\":\"unknown\",\"listsComplete\":true,\"sourceEvidenceComplete\":false,\"limitations\":[\"unmapped-calls\",\"source-evidence\",\"freshness-unknown\",\"new-files-unchecked\"],\"nextSteps\":[\"Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.\",\"Inspect caller source for missing or capped label matches; MCP bodies:\\\"full\\\" (CLI: --full-bodies) shows whole recorded spans. Restore unavailable source first.\",\"Refresh the map (MCP: codeweb_refresh) before relying on recorded locations.\",\"Refresh after adding files; this map has no directory stamps to detect additions.\"]}}\n",
+      "stderr": ""
+    },
+    {
+      "check": "refresh",
+      "exit": 2,
+      "stdout": "",
+      "stderr": "cannot refresh: graph.meta.root is missing or not on disk (got none) \u2014 refresh re-extracts from the recorded target root\n"
+    }
+  ]
+}

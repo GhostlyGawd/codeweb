@@ -105,6 +105,30 @@ class TestAcPins(unittest.TestCase):
         self.assertIn("AGENT_ENGINES", brief,
                       "the briefing reads the fallback's provenance stamp")
 
+    def test_ac_13_actionable_gate_comments(self):
+        proc = _run(["node", "--test", "tests/gate-md.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_14_context_analysis(self):
+        proc = _run(["node", "--test", "tests/context-analysis.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_15_edit_baseline(self):
+        proc = _run(["node", "--test", "tests/edit-baseline.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_16_setup_diagnostics(self):
+        proc = _run(["node", "--test", "tests/doctor.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_17_first_use_cycle(self):
+        proc = _run(["node", "--test", "tests/first-use-cycle.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_18_shipped_hooks_metadata(self):
+        proc = _run(["node", "--test", "tests/hooks-config.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

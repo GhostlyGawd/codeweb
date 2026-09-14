@@ -1,5 +1,9 @@
 # codeweb — Product Improvement Discovery
 
+> Historical review. For current implementation status, see the
+> [audit inventory](../reports/AUDIT-STATUS.md); for current guides, use the
+> [documentation index](README.md).
+
 > **Implementation addendum (2026-07-21):** all 15 findings below were built, in order, on this
 > branch — one commit per item, each with tests and a changelog entry. Verification at the end of
 > the run: **552 tests, 0 fail** with the AST tier; **0 fail** on the zero-dependency path (43

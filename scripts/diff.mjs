@@ -19,23 +19,60 @@
 // `renamed` stays []) and one text line names it. The MCP codeweb_diff tool consumes this payload;
 // hooks gate via graph-ops' structuralRegressions — the additive field breaks neither.
 
-import { basename } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
+import { existsSync, realpathSync, readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { die, emitJson, finish, sign, loadGraph, parseArgs } from './lib/cli.mjs';
 import { diffGraphs } from './lib/diff-core.mjs';
+import { normalizeGraph } from './lib/graph-ops.mjs';
 
-const USAGE = 'usage: diff.mjs <before.json> <after.json> [--json]';
+const USAGE = 'usage: diff.mjs <before.json|baseline|prev> <after.json> [--refresh] [--json]';
 
 // finding #39: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy (reject with usage,
 // exit 2; --help prints usage, exit 0). Replaces a no-else hand-roll that silently ignored typos.
-const { opts: { json }, pos: paths } = parseArgs(process.argv.slice(2), {
+const { opts: { json, refresh }, pos: paths } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
-  flags: { json: { type: 'bool', default: false } },
+  flags: { json: { type: 'bool', default: false }, refresh: { type: 'bool', default: false } },
 });
 if (paths.length < 2) die(USAGE, 2);
 
-const before = loadGraph(paths[0]).graph; // Spec E: one truth with every other CLI (loadGraph normalizes + dies on IO)
+const beforeArg = paths[0];
+if (['baseline', 'prev'].includes(beforeArg)) paths[0] = join(dirname(resolve(paths[1])), `graph.${beforeArg}.json`);
+if (beforeArg === 'baseline' && !existsSync(paths[0])) die('no pre-edit baseline — run refresh.mjs <graph.json> --baseline BEFORE editing (MCP: codeweb_refresh {baseline:true}); edited source cannot reconstruct a lost baseline', 2);
+// Load BEFORE any mutation. Failure must not replace the live graph or the baseline.
+let before;
+let verification;
+if (refresh) {
+  // Parse and fingerprint the SAME bytes, so a concurrent baseline replacement
+  // cannot make the digest describe a different graph from the one compared.
+  let beforeBytes;
+  try {
+    beforeBytes = readFileSync(paths[0]);
+    const raw = JSON.parse(beforeBytes);
+    if (!Array.isArray(raw?.nodes) || !Array.isArray(raw?.edges)) {
+      throw new Error('baseline must contain nodes and edges arrays');
+    }
+    before = normalizeGraph(raw);
+  }
+  catch (e) { die(`cannot read baseline: ${e.message}`, 2); }
+  const current = loadGraph(paths[1]);
+  if (realpathSync(paths[0]) === realpathSync(current.abs)) die('before and after must be separate files when using --refresh', 2);
+  if (!before.meta?.root || !current.graph.meta?.root || resolve(before.meta.root) !== resolve(current.graph.meta.root)) die('baseline and after graph must describe the same source root before refreshing', 2);
+  const beforeHash = createHash('sha256').update(beforeBytes).digest('hex');
+  const r = spawnSync(process.execPath, [join(dirname(fileURLToPath(import.meta.url)), 'refresh.mjs'), current.abs, '--json'], { encoding: 'utf8', maxBuffer: 1 << 28 });
+  if (r.status !== 0) die(`verification refresh failed: ${(r.stderr || '').trim() || r.error?.message || r.status}`, 2);
+  // Refuse a competing explicit rebaseline (e.g. another CLI process), rather than
+  // labeling the originally loaded graph with a different baseline's current bytes.
+  let baselineUnchanged = false;
+  try { baselineUnchanged = createHash('sha256').update(readFileSync(paths[0])).digest('hex') === beforeHash; } catch { /* removed baseline is also a change */ }
+  if (!baselineUnchanged) die('baseline changed during verification — retry with a stable pre-edit baseline', 2);
+  verification = { before: resolve(paths[0]), beforeSha256: beforeHash, after: current.abs, refreshed: true };
+} else before = loadGraph(paths[0]).graph;
 const after = loadGraph(paths[1]).graph;
 const { payload, code } = diffGraphs(before, after, { names: { before: basename(paths[0]), after: basename(paths[1]) } });
+if (verification) payload.verification = verification;
 
 if (json) { emitJson(payload, code); } else {
   const n = payload.nodes, renamed = n.renamed || [];
@@ -46,5 +83,6 @@ if (json) { emitJson(payload, code); } else {
   console.log(`  cycles +${payload.cycles.added.length} -${payload.cycles.removed.length}   overlaps +${payload.overlaps.added.length} -${payload.overlaps.removed.length}   orphans +${payload.orphans.added.length} -${payload.orphans.removed.length}`);
   if (payload.regressions.length) { console.log('REGRESSIONS (a gate would block):'); for (const r of payload.regressions) console.log(`  x ${r}`); }
   else console.log('  ok — no structural regressions');
+  for (const step of payload.analysis.nextSteps) console.log(`  analysis: ${step}`);
   finish(code);
 }

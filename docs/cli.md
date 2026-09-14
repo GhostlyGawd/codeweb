@@ -68,3 +68,108 @@ here (or anywhere else in codeweb) transmits anything.
 | `CODEWEB_BIN` | set to `1` by the `bin/` shims so the server's main-guard fires when invoked through a bin entry (internal signal — not an editor setting) |
 | `CODEWEB_CHROMIUM` | Chromium executable for `screenshot.mjs` |
 | `TS_MODULE` | path to a `typescript` module for the bench's token grading |
+
+## Context analysis status
+
+`codeweb_context` and `context-pack.mjs --json` include an `analysis` object:
+
+- `scope: "mapped-call-graph"`: counts describe mapped call edges. Imports,
+  inheritance, tests, and references are available through `codeweb_dependents`.
+  Neither a full response nor an unchanged map proves all runtime callers are known.
+- `freshness`: `stale` preserves the existing `stale` detail; `unchanged-stamps`
+  means the recorded stamps showed no change; `unknown` means source access or
+  nonempty source stamps were unavailable. Stamp checking is not a completeness
+  audit. `CODEWEB_VERIFY_FRESHNESS=1` also checks recorded content hashes.
+- `listsComplete`: whether all mapped callers, callees, and impact IDs are shown.
+  Existing `moreCallers` / `moreCallees` and new `blastRadius.more` count omissions.
+  Context has no offset argument: increase `limit` / `--limit`, or use MCP
+  `full:true` to remove list budgets.
+- `sourceEvidenceComplete`: whether the returned targets have bodies and each
+  returned caller has uncapped label-match evidence (or a body in full-body mode).
+  This concerns returned items only; it is independent of `listsComplete`.
+- `limitations` contains stable reason codes; `nextSteps` gives corresponding
+  recovery or inspection actions, including exported contracts and dynamic calls.
+
+Each caller in window mode carries `windowEvidence`: `shown`, `truncated`,
+`no-label-match`, or `source-unavailable`. When source can be searched,
+`matchedLines`, `shownLines`, and `remaining` describe matching **lines**, not
+verified call sites. Windows use lexical label matches within recorded spans;
+comments can match and aliases can be missed.
+
+At most eight matching lines per caller seed the windows. MCP `full:true` removes list budgets but retains that
+cap; use `bodies:"full"` (CLI `--full-bodies`) or inspect the file to see the rest.
+
+Missing source must be restored; stale spans require a refresh. No numeric
+confidence or whole-repository completeness score is inferred from these signals.
+
+
+## Before and after an edit
+
+**Unreleased checkout workflow:** `baseline:true`, `--baseline`, diff `refresh:true` /
+`--refresh`, and the analysis fields below require the current development checkout.
+The v0.14.0 npm package can compare explicit snapshot files; use the
+[snapshot quickstart](https://ghostlygawd.github.io/codeweb/start.html#npm-quickstart).
+
+CLI examples in this section run from the Codeweb checkout. For another target, pass
+its absolute `.codeweb/graph.json` path instead of the relative example.
+
+Capture a fresh baseline **before** changing source:
+
+```text
+MCP: codeweb_refresh {baseline:true}
+CLI: node scripts/refresh.mjs .codeweb/graph.json --baseline --json
+```
+
+This saves `graph.baseline.json` after successful extraction. Ordinary refresh,
+background auto-refresh, and `snapshot:true` leave it intact. Calling
+`baseline:true` again explicitly starts a new edit and replaces it; finish the
+current comparison first. Baselines are local workspace state, not committed history.
+
+After editing, refresh and compare in one action:
+
+```text
+MCP: codeweb_diff {before:"baseline", refresh:true}
+CLI: node scripts/diff.mjs baseline .codeweb/graph.json --refresh --json
+```
+
+MCP serializes extraction and comparison as one workspace writer operation.
+`verification` names the baseline, its SHA-256, and the refreshed graph. A missing,
+invalid, or different-root baseline fails before refreshing. Losing a pre-edit
+baseline cannot be repaired by capturing already-edited source.
+
+The legacy `refresh {snapshot:true}` → `diff {}` loop remains available. It compares
+with the graph just before that refresh, which may already include edits after an
+automatic refresh. Use the explicit baseline flow for a stable comparison across
+mid-edit queries. Without `refresh:true`, diff still compares stored snapshots only.
+
+`analysis.checks` distinguishes evaluated graph checks from missing analysis.
+Refresh drops overlap findings, so diff reports duplication as `not-evaluated`
+and does not claim that old findings disappeared. Run the full pipeline for both
+snapshots or use `codeweb_review` with `gate:true` for a bounded scan of changed
+symbols. Review also labels checks it could not run.
+
+`ok:true` means no regressions were found by the checks performed. It does not
+mean every check ran or that behavior is correct. Inspect `analysis` and run the
+relevant tests. The existing exit codes remain 0 for no detected regressions,
+1 for regressions, and 2 for setup or IO failures.
+
+## Setup diagnostics
+
+Run `codeweb --doctor --json` (or `node scripts/doctor.mjs --json`) to inspect the
+running installation without creating a map. An optional target directory checks
+that project's setup. The standalone script also accepts `--graph <path>`.
+
+The result includes package root, version, checkout/packaged origin, entrypoint,
+Node executable, and Codeweb executables found on PATH. Compare these paths when
+a global package and a development checkout behave differently: a packaged install
+is a snapshot, even when it shares the checkout's version number.
+
+Diagnostics report graph discovery, recorded source root, freshness, and optional
+parser availability. Parser probes check availability, not successful grammar
+initialization. Missing optional AST support is a warning; regex extraction
+remains available. Missing or invalid graph/source setup exits 2; stale or
+unstamped graphs produce warnings with repair guidance.
+
+Repair commands use explicit argument arrays in `issues[].command`, avoiding
+ambiguous quoting. Diagnostics never install dependencies, remap code, modify
+workspace artifacts, or contact a package registry.

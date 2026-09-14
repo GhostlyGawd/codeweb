@@ -1,80 +1,127 @@
 # codeweb graph schema (`graph.json`)
 
-The single source of truth that flows between dissectors, the domain-mapper, and the HTML
-renderer. All examples below use synthetic values.
+`graph.json` connects extraction, domain assignment, overlap analysis and graph consumers.
+The format is additive and currently unversioned: preserve unknown fields. A breaking
+change requires the versioning decision described in [the artifact reference](../../../docs/reference.md#outputs-under-targetcodeweb).
+
+## Minimum renderable graph
+
+This valid JSON illustrates a renderable node and an empty edge list. It does not claim
+the source file exists or that the function has no runtime callers.
 
 ```json
 {
-  "meta": {
-    "target": "src/ or https://github.com/owner/repo",
-    "mode": "internal | external",
-    "engine": "hybrid | tools | read",       // ALSO the map's provenance label (AC-12): these three
-                                             // values mark an AGENT-extracted map, and downstream
-                                             // surfaces (codeweb_brief, the session brief) caveat it
-                                             // as unverified; the deterministic pipeline writes
-                                             // ctags|regex here instead. Always stamp it.
-    "complexityEngine": "tree-sitter(...)",  // present ONLY under --engine tree-sitter; signals exact
-                                             // complexity + class-qualified method ids + dispatch edges
-    "depth": "module | symbol | auto",
-    "languages": ["typescript", "python"],
-    "generatedAt": "ISO-8601 string, stamped by the renderer (not by agents)",
-    "stats": { "files": 0, "nodes": 0, "edges": 0, "domains": 0, "overlaps": 0 }
-  },
-
   "nodes": [
     {
-      "id": "src/auth/login.ts:loginUser",   // <repo-relative-path>:<symbol>  (path alone for file/module nodes).
-                                             // Under --engine tree-sitter a METHOD's <symbol> is class-qualified
-                                             // (`Class.method`) so same-named methods don't collide; bare otherwise.
-      "label": "loginUser",                  // display name — a method label stays BARE (`method`, never `Class.method`)
-      "kind": "function",                     // function | class | method | module | file
-      "file": "src/auth/login.ts",
-      "line": 42,
-      "loc": 120,                              // size of the symbol body, for node radius
-      "exports": true,
-      "domain": "auth",                        // assigned by domain-mapper (empty from dissectors)
-      "summary": "Authenticates a user and issues a session token.",
-      "complexity": 7,                         // F4: approximate cyclomatic complexity (function|method only; absent on class/module)
-      "maxDepth": 3                            // F4: max control-flow nesting depth (function|method only)
+      "id": "greet.js:greet",
+      "label": "greet",
+      "kind": "function",
+      "file": "greet.js",
+      "line": 1,
+      "loc": 1
     }
   ],
-
-  "edges": [
-    {
-      "from": "src/auth/login.ts:loginUser",
-      "to": "src/db/query.ts:runQuery",
-      "kind": "call",                          // call | import | inherit | ref | test (emitted) · dataflow (reserved)
-      "weight": 1                              // number of occurrences; optional, default 1
-    }
-  ],
-
-  "domains": [
-    {
-      "name": "auth",
-      "nodes": 12,
-      "summary": "Authentication, session issuance, and authorization checks.",
-      "files": ["src/auth/"]                   // optional, representative paths
-    }
-  ],
-
-  "overlaps": [
-    {
-      "id": "ov1",
-      "title": "User validation duplicated across auth, billing, and api",
-      "kind": "duplicate-logic",               // duplicate-logic | parallel-impl | shared-responsibility | tangled-domain
-      "severity": "high",                      // high | medium | low
-      "domains": ["auth", "billing", "api"],
-      "nodes": [
-        "src/auth/login.ts:validateUser",
-        "src/billing/charge.ts:checkUser",
-        "src/api/guard.ts:assertUser"
-      ],
-      "evidence": "All three re-implement the same email + password + active-role check.",
-      "recommendation": "Extract a single auth.validateUser; have billing and api depend on it."
-    }
-  ]
+  "edges": []
 }
 ```
+
+`domains` and `overlaps` enrich rendering; absent values become empty collections.
+A renderer can display this graph without `meta.root`. Source lookup, refresh and
+freshness checks need additional operational fields; rendering success does not establish them.
+
+## Generate an operational example
+
+Run this block from a Codeweb source checkout with Node.js ≥ 22 and a POSIX shell.
+It creates a temporary source file, generates real metadata, reads its mapped body, and
+refreshes its map. Codeweb analyzes the source without executing it.
+
+<!-- operational-example -->
+```sh
+schema_demo=$(mktemp -d "${TMPDIR:-/tmp}/codeweb-schema.XXXXXX") || exit 1
+printf 'export function greet(name) { return name; }\n' > "$schema_demo/greet.js"
+node scripts/run.mjs "$schema_demo" --json
+node scripts/context-pack.mjs "$schema_demo/.codeweb/graph.json" greet --full-bodies --json
+node scripts/refresh.mjs "$schema_demo/.codeweb/graph.json" --json
+```
+<!-- /operational-example -->
+
+The context response includes `greet`'s source body and parsed parameter `name`.
+Inspect `$schema_demo/.codeweb/graph.json` for actual source stamps. Keep the temporary
+directory while inspecting it; remove it when finished.
+
+## Operational fields and ownership
+
+Fields below describe producer output and consumer requirements. They are not all required
+for every graph operation. Agents must not invent source stamps, coverage or parser provenance.
+
+`meta.engine` is the map's provenance label. Always stamp the actual extraction path;
+agent-generated maps use `hybrid`, `tools` or `read` and remain unverified by the
+deterministic pipeline.
+
+| Field | Shape / producer | Consumer behavior when absent |
+| --- | --- | --- |
+| `meta.root` | Absolute source-directory path, forward slashes; extractor | Source-backed tools cannot resolve files; refresh refuses a missing or unavailable root. |
+| `meta.target` | Display label; extractor or orchestrator | Not a filesystem substitute for `root`. |
+| `meta.engine` | `regex` or `ctags` from deterministic extraction; `hybrid`, `tools` or `read` from agent dissection | Missing provenance must not be inferred. Agent values trigger the brief's unverified-map caveat. |
+| `meta.complexityEngine` | Optional parser-version string, e.g. the actual tree-sitter probe result; extractor | No assertion of tree-sitter complexity support. `meta.engine` can still be `regex` when this field is present. |
+| `meta.languages`, `meta.symbols` | Observed language names and symbol count; extractor | Informational, not proof of full language or runtime coverage. |
+| `meta.sources` | Object keyed by source-relative paths; extractor | Freshness is unknown without usable stamps; a null staleness result alone is not proof of freshness. |
+| `meta.dirs` | Object mapping observed relative directories to rounded modification times; extractor | Consumers using directory stamps lose that change signal. Recorded-file checks alone do not detect every newly added file. |
+| `meta.dynamic` | Optional `{files, sample}` of dynamic-dispatch-pattern observations; extractor | Absence does not establish complete call resolution. This is diagnostic evidence, not a numeric confidence score. |
+| `meta.stats`, `meta.generatedAt` | Summary counts and timestamp; renderer | Derived display metadata. Do not use rendering time as a source-freshness guarantee. |
+| `meta.mode`, `meta.depth` | Orchestration context such as internal/external and symbol/module depth | Descriptive; they do not replace node locations or source stamps. |
+| `meta.overlapsDroppedAt` | Timestamp added by refresh when it discards overlap results | Full mapping reconstructs analysis. Its absence alone is not proof that an arbitrary imported graph was analyzed for duplication. |
+| `meta.coverage` | Optional recorded-run source and counts; coverage importer | Coverage is unknown. Refresh removes it because source spans may have changed. |
+
+Each `meta.sources[path]` stamp has:
+
+| Key | Meaning |
+| --- | --- |
+| `s` | File size in bytes; a negative sentinel can record an unavailable mapped file. |
+| `m` | Rounded filesystem modification time in milliseconds. |
+| `h` | Optional SHA-1 of the UTF-8 source text, as computed by the extractor. |
+
+The default recorded-file freshness check compares size and modification time.
+`CODEWEB_VERIFY_FRESHNESS=1` also verifies recorded hashes where available.
+Do not copy stamp values from an example; regenerate them from the actual source.
+
+## Nodes, edges and analysis collections
+
+| Node field | Meaning |
+| --- | --- |
+| `id` | Stable graph identity, usually `<relative file>:<symbol>`. Class-qualified methods and `@<line>` disambiguators may occur; consumers must treat IDs as opaque. |
+| `label`, `kind` | Display name and function/class/method/module/file classification. A method label can remain bare while its ID includes its class. |
+| `file`, `line`, `loc` | Source-relative file, one-based starting line and line span. Source readers use `[line, line + loc - 1]`. |
+| `exports` | Whether the node is marked exported; relevant to orphan gating. |
+| `role` | `product`, `test`, `fixture`, `example`, `bench`, `generated`, or `vendored`. Extraction uses path heuristics and `codeweb.rules.json` overrides; missing roles fall back to path classification in role-aware consumers. |
+| `signature` | Function/method contract: `{params: string[], returns: string or null, raw: string}`. It can be null when the declaration cannot be parsed; class/module nodes can omit it. |
+| `domain`, `summary` | Assigned domain and optional explanatory text. Extraction starts with empty values; later stages or agent workflows enrich them. |
+| `complexity`, `maxDepth` | Optional function/method complexity and nesting measurements. Interpret them with their recorded engine; absence is not zero complexity. |
+| `covered`, `hits` | Optional recorded coverage: true/false and peak hit count. Missing coverage is unknown; `false` means the recorded report saw the span without execution. |
+
+Additional extractor fields, such as clone-analysis fingerprints, may be present.
+Consumers should preserve fields they do not interpret.
+
+Edges contain `from` and `to` node IDs plus `kind`; optional `weight` describes occurrence
+weight. Every endpoint must resolve to a node after merging. An empty edge list means
+no edges were supplied or resolved, not that no dependencies exist at runtime.
+
+`domains` contains domain descriptors such as `name`, node count, `summary` and optional
+representative `files`. `overlaps` contains findings with fields such as `id`, `kind`,
+`title`, `nodes`, `domains`, `severity`, `confidence`, `evidence` and `recommendation`.
+Interpret each finding's supplied evidence; severity and confidence are separate properties.
+
+## Refresh and missing analysis
+
+Refresh re-extracts nodes and edges, updates source metadata, and reattaches surviving
+node domains by ID. It retains domain summaries, drops overlaps, stamps
+`meta.overlapsDroppedAt`, and removes stale coverage provenance. Run the full pipeline
+to reconstruct overlap analysis.
+
+The unreleased checkout adds response-level `analysis` fields to context and diff outputs.
+Those response envelopes are distinct from stored `graph.json`; see
+[context status and baseline verification](../../../docs/cli.md#context-analysis-status).
+A complete returned list or a clean structural verdict does not establish runtime completeness.
 
 ## Edge kinds
 
@@ -120,9 +167,3 @@ renderer. All examples below use synthetic values.
 - The renderer (`build-report.mjs`) computes `meta.stats`, stamps `meta.generatedAt`, and persists
   both back into `graph.json` (along with the dangling-edge drop), so the on-disk graph matches the
   rendered report.
-
-## Minimum viable graph
-
-A graph is renderable with only `nodes` and `edges`. `domains` and `overlaps` enrich the
-report; if absent, the renderer treats every node as domain `"unassigned"` and shows an empty
-overlap tab.

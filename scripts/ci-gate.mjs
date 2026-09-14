@@ -15,7 +15,7 @@
 
 import { mkdtempSync, rmSync, writeFileSync, readFileSync, appendFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { gateComment } from './lib/gate-md.mjs';
@@ -56,6 +56,10 @@ const base = mkdtempSync(join(tmpdir(), 'codeweb-gate-'));
 const afterWs = join(base, 'after'), beforeWs = join(base, 'before'), wt = join(base, 'wt');
 let code = 0;
 try {
+  // A working-tree graph is only eligible for HEAD links when the checkout is
+  // clean before and after analysis and HEAD has not moved in between.
+  const headBefore = spawnSync('git', ['-C', repo, 'rev-parse', 'HEAD'], { encoding: 'utf8' });
+  const cleanBefore = spawnSync('git', ['-C', repo, 'status', '--porcelain', '--untracked-files=all'], { encoding: 'utf8' });
   // AFTER = the current working tree (what the PR proposes to merge)
   const afterGraph = buildGraph(join(repo, opts.target), 'after', afterWs);
   // BEFORE = the base ref, materialized read-only in an ephemeral worktree
@@ -92,7 +96,21 @@ try {
   if (opts.md) {
     try {
       const dj = spawnSync(node, [join(HERE, 'diff.mjs'), beforeGraph, afterGraph, '--json'], { encoding: 'utf8', maxBuffer: 1 << 26 });
-      writeFileSync(opts.md, gateComment(JSON.parse(dj.stdout), { history }));
+      const head = spawnSync('git', ['-C', repo, 'rev-parse', 'HEAD'], { encoding: 'utf8' });
+      const cleanAfter = spawnSync('git', ['-C', repo, 'status', '--porcelain', '--untracked-files=all'], { encoding: 'utf8' });
+      const linkedRef = headBefore.status === 0 && head.status === 0 &&
+        headBefore.stdout.trim() === head.stdout.trim() &&
+        cleanBefore.status === 0 && cleanAfter.status === 0 &&
+        !cleanBefore.stdout.trim() && !cleanAfter.stdout.trim() ? head.stdout.trim() : null;
+      const repositoryUrl = process.env.GITHUB_REPOSITORY
+        ? `${process.env.GITHUB_SERVER_URL || 'https://github.com'}/${process.env.GITHUB_REPOSITORY}` : null;
+      const source = {
+        repositoryUrl, ref: linkedRef,
+        target: relative(repo, resolve(repo, opts.target)).split('\\').join('/'),
+      };
+      writeFileSync(opts.md, gateComment(JSON.parse(dj.stdout), {
+        history, graph: JSON.parse(readFileSync(afterGraph, 'utf8')), source,
+      }));
     } catch (e) { console.error(`[codeweb] gate comment not written: ${(e && e.message) || e}`); }
   }
 } catch (e) {

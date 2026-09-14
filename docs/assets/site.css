@@ -99,6 +99,8 @@
 /* ============================ reset + base ============================ */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+/* Keep documentation link targets below the sticky navigation. */
+#npm-quickstart, #cycle-walkthrough, #rules-snippet { scroll-margin-top: 6rem; }
 body {
   margin: 0;
   background: var(--bg);

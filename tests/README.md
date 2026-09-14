@@ -4,11 +4,14 @@ These characterization tests protect the deterministic engine invariants. `run.m
 `scripts/extract-symbols.mjs` → `cluster3.mjs` → `overlap.mjs` →
 `build-report.mjs`.
 
-The engine scripts are monolithic run-on-import CLIs. Each suite runs the **shipped artifact** as
-a child process against a controlled fixture and checks its output. The engine tests do not use
-mocks or a separate test implementation.
+Tests exercise shipped CLIs in child processes and shared implementation modules in-process.
+Controlled fixtures and independent expected results check the actual implementation.
 
 ## Run
+
+Run from the Codeweb checkout. The required pre-PR gate is `sh scripts/check`; it adds
+spec lint, harness tests, consistency checks and evals to the product suite below.
+See [contributor prerequisites and workflow](../CONTRIBUTING.md).
 
 ```bash
 npm test                          # = node --test "tests/**/*.test.mjs"

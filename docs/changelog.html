@@ -56,7 +56,52 @@
       <div class="btn-row"><a class="btn" href="https://github.com/GhostlyGawd/codeweb/releases" rel="noopener">GitHub releases</a><a class="btn" href="https://github.com/GhostlyGawd/codeweb/blob/main/CHANGELOG.md" rel="noopener">CHANGELOG.md</a></div>
     </div>
     <div class="prose changelog"><h2 class="cl-ver">[Unreleased]</h2>
-<p>Nothing yet. Open work lands here before it ships in the next tagged release.</p>
+<h3 class="cl-grp">Added</h3>
+<ul>
+<li>Explicit pre-edit baselines: refresh with <code>baseline:true</code> / <code>--baseline</code>, then verify</li>
+</ul>
+<p>  with <code>codeweb_diff {before:"baseline", refresh:true}</code> or CLI <code>diff --refresh</code>.</p>
+<p>  Ordinary and automatic refreshes preserve the saved baseline through repair.</p>
+<ul>
+<li><code>codeweb --doctor</code> reports the running installation, graph discovery, source freshness</li>
+</ul>
+<p>  and parser availability, with local repair commands and no workspace changes.</p>
+<ul>
+<li>Context responses distinguish list completeness, source evidence and graph uncertainty.</li>
+</ul>
+<p>  Diff and review responses identify skipped checks and behavioral limits.</p>
+<ul>
+<li>Gate comments include bounded source locations, duplication evidence and investigation</li>
+</ul>
+<p>  guidance. Commit links require a clean, unchanged checkout; dirty locations remain text.</p>
+<h3 class="cl-grp">Fixed</h3>
+<ul>
+<li>Refreshing verification rejects baselines without node and edge arrays before changing</li>
+</ul>
+<p>  the live graph. The regression check covers missing and incorrectly typed arrays.</p>
+<ul>
+<li>Refreshed graphs no longer make dropped overlap evidence appear to be removed duplication.</li>
+<li>Plugin hook configuration omits settings-schema and matcher metadata; handler descriptions</li>
+</ul>
+<p>  remain in the adjacent guide, with the same commands, matchers and timeouts.</p>
+<ul>
+<li>Current documentation count checks include SPEC and recognize Markdown/HTML emphasis</li>
+</ul>
+<p>  and possessive Codeweb phrasing. Historical audit and release counts stay dated.</p>
+<h3 class="cl-grp">Documentation</h3>
+<ul>
+<li>Separate npm snapshot and unreleased-checkout baseline walkthroughs, each verified through</li>
+</ul>
+<p>  cycle detection and repair. Verdict summaries identify exported-symbol exceptions and</p>
+<p>  skipped analysis; section links land below the sticky header.</p>
+<ul>
+<li>Contributor guidance names the required gate, prerequisites and harness ownership.</li>
+</ul>
+<p>  The graph schema explains operational fields, provenance, freshness and missing data.</p>
+<ul>
+<li>A documentation entry point maps reading paths and repository ownership. Audit indexes</li>
+</ul>
+<p>  connect dated findings to implementation and verification receipts.</p>
 <h2 class="cl-ver">[0.14.0] - 2026-09-02</h2>
 <h3 class="cl-grp">Added</h3>
 <ul>

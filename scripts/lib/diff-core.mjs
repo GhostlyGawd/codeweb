@@ -78,7 +78,15 @@ export function diffGraphs(before, after, { names = {}, bIx, aIx } = {}) {
   const ovMap = (g) => new Map(g.overlaps.filter((o) => o.confidence == null || CONFIRMED.has(o.confidence)).map((o) => [ovSig(o), o]));
   const bOv = ovMap(before), aOv = ovMap(after);
   const ovDiff = (from, to) => [...from.keys()].filter((k) => !to.has(k))
-    .map((k) => ({ kind: from.get(k).kind, title: from.get(k).title || '' }))
+    .map((k) => {
+      const o = from.get(k);
+      return {
+        kind: o.kind, title: o.title || '', nodes: [...(o.nodes || [])].sort(),
+        ...(o.evidence ? { evidence: o.evidence } : {}),
+        ...(o.confidence ? { confidence: o.confidence } : {}),
+        ...(Number.isFinite(o.bodySim) ? { bodySim: o.bodySim } : {}),
+      };
+    })
     .sort((x, y) => (x.title < y.title ? -1 : x.title > y.title ? 1 : 0));
 
   const cycSig = (c) => c.join('|');
@@ -115,8 +123,11 @@ export function diffGraphs(before, after, { names = {}, bIx, aIx } = {}) {
   const orphansRemoved = sortedDiff(bOrph, aOrph);
   const cyclesAdded = cycDiff(aCyc, bCycSet);
   const cyclesRemoved = cycDiff(bCyc, aCycSet);
-  const overlapsAdded = ovDiff(aOv, bOv);
-  const overlapsRemoved = ovDiff(bOv, aOv);
+  // A refresh drops findings. Empty arrays on that side are missing analysis,
+  // not evidence that duplication was removed or that the check passed.
+  const duplicationEvaluated = !before.meta?.overlapsDroppedAt && !after.meta?.overlapsDroppedAt;
+  const overlapsAdded = duplicationEvaluated ? ovDiff(aOv, bOv) : [];
+  const overlapsRemoved = duplicationEvaluated ? ovDiff(bOv, aOv) : [];
   // regressed orphans = newly-orphaned nodes that EXISTED before (lost their callers), not brand-new
   const regressedOrphans = orphansAdded.filter((id) => bIds.has(id));
 
@@ -140,6 +151,14 @@ export function diffGraphs(before, after, { names = {}, bIx, aIx } = {}) {
     ok: regressions.length === 0,
     // API §5: the shared verdict object — same fields, same check label, on every presenter.
     verdict: gateVerdict(before, after, { exemptExported: true, newDuplications: overlapsAdded, scope: 'full' }),
+    analysis: {
+      scope: 'mapped-graph-delta',
+      checks: { cycles: 'evaluated', lostCallers: 'evaluated', duplication: duplicationEvaluated ? 'evaluated' : 'not-evaluated', behavior: 'not-evaluated' },
+      nextSteps: [
+        ...(!duplicationEvaluated ? ['Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.'] : []),
+        'Mapped structural checks do not establish behavioral correctness; run the relevant tests.',
+      ],
+    },
   };
   return { payload, code: payload.ok ? 0 : 1 };
 }

@@ -10,19 +10,20 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const USAGE = 'usage: refresh.mjs [graph.json] [--cache <path>] [--snapshot] [--json]   (or set CODEWEB_WS, or run from a mapped repo)';
+const USAGE = 'usage: refresh.mjs [graph.json] [--cache <path>] [--snapshot | --baseline] [--json]   (or set CODEWEB_WS, or run from a mapped repo)';
 import { die, emitJson, finish, atomicWrite, SCAN_CACHE_NAME, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
 const { opts, pos } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
-  flags: { json: { type: 'bool', default: false }, cache: { type: 'string', default: null }, snapshot: { type: 'bool', default: false } },
+  flags: { json: { type: 'bool', default: false }, cache: { type: 'string', default: null }, snapshot: { type: 'bool', default: false }, baseline: { type: 'bool', default: false } },
 });
-const { json, cache, snapshot } = opts;
+const { json, cache, snapshot, baseline } = opts;
+if (snapshot && baseline) die('choose --baseline BEFORE editing or --snapshot AFTER editing, not both', 2);
 
 // API F7 (COPY.md #9): refresh required a positional and hand-rolled a weaker error — no
 // CODEWEB_WS, no walk-up. It now uses THE one loader (arg -> env -> nearest .codeweb above cwd,
@@ -30,6 +31,7 @@ const { json, cache, snapshot } = opts;
 // JSON + the fresh fragment, never from normalizeGraph's in-memory back-fills (its mutation runs
 // post-write for the sidecars — see the #25 note below).
 const { abs } = loadGraph(pos[0], { usage: USAGE });
+if (basename(abs) === 'graph.baseline.json') die('the baseline is read-only: refresh graph.json instead; use --baseline there to start a new edit', 2);
 let graph, rawBefore;
 try { rawBefore = readFileSync(abs, 'utf8'); graph = JSON.parse(rawBefore); }
 catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
@@ -73,6 +75,11 @@ const hadCoverage = !!updated.meta.coverage;
 if (hadCoverage) delete updated.meta.coverage;
 const updatedJson = JSON.stringify(updated);
 atomicWrite(abs, updatedJson); // finding 3: a SIGTERM mid-write (MCP's 60s timeout) must not truncate the graph
+// AC-15: save the freshly extracted PRE-EDIT map only on an explicit baseline request.
+// Ordinary/automatic refreshes and legacy --snapshot never touch this separate file.
+const baselinePath = join(dirname(abs), 'graph.baseline.json');
+if (baseline) atomicWrite(baselinePath, updatedJson);
+
 // Round 2, finding #18a: refresh re-baselines the post-edit hook's sidecar — `h`/`s` from the
 // in-memory string just written (free), `m` from a post-rename stat. Best-effort by contract.
 try {
@@ -101,9 +108,11 @@ const payload = {
   sidecars,
 };
 if (snapshot) payload.snapshot = prevPath;
+if (baseline) payload.baseline = baselinePath;
 if (hadCoverage) payload.note = 'coverage annotations dropped (spans changed) — re-run scripts/coverage.mjs with a fresh report';
 if (json) { emitJson(payload); } else {
 console.log(`codeweb refresh: ${root}`);
+if (baseline) console.log(`  baseline saved: ${baselinePath} — edit, then run diff.mjs baseline ${abs} --refresh`);
 console.log(`  nodes ${before.nodes} -> ${updated.nodes.length}   edges ${before.edges} -> ${updated.edges.length}   domains re-attached ${reattached}`);
 console.log(`  overlaps dropped (run the full pipeline to recompute). scanned ${payload.scanned ?? '?'} file(s).`);
 finish();

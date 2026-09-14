@@ -98,14 +98,19 @@ npx -y @ghostlygawd/codeweb .</code></pre>
          in a rules file. One paste-ready block, kept in step with the server's instructions. -->
     <div class="card" style="margin-top:1.25rem">
       <h3 id="rules-snippet">Teach your agent the loop — paste into <code>.cursor/rules</code>, <code>AGENTS.md</code>, or <code>GEMINI.md</code></h3>
+      <p><strong>Unreleased checkout workflow.</strong> These rules require an MCP server running from the current Codeweb development checkout. The v0.14.0 npm package uses the <a href="#npm-quickstart">snapshot quickstart</a> below.</p>
 <pre><code>## codeweb — ask the map before and after every edit
 This repo is mapped by codeweb (a deterministic call/import graph; 28 read-only MCP tools).
 - Orient once per session: codeweb_brief. No symbol name yet? codeweb_find "&lt;concept&gt;".
-- BEFORE touching a symbol: codeweb_explain (one card), then codeweb_context (edit window)
-  or codeweb_impact (blast radius); codeweb_dependents lists EVERY user of it.
+- BEFORE editing: codeweb_refresh {baseline:true} once to save fresh pre-edit source.
+- Before touching a symbol: codeweb_explain (one card), then codeweb_context (edit window)
+  or codeweb_impact (blast radius); codeweb_dependents lists mapped users of it.
 - Before writing a new function: codeweb_find_similar (does this exist?) and codeweb_placement.
-- AFTER editing: codeweb_refresh {snapshot:true}, then codeweb_diff {} — fix any regression
-  it reports before moving on.
+- AFTER editing: codeweb_diff {before:"baseline",refresh:true}. If red, repair and repeat
+  that same diff against the same baseline. Do not capture another baseline during repair.
+  Ordinary/automatic refreshes preserve it; baseline:true replaces it for a new task.
+- Read analysis.checks: skipped is not passed. Refresh does not evaluate duplication;
+  structural green does not prove behavior. Run the project tests too.
 - A stale answer names codeweb_refresh; "no graph found" names codeweb_map. Follow the remedy.</code></pre>
     </div>
     <p class="muted" style="margin-top:1rem"><em>For a temporary evaluation, run the <code>npx</code> command and open the generated map.</em></p>
@@ -116,10 +121,13 @@ This repo is mapped by codeweb (a deterministic call/import graph; 28 read-only 
         <p class="muted" style="margin-top:.5rem">A repository with 3,000 symbols maps in approximately 3 seconds. Select the image to open the live axios demo.</p>
       </div>
       <div class="card">
-        <p><strong>What success looks like</strong> — the run ends with a result, not a log:</p>
+        <p><strong>Development checkout output</strong> — baseline guidance is unreleased:</p>
 <pre><code>[run] mapped 1668 symbols -> 14 actionable finding(s) · 6 ready merge(s)
 [run] done -> your-project/.codeweb · codeweb v0.14.0
-[run] next:  1. see the map: open .codeweb/report.html</code></pre>
+[run] next:
+[run]   1. connect your agent
+[run]   2. BEFORE edits: codeweb_refresh {baseline:true}
+[run]   3. AFTER edits: codeweb_diff {before:"baseline",refresh:true}</code></pre>
       </div>
     </div>
   </div>
@@ -128,34 +136,81 @@ This repo is mapped by codeweb (a deterministic call/import graph; 28 read-only 
 <section class="section section-tint">
   <div class="wrap">
     <div class="section-head">
-      <span class="eyebrow">Five-minute quickstart</span>
-      <h2>From a cold repo to a queryable map</h2>
+      <span class="eyebrow">npm quickstart</span>
+      <h2 id="npm-quickstart">Map, edit, detect, repair</h2>
+      <p class="lead">Requires Node.js ≥ 22, npm, and a POSIX shell. Run these four blocks in the same shell from any directory. They create a temporary project and use the pinned v0.14.0 package; no Codeweb source checkout is needed.</p>
     </div>
     <div class="grid cols-2">
       <div class="card">
-        <div class="eyebrow">1 · Map it</div>
-        <p>Build the graph and the interactive report for a target.</p>
-<pre><code>node scripts/run.mjs ./my-app --out-dir ./my-app/.codeweb
-# open ./my-app/.codeweb/report.html</code></pre>
+        <div class="eyebrow">1 · Create and map</div>
+        <p>Create two source files with one dependency. Codeweb analyzes them without executing them.</p>
+<!-- npm-quickstart: executable step -->
+<pre><code>demo=$(mktemp -d "${TMPDIR:-/tmp}/codeweb-npm.XXXXXX") || exit 1
+cd "$demo" || exit 1
+printf 'import { beta } from "./b.js";\nexport function alpha() { return beta(); }\n' > a.js
+printf 'export function beta() { return 1; }\n' > b.js
+npx -y -p @ghostlygawd/codeweb@0.14.0 codeweb .</code></pre>
+<!-- /npm-quickstart -->
       </div>
       <div class="card">
-        <div class="eyebrow">2 · Query the graph</div>
-        <p>Ask what a change touches before you make it.</p>
-<pre><code>node scripts/query.mjs ./my-app/.codeweb/graph.json \
-  --impact myFunction --json</code></pre>
+        <div class="eyebrow">2 · Query and save</div>
+        <p>The caller list contains <code>a.js:alpha</code>. Save this complete pre-edit graph outside the generated workspace.</p>
+<!-- npm-quickstart: executable step -->
+<pre><code>npx -y -p @ghostlygawd/codeweb@0.14.0 codeweb-query --callers beta --json
+cp .codeweb/graph.json before.json</code></pre>
+<!-- /npm-quickstart -->
       </div>
       <div class="card">
-        <div class="eyebrow">3 · Guard the edit</div>
-        <p>Diff two snapshots and get a regression verdict.</p>
-<pre><code>node scripts/diff.mjs before.json after.json
-# exit 1 on a new cycle, new duplication, or lost callers</code></pre>
+        <div class="eyebrow">3 · Introduce a cycle</div>
+        <p>Add the reverse dependency and rebuild the full map. The diff should report a new cycle and exit 1.</p>
+<!-- npm-quickstart: executable step -->
+<pre><code>printf 'import { alpha } from "./a.js";\nexport function beta() { return alpha(); }\n' > b.js
+npx -y -p @ghostlygawd/codeweb@0.14.0 codeweb . --full
+npx -y -p @ghostlygawd/codeweb@0.14.0 codeweb-diff before.json .codeweb/graph.json --json</code></pre>
+<!-- /npm-quickstart -->
       </div>
       <div class="card">
-        <div class="eyebrow">4 · Gate the PR</div>
-        <p>Run the same verdict automatically on every pull request.</p>
-<pre><code>node scripts/ci-gate.mjs --base origin/main --target src</code></pre>
-        <p class="muted">Or drop in the GitHub Action — see <a href="product.html">the CI gate</a>.</p>
+        <div class="eyebrow">4 · Repair and compare</div>
+        <p>Remove the reverse dependency and compare against the same <code>before.json</code>. Expect exit 0 and <code>ok:true</code>. Keep the saved baseline unchanged throughout repair.</p>
+<!-- npm-quickstart: executable step -->
+<pre><code>printf 'export function beta() { return 1; }\n' > b.js
+npx -y -p @ghostlygawd/codeweb@0.14.0 codeweb . --full
+npx -y -p @ghostlygawd/codeweb@0.14.0 codeweb-diff before.json .codeweb/graph.json --json</code></pre>
+<!-- /npm-quickstart -->
       </div>
+    </div>
+    <p>This walkthrough compares full maps, including overlap analysis. The diff flags new cycles, body-confirmed duplication findings, and existing non-exported symbols that become orphans. Exported symbols are exempt from its orphan check. Structural green does not prove behavioral correctness; run your project’s tests.</p>
+    <p class="muted">Step 3 deliberately exits 1. In an automated shell with <code>set -e</code>, handle that expected status before continuing to repair. The temporary directory remains available for inspection at <code>$demo</code>.</p>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Try one edit</span>
+      <h2 id="cycle-walkthrough">A tiny cycle: red → repair → green</h2>
+      <p class="lead">Unreleased development workflow: run from the Codeweb checkout containing baseline support, with Node.js ≥ 22 and a POSIX shell. These commands create a temporary target. The v0.14.0 npm package does not support the baseline flags below.</p>
+    </div>
+    <div class="card">
+<!-- cycle-walkthrough: executable fixture -->
+<pre><code>demo=$(mktemp -d "${TMPDIR:-/tmp}/codeweb-cycle.XXXXXX") || exit 1
+printf 'import { beta } from "./b.js";\nexport function alpha() { return beta(); }\n' > "$demo/a.js"
+printf 'export function beta() { return 1; }\n' > "$demo/b.js"
+node scripts/run.mjs "$demo"
+node scripts/refresh.mjs "$demo/.codeweb/graph.json" --baseline
+node scripts/query.mjs "$demo/.codeweb/graph.json" --callers beta --json
+# Expected caller: alpha. Introduce beta → alpha, closing the cycle.
+printf 'import { alpha } from "./a.js";\nexport function beta() { return alpha(); }\n' > "$demo/b.js"
+node scripts/diff.mjs baseline "$demo/.codeweb/graph.json" --refresh
+# Red: exit 1, REGRESSIONS, a new cycle. Repair without replacing the baseline.
+printf 'export function beta() { return 1; }\n' > "$demo/b.js"
+node scripts/diff.mjs baseline "$demo/.codeweb/graph.json" --refresh
+# Green: exit 0, no structural regressions against the SAME pre-edit baseline.</code></pre>
+<!-- /cycle-walkthrough -->
+      <p>With an MCP client targeting this map, the equivalent calls are <code>codeweb_refresh {baseline:true}</code> before the edit and <code>codeweb_diff {before:"baseline",refresh:true}</code> after the edit and repair. Keep the same baseline throughout.</p>
+      <p class="muted">Read the analysis lines (or <code>analysis.checks</code> in JSON): duplication is not evaluated after refresh drops overlap evidence; behavior is never evaluated by this structural check.</p>
+      <p class="muted">Optional parsers may be absent; this JavaScript example works with the built-in fallback. A green result applies to the extracted graph, not runtime correctness. Run your product tests. Missing baseline? Recover pre-edit source before capturing it again; edited source cannot reconstruct the original.</p>
     </div>
   </div>
 </section>
@@ -170,8 +225,8 @@ This repo is mapped by codeweb (a deterministic call/import graph; 28 read-only 
       <div class="card"><h3>Node &amp; edge</h3><p>Every function, class, and method is a <strong>node</strong>; calls, imports, inheritance, and test links are <strong>edges</strong>. That graph is the substrate for every query.</p></div>
       <div class="card"><h3>Domain</h3><p>codeweb clusters nodes into semantic <strong>domains</strong>. Use the domains to reason about subsystems across files. Cross-domain overlap identifies consolidation opportunities.</p></div>
       <div class="card"><h3>Overlap</h3><p>Two nodes overlap when they do the same work. codeweb confirms overlap by comparing bodies and dismisses same-name functions with different bodies.</p></div>
-      <div class="card"><h3>Blast radius</h3><p>Everything transitively affected by changing a symbol. Ask for it <em>before</em> editing so you know what an edit can break.</p></div>
-      <div class="card"><h3>The gate</h3><p>A structural regression check: a change fails if it adds a cycle, adds a body-confirmed duplicate, or orphans a symbol. Pure removals always pass.</p></div>
+      <div class="card"><h3>Blast radius</h3><p>Mapped transitive call and inheritance dependencies of a symbol. Ask before editing to identify code to inspect; unresolved runtime dependencies can be absent.</p></div>
+      <div class="card"><h3>The gate</h3><p>A structural regression check for new cycles, body-confirmed duplication findings, and existing non-exported symbols that become orphans. Inspect which checks ran and verify behavior with your tests.</p></div>
       <div class="card"><h3>Severity</h3><p>Each finding has a high, medium, or low confidence tier. The report highlights high-confidence rows so you can inspect actionable findings first.</p></div>
     </div>
   </div>

@@ -1,0 +1,9 @@
+{
+  "CONTRIBUTING.md": "3dd635db7d9d5e0f4ce919e0a043a94191d2ba5d6e4e1c26052753e0387076df",
+  "tests/README.md": "d9292c47b8551b7b5fb91a8f5da74de0470e22baf327ac8804d4c4375cb5e4af",
+  "SPEC.md": "55cd5bdf2525434a3c7a4bedf7fe4669ff1223b7022cd5ce3632cb36aa95b2ba",
+  "docs/reference.md": "c05fec95ad4eafe941c163170434181bbd3ffbbabe573e3b793b0593975d1987",
+  "scripts/release-utils.mjs": "df4cd071ea8f3ca311f8e49429adf99b88e6bf247ca954566944b0a2675f7665",
+  "tests/release-tooling.test.mjs": "f169c34f0c2c29991af8357e6f41407385d22368f98819decd2f2545b6743ba8",
+  "skills/codebase-anatomy/references/graph-schema.md": "8a63992ee61013a33cc4a0cfca548a6033ac37fa979ac657c5380df2eec1cc23"
+}

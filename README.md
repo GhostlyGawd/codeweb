@@ -29,7 +29,8 @@ npx -y @ghostlygawd/codeweb .
 
 **A deterministic guardrail for agent-written code — zero tokens per PR.** codeweb's gate builds
 the call graph before and after a change, then fails the pull request on three regressions: a new
-dependency cycle, a new body-confirmed duplication, or a symbol that lost every caller.
+dependency cycle, a new body-confirmed duplication, or an existing non-exported symbol that
+becomes an orphan with no mapped callers. [Gate conditions and limits](docs/ci-gate.md).
 
 The verdict is static analysis, not a model: it never hallucinates, and it costs zero tokens
 however many pull requests you open. Pure removals always pass.
@@ -289,10 +290,29 @@ check before writing, gate an edit, and plan cleanup.
 claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
 ```
 
-The loop an agent runs: `codeweb_brief` once per session (or `codeweb_find` when no symbol name
-is known) → `codeweb_explain` before touching a symbol → `codeweb_context`, `codeweb_impact`, or
-`codeweb_dependents` before the edit → `codeweb_refresh` with `snapshot:true`, then `codeweb_diff`
-after it. Clients that hide the server's built-in instructions can paste
+**Unreleased checkout workflow.** The baseline calls below require the current development
+checkout; they are not available in the v0.14.0 npm package. Register that checkout’s MCP
+server using its absolute path, as shown in the [reference](docs/reference.md#the-mcp-server-tool-by-tool).
+
+The loop an agent runs:
+
+1. Orient with `codeweb_brief` (or `codeweb_find` when no symbol name is known).
+2. **Before editing**, call `codeweb_refresh {baseline:true}` once to capture fresh source.
+   Ask `codeweb_explain`, then `codeweb_context`, `codeweb_impact`, or `codeweb_dependents`
+   about the symbol before changing it.
+3. **After editing**, call `codeweb_diff {before:"baseline",refresh:true}`.
+4. If red, repair the code and repeat that same diff against the **same baseline**.
+   Do not capture another baseline during repair: `baseline:true` replaces the original.
+   Ordinary and automatic refreshes preserve it. Start a new baseline for the next task.
+
+Read `analysis.checks`: a skipped check is not a pass. Refresh drops overlap evidence, so
+this loop does not evaluate duplication; structural green does not prove behavioral
+correctness. Run the project's tests too. If the baseline is missing, edited source cannot
+reconstruct it — recover the pre-edit source before beginning again.
+
+For npm v0.14.0, use the [snapshot quickstart](https://ghostlygawd.github.io/codeweb/start.html#npm-quickstart).
+For the unreleased checkout, try the [tiny cycle → repair → green walkthrough](https://ghostlygawd.github.io/codeweb/start.html#cycle-walkthrough).
+Clients that hide the server's built-in instructions can paste
 [the rules snippet](https://ghostlygawd.github.io/codeweb/start.html#rules-snippet) instead.
 
 The server includes these agent-specific features:
@@ -349,8 +369,8 @@ transitive impact, duplication with body evidence, dead code, and domain couplin
 Agents query that artifact over MCP, and CI diffs it to gate a PR. The two compose — codeweb
 replaces the grep loop, not your language server.
 
-Curious how the repo is laid out? [The component map lives in the
-reference.](docs/reference.md#components)
+Choose a reading path in the [documentation index](docs/README.md), which also explains
+repository ownership. [The component map](docs/reference.md#components) details the engine.
 
 ## Roadmap
 

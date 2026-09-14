@@ -9,7 +9,37 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Added
+
+- Explicit pre-edit baselines: refresh with `baseline:true` / `--baseline`, then verify
+  with `codeweb_diff {before:"baseline", refresh:true}` or CLI `diff --refresh`.
+  Ordinary and automatic refreshes preserve the saved baseline through repair.
+- `codeweb --doctor` reports the running installation, graph discovery, source freshness
+  and parser availability, with local repair commands and no workspace changes.
+- Context responses distinguish list completeness, source evidence and graph uncertainty.
+  Diff and review responses identify skipped checks and behavioral limits.
+- Gate comments include bounded source locations, duplication evidence and investigation
+  guidance. Commit links require a clean, unchanged checkout; dirty locations remain text.
+
+### Fixed
+
+- Refreshing verification rejects baselines without node and edge arrays before changing
+  the live graph. The regression check covers missing and incorrectly typed arrays.
+- Refreshed graphs no longer make dropped overlap evidence appear to be removed duplication.
+- Plugin hook configuration omits settings-schema and matcher metadata; handler descriptions
+  remain in the adjacent guide, with the same commands, matchers and timeouts.
+- Current documentation count checks include SPEC and recognize Markdown/HTML emphasis
+  and possessive Codeweb phrasing. Historical audit and release counts stay dated.
+
+### Documentation
+
+- Separate npm snapshot and unreleased-checkout baseline walkthroughs, each verified through
+  cycle detection and repair. Verdict summaries identify exported-symbol exceptions and
+  skipped analysis; section links land below the sticky header.
+- Contributor guidance names the required gate, prerequisites and harness ownership.
+  The graph schema explains operational fields, provenance, freshness and missing data.
+- A documentation entry point maps reading paths and repository ownership. Audit indexes
+  connect dated findings to implementation and verification receipts.
 
 ## [0.14.0] - 2026-09-02
 

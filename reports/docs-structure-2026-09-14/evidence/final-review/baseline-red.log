@@ -1,0 +1,31 @@
+✖ ac_15: structurally invalid baseline JSON fails before refreshing the live graph (259.591125ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 327.086667
+
+✖ failing tests:
+
+test at tests/edit-baseline.test.mjs:73:1
+✖ ac_15: structurally invalid baseline JSON fails before refreshing the live graph (259.591125ms)
+  AssertionError [ERR_ASSERTION]: {"before":"graph.baseline.json","after":"cw-baseline-nInaGj/src","nodes":{"added":["a.js:alpha"],"removed":[],"renamed":[]},"edges":{"added":0,"removed":0},"domains":{"before":0,"after":1},"crossDomainEdges":{"before":0,"after":0,"delta":0},"overlaps":{"added":[],"removed":[]},"cycles":{"added":[],"removed":[]},"orphans":{"added":[],"removed":[]},"regressions":[],"ok":true,"verdict":{"ok":true,"check":"orphan-gate","scope":"full","checks":{"newCycles":[],"lostCallers":[],"newDuplications":[]}},"analysis":{"scope":"mapped-graph-delta","checks":{"cycles":"evaluated","lostCallers":"evaluated","duplication":"not-evaluated","behavior":"not-evaluated"},"nextSteps":["Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.","Mapped structural checks do not establish behavioral correctness; run the relevant tests."]},"verification":{"before":"/var/folders/3r/mm394ldj6fx82vpdgz3tmwj00000gp/T/cw-baseline-nInaGj/.codeweb/graph.baseline.json","beforeSha256":"b54bfe1f8409e02b1bd4685db74dfb66d37f0368e55972acf7bf11e3648797c3","after":"/var/folders/3r/mm394ldj6fx82vpdgz3tmwj00000gp/T/cw-baseline-nInaGj/.codeweb/graph.json","refreshed":true}}
+  
+  
+  0 !== 2
+  
+      at TestContext.<anonymous> (file://$CODEWEB_ROOT/tests/edit-baseline.test.mjs:84:14)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

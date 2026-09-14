@@ -42,6 +42,7 @@ const USAGE = `usage: run.mjs [<SRC>] [--target <label>] [--out-dir <dir>] [--op
   <SRC>            path to the codebase to map (default: current directory)
   --target <label> display label stamped into the map (default: last two path segments of <SRC>)
   --out-dir <dir>  where the artifacts go (default: <SRC>/.codeweb — where MCP + hooks find them)
+  --doctor         diagnose this installation and target without creating or changing a map
   --open           open report.html when the map is built
   --serve          after the map, serve the workspace at http://127.0.0.1:<port> (localhost only)
   --full           recompute every stage (skip the fragment memo + edge cache)
@@ -58,6 +59,7 @@ const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
   flags: {
     target: { type: 'string', default: null },
     'out-dir': { type: 'string', default: null },
+    doctor: { type: 'bool', default: false },
     open: { type: 'bool', default: false },
     serve: { type: 'bool', default: false },         // AI-IDEAS/reach: give the report a real origin, localhost only
     full: { type: 'bool', default: false },
@@ -67,6 +69,13 @@ const { opts: flags, pos } = parseArgs(process.argv.slice(2), {
     json: { type: 'bool', default: false },          // CLI.md 5.1: the flagship's machine mode
   },
 });
+// AC-16: diagnostics exits before target validation, mkdir, extraction, or history writes.
+if (flags.doctor) {
+  const { runDoctor } = await import('./doctor.mjs');
+  process.exitCode = runDoctor({ target: pos[0] || '.', json: flags.json });
+  process.exit(process.exitCode);
+}
+
 // FUNNEL #2 / FORMS cut #4: the main form has zero required fields. <SRC> defaults to the
 // current directory; the empty-target guard downstream keeps a wrong cwd from producing a
 // silent nonsense map.
@@ -344,13 +353,15 @@ if (opts.json) {
         }
       } catch { /* the ask must never break the pipeline */ }
     } else {
-      // ACTIVATION A5: first map of this repo — the three moves that turn one run into a habit.
-      // #5 still holds: the map's whole point is to be LOOKED AT, so seeing it is step 1.
+      // First use leads with the agent's edit/check loop; the map supports it.
       const openCmd = process.platform === 'win32' ? 'start ""' : process.platform === 'darwin' ? 'open' : 'xdg-open';
       console.log(`[run] next:`);
-      console.log(`[run]   1. ${opts.open ? 'the map is opening in your browser' : `see the map: ${openCmd} ${join(ws, 'report.html')}`}`);
-      console.log(`[run]   2. live queries in Claude Code: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp`);
-      console.log(`[run]   3. after edits: re-run codeweb here — the refresh is cache-warm (seconds, not a re-map)`);
+      console.log(`[run]   1. connect your agent: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp (other clients: https://ghostlygawd.github.io/codeweb/start.html#other-clients)`);
+      console.log(`[run]   2. BEFORE edits: codeweb_refresh {baseline:true}, then codeweb_explain / codeweb_dependents for the symbol`);
+      console.log(`[run]   3. AFTER edits: codeweb_diff {before:"baseline",refresh:true}; repair and re-run this diff against the same baseline — do not capture another baseline during repair`);
+      console.log(`[run]      Read analysis.checks for skipped checks; green structure does not prove behavior. Run your product tests.`);
+      console.log(`[run]      Try the cycle walkthrough: https://ghostlygawd.github.io/codeweb/start.html#cycle-walkthrough`);
+      console.log(`[run]      Supporting view: ${opts.open ? 'the map is opening in your browser' : `see the map: ${openCmd} ${join(ws, 'report.html')}`}`);
       // GRW-F4: the CI gate is the team-lead doorway (and the one surface with a distribution
       // trigger defined on it), yet no in-product moment ever said it exists. Say it exactly
       // where an activated user with a CI setup is already looking.

@@ -3,6 +3,13 @@
 Every tool, output, and workflow — the full detail behind the [README](../README.md).
 Bins, flags, environment variables, and exit codes are tabled separately in [`cli.md`](cli.md).
 
+For reading paths and file ownership, start with the [documentation index](README.md).
+
+Examples using `node scripts/...` run from a Codeweb source checkout; `<graph.json>`
+is a placeholder for your target’s graph path. npm users can follow the
+[runnable snapshot quickstart](https://ghostlygawd.github.io/codeweb/start.html#npm-quickstart)
+using shipped bins from their own repository.
+
 - [Outputs](#outputs-under-targetcodeweb)
 - [Query the graph](#query-the-graph-for-agents--humans)
 - [Guard agent edits (`diff`)](#guard-agent-edits-diff)
@@ -66,9 +73,27 @@ node scripts/diff.mjs <before.json> <after.json> [--json]
 
 The verdict:
 
-- **Exits 1** on a new cycle, a new duplication, or a symbol that loses all its callers.
+- **Exits 1** on a new dependency cycle, a new body-confirmed duplication finding, or an
+  existing non-exported symbol that becomes an orphan. Exported symbols are exempt here.
 - **Exits 0** on pure removals. Deleting code is an improvement, not a regression.
 - A brand-new uncalled function never trips it — agents add functions before wiring them up.
+
+The edit preflight (`codeweb_simulate` and the post-edit hook) also flags exported symbols
+that lose their last mapped call-caller. It is a separate check from the diff’s orphan gate.
+See [the gate contract](ci-gate.md).
+
+For npm v0.14.0, copy the full map to `before.json` **before** editing. Rebuild the full
+map after each edit or repair and compare it with that same saved file. Keep the baseline
+outside the regenerated workspace; the [quickstart](https://ghostlygawd.github.io/codeweb/start.html#npm-quickstart) supplies every command.
+
+**Unreleased checkout:** follow [the explicit-baseline workflow](cli.md#before-and-after-an-edit):
+`codeweb_refresh {baseline:true}` before editing, then
+`codeweb_diff {before:"baseline",refresh:true}` after editing and each repair.
+
+Inspect `analysis.checks` in checkout responses. Refresh drops overlap evidence, so its
+diff does not evaluate duplication. `ok:true` means no regressions were found by the
+checks performed; it does not prove behavior or complete runtime dependency coverage.
+Run the project’s tests too.
 
 ## Gate every PR (GitHub Action)
 
@@ -242,7 +267,7 @@ production `--callers` answers exclude tests.
 
 ## The MCP server, tool by tool
 
-`scripts/mcp-server.mjs` exposes all **27** of codeweb's tools to any MCP client. In the order
+`scripts/mcp-server.mjs` exposes all **28** of codeweb's tools to any MCP client. In the order
 your agents meet them:
 
 - **Orient** — `codeweb_map` builds the graph; `codeweb_brief` is the day-one repo page (call it
@@ -251,8 +276,9 @@ your agents meet them:
   and `explain` (one symbol, everything known about it).
 - **Before writing** — `codeweb_find_similar` (does this already exist?), `placement` (where does
   a new symbol belong?), `context` (the minimal window needed to edit a symbol).
-- **Gate the edit** — `codeweb_simulate` (the gate's verdict for a delete/merge/move, before any
-  edit), then `refresh` + `diff` after it; `review`, `fitness`, and `risk` for PR time.
+- **Gate the edit** — `codeweb_simulate` preflights a delete/merge/move. Follow the
+  [version-specific snapshot workflow](#guard-agent-edits-diff) for verification; use
+  `review`, `fitness`, and `risk` for PR time.
 - **Clean up** — `codeweb_hotspots`, `deadcode`, `break_cycles`, `campaign`, `reading_order`,
   `codemod` (plan-only over MCP — `--write` is not exposed).
 - **Housekeeping** — `codeweb_annotate` (false-positive suppressions, kept in a sidecar, never in
@@ -271,8 +297,10 @@ or in an `.mcp.json`:
 { "mcpServers": { "codeweb": { "command": "node", "args": ["/abs/path/to/codeweb/scripts/mcp-server.mjs"] } } }
 ```
 
-The handshake carries `instructions` teaching the per-edit loop: *context → edit → refresh →
-diff-gate*.
+The checkout handshake teaches the unreleased explicit-baseline loop. npm v0.14.0 users
+should save a full map before editing and compare full rebuilt snapshots, as described
+[above](#guard-agent-edits-diff). Query results describe mapped dependencies; dynamic or
+unresolved callers can be absent.
 
 ## Components
 

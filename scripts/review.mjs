@@ -106,6 +106,16 @@ const verdict = {
   },
 };
 const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural, newDuplications, verdict };
+// The bounded body scan can skip unreadable/short bodies. A missing source root
+// means it did not run at all; neither case establishes whole-repo completeness.
+payload.analysis = {
+  scope: 'changed-mapped-symbols',
+  checks: { cycles: structural ? 'evaluated' : 'not-evaluated', lostCallers: structural ? 'evaluated' : 'not-evaluated', duplication: root && existsSync(root) ? 'bounded-source-check' : 'not-evaluated', behavior: 'not-evaluated' },
+  nextSteps: [
+    ...(!structural ? ['Pass before (CLI: --before) with a pre-edit graph to check cycles and lost callers.'] : []),
+    ...(root && existsSync(root) ? ['Duplication uses capped bodies of mapped functions; unreadable or short bodies can be skipped. Inspect changed source and relevant tests.'] : ['Restore the recorded source root or remap at the code root to evaluate duplication; run relevant tests.']),
+  ],
+};
 const code = (gate && hasRegression) ? 1 : 0;
 
 if (json) { emitJson(payload, code); } else {
@@ -128,5 +138,6 @@ if (newDuplications.length) {
   console.log(`  NEW DUPLICATION (body-confirmed) — ${newDuplications.length}:`);
   for (const d of newDuplications) console.log(`    x ${d.id} duplicates ${d.dupOf} (${(d.sim * 100).toFixed(0)}%)`);
 }
+for (const step of payload.analysis.nextSteps) console.log(`  analysis: ${step}`);
 finish(code);
 }

@@ -55,3 +55,47 @@ test('gate-md: lost-callers excludes brand-new and renamed-to symbols; renames s
   assert.doesNotMatch(body, /- `a\.js:neu`/, 'a renamed-to orphan is not "lost"');
   assert.match(body, /`a\.js:old` → `a\.js:neu` \(body 92%\)/, 'renames render with body similarity');
 });
+
+test('ac_13: evidence links use graph lines, analyzed commit and target; guidance distinguishes unknown callers', () => {
+  const ref = 'a'.repeat(40);
+  const body = gateComment(payload({
+    ok: false, regressions: ['1 new duplication finding(s)'],
+    overlaps: { added: [{ kind: 'duplicate-logic', title: 'Repeated check', nodes: ['a:f', 'b:f'], evidence: 'Bodies share 90% of tokens.', confidence: 'high', bodySim: 0.9 }], removed: [] },
+    orphans: { added: ['a:f'], removed: [] },
+    cycles: { added: [['a file.js', 'b.js']], removed: [] },
+  }), {
+    graph: { nodes: [{ id: 'a:f', file: 'a file.js', line: 12 }, { id: 'b:f', file: 'b.js', line: 7 }] },
+    source: { repositoryUrl: 'https://github.com/acme/project', ref, target: 'packages/api' },
+  });
+  assert.ok(body.includes(`https://github.com/acme/project/blob/${ref}/packages/api/a%20file.js#L12`));
+  assert.ok(body.includes(`https://github.com/acme/project/blob/${ref}/packages/api/b.js#L7`));
+  assert.match(body, /Bodies share 90% of tokens/);
+  assert.match(body, /confidence: high/);
+  assert.match(body, /Compare the implementations/);
+  assert.match(body, /Inspect the dependency path/);
+  assert.match(body, /Check entry points/);
+  assert.match(body, /No mapped callers does not prove/);
+  assert.match(body, /does not establish behavioral correctness/);
+});
+
+test('ac_13: evidence is bounded and escaped; unsafe paths and link contexts stay plain text', () => {
+  const nodes = Array.from({ length: 9 }, (_, i) => `n${i}`);
+  const graph = { nodes: nodes.map((id) => ({ id, file: '../outside.js', line: 2 })) };
+  const body = gateComment(payload({ overlaps: { added: [{
+    kind: 'duplicate-logic', title: '<img src=x>\n## forged', nodes,
+    evidence: '<script>alert(1)</script> ' + 'x'.repeat(2000),
+  }], removed: [] } }), { graph, source: { repositoryUrl: 'javascript:alert(1)', ref: 'main', target: '..' } });
+  assert.doesNotMatch(body, /<img|<script|\n## forged|javascript:/);
+  assert.match(body, /&lt;script&gt;/);
+  assert.match(body, /…\+4 more sites/);
+  assert.ok(body.length < 2500, 'large evidence is truncated');
+  assert.doesNotMatch(body, /\/blob\//);
+});
+
+test('ac_13: local comments use file:line and missing evidence never invents a confidence', () => {
+  const body = gateComment(payload({ overlaps: { added: [{ kind: 'duplicate-logic', title: 'copy', nodes: ['a:f'] }], removed: [] } }), {
+    graph: { nodes: [{ id: 'a:f', file: 'a.js', line: 3 }] },
+  });
+  assert.match(body, /a\.js:3/);
+  assert.doesNotMatch(body, /confidence:|body similarity:/);
+});

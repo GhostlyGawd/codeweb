@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-14",
+  "status": "verified-working-tree",
+  "findings": [
+    "DS-01",
+    "DS-02",
+    "DS-03"
+  ],
+  "npmVersionTested": "0.14.0",
+  "npmDiffExitCodes": [
+    1,
+    0
+  ],
+  "checkoutWalkthrough": "tests/first-use-cycle.test.mjs passed",
+  "gateExit": 0,
+  "browser": "Verified with Playwright and Chromium; see browser/results.json for final rendered-source hashes and checks.",
+  "sourceSha256": {
+    "README.md": "7cfa5f5e9dbd8df0e2eeddfb6b485f0c5c708be66ef2daee1278187306444fb7",
+    "docs/cli.md": "099b440cdc24cd6beb10c48d2dd941aa798aff86263cdbbad35d0704087721e0",
+    "docs/reference.md": "2c7c01adb55a063111d33090601898dd3b3a2aa492a4f36f0adeaa89e73aa9cb",
+    "docs/start.html": "df363926b25146a9980a0e4c0ec2f13768ea9551e831fa3a12b106ae1c0495ed",
+    "site/content/start.html": "21643907509b6057e5277b99c52c635cc48082c4da623f13f2ff634462d436dd",
+    "scripts/mcp-server.mjs": "e045662140a233dbf56ef25899d19acbd37f385469f429e8c64371e404eba0b8",
+    "tests/first-use-cycle.test.mjs": "664c66665e0ac2646be7c6dc3841909c950c964796327329ab8e686c412e96c9"
+  }
+}

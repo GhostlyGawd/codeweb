@@ -265,6 +265,43 @@ test('scanProseCounts flags a stale tool count, in digits and words', async () =
   assert.equal(scanProseCounts('over 20,000 comparisons with tools', 'f', facts).length, 0, 'unrelated numbers pass');
 });
 
+test('documentation counts survive formatting and Codeweb possessive phrasing', () => {
+  const facts = { toolCount: 28, langCount: 13 };
+  for (const text of ["all **27** of codeweb's tools", 'all __27__ of Codeweb’s MCP tools',
+    '<strong>27</strong> MCP tools', '`27` tools', 'twenty-seven tools']) {
+    assert.equal(scanProseCounts(text, 'reference', facts).length, 1, text);
+  }
+  for (const text of ["all **28** of codeweb's tools", 'twenty-eight MCP tools',
+    '27 of our tests exercise tools', '20,000 comparisons with tools']) {
+    assert.equal(scanProseCounts(text, 'reference', facts).length, 0, text);
+  }
+});
+
+test('current SPEC and reference counts are checked while dated audit counts stay historical', () => {
+  const root = tmpDir('cw-doc-counts-');
+  try {
+    writeTree(root, {
+      'package.json': JSON.stringify({ version: '0.3.0' }),
+      '.claude-plugin/plugin.json': JSON.stringify({ version: '0.3.0', description: 'x' }),
+      'skills/codebase-anatomy/SKILL.md': '---\nmetadata:\n  version: 0.3.0\n---\n',
+      'site/data/product.json': JSON.stringify({ toolPhases: [{ tools: [{}, {}, {}] }] }),
+      'scripts/mcp-server.mjs': "const TOOLS=[{ name: 'codeweb_a' },{ name: 'codeweb_b' },{ name: 'codeweb_c' }];",
+      'SPEC.md': 'MCP server: 27 tools.',
+      'docs/reference.md': "all **27** of codeweb's tools",
+      'reports/DOCS.md': '# Audit — 2026-07-24\n27 tools at review time.',
+      'CHANGELOG.md': '## [0.3.0] - 2026-01-01\n27 tools in this historical release.',
+    });
+    const stale = checkConsistency(root).problems;
+    for (const path of ['SPEC.md', 'docs/reference.md']) {
+      assert.ok(stale.some((p) => p.includes(path) && p.includes('27')), path);
+    }
+    writeTree(root, { 'SPEC.md': 'MCP server: 3 tools.', 'docs/reference.md': "all **3** of codeweb's tools" });
+    const fixed = checkConsistency(root).problems;
+    assert.ok(!fixed.some((p) => /SPEC\.md|docs\/reference\.md|reports\/DOCS\.md/.test(p)), fixed.join('; '));
+    assert.equal(readFileSync(join(root, 'reports/DOCS.md'), 'utf8'), '# Audit — 2026-07-24\n27 tools at review time.');
+  } finally { cleanup(root); }
+});
+
 test('scanProseCounts flags a stale native-language count', async () => {
   const { scanProseCounts } = await import('../scripts/release-utils.mjs');
   const facts = { toolCount: 24, langCount: 11 };

@@ -47,8 +47,8 @@ before(() => {
 });
 after(() => { if (WS) cleanup(WS); });
 
-function spawnServer(input) {
-  const r = spawnSync(process.execPath, [script('mcp-server.mjs')], { encoding: 'utf8', input, maxBuffer: 1 << 28 });
+function spawnServer(input, options = {}) {
+  const r = spawnSync(process.execPath, [script('mcp-server.mjs')], { encoding: 'utf8', input, maxBuffer: 1 << 28, ...options });
   if (r.error) throw new Error(`mcp-server.mjs spawn failed: ${r.error.message}`); // makes pre-impl RED explicit, not vacuous
   return r;
 }
@@ -56,9 +56,9 @@ const parseLines = (stdout) => (stdout || '').split('\n').filter(Boolean).map((l
   try { return JSON.parse(l); } catch { return { __unparseable: l }; }
 });
 // Send JSON-RPC message objects; assert stdout purity (the server's load-bearing invariant).
-function rpc(messages) {
+function rpc(messages, options) {
   const input = messages.map((m) => JSON.stringify(m)).join('\n') + '\n';
-  const r = spawnServer(input);
+  const r = spawnServer(input, options);
   const responses = parseLines(r.stdout);
   const junk = responses.filter((x) => x.__unparseable);
   assert.equal(junk.length, 0, `stdout must be JSON-RPC only; got non-JSON: ${junk.map((j) => j.__unparseable).join(' | ')}`);
@@ -248,9 +248,11 @@ test('MD2b: adding a brand-new uncalled node is reported but NOT a regression (o
 });
 
 test('MD3: codeweb_diff args are optional (AC-9) — no discoverable graph for the default `after` fails actionably', () => {
-	// The test runner's cwd has no .codeweb/graph.json, so the omitted `after` cannot resolve:
-	// the reply must be the NO_GRAPH remedy, never a silent default or a JSON-RPC error.
-	const r = rpc([INIT, callTool(22, 'codeweb_diff', { before: DBP })]).byId.get(22);
+	// Isolate discovery from both the developer checkout and an inherited workspace override.
+	// This explicit, absent workspace makes the missing-map premise deterministic.
+	const r = rpc([INIT, callTool(22, 'codeweb_diff', { before: DBP })], {
+		cwd: WS, env: { ...process.env, CODEWEB_WS: join(WS, 'unmapped') },
+	}).byId.get(22);
 	assert.ok(!r.error, 'still a tools/call result, not a JSON-RPC error');
 	assert.ok(r.result.isError, 'no discoverable graph -> isError:true');
 	assert.match(r.result.content[0].text, /no graph found/, 'the NO_GRAPH remedy');

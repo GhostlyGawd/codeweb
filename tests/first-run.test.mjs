@@ -67,7 +67,7 @@ test('FR2: bare run maps the current directory into ./.codeweb; usage states bot
   } finally { cleanup(dir); }
 });
 
-test('FR3: the first-run banner leads with the result and a next: block — no fossil strings', () => {
+test('ac_17 FR3: the first-run banner leads with the result and a next: block — no fossil strings', () => {
   const dir = tmpDir('codeweb-firstrun-');
   try {
     writeTree(dir, DUP_FIXTURE);
@@ -80,6 +80,13 @@ test('FR3: the first-run banner leads with the result and a next: block — no f
     assert.match(r.stdout, /next:/, 'the next: block exists on a first run');
     assert.match(r.stdout, /claude mcp add codeweb/, 'the living-map bridge is named');
     assert.match(r.stdout, /re-run/, 'the habit loop is named');
+    const next = r.stdout.slice(r.stdout.indexOf('[run] next:'));
+    assert.match(next, /BEFORE edits: codeweb_refresh \{baseline:true\}/);
+    assert.match(next, /AFTER edits: codeweb_diff \{before:"baseline",refresh:true\}/);
+    assert.match(next, /same baseline.*do not capture another baseline during repair/);
+    assert.ok(next.indexOf('BEFORE edits') < next.indexOf('AFTER edits'));
+    assert.ok(next.indexOf('AFTER edits') < next.indexOf('Supporting view:'));
+    assert.match(next, /skipped checks.*does not prove behavior/);
     const out = r.stderr + r.stdout;
     assert.ok(!/was 32/.test(out), 'fossil "(was 32)" is gone');
     assert.ok(!/top 18 domains/.test(out) || /--- top \d+ domains ---/.test(out.replace(/top 18 domains/g, '')), 'hardcoded "top 18" header is gone');

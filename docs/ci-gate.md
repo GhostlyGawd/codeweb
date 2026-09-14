@@ -70,6 +70,18 @@ cycles, and duplication findings.
 The digest also identifies each blocker and gives the local reproduction command. Reviewers can
 inspect the pull request's blast radius without installing codeweb.
 
+Findings include source locations, bounded duplication evidence and confidence when available,
+and investigation steps. With GitHub context, clean checkouts link to the checked-out commit and include
+the configured target subdirectory. Dirty checkouts or a HEAD change during analysis fall back to
+file-and-line locations, so a link cannot imply uncommitted code exists in that commit.
+
+Local digests without GitHub context also use plain locations. Large finding
+lists, cycle members, and duplication sites show explicit omitted counts.
+
+The comment also states the analysis limits: a passing structural gate does not establish
+behavioral correctness, and no mapped callers does not prove a symbol is unused. Check entry
+points and dynamic dispatch before removing code, and run the relevant tests.
+
 - Requires `permissions: pull-requests: write` in the calling workflow (shown above) and a
   `pull_request` event. Without either, the comment is skipped with a warning and the **check
   verdict still enforces** — fork PRs with a read-only token degrade gracefully.

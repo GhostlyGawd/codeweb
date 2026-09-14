@@ -1,19 +1,40 @@
 # Contributing
 
-One page, everything you need.
+Run the required verification gate before opening a pull request. Commands below run
+from the Codeweb checkout; user-project setup is covered in the [README](README.md).
 
-## The loop
+## Prerequisites and setup
 
+- Node.js ≥ 22 and npm for the product and its tests.
+- Python 3 for spec lint, harness tests and evals; the dedicated gate CI uses Python 3.12.
+- Git and a POSIX shell for the repository workflow. On Windows, use Git Bash or WSL for `sh` commands.
+
+```sh
+git clone https://github.com/GhostlyGawd/codeweb.git
+cd codeweb
+npm ci                    # installs the optional parser tier for broader test coverage
+git config core.hooksPath .githooks
+sh scripts/check
 ```
-git clone https://github.com/GhostlyGawd/codeweb.git && cd codeweb
-npm ci                    # optional tree-sitter tier; the suite passes without it (a few skips)
-npm test                  # the full suite, node:test, zero test dependencies
-node scripts/check-consistency.mjs   # version/count/docs alignment — must say OK
-```
 
-Create a branch and make the change. Add tests beside the changed behavior. This repository is
-tests-first, so each behavior change must include a test that fixes the behavior in place. Run the
-two commands above, and then open a pull request.
+The required gate also runs without optional dependencies; parser-dependent tests then
+skip. Keep the optional parser tier installed when working on parser behavior.
+
+## The change loop
+
+1. Read [CHARTER.md](CHARTER.md) for product boundaries and [SPEC.md](SPEC.md) for acceptance criteria.
+2. Create a branch. Add a failing regression test before changing product behavior.
+3. Run focused tests while editing, for example `node --test tests/overlap.test.mjs`.
+4. Regenerate affected site output when changing its authored sources, as described below.
+5. Run `sh scripts/check` before opening the pull request. Report any environment skips.
+
+The gate runs spec lint, harness tests, product tests, consistency checks and evals.
+`npm test` and `node scripts/check-consistency.mjs` are useful focused checks;
+neither replaces the complete gate.
+
+The [harness contract](docs/harness.md) lists operator-owned files, including
+`scripts/check`, its protection hooks and `tests/harness/`. Change product code and
+product tests outside that protected list; report harness problems to the operator.
 
 ## Where to post
 
@@ -32,7 +53,9 @@ Each pull request runs these checks:
 - the complete suite on Windows with Node 22
 - a no-AST job that verifies the optional tier is optional
 - the benchmark smoke test
-- `check-consistency`, which rebuilds the site and fails on drift
+- the required `sh scripts/check` gate
+- `check-consistency` for metadata and claim alignment
+- a separate site build and generated-output freshness check
 - codeweb's structural self-review of `scripts/`
 - `tests/brand-sync.test.mjs`, which checks the visual surfaces
 
@@ -41,10 +64,13 @@ visual-surface workflow.
 
 ## Where things live
 
+Use the [documentation entry point and ownership map](docs/README.md) to distinguish
+current contracts, authored sources, generated output and historical evidence.
+
 `scripts/` pipeline + CLIs · `scripts/lib/` shared logic · `hooks/` Claude Code hooks ·
 `bin/` npm bins · `site/` → builds into `docs/` (GitHub Pages) · `editor/vscode-codeweb/`
 the extension · `tests/` (see `tests/README.md`) · `reports/` audit paper trail ·
-`decisions/` + `specs/` design history.
+`docs/decisions/` + `docs/specs/` design history.
 
 ## Writing style
 

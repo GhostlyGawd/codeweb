@@ -1,0 +1,7 @@
+{
+  "scripts/diff.mjs": "99711dd5a00391bcc7c3bc7cb66ad85a063a77f004b55e52ef1f774be5a62209",
+  "tests/edit-baseline.test.mjs": "9764a16741542cd756e93e4f7267ec3031ee0121ecc54408928637783635c35c",
+  "CHANGELOG.md": "f1e15db707a2d0d4b0fc00170fc6f53813821fe8bf0188af8f2ae633fdaabb47",
+  "docs/changelog.html": "0cfc2776bf8fa47fdb783e5b05d75ab397fa0955ea85efb0d51f82f24a141ef4",
+  "reports/AUDIT-STATUS.md": "d74664f428f01ffc856c4e29c3d8336cd7606bc98cdcb8a942994f79981f6659"
+}

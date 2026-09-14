@@ -1,0 +1,976 @@
+{
+  "scope": "Inline local links and GitHub-style heading anchors in current navigation files; only navigation headers in dated reviews. External URLs and reference-style links excluded.",
+  "checked": 137,
+  "failed": [],
+  "links": [
+    {
+      "file": "docs/README.md",
+      "line": 10,
+      "target": "../README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 10,
+      "target": "cli.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 10,
+      "target": "reference.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 11,
+      "target": "../README.md#use-it-as-an-mcp-tool",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 11,
+      "target": "reference.md#guard-agent-edits-diff",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 11,
+      "target": "cli.md#context-analysis-status",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 12,
+      "target": "ci-gate.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 13,
+      "target": "../CONTRIBUTING.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 13,
+      "target": "../SPEC.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 13,
+      "target": "../tests/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 14,
+      "target": "../skills/codebase-anatomy/references/graph-schema.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 14,
+      "target": "extractor-invariants.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 15,
+      "target": "../reports/AUDIT-STATUS.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 15,
+      "target": "../reports/docs-structure-2026-09-14/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 15,
+      "target": "../reports/docs-structure-2026-09-14/FIXLOG.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 19,
+      "target": "../CHARTER.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 20,
+      "target": "../SPEC.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 21,
+      "target": "../DECISIONS.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 21,
+      "target": "decisions/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 21,
+      "target": "specs/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 22,
+      "target": "requirements/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 23,
+      "target": "../CHANGELOG.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 23,
+      "target": "ROADMAP.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 24,
+      "target": "harness.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 24,
+      "target": "../CONTRIBUTING.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 34,
+      "target": "../bin/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 34,
+      "target": "../scripts/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 34,
+      "target": "../scripts/lib/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 34,
+      "target": "reference.md#components",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 35,
+      "target": "../site/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 36,
+      "target": "assets/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 37,
+      "target": "../scripts/report-template.html",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 37,
+      "target": "demo/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 37,
+      "target": "../CONTRIBUTING.md#brand-sync-visual-surfaces",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 38,
+      "target": "../commands/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 38,
+      "target": "../skills/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 38,
+      "target": "../agents/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 39,
+      "target": "../hooks/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 39,
+      "target": "../hooks/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 40,
+      "target": "../tests/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 40,
+      "target": "../evals/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 40,
+      "target": "harness.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 42,
+      "target": "specs/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 42,
+      "target": "decisions/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 42,
+      "target": "requirements/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 43,
+      "target": "../reports/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 44,
+      "target": "../bench/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 44,
+      "target": "../bench/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 46,
+      "target": "../editor/vscode-codeweb/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 46,
+      "target": "../editor/vscode-codeweb/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 59,
+      "target": "../reports/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 60,
+      "target": "../reports/INDEX.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 61,
+      "target": "../reports/AUDIT-STATUS.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 63,
+      "target": "product-review-2026-07-18.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 64,
+      "target": "product-review-2026-07-20.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/README.md",
+      "line": 65,
+      "target": "perf-quality-review-2026-07-21.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 7,
+      "target": "LICENSE",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 11,
+      "target": "#gate-every-pull-request",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 11,
+      "target": "#see-it-in-action",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 11,
+      "target": "#install",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 11,
+      "target": "#use",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 11,
+      "target": "#use-it-as-an-mcp-tool",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 11,
+      "target": "#how-it-works",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 11,
+      "target": "#free-forever-and-where-the-paid-line-sits",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 11,
+      "target": "CHANGELOG.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 13,
+      "target": "#try-it-on-your-repo",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 15,
+      "target": "#install",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 33,
+      "target": "docs/ci-gate.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 37,
+      "target": "#gate-every-pull-request",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 96,
+      "target": "docs/ci-gate.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 100,
+      "target": "#free-forever-and-where-the-paid-line-sits",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 108,
+      "target": "docs/case-study-axios.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 241,
+      "target": "docs/cli.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 243,
+      "target": "editor/vscode-codeweb/",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 248,
+      "target": "docs/reference.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 252,
+      "target": "docs/reference.md#query-the-graph-for-agents--humans",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 253,
+      "target": "docs/reference.md#agent-tools--context--pre-flight-context-pack-simulate-edit",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 256,
+      "target": "docs/reference.md#guard-agent-edits-diff",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 257,
+      "target": "docs/reference.md#gate-every-pr-github-action",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 258,
+      "target": "docs/reference.md#agent-capability-suite-write--review--optimize",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 260,
+      "target": "docs/reference.md#advise-consolidations-optimizemjs",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 261,
+      "target": "docs/reference.md#find-the-hotspots--where-to-refactor-first-hotspotsmjs",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 262,
+      "target": "docs/reference.md#plan-a-whole-optimization-campaign-campaignmjs",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 263,
+      "target": "docs/reference.md#track-duplication-over-time-trendmjs",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 279,
+      "target": "docs/reference.md#outputs-under-targetcodeweb",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 295,
+      "target": "docs/reference.md#the-mcp-server-tool-by-tool",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 327,
+      "target": "docs/reference.md#the-mcp-server-tool-by-tool",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 372,
+      "target": "docs/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 373,
+      "target": "docs/reference.md#components",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 392,
+      "target": "CHANGELOG.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 415,
+      "target": "SECURITY.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "README.md",
+      "line": 422,
+      "target": "CHARTER.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "line": 4,
+      "target": "README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "line": 25,
+      "target": "CHARTER.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "line": 25,
+      "target": "SPEC.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "line": 35,
+      "target": "docs/harness.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "line": 46,
+      "target": "SECURITY.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "line": 67,
+      "target": "docs/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 3,
+      "target": "../README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 4,
+      "target": "cli.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 6,
+      "target": "README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 13,
+      "target": "#outputs-under-targetcodeweb",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 14,
+      "target": "#query-the-graph-for-agents--humans",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 15,
+      "target": "#guard-agent-edits-diff",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 16,
+      "target": "#gate-every-pr-github-action",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 17,
+      "target": "#advise-consolidations-optimizemjs",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 18,
+      "target": "#track-duplication-over-time-trendmjs",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 19,
+      "target": "#find-the-hotspots--where-to-refactor-first-hotspotsmjs",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 20,
+      "target": "#plan-a-whole-optimization-campaign-campaignmjs",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 21,
+      "target": "#onboard-in-dependency-order-reading-ordermjs",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 22,
+      "target": "#measured-coverage--is-this-symbol-actually-tested-coveragemjs",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 23,
+      "target": "#agent-tools--context--pre-flight-context-pack-simulate-edit",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 24,
+      "target": "#agent-capability-suite-write--review--optimize",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 25,
+      "target": "#the-mcp-server-tool-by-tool",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 26,
+      "target": "#components",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 83,
+      "target": "ci-gate.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 89,
+      "target": "cli.md#before-and-after-an-edit",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 103,
+      "target": "ci-gate.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 249,
+      "target": "agent-tools-v2.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 280,
+      "target": "#guard-agent-edits-diff",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 302,
+      "target": "#guard-agent-edits-diff",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "reports/README.md",
+      "line": 3,
+      "target": "docs-structure-2026-09-14/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "reports/README.md",
+      "line": 5,
+      "target": "docs-structure-2026-09-14/FIXLOG.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "reports/README.md",
+      "line": 7,
+      "target": "AUDIT-STATUS.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "reports/README.md",
+      "line": 11,
+      "target": "../docs/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "reports/README.md",
+      "line": 15,
+      "target": "INDEX.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "reports/README.md",
+      "line": 16,
+      "target": "FIXLOG.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "reports/README.md",
+      "line": 17,
+      "target": "BUILDLOG.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "reports/README.md",
+      "line": 18,
+      "target": "docs-structure-2026-09-14/FIXLOG.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "reports/README.md",
+      "line": 19,
+      "target": "launch/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "reports/README.md",
+      "line": 19,
+      "target": "submissions/README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/product-review-2026-07-18.md",
+      "line": 5,
+      "target": "../reports/AUDIT-STATUS.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/product-review-2026-07-18.md",
+      "line": 6,
+      "target": "../reports/IMPROVEMENTS.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/product-review-2026-07-20.md",
+      "line": 4,
+      "target": "../reports/AUDIT-STATUS.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/product-review-2026-07-20.md",
+      "line": 5,
+      "target": "README.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/perf-quality-review-2026-07-21.md",
+      "line": 4,
+      "target": "../reports/AUDIT-STATUS.md",
+      "exists": true,
+      "anchorValid": true
+    },
+    {
+      "file": "docs/perf-quality-review-2026-07-21.md",
+      "line": 5,
+      "target": "README.md",
+      "exists": true,
+      "anchorValid": true
+    }
+  ],
+  "sourceSha256": {
+    "docs/README.md": "a70e28274183d5b29e409e3bbe3300fbd7a567580932082cf47fb577d7016836",
+    "README.md": "255ad075218493b6393f099c9e10a25bde191b77028f15ecab04699fd086387f",
+    "CONTRIBUTING.md": "47d10793b40d163e9378a5253d6fc4232710811f78a1993a0fe9971203fe2967",
+    "docs/reference.md": "e3bdd82255747bd5de67b9792743e28d405368103220e0cafe5aace635ed9993",
+    "reports/README.md": "1f5864128dba91a17ef09d9dc8934a95d1a728c1f3e554e8d664c254ea7eff5b",
+    "docs/product-review-2026-07-18.md": "ec55d236ef6c342df88c9bf509b5553bd81031387b2936f525e2c2acff1bd6e4",
+    "docs/product-review-2026-07-20.md": "9a24c21607e63fbeefbd6cc345035be9a90281d21cd5b2b3d9ec28e0fe499ce4",
+    "docs/perf-quality-review-2026-07-21.md": "01f35c6d3fe6289247f13d7425ae9e7785b02148f45c0fb3623eb8a95bb918d5"
+  }
+}

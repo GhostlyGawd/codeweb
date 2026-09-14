@@ -116,6 +116,14 @@ test('P3: packed release installs offline and each installed bin answers --help'
         `${name} --help failed after offline installation\n${help.stderr}`,
       );
     }
+    const doctor = spawnSync(process.execPath, [join(prefix, 'node_modules', '@ghostlygawd', 'codeweb', 'bin', 'codeweb.mjs'), prefix, '--doctor', '--json'], {
+      ...spawnOptions, shell: false, cwd: prefix, env: { ...spawnOptions.env, CODEWEB_WS: '' },
+    });
+    assert.equal(doctor.status, 2, 'the installed doctor reports an unmapped target');
+    const diagnosis = JSON.parse(doctor.stdout);
+    assert.equal(diagnosis.installation.kind, 'packaged');
+    assert.equal(diagnosis.parsers.ast.ts, false, 'offline install omits optional AST runtime');
+    assert.equal(diagnosis.parsers.regex, true, 'zero-dependency fallback remains available');
   } finally {
     cleanup(packDir);
     cleanup(prefix);
