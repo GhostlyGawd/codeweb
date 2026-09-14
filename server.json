@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.GhostlyGawd/codeweb",
-  "description": "See what your AI edits affect. Structural checks for AI code changes. Local call/import graphs and 28 MCP tools for impact, callers, and duplication. No LLM in the checks.",
+  "description": "See what your AI edits affect. Structural checks for AI code changes. 28 MCP tools, no LLM.",
   "status": "active",
   "repository": {
     "url": "https://github.com/GhostlyGawd/codeweb",
