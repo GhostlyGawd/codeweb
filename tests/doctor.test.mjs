@@ -14,7 +14,7 @@ test('ac_24: diagnostics from the installed front door are read-only and name ex
     assert.equal(p.graph.status, 'missing');
     assert.equal(p.installation.root, PLUGIN_ROOT);
     assert.equal(p.installation.version, JSON.parse(readFileSync(join(PLUGIN_ROOT, 'package.json'), 'utf8')).version);
-    assert.ok(p.installation.entrypoint.endsWith('bin/codeweb.mjs'));
+    assert.equal(p.installation.entrypoint, join(PLUGIN_ROOT, 'bin', 'codeweb.mjs'));
     assert.equal(p.parsers.regex, true);
     assert.equal(p.parsers.probeOnly, true);
     assert.deepEqual(p.issues.find((i) => i.code === 'graph-missing').command, [process.execPath, script('run.mjs'), root]);
