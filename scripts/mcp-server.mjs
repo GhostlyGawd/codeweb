@@ -54,8 +54,8 @@ const SPAWN_TIMEOUT_MS = 120_000; // a wedged child must not wedge the whole ses
 
 const INSTRUCTIONS = [
   'codeweb answers structural questions about a mapped repo (graph.json) deterministically — no LLM, ~100ms.',
-  'Loop: BEFORE editing a symbol call codeweb_context (bounded edit window) or codeweb_impact (blast radius); codeweb_dependents lists EVERY user of it (call+import+inherit+test+ref).',
-  'AFTER editing call codeweb_refresh {snapshot:true} (re-extracts; keeps the pre-refresh graph as graph.prev.json), then codeweb_diff {} (defaults: before:"prev" vs the current graph) to gate the edit.',
+  'Loop: BEFORE editing a symbol call codeweb_context (bounded edit window) or codeweb_impact (blast radius); codeweb_dependents lists mapped users of it (call+import+inherit+test+ref).',
+  'BEFORE editing call codeweb_refresh {baseline:true} once to capture a fresh baseline. AFTER editing call codeweb_diff {before:"baseline", refresh:true} to refresh and verify in one call. Ordinary/automatic refreshes preserve this baseline. Legacy refresh {snapshot:true} then diff {} remains available.',
   'Before WRITING a new function call codeweb_find_similar (does this exist?) and codeweb_placement (where does it belong?).',
   'Before a refactor, codeweb_simulate pre-flights a delete/merge/move; after verifying a finding is wrong, codeweb_annotate suppresses it so it stops resurfacing.',
   'No symbol name yet? codeweb_find turns a concept ("retry backoff") into ranked starting symbols.',
@@ -143,7 +143,7 @@ const TOOL_BEHAVIOR = {
   codeweb_callers: (s) => ({ argv: (a) => ['--callers', a.symbol],
     description: `Direct callers (call-edge in-neighbors) of a symbol. For EVERY kind of user (imports, subclasses, tests, refs too) use codeweb_dependents. Budgeted: top ${s.budget.value} by default (full:true for all).` }),
   codeweb_dependents: (s) => ({ argv: (a) => ['--dependents', a.symbol],
-    description: `"Who do I break?" — EVERY user of a symbol in one answer: the union codeweb_callers cannot see (call + import + inherit + test + ref edges, each tagged by kind). Call BEFORE changing a symbol's contract or signature. Budgeted: top ${s.budget.value} by default (full:true for all).` }),
+    description: `"Who do I break?" — mapped users of a symbol in one answer: the union codeweb_callers cannot see (call + import + inherit + test + ref edges, each tagged by kind). Call BEFORE changing a symbol's contract or signature. Budgeted: top ${s.budget.value} by default (full:true for all).` }),
   codeweb_callees: (s) => ({ argv: (a) => ['--callees', a.symbol],
     description: `Direct callees (the functions a symbol calls). Budgeted: top ${s.budget.value} by default.` }),
   codeweb_impact: (s) => ({ argv: (a) => ['--impact', a.symbol],
@@ -155,7 +155,7 @@ const TOOL_BEHAVIOR = {
   codeweb_tests: () => ({ argv: (a) => ['--tests', a.symbol],
     description: 'The tests that exercise a symbol (test-edge in-neighbors). Run the right subset after editing a symbol.' }),
   codeweb_diff: () => ({ queueFrom: (a) => a.after, argv: (a) => [a.before, a.after],
-    description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression. The CI gate\'s exact semantics (verdict.check: orphan-gate): a new cycle, a new confirmed duplication, or a NON-EXPORTED symbol newly losing every in-edge — exported ones are listed in verdict, flagged exempt. Call AFTER an edit to gate it. Both args are optional: `after` defaults to the discovered graph, `before` defaults to "prev" (the graph.prev.json that codeweb_refresh {snapshot:true} saves) — so refresh {snapshot:true} then diff {} completes the loop.' }),
+    description: 'Structural delta + regression verdict between two graph.json snapshots (before vs after an edit): nodes/edges/cycles/overlaps/orphans added & removed, coupling delta, and ok:false with reasons on a regression. The CI gate\'s exact semantics (verdict.check: orphan-gate): a new cycle, a new confirmed duplication, or a NON-EXPORTED symbol newly losing every in-edge — exported ones are listed in verdict, flagged exempt. Call AFTER an edit to gate it. Both args are optional: `after` defaults to the discovered graph, `before` defaults to "prev" (the graph.prev.json that codeweb_refresh {snapshot:true} saves) — so refresh {snapshot:true} then diff {} completes the legacy loop. Prefer before:"baseline", refresh:true after capturing a pre-edit baseline: one queued action refreshes and compares; skipped analysis checks are labeled.' }),
   codeweb_explain: () => ({ argv: (a) => [a.symbol],
     description: '"Tell me about X before I touch it" in ONE ~1KB card: identity, role, signature, complexity, fan-in/out, tests, blast radius + domains, top-5 callers/callees, and any duplication/pattern findings it belongs to. Start here; drill down with impact/context/callers.' }),
   codeweb_brief: () => ({ argv: () => [],
@@ -169,8 +169,10 @@ const TOOL_BEHAVIOR = {
     valid: (a) => (a.bodies != null && a.bodies !== 'windows' && a.bodies !== 'full') ? `argument bodies must be "windows" or "full" (got ${JSON.stringify(a.bodies)})` : null,
     argv: (a) => [a.symbol, ...(a.bodies === 'full' ? ['--full-bodies'] : []), ...(a.window != null ? ['--window', String(a.window)] : [])],
     description: `Bounded edit window for a symbol in ONE call: its body, direct callers as CALL-SITE WINDOWS (±3 lines around each use — the lines that break if the contract changes), callees (location-only), and the impact set. Budgeted: ${s.budget.value} callers by default (full:true for the unabridged lists); bodies:"full" switches callers to whole caller bodies (large).` }),
-  codeweb_refresh: () => ({ argv: (a) => (a.snapshot ? ['--snapshot'] : []),
-    description: 'Re-extract the graph from disk (meta.root) so mid-task queries reflect your edits, not a stale snapshot. Incremental; preserves domains, drops stale overlaps. snapshot:true first saves the current graph as graph.prev.json, so codeweb_diff {} can gate the edit against it. Call AFTER you edit source and BEFORE re-querying impact/callers/context.' }),
+  codeweb_refresh: () => ({
+    valid: (a) => a.snapshot && a.baseline ? 'choose baseline:true BEFORE editing or snapshot:true AFTER editing, not both' : null,
+    argv: (a) => [...(a.snapshot ? ['--snapshot'] : []), ...(a.baseline ? ['--baseline'] : [])],
+    description: 'Re-extract the graph from disk (meta.root) so mid-task queries reflect your edits, not a stale snapshot. Incremental; preserves domains, drops stale overlaps. snapshot:true first saves the current graph as graph.prev.json, so codeweb_diff {} can gate the edit against it. Use baseline:true BEFORE editing to refresh and save graph.baseline.json, protected from ordinary/automatic refreshes. Then codeweb_diff {before:"baseline", refresh:true} verifies the edit. baseline:true explicitly replaces any earlier baseline.' }),
   codeweb_find_similar: () => ({
     valid: (a) => (a.signature || a.body) ? null : 'pass `signature` (a candidate signature) or `body` (a code snippet)',
     argv: (a) => a.body ? ['--stdin', ...(a.structural ? ['--structural'] : [])] : ['--signature', a.signature, ...(a.structural ? ['--structural'] : [])],
@@ -244,8 +246,10 @@ const PROP = {
   graph: { type: 'string', description: 'Path to graph.json. OPTIONAL — defaults to CODEWEB_WS or the nearest .codeweb/graph.json above cwd' },
   symbol: { type: 'string', description: 'A node id (file:label) or a bare label' },
   query: { type: 'string', description: 'Free-text concept ("retry backoff", "where is config parsed") — no symbol name needed' },
-  before: { type: 'string', description: 'Path to the BEFORE graph.json snapshot. codeweb_diff only: OPTIONAL — defaults to "prev" (graph.prev.json beside `after`, written by codeweb_refresh snapshot:true)' },
+  before: { type: 'string', description: 'Path to the BEFORE graph.json snapshot. For codeweb_diff, "baseline" selects graph.baseline.json beside after; omitted defaults to "prev" (graph.prev.json, written by codeweb_refresh snapshot:true)' },
   after: { type: 'string', description: 'Path to the AFTER graph.json snapshot. codeweb_diff only: OPTIONAL — defaults to the discovered graph' },
+  baseline: { type: 'boolean', description: 'BEFORE editing: refresh, then save graph.baseline.json. Explicitly replaces the previous baseline; ordinary refreshes never overwrite it.' },
+  refresh: { type: 'boolean', description: 'Refresh the after graph, then compare in one queued operation. Use before:"baseline" after capturing a baseline BEFORE editing.' },
   snapshot: { type: 'boolean', description: 'First save the current graph as graph.prev.json — the default `before` side for codeweb_diff' },
   signature: { type: 'string', description: 'A candidate function signature to check for existing implementations' },
   body: { type: 'string', description: 'A candidate code snippet (function body) to check for existing implementations' },
@@ -402,7 +406,14 @@ function handleDiff(id, args, tool) {
   if (!afterPath) return errResult(id, NO_GRAPH);
   const afterAbs = resolve(afterPath);
   const beforeArg = args.before || 'prev';
-  const beforeAbs = beforeArg === 'prev' ? join(dirname(afterAbs), 'graph.prev.json') : resolve(beforeArg);
+  const beforeAbs = ['prev', 'baseline'].includes(beforeArg) ? join(dirname(afterAbs), `graph.${beforeArg}.json`) : resolve(beforeArg);
+  // AC-23: refresh+diff is ONE writer job; another workspace writer cannot land
+  // between extraction and comparison. Validate/load the baseline in the child after waiting.
+  if (args.refresh) return enqueueChild(id, {
+    kind: 'writer', key: dirname(afterAbs), tool: tool.name, bin: tool.bin,
+    argv: [beforeArg === 'baseline' ? 'baseline' : beforeAbs, afterAbs, '--refresh', '--json'],
+    stdio: ['ignore', 'pipe', 'pipe'], timeoutMs: SPAWN_TIMEOUT_MS, onSettle: spawnedToolReply(id, tool),
+  });
   const key = dirname(afterAbs); // == queueKeyFor(diff) — the after-workspace
   const entry = { kill: () => {}, cancelled: false };
   inflight.set(id, entry);
@@ -422,6 +433,7 @@ function handleDiff(id, args, tool) {
       inflight.delete(id); asyncDone();
       return errResult(id, beforeArg === 'prev'
         ? `no snapshot at ${beforeAbs} — call codeweb_refresh {snapshot:true} first (it saves the pre-refresh graph there), or pass \`before\` explicitly`
+        : beforeArg === 'baseline' ? `no baseline at ${beforeAbs} — call codeweb_refresh {baseline:true} BEFORE editing; a lost pre-edit baseline cannot be reconstructed from edited source`
         : `before graph not found: ${beforeAbs}`);
     }
     let payload;

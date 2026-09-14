@@ -1,0 +1,328 @@
+{
+  "initializedNotificationSent": true,
+  "initialization": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {
+      "tools": {}
+    },
+    "serverInfo": {
+      "name": "codeweb",
+      "version": "0.14.0"
+    },
+    "instructions": "codeweb answers structural questions about a mapped repo (graph.json) deterministically — no LLM, ~100ms.\nLoop: BEFORE editing a symbol call codeweb_context (bounded edit window) or codeweb_impact (blast radius); codeweb_dependents lists EVERY user of it (call+import+inherit+test+ref).\nBEFORE editing call codeweb_refresh {baseline:true} once to capture a fresh baseline. AFTER editing call codeweb_diff {before:\"baseline\", refresh:true} to refresh and verify in one call. Ordinary/automatic refreshes preserve this baseline. Legacy refresh {snapshot:true} then diff {} remains available.\nBefore WRITING a new function call codeweb_find_similar (does this exist?) and codeweb_placement (where does it belong?).\nBefore a refactor, codeweb_simulate pre-flights a delete/merge/move; after verifying a finding is wrong, codeweb_annotate suppresses it so it stops resurfacing.\nNo symbol name yet? codeweb_find turns a concept (\"retry backoff\") into ranked starting symbols.\n`graph` is optional — the server finds the nearest .codeweb/graph.json from cwd. No graph yet? codeweb_map builds one (~3s for 3k symbols).\nResponses are budgeted (top-N + more:{remaining, nextOffset}). Pass full:true for the unabridged list, or limit/offset to page (campaign/reading_order take `budget` instead; deadcode/context cap per tier via limit only)."
+  },
+  "toolCount": 28,
+  "toolNames": [
+    "codeweb_callers",
+    "codeweb_dependents",
+    "codeweb_callees",
+    "codeweb_impact",
+    "codeweb_cycles",
+    "codeweb_orphans",
+    "codeweb_tests",
+    "codeweb_diff",
+    "codeweb_explain",
+    "codeweb_brief",
+    "codeweb_find",
+    "codeweb_context",
+    "codeweb_refresh",
+    "codeweb_find_similar",
+    "codeweb_placement",
+    "codeweb_review",
+    "codeweb_fitness",
+    "codeweb_risk",
+    "codeweb_break_cycles",
+    "codeweb_deadcode",
+    "codeweb_codemod",
+    "codeweb_hotspots",
+    "codeweb_campaign",
+    "codeweb_reading_order",
+    "codeweb_simulate",
+    "codeweb_annotate",
+    "codeweb_stats",
+    "codeweb_map"
+  ],
+  "baselinePreserved": true,
+  "redDetected": true,
+  "repairClean": true,
+  "records": [
+    {
+      "name": "codeweb_refresh",
+      "args": {
+        "baseline": true
+      },
+      "payload": {
+        "graph": "$FIXTURE/.codeweb/graph.json",
+        "root": "$FIXTURE",
+        "before": {
+          "nodes": 2,
+          "edges": 1
+        },
+        "after": {
+          "nodes": 2,
+          "edges": 1
+        },
+        "domainsReattached": 2,
+        "scanned": "0",
+        "sidecars": [
+          "brief",
+          "index-lite",
+          "stale-stamps",
+          "similar-index"
+        ],
+        "baseline": "$FIXTURE/.codeweb/graph.baseline.json"
+      }
+    },
+    {
+      "name": "codeweb_context",
+      "args": {
+        "symbol": "alpha"
+      },
+      "payload": {
+        "symbol": "alpha",
+        "matched": [
+          "a.js:alpha"
+        ],
+        "sourceAvailable": true,
+        "summary": "alpha: 1 caller(s), 0 callee(s), blast radius 1 — graph is stale for 1+ file(s); run codeweb_refresh",
+        "mode": "call-site windows (±3 lines)",
+        "target": [
+          {
+            "id": "a.js:alpha",
+            "label": "alpha",
+            "kind": "function",
+            "file": "a.js",
+            "line": 1,
+            "loc": 1,
+            "domain": "CLI scripts (root)",
+            "exports": true,
+            "signature": {
+              "params": [],
+              "returns": null,
+              "raw": ""
+            },
+            "body": "import { beta } from './b.js';"
+          }
+        ],
+        "callers": [
+          {
+            "id": "b.js:beta",
+            "label": "beta",
+            "kind": "function",
+            "file": "b.js",
+            "line": 2,
+            "loc": 1,
+            "domain": "CLI scripts (root)",
+            "exports": true,
+            "signature": {
+              "params": [],
+              "returns": null,
+              "raw": ""
+            },
+            "windowEvidence": {
+              "status": "shown",
+              "matchedLines": 1,
+              "shownLines": 1,
+              "remaining": 0
+            },
+            "windows": [
+              {
+                "startLine": 2,
+                "endLine": 2,
+                "callLines": [
+                  2
+                ],
+                "text": "export function beta() { return alpha(); }"
+              }
+            ]
+          }
+        ],
+        "callees": [],
+        "blastRadius": {
+          "count": 1,
+          "ids": [
+            "b.js:beta"
+          ]
+        },
+        "stale": {
+          "count": 1,
+          "files": [
+            "a.js"
+          ]
+        },
+        "analysis": {
+          "scope": "mapped-call-graph",
+          "freshness": "stale",
+          "listsComplete": true,
+          "sourceEvidenceComplete": true,
+          "limitations": [
+            "unmapped-calls",
+            "stale-graph",
+            "external-callers"
+          ],
+          "nextSteps": [
+            "Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.",
+            "Refresh the map (MCP: codeweb_refresh) before relying on recorded locations.",
+            "Check package consumers before changing an exported contract."
+          ]
+        }
+      }
+    },
+    {
+      "name": "codeweb_diff",
+      "args": {
+        "before": "baseline",
+        "refresh": true
+      },
+      "payload": {
+        "before": "codeweb-doc-audit-lftjtp52/fixture",
+        "after": "codeweb-doc-audit-lftjtp52/fixture",
+        "nodes": {
+          "added": [],
+          "removed": [],
+          "renamed": []
+        },
+        "edges": {
+          "added": 1,
+          "removed": 0
+        },
+        "domains": {
+          "before": 1,
+          "after": 1
+        },
+        "crossDomainEdges": {
+          "before": 0,
+          "after": 0,
+          "delta": 0
+        },
+        "overlaps": {
+          "added": [],
+          "removed": []
+        },
+        "cycles": {
+          "added": [
+            [
+              "a.js",
+              "b.js"
+            ]
+          ],
+          "removed": []
+        },
+        "orphans": {
+          "added": [],
+          "removed": []
+        },
+        "regressions": [
+          "1 new dependency cycle(s)"
+        ],
+        "ok": false,
+        "verdict": {
+          "ok": false,
+          "check": "orphan-gate",
+          "scope": "full",
+          "checks": {
+            "newCycles": [
+              [
+                "a.js",
+                "b.js"
+              ]
+            ],
+            "lostCallers": [],
+            "newDuplications": []
+          }
+        },
+        "analysis": {
+          "scope": "mapped-graph-delta",
+          "checks": {
+            "cycles": "evaluated",
+            "lostCallers": "evaluated",
+            "duplication": "not-evaluated",
+            "behavior": "not-evaluated"
+          },
+          "nextSteps": [
+            "Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.",
+            "Mapped structural checks do not establish behavioral correctness; run the relevant tests."
+          ]
+        },
+        "verification": {
+          "before": "$FIXTURE/.codeweb/graph.baseline.json",
+          "beforeSha256": "a2bb49ca1c59d398be716a81796b718e2d68c24f47560d5be4772c6afd439bd5",
+          "after": "$FIXTURE/.codeweb/graph.json",
+          "refreshed": true
+        }
+      }
+    },
+    {
+      "name": "codeweb_diff",
+      "args": {
+        "before": "baseline",
+        "refresh": true
+      },
+      "payload": {
+        "before": "codeweb-doc-audit-lftjtp52/fixture",
+        "after": "codeweb-doc-audit-lftjtp52/fixture",
+        "nodes": {
+          "added": [],
+          "removed": [],
+          "renamed": []
+        },
+        "edges": {
+          "added": 0,
+          "removed": 0
+        },
+        "domains": {
+          "before": 1,
+          "after": 1
+        },
+        "crossDomainEdges": {
+          "before": 0,
+          "after": 0,
+          "delta": 0
+        },
+        "overlaps": {
+          "added": [],
+          "removed": []
+        },
+        "cycles": {
+          "added": [],
+          "removed": []
+        },
+        "orphans": {
+          "added": [],
+          "removed": []
+        },
+        "regressions": [],
+        "ok": true,
+        "verdict": {
+          "ok": true,
+          "check": "orphan-gate",
+          "scope": "full",
+          "checks": {
+            "newCycles": [],
+            "lostCallers": [],
+            "newDuplications": []
+          }
+        },
+        "analysis": {
+          "scope": "mapped-graph-delta",
+          "checks": {
+            "cycles": "evaluated",
+            "lostCallers": "evaluated",
+            "duplication": "not-evaluated",
+            "behavior": "not-evaluated"
+          },
+          "nextSteps": [
+            "Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.",
+            "Mapped structural checks do not establish behavioral correctness; run the relevant tests."
+          ]
+        },
+        "verification": {
+          "before": "$FIXTURE/.codeweb/graph.baseline.json",
+          "beforeSha256": "a2bb49ca1c59d398be716a81796b718e2d68c24f47560d5be4772c6afd439bd5",
+          "after": "$FIXTURE/.codeweb/graph.json",
+          "refreshed": true
+        }
+      }
+    }
+  ]
+}

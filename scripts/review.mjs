@@ -98,6 +98,16 @@ const verdict = {
 };
 const evidence = changeReviewEvidence(graph, baseline, hunks, impact);
 const payload = { ...impact, filesChanged: hunks.map((h) => h.file).sort(), structural, newDuplications, verdict, ...boundedReviewEvidence(evidence) };
+payload.analysis.checkStatus = {
+  cycles: structural ? 'evaluated' : 'not-evaluated',
+  lostCallers: structural ? 'evaluated' : 'not-evaluated',
+  duplication: root && existsSync(root) ? 'bounded-source-check' : 'not-evaluated',
+  behavior: 'not-evaluated',
+};
+payload.analysis.nextSteps = [
+  ...(!structural ? ['Pass before (CLI: --before) with a pre-edit graph to check cycles and lost callers.'] : []),
+  'Duplication uses capped mapped bodies; inspect unavailable source and run relevant tests.',
+];
 const code = (gate && hasRegression) ? 1 : 0;
 
 if (html) {
@@ -126,5 +136,6 @@ if (newDuplications.length) {
   console.log(`  NEW DUPLICATION (body-confirmed) — ${newDuplications.length}:`);
   for (const d of newDuplications) console.log(`    x ${d.id} duplicates ${d.dupOf} (${(d.sim * 100).toFixed(0)}%)`);
 }
+for (const step of payload.analysis.nextSteps) console.log(`  analysis: ${step}`);
 finish(code);
 }

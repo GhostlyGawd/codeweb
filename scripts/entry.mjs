@@ -9,7 +9,8 @@ if (first === '--') {
   await import('./run.mjs');
 } else if (Object.hasOwn(routes, first)) {
   process.argv.splice(2, 1);
-  await import(routes[first]);
+  const command = await import(routes[first]);
+  if (first === 'doctor') command.runDoctorCommand();
 } else {
   await import('./run.mjs');
 }

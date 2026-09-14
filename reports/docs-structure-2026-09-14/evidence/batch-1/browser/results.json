@@ -1,0 +1,197 @@
+{
+  "checkedAt": "2026-09-14T19:54:01.647Z",
+  "browser": "151.0.7922.34",
+  "results": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 1000,
+      "status": 200,
+      "layout": {
+        "viewport": 1440,
+        "documentWidth": 1440,
+        "bodyWidth": 1440,
+        "unreleasedLabels": [
+          "Unreleased checkout workflow. These rules require an MCP server running from the current Codeweb development checkout. The v0.14.0 npm package uses the snapshot quickstart below.",
+          "Development checkout output \u2014 baseline guidance is unreleased:",
+          "Unreleased development workflow: run from the Codeweb checkout containing baseline support, with Node.js \u2265 22 and a POSIX shell. These commands create a temporary target. The v0.14.0 npm package does not support the baseline flags below."
+        ],
+        "codeBlocks": [
+          {
+            "width": 269,
+            "scrollWidth": 383,
+            "overflowX": "auto"
+          },
+          {
+            "width": 269,
+            "scrollWidth": 578,
+            "overflowX": "auto"
+          },
+          {
+            "width": 269,
+            "scrollWidth": 274,
+            "overflowX": "auto"
+          },
+          {
+            "width": 960,
+            "scrollWidth": 960,
+            "overflowX": "auto"
+          },
+          {
+            "width": 442,
+            "scrollWidth": 610,
+            "overflowX": "auto"
+          },
+          {
+            "width": 442,
+            "scrollWidth": 766,
+            "overflowX": "auto"
+          },
+          {
+            "width": 442,
+            "scrollWidth": 617,
+            "overflowX": "auto"
+          },
+          {
+            "width": 442,
+            "scrollWidth": 773,
+            "overflowX": "auto"
+          },
+          {
+            "width": 442,
+            "scrollWidth": 742,
+            "overflowX": "auto"
+          },
+          {
+            "width": 960,
+            "scrollWidth": 960,
+            "overflowX": "auto"
+          }
+        ]
+      },
+      "anchor": {
+        "hash": "#npm-quickstart",
+        "top": 96.046875,
+        "headerBottom": 64
+      },
+      "anchors": [
+        {
+          "id": "npm-quickstart",
+          "top": 96.046875,
+          "headerBottom": 64
+        },
+        {
+          "id": "cycle-walkthrough",
+          "top": 95.875,
+          "headerBottom": 64
+        },
+        {
+          "id": "rules-snippet",
+          "top": 96.34375,
+          "headerBottom": 64
+        }
+      ],
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "layout": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "bodyWidth": 390,
+        "unreleasedLabels": [
+          "Unreleased checkout workflow. These rules require an MCP server running from the current Codeweb development checkout. The v0.14.0 npm package uses the snapshot quickstart below.",
+          "Development checkout output \u2014 baseline guidance is unreleased:",
+          "Unreleased development workflow: run from the Codeweb checkout containing baseline support, with Node.js \u2265 22 and a POSIX shell. These commands create a temporary target. The v0.14.0 npm package does not support the baseline flags below."
+        ],
+        "codeBlocks": [
+          {
+            "width": 306,
+            "scrollWidth": 342,
+            "overflowX": "auto"
+          },
+          {
+            "width": 306,
+            "scrollWidth": 522,
+            "overflowX": "auto"
+          },
+          {
+            "width": 306,
+            "scrollWidth": 306,
+            "overflowX": "auto"
+          },
+          {
+            "width": 306,
+            "scrollWidth": 716,
+            "overflowX": "auto"
+          },
+          {
+            "width": 306,
+            "scrollWidth": 550,
+            "overflowX": "auto"
+          },
+          {
+            "width": 306,
+            "scrollWidth": 694,
+            "overflowX": "auto"
+          },
+          {
+            "width": 306,
+            "scrollWidth": 558,
+            "overflowX": "auto"
+          },
+          {
+            "width": 306,
+            "scrollWidth": 702,
+            "overflowX": "auto"
+          },
+          {
+            "width": 306,
+            "scrollWidth": 673,
+            "overflowX": "auto"
+          },
+          {
+            "width": 306,
+            "scrollWidth": 759,
+            "overflowX": "auto"
+          }
+        ]
+      },
+      "anchor": {
+        "hash": "#npm-quickstart",
+        "top": 96.0625,
+        "headerBottom": 64
+      },
+      "anchors": [
+        {
+          "id": "npm-quickstart",
+          "top": 96.0625,
+          "headerBottom": 64
+        },
+        {
+          "id": "cycle-walkthrough",
+          "top": 96.15625,
+          "headerBottom": 64
+        },
+        {
+          "id": "rules-snippet",
+          "top": 96.25,
+          "headerBottom": 64
+        }
+      ],
+      "errors": [],
+      "failedRequests": []
+    }
+  ],
+  "visuallyInspected": true,
+  "sourceSha256": {
+    "site/content/start.html": "036f4b0e1a02b5d9b5283537cc763cddc917c21eb4e9992d438b3419a05e65ec",
+    "site/styles.css": "a2383944e87df187dadcf9ed8bb635b355c465282c1efe5c4e9c1fd08bd0c30e",
+    "docs/start.html": "d7b70afd8c4a767d8be0dfc0b99b74497d3a4e3529261f1116b0984ed14edeee",
+    "docs/assets/site.css": "b5e3734be696ed43eaf51688b491e5ead2b86ce8974a35451dce41f1c44adb72"
+  }
+}

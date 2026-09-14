@@ -52,6 +52,7 @@ const numOf = (s) => (/^\d+$/.test(s) ? Number(s) : WORD_NUM[s.toLowerCase()] ??
 /** Prose files the scans cover — hand-written surfaces where counts can rot. */
 export const PROSE_FILES = [
   'README.md',
+  'SPEC.md', // Current contract; dated audits and CHANGELOG remain historical.
   'docs/reference.md',
   'tests/README.md',
   '.claude-plugin/marketplace.json',
@@ -88,9 +89,14 @@ export const PROSE_FILES = [
 /** Scan one text for tool-count / language-count claims that disagree with the canonical facts. */
 export function scanProseCounts(text, file, { toolCount, langCount }) {
   const problems = [];
+  // DS-06: inspect rendered count wording, including Markdown/HTML emphasis and
+  // "all **27** of codeweb's tools". Keep the bridge specific to Codeweb so
+  // unrelated counts such as "27 of our tests exercise tools" remain untouched.
+  const toolProse = text.replace(/<\/?(?:strong|em|b|code|span)\b[^>]*>/gi, '')
+    .replace(/[*`]|__/g, '');
   // "<N> [deterministic|read-only|agent|query|MCP|structural]* tools" — digits or number-words.
-  const toolRe = /\b(\d+|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|twenty-four|twenty-seven)((?:\s+(?:deterministic|read-only|agent|query|MCP|structural))*)\s+tools\b/gi;
-  for (const m of text.matchAll(toolRe)) {
+  const toolRe = /\b(\d+|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty(?:-four|-seven|-eight)?)(?:\s+of\s+codeweb(?:['’]s)?)?((?:\s+(?:deterministic|read-only|agent|query|MCP|structural))*)\s+tools\b/gi;
+  for (const m of toolProse.matchAll(toolRe)) {
     const n = numOf(m[1]);
     if (n != null && n !== toolCount) problems.push(`${file}: says "${m[0].trim()}" but ${toolCount} tools ship`);
   }

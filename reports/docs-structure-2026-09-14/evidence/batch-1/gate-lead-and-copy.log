@@ -1,0 +1,20 @@
+✔ current Markdown prose stays under 55 words per paragraph (4.6765ms)
+✔ current authored HTML prose stays under 55 words per paragraph (1.152292ms)
+✔ listing descriptions (package/plugin/marketplace) stay under 55 words (0.302917ms)
+✔ README puts the gate lead between the identity line and any map-led narrative (0.551042ms)
+✔ the README gate lead states the verdict, its three blockers, and its token cost (0.228417ms)
+✔ README gates every pull request before it explains the graph internals (0.161334ms)
+✔ README carries a free-forever boundary section linking the published boundary page (0.250166ms)
+✔ the identity line stays verbatim on all four enforced surfaces (0.6115ms)
+✔ the built homepage hero renders the identity line verbatim (0.196ms)
+✔ the homepage leads with the gate and demotes the live map below it (0.136917ms)
+✔ the homepage gate story states its blockers, its cost, and where it runs (0.124958ms)
+✔ the homepage hero still carries its conversion rails after the reorder (0.102042ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 54.454417

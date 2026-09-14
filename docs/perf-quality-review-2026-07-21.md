@@ -1,5 +1,9 @@
 # codeweb — Performance & Quality Review
 
+> Historical review. Its implementation and follow-up work are reconciled in the
+> [audit inventory](../reports/AUDIT-STATUS.md). Current guides start at the
+> [documentation index](README.md).
+
 **Date:** 2026-07-21 · **Scope:** performance and internal quality across every executing surface — extract engine (regex + AST tiers), post-graph advisors (overlap/risk/optimize/campaign/deadcode), hooks, MCP server, report.html, tests, CI, release tooling.
 
 **Method:** six parallel read-only audits (engine perf · analysis perf · interactive latency · code quality · robustness/determinism · tests/CI/packaging), each required to verify claims against this working tree before reporting. Evidence includes CPU profiles, micro-benchmarks on synthetic 10k–20k-node corpora, a scripted MCP stdio client, reproduced corruption cases, one full test-suite run, and dogfood self-maps (codeweb's own overlap/deadcode output on codeweb, machine findings hand-verified before use). Absolute times are from this container (Node 22.22.2, 4 cores) — treat ratios as the signal, not the milliseconds. Three findings were discovered **independently by two audits each** (the masker's regex-literal blind spot, the three-way scan-cache split, the quadratic blast-radius loop) — treat those as high-confidence.

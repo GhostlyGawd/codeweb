@@ -1,0 +1,14 @@
+✔ ac_15: baseline captures refreshed source and survives refresh/snapshot; verification sees later edits (517.106167ms)
+✔ ac_15: invalid baselines fail before mutation; failed extraction preserves a previous baseline (182.483375ms)
+✔ ac_15: structurally invalid baseline JSON fails before refreshing the live graph (114.664958ms)
+✔ ac_15: queued MCP begin/verify is ordered; background refresh preserves baseline and verification finds a regression (864.704083ms)
+✔ ac_15: a dropped overlap set is not a clean duplication check or a claimed fix (0.663834ms)
+✔ ac_15: review identifies unevaluated structure and unavailable duplication evidence (40.371542ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1765.490542

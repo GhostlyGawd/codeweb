@@ -67,19 +67,58 @@ test('ci-gate passes (exit 0) when the working tree matches base', { skip: hasGi
   }
 });
 
-test('ci-gate --md writes the PR-comment digest carrying the verdict', { skip: hasGit ? false : 'git not available' }, () => {
+test('ac_21: ci-gate --md carries real duplication evidence and commit-pinned subdirectory links without changing the verdict', { skip: hasGit ? false : 'git not available' }, () => {
   const { repo, base } = repoWithBase();
   try {
     writeTree(repo, { 'src/b.js': COMPUTE }); // duplication -> failing gate
+    assert.equal(spawnSync('git', ['-C', repo, 'add', 'src/b.js']).status, 0);
+    assert.equal(spawnSync('git', ['-C', repo, 'commit', '-q', '-m', 'duplicate']).status, 0);
+    const head = spawnSync('git', ['-C', repo, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).stdout.trim();
     const md = join(repo, 'gate.md');
-    const r = runNode(script('ci-gate.mjs'), ['--base', base, '--repo', repo, '--target', 'src', '--md', md]);
+    const r = runNode(script('ci-gate.mjs'), ['--base', base, '--repo', repo, '--target', './src', '--md', md], {
+      env: { GITHUB_SERVER_URL: 'https://github.com', GITHUB_REPOSITORY: 'acme/project', GITHUB_SHA: base },
+    });
     assert.equal(r.status, 1, 'verdict unchanged by the digest');
     const body = readFileSync(md, 'utf8');
     assert.match(body, /^<!-- codeweb-gate -->/, 'sticky-comment marker leads the body');
     assert.match(body, /❌ \d+ regression type/, 'verdict in the headline');
     assert.match(body, /New duplication findings/, 'names the regression class');
+    assert.ok(body.includes(`https://github.com/acme/project/blob/${head}/src/b.js#L1`), body);
+    assert.ok(body.includes(`https://github.com/acme/project/blob/${head}/src/a.js#L1`), body);
+    assert.doesNotMatch(body, new RegExp(`/blob/${base}/`), 'uses analyzed HEAD, not an unrelated environment SHA');
+    assert.match(body, /Evidence:/);
+    assert.match(body, /confidence: high/);
+    assert.match(body, /body similarity: 100%/);
+    assert.match(body, /Compare the implementations/);
   } finally {
     cleanup(repo);
+  }
+});
+
+test('ac_21: dirty source locations stay plain text for untracked, modified and staged files', { skip: hasGit ? false : 'git not available' }, () => {
+  for (const state of ['untracked', 'modified', 'staged']) {
+    const { repo, base } = repoWithBase();
+    const git = (...args) => {
+      const r = spawnSync('git', ['-C', repo, ...args], { encoding: 'utf8' });
+      assert.equal(r.status, 0, r.stderr);
+    };
+    try {
+      if (state !== 'untracked') {
+        writeTree(repo, { 'src/b.js': 'export function unrelated() { return 1; }\n' });
+        git('add', 'src/b.js'); git('commit', '-q', '-m', 'second source');
+      }
+      writeTree(repo, { 'src/b.js': COMPUTE });
+      if (state === 'staged') git('add', 'src/b.js');
+      const md = join(repo, 'gate.md');
+      const r = runNode(script('ci-gate.mjs'), ['--base', base, '--repo', repo, '--target', 'src', '--md', md], {
+        env: { GITHUB_SERVER_URL: 'https://github.com', GITHUB_REPOSITORY: 'acme/project' },
+      });
+      assert.equal(r.status, 1, `${state}: ${r.stderr}`);
+      const body = readFileSync(md, 'utf8');
+      assert.match(body, /src\/b\.js:1/, `${state}: location remains useful`);
+      assert.doesNotMatch(body, /https:\/\/github\.com\/acme\/project\/blob\//, `${state}: HEAD does not contain analyzed bytes`);
+      assert.match(body, /New duplication findings/);
+    } finally { cleanup(repo); }
   }
 });
 

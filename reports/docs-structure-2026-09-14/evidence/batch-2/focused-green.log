@@ -1,0 +1,39 @@
+✔ ac_12: every agent-path engine value (hybrid|tools|read) labels the brief payload (1.330917ms)
+✔ ac_12: deterministic-pipeline engines (ctags|regex) carry no agent label (0.1415ms)
+✔ ac_12: the rendered brief (session-start injection) says the provenance out loud (0.184291ms)
+✔ ac_12: the fallback schema documents meta.engine as the provenance label (0.102959ms)
+✔ current Markdown prose stays under 55 words per paragraph (4.113125ms)
+✔ current authored HTML prose stays under 55 words per paragraph (1.056708ms)
+✔ listing descriptions (package/plugin/marketplace) stay under 55 words (0.260458ms)
+✔ auditClaimValues: a stated stat that disagrees with its receipt fails; the real repo is clean (5.8695ms)
+✔ bumpVersion follows SemVer (0.143458ms)
+✔ the real repo derives 28 MCP tools from the source (0.338166ms)
+✔ engines.node claims exactly the tested floor (>=22) (0.097375ms)
+✔ the real repo is consistent (versions + tool count aligned) (15.092625ms)
+✔ check-consistency CLI exits 0 on the aligned repo (51.367625ms)
+✔ rollChangelog moves Unreleased into a dated version section (0.297583ms)
+✔ rollChangelog refuses an empty Unreleased (0.12425ms)
+✔ syncTargets rewrites version + tool count via backref-preserving subs (0.159833ms)
+✔ checkConsistency catches drift, applySync repairs it (round-trip) (3.921833ms)
+✔ checkConsistency fails a sponsorship cost premise in the stdout copy module (3.651167ms)
+✔ checkConsistency fails a sponsorship cost premise on any prose surface, not just product-copy (2.655625ms)
+✔ checkConsistency fails a numeric claim literal in a script outside product-copy.mjs (2.478459ms)
+✔ checkConsistency enforces the D1 manifest discipline (restatement + phantom docs) (2.7115ms)
+✔ scanProseCounts flags the live package.json description string against 27 tools (0.05675ms)
+✔ checkConsistency scans site/data/product.json prose — the stale-elevator class (0.043584ms)
+✔ scanProseCounts flags a stale tool count, in digits and words (0.115ms)
+✔ documentation counts survive formatting and Codeweb possessive phrasing (0.078917ms)
+✔ current SPEC and reference counts are checked while dated audit counts stay historical (3.152625ms)
+✔ scanProseCounts flags a stale native-language count (0.056042ms)
+✔ scanProseCounts catches the "(N total)" and bare "N languages" phrasings that slipped v0.9.0 (0.208875ms)
+✔ product.json languages match the extractor: one file per extension, counted (168.399917ms)
+✔ CHANGELOG never @-mentions a number — bare @digit is banned outside code spans (0.976333ms)
+✔ the release workflow re-syncs notes for an existing release instead of skipping (0.21275ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 307.998375

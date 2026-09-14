@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
     "SessionStart": [
       {
@@ -10,9 +9,7 @@
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-brief.mjs\"",
             "timeout": 10
           }
-        ],
-        "description": "codeweb: when the session starts in a .codeweb-mapped repo, inject the ~2KB day-one briefing (domains, load-bearing symbols, entry points, tests, known issues) so the agent starts oriented instead of exploring (fail-open; inert until /codeweb has mapped the repo)",
-        "id": "codeweb:session-brief"
+        ]
       }
     ],
     "PreToolUse": [
@@ -24,9 +21,7 @@
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/pre-edit-impact.mjs\"",
             "timeout": 10
           }
-        ],
-        "description": "codeweb: before an edit in a .codeweb-mapped target, surface one line of blast-radius awareness (symbols + dependents in the file) so contract changes get impact-checked first (advisory; fail-open; inert until /codeweb has mapped the target)",
-        "id": "codeweb:pre-edit-impact"
+        ]
       }
     ],
     "PostToolUse": [
@@ -38,9 +33,7 @@
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/post-edit-diff.mjs\"",
             "timeout": 30
           }
-        ],
-        "description": "codeweb: after an edit to a .codeweb-mapped target, flag new dependency cycles or symbols that lost all callers (edges-only subset; fail-open, non-blocking, inert until /codeweb has mapped the target)",
-        "id": "codeweb:post-edit-diff"
+        ]
       }
     ]
   }

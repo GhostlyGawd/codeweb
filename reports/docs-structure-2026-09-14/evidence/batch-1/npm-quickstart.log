@@ -1,0 +1,130 @@
+
+[run] done -> $FIXTURE/.codeweb · codeweb v0.14.0
+[run] mapped 2 symbols -> 0 actionable finding(s) — details: optimize.md
+[run]   $FIXTURE/.codeweb/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json
+[run] next:
+[run]   1. see the map: open $FIXTURE/.codeweb/report.html
+[run]   2. live queries in Claude Code: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
+[run]   3. after edits: re-run codeweb here — the refresh is cache-warm (seconds, not a re-map)
+{"query":"callers","symbol":"beta","summary":"1 callers of beta","matched":["b.js:beta"],"results":["a.js:alpha"],"count":1}
+
+[run] done -> $FIXTURE/.codeweb · codeweb v0.14.0
+[run] mapped 2 symbols -> 0 actionable finding(s) — details: optimize.md
+[run] since last map (2026-09-14): dups 0 -> 0 · cycles 0 -> 1 · symbols 2 -> 2
+[run]   $FIXTURE/.codeweb/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json
+[run] next:
+[run]   1. see the map: open $FIXTURE/.codeweb/report.html
+[run]   2. live queries in Claude Code: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
+[run]   3. after edits: re-run codeweb here — the refresh is cache-warm (seconds, not a re-map)
+{"before":"T/codeweb-npm.SN48q0","after":"T/codeweb-npm.SN48q0","nodes":{"added":[],"removed":[],"renamed":[]},"edges":{"added":1,"removed":0},"domains":{"before":1,"after":1},"crossDomainEdges":{"before":0,"after":0,"delta":0},"overlaps":{"added":[],"removed":[]},"cycles":{"added":[["a.js","b.js"]],"removed":[]},"orphans":{"added":[],"removed":[]},"regressions":["1 new dependency cycle(s)"],"ok":false,"verdict":{"ok":false,"check":"orphan-gate","scope":"full","checks":{"newCycles":[["a.js","b.js"]],"lostCallers":[],"newDuplications":[]}}}
+DOC_DIFF_EXIT=1
+
+[run] done -> $FIXTURE/.codeweb · codeweb v0.14.0
+[run] mapped 2 symbols -> 0 actionable finding(s) — details: optimize.md
+[run] since last map (2026-09-14): dups 0 -> 0 · cycles 1 -> 0 · symbols 2 -> 2
+[run]   $FIXTURE/.codeweb/report.html · report.md · overlap.md · optimize.md · graph.json · fragment.json
+[run] next:
+[run]   1. see the map: open $FIXTURE/.codeweb/report.html
+[run]   2. live queries in Claude Code: claude mcp add codeweb -- npx -y -p @ghostlygawd/codeweb codeweb-mcp
+[run]   3. after edits: re-run codeweb here — the refresh is cache-warm (seconds, not a re-map)
+{"before":"T/codeweb-npm.SN48q0","after":"T/codeweb-npm.SN48q0","nodes":{"added":[],"removed":[],"renamed":[]},"edges":{"added":0,"removed":0},"domains":{"before":1,"after":1},"crossDomainEdges":{"before":0,"after":0,"delta":0},"overlaps":{"added":[],"removed":[]},"cycles":{"added":[],"removed":[]},"orphans":{"added":[],"removed":[]},"regressions":[],"ok":true,"verdict":{"ok":true,"check":"orphan-gate","scope":"full","checks":{"newCycles":[],"lostCallers":[],"newDuplications":[]}}}
+DOC_DIFF_EXIT=0
+
+STDERR
+
+[run] extract
+/Library/Developer/CommandLineTools/usr/bin/ctags: illegal option -- -
+usage: ctags [-BFTaduwvx] [-f tagsfile] file ...
+[extract] 2 symbols, 1 edges (1 call + 0 import) from 2 files (regex+tree-sitter engine); dropped 0 ambiguous bare-call edges (0 short-name); wired 0 dispatch edge(s); scanned 2/2 file(s); edged 2/2 (cache on); ast: loaded -> $FIXTURE/.codeweb/fragment.json
+[run] extract done in 112ms
+
+[run] cluster
+hubs stripped (indeg>=12): 0
+domains: 1 (hub-named)
+isolated-after-dehub: 0 (0%)
+--- top 1 domain ---
+   2 CLI scripts (root)
+[run] cluster done in 35ms
+
+[run] overlap
+source: FOUND — body-confirmed
+actionable 0 · needs review 0 · dismissed 0
+--- top findings ---
+[run] overlap done in 41ms
+
+[run] optimize
+codeweb optimize: 0 actionable finding(s) · 0 ready · 0 blocked · 0 judgement · ~0 LOC reclaimable
+  full advisory: $FIXTURE/.codeweb/optimize.md
+[run] optimize done in 36ms
+
+[run] report
+[codeweb] wrote $FIXTURE/.codeweb/report.html
+[codeweb] 2 nodes, 1 edges, 1 domains — actionable 0 · needs review 0 · dismissed 0
+[codeweb] updated $FIXTURE/.codeweb/graph.json (meta.generatedAt + meta.stats persisted)
+[codeweb] wrote $FIXTURE/.codeweb/report.md
+[run] report done in 43ms
+[codeweb] using $FIXTURE/.codeweb/graph.json (nearest .codeweb above cwd)
+
+[run] extract
+/Library/Developer/CommandLineTools/usr/bin/ctags: illegal option -- -
+usage: ctags [-BFTaduwvx] [-f tagsfile] file ...
+[extract] 2 symbols, 2 edges (2 call + 0 import) from 2 files (regex+tree-sitter engine); dropped 0 ambiguous bare-call edges (0 short-name); wired 0 dispatch edge(s); scanned 1/2 file(s); edged 2/2 (cache on); ast: loaded -> $FIXTURE/.codeweb/fragment.json
+[run] extract done in 96ms
+
+[run] cluster
+hubs stripped (indeg>=12): 0
+domains: 1 (hub-named)
+isolated-after-dehub: 0 (0%)
+--- top 1 domain ---
+   2 CLI scripts (root)
+[run] cluster done in 35ms
+
+[run] overlap
+source: FOUND — body-confirmed
+actionable 0 · needs review 0 · dismissed 0
+--- top findings ---
+[run] overlap done in 37ms
+
+[run] optimize
+codeweb optimize: 0 actionable finding(s) · 0 ready · 0 blocked · 0 judgement · ~0 LOC reclaimable
+  full advisory: $FIXTURE/.codeweb/optimize.md
+[run] optimize done in 36ms
+
+[run] report
+[codeweb] wrote $FIXTURE/.codeweb/report.html
+[codeweb] 2 nodes, 2 edges, 1 domains — actionable 0 · needs review 0 · dismissed 0
+[codeweb] updated $FIXTURE/.codeweb/graph.json (meta.generatedAt + meta.stats persisted)
+[codeweb] wrote $FIXTURE/.codeweb/report.md
+[run] report done in 41ms
+
+[run] extract
+/Library/Developer/CommandLineTools/usr/bin/ctags: illegal option -- -
+usage: ctags [-BFTaduwvx] [-f tagsfile] file ...
+[extract] 2 symbols, 1 edges (1 call + 0 import) from 2 files (regex+tree-sitter engine); dropped 0 ambiguous bare-call edges (0 short-name); wired 0 dispatch edge(s); scanned 1/2 file(s); edged 1/2 (cache on); ast: loaded -> $FIXTURE/.codeweb/fragment.json
+[run] extract done in 104ms
+
+[run] cluster
+hubs stripped (indeg>=12): 0
+domains: 1 (hub-named)
+isolated-after-dehub: 0 (0%)
+--- top 1 domain ---
+   2 CLI scripts (root)
+[run] cluster done in 35ms
+
+[run] overlap
+source: FOUND — body-confirmed
+actionable 0 · needs review 0 · dismissed 0
+--- top findings ---
+[run] overlap done in 38ms
+
+[run] optimize
+codeweb optimize: 0 actionable finding(s) · 0 ready · 0 blocked · 0 judgement · ~0 LOC reclaimable
+  full advisory: $FIXTURE/.codeweb/optimize.md
+[run] optimize done in 35ms
+
+[run] report
+[codeweb] wrote $FIXTURE/.codeweb/report.html
+[codeweb] 2 nodes, 1 edges, 1 domains — actionable 0 · needs review 0 · dismissed 0
+[codeweb] updated $FIXTURE/.codeweb/graph.json (meta.generatedAt + meta.stats persisted)
+[codeweb] wrote $FIXTURE/.codeweb/report.md
+[run] report done in 42ms

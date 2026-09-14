@@ -1,0 +1,822 @@
+{
+  "checkedAt": "2026-09-14T19:23:06.520335+00:00",
+  "head": "16d3a9bebbf675ef8ccdad56cde73aa5df40fee7",
+  "node": "v26.7.0",
+  "engine": "regex",
+  "baselinePreserved": true,
+  "sourceHashes": {
+    "README.md": "48b852ff11c6baf47a4299ed7130d132bd643080e4e7c522807e25bd188f4b7b",
+    "CONTRIBUTING.md": "da72a24b4b3695c37b6820a0e2cf5ba332c99554db7a3dde911ab1411d905ae8",
+    "SPEC.md": "8f256c22bfc83f079104fd9408f48fec1b2ba978acb24cccc99b4f32701ab9b0",
+    "CHARTER.md": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd",
+    "docs/cli.md": "a473fa480558a78f42c1340fa67216c3bc88dd4d26d3639787b8cbda951128a1",
+    "docs/reference.md": "66fbbd9ca7947df16ae8e239b02dbdc7fdd361581b3aea9bfe035878cbc39276",
+    "docs/ci-gate.md": "b6183402972ecd2b441b7bde41d73e63c7b8c89bc06b025d6e3b506f832f85cc",
+    "docs/harness.md": "f95cc66fecc38c5ce99d7d0f04615e955d86d771fa389c0eaa8774b1d3a612bd",
+    "site/content/start.html": "a653f24f2bd0a4afe89bc040369e4122edd1c5aaa7ca6cc30bd15d7322286b57",
+    "site/build.mjs": "e83d19fc768e5c7bc7933361543c5caead3b13fba6423d4da2fe873dac3613f8",
+    "scripts/run.mjs": "5c8e0a7e69729cea995c2724d3451bba3018f3ac2a9281fee2f2f17b17564c93",
+    "scripts/refresh.mjs": "684c9fba25ddf993113c64877a95515c25ecc0235013515e3fc1d6b338c44fbf",
+    "scripts/diff.mjs": "0d5d1a49c2a9e057d3b1cbe616c452a76557c116c79a2389b6a65a7777d4da66",
+    "scripts/mcp-server.mjs": "1da7f33afbbce76e0cc9a4b31665601fb2a86d99844352f119a4c03042f07099",
+    "scripts/lib/tool-specs.mjs": "bc217ecf942fecdd25a11e8855c4b3c54f70e27645df55e558c550ebaae6f7c3",
+    "scripts/release-utils.mjs": "ca9ed993be8cabde20dbf060640892ffdc35d968cd602fff90823c0bf4a5c933",
+    "scripts/extract-symbols.mjs": "dad409fb5ab6d51b9ce3133a1998ccd02f713b93e3c85c8fc009c47ce9fcd6f3",
+    "skills/codebase-anatomy/references/graph-schema.md": "9111fdb9f4c6f31956a100afc4d8f1dee019d50555ea6a67c8495f51f7646450",
+    "commands/apply.md": "c8a96df0710c552812d0464d40bbb5961ebadb7ee56f0d97adfdf84c12cb1350",
+    "commands/codeweb.md": "6c27ac8ea9fdeb93adddfd0ed0a68923eb5a44dfefa698d1c12587ce12fc6e40"
+  },
+  "observedSchema": {
+    "metaKeys": [
+      "depth",
+      "dirs",
+      "engine",
+      "generatedAt",
+      "languages",
+      "mode",
+      "root",
+      "sources",
+      "stats",
+      "symbols",
+      "target"
+    ],
+    "nodeKeys": [
+      "complexity",
+      "domain",
+      "exports",
+      "file",
+      "id",
+      "kind",
+      "label",
+      "line",
+      "loc",
+      "maxDepth",
+      "role",
+      "signature",
+      "summary"
+    ]
+  },
+  "runs": [
+    {
+      "id": "codeweb-help",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/bin/codeweb.mjs",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: codeweb [<SRC>] [--target <label>] [--out-dir <dir>] [--open] [--full] [--allow-empty] [--json]\n  <SRC>            path to the codebase to map (default: current directory)\n  --target <label> display label stamped into the map (default: last two path segments of <SRC>)\n  --out-dir <dir>  where the artifacts go (default: <SRC>/.codeweb \u2014 where MCP + hooks find them)\n  --doctor         diagnose this installation and target without creating or changing a map\n  --open           open report.html when the map is built\n  --serve          after the map, serve the workspace at http://127.0.0.1:<port> (localhost only)\n  --full           recompute every stage (skip the fragment memo + edge cache)\n  --allow-empty    permit a target with no supported source (writes an empty map)\n  --json           machine mode: one JSON result line on stdout ({ws, symbols, actionable,\n                   reused, version}); stage progress stays on stderr\n  --stages <phase> partial pipeline; only 'through-overlap' (extract+cluster+overlap, skip\n                   optimize+report) \u2014 the trend fast path; never writes the stage memo\n  --coverage <p>   annotate the graph with a coverage report (lcov or c8 JSON) after mapping\n",
+      "stderr": ""
+    },
+    {
+      "id": "codeweb-query-help",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/bin/codeweb-query.mjs",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: codeweb-query [graph.json] <--callers|--callees|--tests|--dependents|--impact <symbol> | --cycles | --orphans> [--limit N] [--offset N] [--json]\n",
+      "stderr": ""
+    },
+    {
+      "id": "codeweb-diff-help",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/bin/codeweb-diff.mjs",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "usage: codeweb-diff <before.json|baseline|prev> <after.json> [--refresh] [--json]\n",
+      "stderr": ""
+    },
+    {
+      "id": "codeweb-mcp-help",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/bin/codeweb-mcp.mjs",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "id": "doctor-before-map",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/bin/codeweb.mjs",
+        "$FIXTURE",
+        "--doctor",
+        "--json"
+      ],
+      "exit": 2,
+      "stdout": {
+        "ok": false,
+        "installation": {
+          "root": "$CODEWEB_ROOT",
+          "version": "0.14.0",
+          "kind": "checkout",
+          "entrypoint": "$CODEWEB_ROOT/bin/codeweb.mjs",
+          "nodeExecutable": "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+          "nodeVersion": "v26.7.0",
+          "pathExecutables": {
+            "codeweb": "/opt/homebrew/lib/node_modules/@ghostlygawd/codeweb/bin/codeweb.mjs",
+            "codeweb-mcp": "/opt/homebrew/lib/node_modules/@ghostlygawd/codeweb/bin/codeweb-mcp.mjs"
+          }
+        },
+        "target": "$FIXTURE",
+        "graph": {
+          "path": null,
+          "status": "missing",
+          "root": null,
+          "freshness": "unknown"
+        },
+        "parsers": {
+          "regex": true,
+          "universalCtags": false,
+          "ast": {
+            "ts": true,
+            "java": true,
+            "csharp": true,
+            "python": true,
+            "go": true,
+            "rust": true,
+            "ruby": true,
+            "php": true,
+            "cpp": true,
+            "c": true,
+            "tsVersion": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)"
+          },
+          "probeOnly": true
+        },
+        "issues": [
+          {
+            "code": "graph-missing",
+            "level": "error",
+            "next": "Build a map at this target; correct or unset CODEWEB_WS if it points elsewhere.",
+            "command": [
+              "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+              "$CODEWEB_ROOT/scripts/run.mjs",
+              "$FIXTURE"
+            ]
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "first-map",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/bin/codeweb.mjs",
+        "$FIXTURE",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": {
+        "ws": "$FIXTURE/.codeweb",
+        "symbols": 2,
+        "actionable": 0,
+        "reused": false,
+        "version": "0.14.0"
+      },
+      "stderr": "\n[run] extract\n/Library/Developer/CommandLineTools/usr/bin/ctags: illegal option -- -\nusage: ctags [-BFTaduwvx] [-f tagsfile] file ...\n[extract] 2 symbols, 1 edges (1 call + 0 import) from 2 files (regex engine); dropped 0 ambiguous bare-call edges (0 short-name); scanned 2/2 file(s); edged 2/2 (cache on); ast: off -> $FIXTURE/.codeweb/fragment.json\n[run] extract done in 79ms\n\n[run] cluster\nhubs stripped (indeg>=12): 0\ndomains: 1 (hub-named)\nisolated-after-dehub: 0 (0%)\n--- top 1 domain ---\n   2 CLI scripts (root)\n[run] cluster done in 35ms\n\n[run] overlap\nsource: FOUND \u2014 body-confirmed\nactionable 0 \u00b7 needs review 0 \u00b7 dismissed 0\n--- top findings ---\n[run] overlap done in 37ms\n\n[run] optimize\ncodeweb optimize: 0 actionable finding(s) \u00b7 0 ready \u00b7 0 blocked \u00b7 0 judgement \u00b7 ~0 LOC reclaimable\n  full advisory: $FIXTURE/.codeweb/optimize.md\n[run] optimize done in 36ms\n\n[run] report\n[codeweb] wrote $FIXTURE/.codeweb/report.html\n[codeweb] 2 nodes, 1 edges, 1 domains \u2014 actionable 0 \u00b7 needs review 0 \u00b7 dismissed 0\n[codeweb] updated $FIXTURE/.codeweb/graph.json (meta.generatedAt + meta.stats persisted)\n[codeweb] wrote $FIXTURE/.codeweb/report.md\n[run] report done in 39ms\n"
+    },
+    {
+      "id": "query-discovery",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/bin/codeweb-query.mjs",
+        "--callers",
+        "alpha",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": {
+        "query": "callers",
+        "symbol": "alpha",
+        "summary": "1 callers of alpha",
+        "matched": [
+          "a.js:alpha"
+        ],
+        "results": [
+          "b.js:beta"
+        ],
+        "count": 1
+      },
+      "stderr": "[codeweb] using $FIXTURE/.codeweb/graph.json (nearest .codeweb above cwd)\n"
+    },
+    {
+      "id": "doctor-after-map",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/bin/codeweb.mjs",
+        "$FIXTURE",
+        "--doctor",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": {
+        "ok": true,
+        "installation": {
+          "root": "$CODEWEB_ROOT",
+          "version": "0.14.0",
+          "kind": "checkout",
+          "entrypoint": "$CODEWEB_ROOT/bin/codeweb.mjs",
+          "nodeExecutable": "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+          "nodeVersion": "v26.7.0",
+          "pathExecutables": {
+            "codeweb": "/opt/homebrew/lib/node_modules/@ghostlygawd/codeweb/bin/codeweb.mjs",
+            "codeweb-mcp": "/opt/homebrew/lib/node_modules/@ghostlygawd/codeweb/bin/codeweb-mcp.mjs"
+          }
+        },
+        "target": "$FIXTURE",
+        "graph": {
+          "path": "$FIXTURE/.codeweb/graph.json",
+          "status": "mapped",
+          "root": "$FIXTURE",
+          "freshness": "unchanged-stamps",
+          "symbols": 2,
+          "engine": "regex + de-hubbed dir-seeded call-cohesion clustering",
+          "baseline": null
+        },
+        "parsers": {
+          "regex": true,
+          "universalCtags": false,
+          "ast": {
+            "ts": true,
+            "java": true,
+            "csharp": true,
+            "python": true,
+            "go": true,
+            "rust": true,
+            "ruby": true,
+            "php": true,
+            "cpp": true,
+            "c": true,
+            "tsVersion": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)"
+          },
+          "probeOnly": true
+        },
+        "issues": []
+      },
+      "stderr": ""
+    },
+    {
+      "id": "pre-edit-baseline",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/scripts/refresh.mjs",
+        "$FIXTURE/.codeweb/graph.json",
+        "--baseline",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": {
+        "graph": "$FIXTURE/.codeweb/graph.json",
+        "root": "$FIXTURE",
+        "before": {
+          "nodes": 2,
+          "edges": 1
+        },
+        "after": {
+          "nodes": 2,
+          "edges": 1
+        },
+        "domainsReattached": 2,
+        "scanned": "0",
+        "sidecars": [
+          "brief",
+          "index-lite",
+          "stale-stamps",
+          "similar-index"
+        ],
+        "baseline": "$FIXTURE/.codeweb/graph.baseline.json"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "intervening-refresh",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/scripts/refresh.mjs",
+        "$FIXTURE/.codeweb/graph.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": {
+        "graph": "$FIXTURE/.codeweb/graph.json",
+        "root": "$FIXTURE",
+        "before": {
+          "nodes": 2,
+          "edges": 1
+        },
+        "after": {
+          "nodes": 2,
+          "edges": 2
+        },
+        "domainsReattached": 2,
+        "scanned": "1",
+        "sidecars": [
+          "brief",
+          "index-lite",
+          "stale-stamps",
+          "similar-index"
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "legacy-snapshot",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/scripts/refresh.mjs",
+        "$FIXTURE/.codeweb/graph.json",
+        "--snapshot",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": {
+        "graph": "$FIXTURE/.codeweb/graph.json",
+        "root": "$FIXTURE",
+        "before": {
+          "nodes": 2,
+          "edges": 2
+        },
+        "after": {
+          "nodes": 2,
+          "edges": 2
+        },
+        "domainsReattached": 2,
+        "scanned": "0",
+        "sidecars": [
+          "brief",
+          "index-lite",
+          "stale-stamps",
+          "similar-index"
+        ],
+        "snapshot": "$FIXTURE/.codeweb/graph.prev.json"
+      },
+      "stderr": ""
+    },
+    {
+      "id": "legacy-diff",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/scripts/diff.mjs",
+        "prev",
+        "$FIXTURE/.codeweb/graph.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": {
+        "before": "codeweb-doc-audit-lftjtp52/fixture",
+        "after": "codeweb-doc-audit-lftjtp52/fixture",
+        "nodes": {
+          "added": [],
+          "removed": [],
+          "renamed": []
+        },
+        "edges": {
+          "added": 0,
+          "removed": 0
+        },
+        "domains": {
+          "before": 1,
+          "after": 1
+        },
+        "crossDomainEdges": {
+          "before": 0,
+          "after": 0,
+          "delta": 0
+        },
+        "overlaps": {
+          "added": [],
+          "removed": []
+        },
+        "cycles": {
+          "added": [],
+          "removed": []
+        },
+        "orphans": {
+          "added": [],
+          "removed": []
+        },
+        "regressions": [],
+        "ok": true,
+        "verdict": {
+          "ok": true,
+          "check": "orphan-gate",
+          "scope": "full",
+          "checks": {
+            "newCycles": [],
+            "lostCallers": [],
+            "newDuplications": []
+          }
+        },
+        "analysis": {
+          "scope": "mapped-graph-delta",
+          "checks": {
+            "cycles": "evaluated",
+            "lostCallers": "evaluated",
+            "duplication": "not-evaluated",
+            "behavior": "not-evaluated"
+          },
+          "nextSteps": [
+            "Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.",
+            "Mapped structural checks do not establish behavioral correctness; run the relevant tests."
+          ]
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "id": "stable-diff-red",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/scripts/diff.mjs",
+        "baseline",
+        "$FIXTURE/.codeweb/graph.json",
+        "--refresh",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout": {
+        "before": "codeweb-doc-audit-lftjtp52/fixture",
+        "after": "codeweb-doc-audit-lftjtp52/fixture",
+        "nodes": {
+          "added": [],
+          "removed": [],
+          "renamed": []
+        },
+        "edges": {
+          "added": 1,
+          "removed": 0
+        },
+        "domains": {
+          "before": 1,
+          "after": 1
+        },
+        "crossDomainEdges": {
+          "before": 0,
+          "after": 0,
+          "delta": 0
+        },
+        "overlaps": {
+          "added": [],
+          "removed": []
+        },
+        "cycles": {
+          "added": [
+            [
+              "a.js",
+              "b.js"
+            ]
+          ],
+          "removed": []
+        },
+        "orphans": {
+          "added": [],
+          "removed": []
+        },
+        "regressions": [
+          "1 new dependency cycle(s)"
+        ],
+        "ok": false,
+        "verdict": {
+          "ok": false,
+          "check": "orphan-gate",
+          "scope": "full",
+          "checks": {
+            "newCycles": [
+              [
+                "a.js",
+                "b.js"
+              ]
+            ],
+            "lostCallers": [],
+            "newDuplications": []
+          }
+        },
+        "analysis": {
+          "scope": "mapped-graph-delta",
+          "checks": {
+            "cycles": "evaluated",
+            "lostCallers": "evaluated",
+            "duplication": "not-evaluated",
+            "behavior": "not-evaluated"
+          },
+          "nextSteps": [
+            "Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.",
+            "Mapped structural checks do not establish behavioral correctness; run the relevant tests."
+          ]
+        },
+        "verification": {
+          "before": "$FIXTURE/.codeweb/graph.baseline.json",
+          "beforeSha256": "99061249621b28ebbf1a764954320208e8721bdd5af7b15f4b9a0f1ca6148b3a",
+          "after": "$FIXTURE/.codeweb/graph.json",
+          "refreshed": true
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "id": "stable-diff-repair",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/scripts/diff.mjs",
+        "baseline",
+        "$FIXTURE/.codeweb/graph.json",
+        "--refresh",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": {
+        "before": "codeweb-doc-audit-lftjtp52/fixture",
+        "after": "codeweb-doc-audit-lftjtp52/fixture",
+        "nodes": {
+          "added": [],
+          "removed": [],
+          "renamed": []
+        },
+        "edges": {
+          "added": 0,
+          "removed": 0
+        },
+        "domains": {
+          "before": 1,
+          "after": 1
+        },
+        "crossDomainEdges": {
+          "before": 0,
+          "after": 0,
+          "delta": 0
+        },
+        "overlaps": {
+          "added": [],
+          "removed": []
+        },
+        "cycles": {
+          "added": [],
+          "removed": []
+        },
+        "orphans": {
+          "added": [],
+          "removed": []
+        },
+        "regressions": [],
+        "ok": true,
+        "verdict": {
+          "ok": true,
+          "check": "orphan-gate",
+          "scope": "full",
+          "checks": {
+            "newCycles": [],
+            "lostCallers": [],
+            "newDuplications": []
+          }
+        },
+        "analysis": {
+          "scope": "mapped-graph-delta",
+          "checks": {
+            "cycles": "evaluated",
+            "lostCallers": "evaluated",
+            "duplication": "not-evaluated",
+            "behavior": "not-evaluated"
+          },
+          "nextSteps": [
+            "Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.",
+            "Mapped structural checks do not establish behavioral correctness; run the relevant tests."
+          ]
+        },
+        "verification": {
+          "before": "$FIXTURE/.codeweb/graph.baseline.json",
+          "beforeSha256": "99061249621b28ebbf1a764954320208e8721bdd5af7b15f4b9a0f1ca6148b3a",
+          "after": "$FIXTURE/.codeweb/graph.json",
+          "refreshed": true
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "id": "unsupported-cli-flag",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/bin/codeweb.mjs",
+        "$FIXTURE",
+        "--focus",
+        "a.js"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "unknown flag: --focus\nusage: codeweb [<SRC>] [--target <label>] [--out-dir <dir>] [--open] [--full] [--allow-empty] [--json]\n  <SRC>            path to the codebase to map (default: current directory)\n  --target <label> display label stamped into the map (default: last two path segments of <SRC>)\n  --out-dir <dir>  where the artifacts go (default: <SRC>/.codeweb \u2014 where MCP + hooks find them)\n  --doctor         diagnose this installation and target without creating or changing a map\n  --open           open report.html when the map is built\n  --serve          after the map, serve the workspace at http://127.0.0.1:<port> (localhost only)\n  --full           recompute every stage (skip the fragment memo + edge cache)\n  --allow-empty    permit a target with no supported source (writes an empty map)\n  --json           machine mode: one JSON result line on stdout ({ws, symbols, actionable,\n                   reused, version}); stage progress stays on stderr\n  --stages <phase> partial pipeline; only 'through-overlap' (extract+cluster+overlap, skip\n                   optimize+report) \u2014 the trend fast path; never writes the stage memo\n  --coverage <p>   annotate the graph with a coverage report (lcov or c8 JSON) after mapping\n"
+    },
+    {
+      "id": "site-quickstart-from-user-repo",
+      "argv": [
+        "node",
+        "scripts/run.mjs",
+        "./my-app",
+        "--out-dir",
+        "./my-app/.codeweb"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "node:internal/modules/cjs/loader:1573\n  throw err;\n  ^\n\nError: Cannot find module '$FIXTURE/scripts/run.mjs'\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1569:15)\n    at wrapResolveFilename (node:internal/modules/cjs/loader:1123:27)\n    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1147:10)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1174:12)\n    at Module._load (node:internal/modules/cjs/loader:1346:5)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: []\n}\n\nNode.js v26.7.0\n"
+    },
+    {
+      "id": "lost-callers-exported",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/scripts/diff.mjs",
+        "$AUDIT_TMP/before.json",
+        "$AUDIT_TMP/after.json",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout": {
+        "before": "before.json",
+        "after": "after.json",
+        "nodes": {
+          "added": [],
+          "removed": [],
+          "renamed": []
+        },
+        "edges": {
+          "added": 0,
+          "removed": 1
+        },
+        "domains": {
+          "before": 1,
+          "after": 1
+        },
+        "crossDomainEdges": {
+          "before": 0,
+          "after": 0,
+          "delta": 0
+        },
+        "overlaps": {
+          "added": [],
+          "removed": []
+        },
+        "cycles": {
+          "added": [],
+          "removed": []
+        },
+        "orphans": {
+          "added": [],
+          "removed": []
+        },
+        "regressions": [],
+        "ok": true,
+        "verdict": {
+          "ok": true,
+          "check": "orphan-gate",
+          "scope": "full",
+          "checks": {
+            "newCycles": [],
+            "lostCallers": [
+              {
+                "id": "a.js:alpha",
+                "exported": true,
+                "exempted": true
+              }
+            ],
+            "newDuplications": []
+          }
+        },
+        "analysis": {
+          "scope": "mapped-graph-delta",
+          "checks": {
+            "cycles": "evaluated",
+            "lostCallers": "evaluated",
+            "duplication": "evaluated",
+            "behavior": "not-evaluated"
+          },
+          "nextSteps": [
+            "Mapped structural checks do not establish behavioral correctness; run the relevant tests."
+          ]
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "id": "lost-callers-nonexported",
+      "argv": [
+        "node",
+        "$CODEWEB_ROOT/scripts/diff.mjs",
+        "$AUDIT_TMP/before.json",
+        "$AUDIT_TMP/after.json",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout": {
+        "before": "before.json",
+        "after": "after.json",
+        "nodes": {
+          "added": [],
+          "removed": [],
+          "renamed": []
+        },
+        "edges": {
+          "added": 0,
+          "removed": 1
+        },
+        "domains": {
+          "before": 1,
+          "after": 1
+        },
+        "crossDomainEdges": {
+          "before": 0,
+          "after": 0,
+          "delta": 0
+        },
+        "overlaps": {
+          "added": [],
+          "removed": []
+        },
+        "cycles": {
+          "added": [],
+          "removed": []
+        },
+        "orphans": {
+          "added": [
+            "a.js:alpha"
+          ],
+          "removed": []
+        },
+        "regressions": [
+          "1 symbol(s) lost all callers"
+        ],
+        "ok": false,
+        "verdict": {
+          "ok": false,
+          "check": "orphan-gate",
+          "scope": "full",
+          "checks": {
+            "newCycles": [],
+            "lostCallers": [
+              {
+                "id": "a.js:alpha",
+                "exported": false,
+                "exempted": false
+              }
+            ],
+            "newDuplications": []
+          }
+        },
+        "analysis": {
+          "scope": "mapped-graph-delta",
+          "checks": {
+            "cycles": "evaluated",
+            "lostCallers": "evaluated",
+            "duplication": "evaluated",
+            "behavior": "not-evaluated"
+          },
+          "nextSteps": [
+            "Mapped structural checks do not establish behavioral correctness; run the relevant tests."
+          ]
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "id": "count-scanner-repro",
+      "argv": [
+        "node",
+        "--input-type=module",
+        "-e",
+        "import {scanProseCounts,PROSE_FILES,mcpToolCount} from './scripts/release-utils.mjs'; import {readFileSync} from 'node:fs'; console.log(JSON.stringify({actual:mcpToolCount(process.cwd()),referenceListed:PROSE_FILES.includes('docs/reference.md'),specListed:PROSE_FILES.includes('SPEC.md'),reference:scanProseCounts(readFileSync('docs/reference.md','utf8'),'docs/reference.md',{toolCount:28,langCount:13}),plain:scanProseCounts('27 tools','fixture',{toolCount:28,langCount:13}),formatted:scanProseCounts('all **27** of codeweb tools','fixture',{toolCount:28,langCount:13})}));"
+      ],
+      "exit": 0,
+      "stdout": {
+        "actual": 28,
+        "referenceListed": true,
+        "specListed": false,
+        "reference": [],
+        "plain": [
+          "fixture: says \"27 tools\" but 28 tools ship"
+        ],
+        "formatted": []
+      },
+      "stderr": ""
+    }
+  ],
+  "environment": {
+    "CODEWEB_ENGINE": "regex",
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_PROMO": "1",
+    "CODEWEB_WS": "unset"
+  },
+  "fixture": {
+    "before": {
+      "a.js": "export function alpha() { return 1; }\n",
+      "b.js": "import { alpha } from './a.js';\nexport function beta() { return alpha(); }\n"
+    },
+    "regression": {
+      "a.js": "import { beta } from './b.js';\nexport function alpha() { return beta(); }\n"
+    },
+    "repair": "Restore before/a.js; leave b.js unchanged."
+  }
+}

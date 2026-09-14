@@ -116,6 +116,14 @@ test('P3: packed release installs offline and each installed bin answers --help'
         `${name} --help failed after offline installation\n${help.stderr}`,
       );
     }
+    const doctor = spawnSync(process.execPath, [join(prefix, 'node_modules', '@ghostlygawd', 'codeweb', 'bin', 'codeweb.mjs'), prefix, '--doctor', '--json'], {
+      ...spawnOptions, shell: false, cwd: prefix, env: { ...spawnOptions.env, CODEWEB_WS: '' },
+    });
+    assert.equal(doctor.status, 2, 'the installed doctor reports an unmapped target');
+    const localDiagnosis = JSON.parse(doctor.stdout);
+    assert.equal(localDiagnosis.installation.kind, 'packaged');
+    assert.equal(localDiagnosis.parsers.ast.ts, false, 'offline install omits optional AST runtime');
+    assert.equal(localDiagnosis.parsers.regex, true, 'zero-dependency fallback remains available');
     // P3 exercises the shipped package entry, outside the checkout and without optional deps.
     const project = join(prefix, 'fixture');
     const body = 'export function compute(x) {\n let total = 0;\n for (let i = 0; i < x; i++) {\n  if (i % 2) total += i * 3;\n  else total -= i;\n }\n const scaled = total * 2 + 7;\n return scaled > 100 ? scaled - 100 : scaled;\n}\n';

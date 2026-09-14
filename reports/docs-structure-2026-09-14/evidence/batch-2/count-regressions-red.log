@@ -1,0 +1,49 @@
+✖ documentation counts survive formatting and Codeweb possessive phrasing (1.010292ms)
+✖ current SPEC and reference counts are checked while dated audit counts stay historical (3.912167ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 45.42525
+
+✖ failing tests:
+
+test at tests/release-tooling.test.mjs:268:1
+✖ documentation counts survive formatting and Codeweb possessive phrasing (1.010292ms)
+  AssertionError [ERR_ASSERTION]: all **27** of codeweb's tools
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file://$CODEWEB_ROOT/tests/release-tooling.test.mjs:272:12)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/release-tooling.test.mjs:280:1
+✖ current SPEC and reference counts are checked while dated audit counts stay historical (3.912167ms)
+  AssertionError [ERR_ASSERTION]: SPEC.md
+      at TestContext.<anonymous> (file://$CODEWEB_ROOT/tests/release-tooling.test.mjs:296:14)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

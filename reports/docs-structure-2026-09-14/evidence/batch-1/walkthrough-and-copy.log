@@ -1,0 +1,13 @@
+✔ current Markdown prose stays under 55 words per paragraph (3.2875ms)
+✔ current authored HTML prose stays under 55 words per paragraph (1.194458ms)
+✔ listing descriptions (package/plugin/marketplace) stay under 55 words (0.290458ms)
+✔ ac_17: README and agent rules preserve the baseline through repair (0.928041ms)
+✔ ac_17: the published cycle commands find the caller, go red, then repair to green (790.046541ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 838.106792

@@ -32,13 +32,17 @@ export function buildContextPack(graph, index, reader, ids, { symbol, windowN = 
   // label, each with ±windowN lines of context. Windows overlapping-adjacent are merged.
   const targetLabels = [...new Set(ids.map((id) => index.byId.get(id)?.label).filter(Boolean))];
   const labelRe = targetLabels.length ? new RegExp(`\\b(${targetLabels.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`) : null;
-  const windowsOf = (n) => {
-    if (!sourceAvailable || !labelRe) return [];
+  const windowsOf = (n, evidence) => {
+    evidence.status = 'source-unavailable';
+    if (!sourceAvailable) return [];
     const lines = readLines(n.file);
     if (!lines) return [];
+    evidence.status = 'no-label-match';
+    if (!labelRe) return [];
     const start = n.line, end = Math.min(n.line + (n.loc || 1) - 1, lines.length);
     const hits = [];
     for (let ln = start; ln <= end; ln++) if (labelRe.test(lines[ln - 1] || '')) hits.push(ln);
+    Object.assign(evidence, { status: hits.length ? (hits.length > 8 ? 'truncated' : 'shown') : 'no-label-match', matchedLines: hits.length, shownLines: Math.min(hits.length, 8), remaining: Math.max(0, hits.length - 8) });
     const windows = [];
     for (const h of hits.slice(0, 8)) { // a caller with >8 call sites: the first 8 windows tell the story
       const s = Math.max(start, h - windowN), e = Math.min(end, h + windowN);
@@ -53,7 +57,10 @@ export function buildContextPack(graph, index, reader, ids, { symbol, windowN = 
   const callerView = (id) => {
     const n = byId.get(id);
     const o = view(n, fullBodies);
-    if (!fullBodies) o.windows = windowsOf(n);
+    if (!fullBodies) {
+      o.windowEvidence = {};
+      o.windows = windowsOf(n, o.windowEvidence);
+    }
     return o;
   };
   const cappedCallers = capList(callerIds, limit);
@@ -81,5 +88,40 @@ export function buildContextPack(graph, index, reader, ids, { symbol, windowN = 
     if (uncoveredTargets.length) { payload.coverage = uncoveredTargets.map((id) => `${id}: ${coverageNote(graph, index.byId.get(id))}`); payload.summary += ' — ⚠ target NOT covered by the recorded test run'; }
   }
   if (cappedCallees.truncated) payload.moreCallees = { remaining: cappedCallees.remaining, nextOffset: cappedCallees.offset + cappedCallees.items.length };
+  if (cappedBlast.truncated) payload.blastRadius.more = { remaining: cappedBlast.remaining, nextOffset: cappedBlast.items.length };
+
+  // AC-22: response completeness describes only the mapped evidence. No graph-wide
+  // recall percentage can be inferred from a fresh map or an unabridged neighbor list.
+  const stamped = sourceAvailable && Object.keys(graph.meta?.sources || {}).length > 0;
+  const limitations = ['unmapped-calls'];
+  const nextSteps = ['Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.'];
+  const listsComplete = ![cappedCallers, cappedCallees, cappedBlast].some((c) => c.truncated);
+  if (!listsComplete) {
+    limitations.push('list-budget');
+    nextSteps.push('Increase limit (CLI: --limit) or request MCP full:true for all mapped neighbors.');
+  }
+  const sourceEvidenceComplete = payload.target.every((n) => !!n.body) && payload.callers.every((n) => fullBodies ? !!n.body : n.windowEvidence.status === 'shown');
+  if (!sourceEvidenceComplete) {
+    limitations.push('source-evidence');
+    nextSteps.push('Inspect caller source for missing or capped label matches; MCP bodies:"full" (CLI: --full-bodies) shows whole recorded spans. Restore unavailable source first.');
+  }
+  if (staleInfo || !stamped) {
+    limitations.push(staleInfo ? 'stale-graph' : 'freshness-unknown');
+    nextSteps.push('Refresh the map (MCP: codeweb_refresh) before relying on recorded locations.');
+  }
+  if (!Object.keys(graph.meta?.dirs || {}).length) {
+    limitations.push('new-files-unchecked');
+    nextSteps.push('Refresh after adding files; this map has no directory stamps to detect additions.');
+  }
+  if (ids.some((id) => byId.get(id).pub || byId.get(id).exports)) {
+    limitations.push('external-callers');
+    nextSteps.push('Check package consumers before changing an exported contract.');
+  }
+  if (graph.meta?.dynamic?.files > 0) limitations.push('dynamic-dispatch');
+  payload.analysis = {
+    scope: 'mapped-call-graph',
+    freshness: staleInfo ? 'stale' : stamped ? 'unchanged-stamps' : 'unknown',
+    listsComplete, sourceEvidenceComplete, limitations, nextSteps,
+  };
   return payload;
 }

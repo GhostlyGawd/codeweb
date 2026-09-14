@@ -1,0 +1,239 @@
+{
+  "scope": "Local inline Markdown file links outside fences; excludes URL checks, reference-style links and anchor validation.",
+  "files": [
+    "README.md",
+    "CONTRIBUTING.md",
+    "SPEC.md",
+    "SECURITY.md",
+    "OPERATOR-ACTIONS.md",
+    "docs/cli.md",
+    "docs/reference.md",
+    "docs/ci-gate.md",
+    "docs/ROADMAP.md",
+    "tests/README.md",
+    "bench/README.md",
+    "editor/vscode-codeweb/README.md",
+    "commands/narrate.md",
+    "commands/codeweb.md",
+    "commands/apply.md",
+    "commands/pitch.md",
+    "skills/codebase-anatomy/SKILL.md",
+    "skills/codebase-anatomy/references/overlap-heuristics.md",
+    "skills/codebase-anatomy/references/engine-detection.md",
+    "skills/codebase-anatomy/references/graph-schema.md",
+    "agents/codeweb-dissector.md",
+    "agents/codeweb-domain-mapper.md"
+  ],
+  "links": [
+    {
+      "file": "README.md",
+      "line": 7,
+      "target": "LICENSE",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 11,
+      "target": "CHANGELOG.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 95,
+      "target": "docs/ci-gate.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 107,
+      "target": "docs/case-study-axios.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 240,
+      "target": "docs/cli.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 242,
+      "target": "editor/vscode-codeweb/",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 247,
+      "target": "docs/reference.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 251,
+      "target": "docs/reference.md#query-the-graph-for-agents--humans",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 252,
+      "target": "docs/reference.md#agent-tools--context--pre-flight-context-pack-simulate-edit",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 255,
+      "target": "docs/reference.md#guard-agent-edits-diff",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 256,
+      "target": "docs/reference.md#gate-every-pr-github-action",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 257,
+      "target": "docs/reference.md#agent-capability-suite-write--review--optimize",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 259,
+      "target": "docs/reference.md#advise-consolidations-optimizemjs",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 260,
+      "target": "docs/reference.md#find-the-hotspots--where-to-refactor-first-hotspotsmjs",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 261,
+      "target": "docs/reference.md#plan-a-whole-optimization-campaign-campaignmjs",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 262,
+      "target": "docs/reference.md#track-duplication-over-time-trendmjs",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 278,
+      "target": "docs/reference.md#outputs-under-targetcodeweb",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 307,
+      "target": "docs/reference.md#the-mcp-server-tool-by-tool",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 353,
+      "target": "docs/reference.md#components",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 372,
+      "target": "CHANGELOG.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 395,
+      "target": "SECURITY.md",
+      "exists": true
+    },
+    {
+      "file": "README.md",
+      "line": 402,
+      "target": "CHARTER.md",
+      "exists": true
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "line": 25,
+      "target": "SECURITY.md",
+      "exists": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 3,
+      "target": "../README.md",
+      "exists": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 4,
+      "target": "cli.md",
+      "exists": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 78,
+      "target": "ci-gate.md",
+      "exists": true
+    },
+    {
+      "file": "docs/reference.md",
+      "line": 224,
+      "target": "agent-tools-v2.md",
+      "exists": true
+    }
+  ],
+  "sourceHashes": {
+    "CHARTER.md": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd",
+    "CONTRIBUTING.md": "da72a24b4b3695c37b6820a0e2cf5ba332c99554db7a3dde911ab1411d905ae8",
+    "OPERATOR-ACTIONS.md": "7fdb34b5b07d786dccbcea0c088d60bb014ecf8163a7c02158db46923290e502",
+    "README.md": "48b852ff11c6baf47a4299ed7130d132bd643080e4e7c522807e25bd188f4b7b",
+    "SECURITY.md": "deee691c707efc226d7bce2342078b2a1bf8d0ca4e99ca40e0e69c01e069fa1d",
+    "SPEC.md": "8f256c22bfc83f079104fd9408f48fec1b2ba978acb24cccc99b4f32701ab9b0",
+    "agents/codeweb-dissector.md": "233ed68960e59f4311722ea070acce5433089c2e97552873176bb6bfde6424b3",
+    "agents/codeweb-domain-mapper.md": "01e3d5717f8848d1334addfc8656299557a7d32f0e5e55487503bd2648e5391e",
+    "bench/README.md": "c153755ec9d47c8d08953568119474d5aab93a9ce1676d86105c6ff0f446aa07",
+    "commands/apply.md": "c8a96df0710c552812d0464d40bbb5961ebadb7ee56f0d97adfdf84c12cb1350",
+    "commands/codeweb.md": "6c27ac8ea9fdeb93adddfd0ed0a68923eb5a44dfefa698d1c12587ce12fc6e40",
+    "commands/narrate.md": "1968703f2b64159ec4fab6e29e3a55d4de7c5876100aa71cf990a9a27b387231",
+    "commands/pitch.md": "1c73ca6f8a87c515c6fedb8e80897e6930defa302eeb0ab60e48aa29454bc59e",
+    "docs/ROADMAP.md": "30530011234e578f86966e5fd93fa9e7987df31e9233fdc5467e0866d4eb8ccc",
+    "docs/ci-gate.md": "b6183402972ecd2b441b7bde41d73e63c7b8c89bc06b025d6e3b506f832f85cc",
+    "docs/cli.md": "a473fa480558a78f42c1340fa67216c3bc88dd4d26d3639787b8cbda951128a1",
+    "docs/harness.md": "f95cc66fecc38c5ce99d7d0f04615e955d86d771fa389c0eaa8774b1d3a612bd",
+    "docs/product-review-2026-07-18.md": "8602da183ee17b16fbd0f9d240dea822560d9543dcefcddaaee5f34fd96dd4ae",
+    "docs/reference.md": "66fbbd9ca7947df16ae8e239b02dbdc7fdd361581b3aea9bfe035878cbc39276",
+    "editor/vscode-codeweb/README.md": "dedb4d54b6b7afe01e4079c06307aa0cf6d12a1d6377e0041adbca238d1c1fb8",
+    "scripts/check": "16d18888050ba912afad8dcc3d6e543ba942fe39b80f99737512e4e955ced993",
+    "scripts/diff.mjs": "0d5d1a49c2a9e057d3b1cbe616c452a76557c116c79a2389b6a65a7777d4da66",
+    "scripts/extract-symbols.mjs": "dad409fb5ab6d51b9ce3133a1998ccd02f713b93e3c85c8fc009c47ce9fcd6f3",
+    "scripts/lib/tool-specs.mjs": "bc217ecf942fecdd25a11e8855c4b3c54f70e27645df55e558c550ebaae6f7c3",
+    "scripts/mcp-server.mjs": "1da7f33afbbce76e0cc9a4b31665601fb2a86d99844352f119a4c03042f07099",
+    "scripts/refresh.mjs": "684c9fba25ddf993113c64877a95515c25ecc0235013515e3fc1d6b338c44fbf",
+    "scripts/release-utils.mjs": "ca9ed993be8cabde20dbf060640892ffdc35d968cd602fff90823c0bf4a5c933",
+    "scripts/run.mjs": "5c8e0a7e69729cea995c2724d3451bba3018f3ac2a9281fee2f2f17b17564c93",
+    "site/build.mjs": "e83d19fc768e5c7bc7933361543c5caead3b13fba6423d4da2fe873dac3613f8",
+    "site/content/start.html": "a653f24f2bd0a4afe89bc040369e4122edd1c5aaa7ca6cc30bd15d7322286b57",
+    "skills/codebase-anatomy/SKILL.md": "a3be6b1072f069900d8b048117845d2881b8154fae9b35ad3f377baac942dbd2",
+    "skills/codebase-anatomy/references/engine-detection.md": "794c984801ea8b015266e274723c2e7e2f96490be8fc96d2d2b03a4c5a6e58a5",
+    "skills/codebase-anatomy/references/graph-schema.md": "9111fdb9f4c6f31956a100afc4d8f1dee019d50555ea6a67c8495f51f7646450",
+    "skills/codebase-anatomy/references/overlap-heuristics.md": "58ded573142ad11ad47dc2c1a541e1c5607919dda82423c30af45c34d606c7aa",
+    "tests/README.md": "48705d325ddf349d1fe7ef4edf1ec56ba344dbd8b9db0b09456b8727622af122"
+  },
+  "pathChecks": {
+    "decisions": false,
+    "specs": false,
+    "docs/decisions": true,
+    "docs/specs": true,
+    "docs/README.md": false,
+    "docs/architecture.md": false,
+    "IMPROVEMENTS.md": false,
+    "reports/IMPROVEMENTS.md": true
+  },
+  "gitStatus": " M .codeweb/history.jsonl\n M SPEC.md\n M docs/ci-gate.md\n M docs/cli.md\n M reports/README.md\n M scripts/ci-gate.mjs\n M scripts/diff.mjs\n M scripts/lib/context-core.mjs\n M scripts/lib/diff-core.mjs\n M scripts/lib/gate-md.mjs\n M scripts/lib/tool-specs.mjs\n M scripts/mcp-server.mjs\n M scripts/refresh.mjs\n M scripts/review.mjs\n M scripts/run.mjs\n M tests/ci-gate.test.mjs\n M tests/gate-md.test.mjs\n M tests/mcp.test.mjs\n M tests/package-shape.test.mjs\n M tests/test_ac_pins.py\n?? reports/AUDIT-STATUS.md\n?? reports/docs-structure-2026-09-14/\n?? reports/paperclip-pilot/\n?? scripts/doctor.mjs\n?? tests/context-analysis.test.mjs\n?? tests/doctor.test.mjs\n?? tests/edit-baseline.test.mjs\n"
+}
