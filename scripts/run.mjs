@@ -103,6 +103,10 @@ const partial = opts.stages === 'through-overlap';
 // a .codeweb directory on the way out.
 opts.src = resolve(opts.src);
 if (!existsSync(opts.src)) { console.error(`[run] target not found: ${opts.src}`); process.exit(2); }
+if (!opts.outDir && statSync(opts.src).isFile()) {
+  console.error(`[run] target is not a directory: ${opts.src}; point at the containing code directory (for example: codeweb .).`);
+  process.exit(2);
+}
 // FORMS F9: --coverage names a FILE — check it now, not after five stages of work on a large
 // repo (the map used to build fully, then die on an lcov typo with an "aborting" frame that
 // hid the map's success).
