@@ -1,7 +1,7 @@
 // File-target regression boundaries for CLI and MCP; also runnable on installed packages.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, existsSync, rmSync, symlinkSync, readFileSync, readdirSync, mkdirSync, chmodSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, existsSync, rmSync, symlinkSync, readFileSync, readdirSync, mkdirSync, copyFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -75,19 +75,31 @@ test('ac_28 supported directory and directory symlink remain mappable', () => fi
 }));
 
 // Restrict child discovery to a private PATH: optional npm dependencies do not
-// control OS tools. Exercise both ENOENT and an installed rg returning failure.
+// control OS tools. Exercise both ENOENT and a native executable returning failure.
 for (const discovery of ['absent', 'failed']) {
   for (const transport of ['CLI', 'MCP']) {
     for (const target of ['app.js', '.']) {
-      test(`ac_${transport === 'CLI' ? 28 : 29} ${transport} fallback ${discovery} tools target ${target}`, () => fixture(dir => {
+      test(`ac_${transport === 'CLI' ? 28 : 29} ${transport} fallback ${discovery} tools target ${target}`, (t) => fixture(dir => {
         const bin = join(dir, 'tools'); mkdirSync(bin);
         symlinkSync(process.execPath, join(bin, 'node'));
-        const marker = join(dir, 'rg-invoked');
         if (discovery === 'failed') {
-          writeFileSync(join(bin, 'rg'), '#!/bin/sh\nprintf "%s\\n" "$*" >> "$CODEWEB_TEST_RG_LOG"\nexit 2\n');
-          chmodSync(join(bin, 'rg'), 0o755);
+          // A native executable works with execFile on Windows too; shell scripts
+          // and .cmd files do not. Node rejects rg's --files option before parsing.
+          if (process.platform === 'win32') copyFileSync(process.execPath, join(bin, 'rg.exe'));
+          else symlinkSync(process.execPath, join(bin, 'rg')); // preserve loader-relative libraries
         }
-        const env = { PATH: bin, CODEWEB_ENGINE: 'regex', CODEWEB_TEST_RG_LOG: marker };
+        const env = { PATH: bin, CODEWEB_ENGINE: 'regex' };
+        let calibration;
+        if (discovery === 'failed') {
+          // Independently calibrate the exact command used by listFiles. A failed
+          // spawn (including ENOENT) must never masquerade as an executable failure.
+          calibration = spawnSync('rg', ['--files', resolve(dir, target)], { cwd: dir, env, encoding: 'utf8' });
+          assert.ifError(calibration.error);
+          assert.equal(calibration.signal, null);
+          assert.ok(Number.isInteger(calibration.status) && calibration.status !== 0);
+          assert.match(calibration.stderr, /bad option: --files/);
+          t.diagnostic(JSON.stringify({ discovery, target, executable: process.platform === 'win32' ? 'rg.exe' : 'rg', status: calibration.status, stderr: calibration.stderr.trim() }));
+        }
         assert.equal(spawnSync('ctags', ['--version'], { env }).error?.code, 'ENOENT');
         if (discovery === 'absent') assert.equal(spawnSync('rg', ['--version'], { env }).error?.code, 'ENOENT');
         const out = join(dir, '.codeweb');
@@ -109,7 +121,7 @@ for (const discovery of ['absent', 'failed']) {
         const graph = JSON.parse(readFileSync(join(out, 'graph.json'), 'utf8'));
         assert.ok(graph.nodes.some(n => n.label === 'greet'));
         assert.equal(readFileSync(join(dir, 'app.js'), 'utf8'), source);
-        if (discovery === 'failed') assert.match(readFileSync(marker, 'utf8'), /--files /);
+        if (discovery === 'failed') assert.match(calibration.stderr, /--files/);
       }));
     }
   }
