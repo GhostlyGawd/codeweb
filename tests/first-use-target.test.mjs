@@ -1,7 +1,7 @@
 // File-target regression boundaries for CLI and MCP; also runnable on installed packages.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, existsSync, rmSync, symlinkSync, readFileSync, readdirSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, existsSync, rmSync, symlinkSync, readFileSync, readdirSync, mkdirSync, chmodSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -13,10 +13,10 @@ function fixture(fn) {
   writeFileSync(join(dir, 'app.js'), source);
   try { fn(dir); } finally { rmSync(dir, { recursive: true, force: true }); }
 }
-function invoke(bin, args, dir, input) {
+function invoke(bin, args, dir, input, env = {}) {
   const r = spawnSync(process.execPath, [join(pkg, 'bin', bin), ...args], {
     cwd: dir, input, encoding: 'utf8', timeout: 30000,
-    env: { ...process.env, CODEWEB_NO_STATS: '1', CODEWEB_NO_PROMO: '1', CODEWEB_MCP_TRACE: '1' },
+    env: { ...process.env, CODEWEB_NO_STATS: '1', CODEWEB_NO_PROMO: '1', CODEWEB_MCP_TRACE: '1', ...env },
   });
   assert.ifError(r.error); return r;
 }
@@ -73,3 +73,44 @@ test('ac_28 supported directory and directory symlink remain mappable', () => fi
   assert.ok(graph.nodes.some(n => n.label === 'greet'));
   assert.ok(existsSync(join(dir, '.codeweb/report.html')));
 }));
+
+// Restrict child discovery to a private PATH: optional npm dependencies do not
+// control OS tools. Exercise both ENOENT and an installed rg returning failure.
+for (const discovery of ['absent', 'failed']) {
+  for (const transport of ['CLI', 'MCP']) {
+    for (const target of ['app.js', '.']) {
+      test(`ac_${transport === 'CLI' ? 28 : 29} ${transport} fallback ${discovery} tools target ${target}`, () => fixture(dir => {
+        const bin = join(dir, 'tools'); mkdirSync(bin);
+        symlinkSync(process.execPath, join(bin, 'node'));
+        const marker = join(dir, 'rg-invoked');
+        if (discovery === 'failed') {
+          writeFileSync(join(bin, 'rg'), '#!/bin/sh\nprintf "%s\\n" "$*" >> "$CODEWEB_TEST_RG_LOG"\nexit 2\n');
+          chmodSync(join(bin, 'rg'), 0o755);
+        }
+        const env = { PATH: bin, CODEWEB_ENGINE: 'regex', CODEWEB_TEST_RG_LOG: marker };
+        assert.equal(spawnSync('ctags', ['--version'], { env }).error?.code, 'ENOENT');
+        if (discovery === 'absent') assert.equal(spawnSync('rg', ['--version'], { env }).error?.code, 'ENOENT');
+        const out = join(dir, '.codeweb');
+        let r;
+        if (transport === 'CLI') {
+          r = invoke('codeweb.mjs', [target, '--out-dir', out], dir, undefined, env);
+          assert.equal(r.status, 0, r.stderr);
+        } else {
+          const requests = [
+            { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'fallback-regression', version: '1' } } },
+            { jsonrpc: '2.0', id: 2, method: 'tools/call', params: { name: 'codeweb_map', arguments: { target, out } } },
+          ];
+          r = invoke('codeweb-mcp.mjs', [], dir, requests.map(x => JSON.stringify(x)).join('\n')+'\n', env);
+          assert.equal(r.status, 0, r.stderr);
+          const result = r.stdout.trim().split('\n').map(JSON.parse).find(x => x.id === 2)?.result;
+          assert.notEqual(result?.isError, true, JSON.stringify(result));
+          assert.equal(JSON.parse(result.content[0].text).ok, true);
+        }
+        const graph = JSON.parse(readFileSync(join(out, 'graph.json'), 'utf8'));
+        assert.ok(graph.nodes.some(n => n.label === 'greet'));
+        assert.equal(readFileSync(join(dir, 'app.js'), 'utf8'), source);
+        if (discovery === 'failed') assert.match(readFileSync(marker, 'utf8'), /--files /);
+      }));
+    }
+  }
+}
