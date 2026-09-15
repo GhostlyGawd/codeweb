@@ -174,6 +174,14 @@ class TestAcPins(unittest.TestCase):
         proc = _run(["node", "--test", "tests/analysis-completeness.test.mjs"])
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
 
+    def test_ac_28_cli_file_target(self):
+        proc = _run(["node", "--test", "--test-name-pattern=ac_28", "tests/first-use-target.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_29_mcp_file_target(self):
+        proc = _run(["node", "--test", "--test-name-pattern=ac_29", "tests/first-use-target.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

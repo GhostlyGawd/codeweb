@@ -18,7 +18,7 @@
 // protocol, and every trace write is try/catch-guarded (a client may close stderr — the #29 lesson).
 
 import { createInterface } from 'node:readline';
-import { readFileSync, existsSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeGraph, resolveSymbol, suggestSymbols, findingBuckets, bucketsLine } from './lib/graph-ops.mjs';
@@ -306,6 +306,9 @@ const { enqueueChild, wsOf, inflight } = createWorkspaceQueue({ trace, begin: ()
 function handleMap(id, args, meta) {
   const target = resolve(args.target || process.cwd());
   if (!existsSync(target)) return errResult(id, `target not found: ${target}`); // sync validation stays PRE-enqueue
+  if (!args.out && statSync(target).isFile()) {
+    return errResult(id, `target is not a directory: ${target}; point target at the containing code directory (for example: target: ".").`);
+  }
   const out = resolve(args.out || join(target, '.codeweb'));
   const token = meta && meta.progressToken;
   const onStderr = (chunk) => {

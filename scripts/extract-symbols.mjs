@@ -146,7 +146,9 @@ function listFiles() {
   } else {
     files = [];
     const walk = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = join(d, e.name); if (SKIP.test(p)) continue; if (e.isDirectory()) walk(p); else files.push(p); } };
-    walk(root);
+    // rg accepts a file root; preserve that behavior when discovery falls back.
+    if (statSync(root).isFile()) files.push(root);
+    else walk(root);
   }
   // Canonicalize enumeration order: `rg --files` (parallel walk) and readdir can return files in a
   // nondeterministic order, which leaks into node-array order AND cluster3's domain-assignment
