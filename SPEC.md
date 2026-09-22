@@ -82,6 +82,20 @@ controlling product specification.
 
 - **AC-27** — known unsupported JS/TS same-line function, arrow and class declaration layouts carry bounded masked-source diagnostics through extraction, cache, graph and refresh/baseline; either incomplete snapshot makes CLI/MCP diff and review inconclusive (exit 2, false verdict), while supported green and regression controls retain exit 0/1 | check: `node --test tests/analysis-completeness.test.mjs tests/ci-gate.test.mjs` | status: built
 
+### Evidence reconciliation (implemented locally, unreleased)
+
+The [V1 implementation specification](docs/specs/evidence-reconciliation.md) defines
+explicit task-owned context receipts and answer-specific reconciliation in review.
+AC-30–33 are implemented and pinned by the evidence suites. Their detailed trace is
+the feature specification’s ER-T01–20 matrix and implementation verification report.
+The requirements companion retains its separately reviewed historical baseline. Automatic hooks, multi-symbol boundary packets and
+API adapters remain outside V1.
+
+- **AC-30** — evidence receipts retain canonical queries and complete original relationship sets; reconciliation reports exact mapped deltas and task-owned unresolved questions without semantic resolution claims | check: `node --test tests/evidence-core.test.mjs` | status: built
+- **AC-31** — evidence capture and reconciliation use coherent content-verified source inventories including new files and extraction inputs; incompatible, changing or incomplete analysis cannot validate stale evidence | check: `node --test tests/evidence-snapshot.test.mjs` | status: built
+- **AC-32** — immutable local evidence artifacts enforce schema, digest, workspace and task identity, storage limits and bounded deterministic pagination without partial records or silent omissions | check: `node --test tests/evidence-store.test.mjs` | status: built
+- **AC-33** — explicit CLI and MCP evidence modes agree, return reconciliation on clean-review paths and preserve existing payloads, baselines, verdicts and exit semantics outside the specified opt-in additions | check: `node --test tests/evidence-transport.test.mjs` | status: built
+
 Pins live in `tests/test_ac_pins.py` (`test_ac_<n>_...`); pins are cheap wiring witnesses —
 the `check:` commands above are what brief 144 runs verbatim.
 

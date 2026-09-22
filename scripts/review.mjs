@@ -23,14 +23,16 @@ import { loadSimilarIndex } from './lib/similar-index.mjs'; // finding #26: serv
 
 import { loadReviewBaseline, reviewGitHunks, changeReviewEvidence, boundedReviewEvidence } from './lib/change-review.mjs';
 import { changeReviewHtml } from './lib/change-review-html.mjs';
+import { hasEvidenceArguments, validateEvidenceArgs, evidenceArgsFromCli } from './lib/evidence-args.mjs';
 
-const USAGE = 'usage: review.mjs <graph.json> (--changed <file[:s-e],...> | --range <gitref>) [--before <graph.json>] [--gate] [--json] [--html <file>]';
+const USAGE = 'usage: review.mjs <graph.json> (--changed <file[:s-e],...> | --range <gitref>) [--before <graph.json>] [--gate] [--receipt ID --task ID] [--json] [--html <file>]';
 import { die, emitJson, finish, loadGraph, parseArgs } from './lib/cli.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
 const { opts, pos } = parseArgs(process.argv.slice(2), {
   usage: USAGE,
   flags: {
+    receipt: { type: 'string' }, task: { type: 'string' },
     json: { type: 'bool', default: false },
     gate: { type: 'bool', default: false },
     changed: { type: 'string', default: null },
@@ -40,6 +42,11 @@ const { opts, pos } = parseArgs(process.argv.slice(2), {
   },
 });
 const { json, gate, changed, range, before, html } = opts;
+const evidenceArgs = evidenceArgsFromCli(opts);
+if (hasEvidenceArguments(evidenceArgs)) {
+  const problem=validateEvidenceArgs('codeweb_review',{...evidenceArgs,changed,...(range!=null?{range}:{})});
+  if(problem) die(problem,2);
+}
 const graphPath = pos[0];
 if (!graphPath || (changed == null && range == null)) die(USAGE, 2);
 
@@ -119,6 +126,10 @@ payload.analysis.nextSteps = [
   'Duplication uses capped mapped bodies; inspect unavailable source and run relevant tests.',
 ];
 const code = incomplete ? 2 : (gate && hasRegression) ? 1 : 0;
+if (hasEvidenceArguments(evidenceArgs)) {
+  const { evidenceReview } = await import('./lib/evidence-service.mjs');
+  payload.evidence = await evidenceReview(abs, graph, {...evidenceArgs,beforePath:before,beforeGraph});
+}
 
 if (html) {
   try { writeFileSync(html, changeReviewHtml({ ...payload, ...evidence, analysis: { ...payload.analysis, unavailableFiles: evidence.analysis.unavailableFiles, unmappedFiles: evidence.analysis.unmappedFiles } })); }
@@ -147,5 +158,9 @@ if (newDuplications.length) {
   for (const d of newDuplications) console.log(`    x ${d.id} duplicates ${d.dupOf} (${(d.sim * 100).toFixed(0)}%)`);
 }
 for (const step of payload.analysis.nextSteps) console.log(`  analysis: ${step}`);
+if (payload.evidence) {
+  const { renderEvidence } = await import('./lib/evidence-service.mjs');
+  console.log(renderEvidence(payload.evidence));
+}
 finish(code);
 }

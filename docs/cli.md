@@ -235,3 +235,55 @@ failed comparison green. Skipped duplication checks and behavioral limits still 
 Graphs saved by older versions are not retroactively audited for these diagnostics.
 Refresh or remap before relying on them. To audit an old baseline, restore its pre-edit
 source revision and remap that revision; do not overwrite it from edited source.
+
+## Task-owned evidence receipts (source checkout / package scripts)
+
+Capture the mapped evidence for one unambiguous symbol before editing:
+
+```sh
+node scripts/context-pack.mjs .codeweb/graph.json target --capture-evidence --task edit-42 --json
+```
+
+The response supplies `receiptId`. After editing, pass that ID and the same task to review:
+
+```sh
+node scripts/review.mjs .codeweb/graph.json --changed src/example.js --receipt <receiptId> --task edit-42 --json
+```
+
+Use the existing `--before <graph>` and `--gate` workflow independently for the structural
+verdict. Evidence reconciliation does not refresh or replace the graph used by that verdict.
+Read `evidence.state` separately from `verdict.ok` and the exit code: a clean review can have
+changed, inconclusive or unavailable evidence. The response identifies both snapshots.
+
+Read an immutable section, following its `nextOffset` until null:
+
+```sh
+node scripts/context-pack.mjs .codeweb/graph.json target --receipt <receiptId> --task edit-42 --section callers --offset 0 --json
+```
+
+Add `--result <resultId>` for a reconciliation result section (`added`, `removed`,
+`witnessChanged`, `questions`). Receipt sections are `callers`, `callees`, `impact`, `questions`.
+Pages describe recorded evidence, not current source. Capture/page envelopes and the review's
+new evidence field are capped at 8 KiB; oversized item details have explicit local record locators.
+
+MCP equivalents use the existing tools:
+
+- `codeweb_context {symbol:"target", captureEvidence:true, task:"edit-42"}`
+- `codeweb_review {changed:"src/example.js", evidenceReceipt:"<receiptId>", task:"edit-42"}`
+- `codeweb_context {symbol:"target", evidenceReceipt:"<receiptId>", task:"edit-42", evidenceSection:"callers", evidenceOffset:0}`
+
+The private `native-regex-snapshot-v1` profile reads captured source bytes with ctags/AST/cache
+disabled. It uses fixed directory exclusions and includes hidden source files; it does not apply
+ignore files. Its evidence may differ from the ordinary saved graph, and it never executes target
+code.
+
+Questions remain unresolved, need rechecking, or become no-longer-observed; none of these
+establishes behavioral correctness. Renamed/missing targets require explicit recapture.
+
+Records live under the graph directory's `evidence/v1` (2 MiB each, 32 MiB total). Identical records
+reuse their ID; there is no automatic cleanup. Deliberately remove unwanted records when the store
+fills.
+
+Remove a stale `.lock` only after confirming no evidence writer is active. Clearing evidence
+records does not clear maps, graph baselines, or hook state. Restart a long-lived process after
+updating analyzer files before capturing more evidence.

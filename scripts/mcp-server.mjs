@@ -32,6 +32,7 @@ import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's ca
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
 import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
 import { sourceReader, editDistance } from './lib/cli.mjs';
+import { hasEvidenceArguments, validateEvidenceArgs, evidenceCliArgs } from './lib/evidence-args.mjs';
 import { TOOL_SPECS, QUERY_TOOL_SPECS } from './lib/tool-specs.mjs'; // D1: THE tool-interface manifest
 import { discoverGraph, discoverUnsupported, NO_GRAPH, cachedGraph, staleOnce } from './lib/mcp-graphs.mjs'; // D2: graph serving state
 import { createWorkspaceQueue, queueKeyFor, WRITER_TOOLS } from './lib/mcp-queue.mjs'; // D2: the I1-I7 queue
@@ -56,6 +57,7 @@ const INSTRUCTIONS = [
   'codeweb answers structural questions about a mapped repo (graph.json) deterministically — no LLM, ~100ms.',
   'Loop: BEFORE editing a symbol call codeweb_context (bounded edit window) or codeweb_impact (blast radius); codeweb_dependents lists mapped users of it (call+import+inherit+test+ref).',
   'BEFORE editing call codeweb_refresh {baseline:true} once to capture a fresh baseline. AFTER editing call codeweb_diff {before:"baseline", refresh:true} to refresh and verify in one call. Ordinary/automatic refreshes preserve this baseline. Legacy refresh {snapshot:true} then diff {} remains available.',
+  'Optional evidence loop: codeweb_context {symbol, captureEvidence:true, task} captures a receipt using an isolated regex snapshot. After editing pass evidenceReceipt and the same task to codeweb_review. Inspect evidence.state separately from verdict; historical pages never imply current currency.',
   'Before WRITING a new function call codeweb_find_similar (does this exist?) and codeweb_placement (where does it belong?).',
   'Before a refactor, codeweb_simulate pre-flights a delete/merge/move; after verifying a finding is wrong, codeweb_annotate suppresses it so it stops resurfacing.',
   'No symbol name yet? codeweb_find turns a concept ("retry backoff") into ranked starting symbols.',
@@ -243,6 +245,12 @@ const TOOLS = TOOL_SPECS.map((s) => ({
 }));
 
 const PROP = {
+  captureEvidence: { type: 'boolean', const: true, description: 'Opt in to a task-owned evidence receipt from the isolated native regex snapshot profile; no bodies. Requires task.' },
+  task: { type: 'string', pattern: '^[A-Za-z0-9_-]{1,64}$', description: 'Explicit owner ID for evidence capture, review or a historical page; never inferred from the last call.' },
+  evidenceReceipt: { type: 'string', pattern: '^[a-f0-9]{64}$', description: 'Immutable local receipt ID returned by context capture.' },
+  evidenceResult: { type: 'string', pattern: '^[a-f0-9]{64}$', description: 'Immutable reconciliation result ID; requires parent receipt and section.' },
+  evidenceSection: { type: 'string', description: 'Historical receipt page: callers/callees/impact/questions. Result page: added/removed/witnessChanged/questions.' },
+  evidenceOffset: { type: 'integer', minimum: 0, description: 'Historical evidence page offset; follow nextOffset, pages never imply current currency.' },
   graph: { type: 'string', description: 'Path to graph.json. OPTIONAL — defaults to CODEWEB_WS or the nearest .codeweb/graph.json above cwd' },
   symbol: { type: 'string', description: 'A node id (file:label) or a bare label' },
   query: { type: 'string', description: 'Free-text concept ("retry backoff", "where is config parsed") — no symbol name needed' },
@@ -488,6 +496,12 @@ function handleToolCall(id, params) {
     if (typeof v !== 'string') return errResult(id, `argument ${k} must be a string (got ${typeof v})`);
     if (v === '') return errResult(id, `argument ${k} must be non-empty`);
   }
+  const evidenceMode = ['codeweb_context','codeweb_review'].includes(name) && hasEvidenceArguments(args);
+  if (evidenceMode) {
+    const problem = validateEvidenceArgs(name,args);
+    if(problem) return errResult(id,problem);
+    if(args.graph !== undefined && (typeof args.graph !== 'string' || !args.graph)) return errResult(id,'graph must be a non-empty string');
+  }
   // FORMS F3: ONE clamp for every numeric param. Garbage ("abc" -> NaN) silently disabled the
   // budget the tool exists to protect; a negative value minted empty pages with a nextOffset:0
   // loop. Normalized in place so fast paths and spawn paths see the same real number.
@@ -528,6 +542,24 @@ function handleToolCall(id, params) {
     else cliArgs.push(graphPath);
   }
 
+  // Evidence modes deliberately precede ordinary cache guards, default budgets and auto-refresh.
+  // Queue record writers explicitly without changing the ordinary context/review scheduling.
+  if (evidenceMode) {
+    const argv = tool.name === 'codeweb_context'
+      ? [graphPath,args.symbol,...evidenceCliArgs(args),'--json']
+      : [graphPath,...tool.argv(args),...evidenceCliArgs(args),'--json'];
+    return enqueueChild(id, {
+      kind: tool.name === 'codeweb_context' && args.evidenceReceipt ? 'reader' : 'writer',
+      key: queueKeyFor(tool,args,graphPath), tool:tool.name, bin:tool.bin, argv,
+      stdio:['ignore','pipe','pipe'], timeoutMs:SPAWN_TIMEOUT_MS,
+      onSettle: tool.name === 'codeweb_review' ? spawnedToolReply(id,tool) : ({code,out,errBuf,timedOut}) => {
+        if(timedOut || code == null) return errResult(id,timedOut ? 'evidence operation timed out' : 'evidence operation unavailable');
+        const text=(out || '').trim();
+        if(!text) return errResult(id,(errBuf || 'evidence operation unavailable').slice(0,1024));
+        reply(id,{content:[{type:'text',text}],...(code===2?{isError:true}:{})});
+      },
+    });
+  }
   if (graphPath) bump(resolve(graphPath), 'queriesServed'); // the receipt's denominator
   if (graphPath && AUTOREFRESH_TOOLS.has(tool.name)) autoRefresh(resolve(graphPath));
 

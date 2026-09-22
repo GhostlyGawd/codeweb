@@ -9,7 +9,8 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Added
+- Add opt-in local evidence receipts to context and review. Agents can compare previously mapped callers with a fresh source snapshot and read bounded historical pages. See `docs/cli.md`.
 
 ## [0.15.0] - 2026-09-14
 
