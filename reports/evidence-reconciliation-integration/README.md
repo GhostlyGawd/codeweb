@@ -22,3 +22,7 @@ The local test environment used Node 26. GitHub CI will supply the repository's 
 The evidence mode is opt-in. The private snapshot deliberately uses native regex extraction with no ctags, AST or shared cache; its scope is labeled beside the existing graph's review result. It does not run the target code or establish behavioral correctness. Source files may have changed after a historical page was written, so pages do not claim present currency.
 
 A prior single generated task on the original branch showed additional overall time and stdout bytes when capture, review and one delta page were counted. No token savings or improvement in edit quality is claimed. A real maintainer task remains the next product test after the integration is reviewed.
+
+## CI correction
+
+The first PR run exposed three integration issues. The changelog source needed its generated site page. The self gate mapped a false file cycle through a generic helper name and treated two unrelated error constructors as duplication; specific names and an error factory removed those reported regressions without changing gate rules. Windows treated different casing of the same canonical workspace path as distinct; record checks now compare normalized paths according to the host filesystem. The full local gate and self gate passed after these changes. Cross-platform CI is the final verification for this correction.

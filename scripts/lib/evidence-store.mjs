@@ -1,10 +1,10 @@
 /** Immutable, workspace-local evidence records and byte-bounded historical views. */
 import * as fs from 'node:fs/promises';
 import { constants } from 'node:fs';
-import { dirname, basename, resolve, join, relative, sep } from 'node:path';
+import { dirname, basename, resolve, join, normalize } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-import { canonicalJSON, hash, EvidenceError, validateRecord } from './evidence-core.mjs';
+import { canonicalJSON, hash, EvidenceError, evidenceError, validateRecord } from './evidence-core.mjs';
 
 export const RECORD_LIMIT = 2 * 1024 * 1024;
 export const STORE_LIMIT = 32 * 1024 * 1024;
@@ -17,9 +17,15 @@ const RESULT_SECTIONS = ['added', 'removed', 'witnessChanged', 'questions'];
 const NEXT = ['Read a historical section using its receipt ID, task, section and offset.'];
 const ERROR_CODES = new Set(['missing', 'corrupt', 'wrong-task', 'wrong-workspace', 'wrong-parent', 'wrong-selector', 'invalid-arguments', 'invalid-schema', 'invalid-path', 'record-too-large', 'store-full', 'store-busy', 'store-unavailable', 'summary-too-large', 'item-too-large', 'target-not-found', 'ambiguous-target', 'source-unavailable', 'source-changing', 'unsupported-source-layout', 'unsupported-engine', 'analysis-incompatible', 'target-unresolved', 'extraction-incomplete', 'invalid-witness']);
 const bytes = value => Buffer.byteLength(JSON.stringify(value), 'utf8');
-const fail = code => { throw new EvidenceError(code); };
+const fail = code => { throw evidenceError(code); };
 const validId = id => typeof id === 'string' && ID.test(id);
 const validTask = task => typeof task === 'string' && TASK.test(task);
+// Windows names are case-insensitive; fs.realpathSync and fs.promises.realpath may retain
+// different spelling for the same directory. Both sides are absolute before comparison.
+const sameWorkspacePath = (a, b) => {
+  const left = normalize(resolve(a)), right = normalize(resolve(b));
+  return process.platform === 'win32' ? left.toLowerCase() === right.toLowerCase() : left === right;
+};
 const kindCheck = kind => { if (kind !== 'receipts' && kind !== 'results') fail('invalid-arguments'); };
 
 /** Errors deliberately contain fixed guidance, never raw exception text or arbitrary paths. */
@@ -216,9 +222,9 @@ async function readPayload(path, id, kind) {
 }
 function normalizeError(error) {
   if (error instanceof EvidenceError) return error;
-  if (error?.code === 'ENOENT') return new EvidenceError('missing');
-  if (error?.code === 'ELOOP' || error?.code === 'ENOTDIR') return new EvidenceError('invalid-path');
-  return new EvidenceError('store-unavailable');
+  if (error?.code === 'ENOENT') return evidenceError('missing');
+  if (error?.code === 'ELOOP' || error?.code === 'ENOTDIR') return evidenceError('invalid-path');
+  return evidenceError('store-unavailable');
 }
 
 export async function putRecord(graphPath, kind, payload) {
@@ -227,7 +233,7 @@ export async function putRecord(graphPath, kind, payload) {
     kindCheck(kind); validateRecord(payload, kind);
     const text = canonicalJSON(payload), encodedBytes = Buffer.byteLength(text, 'utf8');
     if (encodedBytes > RECORD_LIMIT) {
-      const error = new EvidenceError('record-too-large');
+      const error = evidenceError('record-too-large');
       error.counts = { ...relationCounts(payload), questions: payload.questions.length };
       throw error;
     }
@@ -237,9 +243,9 @@ export async function putRecord(graphPath, kind, payload) {
       summarizeReceipt(payload, id);
     }
     const root = await fs.realpath(payload.sourceRootRealpath);
-    if (root !== payload.sourceRootRealpath) fail('wrong-workspace');
+    if (!sameWorkspacePath(root, payload.sourceRootRealpath)) fail('wrong-workspace');
     const canonicalGraph = join(await fs.realpath(dirname(resolve(graphPath))), basename(graphPath));
-    if (kind === 'receipts' && resolve(root, payload.graphRelativePath) !== canonicalGraph) fail('wrong-workspace');
+    if (kind === 'receipts' && !sameWorkspacePath(resolve(root, payload.graphRelativePath), canonicalGraph)) fail('wrong-workspace');
     const loc = await layout(graphPath, kind, true);
     // One workspace lock coordinates both namespaces.
     await safeDirectory(join(loc.base, 'receipts'), true);
@@ -249,7 +255,7 @@ export async function putRecord(graphPath, kind, payload) {
     if (kind === 'results') {
       const parent = await readPayload(join(loc.base, 'receipts', `${payload.parentReceiptId}.json`), payload.parentReceiptId, 'receipts');
       if (parent.task !== payload.task) fail('wrong-task');
-      if (parent.sourceRootRealpath !== payload.sourceRootRealpath) fail('wrong-workspace');
+      if (!sameWorkspacePath(parent.sourceRootRealpath, payload.sourceRootRealpath)) fail('wrong-workspace');
     }
     const destination = join(loc.directory, `${id}.json`);
     if (await lstatMaybe(destination)) {
@@ -284,8 +290,8 @@ export async function readRecord(graphPath, kind, id, { task, root, receiptId } 
     await checkLayout(loc, kind);
     if (payload.task !== task) fail('wrong-task');
     const rootRealpath = await fs.realpath(root);
-    if (payload.sourceRootRealpath !== rootRealpath) fail('wrong-workspace');
-    if (kind === 'receipts' && payload.graphRelativePath !== relative(rootRealpath, join(loc.anchor, basename(graphPath))).split(sep).join('/')) fail('wrong-workspace');
+    if (!sameWorkspacePath(payload.sourceRootRealpath, rootRealpath)) fail('wrong-workspace');
+    if (kind === 'receipts' && !sameWorkspacePath(resolve(rootRealpath, payload.graphRelativePath), join(loc.anchor, basename(graphPath)))) fail('wrong-workspace');
     if (kind === 'results') {
       if (payload.parentReceiptId !== receiptId) fail('wrong-parent');
       await readRecord(graphPath, 'receipts', receiptId, { task, root });

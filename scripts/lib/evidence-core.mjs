@@ -3,12 +3,17 @@ import { createHash } from 'node:crypto';
 import { buildIndex, callersOf, calleesOf, impactOf, resolveSymbol } from './graph-ops.mjs';
 import { buildContextPack } from './context-core.mjs';
 
-export class EvidenceError extends Error {
-  constructor(code, message = code, state = 'unavailable') { super(message); this.name = 'EvidenceError'; this.code = code; this.state = state; }
+export class EvidenceError extends Error {}
+export function evidenceError(code, message = code, state = 'unavailable') {
+  const error = new EvidenceError(message);
+  error.name = 'EvidenceError';
+  error.code = code;
+  error.state = state;
+  return error;
 }
 const PROFILE = 'native-regex-snapshot-v1';
 const compare = (a,b) => Buffer.compare(Buffer.from(a),Buffer.from(b));
-const fail = (message='Invalid evidence record') => { throw new EvidenceError('corrupt',message); };
+const fail = (message='Invalid evidence record') => { throw evidenceError('corrupt',message); };
 function validString(s) {
   if (typeof s !== 'string') fail('Expected string');
   for(let i=0;i<s.length;i++) {const c=s.charCodeAt(i);if(c>=0xd800&&c<=0xdbff){const d=s.charCodeAt(++i);if(!(d>=0xdc00&&d<=0xdfff))fail('Unpaired surrogate');}else if(c>=0xdc00&&c<=0xdfff)fail('Unpaired surrogate');}
@@ -84,10 +89,10 @@ function relationsOf(snapshot,target) {
   const relations={};
   for(const [relation,ids] of Object.entries(memberships))relations[relation]=sorted(ids.map(relatedId=>{
     const witnessPath=relation==='impact'?paths.get(relatedId):[{from:relation==='callers'?relatedId:target.id,to:relation==='callers'?target.id:relatedId,kind:'call'}];
-    if(!witnessPath)throw new EvidenceError('invalid-witness','No supporting path','inconclusive');
+    if(!witnessPath)throw evidenceError('invalid-witness','No supporting path','inconclusive');
     const nodeIds=new Set([target.id,...witnessPath.flatMap(e=>[e.from,e.to])]);
-    const nodes=sorted([...nodeIds].map(id=>{const n=ix.byId.get(id);if(!n)throw new EvidenceError('invalid-witness','Unknown witness node','inconclusive');return {id:n.id,file:n.file,line:nil(n.line),loc:nil(n.loc),kind:nil(n.kind)};}));
-    const support=[...new Set(nodes.map(n=>n.file))].sort(compare).map(path=>{const sha256=snapshot.sourceHashes[path];if(!sha256)throw new EvidenceError('source-unavailable','Witness source absent','inconclusive');return {path,sha256};});
+    const nodes=sorted([...nodeIds].map(id=>{const n=ix.byId.get(id);if(!n)throw evidenceError('invalid-witness','Unknown witness node','inconclusive');return {id:n.id,file:n.file,line:nil(n.line),loc:nil(n.loc),kind:nil(n.kind)};}));
+    const support=[...new Set(nodes.map(n=>n.file))].sort(compare).map(path=>{const sha256=snapshot.sourceHashes[path];if(!sha256)throw evidenceError('source-unavailable','Witness source absent','inconclusive');return {path,sha256};});
     const id=tupleHash([relation,target.id,relatedId]);
     const evidenceDigest=hash({id,witnessPath,nodes,support});
     return {id,relation,targetId:target.id,relatedId,witnessPath,nodes,support,evidenceDigest};
@@ -119,13 +124,13 @@ function qualifyAnalysis(analysis,target,questions,context=null) {
   return {...analysis,limitations:[...limits].sort(compare)};
 }
 export function createReceipt(snapshot,{task,symbol,graphRelativePath}) {
-  if(!/^[A-Za-z0-9_-]{1,64}$/.test(task)||typeof symbol!=='string')throw new EvidenceError('invalid-arguments');
-  if(snapshot.profile!==PROFILE)throw new EvidenceError('unsupported-engine');
+  if(!/^[A-Za-z0-9_-]{1,64}$/.test(task)||typeof symbol!=='string')throw evidenceError('invalid-arguments');
+  if(snapshot.profile!==PROFILE)throw evidenceError('unsupported-engine');
   const ids=resolveSymbol(snapshot.graph,symbol);
-  if(!ids.length)throw new EvidenceError('target-not-found');
-  if(ids.length!==1)throw new EvidenceError('ambiguous-target');
+  if(!ids.length)throw evidenceError('target-not-found');
+  if(ids.length!==1)throw evidenceError('ambiguous-target');
   const target=targetProjection(snapshot.graph.nodes.find(n=>n.id===ids[0]),snapshot.sourceHashes);
-  if(!target.sourceSha256)throw new EvidenceError('source-unavailable');
+  if(!target.sourceSha256)throw evidenceError('source-unavailable');
   const relations=relationsOf(snapshot,target),context=contextEvidence(snapshot,target);
   const payload={schemaVersion:1,task,sourceRootRealpath:snapshot.root,graphRelativePath,query:queryOf(symbol,target,snapshot),baseline:baselineOf(snapshot),target,relations,questions:questionsOf(snapshot,target,relations,task,context),analysis:analysisOf(snapshot)};
   payload.analysis=qualifyAnalysis(payload.analysis,target,payload.questions,context);
@@ -145,7 +150,7 @@ function reconcileQuestions(original,current,snapshot,inconclusive) {
 }
 export function reconcileReceipt(receipt,snapshot,{legacyGraph}={}) {
   validateRecord(receipt,'receipt');
-  if(receipt.sourceRootRealpath!==snapshot.root)throw new EvidenceError('wrong-workspace');
+  if(receipt.sourceRootRealpath!==snapshot.root)throw evidenceError('wrong-workspace');
   const current=baselineOf(snapshot),analysis=analysisOf(snapshot),reasons=[];
   if(snapshot.profile!==PROFILE)reasons.push('unsupported-engine');
   if(hash(receipt.baseline.analyzerIdentity)!==hash(current.analyzerIdentity)||receipt.baseline.optionsDigest!==current.optionsDigest||receipt.baseline.profile!==current.profile)reasons.push('analysis-incompatible');
@@ -231,7 +236,7 @@ export function validateRecord(record,kind) {
   const receipt=kind==='receipt'||kind==='receipts';if(!receipt&&kind!=='result'&&kind!=='results')fail('Unknown record kind');
   keys(record,receipt?['schemaVersion','task','sourceRootRealpath','graphRelativePath','query','baseline','target','relations','questions','analysis']:['schemaVersion','parentReceiptId','task','sourceRootRealpath','baseline','current','query','target','targetEvidenceChanged','inputsChanged','state','reasons','relations','deltas','questions','analysis','legacyReviewGraph','sameGraphAsEvidence']);
   if(typeof record.task!=='string'||record.schemaVersion!==1||!/^[A-Za-z0-9_-]{1,64}$/.test(record.task))fail();str(record.sourceRootRealpath);querySchema(record.query);baselineSchema(record.baseline);targetSchema(record.target);if(record.query.targetId!==record.target.id)fail('Target mismatch');relationSets(record.relations,record.target.id);analysisSchema(record.analysis);list(record.questions,q=>questionSchema(q,record.task,record.target.id),q=>q.id);
-  if(receipt){str(record.graphRelativePath);if(record.graphRelativePath.startsWith('/'))fail('Invalid workspace path');const a=record.baseline.analyzerIdentity;if(record.baseline.profile!==PROFILE||a.profile!==PROFILE||a.engine!=='regex'||a.ctags||a.ast||record.analysis.profile!==PROFILE)throw new EvidenceError('unsupported-engine');digest(record.target.sourceSha256);if(record.questions.some(q=>q.state!=='unresolved'||q.originalSourceSha256!==q.currentSourceSha256))fail('Invalid capture question state');}
+  if(receipt){str(record.graphRelativePath);if(record.graphRelativePath.startsWith('/'))fail('Invalid workspace path');const a=record.baseline.analyzerIdentity;if(record.baseline.profile!==PROFILE||a.profile!==PROFILE||a.engine!=='regex'||a.ctags||a.ast||record.analysis.profile!==PROFILE)throw evidenceError('unsupported-engine');digest(record.target.sourceSha256);if(record.questions.some(q=>q.state!=='unresolved'||q.originalSourceSha256!==q.currentSourceSha256))fail('Invalid capture question state');}
   else {digest(record.parentReceiptId);baselineSchema(record.current);boolean(record.targetEvidenceChanged);boolean(record.inputsChanged);boolean(record.sameGraphAsEvidence);if(!['changed','unchanged','inconclusive'].includes(record.state))fail();list(record.reasons,str,x=>x);keys(record.deltas,['added','removed','witnessChanged']);for(const items of Object.values(record.deltas))list(items,r=>{relationSchema(r);if(r.targetId!==record.target.id)fail('Wrong delta owner');},x=>x.id);if(record.state!=='inconclusive'&&record.reasons.length)fail('Reason without inconclusive state');if(record.state==='inconclusive'&&(!record.reasons.length||Object.values(record.deltas).some(a=>a.length)))fail('Invalid inconclusive deltas');if(record.legacyReviewGraph!==null){keys(record.legacyReviewGraph,['digest','profile']);digest(record.legacyReviewGraph.digest);nullable(record.legacyReviewGraph.profile,str);}}
   recordSemantics(record,receipt);
   return record;

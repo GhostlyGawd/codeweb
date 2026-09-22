@@ -1,15 +1,15 @@
 // Shared evidence orchestration for explicit CLI/MCP modes. Never mutates graph baselines.
 import { realpathSync } from 'node:fs';
 import { relative, resolve, dirname, basename, join } from 'node:path';
-import { createReceipt, reconcileReceipt, hash, projectGraph, EvidenceError } from './evidence-core.mjs';
+import { createReceipt, reconcileReceipt, hash, projectGraph, EvidenceError, evidenceError } from './evidence-core.mjs';
 import { captureSnapshot } from './evidence-snapshot.mjs';
 import { putRecord, readRecord, pageRecord, summarizeReceipt, summarizeResult, boundedError } from './evidence-store.mjs';
 import { resolveSymbol } from './graph-ops.mjs';
 import { checkStaleness } from './cli.mjs';
 
 function rootOf(graph) {
-  if(typeof graph?.meta?.root !== 'string' || !graph.meta.root) throw new EvidenceError('source-unavailable');
-  try { return realpathSync(graph.meta.root); } catch { throw new EvidenceError('source-unavailable'); }
+  if(typeof graph?.meta?.root !== 'string' || !graph.meta.root) throw evidenceError('source-unavailable');
+  try { return realpathSync(graph.meta.root); } catch { throw evidenceError('source-unavailable'); }
 }
 const analysisErrors = new Set(['analysis-incompatible','source-unavailable','source-changing','unsupported-source-layout','unsupported-engine','target-unresolved','extraction-incomplete','invalid-witness']);
 function failure(error,args,receipt=null) {
@@ -29,12 +29,12 @@ export async function evidenceContext(graphPath,graph,args) {
       const id=hash(receipt);
       const payload=summarizeReceipt(receipt,id); // envelope feasibility before any publication
       payload.savedGraphProvenance={engine:graph.meta?.engine ?? null};
-      if(Buffer.byteLength(JSON.stringify(payload))>8192) throw new EvidenceError('summary-too-large');
+      if(Buffer.byteLength(JSON.stringify(payload))>8192) throw evidenceError('summary-too-large');
       await putRecord(graphPath,'receipts',receipt);
       return {payload,code:0};
     }
     const receipt=await readRecord(graphPath,'receipts',args.evidenceReceipt,{task:args.task,root});
-    if(args.symbol!==receipt.query.selector && args.symbol!==receipt.target.id) throw new EvidenceError('wrong-selector');
+    if(args.symbol!==receipt.query.selector && args.symbol!==receipt.target.id) throw evidenceError('wrong-selector');
     const record=args.evidenceResult ? await readRecord(graphPath,'results',args.evidenceResult,{task:args.task,root,receiptId:args.evidenceReceipt}) : receipt;
     const payload=pageRecord(record,{receiptId:args.evidenceReceipt,resultId:args.evidenceResult,task:args.task,section:args.evidenceSection,offset:args.evidenceOffset ?? 0});
     return {payload,code:0};
@@ -65,14 +65,14 @@ export async function evidenceReview(graphPath,graph,args) {
     // Reserve the live advisory before publication; an unrenderable summary must not hide a stored result.
     const stale=checkStaleness(graph);
     summary.legacyReviewFreshness=stale ? 'stale' : Object.keys(graph.meta?.sources || {}).length ? 'unchanged-stamps' : 'unknown';
-    if(Buffer.byteLength(JSON.stringify(summary))>8192) throw new EvidenceError('summary-too-large');
+    if(Buffer.byteLength(JSON.stringify(summary))>8192) throw evidenceError('summary-too-large');
     try { await putRecord(graphPath,'results',record); }
     catch(error) {
       const unavailable={...failure(error,args,receipt),persistence:'not-persisted',computedState:record.state,
         computedSummary:{relations:summary.relations,deltas:summary.deltas,questions:summary.questions,
           targetEvidenceChanged:record.targetEvidenceChanged,inputsChanged:record.inputsChanged}};
       // Counts are bounded primitives; keep this check if future schemas add larger metadata.
-      return Buffer.byteLength(JSON.stringify(unavailable))<=8192 ? unavailable : failure(new EvidenceError('summary-too-large'),args);
+      return Buffer.byteLength(JSON.stringify(unavailable))<=8192 ? unavailable : failure(evidenceError('summary-too-large'),args);
     }
     return summary;
   } catch(error) { return failure(error,args,receipt); }

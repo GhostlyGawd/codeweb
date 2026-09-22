@@ -5,22 +5,22 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { runExtract, EXTRACTION_SKIP, EXTRACTION_MANIFESTS } from '../extract-symbols.mjs';
 import { SRC_RE } from './common.mjs';
-import { canonicalJSON, hash, EvidenceError } from './evidence-core.mjs';
+import { canonicalJSON, hash, EvidenceError, evidenceError } from './evidence-core.mjs';
 
 export const EVIDENCE_PROFILE = 'native-regex-snapshot-v1';
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const cmp = (a, b) => Buffer.compare(Buffer.from(a), Buffer.from(b));
 function failure(code, cause) {
-  const error = new EvidenceError(code);
+  const error = evidenceError(code);
   if (cause) error.cause = cause;
   return error;
 }
-const manifest = name => EXTRACTION_MANIFESTS.includes(name) || /\.(csproj|sln)$/.test(name);
+const isSnapshotManifestName = name => EXTRACTION_MANIFESTS.includes(name) || /\.(csproj|sln)$/.test(name);
 function roles(path, name) {
   const found = [];
   if (SRC_RE.test(path)) found.push('source');
   if (path.endsWith('.json')) found.push('json');
-  if (manifest(name)) found.push('manifest');
+  if (isSnapshotManifestName(name)) found.push('manifest');
   if (path === 'codeweb.rules.json') found.push('config');
   return found;
 }
@@ -124,7 +124,7 @@ const loadedAnalyzerCanonical = canonicalJSON(loadedAnalyzerIdentity);
 function verifyLoadedAnalyzer() {
   let matches = false;
   try { matches = canonicalJSON(analyzerIdentity()) === loadedAnalyzerCanonical; } catch { /* removed/unreadable runtime is incompatible too */ }
-  if (!matches) throw new EvidenceError('analysis-incompatible', 'Analyzer files changed after module loading; restart this process and recapture.', 'inconclusive');
+  if (!matches) throw evidenceError('analysis-incompatible', 'Analyzer files changed after module loading; restart this process and recapture.', 'inconclusive');
   return loadedAnalyzerIdentity;
 }
 
