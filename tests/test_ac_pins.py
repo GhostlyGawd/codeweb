@@ -183,5 +183,22 @@ class TestAcPins(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
 
 
+    def test_ac_30_evidence_reconciliation(self):
+        proc = _run(["node", "--test", "tests/evidence-core.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_31_coherent_evidence_snapshot(self):
+        proc = _run(["node", "--test", "tests/evidence-snapshot.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_32_immutable_evidence_store(self):
+        proc = _run(["node", "--test", "tests/evidence-store.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_33_evidence_transport_parity(self):
+        proc = _run(["node", "--test", "tests/evidence-transport.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()

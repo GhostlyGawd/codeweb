@@ -14,6 +14,7 @@
 //   node extract-symbols.mjs <path> [--out fragment.json] [--no-ctags]
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, realpathSync } from 'node:fs';
+import * as nativeFs from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { relative, resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url'; // finding #40 (T-40.3): main-guard idiom (the hooks' verbatim compare)
@@ -29,6 +30,10 @@ import { createOwnerStack } from './lib/enclosing.mjs'; // finding #21: live ope
 import { createEdgeDeriver, idFile, markPublicApi, resolveTypedIntents } from './lib/edge-derive.mjs'; // finding #40: per-file derivation factory + pub-API walk + typed-intent resolution; idFile (id->file split) is its one truth, imported back
 import { sha1 } from './lib/hash.mjs'; // one truth — codeweb's own gate flagged the duplicate on this branch
 import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
+
+// Shared discovery vocabulary; evidence snapshots select the fallback walk explicitly.
+export const EXTRACTION_SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
+export const EXTRACTION_MANIFESTS = Object.freeze(['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'pom.xml', 'build.gradle', 'build.gradle.kts', 'Gemfile', 'composer.json', 'Package.swift']);
 
 // F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
 // v2: nodes carry complexity/maxDepth (F4) + the cache holds per-file edge lists + a symbol signature (F9).
@@ -92,6 +97,13 @@ let _tsEnginePromise;               // undefined = not attempted; Promise<engine
 const _langEnginePromises = {};     // langKey -> Promise<engine|null>
 
 export async function runExtract(opts = {}) {
+  // An input adapter is private immutable analysis, never a cache/output transport.
+  // Ordinary callers continue using the exact native filesystem and discovery paths.
+  const input = opts.input;
+  if (input && (opts.engine !== 'regex' || opts.ctags !== false || opts.cache || opts.out)) {
+    throw new ExtractError(2, 'snapshot input requires regex, ctags:false, no cache or output');
+  }
+  const { readFileSync, existsSync, readdirSync, statSync } = input || nativeFs;
   // Defaults == today's CLI defaults (ctags on, engine from CODEWEB_ENGINE) so engineMode / cache
   // namespace / SCANNER_VERSION match — a warm cache the CLI wrote is reused by an in-process call.
   opts = { path: null, out: null, ctags: true, target: null, cache: null, full: false, allowEmpty: false, engine: process.env.CODEWEB_ENGINE || null, ...opts };
@@ -127,7 +139,7 @@ const roleFor = (rel) => roleOverride(rel) || roleOf(rel);
 if (!existsSync(root)) throw new ExtractError(1, `[extract] not found: ${root}`);
 
 const SRC = SRC_RE; // finding 25: the extractor and the hooks share ONE source-extension list
-const SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
+const SKIP = EXTRACTION_SKIP;
 
 function tryExec(cmd, args) { try { return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 28 }); } catch { return null; } }
 function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
@@ -139,13 +151,13 @@ function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
 // exists only for a json file something actually imports (created on demand with the barrels).
 const JSON_RE = /\.json$/;
 function listFiles() {
-  const viaRg = tryExec('rg', ['--files', root]);
+  const viaRg = input ? null : tryExec('rg', ['--files', root]);
   let files;
   if (viaRg != null) {
     files = viaRg.split(/\r?\n/).filter(Boolean);
   } else {
     files = [];
-    const walk = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = join(d, e.name); if (SKIP.test(p)) continue; if (e.isDirectory()) walk(p); else files.push(p); } };
+    const walk = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = join(d, e.name); if (SKIP.test(input ? relative(root, p) : p)) continue; if (e.isDirectory()) walk(p); else files.push(p); } };
     // rg accepts a file root; preserve that behavior when discovery falls back.
     if (statSync(root).isFile()) files.push(root);
     else walk(root);
@@ -154,7 +166,7 @@ function listFiles() {
   // nondeterministic order, which leaks into node-array order AND cluster3's domain-assignment
   // tie-breaks — making the pipeline non-reproducible. Sorting pins a stable order without changing
   // the file set. (Surfaced + verified by the determinism study, H1.)
-  const kept = files.filter((f) => !SKIP.test(f));
+  const kept = files.filter((f) => !SKIP.test(input ? relative(root, f) : f));
   return { src: kept.filter((f) => SRC.test(f)).sort(), json: kept.filter((f) => JSON_RE.test(f)).sort() };
 }
 
@@ -166,7 +178,7 @@ const rel = (f) => relative(root, f).replace(/\\/g, '/');
 // precisely); a cross-package NAME COLLISION is exactly how `create-vite` template files ended up
 // "calling" vite's normalizePath. Single-package repos (or trees with no manifests) all map to ''
 // — behavior there is unchanged.
-const MANIFESTS = ['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'pom.xml', 'build.gradle', 'build.gradle.kts', 'Gemfile', 'composer.json', 'Package.swift'];
+const MANIFESTS = EXTRACTION_MANIFESTS;
 const manifestMemo = new Map(); // dir -> boolean
 const hasManifest = (dir) => {
   if (!manifestMemo.has(dir)) {
@@ -942,7 +954,7 @@ for (const f of files) {
 }
 
 // ---- derive call edges (F9: incremental, per-file, cacheable) ------------------------------
-const LEGACY_FALLBACK = !!process.env.CODEWEB_LEGACY_FALLBACK; // A/B: restore pre-fix byName[0] wiring for regression testing
+const LEGACY_FALLBACK = !input && !!process.env.CODEWEB_LEGACY_FALLBACK; // A/B only outside fixed snapshot profile
 
 // finding #40 (WS-H T-40.1): per-file edge derivation moved VERBATIM into lib/edge-derive.mjs's
 // createEdgeDeriver factory. Free-vars re-derived against the CURRENT engine (not the spec-time

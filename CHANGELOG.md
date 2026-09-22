@@ -9,7 +9,12 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
-_Nothing yet. Open work lands here before it ships in the next tagged release._
+### Added
+- Explicit task-owned evidence receipts in context and review: compare the mapped evidence
+  previously returned for one symbol against a coherent private source snapshot, retain
+  unanswered source questions and read immutable bounded historical pages. Evidence states
+  remain separate from structural verdicts. The isolated regex profile, storage limits and
+  CLI/MCP arguments are documented in `docs/cli.md`.
 
 ## [0.15.0] - 2026-09-14
 
