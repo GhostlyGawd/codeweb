@@ -20,12 +20,19 @@ const bytes = value => Buffer.byteLength(JSON.stringify(value), 'utf8');
 const fail = code => { throw evidenceError(code); };
 const validId = id => typeof id === 'string' && ID.test(id);
 const validTask = task => typeof task === 'string' && TASK.test(task);
-// Windows names are case-insensitive; fs.realpathSync and fs.promises.realpath may retain
-// different spelling for the same directory. Both sides are absolute before comparison.
-const sameWorkspacePath = (a, b) => {
-  const left = normalize(resolve(a)), right = normalize(resolve(b));
-  return process.platform === 'win32' ? left.toLowerCase() === right.toLowerCase() : left === right;
+// Windows can expose the same directory as an 8.3 short name (RUNNER~1) through
+// realpathSync and as a long name (runneradmin) through fs.promises.realpath.
+// Compare resolved directory identities. The graph locator keeps its basename distinct:
+// graph.json and an alias symlink in the same workspace remain different receipt owners.
+const filesystemSpelling = path => {
+  const normalized = normalize(path);
+  return process.platform === 'win32' ? normalized.toLowerCase() : normalized;
 };
+const sameWorkspaceRoot = async (a, b) =>
+  filesystemSpelling(await fs.realpath(a)) === filesystemSpelling(await fs.realpath(b));
+const sameGraphLocator = async (a, b) =>
+  filesystemSpelling(await fs.realpath(dirname(resolve(a)))) === filesystemSpelling(await fs.realpath(dirname(resolve(b))))
+  && filesystemSpelling(basename(a)) === filesystemSpelling(basename(b));
 const kindCheck = kind => { if (kind !== 'receipts' && kind !== 'results') fail('invalid-arguments'); };
 
 /** Errors deliberately contain fixed guidance, never raw exception text or arbitrary paths. */
@@ -243,9 +250,9 @@ export async function putRecord(graphPath, kind, payload) {
       summarizeReceipt(payload, id);
     }
     const root = await fs.realpath(payload.sourceRootRealpath);
-    if (!sameWorkspacePath(root, payload.sourceRootRealpath)) fail('wrong-workspace');
+    if (!(await sameWorkspaceRoot(root, payload.sourceRootRealpath))) fail('wrong-workspace');
     const canonicalGraph = join(await fs.realpath(dirname(resolve(graphPath))), basename(graphPath));
-    if (kind === 'receipts' && !sameWorkspacePath(resolve(root, payload.graphRelativePath), canonicalGraph)) fail('wrong-workspace');
+    if (kind === 'receipts' && !(await sameGraphLocator(resolve(root, payload.graphRelativePath), canonicalGraph))) fail('wrong-workspace');
     const loc = await layout(graphPath, kind, true);
     // One workspace lock coordinates both namespaces.
     await safeDirectory(join(loc.base, 'receipts'), true);
@@ -255,7 +262,7 @@ export async function putRecord(graphPath, kind, payload) {
     if (kind === 'results') {
       const parent = await readPayload(join(loc.base, 'receipts', `${payload.parentReceiptId}.json`), payload.parentReceiptId, 'receipts');
       if (parent.task !== payload.task) fail('wrong-task');
-      if (!sameWorkspacePath(parent.sourceRootRealpath, payload.sourceRootRealpath)) fail('wrong-workspace');
+      if (!(await sameWorkspaceRoot(parent.sourceRootRealpath, payload.sourceRootRealpath))) fail('wrong-workspace');
     }
     const destination = join(loc.directory, `${id}.json`);
     if (await lstatMaybe(destination)) {
@@ -290,8 +297,8 @@ export async function readRecord(graphPath, kind, id, { task, root, receiptId } 
     await checkLayout(loc, kind);
     if (payload.task !== task) fail('wrong-task');
     const rootRealpath = await fs.realpath(root);
-    if (!sameWorkspacePath(payload.sourceRootRealpath, rootRealpath)) fail('wrong-workspace');
-    if (kind === 'receipts' && !sameWorkspacePath(resolve(rootRealpath, payload.graphRelativePath), join(loc.anchor, basename(graphPath)))) fail('wrong-workspace');
+    if (!(await sameWorkspaceRoot(payload.sourceRootRealpath, rootRealpath))) fail('wrong-workspace');
+    if (kind === 'receipts' && !(await sameGraphLocator(resolve(rootRealpath, payload.graphRelativePath), join(loc.anchor, basename(graphPath))))) fail('wrong-workspace');
     if (kind === 'results') {
       if (payload.parentReceiptId !== receiptId) fail('wrong-parent');
       await readRecord(graphPath, 'receipts', receiptId, { task, root });
