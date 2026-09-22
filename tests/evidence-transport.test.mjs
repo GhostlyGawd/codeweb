@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, symlinkSync, realpathSync } from 'node:fs';
+import { realpath as realpathAsync } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, relative, dirname, basename, normalize } from 'node:path';
 
 const script = (f) => resolve('scripts', f);
 function fixture(t) {
@@ -28,10 +29,21 @@ function mcp(f,name,args) {
   return {res,data:JSON.parse(res.content[0].text),stderr:p.stderr};
 }
 const capture = (f,task='task1') => cli('context-pack.mjs',[f.graph,'target','--capture-evidence','--task',task],f.root);
+async function workspacePathDiagnostic(f) {
+  const rootSync=realpathSync(f.root), rootAsync=await realpathAsync(f.root);
+  const graphSync=join(realpathSync(dirname(resolve(f.graph))),basename(f.graph));
+  const graphAsync=join(await realpathAsync(dirname(resolve(f.graph))),basename(f.graph));
+  const recordedRelative=relative(rootSync,graphSync).replaceAll('\\','/');
+  const fromReceipt=resolve(rootAsync,recordedRelative);
+  return {platform:process.platform,rootSync,rootAsync,graphSync,graphAsync,recordedRelative,fromReceipt,
+    sameRoot:normalize(rootSync).toLowerCase()===normalize(rootAsync).toLowerCase(),
+    sameGraph:normalize(fromReceipt).toLowerCase()===normalize(graphAsync).toLowerCase()};
+}
 
-test('ac_33: CLI/MCP capture parity bypasses empty cached graph and auto-refresh',t=>{
+test('ac_33: CLI/MCP capture parity bypasses empty cached graph and auto-refresh',async t=>{
   const f=fixture(t), before=readFileSync(f.graph,'utf8');
-  const c=capture(f); assert.equal(c.status,0,c.stderr); assert.equal(c.data.state,'captured');
+  const c=capture(f); if(c.status!==0)t.diagnostic(JSON.stringify(await workspacePathDiagnostic(f)));
+  assert.equal(c.status,0,c.stderr + JSON.stringify(c.data)); assert.equal(c.data.state,'captured');
   assert.equal(Buffer.byteLength(JSON.stringify(c.data))<=8192,true);
   const m=mcp(f,'codeweb_context',{symbol:'target',captureEvidence:true,task:'task1'});
   assert.equal(m.res.isError,undefined); assert.deepEqual(m.data,c.data);
