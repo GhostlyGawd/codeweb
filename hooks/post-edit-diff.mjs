@@ -6,8 +6,8 @@
 // re-extracts that target and compares to the baseline via structuralRegressions(): a NEW file
 // dependency cycle, or a symbol that lost ALL its callers, is surfaced to the agent.
 //
-// FAIL-OPEN by construction: any parse error, missing baseline, or extraction failure exits 0
-// silently, so the hook can never block or break an edit. It is INERT until a target is mapped
+// Non-blocking by construction: unavailable mapped evidence gets concise recovery
+// context and exits 0, so the hook can never block an edit. It is INERT until a target is mapped
 // (no `.codeweb/graph.json` up-tree -> no-op), and only checks the edges-only regression subset
 // (cycles + lost-callers) — run `scripts/diff.mjs` or re-run /codeweb for the full delta.
 
@@ -18,7 +18,8 @@ import { execFileSync } from 'node:child_process';
 import { structuralRegressions, regressionsAgainstSummary } from '../scripts/lib/graph-ops.mjs';
 import { loadHookBaseline } from '../scripts/lib/hook-baseline.mjs';
 import { bump, correlateEdit } from '../scripts/lib/stats.mjs';
-import { atomicWrite } from '../scripts/lib/cli.mjs';
+import { atomicWrite, sameFile } from '../scripts/lib/cli.mjs';
+import { hookFileInScope, readHookGraph, hookIssue, formatHookIssue } from '../scripts/lib/hook-evidence.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const EXTRACT = join(HERE, '..', 'scripts', 'extract-symbols.mjs');
@@ -43,7 +44,7 @@ function extractViaSpawn(root, cache) {
 }
 // Crash-safety ladder (fail-open, observable): CODEWEB_HOOK_INPROC=0 forces the spawn (the rollback
 // lever); any throw from the lazy import or runExtract -> ONE spawn attempt, bumped so the
-// divergence is ledger-visible, then (if that throws too) the caller's catch returns null silently.
+// divergence is ledger-visible, then (if that throws too) the caller reports unavailable evidence.
 async function extractAfter(root, cache, baseline) {
   if (process.env.CODEWEB_HOOK_INPROC === '0') return extractViaSpawn(root, cache); // rollback lever
   try {
@@ -56,17 +57,34 @@ async function extractAfter(root, cache, baseline) {
   }
 }
 
-// Returns { root, newCycles, lostCallers } when an edit introduces a structural regression, else null.
+// Returns a structural regression, a bounded unavailable state, or null for a quiet check.
 export async function check(raw) {
   let input; try { input = JSON.parse(raw); } catch { return null; }
   const fp = input?.tool_input?.file_path || input?.tool_input?.filePath;
   if (!fp || !SRC_RE.test(fp)) return null;
   const t = findTarget(fp);
   if (!t) return null;
+  if (!hookFileInScope(fp, t)) return null;
+  const side = loadHookBaseline(t.baseline);
+  let baseline;
+  if (!side.summary || side.summary.nodeCount == null || !Array.isArray(side.summary.excludedFiles)) {
+    try { baseline = readHookGraph(t, side.graphBytes); } catch { return hookIssue(t, 'invalid-map'); }
+    if (!baseline.nodes.length) return hookIssue(t, 'empty-map');
+    if (baseline.meta?.analysis?.status === 'incomplete') return hookIssue(t, 'incomplete-map');
+    const rel = resolve(fp).slice(t.root.length + 1).replace(/\\/g, '/');
+    const nodes = baseline.nodes.filter((n) => n.file === rel);
+    if (nodes.length && nodes.every((n) => n.role === 'generated' || n.role === 'vendored')) return null;
+  } else {
+    const rel = resolve(fp).slice(t.root.length + 1).replace(/\\/g, '/');
+    if (side.summary.excludedFiles?.includes(rel)) return null;
+    if (side.summary.nodeCount === 0) return hookIssue(t, 'empty-map');
+    if (side.summary.analysisIncomplete) return hookIssue(t, 'incomplete-map');
+  }
   const cache = join(dirname(t.baseline), SCAN_CACHE_NAME);
   let after;
-  try { after = await extractAfter(t.root, cache, t.baseline); } catch { return null; }
-  if (!after) return null;
+  try { after = await extractAfter(t.root, cache, t.baseline); } catch { return hookIssue(t, 'extraction-failed'); }
+  if (!after) return hookIssue(t, 'extraction-failed');
+  if (after.meta?.analysis?.status === 'incomplete') return hookIssue(t, 'incomplete-extraction');
   // Round 2, finding #18a: the map-time sidecar carries the baseline's cycle keys + caller
   // counts, so the before side needs NO JSON.parse of the multi-MB graph and NO
   // normalizeGraph/fileCycles/buildIndex recompute. Seam matrix (all fail-open): graph.json
@@ -74,14 +92,11 @@ export async function check(raw) {
   // corrupt x graph valid -> the legacy path below, sharing the bytes the hash check already
   // read (one read); sidecar valid x graph tampered under a matching stamp -> sidecar consumed —
   // CORRECT: it snapshots map-time truth where the legacy path would parse the tampered file;
-  // both corrupt -> null -> silent exit 0 (the hooks.json advisory contract).
-  const side = loadHookBaseline(t.baseline);
+  // both corrupt -> mapped unavailable context, still exit 0.
   let reg;
   if (side.summary) {
     reg = regressionsAgainstSummary(side.summary, after);
   } else {
-    let baseline;
-    try { baseline = JSON.parse(side.graphBytes != null ? side.graphBytes : readFileSync(t.baseline, 'utf8')); } catch { return null; }
     reg = structuralRegressions(baseline, after);
   }
   if (!reg.newCycles.length && !reg.lostCallers.length) return null;
@@ -116,6 +131,7 @@ export function dedupeFlags(baselinePath, out) {
 }
 
 function format(out) {
+  if (out.status === 'unavailable') return formatHookIssue(out);
   const lines = [`[codeweb] ⚠ structural regression after edit (target: ${out.root}):`];
   for (const c of out.newCycles) lines.push(`  new dependency cycle: ${c.join(' <-> ')}`);
   for (const id of out.lostCallers) lines.push(`  ${id} lost all callers (now uncalled)`);
@@ -126,7 +142,7 @@ function format(out) {
 
 // Execute as a hook only when run directly (not when imported by tests). check() is async now
 // (#18b's lazy in-process extraction), so the guard runs it in an async IIFE and awaits it.
-if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
+if (process.argv[1] && sameFile(process.argv[1], fileURLToPath(import.meta.url))) {
   (async () => {
     let raw = '';
     try { raw = readFileSync(0, 'utf8'); } catch { /* no stdin */ }
@@ -136,10 +152,10 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
       const fp = JSON.parse(raw)?.tool_input?.file_path || JSON.parse(raw)?.tool_input?.filePath;
       const t = fp && SRC_RE.test(fp) && findTarget(fp);
       // R4: dedupe BEFORE the ledger so regressionsFlagged counts fresh flags, not repeats.
-      if (out && t) { try { out = dedupeFlags(t.baseline, out); } catch { /* keep the warning */ } }
+      if (out && t && out.status !== 'unavailable') { try { out = dedupeFlags(t.baseline, out); } catch { /* keep the warning */ } }
       if (t) {
         bump(t.baseline, 'postEditChecks');
-        if (out) bump(t.baseline, 'regressionsFlagged', out.newCycles.length + out.lostCallers.length);
+        if (out && out.status !== 'unavailable') bump(t.baseline, 'regressionsFlagged', out.newCycles.length + out.lostCallers.length);
         // advice-followed correlation: did this edit touch a caller file the last card warned about?
         const rel = resolve(fp).slice(t.root.length + 1).replace(/\\/g, '/');
         correlateEdit(t.baseline, rel);

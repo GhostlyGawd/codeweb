@@ -186,7 +186,7 @@ test('S18-4: a stale or corrupt sidecar falls back to the legacy path with the c
   } finally { cleanup(dir); }
 });
 
-test('S18-5: both sidecar AND graph corrupt -> the hook binary exits 0 silently (the contract is fail-open)', () => {
+test('S18-5: both sidecar AND graph corrupt -> non-blocking unavailable evidence and recovery context', () => {
   const dir = tmpDir('codeweb-hb-');
   try {
     writeTree(dir, CYCLE_FIXTURE);
@@ -196,7 +196,11 @@ test('S18-5: both sidecar AND graph corrupt -> the hook binary exits 0 silently 
     const res = spawnSync(process.execPath, [HOOK],
       { input: JSON.stringify({ tool_name: 'Edit', tool_input: { file_path: join(dir, 'x.mjs') } }), encoding: 'utf8' });
     assert.equal(res.status, 0, 'always exit 0');
-    assert.ok(!/cycle|regression/i.test(res.stderr || ''), 'no structural output — silence IS the fail-open');
+    const envelope = JSON.parse(res.stdout);
+    assert.match(envelope.hookSpecificOutput.additionalContext, /mapped evidence unavailable \(invalid-map\)/);
+    assert.match(envelope.hookSpecificOutput.additionalContext, /codeweb_map/);
+    assert.equal(envelope.hookSpecificOutput.permissionDecision, undefined);
+    assert.equal(res.stderr, '', 'one contextual channel; no repeated stderr warning');
   } finally { cleanup(dir); }
 });
 

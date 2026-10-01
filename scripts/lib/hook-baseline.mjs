@@ -23,11 +23,20 @@ export const sidecarPathFor = (graphPath) => join(dirname(graphPath), HOOK_BASEL
  *  run.mjs passes the bytes it read back. */
 export function computeHookBaseline(graph, graphString, mtimeMs) {
   const { cycles, callIn } = baselineSummary(graph);
+  const files = new Map();
+  for (const n of graph.nodes) {
+    if (!files.has(n.file)) files.set(n.file, []);
+    files.get(n.file).push(n);
+  }
+  const excludedFiles = [...files].filter(([, nodes]) => nodes.every((n) => n.role === 'generated' || n.role === 'vendored')).map(([file]) => file).sort();
   return {
     version: 1,
     graph: { s: Buffer.byteLength(graphString), m: Math.round(mtimeMs), h: sha1(graphString) },
     cycles,
     callIn,
+    nodeCount: graph.nodes.length,
+    analysisIncomplete: graph.meta?.analysis?.status === 'incomplete',
+    excludedFiles,
   };
 }
 
@@ -59,13 +68,14 @@ export function loadHookBaseline(graphPath) {
   let side = null;
   try { side = JSON.parse(readFileSync(sidecarPathFor(graphPath), 'utf8')); } catch { return { summary: null }; }
   if (!side || side.version !== 1 || !side.graph || !Array.isArray(side.cycles) || !side.callIn) return { summary: null };
+  const summary = { cycles: side.cycles, callIn: side.callIn, nodeCount: side.nodeCount, analysisIncomplete: side.analysisIncomplete, excludedFiles: side.excludedFiles };
   let st = null;
   try { st = statSync(graphPath); } catch { return { summary: null }; }
   if (st.size === side.graph.s && Math.round(st.mtimeMs) === side.graph.m) {
-    return { summary: { cycles: side.cycles, callIn: side.callIn } };
+    return { summary };
   }
   let graphBytes = null;
   try { graphBytes = readFileSync(graphPath, 'utf8'); } catch { return { summary: null }; }
-  if (sha1(graphBytes) === side.graph.h) return { summary: { cycles: side.cycles, callIn: side.callIn }, graphBytes };
+  if (sha1(graphBytes) === side.graph.h) return { summary, graphBytes };
   return { summary: null, graphBytes };
 }
