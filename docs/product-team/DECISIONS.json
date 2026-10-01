@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-01T18:21:52.669725+00:00",
+  "updated_at": "2026-10-01T20:30:22.358560+00:00",
   "authority": "Derived living decisions; frozen research and charter remain separate authorities.",
   "review_status": "critic_pass_completed_same_session",
   "source_packet": "reports/hypothesis-pressure-test-2026-09-29",
@@ -498,7 +498,8 @@
       "owner": "Codex session owning the selected work",
       "work_ids": [
         "P-02",
-        "P-03"
+        "P-03",
+        "P-04"
       ],
       "claim_ids": [
         "F-C02"
@@ -530,9 +531,11 @@
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
         "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
         "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
-        "reports/native-evidence-p03-2026-10-01/README.md"
+        "reports/native-evidence-p03-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
       ],
-      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
       "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
       "technical_followthrough": {
         "work": "P-03",
@@ -540,6 +543,12 @@
         "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
         "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
         "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      },
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       }
     },
     {
@@ -550,7 +559,8 @@
       "owner": "Codex session owning the selected work",
       "work_ids": [
         "P-02",
-        "P-03"
+        "P-03",
+        "P-04"
       ],
       "claim_ids": [
         "F-C02"
@@ -581,9 +591,11 @@
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
         "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
         "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
-        "reports/native-evidence-p03-2026-10-01/README.md"
+        "reports/native-evidence-p03-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
       ],
-      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
       "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
       "technical_followthrough": {
         "work": "P-03",
@@ -591,6 +603,12 @@
         "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
         "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
         "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      },
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       }
     },
     {
@@ -600,7 +618,8 @@
       "decision_reason": "Record request-to-usable-evidence latency per run; one second remains a provisional design target.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-02"
+        "P-02",
+        "P-04"
       ],
       "claim_ids": [
         "F-C02"
@@ -628,10 +647,18 @@
       "user_outcome_status": "unobserved",
       "result_refs": [
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
-        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
       ],
-      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
-      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
+      }
     },
     {
       "finding_id": "L03-F04",
@@ -641,7 +668,8 @@
       "owner": "Codex session owning the selected work",
       "work_ids": [
         "P-02",
-        "P-03"
+        "P-03",
+        "P-04"
       ],
       "claim_ids": [
         "F-C02",
@@ -676,9 +704,11 @@
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
         "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
         "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
-        "reports/native-evidence-p03-2026-10-01/README.md"
+        "reports/native-evidence-p03-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
       ],
-      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
       "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
       "technical_followthrough": {
         "work": "P-03",
@@ -686,6 +716,12 @@
         "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
         "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
         "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      },
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       }
     },
     {
@@ -696,7 +732,8 @@
       "owner": "Codex session owning the selected work",
       "work_ids": [
         "P-02",
-        "P-03"
+        "P-03",
+        "P-04"
       ],
       "claim_ids": [
         "F-C02"
@@ -728,9 +765,11 @@
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
         "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
         "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
-        "reports/native-evidence-p03-2026-10-01/README.md"
+        "reports/native-evidence-p03-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
       ],
-      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
       "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
       "technical_followthrough": {
         "work": "P-03",
@@ -738,6 +777,12 @@
         "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
         "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
         "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      },
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       }
     },
     {
@@ -787,7 +832,8 @@
       "owner": "Codex session owning the selected work",
       "work_ids": [
         "P-01",
-        "P-03"
+        "P-03",
+        "P-04"
       ],
       "claim_ids": [
         "F-C03"
@@ -818,9 +864,11 @@
       "user_outcome_status": "unobserved",
       "result_refs": [
         "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
-        "reports/native-evidence-p03-2026-10-01/README.md"
+        "reports/native-evidence-p03-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
       ],
-      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
       "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met.",
       "technical_followthrough": {
         "work": "P-03",
@@ -828,6 +876,12 @@
         "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
         "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
         "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      },
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       }
     },
     {
@@ -880,7 +934,8 @@
       "owner": "Codex session owning the selected work",
       "work_ids": [
         "P-02",
-        "P-03"
+        "P-03",
+        "P-04"
       ],
       "claim_ids": [
         "F-C03"
@@ -912,9 +967,11 @@
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
         "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
         "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
-        "reports/native-evidence-p03-2026-10-01/README.md"
+        "reports/native-evidence-p03-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
       ],
-      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
       "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
       "technical_followthrough": {
         "work": "P-03",
@@ -922,6 +979,12 @@
         "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
         "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
         "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      },
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       }
     },
     {
@@ -932,7 +995,8 @@
       "owner": "Codex session owning the selected work",
       "work_ids": [
         "P-02",
-        "P-03"
+        "P-03",
+        "P-04"
       ],
       "claim_ids": [
         "F-C02",
@@ -967,9 +1031,11 @@
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
         "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
         "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
-        "reports/native-evidence-p03-2026-10-01/README.md"
+        "reports/native-evidence-p03-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
       ],
-      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
       "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
       "technical_followthrough": {
         "work": "P-03",
@@ -977,6 +1043,12 @@
         "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
         "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
         "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      },
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       }
     },
     {
@@ -986,7 +1058,8 @@
       "decision_reason": "Keep structural verdicts, test-neighbor hints, recorded coverage and executed tests distinct.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-01"
+        "P-01",
+        "P-04"
       ],
       "claim_ids": [
         "F-C03"
@@ -1016,9 +1089,18 @@
       "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
       "execution_status": "decision_recorded",
       "user_outcome_status": "unobserved",
-      "result_refs": [],
-      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
-      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+      "result_refs": [
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
+      ],
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met.",
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
+      }
     },
     {
       "finding_id": "L04-F06",
@@ -1587,7 +1669,8 @@
       "owner": "Codex session owning the selected work",
       "work_ids": [
         "P-01",
-        "P-03"
+        "P-03",
+        "P-04"
       ],
       "claim_ids": [
         "F-C03",
@@ -1621,9 +1704,11 @@
       "user_outcome_status": "unobserved",
       "result_refs": [
         "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
-        "reports/native-evidence-p03-2026-10-01/README.md"
+        "reports/native-evidence-p03-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
       ],
-      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
       "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met.",
       "technical_followthrough": {
         "work": "P-03",
@@ -1631,6 +1716,12 @@
         "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
         "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
         "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      },
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       }
     },
     {
@@ -1769,7 +1860,8 @@
       "owner": "Codex session owning the selected work",
       "work_ids": [
         "P-02",
-        "P-03"
+        "P-03",
+        "P-04"
       ],
       "claim_ids": [
         "F-C02"
@@ -1798,9 +1890,11 @@
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
         "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
         "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
-        "reports/native-evidence-p03-2026-10-01/README.md"
+        "reports/native-evidence-p03-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
       ],
-      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
       "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
       "technical_followthrough": {
         "work": "P-03",
@@ -1808,6 +1902,12 @@
         "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
         "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
         "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      },
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       }
     },
     {
@@ -1817,7 +1917,8 @@
       "decision_reason": "Declare the owner/state of behavioral verification independently of completed structural collection.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-01"
+        "P-01",
+        "P-04"
       ],
       "claim_ids": [
         "F-C03"
@@ -1844,9 +1945,18 @@
       "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
       "execution_status": "decision_recorded",
       "user_outcome_status": "unobserved",
-      "result_refs": [],
-      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
-      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+      "result_refs": [
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
+      ],
+      "last_reviewed_at": "2026-10-01T20:30:22.358560+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met.",
+      "native_followthrough": {
+        "work": "P-04",
+        "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+        "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
+        "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
+      }
     },
     {
       "finding_id": "L08-F04",

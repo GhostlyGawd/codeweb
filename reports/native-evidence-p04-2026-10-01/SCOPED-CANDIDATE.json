@@ -1,0 +1,404 @@
+{
+  "schema_version": 1,
+  "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+  "source_pr": "https://github.com/GhostlyGawd/codeweb/pull/100",
+  "approval": "controlled_codex_explicit_mcp_learning_only",
+  "full_product_field_ready": false,
+  "full_NED_ready": false,
+  "claude": "pending_per_user_decision",
+  "tested_client": "Codex CLI 0.159.2",
+  "native_invocation": {
+    "requested_model": "gpt-6.1-sol",
+    "requested_reasoning_effort": "xhigh",
+    "explicit_invocation_accepted": true,
+    "independent_backend_echo": false
+  },
+  "approved_tools": [
+    "codeweb_map",
+    "codeweb_refresh",
+    "codeweb_explain",
+    "codeweb_impact",
+    "codeweb_context",
+    "codeweb_find_similar",
+    "codeweb_diff",
+    "codeweb_deadcode"
+  ],
+  "conditions": [
+    "Ephemeral sessions with user config ignored; apps/hooks disabled.",
+    "Workspace-write sandbox and approval policy never; server default prompt.",
+    "Exact per-tool preauthorization for known owned fixture calls, scoped graph paths.",
+    "Source regex integration, installed source-build files match source; package metadata 0.15.0 is not a release.",
+    "Prescribed synthetic fixture tasks; observation of reads/edits, not security confinement or natural-use proof."
+  ],
+  "verified_mechanisms": [
+    "Native missing-map recovery, one original baseline, exact low-target consumers and source opened before edit.",
+    "Native limited/full impact counts, bounded similarity with source comparison and graph-only limits.",
+    "Native distinct corrupt/invalid/EMPTY/sparse/zero/unmatched/incomplete/lost-baseline/child-failure states.",
+    "Actual generated-path orphan classification/ranking, default exclusion and all:true restoration; header-only classification remains product.",
+    "Cold/warm/linked originals remain unchanged through recorded refresh/diff/recovery.",
+    "Structural green, executed failing oracle, skipped tests and recorded coverage/test-neighbors remain distinct.",
+    "Enabled server initializes/lists28 definitions/calls; disabled/removed scoped definitions do not launch it, ordinary edits succeed."
+  ],
+  "verification": {
+    "full_gate": {
+      "product_passed": 1230,
+      "product_skipped": 60,
+      "python_checks": 47,
+      "golden_evals": 5,
+      "passed": true
+    },
+    "github_source_checks_passed": 10,
+    "independent_review": "approved exact scoped candidate",
+    "native_results_matched_server_traffic": 49,
+    "source_files_hash_checked": 696,
+    "installed_product_files_byte_compared": 139,
+    "host_frozen_files": 1334,
+    "host_frozen_symlinks": 8,
+    "host_packet_digest": "062b1c08af396e4c878bbb4b1a6639a822f1c236ed4bbbc79eeb55241d05e5a7",
+    "review_digest": "5af8bb24ae4a8e2c402aadef964493cd97503a7193f917bdc7449a8dfc7a49ca"
+  },
+  "observed_timing_examples": {
+    "cold_context_seconds": 42.658,
+    "cold_source_open_seconds": 113.892,
+    "cold_edit_seconds": 137.175,
+    "cold_whole_process_seconds": 212.946,
+    "linked_context_seconds": 44.591,
+    "linked_source_open_seconds": 70.008,
+    "linked_edit_seconds": 108.348,
+    "scope": "Model/process work in prescribed runs, with some concurrency; no permission-wait measurement, distribution or benefit comparison."
+  },
+  "matrix": {
+    "counts": {
+      "pass": 26,
+      "fail": 0,
+      "unverified": 4,
+      "excluded": 4
+    },
+    "counts_are_overlapping_surface_dispositions": true,
+    "cases": [
+      {
+        "id": "P04-DIAG-01",
+        "ned_ids": [
+          "NED-01",
+          "NED-08"
+        ],
+        "status": "excluded",
+        "surface": "interrupted original-source native diagnostic",
+        "scope_note": "Interrupted old-source diagnostic retained; not final acceptance or timing."
+      },
+      {
+        "id": "P04-01",
+        "ned_ids": [
+          "NED-04",
+          "NED-05",
+          "NED-08",
+          "NED-09"
+        ],
+        "status": "pass",
+        "surface": "actual native Codex explicit MCP"
+      },
+      {
+        "id": "P04-02",
+        "ned_ids": [
+          "NED-02",
+          "NED-07",
+          "NED-08",
+          "NED-09"
+        ],
+        "status": "pass",
+        "surface": "actual native Codex explicit MCP plus disk reads"
+      },
+      {
+        "id": "P04-03",
+        "ned_ids": [
+          "NED-07"
+        ],
+        "status": "pass",
+        "surface": "actual native impact budget and expansion"
+      },
+      {
+        "id": "P04-04",
+        "ned_ids": [
+          "NED-03",
+          "NED-07"
+        ],
+        "status": "pass",
+        "surface": "actual native similarity/source comparison"
+      },
+      {
+        "id": "P04-05",
+        "ned_ids": [
+          "NED-03"
+        ],
+        "status": "pass",
+        "surface": "direct CLI conflicting-contract and cap controls"
+      },
+      {
+        "id": "P04-06",
+        "ned_ids": [
+          "NED-03"
+        ],
+        "status": "pass",
+        "surface": "direct CLI different-syntax control"
+      },
+      {
+        "id": "P04-07",
+        "ned_ids": [
+          "NED-01",
+          "NED-03"
+        ],
+        "status": "pass",
+        "surface": "direct CLI missing-body/empty-match control"
+      },
+      {
+        "id": "P04-08",
+        "ned_ids": [
+          "NED-03"
+        ],
+        "status": "pass",
+        "surface": "direct CLI body-cap control plus native metadata"
+      },
+      {
+        "id": "P04-09",
+        "ned_ids": [
+          "NED-01",
+          "NED-04"
+        ],
+        "status": "pass",
+        "surface": "actual native incomplete deadcode"
+      },
+      {
+        "id": "P04-10",
+        "ned_ids": [
+          "NED-01",
+          "NED-04"
+        ],
+        "status": "pass",
+        "surface": "actual native recognized generated ranking"
+      },
+      {
+        "id": "P04-11",
+        "ned_ids": [
+          "NED-04"
+        ],
+        "status": "pass",
+        "surface": "actual native dependency/unsupported extraction scope"
+      },
+      {
+        "id": "P04-12",
+        "ned_ids": [
+          "NED-04"
+        ],
+        "status": "pass",
+        "surface": "actual native invalid/corrupt/empty/sparse states"
+      },
+      {
+        "id": "P04-13",
+        "ned_ids": [
+          "NED-01",
+          "NED-04",
+          "NED-10"
+        ],
+        "status": "pass",
+        "surface": "actual native matched-zero/unmatched/repeated explicit requests"
+      },
+      {
+        "id": "P04-14",
+        "ned_ids": [
+          "NED-05",
+          "NED-08",
+          "NED-09"
+        ],
+        "status": "pass",
+        "surface": "actual native warm stale-map recovery"
+      },
+      {
+        "id": "P04-15",
+        "ned_ids": [
+          "NED-05",
+          "NED-08",
+          "NED-09"
+        ],
+        "status": "pass",
+        "surface": "actual native detached linked-worktree"
+      },
+      {
+        "id": "P04-16",
+        "ned_ids": [
+          "NED-05"
+        ],
+        "status": "pass",
+        "surface": "actual native lost-original-baseline control"
+      },
+      {
+        "id": "P04-17",
+        "ned_ids": [
+          "NED-04",
+          "NED-05"
+        ],
+        "status": "pass",
+        "surface": "actual native spawned-child invocation failure"
+      },
+      {
+        "id": "P04-18",
+        "ned_ids": [
+          "NED-01",
+          "NED-06"
+        ],
+        "status": "pass",
+        "surface": "actual native structural versus executed oracle"
+      },
+      {
+        "id": "P04-19",
+        "ned_ids": [
+          "NED-06"
+        ],
+        "status": "pass",
+        "surface": "actual process genuine skipped-test control"
+      },
+      {
+        "id": "P04-20",
+        "ned_ids": [
+          "NED-06"
+        ],
+        "status": "pass",
+        "surface": "actual measured LCOV plus native historical coverage serving"
+      },
+      {
+        "id": "P04-21",
+        "ned_ids": [
+          "NED-06"
+        ],
+        "status": "pass",
+        "surface": "direct stale coverage/refresh control"
+      },
+      {
+        "id": "P04-22",
+        "ned_ids": [
+          "NED-08",
+          "NED-10"
+        ],
+        "status": "pass",
+        "surface": "actual native enabled MCP lifecycle"
+      },
+      {
+        "id": "P04-23",
+        "ned_ids": [
+          "NED-10"
+        ],
+        "status": "pass",
+        "surface": "actual native disabled scoped MCP lifecycle"
+      },
+      {
+        "id": "P04-24",
+        "ned_ids": [
+          "NED-10"
+        ],
+        "status": "pass",
+        "surface": "actual native removed scoped MCP lifecycle"
+      },
+      {
+        "id": "P04-25",
+        "ned_ids": [
+          "NED-09"
+        ],
+        "status": "pass",
+        "surface": "per-run native timestamp receipts"
+      },
+      {
+        "id": "P04-26",
+        "ned_ids": [
+          "NED-08"
+        ],
+        "status": "pass",
+        "surface": "pinned source build and accepted explicit model condition"
+      },
+      {
+        "id": "P04-27",
+        "ned_ids": [
+          "NED-05",
+          "NED-08"
+        ],
+        "status": "unverified",
+        "surface": "current default/ambient permission configuration",
+        "scope_note": "Default permission/setup experience is unverified; only the scoped preauthorized condition is approved."
+      },
+      {
+        "id": "P04-28",
+        "ned_ids": [
+          "NED-08",
+          "NED-10"
+        ],
+        "status": "unverified",
+        "surface": "frontend filtered tool catalog/global uninstall",
+        "scope_note": "Frontend-filtered tool catalog and global uninstall remain unverified; scoped server lifecycle is observed."
+      },
+      {
+        "id": "P04-29",
+        "ned_ids": [
+          "NED-08"
+        ],
+        "status": "unverified",
+        "surface": "Codex product-skill discovery/use",
+        "scope_note": "Faithful native product-skill discovery/use remains unverified."
+      },
+      {
+        "id": "P04-30",
+        "ned_ids": [
+          "NED-02",
+          "NED-04",
+          "NED-08",
+          "NED-09",
+          "NED-10"
+        ],
+        "status": "unverified",
+        "surface": "authenticated Claude native tools/hooks/lifecycle",
+        "scope_note": "Claude native verification remains pending by user decision."
+      },
+      {
+        "id": "P04-31",
+        "ned_ids": [
+          "NED-02",
+          "NED-04",
+          "NED-08",
+          "NED-09",
+          "NED-10"
+        ],
+        "status": "excluded",
+        "surface": "Codex ambient hooks",
+        "scope_note": "Codex ambient hooks are not implemented or claimed in this candidate scope."
+      },
+      {
+        "id": "P04-32",
+        "ned_ids": [
+          "NED-08"
+        ],
+        "status": "excluded",
+        "surface": "published npm package/other hosts/parsers",
+        "scope_note": "Published package, other native hosts and native optional-parser conditions are outside this observed scope."
+      },
+      {
+        "id": "P04-33",
+        "ned_ids": [
+          "NED-09"
+        ],
+        "status": "excluded",
+        "surface": "latency percentiles/human value",
+        "scope_note": "No latency percentile, one-second promise, human benefit, return or payment inference."
+      }
+    ]
+  },
+  "remaining_limits": [
+    "Interrupted old-source diagnostic retained; not final acceptance or timing.",
+    "Default permission/setup experience is unverified; only the scoped preauthorized condition is approved.",
+    "Frontend-filtered tool catalog and global uninstall remain unverified; scoped server lifecycle is observed.",
+    "Faithful native product-skill discovery/use remains unverified.",
+    "Claude native verification remains pending by user decision.",
+    "Codex ambient hooks are not implemented or claimed in this candidate scope.",
+    "Published package, other native hosts and native optional-parser conditions are outside this observed scope.",
+    "No latency percentile, one-second promise, human benefit, return or payment inference."
+  ],
+  "root_registry_addendum": "Separate no-inference app-server attempts rejected a host configuration transport before initialization; no positive catalog proof. Original attempts preserved privately.",
+  "publication": "Only curated product summary and case identities. Raw transcripts, configs, paths, package/cache, fixture metadata and host setup remain private.",
+  "user_outcomes": "unobserved"
+}

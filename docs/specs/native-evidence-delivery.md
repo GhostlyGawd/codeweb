@@ -1,6 +1,6 @@
 # Native evidence delivery and trust — first bounded product spec
 
-Spec ID: NED. Prepared September 30, 2026. Status: P-01/P-03 source candidates reviewed and passing; P-02 factual preflight complete; remaining native-host readiness work is P-04. Owner: Codex. Work: P-01 through P-04. Sources: F-C02/F-C03, F-T02/F-T03 and the linked findings in [DECISIONS.json](../product-team/DECISIONS.json). [Baseline and reproduced CLI behavior](../../reports/research-to-execution-plan-2026-09-30/BASELINE.json).
+Spec ID: NED. Prepared September 30, 2026. Status: P-01/P-03 source candidates reviewed and passing; P-02 factual preflight complete; P-04 has an approved controlled Codex MCP-only candidate; broader native-host readiness remains open. Owner: Codex. Work: P-01 through P-04. Sources: F-C02/F-C03, F-T02/F-T03 and the linked findings in [DECISIONS.json](../product-team/DECISIONS.json). [Baseline and reproduced CLI behavior](../../reports/research-to-execution-plan-2026-09-30/BASELINE.json).
 
 ## User and outcome
 
@@ -38,6 +38,10 @@ The full technical matrix precedes an unqualified field-ready claim; P-01 alone 
 ## Current source delivery
 
 P-03 is separately reviewed on `669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28` in [draft PR #99](https://github.com/GhostlyGawd/codeweb/pull/99), stacked on P-01. [Product verification](../../reports/native-evidence-p03-2026-10-01/README.md) links each demonstrated repair to the original cases and research rationale. AC-35 pins corrected deletion wording/provenance, edit relevance, mapped failures, legacy shapes, freshness, source entry aliases and optional-tool noise. Actual native delivery, lifecycle and broader applicable cases remain unverified under P-04; this is a reviewed source candidate, not field readiness or user value.
+
+## Scoped native candidate
+
+Independent review approves `95bf6178f1c3979d3ed169329002daa9a41fb73d` for controlled Codex CLI explicit MCP-only learning under the recorded eight-tool preauthorization. [Scoped candidate and cases](../../reports/native-evidence-p04-2026-10-01/README.md) preserve source/host distinctions, raw-private evidence digests, known exclusions and remaining owners. The observed protocol is not default onboarding, natural use or user benefit. Claude remains pending by user choice; native skill, default/global lifecycle and frontend filtering remain unverified. Full NED/all-host field readiness is not approved. G-01/E-01 may prepare learning on this exact scoped candidate while those broader boundaries remain open.
 
 ## Host surfaces
 

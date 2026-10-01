@@ -198,7 +198,7 @@
     {
       "id": "P-04",
       "title": "Freeze the technically ready candidate for field use",
-      "execution_status": "ready",
+      "execution_status": "in_progress",
       "outcome_status": "unobserved",
       "owner": "Codex",
       "lane": "Product",
@@ -215,14 +215,37 @@
         "F-T02",
         "F-T03"
       ],
-      "finding_ids": [],
+      "finding_ids": [
+        "L03-F01",
+        "L03-F02",
+        "L03-F03",
+        "L03-F04",
+        "L03-F05",
+        "L04-F01",
+        "L04-F03",
+        "L04-F04",
+        "L04-F05",
+        "L07-F02",
+        "L08-F02",
+        "L08-F03"
+      ],
       "acceptance": "All applicable NED cases have evidence; P-03 resolved when needed; exact candidate identity and independent review requirement satisfied.",
-      "result_refs": [],
-      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
-      "last_updated_at": "2026-10-01T18:21:52.669725+00:00",
-      "entry_condition": "P-01 and P-03 source candidates are reviewed and passing; remaining actual-host cases and lifecycle boundaries are the P-04 work, not assumed complete.",
-      "readiness_state": "source_repairs_reviewed_native_host_verification_required",
-      "required_followup": "Verify applicable native startup/delivery, authenticated Claude or a valid declared surface scope, trusted Codex ambient scope, actual generated/dependency exclusion, disable/uninstall lifecycle and remaining native controls. Scoped direct handler/CLI/MCP successes do not freeze a field-ready candidate."
+      "result_refs": [
+        "reports/native-evidence-p04-2026-10-01/README.md",
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
+      ],
+      "authority": "User approved continuing native workflow verification. Claude verification explicitly remains pending. Known owned-fixture scoped reads/writes and necessary bounded metadata corrections are authorized; no new authentication, global trust/profile changes, release, merge or outreach.",
+      "last_updated_at": "2026-10-01T20:30:22.358560+00:00",
+      "entry_condition": "Reviewed P03 source is immutable baseline; native catalog audit found metadata-safety correction required before final candidate freeze.",
+      "readiness_state": "scoped_eight_tool_codex_explicit_mcp_candidate_frozen_broader_readiness_unverified",
+      "required_followup": "Broad P-04 remains open: default onboarding/permissions, filtered frontend/global lifecycle, faithful product skill and Claude when later authorized. Controlled Codex-only learning may use the separately approved exact candidate.",
+      "candidate_source_base": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+      "declared_scope": "Controlled Codex CLI explicit MCP-only learning under observed per-tool preauthorization. Claude remains pending; native skill/default/global/frontend/ambient scope not approved.",
+      "scoped_delivery_status": "done",
+      "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+      "draft_pr": "https://github.com/GhostlyGawd/codeweb/pull/100",
+      "full_product_field_ready": false,
+      "scoped_completion": "Source95bf, local gate1230/60skip/47Py/5evals, all10sourceCI,49native results matched server traffic;139installed files match,1334host files and8symlinks independently audited. Exact scoped candidate approved; no all-host readiness or user value."
     },
     {
       "id": "G-01",

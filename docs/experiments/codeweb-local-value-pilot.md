@@ -18,6 +18,12 @@ Seek both Claude Code and Codex users where qualified participants permit; recor
 
 Raw source, transcripts and personal/contact data remain private by default. Obtain explicit consent for observation, any recording, follow-up, and any public/anonymized case publication. Store only agreed data; public GitHub carries sanitized aggregate results or cases with specific publication consent. No telemetry is added to the local product.
 
+## Current candidate scope for preparation
+
+P-04 separately approves source `95bf6178f1c3979d3ed169329002daa9a41fb73d` for controlled Codex CLI explicit MCP-only learning under its tested preauthorization; [candidate scope](../../reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json) is narrower than all-host/default readiness. Claude verification was explicitly deferred, so initial recruitment may focus on qualified Codex maintainers and record this imbalance. Product skill, default permissions and broader global lifecycle remain unverified.
+
+The synthetic fixture protocol does not replace a maintainer’s competent usual setup. Freeze the actual participant configuration, consented source boundaries and per-tool permission method before observation. Preserve their normal useful tools/instructions in both conditions except the declared Codeweb treatment, verify absence/exposure as applicable, and count real setup/permission/recovery effort. Do not silently import fixture-only tool preauthorization or suppressed instructions as a claim about ordinary usability. Allocation, scoring and adjudicator still require E-01 freeze before measurement; no participant has been enrolled by this technical result.
+
 ## Allocation to freeze
 
 Proposed allocation is three scope pairs and two reuse pairs across the five participants, with condition order counterbalanced within each pair. Reassign by naturally available task type before measurement if this allocation is not feasible and record the reason. Two distinct comparable real changes per person; never have one person repeat the same change as an independent timing comparison.
