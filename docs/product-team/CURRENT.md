@@ -1,8 +1,8 @@
 # Current Codeweb work
 
-This public copy omits personal host/settings material. See [publication scope](PUBLICATION.md); original frozen evidence remains local.
+Updated October 1, 2026. Operate directly through Codex under [TERMINAL-CONTRACT.md](TERMINAL-CONTRACT.md). Paperclip remains retired; historical state is preserved in [the retirement report](../../reports/paperclip-retirement-2026-09-30/README.md).
 
-Updated September 30, 2026. Operate directly through Codex under [TERMINAL-CONTRACT.md](TERMINAL-CONTRACT.md). Paperclip remains retired; historical state is preserved in [the retirement report](../../reports/paperclip-retirement-2026-09-30/README.md).
+**Privacy cleanup completed:** the user approved replacing only the research branch with sanitized history. The sanitized research snapshot was verified at `07ff3d8572f81309883e2975252621544d7a58de`; all 1,771 public file blobs match the scanned candidate. Twenty-three host/settings files are withheld and local paths are redacted, including inside archives. Main is unchanged. Original evidence remains unchanged locally; the old local research snapshot must never be republished. [PUBLICATION.md](PUBLICATION.md) defines the public derivative and publication boundary. Downloaded or cached copies cannot be retracted by this branch rewrite.
 
 ## Current priority
 
@@ -12,7 +12,9 @@ The [research-to-execution planning packet](../../reports/research-to-execution-
 
 **Completed factual preflight: P-02.** The [reviewed packet](../../reports/native-evidence-p02-2026-09-30/README.md) preserves 66 overlapping surface dispositions and exact raw evidence; source is unchanged. Scoped actual Codex source tools, linked-worktree recovery and original baselines work. The fresh explicit GPT-6.1 Sol/high condition on CLI0.159.3 succeeded; default/ambient/Claude boundaries are separate. Review confirmed unsafe incomplete deadcode wording, known-target omission, mapped silent failures and other bounded gaps. This is investigation completion, not field readiness.
 
-**Next product action: P-03.** [REPAIR-PLAN.json](../../reports/native-evidence-p02-2026-09-30/REPAIR-PLAN.json) defines supported repair themes and external owners. Keep out-of-scope silence legitimate, preserve compatibility and original baselines, and recheck only the demonstrated failures. P-04 remains blocked/unverified until required cases pass or legitimate exclusions are declared.
+**Completed product action: P-03.** [The bounded repair candidate](../../reports/native-evidence-p03-2026-10-01/README.md) is separately reviewed and passing on commit `669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28` in [draft PR #99](https://github.com/GhostlyGawd/codeweb/pull/99), stacked on P-01. Requested Sol 6.1 xhigh implementation and separate xhigh review preserved legacy/sparse graph compatibility, quiet/excluded behavior, original baselines and the protected harness. The required gate passed (1,227 product tests passed, 60 skipped; 47 Python checks, consistency and five evals); all ten GitHub checks passed, including Windows. The initial sparse-format gate failure and its fix remain in private evidence. R06 covers source entry aliases and explicit Claude-envelope scope only; actual Codex ambient integration remains unverified. No merge, release or human benefit is inferred.
+
+**Next product action: P-04.** Source repairs are complete; verify the remaining actual-host, permission/lifecycle, generated/dependency and delivery boundaries before freezing a field-ready candidate. Authenticated Claude/trusted ambient delivery and other required native cases remain unverified. The technical candidate is ready for this verification work, not declared field-ready.
 
 **Learning preparation: G-01 and E-01.** Qualify [public leads and drafts](../gtm-cofounder/PROSPECTS.md) and freeze [LOCAL-01](../experiments/codeweb-local-value-pilot.md). No outreach/enrollment or simulated answers. The agent owns sourcing/logistics; actual sends and private-data publication use scoped authorization.
 

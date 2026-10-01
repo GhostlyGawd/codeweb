@@ -153,7 +153,7 @@
     {
       "id": "P-03",
       "title": "Repair only demonstrated remaining delivery gaps",
-      "execution_status": "ready",
+      "execution_status": "done",
       "outcome_status": "unobserved",
       "owner": "Codex",
       "lane": "Product",
@@ -168,25 +168,44 @@
         "F-T02",
         "F-T03"
       ],
-      "finding_ids": [],
+      "finding_ids": [
+        "L03-F01",
+        "L03-F02",
+        "L03-F04",
+        "L03-F05",
+        "L04-F01",
+        "L04-F03",
+        "L04-F04",
+        "L05-F04",
+        "L07-F02",
+        "L08-F01",
+        "L08-F02"
+      ],
       "acceptance": "Minimal demonstrated repairs pass relevant existing/new tests and preserve the original baseline, permissions and scope.",
       "result_refs": [
-        "reports/native-evidence-p02-2026-09-30/REPAIR-PLAN.json"
+        "reports/native-evidence-p02-2026-09-30/REPAIR-PLAN.json",
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
       ],
-      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
-      "last_updated_at": "2026-10-01T02:50:01.943454+00:00",
-      "entry_condition": "P-02 independently reproduced product gaps; REPAIR-PLAN.json defines supported high-priority, medium and conditional surfaces. No product repair was executed by preflight."
+      "authority": "User approved P-03 implementation with a GPT-6.1 Sol xhigh implementer and separate xhigh reviewer; draft PR preparation is within delivery scope. No release, merge, outreach or new authentication.",
+      "last_updated_at": "2026-10-01T18:21:52.669725+00:00",
+      "entry_condition": "Reviewed P-01 source is the base; P-02 repair themes are the bounded scope. Source is owned by one implementer; root and separate reviewer verify the frozen candidate.",
+      "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+      "draft_pr": "https://github.com/GhostlyGawd/codeweb/pull/99",
+      "completion_scope": "R01-R05/R07 source repairs and existing-surface entry aliases from R06; separate review, local gate and all ten GitHub checks pass. Actual host readiness and user value remain separate.",
+      "remaining_work_owner": "P-04"
     },
     {
       "id": "P-04",
       "title": "Freeze the technically ready candidate for field use",
-      "execution_status": "planned",
+      "execution_status": "ready",
       "outcome_status": "unobserved",
       "owner": "Codex",
       "lane": "Product",
       "depends_on": [
         "P-01",
-        "P-02"
+        "P-02",
+        "P-03"
       ],
       "claim_ids": [
         "F-C02",
@@ -200,10 +219,10 @@
       "acceptance": "All applicable NED cases have evidence; P-03 resolved when needed; exact candidate identity and independent review requirement satisfied.",
       "result_refs": [],
       "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
-      "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
-      "entry_condition": "P-01 is complete and every applicable NED case has a passing result or a justified exclusion; P-03 is resolved if needed.",
-      "readiness_state": "blocked_by_demonstrated_product_gaps_and_unverified_required_boundaries",
-      "required_followup": "P-03 repairs, authenticated Claude/trusted ambient/generated/disable proof or legitimate declared exclusions; do not infer full readiness from scoped Codex successes."
+      "last_updated_at": "2026-10-01T18:21:52.669725+00:00",
+      "entry_condition": "P-01 and P-03 source candidates are reviewed and passing; remaining actual-host cases and lifecycle boundaries are the P-04 work, not assumed complete.",
+      "readiness_state": "source_repairs_reviewed_native_host_verification_required",
+      "required_followup": "Verify applicable native startup/delivery, authenticated Claude or a valid declared surface scope, trusted Codex ambient scope, actual generated/dependency exclusion, disable/uninstall lifecycle and remaining native controls. Scoped direct handler/CLI/MCP successes do not freeze a field-ready candidate."
     },
     {
       "id": "G-01",

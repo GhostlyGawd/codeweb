@@ -16,6 +16,8 @@ Repository documents hold priorities, decisions, requirements and results. Git r
 
 Track implementation status separately from user-value validation. At a handoff or task completion record the changed files/commit, checks, remaining uncertainty, and next action. A checked implementation is not proof of adoption, repeat use or payment. An inconclusive experiment can be a complete deliverable.
 
+Personal Mac configuration, global settings/instructions, host inventories and private backups stay outside public repository publication. Permission to change local settings does not authorize publishing them. Publish only explicitly selected product artifacts, inspect nested archives, and redact personal filesystem/device paths. Preserve immutable originals locally and label sanitized public derivatives; original SHA manifests do not certify modified public bytes. Do not republish the original local research snapshot after the approved privacy cleanup.
+
 ## Scope and existing work
 
 The retirement migrates workflow ownership, not product acceptance criteria. Preserve the charter, protected harness, existing local changes, research packets and original task constraints. [BACKLOG.md](BACKLOG.md) retains the six unfinished Paperclip records for reconciliation before reuse. Keep one source owner for overlapping work; do not duplicate earlier implementation or restart a completed research pass.

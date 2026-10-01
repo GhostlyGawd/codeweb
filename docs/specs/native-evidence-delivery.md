@@ -1,6 +1,6 @@
 # Native evidence delivery and trust — first bounded product spec
 
-Spec ID: NED. Prepared September 30, 2026. Status: execution-ready specification; product work and host trials are pending. Owner: Codex. Work: P-01 through P-04. Sources: F-C02/F-C03, F-T02/F-T03 and the linked findings in [DECISIONS.json](../product-team/DECISIONS.json). [Baseline and reproduced CLI behavior](../../reports/research-to-execution-plan-2026-09-30/BASELINE.json).
+Spec ID: NED. Prepared September 30, 2026. Status: P-01/P-03 source candidates reviewed and passing; P-02 factual preflight complete; remaining native-host readiness work is P-04. Owner: Codex. Work: P-01 through P-04. Sources: F-C02/F-C03, F-T02/F-T03 and the linked findings in [DECISIONS.json](../product-team/DECISIONS.json). [Baseline and reproduced CLI behavior](../../reports/research-to-execution-plan-2026-09-30/BASELINE.json).
 
 ## User and outcome
 
@@ -34,6 +34,10 @@ Explicit evidence outputs already distinguish several failures. Verify the ambie
 | NED-10 | User control and ordinary workflow survive: disable/uninstall stops injection, and quiet supported cases avoid repeated irrelevant interventions | Claimed disable/uninstall path, normal edits, repeated events, and equivalent competent-control sessions |
 
 The full technical matrix precedes an unqualified field-ready claim; P-01 alone does not pass the spec. P-02 records all cases, P-03 repairs only demonstrated remaining gaps, and P-04 freezes the final candidate and relevant review/check evidence. Amend central SPEC.md/acceptance pins through its existing process if implementation changes require it; this planning pass changes no protected harness or product code.
+
+## Current source delivery
+
+P-03 is separately reviewed on `669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28` in [draft PR #99](https://github.com/GhostlyGawd/codeweb/pull/99), stacked on P-01. [Product verification](../../reports/native-evidence-p03-2026-10-01/README.md) links each demonstrated repair to the original cases and research rationale. AC-35 pins corrected deletion wording/provenance, edit relevance, mapped failures, legacy shapes, freshness, source entry aliases and optional-tool noise. Actual native delivery, lifecycle and broader applicable cases remain unverified under P-04; this is a reviewed source candidate, not field readiness or user value.
 
 ## Host surfaces
 

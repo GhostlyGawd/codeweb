@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-01T02:50:01.943454+00:00",
+  "updated_at": "2026-10-01T18:21:52.669725+00:00",
   "authority": "Derived living decisions; frozen research and charter remain separate authorities.",
   "review_status": "critic_pass_completed_same_session",
   "source_packet": "reports/hypothesis-pressure-test-2026-09-29",
@@ -137,7 +137,7 @@
     },
     {
       "finding_id": "L01-F04",
-      "statement": "Reviewers have an adjacent need for architectural triage, which is not equivalent to the author’s pre-edit reuse lookup.",
+      "statement": "Reviewers have an adjacent need for architectural triage, which is not equivalent to the author\u2019s pre-edit reuse lookup.",
       "disposition": "later",
       "decision_reason": "Require a named reviewer reconstruction/triage step before a separate reviewer trial.",
       "owner": "Codex session owning the selected work",
@@ -497,7 +497,8 @@
       "decision_reason": "Verify each host/surface/worktree with observed discovery and delivery; do not infer parity from installation.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-02"
+        "P-02",
+        "P-03"
       ],
       "claim_ids": [
         "F-C02"
@@ -527,10 +528,19 @@
       "user_outcome_status": "unobserved",
       "result_refs": [
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
-        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
       ],
-      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
-      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L03-F02",
@@ -539,7 +549,8 @@
       "decision_reason": "Check low-fan-in edited targets; exact or declared ambiguous scope must beat popularity-based selection.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-02"
+        "P-02",
+        "P-03"
       ],
       "claim_ids": [
         "F-C02"
@@ -568,10 +579,19 @@
       "user_outcome_status": "unobserved",
       "result_refs": [
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
-        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
       ],
-      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
-      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L03-F03",
@@ -620,7 +640,8 @@
       "decision_reason": "Distinguish empty supported results from missing, corrupt, stale, unsupported or suppressed evidence.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-02"
+        "P-02",
+        "P-03"
       ],
       "claim_ids": [
         "F-C02",
@@ -653,10 +674,19 @@
       "user_outcome_status": "unobserved",
       "result_refs": [
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
-        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
       ],
-      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
-      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L03-F05",
@@ -665,7 +695,8 @@
       "decision_reason": "Verify permission-respecting recovery, original-baseline preservation and disable/uninstall behavior.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-02"
+        "P-02",
+        "P-03"
       ],
       "claim_ids": [
         "F-C02"
@@ -695,10 +726,19 @@
       "user_outcome_status": "unobserved",
       "result_refs": [
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
-        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
       ],
-      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
-      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L03-F06",
@@ -746,7 +786,8 @@
       "decision_reason": "Remove exhaustive/safe-deletion implications and label dynamic/generated boundaries.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-01"
+        "P-01",
+        "P-03"
       ],
       "claim_ids": [
         "F-C03"
@@ -775,13 +816,23 @@
       "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
       "execution_status": "decision_recorded",
       "user_outcome_status": "unobserved",
-      "result_refs": [],
-      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
-      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+      "result_refs": [
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
+      ],
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L04-F02",
-      "statement": "Similarity supports candidate comparison, not semantic reuse; reject the frozen CLI’s empty-result safety wording.",
+      "statement": "Similarity supports candidate comparison, not semantic reuse; reject the frozen CLI\u2019s empty-result safety wording.",
       "disposition": "build_now",
       "decision_reason": "Replace the reproduced published empty-result safety claim; retain similarity as a comparison lead.",
       "owner": "Codex session owning the selected work",
@@ -828,7 +879,8 @@
       "decision_reason": "Reuse existing receipt/baseline work; verify refresh/duplication and incomplete-baseline distinctions.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-02"
+        "P-02",
+        "P-03"
       ],
       "claim_ids": [
         "F-C03"
@@ -858,10 +910,19 @@
       "user_outcome_status": "unobserved",
       "result_refs": [
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
-        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
       ],
-      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
-      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L04-F04",
@@ -870,7 +931,8 @@
       "decision_reason": "Test ambient failure paths separately from explicit diagnostic/evidence outputs.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-02"
+        "P-02",
+        "P-03"
       ],
       "claim_ids": [
         "F-C02",
@@ -903,10 +965,19 @@
       "user_outcome_status": "unobserved",
       "result_refs": [
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
-        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
       ],
-      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
-      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L04-F05",
@@ -1116,7 +1187,8 @@
       "decision_reason": "Respect intentional duplication and capture noisy/unwanted interventions in the pilot.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-01"
+        "P-01",
+        "P-03"
       ],
       "claim_ids": [
         "F-C03",
@@ -1146,9 +1218,19 @@
       "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
       "execution_status": "decision_recorded",
       "user_outcome_status": "unobserved",
-      "result_refs": [],
-      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
-      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+      "result_refs": [
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
+      ],
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L05-F05",
@@ -1504,7 +1586,8 @@
       "decision_reason": "Structural inspection cannot authorize broader semantic/runtime changes; ordinary validation remains.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-01"
+        "P-01",
+        "P-03"
       ],
       "claim_ids": [
         "F-C03",
@@ -1536,9 +1619,19 @@
       "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
       "execution_status": "decision_recorded",
       "user_outcome_status": "unobserved",
-      "result_refs": [],
-      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
-      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+      "result_refs": [
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
+      ],
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L07-F03",
@@ -1624,7 +1717,8 @@
       "decision_reason": "Own bounded factual collection; the maintainer retains suitability, intent and scope decisions.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-01"
+        "P-01",
+        "P-03"
       ],
       "claim_ids": [
         "F-C01",
@@ -1653,9 +1747,19 @@
       "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
       "execution_status": "decision_recorded",
       "user_outcome_status": "unobserved",
-      "result_refs": [],
-      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
-      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+      "result_refs": [
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
+      ],
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L08-F02",
@@ -1664,7 +1768,8 @@
       "decision_reason": "Measure who performs refresh/recovery and prevent silent stale evidence use.",
       "owner": "Codex session owning the selected work",
       "work_ids": [
-        "P-02"
+        "P-02",
+        "P-03"
       ],
       "claim_ids": [
         "F-C02"
@@ -1691,10 +1796,19 @@
       "user_outcome_status": "unobserved",
       "result_refs": [
         "reports/native-evidence-p02-2026-09-30/MATRIX.json",
-        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
+        "reports/native-evidence-p03-2026-10-01/VERIFICATION.json",
+        "reports/native-evidence-p03-2026-10-01/README.md"
       ],
-      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
-      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+      "last_reviewed_at": "2026-10-01T18:21:52.669725+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes.",
+      "technical_followthrough": {
+        "work": "P-03",
+        "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
+        "status": "bounded_source_repairs_reviewed_awaiting_merge_release",
+        "scope": "Source behavior and controlled fixtures only. Actual host availability and user benefit remain separate.",
+        "conditional_R06": "Entry aliases only; Codex ambient adapter/trusted runtime remain P-04/unverified."
+      }
     },
     {
       "finding_id": "L08-F03",
@@ -2532,7 +2646,7 @@
     },
     {
       "finding_id": "L12-F04",
-      "statement": "Managed coordination is the only compared candidate that clearly crosses the charter’s paid boundary, but the strongest source asks for dependable cross-repo compatibility checking, not inherently for a new coordination vendor.",
+      "statement": "Managed coordination is the only compared candidate that clearly crosses the charter\u2019s paid boundary, but the strongest source asks for dependable cross-repo compatibility checking, not inherently for a new coordination vendor.",
       "disposition": "test_first",
       "decision_reason": "Test demand for the check job and competent substitutes before proposing a new coordination vendor.",
       "owner": "Codex session owning the selected work",
