@@ -1,0 +1,61 @@
+{
+  "participant_id": null,
+  "role": null,
+  "qualified_at": null,
+  "screening": {
+    "completed_at": null,
+    "recent_unresolved_episode": null,
+    "codex_usual": null,
+    "source_authority": null,
+    "two_distinct_comparable_changes": null,
+    "qualified": null,
+    "notes_private_ref": null,
+    "discovery_source_voluntary": null
+  },
+  "consent": {
+    "consented_at": null,
+    "observation": false,
+    "source_access_by_named_adjudicator": false,
+    "install_and_session_permissions": false,
+    "recording": false,
+    "followup": false,
+    "optional_selected_aggregates": false,
+    "publication": false,
+    "access_people_private_ref": null,
+    "retention_delete_at": null,
+    "withdrawal_route_private_ref": null,
+    "evidence_private_ref": null
+  },
+  "route": {
+    "confirmed": false,
+    "send_authorized": false,
+    "authorization_private_ref": null,
+    "channel_private_ref": null
+  },
+  "setup": {
+    "confirmed": false,
+    "candidate_source": null,
+    "node_version": null,
+    "client_version": null,
+    "model_requested": null,
+    "reasoning_requested": null,
+    "backend_echo": null,
+    "source_regex_profile": null,
+    "approved_tools": [],
+    "permissions_participant_accepted": false,
+    "native_controls_preserved": false,
+    "configuration_scope_verified": false,
+    "source_receipt_private_ref": null,
+    "started_at": null,
+    "confirmed_at": null
+  },
+  "activation": {
+    "status": "unobserved",
+    "first_useful_case_id": null
+  },
+  "publication": {
+    "exact_artifacts": [],
+    "participant_approval_private_ref": null,
+    "operator_allowlist_private_ref": null
+  }
+}

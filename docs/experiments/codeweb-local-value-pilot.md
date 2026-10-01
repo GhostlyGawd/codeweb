@@ -1,6 +1,6 @@
 # Local Codeweb value pilot — prepared protocol
 
-Experiment ID: LOCAL-01. Status: prepared; allocation must be frozen before enrollment/measurement. Owner: Codex. Work: E-01/E-02/E-03/D-01. Sources: F-C01/F-C04/F-C05/F-C12 and F-T01/F-T04/F-T05/F-T12. No participant trial or outreach has been performed by creating this protocol.
+Experiment ID: LOCAL-01. Status: generic rules/templates/helper separately reviewed; actual allocation, consented human adjudicator, source/configuration and participant entry facts remain pending before observation. Owner: Codex. Work: E-01/E-02/E-03/D-01. Sources: F-C01/F-C04/F-C05/F-C12 and F-T01/F-T04/F-T05/F-T12. No participant trial or outreach has been performed by creating this protocol.
 
 ## Decision and separate hypotheses
 
@@ -61,3 +61,7 @@ Two tasks and this follow-up do not establish post-familiarity withdrawal loss. 
 Use the fields and definitions in [SCORECARD.md](../product-team/SCORECARD.md). Each case records anonymized participant/task ID, consent/data-location reference, source/host/model identity, condition/order, job, opportunity, correctness/action/harms, all effort, and result/unknowns. Store raw private evidence locally; link only publication-approved summaries in GitHub.
 
 D-01 records retain/revise/stop per local job, with the severe-case verdict and unresolved recurrence. E-03 supplies the later return record. Successful setup is technical readiness; preference, task benefit and paid demand require their own observations.
+
+## Executable manual measurement companion
+
+[local-01/README.md](local-01/README.md) links the frozen operational rules, seven-question discovery/consent scripts, source-session runbook, blank private-ledger templates and offline summary helper. Its 44 author and 38 independent checks use explicitly labeled synthetic verification data. No participant outcomes are recorded. [READINESS.json](local-01/READINESS.json) retains pending actual entry facts. [The measurement explanation](local-01/MEASUREMENT-EXPLAINER.md) distinguishes on-machine counters and public acquisition context from actual task benefit and eligible optional use. The original two-findings/ten-change/no-higher-median-full-effort gate remains unchanged.

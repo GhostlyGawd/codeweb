@@ -1,0 +1,82 @@
+{
+  "checked_at": "2026-10-01T21:59:08.467890+00:00",
+  "product_source": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+  "charter": "No accounts, telemetry or license keys in local product. User asked current measurement; no explicit amendment.",
+  "local_measurement": {
+    "files": [
+      "<target>/.codeweb/stats.json",
+      "<target>/.codeweb/pending-card.json"
+    ],
+    "location": "Participant machine only",
+    "transmitted_to_codeweb": false,
+    "opt_out": "CODEWEB_NO_STATS=1",
+    "observed_source_fields": [
+      "monthly integer counters",
+      "map/session timestamps",
+      "weeks incremented only by briefInjected",
+      "pending-card symbol and relative caller filenames"
+    ],
+    "limitations": [
+      "Counters can undercount concurrent writes.",
+      "Queries/cards/regressionsFlagged are mechanisms, not adjudicated useful outcomes or avoided bugs.",
+      "cardCallersFollowed observes an edit correlation, not reading, correctness or causal influence.",
+      "Brief-based weeks do not measure voluntary return in the scoped Codex MCP-only/hook-disabled pilot.",
+      "Raw pending-card/history/graph/source folders are not appropriate study exports."
+    ]
+  },
+  "central_product_telemetry": {
+    "present_in_observed_local_product": false,
+    "user_identity_or_retention_dashboard": false
+  },
+  "website": {
+    "observed_source": "site/build.mjs and relevant site source",
+    "tracking_implementation_found": false,
+    "qualification": "Downloads page reads public npm API; this is not a product usage beacon. No deployed server-log/hosting-infrastructure claim inferred."
+  },
+  "public_acquisition": {
+    "configured_workflow": ".github/workflows/acquisition-ledger.yml",
+    "latest_successful_schedule": "2026-09-28",
+    "public_latest_record": {
+      "at": "2026-09-28",
+      "npmWeeklyDownloads": 94,
+      "npmPeriodStart": "2026-09-21",
+      "npmPeriodEnd": "2026-09-27",
+      "stars": 0,
+      "forks": 0,
+      "openIssues": 2,
+      "gateReposExternal": null
+    },
+    "latest_successful_run": "https://github.com/GhostlyGawd/codeweb/actions/runs/36424507650",
+    "limitations": [
+      "Downloads/retrievals are not unique active users, conversion, satisfaction or return.",
+      "Unknown external-gate search stays null, not zero.",
+      "Public author reports supply discovery leads, not current Codeweb customers or consent."
+    ]
+  },
+  "verification_health": {
+    "workflow": ".github/workflows/weekly-vitals.yml",
+    "latest_successful_schedule": "2026-09-28",
+    "meaning": "Source gate/prove-red/bench health, not user behavior."
+  },
+  "pilot_measurement": {
+    "method": "Explicit consented observations, participant-reviewed records, private offline ledgers and optional agreed aggregate counts.",
+    "automatic_upload_or_background_collection": false,
+    "primary_outcomes": [
+      "Adjudicated source-backed decision change",
+      "Combined effort including actual setup/help/recovery",
+      "Harms and null findings",
+      "Voluntary later use per eligible opportunity"
+    ],
+    "actual_participants": 0,
+    "actual_changes": 0,
+    "outreach_sent_this_preparation": 0
+  },
+  "prospect_list_method": [
+    "Saved firsthand public sources and existing reported user lead",
+    "Focused current source/profile/host/job recheck",
+    "Legitimate self-declared route and duplicate-contact checks",
+    "Discovery reply and screening before trial enrollment",
+    "Owner-channel opt-in recruitment draft where personal routes/fit are unresolved"
+  ],
+  "privacy": "Prospect identities/contact routes/drafts and participant/source/consent records stay private. Only selected generic protocol and sanitized aggregate product status may be published."
+}

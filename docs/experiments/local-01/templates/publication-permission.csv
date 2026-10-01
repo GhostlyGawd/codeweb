@@ -1,0 +1,1 @@
+participant_id,artifact_id,exact_artifact_sha256,participant_approval_at,participant_approval_private_ref,operator_allowlist_ref,privacy_review_ref,permitted,withdrawn_at

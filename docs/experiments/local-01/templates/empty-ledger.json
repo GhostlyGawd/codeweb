@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "data_kind": "actual",
+  "experiment_id": "LOCAL-01",
+  "protocol_version": "E01-2026-10-01-v1",
+  "rules_sha256": null,
+  "entry": {
+    "protocol_review_approved": false,
+    "protocol_review_ref": null
+  },
+  "adjudicators": [],
+  "participants": [],
+  "allocation": null,
+  "cases": [],
+  "followups": [],
+  "cohort_effort": [],
+  "notes": "Empty preparation template; no screened/enrolled/observed participants. Actual ledgers remain private outside public repository."
+}

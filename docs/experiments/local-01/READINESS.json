@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "experiment_id": "LOCAL-01",
+  "design_rules_frozen": true,
+  "protocol_version": "E01-2026-10-01-v1",
+  "separate_review": "PASS bounded preparation, revised exact hashes",
+  "measurement_ready": false,
+  "actual_counts": {
+    "screened": 0,
+    "consenting": 0,
+    "enrolled": 0,
+    "actual_changes": 0,
+    "observed_later_eligible_opportunities": 0
+  },
+  "pending_entry_facts": [
+    "Authorized individual recipients/sender/routes/content/timing before any outreach",
+    "Five actual qualified consenting ordinary Codex maintainers with source authority",
+    "Actual task identities, comparable pairs, job composition and predefined order frozen before outcomes",
+    "Named human adjudicator with actual availability/consent/source access, not each case decision maker",
+    "Participant-reviewed source-build install and per-tool permissions",
+    "Actual source/Node/client/model/parser identity and candidate-scope qualification",
+    "Competent usual controls preserved and actual frontend/baseline absence/treatment exposure verified",
+    "Agreed private data access/retention/withdrawal and follow-up choices"
+  ],
+  "approved_technical_scope": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+  "unverified_boundaries": [
+    "Claude deferred",
+    "default permission usability",
+    "faithful native product skill",
+    "frontend-filtered catalog/global uninstall",
+    "ambient integration unimplemented/unclaimed"
+  ],
+  "user_outcomes": "unobserved",
+  "notes": "Design preparation passed independent review; allocation and measurement readiness cannot be claimed from a blank template.",
+  "revision": 2,
+  "original_frozen_packet": "Private iteration-01/FREEZE.json, retained outside public publication",
+  "public_derivative": "Generic protocol/templates only; identities, contact details, drafts and raw sources stay private.",
+  "completed_preparation_facts": [
+    "Separate protocol review passed on exact frozen file hashes"
+  ]
+}

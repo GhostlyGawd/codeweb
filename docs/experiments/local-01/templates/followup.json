@@ -1,0 +1,17 @@
+{
+  "participant_id": null,
+  "observed_at": null,
+  "consented_route_verified": null,
+  "state": "unknown",
+  "optional_useful_use": null,
+  "actual_task_private_ref": null,
+  "changed_decision_private_ref": null,
+  "source_or_check_private_ref": null,
+  "participant_reviewed": null,
+  "opportunity_count": null,
+  "use_count": null,
+  "access_failure": null,
+  "familiarity_removed_need": null,
+  "notes_private_ref": null,
+  "selected_aggregates_shared": false
+}

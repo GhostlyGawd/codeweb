@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "experiment_id": "LOCAL-01",
+  "protocol_version": "E01-2026-10-01-v1",
+  "design_rules_status": "frozen_awaiting_independent_review",
+  "frozen_at": "2026-10-01T21:50:51Z",
+  "candidate_source": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+  "approved_tools": [
+    "codeweb_map",
+    "codeweb_refresh",
+    "codeweb_explain",
+    "codeweb_impact",
+    "codeweb_context",
+    "codeweb_find_similar",
+    "codeweb_diff",
+    "codeweb_deadcode"
+  ],
+  "target_participants": 5,
+  "target_distinct_changes": 10,
+  "conditions_per_person": [
+    "native",
+    "treatment"
+  ],
+  "provisional_job_slots": [
+    "scope",
+    "scope",
+    "scope",
+    "reuse",
+    "reuse"
+  ],
+  "slot_ids": [
+    "S01",
+    "S02",
+    "S03",
+    "R01",
+    "R02"
+  ],
+  "first_condition_by_slot": [
+    "native",
+    "treatment",
+    "native",
+    "treatment",
+    "native"
+  ],
+  "assignment_rule": "actual qualification/consent timestamp, participant ID tie-break; first available natural-job slot; before outcomes availability-only fallback preserving vacant slot order",
+  "required_additional_correct_actionable_findings": 2,
+  "median_effort_comparison": "treatment <= native; exact seconds; no tolerance/outlier removal",
+  "effort_unit": "human person-seconds, exclusive per-actor active+blocked intervals; all observed setup/recovery/reading/author/reviewer/check/facilitator/adjudication costs included; no invented amortization",
+  "required_cost_phases": [
+    "setup",
+    "mapping",
+    "refresh",
+    "permission",
+    "recovery",
+    "source_reading",
+    "inspection",
+    "author",
+    "reviewer",
+    "checks",
+    "facilitator",
+    "adjudication"
+  ],
+  "severe_harms": "any occurrence blocks unqualified pass even if mitigated",
+  "unresolved_material_harms": "block",
+  "incorrect_final_or_acted_on_decision": "block",
+  "missing_consent_adjudication_or_effort": "never pass",
+  "actual_allocation_status": "pending_no_screened_participants",
+  "human_adjudicator_status": "pending_named_available_consent_required",
+  "claude": "deferred",
+  "ambient_skill_default_frontend_global_readiness": "unverified_or_unimplemented_not_approved",
+  "privacy": "offline manual explicit records only; no autocollection/transmission; optional selected aggregate sharing not primary gate",
+  "review_status": "awaiting_separate_critic"
+}

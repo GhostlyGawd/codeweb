@@ -1,5 +1,7 @@
 # Source-grounded prospective cohort — drafts only
 
+**October 1 overlay:** this historical public list is not the current Codex cohort. The separately reviewed current discovery queue is private: six prospects, twelve preserved hold/control/excluded/separate records and two self-published route candidates. No individual send, eligible participant or enrollment is established. New identities, contact routes and draft messages remain outside public publication; [preparation status](../experiments/local-01/PREPARATION.json) contains aggregate counts only.
+
 Prepared September 30, 2026. Work: G-01/G-02/B-01. These are five local-user leads and one separate team-discovery lead, not enrolled participants or a representative audience. Public accounts/posts are evidence, not contact consent. Original role labels may be incomplete or historical; qualify them with a recent episode before enrollment.
 
 Proposed sender after exact recipient/route/content authorization: GhostlyGawd for this session. Reconfirm the user's GitHub account each new session. No messages were sent by creating this packet. Do not post recruitment into a third-party bug thread simply because it supplied a lead; qualify an appropriate contact route and check for earlier messages first.

@@ -250,7 +250,7 @@
     {
       "id": "G-01",
       "title": "Qualify prospects and prepare individual invitations",
-      "execution_status": "ready",
+      "execution_status": "in_progress",
       "outcome_status": "unobserved",
       "owner": "Codex",
       "lane": "Growth",
@@ -268,9 +268,16 @@
         "L01-F05"
       ],
       "acceptance": "Role/job/route/duplicate-contact checks and exact drafts ready; builder/control roles labeled; no invented participants.",
-      "result_refs": [],
-      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
-      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+      "result_refs": [
+        "docs/experiments/local-01/README.md",
+        "docs/experiments/local-01/PREPARATION.json",
+        "docs/experiments/local-01/READINESS.json"
+      ],
+      "authority": "User authorized preparing and qualifying the cohort list, exact invitations, protocol and private measurement records, with Sol 6.1 xhigh bounded authors/reviewer. Actual sends, consented observations, private publication and charter changes require their actual scope; no telemetry added.",
+      "last_updated_at": "2026-10-01T22:43:18.954862+00:00",
+      "preparation_delivery_status": "done",
+      "completion_scope": "Independent review passed public-source discovery preparation: six prospects, twelve holds/controls/exclusions and two self-published route candidates; private identities/routes/drafts preserved. No individual is send-ready or confirmed trial-eligible/enrolled.",
+      "remaining_gate": "Actual appropriate route/sender/prior-contact/decline checks and scoped send approval. Current host/job/opportunity and participant consent require actual discovery."
     },
     {
       "id": "G-02",
@@ -292,12 +299,14 @@
       "acceptance": "Only authorized messages sent; real replies/consent recorded; shortfall and nonresponse preserved.",
       "result_refs": [],
       "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
-      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+      "last_updated_at": "2026-10-01T22:43:18.954862+00:00",
+      "prepared_action": "One reviewed standalone owned GitHub General discussion invitation; exact draft private, sender GhostlyGawd for this session. No public code/contact request. No post yet.",
+      "remaining_gate": "Scoped authorization of exact owned discussion title/body/category/sender; individual discovery routes/checks remain separate."
     },
     {
       "id": "E-01",
       "title": "Freeze the local comparison protocol and allocation",
-      "execution_status": "ready",
+      "execution_status": "in_progress",
       "outcome_status": "unobserved",
       "owner": "Codex",
       "lane": "Learning",
@@ -325,9 +334,18 @@
         "L07-F03"
       ],
       "acceptance": "Separate scope/reuse hypotheses, competent controls, ten-change allocation, scoring and full-cost capture frozen before measurement.",
-      "result_refs": [],
-      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
-      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+      "result_refs": [
+        "docs/experiments/local-01/README.md",
+        "docs/experiments/local-01/PREPARATION.json",
+        "docs/experiments/local-01/READINESS.json"
+      ],
+      "authority": "User authorized preparing and qualifying the cohort list, exact invitations, protocol and private measurement records, with Sol 6.1 xhigh bounded authors/reviewer. Actual sends, consented observations, private publication and charter changes require their actual scope; no telemetry added.",
+      "last_updated_at": "2026-10-01T22:43:18.954862+00:00",
+      "design_delivery_status": "done",
+      "protocol_rules_status": "frozen_reviewed",
+      "completion_scope": "Protocol rules, generic offline ledgers and helper passed separate review; 44 author synthetic and 38 independent checks passed. Success rule unchanged; original failed versions retained.",
+      "measurement_ready": false,
+      "remaining_gate": "Actual people, two natural distinct tasks per person, task identities/order, an available consenting human adjudicator, participant permission/source/configuration/control exposure and consent/route facts must be confirmed before measurement."
     },
     {
       "id": "E-02",

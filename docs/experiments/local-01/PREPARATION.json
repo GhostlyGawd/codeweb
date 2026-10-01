@@ -1,0 +1,23 @@
+{
+  "experiment": "LOCAL-01",
+  "preparation_review": "PASS",
+  "protocol_rules_sha256": "41af920cc92047385598e1756552103340988e444154056196a96a8d4db91b56",
+  "helper_sha256": "95e61bda900a29c967b3d5b9c96ea95f3566f81ecb671ef9f77bdfc2a53b9e0a",
+  "author_synthetic_checks_passed": 44,
+  "independent_synthetic_checks_passed": 38,
+  "customer_outcomes_observed": false,
+  "discovery_prospects": 6,
+  "closer_CLI_source_signal": 1,
+  "screening_backups": 5,
+  "hold_control_excluded_separate_records": 12,
+  "self_published_route_candidates": 2,
+  "send_ready_individuals": 0,
+  "confirmed_eligible_participants": 0,
+  "enrolled": 0,
+  "actual_changes": 0,
+  "outreach_sent": 0,
+  "owned_opt_in_draft_prepared": true,
+  "local_product_telemetry_added": false,
+  "threshold": "At least two additional adjudicated correct actionable findings across ten actual changes, with no higher median full combined human effort; severe or unresolved harm blocks.",
+  "status": "Generic design ready; exact sends, actual allocation, an available consenting human adjudicator, consent and source setup remain pending."
+}

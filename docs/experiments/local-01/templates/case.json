@@ -1,0 +1,149 @@
+{
+  "case_id": null,
+  "change_id": null,
+  "participant_id": null,
+  "pair_id": null,
+  "job": null,
+  "condition": null,
+  "order": null,
+  "status": "pending",
+  "real_change": null,
+  "task_started_at": null,
+  "task_ended_at": null,
+  "request_at": null,
+  "useful_decision_at": null,
+  "source_identity_private_ref": null,
+  "decision_maker_actor_id": null,
+  "prior_familiarity": null,
+  "difficulty_before_output": null,
+  "natural_controls": [],
+  "control_features": [],
+  "oracle": {
+    "oracle_id": null,
+    "frozen_at": null,
+    "adjudicator_id": null,
+    "participant_scope_confirmed": null,
+    "source_private_ref": null,
+    "bounded_limits_private_ref": null,
+    "source_identity_private_ref": null
+  },
+  "configuration": {
+    "candidate_source": null,
+    "native_controls_preserved": null,
+    "host_model_identical_within_pair": null,
+    "scope_verified": null,
+    "baseline_absence_verified": null,
+    "treatment_exposure_verified": null,
+    "inventory_private_ref": null,
+    "approved_tool_events": [],
+    "contamination": "unknown",
+    "verified_at": null
+  },
+  "native_stage": {
+    "completed": null,
+    "recorded_before_treatment": null,
+    "decision_private_ref": null,
+    "evidence_private_ref": null
+  },
+  "adjudication": {
+    "adjudicator_id": null,
+    "signed_at": null,
+    "source_validity": null,
+    "agreement": null,
+    "final_decision_correct": null,
+    "incorrect_acted_on_guidance": null,
+    "material_unknowns_resolved": null,
+    "harm_review_complete": null,
+    "evidence_private_ref": null
+  },
+  "findings": [],
+  "finding_template": {
+    "finding_id": null,
+    "unique_key": null,
+    "correct": null,
+    "additional_to_native": null,
+    "actionable": null,
+    "participant_agrees": null,
+    "adjudicator_agrees": null,
+    "source_private_ref": null,
+    "action_private_ref": null
+  },
+  "misses": [],
+  "harms": [],
+  "harm_template": {
+    "harm_id": null,
+    "severity": null,
+    "resolved": null,
+    "adjudicator_verdict_private_ref": null
+  },
+  "costs_complete": null,
+  "cost_phase_review": {
+    "setup": {
+      "status": "unknown",
+      "reason": null
+    },
+    "mapping": {
+      "status": "unknown",
+      "reason": null
+    },
+    "refresh": {
+      "status": "unknown",
+      "reason": null
+    },
+    "permission": {
+      "status": "unknown",
+      "reason": null
+    },
+    "recovery": {
+      "status": "unknown",
+      "reason": null
+    },
+    "source_reading": {
+      "status": "unknown",
+      "reason": null
+    },
+    "inspection": {
+      "status": "unknown",
+      "reason": null
+    },
+    "author": {
+      "status": "unknown",
+      "reason": null
+    },
+    "reviewer": {
+      "status": "unknown",
+      "reason": null
+    },
+    "checks": {
+      "status": "unknown",
+      "reason": null
+    },
+    "facilitator": {
+      "status": "unknown",
+      "reason": null
+    },
+    "adjudication": {
+      "status": "unknown",
+      "reason": null
+    }
+  },
+  "effort": [],
+  "effort_template": {
+    "effort_id": null,
+    "actor_id": null,
+    "role": null,
+    "phase": null,
+    "mode": null,
+    "start_at": null,
+    "end_at": null,
+    "evidence_private_ref": null,
+    "attribution_reason": null
+  },
+  "model_wait_seconds": null,
+  "model_tokens": null,
+  "stdout_bytes": null,
+  "money_cost": null,
+  "activation_useful_decision": null,
+  "participant_reviewed_note_private_ref": null,
+  "source_identity_recorded_at": null
+}

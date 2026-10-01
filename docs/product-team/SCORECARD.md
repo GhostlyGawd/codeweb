@@ -10,7 +10,7 @@ Prepared September 30, 2026. Owner: Codex. Status: definitions established; cust
 | Participants enrolled / actual trial changes in this new pilot | 0 / 0 at preparation | No invitation or simulated response is counted |
 | Published empty-result behavior | Unsafe wording reproduced in 0.15.0 | Technical output defect, not observed customer harm |
 | Receipt mechanism | Source implementation/replay available; ordinary workflow can also find the new caller | Availability only; internal serial replay added time/output |
-| Native host readiness for the new candidate | Pending | Source inspection, documentation and installed metadata are not host proof |
+| Native host readiness for the new candidate | Scoped Codex explicit MCP candidate separately approved; broader defaults/skills/Claude pending | Controlled fixture evidence is not natural usability or user benefit |
 | Channel, buyer, Codeweb payment or renewal | Unobserved | No acquired or paying customer claimed |
 | Company workflow | Paperclip retired; direct Codex selected | No comparative benefit measured |
 
@@ -49,3 +49,7 @@ At a session restart, read CURRENT, the selected task and relevant spec/results;
 Review active findings when their source/package/host surface changes; the selected user's job or alternatives change; real trials contradict them; a candidate contact or consent changes; a paid decision depends on current costs or competitor capability; or the next action relies on an old factual baseline. Refresh the smallest affected source set and record last-reviewed date, version identity and reason. An old report remains historical evidence, not a verified current product capability.
 
 The manual [planning validator](../../reports/research-to-execution-plan-2026-09-30/validate.py) checks finding/claim/test coverage, links, source hashes and task dependencies. It does not establish strategy quality, user outcomes or automated plan maintenance.
+
+## Current measurement implementation — October 1
+
+[LOCAL-01 preparation](../experiments/local-01/README.md) provides private explicit records and an offline validator/summary, verified with 44 author and 38 independent synthetic checks. No participant outcomes were measured. Local stats remain local and optional; their counts/correlations do not prove task value, causality or eligible return. The existing public acquisition snapshot recorded 94 weekly retrievals on September 28 and unknown external gate adoption; neither supplies a user list. Discovery, screened, consenting, enrolled, setup and useful-task states remain distinct. Contact, participant and source records stay private. Actual allocation, adjudicator, consent and control exposure must be confirmed before measurement.

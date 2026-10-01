@@ -1,0 +1,11 @@
+{
+  "adjudicator_id": null,
+  "name_private_ref": null,
+  "human": null,
+  "consent": false,
+  "availability_confirmed_at": null,
+  "method": "source_case_adjudication-v1",
+  "conflicts_private_ref": null,
+  "not_decision_maker_confirmed": false,
+  "consented_at": null
+}
