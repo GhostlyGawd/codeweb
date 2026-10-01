@@ -25,7 +25,8 @@ const DEADCODE_LEGACY = process.env.CODEWEB_DEADCODE_LEGACY === '1';
 // FORMS F10: the usage names EVERY real flag — the parser rejects unknown flags loudly, so a
 // flag missing from --help was undiscoverable except by reading source.
 const USAGE = 'usage: deadcode.mjs <graph.json> [--limit N] [--all] [--show-suppressed] [--annotations <dir>] [--json]   (or set CODEWEB_WS)';
-import { die, emitJson, finish, capList, loadGraph, manifestEntryFiles, parseArgs } from './lib/cli.mjs';
+import { die, emitJson, finish, capList, loadGraph, manifestEntryFiles, parseArgs, sourceReader, checkStaleness } from './lib/cli.mjs';
+import { incompleteAnalysis } from './lib/analysis-completeness.mjs';
 
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
 const { opts, pos } = parseArgs(process.argv.slice(2), {
@@ -42,7 +43,7 @@ const { json, limit, all } = opts, showSuppressed = opts['show-suppressed'], ann
 const { graph, abs } = loadGraph(pos[0], { usage: USAGE });
 
 const index = buildIndex(graph);
-const CAVEAT = 'extraction drops ambiguous call edges (precision over recall), so a genuinely-called symbol can surface here — cross-check before deleting';
+const CAVEAT = 'mapped orphan candidates only; extraction can miss ambiguous or dynamic calls. No tier establishes safe deletion — inspect source, runtime entrypoints and relevant tests before deleting';
 
 // #6a: product scope by default — bench/fixture/generated orphans are their own cleanup problem,
 // not a delete list to hand an agent. Counted, --all restores the everything view.
@@ -82,8 +83,35 @@ for (const o of deadScope.kept) {                  // orphans = no call|import|i
   else if (manifest) review.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: `'${file}' is a declared entrypoint of ${manifest} — the host invokes it without a code edge (activate/bin/hook), so it is never safe-tier` });
   else if (parent) review.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: `defined inside ${parent.label || parent.id}'s span — reachable through the closure even with no direct edge` });
   else if (ENTRYPOINTS.has(label)) review.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: `entrypoint-like name '${label}' — may be invoked by a framework/CLI/test runner, not via a code edge` });
-  else safe.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: 'no production caller, not exported, no test edge, not in a test file — high-confidence dead' }); // the shared caveat lives once in payload.note
+  else safe.push({ id: o.id, file: o.file, domain: o.domain, loc, reason: 'no mapped production caller, not exported, no mapped test edge, not in a test file — candidate for source review' });
 }
+
+// Preserve the historical tier keys/membership, but carry uncertainty IN the
+// answer: MCP consumers do not receive loadGraph's stderr diagnostic.
+const reader = sourceReader(graph.meta?.root);
+const missingFiles = [...new Set(graph.nodes.map((n) => n.file).filter((file) => !file || !reader.linesOf(file)))].sort();
+for (const o of [...safe, ...review]) o.sourceEvidence = reader.linesOf(o.file) ? 'available' : 'unavailable';
+const completeness = incompleteAnalysis(graph);
+const stale = checkStaleness(graph);
+const stamped = reader.available && Object.keys(graph.meta?.sources || {}).length > 0;
+const analysis = {
+  scope: 'mapped-orphans',
+  status: completeness || !reader.available || missingFiles.length ? 'incomplete' : !graph.nodes.length ? 'empty' : 'bounded',
+  engine: graph.meta?.engine || 'unknown',
+  sourceAvailable: reader.available && missingFiles.length === 0,
+  missingSourceCount: missingFiles.length,
+  missingSourceFiles: missingFiles.slice(0, 8),
+  freshness: stale ? 'stale' : stamped ? 'unchanged-stamps' : 'unknown',
+  ...(completeness ? { completeness } : {}),
+  ...(stale ? { stale } : {}),
+  legacyTierMeaning: '`safe` and totals.safe count structural candidates without the listed review flags; they are not deletion guarantees.',
+  nextSteps: [
+    ...(!reader.available || missingFiles.length ? ['Restore the mapped source files before assessing deletion candidates.'] : []),
+    ...(completeness ? completeness.nextSteps : []),
+    ...(stale || !stamped ? ['Refresh the map with codeweb_refresh; preserve the original pre-edit baseline.'] : []),
+    'Inspect dynamic callers, runtime entrypoints and relevant tests before deleting any candidate.',
+  ],
+};
 
 // F7: every finding carries a stable fingerprint (kind 'orphan' + its id). A '.codeweb/annotations.json'
 // false-positive suppression hides a safe finding by default (so a confirmed not-dead symbol stops
@@ -107,12 +135,16 @@ const capSafe = capList(limit != null ? visibleSafe.slice().sort(byLocDesc) : vi
 const capReview = capList(limit != null ? review.slice().sort(byLocDesc) : review, limit);
 const payload = {
   target: graph.meta?.target || 'target',
-  summary: `${visibleSafe.length + review.length} orphan(s): ${visibleSafe.length} safe to delete, ${review.length} need review${suppressed.length ? `, ${suppressed.length} suppressed` : ''}`,
+  summary: `${visibleSafe.length + review.length} mapped orphan candidate(s): ${visibleSafe.length} without listed review flags, ${review.length} need review${suppressed.length ? `, ${suppressed.length} suppressed` : ''} — deletion safety not established${analysis.status === 'incomplete' ? '; evidence incomplete' : ''}`,
   totals: { orphans: visibleSafe.length + review.length, safe: visibleSafe.length, review: review.length, suppressed: suppressed.length },
   excluded: deadScope.excluded, excludedByRole: deadScope.excludedByRole, // #6: counted, never silent
   note: CAVEAT,
+  analysis,
   safe: capSafe.items, review: capReview.items, suppressed,
 };
+// Match the existing MCP advisor annotation instead of leaving CLI consumers
+// with freshness only in nested provenance.
+if (stale) { payload.stale = stale; payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`; }
 // API F3 (§4 convention: nextOffset rides wherever `remaining` is emitted). A single --offset
 // paging BOTH tiers in lockstep would over-skip the shorter tier — genuinely ambiguous — so the
 // tiers carry nextOffset only (the page boundary), without an offset param.
@@ -122,7 +154,9 @@ if (capReview.truncated) payload.moreReview = { remaining: capReview.remaining, 
 if (json) { emitJson(payload); } else {
 
 const t = payload.totals;
-console.log(`codeweb deadcode: ${payload.target} — ${t.orphans} orphan(s): ${t.safe} safe, ${t.review} review${t.suppressed ? `, ${t.suppressed} suppressed` : ''}`);
+console.log(`codeweb deadcode: ${payload.target} — ${t.orphans} mapped orphan candidate(s): ${t.safe} without listed review flags, ${t.review} review${t.suppressed ? `, ${t.suppressed} suppressed` : ''}`);
+console.log(`  analysis: ${analysis.status}; freshness: ${analysis.freshness}; source ${analysis.sourceAvailable ? 'available' : 'unavailable/incomplete'} — deletion safety not established`);
+if (analysis.status === 'incomplete') console.log(`  → ${analysis.nextSteps[0]}`);
 if (deadScope.excluded) console.log(`  scope: product — ${scopeNote(deadScope)}`); // #6: counted, never silent
 // MICROCOPY A4: the heading is the label people act on — the hedge rides IN it, before the
 // list, not in a note after both lists. "safe to delete" asserted safety the caveat then undid.

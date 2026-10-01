@@ -86,6 +86,20 @@ export function compileRoleOverrides(roles) {
 
 // Fill the same defaults build-report.mjs applies, so every consumer sees a well-formed graph.
 export function normalizeGraph(graph) {
+  // Missing optional fields occur in legacy maps; a malformed node collection is
+  // not an empty map. Keep invalid input distinct from a valid selector miss.
+  const invalid = (detail) => { const e = new Error(`invalid graph: ${detail}`); e.code = 'INVALID_GRAPH'; throw e; };
+  if (!graph || typeof graph !== 'object' || Array.isArray(graph)) invalid('expected an object');
+  if (graph.nodes !== undefined && !Array.isArray(graph.nodes)) invalid('nodes must be an array');
+  if (graph.edges != null && !Array.isArray(graph.edges)) invalid('edges must be an array');
+  if (graph.meta != null && (typeof graph.meta !== 'object' || Array.isArray(graph.meta))) invalid('meta must be an object');
+  for (const n of graph.nodes || []) {
+    if (!n || typeof n !== 'object' || Array.isArray(n) || typeof n.id !== 'string' || !n.id) invalid('each node needs a nonempty string id');
+    for (const k of ['file', 'label', 'kind']) if (n[k] != null && typeof n[k] !== 'string') invalid(`node ${k} must be a string`);
+  }
+  for (const e of graph.edges || []) {
+    if (!e || typeof e !== 'object' || Array.isArray(e) || typeof e.from !== 'string' || typeof e.to !== 'string') invalid('each edge needs string from/to ids');
+  }
   const g = graph || {};
   g.meta = g.meta || {};
   g.nodes = asArray(g.nodes);

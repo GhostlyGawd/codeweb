@@ -203,6 +203,10 @@ class TestAcPins(unittest.TestCase):
         proc = _run(["node", "--test", "tests/find-similar-output.test.mjs"])
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
 
+    def test_ac_35_native_evidence_repairs(self):
+        proc = _run(["node", "--test", "tests/native-evidence-repairs.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

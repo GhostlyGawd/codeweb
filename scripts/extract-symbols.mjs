@@ -19,8 +19,8 @@ import { execFileSync } from 'node:child_process';
 import { relative, resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url'; // finding #40 (T-40.3): main-guard idiom (the hooks' verbatim compare)
 import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
-import { atomicWrite, parseArgs } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
-import { SRC_RE } from './lib/common.mjs'; // finding 25: one truth for the mappable-source list (the copy here could drift)
+import { atomicWrite, parseArgs, sameFile } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
+import { SRC_RE, EXTRACTION_SKIP } from './lib/common.mjs'; // discovery scope shared with hooks
 import { scanSymbols, bodyEnd, parseSignature, DYNAMIC_RE, langOf, CPP_RE, C_RE, C_FAMILY_RE } from './lib/lang-rules.mjs'; // finding 25: pure per-language rules
 import { createImportResolver, defaultExportOf, importCandidates } from './lib/import-resolve.mjs'; // finding 25: cross-file name binding, one place; finding #11: shared specifier-candidate list
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
@@ -32,7 +32,7 @@ import { sha1 } from './lib/hash.mjs'; // one truth — codeweb's own gate flagg
 import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
 
 // Shared discovery vocabulary; evidence snapshots select the fallback walk explicitly.
-export const EXTRACTION_SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
+export { EXTRACTION_SKIP } from './lib/common.mjs';
 export const EXTRACTION_MANIFESTS = Object.freeze(['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'pom.xml', 'build.gradle', 'build.gradle.kts', 'Gemfile', 'composer.json', 'Package.swift']);
 
 // F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
@@ -141,7 +141,10 @@ if (!existsSync(root)) throw new ExtractError(1, `[extract] not found: ${root}`)
 const SRC = SRC_RE; // finding 25: the extractor and the hooks share ONE source-extension list
 const SKIP = EXTRACTION_SKIP;
 
-function tryExec(cmd, args) { try { return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 28 }); } catch { return null; } }
+// Optional accelerators may reject our flags (Apple ctags is not Universal
+// Ctags). Capture their diagnostics while falling back; extractor failures still
+// throw ExtractError and are reported by the CLI or mapped advisory hook.
+function tryExec(cmd, args) { try { return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 28, stdio: ['pipe', 'pipe', 'pipe'] }); } catch { return null; } }
 function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
 
 // ---- enumerate source files ----
@@ -251,7 +254,7 @@ function ctagsBatchOnce() {
   if (ctagsBatch !== undefined) return ctagsBatch;
   try {
     const out = execFileSync('ctags', ['--output-format=json', '--fields=+n-P', '-f', '-', '-L', '-'],
-      { encoding: 'utf8', maxBuffer: 1 << 28, input: files.join('\n') });
+      { encoding: 'utf8', maxBuffer: 1 << 28, input: files.join('\n'), stdio: ['pipe', 'pipe', 'pipe'] });
     ctagsBatch = new Map();
     parseCtagsLines(out, ctagsBatch);
   } catch { ctagsBatch = null; }
@@ -1212,10 +1215,6 @@ async function main() {
 // a symlink (macOS `/tmp` -> `/private/tmp` is the everyday case), so the process exits 0 having
 // written nothing. Falls back to the lexical form when a path cannot be realpath'd (deleted or
 // unreadable), which is the pre-existing behavior.
-const sameFile = (a, b) => {
-  const real = (p) => { try { return realpathSync(p); } catch { return resolve(p); } };
-  return real(a) === real(b);
-};
 if (process.argv[1] && sameFile(process.argv[1], fileURLToPath(import.meta.url))) {
   main();
 }

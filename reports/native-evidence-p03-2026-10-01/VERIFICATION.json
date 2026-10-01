@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "task": "P-03",
+  "status": "separately_reviewed_source_candidate",
+  "source_base": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+  "edited_files_sha256": {
+    "SPEC.md": "069026f29d587ef7439259e324852e2952c9f837c3b3037db049ce11e9363555",
+    "hooks/README.md": "8109bfe8be6cf3acf995701c689169fad2f633e24ad4fc3068c9db1b5027d6af",
+    "hooks/post-edit-diff.mjs": "55fcf5fbed530bc18864017ce9e8d3799bc820a016e9ea6fc94368f15961db4a",
+    "hooks/pre-edit-impact.mjs": "b0c6b40cede0ccff30a9c5b0f7b52f2edff9d66f2f170e02ba7d800ac07858f8",
+    "hooks/session-brief.mjs": "e18f000531c0b989bc052392db9231b296aed39da784c097774f31a342fed37e",
+    "scripts/deadcode.mjs": "c3e3cd447cea61a574341c1d37227546d03ade42629659ab47357d53483fb13d",
+    "scripts/extract-symbols.mjs": "37686c4a6558c48e9dcbd61855e7a3fbe4c76ad30f825d5d67f48776d79d44f5",
+    "scripts/lib/cli.mjs": "afd1ef70b16c88e88494d167996f29f991ba89bb3633687109b61099dc5fb24d",
+    "scripts/lib/common.mjs": "a3c88e91ab4a161f4c0f55d917752670637c830aa6023f8da02afbc656a177bd",
+    "scripts/lib/graph-ops.mjs": "7eeee0ed7a44cad14393a5295afd5264cc286407f192ac5c920955599178440c",
+    "scripts/lib/hook-baseline.mjs": "b1dd95d53d379161d402acde857ff28b795b031c5ae95e9d0b65f143ba2f3d3c",
+    "scripts/lib/hook-evidence.mjs": "743bfc7626244422ec5e929e4cabcf7579c2ae1d9d60da22eb60d63e05490216",
+    "scripts/lib/index-lite.mjs": "cdb7ce4ff6c45ab0a2f00643329e4083ff7afcce5e6fa25630135568048c0ecf",
+    "tests/native-evidence-repairs.test.mjs": "7ea94cbb0d15849e685697f543c7f854de834087ee351596919dbe6ee5a27cf4",
+    "tests/post-edit-diff.test.mjs": "a241ec74496a3d71c45145f7b80fe41eb9da65de8a16a8dd933cb47a670a0c7b",
+    "tests/test_ac_pins.py": "a17161e31628114017f64464282773e176198e1a3721ba6131e122b8d010f6f6"
+  },
+  "source_freeze_sha256": "ef102096c8e9a2f43b07f8906c5a303b496c658ea4c02a74797020e9f4637ce6",
+  "repair_trace": [
+    {
+      "id": "P03-R01",
+      "sourceCases": [
+        "TECH-02"
+      ],
+      "nedIds": [
+        "NED-01"
+      ],
+      "findingIds": [
+        "L04-F01",
+        "L07-F02"
+      ],
+      "status": "implemented",
+      "result": "Deadcode safety text retired; legacy tier/count/rank/exit semantics retained; additive source/completeness/freshness provenance survives CLI/MCP.",
+      "files": [
+        "scripts/deadcode.mjs"
+      ],
+      "test": "tests/native-evidence-repairs.test.mjs"
+    },
+    {
+      "id": "P03-R02",
+      "sourceCases": [
+        "TECH-06",
+        "TECH-36"
+      ],
+      "nedIds": [
+        "NED-02",
+        "NED-07",
+        "NED-10"
+      ],
+      "findingIds": [
+        "L03-F02",
+        "L08-F01"
+      ],
+      "status": "implemented",
+      "result": "Existing symbol selectors or unique old_string/MultiEdit spans select the relevant mapped target; ambiguous/changed-stamp cases are file summaries; same/external consumers and true omissions are bounded; known zero stays quiet.",
+      "files": [
+        "hooks/pre-edit-impact.mjs",
+        "scripts/lib/index-lite.mjs"
+      ],
+      "test": "tests/native-evidence-repairs.test.mjs"
+    },
+    {
+      "id": "P03-R03",
+      "sourceCases": [
+        "TECH-15"
+      ],
+      "nedIds": [
+        "NED-04",
+        "NED-05"
+      ],
+      "findingIds": [
+        "L03-F04",
+        "L03-F05",
+        "L04-F04",
+        "L08-F02"
+      ],
+      "status": "implemented",
+      "result": "Mapped invalid/empty/unavailable source and actual post-extraction failure get advisory recovery; unmapped, excluded, explicit generated/vendored-role and supported-zero cases stay quiet; original baseline stays immutable.",
+      "files": [
+        "hooks/pre-edit-impact.mjs",
+        "hooks/post-edit-diff.mjs",
+        "scripts/lib/hook-evidence.mjs",
+        "scripts/lib/hook-baseline.mjs",
+        "scripts/lib/common.mjs"
+      ],
+      "test": "tests/native-evidence-repairs.test.mjs"
+    },
+    {
+      "id": "P03-R04",
+      "sourceCases": [
+        "TECH-12"
+      ],
+      "nedIds": [
+        "NED-04"
+      ],
+      "findingIds": [
+        "L03-F04",
+        "L04-F04"
+      ],
+      "status": "implemented",
+      "result": "Explicit malformed/null node collections/entries and malformed graph shapes fail explicitly; sparse legacy graphs with omitted collection fields retain original empty defaults, and minimal nodes arrays retain optional-field compatibility.",
+      "files": [
+        "scripts/lib/graph-ops.mjs",
+        "scripts/lib/cli.mjs"
+      ],
+      "test": "tests/native-evidence-repairs.test.mjs"
+    },
+    {
+      "id": "P03-R05",
+      "sourceCases": [
+        "TECH-14"
+      ],
+      "nedIds": [
+        "NED-04",
+        "NED-05"
+      ],
+      "findingIds": [
+        "L03-F05",
+        "L04-F03",
+        "L08-F02"
+      ],
+      "status": "implemented",
+      "result": "Graph-only fallback uses existing source stamps; absent stamps/source remain unknown/unavailable; old sidecars recover through graph fallback.",
+      "files": [
+        "hooks/pre-edit-impact.mjs",
+        "scripts/lib/index-lite.mjs",
+        "scripts/lib/hook-baseline.mjs"
+      ],
+      "test": "tests/native-evidence-repairs.test.mjs"
+    },
+    {
+      "id": "P03-R06",
+      "sourceCases": [
+        "TECH-31",
+        "H-P02-14",
+        "H-P02-15"
+      ],
+      "nedIds": [
+        "NED-08"
+      ],
+      "findingIds": [
+        "L03-F01"
+      ],
+      "status": "partial_existing_surface",
+      "result": "Canonical/alias entryguards fixed for all three shipped Claude handlers; actual Codex ambient integration/delivery remains unverified. Claude matcher/payload and Codex MCP-only recipe inspected; no apply_patch adapter or ambient API invented.",
+      "files": [
+        "scripts/lib/cli.mjs",
+        "hooks/pre-edit-impact.mjs",
+        "hooks/post-edit-diff.mjs",
+        "hooks/session-brief.mjs",
+        "hooks/README.md"
+      ],
+      "test": "tests/native-evidence-repairs.test.mjs"
+    },
+    {
+      "id": "P03-R07",
+      "sourceCases": [
+        "TECH-37"
+      ],
+      "nedIds": [
+        "NED-10"
+      ],
+      "findingIds": [
+        "L05-F04"
+      ],
+      "status": "implemented",
+      "result": "Optional subprocess stderr captured during fallback, including unsupported Apple ctags version/flag output; genuine extractor no-source exit and mapped extraction-failed state remain observable.",
+      "files": [
+        "scripts/extract-symbols.mjs"
+      ],
+      "test": "tests/native-evidence-repairs.test.mjs"
+    }
+  ],
+  "acceptance_criterion": "AC-35",
+  "full_gate": {
+    "command": "sh scripts/check",
+    "exit_code": 0,
+    "product_test_counts": {
+      "tests": 1287,
+      "pass": 1227,
+      "fail": 0,
+      "skipped": 60,
+      "cancelled": 0
+    },
+    "python_test_count": 47,
+    "golden_evals": 5,
+    "consistency": "passed",
+    "source_unchanged_during_gate": true
+  },
+  "review": {
+    "verdict": "approve_bounded_P03_source_repairs",
+    "method": "Separate agent, independent private fixtures, same requested model and shared filesystem; procedural independence, not a blinded user trial.",
+    "requested_agent_model": "gpt-6.1-sol",
+    "requested_reasoning_effort": "xhigh",
+    "initial_candidate_controls": 89,
+    "revised_legacy_cli_mcp_controls": 30,
+    "revised_controls_passed": 30,
+    "review_digest_sha256": "423d5500aa5556079fc7d6ae70cd903f4551e35e7777f76f86c4335cde312b2e",
+    "verification_digest_sha256": "9c5a32397ec5200b8b4083418e68e2e90a2394db606a1081d3350c65526ffb40",
+    "final_source_files_checked": 694,
+    "protected_files_and_original_P02_packets": "unchanged"
+  },
+  "compatibility_iteration": {
+    "initial_full_gate": "failed: supported omitted-array legacy graph was rejected",
+    "repair": "Restore omitted-array normalization while rejecting explicit malformed collections. Existing D-sparse assertion preserved.",
+    "failed_gate_and_first_review": "retained privately"
+  },
+  "publication": {
+    "scope": "Product source/spec/tests and this curated product-only summary.",
+    "raw_logs_and_private_paths": "kept outside public publication",
+    "personal_configuration_or_host_inventory_included": false
+  },
+  "remaining_boundaries": [
+    "Actual trusted Codex ambient delivery and authenticated Claude delivery remain P-04/unverified.",
+    "Lifecycle, actual native generated/dependency exclusion and remaining applicable host cases require separate verification.",
+    "Direct Claude-shaped payload/alias probes do not prove actual native hook delivery.",
+    "No field readiness, human decision benefit, voluntary return, payment, merge or release is established by these checks."
+  ]
+}
