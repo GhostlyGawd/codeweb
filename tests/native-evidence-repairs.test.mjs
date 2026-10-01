@@ -58,6 +58,60 @@ const source = {
   ...Object.fromEntries(Array.from({ length: 7 }, (_, i) => [`format${i}.mjs`, `import { decorate } from "./access.mjs";\nexport function formatter${i}(value) {\n  return decorate(value);\n}\n`])),
 };
 
+function servedCatalog(workspace) {
+  const messages = [
+    { jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'catalog-contract-test', version: '1' } } },
+    { jsonrpc: '2.0', method: 'notifications/initialized', params: {} },
+    { jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} },
+  ];
+  const r = run(script('mcp-server.mjs'), [], messages.map((m) => JSON.stringify(m)).join('\n') + '\n', { CODEWEB_WS: workspace });
+  assert.equal(r.status, 0, r.stderr);
+  const replies = r.stdout.split('\n').filter(Boolean).map(JSON.parse);
+  assert.equal(typeof replies.find((m) => m.id === 1).result.capabilities.tools, 'object');
+  const tools = replies.find((m) => m.id === 2).result.tools;
+  assert.equal(tools.length, 28);
+  assert.equal(new Set(tools.map((t) => t.name)).size, 28);
+  for (const tool of tools) {
+    assert.match(tool.name, /^codeweb_/);
+    assert.equal(tool.inputSchema.type, 'object');
+  }
+  return tools;
+}
+
+for (const toolName of ['codeweb_deadcode', 'codeweb_impact', 'codeweb_campaign']) {
+  test(`ac_35 served catalog: ${toolName} describes bounded graph evidence even without a usable map`, () => {
+    const f = fixture();
+    try {
+      const missing = servedCatalog(join(f.root, '.codeweb'));
+      writeFileSync(f.graph, JSON.stringify({ nodes: [], edges: [] }));
+      const empty = servedCatalog(join(f.root, '.codeweb'));
+      assert.deepEqual(empty, missing, 'catalog scope and schemas do not turn an empty/missing graph into a guarantee');
+      const tool = empty.find((t) => t.name === toolName), description = tool.description;
+      assert.match(description, /mapped/i);
+      assert.match(description, /full:true/, 'bounded candidates have an existing expansion path');
+      if (toolName === 'codeweb_deadcode') {
+        assert.doesNotMatch(description, /safe[- ]to[- ]delete|high[- ]confidence dead/i);
+        assert.match(description, /(?:orphan|candidate)/i);
+        assert.match(description, /deletion safety.*not established|no.*deletion guarantee/i);
+        assert.match(description, /(?:source|unavailable|incomplete)/i);
+        assert.deepEqual(tool.inputSchema.required, []);
+      } else if (toolName === 'codeweb_impact') {
+        assert.doesNotMatch(description, /every function.*affected|exhaustive|complete runtime/i);
+        assert.match(description, /transitive/i);
+        assert.match(description, /unmapped|dynamic/i);
+        assert.match(description, /mapped.*total|total.*mapped/i);
+        assert.deepEqual(tool.inputSchema.required, ['symbol']);
+      } else {
+        assert.doesNotMatch(description, /never introduces a cycle|safe to apply/i);
+        assert.match(description, /simulat/i);
+        assert.match(description, /new cycles/i);
+        assert.match(description, /does not.*runtime|runtime.*not established/i);
+        assert.deepEqual(tool.inputSchema.required, []);
+      }
+    } finally { rmSync(f.root, { recursive: true, force: true }); }
+  });
+}
+
 test('ac_35 R01: incomplete/missing-source CLI and MCP deadcode retain structural tiers and in-band provenance', async () => {
   const f = fixture({ 'stray.mjs': 'function abandoned() {\n  return 42;\n}\n' });
   try {

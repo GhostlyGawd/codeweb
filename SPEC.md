@@ -107,7 +107,7 @@ the `check:` commands above are what brief 144 runs verbatim.
 AC-34 pins P-01's similarity-output correction only. The broader native evidence delivery
 matrix, actual host delivery and user outcomes remain pending separate verification.
 
-- **AC-35** — deadcode CLI/MCP preserves structural tier keys while carrying source/completeness provenance and no deletion guarantee; advisory hooks target resolvable mapped edits, retain same-file and external consumers with bounded expansion, qualify file-only/ambiguous/stale/unknown evidence, distinguish mapped invalid/empty/extraction failure from quiet supported and excluded cases, preserve original baselines and permission flow, and work through filesystem entry aliases without optional ctags stderr noise | check: `node --test tests/native-evidence-repairs.test.mjs` | status: built
+- **AC-35** — deadcode CLI/MCP preserves structural tier keys while carrying source/completeness provenance and no deletion guarantee; served deadcode/impact/campaign descriptions retain mapped-source or simulation limits and bounded expansion without deletion/runtime guarantees; advisory hooks target resolvable mapped edits, retain same-file and external consumers with bounded expansion, qualify file-only/ambiguous/stale/unknown evidence, distinguish mapped invalid/empty/extraction failure from quiet supported and excluded cases, preserve original baselines and permission flow, and work through filesystem entry aliases without optional ctags stderr noise | check: `node --test tests/native-evidence-repairs.test.mjs` | status: built
 
 AC-35 pins P-03's bounded handler and transport repairs (P03-R01–R05/R07 and entry
 aliases from conditional R06; NED-01/02/04/05/07/10). The shipped hook metadata
