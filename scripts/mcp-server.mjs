@@ -32,6 +32,7 @@ import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's ca
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
 import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
 import { sourceReader, editDistance } from './lib/cli.mjs';
+import { BANDS, BODY_LINE_CAP } from './lib/shingles.mjs';
 import { hasEvidenceArguments, validateEvidenceArgs, evidenceCliArgs } from './lib/evidence-args.mjs';
 import { TOOL_SPECS, QUERY_TOOL_SPECS } from './lib/tool-specs.mjs'; // D1: THE tool-interface manifest
 import { discoverGraph, discoverUnsupported, NO_GRAPH, cachedGraph, staleOnce } from './lib/mcp-graphs.mjs'; // D2: graph serving state
@@ -179,7 +180,7 @@ const TOOL_BEHAVIOR = {
     valid: (a) => (a.signature || a.body) ? null : 'pass `signature` (a candidate signature) or `body` (a code snippet)',
     argv: (a) => a.body ? ['--stdin', ...(a.structural ? ['--structural'] : [])] : ['--signature', a.signature, ...(a.structural ? ['--structural'] : [])],
     input: (a) => a.body || undefined,
-    description: 'Before writing a function, ask "does something already do this?": ranks existing bodies by similarity to a candidate `signature` or `body` snippet. structural:true matches identifier-renamed (Type-2) clones. Call to AVOID re-implementing existing logic.' }),
+    description: `Before writing a function, rank mapped non-test function/method source candidates for comparison with a signature or body snippet (>=${BANDS.low * 100}% similarity; existing bodies limited to first ${BODY_LINE_CAP} lines, candidate uncapped). structural:true uses identifier-normalized shingles. Missing bodies and unmapped code may hide candidates; similarity does not establish equivalent behavior, novelty, or safe reuse. Inspect source and run relevant tests.` }),
   codeweb_placement: () => ({ argv: (a) => ['--calls', a.calls],
     description: 'Where a NEW symbol belongs: given the comma-separated ids/labels it will call, suggests the domain + file by callee gravity, and warns if it duplicates an existing symbol.' }),
   // FORMS F11: limit/full were advertised here but wired to nothing (no budget entry, no CLI
