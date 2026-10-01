@@ -1,0 +1,18 @@
+# Claude Code — integrated brief
+
+Final synthesis candidate; independent final review pending. Claims are reported/qualified as in [corpus](../EVIDENCE.jsonl). Coverage spans pilot, original lanes, supplements and final targeted sweeps; [source map](../SOURCE-MAP.md) gives exact boundaries. No saturation claimed.
+
+- [CW-P001](https://scottspence.com/posts/enable-lsp-in-claude-code): LSP produced one precise definition after grep returned three candidates. Across four days the author counted 12 LSP calls against 539 Grep and 531 Glob calls. **Limit:** Full article read. February/March experience outside preferred six months; September 13 update distinguishes a different harness. No current Claude support claim or controlled benchmark. Event spans days; event_at left null.
+- [CW-T002](https://github.com/anthropics/claude-code/issues/88214): Cloud session synchronized marketplace metadata but left declared plugins uninstalled and their agents unavailable. **Limit:** Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution.
+- [CW-T004](https://github.com/anthropics/claude-code/issues/97515): CLI-installed plugins including official pyright were invisible in Desktop Code sessions targeting WSL; restarting did not help. **Limit:** Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution.
+- [CW-X003](https://baransel.dev/post/replaced-entire-dev-workflow-with-claude-code/): Author reports splitting a 300-line utility into four modules, updating imports across the project, with no broken tests. **Limit:** Reporter-confirmed success for this task only. Business rules outside code remain a stated limitation; linked repositories not reproduced.
+- [CW-Z003](https://ngof.nikhaldimann.com/p/deja-code): Reports repeatedly prompting Claude to reuse library code and extract abstractions in GitGuessr; inspected deduplicating commits with jscpd. **Limit:** One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed.
+- [CW-X017](https://github.com/anthropics/claude-code/issues/84125): Reporter clean-room comparison finds parent LSP works, interactive subagent LSP absent, and headless subagent lookup succeeds. **Limit:** Only opened body sections support claim; comments and remaining diagnostics not fully read. Reporter probes not independently rerun.
+
+**Synthesis/inference:** Host-specific tool exposure, invocation and reuse must be separated from model adherence. Native modularization and semantic navigation can succeed.
+
+**Decision and proposed experiment:** Audit change: prove actual tool use in the intended surface before changing packaging. Test one shared-function edit against native tools; record invocation, misses and review effort. No experiment executed or authorized by this report.
+
+**Segments and moments:** use only the source-supported segments in each record. The primary proposed audience remains agent-heavy developers working their own repository, with reviewers secondary; builder demonstrations are distinct from ordinary-user outcomes. Before-edit, review/merge, return-use and buy/renew moments must not be collapsed.
+
+**Unknowns:** incremental Codeweb effect, actual recurrence outside purposive public samples, ordinary-user week-two reuse, current host/version transfer and paid authority. See [contradictions](../CONTRADICTIONS.md) and [opportunity decisions](../OPPORTUNITY-DECISIONS.md). Earlier briefs and correction histories remain unmodified.

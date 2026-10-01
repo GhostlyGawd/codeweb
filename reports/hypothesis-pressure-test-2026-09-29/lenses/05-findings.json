@@ -1,0 +1,426 @@
+{
+  "schema_version": 1,
+  "assignment": "05 \u2014 Repeated reliance",
+  "issue_identifier": "COD-84",
+  "issue_id": "a578154c-75d4-48de-bb1c-13a93fa55398",
+  "run_id": "82d1566c-5c11-42c4-b9f7-ce3d2ed06f09",
+  "session_id": "01a0f07f-bece-7833-8fb9-cdf7eb04ac59",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "verdict": "narrow",
+  "local_verdict": "narrow",
+  "paid_verdict": "unresolved_from_existing_evidence",
+  "findings": [
+    {
+      "id": "L05-F01",
+      "statement": "Recurring reuse uncertainty is supported; repeated voluntary Codeweb reliance is not established.",
+      "evidence_type": "Analytical inference from attributed public reports and the frozen unexecuted strategy/protocol; no Codeweb longitudinal observation",
+      "supported_actor_task": "Agent-heavy developer extending shared utilities in a changing repository; strongest concrete account is an experienced solo developer who later built duplication tooling.",
+      "conditions": [
+        "Later task has an unresolved consumer or reuse decision",
+        "A fresh source-backed answer changes inspection or reuse choice beyond native search"
+      ],
+      "evidence_ids": [
+        "CW-Z003",
+        "CW-T018"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z001",
+        "CW-X001"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-Z003",
+          "url": "https://ngof.nikhaldimann.com/p/deja-code",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:111",
+          "passage_pointer": "Quantifying code duplication; methodological weaknesses",
+          "capture_pointer": "sources/L05/REOPEN-NOTES.json#CW-Z003",
+          "source_access": "opened_full",
+          "limits": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed."
+        },
+        {
+          "evidence_id": "CW-T018",
+          "url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality."
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Z001",
+          "url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts."
+        },
+        {
+          "evidence_id": "CW-X001",
+          "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Two\u2013three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents."
+        }
+      ],
+      "strongest_supported_case": "Haldimann reports repeated intervention to find abstractions; david_d8912 reports duplicated utilities and review burden. These support recurrence of a problem, not adoption of this solution.",
+      "strongest_countercase": "Successful bounded native changes and the clean-code pilot allow the same person to solve later work without another tool. The author already supplies architectural memory.",
+      "failure_scenario": "The first brief introduces an overlooked helper; on later tasks the developer already knows it and ignores the brief.",
+      "verdict": "narrow",
+      "weakest_assumption": "The next task contains new structural uncertainty that Codeweb resolves more cheaply than the now-informed user and native tools.",
+      "local_implication": "Retain only an opportunity-conditioned return hypothesis; do not sell a universal pre-edit ritual.",
+      "paid_implication": "Recurring local value remains free and cannot establish paid-service retention.",
+      "minimal_falsification_test": "After one independently adjudicated useful task, observe the same person on two naturally occurring later eligible changes without reminders; compare decisions and total effort to their native baseline. Two redundant or prompted-only uses falsify repeated value for that case.",
+      "confidence_reason": "Moderate confidence in a reported recurrence mechanism; low confidence in generality and no direct Codeweb retention evidence."
+    },
+    {
+      "id": "L05-F02",
+      "statement": "Familiarity can erase first-use value; repeated orientation is a distinct, only partly addressable burden.",
+      "evidence_type": "Analytical inference from attributed public reports and the frozen unexecuted strategy/protocol; no Codeweb longitudinal observation",
+      "supported_actor_task": "Developer resuming a changed or unfamiliar module; distinguish source orientation from remembering task intent and session state.",
+      "conditions": [
+        "New revision, unfamiliar module or genuine lapse in source knowledge",
+        "Evidence reduces repeated lookup without requiring equivalent revalidation"
+      ],
+      "evidence_ids": [
+        "CW-L037",
+        "CW-T007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z012",
+        "CW-L015"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-L037",
+          "url": "https://david.coffee/i-still-prefer-mcp-over-skills/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:89",
+          "passage_pointer": "Skills + MCP",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Explicit commercial interest in MCP hosting/tunneling; not ordinary-user proof. Broad host capabilities and security claims not adopted."
+        },
+        {
+          "evidence_id": "CW-T007",
+          "url": "https://github.com/anthropics/claude-code/issues/83790",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:13",
+          "passage_pointer": "Body and all 1 comments; comment IDs in source registry",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Z012",
+          "url": "https://github.com/oraios/serena/discussions/131",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+          "passage_pointer": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+          "capture_pointer": "sources/L05/REOPEN-NOTES.json#CW-Z012",
+          "source_access": "opened_full",
+          "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once."
+        },
+        {
+          "evidence_id": "CW-L015",
+          "url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:67",
+          "passage_pointer": "UnrulyThesis reply",
+          "capture_pointer": null,
+          "source_access": "opened_partial",
+          "limits": "Historical account; relative date only. No general conclusion about current Serena capability."
+        }
+      ],
+      "strongest_supported_case": "A builder reports encoding learned NotePlan quirks in skills to avoid rediscovery; a session-handoff report describes manual summaries. These show recurring orientation work but do not demonstrate a structural-map solution.",
+      "strongest_countercase": "Serena maintainers describe overkill when relevant code is already in context; a small-repo user reports removing Serena. Existing skills and handoff summaries can retain knowledge.",
+      "failure_scenario": "The user returns after a week needing to remember why work stopped; Codeweb returns callers but not the outstanding decision or task state.",
+      "verdict": "narrow",
+      "weakest_assumption": "The repeated burden is rebuilding source facts rather than remembering intent, and those facts can be refreshed cheaply.",
+      "local_implication": "Limit the promise to source orientation on changed/unfamiliar code. If benefit disappears after familiarization, describe an episodic exploration aid. Saved decisions remain proposed, not established retention machinery.",
+      "paid_implication": "Do not charge for local memory or infer a compounding paid knowledge asset from this evidence.",
+      "minimal_falsification_test": "Compare a familiar unchanged module and a genuinely changed/unfamiliar module after initial use. Record time spent locating facts versus reconstructing intent. Narrow to exploration if only the unfamiliar first encounter benefits.",
+      "confidence_reason": "Moderate confidence in the boundary; builder analogy and partial Reddit access make magnitude and ordinary-user transfer uncertain."
+    },
+    {
+      "id": "L05-F03",
+      "statement": "Low calendar frequency need not mean low value; lack of an eligible task must not be scored as churn.",
+      "evidence_type": "Analytical inference from attributed public reports and the frozen unexecuted strategy/protocol; no Codeweb longitudinal observation",
+      "supported_actor_task": "Developer making occasional consequential shared-code changes; adjacent evidence comes from a team member discussing complex feature PRs.",
+      "conditions": [
+        "An independently identified consequential task actually occurs",
+        "Benefit is assessed per eligible opportunity and net of idle-period maintenance"
+      ],
+      "evidence_ids": [
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y010",
+        "CW-Z001"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-Y001",
+          "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:121",
+          "passage_pointer": "posts 1 and 3",
+          "capture_pointer": "sources/L05/REOPEN-NOTES.json#CW-Y001",
+          "source_access": "opened_full",
+          "limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent."
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Y010",
+          "url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:130",
+          "passage_pointer": "post 1",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Outside two-year preference; proposed purchase, not completed sale or observed downgrade."
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts."
+        }
+      ],
+      "strongest_supported_case": "A Bugbot user values complex low-volume feature PR review and automatic operation. This challenges a daily-use requirement, without proving Codeweb return or renewal.",
+      "strongest_countercase": "A consultant describes a client considering a temporary paid period before returning to free tooling; small native changes can remain adequate. Neither proposed future behavior is an observed outcome.",
+      "failure_scenario": "A two-week follow-up finds no cross-file work and incorrectly labels a satisfied occasional user a churned user; alternatively one valuable migration is mistaken for a permanent recurring job.",
+      "verdict": "revise",
+      "weakest_assumption": "Consequential opportunities recur for this person rather than ending with one migration.",
+      "local_implication": "Report eligible opportunities, delay until opportunity, voluntary choice and outcome separately; calendar activity is insufficient.",
+      "paid_implication": "Rare complexity can justify some services, but this competitor account proves neither Codeweb willingness to pay nor paid-attributable coordination savings.",
+      "minimal_falsification_test": "At the proposed two-week follow-up classify no opportunity, inaccessible workflow, eligible nonuse and actual use separately. Leave recurrence unresolved if no eligible task occurs; do not extend observation or outreach without separate authority.",
+      "confidence_reason": "Strong measurement rationale, weak evidence on Codeweb opportunity frequency; competitor self-report is a boundary example only."
+    },
+    {
+      "id": "L05-F04",
+      "statement": "Repeated noise and intentional duplication can turn a correct finding into a reason to stop using the brief.",
+      "evidence_type": "Analytical inference from attributed public reports and the frozen unexecuted strategy/protocol; no Codeweb longitudinal observation",
+      "supported_actor_task": "Developer maintaining purposeful separate implementations or repeatedly reviewing familiar consumers.",
+      "conditions": [
+        "Similarity is treated as a candidate, not semantic equivalence",
+        "Fresh source evidence and exception scope prevent stale advice",
+        "All reading, dismissal and unnecessary edit costs are counted"
+      ],
+      "evidence_ids": [
+        "CW-L023",
+        "CW-Z006"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L051",
+        "CW-T018"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-L023",
+          "url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:75",
+          "passage_pointer": "Parts 1, 5; limitations 23.5\u201323.7",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Full article read in overlapping chunks; author adjudication, three small tasks, two models, no independent rerun. Tool-builder case. Not a model leaderboard or proven Codeweb effect."
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+          "passage_pointer": "Refactoring at scale; What humans still do",
+          "capture_pointer": "sources/L05/REOPEN-NOTES.json#CW-Z006",
+          "source_access": "opened_full",
+          "limits": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited."
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-L051",
+          "url": "https://news.ycombinator.com/item?id=49321400",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:103",
+          "passage_pointer": "Comment 49353756",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Self-reported satisfaction, no measured accuracy or purchase amount; considered disabling Copilot but has not reported doing so."
+        },
+        {
+          "evidence_id": "CW-T018",
+          "url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality."
+        }
+      ],
+      "strongest_supported_case": "The firmware experiment reports recurring false positives reduced by repository context but with a recall tradeoff. Bruniaux explicitly leaves intentional duplication decisions to humans. A repeated finding can be technically true and operationally useless.",
+      "strongest_countercase": "One reviewer keeps multiple tools for occasional useful catches despite noise; duplicated utilities are also a real reported burden. Noise alone does not imply universal rejection.",
+      "failure_scenario": "An intentional duplicate is highlighted on every edit, producing repeated explanations or an inappropriate abstraction; a saved dismissal later hides a materially changed implementation.",
+      "verdict": "revise",
+      "weakest_assumption": "The brief can avoid repeat burden without suppressing newly relevant evidence.",
+      "local_implication": "Measure net effort and correct decisions after familiarity; explicit revision-scoped exceptions are a proposal requiring validation. Static similarity never decides shared lifecycle or behavior.",
+      "paid_implication": "Shared evidence that repeats unresolved noise can increase team coordination work; count that cost separately from free findings.",
+      "minimal_falsification_test": "On a real later task containing a previously adjudicated intentional duplicate, record dismissal effort and whether changed source reopens it appropriately. An unnecessary refactor or persistent net added work fails that case.",
+      "confidence_reason": "Moderate confidence in failure mechanisms; no runtime trial of Codeweb suppression, saved decisions or net effect."
+    },
+    {
+      "id": "L05-F05",
+      "statement": "Automatic invocation and installed defaults are not voluntary return; repeated prompting would defeat the stated reliance loop.",
+      "evidence_type": "Analytical inference from attributed public reports and the frozen unexecuted strategy/protocol; no Codeweb longitudinal observation",
+      "supported_actor_task": "Ordinary host user with a readily available workflow; integration counterevidence includes a custom MCP builder and an application-security engineer.",
+      "conditions": [
+        "User has a real choice and can bypass the brief",
+        "No experimenter reminders or per-task enforcement masquerade as preference",
+        "Availability and user action are separately observed"
+      ],
+      "evidence_ids": [
+        "CW-001",
+        "CW-L022"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y001",
+        "CW-L051"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-001",
+          "url": "https://github.com/anthropics/claude-code/issues/47565",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:1",
+          "passage_pointer": "Issue body: What Claude Actually Did; Additional Context items 6\u20137",
+          "capture_pointer": null,
+          "source_access": "opened_partial",
+          "limits": "Complete issue body read through web.open; comments/activity were not exposed, so entire thread is NOT counted fully read. Closed as not planned/stale is not a verified fix. Model-caused regression and subscription reasons are self-report. Single incident, not prevalence or Codeweb purchase intent."
+        },
+        {
+          "evidence_id": "CW-L022",
+          "url": "https://www.synthesia.io/post/automating-code-security-reviews-with-claude-mythos-level-capabilities",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:74",
+          "passage_pointer": "Building a map; Security Context; From self-serve to CI",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Company self-report, not independently replicated. Full article read; figures not visually inspected or used. HN gbrindisi is same author/workflow, not another incident."
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Y001",
+          "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:121",
+          "passage_pointer": "posts 1 and 3",
+          "capture_pointer": "sources/L05/REOPEN-NOTES.json#CW-Y001",
+          "source_access": "opened_full",
+          "limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent."
+        },
+        {
+          "evidence_id": "CW-L051",
+          "url": "https://news.ycombinator.com/item?id=49321400",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:103",
+          "passage_pointer": "Comment 49353756",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Self-reported satisfaction, no measured accuracy or purchase amount; considered disabling Copilot but has not reported doing so."
+        }
+      ],
+      "strongest_supported_case": "A builder reports skipped MCP use despite instructions after prior success; Synthesia reports slow self-serve adoption and moves review into nonblocking CI. Useful outputs need not generate voluntary behavior.",
+      "strongest_countercase": "Automatic review is valued in the Bugbot account, and another reviewer voluntarily keeps a noisy tool. Defaults can reduce effort without making every invocation evidence of preference.",
+      "failure_scenario": "Hooks display a brief on every task; the team reports perfect retention even though the user neither reads nor acts on it, or an observer repeatedly reminds them to invoke it.",
+      "verdict": "revise",
+      "weakest_assumption": "The user would keep or select this workflow because of its benefit, independent of prompting, inertia or mandate.",
+      "local_implication": "Count self-initiated invocation separately from user-chosen continued automation and passive exposure. Require a useful action/outcome; an enabled hook is only exposure.",
+      "paid_implication": "CI execution may be operationally useful but is not buyer preference or renewal. Separate continued service operation from an authorized buyer choosing it.",
+      "minimal_falsification_test": "After first use, make native and Codeweb paths available without reminders. Record user initiation, retained automation, passive exposure and useful action separately. Prompted-only uses cannot pass voluntary-return evidence.",
+      "confidence_reason": "Strong distinction between adoption and exposure; host incidents are historical and not asserted current Codeweb defects."
+    },
+    {
+      "id": "L05-F06",
+      "statement": "The proof sprint needs an opportunity-based longitudinal record before either reliance claim can survive as more than a hypothesis.",
+      "evidence_type": "Analytical inference from attributed public reports and the frozen unexecuted strategy/protocol; no Codeweb longitudinal observation",
+      "supported_actor_task": "Same consenting developer on successive real tasks; a separate actual buyer/team for paid coordination.",
+      "conditions": [
+        "Frozen eligibility rule chosen before outcomes",
+        "Familiar and successful-native tasks retained as controls",
+        "No customer simulation or automatic inference from model agreement"
+      ],
+      "evidence_ids": [
+        "CW-T018",
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Y010",
+        "CW-Z012"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-T018",
+          "url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality."
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+          "passage_pointer": "posts 1,5,6",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-X001",
+          "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Two\u2013three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents."
+        },
+        {
+          "evidence_id": "CW-Y010",
+          "url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:130",
+          "passage_pointer": "post 1",
+          "capture_pointer": null,
+          "source_access": "opened_full",
+          "limits": "Outside two-year preference; proposed purchase, not completed sale or observed downgrade."
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "url": "https://github.com/oraios/serena/discussions/131",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+          "passage_pointer": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+          "capture_pointer": "sources/L05/REOPEN-NOTES.json#CW-Z012",
+          "source_access": "opened_full",
+          "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once."
+        }
+      ],
+      "strongest_supported_case": "The frozen sprint explicitly seeks later voluntary use; the cross-repo report describes repeated manual checking, giving a candidate recurring job to investigate. Neither contains observed Codeweb returns.",
+      "strongest_countercase": "Ordinary CI, native lookup and short-lived project needs may remove the burden. First-time novelty and transfer of knowledge can explain an initial win.",
+      "failure_scenario": "Ten task demonstrations yield two useful findings, but none of the developers independently chooses the tool later; a positive first-use gate gets misreported as retention or renewal.",
+      "verdict": "unresolved_from_existing_evidence",
+      "weakest_assumption": "The same person encounters another eligible task, chooses the tool, and gains net benefit after familiarization.",
+      "local_implication": "Keep the first-use gate separate from return. A small case series can falsify a mechanism for those cases, not estimate population retention.",
+      "paid_implication": "Require separate later evidence of recurring coordination work removed beyond CI/free local capability, followed by actual purchase and renewal; local returns cannot satisfy it.",
+      "minimal_falsification_test": "Proposed minimum: one established first-use benefit followed by two naturally occurring eligible opportunities per person, with task/revision, prior familiarity, native baseline, availability, choice, prompts, changed decision, independent adjudication and total effort recorded locally with consent. If later choices require reminders or later benefits disappear, narrow to episodic exploration.",
+      "confidence_reason": "High confidence the packet lacks this direct observation; actual effects, recurrence rates and buyer outcomes remain unknown. The test is proposed, not executed or newly authorized."
+    }
+  ],
+  "access_coverage_limits": [
+    "The complete frozen packet was available; all 192 hashes checked. All 132 canonical record summaries were screened; selected complete records, source registry, original reopens, strategy, proof sprint and independent research review were inspected. This is not a claim to reread all 110 declared full sources.",
+    "No other pressure-test lens output was read before freezing this first draft. Filesystem isolation is procedural. Session identity is recorded, while runtime freshness remains for lead verification.",
+    "The research corpus has a source-volume shortfall, builder-heavy examples, partial Reddit access and historical/version-specific reports. Counts are not prevalence. No customer, host trial, withdrawal test, purchase or renewal was invented.",
+    "Mapped consumers are incomplete structural evidence; body similarity is not semantic reuse; static checks do not establish behavior. No capability execution was performed in this lens.",
+    "Four targeted original reopens are preserved as dated passage notes, not complete page archives. Other citations rely on frozen original evidence records and declared prior read boundaries."
+  ]
+}

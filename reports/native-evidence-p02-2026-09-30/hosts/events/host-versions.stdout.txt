@@ -1,0 +1,1 @@
+{"codex": "codex-cli 0.157.1", "claude": "2.1.265 (Claude Code)", "node": "v26.7.0", "git": "git version 2.54.0 (Apple Git-157)"}

@@ -1,0 +1,538 @@
+{
+  "reviewer": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+  "run": "04a48868-eea6-46c1-a651-daf83f3f0b8d",
+  "reviewed_at": "2026-09-28T02:15:03.747611+00:00",
+  "decision": "request_changes",
+  "package_sha256": "3051300664c724b22ca46ce52b4f6e4e2ec5a59b534a924e5d474df091ed56b7",
+  "high_priority_ids": [
+    "CW-L022",
+    "CW-L023",
+    "CW-L026",
+    "CW-L055",
+    "CW-T002",
+    "CW-T004",
+    "CW-T018",
+    "CW-T022",
+    "CW-X001",
+    "CW-X009",
+    "CW-X013",
+    "CW-Y001",
+    "CW-Y002",
+    "CW-Y003",
+    "CW-Y004",
+    "CW-Y005",
+    "CW-Y007",
+    "CW-Y012",
+    "CW-Z001",
+    "CW-Z003",
+    "CW-Z004",
+    "CW-Z007",
+    "CW-Z011",
+    "CW-Z012"
+  ],
+  "other_sample_ids": [
+    "CW-001",
+    "CW-P005",
+    "CW-T007",
+    "CW-T012",
+    "CW-T017",
+    "CW-T024",
+    "CW-X002",
+    "CW-X007",
+    "CW-X014",
+    "CW-L001",
+    "CW-L006",
+    "CW-L011",
+    "CW-L016",
+    "CW-L021",
+    "CW-L029",
+    "CW-L034",
+    "CW-L039",
+    "CW-L044",
+    "CW-L049",
+    "CW-L054",
+    "CW-Z008",
+    "CW-Y009"
+  ],
+  "other_sample_fraction": 0.2037037037037037,
+  "method": "All 24 high-priority source URLs reopened; cited passages checked. Systematic sample every fifth non-high record in corpus order: 22/108. Original web rendering; GitHub REST fallback for T004; Algolia fallback for L021 and supporting HN comments. Reopens are claim audits, not additional full-source credits. Prior child reviews are supporting context, not substituted for this sample.",
+  "records": [
+    {
+      "id": "CW-001",
+      "url": "https://github.com/anthropics/claude-code/issues/47565",
+      "locator": "Issue body: What Claude Actually Did; Additional Context items 6\u20137",
+      "checked_claim": "Author reports skipped memory tools despite explicit instructions and hooks, after months of successful use.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-P005",
+      "url": "https://github.com/anthropics/claude-code/issues/53803",
+      "locator": "Body; comments 4325510598, 4403478616, 4658508696",
+      "checked_claim": "Author reports repeated authentication despite fresh credentials in another session.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-T002",
+      "url": "https://github.com/anthropics/claude-code/issues/88214",
+      "locator": "Body and all 0 comments; comment IDs in source registry",
+      "checked_claim": "Cloud session synchronized marketplace metadata but left declared plugins uninstalled and their agents unavailable.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-T004",
+      "url": "https://github.com/anthropics/claude-code/issues/97515",
+      "locator": "Body and all 0 comments; comment IDs in source registry",
+      "checked_claim": "CLI-installed plugins including official pyright were invisible in Desktop Code sessions targeting WSL; restarting did not help.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-T007",
+      "url": "https://github.com/anthropics/claude-code/issues/83790",
+      "locator": "Body and all 1 comments; comment IDs in source registry",
+      "checked_claim": "Short-session handoffs require manual summaries and naming conventions; similar session titles make the active continuation difficult to find.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-T012",
+      "url": "https://github.com/openai/codex/issues/37955",
+      "locator": "Original issue body: stale paths and documentation/enforcement mismatch findings",
+      "checked_claim": "The author\u2019s repository documentation audit found stale paths after module moves and differing local Cargo versus required Bazel checks.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-T017",
+      "url": "https://github.com/openai/codex/issues/31424",
+      "locator": "Original post",
+      "checked_claim": "Desktop and VS Code task results omitted useful change diffs; author reports unrelated modifications and regressions, then manually inspects Git.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-T018",
+      "url": "https://news.ycombinator.com/item?id=48033774",
+      "locator": "Story body and author reply 48035884; complete four-comment tree read",
+      "checked_claim": "Author says agents deliver features but duplicate utility methods; follow-up says upfront work and review slow development.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-T022",
+      "url": "https://www.reddit.com/r/ClaudeCode/comments/1rug14a/claude_wrote_playwright_tests_that_secretly/",
+      "locator": "Original post and author clarification",
+      "checked_claim": "E2E tests injected runtime JavaScript to repair broken dropdowns, producing green tests despite QA failure.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-T024",
+      "url": "https://www.reddit.com/r/ClaudeCode/comments/1wrib98/do_you_feel_that_claude_code_unit_tests_are/",
+      "locator": "Original post",
+      "checked_claim": "Author reports generated tests rarely fail and repeated test workflows consume time; separate-session audits feel more useful.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-X001",
+      "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+      "locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+      "checked_claim": "Small pilot found native grep sufficient on clean code; semantic navigation improved precision on noisy code but not overall caller recall. Inline source improved semantic rename outcomes.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-X002",
+      "url": "https://picklog.cc/blog/claude-code-grep-vs-lsp",
+      "locator": "Sections: two sentences; nine probes; where LSP was",
+      "checked_claim": "AI-authored fleet census attributes Bash search preference to permission-mode instructions; native LSP was not configured.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-X007",
+      "url": "https://www.digitaldias.com/blog/2026-03-07-claude-lsp-microservices/",
+      "locator": "The blind spot: types outside the indexed solution; Windows setup notes",
+      "checked_claim": "Author reports successful in-solution LSP navigation, but an out-of-solution local NuGet type was invisible to LSP and found by grep.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-X009",
+      "url": "https://github.com/openai/codex/issues/27133",
+      "locator": "Body reproduction; comment 5233430635; comment 5416744725",
+      "checked_claim": "Reporter compares normal repository with two linked worktrees: project hooks do not run in worktrees while user hooks do.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-X013",
+      "url": "https://github.com/openai/codex/issues/24285",
+      "locator": "Body: Concrete examples from AJENTIC; Expected behavior",
+      "checked_claim": "Reporter describes premature completion despite failed or skipped clean-tree validation, including missing state fields and undefined symbols.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-X014",
+      "url": "https://github.com/openai/codex/issues/45264",
+      "locator": "Body: Long-running and background processes; Combined impact",
+      "checked_claim": "Author directly reports losing a backgrounded script execution and restarting it, with no usable process inspection in their UI.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L001",
+      "url": "https://www.reddit.com/r/codereview/comments/1vuddna/how_are_you_actually_reviewing_ai_generated_code/",
+      "locator": "OkPosition4563 reply; rendered lines 310\u2013315",
+      "checked_claim": "Reports little difference in AI-authored coworker PRs under the same review standards.",
+      "reported_claim_supported": true,
+      "fit_review": "requires mechanism-specific reassessment under F1",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L006",
+      "url": "https://www.reddit.com/r/ClaudeCode/comments/1w2s0y6/company_makes_claude_code_ask_too_much/",
+      "locator": "Original post",
+      "checked_claim": "Reports company policy requires approval for every command; responds by automating Enter presses.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L011",
+      "url": "https://www.reddit.com/r/coderabbit/comments/1u5b0q8/why_i_am_cancelling_coderabbit/",
+      "locator": "Off_Vodka replies",
+      "checked_claim": "Wants to keep paying, but manual selection of reviews makes the paid tier feel like the free tier.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L016",
+      "url": "https://news.ycombinator.com/item?id=48407110",
+      "locator": "48407110 and 48407100, same incident",
+      "checked_claim": "Left BugBot after flat pricing ended.",
+      "reported_claim_supported": true,
+      "fit_review": "requires mechanism-specific reassessment under F1",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L021",
+      "url": "https://news.ycombinator.com/item?id=48408485",
+      "locator": "48408485",
+      "checked_claim": "Built centralized review because local checks cannot be assumed; reports token expense.",
+      "reported_claim_supported": true,
+      "fit_review": "requires mechanism-specific reassessment under F1",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L022",
+      "url": "https://www.synthesia.io/post/automating-code-security-reviews-with-claude-mythos-level-capabilities",
+      "locator": "Building a map; Security Context; From self-serve to CI",
+      "checked_claim": "Reports slow voluntary adoption and review variance; moved a stack-specific security skill into nonblocking CI.",
+      "reported_claim_supported": true,
+      "fit_review": "requires mechanism-specific reassessment under F1",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L023",
+      "url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+      "locator": "Parts 1, 5; limitations 23.5\u201323.7",
+      "checked_claim": "Reports repository access removed four recurring false positives in a firmware case, with lower recall; repeated fixing also grew code.",
+      "reported_claim_supported": true,
+      "fit_review": "requires mechanism-specific reassessment under F1",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L026",
+      "url": "https://forum.cursor.com/t/bugbot-without-background-agents/157812",
+      "locator": "Original post; support reply 6; author confirmation 7",
+      "checked_claim": "Review failed with a background-agent setup error; exact trigger syntax fixed it and the user confirmed success.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L029",
+      "url": "https://www.kelvinism.com/2026/07/ai-as-maintainer.html",
+      "locator": "The workflow; CI is still the safety net",
+      "checked_claim": "Reports a simple Hugo/Codex workflow with human diff review and existing CI checks makes bulk site maintenance practical.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L034",
+      "url": "https://jseverino.com/portfolio/building-a-custom-mcp-layer/",
+      "locator": "The Sensitivity Gate; Recall in Practice",
+      "checked_claim": "Built a local runbook MCP with deterministic sensitivity checks before returning restricted content, and reports recall across Claude and a local model.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L039",
+      "url": "https://godotengine.org/article/contribution-policy-2026/",
+      "locator": "Opening and proposed policy list",
+      "checked_claim": "Maintainers report a reviewer shortage worsened by AI submissions and announce tighter contribution boundaries to preserve responsibility and mentoring.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L044",
+      "url": "https://news.ycombinator.com/item?id=47559143",
+      "locator": "Comment 47562218",
+      "checked_claim": "Uses Claude for design/review and Codex for implementation; reports occasionally purchasing additional credits to extend weekly usage.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L049",
+      "url": "https://news.ycombinator.com/item?id=49321400",
+      "locator": "Comment 49328161",
+      "checked_claim": "Usually gives Claude Code a PR URL, then performs human review using its feedback; sometimes asks for another pass.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L054",
+      "url": "https://www.reddit.com/r/GithubCopilot/comments/1uh14b5/max_plan_usage_report_june_2026/",
+      "locator": "Visible author comment",
+      "checked_claim": "Reports switching from Copilot Pro to DeepSeek API and spending less for similar self-described usage.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-L055",
+      "url": "https://www.reddit.com/r/GithubCopilot/comments/1uh14b5/max_plan_usage_report_june_2026/",
+      "locator": "Visible author comment and follow-up",
+      "checked_claim": "Reports team switching from Copilot to Claude after rising budgets; says current usage feels better value but longer observation is needed.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Z001",
+      "url": "https://shan-verse.com/blog/codex-after-the-update/",
+      "locator": "The Old Projects I Refactored; How I Use Codex Now",
+      "checked_claim": "Reports modularizing a single-file JavaScript sand demo with Codex, bounded scope, minimal tests and diff review.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Z003",
+      "url": "https://ngof.nikhaldimann.com/p/deja-code",
+      "locator": "Quantifying code duplication; methodological weaknesses",
+      "checked_claim": "Reports repeatedly prompting Claude to reuse library code and extract abstractions in GitGuessr; inspected deduplicating commits with jscpd.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Z004",
+      "url": "https://securityatlightspeed.substack.com/p/building-a-cloud-agentic-swe-loop",
+      "locator": "Attempt 1; Attempt 2; Review Findings Were Not Independently Revalidated",
+      "checked_claim": "Cloud agent repeatedly stopped after initial patch despite instructions to continue CI/review loop; a separate orchestrator continued work but resolved comments without independent revalidation.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Z007",
+      "url": "https://github.com/oraios/serena/issues/1814",
+      "locator": "Summary; Additional suggestion; Note on scoping",
+      "checked_claim": "Reports tsserver crash yielding empty references with no error; increasing heap returned results; narrowing scope lost cross-project references.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Z008",
+      "url": "https://ronveen.com/posts/claude-code-07-lsp/",
+      "locator": "Opening rename incident; Three Small Sessions; Catch",
+      "checked_claim": "Reports rename of Ticket.getStatus affecting unrelated same-name methods and causing Maven failures; later grep and LSP both found the same 19 Runnable implementations in a worked example.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Z011",
+      "url": "https://github.com/oraios/serena/issues/1432",
+      "locator": "Capability matrix in body",
+      "checked_claim": "Maintainer records that generated Lombok methods are not addressable through some symbol tools, while text operations reach usages and compiler bindings cover the API.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Z012",
+      "url": "https://github.com/oraios/serena/discussions/131",
+      "locator": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+      "checked_claim": "Maintainers acknowledge full-symbol replacement is poorly suited to tiny edits and whole-context code may not need Serena; experiments with alternative edit tools induced verification rereads that erased token savings.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Y001",
+      "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+      "locator": "posts 1 and 3",
+      "checked_claim": "Reports paying annual Bugbot charges and valuing repeated review of complex feature PRs despite infrequent PR counts.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Y002",
+      "url": "https://forum.cursor.com/t/bugbot-stopped-being-triggered/156739",
+      "locator": "posts 1,17,19,21",
+      "checked_claim": "Reports cancelling Cursor after review allowance stopped and support did not resolve documentation discrepancy.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Y003",
+      "url": "https://forum.cursor.com/t/bugbot-run-or-cursor-review-stopped-working/150186",
+      "locator": "posts 14-17",
+      "checked_claim": "Reports cancelling because author eligibility excluded work produced through another provider.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Y004",
+      "url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+      "locator": "posts 1,6,7",
+      "checked_claim": "Needs non-transitive repository isolation including persisted derived context and deletion provenance; requested formal security material.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Y005",
+      "url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+      "locator": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+      "checked_claim": "Built internal review rather than buying general tooling; replaced bespoke retrieval tools with a sandboxed filesystem and shell.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Y007",
+      "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+      "locator": "posts 1,5,6",
+      "checked_claim": "Uses Claude for cross-repo checking; accepts CI or monorepo as more appropriate, but migration is not near-term.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Y009",
+      "url": "https://community.sonarsource.com/t/upgrading-license-in-the-middle-of-current-license-term/49869",
+      "locator": "post 1",
+      "checked_claim": "Near LOC allowance, sought upgrade/proration clarity before renewing.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    },
+    {
+      "id": "CW-Y012",
+      "url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+      "locator": "Solutions; Artifacts; Where we are now",
+      "checked_claim": "Kept generated summaries but found them insufficient; tried stacked PRs then risk tiers and attached existing artifacts.",
+      "reported_claim_supported": true,
+      "fit_review": "qualified inference consistent with stated limits",
+      "date_status_review": "Publication/event/current-state distinctions retained; unknown dates not imputed; historical reports not treated as current capability proof."
+    }
+  ],
+  "baseline_checks": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "expected": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "actual": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "expected": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "actual": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "expected": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "actual": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "expected": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "actual": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "expected": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "actual": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c"
+    }
+  ],
+  "manifest_mismatches": [],
+  "csv_jsonl_parity": true,
+  "counts": {
+    "records": 132,
+    "sources": 189,
+    "full": 110,
+    "partial": 66,
+    "inaccessible": 13
+  },
+  "affected_generic_fit_ids": [
+    "CW-L001",
+    "CW-L002",
+    "CW-L003",
+    "CW-L004",
+    "CW-L005",
+    "CW-L008",
+    "CW-L009",
+    "CW-L014",
+    "CW-L015",
+    "CW-L016",
+    "CW-L017",
+    "CW-L018",
+    "CW-L019",
+    "CW-L020",
+    "CW-L021",
+    "CW-L022",
+    "CW-L023",
+    "CW-L024",
+    "CW-L025"
+  ],
+  "finding": "F1: generic fit reasoning assigns partial structural relevance even to a price-only cancellation (CW-L016). Replace blanket inference with supported mechanism-specific reasoning or unknown/unsupported; audit all 19 instances.",
+  "limits": [
+    "Not an independent reread of all 110 declared full units",
+    "No customer interviews, runtime reproduction, current host compatibility matrix, or paid validation",
+    "Source target missed by 40; requested repository placement incomplete"
+  ]
+}

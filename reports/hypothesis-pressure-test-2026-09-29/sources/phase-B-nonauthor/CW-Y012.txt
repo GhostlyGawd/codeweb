@@ -1,0 +1,53 @@
+AI writes faster than we can review — here's how we fixed that
+Beyond Autocomplete
+Home
+About
+Sign in
+Subscribe
+20 Mar 2026
+4 min read
+AI writes faster than we can review — here's how we fixed that
+AI-assisted coding is great for velocity. But somewhere between "the agent wrote this feature in 20 minutes" and "this PR has 47 changed files," I realized that my team is getting overwhelmed.
+We're creating more pull requests because the AI can produce working code faster than anyone on the team. And those PRs are bigger, because when you can generate a complete implementation from a single spec, the temptation is to do exactly that. Last year, our review queue was manageable. Today it's not.
+The solutions we tried out first
+The first thing we did was ask Claude to generate a structured PR summary with
+every pull request — not just "what changed," but "here's what matters, here's what's routine, here's where you should actually look." This helped. Reviewers could skim the summary, get oriented, and focus their attention rather than starting from scratch.
+But it didn't solve the underlying problem. The code is still there. All of it. A good summary makes a 50-file PR navigable — it doesn't make it small.
+Next, we looked at
+stacked pull requests
+. The idea is appealing: split a large change into a series of smaller PRs that build on each other. Merge them in order, and the diff stays manageable. Tools exist to automate most of this.
+We tried it. I'll be blunt: it was a pain. The merge ordering has to be exact — get it wrong, and you're untangling conflicts with no obvious fix. Creating a coherent stacked series turned out to be hard as well. We kept making mistakes, and the stacked PR tooling helped much less than expected.
+What actually helped: risk-based review tiers
+After trying stacked PRs and review guides for two weeks, we asked ourselves: Not
+every PR carries the same risk. So why were we reviewing them all the same way?
+We now classify every PR into one of three tiers and apply a different review process for each:
+High
+: Line-by-line human review, plus an AI agent scanning for additional issues
+Medium:
+AI agent review is primary; a human does a spot-check on a handful of files
+Low:
+AI agent review only; humans step back entirely
+We kept the Claude-generated PR summary as part of this. It provides reviewers with quick context and feeds into the risk classification. A summary that says "this touches the authentication flow and session management" is a useful signal before anyone opens a single file.
+How we decide what's risky
+We use an agent to classify each PR. We've given it explicit instructions: authentication, authorization, and core business logic are high by default. We also included structural changes and new runtime scenarios in this category for now. Configuration changes, dependency bumps with no API surface changes, and additions to well-tested areas tend to land lower. A change that modifies existing behavior in an area without tests is automatically high, regardless of how small the diff looks.
+For the agent review itself, we give it the PR diff along with the original spec and ask it to flag anything that looks risky, inconsistent with the stated intent, or missing from the implementation. The output is a structured report — a list of concerns, each with a severity and a short explanation.
+We're not alone in using risk estimation to determine the level of review needed for a set of changes. Meta recently published a paper called
+"Moving Faster and Reducing Risk: Using LLMs in Release Deployment"
+that explains how you can use Diff Risk Scoring.
+We're still in the trust-building phase with the classification. Every classification is spot-checked against the actual diff to ensure it landed in the right bucket. So far, the misclassifications have been rare, but we haven't handed this off fully yet. That's deliberate — you don't fully trust a new process until it's earned it.
+The artifacts we record
+The spec and implementation plan already exist — that's how we work with Claude Code. Attaching them to the PR costs almost nothing. The agent review report is output we were already generating.
+Together, these give you a proper audit trail. When a regression surfaces three months later, you can trace back to what the change was supposed to do, how it was planned, and what the automated review flagged. Git gives you commit history, PR history, and linked issues on top of that. Traceability, basically for free.
+Smaller pull requests are still better
+Here's the part that humbled us a bit.
+When AI can produce a complete feature from a single spec, it's tempting to build large. We felt this pull. "Why split it into three smaller stories when the agent can deliver the whole thing in one session?" The answer is that large changes are still hard to review, still harder to test, and still carry more regression risk — regardless of whether a human or an AI produced them.
+But here's what really made us stop and think: we went back and looked at old PRs from before we started using agents. We ran into the same problems! Large diffs, hard-to-follow context, reviewer fatigue. AI didn't create the code review problem. It just turned up the volume until we couldn't ignore it anymore.
+So we still push for smaller, focused features — not because the AI can't handle bigger ones, but because the downstream costs of large changes don't disappear just because the code was generated quickly.
+Where we are now
+We're a few days into this experiment. The team is on board, the classification is running, and no obvious disasters yet. Cautiously optimistic.
+In two weeks, we'll sit down and look at what went wrong. Not "if" — "what." There will be something. A misclassified PR that slipped through with a bug, or a case where the agent review missed something a human would have caught. That's fine. That's how you tune a process.
+If you're hitting the same wall — AI velocity outrunning your review capacity — try even a rough version of this. Pick three risk buckets. Define what goes in each one. Apply different levels of scrutiny. The tiered approach, even in rough form, is the right direction. We're sure of that much.
+Published by:
+Beyond Autocomplete © 2026
+Sign up
+Powered by Ghost

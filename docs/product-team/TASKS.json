@@ -1,0 +1,621 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-01T02:50:01.943454+00:00",
+  "record_type": "Repository work record; no queue, agent service or scheduler",
+  "current_planning_task": "PLAN-001",
+  "next_product_task": "P-03",
+  "tasks": [
+    {
+      "id": "PLAN-001",
+      "title": "Create the reviewed research-to-execution packet",
+      "execution_status": "done",
+      "outcome_status": "planning_delivered_customer_effect_unobserved",
+      "owner": "Codex",
+      "lane": "Planning",
+      "depends_on": [],
+      "claim_ids": [],
+      "test_ids": [
+        "F-T12"
+      ],
+      "finding_ids": [],
+      "acceptance": "Current state, roadmap, all 65 finding dispositions, first spec, growth/pilot plans and trace validation delivered.",
+      "result_refs": [
+        "reports/research-to-execution-plan-2026-09-30/REVIEW.md",
+        "reports/research-to-execution-plan-2026-09-30/VALIDATION.json"
+      ],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+    },
+    {
+      "id": "BASE-001",
+      "title": "Pin current baselines and inventory prior artifacts",
+      "execution_status": "done",
+      "outcome_status": "technical_baseline_only",
+      "owner": "Codex",
+      "lane": "Planning",
+      "depends_on": [],
+      "claim_ids": [
+        "F-C02",
+        "F-C03",
+        "F-C08"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "finding_ids": [],
+      "acceptance": "Published package integrity and source identities pinned; merged work distinguished from package; static carry-over inventory recorded without a visual/current-candidate acceptance claim.",
+      "result_refs": [
+        "reports/research-to-execution-plan-2026-09-30/BASELINE.json",
+        "reports/research-to-execution-plan-2026-09-30/EMPTY-RESULT-REPRO.json",
+        "reports/research-to-execution-plan-2026-09-30/CARRY-OVER.json"
+      ],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+    },
+    {
+      "id": "P-01",
+      "title": "Correct confirmed unsafe similarity wording and define honest evidence output",
+      "execution_status": "done",
+      "outcome_status": "reviewed_technical_candidate_customer_effect_unobserved",
+      "owner": "Codex; Sol high implementation and separate Sol high review completed",
+      "lane": "Product",
+      "depends_on": [
+        "BASE-001",
+        "PLAN-001"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "test_ids": [
+        "F-T03"
+      ],
+      "finding_ids": [
+        "L04-F01",
+        "L04-F02",
+        "L04-F05",
+        "L05-F04",
+        "L07-F02",
+        "L08-F01",
+        "L08-F03",
+        "L12-F01",
+        "L12-F03"
+      ],
+      "acceptance": "NED-01/03/06/07 pass; empty/similar outputs retain compatible behavior and bounded truth; current gate/review recorded.",
+      "result_refs": [
+        "reports/native-evidence-p01-2026-09-30/COMPLETION.json",
+        "reports/native-evidence-p01-2026-09-30/REVIEW.md",
+        "reports/native-evidence-p01-2026-09-30/FULL-GATE.json",
+        "reports/native-evidence-p01-2026-09-30/DELIVERY.json",
+        "reports/native-evidence-p01-2026-09-30/CI.json"
+      ],
+      "authority": "User approved proceeding after the recommendation to implement P-01 with Sol high implementer and separate reviewer. Direct execution is the stated working assumption while the optional coordination clarification is pending. No Paperclip restore, outreach, release or deployment is included.",
+      "last_updated_at": "2026-10-01T00:46:03.127625+00:00",
+      "delivery": {
+        "branch": "codex/p01-honest-similarity-output",
+        "commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "pull_request": "https://github.com/GhostlyGawd/codeweb/pull/98",
+        "state": "draft_pull_request",
+        "released": false,
+        "ci": "10/10 success"
+      },
+      "scope_note": "Applicable similarity surface delivered; full NED/host readiness stays P-02/P-04. Main/published package are not changed by branch delivery.",
+      "central_acceptance_ids": [
+        "AC-34"
+      ]
+    },
+    {
+      "id": "P-02",
+      "title": "Run target, uncertainty, recovery and host preflight",
+      "execution_status": "done",
+      "outcome_status": "reviewed_factual_preflight_readiness_blocked",
+      "owner": "Codex; Sol61/high technical, hosts and separate review completed",
+      "lane": "Product",
+      "depends_on": [
+        "PLAN-001",
+        "P-01"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "finding_ids": [
+        "L03-F01",
+        "L03-F02",
+        "L03-F03",
+        "L03-F04",
+        "L03-F05",
+        "L04-F03",
+        "L04-F04",
+        "L08-F02"
+      ],
+      "acceptance": "NED matrix executed on pinned candidate/surfaces; failures and unavailable hosts retained with owners.",
+      "result_refs": [
+        "reports/native-evidence-p02-2026-09-30/COMPLETION.json",
+        "reports/native-evidence-p02-2026-09-30/MATRIX.json",
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md",
+        "reports/native-evidence-p02-2026-09-30/REPAIR-PLAN.json"
+      ],
+      "authority": "User go ahead after P-02 was named as next. Execute preflight on P-01 candidate, record factual failures/unverified cases, and preserve product source. No restoration, login, product repair, outreach or release is included.",
+      "last_updated_at": "2026-10-01T02:50:01.943454+00:00",
+      "candidate_ref": {
+        "branch": "codex/p01-honest-similarity-output",
+        "commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "reason": "Use the corrected candidate, or its verified merged successor, rather than assuming the unchanged published package includes P-01."
+      },
+      "scope_note": "66 overlapping surface dispositions are not 66 independent defects or a readiness score. Source unchanged; scoped actual6.1/native success, host limitations and reviewer qualifications retained."
+    },
+    {
+      "id": "P-03",
+      "title": "Repair only demonstrated remaining delivery gaps",
+      "execution_status": "ready",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Product",
+      "depends_on": [
+        "P-02"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "finding_ids": [],
+      "acceptance": "Minimal demonstrated repairs pass relevant existing/new tests and preserve the original baseline, permissions and scope.",
+      "result_refs": [
+        "reports/native-evidence-p02-2026-09-30/REPAIR-PLAN.json"
+      ],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-10-01T02:50:01.943454+00:00",
+      "entry_condition": "P-02 independently reproduced product gaps; REPAIR-PLAN.json defines supported high-priority, medium and conditional surfaces. No product repair was executed by preflight."
+    },
+    {
+      "id": "P-04",
+      "title": "Freeze the technically ready candidate for field use",
+      "execution_status": "planned",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Product",
+      "depends_on": [
+        "P-01",
+        "P-02"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "finding_ids": [],
+      "acceptance": "All applicable NED cases have evidence; P-03 resolved when needed; exact candidate identity and independent review requirement satisfied.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
+      "entry_condition": "P-01 is complete and every applicable NED case has a passing result or a justified exclusion; P-03 is resolved if needed.",
+      "readiness_state": "blocked_by_demonstrated_product_gaps_and_unverified_required_boundaries",
+      "required_followup": "P-03 repairs, authenticated Claude/trusted ambient/generated/disable proof or legitimate declared exclusions; do not infer full readiness from scoped Codex successes."
+    },
+    {
+      "id": "G-01",
+      "title": "Qualify prospects and prepare individual invitations",
+      "execution_status": "ready",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Growth",
+      "depends_on": [
+        "PLAN-001"
+      ],
+      "claim_ids": [
+        "F-C01"
+      ],
+      "test_ids": [
+        "F-T01",
+        "F-T12"
+      ],
+      "finding_ids": [
+        "L01-F05"
+      ],
+      "acceptance": "Role/job/route/duplicate-contact checks and exact drafts ready; builder/control roles labeled; no invented participants.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+    },
+    {
+      "id": "G-02",
+      "title": "Enroll consenting participants through an approved route",
+      "execution_status": "awaiting_send_authorization",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Growth",
+      "depends_on": [
+        "G-01"
+      ],
+      "claim_ids": [
+        "F-C01"
+      ],
+      "test_ids": [
+        "F-T01"
+      ],
+      "finding_ids": [],
+      "acceptance": "Only authorized messages sent; real replies/consent recorded; shortfall and nonresponse preserved.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+    },
+    {
+      "id": "E-01",
+      "title": "Freeze the local comparison protocol and allocation",
+      "execution_status": "ready",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Learning",
+      "depends_on": [
+        "PLAN-001"
+      ],
+      "claim_ids": [
+        "F-C01",
+        "F-C04"
+      ],
+      "test_ids": [
+        "F-T01",
+        "F-T04"
+      ],
+      "finding_ids": [
+        "L01-F01",
+        "L01-F02",
+        "L01-F03",
+        "L02-F01",
+        "L02-F02",
+        "L02-F03",
+        "L02-F04",
+        "L03-F06",
+        "L04-F06",
+        "L07-F03"
+      ],
+      "acceptance": "Separate scope/reuse hypotheses, competent controls, ten-change allocation, scoring and full-cost capture frozen before measurement.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+    },
+    {
+      "id": "E-02",
+      "title": "Observe up to five participants and ten actual changes",
+      "execution_status": "planned",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Learning",
+      "depends_on": [
+        "P-04",
+        "G-02",
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C01",
+        "F-C04"
+      ],
+      "test_ids": [
+        "F-T01",
+        "F-T04"
+      ],
+      "finding_ids": [],
+      "acceptance": "Actual case evidence or honest participation shortfall; adjudicated decisions/harms and total effort retained.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+    },
+    {
+      "id": "E-03",
+      "title": "Record voluntary return and opportunity context at two weeks",
+      "execution_status": "planned",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Learning",
+      "depends_on": [
+        "E-02"
+      ],
+      "claim_ids": [
+        "F-C05",
+        "F-C06"
+      ],
+      "test_ids": [
+        "F-T05"
+      ],
+      "finding_ids": [
+        "L05-F01",
+        "L05-F02",
+        "L05-F03",
+        "L05-F05",
+        "L05-F06",
+        "L09-F03",
+        "L09-F05",
+        "L11-F04"
+      ],
+      "acceptance": "Use/prompted use/eligible nonuse/no opportunity/access failure separated; no fabricated retention or expanded withdrawal study.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+    },
+    {
+      "id": "D-01",
+      "title": "Decide what to retain, revise, stop or test next",
+      "execution_status": "planned",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Decision",
+      "depends_on": [
+        "E-02"
+      ],
+      "claim_ids": [
+        "F-C12"
+      ],
+      "test_ids": [
+        "F-T12"
+      ],
+      "finding_ids": [
+        "L12-F05"
+      ],
+      "acceptance": "A bounded next decision cites case results, severe harms, uncertainty and pending recurrence; no automatic hosted progression.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+    },
+    {
+      "id": "G-03",
+      "title": "Test one acquisition channel for users receiving repeat value",
+      "execution_status": "later",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Growth",
+      "depends_on": [
+        "D-01",
+        "E-03"
+      ],
+      "claim_ids": [
+        "F-C01",
+        "F-C05"
+      ],
+      "test_ids": [
+        "F-T05",
+        "F-T12"
+      ],
+      "finding_ids": [],
+      "acceptance": "Channel, cohort boundary, value/return measures and effort budget chosen from actual conversations before wider acquisition.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
+      "entry_condition": "Actual local task value and opportunity-based optional return support a selected channel investment."
+    },
+    {
+      "id": "WEB-01",
+      "title": "Reconcile existing homepage candidates before new presentation work",
+      "execution_status": "ready",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Design",
+      "depends_on": [
+        "PLAN-001"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C04"
+      ],
+      "test_ids": [
+        "F-T04"
+      ],
+      "finding_ids": [],
+      "acceptance": "One current candidate/reference lock identified from six preserved records and later user decisions; originals and unresolved acceptance remain explicit.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00"
+    },
+    {
+      "id": "B-01",
+      "title": "Qualify residual team coordination against adequate CI",
+      "execution_status": "later",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Commercial",
+      "depends_on": [
+        "PLAN-001"
+      ],
+      "claim_ids": [
+        "F-C09",
+        "F-C10"
+      ],
+      "test_ids": [
+        "F-T09"
+      ],
+      "finding_ids": [
+        "L01-F06",
+        "L02-F06",
+        "L06-F01",
+        "L06-F02",
+        "L07-F04",
+        "L08-F04",
+        "L09-F04",
+        "L10-F06",
+        "L11-F02",
+        "L12-F04"
+      ],
+      "acceptance": "Check owner, policy owner and buyer identified; two real changes and working CI baseline costed; absent residual work rejects that case.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
+      "entry_condition": "A qualified team/check owner and appropriate authorized discovery route are available; it can be selected independently of local adoption."
+    },
+    {
+      "id": "B-02",
+      "title": "Test actual paid economics and buying decisions",
+      "execution_status": "later",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Commercial",
+      "depends_on": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C11"
+      ],
+      "test_ids": [
+        "F-T11"
+      ],
+      "finding_ids": [
+        "L06-F03",
+        "L06-F05",
+        "L06-F06"
+      ],
+      "acceptance": "Observed net service benefit, buyer authority and delivery costs; real purchase/renewal only under separately authorized offer/transaction.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
+      "entry_condition": "B-01 identifies recurring residual work beyond adequate CI, policy viability and budget authority; any offer/payment/renewal action is separately scoped."
+    },
+    {
+      "id": "F-REVIEW",
+      "title": "Evaluate a specific remaining reviewer reconstruction job",
+      "execution_status": "later",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Follow-on",
+      "depends_on": [
+        "D-01"
+      ],
+      "claim_ids": [
+        "F-C04",
+        "F-C10"
+      ],
+      "test_ids": [
+        "F-T04",
+        "F-T10"
+      ],
+      "finding_ids": [
+        "L01-F04",
+        "L02-F05",
+        "L08-F05",
+        "L11-F01"
+      ],
+      "acceptance": "Named recipient problem survives ordinary PR/CI; separate scope/adjudication and total recipient/author cost declared.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
+      "entry_condition": "An actual recipient reconstruction/triage problem remains after ordinary PR/CI and a separate comparison is selected."
+    },
+    {
+      "id": "F-WITHDRAWAL",
+      "title": "Test work returned after removal and adaptation",
+      "execution_status": "later",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Follow-on",
+      "depends_on": [
+        "E-03"
+      ],
+      "claim_ids": [
+        "F-C06"
+      ],
+      "test_ids": [
+        "F-T06"
+      ],
+      "finding_ids": [
+        "L09-F01",
+        "L09-F02"
+      ],
+      "acceptance": "Separate familiarized matched-task study, retained exports/native alternatives, and voluntary reinstatement; exceeds the original pilot.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
+      "entry_condition": "Initial useful decisions and later opportunities justify a separately scoped, familiarized with/without study retaining history and alternatives."
+    },
+    {
+      "id": "F-CAPABILITY",
+      "title": "Test a real previously deferred task",
+      "execution_status": "later",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Follow-on",
+      "depends_on": [
+        "D-01"
+      ],
+      "claim_ids": [
+        "F-C07"
+      ],
+      "test_ids": [
+        "F-T07"
+      ],
+      "finding_ids": [
+        "L07-F01"
+      ],
+      "acceptance": "Predeclared barrier, matched capable baseline, correctly completed task and attributable reduced help.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
+      "entry_condition": "A real deferred task has a declared scoping/expert-help barrier and a separate capable baseline study is selected."
+    },
+    {
+      "id": "F-KNOWLEDGE",
+      "title": "Test net source-fact reorientation across related changes",
+      "execution_status": "later",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Follow-on",
+      "depends_on": [
+        "D-01"
+      ],
+      "claim_ids": [
+        "F-C08"
+      ],
+      "test_ids": [
+        "F-T08"
+      ],
+      "finding_ids": [
+        "L10-F01",
+        "L10-F02",
+        "L10-F03",
+        "L10-F04",
+        "L12-F02"
+      ],
+      "acceptance": "Three related changes including rename/semantic change; baseline handoffs and all capture/maintenance costs; no new memory platform assumed.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
+      "entry_condition": "A recurring factual reorientation burden is observed and a separate three-related-change comparison is selected."
+    },
+    {
+      "id": "F-SHARED",
+      "title": "Verify recipient utility, ownership and permitted information flows",
+      "execution_status": "later",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Follow-on",
+      "depends_on": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C10"
+      ],
+      "test_ids": [
+        "F-T10"
+      ],
+      "finding_ids": [
+        "L06-F04",
+        "L10-F05",
+        "L11-F03"
+      ],
+      "acceptance": "Allowed/forbidden transitive pair and ownership/revision change verified; all policy/triage costs recorded before a shared-service claim.",
+      "result_refs": [],
+      "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
+      "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
+      "entry_condition": "A qualified shared-check case and legitimate permitted/forbidden scope are defined before cross-repo evidence use."
+    }
+  ]
+}

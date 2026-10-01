@@ -1,0 +1,25 @@
+{
+  "id": "T48-similar-body-cap",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/find-similar.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/similarity/.codeweb/graph.json",
+    "--body",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/similarity/long.mjs",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:14.228Z",
+  "end": "2026-10-01T01:50:14.265Z",
+  "durationMs": 36.79404199999999,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"candidate\":{\"source\":\"body\",\"shingles\":1274,\"mode\":\"lexical\"},\"index\":\"live\",\"bodyLineCap\":400,\"matches\":[{\"id\":\"long.mjs:huge\",\"label\":\"huge\",\"file\":\"long.mjs\",\"line\":1,\"domain\":\"unassigned\",\"sim\":0.94427,\"tier\":\"high\"}],\"count\":1,\"scanned\":9}\n",
+  "stderr": ""
+}

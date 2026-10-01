@@ -1,0 +1,23 @@
+{
+  "id": "R14-ordinary-refresh",
+  "command": [
+    "/opt/homebrew/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/refresh.mjs",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/target/.codeweb/graph.json",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_NO_RECEIPTS": "1",
+    "CODEWEB_NO_PROMO": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T02:23:38.880696+00:00",
+  "end": "2026-10-01T02:23:39.017395+00:00",
+  "durationSeconds": 0.1367305830353871,
+  "exit": 0,
+  "stdout": "{\"graph\":\"$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/target/.codeweb/graph.json\",\"root\":\"$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/target\",\"analysis\":{\"status\":\"no-known-incompleteness\",\"diagnosticCount\":0,\"diagnostics\":[]},\"before\":{\"nodes\":10,\"edges\":7},\"after\":{\"nodes\":10,\"edges\":7},\"domainsReattached\":0,\"scanned\":\"1\",\"sidecars\":[\"brief\",\"index-lite\",\"stale-stamps\",\"similar-index\"]}\n",
+  "stderr": ""
+}

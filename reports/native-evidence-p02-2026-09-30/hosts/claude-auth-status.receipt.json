@@ -1,0 +1,21 @@
+{
+  "id": "claude-auth-status",
+  "command": [
+    "claude",
+    "auth",
+    "status",
+    "--json"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819368.925737,
+  "end_epoch": 1790819369.128691,
+  "duration_seconds": 0.2026512622833252,
+  "timeout_seconds": 15,
+  "timed_out": false,
+  "exit_code": 1,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/claude-auth-status.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/claude-auth-status.stderr.txt"
+}

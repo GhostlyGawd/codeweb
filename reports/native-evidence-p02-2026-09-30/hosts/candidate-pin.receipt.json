@@ -1,0 +1,20 @@
+{
+  "id": "candidate-pin",
+  "command": [
+    "git",
+    "rev-parse",
+    "HEAD"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+  "start_epoch": 1790819829.4127748,
+  "end_epoch": 1790819829.4510589,
+  "duration_seconds": 0.038117170333862305,
+  "timeout_seconds": 15,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/candidate-pin.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/candidate-pin.stderr.txt"
+}

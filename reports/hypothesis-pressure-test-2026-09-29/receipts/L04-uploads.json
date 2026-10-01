@@ -1,0 +1,26 @@
+[
+  {
+    "path": "lenses/04-capability-and-trust.md",
+    "attachment_id": "c492bde3-9093-41ea-a7bd-5845d9abc576",
+    "work_product_id": "cc7c29ff-5f17-440d-9097-dbb3105e9590",
+    "url": "/api/attachments/c492bde3-9093-41ea-a7bd-5845d9abc576/content"
+  },
+  {
+    "path": "lenses/04-findings.json",
+    "attachment_id": "fd46147e-e800-4ddf-8391-47072220bc72",
+    "work_product_id": "c7a4d636-93ac-424e-9676-1d8f785a64fc",
+    "url": "/api/attachments/fd46147e-e800-4ddf-8391-47072220bc72/content"
+  },
+  {
+    "path": "receipts/L04.json",
+    "attachment_id": "d9815257-fda0-4d44-9865-8f6bf2cc704f",
+    "work_product_id": "00d9ac86-2aaa-4db0-b7f8-9509cb09e584",
+    "url": "/api/attachments/d9815257-fda0-4d44-9865-8f6bf2cc704f/content"
+  },
+  {
+    "path": "receipts/L04-source-addendum.json",
+    "attachment_id": "e13422b1-4787-47fb-8b23-5d0398164f2d",
+    "work_product_id": "ac1569ba-4b75-453d-9b24-1675b2e90f01",
+    "url": "/api/attachments/e13422b1-4787-47fb-8b23-5d0398164f2d/content"
+  }
+]

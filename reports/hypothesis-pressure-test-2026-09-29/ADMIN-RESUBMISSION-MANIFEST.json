@@ -1,0 +1,37 @@
+{
+  "scope": "Post-placement administrative supplement; reviewed analytical content and delivered manifests unchanged",
+  "files": [
+    {
+      "path": "COMPLETION.json",
+      "sha256": "bb456ac18e4656263783fa2987e9dbed67274da6ca706d6b4adddde51b20f729"
+    },
+    {
+      "path": "RUNS.json",
+      "sha256": "4aa2ef7f96584d6fdb08ef2be6d0b0924aaa7072c188e553451e80b2ad71dbc3"
+    },
+    {
+      "path": "CONTROL-PLANE.json",
+      "sha256": "39af82218419dda4909ac9ef1ad828dc4eff09f228637103842c67dd031453ad"
+    },
+    {
+      "path": "PARENT-PLACEMENT-VERIFICATION.json",
+      "sha256": "1457890e7639c95dc0149dc9e94d2d66773740dd24dac4df9fd0738a1e3f52a8"
+    },
+    {
+      "path": "ROOT-PLACEMENT-RECEIPT.json",
+      "sha256": "306c6c7d72972b65f91425322cb335052661d239a07a5c5d96153572e5d064b5"
+    },
+    {
+      "path": "history/post-placement/CONTROL-PLANE.json",
+      "sha256": "6a777046471c23b5f082c6257ca3c076758a165fb725f5938a80d5032d2c686d"
+    },
+    {
+      "path": "history/post-placement/RUNS.json",
+      "sha256": "59512fe6fa4c5cde1c59e6b3dcd89a63c69dd6e6b77ec7ab74b4f5485860df9d"
+    },
+    {
+      "path": "history/post-placement/COMPLETION.json",
+      "sha256": "a7cd80a60b13549013349e8e8e3672a0411e0c85c4e34cbb8294c3c34daf9127"
+    }
+  ]
+}

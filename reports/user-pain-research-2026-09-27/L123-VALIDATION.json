@@ -1,0 +1,92 @@
+{
+  "retrieved_at": "2026-09-28T01:14:26.519747+00:00",
+  "records": 28,
+  "schema_required_fields": 32,
+  "schema_pass": true,
+  "unique_incident_keys": 28,
+  "source_counts": {
+    "opened_full": 21,
+    "opened_partial": 37,
+    "inaccessible": 1
+  },
+  "baseline_checks": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "matches": true
+    }
+  ],
+  "files": [
+    {
+      "path": "L123-EVIDENCE.jsonl",
+      "bytes": 52024,
+      "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4"
+    },
+    {
+      "path": "L123-SOURCES.jsonl",
+      "bytes": 42345,
+      "sha256": "2ee8777311b02ffd7d05f7937b30741effec46f87694c90cc40b524ee3440b14"
+    },
+    {
+      "path": "L123-QUERY-LOG.csv",
+      "bytes": 4627,
+      "sha256": "d2da6e699f5955603f849b89d845371078b8f225e33eaf2025aba9482d359212"
+    },
+    {
+      "path": "L123-HANDOFF.md",
+      "bytes": 4547,
+      "sha256": "0c9f9dca74422a7dd1098abbb26e20166d435d02ff2849e6b7839ed8aec074dd"
+    },
+    {
+      "path": "lanes/01-claude.md",
+      "bytes": 3080,
+      "sha256": "42faae2c1ce7ee1d6c5f1fafc85f360e835a3878f2f2175ae4c1a895bc41d9e4"
+    },
+    {
+      "path": "lanes/02-codex.md",
+      "bytes": 2959,
+      "sha256": "5ee52fc3abdbede8c4912fea91cf92c05988b1d2cd6258597a6837064ce83b01"
+    },
+    {
+      "path": "lanes/03-change-risk.md",
+      "bytes": 3639,
+      "sha256": "0b78a5dce6e482674a93fac527c4a574aed8bf9036d407015d575658217c8675"
+    },
+    {
+      "path": "L123-CORRECTION.md",
+      "bytes": 3857,
+      "sha256": "4655182ce1b549a7b57d0e6633f2c171825b582d2bdc0bea52e56d317156e6f0"
+    }
+  ],
+  "correction_attempt": 1,
+  "status_counts": {
+    "historical_unresolved": 18,
+    "unclear": 4,
+    "resolved": 4,
+    "current_supported": 2
+  },
+  "semantic_checks": {
+    "all_28_checked": true,
+    "experience_consequences_present": 26,
+    "capability_consequences_unknown": 2,
+    "reporter_only_resolution_urls_removed": true,
+    "unchanged_source_counts": true,
+    "no_new_records": true,
+    "short_excerpts_all_null": true
+  }
+}

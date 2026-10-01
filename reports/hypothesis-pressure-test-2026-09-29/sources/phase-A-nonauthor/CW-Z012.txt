@@ -1,0 +1,777 @@
+
+  Idea for implementing more token efficient editing · oraios/serena · Discussion #131 · GitHub
+      Skip to content
+Navigation Menu
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub CopilotWrite better code with AI
+GitHub Copilot appDirect agents from issue to merge
+MCP RegistryIntegrate external tools
+DEVELOPER WORKFLOWS
+ActionsAutomate any workflow
+CodespacesInstant dev environments
+IssuesPlan and track work
+Code ReviewManage code changes
+Code QualityEnforce quality at merge
+APPLICATION SECURITY
+GitHub Advanced SecurityFind and fix vulnerabilities
+Code securitySecure your code as you build
+Secret protectionStop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+View all resources
+Open Source
+COMMUNITY
+GitHub SponsorsFund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+GitHub Stars
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platformAI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced SecurityEnterprise-grade security features
+Copilot for BusinessEnterprise-grade AI features
+Premium SupportEnterprise-grade 24/7 support
+Pricing
+Search/
+Sign inSign up
+Appearance settings
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+Dismiss alert
+{{ message }}
+        oraios
+    /
+      serena
+    Public
+        Uh oh!
+There was an error while loading. Please reload this page.
+Notifications
+    You must be signed in to change notification settings
+Fork
+    2k
+          Star
+          29.9k
+        Code
+        Issues
+          95
+        Pull requests
+          95
+        Discussions
+        Actions
+        Projects
+        Security and quality
+          2
+        Insights
+Additional navigation options
+          Code
+          Issues
+          Pull requests
+          Discussions
+          Actions
+          Projects
+          Security and quality
+          Insights
+                Idea for implementing more token efficient editing
+              #131
+  Closed
+                      chknd1nner
+                  started this conversation in
+                Ideas
+              Idea for implementing more token efficient editing
+            #131
+          chknd1nner
+    May 28, 2025
+    ·
+    5 comments
+      ·
+      12 replies
+        Return to top
+Discussion options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    chknd1nner
+          May 28, 2025
+I've been working on this with Claude a while. I had a whole PRD and technical requirements document written up with code listings for the implementation all ready to go.
+But I think after you showed how much better you understand the Serena codebase than I do, I'll just give you the summary of the idea I came up with and let you run with it if you see merit in the concept.
+Let me know if you want to see the full documentation I had prepared, I made the validation method particularly comprehensive.
+The Problem
+Current LLM coding agents are token-hungry monsters when editing code. To change a single line in a 200-line class, they must:
+Read the entire symbol (consuming tokens)
+Generate the entire new version (consuming more tokens)
+Send the complete replacement to 'replace_symbol_body'
+Result: 6,000 tokens for a 1-line change 💸
+The Solution
+Chunk-based differential editing - send only what changed, not the entire symbol.
+Instead of full replacement:
+# Traditional approach - EXPENSIVE
+replace_symbol_body(location, entire_200_line_function)
+Use targeted chunks:
+# Chunk approach - 95% CHEAPER
+patch_symbol_with_chunks(location, [
+    {
+        "context_before": "    def process_data(self, input_data):",
+        "old_lines": ["        return transform(input_data)"],
+        "new_lines": ["        try:", "            return transform(input_data)", 
+                     "        except ValueError:", "            return None"],
+        "context_after": "    def next_method(self):"
+    }
+])
+Why It's Brilliant
+Context-based positioning (Plays to LLM strength in pattern and semantic understanding. Minimises weaknesses--Line counting needed for traditional universal diff formats)
+80-95% token reduction in typical scenarios
+LLM-friendly format designed specifically for AI code generation
+Atomic Validation - The Secret Sauce
+The real innovation is comprehensive validation before any changes:
+Phase 1: Validate ALL chunks before touching anything
+Context matching (flexible whitespace handling)
+Old lines verification (exact content matching)
+Symbol boundary checks (no edits outside symbol range)
+Cross-platform line ending consistency (detects and preserves CRLF/LF/CR)
+End-of-symbol context validation
+Insertion/deletion logic verification
+Phase 2: Apply all changes atomically
+Only executes if ALL chunks pass validation
+Single write operation with preserved line endings
+All-or-nothing guarantee - no partial corrupted edits
+# Example validation catches this before any damage:
+# Chunk 1: ✅ Valid
+# Chunk 2: ❌ Context mismatch  
+# Chunk 3: ✅ Valid
+# Result: No changes applied, detailed error returned
+The line ending detection is particularly robust - handles Windows CRLF, Unix LF, and legacy Mac CR formats, preventing the "massive diff due to line ending changes" problem that breaks git workflows.
+The Impact
+Longer coding sessions without hitting token limits
+Dramatically lower API costs
+Ability to work with larger codebases
+Zero risk of corrupted partial edits through atomic validation
+Cross-platform compatibility without line ending chaos
+        3
+        You must be logged in to vote
+    All reactions
+    Replies: 
+      5 comments
+      ·
+        12 replies
+    Oldest
+    Newest
+    Top
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    MischaPanch
+          May 29, 2025
+  Maintainer
+Hi @chknd1nner , really appreciate your input, thanks for it!
+Quick analysis of current status quo and our work on editing:
+We are currently working on several large improvements to the editing, will be merged within the next few days. The main improvements will come from easier identification of symbols in editing tools (using qualified names instead of locations).
+Your approach is a welcome extension that we have also been discussing already. We generally want to get rid of the ReplaceLinesTool, it is too fragile and LLMs are too dumb for using it properly.
+Claude Code and other similar systems often use string-matching based replacement, giving the entire old and new string. This is much less fragile but very token consuming. The symbol based replacement doesn't need the old symbol, so it's already better in terms of consumption. We need to see how well it works.
+We are moving fast towards first quantitative evaluations, where we will use subsets of SWE-verified. Once these are set up, we can experimentally see which editing approaches really work best.
+Your approach:
+The editing you propose still has a place even if symbol based editing starts working perfectly, as it could help us get rid of ReplaceLinesTool and still permit efficient, surgical operations. So I think it should be implemented and tested out. If you want to do that, feel free to go ahead! I'd suggest you write a new editing tool, disable the ReplaceLinesTool and experiment manually to see if you see improvements. Otherwise, we will likely implement something along these lines ourselves soon.
+In the implementation you need to make sure that there is exactly one match of the context before and context above, and that all whitespace and so is written correctly.
+Comment on Experimenting
+A very simple way for you to test things out would be to write a new mode file in config/modes where you disable the ReplaceLinesTool and provide examples for the new tool you write in the prompt. This is only really needed if the description of the tool itself is not enough and if you don't want to change your local serena config. Otherwise, you can disable the replace lines in a different way. Maybe it even makes sense to still keep the line-based replacement but to restrict it to just one line or something like that.
+        2
+        You must be logged in to vote
+    All reactions
+                    3 replies
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+            chknd1nner
+          May 30, 2025
+  Author
+Thanks for the feedback.
+Can I ask how the current symbol editing tool replace_symbol_body is better? To use that tool, we need to pass the entire symbol body replacement as a parameter.
+What if the symbol is 100 lines in length, yet we are only changing a single line in that symbol? To use replace_symbol_body, we'd need to feed the entire updated 100 line symbol to the tool. Then, if for any reason, the tool retuns an error, that's all those tokens sent wasted! (I've had that happen a few times and it's a horrible feeling, especially if Serena immediately follows up by falling back on write_file and commencing to output the entire file!)
+With my tool, it literally only sends the edited line +- a few lines of context before and after so the tool can precisely locate the edit. Just like how universal diffs work, but since LLMs suck as line counting, we need to use a format they excel at--detecting and matching patterns of text.
+In the implementation you need to make sure that there is exactly one match of the context before and context above, and that all whitespace and so is written correctly.
+This is one of the design choices I had to make. The choice was fixed length of context before and after such as always 5 lines, or let the LLM dynamically choose how many lines. I chose dynamic because:
+Claude said LLMs excel at pattern recognition and matching and was confident in being able to determine how unique any line is and hence whether to expand the before/after context to guarantee a unique match
+The comprehensive chunk validation helper function would catch any chunks that didn't match exactly one position anyway and alert the LLM which could try outputing the chunk again with expanded before/after context. All or nothing validation. Either all chunks pass and get atomically written, or the whole edit fails and nothing happens. But in the case of failure, at least we haven't wasted as many tokens as replace_symbol_body by sending the entire symbol body.
+I actually ended up implementing my feature on a branch on my fork. I'm not sure if you can see it. I'll add some screenshots of my successful first test.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+            chknd1nner
+          May 30, 2025
+  Author
+Initial test with a single chunk. Pretty basic. Even replace_lines could do that.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+            chknd1nner
+          May 30, 2025
+  Author
+Now the real power of the tool. Making multiple scattered changes throughout the entire file with one tool call and only sending the tokens relating to the changes instead of the entire file!
+Note how many tokens were saved.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    MischaPanch
+          May 30, 2025
+  Maintainer
+What I meant is that the replace symbol body is often better than what Claude code is doing because even though it replaces the whole symbol, it doesn't need to also output the old code. So for larger operations it's definitely better.
+But for performing smaller edits within a large symbol it's not suited, I agree. Our hope was that the LLM would be good in using replace-lines for doing that, but it doesn't work very well. That's precisely why I think your approach is promising. For larger edits or refactorings, symbol replacement will still be the tool to go. But for smaller edits, I think something like your proposal will be best.
+One thing you can consider is to allow passing a symbol name in your tool to restrict the edits to a single symbol body.
+How would you prefer to proceed - do you want to prepare a PR and continue from there? Otherwise I'll take a look at your fork and will check how to incorporate the new editing tool.
+Btw, the branch better-symbol-editing is essentially ready and will likely be merged today
+        1
+        You must be logged in to vote
+    All reactions
+                    0 replies
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    chknd1nner
+          May 30, 2025
+  Author
+Got it. That makes sense.
+After my last experience with PR I think I should let you examine the code in the feature branch on my fork first. You're the expert on your own project lol. It's not ready for PR. I just noticed Claude left a lot of sloppy comments in the new class from stages 0-3 of the implementation lol.
+Anyway, I can't do any work for now as your last 41 commits broke my Serena! I restarted Claude and was greeted by this wierd log window that I never got before. The config yaml template format is now totally different. As a result, my Serena MCP server is completely broken until I can unravel what's wrong which I don't have time for today.
+I wouldn't prefer to add a restriction on symbol as that would defeat the purpose of the tool which is to be able to make small line edits across a whole file with token efficiency.
+The way I was working:
+I Use Claude projects GitHub integration to sync with my GH repo which has the latest code (I manage limited 200k knowledge limit by picking and choosing the relevant folders in the project to expose e.g. src/serena mostly
+I have project instructions that override the tool injected prompts from initialinstructions, thinkabouttask etc that says to avoid reading file contents from the local repo if the same file is available in knowledge. This is important, because after the first message, ALL files in knowledge are cached(Point 6) and no longer count toward token limits. A potentially MASSIVE saving of tokens over a long chat. I have fall back instructions that say to use the symbolic tools to read from local files if what is needed isn't in knowledge.
+I instruct Claude to put the file to be edited in an artifact and use Claude's native update_artifact tool (token efficient line replacement) to make the code changes in the artifact "scratchpad" where I can see it and then ask me for approval to write the edited contents to the local repo. I love being able to see the code in a seperate window to chat and observe it being edited in realtime by Claude.
+My new tool was intended to be the last step of the workflow outlined in point 3.
+I take your point about major refactoring. My workflow above is definitely suited to (and more efficient) for small disparate edits as opposed to massive changes. Then, I think maybe the replace_symbol_body tool would be better.
+        2
+        You must be logged in to vote
+    All reactions
+                    4 replies
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+            MischaPanch
+          May 31, 2025
+  Maintainer
+Cool, I'll have a look at your fork then!
+Concerning the config: nothing really changed, we just added a web dashboard for the logs that is enabled by default. You can disable it with web_dashboard: False in your serena_config.yml.
+The recent changes on main turned serena into a natively multi-project tool where one can now activate a project without first having to create a project.yml file, but the changes should have been backwards compatible. If it doesn't startup for you, I'd be happy to help fixing your config. We have documented all things about the new config options in the readme.
+NB: interesting workflow with using Claude projects for caching! Not what we had in mind as use case for Serena, but definitely something to try out. I kinda feel that if the whole code fits within the context, a tool like Serena might be an overkill. You could disable essentially all tools, since the LM already knows everything about the project and doesn't need to search anymore.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+            chknd1nner
+          May 31, 2025
+  Author
+All good, I fixed my issue. I fetched the latest upstream commits and hard reset main. I also stopped trying to edit my config file and just fully replaced it with the new template config supplied. And suddenly everything worked!
+I took the opportunity to create a v3 feature branch and do a major refactor cleaning up a lot of junk comments, non-compliant double line breaks etc and refining the validation down to 4 key checks of the chunks. I also implemented your idea for symbol_name parameter.
+The v3 branch is now ready for you to look at.
+Yes, I do agree it might be overkill to use Serena tools if the whole codebase fits in project knowledge! But I think a hybrid workflow leveraging the fact that knowledge files are "free" and don't count toward usage can be useful.
+As I mentioned, the whole Serena project doesn't fit in 200k context. But you can select and deselect folders to sync at will. So if your project was well organised into folders, you could tick one folders worth of codebase that fits into knowledge and work on that.
+Remember also, that Claude GitHub integration is limited to the "main" branch only. So when working on a feature or any other type of branch, you'd still need to use the Serena tools to manipulate the local files until such time as the branch gets merged to main and syncs to knowledge.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+            opcode81
+          Jun 1, 2025
+  Maintainer
+your last 41 commits broke my Serena! I restarted Claude and was greeted by this wierd log window that I never got before. The config yaml template format is now totally different. As a result, my Serena MCP server is completely broken until I can unravel what's wrong which I don't have time for today.
+@chknd1nner, do you remember what the exact problem was?
+The changes we made should have been backwards-compatible - so if they weren't, we'd want to fix that.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+            chknd1nner
+          Jun 1, 2025
+  Author
+Not really sure, but probably related to my serena_config.yml following the old format. Claude compared it to the template and said there were a few deprecated parameters in there.
+So instead of trying to edit my original config to match the new format, I just replaced my config with the template.
+I also fetched upstream and hard reset my main. Then I restarted Claude Desktop and everything started working again. The browser based log window opened in Safari without issue.
+Nice touch. I can now click the button to shut down Serena each time I close Claude to ensure there's no leftover threads.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    opcode81
+          Jun 1, 2025
+  Maintainer
+Context-based positioning (Plays to LLM strength in pattern and semantic understanding. Minimises weaknesses--Line counting needed for traditional universal diff formats)
+@chknd1nner, you would think so, but it turns out models (particularly Sonnet 4) are not smart enough to understand the concepts behind more "exotic" replace tools.
+I have added two new tools on branch replace-tool: one supports regular expressions, which generalises all replacement variants (including context before/after) and one which is more specifically based on replacing content starting/ending with a text snippet.
+Sonnet 4 failed miserably at applying them correctly/in the intended way. Sonnet 3.7 was better though.
+        1
+        You must be logged in to vote
+    All reactions
+                    5 replies
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+            chknd1nner
+          Jun 1, 2025
+  Author
+So far, my patch_symbol tool has been working well. Claude is able to know how to use the tool, thanks to the example format in the docstring, plus my project instructions telling it how to use the tool. The only issue I came across is Claude using new lines being written as context to locate subsequent chunks. No worries. Circular references easily solved via prompt enginering:
+Snippet from my system prompt:
+Phase 3: Chunk Generation & Validation
+Critical Design Rule: Chunk Independence
+All chunks must validate against the original code - never reference code added by other chunks in the same operation
+Pre-Chunk Validation Checklist
+ Independence Check: No chunk references code added by other chunks
+ Context Verification: All context_before/context_after exist in original code
+ Boundary Analysis: Chunks don't extend beyond symbol boundaries
+The way my tool works is the individual chunks to edit have to first match 1 and only 1 position in the symbol. I think it would be rare to fail at this step, but if it does, then the LLM would go back and send more than 1 line of before/after text until uniqueness of location is guaranteed.
+Then the chunk has to pass "the four tests".
+Check 1: Context After Validation - ensure context_after matches what follows old_lines
+Check 2: Old Lines Matching - ensure old_lines exactly match the content to be replaced
+Check 3: Position Boundary Validation - ensure position is within valid range
+Check 4: Line Ending Consistency - ensure chunk content doesn't introduce mixed line endings
+Only then, if all chunks pass all tests, are the chunk(s) applied to the target symbol atomically.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+            opcode81
+          Jun 1, 2025
+  Maintainer
+Technically, the replacement logic your tool applies can be reduced to a regex replacement as follows,
+regex: rf"({escape(context_before)}.*?){escape(old_lines)}(.*?{escape(context_after})"
+repl: rf"\1{new_lines}\2"
+and line endings can be replaced in new_lines before applying the replacement.
+Unfortunately, similar to applications of the regex tool I added on my branch, the model has low confidence that its actions definitely produced the right result, as it consequently proceeds to read the file in order to verify its changes, which completely eliminates any token savings we might otherwise have had:
+(from your screenshot)
+Notably, it does not do this when using the replace_symbol_body tool.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+            chknd1nner
+          Jun 1, 2025
+  Author
+The core logic could be reduced to regex. However, there are some advantages to the explicit chunk-based approach:
+Regex approach pros:
+Simpler implementation
+Potentially faster execution
+Current approach pros:
+Better error diagnostics: Instead of "regex didn't match", you get specific failures like "Check 2 failed: old_lines don't match actual content. Expected ['line_47 = old'], got ['line_47 = different'] at line index 23" - This would be crucial for the LLM to make a followup tool call armed with enough information to correct the error.
+Multi-chunk atomicity: Validates all chunks before applying any (harder with sequential regex operations)
+Boundary safety: Explicit checks for edge cases like extending beyond symbol boundaries
+More debuggable: Clear separation of positioning vs validation logic
+On the Confidence Issue (The Real Problem)
+This is the much more serious concern. If the LLM follows up with reading the finished file just to confirm success, then we're back to wasting tokens again.
+But fortunately, it's something that can be solved by prompt engineering. The LLM needs to learn to trust the tool's success responses. This would involve:
+Better tool documentation emphasizing reliability
+Examples showing when verification reads are unnecessary
+Explicit prompting to avoid verification unless the tool reports errors
+Edit: Actually. I just thought of a solution. Just instruct it to follow up any use of a surgical edit tool with terminal git commands to check the commit diff to verify the change was successful. For the intended use case (small edits in big symbols), the diff wouldn't be very big to display in the chat context.
+Approved to make the edits to the file.
+When done, stage and commit the change. Verify success by checking the diff, then push if successful.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+            opcode81
+          Jun 1, 2025
+  Maintainer
+Better error diagnostics
+This is purely theoretical. LLMs are very good at copying and therefore will only very rarely (if it all) run into such cases.
+Multi-chunk atomicity
+Both implementations can accept multiple operations at once and apply them only if they all succeed.
+Boundary safety
+I don't see how your approach establishes any bounds that go beyond the context check that is also possible with the regex implementation.
+Symbol-based bounds could, however, be introduced by explicitly limiting edits to a symbol, i.e. by providing not only the path of the file but also the "name path" of the symbol to be edited within it (name path being a concept we introduced in branch better-symbolic-editing).
+it's something that can be solved by prompt engineering
+Prompt engineering is hit or miss. A model might respect your prompt one time and completely ignore it on other occasions. In my experiment, Sonnet 4 completely failed to understand how my new tool worked and no amount of prompting (adding examples and clearer, more explicit explanations) could fix it.
+Just instruct it to follow up any use of a surgical edit tool with terminal git commands to check the commit diff
+Editing should not be conflated with version control operations. These are unrelated operations, and I don't necessarily want the model to alter the git state whenever I perform edits. Also, The diff itself consumes as many tokens as the original edit operation, which is potentially wasteful also.
+    All reactions
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    edited
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{editor}}'s edit
+        {{actor}} deleted this content
+        .
+        {{editor}}'s edit
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+            chknd1nner
+          Jun 1, 2025
+  Author
+Editing should not be conflated with version control operations.
+Differences of opinion I guess. I do this ALL the time to save context. I'm a big believer in one-shot prompting as opposed to incremental prompting in order to maximise chat length by getting as much done in each prompt as possible.
+Question: Do you have extended thinking turned on or use the sequential thinking MCP server?
+For example, let's say I split the approved to make change prompt from the stage, commit, check and push prompt.
+Then what happens? In the stage, commit, check and push prompt, you have to send the entire chat history back to Claude just to perform an operation that's completely safe (since it can easily be reverted). So basically, double the tokens. Why not just get everything done in a single prompt?
+And yes, the diff doess consume tokens, but since it's a diff, only the changed lines, so equivalent to the token efficiency of the edit chunk. Still way better than reading the entire symbol/file to verify the change.
+Claude's analysis of my idea:
+Ah, that's a brilliant approach! You're redirecting the verification instinct rather than fighting it. Let me break down why this works so well:
+The Psychology
+Instead of telling the LLM "trust the tool, don't verify," you're saying "verify, but do it the right way." This satisfies the natural desire for verification while avoiding the token-expensive file reading.
+Token Economics
+Bad verification pattern:
+patch_symbol(...)  # ~20 tokens
+read_file("src/example.py", start_line=10, end_line=60)  # ~500 tokens to verify
+Total: ~520 tokens
+Good verification pattern:
+patch_symbol(...)  # ~20 tokens  
+execute_shell_command("git diff")  # ~50 tokens for just the changes
+Total: ~70 tokens
+Why Git Diff is Perfect
+Shows only changes: Unlike reading files, git diff only returns modified lines
+Natural workflow: Developers expect to check diffs before committing
+Built-in context: Git diff shows surrounding lines automatically
+Confidence building: Seeing the exact changes validates the tool worked correctly
+Actionable next steps: Stage → commit → push is a clear workflow
+Expanded Prompting Strategy
+You have permission to edit files using tools like patch_symbol.
+When making changes:
+Apply your edits using the most efficient tool available
+Verify success with git diff to see exactly what changed
+If the diff looks correct, stage and commit the changes
+Push if successful
+Do NOT verify edits by re-reading files - use git operations instead.
+Additional Benefits
+Catches unexpected changes: Git diff shows if something went wrong
+Documents the change: The commit becomes a record of what the LLM did
+Enables rollback: Easy to undo if needed
+Builds workflow habits: Trains the LLM to work like a real developer
+This approach essentially redirects verification anxiety into productive development workflow. Rather than fighting the LLM's instinct to double-check its work, you're channeling it into standard git practices that are both more efficient and more professional.
+                ❤️
+            1
+    All reactions
+              ❤️
+              1
+Comment options
+        Uh oh!
+There was an error while loading. Please reload this page.
+        {{title}}
+            Something went wrong.
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Quote reply
+    MischaPanch
+          Jun 2, 2025
+  Maintainer
+Closing this since we recently implemented various measures to improve editing, including a regex based tool. Further discussions should happen in a separate thread
+        2
+        You must be logged in to vote
+    All reactions
+                    0 replies
+    Sign up for free
+    to join this conversation on GitHub.
+    Already have an account?
+    Sign in to comment
+      Category
+        💡
+      Ideas
+        Labels
+        None yet
+      3 participants
+Heading
+Bold
+Italic
+Quote
+Code
+Link
+Numbered list
+Unordered list
+Task list
+Attach files
+Mention
+Reference
+Menu
+          Heading
+          Bold
+          Italic
+          Quote
+          Code
+          Link
+          Numbered list
+          Unordered list
+          Task list
+          Attach files
+          Mention
+          Reference
+        Select a reply
+    Loading
+        Uh oh!
+There was an error while loading. Please reload this page.
+    Create a new saved reply
+        👍
+    1
+   reacted with thumbs up emoji
+        👎
+    1
+   reacted with thumbs down emoji
+        😄
+    1
+   reacted with laugh emoji
+        🎉
+    1
+   reacted with hooray emoji
+        😕
+    1
+   reacted with confused emoji
+        ❤️
+    1
+   reacted with heart emoji
+        🚀
+    1
+   reacted with rocket emoji
+        👀
+    1
+   reacted with eyes emoji
+Footer
+        © 2026 GitHub, Inc.
+Footer navigation
+            Terms
+            Privacy
+              Security
+              Status
+            Community
+            Docs
+            Contact
+      Manage cookies
+        Do not share my personal information
+    You can’t perform that action at this time.

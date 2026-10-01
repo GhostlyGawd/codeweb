@@ -1,0 +1,161 @@
+I Replaced My Entire Dev Workflow with Claude Code | Baransel Arslan
+🏡 Go back to homepage
+I Replaced My Entire Dev Workflow with Claude Code
+I went all-in on Claude Code for a month — debugging, refactoring, writing tests, even git commits. Here's what worked, what didn't, and what surprised me.
+Published
+Apr 13, 2026
+A month ago I made a decision that felt reckless. I’d stop doing things the way I’d done them for years and run everything through Claude Code. Debugging, writing features, refactoring, tests, git commits — all of it. Not as a side experiment. As my actual workflow.
+I figured I’d either save a ton of time or waste a ton of time. Either way, I’d have a real answer instead of an opinion based on a weekend demo.
+Here’s what actually happened.
+Debugging — This Is Where It Shines
+I used to spend 30 minutes reading stack traces, adding console logs, re-running, adding more logs. You know the drill.
+Now I paste the error into Claude Code and let it work. It reads the relevant files, traces the logic, and finds the bug. I’d say
+it solves 80% of bugs faster than I would manually
+. That’s not an exaggeration.
+Here’s a real example. I had a Next.js API route that was returning 500 on POST requests but working fine on GET. I’d been staring at it for 20 minutes. I ran:
+claude
+"This API route returns 500 on POST but works on GET. Find the bug."
+-p src/app/api/orders/route.ts
+It came back in about 15 seconds:
+The issue is on line 23. You're calling `request.json()` but not awaiting it.
+The body is a Promise, not the actual data, so every field is undefined
+when you try to insert into the database.
+
+Fix: change `const body = request.json()` to `const body = await request.json()`
+That’s it. One missing
+await
+. I’d have found it eventually, but Claude Code found it in seconds because it doesn’t get tunnel vision the way I do.
+The pattern I’ve settled on:
+paste the error, point it at the file, let it read whatever it needs
+. Don’t try to explain the whole codebase. Just give it the problem and the entry point.
+Writing New Features — Mixed Results
+This one’s honest. Writing new features with Claude Code is great sometimes and frustrating other times.
+It’s fantastic for
+boilerplate and CRUD
+. Need a new API endpoint that validates input, hits the database, and returns a response? Done in a minute. Need a React form with validation? Handled.
+Where it struggles is
+complex business logic that requires deep context
+. If the feature depends on understanding how five different services interact, or there’s a weird edge case that only makes sense if you know the business rules, it’s going to get things wrong.
+The fix I found:
+break the task into small pieces
+. Don’t ask it to build an entire checkout flow. Ask it to build the cart total calculation. Then the tax logic. Then the payment validation. Each piece in isolation, with clear inputs and outputs.
+claude
+"Add a function that calculates cart total with quantity discounts.
+10+ items = 10% off, 25+ items = 20% off.
+Takes an array of {price, quantity} objects."
+-p src/lib/pricing.ts
+Small, specific, self-contained. That’s how you get good output.
+Refactoring — Surprisingly Good
+I didn’t expect this one. Refactoring is where Claude Code consistently impresses me.
+“Extract this into a separate module.” “Convert this class component to a functional component with hooks.” “Split this 200-line function into smaller functions.” It handles all of these well.
+I think the reason is simple:
+refactoring has clear input and output
+. The code already exists. The behavior shouldn’t change. The transformation is well-defined. That’s exactly the kind of task where AI excels.
+I had a 300-line utility file that had grown into a mess over six months. Everything was in one file, functions depended on each other in weird ways, and half the exports were only used in one place.
+claude
+"Refactor this utility file. Split it into separate modules by concern.
+Keep the public API the same."
+-p src/utils/helpers.ts
+It broke it into four files:
+string-utils.ts
+,
+date-utils.ts
+,
+validation.ts
+, and
+formatting.ts
+. Updated all the imports across the project. Didn’t break a single test.
+Would I have done the same split? Mostly, yeah. But it would’ve taken me an hour of careful work. Claude Code did it in two minutes.
+Writing Tests — The Killer Feature Nobody Talks About
+This is where I save the most time. It’s not even close.
+I’ve always been the developer who knows tests are important but finds writing them tedious. So I’d skip edge cases, write the happy path, and move on. I’m not proud of it, but that’s the truth.
+Now I just point Claude Code at a module and say “write tests for this.”
+claude
+"Write comprehensive tests for this module.
+Cover edge cases, error handling, and boundary conditions."
+-p src/lib/pricing.ts
+Here’s what surprised me:
+it catches edge cases I wouldn’t have thought of
+. Negative quantities. Prices of zero. Arrays with thousands of items. Empty arrays. Items with missing fields.
+It doesn’t just generate boilerplate assertions. It actually reads the code, understands what could go wrong, and writes tests that target those specific weaknesses.
+Before Claude Code, I’d write maybe 5-8 tests per module. Now I’m averaging 15-20, and they’re better tests. My test coverage went from “good enough” to actually thorough.
+I still review every generated test. Sometimes it tests implementation details instead of behavior, and I delete those. But
+80% of what it generates is exactly what I’d want
+, and the other 20% is easy to clean up.
+Code Review — Catches Real Issues
+I started asking Claude Code to review PRs before I submit them. Not as a replacement for human review — as a first pass.
+claude
+"Review this diff for bugs, logic errors, and edge cases
+that could cause issues in production."
+-p
+$(
+git diff main --name-only
+)
+It doesn’t just flag style issues. It catches actual problems. Off-by-one errors. Missing null checks. Race conditions in async code. Cases where an early return skips cleanup logic.
+Last week it caught a bug where I was comparing dates with
+===
+instead of using
+.getTime()
+. That would’ve made it to production. Nobody on the team would’ve caught it in review because the code looked correct at a glance.
+I now treat Claude Code review as a mandatory step before opening a PR.
+It takes 30 seconds and catches things that would take 30 minutes to debug later.
+Git Workflow — Never Writing Commit Messages Again
+This sounds lazy. It is lazy. I don’t care.
+Writing good commit messages is important. I know that. But I used to write things like “fix bug” or “update stuff” because I was in the zone and didn’t want to stop and think about the commit message.
+Now:
+claude commit
+It reads the diff, understands what changed and why, and writes a commit message that’s better than anything I’d write manually. Same with PR descriptions. Same with changelogs.
+I’ve stopped thinking about commit messages entirely, and my git history is cleaner than it’s ever been. That’s the kind of irony I can live with.
+Where It Falls Short
+I’m not going to pretend it’s perfect. There are real limitations.
+Complex architectural decisions
+are still on me. “Should we use a message queue or direct API calls?” Claude Code can list tradeoffs, but it doesn’t know our traffic patterns, our team’s experience, or our infrastructure constraints. Architecture requires context that lives in people’s heads, not in code.
+Business context it hasn’t been told about
+trips it up regularly. If there’s a reason we handle refunds differently for enterprise customers, and that reason lives in a Notion doc from 2024, Claude Code isn’t going to know that. It’ll write perfectly logical code that’s wrong for the business.
+Large refactors across 20+ files
+get messy. It can handle them, but the error rate goes up. It might miss an import in file 17 or introduce a subtle type mismatch that only shows up at runtime. For big changes, I break things into smaller batches and verify each one.
+It’s also not great at saying “I don’t know."
+It’ll generate confident-looking code that’s subtly wrong. You have to stay sharp. Review everything. Run the tests. Don’t trust blindly.
+The Surprising Part
+Here’s what I didn’t expect:
+Claude Code made me a better developer
+.
+Watching how it approaches problems taught me patterns I didn’t know. It refactored a piece of my code using a discriminated union pattern in TypeScript that I’d never used before. I looked it up, understood it, and now I use it myself.
+When it writes tests, I see edge cases I wouldn’t have considered. That changes how I think about writing code in the first place. I’ve started writing more defensively because I’ve seen all the ways things can break.
+It’s like pair programming with someone who has read every programming book ever written. They don’t always give the right answer for your specific situation, but they expose you to ideas you wouldn’t encounter on your own.
+I’m Not Going Back
+A month in and my workflow has permanently changed. I write code faster, my tests are better, my git history is cleaner, and I catch more bugs before they ship.
+Claude Code isn’t replacing me. It’s making me 3-5x faster at the boring parts so I can focus on the interesting ones.
+The architecture decisions, the product thinking, the creative problem-solving — that’s still all me. But the boilerplate, the debugging, the test writing, the commit messages? That’s Claude Code’s job now.
+I used to think AI coding tools were a gimmick. I was wrong. The trick is knowing what to hand off and what to keep. Get that balance right and you won’t go back either.
+You might also like
+Claude Code Tips That Actually Save Me Hours Every Day
+🏡 Home
+🌓 Light|dark mode
+✉️ Contact
+Follow @kaex
+Follow @bxransel
+AI
+Blockchain
+Claude Code
+CLI
+Dart
+Database
+Flutter
+General
+GIT
+JavaScript
+Lab
+PHP
+Python
+React
+Regex
+Solana
+SQL
+Typescript
+Now Playing
+on Spotify
+CV 📝
+RSS Feed
+© 2026
+Baransel Arslan

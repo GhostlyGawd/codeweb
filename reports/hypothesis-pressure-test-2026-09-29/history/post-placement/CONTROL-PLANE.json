@@ -1,0 +1,335 @@
+{
+  "parent": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+  "dispatch_run": "449652d7-7628-40a4-a10f-46c5b367926c",
+  "tasks": [
+    {
+      "key": "phase-A",
+      "id": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+      "identifier": "COD-77",
+      "parentId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+      "owner": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "qualifying_reason": "Phase ownership and six-child governance boundary",
+      "blockedByIssueIds": [
+        "375bee1a-6e50-4430-bef6-20cf523f4771",
+        "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+        "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+        "a3294b08-b019-4ccc-816d-5766e59f90b1",
+        "a578154c-75d4-48de-bb1c-13a93fa55398",
+        "f3d31ac5-0a32-4c96-be9e-4aab46566c3d"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:21:30.235Z"
+    },
+    {
+      "key": "phase-B",
+      "id": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "identifier": "COD-78",
+      "parentId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+      "owner": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "qualifying_reason": "Phase ownership and six-child governance boundary",
+      "blockedByIssueIds": [
+        "d89a661f-67ec-44c9-892d-c91cc346da58",
+        "bc105098-f7d1-44a0-8e23-ba3e3b1b86a0",
+        "a607cbae-3a0e-43a1-9e8b-7386ff63c26c",
+        "b069b0f2-e4f1-4ac4-806e-7131bafd6447",
+        "240c3739-aedd-40ee-8382-aa1c0803b438",
+        "b095ce67-4c3e-4a89-8733-391b8527ce07",
+        "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:44:15.859Z"
+    },
+    {
+      "key": "phase-C",
+      "id": "5e929c74-6224-4f8c-b865-38f840720b34",
+      "identifier": "COD-79",
+      "parentId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+      "owner": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "qualifying_reason": "Synthesis/edit phase ownership and three-child governance boundary",
+      "blockedByIssueIds": [
+        "892c9083-ce03-4257-afdc-3beb443e1b01",
+        "265838d5-9909-432f-bb3a-34e2a353087b",
+        "1fd63335-ee92-422c-888e-9db5dfaf7b5a"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T05:10:56.470Z"
+    },
+    {
+      "key": "L01",
+      "id": "375bee1a-6e50-4430-bef6-20cf523f4771",
+      "identifier": "COD-80",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+      "owner": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [],
+      "initial_status": "backlog",
+      "actual_assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:03:30.047Z"
+    },
+    {
+      "key": "L02",
+      "id": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+      "identifier": "COD-81",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+      "owner": "79d272db-70e2-483b-b817-292dac08593e",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [],
+      "initial_status": "backlog",
+      "actual_assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:03:25.246Z"
+    },
+    {
+      "key": "L03",
+      "id": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+      "identifier": "COD-82",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+      "owner": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [],
+      "initial_status": "backlog",
+      "actual_assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:08:11.459Z"
+    },
+    {
+      "key": "L04",
+      "id": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+      "identifier": "COD-83",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+      "owner": "79d272db-70e2-483b-b817-292dac08593e",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [],
+      "initial_status": "backlog",
+      "actual_assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:09:07.769Z"
+    },
+    {
+      "key": "L05",
+      "id": "a578154c-75d4-48de-bb1c-13a93fa55398",
+      "identifier": "COD-84",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+      "owner": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [],
+      "initial_status": "backlog",
+      "actual_assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:13:18.579Z"
+    },
+    {
+      "key": "L06",
+      "id": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+      "identifier": "COD-85",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+      "owner": "79d272db-70e2-483b-b817-292dac08593e",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [],
+      "initial_status": "backlog",
+      "actual_assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:14:33.739Z"
+    },
+    {
+      "key": "L07",
+      "id": "d89a661f-67ec-44c9-892d-c91cc346da58",
+      "identifier": "COD-86",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "owner": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [
+        "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:32:03.308Z"
+    },
+    {
+      "key": "L08",
+      "id": "bc105098-f7d1-44a0-8e23-ba3e3b1b86a0",
+      "identifier": "COD-87",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "owner": "79d272db-70e2-483b-b817-292dac08593e",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [
+        "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:33:39.928Z"
+    },
+    {
+      "key": "L09",
+      "id": "a607cbae-3a0e-43a1-9e8b-7386ff63c26c",
+      "identifier": "COD-88",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "owner": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [
+        "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:37:23.385Z"
+    },
+    {
+      "key": "L10",
+      "id": "b069b0f2-e4f1-4ac4-806e-7131bafd6447",
+      "identifier": "COD-89",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "owner": "79d272db-70e2-483b-b817-292dac08593e",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [
+        "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:27:47.367Z"
+    },
+    {
+      "key": "L11",
+      "id": "240c3739-aedd-40ee-8382-aa1c0803b438",
+      "identifier": "COD-90",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "owner": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [
+        "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:26:18.292Z"
+    },
+    {
+      "key": "L12",
+      "id": "b095ce67-4c3e-4a89-8733-391b8527ce07",
+      "identifier": "COD-91",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "owner": "79d272db-70e2-483b-b817-292dac08593e",
+      "qualifying_reason": "Separately approved independent analytical deliverable",
+      "blockedByIssueIds": [
+        "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:38:26.750Z"
+    },
+    {
+      "key": "SA",
+      "id": "265838d5-9909-432f-bb3a-34e2a353087b",
+      "identifier": "COD-92",
+      "parentId": "5e929c74-6224-4f8c-b865-38f840720b34",
+      "owner": "79d272db-70e2-483b-b817-292dac08593e",
+      "qualifying_reason": "Independent full-packet synthesis and blinded first-draft boundary",
+      "blockedByIssueIds": [
+        "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+        "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:53:58.729Z"
+    },
+    {
+      "key": "SB",
+      "id": "1fd63335-ee92-422c-888e-9db5dfaf7b5a",
+      "identifier": "COD-93",
+      "parentId": "5e929c74-6224-4f8c-b865-38f840720b34",
+      "owner": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "qualifying_reason": "Independent full-packet synthesis and blinded first-draft boundary",
+      "blockedByIssueIds": [
+        "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+        "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T04:53:26.755Z"
+    },
+    {
+      "key": "adversarial",
+      "id": "892c9083-ce03-4257-afdc-3beb443e1b01",
+      "identifier": "COD-94",
+      "parentId": "5e929c74-6224-4f8c-b865-38f840720b34",
+      "owner": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "qualifying_reason": "Independent adversarial evidence review boundary",
+      "blockedByIssueIds": [
+        "265838d5-9909-432f-bb3a-34e2a353087b",
+        "1fd63335-ee92-422c-888e-9db5dfaf7b5a"
+      ],
+      "initial_status": "backlog",
+      "actual_assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "actual_status": "done",
+      "parent_verified": true,
+      "executionRunId": null,
+      "completed_at": "2026-09-30T05:02:43.225Z"
+    }
+  ],
+  "graph_dependencies_verified": true,
+  "dispatch_complete": true,
+  "limitation": "Bootstrap limitation resolved by one root repair. Current blocker is canonical placement outside worker writable roots.",
+  "next_action": "Root terminal mirrors complete staged packet to canonical repository and supplies destination hash receipt; Product Lead then resubmits native final review.",
+  "final_repository_placement_pending": true,
+  "continuation": {
+    "scheduled": false,
+    "attempts": 2,
+    "errors": [
+      "400 monitor schema validation",
+      "409 unresolved parent blocker rejects follow-up despite requested blocker removal"
+    ],
+    "fallback": "Adapter/runtime status recovery; Product Lead owns activation of remaining 16 existing task assignments next heartbeat."
+  },
+  "activation_receipt": "ACTIVATION-BATCH-RECEIPT.json",
+  "activation_repair_count": 1,
+  "activation_updates": 14,
+  "activation_reconciled_run": "47750c7b-6cad-4138-a2cb-7498b3f06566",
+  "verified_at": "2026-09-30T05:19:19.313873+00:00"
+}

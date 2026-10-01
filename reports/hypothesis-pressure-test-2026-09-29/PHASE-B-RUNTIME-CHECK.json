@@ -1,0 +1,88 @@
+{
+  "runs": [
+    {
+      "id": "e8fdf514-cafb-4493-a52c-c2d7970115da",
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "succeeded",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f090-4bd4-7132-ba85-86a11ee00e91",
+      "contextSnapshot": {
+        "issueId": "d89a661f-67ec-44c9-892d-c91cc346da58",
+        "taskId": "d89a661f-67ec-44c9-892d-c91cc346da58",
+        "wakeReason": "issue_blockers_resolved"
+      },
+      "startedAt": "2026-09-30T04:26:23.434Z",
+      "finishedAt": "2026-09-30T04:32:08.860Z"
+    },
+    {
+      "id": "c6d49b49-d362-4fd7-abe4-d024840bc338",
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "succeeded",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f091-b09a-7ed1-b81f-df94239ce5ae",
+      "contextSnapshot": {
+        "issueId": "bc105098-f7d1-44a0-8e23-ba3e3b1b86a0",
+        "taskId": "bc105098-f7d1-44a0-8e23-ba3e3b1b86a0",
+        "wakeReason": "issue_blockers_resolved"
+      },
+      "startedAt": "2026-09-30T04:27:54.755Z",
+      "finishedAt": "2026-09-30T04:33:44.891Z"
+    },
+    {
+      "id": "ecdb87a7-76f8-4cfa-8a0b-0a1ff8bde6dd",
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "succeeded",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f095-9182-7f73-8720-c2cc8026cde5",
+      "contextSnapshot": {
+        "issueId": "a607cbae-3a0e-43a1-9e8b-7386ff63c26c",
+        "taskId": "a607cbae-3a0e-43a1-9e8b-7386ff63c26c",
+        "wakeReason": "issue_blockers_resolved"
+      },
+      "startedAt": "2026-09-30T04:32:08.923Z",
+      "finishedAt": "2026-09-30T04:37:27.907Z"
+    },
+    {
+      "id": "232ff50e-4bf6-4ddb-a637-1bc894cdd553",
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "succeeded",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f08b-d307-7010-827f-344b19800e1e",
+      "contextSnapshot": {
+        "issueId": "b069b0f2-e4f1-4ac4-806e-7131bafd6447",
+        "taskId": "b069b0f2-e4f1-4ac4-806e-7131bafd6447",
+        "wakeReason": "issue_blockers_resolved"
+      },
+      "startedAt": "2026-09-30T04:21:30.276Z",
+      "finishedAt": "2026-09-30T04:27:54.690Z"
+    },
+    {
+      "id": "d339a9e1-2486-45e3-8744-8bf2a9342773",
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "succeeded",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f08b-d2d5-7b91-a3a8-ef298b06f39f",
+      "contextSnapshot": {
+        "issueId": "240c3739-aedd-40ee-8382-aa1c0803b438",
+        "taskId": "240c3739-aedd-40ee-8382-aa1c0803b438",
+        "wakeReason": "issue_blockers_resolved"
+      },
+      "startedAt": "2026-09-30T04:21:30.276Z",
+      "finishedAt": "2026-09-30T04:26:23.371Z"
+    },
+    {
+      "id": "d4f5357a-1928-4b1d-bc5d-f9e5164b1be6",
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "succeeded",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f097-088a-7562-b884-2a07ed4650a1",
+      "contextSnapshot": {
+        "issueId": "b095ce67-4c3e-4a89-8733-391b8527ce07",
+        "taskId": "b095ce67-4c3e-4a89-8733-391b8527ce07",
+        "wakeReason": "issue_blockers_resolved"
+      },
+      "startedAt": "2026-09-30T04:33:44.955Z",
+      "finishedAt": "2026-09-30T04:38:31.265Z"
+    }
+  ]
+}

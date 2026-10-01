@@ -1,0 +1,33 @@
+{
+  "assignment": "L08",
+  "issue_identifier": "COD-87",
+  "issue_id": "bc105098-f7d1-44a0-8e23-ba3e3b1b86a0",
+  "run_id": "c6d49b49-d362-4fd7-abe4-d024840bc338",
+  "session_identity": "01a0f091-b09a-7ed1-b81f-df94239ce5ae",
+  "session_identity_source": "CODEX_THREAD_ID environment",
+  "created_at": "2026-09-30T04:32:34.220401+00:00",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "initial_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "final_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "first_draft_preserved_at": "history/L08-first-draft/",
+  "other_lens_outputs_read": false,
+  "independence_limit": "Fresh assignment context supplied; shared filesystem isolation procedural. Runtime session audit belongs to Product Lead.",
+  "corrections_used": 0,
+  "self_review_approval": false,
+  "output_sha256": {
+    "lenses/08-ownership-of-a-complete-job.md": "57d44f843d5fcf17e731d468c121c1214aa00b0abfee34683bfc5ddd47bc7823",
+    "lenses/08-findings.json": "cdc3273400768af355586cbdd894d8452f03bd8d54ef7173cb7557fb117bf65f",
+    "sources/L08/CW-T018.html": "b717900277ead78de576f2aa7b94e16691c7f6674b900b1265d1bff24a2605a6",
+    "sources/L08/CW-Y007.html": "38beba8c3c65ecbf02f738fc18eb56d341abd10b37c48f370fa4a085f3e1e509",
+    "sources/L08/CW-Z012.html": "fa6b17b1d843daa2854493c5db518e45b5e549964e85f755f160c11c1c25d18c",
+    "sources/L08/SOURCE-ADDENDUM.json": "fa1c9e846bccfa96a8e42d9f812bc30379061aea06f184f84e975c981dbf489a",
+    "history/L08-first-draft/08-findings.json": "cdc3273400768af355586cbdd894d8452f03bd8d54ef7173cb7557fb117bf65f",
+    "history/L08-first-draft/08-ownership-of-a-complete-job.md": "57d44f843d5fcf17e731d468c121c1214aa00b0abfee34683bfc5ddd47bc7823"
+  }
+}

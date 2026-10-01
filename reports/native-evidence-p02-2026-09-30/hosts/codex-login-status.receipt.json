@@ -1,0 +1,20 @@
+{
+  "id": "codex-login-status",
+  "command": [
+    "codex",
+    "login",
+    "status"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819829.3742468,
+  "end_epoch": 1790819829.4126122,
+  "duration_seconds": 0.03822016716003418,
+  "timeout_seconds": 15,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/codex-login-status.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/codex-login-status.stderr.txt"
+}

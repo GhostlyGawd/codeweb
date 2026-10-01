@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "phase": "B",
+  "phase_complete": true,
+  "objective_complete": false,
+  "verified_at": "2026-09-30T04:43:15.255765+00:00",
+  "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+  "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+  "lenses": [
+    {
+      "lens": "07",
+      "issue_id": "d89a661f-67ec-44c9-892d-c91cc346da58",
+      "author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "run_id": "e8fdf514-cafb-4493-a52c-c2d7970115da",
+      "session_id": "01a0f090-4bd4-7132-ba85-86a11ee00e91",
+      "fresh_session_verified": true,
+      "report": "lenses/07-capability-expansion.md",
+      "report_sha256": "cfc6de65400fecf794da57f834024e8741739ccf65ad892d8f53cdc945d0152f",
+      "findings_sha256": "0e6ab824c1b2f904dce0666d9795d444983a21343a7c9e39b8e139e0d1a4c37d",
+      "receipt_sha256": "9952294431850dc03df53c90b36488ef39684c607fc1330ed1d2e23c941a9bb4",
+      "material_findings": [
+        "L07-F01",
+        "L07-F02",
+        "L07-F03",
+        "L07-F04"
+      ],
+      "first_draft_preserved": true
+    },
+    {
+      "lens": "08",
+      "issue_id": "bc105098-f7d1-44a0-8e23-ba3e3b1b86a0",
+      "author_agent_id": "79d272db-70e2-483b-b817-292dac08593e",
+      "run_id": "c6d49b49-d362-4fd7-abe4-d024840bc338",
+      "session_id": "01a0f091-b09a-7ed1-b81f-df94239ce5ae",
+      "fresh_session_verified": true,
+      "report": "lenses/08-ownership-of-a-complete-job.md",
+      "report_sha256": "57d44f843d5fcf17e731d468c121c1214aa00b0abfee34683bfc5ddd47bc7823",
+      "findings_sha256": "cdc3273400768af355586cbdd894d8452f03bd8d54ef7173cb7557fb117bf65f",
+      "receipt_sha256": "95b40b73838698b75214a3b54ab98c3b5054e0e2f9936ad23401adc8ab9725ea",
+      "material_findings": [
+        "L08-F01",
+        "L08-F02",
+        "L08-F03",
+        "L08-F04",
+        "L08-F05"
+      ],
+      "first_draft_preserved": true
+    },
+    {
+      "lens": "09",
+      "issue_id": "a607cbae-3a0e-43a1-9e8b-7386ff63c26c",
+      "author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "run_id": "ecdb87a7-76f8-4cfa-8a0b-0a1ff8bde6dd",
+      "session_id": "01a0f095-9182-7f73-8720-c2cc8026cde5",
+      "fresh_session_verified": true,
+      "report": "lenses/09-withdrawal-test.md",
+      "report_sha256": "1054c9814dcc9a62ce684bb49ef9c4f598bf701f9a2cf8a97422f7ee3fb00a2b",
+      "findings_sha256": "2be3adcd0ed583e4194c7a205b083ff579aa10e44a442ad71d67a03928c567fd",
+      "receipt_sha256": "ce755818e3f40352b517e93cd4f40e67801178a9a118d1fa28f058997b32eb39",
+      "material_findings": [
+        "L09-F01",
+        "L09-F02",
+        "L09-F03",
+        "L09-F04",
+        "L09-F05"
+      ],
+      "first_draft_preserved": true
+    },
+    {
+      "lens": "10",
+      "issue_id": "b069b0f2-e4f1-4ac4-806e-7131bafd6447",
+      "author_agent_id": "79d272db-70e2-483b-b817-292dac08593e",
+      "run_id": "232ff50e-4bf6-4ddb-a637-1bc894cdd553",
+      "session_id": "01a0f08b-d307-7010-827f-344b19800e1e",
+      "fresh_session_verified": true,
+      "report": "lenses/10-compounding-project-knowledge.md",
+      "report_sha256": "9d8e281460a9be0f230333fd58e9479a4aa3351f8adee3359d418757cf993721",
+      "findings_sha256": "5ecdfc56aaa5e63446f2f1c87493a6001bee28b05711023e07f004f17c9ad092",
+      "receipt_sha256": "717f3935917a7ed24d070b3bca7f261f46ad631f52cc87be312ee2c47064a823",
+      "material_findings": [
+        "L10-F01",
+        "L10-F02",
+        "L10-F03",
+        "L10-F04",
+        "L10-F05",
+        "L10-F06"
+      ],
+      "first_draft_preserved": true
+    },
+    {
+      "lens": "11",
+      "issue_id": "240c3739-aedd-40ee-8382-aa1c0803b438",
+      "author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "run_id": "d339a9e1-2486-45e3-8744-8bf2a9342773",
+      "session_id": "01a0f08b-d2d5-7b91-a3a8-ef298b06f39f",
+      "fresh_session_verified": true,
+      "report": "lenses/11-shared-team-dependence.md",
+      "report_sha256": "8cd05efdb383bee01e29c2072e96b91aa3e77d7d648fdf922cfc81e606e8855b",
+      "findings_sha256": "6dfcafb89273792f55323a299d1834ec7e830361103ba63d7ab4d123c26c326e",
+      "receipt_sha256": "89e15ebc00baf7b7fe123f08379c5e2f6452222affc978ece98ded1c7f6095b1",
+      "material_findings": [
+        "L11-F01",
+        "L11-F02",
+        "L11-F03",
+        "L11-F04"
+      ],
+      "first_draft_preserved": true
+    },
+    {
+      "lens": "12",
+      "issue_id": "b095ce67-4c3e-4a89-8733-391b8527ce07",
+      "author_agent_id": "79d272db-70e2-483b-b817-292dac08593e",
+      "run_id": "d4f5357a-1928-4b1d-bc5d-f9e5164b1be6",
+      "session_id": "01a0f097-088a-7562-b884-2a07ed4650a1",
+      "fresh_session_verified": true,
+      "report": "lenses/12-ceiling-of-the-hypothesis.md",
+      "report_sha256": "841fb9b5509a2f82632116155c9aaba8d1d6ff3b87fbc6b6a933c6b29010c819",
+      "findings_sha256": "ba5dca9e8d3f6b3a03104b81ae144d13b5162c29a446a3f4cb0a1800d053eb30",
+      "receipt_sha256": "11691052b9ffbdbb9c8ee4f1cdbddf84b533522f100b493d1f04e3cff0e720d4",
+      "material_findings": [
+        "L12-F01",
+        "L12-F02",
+        "L12-F03",
+        "L12-F04",
+        "L12-F05"
+      ],
+      "first_draft_preserved": true
+    }
+  ],
+  "frozen_input_files_verified": 192,
+  "hash_check": "PHASE-B-HASH-CHECK.json",
+  "runtime_check": "PHASE-B-RUNTIME-CHECK.json",
+  "non_author_verification": {
+    "path": "PHASE-B-NONAUTHOR-VERIFICATION.json",
+    "sha256": "85286156827ade3171ba1fb6c06810bf1fd74ba5d2a46284238ea3d230094e75",
+    "findings": 13
+  },
+  "synthesis_packet": {
+    "manifest_sha256": "4ac3b8bd9c8c0d80d0d4f491dbefcb83c66eea2efb8b6efa1fd3c91e69b0b1ba",
+    "archive_sha256": "24ea9f018faf90dfc71f94da64fe7fc8040edfeeb01a29dfb5cb9a4e63453477",
+    "files": 344,
+    "identical_for": [
+      "A",
+      "B"
+    ]
+  },
+  "corrections_requested": 0,
+  "isolation_limit": "Unique fresh runtime sessions; procedural shared-filesystem isolation, not access control. Future syntheses must use new sessions and freeze drafts before cross-read.",
+  "canonical_source_placement_complete": false,
+  "next_path": "Existing native dependencies release synthesis A/B. No additional child, wake loop or recommendation supplied."
+}

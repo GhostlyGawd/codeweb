@@ -1,0 +1,1259 @@
+{
+  "status": "internal-replay-of-real-merged-change",
+  "task": "Review new callers of buildContextPack across merged PR #97",
+  "sourceBase": "2fb533f38ec9d69ecf4ab4a82d1dbe17983983aa",
+  "sourceAfter": "2bd8c19452e742213ec9f7aab0cfce7c10662f7d",
+  "toolSourceCommit": "2bd8c19452e742213ec9f7aab0cfce7c10662f7d",
+  "oracle": {
+    "newMappedCaller": "lib/evidence-core.mjs:contextEvidence",
+    "basis": "The actual merged source adds an import and a direct call in contextEvidence."
+  },
+  "conditions": {
+    "ordinary": {
+      "steps": [
+        {
+          "command": "run.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts",
+            "--out-dir",
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb",
+            "--stages",
+            "through-overlap",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 306.8,
+          "stdoutBytes": 185,
+          "data": {
+            "ws": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb",
+            "symbols": null,
+            "actionable": null,
+            "reused": false,
+            "version": "0.15.0"
+          }
+        },
+        {
+          "command": "refresh.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb/graph.json",
+            "--baseline",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 228.3,
+          "stdoutBytes": 642,
+          "data": {
+            "graph": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb/graph.json",
+            "root": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts",
+            "analysis": {
+              "status": "no-known-incompleteness",
+              "diagnosticCount": 0,
+              "diagnostics": []
+            },
+            "before": {
+              "nodes": 607,
+              "edges": 1485
+            },
+            "after": {
+              "nodes": 607,
+              "edges": 1485
+            },
+            "domainsReattached": 607,
+            "scanned": "0",
+            "sidecars": [
+              "brief",
+              "index-lite",
+              "stale-stamps",
+              "similar-index"
+            ],
+            "baseline": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb/graph.baseline.json"
+          }
+        },
+        {
+          "command": "context-pack.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb/graph.json",
+            "buildContextPack",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 44.8,
+          "stdoutBytes": 11940
+        },
+        {
+          "command": "refresh.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb/graph.json",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 282.4,
+          "stdoutBytes": 501,
+          "data": {
+            "graph": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb/graph.json",
+            "root": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts",
+            "analysis": {
+              "status": "no-known-incompleteness",
+              "diagnosticCount": 0,
+              "diagnostics": []
+            },
+            "before": {
+              "nodes": 607,
+              "edges": 1485
+            },
+            "after": {
+              "nodes": 721,
+              "edges": 1838
+            },
+            "domainsReattached": 607,
+            "scanned": "10",
+            "sidecars": [
+              "brief",
+              "index-lite",
+              "stale-stamps",
+              "similar-index"
+            ]
+          }
+        },
+        {
+          "command": "review.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb/graph.json",
+            "--changed",
+            "lib/evidence-core.mjs",
+            "--before",
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb/graph.baseline.json",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 76.0,
+          "stdoutBytes": 12195
+        },
+        {
+          "command": "context-pack.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/ordinary-repo/scripts/.codeweb/graph.json",
+            "buildContextPack",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 46.8,
+          "stdoutBytes": 12823
+        }
+      ],
+      "pre": {
+        "matched": [
+          "lib/context-core.mjs:buildContextPack"
+        ],
+        "callers": [
+          "context-pack.mjs:<module>",
+          "mcp-server.mjs:handleToolCall"
+        ],
+        "callerCount": 2,
+        "blastRadiusCount": 4,
+        "analysis": {
+          "scope": "mapped-call-graph",
+          "freshness": "unchanged-stamps",
+          "listsComplete": true,
+          "sourceEvidenceComplete": false,
+          "limitations": [
+            "unmapped-calls",
+            "source-evidence",
+            "external-callers",
+            "dynamic-dispatch"
+          ],
+          "nextSteps": [
+            "Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.",
+            "Inspect caller source for missing or capped label matches; MCP bodies:\"full\" (CLI: --full-bodies) shows whole recorded spans. Restore unavailable source first.",
+            "Check package consumers before changing an exported contract."
+          ]
+        }
+      },
+      "after": {
+        "verdict": {
+          "ok": false,
+          "check": "call-caller-preflight",
+          "scope": "full",
+          "checks": {
+            "newCycles": [],
+            "lostCallers": [],
+            "newDuplications": [
+              {
+                "id": "lib/evidence-core.mjs:canonicalJSON",
+                "dupOf": "lib/evidence-core.mjs:encode",
+                "sim": 0.919192
+              },
+              {
+                "id": "lib/evidence-core.mjs:compare",
+                "dupOf": "lib/evidence-snapshot.mjs:cmp",
+                "sim": 0.904762
+              },
+              {
+                "id": "lib/evidence-core.mjs:encode",
+                "dupOf": "lib/evidence-core.mjs:canonicalJSON",
+                "sim": 0.919192
+              }
+            ]
+          }
+        },
+        "changedSymbols": [
+          "lib/evidence-core.mjs:<module>",
+          "lib/evidence-core.mjs:EvidenceError",
+          "lib/evidence-core.mjs:analysisOf",
+          "lib/evidence-core.mjs:analysisSchema",
+          "lib/evidence-core.mjs:baselineOf",
+          "lib/evidence-core.mjs:baselineSchema",
+          "lib/evidence-core.mjs:boolean",
+          "lib/evidence-core.mjs:canonicalJSON",
+          "lib/evidence-core.mjs:compare",
+          "lib/evidence-core.mjs:contextEvidence",
+          "lib/evidence-core.mjs:createReceipt",
+          "lib/evidence-core.mjs:currentWitnessMatchesTarget",
+          "lib/evidence-core.mjs:diagnosticsOf",
+          "lib/evidence-core.mjs:digest",
+          "lib/evidence-core.mjs:distinct",
+          "lib/evidence-core.mjs:encode",
+          "lib/evidence-core.mjs:evidenceError",
+          "lib/evidence-core.mjs:fail",
+          "lib/evidence-core.mjs:hash",
+          "lib/evidence-core.mjs:keys",
+          "lib/evidence-core.mjs:list",
+          "lib/evidence-core.mjs:nil",
+          "lib/evidence-core.mjs:nullable",
+          "lib/evidence-core.mjs:number",
+          "lib/evidence-core.mjs:pathKey",
+          "lib/evidence-core.mjs:pathsTo",
+          "lib/evidence-core.mjs:projectGraph",
+          "lib/evidence-core.mjs:qualifyAnalysis",
+          "lib/evidence-core.mjs:queryOf",
+          "lib/evidence-core.mjs:querySchema",
+          "lib/evidence-core.mjs:questionSchema",
+          "lib/evidence-core.mjs:questionsOf",
+          "lib/evidence-core.mjs:reconcileQuestions",
+          "lib/evidence-core.mjs:reconcileReceipt",
+          "lib/evidence-core.mjs:recordSemantics",
+          "lib/evidence-core.mjs:relationSchema",
+          "lib/evidence-core.mjs:relationSets",
+          "lib/evidence-core.mjs:relationsOf",
+          "lib/evidence-core.mjs:sorted",
+          "lib/evidence-core.mjs:str",
+          "lib/evidence-core.mjs:targetProjection",
+          "lib/evidence-core.mjs:targetSchema",
+          "lib/evidence-core.mjs:tupleBytes",
+          "lib/evidence-core.mjs:tupleHash",
+          "lib/evidence-core.mjs:validString",
+          "lib/evidence-core.mjs:validateRecord"
+        ],
+        "review": {
+          "changed": [
+            {
+              "id": "lib/evidence-core.mjs:<module>",
+              "label": "<module>",
+              "file": "lib/evidence-core.mjs",
+              "line": 1,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:EvidenceError",
+              "label": "EvidenceError",
+              "file": "lib/evidence-core.mjs",
+              "line": 6,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:analysisOf",
+              "label": "analysisOf",
+              "file": "lib/evidence-core.mjs",
+              "line": 68,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:analysisSchema",
+              "label": "analysisSchema",
+              "file": "lib/evidence-core.mjs",
+              "line": 194,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:baselineOf",
+              "label": "baselineOf",
+              "file": "lib/evidence-core.mjs",
+              "line": 76,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:baselineSchema",
+              "label": "baselineSchema",
+              "file": "lib/evidence-core.mjs",
+              "line": 192,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:boolean",
+              "label": "boolean",
+              "file": "lib/evidence-core.mjs",
+              "line": 189,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:canonicalJSON",
+              "label": "canonicalJSON",
+              "file": "lib/evidence-core.mjs",
+              "line": 22,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:compare",
+              "label": "compare",
+              "file": "lib/evidence-core.mjs",
+              "line": 15,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:contextEvidence",
+              "label": "contextEvidence",
+              "file": "lib/evidence-core.mjs",
+              "line": 114,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:createReceipt",
+              "label": "createReceipt",
+              "file": "lib/evidence-core.mjs",
+              "line": 126,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:currentWitnessMatchesTarget",
+              "label": "currentWitnessMatchesTarget",
+              "file": "lib/evidence-core.mjs",
+              "line": 212,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            }
+          ],
+          "affectedCallers": [
+            {
+              "id": "context-pack.mjs:<module>",
+              "label": "<module>",
+              "file": "context-pack.mjs",
+              "line": 1,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-service.mjs:evidenceContext",
+              "label": "evidenceContext",
+              "file": "lib/evidence-service.mjs",
+              "line": 22,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-service.mjs:evidenceReview",
+              "label": "evidenceReview",
+              "file": "lib/evidence-service.mjs",
+              "line": 55,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-service.mjs:rootOf",
+              "label": "rootOf",
+              "file": "lib/evidence-service.mjs",
+              "line": 10,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:<module>",
+              "label": "<module>",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 1,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:analyzerIdentity",
+              "label": "analyzerIdentity",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 108,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:captureSnapshot",
+              "label": "captureSnapshot",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 148,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:existsSync",
+              "label": "existsSync",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 87,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:failure",
+              "label": "failure",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 13,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:inventory",
+              "label": "inventory",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 42,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:key",
+              "label": "key",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 75,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:readFileSync",
+              "label": "readFileSync",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 82,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            }
+          ],
+          "removed": [],
+          "baselineAffectedCallers": [],
+          "totals": {
+            "changed": 46,
+            "affectedCallers": 34,
+            "removed": 0,
+            "baselineAffectedCallers": 0
+          },
+          "omitted": {
+            "changed": 34,
+            "affectedCallers": 22,
+            "removed": 0,
+            "baselineAffectedCallers": 0
+          },
+          "detailBudget": {
+            "maxItemsPerList": 12,
+            "maxBytesPerList": 4096,
+            "fullDetails": "Use --html <file> for all detail rows."
+          }
+        },
+        "analysis": {
+          "status": "incomplete",
+          "scope": "Mapped changed spans, graph structural delta, and readable changed-symbol duplication checks",
+          "reasons": [
+            "Recorded dynamic calls can hide callers from structural analysis."
+          ],
+          "freshness": {
+            "status": "fresh"
+          },
+          "checks": {
+            "changedSpans": true,
+            "structuralDelta": true,
+            "duplication": true
+          },
+          "limits": [
+            "A complete checked scope does not establish runtime correctness.",
+            "Mapped symbol spans and static call edges are best-effort. Recorded coverage describes a past run."
+          ],
+          "unavailableFiles": [],
+          "unmappedFiles": [],
+          "provenance": {
+            "target": "ordinary-repo/scripts",
+            "engine": "regex",
+            "generatedAt": null,
+            "sourceRevision": null,
+            "baselineProvided": true,
+            "coverageSource": null
+          },
+          "totals": {
+            "unavailableFiles": 0,
+            "unmappedFiles": 0
+          },
+          "omitted": {
+            "unavailableFiles": 0,
+            "unmappedFiles": 0
+          },
+          "checkStatus": {
+            "cycles": "evaluated",
+            "lostCallers": "evaluated",
+            "duplication": "bounded-source-check",
+            "behavior": "not-evaluated"
+          },
+          "nextSteps": [
+            "Duplication uses capped mapped bodies; inspect unavailable source and run relevant tests."
+          ]
+        },
+        "oracleTargetNamedInReview": false,
+        "oracleCallerDirectlyNamedInReview": false,
+        "followupContext": {
+          "matched": [
+            "lib/context-core.mjs:buildContextPack"
+          ],
+          "callers": [
+            "context-pack.mjs:<module>",
+            "lib/evidence-core.mjs:contextEvidence",
+            "mcp-server.mjs:handleToolCall"
+          ],
+          "callerCount": 3,
+          "blastRadiusCount": 10,
+          "analysis": {
+            "scope": "mapped-call-graph",
+            "freshness": "unchanged-stamps",
+            "listsComplete": true,
+            "sourceEvidenceComplete": false,
+            "limitations": [
+              "unmapped-calls",
+              "source-evidence",
+              "external-callers",
+              "dynamic-dispatch"
+            ],
+            "nextSteps": [
+              "Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.",
+              "Inspect caller source for missing or capped label matches; MCP bodies:\"full\" (CLI: --full-bodies) shows whole recorded spans. Restore unavailable source first.",
+              "Check package consumers before changing an exported contract."
+            ]
+          }
+        }
+      },
+      "totalWallMs": 985.1,
+      "totalStdoutBytes": 38286
+    },
+    "receipt": {
+      "steps": [
+        {
+          "command": "run.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts",
+            "--out-dir",
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb",
+            "--stages",
+            "through-overlap",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 313.2,
+          "stdoutBytes": 184,
+          "data": {
+            "ws": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb",
+            "symbols": null,
+            "actionable": null,
+            "reused": false,
+            "version": "0.15.0"
+          }
+        },
+        {
+          "command": "refresh.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.json",
+            "--baseline",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 225.3,
+          "stdoutBytes": 639,
+          "data": {
+            "graph": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.json",
+            "root": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts",
+            "analysis": {
+              "status": "no-known-incompleteness",
+              "diagnosticCount": 0,
+              "diagnostics": []
+            },
+            "before": {
+              "nodes": 607,
+              "edges": 1485
+            },
+            "after": {
+              "nodes": 607,
+              "edges": 1485
+            },
+            "domainsReattached": 607,
+            "scanned": "0",
+            "sidecars": [
+              "brief",
+              "index-lite",
+              "stale-stamps",
+              "similar-index"
+            ],
+            "baseline": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.baseline.json"
+          }
+        },
+        {
+          "command": "context-pack.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.json",
+            "buildContextPack",
+            "--capture-evidence",
+            "--task",
+            "pr97-replay",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 198.4,
+          "stdoutBytes": 2050
+        },
+        {
+          "command": "refresh.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.json",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 298.5,
+          "stdoutBytes": 499,
+          "data": {
+            "graph": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.json",
+            "root": "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts",
+            "analysis": {
+              "status": "no-known-incompleteness",
+              "diagnosticCount": 0,
+              "diagnostics": []
+            },
+            "before": {
+              "nodes": 607,
+              "edges": 1485
+            },
+            "after": {
+              "nodes": 721,
+              "edges": 1838
+            },
+            "domainsReattached": 607,
+            "scanned": "10",
+            "sidecars": [
+              "brief",
+              "index-lite",
+              "stale-stamps",
+              "similar-index"
+            ]
+          }
+        },
+        {
+          "command": "review.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.json",
+            "--changed",
+            "lib/evidence-core.mjs",
+            "--before",
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.baseline.json",
+            "--receipt",
+            "6b10366800a6764b5a9888fca3a2eb73d27fde08e391989f67f862f3455f44de",
+            "--task",
+            "pr97-replay",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 299.6,
+          "stdoutBytes": 15984
+        },
+        {
+          "command": "context-pack.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.json",
+            "buildContextPack",
+            "--receipt",
+            "6b10366800a6764b5a9888fca3a2eb73d27fde08e391989f67f862f3455f44de",
+            "--task",
+            "pr97-replay",
+            "--result",
+            "5587163a2114101a032b29756d056d2770857bfdbbed5ae8b560423acb45a1e5",
+            "--section",
+            "added",
+            "--offset",
+            "0",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 59.0,
+          "stdoutBytes": 7259
+        },
+        {
+          "command": "context-pack.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.json",
+            "buildContextPack",
+            "--receipt",
+            "6b10366800a6764b5a9888fca3a2eb73d27fde08e391989f67f862f3455f44de",
+            "--task",
+            "pr97-replay",
+            "--result",
+            "5587163a2114101a032b29756d056d2770857bfdbbed5ae8b560423acb45a1e5",
+            "--section",
+            "added",
+            "--offset",
+            "3",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 62.0,
+          "stdoutBytes": 7581
+        },
+        {
+          "command": "context-pack.mjs",
+          "args": [
+            "$LOCAL_TMP/codeweb-pr97-replay-zlw8hzqs/receipt-repo/scripts/.codeweb/graph.json",
+            "buildContextPack",
+            "--receipt",
+            "6b10366800a6764b5a9888fca3a2eb73d27fde08e391989f67f862f3455f44de",
+            "--task",
+            "pr97-replay",
+            "--result",
+            "5587163a2114101a032b29756d056d2770857bfdbbed5ae8b560423acb45a1e5",
+            "--section",
+            "added",
+            "--offset",
+            "6",
+            "--json"
+          ],
+          "exit": 0,
+          "wallMs": 61.6,
+          "stdoutBytes": 4474
+        }
+      ],
+      "pre": {
+        "state": "captured",
+        "target": "lib/context-core.mjs:buildContextPack",
+        "sections": {
+          "callers": 2,
+          "callees": 8,
+          "impact": 4,
+          "questions": 2
+        },
+        "limitations": [
+          "dynamic-dispatch",
+          "external-callers",
+          "isolated-discovery-does-not-apply-ignore-files",
+          "source-evidence",
+          "unmapped-calls"
+        ]
+      },
+      "after": {
+        "verdict": {
+          "ok": false,
+          "check": "call-caller-preflight",
+          "scope": "full",
+          "checks": {
+            "newCycles": [],
+            "lostCallers": [],
+            "newDuplications": [
+              {
+                "id": "lib/evidence-core.mjs:canonicalJSON",
+                "dupOf": "lib/evidence-core.mjs:encode",
+                "sim": 0.919192
+              },
+              {
+                "id": "lib/evidence-core.mjs:compare",
+                "dupOf": "lib/evidence-snapshot.mjs:cmp",
+                "sim": 0.904762
+              },
+              {
+                "id": "lib/evidence-core.mjs:encode",
+                "dupOf": "lib/evidence-core.mjs:canonicalJSON",
+                "sim": 0.919192
+              }
+            ]
+          }
+        },
+        "changedSymbols": [
+          "lib/evidence-core.mjs:<module>",
+          "lib/evidence-core.mjs:EvidenceError",
+          "lib/evidence-core.mjs:analysisOf",
+          "lib/evidence-core.mjs:analysisSchema",
+          "lib/evidence-core.mjs:baselineOf",
+          "lib/evidence-core.mjs:baselineSchema",
+          "lib/evidence-core.mjs:boolean",
+          "lib/evidence-core.mjs:canonicalJSON",
+          "lib/evidence-core.mjs:compare",
+          "lib/evidence-core.mjs:contextEvidence",
+          "lib/evidence-core.mjs:createReceipt",
+          "lib/evidence-core.mjs:currentWitnessMatchesTarget",
+          "lib/evidence-core.mjs:diagnosticsOf",
+          "lib/evidence-core.mjs:digest",
+          "lib/evidence-core.mjs:distinct",
+          "lib/evidence-core.mjs:encode",
+          "lib/evidence-core.mjs:evidenceError",
+          "lib/evidence-core.mjs:fail",
+          "lib/evidence-core.mjs:hash",
+          "lib/evidence-core.mjs:keys",
+          "lib/evidence-core.mjs:list",
+          "lib/evidence-core.mjs:nil",
+          "lib/evidence-core.mjs:nullable",
+          "lib/evidence-core.mjs:number",
+          "lib/evidence-core.mjs:pathKey",
+          "lib/evidence-core.mjs:pathsTo",
+          "lib/evidence-core.mjs:projectGraph",
+          "lib/evidence-core.mjs:qualifyAnalysis",
+          "lib/evidence-core.mjs:queryOf",
+          "lib/evidence-core.mjs:querySchema",
+          "lib/evidence-core.mjs:questionSchema",
+          "lib/evidence-core.mjs:questionsOf",
+          "lib/evidence-core.mjs:reconcileQuestions",
+          "lib/evidence-core.mjs:reconcileReceipt",
+          "lib/evidence-core.mjs:recordSemantics",
+          "lib/evidence-core.mjs:relationSchema",
+          "lib/evidence-core.mjs:relationSets",
+          "lib/evidence-core.mjs:relationsOf",
+          "lib/evidence-core.mjs:sorted",
+          "lib/evidence-core.mjs:str",
+          "lib/evidence-core.mjs:targetProjection",
+          "lib/evidence-core.mjs:targetSchema",
+          "lib/evidence-core.mjs:tupleBytes",
+          "lib/evidence-core.mjs:tupleHash",
+          "lib/evidence-core.mjs:validString",
+          "lib/evidence-core.mjs:validateRecord"
+        ],
+        "review": {
+          "changed": [
+            {
+              "id": "lib/evidence-core.mjs:<module>",
+              "label": "<module>",
+              "file": "lib/evidence-core.mjs",
+              "line": 1,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:EvidenceError",
+              "label": "EvidenceError",
+              "file": "lib/evidence-core.mjs",
+              "line": 6,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:analysisOf",
+              "label": "analysisOf",
+              "file": "lib/evidence-core.mjs",
+              "line": 68,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:analysisSchema",
+              "label": "analysisSchema",
+              "file": "lib/evidence-core.mjs",
+              "line": 194,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:baselineOf",
+              "label": "baselineOf",
+              "file": "lib/evidence-core.mjs",
+              "line": 76,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:baselineSchema",
+              "label": "baselineSchema",
+              "file": "lib/evidence-core.mjs",
+              "line": 192,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:boolean",
+              "label": "boolean",
+              "file": "lib/evidence-core.mjs",
+              "line": 189,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:canonicalJSON",
+              "label": "canonicalJSON",
+              "file": "lib/evidence-core.mjs",
+              "line": 22,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:compare",
+              "label": "compare",
+              "file": "lib/evidence-core.mjs",
+              "line": 15,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:contextEvidence",
+              "label": "contextEvidence",
+              "file": "lib/evidence-core.mjs",
+              "line": 114,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:createReceipt",
+              "label": "createReceipt",
+              "file": "lib/evidence-core.mjs",
+              "line": 126,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-core.mjs:currentWitnessMatchesTarget",
+              "label": "currentWitnessMatchesTarget",
+              "file": "lib/evidence-core.mjs",
+              "line": 212,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            }
+          ],
+          "affectedCallers": [
+            {
+              "id": "context-pack.mjs:<module>",
+              "label": "<module>",
+              "file": "context-pack.mjs",
+              "line": 1,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-service.mjs:evidenceContext",
+              "label": "evidenceContext",
+              "file": "lib/evidence-service.mjs",
+              "line": 22,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-service.mjs:evidenceReview",
+              "label": "evidenceReview",
+              "file": "lib/evidence-service.mjs",
+              "line": 55,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-service.mjs:rootOf",
+              "label": "rootOf",
+              "file": "lib/evidence-service.mjs",
+              "line": 10,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:<module>",
+              "label": "<module>",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 1,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:analyzerIdentity",
+              "label": "analyzerIdentity",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 108,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:captureSnapshot",
+              "label": "captureSnapshot",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 148,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:existsSync",
+              "label": "existsSync",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 87,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:failure",
+              "label": "failure",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 13,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:inventory",
+              "label": "inventory",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 42,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:key",
+              "label": "key",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 75,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            },
+            {
+              "id": "lib/evidence-snapshot.mjs:readFileSync",
+              "label": "readFileSync",
+              "file": "lib/evidence-snapshot.mjs",
+              "line": 82,
+              "coverage": {
+                "status": "unknown",
+                "note": "No recorded coverage is available."
+              }
+            }
+          ],
+          "removed": [],
+          "baselineAffectedCallers": [],
+          "totals": {
+            "changed": 46,
+            "affectedCallers": 34,
+            "removed": 0,
+            "baselineAffectedCallers": 0
+          },
+          "omitted": {
+            "changed": 34,
+            "affectedCallers": 22,
+            "removed": 0,
+            "baselineAffectedCallers": 0
+          },
+          "detailBudget": {
+            "maxItemsPerList": 12,
+            "maxBytesPerList": 4096,
+            "fullDetails": "Use --html <file> for all detail rows."
+          }
+        },
+        "analysis": {
+          "status": "incomplete",
+          "scope": "Mapped changed spans, graph structural delta, and readable changed-symbol duplication checks",
+          "reasons": [
+            "Recorded dynamic calls can hide callers from structural analysis."
+          ],
+          "freshness": {
+            "status": "fresh"
+          },
+          "checks": {
+            "changedSpans": true,
+            "structuralDelta": true,
+            "duplication": true
+          },
+          "limits": [
+            "A complete checked scope does not establish runtime correctness.",
+            "Mapped symbol spans and static call edges are best-effort. Recorded coverage describes a past run."
+          ],
+          "unavailableFiles": [],
+          "unmappedFiles": [],
+          "provenance": {
+            "target": "receipt-repo/scripts",
+            "engine": "regex",
+            "generatedAt": null,
+            "sourceRevision": null,
+            "baselineProvided": true,
+            "coverageSource": null
+          },
+          "totals": {
+            "unavailableFiles": 0,
+            "unmappedFiles": 0
+          },
+          "omitted": {
+            "unavailableFiles": 0,
+            "unmappedFiles": 0
+          },
+          "checkStatus": {
+            "cycles": "evaluated",
+            "lostCallers": "evaluated",
+            "duplication": "bounded-source-check",
+            "behavior": "not-evaluated"
+          },
+          "nextSteps": [
+            "Duplication uses capped mapped bodies; inspect unavailable source and run relevant tests."
+          ]
+        },
+        "evidence": {
+          "state": "changed",
+          "reason": [],
+          "deltas": {
+            "added": 7,
+            "removed": 0,
+            "witnessChanged": 6
+          },
+          "questions": {
+            "total": 2,
+            "unresolved": 1,
+            "needs-recheck": 1,
+            "no-longer-observed": 0
+          },
+          "resultId": "5587163a2114101a032b29756d056d2770857bfdbbed5ae8b560423acb45a1e5",
+          "sameGraphAsEvidence": false
+        },
+        "pagedAdded": [
+          {
+            "relation": "impact",
+            "relatedId": "lib/evidence-core.mjs:createReceipt",
+            "id": "19b6f2ad96dbc47d2efbf9ddedcf0f60963de74c5b83021f6b1d0514da144682",
+            "itemOmitted": false
+          },
+          {
+            "relation": "impact",
+            "relatedId": "lib/evidence-core.mjs:contextEvidence",
+            "id": "296ccd775340c2607aecaefea63fd06f1e2734deaebf574c708484e8101c14ad",
+            "itemOmitted": false
+          },
+          {
+            "relation": "impact",
+            "relatedId": "review.mjs:<module>",
+            "id": "2aed50926528b0920136905cda3a0fe928c50cda26c0004b9d6349687a64bdf2",
+            "itemOmitted": false
+          },
+          {
+            "relation": "impact",
+            "relatedId": "lib/evidence-service.mjs:evidenceReview",
+            "id": "530400fbf8f41dd70728bd0bf75eac9da57cd04bab51fc56e75bf6e9fbce936e",
+            "itemOmitted": false
+          },
+          {
+            "relation": "impact",
+            "relatedId": "lib/evidence-core.mjs:reconcileReceipt",
+            "id": "648276d59c4011b651cc376f912d9c2d3df3d9feb883cc9fae11952421646267",
+            "itemOmitted": false
+          },
+          {
+            "relation": "impact",
+            "relatedId": "lib/evidence-service.mjs:evidenceContext",
+            "id": "929a376fe5a10b2f4fbdbf42d98a794e55e054858ed2f94e244476fbd8270ae2",
+            "itemOmitted": false
+          },
+          {
+            "relation": "callers",
+            "relatedId": "lib/evidence-core.mjs:contextEvidence",
+            "id": "f782cd8a92cb62a60f89111736cac2c296e00dc67b054fb8682f988788785e77",
+            "itemOmitted": false
+          }
+        ]
+      },
+      "totalWallMs": 1517.6,
+      "totalStdoutBytes": 38670
+    }
+  },
+  "limits": [
+    "Two serial tool flows run by the same script; no independent participant or agent decision",
+    "Timing includes process startup and can reflect cache/order effects",
+    "stdout bytes are not LLM tokens",
+    "One source relationship does not establish API completeness, behavioral correctness or user value"
+  ]
+}

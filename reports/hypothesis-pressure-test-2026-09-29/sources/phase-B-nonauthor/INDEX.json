@@ -1,0 +1,192 @@
+[
+  {
+    "id": "CW-L015",
+    "url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+    "locator": "UnrulyThesis reply",
+    "error": "HTTP Error 403: Blocked"
+  },
+  {
+    "id": "CW-L024",
+    "url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+    "locator": "There\u2019s no difference anymore?; final paragraphs",
+    "original_capture": "sources/phase-A-nonauthor/CW-L024.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-L024.txt",
+    "chars": 10179
+  },
+  {
+    "id": "CW-L025",
+    "url": "https://nickperkins.au/article/skills-over-mcps/",
+    "locator": "What I did instead; The thing MCPs can\u2019t do; tradeoff",
+    "original_capture": "sources/phase-B-nonauthor/CW-L025.html",
+    "text_capture": "sources/phase-B-nonauthor/CW-L025.txt",
+    "chars": 5462
+  },
+  {
+    "id": "CW-L037",
+    "url": "https://david.coffee/i-still-prefer-mcp-over-skills/",
+    "locator": "Skills + MCP",
+    "original_capture": "sources/phase-A-nonauthor/CW-L037.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-L037.txt",
+    "chars": 11181
+  },
+  {
+    "id": "CW-P003",
+    "url": "https://github.com/anthropics/claude-code/issues/39703",
+    "locator": "Context and Category H; all body categories read",
+    "original_capture": "sources/L01/CW-P003.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-P003.txt",
+    "chars": 32478
+  },
+  {
+    "id": "CW-T018",
+    "url": "https://news.ycombinator.com/item?id=48033774",
+    "locator": "Story body and author reply 48035884; complete four-comment tree read",
+    "original_capture": "sources/L01/CW-T018.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-T018.txt",
+    "chars": 2342
+  },
+  {
+    "id": "CW-T019",
+    "url": "https://moonlab.ventures/blog/hand-claude-code-a-red-test-suite",
+    "locator": "What it did; The brief; The gotchas",
+    "original_capture": "sources/phase-B-nonauthor/CW-T019.html",
+    "text_capture": "sources/phase-B-nonauthor/CW-T019.txt",
+    "chars": 11187
+  },
+  {
+    "id": "CW-T020",
+    "url": "https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318",
+    "locator": "Posts 1, 4 and 11",
+    "original_capture": "sources/phase-B-nonauthor/CW-T020.html",
+    "text_capture": "sources/phase-B-nonauthor/CW-T020.txt",
+    "chars": 18100
+  },
+  {
+    "id": "CW-X001",
+    "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+    "locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+    "original_capture": "sources/L01/CW-X001.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-X001.txt",
+    "chars": 11653
+  },
+  {
+    "id": "CW-X003",
+    "url": "https://baransel.dev/post/replaced-entire-dev-workflow-with-claude-code/",
+    "locator": "Refactoring \u2014 Surprisingly Good; Where It Falls Short",
+    "original_capture": "sources/phase-B-nonauthor/CW-X003.html",
+    "text_capture": "sources/phase-B-nonauthor/CW-X003.txt",
+    "chars": 9961
+  },
+  {
+    "id": "CW-Y001",
+    "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+    "locator": "posts 1 and 3",
+    "original_capture": "sources/phase-A-nonauthor/CW-Y001.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-Y001.txt",
+    "chars": 6028
+  },
+  {
+    "id": "CW-Y004",
+    "url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+    "locator": "posts 1,6,7",
+    "original_capture": "sources/phase-B-nonauthor/CW-Y004.html",
+    "text_capture": "sources/phase-B-nonauthor/CW-Y004.txt",
+    "chars": 5731
+  },
+  {
+    "id": "CW-Y005",
+    "url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+    "locator": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+    "original_capture": "sources/phase-A-nonauthor/CW-Y005.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-Y005.txt",
+    "chars": 16834
+  },
+  {
+    "id": "CW-Y007",
+    "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+    "locator": "posts 1,5,6",
+    "original_capture": "sources/L01/CW-Y007.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-Y007.txt",
+    "chars": 4708
+  },
+  {
+    "id": "CW-Y008",
+    "url": "https://forum.cursor.com/t/applying-shared-coding-guidelines-across-multiple-repos-with-bugbot/133667",
+    "locator": "posts 1-13,15,17,20",
+    "original_capture": "sources/phase-B-nonauthor/CW-Y008.html",
+    "text_capture": "sources/phase-B-nonauthor/CW-Y008.txt",
+    "chars": 3836
+  },
+  {
+    "id": "CW-Y010",
+    "url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+    "locator": "post 1",
+    "original_capture": "sources/phase-A-nonauthor/CW-Y010.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-Y010.txt",
+    "chars": 3693
+  },
+  {
+    "id": "CW-Y012",
+    "url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+    "locator": "Solutions; Artifacts; Where we are now",
+    "original_capture": "sources/L11/CW-Y012.html",
+    "text_capture": "sources/phase-B-nonauthor/CW-Y012.txt",
+    "chars": 6274
+  },
+  {
+    "id": "CW-Z001",
+    "url": "https://shan-verse.com/blog/codex-after-the-update/",
+    "locator": "The Old Projects I Refactored; How I Use Codex Now",
+    "original_capture": "sources/L01/CW-Z001.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-Z001.txt",
+    "chars": 16770
+  },
+  {
+    "id": "CW-Z003",
+    "url": "https://ngof.nikhaldimann.com/p/deja-code",
+    "locator": "Quantifying code duplication; methodological weaknesses",
+    "original_capture": "sources/L01/CW-Z003.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-Z003.txt",
+    "chars": 14013
+  },
+  {
+    "id": "CW-Z005",
+    "url": "https://omeratagun.net/blog/ai-coding-agents-experiment",
+    "locator": "Chapters 1\u20134; What I Learned",
+    "original_capture": "sources/phase-B-nonauthor/CW-Z005.html",
+    "text_capture": "sources/phase-B-nonauthor/CW-Z005.txt",
+    "chars": 21624
+  },
+  {
+    "id": "CW-Z006",
+    "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+    "locator": "Refactoring at scale; What humans still do",
+    "original_capture": "sources/L01/CW-Z006.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-Z006.txt",
+    "chars": 21517
+  },
+  {
+    "id": "CW-Z007",
+    "url": "https://github.com/oraios/serena/issues/1814",
+    "locator": "Summary; Additional suggestion; Note on scoping",
+    "original_capture": "sources/phase-A-nonauthor/CW-Z007.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-Z007.txt",
+    "chars": 10975
+  },
+  {
+    "id": "CW-Z011",
+    "url": "https://github.com/oraios/serena/issues/1432",
+    "locator": "Capability matrix in body",
+    "original_capture": "sources/phase-A-nonauthor/CW-Z011.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-Z011.txt",
+    "chars": 5276
+  },
+  {
+    "id": "CW-Z012",
+    "url": "https://github.com/oraios/serena/discussions/131",
+    "locator": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+    "original_capture": "sources/phase-A-nonauthor/CW-Z012.txt",
+    "text_capture": "sources/phase-B-nonauthor/CW-Z012.txt",
+    "chars": 37792
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "id": "T93-missing-evidence-original",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/review.mjs",
+    "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w/.codeweb/graph.json",
+    "--changed",
+    "subject.mjs",
+    "--receipt",
+    "0000000000000000000000000000000000000000000000000000000000000000",
+    "--task",
+    "P02Missing",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:54:42.725Z",
+  "end": "2026-10-01T01:54:42.769Z",
+  "durationMs": 44.00025000000005,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"changedSymbols\":[\"subject.mjs:low\"],\"blastRadius\":{\"count\":1,\"ids\":[\"consumer.mjs:consumer\"]},\"domainsTouched\":[\"unassigned\"],\"callerCounts\":[{\"id\":\"subject.mjs:low\",\"callers\":1}],\"filesChanged\":[\"subject.mjs\"],\"structural\":null,\"newDuplications\":[],\"verdict\":{\"ok\":true,\"check\":\"duplication-only\",\"scope\":\"full\",\"checks\":{\"newCycles\":[],\"lostCallers\":[],\"newDuplications\":[]}},\"analysis\":{\"status\":\"incomplete\",\"scope\":\"Mapped changed spans, graph structural delta, and readable changed-symbol duplication checks\",\"reasons\":[\"No baseline supplied; new cycles and lost callers were not checked.\"],\"freshness\":{\"status\":\"fresh\"},\"checks\":{\"changedSpans\":true,\"structuralDelta\":false,\"duplication\":true},\"limits\":[\"A complete checked scope does not establish runtime correctness.\",\"Mapped symbol spans and static call edges are best-effort. Recorded coverage describes a past run.\"],\"unavailableFiles\":[],\"unmappedFiles\":[],\"provenance\":{\"target\":\"T/codeweb-p02-final-controls-DfjF3w\",\"engine\":\"regex\",\"generatedAt\":null,\"sourceRevision\":null,\"baselineProvided\":false,\"coverageSource\":null},\"totals\":{\"unavailableFiles\":0,\"unmappedFiles\":0},\"omitted\":{\"unavailableFiles\":0,\"unmappedFiles\":0},\"checkStatus\":{\"cycles\":\"not-evaluated\",\"lostCallers\":\"not-evaluated\",\"duplication\":\"bounded-source-check\",\"behavior\":\"not-evaluated\"},\"nextSteps\":[\"Pass before (CLI: --before) with a pre-edit graph to check cycles and lost callers.\",\"Duplication uses capped mapped bodies; inspect unavailable source and run relevant tests.\"]},\"review\":{\"changed\":[{\"id\":\"subject.mjs:low\",\"label\":\"low\",\"file\":\"subject.mjs\",\"line\":1,\"coverage\":{\"status\":\"unknown\",\"note\":\"No recorded coverage is available.\"}}],\"affectedCallers\":[{\"id\":\"consumer.mjs:consumer\",\"label\":\"consumer\",\"file\":\"consumer.mjs\",\"line\":2,\"coverage\":{\"status\":\"unknown\",\"note\":\"No recorded coverage is available.\"}}],\"removed\":[],\"baselineAffectedCallers\":[],\"totals\":{\"changed\":1,\"affectedCallers\":1,\"removed\":0,\"baselineAffectedCallers\":0},\"omitted\":{\"changed\":0,\"affectedCallers\":0,\"removed\":0,\"baselineAffectedCallers\":0},\"detailBudget\":{\"maxItemsPerList\":12,\"maxBytesPerList\":4096,\"fullDetails\":\"Use --html <file> for all detail rows.\"}},\"evidence\":{\"mode\":\"evidence\",\"schemaVersion\":1,\"state\":\"unavailable\",\"code\":\"missing\",\"task\":\"P02Missing\",\"receiptId\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"nextSteps\":[\"Check the explicit task and evidence IDs, then recapture if the record is unavailable.\"]}}\n",
+  "stderr": ""
+}

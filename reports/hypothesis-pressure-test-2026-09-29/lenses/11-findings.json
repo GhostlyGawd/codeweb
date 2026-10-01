@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "assignment": "11 \u2014 Shared team dependence",
+  "issue_identifier": "COD-90",
+  "issue_id": "240c3739-aedd-40ee-8382-aa1c0803b438",
+  "run_id": "d339a9e1-2486-45e3-8744-8bf2a9342773",
+  "session_identity": "01a0f08b-d2d5-7b91-a3a8-ef298b06f39f",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "overall_verdict": "revise",
+  "overall_statement": "Narrow to revision-bound factual handoffs; reject generic paid shared receipts and test residual managed coordination only after adequate ordinary CI. Earned shared dependence remains unresolved.",
+  "findings": [
+    {
+      "id": "L11-F01",
+      "statement": "Shared facts can reduce repeated factual reconstruction, but ordinary PR/CI artifacts already supply much of this mechanism.",
+      "evidence_type": "source-grounded inference; proposed mechanism, no observed Codeweb team reliance",
+      "supported_actor_segment_task": "Authors handing a concrete change to reviewers and repository owners; shared implementation or cross-file change.",
+      "conditions": "Facts must bind to exact source revisions and actual check runs; reviewer must use them in a decision, not merely acknowledge a report.",
+      "evidence_ids": [
+        "L11-S02",
+        "CW-Y012"
+      ],
+      "opposing_evidence_ids": [
+        "L11-S01",
+        "CW-T019"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "L11-S02",
+          "original_url": "https://github.com/GhostlyGawd/codeweb/blob/v0.15.0/docs/ci-gate.md",
+          "record_pointer": "inputs/docs/ci-gate.md",
+          "passage_pointer": "The gate as a reviewer; What it does; Pin the action; analysis.checks",
+          "capture_pointer": "INPUT-MANIFEST.json",
+          "evidence_type": "frozen_repository_documentation",
+          "limits": "Documented capability, not a fresh runtime test; URL is navigation pointer, frozen bytes govern."
+        },
+        {
+          "evidence_id": "CW-Y012",
+          "original_url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y012",
+          "passage_pointer": "Solutions; Artifacts; Where we are now",
+          "capture_pointer": "sources/L11/CW-Y012.html#The-artifacts-we-record",
+          "evidence_type": "first_person_report",
+          "limits": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "L11-S01",
+          "original_url": "https://github.com/GhostlyGawd/codeweb/pull/96",
+          "record_pointer": "sources/L11/PR96.json",
+          "passage_pointer": "body, head.sha, base.sha, merged; PR96-comments.json/[0]/body; PR96-checks.json/check_runs",
+          "capture_pointer": "sources/L11/provenance.json",
+          "evidence_type": "repository_observed_artifact",
+          "limits": "Own product repository, not independent customer use. Read PR metadata/body, returned issue comments and check metadata; no CI logs, source diff, review approvals or runtime behavior reproduced. First checks page contains all 10 returned records."
+        },
+        {
+          "evidence_id": "CW-T019",
+          "original_url": "https://moonlab.ventures/blog/hand-claude-code-a-red-test-suite",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-T019",
+          "passage_pointer": "What it did; The brief; The gotchas",
+          "capture_pointer": null,
+          "evidence_type": "first_person_report",
+          "limits": "Firsthand commercial engineering blog; self-reported success, no repository/trace independently inspected. Direct HTTPS recovered web cache miss. Resolved means author-reported completion of this regression fix only, not maintainer confirmation or universal host reliability; resolution_source_url stays null."
+        }
+      ],
+      "strongest_supported_case": "A common source-linked inspection record can let an author and reviewer reason from the same scope and distinguish checked from unknown.",
+      "strongest_countercase": "Existing specs, PR history, commit-linked CI and the free structural digest already preserve facts. A reported regression was solved with history and tests.",
+      "failure_scenario": "Author maintains a separate receipt while reviewers reconstruct the PR anyway; two status surfaces disagree after a push.",
+      "verdict": "narrow",
+      "weakest_assumption": "Reviewers repeatedly lack facts that cannot be made accessible through their existing PR.",
+      "local_hypothesis_implication": "Retain free source-linked factual evidence as an optional aid; do not claim shared dependence from gate adoption.",
+      "paid_hypothesis_implication": "Reject a paid generic receipt; incremental coordination must exceed existing PR/CI value.",
+      "minimal_falsification_test": "For one real eligible PR, observe author preparation and reviewer reconstruction using normal PR/CI, then the proposed artifact on a matched later task. Count duplicated lookups, stale interpretations and total maintenance/reading time. If decisions and reconstruction are unchanged or overhead rises, reject added artifact.",
+      "confidence_reason": "High confidence in availability of the substitute; low confidence in incremental human benefit.",
+      "access_coverage_limits": "Frozen original evidence records and selected public originals reviewed; no participant observations, purchases or removal trial. Source counts are not prevalence."
+    },
+    {
+      "id": "L11-F02",
+      "statement": "Cross-repository revision reconciliation is a plausible narrower coordination job, not demonstrated shared Codeweb dependence.",
+      "evidence_type": "source-grounded inference; proposed mechanism, no observed Codeweb team reliance",
+      "supported_actor_segment_task": "Backend author, frontend consumer owner and reviewer on a change spanning separate repositories.",
+      "conditions": "Explicit producer-consumer relationships, tested revision pairs, supported check commands, owner routing and a real residual burden after a CI baseline.",
+      "evidence_ids": [
+        "CW-Y007",
+        "L11-S03"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "L11-S01"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y007",
+          "passage_pointer": "posts 1,5,6",
+          "capture_pointer": "sources/L11/CW-Y007.json#/post_stream/posts (post_number 1,5,6)",
+          "evidence_type": "first_person_report",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+        },
+        {
+          "evidence_id": "L11-S03",
+          "original_url": null,
+          "record_pointer": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "passage_pointer": "Connect developer value to a paid team job; hypothetical before/after; Confidence and review target",
+          "capture_pointer": "INPUT-MANIFEST.json",
+          "evidence_type": "proposal",
+          "limits": "No external original URL: internal proposal, not customer evidence."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y007",
+          "passage_pointer": "posts 1,5,6",
+          "capture_pointer": "sources/L11/CW-Y007.json#/post_stream/posts (post_number 1,5,6)",
+          "evidence_type": "first_person_report",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+        },
+        {
+          "evidence_id": "L11-S01",
+          "original_url": "https://github.com/GhostlyGawd/codeweb/pull/96",
+          "record_pointer": "sources/L11/PR96.json",
+          "passage_pointer": "body, head.sha, base.sha, merged; PR96-comments.json/[0]/body; PR96-checks.json/check_runs",
+          "capture_pointer": "sources/L11/provenance.json",
+          "evidence_type": "repository_observed_artifact",
+          "limits": "Own product repository, not independent customer use. Read PR metadata/body, returned issue comments and check metadata; no CI logs, source diff, review approvals or runtime behavior reproduced. First checks page contains all 10 returned records."
+        }
+      ],
+      "strongest_supported_case": "The original reporter repeatedly invokes an assistant for frontend/backend checks. Revision-pair evidence could prevent different owners relying on different checked states.",
+      "strongest_countercase": "The same reporter accepts CI or a monorepo as more correct. No implemented CI comparison or Codeweb team outcome exists.",
+      "failure_scenario": "Backend head advances after a frontend check; the shared page remains green, and people chase which pair was tested manually.",
+      "verdict": "revise",
+      "weakest_assumption": "Scheduling, reruns and result reconciliation remain recurring work after a simple two-repository CI check is configured.",
+      "local_hypothesis_implication": "Single-repository consumer lookup may aid the author but cannot certify cross-repo compatibility.",
+      "paid_hypothesis_implication": "Test managed check coordination only where it owns dispatch, stale-result invalidation and failure recovery; do not sell inferred graph edges as contract tests.",
+      "minimal_falsification_test": "On one consented producer/consumer workflow, first configure or inspect existing CI with explicit revisions. Compare a matched later change with managed coordination; record messages chasing results, reruns and setup/maintenance. If CI removes the burden or owners still chase the same work, reject the paid mechanism.",
+      "confidence_reason": "Medium for existence of a specific manual workflow; low for incremental service value and recurrence magnitude.",
+      "access_coverage_limits": "Frozen original evidence records and selected public originals reviewed; no participant observations, purchases or removal trial. Source counts are not prevalence."
+    },
+    {
+      "id": "L11-F03",
+      "statement": "Shared evidence needs explicit ownership and permitted information flows; cross-repo aggregation can increase coordination instead of reducing it.",
+      "evidence_type": "source-grounded inference; proposed mechanism, no observed Codeweb team reliance",
+      "supported_actor_segment_task": "Repository owners and organization evaluators permitting selected repository combinations.",
+      "conditions": "Repository/ref access, non-transitive sharing policy where required, authorized consumer relationship, named decision owner and exception expiry.",
+      "evidence_ids": [
+        "CW-Y004",
+        "L11-S03"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y008",
+        "L11-S02"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Y004",
+          "original_url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y004",
+          "passage_pointer": "posts 1,6,7",
+          "capture_pointer": "sources/L11/CW-Y004.json#/post_stream/posts (post_number 1,6,7)",
+          "evidence_type": "first_person_report",
+          "limits": "No purchase authority, rejection, approval, or technical breach demonstrated."
+        },
+        {
+          "evidence_id": "L11-S03",
+          "original_url": null,
+          "record_pointer": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "passage_pointer": "Connect developer value to a paid team job; hypothetical before/after; Confidence and review target",
+          "capture_pointer": "INPUT-MANIFEST.json",
+          "evidence_type": "proposal",
+          "limits": "No external original URL: internal proposal, not customer evidence."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-Y008",
+          "original_url": "https://forum.cursor.com/t/applying-shared-coding-guidelines-across-multiple-repos-with-bugbot/133667",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y008",
+          "passage_pointer": "posts 1-13,15,17,20",
+          "capture_pointer": null,
+          "evidence_type": "first_person_report",
+          "limits": "File-reference limitation resolved per maintainer; separate-repo access not thereby proven. No new current host gap."
+        },
+        {
+          "evidence_id": "L11-S02",
+          "original_url": "https://github.com/GhostlyGawd/codeweb/blob/v0.15.0/docs/ci-gate.md",
+          "record_pointer": "inputs/docs/ci-gate.md",
+          "passage_pointer": "The gate as a reviewer; What it does; Pin the action; analysis.checks",
+          "capture_pointer": "INPUT-MANIFEST.json",
+          "evidence_type": "frozen_repository_documentation",
+          "limits": "Documented capability, not a fresh runtime test; URL is navigation pointer, frozen bytes govern."
+        }
+      ],
+      "strongest_supported_case": "One evaluator requires isolation and provenance of derived context; a source-linked shared record must respect which owners may see it.",
+      "strongest_countercase": "Shared rule configuration has native substitutes, including a reported resolved file-reference limitation. Local per-repo evidence avoids some transfer burden.",
+      "failure_scenario": "Owner B can access A and C, but publishing a combined receipt leaks A context to C; people then redact and manually duplicate reports.",
+      "verdict": "narrow",
+      "weakest_assumption": "A narrowly scoped service can enforce the actual ownership boundaries without adding more setup and triage than it removes.",
+      "local_hypothesis_implication": "Keep local evidence portable and free; a cross-repo ownership regime is not required for every individual user.",
+      "paid_hypothesis_implication": "No generic organization-wide evidence pool. Require a small explicit relationship and permission model only for the demonstrated job; no inferred compliance product.",
+      "minimal_falsification_test": "For one proposed allowed repository pair and one forbidden transitive pair, trace source and derived fields to recipients and replay an owner/revision change. Reject the service design if unauthorized evidence flows or human redaction is needed each run. This is a proposed design test, not an executed security assessment.",
+      "confidence_reason": "Strong evidence for one evaluator constraint, not prevalence, breach, purchase rejection or buyer authority.",
+      "access_coverage_limits": "Frozen original evidence records and selected public originals reviewed; no participant observations, purchases or removal trial. Source counts are not prevalence."
+    },
+    {
+      "id": "L11-F04",
+      "statement": "Earned shared reliance remains unproven; removing a mandated gate is not a valid withdrawal test.",
+      "evidence_type": "source-grounded inference; proposed mechanism, no observed Codeweb team reliance",
+      "supported_actor_segment_task": "Authors, reviewers and owners with repeated eligible tasks, each free to use existing PR/CI alternatives.",
+      "conditions": "After familiarity, remove only the supplemental shared artifact while retaining repository access, tests, historical evidence and normal merge policy.",
+      "evidence_ids": [
+        "CW-Y007",
+        "CW-Y012"
+      ],
+      "opposing_evidence_ids": [
+        "L11-S01",
+        "CW-Y005",
+        "CW-Y001"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y007",
+          "passage_pointer": "posts 1,5,6",
+          "capture_pointer": "sources/L11/CW-Y007.json#/post_stream/posts (post_number 1,5,6)",
+          "evidence_type": "first_person_report",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+        },
+        {
+          "evidence_id": "CW-Y012",
+          "original_url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y012",
+          "passage_pointer": "Solutions; Artifacts; Where we are now",
+          "capture_pointer": "sources/L11/CW-Y012.html#The-artifacts-we-record",
+          "evidence_type": "first_person_report",
+          "limits": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "L11-S01",
+          "original_url": "https://github.com/GhostlyGawd/codeweb/pull/96",
+          "record_pointer": "sources/L11/PR96.json",
+          "passage_pointer": "body, head.sha, base.sha, merged; PR96-comments.json/[0]/body; PR96-checks.json/check_runs",
+          "capture_pointer": "sources/L11/provenance.json",
+          "evidence_type": "repository_observed_artifact",
+          "limits": "Own product repository, not independent customer use. Read PR metadata/body, returned issue comments and check metadata; no CI logs, source diff, review approvals or runtime behavior reproduced. First checks page contains all 10 returned records."
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y005",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "capture_pointer": null,
+          "evidence_type": "first_person_report",
+          "limits": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP."
+        },
+        {
+          "evidence_id": "CW-Y001",
+          "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y001",
+          "passage_pointer": "posts 1 and 3",
+          "capture_pointer": null,
+          "evidence_type": "first_person_report",
+          "limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent."
+        }
+      ],
+      "strongest_supported_case": "Repeated factual reconciliation could become work users voluntarily avoid by returning to the shared artifact.",
+      "strongest_countercase": "Internal review infrastructure and ordinary CI can absorb the job. Competitor payment relates to AI review, not Codeweb receipts; no Codeweb withdrawal evidence exists.",
+      "failure_scenario": "Manager requires report links before merge; usage rises, but removing that requirement eliminates usage and reduces review time.",
+      "verdict": "unresolved_from_existing_evidence",
+      "weakest_assumption": "Multiple roles voluntarily depend on the same facts rather than one champion maintaining a compliance step.",
+      "local_hypothesis_implication": "A useful individual brief can survive even if team dependence fails.",
+      "paid_hypothesis_implication": "Do not infer purchase or renewal from compulsory usage or a manager request. Paid benefit requires observed removal of coordination work and a buyer decision.",
+      "minimal_falsification_test": "After a familiarization task, alternate matched eligible changes with and without the artifact, counterbalancing order. Keep checks and merge rules constant. Measure author/reviewer/owner reconstruction, stale-state errors and total time; allow voluntary reinstatement without prompts. No recurring loss and no voluntary reinstatement falsify shared dependence for that workflow.",
+      "confidence_reason": "High confidence that existing packet lacks direct Codeweb reliance evidence; effect unresolved, not technical failure.",
+      "access_coverage_limits": "Frozen original evidence records and selected public originals reviewed; no participant observations, purchases or removal trial. Source counts are not prevalence."
+    }
+  ],
+  "actor_handoffs": [
+    {
+      "actor": "Author",
+      "needs": "PR base/head, local dirty state, mapped scope and omissions, consumer candidates, exact check run/revision",
+      "decision": "What to inspect/change and which checks to request",
+      "without_shared_artifact": "Reconstruct source facts and link CI in PR; no loss if PR already contains them"
+    },
+    {
+      "actor": "Reviewer",
+      "needs": "Same base/head plus tested revisions, engine/config version, completed/failed/skipped/pending/unknown status, source-linked findings and previous exceptions",
+      "decision": "Inspect, request changes or approve within normal review policy",
+      "without_shared_artifact": "Follow existing diff/check links; repeated questions return only if facts are genuinely missing"
+    },
+    {
+      "actor": "Producer repository owner",
+      "needs": "Consumer relationship inventory, intended supported version pair, test owner and unresolved consumer states",
+      "decision": "Coordinate compatibility work and accept residual limits",
+      "without_shared_artifact": "Ask consumer owners for specific revision results unless CI already dispatches them"
+    },
+    {
+      "actor": "Consumer repository owner",
+      "needs": "Own revision plus producer revision, generated schema/artifact revision where applicable, actual contract/type/runtime test result",
+      "decision": "Rerun/update consumer or explicitly accept supported state",
+      "without_shared_artifact": "Manual rerun/result reconciliation may return; measured impact unknown"
+    }
+  ],
+  "source_addendum": "sources/L11/provenance.json",
+  "independence": "Fresh assigned task context; no other lens output read. Shared filesystem is procedural isolation, not access control. Lead runtime verification pending.",
+  "tests_executed": [],
+  "limits": [
+    "No customer team observations, withdrawal, payment or renewal.",
+    "No runtime cross-repo capability test or simulated participant.",
+    "PR96 is own repository capability evidence, not customer validation.",
+    "Selected source originals reopened; complete frozen corpus available but not every source read in this lens."
+  ]
+}

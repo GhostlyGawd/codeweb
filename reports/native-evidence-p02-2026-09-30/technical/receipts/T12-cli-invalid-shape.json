@@ -1,0 +1,25 @@
+{
+  "id": "T12-cli-invalid-shape",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/query.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/invalid-shape.json",
+    "--impact",
+    "low",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:11.160Z",
+  "end": "2026-10-01T01:50:11.194Z",
+  "durationMs": 33.32637500000004,
+  "exit": 1,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"query\":\"impact\",\"symbol\":\"low\",\"found\":false,\"hint\":\"no symbol matches \\\"low\\\" — try codeweb_find \\\"<free text>\\\" (concept search, no name needed)\"}\n",
+  "stderr": ""
+}

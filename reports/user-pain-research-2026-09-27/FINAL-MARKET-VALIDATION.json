@@ -1,0 +1,55 @@
+{
+  "created_at": "2026-09-28T01:49:47.661666+00:00",
+  "schema_fields_pass": true,
+  "null_excerpts_pass": true,
+  "new_records": 12,
+  "new_first_person_labels": 12,
+  "new_ordinary_incidents_verified": false,
+  "source_attempt_units": 42,
+  "fully_read_units_this_pass": 30,
+  "new_full_units": 29,
+  "recovered_full_units": 1,
+  "partial_units": 7,
+  "inaccessible_units": 5,
+  "baseline_candidate_full_units": 62,
+  "provisional_full_union_excludes_concurrent_technical_pass": 92,
+  "target_additional_40_50_met": false,
+  "global_target_150_200_not_claimed": true,
+  "audit_hashes": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "expected": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "actual": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "expected": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "actual": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "expected": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "actual": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "expected": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "actual": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "expected": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "actual": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "match": true
+    }
+  ],
+  "review_pending": true,
+  "operator_interventions_observed": 0,
+  "new_children": 0,
+  "correction_attempts": 0,
+  "limits": "Full read means exposed textual original; linked images and external comments excluded. Canonical union precedes parent alias and semantic audits."
+}

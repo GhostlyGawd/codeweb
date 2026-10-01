@@ -1,0 +1,32 @@
+{
+  "name": "codeweb",
+  "version": "0.15.0",
+  "description": "Your agents break less code and burn fewer tokens. codeweb builds a deterministic call/import graph with 28 MCP tools for mapped callers, impact, duplication and review. Includes an interactive report and Claude Code hooks. Runs locally with zero required dependencies.",
+  "author": {
+    "name": "GhostlyGawd",
+    "email": "141867403+GhostlyGawd@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/GhostlyGawd/codeweb",
+  "repository": "https://github.com/GhostlyGawd/codeweb",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": {
+    "codeweb": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/mcp-server.mjs"
+      ]
+    }
+  },
+  "keywords": [
+    "codebase-analysis",
+    "dependency-graph",
+    "call-graph",
+    "architecture",
+    "duplication",
+    "refactoring",
+    "domain-mapping",
+    "code-review",
+    "visualization"
+  ],
+  "license": "MIT"
+}

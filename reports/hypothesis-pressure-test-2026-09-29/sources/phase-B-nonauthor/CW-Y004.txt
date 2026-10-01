@@ -1,0 +1,114 @@
+Request for Documentation: Bugbot repository isolation boundaries for GitLab - Help - Cursor - Community Forum
+Cursor - Community Forum
+Request for Documentation: Bugbot repository isolation boundaries for GitLab
+Support
+Help
+security
+,
+privacy-mode
+,
+gitlab
+,
+bugbot
+Philipp_Nolte
+(Philipp Nolte)
+July 14, 2026,  6:40am
+1
+Hi Cursor team,
+we are evaluating Bugbot for GitLab and need documentation of its repository-isolation boundaries for our compliance assessment.
+We are still building our understanding of how Bugbot handles repository context. A simple high-level explanation of the processing and isolation model would already be very helpful, even if some implementation details cannot be shared publicly.
+From our review of the current public documentation, we understand that Bugbot is enabled per repository, retrieves additional context dynamically, and persists data such as findings, learned rules, analytics, and patch IDs. Team Rules can also apply across all repositories in a team. However, we could not find documentation of the technical isolation boundaries, data provenance, or possible reuse of this persisted and derived context across repositories.
+Our compliance requirements allow only specific repository combinations. As an abstract example, assume three repositories, A, B, and C:
+- A and B may be processed together.
+- B and C may be processed together.
+- A and C must never be processed together.
+- A, B, and C must never be processed together in a single context.
+- Repository B must not act as an indirect bridge through which information flows between A and C.
+This restriction applies to model requests, indexes, caches, learned rules, tool results, agent sessions, and any other persisted or derived context.
+Assume Bugbot is enabled individually for all three repositories in the same GitLab group and Cursor organization. We would not configure MCP tools, automatic fixes, or Cloud Agents.
+Could Cursor document:
+1. When reviewing a merge request, can Bugbot’s built-in tools access only the current repository, or also other repositories connected to the same Cursor organization or GitLab installation?
+2. Does Bugbot create or reuse persistent code-derived data such as embeddings, indexes, summaries, file caches, tool results, learned rules, or previous review context?
+3. What is the isolation boundary for this data: repository, GitLab project, GitLab installation, Cursor team, or Cursor organization?
+4. Can information derived from one repository be used in a later review of another repository, either directly or through team rules, learned rules, caches, analytics, or agent memory?
+5. Does enabling Bugbot separately per repository guarantee isolated processing contexts?
+6. Can Cursor enforce the non-transitive policy described above? If not, what isolation model is required, for example separate Cursor organizations, GitLab applications, or service accounts?
+7. Is data provenance tracked for persisted or derived content so that information-flow restrictions can be enforced?
+8. Does Privacy Mode provide any repository-level isolation guarantee, or does it only govern training and retention?
+9. What retention and deletion periods apply to each category of data Bugbot persists, for example MR diffs, prompts, tool results, findings, learned rules, analytics, patch IDs, logs, caches, and backups? Do different periods apply during normal operation, after disabling Bugbot for a repository, and after disconnecting the GitLab integration? How can a complete deletion per repository be triggered and verified?
+We would appreciate documentation explaining not only what can be configured in the UI, but also how repository data is technically separated during processing and storage. This would help us assess Bugbot accurately and identify a compliant setup without making assumptions about its internal architecture.
+Thank you very much for your help!
+mohitjain
+(Mohit)
+July 14, 2026,  8:52am
+6
+Hi Philipp,
+This is the kind of question our security team should handle directly, rather than a public forum thread. A compliance assessment of repository isolation, data provenance, and retention/deletion deserves a precise, documented answer we can stand behind, and it’s not something we’d want to characterize informally in a public post.
+Could you email
+[email protected]
+with these questions? That gets it to the people who can give you a formal, written response and share the relevant security documentation. You can also request our security materials directly through the
+Trust Center
+(“Request access” in the top right).
+Once you’ve sent that over, feel free to reply here and I’ll help make sure it lands with the right team.
+Philipp_Nolte
+(Philipp Nolte)
+July 15, 2026,  6:42am
+7
+Hi Mohit,
+thank you very much for your guidance and support. I’ve sent the questions to
+[email protected]
+and have also requested access to the security materials through the Trust Center.
+Best regards,
+Philipp
+Related topics
+Topic
+Replies
+Views
+Activity
+Bugbot says "disabled for this repository" for a repo the dashboard shows as enabled, while Approval and Security Agents run on it
+Bug Reports
+bugbot
+,
+github
+2
+55
+September 14, 2026
+Would BugBot clone my code to the cursor server side?
+Discussions
+4
+172
+June 5, 2025
+API or Git-based workflow to promote Bugbot learned rules into repository rules
+Feature Requests
+rules
+,
+bugbot
+2
+60
+September 8, 2026
+[Regression] Bugbot does not allow to enable repositories
+Bug Reports
+bugbot
+,
+github
+3
+77
+September 3, 2026
+BugBot without Background Agents?
+Bug Reports
+privacy-mode
+,
+bugbot
+,
+gitlab
+2
+88
+April 16, 2026
+Home
+Categories
+Guidelines
+Terms of Service
+Privacy Policy
+Powered by
+Discourse
+, best viewed with JavaScript enabled

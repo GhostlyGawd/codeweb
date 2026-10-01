@@ -1,0 +1,27 @@
+{
+  "id": "T87-own-receipt-capture",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/context-pack.mjs",
+    "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w/.codeweb/graph.json",
+    "subject.mjs:low",
+    "--capture-evidence",
+    "--task",
+    "P02OwnReceipt",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:54:42.181Z",
+  "end": "2026-10-01T01:54:42.241Z",
+  "durationMs": 60.450874999999996,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"mode\":\"evidence\",\"schemaVersion\":1,\"state\":\"captured\",\"task\":\"P02OwnReceipt\",\"receiptId\":\"38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf\",\"baseline\":{\"inventoryDigest\":\"e4ee1288c91570b39f97aa126954457ec7d09f1015f566f1d5c6cd6088ea0aee\",\"graphDigest\":\"1eff0c7c4a3607159e11a6b152ff35606e98d1637ba5527842fd2a6822ef93b3\",\"analyzerIdentity\":{\"profile\":\"native-regex-snapshot-v1\",\"nodeVersion\":\"v26.7.0\",\"runtimeDigest\":\"2868a01827a3ccf13b5ea2d8186838cf0a3ef342300987d0c471aeec87833979\",\"discoveryDigest\":\"6426b2a9bd12e9b5a30873959b6fa55af921a402bfe4aa7ddcf3b51c0304fef1\",\"engine\":\"regex\",\"ctags\":false,\"ast\":false,\"relationVersion\":1,\"projectionVersion\":1,\"schemaVersion\":1},\"optionsDigest\":\"c832979a7581c437c147a0381a614238e570e2833f56dd2640b4fee14d53a0c7\",\"profile\":\"native-regex-snapshot-v1\"},\"target\":{\"id\":\"subject.mjs:low\",\"label\":\"low\",\"file\":\"subject.mjs\",\"line\":1,\"loc\":3,\"kind\":\"function\",\"exports\":true,\"signature\":{\"params\":[\"x\"],\"returns\":null,\"raw\":\"x\"},\"sourceSha256\":\"b0f00670ee75afc631386a6ecdc4fd3c38f9b613f578774ecafbe931db91bfae\"},\"sections\":{\"callers\":{\"total\":1,\"receiptId\":\"38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf\",\"section\":\"callers\",\"offset\":0},\"callees\":{\"total\":0,\"receiptId\":\"38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf\",\"section\":\"callees\",\"offset\":0},\"impact\":{\"total\":1,\"receiptId\":\"38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf\",\"section\":\"impact\",\"offset\":0},\"questions\":{\"total\":1,\"receiptId\":\"38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf\",\"section\":\"questions\",\"offset\":0}},\"limitations\":[\"external-callers\",\"isolated-discovery-does-not-apply-ignore-files\",\"unmapped-calls\"],\"nextSteps\":[\"Read a historical section using its receipt ID, task, section and offset.\"],\"savedGraphProvenance\":{\"engine\":\"regex\"}}\n",
+  "stderr": ""
+}

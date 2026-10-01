@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "saved_at_utc": "2026-09-28T00:22:35.805023+00:00",
+  "purpose": "Preserve the original lens audit and exact inspected screenshots; new research overlays this dated baseline.",
+  "audit_directory": "$LOCAL_HOME/Repositories/codeweb/reports/product-indispensability-audit-2026-09-26",
+  "files": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "bytes": 10760,
+      "sha256": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "bytes": 915748,
+      "sha256": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "bytes": 889366,
+      "sha256": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "bytes": 187178,
+      "sha256": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "bytes": 293562,
+      "sha256": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c"
+    }
+  ],
+  "storage": "saved locally in shared workspace; no commit or external publication performed by this planning turn",
+  "research_dispatched_by_this_turn": false
+}

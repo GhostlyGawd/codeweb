@@ -1,0 +1,157 @@
+{
+  "objective": "COD-56 deep public-source user-pain research",
+  "prepared_at": "2026-09-28T02:18:52.309434+00:00",
+  "status": "done",
+  "independent_review": {
+    "status": "approved",
+    "owner": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "gate": "native parent review",
+    "claim_ledger": "CLAIM-LEDGER.json",
+    "prior_decision": "changes_requested",
+    "request_report": "PARENT-CORRECTION-1-REQUEST.md",
+    "reviewed_at": "2026-09-28T02:21:49.903932+00:00",
+    "run_id": "2ecaedd2-d732-4333-a363-4209bd537dbc",
+    "report": "REVIEW.md",
+    "validation": "FINAL-CORRECTION-REVIEW-VALIDATION.json",
+    "approval_scope": "Delivery of transparently limited research/synthesis; source breadth and requested repository placement remain unachieved."
+  },
+  "counts": {
+    "evidence_records": 132,
+    "evidence_types": {
+      "first_person_report": 119,
+      "official_capability": 2,
+      "independent_measurement": 2,
+      "vendor_claim": 6,
+      "maintainer_confirmation": 3
+    },
+    "source_attempts_canonical": 189,
+    "source_access": {
+      "opened_full": 110,
+      "opened_partial": 66,
+      "inaccessible": 13
+    },
+    "full_sources_supporting_retained_records": 85,
+    "record_source_families": {
+      "github": 34,
+      "engineering_blog": 40,
+      "reddit": 28,
+      "hacker_news": 17,
+      "forum": 11,
+      "official_docs": 2
+    },
+    "dated_in_preferred_window": 77,
+    "dated_older": 22,
+    "unknown_publication_dates": 33
+  },
+  "original_targets": {
+    "full_sources": [
+      150,
+      200
+    ],
+    "useful_firsthand_records": [
+      80,
+      120
+    ]
+  },
+  "breadth_target_met": false,
+  "lower_full_source_shortfall": 40,
+  "record_label_count_in_target_band": true,
+  "record_count_caveat": "119 firsthand labels include builders, investigations and demonstration; not independently validated ordinary customer incidents.",
+  "all_required_artifacts_prepared": true,
+  "overall_objective_verified_complete": true,
+  "baseline_hashes_match": true,
+  "children_used": 6,
+  "max_children": 6,
+  "corrections": {
+    "COD-59": 1,
+    "COD-60": 1,
+    "parent": 1
+  },
+  "runtime": {
+    "collection_timeouts": [
+      {
+        "issue": "COD-56",
+        "run": "7a7cafd7-8c6b-4ea8-bab1-7d5af6ea7454",
+        "seconds": 600
+      },
+      {
+        "issue": "COD-63",
+        "run": "a0d3e815-d72d-420c-947c-12ff99ea7588",
+        "seconds": 600
+      }
+    ],
+    "recovery_failures": [
+      "COD-63 status-only recovery denied artifact/document writes HTTP403; two blocked-status writes failed.",
+      "Product Lead recovery checkout on COD-63 returned HTTP409; no retry/override. Native comment continuation then completed normal-model upload/review."
+    ],
+    "operator_interventions": [
+      {
+        "phase": "pre-dispatch",
+        "status": "reported in authorization payload",
+        "description": "Root exec EMFILE; existing CLI worked from Node execution context."
+      }
+    ],
+    "agent_local_adaptations": [
+      "In-memory artifact upload after helper mktemp sandbox failure",
+      "Public HTML/API retrieval fallbacks and bounded rereads",
+      "Native continuation after timeout and role-preserving comment coordination"
+    ],
+    "manual_wake_loops": false,
+    "intervention_free_claim": false
+  },
+  "scope": {
+    "interviews": 0,
+    "outreach_sent": 0,
+    "purchases": 0,
+    "product_changes": 0,
+    "charter_changes": 0,
+    "releases": 0,
+    "publication": false,
+    "experiments_executed": 0
+  },
+  "placement": {
+    "actual": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/cycle-01/workspace/reports/user-pain-research-2026-09-27",
+    "requested": "$LOCAL_HOME/Repositories/codeweb/reports/user-pain-research-2026-09-27",
+    "requested_path_written": false,
+    "reason": "Repository destination outside current writable roots; board attachments provide portable deliverables."
+  },
+  "remaining_unknowns": [
+    "Incremental Codeweb value and week-two reliance",
+    "Ordinary non-builder retention",
+    "Paid authority, conversion and renewal",
+    "Private-source transfer/isolation policy",
+    "Dynamic/generated and multi-repo coverage"
+  ],
+  "completion_boundary": "Independently approved research/synthesis delivery with explicit 40-source shortfall and alternative artifact placement; no claim of full target achievement or validated customer demand.",
+  "parent_correction": {
+    "number": 1,
+    "requested_defect": "F1 generic fit in 19 records",
+    "changed_ids": [
+      "CW-L001",
+      "CW-L002",
+      "CW-L003",
+      "CW-L004",
+      "CW-L005",
+      "CW-L008",
+      "CW-L009",
+      "CW-L014",
+      "CW-L015",
+      "CW-L016",
+      "CW-L017",
+      "CW-L018",
+      "CW-L019",
+      "CW-L020",
+      "CW-L021",
+      "CW-L022",
+      "CW-L023",
+      "CW-L024",
+      "CW-L025"
+    ],
+    "changed_fields": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "validation": "PARENT-CORRECTION-1-VALIDATION.json",
+    "status": "independently verified; F1 resolved"
+  }
+}

@@ -1,0 +1,1710 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-10-01T02:31:03.562758+00:00",
+  "reviewer": {
+    "agent": "p02_reviewer",
+    "requested_model": "gpt-6.1-sol",
+    "reasoning_effort": "high",
+    "separate_from_technical_and_hosts_workers": true
+  },
+  "verdict": "APPROVE factual P-02 delivery with reviewer qualifications recorded in REVIEW.md",
+  "full_field_readiness": false,
+  "product_identity": {
+    "head": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+    "expected_head": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+    "tracked_diff_exit": 0,
+    "start_product_files_checked": 600,
+    "mismatches": []
+  },
+  "frozen_packets": [
+    {
+      "manifest": "technical/MANIFEST.json",
+      "manifest_sha256": "d1ce9d2a32ab9519d0f6d29bda8ae3359a01eec59b5b9d1e4a103d2ee0c17aa1",
+      "files_checked": 129,
+      "mismatches": []
+    },
+    {
+      "manifest": "hosts/FREEZE.json",
+      "manifest_sha256": "ac0da74297bb8ef5f92537e6effd86e586588cecbed0375522ed342059a8930b",
+      "files_checked": 113,
+      "mismatches": []
+    },
+    {
+      "manifest": "hosts-global-model-update/FREEZE.json",
+      "manifest_sha256": "b7703705ec0dae5d1d6d2d98a46975d70f122698a03e7ce89e379de5847b5fad",
+      "files_checked": 15,
+      "mismatches": []
+    }
+  ],
+  "original_counts": {
+    "pass": 39,
+    "fail": 10,
+    "unverified": 11
+  },
+  "addendum_counts": {
+    "pass": 4,
+    "fail": 1,
+    "unverified": 1
+  },
+  "counts_are_surface_dispositions_not_independent_defects": true,
+  "global_settings_record_hash_verification": {
+    "current_config_matches_after": true,
+    "private_backup_matches_before": true,
+    "contents_emitted": false,
+    "global_defaults_runtime_reload_tested": false
+  },
+  "original_surviving_evidence_hashes": {
+    "technical_baseline": {
+      "path": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/.codeweb/graph.baseline.json",
+      "sha256": "99ccab18b3640ba2550f849d8e96ada4dc2693cc4fc4c6ca99aa886bf4d987ce"
+    },
+    "technical_receipt": {
+      "path": "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w/.codeweb/evidence/v1/receipts/38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf.json",
+      "sha256": "38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf"
+    },
+    "host_baseline": {
+      "path": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.baseline.json",
+      "sha256": "25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd"
+    },
+    "linked_baseline": {
+      "path": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/.codeweb/graph.baseline.json",
+      "sha256": "f2d4c34eaefc9a227a4d36733d398d5a0bbcfe41101828564c732b22b3ffa3b6"
+    }
+  },
+  "reviewed_files": [
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/CASES.json",
+      "sha256": "3a14d226e396fc773f00b8202a2c62c94678659a03acc66ed51a1ad8941e5764",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/FINAL-CONTROLS.json",
+      "sha256": "418ef36dc23697001b1167dbc769b9fe666b64fd705e46ec16531e5eed1e6e5f",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/IDENTITY.json",
+      "sha256": "75dc498ba405728fc5202c622455800df0f18cc404ae5a5d109d1a2282aa4256",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/RUN.json",
+      "sha256": "cd7b950a4353f58ccb75201cd1a2bb5dee11733e171b8bcd550e190c235a2f08",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/SUPPLEMENT.json",
+      "sha256": "3121d452d53a3997127c50c2e4b9b30c07146edb116b690c7525a9cd285587d6",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/TECHNICAL.md",
+      "sha256": "54727982eb1faaac217bd8dfebf56dffbe5f3bd056dfca1fb858c5642c505c58",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/TIMINGS.csv",
+      "sha256": "754a3c0b299ae13a9aea2c8eae8e1b615a850e24114724078630731d9635c794",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/baseline-hashes.json",
+      "sha256": "0f2f59915b3eb7caf764439959fb1895b9941b6cffba6efeb58374589fb46301",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/behavior-provenance.json",
+      "sha256": "0395979f625d47d51585a3329d0f28165f6b9cf02ff87f68872fe49265b44f83",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/executed-coverage-provenance.json",
+      "sha256": "e2e0644fe32896848e5e77d37dfb50a3c432ef2956e5bfce7356fa4d575bc1ee",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/final-controls.mjs",
+      "sha256": "fd47cd89e417546f2689f6365e4ae5a7a0c6f27dad811bdd770ba7519eb3999a",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/fixture-manifest.json",
+      "sha256": "930ddae802df7b53229f1012fc104e16951b7f14bc2e5ee9b5dfe4e7a8b0bd9b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/fixtures-final.tar.gz",
+      "sha256": "0ccc78281182de0be9377f63613269cdd371cd9c706a5652de594fe9089c4790",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/intentional-finding-after.json",
+      "sha256": "9e2bbee69eb71bd6627e419a36057fc9a8930977110ea97f35221061eb41e01f",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/intentional-finding-before.json",
+      "sha256": "5a58207dc5aba754ab6ef02ef80f9c57229576085dadfc286e8bfa229fbd74b4",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/probe.mjs",
+      "sha256": "62de60485eb9c416d034a433167e6c937b98ac9584c71876a017406b742f8618",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipt-hashes.json",
+      "sha256": "2ec5e494f3afb0b75e58324a8cafd7a194672019af1daa981cdffdb90e5ce05f",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T00-extract-fixture.json",
+      "sha256": "97a1f7abc99c94a0840f4eee1d99c8514516e90e1a9380d1d6d0d972a8634d73",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T01-cli-exact-impact.json",
+      "sha256": "47aab4c8105f26125692bd91ca71ebc0d062bf463d0f59830102de2b4646011f",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T02-cli-exact-context.json",
+      "sha256": "8d95c9f24b51a85792fbbbc7e06f66e85bb7340891adc6b8e3a775bb16b7b065",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T03-mcp-exact-impact.json",
+      "sha256": "2d3a9e05959633142d3c069a1da5a56ef7936e826e956480d3e32ab4fe90f39b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T04-mcp-exact-context.json",
+      "sha256": "07a276643a1bfcf12b2511c1aeb76b1d3059d7b099b57e0764cc6de14e5a23a8",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T05-hook-known-low-edit.json",
+      "sha256": "e4a86bec34a2ed349afcc51ad73440b69cfe5efef1333f61d6f70c472b4fef85",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T06-hook-file-only.json",
+      "sha256": "68e6634bbcf1ee17f6f1b4d697e596e9f1061b4330332dc89fb965a5e8d8b243",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T07-hook-known-low-repeat.json",
+      "sha256": "7b3ba350196043449bbff983d5f15fda4107cc15f8333df5f8415a42d8922c53",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T08-cli-zero.json",
+      "sha256": "3dd94730116e3ef1f5fb23f130ea20d29eb44c5d480a22bb564c9363a2036c77",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T09-cli-unmapped-symbol.json",
+      "sha256": "4caafac2ae7e90a196fe12d72c6fdfc5d9387453ea11d1bbdb91e5f86870eb28",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T10-cli-missing-map.json",
+      "sha256": "6635d036dfc3c569eccc01bb6fdce39f925ff2606e5b68cbe845a7fbd77b7bf6",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T11-cli-corrupt-map.json",
+      "sha256": "3c7b0791ad7178d109fbcfa855e979e0eff22c33ac4ce489bcace0b733ff7dce",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T12-cli-invalid-shape.json",
+      "sha256": "ba9dc0f2884576793c696081b891b3b1901573379afabd61982a6e4cdf08dec8",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T13-cli-stale-context.json",
+      "sha256": "6e48d40d7114273cd537af3d7d7caf7c6f140e0aee75e78a8c8c748441a4174d",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T14-hook-stale.json",
+      "sha256": "06bbcb028ded9a6bbfd87a54e49de0b0110fd637097f757c23fef386c2564db2",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T15-hook-corrupt.json",
+      "sha256": "8c0c3495c2aaf9df831ccba433ab4b301ac30a907c06695ea65b7b51f9253708",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T15-hook-extraction-failure.json",
+      "sha256": "5133ad112e31b3945a07c9e4e5e66ecacb9b703d2fff09b7f13521c2f71bc3ef",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T15-hook-generated.json",
+      "sha256": "704d5c6450f54b11999b6d7cd61bc6575ceaf0565be92d8351426e454694be7e",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T15-hook-missing.json",
+      "sha256": "1e5af0761bcfdd757a8f917ca6ce86bb0c950902167a2adcacbd3e911369d9b0",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T15-hook-unmapped.json",
+      "sha256": "eceb799c9897305c3e3980053f40e85095bee30a7b0c86df4449955dc21b5f21",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T15-hook-unsupported.json",
+      "sha256": "f82cd0c5316779572d8bd452ebed04f34da601698ab4f75de83a326c3cfc847a",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T15-hook-zero.json",
+      "sha256": "1d3e0897905e77fac30230d589f1ccb2df443bcbadee449082e8b5949e29f3d3",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T16-post-corrupt.json",
+      "sha256": "e27c4e30b8834798dc8801b05c5222b48488f602fe28794c60a7415c51d7a0a8",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T16-post-extraction-failure.json",
+      "sha256": "b504ada0dd0903ff48df134a05747e67a551eb56aa05affad625a89e7b8515e6",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T16-post-generated.json",
+      "sha256": "fe387555f6f1bdcc08eeed17e7702d52837752d5e8da0b002080591dc74d016a",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T16-post-missing.json",
+      "sha256": "d1dd9e450131c1f43e20f172abf7070ab80f069daca2ee5073b84c7ae8e93806",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T16-post-unmapped.json",
+      "sha256": "ae9f14c691638f5c1eaaeb02f75927a75cff302a91a5604deceab066d5c78bcc",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T16-post-unsupported.json",
+      "sha256": "533cd543ee760796d3bca8f02f6e18ba7df6987d3c0e0dd6c3b95facc202f727",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T16-post-zero.json",
+      "sha256": "0ff93c0f74d6217be1aad8829c41e09d1a4f6ec59b93b1d969dbbe58567f92df",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T17-extract-generated.json",
+      "sha256": "6d1a5182d264418cd57be6f3141c5526b5ae42b28a06d2b6f19629a6fc2c2042",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T18-extract-only-unsupported.json",
+      "sha256": "5c23d6eaa2804080220bac16f6207a170ef08fbf122035ae0577fb9bf165add8",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T19-refresh-extraction-failure.json",
+      "sha256": "49f1b204e014bb578d2c507204a72bd731b7a5c07ca6a79fbcf47053eda28af2",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T20-cli-invalid-invocation.json",
+      "sha256": "364a9769db5ee5ab7ad6fa93c5f74dc7c5eb09f22ac0733668d88be3704632d5",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T21-mcp-missing-map.json",
+      "sha256": "b83195bd652b2ae4a3de71f32e1a6a8150e0a1e9166ae9ace087a5b00fe8894c",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T22-mcp-corrupt-map.json",
+      "sha256": "a6a91d2649c72c873b05e68ac1327f9b5fcab71cdfecb6c4f3a550462ccea67e",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T23-mcp-zero.json",
+      "sha256": "7b5ae27fc0f675399c804ee491ae12b93611d1d980731560440615f0266033eb",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T24-mcp-unmapped.json",
+      "sha256": "6f2773df3b3e7ae08ffb443e5c35c5b15a71d487a6e297ca5fa7d78b3d4031b6",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T25-mcp-invalid-selector.json",
+      "sha256": "dd600ec5a5a6f7fff4bbfa4104ca09b43e65d9d8c66a4418915e5c8ab31247d9",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T26-impact-cap.json",
+      "sha256": "f49cf46916eca3d11590856a9d13a5ae3b151a854f6e21d35f200453a1b4d153",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T27-impact-expand.json",
+      "sha256": "d14523e7e82171ee547aa23006d378e71bd62ae15138a99b938e7f43d44bafde",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T28-context-cap.json",
+      "sha256": "4f003c65e971e313526f2e5bb3a813346cc4cfbd75b234a253f59650fc4cf91d",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T29-context-expand.json",
+      "sha256": "61886f798b8f997d9cbe95129542b21866b0a77216118295283e5f1ce01a56c8",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T30-missing-original-baseline.json",
+      "sha256": "fa52bd1f991fb942ea08a390477df1aca2804b6c01a1183505a7eebd28267d70",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T31-capture-baseline.json",
+      "sha256": "0291a129eec5702ccb670da82d412e17afa17d9083909ad95fca80aa639fc8ce",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T32-ordinary-refresh.json",
+      "sha256": "da8c076e345f96d5f2731c182d97d38497e50923807b5f31cf2556fce876f2cc",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T33-verify-baseline.json",
+      "sha256": "acb8a7e428b98e6ab8d6a4c14a007e709e7fa394403c9527075b1bb465dbffc6",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T34-repair-refresh.json",
+      "sha256": "402d7789571a20e81c33bdb318ee8811cd5ef5e0101002efe0d441f3cdf8ce96",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T35-verify-repair.json",
+      "sha256": "23b6dd3ff435b03f5af91a2b9f76f37418a5bb27e01272a78f6ab46e76368131",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T36-deny-baseline-refresh.json",
+      "sha256": "d1e6461204bac8855e653d1718b91734aa58f084370acca5a9d20d026864f60b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T37-incomplete-before.json",
+      "sha256": "995459365b70bb849d67d2578b65076ac2db9c5f858fc2db9e44dd73b96921ab",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T38-post-normal.json",
+      "sha256": "1c3aa16315d72333c58f3f49a5840f2910577fe21dd1039c93d85261a2cfbcae",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T39-post-regression-first.json",
+      "sha256": "dceff7300baf0fa4dcef35b15d3884cb3ff0845e350aff220992b93de0b8c57b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T40-post-regression-repeat.json",
+      "sha256": "15a884ad15b32cc70f4e5b6a45eeceb51040d53f3348f607a062cf995bc2b478",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T41-extract-similarity.json",
+      "sha256": "31bbce463c0be0faf41a3ba716cd3504355f144d443772689924471c3c19c6ea",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T42-similar-conflicting-contract.json",
+      "sha256": "8a74f37b852eaa1f0bae5d587c92c3db400a21a56e14afd850abf7495d79d1b2",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T43-similar-json-cap.json",
+      "sha256": "08c869dec935270d79f8d4e257977f97cf403fb4f6fba6caea7bced11e99b387",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T44-similar-expand.json",
+      "sha256": "5c802274f8707a64bc928e1404e1a9d749dddeab14aed525973b3d31ed4d3c6c",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T45-similar-equivalent-syntax.json",
+      "sha256": "dab5ad657e28a20f5973a7984ae3cf06a1b593da58443bae1b16499cfc52bf0e",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T46-similar-zero-text.json",
+      "sha256": "1df1e2e15f3211d4986d2bacd3cfdf50cba6d9ae4647a39097d9b17c7c6a9af2",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T47-similar-zero-json.json",
+      "sha256": "cdebbdb7cff4ff5f823d427da11a1129a7209cfd0eb9ae4aa91d369ee4958ff9",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T48-similar-body-cap.json",
+      "sha256": "3c9598059493cdf49891194ead961d0696f8a4c13503569c7763a9098d06a05e",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T49-mcp-similarity.json",
+      "sha256": "1c9ad8cf31d43b0859f0ddb49d368253100050f3ac18717bcf749875e1ab80c0",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T50-overlap.json",
+      "sha256": "3e8564d6ed859c53f34f2a6270cf87728e60d5c1910744af62620ea5035faf3d",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T51-extract-behavior.json",
+      "sha256": "ce78b4d8a4825303073803d0b0caaadc173cfff636d6668a53a2f39dba43d275",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T52-behavior-current.json",
+      "sha256": "4b0f7d4a5c68b6ca7c31425e5d11b2725dc547f62dbce3e31e3eaff0e59ac29d",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T53-behavior-failed.json",
+      "sha256": "b53aa09e8cc3ea286fd53441d5cdf1980567cc144a522415ae9604a1c938800b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T54-behavior-skipped.json",
+      "sha256": "b26da8e42c089c62e8db309fa35255215aa2488c6f2cf7f52366c0f1c72cda26",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T55-behavior-malformed.json",
+      "sha256": "3d2ad2186245929d7f87e3ff318cd686a64ef3f16914a7c1db6dda232077c751",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T56-structural-green-with-failed-oracle.json",
+      "sha256": "0d8f9eca4b179b5d419bd60b2e3dcc5532b324b32432cf919e04f5292b920173",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T57-test-neighbor.json",
+      "sha256": "1fc125aaaf75cd111ea7339d6718633e1e3a60ce809c9f1a3b2c44490cee2031",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T58-import-historical-coverage.json",
+      "sha256": "d2bf77e4065ffb3e415b23e2e62107b17aa3ab5d20dc409e5dadab777fc647ae",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T59-recorded-coverage-explain.json",
+      "sha256": "ba6309d4d47afe270706404c1efe446d2b7772ca5016b450143b2d3099ecfc52",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T60-stale-coverage-explain.json",
+      "sha256": "e5dfe28be516a7ec757a03edb78b99ef10a7330450f4e122dc98321bc8ef02e0",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T61-stale-test-now-fails.json",
+      "sha256": "f770a93ca245264e8824182bb6afdfd3bec15f17313df6e9d546d10d552eefd5",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T62-targeted-suites.json",
+      "sha256": "0ed099d22da2fc415403f92f4eb7fb1492ab3ddb671f9389a803434134e7d907",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T63-fresh-refresh.json",
+      "sha256": "a8cedfdc4981647be71848702e5a52c1e8542aa27552d1fe922192d56bc154c9",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T64-fresh-context.json",
+      "sha256": "80d4bbf4bddeb2d05318c65d58ba3297713c76ac803ec1c7d268ad8c1b74c6dd",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T65-fresh-hook.json",
+      "sha256": "4319dc28bc50dacb57cac41530069b3d05d55aa81f1284367139e33a3e387f6c",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T66-stale-stamped-hook.json",
+      "sha256": "031837fe8f119ac50ea53a7c906ead444a2f8583d988f45f215d77fa8ea94888",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T67-codex-shaped-hook.json",
+      "sha256": "77dac45a82534a7b6a38372a36fec8b049f7ecbc9e42f98d0e4932956ea6fade",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T68-real-extraction-failure-hook.json",
+      "sha256": "df2f5423d336e1f49a254bd75d3e02d07730d7fead941e2f8894aef7cd30a660",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T69-real-extraction-failure-cli.json",
+      "sha256": "bd0e3a4d26e1d76c83f7637989960c68769afbfd8dbb65281a33b3811b496bf6",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T70-intentional-extract.json",
+      "sha256": "43ac2b6404f6f4c1587e3f5e7d18d01814b7917849ed6cc5c340e43686d71b88",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T71-corrected-overlap.json",
+      "sha256": "78ba3ad56142db5e8996fbfe6ac651fcd7bb0aa8f2c3028e2c1c49614101fe38",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T72-intentional-dismissal.json",
+      "sha256": "a9b00909be30735824223d3df0d451b532dd479d8af94d779b316e888732b214",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T73-dismissal-repeat-overlap.json",
+      "sha256": "423cfb523756123e78e2bdb8810433fc26de2d330cb184afcba2a9f6d9ef9622",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T74-corrected-mcp-similarity.json",
+      "sha256": "51d409f635b1c2a08bc035719e51f7f1e0085acdeb2d4b35b3cdb66234409114",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T75-empty-deadcode-json.json",
+      "sha256": "ac66e32856bf7040a72a40004f4ebde56468dedb3c527f723833b773cfb9c277",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T76-incomplete-deadcode-json.json",
+      "sha256": "52bc6e417bb64eaae07471af2032aa1c068ffb7620fea3a2c9be90424bb21557",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T77-incomplete-deadcode-mcp.json",
+      "sha256": "0e0ccf33730247bf7cfaddcfec183e16c1f81447557bf259928df80bbbbfec12",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T78-corrected-stats-test.json",
+      "sha256": "28ffae2c13de7f65bd10a4317e1f1e220f1ef3626bf014feb35d0a8f8c9f6af6",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T79-current-executed-coverage.json",
+      "sha256": "ef7aa9ac2be5899ab4f6cd0e4a2b4d2b6c22c25003938bd1bd2fdc8c41701b9d",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T80-measured-extract.json",
+      "sha256": "bdf49d40ae0975fe78052c8138a324083c9e1110191f4e7dda45b8ea070c9a2b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T81-import-executed-coverage.json",
+      "sha256": "b517c5fd10520f3b98bd73c59a29184e3c88f14589edf265eb9c50b5e15a6801",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T82-executed-coverage-explain.json",
+      "sha256": "61590cb47323fba3f2c45667e2584472cc0dec61aa4b4fe0e20e3ed7c0110292",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T83-executed-stale-coverage-explain.json",
+      "sha256": "51ac921326a6f63864f2d61f9e7248bdfe2fcf603a22e4db44ff54d97092f1e3",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T84-current-after-edit-fails.json",
+      "sha256": "aec9355a285cdd0721ef3e3d6471e598443810b1e3f8dc1b987a857c8934cc30",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T85-mcp-tools-list.json",
+      "sha256": "4069aa3f3d2be1b7a40e51e6f798b762b59cc8291ac54edca8718beee32f4c33",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T86-final-fresh-refresh.json",
+      "sha256": "954659210048bdf0fe1727bda3dab3c17fbd91555734e5d58fa47fc7bd9a4e8c",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T87-own-receipt-capture.json",
+      "sha256": "2ccc654d5c1972df6cbac6b9d662d1c81ece3ad07efe84a4fdd52778041d8baa",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T88-own-receipt-page.json",
+      "sha256": "d38e58e690417ecf2c59c233c264bd61e38ceb1603bfd5b13e932283b8b161be",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T89-own-receipt-refresh.json",
+      "sha256": "f7c2cf79cb28819a6dd45dc4d3291e62b37e909d47e5b915c299c731c6c5959c",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T90-own-receipt-review.json",
+      "sha256": "0bbf803b29a62cab88f8e764bca7e8bb639d265dfcbfaa8e0ff02d42c6531bf6",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T91-own-receipt-repair-refresh.json",
+      "sha256": "bfbef73726bcdb0170034708796586ccee91a4b3d7c7fe8c49ca61941d25575b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T92-own-receipt-repair-review.json",
+      "sha256": "4f26167c11f5900a4e08ed18e149c0ab7e4993ad9ddea62bc159b703b3a4f1b7",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T93-missing-evidence-original.json",
+      "sha256": "b91a3b5adc26d9511255f81cd0fe3a13dfd9fa3d489eab707372346b251ac039",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T94-generated-selector-cli.json",
+      "sha256": "e074ba352c370a9dcb8b7da5a40f29f40f8608677b6e1eb922f80c59d99e0744",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T95-generated-selector-mcp.json",
+      "sha256": "6c74bd6c2fa1dbd5968198bf527f3bf89ed8d1e2e8309cf6abd552bcdc4cd025",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T96-invalid-shape-mcp.json",
+      "sha256": "8ce25a6ed230791d4775c38e7af3fdbee394b3bf0986605c0d03cabbff4dd60e",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/receipts/T97-advisory-permission-output.json",
+      "sha256": "45c47c9f3ce43c80db000b3d079280a1a4700d2f253ecb73e6a1073a344491ed",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/source-opening.json",
+      "sha256": "ac181ce35ab763991d514e77d9c69fb88997335cb55e3f0c8acd8fca16a1dd27",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/supplement.mjs",
+      "sha256": "636ef62afc69007717ed22772cee9a549905e255e9b0bfcf6e274065373ccbf7",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/CASES-builder.py",
+      "sha256": "88847165538b9d420cdefb053a33479df8d707f15c4dbdc51ba5c4b11dda5532",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/CASES.json",
+      "sha256": "f52c1580d9ba988105989b5bd1f6c377ea7ec501dce01daccc906c8affdfdead",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/FINAL-PRESERVATION.json",
+      "sha256": "bc88078cef8cca5db1ebe73974c5df7228e6a2c95a9a61f959e6a41a65f84e08",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/HOSTS.md",
+      "sha256": "c13db973ab5bfd0d0c6fabb572254cc83825010c2d5ba0e2ef53bd74b1ba4f60",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/IDENTITY.json",
+      "sha256": "7197c74c6cfe2008801dbddeebf8ae22b101e875eb2af4f2cf61ff93ca656151",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/LINKED.json",
+      "sha256": "16d41457c3fee0d0c05f3e7186e70311883002923647af184b5234530cd06d39",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/PUBLISHED-EVIDENCE.json",
+      "sha256": "fbc7c9e1c6b996070d5367f63fa4edbeacff0dee866b7ac3dc844ef88ea62685",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/RUN-SUMMARIES.json",
+      "sha256": "eeb87ac5a2967ef72b9daada4019548e3fc8177b8c23b24655a232cb5ad9b44e",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/STATE-FIXTURES.json",
+      "sha256": "8224e7e11e38213b3e6c3e4bf164ccb7c308cffa4ea5b57d7dc722cffef3b8ce",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/candidate-pin.receipt.json",
+      "sha256": "72a86c67d87ee6760eeca0f37f2e8feb8106aa174f292d5711f9836ff930276c",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/claude-auth-status.receipt.json",
+      "sha256": "844d9e3952cadc2afad7c3fc8f3f8e3df9223e975abc7b1a1327de26f500c658",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/claude-plugin-validate.receipt.json",
+      "sha256": "a06357fc528012a89d43a57e5ce8ff2b2d04e828a60276f7a68d8bdbd182d058",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/claude-scoped-discovery-corrected.receipt.json",
+      "sha256": "75ec8693caa262983279c850e661e77fe24f03019c7fb2403b86b594ed43a198",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/claude-scoped-discovery.receipt.json",
+      "sha256": "8e4d65b1ffe79841f5b2541d46c91b8f253cb776aced01718265ef21e927104e",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/claude-shipped-plugin-manifest.receipt.json",
+      "sha256": "329cb506c036ad8c9b997686762f3501ba4cbfc4215c4e0434beea29e894390d",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/codex-login-status.receipt.json",
+      "sha256": "e3f0aa61d9b01b4b7ad8748b0e45e7140bedbcdec860afaf441f31d1a9a9ddc7",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/codex-specific-config-disable.receipt.json",
+      "sha256": "85a530c50ff411c2e0d450b365dc037e8be60e88bd5bb01a4008151db5f37c1f",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/codex-specific-config-discovery.receipt.json",
+      "sha256": "da049165f0ae21a0e5927f4d9ee380f88cfe33fcff83cc180d787bfb7d00e321",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/cold-corrected-sol.receipt.json",
+      "sha256": "0f89aeb2fbc413b1c3b3e519ee7d080a58c413f1d78ef8e104063add23a9d47b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/cold.receipt.json",
+      "sha256": "f57a8754f3aa8450fadf362c747446fbcee012719bf4a27d47b98212f68864c5",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/disabled-native-control.receipt.json",
+      "sha256": "8fbca2a687335420503dd36cde7cde05257e8fa44dd598ac966336b297a7c059",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/enabled-native-control.receipt.json",
+      "sha256": "8aafc6f3a6f83da231e3856c084407b9bb74157afb54a0fe70ba3687c52a7462",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/candidate-pin.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/candidate-pin.stdout.txt",
+      "sha256": "24d09838196480000dde4b40c3b069c9d7b7b18f9ffe2ee0b9bfa5c076e7fb61",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/candidate-pin.timestamps.json",
+      "sha256": "ba76424ef449c3f20e791e0850dd3076c1a07b6c8bb81eb37cbcb041c67d1362",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/claude-auth-status.sanitized.json",
+      "sha256": "20e2708402605cb80fd5387c0c62691a3539ae83807bd1d76ef1f27aae959ab5",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/claude-plugin-validate.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/claude-plugin-validate.stdout.txt",
+      "sha256": "6b7149176b445c76aabb1a38bc9e309af79524615f3b43ec3ce2b6d3c6c85956",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/claude-scoped-discovery-corrected.stderr.txt",
+      "sha256": "140126bee8bf3460487478af16d939d591388ea2d3a78bddb9da53f03914e9f7",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/claude-scoped-discovery-corrected.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/claude-scoped-discovery.stderr.txt",
+      "sha256": "720cb649a9d9beb4da472c3df56a052518a1faf516af912c4c3effd2bdf04303",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/claude-scoped-discovery.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/claude-shipped-plugin-manifest.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/claude-shipped-plugin-manifest.stdout.txt",
+      "sha256": "cd5a504854ed7205c634f4d8b52598a23eeab315ba380a868423413250f6e0e8",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/codex-login-status.stderr.txt",
+      "sha256": "16118df3eb3595e44a4721878cef0f79910e6564e10ff0e78e451e7c4e478947",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/codex-login-status.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/codex-login-status.timestamps.json",
+      "sha256": "6c20993c46256908a428d77dc0b4bbf33e6bd339b151b9ace613bf24c0448776",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/codex-specific-config-disable.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/codex-specific-config-disable.stdout.txt",
+      "sha256": "09dfbf7212f40fb8aa76a39510b62b7dbe00325b9e1940ff87e01ab284fd0757",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/codex-specific-config-discovery.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/codex-specific-config-discovery.stdout.txt",
+      "sha256": "0a29cac59b0a2251ae6a5bb22e3f2331d339d657d51fe9275d004ac0add4f10d",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/cold-corrected-sol.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/cold-corrected-sol.stdout.txt",
+      "sha256": "a045f10c6b956ccbc6e191c155c88f9ba4b1ea7938067fdfb8417ca7ba042f87",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/cold.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/cold.stdout.txt",
+      "sha256": "84d5bd15f23a20e177ccd35b64ceafdba37c4f371eed3d57786630eb0e58e23e",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/disabled-native-control.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/disabled-native-control.stdout.txt",
+      "sha256": "780a3707b4e347c1f7b88bab5e97f5ae7aa11b8229e094b189fc36887fea2d7b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/disabled-native-control.timestamps.json",
+      "sha256": "b2f12d56de0a2bb61e41c99013003f1256ee8a967bd6f4a63d34b42921d80fa2",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/enabled-native-control.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/enabled-native-control.stdout.txt",
+      "sha256": "f085ca44e173b23fa51edd6ad17ee6021694cab8c82493c2f1c29e6a4428d16b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/enabled-native-control.timestamps.json",
+      "sha256": "a7ce5a98d4f5dbda5dbf3c2371f11129ae0f3ef7661630e944aaf53a74b8ee68",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/host-versions.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/host-versions.stdout.txt",
+      "sha256": "27f61fe270e067265140d8bfda011d97e54d54bd3e8721c799da6c2624daab62",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/host-versions.timestamps.json",
+      "sha256": "45c1b88af587ec1a6f57f23e7dc01297ecbe4b9d2d721e983fdbaf13b5b57b54",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/linked-fixture-map.stderr.txt",
+      "sha256": "cf7f97841cb59ef2cfc6cf23d32020c44276b9311fd44395255efcd0ff28ea12",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/linked-fixture-map.stdout.txt",
+      "sha256": "083e54ea555c6e36439859c351636686264a6ca06f87870747a0d9076e08cbe8",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/linked-fixture-prepare.stderr.txt",
+      "sha256": "2b41dcd424048ec56192e6b91e83c8c84b337aa22cc5dade355cad0c27fb76fe",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/linked-fixture-prepare.stdout.txt",
+      "sha256": "af5841cc17499afde454c308458510867590cc4a948a2305fe1c6d3750f65f02",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/linked-native.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/linked-native.stdout.txt",
+      "sha256": "4c922894b3e4851b0fdf0edddaa231849b8463d9d262f9ccc6b715d7b7ba32dc",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/native-state-matrix.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/native-state-matrix.stdout.txt",
+      "sha256": "d0fca5b23074c403388ed74980d582943003dbee70f23a9fec49a2f560489103",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/native-state-matrix.timestamps.json",
+      "sha256": "2fa8851d22c5231ed8bccf78966904c7d813b49351e33b0ddf5d519e00446545",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/preauthorized-cold.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/preauthorized-cold.stdout.txt",
+      "sha256": "fcdeb488e21ca9214beac658b23d8c9baa02ae240a08e14dea24b300a064cfaa",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/preauthorized-cold.timestamps.json",
+      "sha256": "ef92ca9de8e8257fa63f0624d6ff602ba4614530173775fe17a25b2e199e62ce",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/preauthorized-linked.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/preauthorized-linked.stdout.txt",
+      "sha256": "b00c16f59f18fd93351115acb4fb1eb1fa4c4ec08fce66d980b0458bf6f70221",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/preauthorized-linked.timestamps.json",
+      "sha256": "3df89f39f767d951617af7da70a4c36479119bc4b4ffa29a26589b88520ad372",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/preauthorized-warm-recovery.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/preauthorized-warm-recovery.stdout.txt",
+      "sha256": "4d75bfbf415e62d67954e387815bee0d6f735cee21fbbe9e639bb2cfa7e5d13a",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/preauthorized-warm-recovery.timestamps.json",
+      "sha256": "607623dc44da87b1bacfc5d78848dc9f48f83df821df8cb754bdba6c558770cc",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/state-empty-cli-prep.stderr.txt",
+      "sha256": "f9397a3bd43d4e7e9318798267cabcf6a8b5761dc75b5770836142395f653345",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/state-empty-cli-prep.stdout.txt",
+      "sha256": "e1ad6a8b4a6d909258fd4e96a4e86023348fedf7e84a571289e5d82bedc9c6bd",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/state-empty-cli-prep.timestamps.json",
+      "sha256": "6e94e2bd66e1028c209ed56e919b60bfaded000a00af2d15f0eec813eed9a270",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/state-generated-cli-prep.stderr.txt",
+      "sha256": "5420c4da028116d3a9b4ddbe2736e2fd47f44a2f3fb787709e69aa8080028b3b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/state-generated-cli-prep.stdout.txt",
+      "sha256": "7861a1435cc2848c923220d7946aa966746d4ca927d4e25ca82884172a4bb5b2",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/state-generated-cli-prep.timestamps.json",
+      "sha256": "8156a0ef01230355ba874249510f9bc3a1bbe1e4f4a8e3fe325abc61a8b9c189",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/supplementary-claude-adapter-canonical.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/supplementary-claude-adapter-canonical.stdout.txt",
+      "sha256": "5ac077a4b0fcb0d8c788593b6db3b50ebc085a834cb68c076597ba7b492719e5",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/supplementary-claude-adapter.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/supplementary-claude-adapter.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/supplementary-cli-fixture-map.stderr.txt",
+      "sha256": "30848b5dad9796d18d5f3eb0487f1afea8036236862e8113440ee0f1a091e272",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/supplementary-cli-fixture-map.stdout.txt",
+      "sha256": "e2e145f6e5d9f2f5555ae9003ec2a809f2efaa3daccafaca0c2f623465408c7c",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/supplementary-codex-adapter-canonical.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/supplementary-codex-adapter-canonical.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/supplementary-codex-adapter.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/events/supplementary-codex-adapter.stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/fixture-source/AGENTS.md",
+      "sha256": "0a5ffae21e648a719a34ec6ff89a2ce6d3edab701b5d1d8bf7d6aea84ff0e21d",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/fixture-source/src/consumer.mjs",
+      "sha256": "dea8efd479f4e52e8404f2d3b06938688fb713665afd788ca19fc66e87023d4c",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/fixture-source/src/duplicates.mjs",
+      "sha256": "1b20db633e25ce5eb9810729e93a1681809e79feb2dad6a260731e64e8613488",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/fixture-source/src/library.mjs",
+      "sha256": "eb95020b1847f45a1f9e1bff32d13cd37709e4ad22ac0982fa7aab2985aa8a24",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/fixture-source/src/popular.mjs",
+      "sha256": "117a6551aa4c146d08a7b44b4cacd2da1a8e10bfcd8a0046e9f10734d189a967",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/freeze.py",
+      "sha256": "ae1c2fa3e7812f34f5b0aa9971e5c1155a08b7d2c4a09406fc309133a8a03212",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/host-versions.receipt.json",
+      "sha256": "3690119c8e7bdd26867a42e8ee80a3a97afe751410d88299c4f3870513a00842",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/linked-fixture-map.receipt.json",
+      "sha256": "283626b90300392f4d85f74e8b2784818fdd6e440222e3d61d668e8a82781a86",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/linked-fixture-prepare.receipt.json",
+      "sha256": "22d2f4b97f18857a27279f5067248ccac33ba92d8651d1677e90a052b2fa8e9a",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/linked-native.receipt.json",
+      "sha256": "76416e9f7e9f9c187aed9c85b0879df8a7a9d6d077e6e9260d342cb2e9e799bc",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/native-state-matrix.receipt.json",
+      "sha256": "bbb3b2300ac9eef18f893f66e882beb621a2d13c4a7cfa13b9c33cf51e95de44",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/preauthorized-cold.receipt.json",
+      "sha256": "27489c80006ab1992847f8846179419c9b2583dcf619fa00a0f6bfb04379c7a3",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/preauthorized-linked.receipt.json",
+      "sha256": "be64b74687521a1cd4499f7a20063195aaa7268603a58a3218def4bb009cc644",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/preauthorized-warm-recovery.receipt.json",
+      "sha256": "e90dbe66dd9da131705fb164d1e34bd61bb8770d4bdcd3e9923f92de58393923",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/probe.py",
+      "sha256": "1bb733d4194249fbb3887da87bfe29b2cb4a80b79efc76ae1a5ef4c8bee6ad3e",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/snapshots/native-after-first-edit.json",
+      "sha256": "c7049278f1e6ff929ba0b75cb6ebb5aa55b6e08c997f34debb1d16372249210b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/snapshots/native-original-baseline.json",
+      "sha256": "25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/state-empty-cli-prep.receipt.json",
+      "sha256": "db5182ec03cce5bd94dee13e3f68f0b7bda975fb88dd08bbce6c2e32eb608334",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/state-generated-cli-prep.receipt.json",
+      "sha256": "d287b6b31eefc68244350392265999436f11bac8e5139fd6094362e75984afe7",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/supplementary-claude-adapter-canonical.receipt.json",
+      "sha256": "f2b0f8c2985ae21fb4fb85808cf3bdad961ad120eb6014ed049d436fdbba161f",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/supplementary-claude-adapter.receipt.json",
+      "sha256": "bfcec1f8f435fd86153089300afbb04fe1ee5a98e3a6049053a000e6dd1fb84c",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/supplementary-cli-fixture-map.receipt.json",
+      "sha256": "a30214540523f93cd2e37545bd3efc7d930cfb6bd178b5b8eed7cfcb56729cac",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/supplementary-codex-adapter-canonical.receipt.json",
+      "sha256": "bcfeb86482c308910b56db39fb6906e50a2217196cf03fbc29ca21c0b79626f2",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/supplementary-codex-adapter.receipt.json",
+      "sha256": "f96c3f343e8457dafbcedb18f32a1ce6a41a81e042c9008c8abac3e057d7e135",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/warm-preparation.json",
+      "sha256": "0f119cb48caafdb703d715e8aa467350d7ab2895f33ac101ff92a4b4044274f7",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/.gitignore",
+      "sha256": "d56537a93a9565b3322aa9bc821c9cc30a16303467032cade13b069e394cfddc",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/ADDENDUM.md",
+      "sha256": "9f4d5c37e8039439a3b54df95f5a7ae41b701ada1de53799b44a3d1174e32159",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/CASES.json",
+      "sha256": "9d77759cdb550220f0ae09a26b721271f29ab51ba9375c167ece06adb69adad4",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/PREDECESSOR-INTEGRITY.json",
+      "sha256": "10bf46096611d049e4cf73966bc4c32f794c13b3fc876740e159e232bd3cc2b2",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/RUN-SUMMARY.json",
+      "sha256": "c5b30866ed76c41f04906516b0af7e3e5ac5298595d138e20473ef4445fca439",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/SOURCE-CONDITION.json",
+      "sha256": "0fa6bff0b920295311bcd00ce42dc3cd747a95f880a8aa6910d608be749a269f",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/events/isolated-cli-version.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/events/isolated-cli-version.stdout.txt",
+      "sha256": "da4d955cd9c193a96d80544a5a98d1e6baf53eb35e995d45c175a9c7dbac792a",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/events/isolated-cli-version.timestamps.json",
+      "sha256": "ee35efa5944ff9b2fbb5287491736fdbc0c21ea28a913aedce78838b2386194d",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/events/native-gpt-6.1-sol.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/events/native-gpt-6.1-sol.stdout.txt",
+      "sha256": "bc5f730ab5a08e184e0090ddf0eb7f72b007a7fd061a3bbd9cc7514838d00985",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/events/native-gpt-6.1-sol.timestamps.json",
+      "sha256": "949bc51e73fd38af86104e1f8e50bb52e6e1ac0aa6515c874aa2960373b8415d",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/isolated-cli-version.receipt.json",
+      "sha256": "f49f4f3ba55ea6be7ec84756ec430cd1a751698c8faeda83cab563b6c7940592",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/native-gpt-6.1-sol.receipt.json",
+      "sha256": "84598488026035bca254a7e8543017441d63ee510961f9bb3b35ff61c9aabe7b",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/probe-addendum.py",
+      "sha256": "53c0de7cfbb019aef305cd3f6fdd54f85fd33c575d0ac0106265fe8e50de303a",
+      "review_method": "frozen-file integrity; relevant structured/raw material inspection separately recorded"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/ACCEPTANCE.md",
+      "sha256": "3366ce395c014e6d7afc761d9ad2706d6c1b026ce5166a908d18385d71ea98b0",
+      "review_method": "read and scoped factual audit"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/START.json",
+      "sha256": "6e9f1d0e9d44922f80be93d01e0bcdb8b726bfa476fa2c2c55cd8d612fadd0a4",
+      "review_method": "read and scoped factual audit"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/MATRIX.json",
+      "sha256": "1bd701cd5002bb912c746d444dfbc3e560b0180dab5cf97bbaf53d7b7490ac7a",
+      "review_method": "read and scoped factual audit"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/GLOBAL-MODEL-SETTINGS.json",
+      "sha256": "9cd158f12a079eff1736b81cf849617e9ebd13cbfa497af34149f9abb62ebf96",
+      "review_method": "read and scoped factual audit"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/technical/MANIFEST.json",
+      "sha256": "d1ce9d2a32ab9519d0f6d29bda8ae3359a01eec59b5b9d1e4a103d2ee0c17aa1",
+      "review_method": "read and scoped factual audit"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts/FREEZE.json",
+      "sha256": "ac0da74297bb8ef5f92537e6effd86e586588cecbed0375522ed342059a8930b",
+      "review_method": "read and scoped factual audit"
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/hosts-global-model-update/FREEZE.json",
+      "sha256": "b7703705ec0dae5d1d6d2d98a46975d70f122698a03e7ce89e379de5847b5fad",
+      "review_method": "read and scoped factual audit"
+    },
+    {
+      "path": "$LOCAL_HOME/Repositories/codeweb/docs/specs/native-evidence-delivery.md",
+      "sha256": "51ce256c82783cee57ddbd10bf19e4ae0627dd8da63dfd750800fd308c688e74",
+      "review_method": "acceptance authority read"
+    },
+    {
+      "path": "hooks/pre-edit-impact.mjs",
+      "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb",
+      "review_method": "source mechanism inspection"
+    },
+    {
+      "path": "hooks/post-edit-diff.mjs",
+      "sha256": "127a48f34a8b77bf077746e9b69fad13edabb3a6f2782fce64be3cb7b6be007e",
+      "review_method": "source mechanism inspection"
+    },
+    {
+      "path": "scripts/deadcode.mjs",
+      "sha256": "24a4ce657711ad7a1320d953eaf75d8a76379fa6e78ca752849aab696e45183c",
+      "review_method": "source mechanism inspection"
+    },
+    {
+      "path": "scripts/lib/cli.mjs",
+      "sha256": "48dec1254059bd73dcc94e7169e19169dfb01bc558fda88eeb11927b36cac9c8",
+      "review_method": "source mechanism inspection"
+    },
+    {
+      "path": "scripts/mcp-server.mjs",
+      "sha256": "67bea39f000592963826db38b6078da40c6a8b46e5d12892d5d8d020c8800453",
+      "review_method": "source mechanism inspection"
+    }
+  ],
+  "material_raw_inspection": {
+    "technical": "Exact-selector results; hook states, target/freshness/entry behavior; deadcode safety; invalid-shape transports; before/receipt recovery; source links/expansion; current/failed/skipped/malformed runner and synthetic versus measured coverage receipts; selected suites original failure and corrected stats test. Raw receipt commands/env and probe setup inspected.",
+    "hosts": [
+      "cold",
+      "cold-corrected-sol",
+      "linked-native",
+      "preauthorized-cold",
+      "preauthorized-linked",
+      "preauthorized-warm-recovery",
+      "disabled-native-control",
+      "enabled-native-control",
+      "native-state-matrix",
+      "supplementary-codex-adapter",
+      "supplementary-claude-adapter",
+      "supplementary-codex-adapter-canonical",
+      "supplementary-claude-adapter-canonical"
+    ],
+    "addendum": "All public native/version events, command/prompt/flags, parsed summary, cases and predecessor integrity."
+  },
+  "tested_probes": [
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R01-extract.json",
+      "sha256": "8ea71f63845db34ee4c470e95b14ed39ed4fbcaf7635774ed7c06510081e9698",
+      "id": "R01-extract",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R02-exact-impact.json",
+      "sha256": "5e3fcf3274ca62e76fe5a98123764f4d92024ec3038dc179c8ada31d6330c660",
+      "id": "R02-exact-impact",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R03-exact-context.json",
+      "sha256": "b1d1438ebf5d707637c173d276a16a5205e79fda8572c9b83ab69ffa3838b01e",
+      "id": "R03-exact-context",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R04-exact-mcp.json",
+      "sha256": "1f620210d5671cfb7d739891e90f9952d4a04d6f1d8d20e2cded4fc2e739c0cd",
+      "id": "R04-exact-mcp",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R05-known-target-graph-only.json",
+      "sha256": "8f98cc406ec4a1b4b0945a10e53028ca3b49431d0a4062d00c6ac0b9309badc9",
+      "id": "R05-known-target-graph-only",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R06-stale-context.json",
+      "sha256": "af1bb47b2e411faf8b669f3d9ab290a482c0c678b456cc91d6fb1c51eb4be257",
+      "id": "R06-stale-context",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R07-stale-graph-only.json",
+      "sha256": "8f86f861c0d524feecbcca4702ecca42863055815439f9dc5dfe0e51803b6ad0",
+      "id": "R07-stale-graph-only",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R08-refresh-baseline.json",
+      "sha256": "8f5b62ab601577849febf317534d588bdad8d005db46a664564e53e27b782e96",
+      "id": "R08-refresh-baseline",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R09-known-target-fresh.json",
+      "sha256": "2475e4908572d4952c097ce07a0172238348eff71401657ee3abcfce8592d34a",
+      "id": "R09-known-target-fresh",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R10-known-target-repeat.json",
+      "sha256": "65c8790ed7a72c893c302f392a977e37715631f4d539000fc87f3c1ead896cf7",
+      "id": "R10-known-target-repeat",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R11-entry-alias.json",
+      "sha256": "11a2569fc1de70acd810f5760a1bfed6a6ed7e346ad2c6edff34ca57d6bc8510",
+      "id": "R11-entry-alias",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R12-codex-payload.json",
+      "sha256": "cfacc05614ccf9d44c2fb1650b8b61857ee77ce6b09632b6625692569abe2237",
+      "id": "R12-codex-payload",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R13-stale-with-sidecar.json",
+      "sha256": "1827a390426b9dbc76807f2b5403487d5e89375e2ca265b691f130294ca9a3c3",
+      "id": "R13-stale-with-sidecar",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R14-ordinary-refresh.json",
+      "sha256": "c83ebc154c721710281dd6dc75c507e82a47a2ef55c5cd3d21103992aa162912",
+      "id": "R14-ordinary-refresh",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R15-diff-refresh.json",
+      "sha256": "ced184972cbb222b746cbbb1a313123791fa5661d92ff41934de5d9b53e7cf06",
+      "id": "R15-diff-refresh",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R16-repair-refresh.json",
+      "sha256": "2d964e1d4d9fab5d4b7511674880dac27c6b7f8b17a60bffa29c9834f28c246e",
+      "id": "R16-repair-refresh",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R17-deny-baseline-refresh.json",
+      "sha256": "8b6cef8fe3055293b8f15843c92c08535ff70e4e633b360ba5bb78b458a078d9",
+      "id": "R17-deny-baseline-refresh",
+      "exit": 2
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R18-generated-selector.json",
+      "sha256": "dfee2316563fb85ed3c354c4671fa4bb2cdc2fe0c7eb98ada5792c6b39d8553b",
+      "id": "R18-generated-selector",
+      "exit": 1
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R19-invalid-shape-cli.json",
+      "sha256": "32bbab64144b667650b39b8e38bdd42a7e987c0a8d4b2e81ba8e0a7bd4f6feae",
+      "id": "R19-invalid-shape-cli",
+      "exit": 1
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R20-invalid-shape-mcp.json",
+      "sha256": "906ac1c9f1cba0ceb9fa6d57b48fc69c45d75f9dd361b63c25c21d1535f6e77e",
+      "id": "R20-invalid-shape-mcp",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R21-incomplete-deadcode.json",
+      "sha256": "edf1599989be2cdfe09299280a02b1a5aa9cf829a0388c616d1f130e2149e529",
+      "id": "R21-incomplete-deadcode",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R22-incomplete-deadcode-mcp.json",
+      "sha256": "dcb9eee97b244ec9ca6d333804f14ff8a8d48d5cde978dc0edfd60bb265c27a1",
+      "id": "R22-incomplete-deadcode-mcp",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R23-pre-corrupt.json",
+      "sha256": "06f9450da675cbbd7c58d8e55e196acf55018b06298213b5913991b0ad04fc1d",
+      "id": "R23-pre-corrupt",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R23-pre-empty.json",
+      "sha256": "6d68594c84cd25c89c3b03374391524f7270e6db44fe0677a07a688e50904ef6",
+      "id": "R23-pre-empty",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R23-pre-extraction-failure.json",
+      "sha256": "a42b9d9506d9fd36833cc046b1861ab3e2793fd94b830177d91912f76acbb553",
+      "id": "R23-pre-extraction-failure",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R23-pre-missing.json",
+      "sha256": "22c4d025cfae99f686542cb090973ea6a72c3f974b64d4e98eab4a2ca194c500",
+      "id": "R23-pre-missing",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R23-pre-unmapped.json",
+      "sha256": "aea6c22d18a184de3bf18910ea590ad6dc1acd9ded863679f7d25865d4872dd3",
+      "id": "R23-pre-unmapped",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R23-pre-zero.json",
+      "sha256": "23b7e9626acd17f46cb60428c725d87be94a304f4d7fc88823bd47298ff167fe",
+      "id": "R23-pre-zero",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R24-post-corrupt.json",
+      "sha256": "437acb1fdd97796d745c72f683f662b8c2072e375c3a54fea3b2011fc5b331ab",
+      "id": "R24-post-corrupt",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R24-post-empty.json",
+      "sha256": "20feb4fe2db2797cae640834787bcf4b45ede7cfa7a89f6e47da229c49aa3288",
+      "id": "R24-post-empty",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R24-post-extraction-failure.json",
+      "sha256": "3ae88a230ab6e43d64ef50c878fa3bc6d71dd879d5dd927ff3b3a2d82f944d45",
+      "id": "R24-post-extraction-failure",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R24-post-missing.json",
+      "sha256": "eeb33f0b3d6ce1c8c12c0cdc5c704881491b8093258f81389b7d76fa548727e6",
+      "id": "R24-post-missing",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R24-post-unmapped.json",
+      "sha256": "6db5f22537d01d147b06e1cec96c1ae63035494d417f11308390d81118339079",
+      "id": "R24-post-unmapped",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R24-post-zero.json",
+      "sha256": "3ad472a7c7d0959d45feb394dbdfb561f3940dd1e522df2ca6fe6db92ba220b5",
+      "id": "R24-post-zero",
+      "exit": 0
+    },
+    {
+      "path": "reports/native-evidence-p02-2026-09-30/review/receipts/R25-explicit-refresh-failure.json",
+      "sha256": "ada62bfe8b69ba73de4226a8c599d3e29e954f63660821946a908b2c4542b204",
+      "id": "R25-explicit-refresh-failure",
+      "exit": 2
+    }
+  ],
+  "probe_count": 35,
+  "probe_observation_checks": {
+    "exact_cli_low_both_consumers": true,
+    "exact_mcp_low_consumer": true,
+    "fresh_known_hook_popular_omits_low_consumer": true,
+    "repeat_card_identical": true,
+    "cli_graph_only_stale": true,
+    "hook_graph_only_no_stale": true,
+    "hook_stamped_stale": true,
+    "alias_hook_entry_silent": true,
+    "canonical_codex_payload_silent": true,
+    "invalid_shape_cli_misreported_as_miss": true,
+    "invalid_shape_mcp_misreported_empty": true,
+    "incomplete_cli_safe_claim": true,
+    "incomplete_mcp_safe_claim": true,
+    "incomplete_mcp_warning_not_carried": true,
+    "mapped_corrupt_pre_and_post_silent": true,
+    "mapped_empty_pre_and_post_silent": true,
+    "mapped_extraction_failure_post_silent": true,
+    "explicit_extraction_failure_nonzero": true,
+    "ordinary_post_ctags_stderr": true,
+    "baseline_direct_refresh_rejected": true,
+    "structural_green_behavior_not_evaluated": true,
+    "review_baseline_preserved": true,
+    "actual_dist_generated_excluded": true
+  },
+  "correction_requests": [
+    {
+      "id": "REVIEW-Q01",
+      "case": "TECH-15",
+      "correction": "Narrow repair scope to mapped corrupt/empty/unavailable extraction states. Unmapped/no-.codeweb repositories intentionally lie outside mapped hook scope; their silence alone is not a defect. Preserve frozen row.",
+      "disposition": "Included here and in REVIEW.md; root acknowledged integration overlay."
+    },
+    {
+      "id": "REVIEW-Q02",
+      "case": "TECH-08",
+      "correction": "Self candidate a.mjs:addTax scores 1.0; conflicting b.mjs:discount and duplicate bodies score .714286. Both conflicting bodies are retrieved; do not say they have equal self versus non-self scores.",
+      "disposition": "Included here and in REVIEW.md; root acknowledged integration overlay."
+    },
+    {
+      "id": "REVIEW-Q03",
+      "case": "H-P02-GM-04",
+      "correction": "Keep the failed fixture-only read condition as probe confinement/attention contamination, separate from product defects; scoped MCP results remain observed.",
+      "disposition": "Already disclosed in frozen addendum; reviewer confirms."
+    }
+  ],
+  "limits": [
+    "No product implementation or full gate repeat; product source unchanged.",
+    "No new native-host run by reviewer, login, contacts, GitHub operation, commit, release, Paperclip or subagent.",
+    "Passing scoped cases do not pass whole NED criteria. Unobserved runtime boundaries remain unverified.",
+    "CLI 0.159.3 explicit gpt-6.1-sol/high accepted invocation has no independent backend model/effort echo and ignores global user config. Global-default reload and later installed-CLI operational alignment are outside this evidence.",
+    "Forced prompts and synthetic fixtures do not measure natural developer adoption, customer value, comparative performance or field readiness."
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "records_before_final_semantic_dedup": 108,
+  "record_types": {
+    "first_person_report": 97,
+    "official_capability": 2,
+    "independent_measurement": 2,
+    "vendor_claim": 6,
+    "maintainer_confirmation": 1
+  },
+  "canonical_attempted_units": 125,
+  "full_read_units_before_alias_audit": 62,
+  "source_target": [
+    150,
+    200
+  ],
+  "record_target": [
+    80,
+    120
+  ],
+  "complete": false,
+  "remaining_children_available": 2
+}

@@ -1,0 +1,97 @@
+{
+  "assignment": "L06",
+  "retrieved_at": "2026-09-30T04:13:35.083246+00:00",
+  "sources": [
+    {
+      "evidence_id": "CW-Y007",
+      "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+      "original_publication_date": "2026-02-17",
+      "reopened_at": "2026-09-30T04:13:35.083246+00:00",
+      "method": "web.open, exposed text",
+      "passage_locator": "posts 1, 5, 6; exposed lines 7\u201331",
+      "short_excerpt": "I don\u2019t want to do that all the time.",
+      "paraphrase": "Repeated manual cross-repo compatibility checking; author accepts CI/monorepo as more correct, has not investigated CI.",
+      "read_boundary": "Exposed article/thread text; no images, linked pages, private replies or security materials. Search crawl rendering may differ from live origin; no current product-price or capability claim inferred.",
+      "frozen_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 127",
+      "capture_kind": "bounded excerpt and locator, not full-page archival capture"
+    },
+    {
+      "evidence_id": "CW-Y001",
+      "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+      "original_publication_date": "2025-08-25",
+      "reopened_at": "2026-09-30T04:13:35.083246+00:00",
+      "method": "web.open, exposed text",
+      "passage_locator": "posts 1 and 3; exposed lines 9\u201348",
+      "short_excerpt": "having it always run is very useful.",
+      "paraphrase": "Paid annual review self-report, infrequent complex PR value, unclear invoices and contractor cost; intended continued use only.",
+      "read_boundary": "Exposed article/thread text; no images, linked pages, private replies or security materials. Search crawl rendering may differ from live origin; no current product-price or capability claim inferred.",
+      "frozen_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 121",
+      "capture_kind": "bounded excerpt and locator, not full-page archival capture"
+    },
+    {
+      "evidence_id": "CW-Y004",
+      "url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+      "original_publication_date": "2026-07-14",
+      "reopened_at": "2026-09-30T04:13:35.083246+00:00",
+      "method": "web.open, exposed text",
+      "passage_locator": "posts 1, 6, 7; exposed lines 11\u201358",
+      "short_excerpt": "Repository B must not act as an indirect bridge",
+      "paraphrase": "Evaluator requires non-transitive repository isolation and derived-data provenance; moved questions to security channel.",
+      "read_boundary": "Exposed article/thread text; no images, linked pages, private replies or security materials. Search crawl rendering may differ from live origin; no current product-price or capability claim inferred.",
+      "frozen_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 124",
+      "capture_kind": "bounded excerpt and locator, not full-page archival capture"
+    },
+    {
+      "evidence_id": "CW-Y002",
+      "url": "https://forum.cursor.com/t/bugbot-stopped-being-triggered/156739",
+      "original_publication_date": "2026-04-05",
+      "reopened_at": "2026-09-30T04:13:35.083246+00:00",
+      "method": "web.open, exposed text",
+      "passage_locator": "posts 17, 19, 21; exposed lines 141\u2013153",
+      "short_excerpt": "I don\u2019t use enough of my monthly credit",
+      "paraphrase": "Cancellation self-report follows conflicting allowance guidance and unanswered documentation challenge; low credit usage was an additional pre-existing motivation.",
+      "read_boundary": "Exposed article/thread text; no images, linked pages, private replies or security materials. Search crawl rendering may differ from live origin; no current product-price or capability claim inferred.",
+      "frozen_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 122",
+      "capture_kind": "bounded excerpt and locator, not full-page archival capture"
+    },
+    {
+      "evidence_id": "CW-Y005",
+      "url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+      "original_publication_date": "2026-08-03",
+      "reopened_at": "2026-09-30T04:13:35.083246+00:00",
+      "method": "web.open, exposed text",
+      "passage_locator": "Why Build; Unix Philosophy; Dev Lifecycle; exposed lines 23\u201329,78\u201380,112\u2013118",
+      "short_excerpt": "strong propensity to build over buy",
+      "paraphrase": "Internal builder prefers a narrow internal solution, generic filesystem tools, and additive AI review with mandatory human peer review.",
+      "read_boundary": "Exposed article/thread text; no images, linked pages, private replies or security materials. Search crawl rendering may differ from live origin; no current product-price or capability claim inferred.",
+      "frozen_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 125",
+      "capture_kind": "bounded excerpt and locator, not full-page archival capture"
+    },
+    {
+      "evidence_id": "CW-Y012",
+      "url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+      "original_publication_date": "2026-03-20",
+      "reopened_at": "2026-09-30T04:13:35.083246+00:00",
+      "method": "web.open, exposed text",
+      "passage_locator": "Solutions; Artifacts; Where we are now; exposed lines 14\u201341,49\u201353",
+      "short_excerpt": "The spec and implementation plan already exist",
+      "paraphrase": "Existing summaries insufficient alone; specs, plans and review outputs attached to PR history; initial experiment only days old.",
+      "read_boundary": "Exposed article/thread text; no images, linked pages, private replies or security materials. Search crawl rendering may differ from live origin; no current product-price or capability claim inferred.",
+      "frozen_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 132",
+      "capture_kind": "bounded excerpt and locator, not full-page archival capture"
+    },
+    {
+      "evidence_id": "CW-Y010",
+      "url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+      "original_publication_date": "2021-04-06",
+      "reopened_at": "2026-09-30T04:13:35.083246+00:00",
+      "method": "web.open, exposed text",
+      "passage_locator": "post 1; exposed lines 7\u201318",
+      "short_excerpt": "my client is considering subscribing",
+      "paraphrase": "Consultant describes possible one-year paid branch monitoring with anticipated reversion to free CI; purchase not completed in this account.",
+      "read_boundary": "Exposed article/thread text; no images, linked pages, private replies or security materials. Search crawl rendering may differ from live origin; no current product-price or capability claim inferred.",
+      "frozen_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 130",
+      "capture_kind": "bounded excerpt and locator, not full-page archival capture"
+    }
+  ]
+}

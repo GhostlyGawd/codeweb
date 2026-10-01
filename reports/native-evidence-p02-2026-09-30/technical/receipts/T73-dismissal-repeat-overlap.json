@@ -1,0 +1,22 @@
+{
+  "id": "T73-dismissal-repeat-overlap",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/overlap.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_WS": "$LOCAL_TMP/codeweb-p02-supplement-mshorI/intentional/.codeweb"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:52:49.365Z",
+  "end": "2026-10-01T01:52:49.399Z",
+  "durationMs": 34.49333300000001,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "source: FOUND — body-confirmed\nactionable 0 · needs review 0 · dismissed 0 · suppressed 1\n--- top findings ---\n",
+  "stderr": ""
+}

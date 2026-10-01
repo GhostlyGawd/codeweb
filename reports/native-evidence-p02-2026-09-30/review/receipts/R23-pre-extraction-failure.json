@@ -1,0 +1,21 @@
+{
+  "id": "R23-pre-extraction-failure",
+  "command": [
+    "/opt/homebrew/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_NO_RECEIPTS": "1",
+    "CODEWEB_NO_PROMO": "1"
+  },
+  "stdin": "{\"tool_name\": \"Edit\", \"tool_input\": {\"file_path\": \"$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/extraction-failure/subject.mjs\", \"old_string\": \"value + 1\", \"new_string\": \"value + 2\", \"symbol\": \"subject.mjs:low\"}}",
+  "start": "2026-10-01T02:23:40.096502+00:00",
+  "end": "2026-10-01T02:23:40.135354+00:00",
+  "durationSeconds": 0.03888133307918906,
+  "exit": 0,
+  "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"[codeweb] editing subject.mjs: 1 symbol(s), 1 in-repo dependent edge(s) (most depended-on: alone \u00d71).\\n  function alone (product, undefined) \u2014 1 caller(s), 0 test(s), blast 1 across 1 domain(s)\\n  top callers: consumer.mjs:consumer\\n  \u2192 codeweb_context for a bounded edit window; codeweb_impact for the full blast radius.\"}}\n",
+  "stderr": ""
+}

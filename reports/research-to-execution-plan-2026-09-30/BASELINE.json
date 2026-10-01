@@ -1,0 +1,166 @@
+{
+  "captured_at": "2026-09-30T21:39:17.626743+00:00",
+  "main_sha": "fd3b637e9ad4e1f7265799298761bc1ee83fe76c",
+  "working_head": "e3a09756a13634a858e04d0a0e4957833048a694",
+  "working_copy_dirty": true,
+  "npm": {
+    "version": "0.15.0",
+    "dist.integrity": "sha512-kgulqr9TAlOifJT5Upw8Z7A7T4KOHa6jdkSS855pW2WeV8jKuamJ/zffVup8ey4fC41FFK8iT1iSgeSIVzHKdg==",
+    "dist.tarball": "https://registry.npmjs.org/@ghostlygawd/codeweb/-/codeweb-0.15.0.tgz"
+  },
+  "tarball_sha256": "656d6b08e9af669f27025c76aeeb8096a1c05d4586ddb7f00e4304001c527d16",
+  "tarball_integrity_matches_registry": true,
+  "pull_requests": [
+    {
+      "headRefOid": "080c6079b18d273c93079036df3f5fba6774c5fe",
+      "mergedAt": "2026-09-15T13:41:06Z",
+      "number": 96,
+      "state": "MERGED",
+      "title": "Fix first-use file target errors in CLI and MCP",
+      "url": "https://github.com/GhostlyGawd/codeweb/pull/96"
+    },
+    {
+      "headRefOid": "942e399fe9220636ecc0a1eece5b05f8eb500a42",
+      "mergedAt": "2026-09-22T22:20:34Z",
+      "number": 97,
+      "state": "MERGED",
+      "title": "Track when an agent's pre-edit evidence changes",
+      "url": "https://github.com/GhostlyGawd/codeweb/pull/97"
+    }
+  ],
+  "source_checks": [
+    {
+      "path": "scripts/find-similar.mjs",
+      "version": "published-0.15.0",
+      "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8",
+      "bytes": 6613,
+      "observations": {
+        "empty_result_safety_wording_present": true,
+        "skips_missing_bodies": true
+      }
+    },
+    {
+      "path": "scripts/find-similar.mjs",
+      "version": "origin/main",
+      "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8",
+      "bytes": 6613,
+      "observations": {
+        "empty_result_safety_wording_present": true,
+        "skips_missing_bodies": true
+      }
+    },
+    {
+      "path": "scripts/find-similar.mjs",
+      "version": "HEAD",
+      "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8",
+      "bytes": 6613,
+      "observations": {
+        "empty_result_safety_wording_present": true,
+        "skips_missing_bodies": true
+      }
+    },
+    {
+      "path": "scripts/find-similar.mjs",
+      "version": "working-copy",
+      "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8",
+      "bytes": 6613,
+      "observations": {
+        "empty_result_safety_wording_present": true,
+        "skips_missing_bodies": true
+      }
+    },
+    {
+      "path": "hooks/pre-edit-impact.mjs",
+      "version": "published-0.15.0",
+      "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb",
+      "bytes": 9541,
+      "observations": {
+        "selects_highest_incoming_symbol": true,
+        "missing_target_returns_null": true,
+        "fail_open_output_path": true
+      }
+    },
+    {
+      "path": "hooks/pre-edit-impact.mjs",
+      "version": "origin/main",
+      "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb",
+      "bytes": 9541,
+      "observations": {
+        "selects_highest_incoming_symbol": true,
+        "missing_target_returns_null": true,
+        "fail_open_output_path": true
+      }
+    },
+    {
+      "path": "hooks/pre-edit-impact.mjs",
+      "version": "HEAD",
+      "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb",
+      "bytes": 9541,
+      "observations": {
+        "selects_highest_incoming_symbol": true,
+        "missing_target_returns_null": true,
+        "fail_open_output_path": true
+      }
+    },
+    {
+      "path": "hooks/pre-edit-impact.mjs",
+      "version": "working-copy",
+      "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb",
+      "bytes": 9541,
+      "observations": {
+        "selects_highest_incoming_symbol": true,
+        "missing_target_returns_null": true,
+        "fail_open_output_path": true
+      }
+    },
+    {
+      "path": "scripts/lib/evidence-core.mjs",
+      "version": "origin/main",
+      "sha256": "d98cc4aa66c5a74cedaeb1968d0dd9101d9f7d7b573efaa232f840f3c2859765",
+      "bytes": 24103,
+      "observations": {}
+    },
+    {
+      "path": "scripts/lib/evidence-core.mjs",
+      "version": "working-copy",
+      "sha256": "e864ec6d9a379be7ffe87111bff212c4300ecc47b111a63818317900e82b04b6",
+      "bytes": 24079,
+      "observations": {}
+    },
+    {
+      "path": "hooks/hooks.json",
+      "version": "published-0.15.0",
+      "sha256": "9b64aa9af1e20277fb9751dbea1a8a140c1cf7037dc45832f26545d01dd5d498",
+      "bytes": 857,
+      "observations": {}
+    },
+    {
+      "path": "hooks/hooks.json",
+      "version": "origin/main",
+      "sha256": "9b64aa9af1e20277fb9751dbea1a8a140c1cf7037dc45832f26545d01dd5d498",
+      "bytes": 857,
+      "observations": {}
+    },
+    {
+      "path": "hooks/hooks.json",
+      "version": "HEAD",
+      "sha256": "9b64aa9af1e20277fb9751dbea1a8a140c1cf7037dc45832f26545d01dd5d498",
+      "bytes": 857,
+      "observations": {}
+    },
+    {
+      "path": "hooks/hooks.json",
+      "version": "working-copy",
+      "sha256": "9b64aa9af1e20277fb9751dbea1a8a140c1cf7037dc45832f26545d01dd5d498",
+      "bytes": 857,
+      "observations": {}
+    }
+  ],
+  "host_runtime_trials_executed": false,
+  "participant_trials_executed": false,
+  "limits": [
+    "Static source inspection confirms the listed paths/wording, not actual host behavior.",
+    "Main includes unreleased evidence work; the published package and working copy are distinct baselines.",
+    "No product code changed or release performed in this planning pass."
+  ]
+}

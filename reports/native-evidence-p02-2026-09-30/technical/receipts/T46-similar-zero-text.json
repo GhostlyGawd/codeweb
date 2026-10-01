@@ -1,0 +1,24 @@
+{
+  "id": "T46-similar-zero-text",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/find-similar.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/similarity/.codeweb/graph.json",
+    "--signature",
+    "totally unrelated symbol string xxyyzz"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:14.157Z",
+  "end": "2026-10-01T01:50:14.191Z",
+  "durationMs": 33.970000000000255,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "find-similar: candidate (3 shingles, lexical) across 9 mapped non-test function/method symbols\n  >=15% shingle similarity; existing bodies limited to first 400 lines; candidate uncapped.\n  no candidates at or above threshold in available mapped bodies.\n  Missing bodies and unmapped code may hide candidates. Similarity does not establish equivalent behavior, novelty, or safe reuse; inspect source and run relevant tests.\n",
+  "stderr": ""
+}

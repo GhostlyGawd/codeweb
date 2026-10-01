@@ -1,0 +1,7 @@
+{
+  "status_write_failed": true,
+  "issue_status": "in_progress",
+  "comment_id": "d2dd529a-4a82-4782-8e7e-75503db2a596",
+  "upload_failed": "403 status-only recovery",
+  "required_action": "normal-model continuation for upload and native review"
+}

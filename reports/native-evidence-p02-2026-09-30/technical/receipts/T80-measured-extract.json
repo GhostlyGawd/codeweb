@@ -1,0 +1,25 @@
+{
+  "id": "T80-measured-extract",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/extract-symbols.mjs",
+    "$LOCAL_TMP/codeweb-p02-supplement-mshorI/behavior",
+    "--no-ctags",
+    "--engine",
+    "regex"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:52:50.490Z",
+  "end": "2026-10-01T01:52:50.556Z",
+  "durationMs": 65.35729199999992,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"meta\":{\"root\":\"$LOCAL_TMP/codeweb-p02-supplement-mshorI/behavior\",\"target\":\"codeweb-p02-supplement-mshorI/behavior\",\"engine\":\"regex\",\"languages\":[\"javascript\"],\"symbols\":2,\"analysis\":{\"status\":\"no-known-incompleteness\",\"diagnosticCount\":0,\"diagnostics\":[]},\"sources\":{\"current.test.mjs\":{\"s\":170,\"m\":1790819570404,\"h\":\"89200be80be93f32aeb495b10e602587bfeb9a97\"},\"subject.mjs\":{\"s\":50,\"m\":1790819570404,\"h\":\"12df51ffc728439527868512d6954e88f5b30b49\"}},\"dirs\":{\".\":1790819570491}},\"nodes\":[{\"id\":\"subject.mjs:low\",\"label\":\"low\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":1,\"loc\":3,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"current.test.mjs:<module>\",\"label\":\"<module>\",\"kind\":\"module\",\"file\":\"current.test.mjs\",\"line\":1,\"loc\":1,\"exports\":false,\"domain\":\"\",\"summary\":\"\",\"role\":\"test\"}],\"edges\":[{\"from\":\"current.test.mjs:<module>\",\"to\":\"subject.mjs:low\",\"kind\":\"test\",\"weight\":1}]}",
+  "stderr": "[extract] 2 symbols, 1 edges (1 call + 0 import) from 2 files (regex engine); dropped 0 ambiguous bare-call edges (0 short-name); scanned 2/2 file(s); edged 2/2; ast: off\n"
+}

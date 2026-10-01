@@ -1,0 +1,17 @@
+retrieved_at,method,query,result,stopping_evidence
+2026-09-28T01:26:58.170375+00:00,web search,"""Codex"" ""refactor"" ""monorepo"" problems","cloud validation, monorepo candidates",New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""Claude Code"" ""LSP"" ""grep"" success",AgentConnect discovery through Picklog,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""Codex cloud"" ""tests"" ""failed"" repository",cloud 24285/45264,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,AI refactor missed callers dynamic dispatch developer experience,mixed results; no isolated dynamic-dispatch incident,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"site.github.com/openai/codex/issues ""cloud"" ""test"" ""2026"" ""dependencies""",45264,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""Claude Code"" ""refactor"" ""broke"" ""2026"" blog",BasedStack inaccessible; crystl,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""Codex"" ""refactoring"" ""worked"" ""2026"" blog",discovery,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""AI"" ""dynamic dispatch"" ""refactor"" failure",mostly academic/irrelevant,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""Codex"" ""refactor"" ""2026"" site:simonwillison.net",no retained result,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""Codex"" ""refactoring"" ""2026"" ""I"" ""tests"" blog",Tyler; Renan; Reddit success,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""Claude Code"" ""LSP"" ""worked"" blog 2026",DigitalDias,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""AI"" ""refactor"" ""callers"" ""blog"" 2026",mixed discovery,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""Codex"" ""refactor"" ""site:matklad.github.io""",no retained result,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""Claude Code"" ""refactor"" ""site:martinfowler.com""",thoughtbot,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,web search,"""coding agents"" ""grep"" ""site:news.ycombinator.com"" ""2026""",HN broad show-work threads; not read/countable,New mechanisms found; not a saturation sweep
+2026-09-28T01:26:58.170375+00:00,GitHub REST,31 prior partial candidates + 3 new targeted issues,23 fetched; 11 HTTP403; only 3 fully read,Overbroad initial queue consumed rate budget; switch to primary blogs

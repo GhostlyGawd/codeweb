@@ -1,0 +1,882 @@
+[
+  {
+    "evidence_id": "CW-001",
+    "access": "opened_partial",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-001.txt"
+    ],
+    "limits": "Complete issue body read through web.open; comments/activity were not exposed, so entire thread is NOT counted fully read. Closed as not planned/stale is not a verified fix. Model-caused regression and subscription reasons are self-report. Single incident, not prevalence or Codeweb purchase intent."
+  },
+  {
+    "evidence_id": "CW-P001",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Full article read. February/March experience outside preferred six months; September 13 update distinguishes a different harness. No current Claude support claim or controlled benchmark. Event spans days; event_at left null."
+  },
+  {
+    "evidence_id": "CW-P002",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Body and all 5 API comments read; rendered web page omitted comments. Stale closure is not a fix. Quoted model explanation in author follow-up is not independent causal proof. Distinct author/incident from CW-001."
+  },
+  {
+    "evidence_id": "CW-P003",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-P003.txt"
+    ],
+    "limits": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix."
+  },
+  {
+    "evidence_id": "CW-P004",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Complete post and visible replies read, not certified complete thread. Only relative age exposed; publication and event dates remain null rather than inferred from footer. Historical selection outside preferred six months. Numeric claims unverified."
+  },
+  {
+    "evidence_id": "CW-P005",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Body and all 5 API comments read. Official 2.1.136 changelog supports a concurrent-refresh fix; later commenter disputes resolution and links 65036, not opened here. Thus no blanket resolved/current-bug claim. Related duplicate trackers not counted as separate incidents."
+  },
+  {
+    "evidence_id": "CW-T001",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution. Counted conservatively as one retained issue group keyed to the original reporter, not three independent incidents. status_now refers to ytchenak; commenter success is separate counterevidence. Attribution anchors independently verified in L123-REVIEW; correction REST re-fetch was rate-limited and web rendering omitted comments."
+  },
+  {
+    "evidence_id": "CW-T002",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-T002.txt"
+    ],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  {
+    "evidence_id": "CW-T003",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  {
+    "evidence_id": "CW-T004",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-T004.txt"
+    ],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  {
+    "evidence_id": "CW-T005",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  {
+    "evidence_id": "CW-T006",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-T006.txt"
+    ],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  {
+    "evidence_id": "CW-T007",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-T007.txt"
+    ],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  {
+    "evidence_id": "CW-T008",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  {
+    "evidence_id": "CW-T009",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  {
+    "evidence_id": "CW-T010",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution. Successful local candidate experiment is not a released fix; current stock behavior remains unknown."
+  },
+  {
+    "evidence_id": "CW-T011",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution. Correction excludes the different Fedora commenter experience and labeling workaround from this reporter record; no extra incident retained."
+  },
+  {
+    "evidence_id": "CW-T012",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution. Host field describes a repository-documentation audit, not a demonstrated mixed-host user incident. Later-comment additions excluded from this author-specific finding."
+  },
+  {
+    "evidence_id": "CW-T013",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution. Correction excludes the other commenter’s private-marketplace installation failure; no additional person/incident is claimed."
+  },
+  {
+    "evidence_id": "CW-T014",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution. Resolution is reporter-confirmed, not independent reproduction or maintainer confirmation; idle-session case remains separate."
+  },
+  {
+    "evidence_id": "CW-T015",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  {
+    "evidence_id": "CW-T016",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Body only; comments inaccessible via REST (403 rate limit) and missing in rendered page. Historical model/version; no verified resolution. Potential duplicate reports not separately counted."
+  },
+  {
+    "evidence_id": "CW-T017",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Body only; comments inaccessible via REST (403 rate limit) and missing in rendered page. Historical model/version; no verified resolution. Potential duplicate reports not separately counted. Desktop and VS Code are both reported; host_surface selects desktop without excluding the extension. Exact event date and product version are unknown."
+  },
+  {
+    "evidence_id": "CW-T018",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-T018.txt"
+    ],
+    "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality."
+  },
+  {
+    "evidence_id": "CW-T019",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-T019.txt"
+    ],
+    "limits": "Firsthand commercial engineering blog; self-reported success, no repository/trace independently inspected. Direct HTTPS recovered web cache miss. Resolved means author-reported completion of this regression fix only, not maintainer confirmation or universal host reliability; resolution_source_url stays null."
+  },
+  {
+    "evidence_id": "CW-T020",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-T020.txt"
+    ],
+    "limits": "Posts 1–15 and part of 16 read; no full-thread credit. Progress is reported, migration completion not established. Reported progress and successful workflow adjustment do not establish final migration completion or current outcome. Later additive review: Original reporter reports improvement after expanding bounded iteration and correcting sandbox assumptions; modernization completion not claimed."
+  },
+  {
+    "evidence_id": "CW-T021",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report, possible promotional bias. Resolved refers only to the author-reported state-machine example. The visible narrative names an LLM without establishing a mixed-host incident; subreddit alone does not identify that incident’s host."
+  },
+  {
+    "evidence_id": "CW-T022",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction."
+  },
+  {
+    "evidence_id": "CW-T023",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction. Resolved means completion claimed by the author for this refactor, not independent verification or a general product fix."
+  },
+  {
+    "evidence_id": "CW-T024",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction."
+  },
+  {
+    "evidence_id": "CW-T025",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction. Successful workaround reported by kuroudo_ai; sustained/current outcome unknown and not a resolution for Sviat-IK."
+  },
+  {
+    "evidence_id": "CW-T026",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction. Successful adjustments reported by jsebrech; sustained/current outcome unknown and not a resolution for Sviat-IK."
+  },
+  {
+    "evidence_id": "CW-T027",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Documentation capability, not proof of user success or universal feature availability. Consequence and workaround are unknown because this is capability documentation, not a user-outcome report."
+  },
+  {
+    "evidence_id": "CW-T028",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Documentation capability, not proof of user success or universal feature availability. Consequence and workaround are unknown because this is capability documentation, not a user-outcome report."
+  },
+  {
+    "evidence_id": "CW-X001",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-X001.txt"
+    ],
+    "limits": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents."
+  },
+  {
+    "evidence_id": "CW-X002",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Not ordinary human buyer testimony; underlying private transcripts unverified. AgentConnect study paraphrases excluded from independent incident counts."
+  },
+  {
+    "evidence_id": "CW-X003",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-X003.txt"
+    ],
+    "limits": "Reporter-confirmed success for this task only. Business rules outside code remain a stated limitation; linked repositories not reproduced."
+  },
+  {
+    "evidence_id": "CW-X004",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Outside preferred window. No identified customer or independent repository verification. Claimed completion is vendor-reported; exclude ordinary firsthand target."
+  },
+  {
+    "evidence_id": "CW-X005",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Full validation and Rust performance explicitly unfinished. Coverage is reported, not proof of behavioral completeness."
+  },
+  {
+    "evidence_id": "CW-X006",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-X006.txt"
+    ],
+    "limits": "Resolved refers to reported workflow improvement, not all testing defects. Linked plan/issue not reopened; one author context."
+  },
+  {
+    "evidence_id": "CW-X007",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Outside preferred window. Only own definition lookup is measured; other table rows are cited or derived. No current universal fix claimed."
+  },
+  {
+    "evidence_id": "CW-X008",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Body and zero-comment REST thread fully read. Later sessions used VS Code. Private uploaded traces inaccessible; not proof that workdir was ignored."
+  },
+  {
+    "evidence_id": "CW-X009",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-X009.txt"
+    ],
+    "limits": "Body and all 10 REST comments read, one page. One grouped reporter incident. Root-cause diagnosis is user investigation, not maintainer confirmation; no fix established."
+  },
+  {
+    "evidence_id": "CW-X010",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete body and seven REST comments read. VS Code extension. Bot inactivity closure is not resolution. Commenter experiments are not separately counted."
+  },
+  {
+    "evidence_id": "CW-X011",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Web body inspected; REST rate-limited, comments not enumerated. No full-thread credit."
+  },
+  {
+    "evidence_id": "CW-X012",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "One grouped author history, not ten independent incidents. Model-authored causal explanations are unverified. Closed not planned is not fixed."
+  },
+  {
+    "evidence_id": "CW-X013",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Public report only; underlying commits and traces not reproduced. Comments unavailable after REST rate limit. One project context, not each phase counted."
+  },
+  {
+    "evidence_id": "CW-X014",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Only original firsthand process case retained. Linked issue list and hypothetical late Cloud security blocks are not additional evidence. UI/account scope is reporter-specific. Later additive review: Recovery did not complete; no full credit or changed resolution."
+  },
+  {
+    "evidence_id": "CW-X015",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "VS Code extension per author. Exact date unavailable in opened page. Hidden replies not loaded. Mechanism is agent explanation relayed by reporter, not reproduced."
+  },
+  {
+    "evidence_id": "CW-X016",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Exact date unavailable in opened page. Hidden comments not read. Custom harness limits generalization to stock Codex. Other commenters excluded."
+  },
+  {
+    "evidence_id": "CW-X017",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Only opened body sections support claim; comments and remaining diagnostics not fully read. Reporter probes not independently rerun."
+  },
+  {
+    "evidence_id": "CW-X018",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Outside preferred window; demo rather than production incident. Article fully read; embedded transcript omissions are publication boundary, not full raw traces."
+  },
+  {
+    "evidence_id": "CW-L001",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable."
+  },
+  {
+    "evidence_id": "CW-L002",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable."
+  },
+  {
+    "evidence_id": "CW-L003",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable."
+  },
+  {
+    "evidence_id": "CW-L004",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable."
+  },
+  {
+    "evidence_id": "CW-L005",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable."
+  },
+  {
+    "evidence_id": "CW-L006",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Exact date uncertain: search showed August 30 while opened page showed 11h ago. Unsafe workaround recorded as behavior, never recommended."
+  },
+  {
+    "evidence_id": "CW-L007",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-reported safety and speed not independently measured; relative dates inconsistent."
+  },
+  {
+    "evidence_id": "CW-L008",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable."
+  },
+  {
+    "evidence_id": "CW-L009",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable."
+  },
+  {
+    "evidence_id": "CW-L010",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Author retracts alleged extra charge as UI misunderstanding. Cancellation is intent, not verified completed action. No current-limit claim."
+  },
+  {
+    "evidence_id": "CW-L011",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable."
+  },
+  {
+    "evidence_id": "CW-L012",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable."
+  },
+  {
+    "evidence_id": "CW-L013",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable."
+  },
+  {
+    "evidence_id": "CW-L014",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Historical account; upgrade and removals happened together, so no causal attribution. Full thread not read."
+  },
+  {
+    "evidence_id": "CW-L015",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Historical account; relative date only. No general conclusion about current Serena capability."
+  },
+  {
+    "evidence_id": "CW-L016",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete 74-node public Algolia tree read in chunks; deleted/private content excluded. One thread for page counting. Self-report; no current offer verified."
+  },
+  {
+    "evidence_id": "CW-L017",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete 74-node public Algolia tree read in chunks; deleted/private content excluded. One thread for page counting. Self-report; no current offer verified."
+  },
+  {
+    "evidence_id": "CW-L018",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete 74-node public Algolia tree read in chunks; deleted/private content excluded. One thread for page counting. Self-report; no current offer verified."
+  },
+  {
+    "evidence_id": "CW-L019",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Complete 74-node public Algolia tree read in chunks; deleted/private content excluded. One thread for page counting. Self-report; no current offer verified."
+  },
+  {
+    "evidence_id": "CW-L020",
+    "access": "opened_full",
+    "captures": [
+      "sources/L15/CW-L020.json"
+    ],
+    "limits": "Complete 74-node public Algolia tree read in chunks; deleted/private content excluded. One thread for page counting. Self-report; no current offer verified."
+  },
+  {
+    "evidence_id": "CW-L021",
+    "access": "opened_full",
+    "captures": [
+      "sources/L15/CW-L021.json"
+    ],
+    "limits": "Complete 74-node public Algolia tree read in chunks; deleted/private content excluded. One thread for page counting. Self-report; no current offer verified."
+  },
+  {
+    "evidence_id": "CW-L022",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-L022.txt"
+    ],
+    "limits": "Company self-report, not independently replicated. Full article read; figures not visually inspected or used. HN gbrindisi is same author/workflow, not another incident."
+  },
+  {
+    "evidence_id": "CW-L023",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-L023.txt"
+    ],
+    "limits": "Full article read in overlapping chunks; author adjudication, three small tasks, two models, no independent rerun. Tool-builder case. Not a model leaderboard or proven Codeweb effect."
+  },
+  {
+    "evidence_id": "CW-L024",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-L024.txt",
+      "sources/phase-A-nonauthor/CW-L024.txt"
+    ],
+    "limits": "Three repetitions of one task, vendor-affiliated self-measurement. Claims about general host behavior require official verification; no general MCP/CLI superiority inferred."
+  },
+  {
+    "evidence_id": "CW-L025",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-L025.txt"
+    ],
+    "limits": "Firsthand migration; broad claims about eager loading or unavailable CLIs not adopted as current facts. Counterexample is CW-L024."
+  },
+  {
+    "evidence_id": "CW-L026",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-L026.txt"
+    ],
+    "limits": "All rendered posts read; numbered gaps and JSON API HTTP403 prevent certifying complete thread. Resolution is author-confirmed for this incident, not a general capability test. Later additive review: Additive: exact trigger routes to review without background agents. No new incident."
+  },
+  {
+    "evidence_id": "CW-L027",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Original and DEV syndication read and counted once. No measured activation lift; broad config claims are not current official capability facts. Outside preferred six months by three days."
+  },
+  {
+    "evidence_id": "CW-L028",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Full article read, demo video not viewed. Vendor self-use and future paid plans are not independent buyer demand. No Codeweb architectural change authorized."
+  },
+  {
+    "evidence_id": "CW-L029",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Self-report, no observed task or independent replication. Not evidence of Codeweb use or demand."
+  },
+  {
+    "evidence_id": "CW-L030",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Article text fully read; client-rendered Webmentions not read and not counted. LLM-assisted author analysis not independently rerun; no causal effect size adopted."
+  },
+  {
+    "evidence_id": "CW-L031",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Original report nine days before preferred window; September 15 follow-up notes read. Conference suggestions are not current adopted policies."
+  },
+  {
+    "evidence_id": "CW-L032",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Seven days outside preferred window; no frequency estimate. Distinct participant and experience in same thread."
+  },
+  {
+    "evidence_id": "CW-L033",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Commercial services page and explicitly AI-assisted high-volume marketing. Retained as vendor-adjacent self-use, excluded from ordinary-buyer and firsthand totals; claimed time savings not adopted."
+  },
+  {
+    "evidence_id": "CW-L034",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Builder case, not ordinary buyer. Full prose read; screenshots and code implementation not independently inspected. Does not prove security."
+  },
+  {
+    "evidence_id": "CW-L035",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Commercial consultant self-report; Medium syndication same incident. Market/acquisition forecasts and quoted plan allowances not verified or adopted as current facts."
+  },
+  {
+    "evidence_id": "CW-L036",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Outside preferred window. Historical spend only; no current price or free-tier claim. Some named personal projects, no sale of a competing review tool established."
+  },
+  {
+    "evidence_id": "CW-L037",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-L037.txt",
+      "sources/phase-A-nonauthor/CW-L037.txt"
+    ],
+    "limits": "Explicit commercial interest in MCP hosting/tunneling; not ordinary-user proof. Broad host capabilities and security claims not adopted."
+  },
+  {
+    "evidence_id": "CW-L038",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Exact publication date unavailable. Estimated schema-token measurements are not a current host benchmark; author update acknowledges changed loading. No general protocol superiority inferred."
+  },
+  {
+    "evidence_id": "CW-L039",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "June announcement distinguishes existing agent auto-ban from forthcoming policy amendments; current final policy not independently checked. No claim that AI is banned in all Godot use."
+  },
+  {
+    "evidence_id": "CW-L040",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Promotional competitor/service-selling context explicitly inspected. No verified invoices, procurement rejection, total ownership cost or independent speed test. Published month only; exact date null."
+  },
+  {
+    "evidence_id": "CW-L041",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Cancellation self-report; alternative is intended near-future use, not verified long-term retention. HN submission is same author and incident."
+  },
+  {
+    "evidence_id": "CW-L042",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Two comments grouped as one experience. Future cancellation intent is not completed cancellation."
+  },
+  {
+    "evidence_id": "CW-L043",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Report-era allowance only; no current product-limit claim. Root and reply same incident."
+  },
+  {
+    "evidence_id": "CW-L044",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Self-report, no observed task or independent replication. Not evidence of Codeweb use or demand."
+  },
+  {
+    "evidence_id": "CW-L045",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Explicitly anecdotal; budget and evaluation limit statistical significance. No general host ranking."
+  },
+  {
+    "evidence_id": "CW-L046",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Two comments one workflow; dates differ, initial report date used. No evidence automated tests replaced manual use."
+  },
+  {
+    "evidence_id": "CW-L047",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Self-report; no proof of completed subscription cancellation or current limits."
+  },
+  {
+    "evidence_id": "CW-L048",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Self-report, no observed task or independent replication. Not evidence of Codeweb use or demand."
+  },
+  {
+    "evidence_id": "CW-L049",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Self-report, no observed task or independent replication. Not evidence of Codeweb use or demand."
+  },
+  {
+    "evidence_id": "CW-L050",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Self-report, no observed task or independent replication. Not evidence of Codeweb use or demand."
+  },
+  {
+    "evidence_id": "CW-L051",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-L051.txt"
+    ],
+    "limits": "Self-reported satisfaction, no measured accuracy or purchase amount; considered disabling Copilot but has not reported doing so."
+  },
+  {
+    "evidence_id": "CW-L052",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Rendered dates relative; exact publication date null. Claimed token-price equivalence is not measured productivity or savings; screenshot not independently inspected."
+  },
+  {
+    "evidence_id": "CW-L053",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Partial thread, unknown exact date, reported spend not verified. No current prices adopted."
+  },
+  {
+    "evidence_id": "CW-L054",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Partial thread, unknown exact date; usage and quality not controlled comparisons."
+  },
+  {
+    "evidence_id": "CW-L055",
+    "access": "opened_partial",
+    "captures": [],
+    "limits": "Partial thread; exact date and purchasing authority unknown. Future price increase is speculation, not adopted."
+  },
+  {
+    "evidence_id": "CW-L056",
+    "access": "opened_partial",
+    "captures": [
+      "sources/L15/CW-L056.html"
+    ],
+    "limits": "Vendor self-use, article partial and no independently adjudicated outcome sample. Published activity counts are not proof of detection accuracy; no effect size adopted."
+  },
+  {
+    "evidence_id": "CW-Z001",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Z001.txt"
+    ],
+    "limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts."
+  },
+  {
+    "evidence_id": "CW-Z002",
+    "access": "opened_full",
+    "captures": [
+      "sources/L15/CW-Z002.html"
+    ],
+    "limits": "Vendor/builder dogfooding, AI coauthored. Headline says 100x but table says 47x; no multiplier retained. Reports fixed in same sprint, not independently reproduced."
+  },
+  {
+    "evidence_id": "CW-Z003",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Z003.txt"
+    ],
+    "limits": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed."
+  },
+  {
+    "evidence_id": "CW-Z004",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Single experiment; GPT-5.3-Codex. Author explicitly updates earlier API limitation as historical; do not claim a current missing API."
+  },
+  {
+    "evidence_id": "CW-Z005",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Z005.txt"
+    ],
+    "limits": "Historical 2025 account, not a current Codex performance finding; one author/context bundle rather than counting each comparison as independent."
+  },
+  {
+    "evidence_id": "CW-Z006",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Z006.txt"
+    ],
+    "limits": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited."
+  },
+  {
+    "evidence_id": "CW-Z007",
+    "access": "opened_partial",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Z007.txt",
+      "sources/phase-A-nonauthor/CW-Z007.txt"
+    ],
+    "limits": "API rate-limited; full body read, comment completeness unverified. First-query crash fix merged Aug 20 (#1848); later-query fix #2007 remains open. No blanket fixed claim."
+  },
+  {
+    "evidence_id": "CW-Z008",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Tutorial overstates universal LSP precision and contains setup claims not independently verified. Counterfactual rename prevention is author inference, not a demonstrated replay."
+  },
+  {
+    "evidence_id": "CW-Z009",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-Z009.txt"
+    ],
+    "limits": "Historical success, not a current speed benchmark. Linked PR not counted separately."
+  },
+  {
+    "evidence_id": "CW-Z010",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Author opinion and one uncontrolled PR comparison; 90% sufficiency estimate not adopted. Current Codex claims and subscription advice excluded. English translation counted once; no linked discussion count."
+  },
+  {
+    "evidence_id": "CW-Z011",
+    "access": "opened_partial",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Z011.txt",
+      "sources/phase-A-nonauthor/CW-Z011.txt"
+    ],
+    "limits": "Full body only; comments unavailable. Closed with #1434, but linked PR inaccessible, so resolution not verified."
+  },
+  {
+    "evidence_id": "CW-Z012",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Z012.txt",
+      "sources/phase-A-nonauthor/CW-Z012.txt"
+    ],
+    "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once."
+  },
+  {
+    "evidence_id": "CW-Y001",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Y001.txt",
+      "sources/phase-A-nonauthor/CW-Y001.txt"
+    ],
+    "limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent."
+  },
+  {
+    "evidence_id": "CW-Y002",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "May pricing changed; do not present April allowance as current. Cancellation is self-report."
+  },
+  {
+    "evidence_id": "CW-Y003",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Historical eligibility; current docs allow all contributors on enabled team repositories. Not a current gap."
+  },
+  {
+    "evidence_id": "CW-Y004",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Y004.txt"
+    ],
+    "limits": "No purchase authority, rejection, approval, or technical breach demonstrated."
+  },
+  {
+    "evidence_id": "CW-Y005",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Y005.txt",
+      "sources/phase-A-nonauthor/CW-Y005.txt"
+    ],
+    "limits": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP."
+  },
+  {
+    "evidence_id": "CW-Y006",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-A-nonauthor/CW-Y006.txt"
+    ],
+    "limits": "Historical version 0.49.4; two variables changed. Another user in thread reports fast operation."
+  },
+  {
+    "evidence_id": "CW-Y007",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Y007.txt"
+    ],
+    "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+  },
+  {
+    "evidence_id": "CW-Y008",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Y008.txt"
+    ],
+    "limits": "File-reference limitation resolved per maintainer; separate-repo access not thereby proven. No new current host gap."
+  },
+  {
+    "evidence_id": "CW-Y009",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Outside two-year preference: retained as explicit renewal-process example only; renewal outcome and authority unknown."
+  },
+  {
+    "evidence_id": "CW-Y010",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Y010.txt",
+      "sources/phase-A-nonauthor/CW-Y010.txt"
+    ],
+    "limits": "Outside two-year preference; proposed purchase, not completed sale or observed downgrade."
+  },
+  {
+    "evidence_id": "CW-Y011",
+    "access": "opened_full",
+    "captures": [],
+    "limits": "Page updated 2026-01-20; original incident date unknown and text references old Ruby versions. No current capability/price claims retained."
+  },
+  {
+    "evidence_id": "CW-Y012",
+    "access": "opened_full",
+    "captures": [
+      "sources/phase-B-nonauthor/CW-Y012.txt"
+    ],
+    "limits": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents."
+  }
+]

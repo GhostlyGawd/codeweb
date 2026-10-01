@@ -1,0 +1,31 @@
+# Codeweb user-pain research — holistic synthesis
+
+Prepared 28 September 2026. **Research package delivered for independent final review; breadth target missed.** 110 fully read original source units versus the 150–200 target (40 below the lower bound). There are 132 deduplicated evidence records, including 119 labeled firsthand reports; these include builders, technical investigations and a demonstration, not 119 verified ordinary users. No interviews or Codeweb retention/purchase tests occurred. [Counts](COUNTS.json), [source boundaries](SOURCE-MAP.md), [review](REVIEW.md).
+
+**Recommendation:** retain agent-heavy developers working their own repositories as the primary audience. Test one conditional job: before a risky cross-file edit, identify mapped consumers and existing implementation candidates that the agent would otherwise miss. Deliver a small optional in-agent evidence brief with coverage limits. Do not require it for every edit. Reviewers are a secondary audience for the same source-linked evidence. This is a product hypothesis to test, not a validated feature or charter change.
+
+## What the evidence changes
+
+**Reuse and change scope are plausible recurring pains.** Independent accounts describe duplicated utilities, repeated reuse prompts and difficult structural review. The mechanism can be visible in repository structure, but reuse also requires judgment about whether two pieces of code should share an abstraction. [CW-T018](https://news.ycombinator.com/item?id=48033774), [CW-Z003](https://ngof.nikhaldimann.com/p/deja-code), [CW-L048](https://news.ycombinator.com/item?id=49321400), [CW-Z006](https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/).
+
+**More context can help and still have a cost.** One small author-adjudicated experiment removed recurring false positives when reviewers could inspect callers, while recall fell. A separate small pilot found native search sufficient on clean code. Neither measures Codeweb’s incremental effect. [CW-L023](https://edgelog.dev/blog/how-many-ai-code-reviews/), [CW-X001](https://www.agentconnect.md/blog/grep-beat-lsp-harness/).
+
+**Native integration is an outcome, not an installation checkbox.** Public reports show tools missing from particular host surfaces or worktrees, and an invocation error that was fixed by exact command syntax. Test actual availability and invocation in the intended session before interpreting non-use as rejection. [CW-T002](https://github.com/anthropics/claude-code/issues/88214), [CW-T004](https://github.com/anthropics/claude-code/issues/97515), [CW-X009](https://github.com/openai/codex/issues/27133), [CW-L026](https://forum.cursor.com/t/bugbot-without-background-agents/157812).
+
+**A receipt must reduce decision work.** Team accounts describe voluntary tool adoption concentrating in already careful engineers, internal review alternatives and summaries that did not make large diffs reviewable. Existing CI, smaller changes and PR artifacts are strong substitutes. [CW-L022](https://www.synthesia.io/post/automating-code-security-reviews-with-claude-mythos-level-capabilities), [CW-Y005](https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/), [CW-Y012](https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/).
+
+**Paying for AI review is real in some accounts; paying Codeweb is unproven.** Annual Bugbot payment, reported cancellations and current manual cross-repo checking identify service expectations and possible jobs. They do not establish Codeweb demand or a budget owner. [CW-Y001](https://forum.cursor.com/t/bugbot-pricing-feedback/131907), [CW-Y002](https://forum.cursor.com/t/bugbot-stopped-being-triggered/156739), [CW-Y007](https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120).
+
+## Choices to carry forward
+
+1. **First free experiment:** conditional pre-edit consumer/reuse evidence for agent-heavy developers making changes in repositories with nontrivial mapped relationships. Compare against their existing grep/LSP/tests and measure total effort, false warnings and changed decisions.
+2. **First paid hypothesis:** hosted coordination of cross-repository consumer checks and shared evidence. Compare against checking both repos in CI and ordinary PR history. Require an actual recurring coordination problem and a named buyer before a paid pilot.
+3. **Defer:** a generic paid change receipt, universal mandatory hooks, replacement of behavioral/security review, or a separate graph-view product. Evidence does not justify these leaps. The charter keeps all local single-repo capability free.
+
+See [opportunity decisions and falsification tests](OPPORTUNITY-DECISIONS.md), [prioritized pain map](PAIN-MAP.md), [contradictions](CONTRADICTIONS.md), and [six-lens audit overlay](AUDIT-OVERLAY.md). Six integrated briefs: [Claude](lanes/01-claude-final.md), [Codex](lanes/02-codex-final.md), [change risk](lanes/03-change-risk-final.md), [adoption](lanes/04-adoption-final.md), [trust](lanes/05-trust-final.md), [value](lanes/06-value-final.md).
+
+## What remains unknown
+
+Whether Codeweb changes real edit/review outcomes, week-two voluntary use, incremental token savings after verification cost, ordinary-user retention, frequency of cross-repo incidents, procurement authority, acceptable private-data flows, paid conversion and renewal. Public anecdotes cannot estimate prevalence. Source selection favors public tool communities and builders; 33 records lack exact publication dates. Dynamic/generated/multi-repo coverage is especially thin.
+
+The original audit and four screenshots retain their hashes. The September 26 published-site audit is historical; this research did not inspect newer website candidates or perform new visual/accessibility testing. No code, charter, harness, outreach, purchase, release or publication changed. Artifacts are in the writable management workspace and attached to the parent; the originally requested repository directory remains outside this run’s writable roots. [Operational receipt](COMPLETION.json) records the source shortfall, two collection timeouts, recovery failures, and the reported pre-dispatch operator workaround.

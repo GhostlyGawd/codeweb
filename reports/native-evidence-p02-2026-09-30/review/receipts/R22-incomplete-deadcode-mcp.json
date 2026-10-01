@@ -1,0 +1,21 @@
+{
+  "id": "R22-incomplete-deadcode-mcp",
+  "command": [
+    "/opt/homebrew/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/mcp-server.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_NO_RECEIPTS": "1",
+    "CODEWEB_NO_PROMO": "1"
+  },
+  "stdin": "{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"initialize\", \"params\": {\"protocolVersion\": \"2025-06-18\", \"capabilities\": {}, \"clientInfo\": {\"name\": \"independent-p02-review\", \"version\": \"1\"}}}\n{\"jsonrpc\": \"2.0\", \"id\": 2, \"method\": \"tools/call\", \"params\": {\"name\": \"codeweb_deadcode\", \"arguments\": {\"graph\": \"$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/incomplete.json\"}}}\n",
+  "start": "2026-10-01T02:23:39.473488+00:00",
+  "end": "2026-10-01T02:23:39.550632+00:00",
+  "durationSeconds": 0.07717250008136034,
+  "exit": 0,
+  "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"codeweb\",\"version\":\"0.15.0\"},\"instructions\":\"codeweb answers structural questions about a mapped repo (graph.json) deterministically \u2014 no LLM, ~100ms.\\nLoop: BEFORE editing a symbol call codeweb_context (bounded edit window) or codeweb_impact (blast radius); codeweb_dependents lists mapped users of it (call+import+inherit+test+ref).\\nBEFORE editing call codeweb_refresh {baseline:true} once to capture a fresh baseline. AFTER editing call codeweb_diff {before:\\\"baseline\\\", refresh:true} to refresh and verify in one call. Ordinary/automatic refreshes preserve this baseline. Legacy refresh {snapshot:true} then diff {} remains available.\\nOptional evidence loop: codeweb_context {symbol, captureEvidence:true, task} captures a receipt using an isolated regex snapshot. After editing pass evidenceReceipt and the same task to codeweb_review. Inspect evidence.state separately from verdict; historical pages never imply current currency.\\nBefore WRITING a new function call codeweb_find_similar (does this exist?) and codeweb_placement (where does it belong?).\\nBefore a refactor, codeweb_simulate pre-flights a delete/merge/move; after verifying a finding is wrong, codeweb_annotate suppresses it so it stops resurfacing.\\nNo symbol name yet? codeweb_find turns a concept (\\\"retry backoff\\\") into ranked starting symbols.\\n`graph` is optional \u2014 the server finds the nearest .codeweb/graph.json from cwd. No graph yet? codeweb_map builds one (~3s for 3k symbols).\\nResponses are budgeted (top-N + more:{remaining, nextOffset}). Pass full:true for the unabridged list, or limit/offset to page (campaign/reading_order take `budget` instead; deadcode/context cap per tier via limit only).\"}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"target\\\":\\\"target\\\",\\\"summary\\\":\\\"1 orphan(s): 1 safe to delete, 0 need review\\\",\\\"totals\\\":{\\\"orphans\\\":1,\\\"safe\\\":1,\\\"review\\\":0,\\\"suppressed\\\":0},\\\"excluded\\\":0,\\\"excludedByRole\\\":{},\\\"note\\\":\\\"extraction drops ambiguous call edges (precision over recall), so a genuinely-called symbol can surface here \u2014 cross-check before deleting\\\",\\\"safe\\\":[{\\\"id\\\":\\\"missing.mjs:risky\\\",\\\"file\\\":\\\"missing.mjs\\\",\\\"domain\\\":\\\"unassigned\\\",\\\"loc\\\":3,\\\"reason\\\":\\\"no production caller, not exported, no test edge, not in a test file \u2014 high-confidence dead\\\",\\\"fingerprint\\\":\\\"9c3f50975477d509\\\"}],\\\"review\\\":[],\\\"suppressed\\\":[]}\"}]}}\n",
+  "stderr": ""
+}

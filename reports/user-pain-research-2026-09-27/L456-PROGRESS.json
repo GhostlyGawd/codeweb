@@ -1,0 +1,18 @@
+{
+  "records": 28,
+  "first_person_reports": 26,
+  "independent_measurements": 1,
+  "vendor_claims": 1,
+  "source_units_opened": 22,
+  "fully_read_retained_units": 7,
+  "fully_read_excluded_units": 1,
+  "complete": false,
+  "reviewed": false,
+  "preferred_window_start": "2026-03-28",
+  "limitations": [
+    "Many Reddit dates null and threads partial.",
+    "Current-source bias toward review-tool communities and tool builders.",
+    "Coverage target not met; no saturation claim.",
+    "Original repository destination outside writable roots."
+  ]
+}

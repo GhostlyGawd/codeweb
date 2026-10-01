@@ -1,0 +1,106 @@
+{
+  "runs": [
+    {
+      "id": "818156ef-42b4-4323-b6e2-fa2a14a47bdb",
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "succeeded",
+      "startedAt": "2026-09-30T04:09:14.491Z",
+      "finishedAt": "2026-09-30T04:14:37.850Z",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f080-987a-7d91-93ee-b2307a2a6ea2",
+      "contextSnapshot": {
+        "issueId": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+        "taskId": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+        "taskKey": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "82d1566c-5c11-42c4-b9f7-ce3d2ed06f09",
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "succeeded",
+      "startedAt": "2026-09-30T04:08:18.745Z",
+      "finishedAt": "2026-09-30T04:13:22.980Z",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f07f-bece-7833-8fb9-cdf7eb04ac59",
+      "contextSnapshot": {
+        "issueId": "a578154c-75d4-48de-bb1c-13a93fa55398",
+        "taskId": "a578154c-75d4-48de-bb1c-13a93fa55398",
+        "taskKey": "a578154c-75d4-48de-bb1c-13a93fa55398",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "ac1bcc5f-e0a6-46d6-8c23-5ec4b5bc2a41",
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "succeeded",
+      "startedAt": "2026-09-30T04:03:32.013Z",
+      "finishedAt": "2026-09-30T04:09:14.443Z",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f07b-5eb2-7b93-ae01-563d66c62a13",
+      "contextSnapshot": {
+        "issueId": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+        "taskId": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+        "taskKey": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "ece66b7f-e96f-4c26-8890-574f99aef49d",
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "succeeded",
+      "startedAt": "2026-09-30T04:03:34.314Z",
+      "finishedAt": "2026-09-30T04:08:18.679Z",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f07b-67b6-7022-89ae-b9a898e9e47a",
+      "contextSnapshot": {
+        "issueId": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+        "taskId": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+        "taskKey": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "f7326cb1-7ec5-446f-912a-a1eaaaa45b26",
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "succeeded",
+      "startedAt": "2026-09-30T03:57:32.966Z",
+      "finishedAt": "2026-09-30T04:03:31.950Z",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f075-e447-7802-bd11-d6f12b75b1fc",
+      "contextSnapshot": {
+        "issueId": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+        "taskId": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+        "taskKey": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "766096ef-4afa-4384-bbb6-4fc8f565d43f",
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "succeeded",
+      "startedAt": "2026-09-30T03:57:31.490Z",
+      "finishedAt": "2026-09-30T04:03:34.251Z",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f075-e05a-7182-88b4-87174020a54b",
+      "contextSnapshot": {
+        "issueId": "375bee1a-6e50-4430-bef6-20cf523f4771",
+        "taskId": "375bee1a-6e50-4430-bef6-20cf523f4771",
+        "taskKey": "375bee1a-6e50-4430-bef6-20cf523f4771",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    }
+  ]
+}

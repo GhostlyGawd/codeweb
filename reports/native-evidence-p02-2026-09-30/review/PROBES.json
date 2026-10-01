@@ -1,0 +1,222 @@
+{
+  "candidate": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+  "fixture_root": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "baseline_hashes": {
+    "before": "5fe054ad9075f123dfde3bb6efe43e1d55ee1d9e79f6b63b18f4365f972761fd",
+    "after_edit_refresh_and_diff": "5fe054ad9075f123dfde3bb6efe43e1d55ee1d9e79f6b63b18f4365f972761fd",
+    "after_repair": "5fe054ad9075f123dfde3bb6efe43e1d55ee1d9e79f6b63b18f4365f972761fd"
+  },
+  "generated_excluded_from_actual_extraction": true,
+  "runs": [
+    {
+      "id": "R01-extract",
+      "exit": 0,
+      "stdoutBytes": 3906,
+      "stderrBytes": 172
+    },
+    {
+      "id": "R02-exact-impact",
+      "exit": 0,
+      "stdoutBytes": 364,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R03-exact-context",
+      "exit": 0,
+      "stdoutBytes": 1740,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R04-exact-mcp",
+      "exit": 0,
+      "stdoutBytes": 3852,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R05-known-target-graph-only",
+      "exit": 0,
+      "stdoutBytes": 443,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R06-stale-context",
+      "exit": 0,
+      "stdoutBytes": 1921,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R07-stale-graph-only",
+      "exit": 0,
+      "stdoutBytes": 443,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R08-refresh-baseline",
+      "exit": 0,
+      "stdoutBytes": 752,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R09-known-target-fresh",
+      "exit": 0,
+      "stdoutBytes": 453,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R10-known-target-repeat",
+      "exit": 0,
+      "stdoutBytes": 453,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R11-entry-alias",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R12-codex-payload",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R13-stale-with-sidecar",
+      "exit": 0,
+      "stdoutBytes": 543,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R14-ordinary-refresh",
+      "exit": 0,
+      "stdoutBytes": 570,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R15-diff-refresh",
+      "exit": 0,
+      "stdoutBytes": 1369,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R16-repair-refresh",
+      "exit": 0,
+      "stdoutBytes": 570,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R17-deny-baseline-refresh",
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stderrBytes": 96
+    },
+    {
+      "id": "R18-generated-selector",
+      "exit": 1,
+      "stdoutBytes": 186,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R19-invalid-shape-cli",
+      "exit": 1,
+      "stdoutBytes": 153,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R20-invalid-shape-mcp",
+      "exit": 0,
+      "stdoutBytes": 2266,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R21-incomplete-deadcode",
+      "exit": 0,
+      "stdoutBytes": 571,
+      "stderrBytes": 121
+    },
+    {
+      "id": "R22-incomplete-deadcode-mcp",
+      "exit": 0,
+      "stdoutBytes": 2507,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R23-pre-zero",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R24-post-zero",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 120
+    },
+    {
+      "id": "R23-pre-missing",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R24-post-missing",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R23-pre-corrupt",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R24-post-corrupt",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 120
+    },
+    {
+      "id": "R23-pre-unmapped",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R24-post-unmapped",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R23-pre-empty",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R24-post-empty",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 120
+    },
+    {
+      "id": "R23-pre-extraction-failure",
+      "exit": 0,
+      "stdoutBytes": 403,
+      "stderrBytes": 0
+    },
+    {
+      "id": "R24-post-extraction-failure",
+      "exit": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 120
+    },
+    {
+      "id": "R25-explicit-refresh-failure",
+      "exit": 2,
+      "stdoutBytes": 0,
+      "stderrBytes": 786
+    }
+  ]
+}

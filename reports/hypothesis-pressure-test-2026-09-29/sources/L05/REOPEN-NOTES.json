@@ -1,0 +1,46 @@
+[
+  {
+    "evidence_id": "CW-Z003",
+    "url": "https://ngof.nikhaldimann.com/p/deja-code",
+    "retrieved_at": "2026-09-30T04:12:14.991348+00:00",
+    "method": "web.run open/find rendered original text",
+    "passage_locator": "Article paragraphs on review and repeated prompting; methodological weaknesses",
+    "rendered_line_pointer": "L21\u201327, L57\u201359",
+    "short_excerpt": "It regularly \u201cforgets\u201d about library code",
+    "paraphrase": "Repeated reuse prompting reported in one solo project; author acknowledges intentional duplication and measurement limitations.",
+    "access_boundary": "Targeted text passages inspected; no images, linked repositories or whole-site audit. Rendered excerpts are not a full archival capture. Historical account, not verified current product behavior."
+  },
+  {
+    "evidence_id": "CW-Y001",
+    "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+    "retrieved_at": "2026-09-30T04:12:14.991348+00:00",
+    "method": "web.run open/find rendered original text",
+    "passage_locator": "Posts 1 and 3",
+    "rendered_line_pointer": "L9\u201318, L26\u201348",
+    "short_excerpt": "having it always run is very useful",
+    "paraphrase": "Few complex PRs can still justify review for this team; stated future use is not observed renewal.",
+    "access_boundary": "Targeted text passages inspected; no images, linked repositories or whole-site audit. Rendered excerpts are not a full archival capture. Historical account, not verified current product behavior."
+  },
+  {
+    "evidence_id": "CW-Z006",
+    "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+    "retrieved_at": "2026-09-30T04:12:14.991348+00:00",
+    "method": "web.run open/find rendered original text",
+    "passage_locator": "Refactoring at scale; What humans still do",
+    "rendered_line_pointer": "L73\u201375, L84\u2013102",
+    "short_excerpt": "which apparent duplication was intentional",
+    "paraphrase": "Human judgment chose consolidation targets; automated mechanical changes did not own architecture.",
+    "access_boundary": "Targeted text passages inspected; no images, linked repositories or whole-site audit. Rendered excerpts are not a full archival capture. Historical account, not verified current product behavior."
+  },
+  {
+    "evidence_id": "CW-Z012",
+    "url": "https://github.com/oraios/serena/discussions/131",
+    "retrieved_at": "2026-09-30T04:12:14.991348+00:00",
+    "method": "web.run open/find rendered original text",
+    "passage_locator": "May 31 and June 1 maintainer replies; June 2 closure",
+    "rendered_line_pointer": "L307\u2013319, L387\u2013394, L424\u2013442, L504\u2013506",
+    "short_excerpt": "if the whole code fits within the context",
+    "paraphrase": "Historical discussion describes redundant retrieval and verification overhead; configuration recovery and editing improvements are also reported.",
+    "access_boundary": "Targeted text passages inspected; no images, linked repositories or whole-site audit. Rendered excerpts are not a full archival capture. Historical account, not verified current product behavior."
+  }
+]

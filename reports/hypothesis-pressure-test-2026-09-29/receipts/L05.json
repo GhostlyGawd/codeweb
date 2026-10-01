@@ -1,0 +1,45 @@
+{
+  "assignment": "L05",
+  "issue_identifier": "COD-84",
+  "issue_id": "a578154c-75d4-48de-bb1c-13a93fa55398",
+  "run_id": "82d1566c-5c11-42c4-b9f7-ce3d2ed06f09",
+  "session_identity": {
+    "source": "CODEX_THREAD_ID",
+    "value": "01a0f07f-bece-7833-8fb9-cdf7eb04ac59",
+    "runtime_independence_verification": "pending lead inspection; no other lens drafts read"
+  },
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "created_at": "2026-09-30T04:12:14.991348+00:00",
+  "initial_input_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "final_input_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "outputs": [
+    {
+      "path": "lenses/05-repeated-reliance.md",
+      "sha256": "9d57d8d5cdc7e2ee6e7056b13416bfad481e540df26a4c5ce730a7d7361a889e"
+    },
+    {
+      "path": "lenses/05-findings.json",
+      "sha256": "06f1fea5466d083fcffa75abf40b9c0c6cb51369fc5a4c32cc6bdca643438e03"
+    },
+    {
+      "path": "sources/L05/REOPEN-NOTES.json",
+      "sha256": "84213a408d9b5d4cc9e7b9954690c06852b512e4426dfc6141ee7eda8386f864"
+    }
+  ],
+  "first_draft_preserved": "history/L05-first-draft/",
+  "corrective_attempts": 0,
+  "self_review_approval": false,
+  "limits": [
+    "The complete frozen packet was available; all 192 hashes checked. All 132 canonical record summaries were screened; selected complete records, source registry, original reopens, strategy, proof sprint and independent research review were inspected. This is not a claim to reread all 110 declared full sources.",
+    "No other pressure-test lens output was read before freezing this first draft. Filesystem isolation is procedural. Session identity is recorded, while runtime freshness remains for lead verification.",
+    "The research corpus has a source-volume shortfall, builder-heavy examples, partial Reddit access and historical/version-specific reports. Counts are not prevalence. No customer, host trial, withdrawal test, purchase or renewal was invented.",
+    "Mapped consumers are incomplete structural evidence; body similarity is not semantic reuse; static checks do not establish behavior. No capability execution was performed in this lens.",
+    "Four targeted original reopens are preserved as dated passage notes, not complete page archives. Other citations rely on frozen original evidence records and declared prior read boundaries."
+  ]
+}

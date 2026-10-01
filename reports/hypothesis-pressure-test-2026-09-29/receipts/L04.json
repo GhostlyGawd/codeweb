@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "assignment": "L04",
+  "issue_identifier": "COD-83",
+  "issue_id": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+  "run_id": "ac1bcc5f-e0a6-46d6-8c23-5ec4b5bc2a41",
+  "session_identity": "01a0f07b-5eb2-7b93-ae01-563d66c62a13",
+  "session_identity_source": "CODEX_THREAD_ID environment",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "outputs_sha256": {
+    "lenses/04-capability-and-trust.md": "82b7a6cfc8723cef5df98a3016e48328111300666d47f0e672ead1eb6510b9ea",
+    "lenses/04-findings.json": "12326a31c84e58e1e399e95eddf70bdf0375a702809999b4c524f4f71b0183f1",
+    "receipts/L04-source-addendum.json": "9296c09f387ca850a5396f707e5d59cfcfd23c95ffcd45bc9613634ca7c15201"
+  },
+  "initial_input_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "final_input_verification": {
+    "files": 192,
+    "all_hashes_match": true,
+    "at": "2026-09-30T04:08:02.412962+00:00"
+  },
+  "first_draft_directory": "history/L04-first-draft",
+  "corrections_used": 0,
+  "other_lens_outputs_read": false,
+  "independence_boundary": "Fresh issue turn with listed session identity; procedural shared-filesystem isolation; lead independently checks runtime session history.",
+  "validation": [
+    "JSON parsed; six unique stable finding IDs",
+    "All supporting/opposing evidence IDs resolve to source records",
+    "Report generated from complete JSON findings",
+    "Frozen inputs verified before/after; first-draft copies preserved"
+  ],
+  "review_status": "delivered_for_downstream_independent_review_not_self_approved"
+}

@@ -1,0 +1,13 @@
+# Preserved disagreements and editorial resolutions
+
+A and B agree on narrowing local inspection, unresolved paid value and rejection of automatic commercial progression. Agreement is correlated analysis, not new evidence.
+
+- **L15-F01, attribution:** A's union-derived support lists are retained as inherited lens context, not direct observations. CW-L023 supports inspection/precision-recall tradeoffs, not paid coordination. CAP anchors establish frozen capability/proposal premises. Final edges explicitly state their roles and both graph directions share one edge record.
+- **L15-F02, alternatives:** CW-L020 qualifies generic service/receipt value with satisfactory internal review and human knowledge sharing. CW-L056 challenges orchestration distinctiveness. CW-L021 preserves legitimate coverage governance while separating it from voluntary reliance. CW-Z002 preserves successful lexical migration plus a nonstructural dependency failure, with no graph-completeness or inconsistent cost-multiplier claim.
+- **L15-F03, quality versus effort:** A's acceptable effort and B's lower burden/OR formulations were ambiguous. Final F-T04 retains the original proposed two-additional-findings/no-higher-median-effort rule. Equal-time correct additions count; faster incorrect output fails. Equal-quality efficiency is reported separately. Severe misses/unwanted edits require case-level adjudication, with no invented safety tolerance. Withdrawal and compounding remain separate proposals.
+- **Receipt versus handoff:** Reject a generic extra artifact as value. Retain a named revision/check-state reconstruction job only if normal PR/CI artifacts leave measurable work. L020's knowledge-sharing role survives automation.
+- **Facts versus intent:** Preserve source reorientation, but reject treating mapped facts as conversational reasons, pending plans or proprietary memory. Maintenance costs can defeat compounding.
+- **Convenience versus expansion:** Faster lookup is useful but cannot demonstrate a newly attainable task without a predeclared barrier and held-constant help.
+- **Portable learning versus dependence:** Learned knowledge surviving removal is value, not a failed product. No opportunity is not churn. Forced merge blockage is not earned reliance.
+
+The full 65 finding-level A/B dispositions are preserved in FINDING-COVERAGE.json. Frozen drafts remain unchanged; editor/final-from-synthesis-A.diff and final-from-synthesis-B.diff retain literal prose differences. This final edit uses B's twelve-claim structure with A's conditions and the adversarial corrections; it is not a vote count or independent third synthesis.

@@ -1,0 +1,1560 @@
+<!DOCTYPE html><html lang="en" data-astro-cid-bvzihdzo> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>
+	// Load Google Analytics only on the production host. Skips localhost
+	// (npm run dev) and *.pages.dev preview builds so dev traffic does not
+	// pollute GA. dataLayer is queued before gtag.js loads (standard stub).
+	if (location.hostname.endsWith('edgelog.dev')) {
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		window.gtag = gtag;
+		gtag('js', new Date());
+		gtag('config', 'G-9CMV541R0B');
+		var s = document.createElement('script');
+		s.async = true;
+		s.src = 'https://www.googletagmanager.com/gtag/js?id=G-9CMV541R0B';
+		document.head.appendChild(s);
+
+		// Inbound-intent events (ADR-004 proxies, GROWTH.md). GA4 Enhanced
+		// Measurement cannot cover these: it ignores mailto: entirely, and it
+		// lumps every outbound host into one generic `click` event. The two
+		// links that map to the KPI get named events instead.
+		// A click is INTENT, not a completed contact -- nothing client-side can
+		// observe whether the mail was actually sent.
+		// Delegated on document so it survives ViewTransitions client-side nav
+		// (this inline head script runs once per full page load).
+		document.addEventListener('click', function (e) {
+			var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+			if (!a) return;
+			var href = a.getAttribute('href') || '';
+			var name =
+				href.indexOf('mailto:') === 0
+					? 'contact_click'
+					: href.indexOf('github.com') !== -1
+						? 'github_click'
+						: null;
+			if (!name) return;
+			// 'hero' separates the homepage contact affordance from the site-wide
+			// footer one, so /ga-review can tell which surface actually converts.
+			// Deliberately scoped to contact_click: the masthead already carries
+			// github.com links, and widening this to every link inside the
+			// container would silently reclassify their github_click rows from
+			// 'page' to 'hero' and break that metric's history.
+			// The selector is .contact, the homepage CTA block. It read .hero
+			// until 2026-08-06, a class present nowhere in the markup, so every
+			// homepage contact_click had been filed under 'page'.
+			var where = a.closest('footer')
+				? 'footer'
+				: name === 'contact_click' && a.closest('.contact')
+					? 'hero'
+					: 'page';
+			gtag('event', name, {
+				link_url: href,
+				link_location: where,
+			});
+		});
+	}
+</script><script>
+	(function() {
+		var t = localStorage.getItem('theme');
+		if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+		document.documentElement.setAttribute('data-theme', t);
+	})();
+</script><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#16181c"><link rel="sitemap" href="/sitemap-index.xml"><link rel="alternate" type="application/rss+xml" title="EdgeLog" href="https://edgelog.dev/rss.xml"><meta name="generator" content="Astro v5.18.0"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" href="https://fonts.gstatic.com/s/outfit/v11/QGYyz_MVcBeNP4NjuGObqx1XmO1I4TC1O4a0Ew.woff2" as="font" type="font/woff2" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"><!-- Pretendard (dynamic-subset, unicode-range) renders Hangul across the site.
+	 Latin keeps Outfit/Newsreader; Korean glyphs fall through to Pretendard. --><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"><link rel="alternate" hreflang="en" href="https://edgelog.dev/blog/how-many-ai-code-reviews/"><link rel="alternate" hreflang="ko" href="https://edgelog.dev/ko/blog/how-many-ai-code-reviews/"><link rel="alternate" hreflang="x-default" href="https://edgelog.dev/blog/how-many-ai-code-reviews/"><link rel="canonical" href="https://edgelog.dev/blog/how-many-ai-code-reviews/"><meta name="naver-site-verification" content="6a2b8829ae6f140c6850b4a113d3a0907e108b52"><title>How Many AI Code Reviews Is Enough? | EdgeLog</title><meta name="title" content="How Many AI Code Reviews Is Enough? | EdgeLog"><meta name="description" content="400 LLM calls on one codebase. A single review pass finds 34% of the real defects, and the four most-repeated findings were all false positives."><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://edgelog.dev/#organization","name":"EdgeLog","alternateName":["Edge Log","EdgeLog.dev"],"url":"https://edgelog.dev/","logo":"https://edgelog.dev/apple-touch-icon.png","description":"From the edge, forward. A research log on putting AI into embedded and edge systems: measured on real hardware, written up including where it breaks.","founder":{"@id":"https://edgelog.dev/#person"},"sameAs":["https://github.com/Ecro","https://github.com/Ecro/embedeval","https://github.com/Ecro/harness-maker","https://neuroterm.dev"]},{"@type":"WebSite","@id":"https://edgelog.dev/#website","name":"EdgeLog","alternateName":["Edge Log","EdgeLog.dev"],"url":"https://edgelog.dev/","description":"From the edge, forward. A research log on putting AI into embedded and edge systems: measured on real hardware, written up including where it breaks.","inLanguage":"en","publisher":{"@id":"https://edgelog.dev/#organization"},"author":{"@id":"https://edgelog.dev/#person"}},{"@type":"Person","@id":"https://edgelog.dev/#person","name":"ecro","url":"https://edgelog.dev/about/","jobTitle":"Embedded Edge AI / Agent Systems Engineer","knowsAbout":["Embedded Linux","Edge AI","On-device LLM inference","Zephyr RTOS","Firmware security","Cyber Resilience Act"],"sameAs":["https://github.com/Ecro","https://github.com/Ecro/embedeval","https://github.com/Ecro/harness-maker","https://neuroterm.dev"],"hasCredential":[{"@type":"EducationalOccupationalCredential","name":"UL 2900-1 (Software Cybersecurity for Network-Connectable Products)"},{"@type":"EducationalOccupationalCredential","name":"UL 2941 (Cybersecurity for Connected Devices)"},{"@type":"EducationalOccupationalCredential","name":"VDE PB0033 (Cybersecurity)"}]}]}</script><meta property="og:type" content="article"><meta property="og:url" content="https://edgelog.dev/blog/how-many-ai-code-reviews/"><meta property="og:title" content="How Many AI Code Reviews Is Enough?"><meta property="og:description" content="400 LLM calls on one codebase. A single review pass finds 34% of the real defects, and the four most-repeated findings were all false positives."><meta property="og:image" content="https://edgelog.dev/_astro/og-default.D9Ns0STO.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="article:published_time" content="2026-08-22T00:00:00.000Z"><meta property="article:tag" content="ai-code-review"><meta property="article:tag" content="llm-agents"><meta property="article:tag" content="harness"><meta property="article:tag" content="benchmark"><meta property="article:tag" content="code-review"><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://edgelog.dev/blog/how-many-ai-code-reviews/"><meta property="twitter:title" content="How Many AI Code Reviews Is Enough?"><meta property="twitter:description" content="400 LLM calls on one codebase. A single review pass finds 34% of the real defects, and the four most-repeated findings were all false positives."><meta property="twitter:image" content="https://edgelog.dev/_astro/og-default.D9Ns0STO.png"><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/_astro/ClientRouter.astro_astro_type_script_index_0_lang.CDGfc0hd.js"></script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"How Many AI Code Reviews Is Enough?","description":"400 LLM calls on one codebase. A single review pass finds 34% of the real defects, and the four most-repeated findings were all false positives.","datePublished":"2026-08-22T00:00:00.000Z","author":{"@id":"https://edgelog.dev/#person"},"publisher":{"@id":"https://edgelog.dev/#organization"},"inLanguage":"en","url":"https://edgelog.dev/blog/how-many-ai-code-reviews/","image":"https://edgelog.dev/_astro/og-default.D9Ns0STO.png","keywords":["ai-code-review","llm-agents","harness","benchmark","code-review"],"mainEntityOfPage":"https://edgelog.dev/blog/how-many-ai-code-reviews/"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"EdgeLog","item":"https://edgelog.dev/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://edgelog.dev/blog/"},{"@type":"ListItem","position":3,"name":"How Many AI Code Reviews Is Enough?"}]}</script><link rel="stylesheet" href="/_astro/_slug_.BFY7vqX9.css">
+<link rel="stylesheet" href="/_astro/_slug_.FBCCN9T9.css">
+<style>.upvote[data-astro-cid-xtsolmtf]{display:inline-flex;align-items:center;gap:.35em;font-family:var(--font-mono);color:var(--color-text-faint);background:transparent;border:none;cursor:pointer;padding:0;transition:color .15s,transform .12s}.upvote[data-astro-cid-xtsolmtf]:hover:not(:disabled){color:var(--color-link)}.upvote[data-astro-cid-xtsolmtf]:disabled{cursor:default}.upvote[data-astro-cid-xtsolmtf][aria-pressed=true]{color:var(--color-link)}.upvote-icon[data-astro-cid-xtsolmtf]{width:.9em;height:.9em;flex-shrink:0}.upvote-count[data-astro-cid-xtsolmtf]{font-variant-numeric:tabular-nums;min-width:1ch}.upvote[data-astro-cid-xtsolmtf][data-upvote-flash]{animation:upvote-flash .4s ease-out}@keyframes upvote-flash{0%{transform:translateY(0)}40%{transform:translateY(-3px)}to{transform:translateY(0)}}.upvote-inline[data-astro-cid-xtsolmtf]{font-size:1em}.upvote-large[data-astro-cid-xtsolmtf]{font-family:var(--font-sans);font-size:.88em;font-weight:500;padding:.55em 1.2em;gap:.5em;color:var(--color-text-dim);background:var(--color-bg-soft);border:1px solid var(--color-border);border-radius:999px}.upvote-large[data-astro-cid-xtsolmtf]:hover:not(:disabled){border-color:var(--color-link);color:var(--color-link)}.upvote-large[data-astro-cid-xtsolmtf][aria-pressed=true]{border-color:var(--color-link);background:#d4a37314;color:var(--color-link)}.upvote-large[data-astro-cid-xtsolmtf] .upvote-icon[data-astro-cid-xtsolmtf]{width:1em;height:1em}.upvote-large[data-astro-cid-xtsolmtf] .upvote-count[data-astro-cid-xtsolmtf]{color:inherit;font-family:var(--font-mono);font-size:.95em}
+</style></head> <body data-astro-cid-bvzihdzo> <div class="progress-bar" id="progress-bar" aria-hidden="true" data-astro-cid-jx4nc67j></div>  <script type="module">function i(){const t=document.getElementById("progress-bar"),e=document.querySelector("article");if(!t||!e)return;const n=()=>{const r=e.getBoundingClientRect(),o=r.height-window.innerHeight;if(o<=0){t.style.width="100%";return}const s=Math.min(Math.max(-r.top/o,0),1);t.style.width=`${(s*100).toFixed(1)}%`};window.addEventListener("scroll",n,{passive:!0}),n()}i();document.addEventListener("astro:after-swap",i);</script> <div class="bg-effects" aria-hidden="true" data-astro-cid-tw3ctjfb></div>  <header data-astro-cid-3ef6ksr2> <nav class="nav-row" data-astro-cid-3ef6ksr2> <a href="/" class="logo" data-astro-cid-3ef6ksr2>  <span class="led" aria-hidden="true" data-astro-cid-3ef6ksr2></span>
+EdgeLog <span class="logo-by" data-astro-cid-3ef6ksr2>by Ecro</span> </a> <div class="nav-right" data-astro-cid-3ef6ksr2> <div class="nav-links" data-astro-cid-3ef6ksr2> <a href="/blog/" class="hdr-link active" data-astro-cid-3ef6ksr2="true" data-astro-cid-eimmu3lg> Essays </a>  <a href="/now/" class="hdr-link" data-astro-cid-3ef6ksr2="true" data-astro-cid-eimmu3lg> Now </a>  <a href="/about/" class="hdr-link" data-astro-cid-3ef6ksr2="true" data-astro-cid-eimmu3lg> About </a>  </div> <div class="links" data-astro-cid-3ef6ksr2> <button class="search-trigger" id="search-trigger" aria-label="Search (Ctrl+K)" data-astro-cid-euff75kw> <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-euff75kw> <circle cx="11" cy="11" r="8" data-astro-cid-euff75kw></circle><line x1="21" y1="21" x2="16.65" y2="16.65" data-astro-cid-euff75kw></line> </svg> <span class="search-label" data-astro-cid-euff75kw>Search</span> <kbd data-astro-cid-euff75kw>Ctrl K</kbd> </button> <dialog id="search-dialog" data-astro-cid-euff75kw> <div class="search-container" data-astro-cid-euff75kw> <div class="search-header" data-astro-cid-euff75kw> <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-euff75kw> <circle cx="11" cy="11" r="8" data-astro-cid-euff75kw></circle><line x1="21" y1="21" x2="16.65" y2="16.65" data-astro-cid-euff75kw></line> </svg> <input type="text" id="search-input" placeholder="Search posts..." autocomplete="off" data-astro-cid-euff75kw> <button class="search-close" id="search-close" aria-label="Close search" data-astro-cid-euff75kw> <kbd data-astro-cid-euff75kw>Esc</kbd> </button> </div> <div id="search-results" class="search-results" data-astro-cid-euff75kw></div> </div> </dialog>  <script>
+	var pagefindInstance = null;
+
+	async function getPagefind() {
+		if (pagefindInstance) return pagefindInstance;
+		try {
+			pagefindInstance = await import('/pagefind/pagefind.js');
+			await pagefindInstance.init();
+		} catch (e) {
+			pagefindInstance = null;
+		}
+		return pagefindInstance;
+	}
+
+	function setupSearch() {
+		var trigger = document.getElementById('search-trigger');
+		var dialog = document.getElementById('search-dialog');
+		var input = document.getElementById('search-input');
+		var closeBtn = document.getElementById('search-close');
+		var results = document.getElementById('search-results');
+
+		if (!trigger || !dialog || !input || !results) return;
+
+		function open() {
+			dialog.showModal();
+			input.value = '';
+			results.innerHTML = '';
+			input.focus();
+		}
+
+		function close() {
+			dialog.close();
+		}
+
+		trigger.addEventListener('click', open);
+		if (closeBtn) closeBtn.addEventListener('click', close);
+
+		dialog.addEventListener('click', function(e) {
+			if (e.target === dialog) close();
+		});
+
+		document.addEventListener('keydown', function(e) {
+			if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+				e.preventDefault();
+				if (dialog.open) close();
+				else open();
+			}
+		});
+
+		var debounceTimer;
+		input.addEventListener('input', function() {
+			clearTimeout(debounceTimer);
+			debounceTimer = setTimeout(function() { search(input.value); }, 200);
+		});
+
+		async function search(query) {
+			if (!query.trim()) {
+				results.innerHTML = '';
+				return;
+			}
+
+			var pf = await getPagefind();
+			if (!pf) {
+				results.innerHTML = '<div class="search-empty">Search index not available</div>';
+				return;
+			}
+
+			var searchResult = await pf.search(query);
+			if (searchResult.results.length === 0) {
+				results.innerHTML = '<div class="search-empty">No results found</div>';
+				return;
+			}
+
+			var items = await Promise.all(
+				searchResult.results.slice(0, 8).map(function(r) { return r.data(); })
+			);
+
+			results.innerHTML = items
+				.map(function(item) {
+					var url = item.url;
+					var title = (item.meta && item.meta.title) || url;
+					var excerpt = item.excerpt || '';
+					return '<a class="search-result" href="' + url + '">' +
+						'<div class="search-result-title">' + title + '</div>' +
+						(excerpt ? '<div class="search-result-excerpt">' + excerpt + '</div>' : '') +
+					'</a>';
+				})
+				.join('');
+		}
+	}
+
+	setupSearch();
+	document.addEventListener('astro:after-swap', setupSearch);
+</script> <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme" data-astro-cid-x3pjskd3> <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-x3pjskd3> <circle cx="12" cy="12" r="5" data-astro-cid-x3pjskd3></circle><line x1="12" y1="1" x2="12" y2="3" data-astro-cid-x3pjskd3></line><line x1="12" y1="21" x2="12" y2="23" data-astro-cid-x3pjskd3></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" data-astro-cid-x3pjskd3></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" data-astro-cid-x3pjskd3></line><line x1="1" y1="12" x2="3" y2="12" data-astro-cid-x3pjskd3></line><line x1="21" y1="12" x2="23" y2="12" data-astro-cid-x3pjskd3></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" data-astro-cid-x3pjskd3></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" data-astro-cid-x3pjskd3></line> </svg> <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-x3pjskd3> <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" data-astro-cid-x3pjskd3></path> </svg> </button>  <script type="module">function t(){const e=localStorage.getItem("theme");return e==="light"||e==="dark"?e:window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}function n(e){document.documentElement.setAttribute("data-theme",e),localStorage.setItem("theme",e)}function r(){n(t()),document.getElementById("theme-toggle")?.addEventListener("click",()=>{const e=t();n(e==="dark"?"light":"dark")})}r();document.addEventListener("astro:after-swap",r);</script> <div class="lang-switcher" data-astro-cid-a2mxz4y6>  <span class="lang-active" data-astro-cid-a2mxz4y6>EN</span> <span class="lang-sep" data-astro-cid-a2mxz4y6>/</span> <a href="/ko/blog/how-many-ai-code-reviews/" class="lang-link" hreflang="ko" lang="ko" data-astro-cid-a2mxz4y6>KO</a> </div>  </div> </div> </nav> </header>  <main class="sheet has-toc" data-astro-cid-bvzihdzo> <article data-pagefind-body data-astro-cid-bvzihdzo> <header class="band post-header" data-astro-cid-bvzihdzo> <div class="post-header-top" data-astro-cid-bvzihdzo> <a href="/blog/" class="back-link" data-astro-cid-bvzihdzo>&larr; Essays</a> <span class="post-locator" data-astro-cid-bvzihdzo>
+/Post &middot; 01 of 23  &middot; <a href="/blog/?category=embedded-dev" style="color:#98b294" data-astro-cid-bvzihdzo>Embedded Dev</a> </span> </div> <h1 data-astro-cid-bvzihdzo>How Many AI Code Reviews Is Enough?</h1> <p class="post-dek" data-astro-cid-bvzihdzo>400 LLM calls on one codebase. A single review pass finds 34% of the real defects, and the four most-repeated findings were all false positives.</p> <div class="meta" data-astro-cid-bvzihdzo> <time datetime="2026-08-22T00:00:00.000Z"> Aug 22, 2026 </time>  <span class="meta-sep" data-astro-cid-bvzihdzo>&middot;</span><span class="reading-time" data-astro-cid-rafwukvt>28 min read</span>  <span class="meta-sep" data-astro-cid-bvzihdzo>&middot;</span> <button class="upvote upvote-inline" type="button" data-slug="how-many-ai-code-reviews" data-variant="inline" data-upvote-btn data-label-upvote="Upvote" data-label-upvoted="Upvoted" aria-label="Upvote this post" aria-pressed="false" disabled data-astro-cid-xtsolmtf> <svg class="upvote-icon" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" data-astro-cid-xtsolmtf> <path d="M8 2.5 L14.5 12.5 L1.5 12.5 Z" data-astro-cid-xtsolmtf></path> </svg>  <span class="upvote-count" data-upvote-count data-astro-cid-xtsolmtf>--</span> </button>  <script type="module">function u(t){return t.endsWith("-ko")?t.slice(0,-3):t}function l(t){try{return localStorage.getItem("upvoted:"+t)==="1"}catch{return!1}}function f(t){try{localStorage.setItem("upvoted:"+t,"1")}catch{}}function r(t,n,e){const o=t.querySelector("[data-upvote-count]");if(o&&(o.textContent=String(n)),t.setAttribute("aria-pressed",e?"true":"false"),t.disabled=e,t.dataset.variant==="large"){const a=t.querySelector(".upvote-label");a&&(a.textContent=e?t.dataset.labelUpvoted??"Upvoted":t.dataset.labelUpvote??"Upvote")}}async function p(t){if(new Set(t.map(o=>u(o.dataset.slug??"")).filter(Boolean)).size===0)return;let e={};try{const o=await fetch("/api/upvotes");o.ok&&(e=(await o.json()).counts??{})}catch{}window.__upvoteCounts=e;for(const o of t){const s=u(o.dataset.slug??""),a=e[s]??0;r(o,a,l(s))}}async function v(t){const n=t.dataset.slug??"",e=u(n);if(!e||l(e))return;const s=t.querySelector("[data-upvote-count]")?.textContent??"0",a=parseInt(s,10)||0;r(t,a+1,!0),t.setAttribute("data-upvote-flash","1"),setTimeout(()=>t.removeAttribute("data-upvote-flash"),400);try{const c=await fetch("/api/upvotes/"+encodeURIComponent(e),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({website:""})});if(c.ok||c.status===409){const i=await c.json();typeof i.count=="number"&&r(t,i.count,!0),f(e)}else r(t,a,!1)}catch{r(t,a,!1)}}function d(){const t=Array.from(document.querySelectorAll("[data-upvote-btn]"));if(t.length!==0){for(const n of t)n.addEventListener("click",e=>{e.preventDefault(),e.stopPropagation(),v(n)});p(t)}}d();document.addEventListener("astro:after-swap",d);</script> <span class="meta-sep" data-astro-cid-bvzihdzo>&middot;</span> <div class="share-wrap share-inline" data-share-wrap data-astro-cid-uz5iaaom> <button type="button" class="share-btn share-btn-inline" data-share-toggle data-url="https://edgelog.dev/blog/how-many-ai-code-reviews/" data-label-copy="Copy link" data-label-copied="Copied" aria-haspopup="menu" aria-expanded="false" aria-label="Share" data-astro-cid-uz5iaaom> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-astro-cid-uz5iaaom> <circle cx="12" cy="4" r="2" data-astro-cid-uz5iaaom></circle> <circle cx="4" cy="8" r="2" data-astro-cid-uz5iaaom></circle> <circle cx="12" cy="12" r="2" data-astro-cid-uz5iaaom></circle> <line x1="5.7" y1="7" x2="10.3" y2="5" data-astro-cid-uz5iaaom></line> <line x1="5.7" y1="9" x2="10.3" y2="11" data-astro-cid-uz5iaaom></line> </svg>  </button> <div class="share-menu" role="menu" data-share-menu hidden data-astro-cid-uz5iaaom> <button type="button" class="share-item" role="menuitem" data-share-copy data-astro-cid-uz5iaaom> <span class="share-item-label" data-astro-cid-uz5iaaom>Copy link</span> </button> <a class="share-item" role="menuitem" href="https://twitter.com/intent/tweet?text=How%20Many%20AI%20Code%20Reviews%20Is%20Enough%3F&url=https%3A%2F%2Fedgelog.dev%2Fblog%2Fhow-many-ai-code-reviews%2F" target="_blank" rel="noopener noreferrer" data-astro-cid-uz5iaaom> <span class="share-item-label" data-astro-cid-uz5iaaom>Share on X</span> </a> <a class="share-item" role="menuitem" href="https://news.ycombinator.com/submitlink?u=https%3A%2F%2Fedgelog.dev%2Fblog%2Fhow-many-ai-code-reviews%2F&t=How%20Many%20AI%20Code%20Reviews%20Is%20Enough%3F" target="_blank" rel="noopener noreferrer" data-astro-cid-uz5iaaom> <span class="share-item-label" data-astro-cid-uz5iaaom>Submit to Hacker News</span> </a> <a class="share-item" role="menuitem" href="https://www.reddit.com/submit?url=https%3A%2F%2Fedgelog.dev%2Fblog%2Fhow-many-ai-code-reviews%2F&title=How%20Many%20AI%20Code%20Reviews%20Is%20Enough%3F" target="_blank" rel="noopener noreferrer" data-astro-cid-uz5iaaom> <span class="share-item-label" data-astro-cid-uz5iaaom>Submit to Reddit</span> </a> </div> </div>  <script type="module">function d(){const i=Array.from(document.querySelectorAll("[data-share-wrap]"));if(!i.length)return;function c(a){for(const e of i){if(e===a)continue;const t=e.querySelector("[data-share-menu]"),n=e.querySelector("[data-share-toggle]");t&&(t.hidden=!0),n&&n.setAttribute("aria-expanded","false")}}for(const a of i){const e=a.querySelector("[data-share-toggle]"),t=a.querySelector("[data-share-menu]"),n=a.querySelector("[data-share-copy]");!e||!t||(e.addEventListener("click",r=>{r.preventDefault(),r.stopPropagation();const s=e.getAttribute("aria-expanded")==="true";c(a),s?(t.hidden=!0,e.setAttribute("aria-expanded","false")):(t.hidden=!1,e.setAttribute("aria-expanded","true"),t.querySelector(".share-item")?.focus())}),t.addEventListener("keydown",r=>{r.key==="Escape"&&(t.hidden=!0,e.setAttribute("aria-expanded","false"),e.focus())}),n&&n.addEventListener("click",async r=>{r.preventDefault();const s=e.dataset.url??window.location.href,o=n.querySelector(".share-item-label"),l=e.dataset.labelCopy??"Copy link",u=e.dataset.labelCopied??"Copied";try{await navigator.clipboard.writeText(s),o&&(o.textContent=u),setTimeout(()=>{o&&(o.textContent=l)},1500)}catch{}}))}document.addEventListener("click",a=>{const e=a.target;i.some(n=>n.contains(e))||c()})}d();document.addEventListener("astro:after-swap",d);</script>  <span class="meta-sep" data-astro-cid-bvzihdzo>&middot;</span> <span class="tags" data-astro-cid-bvzihdzo> <a href="/tags/ai-code-review/" data-astro-cid-bvzihdzo>#ai-code-review</a><a href="/tags/llm-agents/" data-astro-cid-bvzihdzo>#llm-agents</a><a href="/tags/harness/" data-astro-cid-bvzihdzo>#harness</a><a href="/tags/benchmark/" data-astro-cid-bvzihdzo>#benchmark</a><a href="/tags/code-review/" data-astro-cid-bvzihdzo>#code-review</a> </span>  </div> </header>  <figure class="hero-figure" data-astro-cid-bvzihdzo> <img src="/_astro/how-many-ai-code-reviews-hero.BU-znzkh_uxMa1.svg" alt="How Many AI Code Reviews Is Enough?" data-astro-cid-bvzihdzo="true" loading="lazy" decoding="async" fetchpriority="auto" width="960" height="480"> </figure>  <div class="band prose-band" data-astro-cid-bvzihdzo> <details class="toc-mobile" open data-astro-cid-xvrfupwn><summary data-astro-cid-xvrfupwn>On this page</summary><ul data-astro-cid-xvrfupwn><li data-astro-cid-xvrfupwn><a href="#the-vocabulary-in-this-write-up" data-astro-cid-xvrfupwn>The vocabulary in this write-up</a></li><li data-astro-cid-xvrfupwn><a href="#the-conclusions-first" data-astro-cid-xvrfupwn>The conclusions first</a></li><li data-astro-cid-xvrfupwn><a href="#part-1-how-much-does-one-review-actually-see" data-astro-cid-xvrfupwn>Part 1. How much does one review actually see?</a></li><li data-astro-cid-xvrfupwn><a href="#part-2-the-bug-i-blamed-on-the-ai-was-in-the-tests" data-astro-cid-xvrfupwn>Part 2. The bug I blamed on the AI was in the tests</a></li><li data-astro-cid-xvrfupwn><a href="#part-3-findings-remain-even-when-the-contract-is-fully-met" data-astro-cid-xvrfupwn>Part 3. Findings remain even when the contract is fully met</a></li><li data-astro-cid-xvrfupwn><a href="#part-4-what-actually-changed-the-code" data-astro-cid-xvrfupwn>Part 4. What actually changed the code</a></li><li data-astro-cid-xvrfupwn><a href="#part-5-the-strongest-lever-was-letting-the-reviewer-read-the-repo" data-astro-cid-xvrfupwn>Part 5. The strongest lever was letting the reviewer read the repo</a></li><li data-astro-cid-xvrfupwn><a href="#part-6-so-how-do-you-run-this" data-astro-cid-xvrfupwn>Part 6. So how do you run this?</a></li><li data-astro-cid-xvrfupwn><a href="#conclusion" data-astro-cid-xvrfupwn>Conclusion</a></li><li data-astro-cid-xvrfupwn><a href="#review-many-times-fix-once" data-astro-cid-xvrfupwn>Review many times. Fix once.</a></li></ul></details><nav class="toc" aria-label="Table of contents" data-astro-cid-xvrfupwn><div class="toc-label" data-astro-cid-xvrfupwn>On this page</div><ul data-astro-cid-xvrfupwn><li data-astro-cid-xvrfupwn><a href="#the-vocabulary-in-this-write-up" data-astro-cid-xvrfupwn>The vocabulary in this write-up</a></li><li data-astro-cid-xvrfupwn><a href="#the-conclusions-first" data-astro-cid-xvrfupwn>The conclusions first</a></li><li data-astro-cid-xvrfupwn><a href="#part-1-how-much-does-one-review-actually-see" data-astro-cid-xvrfupwn>Part 1. How much does one review actually see?</a></li><li data-astro-cid-xvrfupwn><a href="#part-2-the-bug-i-blamed-on-the-ai-was-in-the-tests" data-astro-cid-xvrfupwn>Part 2. The bug I blamed on the AI was in the tests</a></li><li data-astro-cid-xvrfupwn><a href="#part-3-findings-remain-even-when-the-contract-is-fully-met" data-astro-cid-xvrfupwn>Part 3. Findings remain even when the contract is fully met</a></li><li data-astro-cid-xvrfupwn><a href="#part-4-what-actually-changed-the-code" data-astro-cid-xvrfupwn>Part 4. What actually changed the code</a></li><li data-astro-cid-xvrfupwn><a href="#part-5-the-strongest-lever-was-letting-the-reviewer-read-the-repo" data-astro-cid-xvrfupwn>Part 5. The strongest lever was letting the reviewer read the repo</a></li><li data-astro-cid-xvrfupwn><a href="#part-6-so-how-do-you-run-this" data-astro-cid-xvrfupwn>Part 6. So how do you run this?</a></li><li data-astro-cid-xvrfupwn><a href="#conclusion" data-astro-cid-xvrfupwn>Conclusion</a></li><li data-astro-cid-xvrfupwn><a href="#review-many-times-fix-once" data-astro-cid-xvrfupwn>Review many times. Fix once.</a></li></ul></nav><script type="module">const d=Array.from(document.querySelectorAll(".toc a"));if(d.length>0){const i=d.map(e=>({link:e,id:e.getAttribute("href").slice(1),isH3:e.parentElement?.classList.contains("toc-h3")??!1,heading:document.getElementById(e.getAttribute("href").slice(1))})).filter(e=>e.heading),s=()=>{let e=-1;for(let t=0;t<i.length;t++)i[t].heading.getBoundingClientRect().top<=100&&(e=t);e<0&&(e=0);const n=new Set;if(e>=0&&(n.add(i[e].id),i[e].isH3)){for(let t=e-1;t>=0;t--)if(!i[t].isH3){n.add(i[t].id);break}}for(const{link:t,id:o}of i)t.classList.toggle("active",n.has(o))};window.addEventListener("scroll",s,{passive:!0}),s()}</script> <div class="prose" data-astro-cid-bvzihdzo>  
+<blockquote>
+<p>This is the long-form record of the experiments — and the mistakes — that produced
+<code>harness-bench</code>, told as one narrative.
+For the numbers alone see <a href="https://github.com/Ecro/harness-bench/blob/main/docs/review-convergence/FINDINGS.md"><code>FINDINGS.md</code></a>; for the procedure alone see
+<a href="https://github.com/Ecro/harness-bench/blob/main/docs/review-convergence/PRESCRIPTION.md"><code>PRESCRIPTION.md</code></a>; for the reproducible benchmark results see
+<a href="https://github.com/Ecro/harness-bench/blob/main/docs/review-convergence/README.md"><code>README.md</code></a>.
+What these numbers <strong>cannot</strong> be used to claim is kept separately in
+<a href="https://github.com/Ecro/harness-bench/blob/main/docs/LIMITS.md"><code>LIMITS.md</code></a>.</p>
+<p>The study actually spent about 400 <strong>LLM calls</strong>. That is not a count of review
+calls only, nor of experiment runs.</p>
+</blockquote>
+<hr/>
+<h2 id="the-vocabulary-in-this-write-up">The vocabulary in this write-up</h2>
+<p>The study measured review as <strong>two separate roles</strong>, and that split is the backbone of
+everything below.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>reviewer   reads the code and reports problems. Never touches the code</span></span>
+<span class="line"><span>fixer      takes those reports and actually edits the code. May decline</span></span></code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>term</th><th>meaning</th></tr></thead><tbody><tr><td><strong>finding</strong></td><td>one item a reviewer reported. Whether it is real is a separate question</td></tr><tr><td><strong>false positive</strong></td><td>a finding reported as a defect that is not one</td></tr><tr><td><strong>distinct / raw findings</strong></td><td>the count after findings naming the same problem are grouped / the total before grouping</td></tr><tr><td><strong>call</strong></td><td>one model invocation. The unit of cost</td></tr><tr><td><strong>round / loop</strong></td><td>one review→fix pass is a round; repeating that pass several times is a loop</td></tr><tr><td><strong>contract</strong></td><td>the specification pinning what the code must do, and the tests that check it</td></tr><tr><td><strong>compliance</strong></td><td>how much of that contract holds. <code>19/19</code> and <code>23/23</code> mean every criterion and every test passed</td></tr><tr><td><strong>public surface</strong></td><td>the parts other code depends on — names, signatures, documented behaviour</td></tr><tr><td><strong>file-only / repo access</strong></td><td>the reviewer is given the target file alone / the source tree is mounted read-only</td></tr><tr><td><strong>precision / recall</strong></td><td>the share of reported findings that were real / the share of existing defects that were found</td></tr><tr><td><strong>churn</strong></td><td>lines added and deleted in a round. <em>How much was touched</em>, not a quality measure</td></tr><tr><td><strong>decline rate</strong></td><td>the share of handed-over findings the fixer refused to apply, with a stated reason</td></tr><tr><td><strong>fan-out</strong></td><td>splitting one reviewer into several specialists instead of asking one to cover everything</td></tr></tbody></table>
+<p>Terms that appear only once — ARI, mutation testing, differential testing, the null
+distribution, the canary — are explained where they first appear.</p>
+<hr/>
+<h2 id="the-conclusions-first">The conclusions first</h2>
+<p>The study began with one question: <strong>how many times do you have to run an AI code review before
+it is enough?</strong></p>
+<p>I started out thinking it was simple.</p>
+<blockquote>
+<p>Review, fix, review again — surely it gets better each time?</p>
+</blockquote>
+<p>The results were not that simple.</p>
+<p>What survived:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th style="text-align:right"></th><th>What survived</th><th>Evidence</th><th>Where</th></tr></thead><tbody><tr><td style="text-align:right">1</td><td>Repeating a review and repeating a review→fix loop are two different activities</td><td>Review alone took real-defect coverage from <code>34% → 61% → 76%</code>. Alternating review and fix produced no compliance gain while the code grew <code>+24%</code> to <code>+152%</code></td><td><a href="#part-1-how-much-does-one-review-actually-see">Part 1</a></td></tr><tr><td style="text-align:right">2</td><td>One review is not enough</td><td>Reviewing the same unchanged code repeatedly surfaces different defects each time. Some real defects showed up in only 1 run out of 10</td><td><a href="#part-1-how-much-does-one-review-actually-see">Part 1</a></td></tr><tr><td style="text-align:right">3</td><td>Being reported many times is no guarantee of being real</td><td>Given a single file, the false positives were reported more often than the real defects, because every reviewer was missing the same information</td><td><a href="#part-1-how-much-does-one-review-actually-see">Part 1</a></td></tr><tr><td style="text-align:right">4</td><td>Letting the reviewer read the repository was the strongest false-positive killer</td><td>With one file only, 29% of the distinct defects were false. Given the callers, headers and init path, the same four vanished in both vendors’ models</td><td><a href="#part-5-the-strongest-lever-was-letting-the-reviewer-read-the-repo">Part 5</a></td></tr><tr><td style="text-align:right">5</td><td>A quiet model has not necessarily finished</td><td>One model returned “nothing to report” from round 3 onward; given a structured prompt on the same code, it kept finding failure modes it had never mentioned</td><td><a href="#part-3-findings-remain-even-when-the-contract-is-fully-met">Part 3</a></td></tr><tr><td style="text-align:right">6</td><td>A green test suite does not mean the code got better</td><td>Compliance was identical across 47 rounds while size and complexity diverged sharply between arms</td><td><a href="#part-3-findings-remain-even-when-the-contract-is-fully-met">Part 3</a></td></tr></tbody></table>
+<p>So the working prescription is short.</p>
+
+<blockquote>
+<p><strong>Review many times. Fix once.</strong></p>
+</blockquote>
+
+<p>And if the fix changed enough of the code, what follows is not a <em>re-review</em> — it is the <strong>first
+review of newly written code</strong>.</p>
+<blockquote>
+<p><strong>How far those six lines carry.</strong> Three of them have been reproduced under a different
+condition or a different model: that repeating a review and repeating a review→fix loop are
+different activities, that under a single-file scope the most confidently reported finding is
+the most suspect, and that contract compliance discriminates nothing. The rest were each
+observed once.</p>
+<p>And this is not a model leaderboard. What is measured is the loop, the prompt, the tool access
+and the stopping rule wrapped around a model, not which model is smarter. Cited as a ranking,
+it is misread.</p>
+</blockquote>
+<hr/>
+<h2 id="part-1-how-much-does-one-review-actually-see">Part 1. How much does one review actually see?</h2>
+<h3 id="1-it-started-as-a-simple-suspicion">1. It started as a simple suspicion</h3>
+<p>Our workflow had an AI review step in it.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>write code</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>AI review</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>fix</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>AI review again</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>fix again if needed</span></span></code></pre>
+<p>It looped up to three rounds automatically.</p>
+<p>That structure rests on one assumption:</p>
+<blockquote>
+<p><strong>More review makes the code better.</strong></p>
+</blockquote>
+<p>The problem is that the sentence looks so obvious that nobody had measured it.</p>
+<p>So I measured it.</p>
+<p>What I learned most in this study, though, was not about AI review — it was about <strong>how to
+measure</strong>. My own conclusions kept getting overturned as the experiments came in, almost always
+in the less dramatic direction.</p>
+<p>The clearest case:</p>
+<blockquote>
+<p>“The AI’s fixes reproduced the same bug 4 times out of 4.”</p>
+</blockquote>
+<p>That is what it looked like at first.</p>
+<p>It turned out to be <strong>not a bug at all — the tests were pinning a state production can never
+reach</strong>.</p>
+<p>This document is the accumulation of corrections like that one.</p>
+<hr/>
+<h3 id="2-ten-reviews-of-the-same-unchanged-code">2. Ten reviews of the same unchanged code</h3>
+<p>The first target was a real firmware module.</p>
+<ul>
+<li>file: <code>swing_capture.c</code></li>
+<li>size: 359 lines</li>
+<li>shape: a ring buffer written by a sensor thread and read by an ML thread</li>
+<li>problem surface: concurrency, state invariants, resource limits</li>
+<li>tests: 18</li>
+</ul>
+<p>Here the code was <strong>never changed</strong>; the same input was reviewed 10 times independently.</p>
+<p>Each review ran in a completely fresh process. Asking repeatedly inside one conversation lets
+the previous answer contaminate the next review.</p>
+<p>The reviewer was given the target code only; the repository was removed at the filesystem level.</p>
+<h4 id="21-the-results-moved-more-than-expected">2.1 The results moved more than expected</h4>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>run:       01  02  03  04  05  06  07  08  09  10</span></span>
+<span class="line"><span>findings:   6   6   5   7   5   7   9   5   4   7</span></span></code></pre>
+<p>Same code — one run reported 4, another 9.</p>
+<p><strong>A 2.25× spread.</strong></p>
+<p>Clustering the 61 findings from those 10 reviews by underlying defect gave 14 distinct groups.</p>
+<p>The clustering was checked for arbitrariness:</p>
+<ul>
+<li>reshuffled and re-clustered three times: <code>ARI 1.000</code></li>
+<li>a different vendor’s model clustering the same 61 findings: the same 14 groups</li>
+</ul>
+<blockquote>
+<p><strong>ARI</strong> (Adjusted Rand Index) — how far two clusterings agree on the same partition. <code>1.000</code>
+is identical; <code>0</code> is no better than grouping at random. It is used here to check that
+“which findings are the same defect” does not depend on who (or which model) grouped them,
+or in what order.</p>
+</blockquote>
+<p>On that basis, the fraction of distinct defects found as review count rises:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>1 review  :  6.1 / 14  = 44%</span></span>
+<span class="line"><span>3 reviews : 10.0 / 14  = 71%</span></span>
+<span class="line"><span>5 reviews : 11.6 / 14  = 83%</span></span>
+<span class="line"><span>8 reviews : 13.2 / 14  = 94%</span></span></code></pre>
+<p>It would have been easy to stop here and conclude:</p>
+<blockquote>
+<p>“One AI review sees about half.”</p>
+</blockquote>
+<p>Then I adjudicated the 14 against the whole codebase, and the story changed.</p>
+<hr/>
+<h3 id="3-the-most-frequently-reported-findings-were-the-false-ones">3. The most frequently reported findings were the false ones</h3>
+<p>Of the 14 groups, 10 were real and 4 were false.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>real defects  10</span></span>
+<span class="line"><span>false          4</span></span>
+<span class="line"><span>false rate    29%</span></span></code></pre>
+<blockquote>
+<p><strong>False positive</strong> — a finding reported as a defect that is not one. Throughout this document,
+the real/false verdicts were made by reading <strong>the whole repository</strong>, not the target file.</p>
+</blockquote>
+<p>The problem was <em>where</em> the false ones sat.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>mean detection frequency, the 4 false    6.8 / 10</span></span>
+<span class="line"><span>mean detection frequency, the 10 real    3.4 / 10</span></span></code></pre>
+<p><strong>Four of the five most frequently reported findings were false.</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>group</th><th style="text-align:right">freq</th><th>what the reviewer claimed</th><th>what is actually true</th></tr></thead><tbody><tr><td>D02</td><td style="text-align:right">8/10</td><td>descriptors left in the queue are corrupted on re-init</td><td><code>init()</code> is called exactly once, at boot</td></tr><tr><td>D03</td><td style="text-align:right">7/10</td><td>underflow when <code>ring_total == 0</code></td><td><code>ring_push()</code> always runs first; the state is unreachable</td></tr><tr><td>D04</td><td style="text-align:right">7/10</td><td><code>force_expire()</code> is called from another thread, so there is a race</td><td>it is the same <code>sensor_thread</code></td></tr><tr><td>D07</td><td style="text-align:right">5/10</td><td>misbehaves under a particular call order</td><td>the real call order is different</td></tr></tbody></table>
+<img src="/review-consensus-false-positives.svg" alt="Across ten independent reviews the four false positives were reported 6.8 times on average while the ten real defects averaged 3.4. Four of the five most-reported groups are false positives."/>
+<p>The four had one thing in common.</p>
+<p><strong>Inside the target file none of them can be refuted; you have to look at another file to see
+they are wrong.</strong></p>
+<ul>
+<li>call order</li>
+<li>init path</li>
+<li>which thread actually runs it</li>
+<li>invariants held outside the module</li>
+</ul>
+<p>Every reviewer saw the same single file. So every reviewer was missing the same facts.</p>
+<p>And so they converged, repeatedly, on the same wrong conclusion.</p>
+<p>That gave the study one of its central lessons:</p>
+<blockquote>
+<p><strong>Agreement is not evidence of truth.</strong></p>
+<p>Sometimes many reviewers converge on the same wrong answer precisely because none of them has
+the information that would settle it.</p>
+</blockquote>
+<p>Excluding the false positives, one review’s real-defect coverage is not 44% but <strong>34%</strong>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Reviews</th><th style="text-align:right">Against all 14 distinct groups</th><th style="text-align:right">Against the 10 adjudicated real defects</th></tr></thead><tbody><tr><td>1</td><td style="text-align:right">44%</td><td style="text-align:right">34%</td></tr><tr><td>3</td><td style="text-align:right">71%</td><td style="text-align:right">61%</td></tr><tr><td>5</td><td style="text-align:right">83%</td><td style="text-align:right">76%</td></tr></tbody></table>
+<p>So the accurate sentence for this data is:</p>
+<blockquote>
+<p><strong>One review sees about a third of the real defects.</strong></p>
+</blockquote>
+<hr/>
+<h2 id="part-2-the-bug-i-blamed-on-the-ai-was-in-the-tests">Part 2. The bug I blamed on the AI was in the tests</h2>
+<h3 id="4-does-alternating-review-and-fix-help">4. Does alternating review and fix help?</h3>
+<p>Next I built the actual auto-fix loop.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>review → fix → review → fix → ...</span></span></code></pre>
+<p>Five rounds made one loop; the loop ran three times.</p>
+<p>The fixing AI could not see the tests. The tests were run separately after each round.</p>
+<p>The raw result looked alarming.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>12 of 15 rounds ended RED</span></span>
+<span class="line"><span>four independent runs broke exactly the same 4 tests</span></span></code></pre>
+<p>Those “four” are the round 1 of each of the three loops, plus one separate gate run. The four
+differed in finding count (4, 5, 6, 7) and in resulting code size (439–505 lines), and still
+broke the same tests.</p>
+<p>I was nearly convinced:</p>
+<blockquote>
+<p>“The AI keeps writing the same bug.”</p>
+</blockquote>
+<p>That conclusion was wrong.</p>
+<h4 id="41-what-broke-was-not-the-code-but-the-tests-assumption">4.1 What broke was not the code but the tests’ assumption</h4>
+<p>The core change the AI added was a guard:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="c"><code><span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">if</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8"> (ring_total </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">==</span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF"> 0</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583">    return</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>Looking at the one file, that is reasonable defensive code.</p>
+<p>The catch is that in production, <code>ring_push()</code> always runs before that function is reached.</p>
+<p>That is:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>production:</span></span>
+<span class="line"><span>ring_push()</span></span>
+<span class="line"><span>  ↓</span></span>
+<span class="line"><span>arming()</span></span></code></pre>
+<p>Given that order, arming cannot be called with <code>ring_total == 0</code>.</p>
+<p>But several unit tests called arming right after <code>reset()</code>, with no push.</p>
+<p>The tests were pinning <strong>a state that does not exist in production</strong>.</p>
+<p>So the guard the AI added changed nothing about real behaviour, and broke the tests anyway.</p>
+<blockquote>
+<p><strong>The code did not break. Only the tests did.</strong></p>
+</blockquote>
+<p>After that, later experiments stopped treating tests as a plain answer key.</p>
+<p>When a test fails, the first question is:</p>
+<blockquote>
+<p>Is this test pinning a state production can actually reach?</p>
+</blockquote>
+<hr/>
+<h3 id="5-so-i-built-the-contract-first-and-started-over">5. So I built the contract first and started over</h3>
+<p>The first experiment’s real weakness was its oracle.</p>
+<blockquote>
+<p><strong>Oracle</strong> — whatever decides that a result is right or wrong. Here the acceptance suite is
+the oracle. If the oracle itself is wrong, every number measured on top of it is void.</p>
+</blockquote>
+<p>Whatever a failing test showed, you could always answer:</p>
+<blockquote>
+<p>“Wasn’t that test over-specified?”</p>
+</blockquote>
+<p>So the second task inverted the order.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>1. write the SPEC</span></span>
+<span class="line"><span>2. freeze 19 acceptance criteria</span></span>
+<span class="line"><span>3. write tests from the SPEC only  (the 19 criteria yielded 23 acceptance tests)</span></span>
+<span class="line"><span>4. write the implementation from the SPEC only</span></span>
+<span class="line"><span>5. the implementer never sees the tests</span></span>
+<span class="line"><span>6. measure compliance with the acceptance tests</span></span>
+<span class="line"><span>7. iterate review → fix</span></span></code></pre>
+<p>The target was a Python retry-policy module with exponential backoff, full jitter and a circuit
+breaker.</p>
+<blockquote>
+<p><strong>Acceptance criterion (AC)</strong> — one verifiable sentence carved out of what the spec
+guarantees. “Frozen” means fixed before any implementation exists and never edited after —
+the only defence against <em>“the tests were fitted to the implementation”</em>.</p>
+</blockquote>
+<p>From here on, “23/23” means all acceptance tests pass, and “19/19” means all 19 criteria hold.</p>
+<h4 id="51-the-oracle-was-validated-first">5.1 The oracle was validated first</h4>
+<p>Three independent implementations passed the contract on the first attempt.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>reference implementation   23/23</span></span>
+<span class="line"><span>codex independent build    23/23</span></span>
+<span class="line"><span>claude build               23/23</span></span></code></pre>
+<p>Then I checked that the suite actually catches wrong behaviour.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>correct implementation             19/19</span></span>
+<span class="line"><span>AC-19 deliberately violated        18/19  → fails exactly AC-19</span></span>
+<span class="line"><span>code that will not even import      0/19</span></span></code></pre>
+<img src="/review-oracle-validation.svg" alt="Write the SPEC, freeze 19 acceptance criteria, derive 23 tests from the SPEC alone, then implement with the tests hidden. Three positive controls each pass 23 of 23; a deliberate AC-19 violation scores 18 of 19 and fails exactly AC-19."/>
+<p>Only now was there a basis for saying “a failure means a spec violation”.</p>
+<hr/>
+<h2 id="part-3-findings-remain-even-when-the-contract-is-fully-met">Part 3. Findings remain even when the contract is fully met</h2>
+<h3 id="6-reviewers-report-findings-even-on-code-that-is-already-correct">6. Reviewers report findings even on code that is already correct</h3>
+<p>The starting point is the verified 19/19 implementation.</p>
+<p>On compliance alone, there is nothing left to improve.</p>
+<p>Show it to a reviewer anyway, and the findings keep coming.</p>
+<h5 id="claude">Claude</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>findings per round (7 runs per condition)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>bare prompt:</span></span>
+<span class="line"><span>5, 5, 6, 8, 7, 8, 6</span></span>
+<span class="line"><span>median 6</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>structured prompt:</span></span>
+<span class="line"><span>11, 11, 12, 11, 12, 12, 11</span></span>
+<span class="line"><span>median 12</span></span></code></pre>
+<p>All 14 runs returned findings.</p>
+<blockquote>
+<p><strong>bare vs structured prompt</strong> — bare is close to “review this code” and nothing more;
+structured prescribes what to look at, in what order, and in what output format. The two arms
+differ in the prompt only — same code, same model, same number of rounds.</p>
+</blockquote>
+<p>And many of them were not nitpicks:</p>
+<ul>
+<li>reading the <code>state</code> property alone triggers a state transition</li>
+<li>catching <code>BaseException</code> counts <code>KeyboardInterrupt</code> as a circuit failure</li>
+<li>the backoff exponent can overflow instead of saturating</li>
+</ul>
+<p>None of these live inside the 19 acceptance criteria.</p>
+<p>Passing every test does not mean there is nothing to review.</p>
+<blockquote>
+<p><strong>The contract does not describe the whole of the code.</strong></p>
+</blockquote>
+<hr/>
+<h3 id="7-but-the-models-differed-in-how-they-decide-they-are-done">7. But the models differed in how they decide they are done</h3>
+<p>The same code and the same bare prompt went to codex.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>findings per round (7 runs per condition)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>claude bare</span></span>
+<span class="line"><span>5, 5, 6, 8, 7, 8, 6</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>codex bare</span></span>
+<span class="line"><span>1, 1, 1, 1, 0, 1, 1</span></span></code></pre>
+<p>codex actually returned “nothing to report” in one run.</p>
+<p>Running the loop made the difference sharper.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>codex bare</span></span>
+<span class="line"><span>1 → 1 → 0 → 0 → 0</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>codex structured</span></span>
+<span class="line"><span>6 → 3 → 2 → 1 → 1</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>claude bare</span></span>
+<span class="line"><span>5 → 6 → 7 → 6 → 7</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>claude structured</span></span>
+<span class="line"><span>12 → 11 → 10 → 11 → 9</span></span></code></pre>
+<p>codex decayed.</p>
+<p>claude did not.</p>
+<p>And all four conditions stayed at 19/19 the whole way.</p>
+<p>Two things have to be kept apart here.</p>
+<h5 id="1-do-the-findings-decay">1. Do the findings decay?</h5>
+<p>Largely a property of the model.</p>
+<h5 id="2-did-it-actually-see-everything">2. Did it actually see everything?</h5>
+<p>The finding count cannot tell you.</p>
+<p>Across five rounds, codex bare covered what amounted to two families of issue.</p>
+<p>The structured condition, on the same code, kept turning up failure modes bare never mentioned
+once:</p>
+<ul>
+<li>clock failure</li>
+<li>process-control exception</li>
+<li>half-open wedge</li>
+<li>stale cooldown</li>
+</ul>
+<p>Therefore:</p>
+<blockquote>
+<p><strong>Silence is not evidence of completion.</strong></p>
+<p>Stopping because you said less and stopping because you saw enough look identical from
+outside.</p>
+</blockquote>
+<hr/>
+<h3 id="8-every-test-passed-and-the-code-quality-still-diverged">8. Every test passed, and the code quality still diverged</h3>
+<p>At this point a new question appeared.</p>
+<blockquote>
+<p>If all the tests pass, is the code actually improving?</p>
+</blockquote>
+<p>On compliance, all 47 rounds were identical.</p>
+<p>So I layered other measurements onto the existing snapshots.</p>
+<ul>
+<li><strong>Differential testing</strong> — replay identical inputs against two versions and see whether the
+observable behaviour diverges. It catches behaviour changes the tests never look at.</li>
+<li><strong>LOC</strong> — lines of code.</li>
+<li><strong>Cognitive Complexity</strong> — how much nesting and branching a reader has to hold in their head.
+Unlike cyclomatic complexity it weights nesting.</li>
+<li><strong>worst-function complexity</strong> — not the file’s total but the single most complex function:
+where the reading cost is concentrated.</li>
+<li><strong>mutation score</strong> — the fraction of deliberately planted defects the suite catches. A proxy
+for what the tests actually guarantee.</li>
+<li><strong>relative churn</strong> — <strong>churn</strong> is the number of lines added and deleted in a round, i.e. the
+<em>amount changed</em> (not a quality measure). Relative churn divides the accumulated churn by
+file size, so files of different sizes can be compared.</li>
+</ul>
+<h4 id="81-how-much-did-behaviour-outside-the-contract-move">8.1 How much did behaviour outside the contract move?</h4>
+<p>300 deterministic scenarios compared v0 against every round.</p>
+<p>Across all 47 rounds there was exactly <strong>one</strong> observable behaviour change.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>half_open → open</span></span></code></pre>
+<p>The point at issue:</p>
+<blockquote>
+<p>A circuit breaker whose cooldown has elapsed but which nobody has called yet — is that <code>open</code>
+or <code>half_open</code>?</p>
+</blockquote>
+<p>The contract does not answer that.</p>
+<p>So neither choice violated 19/19.</p>
+<p>What is interesting is that the same review loop flipped the choice repeatedly.</p>
+<p>In one round:</p>
+<blockquote>
+<p>Until an actual trial call happens, it must report <code>open</code>.</p>
+</blockquote>
+<p>In the next:</p>
+<blockquote>
+<p>The cooldown is over, so behaviourally it is already <code>half_open</code> and should say so.</p>
+</blockquote>
+<p>Both were plausible.</p>
+<p>Both honoured the contract.</p>
+<p>And they were opposites.</p>
+<p>Which matters because:</p>
+<blockquote>
+<p><strong>If a loop keeps reversing the same decision, the defect is probably not in the code but in
+the blank left by the spec.</strong></p>
+</blockquote>
+<hr/>
+<h3 id="9-a-sparse-contract-makes-it-oscillate-was-also-not-quite-right">9. “A sparse contract makes it oscillate” was also not quite right</h3>
+<p>My first explanation was that a large free space lets the AI keep wobbling inside it.</p>
+<p>So I built a second task — a TTL cache covered by <strong>8</strong> criteria instead of 19.</p>
+<p>Far sparser contract.</p>
+<p>The result was not what I predicted.</p>
+<ul>
+<li>3 independent implementations by claude</li>
+<li>1 by codex</li>
+<li>all pass 8/8</li>
+<li>sizes from 54 to 138 lines — a 2.5× spread</li>
+<li>all 6 implementation pairs: differential test <code>0/400</code></li>
+<li>a 10-round loop applied 104 findings and observable behaviour never moved</li>
+</ul>
+<p>A contract can leave a lot unsaid and the behaviour still agrees.</p>
+<p>Why?</p>
+<p>Because convention was strong there.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>strong convention</span></span>
+<span class="line"><span>- TTL boundary</span></span>
+<span class="line"><span>- LRU refresh</span></span>
+<span class="line"><span>- meaning of len</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>→ all four implementations chose the same</span></span></code></pre>
+<p>Where convention is weak — say, which exception a wrong type should raise — the implementations
+split.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>weak convention</span></span>
+<span class="line"><span>- TypeError?</span></span>
+<span class="line"><span>- ValueError?</span></span>
+<span class="line"><span>- no validation at all?</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>→ four implementations, three answers</span></span></code></pre>
+<p>So the more accurate conclusion is:</p>
+<blockquote>
+<p><strong>Oscillation is not caused by a sparse contract as such, but by places where there is neither
+a contract nor a strong convention.</strong></p>
+</blockquote>
+<hr/>
+<h2 id="part-4-what-actually-changed-the-code">Part 4. What actually changed the code</h2>
+<h3 id="10-the-structured-prompt-was-not-simply-a-find-more-prompt">10. The structured prompt was not simply a “find more” prompt</h3>
+<p>Same model, same code, same number of rounds — and the final code differed sharply by prompt.</p>
+<p>v0:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>LOC 121</span></span>
+<span class="line"><span>Cognitive Complexity 26</span></span>
+<span class="line"><span>worst function 7</span></span></code></pre>
+<p>Final:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>arm</th><th style="text-align:right">LOC</th><th style="text-align:right">Cognitive Complexity</th><th style="text-align:right">worst function</th></tr></thead><tbody><tr><td>claude structured</td><td style="text-align:right">120.7</td><td style="text-align:right">21.7</td><td style="text-align:right">6.3</td></tr><tr><td>claude bare</td><td style="text-align:right">150.7</td><td style="text-align:right">32.7</td><td style="text-align:right">10.3</td></tr><tr><td>codex structured</td><td style="text-align:right">105</td><td style="text-align:right">24</td><td style="text-align:right">9</td></tr><tr><td>codex bare</td><td style="text-align:right">126</td><td style="text-align:right">29</td><td style="text-align:right">7</td></tr><tr><td>fixer given no contract</td><td style="text-align:right">178</td><td style="text-align:right">41</td><td style="text-align:right">15</td></tr></tbody></table>
+<p>In both models the structured condition suppressed code growth relative to bare.</p>
+<p>In claude the direction itself reversed.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>structured → smaller and simpler</span></span>
+<span class="line"><span>bare       → larger and more complex</span></span></code></pre>
+<p>One honest caveat: Cognitive Complexity and LOC are strongly correlated here.</p>
+<p>In this data <code>r = 0.807</code>.</p>
+<p>So this must not be inflated into “complexity improved independently”.</p>
+<p>The safer reading:</p>
+<blockquote>
+<p>the structured prompt suppressed growth in volume and complexity together.</p>
+</blockquote>
+<hr/>
+<h3 id="11-churn-behaved-like-a-cost-signal-not-a-quality-signal">11. churn behaved like a cost signal, not a quality signal</h3>
+<p>Per-round changed lines differed enormously by model.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>codex bare</span></span>
+<span class="line"><span>10 → 6 → 0 → 0 → 0</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>codex structured</span></span>
+<span class="line"><span>41 → 16 → 15 → 5 → 8</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>claude bare</span></span>
+<span class="line"><span>29 → 45 → 73 → 53 → 68</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>claude structured</span></span>
+<span class="line"><span>69 → 71 → 73 → 49 → 100</span></span></code></pre>
+<p>codex genuinely dries up.</p>
+<p>claude does not.</p>
+<p>But high churn did not mean worse final code.</p>
+<p>The arm that rewrote the most — claude structured — ended up smaller and simpler.</p>
+<p>So in this study churn is:</p>
+<blockquote>
+<p><strong>a signal of cost and re-review surface, rather than of quality.</strong></p>
+</blockquote>
+<hr/>
+<h3 id="12-after-one-big-fix-do-you-have-to-review-again">12. After one big fix, do you have to review again?</h3>
+<p>The first prescription was simple.</p>
+<blockquote>
+<p>Review many times, merge the issues, fix once, stop.</p>
+</blockquote>
+<p>One problem remained.</p>
+<p>A large fix produces new code.</p>
+<p>Shouldn’t that be looked at?</p>
+<p>So I tested it.</p>
+<h4 id="121-first-control-for-new-findings-appear-even-without-a-code-change">12.1 First, control for “new findings appear even without a code change”</h4>
+<p>Independent reviews of identical code produce new findings purely from sampling variance.</p>
+<p>So I enumerated every disjoint combination inside the existing review pool to build the
+“novelty rate with no code change”.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>claude, code unchanged:</span></span>
+<span class="line"><span>median 11%</span></span>
+<span class="line"><span>range 0–31%</span></span></code></pre>
+<blockquote>
+<p><strong>Null distribution</strong> — how far a value ranges when there is no effect at all. Here it is the
+novelty rate with the code unchanged; only a post-fix value outside that range licenses the
+claim that the fix caused it.</p>
+</blockquote>
+<p>Then compared re-reviews after a real fix.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>novelty after the fix:</span></span>
+<span class="line"><span>77%</span></span>
+<span class="line"><span>89%</span></span>
+<span class="line"><span>63%</span></span></code></pre>
+<p>Sampling variance does not explain that.</p>
+<p>And <code>74–80%</code> of the issues handed to the fixer genuinely disappeared from the next review.</p>
+<p>So two things are true at once.</p>
+<ol>
+<li>Fixing everything in one pass does resolve most of the existing issues.</li>
+<li>A large fix creates a lot of newly written code that has never been reviewed.</li>
+</ol>
+<p>The correlation between fix size and the genuinely-new finding rate:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>r = 0.837  (n = 6)</span></span></code></pre>
+<p>Small sample, clear direction.</p>
+<p>Which makes a different re-review rule natural:</p>
+<blockquote>
+<p><strong>Not “which round is this” but “how much changed”.</strong></p>
+</blockquote>
+<ul>
+<li>small fix → little to harvest from a re-review</li>
+<li>half the file rewritten → that is not a re-review, it is the first review of new code</li>
+</ul>
+<hr/>
+<h3 id="13-does-splitting-reviewers-by-category-do-better">13. Does splitting reviewers by category do better?</h3>
+<p>Many AI review harnesses fan out, for example:</p>
+<ul>
+<li>design</li>
+<li>functionality</li>
+<li>complexity</li>
+<li>robustness</li>
+<li>naming</li>
+<li>style</li>
+</ul>
+<p>Each area goes to its own reviewer and the results are merged at the end.</p>
+<p>Three conditions were compared.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>A. structured, 1 call</span></span>
+<span class="line"><span>B. 6 category calls</span></span>
+<span class="line"><span>C. the same structured prompt, 6 calls</span></span></code></pre>
+<p>C is the important one.</p>
+<p>Comparing only B against A shows nothing but “six calls find more than one”.</p>
+<p>Comparing the same six calls is what isolates the effect of the fan-out structure itself.</p>
+<h4 id="131-on-the-python-task-fan-out-clearly-won">13.1 On the Python task, fan-out clearly won</h4>
+<h5 id="claude-1">Claude</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>same structured prompt, 6 calls</span></span>
+<span class="line"><span>distinct issues 19.7</span></span>
+<span class="line"><span>raw findings   69.3</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>category, 6 calls</span></span>
+<span class="line"><span>distinct issues 30.0</span></span>
+<span class="line"><span>raw findings   54.7</span></span></code></pre>
+<p>For the same six calls:</p>
+<ul>
+<li>distinct issues <code>+52%</code></li>
+<li>raw findings <code>-21%</code></li>
+</ul>
+<p>Less for a human to read, more kinds of thing found.</p>
+<p>The new material was concentrated in:</p>
+<ul>
+<li>robustness</li>
+<li>naming</li>
+<li>style</li>
+</ul>
+<p>— exactly what a general reviewer truncates when it caps output by severity.</p>
+<h4 id="132-it-did-not-reproduce-on-the-c-firmware">13.2 It did not reproduce on the C firmware</h4>
+<p>Same budget on the firmware task:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>single reviewer recall: 50%</span></span>
+<span class="line"><span>fan-out recall:         43%</span></span></code></pre>
+<blockquote>
+<p><strong>Recall</strong> — of the real defects that exist, what fraction was found. <strong>Precision</strong> — of the
+findings reported, what fraction was real. They usually trade off: say less and precision
+rises while recall falls. The recall denominator in this study is the set of <em>known</em> defects,
+so it is optimistic (§23.5).</p>
+</blockquote>
+<p>The single review was slightly better.</p>
+<p>The most plausible reason is that <strong>the review axes did not actually separate</strong>.</p>
+<p>The <code>state-invariant</code> lens, for instance, pushed attention onto module-internal state — and that
+brought back one of the false positives repository access had removed.</p>
+<p>So fan-out must not be applied as a general law.</p>
+<blockquote>
+<p><strong>Fan-out pays off only where the axes genuinely separate.</strong></p>
+</blockquote>
+<hr/>
+<h2 id="part-5-the-strongest-lever-was-letting-the-reviewer-read-the-repo">Part 5. The strongest lever was letting the reviewer read the repo</h2>
+<h3 id="14-repository-access-was-the-strongest-false-positive-remover-in-the-study">14. Repository access was the strongest false-positive remover in the study</h3>
+<p>All four false positives from part 1 could be refuted by looking at another file.</p>
+<p>So exactly one thing was changed.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="diff"><code><span class="line"><span style="--shiki-light:#B31D28;--shiki-dark:#FDAEB7"><span style="user-select:none">-</span> you have no other files and no repository.</span></span>
+<span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#85E89D"><span style="user-select:none">+</span> the production source tree is readable.</span></span>
+<span class="line"><span style="--shiki-light:#22863A;--shiki-dark:#85E89D"><span style="user-select:none">+</span> check callers, headers, init path and threading before claiming a defect.</span></span></code></pre>
+<p><code>work-docs/</code> — which holds the answer key — stayed blocked; only <code>src/</code> was readable.</p>
+<h4 id="141-claudes-result">14.1 Claude’s result</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Condition</th><th style="text-align:right">Raw findings</th><th style="text-align:right">Distinct groups</th><th style="text-align:right">Real defects</th><th style="text-align:right">False positives</th></tr></thead><tbody><tr><td>File only</td><td style="text-align:right">61</td><td style="text-align:right">14</td><td style="text-align:right">10</td><td style="text-align:right">4</td></tr><tr><td>Repo access</td><td style="text-align:right">30</td><td style="text-align:right">7</td><td style="text-align:right">7</td><td style="text-align:right">0</td></tr></tbody></table>
+<p>All four false positives vanished.</p>
+<p>And it found real defects that a single file cannot establish, such as:</p>
+<ul>
+<li>a time hole left in the ring history after a FIFO overflow</li>
+<li>the interaction of pre-roll and debounce length recording an earlier swing under the later
+swing’s key</li>
+<li>low-power 50 Hz samples labelled as 1000 Hz</li>
+</ul>
+<p>None of these can be decided from a single file.</p>
+<h4 id="142-the-same-four-false-positives-died-in-the-other-model">14.2 The same four false positives died in the other model</h4>
+<p>codex ran the same condition.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>D02  8/10 → 0</span></span>
+<span class="line"><span>D03  7/10 → 0</span></span>
+<span class="line"><span>D04  7/10 → 0</span></span>
+<span class="line"><span>D07  5/10 → 0</span></span></code></pre>
+<p><strong>Two models from different companies removed the same four false positives.</strong></p>
+<p>It is the strongest cross-model result in the study.</p>
+<p>The two models got there by opposite routes.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>claude: fewer findings (61 → 30)</span></span>
+<span class="line"><span>codex:  more findings  (27 → 37)</span></span></code></pre>
+<p>Given the repository, one model talked less and the other found more.</p>
+<p>What mattered was not the volume of speech but <strong>whether claims could be checked</strong>.</p>
+<hr/>
+<h3 id="15-repository-access-is-not-free">15. Repository access is not free</h3>
+<p>It raised precision sharply and lowered recall.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>file only</span></span>
+<span class="line"><span>precision 71%</span></span>
+<span class="line"><span>recall    77%</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>repo access</span></span>
+<span class="line"><span>precision 100%</span></span>
+<span class="line"><span>recall    54%</span></span></code></pre>
+<p>Why?</p>
+<p>Because a reviewer that checks the real call path concludes:</p>
+<blockquote>
+<p>“Possible in theory, but essentially unreachable in practice.”</p>
+</blockquote>
+<p>— and reports less.</p>
+<p>In the process it drops not only false positives but some low-frequency real defects.</p>
+<p>So:</p>
+<blockquote>
+<p>Repository access is not free.
+<strong>It trades away some faint real defects for the false ones it removes.</strong></p>
+</blockquote>
+<p>If you need both, run file-only and repo-open side by side.</p>
+<p>In this study the union of the two conditions reached 13/13 at 20 calls.</p>
+<p>At twice the call cost, of course.</p>
+<img src="/review-repo-access-tradeoff.svg" alt="File-only review produced 61 findings in 14 groups, 10 real and 4 false positives, precision 71 percent and recall 77 percent. With repo access the same reviewer produced 30 findings in 7 groups, 7 real and 0 false positives, precision 100 percent and recall 54 percent. The same four false positives vanished for two models from different vendors."/>
+<hr/>
+<h3 id="16-give-the-fixer-the-contract-and-regressions-stop-was-rejected">16. “Give the fixer the contract and regressions stop” was rejected</h3>
+<p>Early on it looked like this:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>no contract  → the fixer accepts nearly every finding</span></span>
+<span class="line"><span>contract     → the fixer declines some</span></span></code></pre>
+<p>So my first thought was:</p>
+<blockquote>
+<p>Give the fixer the contract and you prevent regressions.</p>
+</blockquote>
+<p>The 2×2 rejected that hypothesis.</p>
+<p>Each cell is <strong>rounds where an acceptance test broke / rounds run in that condition</strong>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Task</th><th style="text-align:right">Contract</th><th style="text-align:right">No contract</th></tr></thead><tbody><tr><td>C firmware</td><td style="text-align:right">3 / 4</td><td style="text-align:right">4 / 4</td></tr><tr><td>Python</td><td style="text-align:right">0 / 40</td><td style="text-align:right">0 / 5</td></tr></tbody></table>
+<p>Fisher exact test:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>p = 1.0</span></span></code></pre>
+<blockquote>
+<p><strong>Fisher exact test · p-value</strong> — a test for whether a difference in a small 2×2 table is
+distinguishable from chance. <code>p = 1.0</code> means it is not — the presence of a contract does not
+explain the breakage.</p>
+</blockquote>
+<p>The contract does not explain the breakage on the C side.</p>
+<p>As shown above, the real cause was <strong>tests pinning an unreachable state</strong>.</p>
+<p>So the honest summary now is:</p>
+<blockquote>
+<p>The contract is not a magic safety device against regressions.</p>
+</blockquote>
+<p>That does not make it useless. Its other effects were clear.</p>
+<hr/>
+<h3 id="17-the-contract-was-in-fact-two-things">17. “The contract” was in fact two things</h3>
+<p>Re-reading the prompt showed that what we called the contract bundled two elements.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>A. do not touch code you were not asked about</span></span>
+<span class="line"><span>B. the public interface and behavioural surface are fixed</span></span>
+<span class="line"><span>C. the SPEC that says what that fixed surface actually is</span></span></code></pre>
+<p>B and C were separated and tested.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>what the fixer was given</th><th style="text-align:right">decline rate</th><th style="text-align:right">final LOC</th><th style="text-align:right">cumulative churn</th></tr></thead><tbody><tr><td>A only</td><td style="text-align:right">26%</td><td style="text-align:right">254</td><td style="text-align:right">195</td></tr><tr><td>A+B</td><td style="text-align:right">50%</td><td style="text-align:right">237</td><td style="text-align:right">136</td></tr><tr><td>A+B+C</td><td style="text-align:right">26%</td><td style="text-align:right">202</td><td style="text-align:right">191</td></tr></tbody></table>
+<blockquote>
+<p><strong>Decline rate</strong> — the share of handed-over findings the fixer <em>explicitly refused, with a
+stated reason</em> — not the share it quietly ignored. High is not bad and low is not good; the
+information is in what the refusal was grounded on.</p>
+</blockquote>
+<p>Their roles turn out to be different.</p>
+<h5 id="b-the-public-surface-is-fixed">B: “the public surface is fixed”</h5>
+<p>Suppresses code growth and unnecessary change.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>LOC 254 → 237</span></span>
+<span class="line"><span>churn 195 → 136</span></span></code></pre>
+<h5 id="c-the-actual-spec">C: the actual SPEC</h5>
+<p>Makes the fixer’s judgement concrete.</p>
+<p>Without a SPEC, anything ambiguous was declined by citing the code’s own docstring.</p>
+<p>With a SPEC, the fixer quoted acceptance criteria directly.</p>
+<p>So the more accurate phrasing:</p>
+<blockquote>
+<p><strong>A fixed scope suppresses growth; the SPEC corrects judgement.</strong></p>
+</blockquote>
+<hr/>
+<h3 id="18-letting-the-fixer-read-the-tests-but-not-edit-them-beats-hiding-them">18. Letting the fixer read the tests but not edit them beats hiding them</h3>
+<p>Early on the tests were hidden from the fixer, so that they remained an independent oracle.</p>
+<p>In practice, though, a fixer who cannot read the tests is the unrealistic setup.</p>
+<p>So later experiments used:</p>
+<ul>
+<li>tests readable</li>
+<li>tests not editable</li>
+</ul>
+<p>The change mattered more than expected.</p>
+<p>Previously, when a review proposed a correct fix outside the module, the narrow test harness
+failed to link.</p>
+<p>A fixer that could read the tests started making judgements like:</p>
+<blockquote>
+<p>“This fix would require changing the tests too.”</p>
+</blockquote>
+<blockquote>
+<p>“The current test pins this behaviour.”</p>
+</blockquote>
+<blockquote>
+<p>“The problem is real but cannot be fixed within this file.”</p>
+</blockquote>
+<p>Build failures that had recurred across an entire loop dropped to zero.</p>
+<p>But this is <strong>deferral</strong>, not resolution.</p>
+<blockquote>
+<p><strong>accept / decline / defer</strong> — the three verdicts a fixer can return on a finding: fixed,
+“not a problem”, and “a real problem that cannot be fixed within this scope”. A defer is not
+resolved; if it is not counted, it disappears quietly.</p>
+</blockquote>
+<p>Real problems that fall outside the scope simply do not get fixed.</p>
+<p>So read-only test access is a safety device and a scope limiter at the same time.</p>
+<hr/>
+<h3 id="19-running-the-whole-prescription-at-once-broke-one-more-of-my-beliefs">19. Running the whole prescription at once broke one more of my beliefs</h3>
+<p>Late in the study I applied everything I had learned at once.</p>
+<p>Everything except the final human triage:</p>
+<ul>
+<li>repository access</li>
+<li>structured review</li>
+<li>fan-out</li>
+<li>issue merging</li>
+<li>fix once</li>
+<li>tests readable / not editable</li>
+<li>size, complexity and churn measured</li>
+<li>a stop rule</li>
+</ul>
+<p>On compliance the result was good.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>RED = a round where an acceptance test broke (broken rounds / rounds run)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>original file-only loop</span></span>
+<span class="line"><span>RED 12 / 15</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>repo-access loop</span></span>
+<span class="line"><span>RED 6 / 10</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>full prescription</span></span>
+<span class="line"><span>RED 0 / 4</span></span></code></pre>
+<p>But the same arm grew the code fastest of all (+152% in four rounds). And the stop rule failed.</p>
+<p>The prescription said:</p>
+<blockquote>
+<p>stop when churn approaches zero.</p>
+</blockquote>
+<p>The threshold — 5 lines — was written into the code before the run.</p>
+<p>Actual churn:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>194 → 262 → 395</span></span></code></pre>
+<p>It rose monotonically.</p>
+<p>The loop ended not on churn but <strong>because findings hit zero</strong>.</p>
+<p>That is, the loop terminated on the criterion my own prescription had explicitly rejected.</p>
+<p>Why did churn dry up on the earlier Python task and grow here?</p>
+<p>The most plausible difference is contract density.</p>
+<p>But that too is not an experiment with all conditions separated.</p>
+<p>So the safe conclusion for now:</p>
+<blockquote>
+<p><strong>“Stop when churn converges to zero” is not a universal stop rule.</strong></p>
+</blockquote>
+<p>On weakly specified code you still need a hard cap such as a round limit.</p>
+<hr/>
+<h2 id="part-6-so-how-do-you-run-this">Part 6. So how do you run this?</h2>
+<h3 id="20-so-how-do-you-end-an-unbounded-review-loop">20. So how do you end an unbounded review loop?</h3>
+<p>There were four candidate stop criteria.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>1. churn → 0</span></span>
+<span class="line"><span>2. findings → 0</span></span>
+<span class="line"><span>3. a round cap</span></span>
+<span class="line"><span>4. do not repeat the fix loop at all</span></span></code></pre>
+<p>The first three all have problems.</p>
+<h5 id="churn--0">churn → 0</h5>
+<p>Fires only under some conditions.</p>
+<h5 id="findings--0">findings → 0</h5>
+<p>Means different things per model.</p>
+<p>A quiet reviewer may simply have seen less.</p>
+<h5 id="a-round-cap">a round cap</h5>
+<p>Truncation, not convergence.</p>
+<p>Which leaves a simpler operational strategy:</p>
+<blockquote>
+<p><strong>Do not make the repeated review→fix loop the default.</strong></p>
+</blockquote>
+<hr/>
+<h3 id="21-how-i-would-run-it-today">21. How I would run it today</h3>
+<h4 id="211-the-single-most-important-rule">21.1 The single most important rule</h4>
+<blockquote>
+<p><strong>Review many times. Fix once.</strong></p>
+</blockquote>
+<p>The strongest result in the study.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>review only, repeated</span></span>
+<span class="line"><span>real-defect coverage</span></span>
+<span class="line"><span>34% → 61% → 76%</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>review→fix loop, repeated</span></span>
+<span class="line"><span>compliance gain zero</span></span>
+<span class="line"><span>code size +24% to +152%</span></span></code></pre>
+<p>The gain in discovery comes from the review side.</p>
+<p>The risk comes from the fix side.</p>
+<p>Binding them into one cycle and spinning it maximises risk per unit of gain.</p>
+<hr/>
+<h4 id="212-give-the-reviewer-read-access-to-the-repository">21.2 Give the reviewer read access to the repository</h4>
+<p>The strongest false-positive lever in the study.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>file-only</span></span>
+<span class="line"><span>false 4/14</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>repo-open</span></span>
+<span class="line"><span>false 0</span></span></code></pre>
+<p>And it reproduced in both models.</p>
+<p>But you must verify that the access was actually attached.</p>
+<p>Several times during the study, what I took for:</p>
+<blockquote>
+<p>the model just cannot do this</p>
+</blockquote>
+<p>was in fact an environment configuration problem.</p>
+<h5 id="a-canary-for-practice">A canary for practice</h5>
+<blockquote>
+<p><strong>Canary</strong> — a probe that checks the <em>instrument is actually attached</em> before you measure
+anything, the way the bird in the mine did. The point is that it must run in both directions:
+something that should be reachable (POS) and something that must not be (NEG). Read a failed
+POS leg as “isolation worked” and you record a run that measured nothing as a success.</p>
+</blockquote>
+<p>Once a month or so, ask the reviewer to do this:</p>
+<blockquote>
+<p>“Quote line N of the <em>caller’s</em> file verbatim — not the file you were just shown.”</p>
+</blockquote>
+<p>If it cannot, repository access is not really attached.</p>
+<hr/>
+<h4 id="213-do-not-use-agreement-count-as-a-truth-score">21.3 Do not use agreement count as a truth score</h4>
+<p>In the file-only condition:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>mean detection frequency, false   6.8 / 10</span></span>
+<span class="line"><span>mean detection frequency, real    3.4 / 10</span></span></code></pre>
+<p>In this data, agreement was anti-predictive.</p>
+<p>When reviewers are all missing the same information, a majority can agree on the same wrong
+answer.</p>
+<hr/>
+<h4 id="214-mix-two-models-where-you-can">21.4 Mix two models where you can</h4>
+<p>Enumerating every combination of the existing runs, mixing models beat repeating one.</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>mixed 3 calls (claude 2 + codex 1)</span></span>
+<span class="line"><span>→ 3.57 real defects on average</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>claude alone, 6 calls</span></span>
+<span class="line"><span>→ 3.43 on average</span></span></code></pre>
+<p>Mixing perspectives beats repeating one model, and mixing won at every budget of two calls or
+more.</p>
+<p>This is consistent with the repo-open finding that the two models see <em>different</em> real defects.</p>
+<hr/>
+<h4 id="215-do-not-reach-for-fan-out-unconditionally">21.5 Do not reach for fan-out unconditionally</h4>
+<p>On the Python task it added +52% distinct issues at the same six calls.</p>
+<p>On the C firmware it gained nothing at the same budget.</p>
+<p>So the question to ask first is:</p>
+<blockquote>
+<p>are the review axes genuinely independent?</p>
+</blockquote>
+<p>Design / naming / robustness separate reasonably well.</p>
+<p>Concurrency / state invariant / lifetime overlap, and may just spend calls.</p>
+<hr/>
+<h4 id="216-a-human-passes-over-it-once">21.6 A human passes over it once</h4>
+<p>Adjudicating the 39 fan-out findings:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>REAL   31%</span></span>
+<span class="line"><span>STYLE  69%</span></span>
+<span class="line"><span>WRONG   0%</span></span></code></pre>
+<p>What is interesting is that the reviewers invented no facts; most findings were naming, comments
+and structure.</p>
+<p>(The adjudicator was the author of the experiment, and the difference between fan-out-exclusive
+and shared findings was not significant, <code>p = 0.236</code>.)</p>
+<p>Handing all of that to an automatic fixer shakes the code for no reason.</p>
+<p>So a human triage step belongs before the final fix.</p>
+<hr/>
+<h4 id="217-give-the-fixer-three-things">21.7 Give the fixer three things</h4>
+<ol>
+<li>the merged issue list</li>
+<li>a SPEC, or at minimum the scope instruction “the public surface is fixed”</li>
+<li>read-only tests</li>
+</ol>
+<p>And require an explicit verdict on every finding:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>accept</span></span>
+<span class="line"><span>decline</span></span>
+<span class="line"><span>defer</span></span></code></pre>
+<p>Receiving a finding is not an instruction to change the code.</p>
+<hr/>
+<h4 id="218-do-not-look-at-tests-alone">21.8 Do not look at tests alone</h4>
+<p>Alongside pass/fail, record at least:</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>test compliance</span></span>
+<span class="line"><span>LOC</span></span>
+<span class="line"><span>complexity</span></span>
+<span class="line"><span>worst-function complexity</span></span>
+<span class="line"><span>churn</span></span></code></pre>
+<p>Compliance was identical across all 47 rounds.</p>
+<p>Size and complexity were not.</p>
+<p>If the suite is green while the code keeps growing and getting more complex, it is hard to argue
+the review loop is improving quality.</p>
+<hr/>
+<h4 id="219-decide-re-review-by-fix-size-not-by-round-number">21.9 Decide re-review by fix size, not by round number</h4>
+<p>Small fix: stop.</p>
+<p>Large fix: look again.</p>
+<p>But frame it as:</p>
+<blockquote>
+<p>“There is a lot of newly written code here; this is its first review.”</p>
+</blockquote>
+<p>rather than:</p>
+<blockquote>
+<p>“Let’s verify it once more.”</p>
+</blockquote>
+<hr/>
+<h3 id="22-if-the-budget-is-tight">22. If the budget is tight</h3>
+<p>Every subset of the existing runs was enumerated — no extra calls.</p>
+<p>The denominator is the 10 adjudicated real defects; entries are (real found / false found).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th style="text-align:right">calls</th><th style="text-align:right">file-only</th><th style="text-align:right">repo model A</th><th style="text-align:right">repo model B</th><th style="text-align:right">repo mixed</th></tr></thead><tbody><tr><td style="text-align:right">2</td><td style="text-align:right">5.04 / <strong>3.62 FP</strong></td><td style="text-align:right">2.09 / 0</td><td style="text-align:right">3.07 / 0</td><td style="text-align:right"><strong>3.18 / 0</strong></td></tr><tr><td style="text-align:right">3</td><td style="text-align:right">6.11 / <strong>3.90 FP</strong></td><td style="text-align:right">2.54 / 0</td><td style="text-align:right">3.27 / 0</td><td style="text-align:right"><strong>3.57 / 0</strong></td></tr><tr><td style="text-align:right">4</td><td style="text-align:right">6.93 / <strong>3.98 FP</strong></td><td style="text-align:right">2.90 / 0</td><td style="text-align:right">3.40 / 0</td><td style="text-align:right"><strong>3.90 / 0</strong></td></tr><tr><td style="text-align:right">6</td><td style="text-align:right">8.20 / <strong>4.00 FP</strong></td><td style="text-align:right">3.43 / 0</td><td style="text-align:right">3.60 / 0</td><td style="text-align:right"><strong>4.43 / 0</strong></td></tr></tbody></table>
+<p>File-only finds more per call.</p>
+<p>The false positives come with it.</p>
+<p>The cost has not disappeared — it moved to the person doing triage later.</p>
+<h5 id="if-you-can-spend-two-calls">If you can spend two calls</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>model A once</span></span>
+<span class="line"><span>model B once</span></span></code></pre>
+<h5 id="if-you-can-spend-four">If you can spend four</h5>
+<pre class="astro-code astro-code-themes github-light github-dark" style="--shiki-light:#24292e;--shiki-dark:#e1e4e8;--shiki-light-bg:#fff;--shiki-dark-bg:#24292e;overflow-x:auto" tabindex="0" data-language="text"><code><span class="line"><span>model A twice</span></span>
+<span class="line"><span>model B twice</span></span></code></pre>
+<p>came close to running a single model ten times.</p>
+<p>⚠️ The denominator here is the 10 real defects the control condition found. Defects that only
+the repo-open arms surfaced are unadjudicated and excluded, so this table is biased <strong>against</strong>
+repository access.</p>
+<hr/>
+<h3 id="23-what-is-still-unknown">23. What is still unknown</h3>
+<p>Separating what was established from what was not matters more than the results.</p>
+<p>Start with the sample. Tier-1, where a frozen contract settles the verdict without human
+judgement, is <strong>two</strong> Python tasks; tier-2, where a human adjudicated what counted as a defect,
+is <strong>one</strong> C firmware module; and there are <strong>two</strong> models. Most results stand on <strong>three</strong>
+loops. Sharp contrasts usually soften as the sample grows.</p>
+<p>Some things this study did not measure at all.</p>
+<ul>
+<li><strong>Whether the design is right, whether intent is visible, whether the names are accurate.</strong>
+These are what code review usually puts first, and none of them were measured here. Cognitive
+Complexity is a validated proxy for reading effort, not for understanding.</li>
+<li><strong>Which model is the better programmer.</strong></li>
+<li><strong>Whether any of this holds in your codebase.</strong></li>
+</ul>
+<p>Numbers from an automated run are a <strong>floor</strong>, not a ceiling: they omit a step the prescription
+itself requires, which is a human passing over the findings once.</p>
+<h4 id="231-when-does-fan-out-pay-off">23.1 When does fan-out pay off?</h4>
+<p>It won on Python and did not on C.</p>
+<p>“How separable the review axes are” looks like the deciding factor, but how to measure that
+separability in advance is unknown.</p>
+<h4 id="232-how-do-repository-access-and-a-narrow-lens-combine">23.2 How do repository access and a narrow lens combine?</h4>
+<p>Repository access says look outward.</p>
+<p>A narrow fan-out lens says concentrate on one internal area.</p>
+<p>Where they conflict, false positives that repository access had removed can come back.</p>
+<p>There is no stable filtering rule yet.</p>
+<h4 id="233-can-a-churn-based-stop-rule-work-on-large-uncontracted-code">23.3 Can a churn-based stop rule work on large uncontracted code?</h4>
+<p>In the current data it failed.</p>
+<p>Whether another stop signal is needed, or a plain cap is more realistic, needs more work.</p>
+<h4 id="234-are-there-external-callers-versus-language-and-size">23.4 “Are there external callers?” versus language and size</h4>
+<p>The C firmware and the Python task differ in too many ways at once.</p>
+<p>An intermediate cell — a Python module with external callers — would separate the causes.</p>
+<h4 id="235-final-adjudication-of-individual-findings">23.5 Final adjudication of individual findings</h4>
+<p>Some groups were adjudicated; the whole set was never re-verified by an independent judge.</p>
+<p>The tier-2 results in particular were adjudicated by the author and should be read as a case
+study.</p>
+<p>Also, the denominator of recall is the set of <strong>known</strong> defects, not the set of defects that
+exist. Anything nobody found is in neither the numerator nor the denominator, so every coverage
+figure here is biased upward.</p>
+<h4 id="236-isolation-of-the-experimental-environment">23.6 Isolation of the experimental environment</h4>
+<p>A post-hoc audit confirmed repository access was controlled (zero tool calls across 190 session
+transcripts), but capabilities were not symmetric between models.</p>
+<p>In particular codex offers no way to disable network tools, while they were disabled on the
+claude side. Nothing in the logs shows those tools being used — but “the capabilities were
+identical” is not a claim that can be made.</p>
+<h4 id="237-contamination">23.7 Contamination</h4>
+<p><code>retry_policy</code> and <code>ttl_cache</code> are textbook patterns, and it is near certain that every model
+measured has seen thousands of similar implementations in training.</p>
+<p>That is not disqualifying here, because what is scored is not “can it produce a correct
+implementation” but “how does it behave in a loop around code that is already correct”. What it
+does mean is that <strong>absolute finding counts cannot be compared across tasks</strong> — familiarity buys
+more confident commentary.</p>
+<hr/>
+<h3 id="24-the-thing-that-changed-most-in-this-study-was-my-own-conclusions">24. The thing that changed most in this study was my own conclusions</h3>
+<p>Sentence after sentence written early on had to be revised.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>what I thought first</th><th>what turned out to be true</th></tr></thead><tbody><tr><td>the AI’s fixes make the same bug, 4/4</td><td>the tests were pinning a state production never reaches</td></tr><tr><td>AI review never ends, even on correct code</td><td>true for claude; codex genuinely went silent</td></tr><tr><td>codex stopping early is the superior behaviour</td><td>the silent arm may simply have seen far less</td></tr><tr><td>give the fixer the contract and regressions stop</td><td>rejected by the 2×2, <code>p = 1.0</code></td></tr><tr><td>behaviour outside the contract will wander a lot</td><td>across 47 rounds exactly one behaviour moved</td></tr><tr><td>the less you change, the safer</td><td>the arm that changed most ended smaller and simpler</td></tr><tr><td>repeated findings from many reviewers mean it is real</td><td>in file-only, false positives repeated more than real ones</td></tr><tr><td>after one big fix there is nothing to review</td><td>the larger the fix, the more genuinely new findings</td></tr><tr><td>fan-out only adds noise</td><td>on Python, +52% distinct issues and -21% raw findings at the same six calls</td></tr><tr><td>fan-out is always better</td><td>on the C firmware it gained nothing at the same budget</td></tr><tr><td>stop when churn converges to zero</td><td>on the weakly contracted C module it rose, 194→262→395</td></tr><tr><td>codex cannot run the repo-access condition</td><td>it was a <code>/tmp</code> environment configuration problem</td></tr></tbody></table>
+<p>That table is close to being the point of the study.</p>
+<p>The subject was AI review, but the AI was not the only thing that kept failing.</p>
+<ul>
+<li>I misread experimental conditions</li>
+<li>I over-trusted tests</li>
+<li>I mistook configuration problems for model properties</li>
+<li>I generalised from one task far too quickly</li>
+</ul>
+<p>And each time, the next question changed the conclusion:</p>
+<blockquote>
+<p>Is it really a bug?</p>
+</blockquote>
+<blockquote>
+<p>Does it hold in another model?</p>
+</blockquote>
+<blockquote>
+<p>Is that difference the model, or the environment?</p>
+</blockquote>
+<blockquote>
+<p>What does this test actually guarantee?</p>
+</blockquote>
+<blockquote>
+<p>Beyond passing tests, did the code actually get better?</p>
+</blockquote>
+<hr/>
+<h2 id="conclusion">Conclusion</h2>
+<p>The first question was simple.</p>
+<blockquote>
+<p><strong>How many times should you run an AI code review?</strong></p>
+</blockquote>
+<p>I now think the question itself is slightly wrong.</p>
+<p>Bundling review count and fix count into one “round” erases the distinction that matters.</p>
+<p>In this data, the thing worth repeating was the <strong>review</strong>.</p>
+<p>Each repetition saw more real defects.</p>
+<p>Repeated fixing, by contrast, often left compliance untouched while growing the volume of change
+and the risk that comes with it.</p>
+<p>So the current answer is:</p>
+<blockquote>
+<h2 id="review-many-times-fix-once">Review many times. Fix once.</h2>
+<p>And if the fix is large enough, the next review is not “one more round”.
+<strong>It is the first review of newly written code.</strong></p>
+</blockquote>
+<p>Do not look for the end of AI review in the model’s silence.</p>
+<p>What matters more:</p>
+<ul>
+<li>can the reviewer see the real context of the code</li>
+<li>do the tests actually pin production behaviour</li>
+<li>how far does the fixer’s scope extend</li>
+<li>how much of the code changed</li>
+<li>how did size and complexity move outside the tests</li>
+<li>is the same design decision being reversed over and over</li>
+</ul>
+<p>In the end, the better question than “how many times?” is:</p>
+
+<blockquote>
+<p><strong>What should be repeated, and what should happen only once?</strong></p>
+</blockquote>
+  </div> </div> <div class="post-engagement" data-astro-cid-bvzihdzo> <button class="upvote upvote-large" type="button" data-slug="how-many-ai-code-reviews" data-variant="large" data-upvote-btn data-label-upvote="Upvote" data-label-upvoted="Upvoted" aria-label="Upvote this post" aria-pressed="false" disabled data-astro-cid-xtsolmtf> <svg class="upvote-icon" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor" data-astro-cid-xtsolmtf> <path d="M8 2.5 L14.5 12.5 L1.5 12.5 Z" data-astro-cid-xtsolmtf></path> </svg> <span class="upvote-label" data-astro-cid-xtsolmtf>Upvote</span> <span class="upvote-count" data-upvote-count data-astro-cid-xtsolmtf>--</span> </button>   <div class="share-wrap share-large" data-share-wrap data-astro-cid-uz5iaaom> <button type="button" class="share-btn share-btn-large" data-share-toggle data-url="https://edgelog.dev/blog/how-many-ai-code-reviews/" data-label-copy="Copy link" data-label-copied="Copied" aria-haspopup="menu" aria-expanded="false" aria-label="Share" data-astro-cid-uz5iaaom> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-astro-cid-uz5iaaom> <circle cx="12" cy="4" r="2" data-astro-cid-uz5iaaom></circle> <circle cx="4" cy="8" r="2" data-astro-cid-uz5iaaom></circle> <circle cx="12" cy="12" r="2" data-astro-cid-uz5iaaom></circle> <line x1="5.7" y1="7" x2="10.3" y2="5" data-astro-cid-uz5iaaom></line> <line x1="5.7" y1="9" x2="10.3" y2="11" data-astro-cid-uz5iaaom></line> </svg> <span data-astro-cid-uz5iaaom>Share</span> </button> <div class="share-menu" role="menu" data-share-menu hidden data-astro-cid-uz5iaaom> <button type="button" class="share-item" role="menuitem" data-share-copy data-astro-cid-uz5iaaom> <span class="share-item-label" data-astro-cid-uz5iaaom>Copy link</span> </button> <a class="share-item" role="menuitem" href="https://twitter.com/intent/tweet?text=How%20Many%20AI%20Code%20Reviews%20Is%20Enough%3F&url=https%3A%2F%2Fedgelog.dev%2Fblog%2Fhow-many-ai-code-reviews%2F" target="_blank" rel="noopener noreferrer" data-astro-cid-uz5iaaom> <span class="share-item-label" data-astro-cid-uz5iaaom>Share on X</span> </a> <a class="share-item" role="menuitem" href="https://news.ycombinator.com/submitlink?u=https%3A%2F%2Fedgelog.dev%2Fblog%2Fhow-many-ai-code-reviews%2F&t=How%20Many%20AI%20Code%20Reviews%20Is%20Enough%3F" target="_blank" rel="noopener noreferrer" data-astro-cid-uz5iaaom> <span class="share-item-label" data-astro-cid-uz5iaaom>Submit to Hacker News</span> </a> <a class="share-item" role="menuitem" href="https://www.reddit.com/submit?url=https%3A%2F%2Fedgelog.dev%2Fblog%2Fhow-many-ai-code-reviews%2F&title=How%20Many%20AI%20Code%20Reviews%20Is%20Enough%3F" target="_blank" rel="noopener noreferrer" data-astro-cid-uz5iaaom> <span class="share-item-label" data-astro-cid-uz5iaaom>Submit to Reddit</span> </a> </div> </div>   </div> <nav class="post-nav post-nav-band" aria-label="Post navigation" data-astro-cid-bknnyp27><div class="nav-link prev" data-astro-cid-bknnyp27><a href="/blog/llm-pcb-routing-human-taught/" data-astro-cid-bknnyp27><span class="label" data-astro-cid-bknnyp27>&larr; Previous</span><span class="title" data-astro-cid-bknnyp27>LLM PCB Routing<span class="post-subtitle" data-astro-cid-bknnyp27>: Turning a Human&#39;s Fixes Into Rules</span></span></a></div><div class="nav-link next" data-astro-cid-bknnyp27></div></nav> <div class="author-bio author-bio-band" data-astro-cid-ynhdph36> <div class="author-avatar" data-astro-cid-ynhdph36> <img src="/_astro/profile.BhO5h5fX_Z1pAPCg.webp" alt="ecro" data-astro-cid-ynhdph36="true" loading="lazy" decoding="async" fetchpriority="auto" width="200" height="200"> </div> <div class="author-info" data-astro-cid-ynhdph36> <span class="author-kicker" data-astro-cid-ynhdph36>Written by</span> <span class="author-name" data-astro-cid-ynhdph36>ecro</span> <p class="author-desc" data-astro-cid-ynhdph36> Created an LLM benchmark for firmware. <a href="https://github.com/Ecro/embedeval" target="_blank" rel="noopener noreferrer" data-astro-cid-ynhdph36>EmbedEval &rarr;</a> </p> <p class="author-desc" data-astro-cid-ynhdph36> Building a project-shaped agent harness for Claude Code, Cursor, and Codex. <a href="https://github.com/Ecro/harness-maker" target="_blank" rel="noopener noreferrer" data-astro-cid-ynhdph36>harness-maker &rarr;</a> </p> <p class="author-desc" data-astro-cid-ynhdph36> Building a terminal that reads your datasheets. <a href="https://neuroterm.dev" target="_blank" rel="noopener noreferrer" data-astro-cid-ynhdph36>NeuroTerm &rarr;</a> </p> </div> </div>  <div class="newsletter newsletter-band" data-astro-cid-bfbmamsi><div class="newsletter-head" data-astro-cid-bfbmamsi><span class="newsletter-kicker" data-astro-cid-bfbmamsi>Subscribe · email</span></div><div class="newsletter-body" data-astro-cid-bfbmamsi><div class="newsletter-copy" data-astro-cid-bfbmamsi><p class="newsletter-heading" data-astro-cid-bfbmamsi>The notebook, by email</p><p class="newsletter-tagline" data-astro-cid-bfbmamsi>A hardware product built solo with LLM harnesses, and the numbers behind each call. Biweekly.</p></div><form action="https://buttondown.email/api/emails/embed-subscribe/ecro" method="post" target="popupwindow" onsubmit="window.open('https://buttondown.email/' + this.dataset.username, 'popupwindow')" class="newsletter-form" data-username="ecro" data-astro-cid-bfbmamsi><input type="email" name="email" id="bd-email" placeholder="your@email.com" required aria-label="your@email.com" class="newsletter-input" data-astro-cid-bfbmamsi><button type="submit" class="newsletter-button" data-astro-cid-bfbmamsi>Subscribe</button></form></div><p class="newsletter-disclaimer" data-astro-cid-bfbmamsi>Unsubscribe anytime.</p></div> <div class="band comments-band" data-astro-cid-bvzihdzo> <section class="comments-section" id="comments" data-slug="how-many-ai-code-reviews" data-labels="{&#34;title&#34;:&#34;Comments&#34;,&#34;name&#34;:&#34;Name&#34;,&#34;comment&#34;:&#34;Comment&#34;,&#34;submit&#34;:&#34;Post Comment&#34;,&#34;submitting&#34;:&#34;Posting...&#34;,&#34;loading&#34;:&#34;Loading comments...&#34;,&#34;empty&#34;:&#34;No comments yet. Be the first!&#34;,&#34;success&#34;:&#34;Comment posted!&#34;,&#34;error&#34;:&#34;Failed to post comment. Try again.&#34;,&#34;namePlaceholder&#34;:&#34;Your name&#34;,&#34;commentPlaceholder&#34;:&#34;Share your thoughts...&#34;}" data-sitekey="0x4AAAAAACq0fG-aBAZsRQRW" data-astro-cid-jvxsf75u> <h2 class="comments-title" data-astro-cid-jvxsf75u>Comments</h2> <div class="comments-list" id="comments-list" data-astro-cid-jvxsf75u> <p class="comments-status" data-astro-cid-jvxsf75u>Loading comments...</p> </div> <form class="comment-form" id="comment-form" novalidate data-astro-cid-jvxsf75u> <div class="form-field" data-astro-cid-jvxsf75u> <label for="comment-name" data-astro-cid-jvxsf75u>Name</label> <input type="text" id="comment-name" name="author_name" required maxlength="80" placeholder="Your name" autocomplete="name" data-astro-cid-jvxsf75u> </div> <!-- Honeypot --> <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px" data-astro-cid-jvxsf75u> <input type="text" name="website" tabindex="-1" autocomplete="off" data-astro-cid-jvxsf75u> </div> <div class="form-field" data-astro-cid-jvxsf75u> <label for="comment-content" data-astro-cid-jvxsf75u>Comment</label> <textarea id="comment-content" name="content" required maxlength="2000" rows="4" placeholder="Share your thoughts..." data-astro-cid-jvxsf75u></textarea> </div> <div class="form-actions" data-astro-cid-jvxsf75u> <div class="turnstile-widget" id="turnstile-widget" data-astro-cid-jvxsf75u></div> <button type="submit" class="comment-submit" id="comment-submit" data-astro-cid-jvxsf75u> Post Comment </button> </div> <p class="form-status" id="form-status" role="status" aria-live="polite" data-astro-cid-jvxsf75u></p> </form> </section> <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script> <script type="module">function p(){const o=document.getElementById("comments");if(!o)return;const r=o.dataset.slug,y=o.dataset.sitekey,s=JSON.parse(o.dataset.labels),i=document.getElementById("comments-list"),c=document.getElementById("comment-form"),a=document.getElementById("comment-submit"),n=document.getElementById("form-status"),g=document.getElementById("turnstile-widget");let m;function d(e){const t=document.createElement("span");return t.textContent=e,t.innerHTML}function w(e){return new Date(e).toLocaleDateString(void 0,{year:"numeric",month:"short",day:"numeric"})}function h(e){if(!e.length){i.innerHTML=`<p class="comments-status">${s.empty}</p>`;return}i.innerHTML=e.map(t=>`
+				<div class="comment-item">
+					<div class="comment-head">
+						<span class="comment-author">${d(t.author_name)}</span>
+						<time class="comment-time">${w(t.created_at)}</time>
+					</div>
+					<div class="comment-body">${d(t.content)}</div>
+				</div>`).join("")}async function u(){try{const t=await(await fetch(`/api/comments/${encodeURIComponent(r)}`)).json();h(t.comments??[])}catch{i.innerHTML=`<p class="comments-status">${s.empty}</p>`}}function l(){const e=window.turnstile;if(!e){setTimeout(l,250);return}const t=document.documentElement.getAttribute("data-theme")??"dark";m=e.render(g,{sitekey:y,theme:t})}c.addEventListener("submit",async e=>{e.preventDefault(),a.disabled=!0,a.textContent=s.submitting,n.textContent="",n.className="form-status";const t=new FormData(c),b=window.turnstile?.getResponse(m)??"";try{const f=await fetch(`/api/comments/${encodeURIComponent(r)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({author_name:t.get("author_name"),content:t.get("content"),website:t.get("website"),turnstile_token:b})});if(f.ok)n.textContent=s.success,n.classList.add("is-success"),c.reset(),window.turnstile?.reset(m),await u();else{const E=await f.json();n.textContent=E.error??s.error,n.classList.add("is-error")}}catch{n.textContent=s.error,n.classList.add("is-error")}finally{a.disabled=!1,a.textContent=s.submit}}),u(),l()}p();document.addEventListener("astro:after-swap",p);</script>  </div> </article> <script type="module">document.querySelectorAll(".prose pre").forEach(o=>{const c=o.querySelector("code");if(!c||o.closest(".buildspec"))return;const l=Array.from(c.classList).find(t=>t.startsWith("language-"))?.replace("language-","")??"",n=document.createElement("div");n.className="code-block",o.parentNode.insertBefore(n,o),n.appendChild(o);const a=document.createElement("div");if(a.className="code-toolbar",l){const t=document.createElement("span");t.className="code-lang",t.textContent=l,a.appendChild(t)}const e=document.createElement("button");e.className="code-copy",e.textContent="Copy",e.setAttribute("aria-label","Copy code to clipboard"),e.addEventListener("click",async()=>{const t=c.textContent??"";await navigator.clipboard.writeText(t),e.textContent="Copied!",setTimeout(()=>{e.textContent="Copy"},1500)}),a.appendChild(e),n.insertBefore(a,o)});</script>  <div class="lightbox-overlay" id="lightbox-overlay" aria-hidden="true" role="dialog" aria-label="Image preview" data-astro-cid-fbflauxb> <button class="lightbox-close" id="lightbox-close" aria-label="Close" data-astro-cid-fbflauxb>&times;</button> <img class="lightbox-img" id="lightbox-img" src="" alt="" data-astro-cid-fbflauxb> </div> <script type="module">function a(){const t=document.getElementById("lightbox-overlay"),c=document.getElementById("lightbox-img"),s=document.getElementById("lightbox-close");if(!t||!c||!s)return;t.parentElement!==document.body&&document.body.appendChild(t);function d(e,n){c.src=e,c.alt=n,t.classList.add("is-active"),t.setAttribute("aria-hidden","false"),document.body.classList.add("lightbox-open")}function r(){t.classList.remove("is-active"),t.setAttribute("aria-hidden","true"),document.body.classList.remove("lightbox-open")}function l(e){return e.currentSrc||e.src||e.getAttribute("src")||""}document.querySelectorAll("article img").forEach(e=>{if(e.closest(".lightbox-overlay")||e.closest(".img-zoom-wrap"))return;const n=e.closest("picture")||e,i=document.createElement("div");i.className="img-zoom-wrap",n.parentNode.insertBefore(i,n),i.appendChild(n);const o=document.createElement("button");o.className="img-zoom-btn",o.setAttribute("aria-label","Enlarge image"),o.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',i.appendChild(o),o.addEventListener("click",m=>{m.stopPropagation(),d(l(e),e.alt)})}),s.addEventListener("click",r),t.addEventListener("click",e=>{e.target===t&&r()}),document.addEventListener("keydown",e=>{e.key==="Escape"&&t.classList.contains("is-active")&&r()})}a();document.addEventListener("astro:after-swap",a);</script>   </main> <footer class="footer-rule" data-astro-cid-sz7xmlte><span data-astro-cid-sz7xmlte>&copy; 2026 EdgeLog &middot; ecro</span><span class="fr-links" data-astro-cid-sz7xmlte><a href="/" data-astro-cid-sz7xmlte>Home</a><a href="/blog/" data-astro-cid-sz7xmlte>Essays</a><a href="/rss.xml" data-astro-cid-sz7xmlte>RSS</a></span></footer> <button class="scroll-top" id="scroll-top" aria-label="Scroll to top" title="Scroll to top" data-astro-cid-73562bqz> <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-73562bqz> <polyline points="18 15 12 9 6 15" data-astro-cid-73562bqz></polyline> </svg> </button>  <script type="module">function o(){const t=document.getElementById("scroll-top");if(!t)return;const e=()=>{t.classList.toggle("visible",window.scrollY>window.innerHeight)};window.addEventListener("scroll",e,{passive:!0}),t.addEventListener("click",()=>{window.scrollTo({top:0,behavior:"smooth"})}),e()}o();document.addEventListener("astro:after-swap",o);</script> <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"64907c26ce384af8ac0632b5fd4439c7","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body></html>

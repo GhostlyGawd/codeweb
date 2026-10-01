@@ -1,0 +1,23 @@
+{
+  "id": "R25-explicit-refresh-failure",
+  "command": [
+    "/opt/homebrew/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/refresh.mjs",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/extraction-failure/.codeweb/graph.json",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_NO_RECEIPTS": "1",
+    "CODEWEB_NO_PROMO": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T02:23:40.318043+00:00",
+  "end": "2026-10-01T02:23:40.441100+00:00",
+  "durationSeconds": 0.12308733304962516,
+  "exit": 2,
+  "stdout": "",
+  "stderr": "extract failed: /Library/Developer/CommandLineTools/usr/bin/ctags: illegal option -- -\nusage: ctags [-BFTaduwvx] [-f tagsfile] file ...\n[extract] no supported source files under $LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/extraction-failure\n[extract]   looked for: .js .mjs .cjs .jsx .ts .tsx .mts .cts .py .rs .go .java .cs .rb .php .kt .kts .swift .c .h .cpp .cc .cxx .hpp .hh .hxx (node_modules, dist, vendor and friends are skipped)\n[extract]   wrong directory? Point at the code root. Non-native language? In Claude Code, the\n[extract]   /codeweb command falls back to agent-based mapping \u2014 no extractor needed.\n[extract]   (Intentionally sparse target? --allow-empty writes an empty map.)\n"
+}

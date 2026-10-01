@@ -1,0 +1,21 @@
+{
+  "id": "T05-hook-known-low-edit",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/subject.mjs\",\"old_string\":\"return value + 1;\",\"new_string\":\"return value + 2;\",\"symbol\":\"subject.mjs:low\"}}",
+  "start": "2026-10-01T01:50:10.902Z",
+  "end": "2026-10-01T01:50:10.937Z",
+  "durationMs": 34.38691699999998,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"[codeweb] editing subject.mjs: 4 symbol(s), 10 in-repo dependent edge(s) (most depended-on: popular ×8).\\n  function popular (product, ) — 8 caller(s), 0 test(s), blast 8 across 1 domain(s); args 1\\n  top callers: popular0.mjs:frequent0, popular1.mjs:frequent1, popular2.mjs:frequent2, popular3.mjs:frequent3\\n  → codeweb_context for a bounded edit window; codeweb_impact for the full blast radius.\"}}\n",
+  "stderr": ""
+}

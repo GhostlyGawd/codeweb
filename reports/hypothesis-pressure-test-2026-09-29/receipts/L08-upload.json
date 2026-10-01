@@ -1,0 +1,30 @@
+[
+  {
+    "path": "lenses/08-ownership-of-a-complete-job.md",
+    "sha256": "57d44f843d5fcf17e731d468c121c1214aa00b0abfee34683bfc5ddd47bc7823",
+    "attachment_id": "25725a5c-a08a-48e2-a488-d0285e8c9f4d",
+    "content_path": "/api/attachments/25725a5c-a08a-48e2-a488-d0285e8c9f4d/content",
+    "work_product_id": "ca18f0a6-69ec-4b20-b832-0125afd849ed"
+  },
+  {
+    "path": "lenses/08-findings.json",
+    "sha256": "cdc3273400768af355586cbdd894d8452f03bd8d54ef7173cb7557fb117bf65f",
+    "attachment_id": "90f0f362-87bb-4e7a-aa46-e7a31420425b",
+    "content_path": "/api/attachments/90f0f362-87bb-4e7a-aa46-e7a31420425b/content",
+    "work_product_id": "1f27e19b-5b24-45de-9c8f-9b8f85be64cb"
+  },
+  {
+    "path": "receipts/L08.json",
+    "sha256": "95b40b73838698b75214a3b54ab98c3b5054e0e2f9936ad23401adc8ab9725ea",
+    "attachment_id": "fbe29e84-b9a1-48a9-a4ee-fabf673da70d",
+    "content_path": "/api/attachments/fbe29e84-b9a1-48a9-a4ee-fabf673da70d/content",
+    "work_product_id": "9cd0a2bd-c1b8-4205-be5b-dd56d26782f4"
+  },
+  {
+    "path": "receipts/L08-delivery.zip",
+    "sha256": "0016e2f393b7f5a7629f079ac8f53a8d84415fad3389b42df0f8e5bbc52a9682",
+    "attachment_id": "d4499d34-f3d6-40c4-8b07-6c1c7b68ba8b",
+    "content_path": "/api/attachments/d4499d34-f3d6-40c4-8b07-6c1c7b68ba8b/content",
+    "work_product_id": "bbb8f217-02fe-485a-8099-1ce4a0bc4e9a"
+  }
+]

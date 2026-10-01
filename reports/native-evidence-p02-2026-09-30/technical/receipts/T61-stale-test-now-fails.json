@@ -1,0 +1,17 @@
+{
+  "id": "T61-stale-test-now-fails",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "--test",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/current.test.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "start": "2026-10-01T01:50:14.885Z",
+  "end": "2026-10-01T01:50:14.962Z",
+  "durationMs": 77.09191700000065,
+  "exit": 1,
+  "signal": null,
+  "error": null,
+  "stdout": "✖ current valid oracle (0.553042ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 43.397084\n\n✖ failing tests:\n\ntest at behavior/current.test.mjs:4:1\n✖ current valid oracle (0.553042ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  4 !== 3\n  \n      at TestContext.<anonymous> (file://$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/current.test.mjs:4:40)\n      at Test.runInAsyncScope (node:async_hooks:226:14)\n      at Test.run (node:internal/test_runner/test:1397:25)\n      at Test.start (node:internal/test_runner/test:1257:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 4,\n    expected: 3,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n",
+  "stderr": ""
+}

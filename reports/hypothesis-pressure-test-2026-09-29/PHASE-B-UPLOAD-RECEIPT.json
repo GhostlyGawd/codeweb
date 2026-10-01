@@ -1,0 +1,50 @@
+[
+  {
+    "file": "SYNTHESIS-INPUT-PACKET.zip",
+    "attachment": {
+      "id": "e555af0c-cbce-4258-80c7-cac1addc26be",
+      "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+      "issueId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "issueCommentId": null,
+      "assetId": "c8437d8d-49a7-4e78-8397-3af3f8a2e5e9",
+      "provider": "local_disk",
+      "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/cd0cc8cb-59bc-48ad-845e-6d938aab2bbf/2026/09/30/bc68fcc3-ead8-4dc1-9251-5309d187dce5-SYNTHESIS-INPUT-PACKET.zip",
+      "contentType": "application/zip",
+      "byteSize": 5638351,
+      "sha256": "24ea9f018faf90dfc71f94da64fe7fc8040edfeeb01a29dfb5cb9a4e63453477",
+      "originalFilename": "SYNTHESIS-INPUT-PACKET.zip",
+      "createdByAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "createdByUserId": null,
+      "createdAt": "2026-09-30T04:43:50.519Z",
+      "updatedAt": "2026-09-30T04:43:50.519Z",
+      "contentPath": "/api/attachments/e555af0c-cbce-4258-80c7-cac1addc26be/content",
+      "openPath": "/api/attachments/e555af0c-cbce-4258-80c7-cac1addc26be/content",
+      "downloadPath": "/api/attachments/e555af0c-cbce-4258-80c7-cac1addc26be/content?download=1"
+    },
+    "work_product_id": "5987c8ee-ce2b-4353-aead-6410bd592ec3"
+  },
+  {
+    "file": "PHASE-B-VERIFICATION.zip",
+    "attachment": {
+      "id": "54f2c47d-fed4-4441-a272-4640a721fda7",
+      "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+      "issueId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "issueCommentId": null,
+      "assetId": "9af22c1f-dc50-4b7a-ae10-ef93dddc5599",
+      "provider": "local_disk",
+      "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/cd0cc8cb-59bc-48ad-845e-6d938aab2bbf/2026/09/30/c40f14aa-0aa3-49e3-a6cc-dde75168bf40-PHASE-B-VERIFICATION.zip",
+      "contentType": "application/zip",
+      "byteSize": 28480,
+      "sha256": "5fd1b5027d5cc03abf30f0eff531cde28a0b905ea6534065ee8c941b10478e39",
+      "originalFilename": "PHASE-B-VERIFICATION.zip",
+      "createdByAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "createdByUserId": null,
+      "createdAt": "2026-09-30T04:43:50.540Z",
+      "updatedAt": "2026-09-30T04:43:50.540Z",
+      "contentPath": "/api/attachments/54f2c47d-fed4-4441-a272-4640a721fda7/content",
+      "openPath": "/api/attachments/54f2c47d-fed4-4441-a272-4640a721fda7/content",
+      "downloadPath": "/api/attachments/54f2c47d-fed4-4441-a272-4640a721fda7/content?download=1"
+    },
+    "work_product_id": "43139c77-e535-42ff-a9f9-1c026570daa8"
+  }
+]

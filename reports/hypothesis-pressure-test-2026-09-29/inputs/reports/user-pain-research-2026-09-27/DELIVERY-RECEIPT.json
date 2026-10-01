@@ -1,0 +1,40 @@
+{
+  "deliveredAt": "2026-09-28T03:02:06.144Z",
+  "parent": "COD-56",
+  "researchStatus": "independently approved with documented source breadth shortfall",
+  "sourceDirectory": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/cycle-01/workspace/reports/user-pain-research-2026-09-27",
+  "destinationDirectory": "$LOCAL_HOME/Repositories/codeweb/reports/user-pain-research-2026-09-27",
+  "approvedManifestSha256": "dfd71831fba06e29e78fd61b6c299e8485c674d815b3f3b98eed37105ba46653",
+  "approvedFilesCopied": 125,
+  "allCopiedBytesVerified": true,
+  "auditBaseline": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "match": true
+    }
+  ],
+  "placementExceptionResolvedByRoot": true,
+  "sourceBreadth": {
+    "targetMinimum": 150,
+    "fullyReadSources": 110,
+    "shortfall": 40
+  },
+  "evidenceRecords": 132,
+  "note": "Worker-approved artifacts preserved unchanged. This root delivery resolves their historical repository-placement exception; it does not revise the source-count limitation."
+}

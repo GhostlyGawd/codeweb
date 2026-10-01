@@ -1,0 +1,19 @@
+# Value, alternatives and buying — integrated brief
+
+Final synthesis candidate; independent final review pending. Claims are reported/qualified as in [corpus](../EVIDENCE.jsonl). Coverage spans pilot, original lanes, supplements and final targeted sweeps; [source map](../SOURCE-MAP.md) gives exact boundaries. No saturation claimed.
+
+- [CW-Y001](https://forum.cursor.com/t/bugbot-pricing-feedback/131907): Reports paying annual Bugbot charges and valuing repeated review of complex feature PRs despite infrequent PR counts. **Limit:** Historical price and intended retention, not observed renewal; no Codeweb buying intent.
+- [CW-Y002](https://forum.cursor.com/t/bugbot-stopped-being-triggered/156739): Reports cancelling Cursor after review allowance stopped and support did not resolve documentation discrepancy. **Limit:** May pricing changed; do not present April allowance as current. Cancellation is self-report.
+- [CW-Y003](https://forum.cursor.com/t/bugbot-run-or-cursor-review-stopped-working/150186): Reports cancelling because author eligibility excluded work produced through another provider. **Limit:** Historical eligibility; current docs allow all contributors on enabled team repositories. Not a current gap.
+- [CW-Y004](https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666): Needs non-transitive repository isolation including persisted derived context and deletion provenance; requested formal security material. **Limit:** No purchase authority, rejection, approval, or technical breach demonstrated.
+- [CW-Y007](https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120): Uses Claude for cross-repo checking; accepts CI or monorepo as more appropriate, but migration is not near-term. **Limit:** No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.
+- [CW-Y010](https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189): Client considered one paid year for multi-project branch monitoring, then returning to free edition. **Limit:** Outside two-year preference; proposed purchase, not completed sale or observed downgrade.
+- [CW-L035](https://www.roshnimohandas.com/blog/why-i-switched-from-cursor-to-windsurf): Reports switching to Windsurf plus Claude Code because overlapping agents and a second metered bill felt redundant; accepts less polished completion. **Limit:** Commercial consultant self-report; Medium syndication same incident. Market/acquisition forecasts and quoted plan allowances not verified or adopted as current facts.
+
+**Synthesis/inference:** Actual provider payment and cancellation coexist with internal/free alternatives. Cross-repo coordination is a plausible paid job; purchasing authority and Codeweb value remain unproven.
+
+**Decision and proposed experiment:** Audit change: require a specific shared job and budget owner before hosted scope or price validation. Compare to existing CI first, then a separately authorized real paid pilot and renewal. No experiment executed or authorized by this report.
+
+**Segments and moments:** use only the source-supported segments in each record. The primary proposed audience remains agent-heavy developers working their own repository, with reviewers secondary; builder demonstrations are distinct from ordinary-user outcomes. Before-edit, review/merge, return-use and buy/renew moments must not be collapsed.
+
+**Unknowns:** incremental Codeweb effect, actual recurrence outside purposive public samples, ordinary-user week-two reuse, current host/version transfer and paid authority. See [contradictions](../CONTRADICTIONS.md) and [opportunity decisions](../OPPORTUNITY-DECISIONS.md). Earlier briefs and correction histories remain unmodified.

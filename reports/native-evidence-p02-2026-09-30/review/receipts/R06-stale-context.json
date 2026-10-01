@@ -1,0 +1,24 @@
+{
+  "id": "R06-stale-context",
+  "command": [
+    "/opt/homebrew/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/context-pack.mjs",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/target/.codeweb/graph.json",
+    "subject.mjs:low",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_NO_RECEIPTS": "1",
+    "CODEWEB_NO_PROMO": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T02:23:38.481746+00:00",
+  "end": "2026-10-01T02:23:38.520712+00:00",
+  "durationSeconds": 0.03899445792194456,
+  "exit": 0,
+  "stdout": "{\"symbol\":\"subject.mjs:low\",\"matched\":[\"subject.mjs:low\"],\"sourceAvailable\":true,\"summary\":\"subject.mjs:low: 2 caller(s), 0 callee(s), blast radius 2 \u2014 graph is stale for 1+ file(s); run codeweb_refresh\",\"mode\":\"call-site windows (\u00b13 lines)\",\"target\":[{\"id\":\"subject.mjs:low\",\"label\":\"low\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":1,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"body\":\"export function low(value) {\\n return value + 1;\\n}\"}],\"callers\":[{\"id\":\"consumer.mjs:consequential\",\"label\":\"consequential\",\"kind\":\"function\",\"file\":\"consumer.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"windowEvidence\":{\"status\":\"shown\",\"matchedLines\":1,\"shownLines\":1,\"remaining\":0},\"windows\":[{\"startLine\":2,\"endLine\":4,\"callLines\":[3],\"text\":\"export function consequential() {\\n return low(10);\\n}\"}]},{\"id\":\"subject.mjs:local\",\"label\":\"local\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":10,\"loc\":3,\"domain\":\"unassigned\",\"exports\":false,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"windowEvidence\":{\"status\":\"shown\",\"matchedLines\":1,\"shownLines\":1,\"remaining\":0},\"windows\":[{\"startLine\":10,\"endLine\":12,\"callLines\":[11],\"text\":\"function local(value) {\\n return low(value);\\n}\"}]}],\"callees\":[],\"blastRadius\":{\"count\":2,\"ids\":[\"consumer.mjs:consequential\",\"subject.mjs:local\"]},\"stale\":{\"count\":1,\"files\":[\"subject.mjs\"]},\"analysis\":{\"scope\":\"mapped-call-graph\",\"freshness\":\"stale\",\"listsComplete\":true,\"sourceEvidenceComplete\":true,\"limitations\":[\"unmapped-calls\",\"stale-graph\",\"external-callers\"],\"nextSteps\":[\"Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.\",\"Refresh the map (MCP: codeweb_refresh) before relying on recorded locations.\",\"Check package consumers before changing an exported contract.\"]}}\n",
+  "stderr": ""
+}

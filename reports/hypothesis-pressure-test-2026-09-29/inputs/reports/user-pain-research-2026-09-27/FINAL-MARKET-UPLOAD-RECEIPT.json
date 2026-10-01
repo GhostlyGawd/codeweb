@@ -1,0 +1,80 @@
+{
+  "attachment": {
+    "id": "053f008f-1a16-4d3c-ab95-ebba8f580217",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "22d6b2b6-4d76-42b1-abce-beac3f423e3b",
+    "issueCommentId": null,
+    "assetId": "9709b750-8eaa-4f16-be8a-9fc80a7c7a00",
+    "provider": "local_disk",
+    "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/22d6b2b6-4d76-42b1-abce-beac3f423e3b/2026/09/28/8a4d15ef-5022-4060-84ef-b5a151c6ad95-FINAL-MARKET-HANDOFF.zip",
+    "contentType": "application/zip",
+    "byteSize": 17283,
+    "sha256": "a0f575403e7255dd4758bf9ce0a1d1bd7ab8b5a3a3d94bf177a7a329dbd9f580",
+    "originalFilename": "FINAL-MARKET-HANDOFF.zip",
+    "createdByAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+    "createdByUserId": null,
+    "createdAt": "2026-09-28T01:50:20.100Z",
+    "updatedAt": "2026-09-28T01:50:20.100Z",
+    "contentPath": "/api/attachments/053f008f-1a16-4d3c-ab95-ebba8f580217/content",
+    "openPath": "/api/attachments/053f008f-1a16-4d3c-ab95-ebba8f580217/content",
+    "downloadPath": "/api/attachments/053f008f-1a16-4d3c-ab95-ebba8f580217/content?download=1"
+  },
+  "work_product": {
+    "id": "47502d5e-bec2-4f41-863a-3bf616da9d69",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "projectId": null,
+    "issueId": "22d6b2b6-4d76-42b1-abce-beac3f423e3b",
+    "executionWorkspaceId": null,
+    "runtimeServiceId": null,
+    "type": "artifact",
+    "provider": "paperclip",
+    "externalId": null,
+    "title": "Final market evidence and decision handoff",
+    "url": null,
+    "status": "ready_for_review",
+    "reviewState": "needs_board_review",
+    "isPrimary": true,
+    "healthStatus": "unknown",
+    "summary": null,
+    "metadata": {
+      "byteSize": 17283,
+      "openPath": "/api/attachments/053f008f-1a16-4d3c-ab95-ebba8f580217/content",
+      "contentPath": "/api/attachments/053f008f-1a16-4d3c-ab95-ebba8f580217/content",
+      "contentType": "application/zip",
+      "attachmentId": "053f008f-1a16-4d3c-ab95-ebba8f580217",
+      "downloadPath": "/api/attachments/053f008f-1a16-4d3c-ab95-ebba8f580217/content?download=1",
+      "originalFilename": "FINAL-MARKET-HANDOFF.zip"
+    },
+    "sourceTrust": null,
+    "createdByRunId": "d7b99237-1ff4-4f52-b2f5-f9cae08a9e28",
+    "createdAt": "2026-09-28T01:50:20.110Z",
+    "updatedAt": "2026-09-28T01:50:20.110Z"
+  },
+  "disposition": {
+    "id": "22d6b2b6-4d76-42b1-abce-beac3f423e3b",
+    "status": "in_review",
+    "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "executionState": {
+      "status": "pending",
+      "monitor": null,
+      "reviewRequest": null,
+      "currentStageId": "3e6ec7ea-7e53-4e6d-8ca0-839836437f68",
+      "lastDecisionId": null,
+      "returnAssignee": {
+        "type": "agent",
+        "userId": null,
+        "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+      },
+      "currentStageType": "review",
+      "completedStageIds": [],
+      "currentStageIndex": 0,
+      "currentParticipant": {
+        "type": "agent",
+        "userId": null,
+        "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4"
+      },
+      "lastDecisionOutcome": null,
+      "changesRequestedCount": 0
+    }
+  }
+}

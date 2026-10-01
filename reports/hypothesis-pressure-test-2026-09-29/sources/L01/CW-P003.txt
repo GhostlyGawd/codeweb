@@ -1,0 +1,973 @@
+Systematic model behavior gaps in extended coding sessions -- 55+ documented incidents with actionable improvement suggestions · Issue #39703 · anthropics/claude-code · GitHub
+Skip to content
+Navigation Menu
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub Copilot
+Write better code with AI
+GitHub Copilot app
+Direct agents from issue to merge
+MCP Registry
+Integrate external tools
+DEVELOPER WORKFLOWS
+Actions
+Automate any workflow
+Codespaces
+Instant dev environments
+Issues
+Plan and track work
+Code Review
+Manage code changes
+Code Quality
+Enforce quality at merge
+APPLICATION SECURITY
+GitHub Advanced Security
+Find and fix vulnerabilities
+Code security
+Secure your code as you build
+Secret protection
+Stop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+View all resources
+Open Source
+COMMUNITY
+GitHub Sponsors
+Fund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+GitHub Stars
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platform
+AI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced Security
+Enterprise-grade security features
+Copilot for Business
+Enterprise-grade AI features
+Premium Support
+Enterprise-grade 24/7 support
+Pricing
+Search
+/
+Sign in
+Sign up
+Appearance settings
+You signed in with another tab or window.
+Reload
+to refresh your session.
+You signed out in another tab or window.
+Reload
+to refresh your session.
+You switched accounts on another tab or window.
+Reload
+to refresh your session.
+Dismiss alert
+{{ message }}
+anthropics
+/
+claude-code
+Public
+Notifications
+You must be signed in to change notification settings
+Fork
+25.1k
+Star
+149k
+Code
+Issues
+5k+
+Pull requests
+707
+Actions
+Security and quality
+32
+Insights
+Additional navigation options
+Code
+Issues
+Pull requests
+Actions
+Security and quality
+Insights
+Systematic model behavior gaps in extended coding sessions -- 55+ documented incidents with actionable improvement suggestions
+#39703
+New issue
+Copy link
+New issue
+Copy link
+Closed as not planned
+Closed as not planned
+Systematic model behavior gaps in extended coding sessions -- 55+ documented incidents with actionable improvement suggestions
+#39703
+Copy link
+Labels
+area:model
+enhancement
+New feature or request
+New feature or request
+platform:vscode
+Issue specifically occurs in VS Code
+Issue specifically occurs in VS Code
+stale
+Issue is inactive
+Issue is inactive
+Description
+casriraj
+opened
+on Mar 27, 2026
+Issue body actions
+Context
+I use Claude Code daily (VS Code extension, Opus model) to build a 67K-line Python/Tkinter desktop application (50+ modules, SQLite, financial domain). Over 3 months of daily use, I have maintained a Known_Bugs file documenting every bug encountered. Of 243 entries,
+55 (23%) trace back to Claude's own code generation
+-- not application logic errors, but repeatable model behavior patterns that cluster into
+12 distinct, addressable categories
+.
+This is not a complaint -- Claude Code has been transformational for my productivity. I am sharing these because each pattern has a
+concrete mechanism
+that could improve the model for all users. The incidents are real, documented with root cause analysis, and include reproduction context.
+Category A: Safety Concern -- Auto-Edit Mode + Wrong Assumption = Silent Regressions
+Severity: P0 -- can destroy working code without user awareness
+The pattern:
+Claude delivers a fix
+User pastes a console log or screenshot (intending to show the
+original
+problem for context, or to document what the error looked like)
+Claude assumes the fix failed
+Claude rewrites the already-working code
+Why this is dangerous in auto-edit mode:
+Steps 3-4 happen without user confirmation. The user now has a regression they did not ask for and may not notice. The "fix" for a non-existent problem can introduce new bugs into code that was already tested and working.
+Chain of harm:
+User pastes pre-fix log --> Claude assumes failure --> Auto-rewrites working code --> Silent regression
+Reproduction:
+In any session, deliver a fix for a bug, then paste a log from BEFORE the fix was applied (without saying "this is the old log"). Claude will very likely start rewriting code without asking.
+Suggested mechanisms:
+Before rewriting code that was just delivered as a fix, Claude should
+ask
+: "Is this log/screenshot from before or after applying the fix?" -- especially in auto-edit mode
+Alternatively, compare timestamps in the log/screenshot against the fix delivery time if timestamps are visible
+In auto-edit mode, treat "user pastes error after fix delivery" as a
+confirmation prompt trigger
+, not an auto-rewrite trigger
+Consider a cooldown: if code was written/edited in the last N messages, require explicit confirmation before modifying the same code again
+Category B: Identifier Verification Gap -- Writes Names from Memory Instead of Tool-Assisted Lookup
+This is the
+#1
+source of Claude-caused bugs (15 incidents)
+The pattern:
+When writing SQL column names, Python variable names, method names, or table names, Claude generates them from memory/training data instead of using available tools (Grep, Read) to verify the actual definition in the current codebase.
+Why it matters:
+These cause silent failures. A query with a wrong column name inside a try/except block returns zero results with no error. In a financial tool, "zero results" looks like "no data" -- not "wrong column name." The user sees empty reports and has no indication why.
+Real examples (representative, not exhaustive):
+What Claude wrote
+What actually exists
+Impact
+opening_balance
+/
+closing_balance
+opening
+/
+closing
+(ledgers table)
+Ledger picker showed "0 shown"; TDS Recon showed "0 TDS ledgers"
+narration
+voucher_narration
+(_vi_voucher table)
+Drill-down returned 0 results silently
+v.primary_party
+v.party_name
+(vouchers table)
+Stock register query failed
+get_ob_info()
+get_opening_balance_info()
+Status bar always showed "Not set"
+update_progress()
+update()
+(ProgressDialog)
+Excel export crashed
+_migrate_add_column()
+Never defined anywhere
+Tag Manager completely broken
+self._fmt_indian
+Module function:
+from stock_engine import _format_indian_number
+Group Summary drill-down crashed
+si.uom
+si.base_unit
+(stock_items table)
+Godown drill-down crashed with SQLite error
+self.gl_query_ui
+self.gl_query_frame
+GL Query showed "No Opening Balances"
+voucher_type
+tally_voucher_type
+(voucher_type_mapping table)
+Credit Note detection silently failed
+4 wrong join columns
+Correct columns in _meta_table_relationships
+AI generated wrong JOIN conditions
+Why existing mitigations do not fully work:
+I added a "MUST-VERIFY" rule to CLAUDE.md: "NEVER write column names from memory. ALWAYS read the actual source first."
+Claude follows this rule about 70% of the time but still skips verification for names that "feel familiar"
+The failure mode is that Claude has high confidence in the wrong name (e.g.,
+opening_balance
+is a very natural column name -- it just happens to be
+opening
+in this schema)
+Suggested mechanisms:
+When generating a SQL query, emit a schema lookup tool call (Grep for CREATE TABLE) for any table being referenced -- even if the column name seems obvious
+When calling a method or accessing an attribute for the first time in a session, verify it exists in the target class/module
+Lower the confidence threshold for "I know this name" -- treat all identifiers as requiring verification unless they were read in the
+current
+context window (not from training data or prior compacted context)
+Consider a pre-generation verification step: before writing code that references external identifiers, list them and verify each one
+Category C: Cross-Session Memory Loss -- Same Bug Reintroduced Up to 4 Times
+The pattern:
+A bug is fixed, documented in CLAUDE.md and Known_Bugs.txt with explicit "NEVER do this" rules, but reintroduced in a later session -- sometimes the exact same bug in a different file.
+Most striking example -- Python 3 exception variable scoping:
+try
+:
+something
+()
+except
+Exception
+as
+e
+:
+pass
+# Python 3 deletes variable e here -- it is out of scope
+logger
+.
+error
+(
+f"Failed:
+{
+e
+}
+"
+)
+# NameError!
+This exact bug was introduced
+4 separate times
+across 4 different sessions. After each incident:
+It was fixed and documented in Known_Bugs.txt
+A gotcha rule was added to CLAUDE.md
+It was added to memory files
+Yet it reappeared each time in a different file. The 4th occurrence means the documentation approach has a ceiling.
+Other repeated patterns (each documented, each reintroduced):
+Using raw
+ve.amount
+sign for debit/credit detection -- CLAUDE.md explicitly says "ALWAYS use ABS(ve.amount) with ve.dr_cr" with a CORRECT/WRONG code example -- violated 3 more times after documentation
+Mixing date formats (YYYYMMDD vs YYYY-MM-DD) -- documented as CRITICAL in project memory with both formats described -- reintroduced 3 times
+Fixed empty-string date bug in one location but did not grep codebase for all instances -- same bug persisted in 11 files, 13 queries
+Why this matters:
+The user has to re-explain the same gotcha in every session. The documentation exists specifically to prevent this, but Claude does not reliably consult it before writing code in the relevant domain. The user investment in maintaining detailed CLAUDE.md rules yields diminishing returns.
+Suggested mechanisms:
+When writing code that touches a domain with documented gotchas (dates, amounts, exception handling), Claude should proactively scan CLAUDE.md and project-specific bug documentation BEFORE generating code -- not just at session start
+Consider a "gotcha checklist" step embedded in the model code generation: before writing Python exception handlers, verify exception variable is not used after the block; before writing SQL with amounts, verify sign convention; before comparing dates, verify format consistency
+After context compaction, re-read critical rules from CLAUDE.md (see Category J below -- compaction may be erasing awareness of these rules mid-session)
+For bugs that have been documented 2+ times, consider treating them as "hard rules" rather than "soft guidance"
+Category D: Wrong Data Source Selection -- Silently Wrong Financial Numbers
+Severity: HIGH for any domain-specific application dealing with calculations
+The pattern:
+When multiple tables have similar-sounding columns, Claude picks the plausible-sounding one without verifying which contains the correct data for the specific context.
+Examples:
+What Claude used
+What was correct
+Impact
+stock_items.opening_qty
+(raw master, often 0/NULL)
+stock_summary.open_qty
+(Tally-authoritative period value)
+Every item
+showed false positive for negative stock
+ledgers.opening
+(period-adjusted) + SUM of prior transactions
+Just
+ledgers.opening
+alone (it already includes the transactions)
+Opening balance
+doubled
+Voucher entries SUM (flow metric) for Balance Sheet items
+ledgers.closing
+(position/snapshot metric)
+Financial ratios wildly wrong -- negative current assets
+party_expense_cache.fy_start
+(a build parameter)
+Filter on
+voucher_date
+range
+Party P&L showed "No results" for non-build FY
+self.query_from_var.get()
+(display format DD-MMM-YYYY)
+self._get_period_dates()
+(returns ISO YYYY-MM-DD)
+Zero results in drill-down despite data existing
+Opening/closing from ledgers + debit/credit from daily_balances (inconsistent sources)
+Both from same source
+Trial Balance showed Opening=0 for all ledgers
+Why this is worse than crashes:
+Wrong financial numbers do not raise errors. They look plausible. A Balance Sheet that is off by a crore still displays as a table with numbers. In an accounting application, users may rely on these for statutory filings, tax returns, or audit reports. The "silently wrong" failure mode is the most dangerous class of bug in financial software.
+Suggested mechanisms:
+When choosing between similar columns from different tables, emit a verification query (SELECT a sample row from each) to confirm which has the expected data
+When a calculation joins multiple tables, briefly reason about whether each source represents a
+stock
+(position/snapshot at a point in time) vs
+flow
+(sum over a period) metric -- mixing these is a common domain error
+Flag when two tables have columns with similar names (e.g.,
+opening_qty
+in two tables) as a potential ambiguity requiring explicit verification
+When using a getter/accessor method, verify it returns the format expected by the consumer (e.g., display format vs SQL format)
+Category E: Does Not Follow Existing Codebase Patterns
+The pattern:
+When building a new feature, Claude invents a new approach instead of checking how the most similar existing feature is already implemented in the same codebase. This creates inconsistency and often introduces bugs that the existing pattern had already solved.
+Examples:
+Existing credit detection:
+ve.dr_cr = 'Cr'
+with
+ABS(ve.amount)
+. New code:
+ve.amount < 0
+. The existing pattern exists specifically because amount sign is unreliable in this schema -- the codebase learned this lesson already
+Existing import method validates against tag master and skips unknown tags. New import code tried to CREATE new tags from external data -- violating a safety invariant that the existing pattern enforced
+Existing formatter is a module-level function imported via
+from module import func
+. New code assumed it was a class attribute
+self._fmt_indian
+-- different calling convention, AttributeError
+Existing code checked for manual tag assignments before INSERT. New code used INSERT OR REPLACE, silently overwriting user manual work
+Updated one date variable after sync but missed the Query Period variables -- existing propagation pattern had 4 variables that needed to be updated together
+Why this matters:
+The codebase encodes lessons learned from prior bugs. When Claude ignores existing patterns, it re-learns those lessons through new bugs. The user ends up fixing the same class of problem repeatedly.
+Suggested mechanism:
+Before implementing a new feature or method, search for the most similar existing implementation in the codebase and use it as a template
+This is already documented in my CLAUDE.md ("CHECK EXISTING PATTERNS FIRST -- MANDATORY") but compliance is inconsistent (about 60%)
+Consider making pattern-search a built-in step: when Claude is about to write a new method, first grep for similar method names or similar functionality
+Category F: Shallow Test Generation -- Checks Existence, Not Correctness
+The pattern:
+When asked to write tests for data methods, Claude generates assertions that verify "method returns data" or "result has expected type" but never validates that the data is
+correct
+.
+Example:
+Forensic Negative Stock method was using wrong opening qty source (Category D), producing false positives for every single item in the database. The test checked
+len(results) > 0
+and passed with flying colors. A single cross-table consistency check (comparing the opening_qty value against the stock_summary source table) would have caught it instantly.
+The gap:
+When I asked "why did you not catch this in the test?", the answer was that the test only validated structure, not business logic. The test would have passed even if every value was wrong -- as long as the method returned non-empty results.
+Suggested mechanisms:
+Test generation should include at least one
+business logic assertion
+per method -- not just existence/type/structure checks
+For calculations joining multiple tables, include a "source verification" assertion that checks a sample computed value against the known-good source table
+Before finalizing a test, Claude should ask: "What wrong result would this test still pass?" If the answer is "any wrong result as long as it is non-empty," the test is insufficient
+For financial/numerical methods, include at least one assertion that verifies a specific computed value against an independently calculated expected value
+Category G: Missing Standard UX Features Unless Explicitly Requested
+The pattern:
+When building multiple UI components of the same type in a session, Claude does not apply standard features (clipboard copy, column consistency, keyboard shortcuts) unless explicitly asked -- even when the codebase already has helper methods for exactly this purpose.
+Example 1 -- Copy Cell/Row:
+Built 30+ TreeView data tables across 12 sub-tabs, 5 popup dialogs, and 4 drill-down cards. None had right-click Copy Cell/Copy Row despite:
+A
+_bind_copy_menu(tree)
+helper method already existing in the same class
+The user core workflow requiring copying values for cross-verification with source system
+The first few TreeViews in the codebase (built earlier) already having this feature
+The user had to explicitly request "add copy everywhere" after the entire feature set was complete, requiring a separate pass through all 30+ trees.
+Example 2 -- Column consistency:
+Voucher-level views were built without Voucher Number columns (essential for the user cross-referencing workflow), Batch columns (present in some views but not others), or Item Name columns (the primary identifier, missing from the main register view). Peer views displaying the same data had these columns.
+Suggested mechanisms:
+When creating the 2nd+ instance of the same widget type, check what features the 1st instance has and apply them consistently
+When building data views, check what columns peer views (showing the same underlying data) already display
+Standard features like clipboard operations should be treated as default-on for data display widgets
+If a helper method exists in the class for a common feature, proactively use it on new instances
+Category H: Breaks Working Code During Refactoring
+The pattern:
+During rename, refactor, or multi-file edit operations, Claude modifies or removes code without verifying all usages across the codebase first.
+Examples:
+replace_all collateral damage:
+Used the Edit tool replace_all flag to rename a method call, which also replaced an occurrence inside the method own definition. Result: infinite recursion on cache load. The tool replaced every match in the file without Claude checking what other matches existed.
+Variable removal without grep:
+Removed
+month_names
+variable during refactoring. It was used in a thread closure in a different part of the same file. Result: NameError during import.
+Partial rename:
+Renamed a variable but missed some references in the same file. Result: AttributeError on UI operations.
+Why this is distinct from Category A:
+This is not about wrong assumptions -- it is about insufficient verification after making changes. The fix itself is correct; the problem is not checking for ripple effects.
+Suggested mechanisms:
+After any rename or variable removal, automatically grep the codebase for all remaining usages of the old name before finalizing
+When using replace_all in the Edit tool, first emit a grep to show ALL matches -- and reason about whether each match should be replaced
+After refactoring, run a syntax check at minimum, and ideally verify that all references to modified identifiers still resolve
+Consider treating replace_all as a higher-risk operation that requires a verification step
+Category I: Silent Failures Masked by Exception Swallowing
+The pattern:
+Claude writes
+except Exception: pass
+blocks or uses
+hasattr()
+checks that swallow the actual error, making wrong-name bugs (Category B) and wrong-source bugs (Category D) invisible.
+Examples:
+Wrong column name was inside a try/except Exception: pass block -- Credit Note detection silently returned empty set with no error visible anywhere. The bug persisted for weeks because there was no error to notice.
+Wrong attribute name was behind a hasattr() check that silently returned False -- refresh after opening balance import did nothing, but no error was raised.
+Why this amplifies other categories:
+Categories B and D (wrong names, wrong sources) would be caught quickly if they raised visible errors. But when wrapped in broad exception handlers, the symptoms are "empty results" or "feature silently disabled" -- which looks like a data problem, not a code problem.
+The compounding effect:
+Wrong column name (Cat B) + except: pass (Cat I) = Silent failure with no error
+Wrong data source (Cat D) + except: pass (Cat I) = Wrong numbers with no warning
+Suggested mechanisms:
+Avoid writing bare
+except Exception: pass
+-- at minimum, log the exception
+When writing error handling for data-fetching code, prefer
+except Exception as e: logger.error(...)
+over silent swallowing
+When Claude detects that a query returns empty results inside a try/except block, flag this as a potential masked error rather than treating empty results as normal
+Consider treating
+except: pass
+and
+except Exception: pass
+as code smells worth flagging during code generation
+Category J: Context Compaction Side Effects -- Rules Forgotten Mid-Session
+This is a cross-cutting concern that amplifies Categories B, C, D, and E
+The pattern:
+In extended sessions (3+ hours), context compaction occurs to manage the context window. After compaction, Claude loses awareness of project-specific rules and gotchas that were either read from CLAUDE.md at session start or learned during the session.
+Observable symptoms:
+Claude follows CLAUDE.md rules consistently in the first half of a session, then starts violating them after compaction
+Gotchas that were explicitly discussed (e.g., "amount sign is unreliable") get re-violated in code written after compaction
+The user notices Claude behavior change and has to re-state rules
+Why this matters:
+Users invest significant effort in maintaining CLAUDE.md and project documentation. If compaction erases awareness of these rules, the documentation provides value only for the first portion of each session.
+Suggested mechanisms:
+After context compaction, re-read CLAUDE.md and key project files (or at least preserve a compressed summary of critical rules)
+Consider a "critical rules" section in CLAUDE.md that is preserved through compaction with higher priority
+Tag certain rules as "must survive compaction" -- e.g., data conventions, sign rules, naming gotchas
+Alert the user when compaction occurs so they know rule-awareness may have degraded
+Category K: Circular Dependencies and Import Issues
+The pattern:
+Claude adds imports without checking the project dependency graph, creating circular import chains that crash on startup.
+Example:
+Added a module-level import that created a circular chain: ledger_tags -> report_engine -> schedule_iii_report -> ledger_tags. Result: ImportError on application startup. The fix was to move the import inside the function that uses it (lazy import).
+Why this happens:
+Claude treats imports as simple additions without considering that module A importing module B may create a cycle if B (or B dependencies) already imports A.
+Suggested mechanism:
+Before adding a new import statement, check if the target module (directly or transitively) already imports the current module
+Prefer lazy imports (inside functions) for cross-module references that might create cycles
+When adding imports to a module that is widely imported by others, extra caution is warranted
+Category L: Generates Unoptimized SQL That Freezes UI on Production Data
+Severity: P1 -- application appears crashed to users (16 incidents)
+The core problem:
+Claude generates SQL that works on small test data but causes indefinite UI freezes on production-sized databases (40K+ ledgers, 500K+ entries, 1.6GB). Despite CLAUDE.md containing an explicit "Zero Lag, Zero Delay, Zero Freeze" directive with specific patterns to follow, Claude repeatedly generates problematic patterns:
+Sub-pattern L1: Correlated subqueries -- O(N*M) complexity (3 incidents)
+Claude generates per-row subqueries instead of pre-aggregated CTEs or JOINs:
+--
+What Claude generated (Daybook query)
+SELECT
+v.
+*
+,
+  (
+SELECT
+le
+.
+ledger_name
+FROM
+voucher_entries le
+WHERE
+le
+.
+voucher_id
+=
+v
+.
+id
+AND
+le
+.
+is_party
+=
+1
+LIMIT
+1
+)
+as
+party,
+  (
+SELECT
+le2
+.
+ledger_name
+FROM
+voucher_entries le2
+WHERE
+le2
+.
+voucher_id
+=
+v
+.
+id
+AND
+...
+LIMIT
+1
+)
+as
+pl_ledger,
+  (
+SELECT
+l
+.
+gstin
+FROM
+ledgers l
+WHERE
+...)
+as
+gstin
+FROM
+vouchers v
+--
+5000 rows x 4 subqueries = 20,000 subquery evaluations
+--
+Each scans voucher_entries (508K rows)
+--
+Result: 30+ seconds to load
+--
+What should have been generated
+WITH party_lookup
+AS
+(
+SELECT
+voucher_id, ledger_name
+FROM
+voucher_entries
+GROUP BY
+voucher_id
+)
+SELECT
+v.
+*
+,
+p
+.
+ledger_name
+as
+party
+FROM
+vouchers v
+LEFT JOIN
+party_lookup p
+ON
+v
+.
+id
+=
+p
+.
+voucher_id
+--
+Result: under 1 second
+Same pattern in intelligence builder: 4 correlated subqueries on _summary_party = 160K evaluations. And in _fix_voucher_party_names: LIKE evaluated on 267K entry rows instead of 10K ledger rows, with ROW_NUMBER containing 8 duplicated LIKE expressions per row.
+Fix: 5+ minutes down to under 5 seconds.
+Sub-pattern L2: N+1 query pattern -- per-row INSERT/SELECT in loops (1 incident, 4 sub-cases)
+# What Claude generated
+for
+ledger
+in
+all_40K_ledgers
+:
+cursor
+.
+execute
+(
+"SELECT ... WHERE ledger_name = ?"
+, (
+ledger
+,))
+cursor
+.
+execute
+(
+"UPDATE ... WHERE ledger_name = ?"
+, (
+ledger
+,))
+# 40K SELECTs + 40K UPDATEs = 80K round-trips
+# What should have been generated
+lookup
+=
+{
+row
+[
+0
+]:
+row
+[
+1
+]
+for
+row
+in
+cursor
+.
+execute
+(
+"SELECT ..."
+).
+fetchall
+()}
+cursor
+.
+executemany
+(
+"UPDATE ..."
+,
+batch
+)
+# Single batch operation
+Applied to: recalculate_daily_balances (40K ledgers x N dates), update_ledger_balances_for_period (40K SELECTs + 40K UPDATEs), sync_ledgers (40K existence checks), sync_vouchers (508K individual INSERTs).
+Sub-pattern L3: Heavy SQL on main Tkinter thread (4 incidents)
+Claude runs database queries during
+init
+() or button click handlers synchronously on the main thread, blocking Tkinter event loop:
+# What Claude generated
+class
+SomeDialog
+:
+def
+__init__
+(
+self
+,
+parent
+):
+self
+.
+_create_ui
+()
+# Runs 6+ SQL queries during init
+# UI frozen until all queries complete
+# What should have been generated (CLAUDE.md documents this pattern)
+def
+__init__
+(
+self
+,
+parent
+):
+self
+.
+_create_empty_tabs
+()
+# Show "Loading..." immediately
+threading
+.
+Thread
+(
+target
+=
+self
+.
+_load_data
+,
+daemon
+=
+True
+).
+start
+()
+def
+_load_data
+(
+self
+):
+results
+=
+run_queries
+()
+# Background thread
+self
+.
+dialog
+.
+after
+(
+0
+,
+lambda
+:
+self
+.
+_populate
+(
+results
+))
+This affected: golden tag import (135K vouchers), auto-compute functions (500K entries), voucher drilldown dialog (6+ queries), and live search (keystroke-triggered queries on 508K rows).
+Sub-pattern L4: Missing LIMIT clauses (1 incident, 195 queries affected)
+195 of 326 SQL presets had no LIMIT clause. On production data, "Vouchers without party name" returned 93,037 rows -- TreeView froze rendering them all.
+Sub-pattern L5: CTE+UPDATE on large tables without temp indexes
+--
+What Claude generates
+WITH computed
+AS
+(
+SELECT
+voucher_id, value
+FROM
+...)
+UPDATE
+target
+SET
+col
+=
+(
+SELECT
+value
+FROM
+computed
+WHERE
+...)
+--
+Full scan per row on large tables
+--
+What CLAUDE.md mandates
+CREATE TEMP TABLE _tmp
+AS
+SELECT
+voucher_id, value
+FROM
+...;
+CREATE
+INDEX
+idx_tmp
+ON
+_tmp(voucher_id);
+--
+Index AFTER bulk insert
+UPDATE
+target
+SET
+col
+=
+t
+.
+value
+FROM
+_tmp t
+WHERE
+target
+.
+id
+=
+t
+.
+voucher_id
+;
+DROP
+TABLE
+_tmp;
+Scale context:
+These are not edge cases. The production database is 1.6GB with 40K+ ledgers, 508K+ voucher entries, 135K vouchers. This is a normal size for a mid-sized business using an ERP for one financial year.
+Why this keeps happening:
+Claude optimizes for
+correctness
+(the SQL returns right results) but not for
+performance
+at scale
+Small-data mental model: queries that take 50ms on 1000 rows take 30+ seconds on 500K rows
+Claude does not consider the Tkinter single-thread constraint -- any blocking call on the main thread freezes the entire UI
+Despite CLAUDE.md containing explicit patterns (temp table + index, background thread, LIMIT), Claude defaults to simpler patterns
+Suggested mechanisms:
+When generating SQL for production applications, prefer JOINs and CTEs over correlated subqueries by default
+When generating UPDATE-FROM patterns, default to the temp-table + index pattern rather than bare CTE
+For any UI framework with a single-threaded event loop (Tkinter, Qt main thread), always generate database queries on background threads with callback-based UI updates
+Always include LIMIT clauses on SELECT queries that feed UI display -- unbounded result sets are never appropriate for table rendering
+Consider row count awareness: if CLAUDE.md or schema documentation indicates table sizes, adjust query strategy accordingly
+Summary of All Categories (Prioritized by Impact)
+Priority
+Category
+Incidents
+Core Issue
+Suggested Mechanism
+P0
+A: Auto-edit safety
+ongoing
+Rewrites working code based on wrong assumption
+Prompt before rewriting recently-delivered code
+P0
+I: Silent exception swallowing
+3+
+except: pass masks real bugs
+Log exceptions; flag bare except as code smell
+P1
+B: Name verification
+15
+Writes identifiers from memory
+Tool-assisted lookup before every identifier use
+P1
+D: Wrong data source
+9
+Picks plausible but wrong table/column
+Verification query when similar columns exist
+P1
+L: Unoptimized SQL / UI freezes
+16
+Correlated subqueries, N+1 loops, main-thread SQL
+Pre-aggregated JOINs, background threads, LIMIT
+P1
+J: Compaction side effects
+cross-cutting
+Rules forgotten after context compaction
+Re-read critical rules after compaction
+P2
+C: Cross-session memory
+12+ (4x for one bug)
+Same bug reintroduced across sessions
+Proactive gotcha scan before writing in relevant domains
+P2
+E: Pattern following
+5+
+Ignores existing codebase patterns
+Search for similar feature before building
+P2
+H: Refactoring breakage
+3+
+Does not verify all usages after rename
+Grep for all references after any change
+P3
+F: Shallow tests
+2+
+Tests check existence, not correctness
+Include business logic assertions
+P3
+G: UX consistency
+ongoing
+Standard features missing unless asked
+Check peer components; apply defaults
+P3
+K: Circular imports
+1+
+No dependency graph check
+Check for cycles before cross-module imports
+Metrics
+55+ Claude-caused bugs out of 243 total (23%)
+over 3 months of daily use
+About 30% of session back-and-forth
+spent correcting thoroughness gaps rather than building features
+4x repeat
+of the single most documented gotcha (Python 3 exception variable scoping)
+Pattern B (wrong names): 15 incidents
+-- the single most impactful fixable category
+Pattern L (SQL performance): 16 incidents
+-- the most user-visible category (app appears crashed)
+Pattern D (wrong data source): 9 incidents
+-- the most dangerous category (silently wrong financial numbers)
+What Makes This Actionable
+Each category has a
+specific, implementable mechanism
+-- not just "be more careful." The suggestions range from:
+Tool-level changes
+(verification steps before code generation, compaction-aware rule preservation, replace_all safety)
+Model behavior changes
+(lower confidence on identifier recall, pattern-search before new features, SQL complexity awareness)
+Safety guardrails
+(confirmation prompts in auto-edit mode, bare-except flagging, LIMIT by default)
+The incidents are documented with root cause analysis and can serve as evaluation cases for testing improvements.
+Reactions are currently unavailable
+Activity
+Sign up for free
+to join this conversation on GitHub.
+Already have an account?
+Sign in to comment
+Metadata
+Metadata
+Assignees
+No one assigned
+Labels
+area:model
+enhancement
+New feature or request
+New feature or request
+platform:vscode
+Issue specifically occurs in VS Code
+Issue specifically occurs in VS Code
+stale
+Issue is inactive
+Issue is inactive
+Type
+No type
+Projects
+No projects
+Milestone
+No milestone
+Relationships
+None yet
+Development
+No branches or pull requests
+Issue actions
+Open in GitHub Copilot app
+Footer
+© 2026 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Community
+Docs
+Contact
+Manage cookies
+Do not share my personal information
+You can’t perform that action at this time.

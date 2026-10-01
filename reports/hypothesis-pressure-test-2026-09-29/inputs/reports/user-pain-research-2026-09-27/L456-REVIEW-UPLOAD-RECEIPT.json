@@ -1,0 +1,75 @@
+{
+  "attachment": {
+    "id": "4ec33cc2-7527-411f-a1d4-65d4fdc02d16",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "76e05df6-14cf-4873-a9c3-95aab90814a3",
+    "issueCommentId": null,
+    "assetId": "1b1572ad-b529-4c00-8cac-1fc7b4788d34",
+    "provider": "local_disk",
+    "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/76e05df6-14cf-4873-a9c3-95aab90814a3/2026/09/28/a7a8209e-9b18-45ca-96ae-75510722668c-L456-REVIEW.md",
+    "contentType": "text/markdown",
+    "byteSize": 11319,
+    "sha256": "612d093b64721f46436971b67068efc40ab7b94010ea51892fb094059d7a9f75",
+    "originalFilename": "L456-REVIEW.md",
+    "createdByAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "createdByUserId": null,
+    "createdAt": "2026-09-28T01:12:32.004Z",
+    "updatedAt": "2026-09-28T01:12:32.004Z",
+    "contentPath": "/api/attachments/4ec33cc2-7527-411f-a1d4-65d4fdc02d16/content",
+    "openPath": "/api/attachments/4ec33cc2-7527-411f-a1d4-65d4fdc02d16/content",
+    "downloadPath": "/api/attachments/4ec33cc2-7527-411f-a1d4-65d4fdc02d16/content?download=1"
+  },
+  "workProduct": {
+    "id": "b659bde2-1016-4319-b512-09423f921ab1",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "projectId": null,
+    "issueId": "76e05df6-14cf-4873-a9c3-95aab90814a3",
+    "executionWorkspaceId": null,
+    "runtimeServiceId": null,
+    "type": "artifact",
+    "provider": "paperclip",
+    "externalId": null,
+    "title": "L456 Independent Review \u2014 changes requested",
+    "url": null,
+    "status": "ready_for_review",
+    "reviewState": "changes_requested",
+    "isPrimary": false,
+    "healthStatus": "unknown",
+    "summary": "32-record audit, intact baseline hashes, date and Codeweb-fit corrections.",
+    "metadata": {
+      "byteSize": 11319,
+      "openPath": "/api/attachments/4ec33cc2-7527-411f-a1d4-65d4fdc02d16/content",
+      "contentPath": "/api/attachments/4ec33cc2-7527-411f-a1d4-65d4fdc02d16/content",
+      "contentType": "text/markdown",
+      "attachmentId": "4ec33cc2-7527-411f-a1d4-65d4fdc02d16",
+      "downloadPath": "/api/attachments/4ec33cc2-7527-411f-a1d4-65d4fdc02d16/content?download=1",
+      "originalFilename": "L456-REVIEW.md"
+    },
+    "sourceTrust": null,
+    "createdByRunId": "67bd9a24-b667-45bd-9b48-ae29948f29d9",
+    "createdAt": "2026-09-28T01:12:32.014Z",
+    "updatedAt": "2026-09-28T01:12:32.014Z"
+  },
+  "decision": {
+    "status": "changes_requested",
+    "monitor": null,
+    "reviewRequest": null,
+    "currentStageId": "6c6b1f2e-5496-42a7-956a-eefab923efef",
+    "lastDecisionId": "2c2e54da-e1c9-4a74-a00d-c6301a0f850b",
+    "returnAssignee": {
+      "type": "agent",
+      "userId": null,
+      "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+    },
+    "currentStageType": "review",
+    "completedStageIds": [],
+    "currentStageIndex": 0,
+    "currentParticipant": {
+      "type": "agent",
+      "userId": null,
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4"
+    },
+    "lastDecisionOutcome": "changes_requested",
+    "changesRequestedCount": 1
+  }
+}

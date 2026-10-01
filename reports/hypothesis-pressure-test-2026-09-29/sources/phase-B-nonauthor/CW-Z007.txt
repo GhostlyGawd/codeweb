@@ -1,0 +1,303 @@
+
+  `find_referencing_symbols` silently returns `{}` after tsserver dies of OOM — reported as "cross-file indexing complete", `isError: false` · Issue #1814 · oraios/serena · GitHub
+      Skip to content
+Navigation Menu
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub CopilotWrite better code with AI
+GitHub Copilot appDirect agents from issue to merge
+MCP RegistryIntegrate external tools
+DEVELOPER WORKFLOWS
+ActionsAutomate any workflow
+CodespacesInstant dev environments
+IssuesPlan and track work
+Code ReviewManage code changes
+Code QualityEnforce quality at merge
+APPLICATION SECURITY
+GitHub Advanced SecurityFind and fix vulnerabilities
+Code securitySecure your code as you build
+Secret protectionStop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+View all resources
+Open Source
+COMMUNITY
+GitHub SponsorsFund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+GitHub Stars
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platformAI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced SecurityEnterprise-grade security features
+Copilot for BusinessEnterprise-grade AI features
+Premium SupportEnterprise-grade 24/7 support
+Pricing
+Search/
+Sign inSign up
+Appearance settings
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+Dismiss alert
+{{ message }}
+        oraios
+    /
+      serena
+    Public
+        Uh oh!
+There was an error while loading. Please reload this page.
+Notifications
+    You must be signed in to change notification settings
+Fork
+    2k
+          Star
+          29.9k
+        Code
+        Issues
+          95
+        Pull requests
+          95
+        Discussions
+        Actions
+        Projects
+        Security and quality
+          2
+        Insights
+Additional navigation options
+          Code
+          Issues
+          Pull requests
+          Discussions
+          Actions
+          Projects
+          Security and quality
+          Insights
+find_referencing_symbols silently returns {} after tsserver dies of OOM — reported as "cross-file indexing complete", isError: false #1814
+New issueCopy link
+New issueCopy link
+Closed
+#1848
+Closed
+find_referencing_symbols silently returns {} after tsserver dies of OOM — reported as "cross-file indexing complete", isError: false#1814
+#1848
+Copy link
+Description
+patrykkopycinski
+opened on Aug 5, 2026
+Issue body actions
+Summary
+When tsserver crashes with a V8 heap OOM (SIGABRT) during the first cross-file
+reference query on a large TypeScript monorepo, Serena does not surface the crash.
+It logs TypeScript cross-file indexing complete, returns Result: {}, and sets
+isError: false.
+Every subsequent find_referencing_symbols call then returns an empty result in
+~0.8s with no error. From the MCP client's perspective this is indistinguishable
+from "this symbol genuinely has no references."
+For an LLM agent this is the worst possible failure shape: fast, confident, and
+wrong. An agent consuming these results will conclude dead code is safe to delete,
+or that a refactor has no downstream callers.
+Environment
+Serena
+1.6.1 (also reproduced on the 1.28.1 MCP server build)
+typescript-language-server
+5.1.3
+TypeScript
+6.0.3 (workspace), tsserver bundled
+Python
+3.13 (uv tool install)
+OS
+macOS 26.x, Apple M1 Max, 64 GB RAM
+Repo
+elastic/kibana (~190k TS/TSX files)
+Context
+ide-assistant
+Host memory was not the constraint: ~95% free, 0 swap, ~60 GB available at
+time of crash. This is the default V8 old-space cap (~4 GB), not host pressure.
+Reproduction
+Activate a project on a very large TS monorepo (Kibana; a single plugin
+subdirectory is enough — x-pack/solutions/security/plugins/security_solution).
+Call get_symbols_overview on any file — succeeds, cheap.
+Call find_referencing_symbols for a real exported symbol in that file.
+Watch the tsserver child process RSS climb past ~4 GB and abort.
+Observed process RSS across the crash (tree sampled every 15s):
+[  6.4s] post-warmup(LSP program)   tree_rss=  658.9 MB   4 node procs
+[ 16.4s] idle+10s                   tree_rss= 1903.4 MB   one node proc at 1417 MB
+[ 26.5s] idle+20s                   tree_rss= 3352.7 MB   one node proc at 2870 MB
+[ 36.5s] idle+30s                   tree_rss= 4647.6 MB   one node proc at 4165 MB
+[ 40.7s] after 5 ref queries        tree_rss=  193.5 MB   <-- tsserver gone
+Actual log output
+INFO  Task-3:FindReferencingSymbolsTool ... find_referencing_symbols: name_path='AGENT_BUILDER_LAST_AGENT_ID_STORAGE_KEY', ...
+INFO  TypeScript LSP progress [646a4e19...]: started - Initializing JS/TS language features…
+INFO  LSP: window/logMessage: {'type': 1, 'message': '[lspserver] [tsclient] [tsserver] Exited. Code: null. Signal: SIGABRT'}
+INFO  TypeScript LSP progress [646a4e19...]: ended -
+INFO  _wait_for_cross_file_references_if_needed:545 - TypeScript cross-file indexing complete   <-- WRONG
+INFO  tools_base:task:410 - Result: {}
+INFO  Task-3:FindReferencingSymbolsTool completed in 28.870 seconds
+macOS crash report for the child confirms V8 heap OOM, not an external kill:
+exception: {'type': 'EXC_CRASH', 'signal': 'SIGABRT'}
+termination: {"code": 6, "namespace": "SIGNAL", "indicator": "Abort trap: 6", "byProc": "node"}
+  abort
+  node::OOMErrorHandler(char const*, v8::OOMDetails const&)
+  v8::internal::V8::FatalProcessOutOfMemory(...)
+  v8::internal::Heap::FatalProcessOutOfMemory(char const*)
+Root cause
+src/solidlsp/language_servers/typescript_language_server.py (line numbers below
+are from current main, verified after the post-v1.6.1 refactor of this file).
+Indexing completion is inferred purely from $/progress token bookkeeping:
+progress_handler(kind="begin") adds the token and clears _indexing_complete.
+progress_handler(kind="end") discards the token, and when the active set is
+empty it sets _indexing_complete (L430-436):
+elif kind == "end":
+    msg = value.get("message", "")
+    log.info(f"TypeScript LSP progress [{token}]: ended - {msg}")
+    with self._progress_lock:
+        self._active_progress_tokens.discard(token)
+        if not self._active_progress_tokens:
+            self._indexing_complete.set()      # <-- also reached on crash teardown
+When tsserver aborts, typescript-language-server emits kind="end" for the
+in-flight token as part of tearing the connection down. That is structurally
+identical to a successful completion, so the event is set and
+_wait_for_indexing_start_or_completion returns True (L546-558):
+def _wait_for_cross_file_references_if_needed(self) -> None:
+    ...
+    if self._wait_for_indexing_start_or_completion(timeout=timeout, start_grace=start_grace):
+        log.info("TypeScript cross-file indexing complete")   # reached after SIGABRT
+Note the else branch here does warn on timeout — but a crash never reaches it,
+because a crash looks like completion rather than a timeout.
+The crash is already observed — it arrives via window/logMessage with
+type: 1 (Error) — but window_log_message only logs it (L383-384):
+def window_log_message(msg: dict) -> None:
+    log.info(f"LSP: window/logMessage: {msg}")
+So the signal is received and discarded, and a kind="end" triggered by process
+death is treated as success.
+This is the same failure class as #1681 (pyright: premature "ready" → silent
+empty results), which was fixed for the pyright backend; the TypeScript backend
+reaches an equivalent false-green by a different route.
+Suggested fix
+Three independent hardening options; (1) alone removes the false-green.
+Treat tsserver exit as a failure state. In window_log_message, match
+[tsserver] Exited / type == 1 and set a _server_crashed flag. Have
+_wait_for_cross_file_references_if_needed (and the symbol-retrieval path)
+raise instead of returning {} when that flag is set, so the tool reports
+isError: true.
+Liveness assertion before returning an empty result. If a reference query
+returns zero results, verify the language-server child process is still alive
+before reporting the empty set as authoritative. Empty-because-dead and
+empty-because-no-refs must not be the same value.
+Distinguish kind="end" on teardown from real completion — e.g. don't set
+_indexing_complete when the token is discarded as part of a connection
+error/exit.
+Additional suggestion: raise the default heap
+The default Node heap (~4 GB) is not sufficient for cross-file references on
+monorepos of this size. With NODE_OPTIONS=--max-old-space-size=20480 the same
+queries succeed and return real results.
+Measured steady state on the same host after the bump (60 queries across 12 files):
+Scope
+Peak RSS
+Plateau
+Median latency
+Real results
+Single plugin
+11.5 GB
+7.5 GB
+1.0 s
+44/60
+Repo root
+9.4 GB
+8.6 GB
+14.0 s
+57/60
+Serena could either default --max-old-space-size higher for the TS backend, or
+warn when a project exceeds some file-count threshold without it set. Right now
+the failure is silent and the user has no signal that they need the flag.
+Note on scoping (separate, possibly worth its own issue)
+Narrowing the activated project to a subdirectory is the natural advice for
+memory, but it changes correctness: 13 of 60 identical (symbol, file) targets
+returned empty when scoped to the plugin directory and returned real references
+at repo root — e.g. mockDataTableModel {} vs 21125 bytes,
+demoTimelineData {} vs 69542 bytes. All 44 targets that returned results in
+both scopes returned more references at repo root.
+If subdirectory activation is expected to under-report cross-project references,
+that's worth documenting explicitly, since the failure mode is again a silent
+empty result rather than a warning.
+Reactions are currently unavailable
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+Metadata
+Metadata
+AssigneesNo one assigned
+LabelsNo labels
+No labels
+TypeNo type
+ProjectsNo projects
+MilestoneNo milestone
+RelationshipsNone yet
+DevelopmentNo branches or pull requests
+Issue actions
+Open in GitHub Copilot app
+Footer
+        © 2026 GitHub, Inc.
+Footer navigation
+            Terms
+            Privacy
+              Security
+              Status
+            Community
+            Docs
+            Contact
+      Manage cookies
+        Do not share my personal information
+    You can’t perform that action at this time.

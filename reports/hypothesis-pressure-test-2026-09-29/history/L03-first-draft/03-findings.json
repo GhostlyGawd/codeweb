@@ -1,0 +1,565 @@
+{
+  "schema_version": 1,
+  "assignment_id": "L03",
+  "assignment": "03 \u2014 Native experience and attention",
+  "issue_id": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+  "issue_identifier": "COD-82",
+  "run_id": "ece66b7f-e96f-4c26-8890-574f99aef49d",
+  "session_identity": "01a0f07b-67b6-7022-89ae-b9a898e9e47a",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "overall_verdict": "revise",
+  "overall_statement": "Retain conditional pre-edit inspection as a hypothesis; revise native-experience claims into surface-specific, decision-timed, recoverable evidence with an explicit total-attention budget. Neither six lines nor one-second warm response is validated.",
+  "findings": [
+    {
+      "id": "L03-F01",
+      "statement": "Availability must be claimed per observed host surface and worktree; installation metadata is insufficient.",
+      "evidence_type": [
+        "frozen_original_evidence_records",
+        "repository_source_or_documentation",
+        "reviewer_inference",
+        "untested_proposal"
+      ],
+      "supported_actor_segment_task": "Agent-heavy developer starting a change in a CLI, desktop/WSL, cloud session or linked worktree.",
+      "relevant_conditions": "Exact package, host version, surface, working directory, trust policy and session restart state matter. Historical incidents are not claims of current defects.",
+      "evidence_ids": [
+        "CW-T002",
+        "CW-T004",
+        "CW-X009"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L026",
+        "CW-L024"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-T002",
+          "original_url": "https://github.com/anthropics/claude-code/issues/88214",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:8",
+          "passage_locator": "Body and all 0 comments; comment IDs in source registry",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+          "source_limit": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+        },
+        {
+          "evidence_id": "CW-T004",
+          "original_url": "https://github.com/anthropics/claude-code/issues/97515",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:10",
+          "passage_locator": "Body and all 0 comments; comment IDs in source registry",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+          "source_limit": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+        },
+        {
+          "evidence_id": "CW-X009",
+          "original_url": "https://github.com/openai/codex/issues/27133",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:43",
+          "passage_locator": "Body reproduction; comment 5233430635; comment 5416744725",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+          "source_limit": "Body and all 10 REST comments read, one page. One grouped reporter incident. Root-cause diagnosis is user investigation, not maintainer confirmation; no fix established."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-L026",
+          "original_url": "https://forum.cursor.com/t/bugbot-without-background-agents/157812",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:78",
+          "passage_locator": "Original post; support reply 6; author confirmation 7",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:52:16.800312+00:00",
+          "source_limit": "All rendered posts read; numbered gaps and JSON API HTTP403 prevent certifying complete thread. Resolution is author-confirmed for this incident, not a general capability test. Later additive review: Additive: exact trigger routes to review without background agents. No new incident."
+        },
+        {
+          "evidence_id": "CW-L024",
+          "original_url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:76",
+          "passage_locator": "There\u2019s no difference anymore?; final paragraphs",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+          "source_limit": "Three repetitions of one task, vendor-affiliated self-measurement. Claims about general host behavior require official verification; no general MCP/CLI superiority inferred."
+        }
+      ],
+      "capability_passages": [
+        "inputs/README.md:217-229 (plugin restart versus per-client MCP registration)",
+        "inputs/docs/reference.md:269-272 (Codex CLI 0.154.0 assessment; Claude and all-tool certification excluded)",
+        "inputs/hooks/hooks.json:1-39 (host-specific event matchers)"
+      ],
+      "strongest_supported_case": "H3 has direct incident-level support: declared cloud plugins were absent; CLI-installed plugins were invisible in Desktop/WSL; project hooks were reported absent in linked worktrees. Graph quality cannot compensate for a tool the active session never invokes.",
+      "strongest_countercase": "The BugBot incident was resolved by precise invocation syntax, and the Checkly author reconsidered MCP after an equivalent-workflow comparison. Integration failure is neither permanent nor evidence that all MCP delivery is burdensome. Frozen Codeweb docs report an exercised Codex baseline loop.",
+      "failure_scenario": "A developer starts a worktree, sees an installed plugin, and edits while believing the consumer brief is active; no brief arrives and silence is mistaken for no affected consumers.",
+      "verdict": "narrow",
+      "weakest_assumption": "A successful advertised installation predicts availability in the next actual editing session.",
+      "minimal_falsification_test": "Proposed only: in one clean session per intended host, record discovery, one real source-linked invocation and a pre-edit trigger; repeat the trigger in a linked worktree. Pin host/package versions and actual cwd. Exclude any failed surface from availability claims until corrected by its owner.",
+      "local_hypothesis_implication": "Keep the local hypothesis limited to demonstrated surfaces; do not promise host parity.",
+      "paid_hypothesis_implication": "Host setup support could cost service labor, but its removal is not established paid coordination value.",
+      "confidence_reason": "High confidence in the frozen source/documentation distinctions; moderate in transfer from reported incidents; low in unmeasured Codeweb user effect. No prevalence inference.",
+      "unresolved_test": "Proposed only: in one clean session per intended host, record discovery, one real source-linked invocation and a pre-edit trigger; repeat the trigger in a linked worktree. Pin host/package versions and actual cwd. Exclude any failed surface from availability claims until corrected by its owner."
+    },
+    {
+      "id": "L03-F02",
+      "statement": "A six-line limit must protect the edit-relevant consumer and uncertainty, not merely truncate a ranked list.",
+      "evidence_type": [
+        "frozen_original_evidence_records",
+        "repository_source_or_documentation",
+        "reviewer_inference",
+        "untested_proposal"
+      ],
+      "supported_actor_segment_task": "Developer modifying one symbol in a multi-symbol file or deciding whether to reuse an implementation.",
+      "relevant_conditions": "Target symbol must be identified; high fan-in is not necessarily relevance to the requested edit. Dynamic/generated consumers remain outside a completeness claim.",
+      "evidence_ids": [
+        "CW-X001",
+        "CW-L023"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z012",
+        "CW-Z009"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+          "source_limit": "Two\u2013three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents."
+        },
+        {
+          "evidence_id": "CW-L023",
+          "original_url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:75",
+          "passage_locator": "Parts 1, 5; limitations 23.5\u201323.7",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+          "source_limit": "Full article read in overlapping chunks; author adjudication, three small tasks, two models, no independent rerun. Tool-builder case. Not a model leaderboard or proven Codeweb effect."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-Z012",
+          "original_url": "https://github.com/oraios/serena/discussions/131",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+          "passage_locator": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_limit": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once."
+        },
+        {
+          "evidence_id": "CW-Z009",
+          "original_url": "https://simonwillison.net/2025/Jun/3/openai-codex-pr/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:117",
+          "passage_locator": "Setup script; prompt; result paragraph",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_limit": "Historical success, not a current speed benchmark. Linked PR not counted separately."
+        }
+      ],
+      "capability_passages": [
+        "inputs/hooks/pre-edit-impact.mjs:58-105 (highest incoming-edge symbol; card assembly)",
+        "inputs/hooks/pre-edit-impact.mjs:147-164 (four callers, two tests and expansion instruction)",
+        "inputs/reports/user-centric-value-strategy/STRATEGY.md, Make the useful path feel native (proposed three consumers/two candidates/six lines)"
+      ],
+      "strongest_supported_case": "The small semantic-navigation pilot supports task-dependent precision and inline source. External caller context helped adjudicate false positives in a firmware experiment. A compact source-linked card could focus inspection.",
+      "strongest_countercase": "Full context can be unnecessary for tiny edits; verification rereads can erase token savings. A bounded cloud change succeeded with ordinary tests. None establishes that three consumers, two candidates and all qualifications fit six readable lines.",
+      "failure_scenario": "The file has a high-fan-in helper and a low-fan-in public function being changed. The hook surfaces the helper and its four callers; the materially affected consumer of the public function falls outside the brief, while a lexical similarity candidate attracts an unnecessary rewrite.",
+      "verdict": "revise",
+      "weakest_assumption": "A popularity-ranked sample remains decision-relevant when compressed into six lines.",
+      "minimal_falsification_test": "Proposed only: freeze ranking before preflight and use one multi-symbol fixture whose edited low-fan-in symbol has a known consequential consumer. Require that consumer or an explicit incomplete-selection indication before edit, working expansion, omitted counts, and coverage/freshness labels. Measure characters/tokens and source-opening work as well as lines.",
+      "local_hypothesis_implication": "Retain compact evidence, but prioritize the requested symbol and relevant relation; reserve uncertainty space before adding optional candidates. Similarity is a source-inspection lead, not semantic reuse advice.",
+      "paid_hypothesis_implication": "A shorter local card creates no independent paid entitlement or buyer evidence.",
+      "confidence_reason": "High confidence in the frozen source/documentation distinctions; moderate in transfer from reported incidents; low in unmeasured Codeweb user effect. No prevalence inference.",
+      "unresolved_test": "Proposed only: freeze ranking before preflight and use one multi-symbol fixture whose edited low-fan-in symbol has a known consequential consumer. Require that consumer or an explicit incomplete-selection indication before edit, working expansion, omitted counts, and coverage/freshness labels. Measure characters/tokens and source-opening work as well as lines."
+    },
+    {
+      "id": "L03-F03",
+      "statement": "One-second warm evidence is an end-to-end pre-edit target, not an engine-speed or installed-readiness result.",
+      "evidence_type": [
+        "frozen_original_evidence_records",
+        "repository_source_or_documentation",
+        "reviewer_inference",
+        "untested_proposal"
+      ],
+      "supported_actor_segment_task": "Developer waiting for useful evidence during a live coding session, particularly after cold start or source changes.",
+      "relevant_conditions": "Clock includes trigger/discovery, permissions, queueing, refresh, tool execution, rendering and usable source links. Warm, cold, stale and failed cases must be separated.",
+      "evidence_ids": [
+        "CW-Y006",
+        "CW-T006"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L024"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Y006",
+          "original_url": "https://forum.cursor.com/t/is-cursor-extremely-slow-for-you-since-the-0-49-update/82831",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:126",
+          "passage_locator": "posts 1 and 5",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+          "source_limit": "Historical version 0.49.4; two variables changed. Another user in thread reports fast operation."
+        },
+        {
+          "evidence_id": "CW-T006",
+          "original_url": "https://github.com/anthropics/claude-code/issues/70680",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:12",
+          "passage_locator": "Body and all 2 comments; comment IDs in source registry",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+          "source_limit": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-L024",
+          "original_url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:76",
+          "passage_locator": "There\u2019s no difference anymore?; final paragraphs",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+          "source_limit": "Three repetitions of one task, vendor-affiliated self-measurement. Claims about general host behavior require official verification; no general MCP/CLI superiority inferred."
+        }
+      ],
+      "capability_passages": [
+        "inputs/hooks/pre-edit-impact.mjs:22-34 (sidecar/fallback paths and code-comment timing claims, not measurements by this review)",
+        "inputs/hooks/hooks.json (10-second pre-edit and 30-second post-edit timeouts are ceilings, not latency evidence)",
+        "inputs/CHARTER.md, Non-goals 1 (no resident daemon)"
+      ],
+      "strongest_supported_case": "The historical Cursor account illustrates disabling workflow features after reported slow invocation. Cold test startup separately interrupts feedback loops. These identify elapsed-time risk, without attributing either problem to Codeweb.",
+      "strongest_countercase": "The Cursor author changed two variables and another user reported speed; Checkly found similar context consumption for equivalent transports. These cannot establish inherent MCP slowness or the correct Codeweb threshold. Frozen sidecar paths suggest a plausible low-cost hook mechanism.",
+      "failure_scenario": "A fast cached hook responds inside a second with stale evidence while a refresh or permission prompt delays the correct result until after the edit decision; the engine meets a microbenchmark while the experience fails.",
+      "verdict": "unresolved_from_existing_evidence",
+      "weakest_assumption": "Cheap map reads dominate elapsed time experienced by the developer.",
+      "minimal_falsification_test": "Proposed only: timestamp ordinary request, trigger, permission, refresh, output and first valid source opening on warm, unmapped and changed-source runs. Report each end-to-end latency, not a percentile from a tiny preflight. Fail the timing claim when usable evidence arrives after the decision; retain one second only as a provisional warm target.",
+      "local_hypothesis_implication": "Do not claim the target achieved; give cold progress and bounded truthful failure. Do not introduce a resident daemon to chase this target under the current charter.",
+      "paid_hypothesis_implication": "Paid coordination must include runner/wait/recovery costs independently; local query speed is not paid-attributable savings.",
+      "confidence_reason": "High confidence in the frozen source/documentation distinctions; moderate in transfer from reported incidents; low in unmeasured Codeweb user effect. No prevalence inference.",
+      "unresolved_test": "Proposed only: timestamp ordinary request, trigger, permission, refresh, output and first valid source opening on warm, unmapped and changed-source runs. Report each end-to-end latency, not a percentile from a tiny preflight. Fail the timing claim when usable evidence arrives after the decision; retain one second only as a provisional warm target."
+    },
+    {
+      "id": "L03-F04",
+      "statement": "Mistaken suppression is a first-class failure: silence must not imply safe isolation.",
+      "evidence_type": [
+        "frozen_original_evidence_records",
+        "repository_source_or_documentation",
+        "reviewer_inference",
+        "untested_proposal"
+      ],
+      "supported_actor_segment_task": "Developer making an apparently isolated edit in an unmapped, stale, generated or partially represented repository.",
+      "relevant_conditions": "The proposal suppresses known small isolated edits but requires uncertainty visibility. Hook silence has several causes and is not a typed zero-consumer answer.",
+      "evidence_ids": [
+        "CW-Z007",
+        "CW-Z011",
+        "CW-X009"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Z009"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Z007",
+          "original_url": "https://github.com/oraios/serena/issues/1814",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:115",
+          "passage_locator": "Summary; Additional suggestion; Note on scoping",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_partial",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_limit": "API rate-limited; full body read, comment completeness unverified. First-query crash fix merged Aug 20 (#1848); later-query fix #2007 remains open. No blanket fixed claim."
+        },
+        {
+          "evidence_id": "CW-Z011",
+          "original_url": "https://github.com/oraios/serena/issues/1432",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:119",
+          "passage_locator": "Capability matrix in body",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_partial",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_limit": "Full body only; comments unavailable. Closed with #1434, but linked PR inaccessible, so resolution not verified."
+        },
+        {
+          "evidence_id": "CW-X009",
+          "original_url": "https://github.com/openai/codex/issues/27133",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:43",
+          "passage_locator": "Body reproduction; comment 5233430635; comment 5416744725",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+          "source_limit": "Body and all 10 REST comments read, one page. One grouped reporter incident. Root-cause diagnosis is user investigation, not maintainer confirmation; no fix established."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+          "source_limit": "Two\u2013three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents."
+        },
+        {
+          "evidence_id": "CW-Z009",
+          "original_url": "https://simonwillison.net/2025/Jun/3/openai-codex-pr/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:117",
+          "passage_locator": "Setup script; prompt; result paragraph",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_limit": "Historical success, not a current speed benchmark. Linked PR not counted separately."
+        }
+      ],
+      "capability_passages": [
+        "inputs/hooks/pre-edit-impact.mjs:44-64 (null on unreadable/no-node/no-edge paths)",
+        "inputs/hooks/pre-edit-impact.mjs:113-139 (unmapped/no-entry returns and best-effort staleness)",
+        "inputs/hooks/pre-edit-impact.mjs:170-197 (caught failures and non-blocking exit)",
+        "inputs/hooks/session-brief.mjs:24-46 (once-per-workspace unmapped nudge)"
+      ],
+      "strongest_supported_case": "The Serena record distinguishes crashed reference lookup from an empty set, and its scoping workaround lost cross-project references. Generated APIs expose representational limits. Frozen Codeweb pre-edit source returns null for unreadable graph, missing nodes, no mapped target and zero incoming edges.",
+      "strongest_countercase": "Native grep and tests can already suffice for small clean changes, so showing a full warning on every edit is also costly. Fail-open avoids blocking the user; it is a reasonable execution policy if evidence availability remains inspectable.",
+      "failure_scenario": "A parser or graph read fails, no card appears, and the user proceeds as if the shared function has no consumers. Alternatively, the classifier labels an edit isolated because the missed consumer was never mapped.",
+      "verdict": "revise",
+      "weakest_assumption": "The trigger can distinguish known irrelevant work from work whose relevance is unknown.",
+      "minimal_falsification_test": "Proposed only: one fixture each for known zero, unmapped, corrupt graph, stale source and generated consumer. Record expected trigger versus observed trigger and whether uncertainty is visible without a full alert. A missed known consequential mapped consumer or failure presented as known zero fails preflight; do not score generated absence as runtime completeness.",
+      "local_hypothesis_implication": "Use a quiet inspectable availability state plus explicit unknown/failure when relying on evidence; count false suppression and unnecessary triggers separately.",
+      "paid_hypothesis_implication": "Hosted silence similarly cannot mean checks passed, but this local defect class does not itself validate a paid job.",
+      "confidence_reason": "High confidence in the frozen source/documentation distinctions; moderate in transfer from reported incidents; low in unmeasured Codeweb user effect. No prevalence inference.",
+      "unresolved_test": "Proposed only: one fixture each for known zero, unmapped, corrupt graph, stale source and generated consumer. Record expected trigger versus observed trigger and whether uncertainty is visible without a full alert. A missed known consequential mapped consumer or failure presented as known zero fails preflight; do not score generated absence as runtime completeness."
+    },
+    {
+      "id": "L03-F05",
+      "statement": "On-demand recovery must preserve the pre-edit baseline and permissions; another reminder to remap leaves recurring work with the user.",
+      "evidence_type": [
+        "frozen_original_evidence_records",
+        "repository_source_or_documentation",
+        "reviewer_inference",
+        "untested_proposal"
+      ],
+      "supported_actor_segment_task": "Developer recovering from stale evidence, first-use absence or a failed check while an edit/repair is already underway.",
+      "relevant_conditions": "Local analysis remains free; host permission decisions remain the host\u2019s. An already lost pre-edit baseline cannot be recreated from edited source.",
+      "evidence_ids": [
+        "CW-001",
+        "CW-Z007",
+        "CW-T004"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L026",
+        "CW-Z012"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-001",
+          "original_url": "https://github.com/anthropics/claude-code/issues/47565",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:1",
+          "passage_locator": "Issue body: What Claude Actually Did; Additional Context items 6\u20137",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_partial",
+          "retrieved_at": "2026-09-28T00:30:52.305900+00:00",
+          "source_limit": "Complete issue body read through web.open; comments/activity were not exposed, so entire thread is NOT counted fully read. Closed as not planned/stale is not a verified fix. Model-caused regression and subscription reasons are self-report. Single incident, not prevalence or Codeweb purchase intent."
+        },
+        {
+          "evidence_id": "CW-Z007",
+          "original_url": "https://github.com/oraios/serena/issues/1814",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:115",
+          "passage_locator": "Summary; Additional suggestion; Note on scoping",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_partial",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_limit": "API rate-limited; full body read, comment completeness unverified. First-query crash fix merged Aug 20 (#1848); later-query fix #2007 remains open. No blanket fixed claim."
+        },
+        {
+          "evidence_id": "CW-T004",
+          "original_url": "https://github.com/anthropics/claude-code/issues/97515",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:10",
+          "passage_locator": "Body and all 0 comments; comment IDs in source registry",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+          "source_limit": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-L026",
+          "original_url": "https://forum.cursor.com/t/bugbot-without-background-agents/157812",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:78",
+          "passage_locator": "Original post; support reply 6; author confirmation 7",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:52:16.800312+00:00",
+          "source_limit": "All rendered posts read; numbered gaps and JSON API HTTP403 prevent certifying complete thread. Resolution is author-confirmed for this incident, not a general capability test. Later additive review: Additive: exact trigger routes to review without background agents. No new incident."
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "original_url": "https://github.com/oraios/serena/discussions/131",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+          "passage_locator": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_limit": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once."
+        }
+      ],
+      "capability_passages": [
+        "inputs/docs/cli.md:108-142 (baseline capture, preservation, missing-baseline limit)",
+        "inputs/hooks/pre-edit-impact.mjs:182-195 (additionalContext only; host permission retained)",
+        "inputs/hooks/session-brief.mjs:43-45 (on-demand mapping nudge)",
+        "inputs/README.md:311-325 (repair against original baseline and behavioral tests)"
+      ],
+      "strongest_supported_case": "Tool-builder self-report describes repeated prompts only briefly restoring invocation. Other records describe restart failure or manual resource recovery. Frozen docs require an explicit pre-edit baseline and preserve it during ordinary refresh; the hook points to further tools instead of owning every recovery step.",
+      "strongest_countercase": "Trigger correction resolved one real incident, and the historical Serena configuration problem recovered. Frozen Codeweb has a documented stable-baseline path and its advisory hook intentionally does not auto-approve edits; recovery need not be burdensome if the host actually performs it.",
+      "failure_scenario": "After a stale-card warning, an agent captures a new baseline over already-edited source to make the comparison look clean, or repeatedly asks the user to repair configuration. The evidence is now misleading even if the command succeeds.",
+      "verdict": "revise",
+      "weakest_assumption": "An on-demand path will be discovered and executed correctly by a person who did not know a brief was missing.",
+      "minimal_falsification_test": "Proposed only: deny one tool permission and supply one stale/missing-baseline condition. Require an actionable typed state, no bypass or auto-approval, and one documented recovery path. Verify baseline hash survives refresh and repair; missing pre-edit evidence remains unknown. Check uninstall disables injection and leaves user source intact.",
+      "local_hypothesis_implication": "Provide discoverable status/expansion and truthful recovery; measure all manual prompts and baseline operations as adoption burden.",
+      "paid_hypothesis_implication": "Account for support/recovery cost before claiming managed service savings; do not monetize fixing local access.",
+      "confidence_reason": "High confidence in the frozen source/documentation distinctions; moderate in transfer from reported incidents; low in unmeasured Codeweb user effect. No prevalence inference.",
+      "unresolved_test": "Proposed only: deny one tool permission and supply one stale/missing-baseline condition. Require an actionable typed state, no bypass or auto-approval, and one documented recovery path. Verify baseline hash survives refresh and repair; missing pre-edit evidence remains unknown. Check uninstall disables injection and leaves user source intact."
+    },
+    {
+      "id": "L03-F06",
+      "statement": "The decisive experience measure is changed decisions per total attention spent, not card delivery or six-line compliance.",
+      "evidence_type": [
+        "frozen_original_evidence_records",
+        "repository_source_or_documentation",
+        "reviewer_inference",
+        "untested_proposal"
+      ],
+      "supported_actor_segment_task": "Ordinary weekly coding-agent developer doing consequential shared-code work versus small familiar changes; tool-builder findings remain separately labeled.",
+      "relevant_conditions": "Count setup, restarts, trigger prompts, refresh, permission handling, card reading, source expansion, false warnings, unnecessary edits and usual validation. Agent context injection and human-visible reading are distinct.",
+      "evidence_ids": [
+        "CW-L023",
+        "CW-X001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z012",
+        "CW-Z009",
+        "CW-L024"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-L023",
+          "original_url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:75",
+          "passage_locator": "Parts 1, 5; limitations 23.5\u201323.7",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+          "source_limit": "Full article read in overlapping chunks; author adjudication, three small tasks, two models, no independent rerun. Tool-builder case. Not a model leaderboard or proven Codeweb effect."
+        },
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+          "source_limit": "Two\u2013three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-Z012",
+          "original_url": "https://github.com/oraios/serena/discussions/131",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+          "passage_locator": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_limit": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once."
+        },
+        {
+          "evidence_id": "CW-Z009",
+          "original_url": "https://simonwillison.net/2025/Jun/3/openai-codex-pr/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:117",
+          "passage_locator": "Setup script; prompt; result paragraph",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_limit": "Historical success, not a current speed benchmark. Linked PR not counted separately."
+        },
+        {
+          "evidence_id": "CW-L024",
+          "original_url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:76",
+          "passage_locator": "There\u2019s no difference anymore?; final paragraphs",
+          "capture_pointer": null,
+          "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+          "source_access": "opened_full",
+          "retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+          "source_limit": "Three repetitions of one task, vendor-affiliated self-measurement. Claims about general host behavior require official verification; no general MCP/CLI superiority inferred."
+        }
+      ],
+      "capability_passages": [
+        "inputs/hooks/session-brief.mjs:1-6 and preview (session briefing is a separate injection)",
+        "inputs/hooks/post-edit-diff.mjs:91-115 (deduplicates post-edit regressions against baseline; does not establish overall attention savings)",
+        "inputs/reports/product-proof-sprint-plan/README.md, Measure decisions and total effort; Proposed decision gate"
+      ],
+      "strongest_supported_case": "External context can change an inspection decision and precision on ambiguous tasks; a well-timed consumer could prevent an omission. This is a defensible conditional job.",
+      "strongest_countercase": "Extra verification rereads, adequate grep and native successful changes can erase the entire benefit. The hooks also inject a session briefing plus per-edit/post-edit material, so one compact card is not the whole attention budget.",
+      "failure_scenario": "The card is correct and quick, but appears repeatedly through a multi-file change, leads to redundant source opens, and does not change the edit plan. The recorded tool invocation looks like activation while total work rises.",
+      "verdict": "narrow",
+      "weakest_assumption": "A useful finding saves more work than all delivery, interpretation and verification work it introduces.",
+      "minimal_falsification_test": "Proposed only after technical preflight and separate trial authority: compare a recorded native baseline with brief-assisted matched tasks, counterbalance order, independently adjudicate changed decisions, and record null/negative cases and later voluntary use. Reject the default brief for a segment if added work persists without material decision benefit.",
+      "local_hypothesis_implication": "Retain only conditional use in tasks where evidence changes inspection or reuse decisions; six-line/warm targets are subordinate to total effort and correctness.",
+      "paid_hypothesis_implication": "No local attention win proves purchase or renewal. Paid coordination needs a separate observed recurring team burden and net savings beyond local/CI.",
+      "confidence_reason": "High confidence in the frozen source/documentation distinctions; moderate in transfer from reported incidents; low in unmeasured Codeweb user effect. No prevalence inference.",
+      "unresolved_test": "Proposed only after technical preflight and separate trial authority: compare a recorded native baseline with brief-assisted matched tasks, counterbalance order, independently adjudicate changed decisions, and record null/negative cases and later voluntary use. Reject the default brief for a segment if added work persists without material decision benefit."
+    }
+  ],
+  "smallest_proposed_preflight": [
+    "Pin package/source and exact Claude Code/Codex host versions, surfaces, cwd/worktree, policy and session identities. Use one small representative repo, not a broad compatibility campaign.",
+    "Prove discovery and a real returned source link, then an ordinary request triggering evidence before edit in each intended host and linked worktree. A listed tool or installed plugin is not sufficient.",
+    "Use the same small fixture for a shared low-fan-in symbol in a busy file, a small isolated change, and generated/unknown coverage. Freeze selection and output rules before comparison; inspect omitted counts and uncertainty.",
+    "Exercise warm, unmapped/cold, changed-source, corrupt-graph and denied-permission states. Timestamp end-to-end evidence; record separate status and recovery work. Test expansion, preserved baseline through repair and uninstall.",
+    "Proceed to a separately authorized participant comparison only after usable evidence precedes the decision, uncertainty cannot masquerade as zero/pass, expansion/recovery works and permission policy is respected. A preflight pass proves operability on these cases only, not usefulness or availability everywhere."
+  ],
+  "access_and_coverage_limits": [
+    "No fresh installation, host experiment, product edit, outreach, participant observation, runtime latency measurement or current-host certification was performed.",
+    "All 192 frozen input hashes verified at start and final delivery; full packet was available, but this lens selectively inspected original evidence records, source-registry boundaries, strategy/proof sprint, research review and relevant frozen capability files.",
+    "Original public URLs and passage locators are carried per finding. Relevant complete external page captures are not present in the frozen packet; this review uses the preserved original evidence records, not a claim to have reopened those pages. No additional source count is claimed.",
+    "The imported explain-core implementation is absent from the frozen selected capability files; internal caller ordering was not inspected. Visible hook code establishes highest-fan-in symbol selection and truncation only. No assertion of ranking completeness follows.",
+    "Historical/version-specific reports and resolved counterexamples are preserved. Corpus counts cannot estimate prevalence; independent measurement labels do not mean this reviewer reproduced studies.",
+    "Fresh task context is reported from this run identity; other lens outputs were not read. Shared filesystem isolation is procedural. Product Lead must independently verify runtime-session freshness."
+  ]
+}

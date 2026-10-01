@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "assignment": "L10",
+  "issue_identifier": "COD-89",
+  "issue_id": "b069b0f2-e4f1-4ac4-806e-7131bafd6447",
+  "run_id": "232ff50e-4bf6-4ddb-a637-1bc894cdd553",
+  "session_id": "01a0f08b-d307-7010-827f-344b19800e1e",
+  "session_identity_source": "CODEX_THREAD_ID injected environment",
+  "agent_id": "79d272db-70e2-483b-b817-292dac08593e",
+  "created_at": "2026-09-30T04:26:53.727062+00:00",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "initial_input_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "final_input_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "outputs": [
+    {
+      "path": "lenses/10-compounding-project-knowledge.md",
+      "sha256": "9d8e281460a9be0f230333fd58e9479a4aa3351f8adee3359d418757cf993721",
+      "bytes": 24399
+    },
+    {
+      "path": "lenses/10-findings.json",
+      "sha256": "5ecdfc56aaa5e63446f2f1c87493a6001bee28b05711023e07f004f17c9ad092",
+      "bytes": 25744
+    },
+    {
+      "path": "receipts/L10-source-reopens.txt",
+      "sha256": "b372f6f3aae476a76a5797c4f45d995200e2f348477b690af2add8b2bc092fd1",
+      "bytes": 65768
+    }
+  ],
+  "first_draft_preservation": [
+    {
+      "path": "history/L10-first-draft/10-compounding-project-knowledge.md",
+      "sha256": "9d8e281460a9be0f230333fd58e9479a4aa3351f8adee3359d418757cf993721"
+    },
+    {
+      "path": "history/L10-first-draft/10-findings.json",
+      "sha256": "5ecdfc56aaa5e63446f2f1c87493a6001bee28b05711023e07f004f17c9ad092"
+    },
+    {
+      "path": "history/L10-first-draft/L10-source-reopens.txt",
+      "sha256": "b372f6f3aae476a76a5797c4f45d995200e2f348477b690af2add8b2bc092fd1"
+    }
+  ],
+  "correction_attempts_used": 0,
+  "other_lens_outputs_read": false,
+  "isolation": "Fresh task-visible first-draft context; procedural shared-filesystem isolation only. Lead must independently verify runtime session uniqueness.",
+  "validation": {
+    "finding_count": 6,
+    "schema_required_fields_present": true,
+    "canonical_evidence_ids_resolve": true,
+    "support_and_opposition_registered": true
+  },
+  "public_reopens": {
+    "capture": "receipts/L10-source-reopens.txt",
+    "retrieval_date_utc": "2026-09-30",
+    "successful_original_sources": 5,
+    "navigation_only_sources": [
+      "https://github.com/openai/codex/issues/37955"
+    ],
+    "boundary": "Web-tool rendered text and exposed passages; no full HTML archive, screenshots, attachment or linked-source inspection. Captured response includes source URLs and line locators."
+  },
+  "verdict": "narrow",
+  "review_state": "Not independently approved; delivered for downstream synthesis/fidelity review.",
+  "runtime_tests_executed": false
+}

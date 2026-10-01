@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "assignment": "L07",
+  "issue_identifier": "COD-86",
+  "issue_id": "d89a661f-67ec-44c9-892d-c91cc346da58",
+  "run_id": "e8fdf514-cafb-4493-a52c-c2d7970115da",
+  "session_identity": {
+    "provider": "CODEX_THREAD_ID",
+    "value": "01a0f090-4bd4-7132-ba85-86a11ee00e91"
+  },
+  "created_at": "2026-09-30T04:30:48.263579+00:00",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "initial_input_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "final_input_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "outputs": [
+    {
+      "path": "lenses/07-capability-expansion.md",
+      "sha256": "cfc6de65400fecf794da57f834024e8741739ccf65ad892d8f53cdc945d0152f"
+    },
+    {
+      "path": "lenses/07-findings.json",
+      "sha256": "0e6ab824c1b2f904dce0666d9795d444983a21343a7c9e39b8e139e0d1a4c37d"
+    },
+    {
+      "path": "sources/L07/CW-Z001.html",
+      "sha256": "453a82853a45368168656f41ee9194ac27d933862d278b14ed35cf0448abc5f9"
+    },
+    {
+      "path": "sources/L07/CW-Z006.html",
+      "sha256": "cfbf9d35ee6707b49568072265c54c178f205bb708f02e01d29345c547983bf1"
+    },
+    {
+      "path": "sources/L07/CW-T018.html",
+      "sha256": "b717900277ead78de576f2aa7b94e16691c7f6674b900b1265d1bff24a2605a6"
+    },
+    {
+      "path": "sources/L07/REOPENS.json",
+      "sha256": "13323f41264b1e8a0aa181bef7ff186d841f27e7c5a65e63da9fa49c13ecad11"
+    },
+    {
+      "path": "history/L07-first-draft/07-findings.json",
+      "sha256": "0e6ab824c1b2f904dce0666d9795d444983a21343a7c9e39b8e139e0d1a4c37d"
+    },
+    {
+      "path": "history/L07-first-draft/07-capability-expansion.md",
+      "sha256": "cfc6de65400fecf794da57f834024e8741739ccf65ad892d8f53cdc945d0152f"
+    }
+  ],
+  "first_draft_preserved": "history/L07-first-draft/",
+  "correction_attempts_used": 0,
+  "other_lens_outputs_read": false,
+  "runtime_freshness_independently_verified": false,
+  "independence_limit": "Fresh supplied task context; identity recorded. Procedural shared-filesystem isolation; lead owns independent session verification.",
+  "review_status": "not_self_approved",
+  "verdict": "narrow",
+  "proposed_tests_executed": false
+}

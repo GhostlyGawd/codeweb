@@ -1,0 +1,24 @@
+{
+  "attachment": {
+    "id": "288f4c31-777b-4f65-8e90-ca40ac732963",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+    "issueCommentId": null,
+    "assetId": "d5ec31e2-8497-42f5-8d82-185c3130a3c8",
+    "provider": "local_disk",
+    "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/573b8d18-80c7-4b18-84b5-aecd340601f8/2026/09/30/603f831b-8a70-4c7c-94fa-1f6d9758019c-FINAL-DELIVERY-ADDENDUM.zip",
+    "contentType": "application/zip",
+    "byteSize": 140345,
+    "sha256": "caf8b791dc7925d6705677d6469e39cfc37dd5979336bdce6a4a8c08a21ff079",
+    "originalFilename": "FINAL-DELIVERY-ADDENDUM.zip",
+    "createdByAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+    "createdByUserId": null,
+    "createdAt": "2026-09-30T05:19:58.487Z",
+    "updatedAt": "2026-09-30T05:19:58.487Z",
+    "contentPath": "/api/attachments/288f4c31-777b-4f65-8e90-ca40ac732963/content",
+    "openPath": "/api/attachments/288f4c31-777b-4f65-8e90-ca40ac732963/content",
+    "downloadPath": "/api/attachments/288f4c31-777b-4f65-8e90-ca40ac732963/content?download=1"
+  },
+  "work_product_id": "6236d5c4-6012-4d37-9e6e-ed94e1d0faa2",
+  "archive_sha256": "caf8b791dc7925d6705677d6469e39cfc37dd5979336bdce6a4a8c08a21ff079"
+}

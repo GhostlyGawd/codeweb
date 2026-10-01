@@ -1,0 +1,23 @@
+{
+  "id": "T50-overlap",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/overlap.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/similarity/.codeweb/graph.json",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:14.303Z",
+  "end": "2026-10-01T01:50:14.338Z",
+  "durationMs": 35.24408399999993,
+  "exit": 1,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": "node:fs:539\n    return binding.readFileUtf8(path, stringToFlags(options.flag));\n                   ^\n\nError: ENOENT: no such file or directory, open '.live/graph.json'\n    at readFileSync (node:fs:539:20)\n    at file://$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/overlap.mjs:28:26\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\n  errno: -2,\n  code: 'ENOENT',\n  syscall: 'open',\n  path: '.live/graph.json'\n}\n\nNode.js v26.7.0\n"
+}

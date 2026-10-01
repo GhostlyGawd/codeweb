@@ -1,0 +1,21 @@
+{
+  "id": "R11-entry-alias",
+  "command": [
+    "/opt/homebrew/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_NO_RECEIPTS": "1",
+    "CODEWEB_NO_PROMO": "1"
+  },
+  "stdin": "{\"tool_name\": \"Edit\", \"tool_input\": {\"file_path\": \"$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/target/subject.mjs\", \"old_string\": \"value + 1\", \"new_string\": \"value + 2\", \"symbol\": \"subject.mjs:low\"}}",
+  "start": "2026-10-01T02:23:38.771002+00:00",
+  "end": "2026-10-01T02:23:38.806596+00:00",
+  "durationSeconds": 0.03562874998897314,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+}

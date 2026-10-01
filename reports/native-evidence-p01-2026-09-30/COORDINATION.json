@@ -1,0 +1,36 @@
+{
+  "recorded_at": "2026-10-01T00:18:23.008553+00:00",
+  "work_id": "P-01",
+  "workflow": "direct Codex with native subagents",
+  "requested_workers": [
+    {
+      "task_name": "/root/p01_implementer",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "role": "implementer",
+      "status": "completed_frozen_handoff"
+    },
+    {
+      "task_name": "/root/p01_reviewer",
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "role": "separate reviewer",
+      "status": "completed_PASS"
+    }
+  ],
+  "planned_root_actions": [
+    "Read current spec/harness and create isolated main-based checkout",
+    "Clarify routing because restore and direct execution were discussed",
+    "Approve related find-similar metadata wording within existing scope",
+    "Run required full gate on frozen candidate",
+    "Integrate results and publish reviewable source/plan records"
+  ],
+  "unplanned_rescues": [],
+  "active_coordination_time_seconds": null,
+  "total_compute_cost": null,
+  "comparative_benefit": "unobserved; no matched Paperclip arm run",
+  "product_or_customer_effect": "unobserved",
+  "review_started_at": "2026-10-01T00:22:28.868841+00:00",
+  "finished_technical_delivery_at": "2026-10-01T00:46:03.127625+00:00",
+  "implementation_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75"
+}

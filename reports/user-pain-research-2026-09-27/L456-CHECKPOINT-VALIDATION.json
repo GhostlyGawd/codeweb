@@ -1,0 +1,32 @@
+{
+  "record_count": 28,
+  "required_fields": 32,
+  "unique_ids": true,
+  "unique_incident_keys": true,
+  "audit_hashes": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "matches": true
+    }
+  ],
+  "independent_review": "pending",
+  "prior_run_timeout_seconds": 600,
+  "recovery": "native issue_continuation_needed",
+  "operator_interventions_this_run": 0
+}

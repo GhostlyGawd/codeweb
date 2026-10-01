@@ -1,0 +1,37 @@
+{
+  "completed_at": "2026-10-01T02:45:12.163476+00:00",
+  "work_id": "P-02",
+  "execution_status": "done_factual_preflight",
+  "review_verdict": "APPROVE factual P-02 delivery with reviewer qualifications recorded in REVIEW.md",
+  "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+  "case_count": 66,
+  "case_outcomes": {
+    "pass": 43,
+    "fail": 11,
+    "unverified": 12
+  },
+  "counts_are_overlapping_surface_dispositions": true,
+  "product_files_verified_unchanged": 600,
+  "original_frozen_evidence_files_verified": 257,
+  "independent_review_probes": 35,
+  "full_field_readiness": false,
+  "native61_condition": "Official isolated CLI0.159.3 accepted explicit gpt-6.1-sol/high; scoped Codeweb context/impact and unchanged baseline",
+  "native_defaults_or_complete_matrix_verified": false,
+  "claude_auth_and_delivery": "unverified",
+  "ambient_trust_delivery": "unverified",
+  "user_value": "unobserved",
+  "product_repairs_performed": false,
+  "release_or_deployment": false,
+  "paperclip_started": false,
+  "next_work": "P-03 demonstrated repairs, then P-04 readiness",
+  "review_qualifications_preserved": true,
+  "global_changes": "User-authorized model/high default and managed CLI upgrade; operational follow-through recorded separately.",
+  "global_model": {
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "installed_cli": "0.159.2",
+    "installed_model_start": "accepted exit0",
+    "actual_codeweb_native_trial_cli": "0.159.3",
+    "other_config_and_auth_trust_preserved": true
+  }
+}

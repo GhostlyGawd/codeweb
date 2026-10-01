@@ -1,0 +1,25 @@
+{
+  "id": "R19-invalid-shape-cli",
+  "command": [
+    "/opt/homebrew/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/query.mjs",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/bad-shape.json",
+    "--impact",
+    "low",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_NO_RECEIPTS": "1",
+    "CODEWEB_NO_PROMO": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T02:23:39.358845+00:00",
+  "end": "2026-10-01T02:23:39.396637+00:00",
+  "durationSeconds": 0.0378217090619728,
+  "exit": 1,
+  "stdout": "{\"query\":\"impact\",\"symbol\":\"low\",\"found\":false,\"hint\":\"no symbol matches \\\"low\\\" \u2014 try codeweb_find \\\"<free text>\\\" (concept search, no name needed)\"}\n",
+  "stderr": ""
+}

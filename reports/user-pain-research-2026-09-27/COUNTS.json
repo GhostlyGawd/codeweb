@@ -1,0 +1,28 @@
+{
+  "evidence_records": 132,
+  "evidence_types": {
+    "first_person_report": 119,
+    "official_capability": 2,
+    "independent_measurement": 2,
+    "vendor_claim": 6,
+    "maintainer_confirmation": 3
+  },
+  "source_attempts_canonical": 189,
+  "source_access": {
+    "opened_full": 110,
+    "opened_partial": 66,
+    "inaccessible": 13
+  },
+  "full_sources_supporting_retained_records": 85,
+  "record_source_families": {
+    "github": 34,
+    "engineering_blog": 40,
+    "reddit": 28,
+    "hacker_news": 17,
+    "forum": 11,
+    "official_docs": 2
+  },
+  "dated_in_preferred_window": 77,
+  "dated_older": 22,
+  "unknown_publication_dates": 33
+}

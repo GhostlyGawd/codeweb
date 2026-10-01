@@ -1,0 +1,469 @@
+<!DOCTYPE html><html lang="en" data-theme="terminal"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AI Coding Agents: Hands-On Test of Codex, Claude CLI &amp; Gemini CLI | Omer&#39;s playground</title><meta name="robots" content="follow, index"><meta name="description" content="Field notes from running three AI coding agents on two real-world projects."><link rel="canonical" href="https://omeratagun.net/blog/ai-coding-agents-experiment/"><link rel="apple-touch-icon" sizes="76x76" href="/static/favicons/favicon.ico"><link rel="icon" href="/static/favicons/favicon.ico"><link rel="manifest" href="/static/favicons/site.webmanifest"><meta name="theme-color" content="#1a1b26"><link rel="alternate" type="application/rss+xml" title="Omer's playground" href="/rss.xml"><script>(function(){const storageKey = "theme";
+const themeColors = {"light":"#ffffff","terminal":"#1a1b26"};
+
+  (function () {
+    try {
+      var saved = localStorage.getItem(storageKey);
+      if (saved) {
+        document.documentElement.dataset.theme = saved;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta && themeColors[saved]) meta.setAttribute('content', themeColors[saved]);
+      }
+    } catch (e) {
+      /* localStorage unavailable (private mode etc) - default theme applies */
+    }
+  })();
+})();</script><meta property="og:url" content="https://omeratagun.net/blog/ai-coding-agents-experiment/"><meta property="og:type" content="article"><meta property="og:site_name" content="Omer's playground"><meta property="og:title" content="AI Coding Agents: Hands-On Test of Codex, Claude CLI &amp; Gemini CLI | Omer's playground"><meta property="og:description" content="Field notes from running three AI coding agents on two real-world projects."><meta property="og:image" content="https://omeratagun.net/static/images/avatar.jpeg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="AI Coding Agents: Hands-On Test of Codex, Claude CLI &amp; Gemini CLI | Omer's playground"><meta name="twitter:description" content="Field notes from running three AI coding agents on two real-world projects."><meta name="twitter:image" content="https://omeratagun.net/static/images/avatar.jpeg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","mainEntityOfPage":{"@type":"WebPage","@id":"https://omeratagun.net/blog/ai-coding-agents-experiment/"},"headline":"AI Coding Agents: Hands-On Test of Codex, Claude CLI & Gemini CLI","image":[{"@type":"ImageObject","url":"https://omeratagun.net/static/images/avatar.jpeg"}],"datePublished":"2025-06-28T00:00:00.000Z","dateModified":"2025-06-28T00:00:00.000Z","author":{"@type":"Person","name":"Omer Atagun"},"publisher":{"@type":"Organization","name":"Omer Atagun","logo":{"@type":"ImageObject","url":"https://omeratagun.net/static/images/avatar.jpeg"}},"description":"Field notes from running three AI coding agents on two real-world projects."}</script><link rel="stylesheet" href="/_astro/BaseLayout.CIoF_NMT.css"></head><body><div class="wrap"><header><pre class="banner" aria-hidden="true">root@omeratagun:~$ ssh <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7107180218051e03311e1c140310051016041f5f1f1405">[email&#160;protected]</a>
+Welcome. Uptime: forever. Coffee: yes.</pre><p><a href="/" style="font-size:1.4rem; text-decoration:none; color:var(--fg-bright);">Omer&#39;s playground</a></p><p class="muted">In pursuit of knowledge, driven by curiosity.</p><nav style="display:flex; gap:1.25rem; align-items:center; flex-wrap:wrap; margin:1rem 0;"><a href="/blog/" class="prompt">blog</a><a href="/about/" class="prompt">about</a><button id="theme-toggle" class="prompt" type="button" aria-label="Switch theme" data-astro-cid-ijxc6blt>switch theme</button><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>(function(){const themes = ["light","terminal"];
+const themeColors = {"light":"#ffffff","terminal":"#1a1b26"};
+const storageKey = "theme";
+
+  (function () {
+    var btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var current = document.documentElement.dataset.theme || themes[0];
+      var idx = themes.indexOf(current);
+      var next = themes[(idx + 1) % themes.length];
+      document.documentElement.dataset.theme = next;
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta && themeColors[next]) meta.setAttribute('content', themeColors[next]);
+      try {
+        localStorage.setItem(storageKey, next);
+      } catch (e) {
+        /* ignore */
+      }
+    });
+  })();
+})();</script></nav><hr></header><main><p class="prompt">cat 2025-06-28-ai-coding-agents-experiment.mdx</p><h1>AI Coding Agents: Hands-On Test of Codex, Claude CLI &amp; Gemini CLI</h1><p class="muted">2025-06-28 &middot; 16 min read</p><p><a href="/tags/codex/" class="tag">#codex</a><a href="/tags/claude-cli/" class="tag">#claude cli</a><a href="/tags/gemini-cli/" class="tag">#gemini cli</a></p><details class="toc" open><summary class="prompt">table of contents</summary><ul><li style="margin-left:1.25rem"><a href="#the-test-subjects">The Test Subjects</a></li><li><a href="#chapter-1-codex">Chapter 1: Codex</a></li><li><a href="#chapter-2--codex--claude-cli-tag-team">Chapter 2 — Codex + Claude CLI Tag Team</a></li><li style="margin-left:1.25rem"><a href="#aaand-finally-i-figured-out-that-i-have-no-clue-what-is-going-on-and-nothing-works">Aaand finally i figured out that i have no clue what is going on and nothing works.</a></li><li><a href="#third-chapter-the-whole-zoo-gemini-cli--claude-cli--codex--human">Third chapter: The Whole Zoo: Gemini CLI × Claude CLI × Codex + Human</a></li><li><a href="#fourth-chapter-gemini-cli--claude-cli--codex--human-review">Fourth chapter: Gemini CLI + Claude CLI + Codex + Human review</a></li><li><a href="#what-i-learned">What I Learned</a></li></ul></details><hr><article><blockquote>
+<p><em>“Hmm… maybe that side project I keep avoiding could write itself?”</em></p>
+</blockquote>
+<p>We’re officially in the age of AI-assisted coding—at least according to the shiny slide decks from every AI CEO on the planet. Over the past few weeks I put that claim to the test, unleashing <strong>Codex Cloud</strong>, <strong>Claude CLI</strong>, and the brand-new <strong>Gemini CLI</strong> on two personal projects. Here’s how that rodeo went.</p>
+<h3 id="the-test-subjects">The Test Subjects</h3>
+<ol>
+<li><strong>Diagramat</strong> – a green-field diagram editor à la draw.io, built from scratch in an npm work-spaced monorepo.</li>
+<li><strong>eDominations v2</strong> – a 2017 browser game I mothballed in 2022. Goal: port the backend from Laravel/MySQL to NestJS/Postgres and modernise the whole stack.</li>
+</ol>
+<h2 id="chapter-1-codex">Chapter 1: Codex</h2>
+<p>Maybe the best one so far. Not because it is the best model out there but because its concurrency capability. You are not locked into your IDE to use CLI tools from other models. As well as, you do not have any safety concerns with the data that can mistakenly be leaked by using terminal commands.</p>
+<p>Initially, I have created a repository to develop diagramming editor.
+My idea was to prepare an npm workspaces so that I can split the code into multiple packages and have a monorepo with all the linters, tests.
+Prepared all deployment yaml files for k8s cluster and CI/CD pipelines for GitHub Actions.
+So instead of locally testing the changes, i could quickly look from my mobile if things go well.
+Goal was to eliminate halucination and have a clear structure to work with.
+This did work well in the beginning, when I described the project to the codex, it was able to understand and deliver not bad results.
+However, it was repetitive and once in a while could get lost and do entirely different things.
+I had to be careful about what I was asking and how I was asking it.</p>
+<p>I have figured out that codex works best when you provide AGENTS.md file in the root of your repository. This file should contain the description of the project, its structure, and how to run it.
+It should also contain the instructions on how to use the codex. This way, codex can understand the context of the project and provide better results.</p>
+<p>AGENTS.md file i used for this project was like this:</p>
+<div class="code-block-wrap" style="position: relative;"><button class="copy-btn" type="button">copy</button><pre><code><span class="line"><span>```markdown</span></span>
+<span class="line"><span># Repository Guidelines for Agents</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>This repository is a Node.js monorepo managed with **npm workspaces**. Node 22 is required.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>## Project Goal</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>This project aims to build a robust, feature-rich diagramming editor similar to [draw.io](https://www.drawio.com). The implementation should closely mirror the usability and key functionalities provided by draw\.io, ensuring a smooth, intuitive user experience.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>## Key Architectural Principles</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>The following principles guide all code contributions and implementations:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### Modularity</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>* All components should be designed as loosely coupled, reusable modules.</span></span>
+<span class="line"><span>* Ensure each module has clear, minimal dependencies.</span></span>
+<span class="line"><span>* Follow package boundaries clearly defined within the `packages/` directory.</span></span>
+<span class="line"><span>* Design modules as plug-and-play packages so they can be swapped or extended with minimal friction, mirroring draw.io&#39;s scalability.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### SOLID Principles</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>All code should adhere strictly to the SOLID principles:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>* **Single Responsibility Principle (SRP)**: Each module or class should have a single clear purpose.</span></span>
+<span class="line"><span>* **Open/Closed Principle (OCP)**: Modules should be open for extension but closed for modification.</span></span>
+<span class="line"><span>* **Liskov Substitution Principle (LSP)**: Derived classes must be substitutable for their base classes without altering correctness.</span></span>
+<span class="line"><span>* **Interface Segregation Principle (ISP)**: Favor specific interfaces over general-purpose ones.</span></span>
+<span class="line"><span>* **Dependency Inversion Principle (DIP)**: Depend on abstractions rather than concrete implementations.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### Heavy Testing</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>* Every new feature or module should come with comprehensive unit tests.</span></span>
+<span class="line"><span>* Integration and end-to-end (E2E) tests are essential, ensuring seamless interactions among components.</span></span>
+<span class="line"><span>* Tests must be clear, readable, and maintainable.</span></span>
+<span class="line"><span>* Aim for high test coverage, particularly for core logic and user interactions.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>## Directory Overview</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>* `packages/` – Core libraries and reusable modules following SOLID principles.</span></span>
+<span class="line"><span>* `ui-shell/vanilla/` – Demo UI built with Vite + Tailwind, adhering to modular and testable design.</span></span>
+<span class="line"><span>* `k8s/` – Kubernetes manifests for deployment.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>## Common Commands</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Run these commands from the repository root:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### Install all dependencies</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>```sh</span></span>
+<span class="line"><span>npm install --workspaces --include-workspace-root</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### Run unit tests</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>```sh</span></span>
+<span class="line"><span>npm test</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### Run Playwright E2E tests</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>```sh</span></span>
+<span class="line"><span>npm test --workspace e2e</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>This spins up the demo UI on port 5173 and executes all tests located in `e2e/tests`.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### Lint all packages</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>```sh</span></span>
+<span class="line"><span>npm run lint</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### Start the demo UI in dev mode</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>```sh</span></span>
+<span class="line"><span>npm run dev --workspace ui-shell/vanilla</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Opens the demo UI at [http://localhost:5173](http://localhost:5173).</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### Build the production UI</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>```sh</span></span>
+<span class="line"><span>npm run build --workspace ui-shell/vanilla</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Output is placed in `ui-shell/vanilla/dist`.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### Docker</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>```sh</span></span>
+<span class="line"><span>docker compose up # builds and serves on port 3002</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>### Kubernetes</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Manifest files reside in `k8s/`. Apply them using:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>```sh</span></span>
+<span class="line"><span>kubectl apply -f k8s</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>## Development Guidelines for Agents</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>* **Clearly defined tasks:** Implement tasks in small, incremental changes, clearly describing input and output expectations.</span></span>
+<span class="line"><span>* **Code readability:** Write clean, well-documented code. Clearly comment any complex logic or design decisions.</span></span>
+<span class="line"><span>* **Automated feedback loops:** Regularly run linting, formatting, and tests to ensure high-quality code.</span></span>
+<span class="line"><span>* **Lint checks:** Ensure `npm run lint` passes without any warnings or errors before committing.</span></span>
+<span class="line"><span>* **Continuous integration:** Use automated CI/CD pipelines to validate code quickly and reliably.</span></span>
+<span class="line"><span>* **Meaningful abstractions:** Whenever you implement logic, extract it into well-named, reusable functions. Favor small, standalone functions to encourage composability.</span></span>
+<span class="line"><span>* **Minimize conditionals:** Avoid large `if`/`else` blocks. Prefer early returns or design patterns such as strategy or polymorphism to keep flow control clear and modular.</span></span>
+<span class="line"><span>* **Feature visibility:** Every new feature must also be enabled in the demo UI so a human tester can manually exercise it. Avoid implementing functionality that cannot be accessed through the interface.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>## Notes</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>* ESLint runs automatically upon commit via Husky, enforcing code quality.</span></span>
+<span class="line"><span>* Refer to the `README.md` for comprehensive details on features and repository layout.</span></span></code></pre></div>
+<p>After couple of iterations, codex new what to do and how to do it.</p>
+<p>In the end of the 700+ commits done by codex, i had a working prototype of a diagramming editor that was able to render diagrams and export them as images.
+It was not perfect, but it was a good start. In overall it was a good experience.</p>
+<p>You can read more about the project <a href="https://diagramat.omeratagun.net">here</a>.</p>
+<div class="flex flex-wrap -mx-2 overflow-hidden xl:-mx-2"><div class="my-1 px-2 w-full overflow-hidden xl:my-1 xl:px-2 xl:w-full"><p><img src="/static/images/diagramat.png" alt="Rancherk3s"/></p></div></div>
+<h2 id="chapter-2--codex--claude-cli-tag-team">Chapter 2 — Codex + Claude CLI Tag Team</h2>
+<p>Back in 2022, i had started v2 for eDominations which is a browser game that i had published its first version in 2017.
+Before i stopped working on v2 i had a working version missing some features.
+Written in React as SPA, laravel as backend and mysql as database. All you had to do was docker compose up and you were ready to go.
+Wanted to test the coding agents with this project if they can nicely and quickly port it to a new stack. Goal was rewriting from Laravel into NestJS and MySQL into Postgres.</p>
+<p>Now that i had experience with codex, i wanted to see if it thrives with a more complex project. Well, in the beginning started well. Codex was able to understand the project since i provided AGENTS.md rather first commit.
+This time we were on stereoids with Codex. First i made sure it analyzed the project when i asked a task to do and come up with a plan and a task list.
+This way, i was able to see if it was on the right track or not. If it was not, i could correct it and ask to do it again.
+After couple of days, codex provided 4x concurrency to the codex cloud. Hence, i got even faster results. However, it was too delusional no matter what i did.
+Lesser descriptions, more comments, more instructions, it was not able to deliver what i wanted. Simply i tried everything i could think of.</p>
+<p>Dont take this project lightly, in a single repository, there were client, legacy service, new service, 2 additional microservices for cdn proxy and socket service for live chat. Not an easy with limited context length.</p>
+<p>AGENTS.md file i used for this project was like this:</p>
+<div class="code-block-wrap" style="position: relative;"><button class="copy-btn" type="button">copy</button><pre><code><span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold"># Repository Guidelines for Agents</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">This repository is a browser game called eDominations includes couple of services.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">## Project Goal</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">This project aims to build an amazing and entertaining browser based multiplayer strategy game with robust, feature-rich backend services. The game is designed to be modular, scalable, and maintainable, allowing for easy addition of new features and enhancements over time.</span></span>
+<span class="line"><span style="color:#E1E4E8">Short term goal is to rewrite the PHP application into NestJS in </span><span style="color:#79B8FF">`service-nest`</span><span style="color:#E1E4E8"> and migrate the database from MySQL to PostgreSQL.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">## Key Architectural Principles</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">The following principles guide all code contributions and implementations:</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Modularity</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8"> All components should be designed as loosely coupled, reusable modules.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8"> Ensure each module has clear, minimal dependencies.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8"> Design modules as plug-and-play packages so they can be swapped or extended with minimal friction.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### SOLID Principles</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">All code should adhere strictly to the SOLID principles:</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8;font-weight:bold"> **Single Responsibility Principle (SRP)**</span><span style="color:#E1E4E8">: Each module or class should have a single clear purpose.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8;font-weight:bold"> **Open/Closed Principle (OCP)**</span><span style="color:#E1E4E8">: Modules should be open for extension but closed for modification.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8;font-weight:bold"> **Liskov Substitution Principle (LSP)**</span><span style="color:#E1E4E8">: Derived classes must be substitutable for their base classes without altering correctness.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8;font-weight:bold"> **Interface Segregation Principle (ISP)**</span><span style="color:#E1E4E8">: Favor specific interfaces over general-purpose ones.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8;font-weight:bold"> **Dependency Inversion Principle (DIP)**</span><span style="color:#E1E4E8">: Depend on abstractions rather than concrete implementations.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Heavy Testing</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8"> Every new feature or module should come with comprehensive unit tests.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8"> Integration and end-to-end (E2E) tests are essential, ensuring seamless interactions among components.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8"> Tests must be clear, readable, and maintainable.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#E1E4E8"> Aim for high test coverage, particularly for core logic and user interactions.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">## Directory Overview</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#79B8FF"> `client/`</span><span style="color:#E1E4E8"> – React client application. Face of the game, built with TypeScript and React.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#79B8FF"> `service/`</span><span style="color:#E1E4E8"> – Laravel application, the original backend of the game, slated to be replaced by the NestJS implementation in </span><span style="color:#79B8FF">`service-nest`</span><span style="color:#E1E4E8">.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#79B8FF"> `service-nest/`</span><span style="color:#E1E4E8"> – NestJS backend hosting modular microservices, including the WebSocket service.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#79B8FF"> `service-nest/src/microservices/cdn/`</span><span style="color:#E1E4E8"> – standalone CDN microservice for serving game assets.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#79B8FF"> `service-nest/src/microservices/socket/`</span><span style="color:#E1E4E8"> – NestJS microservice responsible for WebSocket communication.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#79B8FF"> `k8s/`</span><span style="color:#E1E4E8"> – Kubernetes manifests for deployment.</span></span>
+<span class="line"><span style="color:#FFAB70">*</span><span style="color:#79B8FF"> `docs/`</span><span style="color:#E1E4E8"> – central documentation hub for design notes, API references, and migration guides.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">## Common Commands</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">Run these commands from the repository root:</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Docker</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">```sh</span></span>
+<span class="line"><span style="color:#B392F0">docker</span><span style="color:#9ECBFF"> compose</span><span style="color:#9ECBFF"> up</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### service-nest</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">Run</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run build`</span><span style="color:#B392F0"> before</span><span style="color:#9ECBFF"> executing</span><span style="color:#9ECBFF"> any</span><span style="color:#9ECBFF"> tasks</span><span style="color:#9ECBFF"> in</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">service-nest</span><span style="color:#9ECBFF">`</span><span style="color:#79B8FF">.</span></span>
+<span class="line"><span style="color:#B392F0">Run</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run start`</span><span style="color:#B392F0"> to</span><span style="color:#9ECBFF"> start</span><span style="color:#9ECBFF"> the</span><span style="color:#9ECBFF"> NestJS</span><span style="color:#9ECBFF"> application</span><span style="color:#9ECBFF"> whenever</span><span style="color:#9ECBFF"> you</span><span style="color:#9ECBFF"> work</span><span style="color:#9ECBFF"> on</span><span style="color:#9ECBFF"> new</span><span style="color:#9ECBFF"> features</span><span style="color:#9ECBFF"> or</span><span style="color:#9ECBFF"> debugging</span><span style="color:#9ECBFF"> tasks.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">## Development Guidelines for Agents</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">*</span><span style="color:#F97583"> **</span><span style="color:#E1E4E8">Clearly defined tasks:</span><span style="color:#F97583">**</span><span style="color:#E1E4E8"> Implement tasks in small, incremental changes, clearly describing input and output expectations.</span></span>
+<span class="line"><span style="color:#F97583">*</span><span style="color:#F97583"> **</span><span style="color:#E1E4E8">Code readability:</span><span style="color:#F97583">**</span><span style="color:#E1E4E8"> Write clean, well-documented code. Clearly comment any complex logic or design decisions.</span></span>
+<span class="line"><span style="color:#F97583">*</span><span style="color:#F97583"> **</span><span style="color:#E1E4E8">Automated feedback loops:</span><span style="color:#F97583">**</span><span style="color:#E1E4E8"> Regularly run linting, formatting, and tests to ensure high-quality code.</span></span>
+<span class="line"><span style="color:#F97583">*</span><span style="color:#F97583"> **</span><span style="color:#E1E4E8">Lint checks:</span><span style="color:#F97583">**</span><span style="color:#E1E4E8"> Ensure </span><span style="color:#9ECBFF">`</span><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run lint`</span><span style="color:#B392F0"> passes</span><span style="color:#9ECBFF"> without</span><span style="color:#9ECBFF"> any</span><span style="color:#9ECBFF"> warnings</span><span style="color:#9ECBFF"> or</span><span style="color:#9ECBFF"> errors</span><span style="color:#9ECBFF"> before</span><span style="color:#9ECBFF"> committing.</span></span>
+<span class="line"><span style="color:#F97583">*</span><span style="color:#F97583"> **</span><span style="color:#E1E4E8">Continuous integration:</span><span style="color:#F97583">**</span><span style="color:#E1E4E8"> Use automated CI/CD pipelines to validate code quickly and reliably.</span></span>
+<span class="line"><span style="color:#F97583">*</span><span style="color:#F97583"> **</span><span style="color:#E1E4E8">Meaningful abstractions:</span><span style="color:#F97583">**</span><span style="color:#E1E4E8"> Whenever you implement logic, extract it into well-named, reusable functions. Favor small, standalone functions to encourage composability.</span></span>
+<span class="line"><span style="color:#F97583">*</span><span style="color:#F97583"> **</span><span style="color:#E1E4E8">Minimize conditionals:</span><span style="color:#F97583">**</span><span style="color:#E1E4E8"> Avoid large </span><span style="color:#9ECBFF">`if`</span><span style="color:#B392F0">/</span><span style="color:#9ECBFF">`else`</span><span style="color:#B392F0"> blocks.</span><span style="color:#9ECBFF"> Prefer</span><span style="color:#9ECBFF"> early</span><span style="color:#9ECBFF"> returns</span><span style="color:#9ECBFF"> or</span><span style="color:#9ECBFF"> design</span><span style="color:#9ECBFF"> patterns</span><span style="color:#9ECBFF"> such</span><span style="color:#9ECBFF"> as</span><span style="color:#9ECBFF"> strategy</span><span style="color:#9ECBFF"> or</span><span style="color:#9ECBFF"> polymorphism</span><span style="color:#9ECBFF"> to</span><span style="color:#9ECBFF"> keep</span><span style="color:#9ECBFF"> flow</span><span style="color:#9ECBFF"> control</span><span style="color:#9ECBFF"> clear</span><span style="color:#9ECBFF"> and</span><span style="color:#9ECBFF"> modular.</span></span>
+<span class="line"><span style="color:#F97583">*</span><span style="color:#F97583"> **</span><span style="color:#E1E4E8">Feature visibility:</span><span style="color:#F97583">**</span><span style="color:#E1E4E8"> Every new feature must also be enabled in the demo UI so a human tester can manually exercise it. Avoid implementing functionality that cannot be accessed through the interface.</span></span></code></pre></div>
+<p>No result excited me. Thats when i decided to try out Claude CLI. I had a good experience with it in the past, so i thought it would be a good idea to give it a try.
+Well when you initiate your claude cli, you can <code>/init</code> and let it do its job and prepare a nice AGENTS.md alike file for you. Same purpose as AGENTS.md. However this time i let it cook. So it did a nice meal for itself.</p>
+<div class="code-block-wrap" style="position: relative;"><button class="copy-btn" type="button">copy</button><pre><code><span class="line"><span style="color:#79B8FF;font-weight:bold"># CLAUDE.md</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">## Project Overview</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">eDominations v2 is a browser-based multiplayer strategy game built as a monorepo with microservices architecture. The project is migrating from a PHP/Laravel backend to NestJS with PostgreSQL.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">## Architecture</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Core Services</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **client/**</span><span style="color:#E1E4E8">: React TypeScript SPA for the game interface</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **service-nest/**</span><span style="color:#E1E4E8">: NestJS backend with domain-driven design, including:</span></span>
+<span class="line"><span style="color:#FFAB70">  -</span><span style="color:#E1E4E8"> Main API service on port 3001</span></span>
+<span class="line"><span style="color:#FFAB70">  -</span><span style="color:#E1E4E8"> CDN microservice on port 3036 (</span><span style="color:#79B8FF">`service-nest/src/microservices/cdn/`</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#FFAB70">  -</span><span style="color:#E1E4E8"> WebSocket microservice on port 3035 (</span><span style="color:#79B8FF">`service-nest/src/microservices/socket/`</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **service/**</span><span style="color:#E1E4E8">: Legacy Laravel backend (being phased out)</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **k8s/**</span><span style="color:#E1E4E8">: Kubernetes deployment manifests</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **docs/**</span><span style="color:#E1E4E8">: Project documentation</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Domain Structure</span></span>
+<span class="line"><span style="color:#E1E4E8">The NestJS service follows domain-driven design with domains in </span><span style="color:#79B8FF">`service-nest/src/domains/`</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **user/**</span><span style="color:#E1E4E8">: User management, profiles, training, travel</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **battles/**</span><span style="color:#E1E4E8">: Combat system, battlehits, wars</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **country/**</span><span style="color:#E1E4E8">: Countries, regions, politics, economics</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **company/**</span><span style="color:#E1E4E8">: Business system, employees, market</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **journalism/**</span><span style="color:#E1E4E8">: Articles, newspapers, comments</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **alliance/**</span><span style="color:#E1E4E8">: Player alliances and diplomacy</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **energy/**</span><span style="color:#E1E4E8">: Energy system and logging</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **elections/**</span><span style="color:#E1E4E8">: Political elections and voting</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **chat/**</span><span style="color:#E1E4E8">: In-game messaging and chat</span></span>
+<span class="line"><span style="color:#FFAB70">-</span><span style="color:#E1E4E8;font-weight:bold"> **cron/**</span><span style="color:#E1E4E8">: Scheduled tasks and game events</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">## Development Commands</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#79B8FF;font-weight:bold">### Docker Development</span></span>
+<span class="line"><span style="color:#E1E4E8">```bash</span></span>
+<span class="line"><span style="color:#6A737D"># Start all services</span></span>
+<span class="line"><span style="color:#B392F0">docker</span><span style="color:#9ECBFF"> compose</span><span style="color:#9ECBFF"> up</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Start specific services</span></span>
+<span class="line"><span style="color:#B392F0">docker</span><span style="color:#9ECBFF"> compose</span><span style="color:#9ECBFF"> up</span><span style="color:#9ECBFF"> client</span><span style="color:#9ECBFF"> service-nest</span><span style="color:#9ECBFF"> postgres</span><span style="color:#9ECBFF"> redis</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### service-nest (NestJS Backend)</span></span>
+<span class="line"><span style="color:#9ECBFF">```</span><span style="color:#B392F0">bash</span></span>
+<span class="line"><span style="color:#79B8FF">cd</span><span style="color:#9ECBFF"> service-nest</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Build (required before most tasks)</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run build</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Development</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run start:dev          </span><span style="color:#6A737D"># Main API with hot reload</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run start:cdn          </span><span style="color:#6A737D"># CDN microservice</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run start:socket       </span><span style="color:#6A737D"># WebSocket microservice</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Testing</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run test               </span><span style="color:#6A737D"># Unit tests</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run test:e2e           </span><span style="color:#6A737D"># End-to-end tests</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run test:cov           </span><span style="color:#6A737D"># Coverage report</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Linting</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run lint               </span><span style="color:#6A737D"># Auto-fix linting issues</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run lint:ci            </span><span style="color:#6A737D"># Check linting (CI mode)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Database</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run migration:run      </span><span style="color:#6A737D"># Run migrations</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run migration:revert   </span><span style="color:#6A737D"># Revert last migration</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run seed               </span><span style="color:#6A737D"># Seed database</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### client (React Frontend)</span></span>
+<span class="line"><span style="color:#9ECBFF">```</span><span style="color:#B392F0">bash</span></span>
+<span class="line"><span style="color:#79B8FF">cd</span><span style="color:#9ECBFF"> client</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Development</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> dev</span><span style="color:#6A737D">                # Start with Tailwind compilation</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> start</span><span style="color:#6A737D">                  # React dev server only</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> tailwind</span><span style="color:#6A737D">           # Tailwind CSS compilation</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Testing</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> test</span><span style="color:#6A737D">               # Unit tests</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> e2e</span><span style="color:#6A737D">                # Cypress e2e tests</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> dev:cy</span><span style="color:#6A737D">             # Cypress interactive mode</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Linting</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> lint</span><span style="color:#6A737D">               # ESLint check</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> lint:fix</span><span style="color:#6A737D">           # Auto-fix linting issues</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> format</span><span style="color:#6A737D">             # Prettier formatting</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Build</span></span>
+<span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> build</span><span style="color:#6A737D">              # Production build</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">## Database &amp; Infrastructure</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### PostgreSQL</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Host</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#9ECBFF"> postgres</span><span style="color:#E1E4E8"> (in </span><span style="color:#9ECBFF">Docker</span><span style="color:#E1E4E8">) or localhost</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Port</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#79B8FF"> 5432</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Database</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#9ECBFF"> edominations</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Admin</span><span style="color:#9ECBFF"> UI</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#9ECBFF"> pgAdmin</span><span style="color:#9ECBFF"> on</span><span style="color:#9ECBFF"> port</span><span style="color:#79B8FF"> 5050</span><span style="color:#E1E4E8"> (<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3352575e5a5d7352575e5a5d1d505c5e">[email&#160;protected]</a> </span><span style="color:#9ECBFF">/</span><span style="color:#9ECBFF"> admin</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### Redis</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Host</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#9ECBFF"> redis</span><span style="color:#E1E4E8"> (in </span><span style="color:#9ECBFF">Docker</span><span style="color:#E1E4E8">) or localhost</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Port</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#79B8FF"> 6379</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Used</span><span style="color:#9ECBFF"> for</span><span style="color:#9ECBFF"> caching</span><span style="color:#9ECBFF"> and</span><span style="color:#9ECBFF"> WebSocket</span><span style="color:#9ECBFF"> scaling</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">## Testing Strategy</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### Unit Tests</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Located</span><span style="color:#9ECBFF"> alongside</span><span style="color:#9ECBFF"> source</span><span style="color:#9ECBFF"> files</span><span style="color:#9ECBFF"> in</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">__tests__/</span><span style="color:#9ECBFF">`</span><span style="color:#B392F0"> directories</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> NestJS</span><span style="color:#9ECBFF"> uses</span><span style="color:#9ECBFF"> Jest</span><span style="color:#9ECBFF"> with</span><span style="color:#9ECBFF"> TypeORM</span><span style="color:#9ECBFF"> test</span><span style="color:#9ECBFF"> utilities</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> React</span><span style="color:#9ECBFF"> uses</span><span style="color:#9ECBFF"> Testing</span><span style="color:#9ECBFF"> Library</span><span style="color:#9ECBFF"> and</span><span style="color:#9ECBFF"> Jest</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### E2E Tests</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> NestJS:</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">service-nest/test/*.e2e-spec.ts</span><span style="color:#9ECBFF">`</span><span style="color:#B392F0"> using</span><span style="color:#9ECBFF"> Testcontainers</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> React:</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">client/cypress/e2e/</span><span style="color:#9ECBFF">`</span><span style="color:#B392F0"> using</span><span style="color:#9ECBFF"> Cypress</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### Key Test Patterns</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Use</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">beforeEach</span><span style="color:#9ECBFF">`</span><span style="color:#F97583"> for</span><span style="color:#E1E4E8"> clean database state in e2e tests</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Mock</span><span style="color:#9ECBFF"> external</span><span style="color:#9ECBFF"> dependencies</span><span style="color:#9ECBFF"> in</span><span style="color:#9ECBFF"> unit</span><span style="color:#9ECBFF"> tests</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Test</span><span style="color:#9ECBFF"> both</span><span style="color:#9ECBFF"> success</span><span style="color:#9ECBFF"> and</span><span style="color:#9ECBFF"> error</span><span style="color:#9ECBFF"> scenarios</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Include</span><span style="color:#9ECBFF"> integration</span><span style="color:#9ECBFF"> tests</span><span style="color:#9ECBFF"> for</span><span style="color:#9ECBFF"> complex</span><span style="color:#9ECBFF"> domain</span><span style="color:#9ECBFF"> interactions</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">## Code Conventions</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### NestJS Backend</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Use</span><span style="color:#9ECBFF"> domain-driven</span><span style="color:#9ECBFF"> design</span><span style="color:#9ECBFF"> with</span><span style="color:#9ECBFF"> modules</span><span style="color:#9ECBFF"> per</span><span style="color:#9ECBFF"> business</span><span style="color:#9ECBFF"> domain</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Controllers</span><span style="color:#9ECBFF"> handle</span><span style="color:#9ECBFF"> HTTP</span><span style="color:#9ECBFF"> requests,</span><span style="color:#9ECBFF"> services</span><span style="color:#9ECBFF"> contain</span><span style="color:#9ECBFF"> business</span><span style="color:#9ECBFF"> logic</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> TypeORM</span><span style="color:#9ECBFF"> entities</span><span style="color:#9ECBFF"> with</span><span style="color:#9ECBFF"> proper</span><span style="color:#9ECBFF"> relationships</span><span style="color:#9ECBFF"> and</span><span style="color:#9ECBFF"> indexes</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> DTOs</span><span style="color:#9ECBFF"> for</span><span style="color:#9ECBFF"> request/response</span><span style="color:#9ECBFF"> validation</span><span style="color:#9ECBFF"> using</span><span style="color:#9ECBFF"> class-validator</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Comprehensive</span><span style="color:#9ECBFF"> error</span><span style="color:#9ECBFF"> handling</span><span style="color:#9ECBFF"> with</span><span style="color:#9ECBFF"> proper</span><span style="color:#9ECBFF"> HTTP</span><span style="color:#9ECBFF"> status</span><span style="color:#9ECBFF"> codes</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### React Frontend</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> TypeScript</span><span style="color:#9ECBFF"> with</span><span style="color:#9ECBFF"> strict</span><span style="color:#9ECBFF"> typing</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Functional</span><span style="color:#9ECBFF"> components</span><span style="color:#9ECBFF"> with</span><span style="color:#9ECBFF"> hooks</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Tailwind</span><span style="color:#9ECBFF"> CSS</span><span style="color:#9ECBFF"> for</span><span style="color:#9ECBFF"> styling</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Context</span><span style="color:#9ECBFF"> for</span><span style="color:#9ECBFF"> global</span><span style="color:#9ECBFF"> state</span><span style="color:#9ECBFF"> management</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Component</span><span style="color:#9ECBFF"> colocation</span><span style="color:#E1E4E8"> (components </span><span style="color:#9ECBFF">near</span><span style="color:#9ECBFF"> their</span><span style="color:#9ECBFF"> usage</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">## Development Workflow</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">1.</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Before</span><span style="color:#9ECBFF"> starting</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#9ECBFF"> Run</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run build`</span><span style="color:#E1E4E8"> in </span><span style="color:#9ECBFF">`</span><span style="color:#B392F0">service-nest/</span><span style="color:#9ECBFF">`</span></span>
+<span class="line"><span style="color:#B392F0">2.</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Testing</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#9ECBFF"> Always</span><span style="color:#9ECBFF"> run</span><span style="color:#9ECBFF"> tests</span><span style="color:#9ECBFF"> before</span><span style="color:#9ECBFF"> committing</span><span style="color:#9ECBFF"> changes</span></span>
+<span class="line"><span style="color:#B392F0">3.</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Linting</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#9ECBFF"> Use</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> run lint`</span><span style="color:#B392F0"> to</span><span style="color:#9ECBFF"> check</span><span style="color:#9ECBFF"> code</span><span style="color:#9ECBFF"> quality</span></span>
+<span class="line"><span style="color:#B392F0">4.</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Database</span><span style="color:#9ECBFF"> changes</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#9ECBFF"> Create</span><span style="color:#9ECBFF"> migrations</span><span style="color:#9ECBFF"> for</span><span style="color:#9ECBFF"> schema</span><span style="color:#9ECBFF"> changes</span></span>
+<span class="line"><span style="color:#B392F0">5.</span><span style="color:#79B8FF"> **</span><span style="color:#9ECBFF">Feature</span><span style="color:#9ECBFF"> development</span><span style="color:#79B8FF">**</span><span style="color:#9ECBFF">:</span><span style="color:#9ECBFF"> Follow</span><span style="color:#9ECBFF"> domain</span><span style="color:#9ECBFF"> boundaries</span><span style="color:#9ECBFF"> when</span><span style="color:#9ECBFF"> adding</span><span style="color:#9ECBFF"> functionality</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">## Migration Context</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#B392F0">The</span><span style="color:#9ECBFF"> project</span><span style="color:#9ECBFF"> is</span><span style="color:#9ECBFF"> actively</span><span style="color:#9ECBFF"> migrating</span><span style="color:#9ECBFF"> from</span><span style="color:#9ECBFF"> Laravel/MySQL</span><span style="color:#9ECBFF"> to</span><span style="color:#9ECBFF"> NestJS/PostgreSQL.</span><span style="color:#9ECBFF"> When</span><span style="color:#9ECBFF"> working</span><span style="color:#9ECBFF"> on</span><span style="color:#9ECBFF"> features:</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Prefer</span><span style="color:#9ECBFF"> implementing</span><span style="color:#9ECBFF"> new</span><span style="color:#9ECBFF"> functionality</span><span style="color:#9ECBFF"> in</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">service-nest/</span><span style="color:#9ECBFF">`</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Database</span><span style="color:#9ECBFF"> schema</span><span style="color:#9ECBFF"> is</span><span style="color:#9ECBFF"> defined</span><span style="color:#9ECBFF"> in</span><span style="color:#9ECBFF"> TypeORM</span><span style="color:#9ECBFF"> migrations</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Legacy</span><span style="color:#9ECBFF"> Laravel</span><span style="color:#9ECBFF"> code</span><span style="color:#9ECBFF"> in</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">service/</span><span style="color:#9ECBFF">`</span><span style="color:#B392F0"> is</span><span style="color:#9ECBFF"> reference</span><span style="color:#9ECBFF"> only</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> Game</span><span style="color:#9ECBFF"> logic</span><span style="color:#9ECBFF"> should</span><span style="color:#9ECBFF"> be</span><span style="color:#9ECBFF"> implemented</span><span style="color:#9ECBFF"> in</span><span style="color:#9ECBFF"> appropriate</span><span style="color:#9ECBFF"> domain</span><span style="color:#9ECBFF"> modules</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">## Environment Configuration</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### Docker Environment Files</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">client/.env.docker</span><span style="color:#9ECBFF">`</span><span style="color:#79B8FF">:</span><span style="color:#9ECBFF"> Client</span><span style="color:#9ECBFF"> configuration</span><span style="color:#9ECBFF"> for</span><span style="color:#9ECBFF"> Docker</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">service-nest/.env</span><span style="color:#9ECBFF">`</span><span style="color:#79B8FF">:</span><span style="color:#9ECBFF"> Main</span><span style="color:#9ECBFF"> NestJS</span><span style="color:#9ECBFF"> service</span><span style="color:#9ECBFF"> config</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">service-nest/.env.socket</span><span style="color:#9ECBFF">`</span><span style="color:#79B8FF">:</span><span style="color:#9ECBFF"> WebSocket</span><span style="color:#9ECBFF"> service</span><span style="color:#9ECBFF"> config</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">service-nest/.env.cdn</span><span style="color:#9ECBFF">`</span><span style="color:#79B8FF">:</span><span style="color:#9ECBFF"> CDN</span><span style="color:#9ECBFF"> service</span><span style="color:#9ECBFF"> config</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">### Key Environment Variables</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">DB_HOST</span><span style="color:#9ECBFF">`</span><span style="color:#B392F0">,</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">DB_PORT</span><span style="color:#9ECBFF">`</span><span style="color:#B392F0">,</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">DB_USERNAME</span><span style="color:#9ECBFF">`</span><span style="color:#B392F0">,</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">DB_PASSWORD</span><span style="color:#9ECBFF">`</span><span style="color:#B392F0">,</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">DB_DATABASE</span><span style="color:#9ECBFF">`</span><span style="color:#79B8FF">:</span><span style="color:#9ECBFF"> PostgreSQL</span><span style="color:#9ECBFF"> connection</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">REDIS_HOST</span><span style="color:#9ECBFF">`</span><span style="color:#B392F0">,</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">REDIS_PORT</span><span style="color:#9ECBFF">`</span><span style="color:#79B8FF">:</span><span style="color:#9ECBFF"> Redis</span><span style="color:#9ECBFF"> connection</span></span>
+<span class="line"><span style="color:#B392F0">-</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">JWT_SECRET</span><span style="color:#9ECBFF">`</span><span style="color:#B392F0">,</span><span style="color:#9ECBFF"> `</span><span style="color:#B392F0">JWT_EXPIRES_IN</span><span style="color:#9ECBFF">`</span><span style="color:#79B8FF">:</span><span style="color:#9ECBFF"> Authentication</span><span style="color:#9ECBFF"> configuration</span></span></code></pre></div>
+<p>Did a great job. Finally i got some accurae results and felt that tool got me covered. Only the problem that damage by Codex was done a little.
+Even though i had over 600 tests in total with e2e tests. Unit tests were rather testing framework itself than actually testing something :).
+My poor M1 macbook pro started burning and heating up like a furnace.
+Its summer, i dont need furnace.</p>
+<h3 id="aaand-finally-i-figured-out-that-i-have-no-clue-what-is-going-on-and-nothing-works">Aaand finally i figured out that i have no clue what is going on and nothing works.</h3>
+<div class="flex flex-wrap -mx-2 overflow-hidden xl:-mx-2"><div class="my-1 px-2 w-full overflow-hidden xl:my-1 xl:px-2 xl:w-full"><p><img src="https://i.kym-cdn.com/entries/icons/facebook/000/008/342/ihave.jpg" alt="i have no idea what i am doing"/></p></div></div>
+<h2 id="third-chapter-the-whole-zoo-gemini-cli--claude-cli--codex--human">Third chapter: The Whole Zoo: Gemini CLI × Claude CLI × Codex + Human</h2>
+<blockquote>
+<p><em>Why not staff a full AI scrum team?</em></p>
+</blockquote>
+<p>Spinning 2 clones of the repo—one per agent—worked technically, but juggling PRs felt like herding caffeinated cats.</p>
+<p>After all the pain and suffering, i decided to give it a try with human review. Don’t get me wrong, i did review previously but whenever a sets of tasks was completed. Not like every PR careful review. Whenever i asked claude to do something, i would review the code and see if it was on the right track or not. Manual testing alongside e2e tests, like a primate i was clicking here and there to see if things were working as expected.
+Claude was way more impressive than codex. It did truly felt like understood but the limitation with entry package was a problem. Right at the moment i am about to complete the task with Claude, it was like “Nope, not today”. You have got to wait for some amount of time, chill your horses and then come back to me.</p>
+<h2 id="fourth-chapter-gemini-cli--claude-cli--codex--human-review">Fourth chapter: Gemini CLI + Claude CLI + Codex + Human review</h2>
+<p>I did started the question myself “Why not use all of them together?”. Since Codex handles all its operations on the cloud all i was to clone repository twice and spawn gemini and cloud in each clone of the same repository.
+All of a sudden, i was leading a team of 3 AI agents and myself. I was the product owner, codex was the developer, gemini was the tester and claude was the reviewer. Joking, they did all work i was just clicking on merge.</p>
+<p>After couple of days of struggle, i don’t think i ever felt this bad that i am so disconnected, battling with 3 AI agents to get the job done
+while i had no clue of the project’s latest status.</p>
+<h2 id="what-i-learned">What I Learned</h2>
+<ul>
+<li>AI agents ≠ architects. Give them a blueprint; don’t ask them to design the house.</li>
+<li>Supervision is non-negotiable. Unshepherded agents will drift off-spec.</li>
+<li>Generate tests, then audit them. Half their assertions checked nothing useful.</li>
+<li>Boilerplate? Perfect use-case. CI configs, CRUD layers, doc scaffolding—let the bots grind.</li>
+<li>Small, isolated functions shine. The narrower the task, the crisper the output.</li>
+<li>Stay in the loop. If you stop reading the code, you stop knowing your project.</li>
+</ul>
+<p>Most importantly, knowing the project is how we find comfort and knowledge day by day ( focus, discipline e.g ). If you let bot do all the work, highly likely you will instruct it wrong eventually.</p></article><hr><p><a href="/blog/" class="prompt">cd ..</a></p></main><footer><hr><div class="social-icons" style="margin-bottom: 0.75rem;"><a href="/cdn-cgi/l/email-protection#503f3d22312431373e10373d31393c7e333f3d" rel="noopener noreferrer" aria-label="mail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg></a><a href="https://github.com/omeratagunn" target="_blank" rel="noopener noreferrer" aria-label="github"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub icon</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a><a href="https://www.linkedin.com/in/%C3%B6mer-atag%C3%BCn-139199a2/" target="_blank" rel="noopener noreferrer" aria-label="linkedin"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn icon</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a></div><p class="muted">&copy; 2026 Omer Atagun</p></footer></div><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+      // Delegated copy-button handler for CodeBlock.astro-wrapped code fences.
+      document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.copy-btn');
+        if (!btn) return;
+        var pre = btn.nextElementSibling;
+        if (!pre) return;
+        navigator.clipboard.writeText(pre.textContent || '').then(function () {
+          var original = btn.textContent;
+          btn.textContent = 'copied!';
+          setTimeout(function () {
+            btn.textContent = original;
+          }, 1500);
+        });
+      });
+    </script><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4c8d970b643e40009c795757ae660223","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body></html>

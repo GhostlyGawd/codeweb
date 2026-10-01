@@ -1,0 +1,82 @@
+{
+  "review_run_id": "148af5cf-b5f9-44fc-bf93-8db5b8efd2f3",
+  "checked_at": "2026-09-30T05:28:50.839230+00:00",
+  "checks": [
+    {
+      "manifest": "DELIVERY-MANIFEST.json",
+      "sha256": "0e9de32ff01f64c56cb3b25076e01e338204c43bd8f9996f0a53491ecfc8dd4b",
+      "files": 512,
+      "errors": []
+    },
+    {
+      "manifest": "INPUT-MANIFEST.json",
+      "sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "files": 192,
+      "errors": []
+    },
+    {
+      "manifest": "SYNTHESIS-INPUT-MANIFEST.json",
+      "sha256": "4ac3b8bd9c8c0d80d0d4f491dbefcb83c66eea2efb8b6efa1fd3c91e69b0b1ba",
+      "files": 344,
+      "errors": []
+    }
+  ],
+  "receipt_copies_identical": true,
+  "receipt_sha256": "306c6c7d72972b65f91425322cb335052661d239a07a5c5d96153572e5d064b5",
+  "analytical_hashes": {
+    "FINAL-HYPOTHESIS.md": {
+      "sha256": "856f84aa3798d320167a5af2559cc8dcb7315a41624f09e91c8fb3f1d06e52c7",
+      "destination_matches": true,
+      "staging_matches": true
+    },
+    "VALIDATION-TESTS.md": {
+      "sha256": "5c19340ea66ab11530d4ff3fa0cd4314aa65d170b508e55a0ca168ca4aa939ab",
+      "destination_matches": true,
+      "staging_matches": true
+    },
+    "CLAIM-LEDGER.json": {
+      "sha256": "49f688239402a1f6cdd6d0804c5fc7a890adedb309afd2995b9ac7c0d58f7f3c",
+      "destination_matches": true,
+      "staging_matches": true
+    },
+    "FINDING-COVERAGE.json": {
+      "sha256": "d1da94ff82e13682a69bb93e2ccbbcf4cde19718bfe476abc1c6b662b818c27a",
+      "destination_matches": true,
+      "staging_matches": true
+    },
+    "BREADCRUMBS.json": {
+      "sha256": "2339c0539322298ecaf41518773869afb9afa2ebe336b2085eee53e6a27f804c",
+      "destination_matches": true,
+      "staging_matches": true
+    },
+    "EVIDENCE-USE.json": {
+      "sha256": "79a921b595659509cf375a1a913dede26dc484980ae78b205320c1e2fa2f48ca",
+      "destination_matches": true,
+      "staging_matches": true
+    },
+    "DISAGREEMENTS.md": {
+      "sha256": "8987dd6bf6e8475b0f364ef3ce4eece699ed84d22efdda72e309e9abd0912804",
+      "destination_matches": true,
+      "staging_matches": true
+    },
+    "README.md": {
+      "sha256": "58142d89f49d63e6ef84a7fc94fe1e9b1704aa23f85cfd8e78fb91902c381002",
+      "destination_matches": true,
+      "staging_matches": true
+    }
+  },
+  "administrative_staging_check": {
+    "files": 8,
+    "errors": []
+  },
+  "administrative_mirror_followthrough": [
+    "COMPLETION.json",
+    "RUNS.json",
+    "CONTROL-PLANE.json",
+    "PARENT-PLACEMENT-VERIFICATION.json",
+    "history/post-placement/CONTROL-PLANE.json",
+    "history/post-placement/RUNS.json",
+    "history/post-placement/COMPLETION.json"
+  ],
+  "r1_resolved": true
+}

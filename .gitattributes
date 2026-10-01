@@ -1,2 +1,27 @@
 # Normalize all text to LF in the repo (consistent across Windows/macOS/Linux).
 * text=auto eol=lf
+
+# Preserve research snapshots exactly: evidence manifests hash their original bytes.
+reports/product-indispensability-audit-2026-09-26/** -text
+reports/user-pain-research-plan-2026-09-27/** -text
+reports/user-pain-research-2026-09-27/** -text
+reports/product-proof-sprint-plan/** -text
+reports/user-centric-value-strategy/** -text
+reports/hypothesis-pressure-test-2026-09-29/** -text
+docs/gtm-cofounder/** -text
+
+# Keep retired instruction snapshots byte-identical to their recorded hashes.
+docs/product-team/history/** -text
+
+# Preserve the source-based replay and planning verification receipts exactly.
+reports/evidence-real-task-2026-09-22/** -text
+reports/research-to-execution-plan-2026-09-30/** -text
+
+# Preserve P-01 verification and source-snapshot receipts exactly.
+reports/native-evidence-p01-2026-09-30/** -text
+
+# Keep independently reviewed P-02 raw receipts and freeze manifests byte-identical.
+reports/native-evidence-p02-2026-09-30/** -text
+
+# Frozen CSV records retain their original CRLF bytes.
+reports/native-evidence-p02-2026-09-30/technical/TIMINGS.csv whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

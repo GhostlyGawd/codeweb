@@ -1,0 +1,24 @@
+{
+  "id": "T64-fresh-context",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/context-pack.mjs",
+    "$LOCAL_TMP/codeweb-p02-supplement-mshorI/fresh/.codeweb/graph.json",
+    "low",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:52:48.771Z",
+  "end": "2026-10-01T01:52:48.805Z",
+  "durationMs": 34.577292,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"symbol\":\"low\",\"matched\":[\"subject.mjs:low\"],\"sourceAvailable\":true,\"summary\":\"low: 1 caller(s), 0 callee(s), blast radius 1\",\"mode\":\"call-site windows (±3 lines)\",\"target\":[{\"id\":\"subject.mjs:low\",\"label\":\"low\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":1,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"body\":\"export function low(value) {\\n return value + 1;\\n}\"}],\"callers\":[{\"id\":\"consequential.mjs:consequential\",\"label\":\"consequential\",\"kind\":\"function\",\"file\":\"consequential.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"windowEvidence\":{\"status\":\"shown\",\"matchedLines\":1,\"shownLines\":1,\"remaining\":0},\"windows\":[{\"startLine\":2,\"endLine\":4,\"callLines\":[3],\"text\":\"export function consequential() {\\n return low(10);\\n}\"}]}],\"callees\":[],\"blastRadius\":{\"count\":1,\"ids\":[\"consequential.mjs:consequential\"]},\"analysis\":{\"scope\":\"mapped-call-graph\",\"freshness\":\"unchanged-stamps\",\"listsComplete\":true,\"sourceEvidenceComplete\":true,\"limitations\":[\"unmapped-calls\",\"external-callers\"],\"nextSteps\":[\"Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.\",\"Check package consumers before changing an exported contract.\"]}}\n",
+  "stderr": ""
+}

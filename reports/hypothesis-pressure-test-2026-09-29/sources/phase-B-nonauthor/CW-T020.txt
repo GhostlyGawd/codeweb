@@ -1,0 +1,277 @@
+How to achieve greater code refactoring automation? - Codex CLI - OpenAI Developer Community
+OpenAI Developer Community
+How to achieve greater code refactoring automation?
+Codex
+Codex CLI
+chatgpt
+KevinH
+June 30, 2026,  3:18am
+1
+Currently working on a php code modernization project (5.2 > 7.4 > 8.0 > 8.3 > 8.4). I have a copy of the website codebase and database on a local staging server, with Git, Codex CLI and Playwright installed.
+I’m not a coder so I’m following instructions from ChatGPT Pro on my Windows PC, pasting back and forth with the staging server via Putty/SSH. The iteration loop is basically:
+paste bash command → paste compact output back to ChatGPT → inspect → patch → lint → smoke → commit/checkpoint.
+ChatGPT says it wouldn’t be safe to use Cursor Ai or Rector PHP.
+I’m making good progress - currently working through issues with PHP 8.3, but it’s
+very
+time consuming.
+ChatGPT agrees to use of Codex CLI occasionally for straightforward batch editing and some analysis of PHP files and categorization of issues to tackle, and have prompted ChatGPT to create some ‘helper scripts’, but I can’t help thinking there must be a more efficient, automated way to do this. Can’t believe there isn’t even some way interface ChatGPT to the Codex CLI on my staging server!
+I’d love to hear suggestions as to how I could improve my workflow.
+EricGT
+June 30, 2026,  9:35am
+2
+KevinH:
+I can’t help thinking there must be a more efficient, automated way to do this.
+Codex is one of the better answers for this kind of workflow.
+OpenAI now provides several ways to use Codex, including the Codex app, Codex CLI, Codex IDE extension, and Codex web. The quickstart page is a good place to begin:
+developers.openai.com
+Quickstart – Codex | OpenAI Developers
+Start using Codex in your IDE, CLI, or the cloud
+Before Codex, and even before ChatGPT had artifacts, I was doing a workflow very similar to what you describe. The main limitation with using ChatGPT directly for programming is that, by design, ChatGPT has limited ability to read, edit, and manage files on your local machine.
+Codex is designed more specifically for that kind of work. For example, the Codex CLI can read, modify, and run code in the selected local directory, and the IDE extension can work inside supported editors.
+That said, I would be very careful when first using Codex, or any similar AI coding agent. Treat it like giving a capable but still fallible assistant access to your project files. Start with a test project, use version control, make backups, review diffs before accepting changes, and avoid running it on anything important until you understand how it behaves.
+Used carefully, it can remove a lot of manual copy/paste work. Used carelessly, it can also make unwanted changes very quickly.
+tangweigangsir
+July 1, 2026,  6:45am
+3
+Since you already have Git, Codex CLI, Playwright, lint/smoke, and checkpoints, I would not try to make it fully autonomous first. The safer speed-up is to move one complete loop onto the staging box and make Codex own only that loop.
+A workable pattern is: create one issue class at a time, for example one PHP 8.3 fatal/error family, let Codex inspect files and propose a small patch, require it to run the exact lint/smoke commands, then force it to stop with a diff plus command transcript before commit. Keep ChatGPT for deciding the next batch and reviewing failures, not for copying every command output.
+The main guardrail I would add is a per-task contract: allowed paths, max files changed, required tests, and a rollback/checkpoint command. That should remove most paste-back work without giving a tool permission to rewrite the whole modernization in one run.
+KevinH
+July 1, 2026,  8:02am
+4
+Thanks very much EricGT and tangweigangsir,
+I will read the Codex Quickstart resource. I’ve already realised that ChatGPT is not giving me all the options for how I could use Codex, or in fact many options at all! Perhaps I was expecting too much, or maybe I need to revisit my personalization and/or project instructions.
+I’m pleased to say that since I wrote the post above yesterday I’ve made a lot of progress by questioning some ChatGPTs assumptions and decisions regarding Codex use. It was being overly cautious with its prompts for Codex, only allowing Codex to fix three php warnings at a time, so I suggested we allow Codex to iterate continually until one of numerous stop conditions was met.
+Then I found that Codex was stopping interation due to blockers such as PHP bind failures, MySQL socket access issues and file permissions problems. I’ve realised that ChatGPT was too quick to dismiss these as Codex sandbox restrictions which could not be overcome without giving Codex full file system access. When I questioned this ChatGPT found that there are sandbox control tweaks that would allow Codex to do what it needed in a safe way.
+Each time we resolve a blocker Codex works for longer. I’m thrilled that it just worked for 8m 52s (the longest time yet) and my list of php 8.3 warnings is steadily reducing!
+At the end of each run it summarises what it has done:
+Files changed
+Tests run
+Results, with logs created
+Diff summary
+Git status
+Recommended next steps
+I feed this back to ChatGPT, it reviews the diffs and if appropriate I run a script which does the commit, tag, bundle and updates the project log.
+EricGT
+July 1, 2026,  8:16am
+5
+@KevinH
+Glad to hear you are making progress quickly.
+One of the next major things you will learn is that the models change. At times, they may seem incredibly capable, and then after an update they may appear to have been “dumbed down.” It happens. Expect it, and learn to adjust your workflow when it does.
+With longer sessions, you may also start to notice conversation compression. This can be disruptive, because important context may be lost, which can make the process appear to go off track. In some cases, it can even damage the direction of a project if critical details are compressed away.
+Since Codex is still
+changing
+quickly and regressions do happen, it is worth keeping a close eye on the
+Codex issues
+.
+I could go on for quite a while, but the main advice is this: be active about backups, use Git commits frequently, and guard against changes to your workflow that you do not control.
+sergeliatko
+July 1, 2026,  8:25am
+6
+Great thread here.
+Personally for refactoring I heavily rely on IDE (PHP storm) calling agents from the console inside the IDE
+Also I have released this PHP storm skill which might help your agent to work with IDE:
+github.com
+GitHub - TechSpokes/skill-ide-phpstorm-mcp: IDE PHPStorm MCP server best practices. Helps AI...
+IDE PHPStorm MCP server best practices. Helps AI agents to leverage your IDE tools for better efficiency.
+Also what helps a lot is having the architecture overview document created by the agent after the analysis of your code base with weak spots flagged during the analysis.
+And some alignment on the documentation is also good to help agent produce better code.
+Here are some examples I put in the repository as adopted conventions:
+github.com
+GitHub - TechSpokes/agency-specifications-files-agents-md: AGENTS.md file guidelines
+AGENTS.md file guidelines
+github.com
+GitHub - TechSpokes/agency-specifications-files-readme-md: Readme.md Specification
+Readme.md Specification
+gist.github.com
+https://gist.github.com/sergeliatko/2e3f2a165797db81337c598e9f5f2c53
+code-commenting-specification-v2.md
+# Code Commenting Specification
+
+Version 2.0.0
+
+A specification for code commenting in multi-entity codebases where humans, AI agents, and automated tools collaborate.
+
+## 1. Abstract
+
+This specification defines principles, a tag vocabulary, requirement levels, and guidelines for code comments in software projects. It treats code comments as a form of cross-intelligence context transfer: persistent, asynchronous messages embedded in source code that carry information not available from the code itself.
+This file has been truncated.
+show original
+Hope that helps.
+sergeliatko
+July 1, 2026,  9:29am
+7
+Also adding the latest version of Markdown guidance for agents :
+gist.github.com
+https://gist.github.com/sergeliatko/ceb0ed1506ba800c5323b42b30589739
+markdown.instructions.md
+---
+applyTo: "**/*.md"
+---
+
+# Markdown Formatting Rules
+
+## The background
+
+Four audiences read Markdown files in this repository:
+This file has been truncated.
+show original
+merefield
+July 1, 2026,  9:36am
+8
+Codex CLI is perfect for refactoring.
+Unfortunately it helps a lot to have significant dev experience to do this.
+Why?  Because it allows you to set choice, tasteful guardrails and architecture for the new version.
+But keep going and try to learn from the changes and issues you encounter and perhaps you can improve your software engineering prowess.
+One key thing to think about when refactoring - I don’t believe you can automate this effectively without full test coverage on the original.
+So my question to you is - what is the state of the unit and behavioural test suite of the original?
+Do you have a requirements document - it’s better to have full test coverage but a requirements definition can be used as second best.
+Only when you have a full test suite will you be able to automate a port imho - then you can loop until all test pass on the new version.  Unfortunately, depending on the severity of the port - the tests might need altering (e.g. change of class names, div structure from new frameworks etc.) - and this will add to the challenge.
+I would expect this to be an iterative project if you can’t supply those pre-requisites.
+Try to create those artifacts as part of the port as that will put you in a much better position for future changes.
+sergeliatko
+July 1, 2026,  9:45am
+9
+KevinH:
+pasting back and forth with the staging server via Putty/SSH.
+Wamp64 on Windows + PHP Storm with automated deployment on the development server + Playwright will basically allow your agents editing code live, inspecting code per profile defined in the IDE using the MCP server and fixing the errors, and checking the result immediately on the development server.
+This is probably the fastest setup I have come up with after playing with that for quite a while.
+By automated deployment I mean the setting in the tools → deployment → auto upload, plus “accept external changes”. Which makes your IDE automatically deploy scripts as the agent is editing them.
+merefield
+July 1, 2026,  9:47am
+10
+One more thing:
+KevinH:
+I’m not a coder so I’m following instructions from ChatGPT Pro on my Windows PC, pasting back and forth with the staging server via Putty/SSH. The iteration loop is basically:
+paste bash command → paste compact output back to ChatGPT → inspect → patch → lint → smoke → commit/checkpoint.
+Yuk!!
+DO NOT CUT AND PASTE!
+Get the project running locally and run codex cli over the code locally!
+Time spent cut & pasting is incredibly unproductive (and tiring!)!!
+You do not really need ChatGPT
+and
+Codex CLI - your Codex CLI session context will benefit from all discussion.  Use ChatGPT auth login from Codex CLI to benefit from your bundled credits.
+(one alternative I do occasionally is install codex remotely - but the key thing is to work on codex-cli locally wrt to the code)
+(you can also use remote tooling effectively too, e.g. VSCode remote, but you will need more memory on your server to run the required integration effectively)
+btw, when you need to work on the command line check out this project:
+> clai: your useful command line helper!
+Codex
+Hey guys, I’d like to present my ongoing project I co-authored (with the help of codex-cli
+).  This extremely useful command line tool that provides a natural language way to describe what you want to happen at the terminal. 
+AI has brought a lot of budding new developers into the space and it is extremely useful for CLI beginners, making the terminal much more accessible for all. 
+It is also great for experienced users - very handy for formulating complex piped commands, or ones…
+KevinH
+July 2, 2026, 12:40pm
+11
+Thanks to everyone for the feedback, suggestions and resource links - I will definitely explore those. I wish I had known about this forum before I started this project!
+Re copying and pasting back and forth between ChatGPT and Codex, it’s definitely tedious and time consuming, but from my (none developer) perspective, who had used ChatGPT since 2023, and never used Codex, I didn’t know what I didn’t know.
+I asked ChatGPT from the outset about using Codex, but as I am sure you all know, ChatGPT tends to just run with whatever it comes up with first. Several times I did ask it if there were other workflows and tools I could use to improve efficiency but it didn’t come up with much. It seems to behave like a control freak at times!
+Things like developing helper scripts and using Playwright were prompted by me. I also started using VS Code locally with an SSH plugin so it could access the files on the staging server, but ChatGPT recommended against using other tools like Cursor, and I found I was only using the terminal in VS Code, so I went back to using PuTTY.
+Next time I will ask ChatGPT to list all the different approaches and tools that could be used! Perhaps I will ask Gemini and Claude to cross-check!
+@merefield
+, to answer your question about testing - I have a significant behavioural test suite, comprising over 100 tests addressing both front end and back end (admin) functionality, including mutative tests which create, modify and delete database entries on a disposable copy of the database, with automated logging, and cleanup/reset. The tests may not be 100% exhaustive, but I believe they exercise a very high proportion of the functionality.
+Once I have finished the upgrade to PHP 8.3 I may take a different approach to get up to 8.4.
+merefield
+July 2, 2026,  1:00pm
+12
+Great to hear you have good test coverage!
+EricGT
+July 2, 2026,  1:27pm
+13
+KevinH:
+The tests may not be 100% exhaustive, but I believe they exercise a very high proportion of the functionality.
+Tips and Tricks for using Codex
+Codex
+It is also important to emphasize that 100% test coverage of the core code is essential. Yes, it is a significant amount of work, and yes, it can feel like you are writing tests for situations that “should never happen.” 
+However, the current mindset of many programmers still assumes they are programming only with other humans. When AI is involved, that assumption breaks down. An AI often has visibility into the entire codebase and will actively use any available paths to satisfy the prompt—even…
+Click the link, there are many more useful tips and tricks in the topic.
+tangweigangsir
+July 3, 2026, 11:28am
+14
+Since you are moving PHP 5.2 → 8.x and already have staging, Git, Codex CLI, and Playwright, I would not try to make ChatGPT drive Codex through a long copy/paste loop.
+A cleaner split is: ChatGPT stays the planner/reviewer, and Codex owns one tiny batch on the staging server.
+For example:
+create a branch or checkpoint
+pick one warning family or compatibility issue
+let Codex patch only that family
+run php -l plus one targeted smoke or Playwright path
+commit or revert before the next batch
+For old PHP, I would also treat Rector as a diagnostic or narrow dry-run tool rather than a global rewrite button. “Unsafe globally” does not mean useless for finding repeated upgrade patterns.
+The main automation gain is not full autonomy. It is making every agent run produce a reversible patch plus a test result, instead of moving snippets between two chats.
+sergeliatko
+July 3, 2026, 11:36am
+15
+And timely I have just released the version 1.4.0 of the PHPStorm Skill for codex (updated refactoring capabilities and HTTP requests support from codex via IDE):
+github.com
+GitHub - TechSpokes/skill-ide-phpstorm-mcp: IDE PHPStorm MCP server best practices. Helps AI...
+IDE PHPStorm MCP server best practices. Helps AI agents to leverage your IDE tools for better efficiency.
+kilderesobral
+July 6, 2026,  9:11pm
+16
+You already have most of the right ingredients: staging, Git, Codex CLI, Playwright, smoke tests and a disposable database. The main improvement I would make is not to aim for full autonomy immediately, but to move the whole technical loop into Codex CLI and make ChatGPT only the planner/reviewer.
+I would create an
+AGENTS.md
+file with strict rules: allowed paths, max files per run, one compatibility issue family at a time, required lint/smoke/Playwright commands, stop conditions, and a mandatory final report with changed files, test results, diff summary and recommendation.
+For a PHP 5.2 → 8.x migration, I would separate “compatibility modernization” from “refactoring”. First make the code run safely on PHP 8.3/8.4 with minimal behavioral change. Only after that, consider architectural refactoring.
+I would also not dismiss Rector completely. I would not run it globally, but it can be useful in dry-run mode or on one narrow rule/directory at a time, always behind Git and tests.
+The safer automation loop would be:
+create branch/checkpoint;
+collect warnings/errors;
+pick one error family;
+let Codex patch only that family;
+run php -l, smoke tests and targeted Playwright tests;
+review diff;
+commit or rollback;
+repeat.
+The big gain is to stop copying commands between ChatGPT and PuTTY. Let Codex CLI operate where the code is, and use ChatGPT for strategy, reviewing summaries, and deciding the next batch.
+Related topics
+Topic
+Replies
+Views
+Activity
+When vibe coding turns into an unfixable mess
+Codex
+21
+2231
+March 11, 2026
+GPT 5 & 5.1 (and 5.2) Codex quality degrading over last month or so
+Feedback
+13
+6130
+January 29, 2026
+ChatGPT ↔ Codex Project Delegation and Validation
+Feature requests
+github
+,
+codex
+,
+chatgpt
+,
+feature-request
+,
+integration
+10
+152
+September 21, 2026
+Has anyone automated a ChatGPT <> Codex orchestration loop?
+Use cases and examples
+codex
+19
+538
+September 24, 2026
+My Codex feature requests
+Codex
+codex
+,
+feature-request
+25
+1156
+September 9, 2026
+Home
+Categories
+Guidelines
+Terms of Service
+Privacy Policy
+Powered by
+Discourse
+, best viewed with JavaScript enabled

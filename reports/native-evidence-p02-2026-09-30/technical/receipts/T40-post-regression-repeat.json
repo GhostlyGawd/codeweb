@@ -1,0 +1,21 @@
+{
+  "id": "T40-post-regression-repeat",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/post-edit-diff.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/subject.mjs\"}}",
+  "start": "2026-10-01T01:50:13.845Z",
+  "end": "2026-10-01T01:50:13.936Z",
+  "durationMs": 90.27349999999979,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": "/Library/Developer/CommandLineTools/usr/bin/ctags: illegal option -- -\nusage: ctags [-BFTaduwvx] [-f tagsfile] file ...\n"
+}

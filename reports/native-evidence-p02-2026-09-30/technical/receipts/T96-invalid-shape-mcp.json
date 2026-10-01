@@ -1,0 +1,21 @@
+{
+  "id": "T96-invalid-shape-mcp",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/mcp-server.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"codeweb_impact\",\"arguments\":{\"graph\":\"$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w/invalid-shape.json\",\"symbol\":\"low\"}}}\n",
+  "start": "2026-10-01T01:54:42.849Z",
+  "end": "2026-10-01T01:54:42.885Z",
+  "durationMs": 36.547459,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"the map at $LOCAL_TMP/codeweb-p02-final-controls-DfjF3w/invalid-shape.json is EMPTY (built with --allow-empty; no supported source found) — structural answers would be vacuous, not \\\"0 findings\\\". Re-map at the code root, or use the /codeweb agent fallback for non-native languages.\"}],\"isError\":true}}\n",
+  "stderr": ""
+}

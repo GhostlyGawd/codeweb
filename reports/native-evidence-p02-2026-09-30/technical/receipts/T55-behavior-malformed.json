@@ -1,0 +1,17 @@
+{
+  "id": "T55-behavior-malformed",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "--test",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/malformed.test.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "start": "2026-10-01T01:50:14.630Z",
+  "end": "2026-10-01T01:50:14.699Z",
+  "durationMs": 69.33770800000002,
+  "exit": 1,
+  "signal": null,
+  "error": null,
+  "stdout": "file://$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/malformed.test.mjs:3\n\n\n\nSyntaxError: Unexpected end of input\n    at compileSourceTextModule (node:internal/modules/esm/utils:355:16)\n    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:90:18)\n    at #translate (node:internal/modules/esm/loader:441:20)\n    at afterLoad (node:internal/modules/esm/loader:509:29)\n    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:514:12)\n    at #getOrCreateModuleJobAfterResolve (node:internal/modules/esm/loader:567:36)\n    at afterResolve (node:internal/modules/esm/loader:614:52)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:620:12)\n    at node:internal/modules/esm/loader:639:32\n    at TracingChannel.tracePromise (node:diagnostics_channel:538:22)\n\nNode.js v26.7.0\n✖ $LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/malformed.test.mjs (33.188083ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 36.594459\n\n✖ failing tests:\n\ntest at ../../../../../../..$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/malformed.test.mjs:1:1\n✖ $LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/malformed.test.mjs (33.188083ms)\n  'test failed'\n",
+  "stderr": ""
+}

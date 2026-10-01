@@ -1,0 +1,50 @@
+[
+  {
+    "id": "CW-Y007",
+    "url": "https://forum.cursor.com/t/152120.json",
+    "retrieved_at": "2026-09-30T04:22:45.850262+00:00",
+    "http_status": 200,
+    "path": "sources/L11/CW-Y007.json",
+    "sha256": "488c04c210ba98b486e0fb8a12eb1cb3c81ac19db266fdb5baa6897607eda8ac"
+  },
+  {
+    "id": "CW-Y004",
+    "url": "https://forum.cursor.com/t/165666.json",
+    "retrieved_at": "2026-09-30T04:22:45.850524+00:00",
+    "http_status": 200,
+    "path": "sources/L11/CW-Y004.json",
+    "sha256": "c183f66537437d98463f83318613e43191d2ad9a717686b6901d85d444dd3ddc"
+  },
+  {
+    "id": "CW-Y012",
+    "url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+    "retrieved_at": "2026-09-30T04:22:45.850614+00:00",
+    "http_status": 200,
+    "path": "sources/L11/CW-Y012.html",
+    "sha256": "5a3b6e34baed019eb2f85340b90a85e49f15fba11be160d5bffaa361eccb8eeb"
+  },
+  {
+    "id": "PR96",
+    "url": "https://api.github.com/repos/GhostlyGawd/codeweb/pulls/96",
+    "retrieved_at": "2026-09-30T04:22:45.850668+00:00",
+    "http_status": 200,
+    "path": "sources/L11/PR96.json",
+    "sha256": "779b0ab848dd3268b0a9e8c035d77aa9316c2acf1214f28dd441eff216304781"
+  },
+  {
+    "id": "PR96-comments",
+    "url": "https://api.github.com/repos/GhostlyGawd/codeweb/issues/96/comments",
+    "retrieved_at": "2026-09-30T04:22:45.850714+00:00",
+    "http_status": 200,
+    "path": "sources/L11/PR96-comments.json",
+    "sha256": "78742be8fb5d68007abd6fd0cfc9ede1c50ddf5cef2a61b6ea0ba1a83961a861"
+  },
+  {
+    "id": "PR96-checks",
+    "url": "https://api.github.com/repos/GhostlyGawd/codeweb/commits/080c6079b18d273c93079036df3f5fba6774c5fe/check-runs?per_page=100",
+    "retrieved_at": "2026-09-30T04:22:59.795331+00:00",
+    "path": "sources/L11/PR96-checks.json",
+    "sha256": "a5624bcfbd40acf5d393b869afe524af633b79a8f8b8e9c38bb8416a2e8535e8",
+    "http_status": 200
+  }
+]

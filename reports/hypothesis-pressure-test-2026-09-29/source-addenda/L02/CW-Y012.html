@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI writes faster than we can review — here&#x27;s how we fixed that</title>
+    <link rel="stylesheet" href="https://www.beyondautocomplete.nl/assets/built/screen.css?v=UWankDN32ZX1dXH0">
+
+    <link rel="canonical" href="https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/">
+    <link rel="alternate" type="text/markdown" href="https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that.md">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+    <meta property="og:site_name" content="Beyond Autocomplete">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="AI writes faster than we can review — here&#x27;s how we fixed that">
+    <meta property="og:description" content="AI-assisted coding is great for velocity. But somewhere between &quot;the agent wrote this feature in 20 minutes&quot; and &quot;this PR has 47 changed files,&quot; I realized that my team is getting overwhelmed.
+
+We&#x27;re creating more pull requests because the AI can produce working code faster than anyone on">
+    <meta property="og:url" content="https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/">
+    <meta property="og:image" content="https://storage.ghost.io/c/0c/2e/0c2e6f0e-b369-42cc-88ca-98d9061600ff/content/images/size/w1200/2026/03/openart-image_1773986649642_d7d0fe83_1773986650232_1df37900.webp">
+    <meta property="article:published_time" content="2026-03-20T06:05:39.000Z">
+    <meta property="article:modified_time" content="2026-03-20T06:13:02.000Z">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI writes faster than we can review — here&#x27;s how we fixed that">
+    <meta name="twitter:description" content="AI-assisted coding is great for velocity. But somewhere between &quot;the agent wrote this feature in 20 minutes&quot; and &quot;this PR has 47 changed files,&quot; I realized that my team is getting overwhelmed.
+
+We&#x27;re creating more pull requests because the AI can produce working code faster than anyone on">
+    <meta name="twitter:url" content="https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/">
+    <meta name="twitter:image" content="https://storage.ghost.io/c/0c/2e/0c2e6f0e-b369-42cc-88ca-98d9061600ff/content/images/size/w1200/2026/03/openart-image_1773986649642_d7d0fe83_1773986650232_1df37900.webp">
+    <meta name="twitter:label1" content="Written by">
+    <meta name="twitter:data1" content="Willem Meints">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="896">
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "Beyond Autocomplete",
+        "url": "https://www.beyondautocomplete.nl/",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.beyondautocomplete.nl/favicon.ico",
+            "width": 48,
+            "height": 48
+        }
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Willem Meints",
+        "image": {
+            "@type": "ImageObject",
+            "url": "https://www.gravatar.com/avatar/0e7dd556fe5080e41267b8a0f2a301d8?s=250&r=x&d=mp",
+            "width": 250,
+            "height": 250
+        },
+        "url": "https://www.beyondautocomplete.nl/author/willem/",
+        "sameAs": []
+    },
+    "headline": "AI writes faster than we can review — here's how we fixed that",
+    "url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+    "datePublished": "2026-03-20T06:05:39.000Z",
+    "dateModified": "2026-03-20T06:13:02.000Z",
+    "image": {
+        "@type": "ImageObject",
+        "url": "https://storage.ghost.io/c/0c/2e/0c2e6f0e-b369-42cc-88ca-98d9061600ff/content/images/size/w1200/2026/03/openart-image_1773986649642_d7d0fe83_1773986650232_1df37900.webp",
+        "width": 1200,
+        "height": 896
+    },
+    "description": "AI-assisted coding is great for velocity. But somewhere between \"the agent wrote this feature in 20 minutes\" and \"this PR has 47 changed files,\" I realized that my team is getting overwhelmed.\n\nWe're creating more pull requests because the AI can produce working code faster than anyone on the team. And those PRs are bigger, because when you can generate a complete implementation from a single spec, the temptation is to do exactly that. Last year, our review queue was manageable. Today it's not.\n",
+    "mainEntityOfPage": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/"
+}
+    </script>
+
+    <meta name="generator" content="Ghost 6.65">
+    <link rel="alternate" type="application/rss+xml" title="Beyond Autocomplete" href="https://www.beyondautocomplete.nl/rss/">
+    <script defer src="https://cdn.jsdelivr.net/ghost/portal@~2.71/umd/portal.min.js" data-i18n="true" data-ghost="https://www.beyondautocomplete.nl/" data-key="fa2f9eb8b1be3605f642f1c3fa" data-api="https://beyondautocomplete.ghost.io/ghost/api/content/" data-locale="en" crossorigin="anonymous"></script><style id="gh-members-styles">.gh-post-upgrade-cta-content,
+.gh-post-upgrade-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    width: 100%;
+    color: #ffffff;
+    font-size: 16px;
+}
+
+.gh-post-upgrade-cta-content {
+    border-radius: 8px;
+    padding: 40px 4vw;
+}
+
+.gh-post-upgrade-cta h2 {
+    color: #ffffff;
+    font-size: 28px;
+    letter-spacing: -0.2px;
+    margin: 0;
+    padding: 0;
+}
+
+.gh-post-upgrade-cta p {
+    margin: 20px 0 0;
+    padding: 0;
+}
+
+.gh-post-upgrade-cta small {
+    font-size: 16px;
+    letter-spacing: -0.2px;
+}
+
+.gh-post-upgrade-cta a {
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 500;
+    box-shadow: none;
+    text-decoration: underline;
+}
+
+.gh-post-upgrade-cta a:hover {
+    color: #ffffff;
+    opacity: 0.8;
+    box-shadow: none;
+    text-decoration: underline;
+}
+
+.gh-post-upgrade-cta a.gh-btn {
+    display: block;
+    background: #ffffff;
+    text-decoration: none;
+    margin: 28px 0 0;
+    padding: 8px 18px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.gh-post-upgrade-cta a.gh-btn:hover {
+    opacity: 0.92;
+}</style>
+    <script defer src="https://cdn.jsdelivr.net/ghost/sodo-search@~1.8/umd/sodo-search.min.js" data-key="fa2f9eb8b1be3605f642f1c3fa" data-styles="https://cdn.jsdelivr.net/ghost/sodo-search@~1.8/umd/main.css" data-sodo-search="https://beyondautocomplete.ghost.io/" data-locale="en" crossorigin="anonymous"></script>
+    
+    <link href="https://www.beyondautocomplete.nl/webmentions/receive/" rel="webmention">
+    <script defer src="/public/cards.min.js?v=ShRHxgy4po8zN-Wf"></script>
+    <link rel="stylesheet" type="text/css" href="/public/cards.min.css?v=WwnU9jw5ancNC8Gc">
+    <script defer src="/public/member-attribution.min.js?v=AKG4hWena9j3yX3I"></script>
+    <script defer src="/public/ghost-stats.min.js?v=vFcCUf6ZQ0Hyhc8h" data-stringify-payload="false" data-datasource="analytics_events" data-storage="localStorage" data-host="https://www.beyondautocomplete.nl/.ghost/analytics/api/v1/page_hit"  tb_site_uuid="0c2e6f0e-b369-42cc-88ca-98d9061600ff" tb_post_uuid="5a33becc-8cc1-454c-a492-276c2557b2d6" tb_post_type="post" tb_member_uuid="undefined" tb_member_status="undefined" tb_gift_link=""></script><style>:root {--ghost-accent-color: #FF1A75;}</style>
+    <style>
+  /* Fixing ghost Dawn theme issue */
+  pre {
+    color: var(--color-primary-text)
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .gh-content table:not(.gist table) {
+      background: none;
+    }
+
+    .gh-content table:not(.gist table) td:first-child,
+    .gh-content table:not(.gist table) td:last-child {
+      background-image: none;
+    }
+  }
+</style>
+</head>
+
+<body class='post-template is-head-left-logo'>
+<div class="site">
+
+    <header id="gh-head" class="gh-head gh-outer">
+        <div class="gh-head-inner gh-inner">
+            <div class="gh-head-brand">
+                <div class="gh-head-brand-wrapper">
+                    <a class="gh-head-logo" href="https://www.beyondautocomplete.nl">
+                            Beyond Autocomplete
+                    </a>
+                </div>
+                <button class="gh-search gh-icon-btn" aria-label="Search this site" data-ghost-search><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+                <button class="gh-burger" aria-label="Toggle menu"></button>
+            </div>
+
+            <nav class="gh-head-menu">
+                <ul class="nav">
+    <li class="nav-home"><a href="https://www.beyondautocomplete.nl/">Home</a></li>
+    <li class="nav-about"><a href="https://www.beyondautocomplete.nl/about/">About</a></li>
+</ul>
+
+            </nav>
+
+            <div class="gh-head-actions">
+                    <button class="gh-search gh-icon-btn" aria-label="Search this site" data-ghost-search><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+                    <div class="gh-head-members">
+                                <a class="gh-head-link" href="#/portal/signin" data-portal="signin">Sign in</a>
+                                <a class="gh-head-btn gh-btn gh-primary-btn" href="#/portal/signup" data-portal="signup">Subscribe</a>
+                    </div>
+            </div>
+        </div>
+    </header>
+
+
+    <div class="site-content">
+        
+<main class="site-main">
+
+        <article class="single post featured">
+
+        <header class="single-header gh-canvas">
+            <div class="single-meta">
+                <span class="single-meta-item single-meta-date">
+                    <time datetime="2026-03-20">
+                        20 Mar 2026
+                    </time>
+                </span>
+                    <span class="single-meta-item single-meta-length">
+                        4 min read
+                    </span>
+            </div>
+
+            <h1 class="single-title">AI writes faster than we can review — here&#x27;s how we fixed that</h1>
+
+
+                <figure class="single-media kg-width-wide">
+                    <div class="u-placeholder horizontal">
+                        <img
+                            class="u-object-fit"
+                            srcset="https://storage.ghost.io/c/0c/2e/0c2e6f0e-b369-42cc-88ca-98d9061600ff/content/images/size/w400/2026/03/openart-image_1773986649642_d7d0fe83_1773986650232_1df37900.webp 400w,
+https://storage.ghost.io/c/0c/2e/0c2e6f0e-b369-42cc-88ca-98d9061600ff/content/images/size/w750/2026/03/openart-image_1773986649642_d7d0fe83_1773986650232_1df37900.webp 750w,
+https://storage.ghost.io/c/0c/2e/0c2e6f0e-b369-42cc-88ca-98d9061600ff/content/images/size/w960/2026/03/openart-image_1773986649642_d7d0fe83_1773986650232_1df37900.webp 960w,
+https://storage.ghost.io/c/0c/2e/0c2e6f0e-b369-42cc-88ca-98d9061600ff/content/images/size/w1140/2026/03/openart-image_1773986649642_d7d0fe83_1773986650232_1df37900.webp 1140w"
+                            sizes="(min-width: 1200px) 920px, 92vw"
+                            src="https://storage.ghost.io/c/0c/2e/0c2e6f0e-b369-42cc-88ca-98d9061600ff/content/images/size/w960/2026/03/openart-image_1773986649642_d7d0fe83_1773986650232_1df37900.webp"
+                            alt="AI writes faster than we can review — here&#x27;s how we fixed that"
+                        >
+                    </div>
+
+                </figure>
+        </header>
+
+    <div class="single-content gh-content gh-canvas">
+        <p>AI-assisted coding is great for velocity. But somewhere between "the agent wrote this feature in 20 minutes" and "this PR has 47 changed files," I realized that my team is getting overwhelmed.</p><p>We're creating more pull requests because the AI can produce working code faster than anyone on the team. And those PRs are bigger, because when you can generate a complete implementation from a single spec, the temptation is to do exactly that. Last year, our review queue was manageable. Today it's not.</p><h2 id="the-solutions-we-tried-out-first">The solutions we tried out first</h2><p>The first thing we did was ask Claude to generate a structured PR summary with<br>every pull request — not just "what changed," but "here's what matters, here's what's routine, here's where you should actually look." This helped. Reviewers could skim the summary, get oriented, and focus their attention rather than starting from scratch.</p><p>But it didn't solve the underlying problem. The code is still there. All of it. A good summary makes a 50-file PR navigable — it doesn't make it small.</p><p>Next, we looked at <a href="https://blog.logrocket.com/using-stacked-pull-requests-in-github/?ref=beyondautocomplete.nl">stacked pull requests</a>. The idea is appealing: split a large change into a series of smaller PRs that build on each other. Merge them in order, and the diff stays manageable. Tools exist to automate most of this.</p><p>We tried it. I'll be blunt: it was a pain. The merge ordering has to be exact — get it wrong, and you're untangling conflicts with no obvious fix. Creating a coherent stacked series turned out to be hard as well. We kept making mistakes, and the stacked PR tooling helped much less than expected.</p><h2 id="what-actually-helped-risk-based-review-tiers">What actually helped: risk-based review tiers</h2><p>After trying stacked PRs and review guides for two weeks, we asked ourselves: Not<br>every PR carries the same risk. So why were we reviewing them all the same way?</p><p>We now classify every PR into one of three tiers and apply a different review process for each:</p><ul><li><strong>High</strong>: Line-by-line human review, plus an AI agent scanning for additional issues</li><li><strong>Medium:</strong> AI agent review is primary; a human does a spot-check on a handful of files</li><li><strong>Low:</strong> AI agent review only; humans step back entirely</li></ul><p>We kept the Claude-generated PR summary as part of this. It provides reviewers with quick context and feeds into the risk classification. A summary that says "this touches the authentication flow and session management" is a useful signal before anyone opens a single file.</p><h2 id="how-we-decide-whats-risky">How we decide what's risky</h2><p>We use an agent to classify each PR. We've given it explicit instructions: authentication, authorization, and core business logic are high by default. We also included structural changes and new runtime scenarios in this category for now. Configuration changes, dependency bumps with no API surface changes, and additions to well-tested areas tend to land lower. A change that modifies existing behavior in an area without tests is automatically high, regardless of how small the diff looks.</p><p>For the agent review itself, we give it the PR diff along with the original spec and ask it to flag anything that looks risky, inconsistent with the stated intent, or missing from the implementation. The output is a structured report — a list of concerns, each with a severity and a short explanation.</p><p>We're not alone in using risk estimation to determine the level of review needed for a set of changes. Meta recently published a paper called <a href="https://arxiv.org/abs/2410.06351?ref=engineeringatmeta" rel="noreferrer">"Moving Faster and Reducing Risk: Using LLMs in Release Deployment"</a> that explains how you can use Diff Risk Scoring.</p><p>We're still in the trust-building phase with the classification. Every classification is spot-checked against the actual diff to ensure it landed in the right bucket. So far, the misclassifications have been rare, but we haven't handed this off fully yet. That's deliberate — you don't fully trust a new process until it's earned it.</p><h2 id="the-artifacts-we-record">The artifacts we record</h2><p>The spec and implementation plan already exist — that's how we work with Claude Code. Attaching them to the PR costs almost nothing. The agent review report is output we were already generating.</p><p>Together, these give you a proper audit trail. When a regression surfaces three months later, you can trace back to what the change was supposed to do, how it was planned, and what the automated review flagged. Git gives you commit history, PR history, and linked issues on top of that. Traceability, basically for free.</p><h2 id="smaller-pull-requests-are-still-better">Smaller pull requests are still better</h2><p>Here's the part that humbled us a bit.</p><p>When AI can produce a complete feature from a single spec, it's tempting to build large. We felt this pull. "Why split it into three smaller stories when the agent can deliver the whole thing in one session?" The answer is that large changes are still hard to review, still harder to test, and still carry more regression risk — regardless of whether a human or an AI produced them.</p><p>But here's what really made us stop and think: we went back and looked at old PRs from before we started using agents. We ran into the same problems! Large diffs, hard-to-follow context, reviewer fatigue. AI didn't create the code review problem. It just turned up the volume until we couldn't ignore it anymore.</p><p>So we still push for smaller, focused features — not because the AI can't handle bigger ones, but because the downstream costs of large changes don't disappear just because the code was generated quickly.</p><h2 id="where-we-are-now">Where we are now</h2><p>We're a few days into this experiment. The team is on board, the classification is running, and no obvious disasters yet. Cautiously optimistic.</p><p>In two weeks, we'll sit down and look at what went wrong. Not "if" — "what." There will be something. A misclassified PR that slipped through with a bug, or a case where the agent review missed something a human would have caught. That's fine. That's how you tune a process.</p><p>If you're hitting the same wall — AI velocity outrunning your review capacity — try even a rough version of this. Pick three risk buckets. Define what goes in each one. Apply different levels of scrutiny. The tiered approach, even in rough form, is the right direction. We're sure of that much.</p>
+    </div>
+
+    <div class="gh-canvas">
+    <footer class="single-footer">
+
+        <div class="single-footer-left">
+            <div class="navigation navigation-previous">
+                <a class="navigation-link" href="/off-grid-coding-with-opencode-and-vllm/" aria-label="Previous post">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" class="icon navigation-icon">
+    <path d="M26.667 14.667v2.667h-16L18 24.667l-1.893 1.893L5.547 16l10.56-10.56L18 7.333l-7.333 7.333h16z"></path>
+</svg>                </a>
+            </div>
+        </div>
+
+        <div class="single-footer-middle">
+            <div class="single-footer-top">
+                <h3 class="single-footer-title">Published by:</h3>
+                <div class="author-list">
+                    <div class="author-image-placeholder u-placeholder square">
+                        <a href="/author/willem/" title="Willem Meints">
+                            <img class="author-image u-object-fit" src="https://www.gravatar.com/avatar/0e7dd556fe5080e41267b8a0f2a301d8?s&#x3D;250&amp;r&#x3D;x&amp;d&#x3D;mp" alt="Willem Meints" loading="lazy">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="single-footer-right">
+            <div class="navigation navigation-next">
+                <a class="navigation-link" href="/the-long-road-to-smarter-code-reviews-with-ai-making-it-measurable/" aria-label="Next post">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor" class="icon navigation-icon">
+    <path d="M5.333 14.667v2.667h16L14 24.667l1.893 1.893L26.453 16 15.893 5.44 14 7.333l7.333 7.333h-16z"></path>
+</svg>                </a>
+            </div>
+        </div>
+
+    </footer>
+    </div>
+
+</article>
+        
+        
+</main>
+    </div>
+
+    <footer class="gh-foot gh-outer">
+        <div class="gh-foot-inner gh-inner">
+            <div class="gh-copyright">
+                Beyond Autocomplete © 2026
+            </div>
+                <nav class="gh-foot-menu">
+                    <ul class="nav">
+    <li class="nav-sign-up"><a href="#/portal/">Sign up</a></li>
+</ul>
+
+                </nav>
+            <div class="gh-powered-by">
+                <a href="https://ghost.org/" target="_blank" rel="noopener">Powered by Ghost</a>
+            </div>
+        </div>
+    </footer>
+
+</div>
+
+    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="pswp__bg"></div>
+
+    <div class="pswp__scroll-wrap">
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script
+    src="https://code.jquery.com/jquery-3.5.1.min.js"
+    integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+    crossorigin="anonymous">
+</script>
+<script src='https://www.beyondautocomplete.nl/assets/built/main.min.js?v=MnUi_nSHTqOuRwY8'></script>
+
+
+
+</body>
+</html>

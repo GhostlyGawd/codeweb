@@ -1,0 +1,897 @@
+{
+  "CW-001": {
+    "file": "EVIDENCE-SEED.jsonl",
+    "sha256": "307f3be087dd9e2bd85da3b87f3d305dc1bf3165033318ffb5915e6c0b69e47a",
+    "annotations": []
+  },
+  "CW-P001": {
+    "file": "PILOT-EVIDENCE.jsonl",
+    "sha256": "1958442bf3b34099559de68e92e9df156b82d06a035862d98c36dec432b1534d",
+    "annotations": []
+  },
+  "CW-P002": {
+    "file": "PILOT-EVIDENCE.jsonl",
+    "sha256": "1958442bf3b34099559de68e92e9df156b82d06a035862d98c36dec432b1534d",
+    "annotations": []
+  },
+  "CW-P003": {
+    "file": "PILOT-EVIDENCE.jsonl",
+    "sha256": "1958442bf3b34099559de68e92e9df156b82d06a035862d98c36dec432b1534d",
+    "annotations": []
+  },
+  "CW-P004": {
+    "file": "PILOT-EVIDENCE.jsonl",
+    "sha256": "1958442bf3b34099559de68e92e9df156b82d06a035862d98c36dec432b1534d",
+    "annotations": []
+  },
+  "CW-P005": {
+    "file": "PILOT-EVIDENCE.jsonl",
+    "sha256": "1958442bf3b34099559de68e92e9df156b82d06a035862d98c36dec432b1534d",
+    "annotations": []
+  },
+  "CW-T001": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T002": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T003": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T004": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T005": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T006": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T007": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T008": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T009": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T010": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T011": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T012": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T013": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T014": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T015": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T016": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T017": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T018": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T019": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T020": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": [
+      {
+        "file": "FINAL-TECH-ACCESS-ANNOTATIONS.jsonl",
+        "annotation": {
+          "id": "CW-T020",
+          "source_url": "https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_access": "opened_full",
+          "read_boundary": "All 16 posts and all 16 stream IDs read",
+          "status_annotation": "Original reporter reports improvement after expanding bounded iteration and correcting sandbox assumptions; modernization completion not claimed.",
+          "locators": [
+            "/4",
+            "/11"
+          ],
+          "accepted_original_unchanged": true
+        }
+      }
+    ]
+  },
+  "CW-T021": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T022": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T023": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T024": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T025": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T026": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T027": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-T028": {
+    "file": "L123-EVIDENCE.jsonl",
+    "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "annotations": []
+  },
+  "CW-X001": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X002": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X003": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X004": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X005": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X006": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X007": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X008": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X009": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X010": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X011": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X012": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X013": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X014": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": [
+      {
+        "file": "FINAL-TECH-ACCESS-ANNOTATIONS.jsonl",
+        "annotation": {
+          "id": "CW-X014",
+          "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "source_access": "opened_partial",
+          "status_annotation": "Recovery did not complete; no full credit or changed resolution.",
+          "accepted_original_unchanged": true
+        }
+      }
+    ]
+  },
+  "CW-X015": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X016": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X017": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-X018": {
+    "file": "L123-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "annotations": []
+  },
+  "CW-L001": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L002": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L003": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L004": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L005": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L006": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": []
+  },
+  "CW-L007": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": []
+  },
+  "CW-L008": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L009": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L010": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": []
+  },
+  "CW-L011": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": []
+  },
+  "CW-L012": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": []
+  },
+  "CW-L013": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": []
+  },
+  "CW-L014": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L015": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L016": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L017": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L018": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L019": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L020": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L021": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L022": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L023": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L024": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L025": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [],
+    "parent_correction": {
+      "number": 1,
+      "file": "PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "changed_fields": [
+        "codeweb_fit",
+        "fit_reasoning"
+      ]
+    }
+  },
+  "CW-L026": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": [
+      {
+        "file": "FINAL-MARKET-RECOVERY.jsonl",
+        "annotation": {
+          "accepted_id": "CW-L026",
+          "source_url": "https://forum.cursor.com/t/bugbot-without-background-agents/157812",
+          "source_access": "opened_full",
+          "status_now": "resolved",
+          "resolution_source_locator": "author post 7 April 16, 2026 confirms exact trigger worked",
+          "annotation": "Additive: exact trigger routes to review without background agents. No new incident."
+        }
+      }
+    ]
+  },
+  "CW-L027": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": []
+  },
+  "CW-L028": {
+    "file": "L456-EVIDENCE.jsonl",
+    "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "annotations": []
+  },
+  "CW-L029": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L030": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L031": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L032": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L033": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L034": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L035": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L036": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L037": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L038": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L039": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L040": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L041": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L042": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L043": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L044": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L045": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L046": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L047": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L048": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L049": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L050": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L051": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L052": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L053": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L054": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L055": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-L056": {
+    "file": "L456-SUPPLEMENT-EVIDENCE.jsonl",
+    "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "annotations": []
+  },
+  "CW-Z001": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "high"
+  },
+  "CW-Z002": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "high"
+  },
+  "CW-Z003": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "high"
+  },
+  "CW-Z004": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "medium"
+  },
+  "CW-Z005": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "medium"
+  },
+  "CW-Z006": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "medium"
+  },
+  "CW-Z007": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "high"
+  },
+  "CW-Z008": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "medium"
+  },
+  "CW-Z009": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "medium"
+  },
+  "CW-Z010": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "medium"
+  },
+  "CW-Z011": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "medium"
+  },
+  "CW-Z012": {
+    "file": "FINAL-TECH-EVIDENCE.jsonl",
+    "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "annotations": [],
+    "source_review_priority": "medium"
+  },
+  "CW-Y001": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "high"
+  },
+  "CW-Y002": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "high"
+  },
+  "CW-Y003": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "high"
+  },
+  "CW-Y004": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "high"
+  },
+  "CW-Y005": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "high"
+  },
+  "CW-Y006": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "normal"
+  },
+  "CW-Y007": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "high"
+  },
+  "CW-Y008": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "normal"
+  },
+  "CW-Y009": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "normal"
+  },
+  "CW-Y010": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "normal"
+  },
+  "CW-Y011": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "normal"
+  },
+  "CW-Y012": {
+    "file": "FINAL-MARKET-EVIDENCE.jsonl",
+    "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+    "annotations": [],
+    "source_review_priority": "high"
+  }
+}

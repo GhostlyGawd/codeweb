@@ -1,0 +1,105 @@
+{
+  "recorded_at": "2026-10-01T00:21:00.229573+00:00",
+  "scope": "P-01 modified similarity-output surface only; implementer handoff",
+  "worktree": "$LOCAL_TMP/codeweb-p01-3tylipwm",
+  "branch": "codex/p01-honest-similarity-output",
+  "base_and_head": "fd3b637e9ad4e1f7265799298761bc1ee83fe76c",
+  "node_version": "v26.7.0",
+  "new_commit": null,
+  "candidate_files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "b330997cd7f5499bfff99446dcb9d9573d5d8663ff6b32eb90a1e17432e0978d"
+    },
+    {
+      "path": "scripts/find-similar.mjs",
+      "sha256": "a9b9cd3a7f3c097e4a0cc3ba8fefee1f98349bfe58fba518a9882e7c5ef3bf0b"
+    },
+    {
+      "path": "scripts/mcp-server.mjs",
+      "sha256": "67bea39f000592963826db38b6078da40c6a8b46e5d12892d5d8d020c8800453"
+    },
+    {
+      "path": "tests/find-similar-output.test.mjs",
+      "sha256": "1a3151af95c3fcd97ce81fc82e215b6e4bfbcbf083084a91d91e58c52b45052a"
+    },
+    {
+      "path": "tests/test_ac_pins.py",
+      "sha256": "66d1fc4b7d154fd67e7d9e8d3dd4b7128c65f9b769ca8d56d1e672267dc0bf7a"
+    }
+  ],
+  "regression_before": {
+    "evidence": "REGRESSION-BEFORE.json",
+    "exit_code": 1,
+    "passed": 1,
+    "failed": 6
+  },
+  "focused_tests": {
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0
+  },
+  "checks": [
+    {
+      "command": [
+        "node",
+        "--test",
+        "tests/find-similar-output.test.mjs",
+        "tests/find-similar.test.mjs",
+        "tests/structural-clone.test.mjs",
+        "tests/mcp-budget.test.mjs",
+        "tests/mcp-staleness-parity.test.mjs"
+      ],
+      "exit_code": 0,
+      "evidence": "FOCUSED-TESTS.json"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/spec_lint.py"
+      ],
+      "exit_code": 0,
+      "evidence": "SPEC-LINT.json"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "tests.test_ac_pins.TestAcPins.test_ac_34_bounded_similarity_output"
+      ],
+      "exit_code": 0,
+      "evidence": "AC-PIN.json"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "evidence": "DIFF-CHECK.json"
+    }
+  ],
+  "compatibility": [
+    "JSON field shape/counts/more",
+    "ranking and similarity thresholds",
+    "body cap and uncapped candidate",
+    "live/sidecar results",
+    "ordinary success and failure exits",
+    "MCP name/arguments/schema/transport"
+  ],
+  "case_results": {
+    "NED-01": "pass on modified similarity surface",
+    "NED-03": "pass on modified similarity surface",
+    "NED-06": "pass for unchanged structural/test provenance on modified similarity surface; broader matrix pending",
+    "NED-07": "pass on modified similarity source/cap/expansion surface"
+  },
+  "remaining": [
+    "Root must execute full sh scripts/check and record current result",
+    "Separate independent reviewer verdict pending",
+    "Full NED fixture/host matrix pending P-02; final readiness pending P-04",
+    "No observed customer value, semantic substitutability, behavioral safety or coordination benefit"
+  ],
+  "source_frozen_for_review": true
+}

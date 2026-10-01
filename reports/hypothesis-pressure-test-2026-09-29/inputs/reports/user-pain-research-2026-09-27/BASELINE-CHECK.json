@@ -1,0 +1,35 @@
+{
+  "retrieved_at": "2026-09-28T00:30:52.305900+00:00",
+  "checks": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "expected": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "actual": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "expected": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "actual": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "expected": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "actual": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "expected": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "actual": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "expected": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "actual": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "matches": true
+    }
+  ]
+}

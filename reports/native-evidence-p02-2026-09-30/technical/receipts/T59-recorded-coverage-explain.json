@@ -1,0 +1,24 @@
+{
+  "id": "T59-recorded-coverage-explain",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/explain.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/.codeweb/graph.json",
+    "low",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:14.812Z",
+  "end": "2026-10-01T01:50:14.847Z",
+  "durationMs": 35.384250000000065,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"symbol\":\"low\",\"matched\":[\"subject.mjs:low\"],\"cards\":[{\"callersRelyOn\":{\"sites\":1,\"awaited\":0,\"argRange\":[1,1]},\"id\":\"subject.mjs:low\",\"label\":\"low\",\"kind\":\"function\",\"role\":\"product\",\"domain\":\"unassigned\",\"at\":\"subject.mjs:1\",\"loc\":3,\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"complexity\":1,\"maxDepth\":1,\"dependents\":{\"callers\":1,\"tests\":3,\"blastRadius\":1,\"blastDomains\":1},\"coverage\":\"covered by the recorded run (peak 1 hit)\",\"topCallers\":[\"subject.mjs:local\"],\"topCallees\":[],\"tests\":[\"current.test.mjs:<module>\",\"failed.test.mjs:<module>\",\"skipped.test.mjs:<module>\"],\"findings\":[],\"summary\":\"function low (product, unassigned) — 1 caller(s), 3 test(s), blast 1 across 1 domain(s); args 1\"}],\"summary\":\"function low (product, unassigned) — 1 caller(s), 3 test(s), blast 1 across 1 domain(s); args 1 — graph is stale for 1+ file(s); run codeweb_refresh\",\"stale\":{\"count\":1,\"files\":[\"./ (dir changed — new/removed files)\"]}}\n",
+  "stderr": ""
+}

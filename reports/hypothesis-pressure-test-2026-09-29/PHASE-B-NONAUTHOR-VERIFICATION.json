@@ -1,0 +1,1439 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-09-30T04:43:15.255765+00:00",
+  "scope": "Non-author source fidelity of all 13 material findings in QA-authored lenses 07/09/11; no preferred strategic verdict",
+  "findings": [
+    {
+      "finding_id": "L07-F01",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "e8fdf514-cafb-4493-a52c-c2d7970115da",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/07-capability-expansion.md",
+      "report_sha256": "cfc6de65400fecf794da57f834024e8741739ccf65ad892d8f53cdc945d0152f",
+      "finding_table_sha256": "0e6ab824c1b2f904dce0666d9795d444983a21343a7c9e39b8e139e0d1a4c37d",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-T018",
+          "url": "https://news.ycombinator.com/item?id=48033774",
+          "locator": "Story body and author reply 48035884; complete four-comment tree read",
+          "original_capture": "sources/L01/CW-T018.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-T018.txt",
+          "chars": 2342,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-T018",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897"
+        },
+        {
+          "id": "CW-P003",
+          "url": "https://github.com/anthropics/claude-code/issues/39703",
+          "locator": "Context and Category H; all body categories read",
+          "original_capture": "sources/L01/CW-P003.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-P003.txt",
+          "chars": 32478,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-P003",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "dd7a415ec9bd6ab34b1218c73b0363b7f4dcb81925791c829ecac9266133e0f0"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-X001",
+          "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_capture": "sources/L01/CW-X001.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-X001.txt",
+          "chars": 11653,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-X001",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6"
+        },
+        {
+          "id": "CW-X003",
+          "url": "https://baransel.dev/post/replaced-entire-dev-workflow-with-claude-code/",
+          "locator": "Refactoring — Surprisingly Good; Where It Falls Short",
+          "original_capture": "sources/phase-B-nonauthor/CW-X003.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-X003.txt",
+          "chars": 9961,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-X003",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "6ecb4f30771f9c39334035b0604bd241a0db649f82a56533c12c2e9ddc88849d"
+        },
+        {
+          "id": "CW-Z006",
+          "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "locator": "Refactoring at scale; What humans still do",
+          "original_capture": "sources/L01/CW-Z006.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z006.txt",
+          "chars": 21517,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z006",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "T018 body/reply and P003 Category H support inspection burden. X003 refactor passage and X001 clean-repository results support capable alternatives; Z006 reserves abstraction decisions to humans. Missing Codeweb task expansion is correctly explicit.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L07-F02",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "e8fdf514-cafb-4493-a52c-c2d7970115da",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/07-capability-expansion.md",
+      "report_sha256": "cfc6de65400fecf794da57f834024e8741739ccf65ad892d8f53cdc945d0152f",
+      "finding_table_sha256": "0e6ab824c1b2f904dce0666d9795d444983a21343a7c9e39b8e139e0d1a4c37d",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-Z007",
+          "url": "https://github.com/oraios/serena/issues/1814",
+          "locator": "Summary; Additional suggestion; Note on scoping",
+          "original_capture": "sources/phase-A-nonauthor/CW-Z007.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z007.txt",
+          "chars": 10975,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z007",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "da0bc0a104fca0a86f29f7e3263ff89393b7b6a45f9d8844b409a9e0c958de28"
+        },
+        {
+          "id": "CW-Z011",
+          "url": "https://github.com/oraios/serena/issues/1432",
+          "locator": "Capability matrix in body",
+          "original_capture": "sources/phase-A-nonauthor/CW-Z011.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z011.txt",
+          "chars": 5276,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z011",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "35235bc80eca532bb2e09db3d2734b7644d2eb681bd1f5aa3f7465101d94f7da"
+        },
+        {
+          "id": "CW-Z005",
+          "url": "https://omeratagun.net/blog/ai-coding-agents-experiment",
+          "locator": "Chapters 1–4; What I Learned",
+          "original_capture": "sources/phase-B-nonauthor/CW-Z005.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z005.txt",
+          "chars": 21624,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z005",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "d16006e75ed066e80347b6653a246734b728382171fd194871716419a4ded42b"
+        },
+        {
+          "id": "CW-Z006",
+          "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "locator": "Refactoring at scale; What humans still do",
+          "original_capture": "sources/L01/CW-Z006.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z006.txt",
+          "chars": 21517,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z006",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-P003",
+          "url": "https://github.com/anthropics/claude-code/issues/39703",
+          "locator": "Context and Category H; all body categories read",
+          "original_capture": "sources/L01/CW-P003.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-P003.txt",
+          "chars": 32478,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-P003",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "dd7a415ec9bd6ab34b1218c73b0363b7f4dcb81925791c829ecac9266133e0f0"
+        },
+        {
+          "id": "CW-T018",
+          "url": "https://news.ycombinator.com/item?id=48033774",
+          "locator": "Story body and author reply 48035884; complete four-comment tree read",
+          "original_capture": "sources/L01/CW-T018.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-T018.txt",
+          "chars": 2342,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-T018",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "Z007 empty-result failure and Z011 generated-method matrix support bounded navigation limits, not a present Codeweb defect. P003/T018 preserve positive need. cli/reference/ci-gate documentation explicitly rejects runtime completeness and behavioral safety.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L07-F03",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "e8fdf514-cafb-4493-a52c-c2d7970115da",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/07-capability-expansion.md",
+      "report_sha256": "cfc6de65400fecf794da57f834024e8741739ccf65ad892d8f53cdc945d0152f",
+      "finding_table_sha256": "0e6ab824c1b2f904dce0666d9795d444983a21343a7c9e39b8e139e0d1a4c37d",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-Z001",
+          "url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "locator": "The Old Projects I Refactored; How I Use Codex Now",
+          "original_capture": "sources/L01/CW-Z001.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z001.txt",
+          "chars": 16770,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z001",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "f06ceefb7d3c95cc528d03eae7461b9012fb16c9e08745aa8a5f2dfe81fa7cfd"
+        },
+        {
+          "id": "CW-Z006",
+          "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "locator": "Refactoring at scale; What humans still do",
+          "original_capture": "sources/L01/CW-Z006.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z006.txt",
+          "chars": 21517,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z006",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d"
+        },
+        {
+          "id": "CW-T020",
+          "url": "https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318",
+          "locator": "Posts 1, 4 and 11",
+          "original_capture": "sources/phase-B-nonauthor/CW-T020.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-T020.txt",
+          "chars": 18100,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-T020",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "4a87b777c440369898e76d58651538f63af55d0be1b9a1ad940771068ca49411"
+        },
+        {
+          "id": "CW-X001",
+          "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_capture": "sources/L01/CW-X001.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-X001.txt",
+          "chars": 11653,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-X001",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-T018",
+          "url": "https://news.ycombinator.com/item?id=48033774",
+          "locator": "Story body and author reply 48035884; complete four-comment tree read",
+          "original_capture": "sources/L01/CW-T018.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-T018.txt",
+          "chars": 2342,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-T018",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897"
+        },
+        {
+          "id": "CW-P003",
+          "url": "https://github.com/anthropics/claude-code/issues/39703",
+          "locator": "Context and Category H; all body categories read",
+          "original_capture": "sources/L01/CW-P003.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-P003.txt",
+          "chars": 32478,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-P003",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "dd7a415ec9bd6ab34b1218c73b0363b7f4dcb81925791c829ecac9266133e0f0"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "Z001 old-project table, Z006 Rust-tool account and T020 progress/tests attribute gains to native agent workflows. T018/P003 retain unsolved reference/reuse burdens. No transfer of their outcomes to Codeweb is warranted.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L07-F04",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "e8fdf514-cafb-4493-a52c-c2d7970115da",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/07-capability-expansion.md",
+      "report_sha256": "cfc6de65400fecf794da57f834024e8741739ccf65ad892d8f53cdc945d0152f",
+      "finding_table_sha256": "0e6ab824c1b2f904dce0666d9795d444983a21343a7c9e39b8e139e0d1a4c37d",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-Y007",
+          "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "locator": "posts 1,5,6",
+          "original_capture": "sources/L01/CW-Y007.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y007.txt",
+          "chars": 4708,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y007",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+          "additional_original_capture": "sources/L11/CW-Y007.json",
+          "additional_capture_sha256": "488c04c210ba98b486e0fb8a12eb1cb3c81ac19db266fdb5baa6897607eda8ac"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-Y004",
+          "url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "locator": "posts 1,6,7",
+          "original_capture": "sources/phase-B-nonauthor/CW-Y004.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y004.txt",
+          "chars": 5731,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y004",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "3de9bafccc90e5080b9538eede13d1fac61c631696a3845370c273f03dca7ce2",
+          "additional_original_capture": "sources/L11/CW-Y004.json",
+          "additional_capture_sha256": "c183f66537437d98463f83318613e43191d2ad9a717686b6901d85d444dd3ddc"
+        },
+        {
+          "id": "CW-Z005",
+          "url": "https://omeratagun.net/blog/ai-coding-agents-experiment",
+          "locator": "Chapters 1–4; What I Learned",
+          "original_capture": "sources/phase-B-nonauthor/CW-Z005.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z005.txt",
+          "chars": 21624,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z005",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "d16006e75ed066e80347b6653a246734b728382171fd194871716419a4ded42b"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "Y007 posts 1/5/6 establish manual invocation and an untried CI substitute. Y004 evaluator isolation requirements and Z005 human verification limits oppose generic expansion. Charter separates local inspection from proposed paid coordination.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L09-F01",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "ecdb87a7-76f8-4cfa-8a0b-0a1ff8bde6dd",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/09-withdrawal-test.md",
+      "report_sha256": "1054c9814dcc9a62ce684bb49ef9c4f598bf701f9a2cf8a97422f7ee3fb00a2b",
+      "finding_table_sha256": "2be3adcd0ed583e4194c7a205b083ff579aa10e44a442ad71d67a03928c567fd",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-T018",
+          "url": "https://news.ycombinator.com/item?id=48033774",
+          "locator": "Story body and author reply 48035884; complete four-comment tree read",
+          "original_capture": "sources/L01/CW-T018.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-T018.txt",
+          "chars": 2342,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-T018",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897"
+        },
+        {
+          "id": "CW-Z003",
+          "url": "https://ngof.nikhaldimann.com/p/deja-code",
+          "locator": "Quantifying code duplication; methodological weaknesses",
+          "original_capture": "sources/L01/CW-Z003.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z003.txt",
+          "chars": 14013,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z003",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-X001",
+          "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_capture": "sources/L01/CW-X001.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-X001.txt",
+          "chars": 11653,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-X001",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6"
+        },
+        {
+          "id": "CW-Z006",
+          "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "locator": "Refactoring at scale; What humans still do",
+          "original_capture": "sources/L01/CW-Z006.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z006.txt",
+          "chars": 21517,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z006",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d"
+        },
+        {
+          "id": "CW-Z011",
+          "url": "https://github.com/oraios/serena/issues/1432",
+          "locator": "Capability matrix in body",
+          "original_capture": "sources/phase-A-nonauthor/CW-Z011.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z011.txt",
+          "chars": 5276,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z011",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "35235bc80eca532bb2e09db3d2734b7644d2eb681bd1f5aa3f7465101d94f7da"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "Z003 repeated reprompting and T018 duplicate utility complaint support a possible rediscovery mechanism. X001, Z006 and Z011 retain native success, human abstraction judgment and generated-symbol gaps. Withdrawal effect is expressly unobserved.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L09-F02",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "ecdb87a7-76f8-4cfa-8a0b-0a1ff8bde6dd",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/09-withdrawal-test.md",
+      "report_sha256": "1054c9814dcc9a62ce684bb49ef9c4f598bf701f9a2cf8a97422f7ee3fb00a2b",
+      "finding_table_sha256": "2be3adcd0ed583e4194c7a205b083ff579aa10e44a442ad71d67a03928c567fd",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-L015",
+          "url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+          "locator": "UnrulyThesis reply",
+          "error": "HTTP Error 403: Blocked",
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-L015",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "verified_passage_note": "sources/phase-B-nonauthor/WEB-READ-NOTES.json"
+        },
+        {
+          "id": "CW-X001",
+          "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_capture": "sources/L01/CW-X001.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-X001.txt",
+          "chars": 11653,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-X001",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6"
+        },
+        {
+          "id": "CW-Z012",
+          "url": "https://github.com/oraios/serena/discussions/131",
+          "locator": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "original_capture": "sources/phase-A-nonauthor/CW-Z012.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z012.txt",
+          "chars": 37792,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z012",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "dd59dd53ddae113f258f050b3058dae6a0436349972aa755ebbe88a5b4cfccc2"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-L024",
+          "url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+          "locator": "There’s no difference anymore?; final paragraphs",
+          "original_capture": "sources/phase-A-nonauthor/CW-L024.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-L024.txt",
+          "chars": 10179,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-L024",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "f9f34c73db717c68ffe9d031361363dfe35dfd57b8d85504c03859a5b1eabf83"
+        },
+        {
+          "id": "CW-Z003",
+          "url": "https://ngof.nikhaldimann.com/p/deja-code",
+          "locator": "Quantifying code duplication; methodological weaknesses",
+          "original_capture": "sources/L01/CW-Z003.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z003.txt",
+          "chars": 14013,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z003",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "L015 original reply confirms removal after no perceived small-repo benefit; Z012 maintainer passage says verification rereads erase savings for the discussed edit route. X001 supplies task-dependent nulls. L024 actually reports bringing servers back; Z003 retains recurring reuse pain. These are analogies, not Codeweb withdrawal results.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L09-F03",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "ecdb87a7-76f8-4cfa-8a0b-0a1ff8bde6dd",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/09-withdrawal-test.md",
+      "report_sha256": "1054c9814dcc9a62ce684bb49ef9c4f598bf701f9a2cf8a97422f7ee3fb00a2b",
+      "finding_table_sha256": "2be3adcd0ed583e4194c7a205b083ff579aa10e44a442ad71d67a03928c567fd",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-L037",
+          "url": "https://david.coffee/i-still-prefer-mcp-over-skills/",
+          "locator": "Skills + MCP",
+          "original_capture": "sources/phase-A-nonauthor/CW-L037.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-L037.txt",
+          "chars": 11181,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-L037",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "38999a668054f2f44fa75347468a6859585fecb1fb0990e8f60cc2c33092a426"
+        },
+        {
+          "id": "CW-Z003",
+          "url": "https://ngof.nikhaldimann.com/p/deja-code",
+          "locator": "Quantifying code duplication; methodological weaknesses",
+          "original_capture": "sources/L01/CW-Z003.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z003.txt",
+          "chars": 14013,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z003",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-L025",
+          "url": "https://nickperkins.au/article/skills-over-mcps/",
+          "locator": "What I did instead; The thing MCPs can’t do; tradeoff",
+          "original_capture": "sources/phase-B-nonauthor/CW-L025.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-L025.txt",
+          "chars": 5462,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-L025",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "e38f01a38572f14729d82f80a71bdcccdf808a5c1f336d83435cce4c9bce047e"
+        },
+        {
+          "id": "CW-X001",
+          "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_capture": "sources/L01/CW-X001.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-X001.txt",
+          "chars": 11653,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-X001",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "L037 NotePlan passage preserves learned quirks in a skill while retaining its connector; L025 migration preserves procedures through scripts/skills. Z003 supports recurring rediscovery and X001 capable native alternatives. Durable learning versus dependence is a methodological inference, not an observed Codeweb memory feature.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L09-F04",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "ecdb87a7-76f8-4cfa-8a0b-0a1ff8bde6dd",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/09-withdrawal-test.md",
+      "report_sha256": "1054c9814dcc9a62ce684bb49ef9c4f598bf701f9a2cf8a97422f7ee3fb00a2b",
+      "finding_table_sha256": "2be3adcd0ed583e4194c7a205b083ff579aa10e44a442ad71d67a03928c567fd",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-Y007",
+          "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "locator": "posts 1,5,6",
+          "original_capture": "sources/L01/CW-Y007.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y007.txt",
+          "chars": 4708,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y007",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+          "additional_original_capture": "sources/L11/CW-Y007.json",
+          "additional_capture_sha256": "488c04c210ba98b486e0fb8a12eb1cb3c81ac19db266fdb5baa6897607eda8ac"
+        },
+        {
+          "id": "CW-Y001",
+          "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "locator": "posts 1 and 3",
+          "original_capture": "sources/phase-A-nonauthor/CW-Y001.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y001.txt",
+          "chars": 6028,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y001",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "cb3048e07205f09d040625d836d9a7894bb0a9c1f6777ef38a013f029bb9d13f"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-Y007",
+          "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "locator": "posts 1,5,6",
+          "original_capture": "sources/L01/CW-Y007.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y007.txt",
+          "chars": 4708,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y007",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+          "additional_original_capture": "sources/L11/CW-Y007.json",
+          "additional_capture_sha256": "488c04c210ba98b486e0fb8a12eb1cb3c81ac19db266fdb5baa6897607eda8ac"
+        },
+        {
+          "id": "CW-Y010",
+          "url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+          "locator": "post 1",
+          "original_capture": "sources/phase-A-nonauthor/CW-Y010.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y010.txt",
+          "chars": 3693,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y010",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "21582a6a32fbcf4eaeade1176330e0312fbf40b05c5d89375c35f67b078914f4"
+        },
+        {
+          "id": "CW-Y012",
+          "url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "locator": "Solutions; Artifacts; Where we are now",
+          "original_capture": "sources/L11/CW-Y012.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y012.txt",
+          "chars": 6274,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y012",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "fa25749665b2c95a20640dfd164563b19babf698222ecd95b1ed3b10014a9284"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "Y007 manual checking and Y001 complex low-frequency PR value support candidate recurring work. The same Y007 reporter had not investigated CI; Y010 is a contemplated one-year purchase, and Y012 already attaches artifacts. Paid withdrawal is properly separated from free local capability.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L09-F05",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "ecdb87a7-76f8-4cfa-8a0b-0a1ff8bde6dd",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/09-withdrawal-test.md",
+      "report_sha256": "1054c9814dcc9a62ce684bb49ef9c4f598bf701f9a2cf8a97422f7ee3fb00a2b",
+      "finding_table_sha256": "2be3adcd0ed583e4194c7a205b083ff579aa10e44a442ad71d67a03928c567fd",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-X001",
+          "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_capture": "sources/L01/CW-X001.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-X001.txt",
+          "chars": 11653,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-X001",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6"
+        },
+        {
+          "id": "CW-Z012",
+          "url": "https://github.com/oraios/serena/discussions/131",
+          "locator": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "original_capture": "sources/phase-A-nonauthor/CW-Z012.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Z012.txt",
+          "chars": 37792,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Z012",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "dd59dd53ddae113f258f050b3058dae6a0436349972aa755ebbe88a5b4cfccc2"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-L024",
+          "url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+          "locator": "There’s no difference anymore?; final paragraphs",
+          "original_capture": "sources/phase-A-nonauthor/CW-L024.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-L024.txt",
+          "chars": 10179,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-L024",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "f9f34c73db717c68ffe9d031361363dfe35dfd57b8d85504c03859a5b1eabf83"
+        },
+        {
+          "id": "CW-Y001",
+          "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "locator": "posts 1 and 3",
+          "original_capture": "sources/phase-A-nonauthor/CW-Y001.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y001.txt",
+          "chars": 6028,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y001",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "cb3048e07205f09d040625d836d9a7894bb0a9c1f6777ef38a013f029bb9d13f"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "Proof-sprint original specifies ten changes/two opportunities each plus return follow-up, not a familiar-user withdrawal comparison. X001 small pilot limitations and Z012 rereads motivate proposed controls; L024 reinstatement and Y001 low-frequency consequential work prevent usage-count shortcuts. Proposed protocol is not trial evidence.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L11-F01",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "d339a9e1-2486-45e3-8744-8bf2a9342773",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/11-shared-team-dependence.md",
+      "report_sha256": "8cd05efdb383bee01e29c2072e96b91aa3e77d7d648fdf922cfc81e606e8855b",
+      "finding_table_sha256": "6dfcafb89273792f55323a299d1834ec7e830361103ba63d7ab4d123c26c326e",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "L11-S02",
+          "original_files": [
+            {
+              "path": "inputs/docs/ci-gate.md",
+              "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+            }
+          ]
+        },
+        {
+          "id": "CW-Y012",
+          "url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "locator": "Solutions; Artifacts; Where we are now",
+          "original_capture": "sources/L11/CW-Y012.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y012.txt",
+          "chars": 6274,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y012",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "fa25749665b2c95a20640dfd164563b19babf698222ecd95b1ed3b10014a9284"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "L11-S01",
+          "original_files": [
+            {
+              "path": "sources/L11/PR96.json",
+              "sha256": "779b0ab848dd3268b0a9e8c035d77aa9316c2acf1214f28dd441eff216304781"
+            },
+            {
+              "path": "sources/L11/PR96-comments.json",
+              "sha256": "78742be8fb5d68007abd6fd0cfc9ede1c50ddf5cef2a61b6ea0ba1a83961a861"
+            },
+            {
+              "path": "sources/L11/PR96-checks.json",
+              "sha256": "a5624bcfbd40acf5d393b869afe524af633b79a8f8b8e9c38bb8416a2e8535e8"
+            }
+          ]
+        },
+        {
+          "id": "CW-T019",
+          "url": "https://moonlab.ventures/blog/hand-claude-code-a-red-test-suite",
+          "locator": "What it did; The brief; The gotchas",
+          "original_capture": "sources/phase-B-nonauthor/CW-T019.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-T019.txt",
+          "chars": 11187,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-T019",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "c92235785b88815ea97ac49f80bdd33cd394cc810ce262d3981242dda2358af0"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "Y012 original says existing specs/reports/PR history form a cheap audit trail. Frozen ci-gate documents source-linked digest and limits. PR96 captures contain head-bound ten successful check records and structural digest; T019 reports history/tests solving a regression. Availability does not establish saved reviewer effort.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L11-F02",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "d339a9e1-2486-45e3-8744-8bf2a9342773",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/11-shared-team-dependence.md",
+      "report_sha256": "8cd05efdb383bee01e29c2072e96b91aa3e77d7d648fdf922cfc81e606e8855b",
+      "finding_table_sha256": "6dfcafb89273792f55323a299d1834ec7e830361103ba63d7ab4d123c26c326e",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-Y007",
+          "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "locator": "posts 1,5,6",
+          "original_capture": "sources/L01/CW-Y007.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y007.txt",
+          "chars": 4708,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y007",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+          "additional_original_capture": "sources/L11/CW-Y007.json",
+          "additional_capture_sha256": "488c04c210ba98b486e0fb8a12eb1cb3c81ac19db266fdb5baa6897607eda8ac"
+        },
+        {
+          "id": "L11-S03",
+          "original_files": [
+            {
+              "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+              "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+            }
+          ]
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-Y007",
+          "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "locator": "posts 1,5,6",
+          "original_capture": "sources/L01/CW-Y007.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y007.txt",
+          "chars": 4708,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y007",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+          "additional_original_capture": "sources/L11/CW-Y007.json",
+          "additional_capture_sha256": "488c04c210ba98b486e0fb8a12eb1cb3c81ac19db266fdb5baa6897607eda8ac"
+        },
+        {
+          "id": "L11-S01",
+          "original_files": [
+            {
+              "path": "sources/L11/PR96.json",
+              "sha256": "779b0ab848dd3268b0a9e8c035d77aa9316c2acf1214f28dd441eff216304781"
+            },
+            {
+              "path": "sources/L11/PR96-comments.json",
+              "sha256": "78742be8fb5d68007abd6fd0cfc9ede1c50ddf5cef2a61b6ea0ba1a83961a861"
+            },
+            {
+              "path": "sources/L11/PR96-checks.json",
+              "sha256": "a5624bcfbd40acf5d393b869afe524af633b79a8f8b8e9c38bb8416a2e8535e8"
+            }
+          ]
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "Y007 posts 1/5/6 support repeated invocation and explicitly accept CI without having tested it. Strategy labels dispatch/rerun coordination hypothetical; PR96 shows an ordinary revision-bound substitute. Proposed revision reconciliation is not implemented compatibility or observed demand.",
+      "qualification": null,
+      "correction": null
+    },
+    {
+      "finding_id": "L11-F03",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "d339a9e1-2486-45e3-8744-8bf2a9342773",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/11-shared-team-dependence.md",
+      "report_sha256": "8cd05efdb383bee01e29c2072e96b91aa3e77d7d648fdf922cfc81e606e8855b",
+      "finding_table_sha256": "6dfcafb89273792f55323a299d1834ec7e830361103ba63d7ab4d123c26c326e",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-Y004",
+          "url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "locator": "posts 1,6,7",
+          "original_capture": "sources/phase-B-nonauthor/CW-Y004.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y004.txt",
+          "chars": 5731,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y004",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "3de9bafccc90e5080b9538eede13d1fac61c631696a3845370c273f03dca7ce2",
+          "additional_original_capture": "sources/L11/CW-Y004.json",
+          "additional_capture_sha256": "c183f66537437d98463f83318613e43191d2ad9a717686b6901d85d444dd3ddc"
+        },
+        {
+          "id": "L11-S03",
+          "original_files": [
+            {
+              "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+              "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+            }
+          ]
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "CW-Y008",
+          "url": "https://forum.cursor.com/t/applying-shared-coding-guidelines-across-multiple-repos-with-bugbot/133667",
+          "locator": "posts 1-13,15,17,20",
+          "original_capture": "sources/phase-B-nonauthor/CW-Y008.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y008.txt",
+          "chars": 3836,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y008",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "becd9ab77157c09ee4e307a89168354935f04c805b7a951517d2238819d30c1a"
+        },
+        {
+          "id": "L11-S02",
+          "original_files": [
+            {
+              "path": "inputs/docs/ci-gate.md",
+              "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+            }
+          ]
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_with_access_qualification",
+      "reason": "Y004 original post specifies non-transitive A/B/C source and derived-context boundaries; later posts route a formal security assessment, not a breach or rejection. Strategy is hypothetical. Y008 post 20 confirms explicit relative rule links, while frozen ci-gate supplies a per-repo substitute. Resolution history remains bounded as below.",
+      "qualification": "Y008 current original post 20 confirms explicit-link support, but the historical resolved-bug event relies on frozen record. Do not infer that all rule inclusion works or general cross-repo checking exists.",
+      "correction": null
+    },
+    {
+      "finding_id": "L11-F04",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "lens_author_run_id": "d339a9e1-2486-45e3-8744-8bf2a9342773",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+      "report_path": "lenses/11-shared-team-dependence.md",
+      "report_sha256": "8cd05efdb383bee01e29c2072e96b91aa3e77d7d648fdf922cfc81e606e8855b",
+      "finding_table_sha256": "6dfcafb89273792f55323a299d1834ec7e830361103ba63d7ab4d123c26c326e",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "supporting_originals": [
+        {
+          "id": "CW-Y007",
+          "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "locator": "posts 1,5,6",
+          "original_capture": "sources/L01/CW-Y007.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y007.txt",
+          "chars": 4708,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y007",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+          "additional_original_capture": "sources/L11/CW-Y007.json",
+          "additional_capture_sha256": "488c04c210ba98b486e0fb8a12eb1cb3c81ac19db266fdb5baa6897607eda8ac"
+        },
+        {
+          "id": "CW-Y012",
+          "url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "locator": "Solutions; Artifacts; Where we are now",
+          "original_capture": "sources/L11/CW-Y012.html",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y012.txt",
+          "chars": 6274,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y012",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "fa25749665b2c95a20640dfd164563b19babf698222ecd95b1ed3b10014a9284"
+        }
+      ],
+      "opposing_originals": [
+        {
+          "id": "L11-S01",
+          "original_files": [
+            {
+              "path": "sources/L11/PR96.json",
+              "sha256": "779b0ab848dd3268b0a9e8c035d77aa9316c2acf1214f28dd441eff216304781"
+            },
+            {
+              "path": "sources/L11/PR96-comments.json",
+              "sha256": "78742be8fb5d68007abd6fd0cfc9ede1c50ddf5cef2a61b6ea0ba1a83961a861"
+            },
+            {
+              "path": "sources/L11/PR96-checks.json",
+              "sha256": "a5624bcfbd40acf5d393b869afe524af633b79a8f8b8e9c38bb8416a2e8535e8"
+            }
+          ]
+        },
+        {
+          "id": "CW-Y005",
+          "url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "locator": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "original_capture": "sources/phase-A-nonauthor/CW-Y005.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y005.txt",
+          "chars": 16834,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y005",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "5c1a2bc9d740da12a37db00d4a1d32af71241a4ed05d956963a856153a5a2463"
+        },
+        {
+          "id": "CW-Y001",
+          "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "locator": "posts 1 and 3",
+          "original_capture": "sources/phase-A-nonauthor/CW-Y001.txt",
+          "text_capture": "sources/phase-B-nonauthor/CW-Y001.txt",
+          "chars": 6028,
+          "canonical_record": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl#CW-Y001",
+          "canonical_record_file_sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+          "capture_sha256": "cb3048e07205f09d040625d836d9a7894bb0a9c1f6777ef38a013f029bb9d13f"
+        }
+      ],
+      "capability_evidence": [
+        {
+          "path": "inputs/docs/cli.md",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "path": "inputs/docs/ci-gate.md",
+          "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0"
+        },
+        {
+          "path": "inputs/docs/reference.md",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "path": "inputs/scripts/lib/tool-specs.mjs",
+          "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+        },
+        {
+          "path": "inputs/scripts/find-similar.mjs",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "path": "inputs/README.md",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "path": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        },
+        {
+          "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        },
+        {
+          "path": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_as_bounded_analysis",
+      "reason": "Y007 and Y012 establish candidate manual/review work, not voluntary reliance. PR96 metadata, Y005 internal reading-room/review infrastructure and Y001 adjacent-product payment supply rivals. Removing a mandated gate changes the rules; the proposed optional-artifact comparison is an inference, not a performed experiment.",
+      "qualification": null,
+      "correction": null
+    }
+  ],
+  "corrections_requested": 0,
+  "limits": [
+    "Targeted original passages and captures, not exhaustive reread of every linked page/comment.",
+    "No customer experiment or executed product capability test. Capability evidence is frozen documentation/source inspection.",
+    "Historical complaints remain source/version bounded; no current defect asserted.",
+    "Y008 original explicit-link support verified; historical resolution qualification retained."
+  ]
+}

@@ -1,0 +1,784 @@
+{
+  "schema_version": 1,
+  "candidate": {
+    "candidate": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+    "commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+    "fixture": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+    "source_sha256": {
+      "src/popular.mjs": "117a6551aa4c146d08a7b44b4cacd2da1a8e10bfcd8a0046e9f10734d189a967",
+      "src/duplicates.mjs": "1b20db633e25ce5eb9810729e93a1681809e79feb2dad6a260731e64e8613488",
+      "src/consumer.mjs": "dea8efd479f4e52e8404f2d3b06938688fb713665afd788ca19fc66e87023d4c",
+      "src/library.mjs": "eb95020b1847f45a1f9e1bff32d13cd37709e4ad22ac0982fa7aab2985aa8a24"
+    },
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "candidate_canonical": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+    "candidate_files_sha256": {
+      "scripts/mcp-server.mjs": "67bea39f000592963826db38b6078da40c6a8b46e5d12892d5d8d020c8800453",
+      "hooks/hooks.json": "9b64aa9af1e20277fb9751dbea1a8a140c1cf7037dc45832f26545d01dd5d498",
+      "hooks/pre-edit-impact.mjs": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb",
+      "hooks/post-edit-diff.mjs": "127a48f34a8b77bf077746e9b69fad13edabb3a6f2782fce64be3cb7b6be007e",
+      "hooks/session-brief.mjs": "c7080bb4dcbd84747128ba686a5532307ed139831c4342990233c488ce161ce1",
+      ".claude-plugin/plugin.json": "cebf5ff5260837ff7c3a8c993793d8e4ec744034cec0b8da588eaaec222f11e3"
+    },
+    "native_corrected_model": "gpt-6-sol",
+    "native_corrected_reasoning": "high",
+    "versions": {
+      "codex": "0.157.1",
+      "claude": "2.1.265",
+      "node": "26.7.0",
+      "git": "2.54.0 (Apple Git-157)"
+    },
+    "native_ambient_delivery": "unverified: features.hooks=false; user hooks file exists; no global hooks/trust changed or inspected"
+  },
+  "scope": "Native-host evidence and separately labeled supplementary setup/adapter probes; no full readiness or customer benefit claim.",
+  "cases": [
+    {
+      "id": "H-P02-01",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "actual Codex exec model startup",
+      "status": "unverified",
+      "expected": "The requested native model can run for this authenticated account.",
+      "observed": "gpt-6.1-sol rejected with HTTP 400 before tools. One parent-authorized correction used installed catalog-supported gpt-6-sol/high; the rejected identifier is not silently equated with the working one.",
+      "evidence_refs": [
+        "cold.receipt.json",
+        "events/cold.stdout.txt",
+        "host-versions.receipt.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6.1-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "cold",
+          "duration_seconds": 2.728292942047119,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        },
+        {
+          "run": "host-versions",
+          "duration_seconds": 0.1279599666595459,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-04",
+      "next_step": "Resolve account/model compatibility before claiming gpt-6.1-sol native availability."
+    },
+    {
+      "id": "H-P02-02",
+      "ned_ids": [
+        "NED-05",
+        "NED-08"
+      ],
+      "surface": "actual Codex MCP default-policy denial",
+      "status": "pass",
+      "expected": "The host respects ordinary approval requirements and does not edit after denied pre-edit evidence.",
+      "observed": "Native refresh was denied because approval_policy=never. Original fixture remained byte-identical; no baseline was invented. Linked context/impact were also denied. Raw events describe a policy denial, not an automatic approval-review rejection, despite one model narrative using that phrase.",
+      "evidence_refs": [
+        "cold-corrected-sol.receipt.json",
+        "linked-native.receipt.json",
+        "events/cold-corrected-sol.stdout.txt",
+        "events/linked-native.stdout.txt"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "cold-corrected-sol",
+          "duration_seconds": 52.34466314315796,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        },
+        {
+          "run": "linked-native",
+          "duration_seconds": 77.77094602584839,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-03",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "Codex MCP configuration inspection",
+      "status": "pass",
+      "expected": "The scoped Codeweb transport resolves to the frozen source candidate.",
+      "observed": "codex mcp get codeweb reports the candidate stdio transport. This targeted metadata read is not a live tool invocation.",
+      "evidence_refs": [
+        "codex-specific-config-discovery.receipt.json",
+        "events/codex-specific-config-discovery.stdout.txt"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "codex-specific-config-discovery",
+          "duration_seconds": 0.05851602554321289,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-04",
+      "ned_ids": [
+        "NED-02",
+        "NED-07",
+        "NED-08"
+      ],
+      "surface": "actual Codex MCP exact-target/source opening",
+      "status": "pass",
+      "expected": "Low-fan-in rare is inspected with its consequential consumer, separately from popular.",
+      "observed": "Preauthorized explain/impact/context identify src/consumer.mjs:consequential for rare. Source windows and exact files were opened before apply_patch. Popular full:true independently lists fan0 through fan5.",
+      "evidence_refs": [
+        "preauthorized-cold.receipt.json",
+        "events/preauthorized-cold.stdout.txt",
+        "RUN-SUMMARIES.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "preauthorized-cold",
+          "duration_seconds": 69.47295427322388,
+          "request_to_first_source_evidence_seconds": 23.40245223045349,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-05",
+      "ned_ids": [
+        "NED-03",
+        "NED-07"
+      ],
+      "surface": "actual Codex similarity/source comparison",
+      "status": "pass",
+      "expected": "Source-linked candidates remain comparison evidence, not behavioral substitutes.",
+      "observed": "find_similar returned five source-linked candidates, bodyLineCap=400 and lexical ranking. The agent opened duplicates.mjs and acknowledged intentional duplication and no behavioral equivalence. Broader conflicting-contract/body-cap controls belong to the technical matrix.",
+      "evidence_refs": [
+        "preauthorized-cold.receipt.json",
+        "events/preauthorized-cold.stdout.txt"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "preauthorized-cold",
+          "duration_seconds": 69.47295427322388,
+          "request_to_first_source_evidence_seconds": 23.40245223045349,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-06",
+      "ned_ids": [
+        "NED-01",
+        "NED-05",
+        "NED-06"
+      ],
+      "surface": "actual Codex baseline/edit/diff",
+      "status": "pass",
+      "expected": "Evidence arrives before edit; refreshed structural result preserves original baseline and separate test/behavior provenance.",
+      "observed": "rare +1\u2192+2 was applied after source-linked evidence. Baseline 25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd survived. Diff ok:true explicitly labels duplication and behavior not-evaluated; no tests were run in that session.",
+      "evidence_refs": [
+        "preauthorized-cold.receipt.json",
+        "events/preauthorized-cold.stdout.txt",
+        "snapshots/native-original-baseline.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "preauthorized-cold",
+          "duration_seconds": 69.47295427322388,
+          "request_to_first_source_evidence_seconds": 23.40245223045349,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-07",
+      "ned_ids": [
+        "NED-05",
+        "NED-08"
+      ],
+      "surface": "actual Codex detached linked worktree",
+      "status": "pass",
+      "expected": "Linked source/graph/baseline are independent from the original fixture.",
+      "observed": "Native refresh/impact/context/source reads used the detached worktree graph/root. It captured its own f2d4c34eaefc9a227a4d36733d398d5a0bbcfe41101828564c732b22b3ffa3b6 baseline and made no source edit.",
+      "evidence_refs": [
+        "preauthorized-linked.receipt.json",
+        "events/preauthorized-linked.stdout.txt",
+        "LINKED.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "preauthorized-linked",
+          "duration_seconds": 60.31840705871582,
+          "request_to_first_source_evidence_seconds": 30.25519299507141,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-08",
+      "ned_ids": [
+        "NED-01",
+        "NED-04",
+        "NED-05"
+      ],
+      "surface": "actual Codex stale/zero/recovery",
+      "status": "pass",
+      "expected": "Stale evidence is visible, a matched zero differs from failure, and ordinary refresh preserves original baseline.",
+      "observed": "After rare +2\u2192+3 fixture preparation, impact/context warned stale and context freshness=stale. quiet matched with count0 and the same stale disclaimer. Ordinary refresh and refreshed diff retained the original 25f343... baseline; tests/behavior were not inferred.",
+      "evidence_refs": [
+        "preauthorized-warm-recovery.receipt.json",
+        "events/preauthorized-warm-recovery.stdout.txt",
+        "warm-preparation.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "preauthorized-warm-recovery",
+          "duration_seconds": 52.253146171569824,
+          "request_to_first_source_evidence_seconds": 20.634531021118164,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-09",
+      "ned_ids": [
+        "NED-01",
+        "NED-04"
+      ],
+      "surface": "actual Codex missing/corrupt/unmapped/empty states",
+      "status": "pass",
+      "expected": "Unsupported-empty evidence and missing/corrupt/unmapped failures remain distinct.",
+      "observed": "Native context returned graph-not-found, invalid-JSON, found:false with search hint, and EMPTY/vacuous-not-zero warning. Empty map came from a real unsupported-extension CLI --allow-empty fixture. Unmapped-symbol query used the owned primary graph; other paths are inside owned states.",
+      "evidence_refs": [
+        "native-state-matrix.receipt.json",
+        "events/native-state-matrix.stdout.txt",
+        "STATE-FIXTURES.json",
+        "state-empty-cli-prep.receipt.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "native-state-matrix",
+          "duration_seconds": 26.21266508102417,
+          "request_to_first_source_evidence_seconds": 17.607547998428345,
+          "per_event_timestamps_available": true
+        },
+        {
+          "run": "state-empty-cli-prep",
+          "duration_seconds": 0.2968270778656006,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-10",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "surface": "actual Codex recognized generated-dependency scope",
+      "status": "unverified",
+      "expected": "A legitimately generated/dependency-excluded scope reports its boundary distinctly.",
+      "observed": "The actual src/generated.mjs with @generated comment mapped as role:product and captureEvidence returned state:captured with zero relation totals. This generated-like input does not establish the required recognized generated/dependency exclusion behavior; no manual role was invented.",
+      "evidence_refs": [
+        "native-state-matrix.receipt.json",
+        "events/native-state-matrix.stdout.txt",
+        "state-generated-cli-prep.receipt.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "native-state-matrix",
+          "duration_seconds": 26.21266508102417,
+          "request_to_first_source_evidence_seconds": 17.607547998428345,
+          "per_event_timestamps_available": true
+        },
+        {
+          "run": "state-generated-cli-prep",
+          "duration_seconds": 0.28939318656921387,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-04",
+      "next_step": "Run the documented recognized generated/dependency path in a scoped native host after technical scope rules are reviewed."
+    },
+    {
+      "id": "H-P02-11",
+      "ned_ids": [
+        "NED-09"
+      ],
+      "surface": "actual Codex request/result/source-open/edit timing",
+      "status": "pass",
+      "expected": "Report observed per-run end-to-end timings and evidence ordering without tiny-sample promises.",
+      "observed": "Preauthorized first session 69.473s: first source evidence 23.402s, exact source opened 29.650s, edit 48.247s. Linked session 60.318s: first source evidence 30.255s, source opening 43.273s. Warm recovery 52.253s: first stale evidence 20.635s. Permission waits are unmeasured; these are process/model-inclusive timings on CLI-prepared tiny maps, not extraction-cold or percentile claims.",
+      "evidence_refs": [
+        "preauthorized-cold.receipt.json",
+        "preauthorized-linked.receipt.json",
+        "preauthorized-warm-recovery.receipt.json",
+        "RUN-SUMMARIES.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "preauthorized-cold",
+          "duration_seconds": 69.47295427322388,
+          "request_to_first_source_evidence_seconds": 23.40245223045349,
+          "per_event_timestamps_available": true
+        },
+        {
+          "run": "preauthorized-linked",
+          "duration_seconds": 60.31840705871582,
+          "request_to_first_source_evidence_seconds": 30.25519299507141,
+          "per_event_timestamps_available": true
+        },
+        {
+          "run": "preauthorized-warm-recovery",
+          "duration_seconds": 52.253146171569824,
+          "request_to_first_source_evidence_seconds": 20.634531021118164,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-12",
+      "ned_ids": [
+        "NED-10"
+      ],
+      "surface": "actual Codex scoped MCP disable and ordinary edit",
+      "status": "unverified",
+      "expected": "Disabling the scoped MCP transport removes its native tool use while ordinary work remains usable.",
+      "observed": "Session config enabled=false and targeted config inspection report disabled. No Codeweb MCP calls occurred; quiet -1\u2192-2 and local checks succeeded. However the enabled control also made no MCP calls, and no runtime catalog or process-launch receipt independently proves absent exposure. Ordinary work survives; disable-stops-delivery proof is incomplete, with hook disable/plugin uninstall separate.",
+      "evidence_refs": [
+        "disabled-native-control.receipt.json",
+        "events/disabled-native-control.stdout.txt",
+        "codex-specific-config-disable.receipt.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "disabled-native-control",
+          "duration_seconds": 50.514179706573486,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": true
+        },
+        {
+          "run": "codex-specific-config-disable",
+          "duration_seconds": 0.049455881118774414,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        }
+      ],
+      "owner": "Codex / P-04",
+      "next_step": "Capture runtime tool-catalog or server-launch absence under enabled versus disabled scoped config; separately test ambient disable/uninstall after legitimate hook trust."
+    },
+    {
+      "id": "H-P02-13",
+      "ned_ids": [
+        "NED-10"
+      ],
+      "surface": "ordinary enabled versus disabled small-edit controls",
+      "status": "pass",
+      "expected": "Record ordinary workflow behavior honestly, including non-use of optional evidence.",
+      "observed": "Equivalent sequential arithmetic edits with identical inspection instructions: disabled 50.514s, enabled 41.867s. Neither made MCP calls; both used local source/graph inspection and Node assertions. Different constants, sequential cache state, one operator and tiny task prevent benefit/adoption inference. This is a single native non-use observation, not a customer result.",
+      "evidence_refs": [
+        "disabled-native-control.receipt.json",
+        "enabled-native-control.receipt.json",
+        "events/enabled-native-control.stdout.txt",
+        "RUN-SUMMARIES.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "disabled-native-control",
+          "duration_seconds": 50.514179706573486,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": true
+        },
+        {
+          "run": "enabled-native-control",
+          "duration_seconds": 41.86737394332886,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-14",
+      "ned_ids": [
+        "NED-02",
+        "NED-08"
+      ],
+      "surface": "supplementary shipped hook documented-payload compatibility",
+      "status": "fail",
+      "expected": "Shipped adapter can consume an actual Codex edit payload and show relevant known-target evidence.",
+      "observed": "Standalone canonical-path documented Codex apply_patch payload with tool_input.command produced no output. Claude Edit file_path/old_string/new_string changing rare instead produced popular \u00d76 and popular callers, omitting rare consequential consumer. Edit/Write matcher aliases alone are not inferred to fail. These are adapter subprocess facts, not trusted native hook delivery.",
+      "evidence_refs": [
+        "supplementary-codex-adapter-canonical.receipt.json",
+        "supplementary-claude-adapter-canonical.receipt.json",
+        "events/supplementary-claude-adapter-canonical.stdout.txt"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "none (standalone adapter)",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "supplementary-codex-adapter-canonical",
+          "duration_seconds": 0.0460050106048584,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        },
+        {
+          "run": "supplementary-claude-adapter-canonical",
+          "duration_seconds": 0.03813886642456055,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        }
+      ],
+      "owner": "Codex / P-03",
+      "next_step": "P-03 should review supported payload extraction and exact-target/file-scope claims, then perform actual trusted native hook delivery."
+    },
+    {
+      "id": "H-P02-15",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "supplementary hook symlink entry execution",
+      "status": "fail",
+      "expected": "Invoking the same hook through a valid filesystem alias executes its entry path.",
+      "observed": "/var candidate script entry returned silently for both payloads; canonical /private path corrected Claude output. Source entry guard compares resolve(argv[1]) with canonical fileURLToPath(import.meta.url). Candidate source remained unchanged.",
+      "evidence_refs": [
+        "supplementary-codex-adapter.receipt.json",
+        "supplementary-claude-adapter.receipt.json",
+        "supplementary-claude-adapter-canonical.receipt.json",
+        "IDENTITY.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "none (standalone adapter)",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "supplementary-codex-adapter",
+          "duration_seconds": 0.03654909133911133,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        },
+        {
+          "run": "supplementary-claude-adapter",
+          "duration_seconds": 0.035472869873046875,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        },
+        {
+          "run": "supplementary-claude-adapter-canonical",
+          "duration_seconds": 0.03813886642456055,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        }
+      ],
+      "owner": "Codex / P-03",
+      "next_step": "P-03 should decide whether supported aliased checkouts require an entry-guard repair and retest exact native install paths."
+    },
+    {
+      "id": "H-P02-16",
+      "ned_ids": [
+        "NED-01",
+        "NED-02",
+        "NED-04",
+        "NED-05",
+        "NED-07",
+        "NED-08",
+        "NED-09",
+        "NED-10"
+      ],
+      "surface": "Codex native ambient hooks/trust/quiet/noisy/uninstall",
+      "status": "unverified",
+      "expected": "Actual supported adapter/event/trust delivers advisory context before edits; disable/uninstall and ordinary quiet events behave correctly.",
+      "observed": "Successful exec sessions deliberately use features.hooks=false. A user hooks file exists; it was not read or trusted, so unrelated hooks were not enabled. No trusted native Codeweb hook event was observed and no global plugin uninstall was attempted.",
+      "evidence_refs": [
+        "IDENTITY.json",
+        "preauthorized-cold.receipt.json",
+        "disabled-native-control.receipt.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "preauthorized-cold",
+          "duration_seconds": 69.47295427322388,
+          "request_to_first_source_evidence_seconds": 23.40245223045349,
+          "per_event_timestamps_available": true
+        },
+        {
+          "run": "disabled-native-control",
+          "duration_seconds": 50.514179706573486,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-04",
+      "next_step": "Use a legitimately isolated active hook layer, obtain normal exact-definition trust when available, observe actual payload/context and disable/uninstall behavior."
+    },
+    {
+      "id": "H-P02-17",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "Claude shipped plugin manifest validation",
+      "status": "pass",
+      "expected": "Installed Claude validates the exact shipped plugin manifest without sign-in.",
+      "observed": "claude plugin validate .claude-plugin/plugin.json success:true. Warning: root CLAUDE.md is not loaded as project context; a skill is required to ship context. Marketplace validation was separate. Validation does not establish startup/tool/hook delivery.",
+      "evidence_refs": [
+        "claude-shipped-plugin-manifest.receipt.json",
+        "events/claude-shipped-plugin-manifest.stdout.txt"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Claude Code",
+      "host_version": "2.1.265",
+      "model": "none (validator)",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "claude-shipped-plugin-manifest",
+          "duration_seconds": 0.4152541160583496,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        }
+      ],
+      "owner": "Codex / P-02 reviewer",
+      "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+    },
+    {
+      "id": "H-P02-18",
+      "ned_ids": [
+        "NED-01",
+        "NED-02",
+        "NED-03",
+        "NED-04",
+        "NED-05",
+        "NED-06",
+        "NED-07",
+        "NED-08",
+        "NED-09",
+        "NED-10"
+      ],
+      "surface": "Claude actual authenticated tools/model/hooks/linked worktree",
+      "status": "unverified",
+      "expected": "Real authenticated native discovery/tool invocation/pre-edit hook delivery is demonstrated without bypassing permission/trust.",
+      "observed": "Claude auth status loggedIn:false/authMethod:none. No sign-in/model/tool/hook session attempted. Scoped mcp-list setup failed variadic option parsing; one correction rejected --restricted. Those are probe setup errors, not product failures.",
+      "evidence_refs": [
+        "claude-auth-status.receipt.json",
+        "events/claude-auth-status.sanitized.json",
+        "claude-scoped-discovery.receipt.json",
+        "claude-scoped-discovery-corrected.receipt.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Claude Code",
+      "host_version": "2.1.265",
+      "model": "unavailable",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "claude-auth-status",
+          "duration_seconds": 0.2026512622833252,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        },
+        {
+          "run": "claude-scoped-discovery",
+          "duration_seconds": 0.13883090019226074,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        },
+        {
+          "run": "claude-scoped-discovery-corrected",
+          "duration_seconds": 0.06475114822387695,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        }
+      ],
+      "owner": "Codex / P-04",
+      "next_step": "After separately authorized authentication and legitimate scoped client setup, perform actual tools/hooks/worktree/disable matrix with ordinary trust."
+    },
+    {
+      "id": "H-P02-19",
+      "ned_ids": [
+        "NED-03",
+        "NED-06",
+        "NED-07"
+      ],
+      "surface": "broader native similarity/provenance/truncation controls",
+      "status": "unverified",
+      "expected": "Actual host verifies conflicting contracts, body caps, omitted counts, stale/failed/skipped test provenance and invalid oracles.",
+      "observed": "Native smokes cover source-linked candidates, explicit full expansion, structural versus unrun-test distinctions and actual ordinary-control assertions. Broader boundary matrix is delegated technical evidence, not observed in these native sessions.",
+      "evidence_refs": [
+        "preauthorized-cold.receipt.json",
+        "RUN-SUMMARIES.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "preauthorized-cold",
+          "duration_seconds": 69.47295427322388,
+          "request_to_first_source_evidence_seconds": 23.40245223045349,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-04",
+      "next_step": "Review the technical matrix and explicitly declare remaining native boundary exclusions or run bounded targeted host cases before readiness."
+    },
+    {
+      "id": "H-P02-20",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "surface": "actual Codex Codeweb child invocation unavailable/timeout state",
+      "status": "unverified",
+      "expected": "The Codeweb tool child failing to start or timing out is distinct from supported zero.",
+      "observed": "Observed host failures include model rejection and approval denial, plus native missing/corrupt/empty graph states. A Codeweb child executable/unavailable/timeout fault was not injected in the live host; those other failures are not relabeled as this case.",
+      "evidence_refs": [
+        "cold.receipt.json",
+        "cold-corrected-sol.receipt.json",
+        "native-state-matrix.receipt.json"
+      ],
+      "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+      "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+      "host": "Codex CLI",
+      "host_version": "0.157.1",
+      "model": "gpt-6-sol/high",
+      "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+      "latency": [
+        {
+          "run": "cold",
+          "duration_seconds": 2.728292942047119,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        },
+        {
+          "run": "cold-corrected-sol",
+          "duration_seconds": 52.34466314315796,
+          "request_to_first_source_evidence_seconds": null,
+          "per_event_timestamps_available": false
+        },
+        {
+          "run": "native-state-matrix",
+          "duration_seconds": 26.21266508102417,
+          "request_to_first_source_evidence_seconds": 17.607547998428345,
+          "per_event_timestamps_available": true
+        }
+      ],
+      "owner": "Codex / P-04",
+      "next_step": "Review technical invocation-fault receipts and run a bounded legitimately scoped native transport/child fault case or declare a valid surface exclusion before readiness."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "T16-post-unsupported",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/post-edit-diff.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/unsupported/subject.mjs\"}}",
+  "start": "2026-10-01T01:50:11.884Z",
+  "end": "2026-10-01T01:50:11.972Z",
+  "durationMs": 88.52808299999992,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": "/Library/Developer/CommandLineTools/usr/bin/ctags: illegal option -- -\nusage: ctags [-BFTaduwvx] [-f tagsfile] file ...\n"
+}

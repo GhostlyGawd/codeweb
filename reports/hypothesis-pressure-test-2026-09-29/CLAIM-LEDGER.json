@@ -1,0 +1,2151 @@
+{
+  "claims": [
+    {
+      "id": "F-C01",
+      "statement": "Keep two distinct local hypotheses: consumer-scope inspection and reuse-candidate discovery, conditional on an unresolved consequential decision.",
+      "verdict": "narrow",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "An agent-heavy maintainer changing unfamiliar shared code or extending utilities; occupation unknown for T018, experienced solo developer/later builder for Z003.",
+      "conditions": "Native search leaves a real uncertainty; source coverage is adequate for that question; the maintainer can judge semantics.",
+      "strongest_supported_case": "T018 reports recurring utility duplication and added review; P003 reports missed references with concrete breakage; Z003 describes repeated reuse prompts.",
+      "strongest_countercase": "Z001 and X003 describe successful bounded native refactors; X001 finds clean-repository overhead; P003 includes same-file failures and recommends ordinary reference checking.",
+      "failure_scenario": "A perfectly accurate brief repeats known facts or suppresses a same-file risk because eligibility demands another-module consumer.",
+      "weakest_assumption": "Missing discoverable facts, rather than architecture judgment or execution discipline, are the limiting step.",
+      "local_implication": "Test scope and reuse separately against competent native workflows; no universal weekly-user promise.",
+      "paid_implication": "Both jobs remain free; neither identifies a team buyer.",
+      "minimal_falsification_test": "Compare natural scope and reuse tasks separately with competent native controls. Apply F-T04 quality/effort rule; include familiar success, same-file references and intentional duplication. No incremental correct decision or equal-quality burden benefit defeats the case; efficiency alone does not pass the original actionable-findings gate.",
+      "test_id": "F-T01",
+      "evidence_ids": [
+        "CW-T018",
+        "CW-P003",
+        "CW-Z003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z001",
+        "CW-X003",
+        "CW-X001",
+        "CW-T023"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L01-F01",
+        "L01-F02",
+        "L01-F03",
+        "L02-F01",
+        "L02-F02",
+        "L08-F01",
+        "L12-F01"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-P003",
+          "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+          "passage_pointer": "Context and Category H; all body categories read",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-P003.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+          "evidence_type": "first_person_report",
+          "segment": "Python desktop application developer"
+        },
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-T018.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-T023",
+          "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1qobg1g/how_to_refactor_50k_lines_of_legacy_code_without/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:29",
+          "passage_pointer": "Original post lines 21–94 read; remainder not inspected",
+          "capture_pointers": [],
+          "source_access": "opened_partial",
+          "limits": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction. Resolved means completion claimed by the author for this refactor, not independent verification or a general product fix.",
+          "evidence_type": "first_person_report",
+          "segment": "Django maintainer"
+        },
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-X001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "evidence_type": "independent_measurement",
+          "segment": "tool builder/researcher"
+        },
+        {
+          "evidence_id": "CW-X003",
+          "original_url": "https://baransel.dev/post/replaced-entire-dev-workflow-with-claude-code/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:37",
+          "passage_pointer": "Refactoring — Surprisingly Good; Where It Falls Short",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-X003.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Reporter-confirmed success for this task only. Business rules outside code remain a stated limitation; linked repositories not reproduced.",
+          "evidence_type": "first_person_report",
+          "segment": "developer working with a team"
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts.",
+          "evidence_type": "first_person_report",
+          "segment": "individual maintaining personal projects"
+        },
+        {
+          "evidence_id": "CW-Z003",
+          "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:111",
+          "passage_pointer": "Quantifying code duplication; methodological weaknesses",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z003.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed.",
+          "evidence_type": "first_person_report",
+          "segment": "experienced solo developer; later duplication-tool builder"
+        }
+      ],
+      "capability_or_proposal_pointers": [],
+      "origin_synthesis_claim": "SB-C01",
+      "synthesis_claim_ids": [
+        "SB-C01",
+        "SA-C01",
+        "SA-C02",
+        "SA-C03",
+        "SA-C05",
+        "SA-C11"
+      ],
+      "decision_id": "F-D01",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-T018",
+          "role": "direct_support",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-P003",
+          "role": "direct_support",
+          "passage_pointer": "Context and Category H; all body categories read",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z003",
+          "role": "direct_support",
+          "passage_pointer": "Quantifying code duplication; methodological weaknesses",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "role": "counterevidence",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-X003",
+          "role": "counterevidence",
+          "passage_pointer": "Refactoring — Surprisingly Good; Where It Falls Short",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-X001",
+          "role": "counterevidence",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-T023",
+          "role": "counterevidence",
+          "passage_pointer": "Original post lines 21–94 read; remainder not inspected",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        }
+      ]
+    },
+    {
+      "id": "F-C02",
+      "statement": "Own a bounded factual collection job only if evidence arrives at the actual decision and recovery removes work.",
+      "verdict": "revise",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Developer in a named host/session/worktree, preparing an edit and recovering from stale or unavailable evidence.",
+      "conditions": "Pin package, host, cwd and task revision. Separate known-empty, unknown, stale, unsupported and failed. Preserve original baseline and permissions.",
+      "strongest_supported_case": "Historical T002/T004/X009 show why discovery and hooks must be observed per surface; frozen pre-edit source can select a popular symbol instead of the edited symbol and return silence on multiple states.",
+      "strongest_countercase": "L026 resolved through correct invocation; L024 reconsidered MCP after fair comparison. Fail-open advisory behavior can be sensible; constant alerts can be worse.",
+      "failure_scenario": "Six short lines omit the consequential low-fan-in consumer, or usable output arrives after the edit; manual refresh recreates the job.",
+      "weakest_assumption": "The host can deliver the relevant fact with less combined setup, reading and recovery burden than native search.",
+      "local_implication": "Six lines and one second are provisional budgets, not results; availability and uninstall need actual preflight.",
+      "paid_implication": "Host readiness is not service demand.",
+      "minimal_falsification_test": "Proposed preflight: exact target symbol with known consumer, linked worktree, stale/missing/corrupt map, denied permission and generated boundary. Measure request-to-usable-evidence time and recovery actions. Fail when unknown looks empty, baseline is overwritten, or relevant evidence arrives too late.",
+      "test_id": "F-T02",
+      "evidence_ids": [
+        "CW-T002",
+        "CW-T004",
+        "CW-X009",
+        "CW-X001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L026",
+        "CW-L024",
+        "CW-Z012"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L03-F01",
+        "L03-F02",
+        "L03-F03",
+        "L03-F04",
+        "L03-F05",
+        "L04-F04",
+        "L08-F01",
+        "L08-F02"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-L024",
+          "original_url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:76",
+          "passage_pointer": "There’s no difference anymore?; final paragraphs",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-L024.txt",
+            "sources/phase-A-nonauthor/CW-L024.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Three repetitions of one task, vendor-affiliated self-measurement. Claims about general host behavior require official verification; no general MCP/CLI superiority inferred.",
+          "evidence_type": "first_person_report",
+          "segment": "developer relations/tool vendor practitioner"
+        },
+        {
+          "evidence_id": "CW-L026",
+          "original_url": "https://forum.cursor.com/t/bugbot-without-background-agents/157812",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:78",
+          "passage_pointer": "Original post; support reply 6; author confirmation 7",
+          "capture_pointers": [
+            "sources/phase-A-nonauthor/CW-L026.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "All rendered posts read; numbered gaps and JSON API HTTP403 prevent certifying complete thread. Resolution is author-confirmed for this incident, not a general capability test. Later additive review: Additive: exact trigger routes to review without background agents. No new incident.",
+          "evidence_type": "first_person_report",
+          "segment": "team tool user"
+        },
+        {
+          "evidence_id": "CW-T002",
+          "original_url": "https://github.com/anthropics/claude-code/issues/88214",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:8",
+          "passage_pointer": "Body and all 0 comments; comment IDs in source registry",
+          "capture_pointers": [
+            "sources/phase-A-nonauthor/CW-T002.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-T004",
+          "original_url": "https://github.com/anthropics/claude-code/issues/97515",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:10",
+          "passage_pointer": "Body and all 0 comments; comment IDs in source registry",
+          "capture_pointers": [
+            "sources/phase-A-nonauthor/CW-T004.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-X001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "evidence_type": "independent_measurement",
+          "segment": "tool builder/researcher"
+        },
+        {
+          "evidence_id": "CW-X009",
+          "original_url": "https://github.com/openai/codex/issues/27133",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:43",
+          "passage_pointer": "Body reproduction; comment 5233430635; comment 5416744725",
+          "capture_pointers": [
+            "sources/phase-A-nonauthor/CW-X009.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Body and all 10 REST comments read, one page. One grouped reporter incident. Root-cause diagnosis is user investigation, not maintainer confirmation; no fix established.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "original_url": "https://github.com/oraios/serena/discussions/131",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+          "passage_pointer": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z012.txt",
+            "sources/phase-A-nonauthor/CW-Z012.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once.",
+          "evidence_type": "maintainer_confirmation",
+          "segment": "semantic-tool maintainers and contributor"
+        }
+      ],
+      "capability_or_proposal_pointers": [
+        "inputs/hooks/pre-edit-impact.mjs:40-110",
+        "inputs/reports/user-centric-value-strategy/STRATEGY.md#Make the useful path feel native"
+      ],
+      "origin_synthesis_claim": "SB-C02",
+      "synthesis_claim_ids": [
+        "SB-C02",
+        "SA-C03",
+        "SA-C04",
+        "SA-C05"
+      ],
+      "decision_id": "F-D02",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-T002",
+          "role": "direct_support",
+          "passage_pointer": "Body and all 0 comments; comment IDs in source registry",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-T004",
+          "role": "direct_support",
+          "passage_pointer": "Body and all 0 comments; comment IDs in source registry",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-X009",
+          "role": "direct_support",
+          "passage_pointer": "Body reproduction; comment 5233430635; comment 5416744725",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-X001",
+          "role": "methodological_context",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L026",
+          "role": "counterevidence",
+          "passage_pointer": "Original post; support reply 6; author confirmation 7",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L024",
+          "role": "counterevidence",
+          "passage_pointer": "There’s no difference anymore?; final paragraphs",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "role": "counterevidence",
+          "passage_pointer": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        }
+      ]
+    },
+    {
+      "id": "F-C03",
+      "statement": "Keep structural, similarity and behavioral evidence separate; reject safety inference from an empty or green output.",
+      "verdict": "revise",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Maintainer deciding reuse, deletion and validation of a source change.",
+      "conditions": "A mapped edge is an inspection lead; body similarity is not semantic substitutability; actual tests require run/revision/oracle provenance.",
+      "strongest_supported_case": "Frozen ci-gate documentation explicitly limits structural checks; find-similar text nevertheless says an empty result is safe to write. Refresh skips duplication; ordinary gate and hooks have different orphan semantics.",
+      "strongest_countercase": "Actual mapped facts and preserved baselines remain useful. Z011 generated-symbol limits and Z007 empty-reference failures concern adjacent tools, not reproduced Codeweb runtime defects.",
+      "failure_scenario": "A similar helper with different domain semantics is merged, an unmapped callback is removed, or stale/skipped tests become a synthetic verified badge.",
+      "weakest_assumption": "Users interpret evidence boundaries correctly at the decision rather than treating a compact status as assurance.",
+      "local_implication": "Qualify the proposed experience; record the frozen wording inconsistency without editing the product or opening new work here.",
+      "paid_implication": "A hosted wrapper cannot promote static results into compatibility proof.",
+      "minimal_falsification_test": "Inspect fixtures for conflicting-contract clones, missing bodies, generated callers, refresh-only duplication, failed/skipped/stale tests and an invalid test oracle. Fail any safe/complete/behavioral inference unsupported by the corresponding evidence.",
+      "test_id": "F-T03",
+      "evidence_ids": [
+        "CW-Z007",
+        "CW-Z011",
+        "CW-T022",
+        "CW-X013"
+      ],
+      "opposing_evidence_ids": [
+        "CW-P003",
+        "CW-T018",
+        "CW-Z009"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L01-F02",
+        "L02-F02",
+        "L02-F04",
+        "L03-F04",
+        "L04-F01",
+        "L04-F02",
+        "L04-F03",
+        "L04-F04",
+        "L04-F05",
+        "L05-F04",
+        "L07-F02",
+        "L08-F03",
+        "L12-F03"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-P003",
+          "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+          "passage_pointer": "Context and Category H; all body categories read",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-P003.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+          "evidence_type": "first_person_report",
+          "segment": "Python desktop application developer"
+        },
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-T018.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-T022",
+          "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1rug14a/claude_wrote_playwright_tests_that_secretly/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:28",
+          "passage_pointer": "Original post and author clarification",
+          "capture_pointers": [],
+          "source_access": "opened_partial",
+          "limits": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction.",
+          "evidence_type": "first_person_report",
+          "segment": "Alpine/Bootstrap site developer"
+        },
+        {
+          "evidence_id": "CW-X013",
+          "original_url": "https://github.com/openai/codex/issues/24285",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:47",
+          "passage_pointer": "Body: Concrete examples from AJENTIC; Expected behavior",
+          "capture_pointers": [],
+          "source_access": "opened_partial",
+          "limits": "Public report only; underlying commits and traces not reproduced. Comments unavailable after REST rate limit. One project context, not each phase counted.",
+          "evidence_type": "first_person_report",
+          "segment": "repository developer"
+        },
+        {
+          "evidence_id": "CW-Z007",
+          "original_url": "https://github.com/oraios/serena/issues/1814",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:115",
+          "passage_pointer": "Summary; Additional suggestion; Note on scoping",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z007.txt",
+            "sources/phase-A-nonauthor/CW-Z007.txt"
+          ],
+          "source_access": "opened_partial",
+          "limits": "API rate-limited; full body read, comment completeness unverified. First-query crash fix merged Aug 20 (#1848); later-query fix #2007 remains open. No blanket fixed claim.",
+          "evidence_type": "first_person_report",
+          "segment": "developer working in Kibana monorepo"
+        },
+        {
+          "evidence_id": "CW-Z009",
+          "original_url": "https://simonwillison.net/2025/Jun/3/openai-codex-pr/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:117",
+          "passage_pointer": "Setup script; prompt; result paragraph",
+          "capture_pointers": [
+            "sources/phase-A-nonauthor/CW-Z009.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Historical success, not a current speed benchmark. Linked PR not counted separately.",
+          "evidence_type": "first_person_report",
+          "segment": "maintainer of own Django blog"
+        },
+        {
+          "evidence_id": "CW-Z011",
+          "original_url": "https://github.com/oraios/serena/issues/1432",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:119",
+          "passage_pointer": "Capability matrix in body",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z011.txt",
+            "sources/phase-A-nonauthor/CW-Z011.txt"
+          ],
+          "source_access": "opened_partial",
+          "limits": "Full body only; comments unavailable. Closed with #1434, but linked PR inaccessible, so resolution not verified.",
+          "evidence_type": "maintainer_confirmation",
+          "segment": "maintainer / contributor"
+        }
+      ],
+      "capability_or_proposal_pointers": [
+        "inputs/scripts/find-similar.mjs:1-130",
+        "inputs/docs/ci-gate.md:1-100"
+      ],
+      "origin_synthesis_claim": "SB-C03",
+      "synthesis_claim_ids": [
+        "SB-C03",
+        "SA-C01",
+        "SA-C02",
+        "SA-C03",
+        "SA-C04",
+        "SA-C05",
+        "SA-C06",
+        "SA-C07",
+        "SA-C08"
+      ],
+      "decision_id": "F-D03",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-Z007",
+          "role": "direct_support",
+          "passage_pointer": "Summary; Additional suggestion; Note on scoping",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z011",
+          "role": "direct_support",
+          "passage_pointer": "Capability matrix in body",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-T022",
+          "role": "direct_support",
+          "passage_pointer": "Original post and author clarification",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-X013",
+          "role": "direct_support",
+          "passage_pointer": "Body: Concrete examples from AJENTIC; Expected behavior",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-P003",
+          "role": "counterevidence",
+          "passage_pointer": "Context and Category H; all body categories read",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-T018",
+          "role": "counterevidence",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z009",
+          "role": "counterevidence",
+          "passage_pointer": "Setup script; prompt; result paragraph",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z002",
+          "role": "counterevidence",
+          "passage_pointer": "What went wrong; Where it excelled/struggled",
+          "qualification": "Successful lexical migration coexists with a model-name/pricing-table dependency failure. Include nonstructural dependencies and scope uncertainty; no claim a graph discovers that relation. AI-coauthored builder report and inconsistent headline/table multiplier are not a measured cost fact."
+        }
+      ],
+      "editor_additions": [
+        "Successful lexical migration coexists with a model-name/pricing-table dependency failure. Include nonstructural dependencies and scope uncertainty; no claim a graph discovers that relation. AI-coauthored builder report and inconsistent headline/table multiplier are not a measured cost fact."
+      ]
+    },
+    {
+      "id": "F-C04",
+      "statement": "Require additional correct actionable decisions with no higher median total effort under the provisional sprint gate; score harms separately. A reviewer artifact must remove a named reconstruction step.",
+      "verdict": "narrow",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Author inspecting a change and a separately scored reviewer reconstructing its intent and evidence.",
+      "conditions": "Both arms retain full repository access, usual tests, ordinary PR artifacts and a competent host. Include false warnings and unnecessary edits.",
+      "strongest_supported_case": "L023 reports outside-file context resolving false positives; Y012 reports summaries aiding orientation; L048 describes architecture/review difficulty.",
+      "strongest_countercase": "L023 also lost recall; Y012 already attached existing artifacts at little cost; Y005 replaced bespoke retrieval with filesystem/shell; L051 has a useful custom architecture reviewer.",
+      "failure_scenario": "A receipt repeats the PR, accelerates wrong confidence, or shifts collection effort from author to reviewer.",
+      "weakest_assumption": "A missing factual reconstruction step is material after ordinary PR hygiene and source access.",
+      "local_implication": "Retain factual assistance, reject generic receipt value and comparisons against deliberately deprived controls.",
+      "paid_implication": "Free gate/source-linked history is a strong baseline; repackaging it does not validate a bill.",
+      "minimal_falsification_test": "F-T04 applies the original provisional gate: two additional actionable findings across ten changes, no higher median combined inspection/review time; faster incorrect output fails. Equal-time correct additions count. Examine every severe miss and unwanted edit; unresolved material harm prevents an unqualified pass. No new numerical safety tolerance is asserted.",
+      "test_id": "F-T04",
+      "evidence_ids": [
+        "CW-L023",
+        "CW-Y012",
+        "CW-L048"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y005",
+        "CW-L051",
+        "CW-L001",
+        "CW-Z012"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L01-F04",
+        "L02-F01",
+        "L02-F03",
+        "L02-F04",
+        "L02-F05",
+        "L03-F06",
+        "L04-F06",
+        "L06-F02",
+        "L08-F05",
+        "L11-F01",
+        "L12-F03"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-L001",
+          "original_url": "https://www.reddit.com/r/codereview/comments/1vuddna/how_are_you_actually_reviewing_ai_generated_code/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:53",
+          "passage_pointer": "OkPosition4563 reply; rendered lines 310–315",
+          "capture_pointers": [],
+          "source_access": "opened_partial",
+          "limits": "Self-report; no independent replication. Thread completeness and exact date unavailable.",
+          "evidence_type": "first_person_report",
+          "segment": "team developer"
+        },
+        {
+          "evidence_id": "CW-L023",
+          "original_url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:75",
+          "passage_pointer": "Parts 1, 5; limitations 23.5–23.7",
+          "capture_pointers": [
+            "sources/phase-A-nonauthor/CW-L023.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Full article read in overlapping chunks; author adjudication, three small tasks, two models, no independent rerun. Tool-builder case. Not a model leaderboard or proven Codeweb effect.",
+          "evidence_type": "independent_measurement",
+          "segment": "firmware experiment author"
+        },
+        {
+          "evidence_id": "CW-L048",
+          "original_url": "https://news.ycombinator.com/item?id=49321400",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:100",
+          "passage_pointer": "Root 49321400",
+          "capture_pointers": [],
+          "source_access": "opened_full",
+          "limits": "Self-report, no observed task or independent replication. Not evidence of Codeweb use or demand.",
+          "evidence_type": "first_person_report",
+          "segment": "team developer/reviewer"
+        },
+        {
+          "evidence_id": "CW-L051",
+          "original_url": "https://news.ycombinator.com/item?id=49321400",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:103",
+          "passage_pointer": "Comment 49353756",
+          "capture_pointers": [
+            "sources/phase-A-nonauthor/CW-L051.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Self-reported satisfaction, no measured accuracy or purchase amount; considered disabling Copilot but has not reported doing so.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:125",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y005.txt",
+            "sources/phase-A-nonauthor/CW-Y005.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP.",
+          "evidence_type": "first_person_report",
+          "segment": "Internal review-system builder"
+        },
+        {
+          "evidence_id": "CW-Y012",
+          "original_url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:132",
+          "passage_pointer": "Solutions; Artifacts; Where we are now",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y012.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents.",
+          "evidence_type": "first_person_report",
+          "segment": "Team practitioner / consultant"
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "original_url": "https://github.com/oraios/serena/discussions/131",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+          "passage_pointer": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z012.txt",
+            "sources/phase-A-nonauthor/CW-Z012.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once.",
+          "evidence_type": "maintainer_confirmation",
+          "segment": "semantic-tool maintainers and contributor"
+        }
+      ],
+      "capability_or_proposal_pointers": [],
+      "origin_synthesis_claim": "SB-C04",
+      "synthesis_claim_ids": [
+        "SB-C04",
+        "SA-C02",
+        "SA-C03",
+        "SA-C04",
+        "SA-C08",
+        "SA-C09"
+      ],
+      "decision_id": "F-D04",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-L023",
+          "role": "methodological_context",
+          "passage_pointer": "Parts 1, 5; limitations 23.5–23.7",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y012",
+          "role": "direct_support",
+          "passage_pointer": "Solutions; Artifacts; Where we are now",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L048",
+          "role": "direct_support",
+          "passage_pointer": "Root 49321400",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "role": "counterevidence",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L051",
+          "role": "counterevidence",
+          "passage_pointer": "Comment 49353756",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L001",
+          "role": "counterevidence",
+          "passage_pointer": "OkPosition4563 reply; rendered lines 310–315",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "role": "counterevidence",
+          "passage_pointer": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        }
+      ]
+    },
+    {
+      "id": "F-C05",
+      "statement": "Repeated reliance requires recurring opportunities and unprompted useful choices; low calendar frequency alone cannot disqualify value.",
+      "verdict": "unresolved_from_existing_evidence",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Same maintainer after familiarization on later naturally occurring eligible tasks.",
+      "conditions": "Separate no opportunity, unavailable tool, eligible nonuse, passive exposure, retained automation and deliberate return. Do not manufacture tasks.",
+      "strongest_supported_case": "Z003 reports recurring reuse burden; Y001 values infrequent complex review. A later changed source state can recreate uncertainty.",
+      "strongest_countercase": "Familiarity can erase discovery value; L015 removed extra tooling on a small repo; native successes persist. Automatic invocation and reminders measure exposure, not preference.",
+      "failure_scenario": "Pilot passes on novelty but later use needs prompts, or no task occurs and is falsely called churn.",
+      "weakest_assumption": "Relevant uncertainty returns often enough and the benefit survives learning and noise.",
+      "local_implication": "Classify episodic exploration as a valid outcome if recurrence is absent; no indispensable claim.",
+      "paid_implication": "Competitor subscription intentions cannot establish Codeweb retention or renewal.",
+      "minimal_falsification_test": "After one useful task observe two later eligible opportunities without reminders, logging availability, decision change, total burden and intentional-duplication dismissals. Prompted-only/redundant use defeats reliance for that case. No opportunity leaves it unresolved.",
+      "test_id": "F-T05",
+      "evidence_ids": [
+        "CW-Z003",
+        "CW-T018",
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z001",
+        "CW-L015",
+        "CW-Z012",
+        "CW-Z006"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L05-F01",
+        "L05-F02",
+        "L05-F03",
+        "L05-F04",
+        "L05-F05",
+        "L05-F06",
+        "L09-F05"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-L015",
+          "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:67",
+          "passage_pointer": "UnrulyThesis reply",
+          "capture_pointers": [],
+          "source_access": "opened_partial",
+          "limits": "Historical account; relative date only. No general conclusion about current Serena capability.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-T018.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-Y001",
+          "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:121",
+          "passage_pointer": "posts 1 and 3",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y001.txt",
+            "sources/phase-A-nonauthor/CW-Y001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent.",
+          "evidence_type": "first_person_report",
+          "segment": "Eight-developer team participant"
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts.",
+          "evidence_type": "first_person_report",
+          "segment": "individual maintaining personal projects"
+        },
+        {
+          "evidence_id": "CW-Z003",
+          "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:111",
+          "passage_pointer": "Quantifying code duplication; methodological weaknesses",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z003.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed.",
+          "evidence_type": "first_person_report",
+          "segment": "experienced solo developer; later duplication-tool builder"
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+          "passage_pointer": "Refactoring at scale; What humans still do",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z006.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited.",
+          "evidence_type": "first_person_report",
+          "segment": "founding engineer; developer-tool builder"
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "original_url": "https://github.com/oraios/serena/discussions/131",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+          "passage_pointer": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z012.txt",
+            "sources/phase-A-nonauthor/CW-Z012.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once.",
+          "evidence_type": "maintainer_confirmation",
+          "segment": "semantic-tool maintainers and contributor"
+        }
+      ],
+      "capability_or_proposal_pointers": [],
+      "origin_synthesis_claim": "SB-C05",
+      "synthesis_claim_ids": [
+        "SB-C05",
+        "SA-C06",
+        "SA-C07",
+        "SA-C12"
+      ],
+      "decision_id": "F-D05",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-Z003",
+          "role": "methodological_context",
+          "passage_pointer": "Quantifying code duplication; methodological weaknesses",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-T018",
+          "role": "methodological_context",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y001",
+          "role": "methodological_context",
+          "passage_pointer": "posts 1 and 3",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "role": "counterevidence",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L015",
+          "role": "counterevidence",
+          "passage_pointer": "UnrulyThesis reply",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "role": "counterevidence",
+          "passage_pointer": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "role": "counterevidence",
+          "passage_pointer": "Refactoring at scale; What humans still do",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        }
+      ]
+    },
+    {
+      "id": "F-C06",
+      "statement": "Withdrawal must expose work that returns, not destroy accumulated knowledge or remove competent alternatives.",
+      "verdict": "unresolved_from_existing_evidence",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Familiar user or author/reviewer pair deciding whether to reinstate an optional evidence aid.",
+      "conditions": "Preserve exported artifacts, learned knowledge, source access, native tools, tests and merge policy; allow adaptation and matched tasks.",
+      "strongest_supported_case": "A useful shortlist might otherwise require repeated reconstruction; shared revision state could avoid repeated reconciliation.",
+      "strongest_countercase": "L025 scripts/skills and native workflows can replace integrations; knowledge that survives removal is durable value. L024 reinstatement is an analogy about another tool, not Codeweb evidence.",
+      "failure_scenario": "Removing a mandated gate stops merges, falsely proving dependence; or first removal feels unfamiliar but later native work is better.",
+      "weakest_assumption": "Continuing evidence generation, rather than learned procedure, removes recurring work.",
+      "local_implication": "A successful free tool need not create continuing dependence or lock-in.",
+      "paid_implication": "Withdraw only incremental service coordination, never the free engine or ordinary checks, when testing paid reliance.",
+      "minimal_falsification_test": "After familiarity counterbalance at least two distinct eligible tasks with and two without the aid, retaining history. Record recurring reconstruction/quality loss and voluntary reinstatement with outcomes. No net loss narrows to portable/episodic value. This exceeds the original sprint and needs separate authority.",
+      "test_id": "F-T06",
+      "evidence_ids": [
+        "CW-T018",
+        "CW-Z003",
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L025",
+        "CW-L024",
+        "CW-X001",
+        "CW-Z001"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L05-F06",
+        "L09-F01",
+        "L09-F02",
+        "L09-F03",
+        "L09-F04",
+        "L09-F05",
+        "L11-F04"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-L024",
+          "original_url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:76",
+          "passage_pointer": "There’s no difference anymore?; final paragraphs",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-L024.txt",
+            "sources/phase-A-nonauthor/CW-L024.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Three repetitions of one task, vendor-affiliated self-measurement. Claims about general host behavior require official verification; no general MCP/CLI superiority inferred.",
+          "evidence_type": "first_person_report",
+          "segment": "developer relations/tool vendor practitioner"
+        },
+        {
+          "evidence_id": "CW-L025",
+          "original_url": "https://nickperkins.au/article/skills-over-mcps/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:77",
+          "passage_pointer": "What I did instead; The thing MCPs can’t do; tradeoff",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-L025.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Firsthand migration; broad claims about eager loading or unavailable CLIs not adopted as current facts. Counterexample is CW-L024.",
+          "evidence_type": "first_person_report",
+          "segment": "software engineer"
+        },
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-T018.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-X001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "evidence_type": "independent_measurement",
+          "segment": "tool builder/researcher"
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+          "passage_pointer": "posts 1,5,6",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y007.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+          "evidence_type": "first_person_report",
+          "segment": "Developer in multi-repo team"
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts.",
+          "evidence_type": "first_person_report",
+          "segment": "individual maintaining personal projects"
+        },
+        {
+          "evidence_id": "CW-Z003",
+          "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:111",
+          "passage_pointer": "Quantifying code duplication; methodological weaknesses",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z003.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed.",
+          "evidence_type": "first_person_report",
+          "segment": "experienced solo developer; later duplication-tool builder"
+        }
+      ],
+      "capability_or_proposal_pointers": [],
+      "origin_synthesis_claim": "SB-C06",
+      "synthesis_claim_ids": [
+        "SB-C06",
+        "SA-C02",
+        "SA-C06",
+        "SA-C07",
+        "SA-C09",
+        "SA-C12"
+      ],
+      "decision_id": "F-D06",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-T018",
+          "role": "methodological_context",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z003",
+          "role": "methodological_context",
+          "passage_pointer": "Quantifying code duplication; methodological weaknesses",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "role": "methodological_context",
+          "passage_pointer": "posts 1,5,6",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L025",
+          "role": "counterevidence",
+          "passage_pointer": "What I did instead; The thing MCPs can’t do; tradeoff",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L024",
+          "role": "counterevidence",
+          "passage_pointer": "There’s no difference anymore?; final paragraphs",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-X001",
+          "role": "counterevidence",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "role": "counterevidence",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        }
+      ]
+    },
+    {
+      "id": "F-C07",
+      "statement": "Do not claim new task capability until the incremental evidence removes a predeclared scoping or expert-help barrier.",
+      "verdict": "unresolved_from_existing_evidence",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Maintainer who genuinely postponed a shared-utility change or required substantial scoping help.",
+      "conditions": "Hold host/model, source access and verification constant; task barrier is recorded before seeing Codeweb.",
+      "strongest_supported_case": "T018/P003 identify uncertainty that could obstruct scoping; a correct missing consumer can change a plan.",
+      "strongest_countercase": "Z001/Z006/X003 attribute expanded or successful work to ordinary coding-agent workflows; graph coverage does not prove safe enlargement.",
+      "failure_scenario": "Credit the agent-plus-Codeweb bundle for gains over unaided work, or call faster lookup a newly achievable task.",
+      "weakest_assumption": "The missing fact is the binding constraint on doing the task, not just a convenience.",
+      "local_implication": "Potential expansion is narrower than safety and currently unobserved.",
+      "paid_implication": "No hosted attribution follows from a local task gain.",
+      "minimal_falsification_test": "On one real deferred task record the help/barrier and native plan; use a matched task for timing. Require a correct evidence-linked plan change plus reduced help and verified completion. Same help/attainability means efficiency only.",
+      "test_id": "F-T07",
+      "evidence_ids": [
+        "CW-T018",
+        "CW-P003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z001",
+        "CW-Z006",
+        "CW-X003",
+        "CW-Z005"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L07-F01",
+        "L07-F02",
+        "L07-F03"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-P003",
+          "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+          "passage_pointer": "Context and Category H; all body categories read",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-P003.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+          "evidence_type": "first_person_report",
+          "segment": "Python desktop application developer"
+        },
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-T018.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-X003",
+          "original_url": "https://baransel.dev/post/replaced-entire-dev-workflow-with-claude-code/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:37",
+          "passage_pointer": "Refactoring — Surprisingly Good; Where It Falls Short",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-X003.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Reporter-confirmed success for this task only. Business rules outside code remain a stated limitation; linked repositories not reproduced.",
+          "evidence_type": "first_person_report",
+          "segment": "developer working with a team"
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts.",
+          "evidence_type": "first_person_report",
+          "segment": "individual maintaining personal projects"
+        },
+        {
+          "evidence_id": "CW-Z005",
+          "original_url": "https://omeratagun.net/blog/ai-coding-agents-experiment",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:113",
+          "passage_pointer": "Chapters 1–4; What I Learned",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z005.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Historical 2025 account, not a current Codex performance finding; one author/context bundle rather than counting each comparison as independent.",
+          "evidence_type": "first_person_report",
+          "segment": "developer of personal diagram editor and browser game"
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+          "passage_pointer": "Refactoring at scale; What humans still do",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z006.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited.",
+          "evidence_type": "first_person_report",
+          "segment": "founding engineer; developer-tool builder"
+        }
+      ],
+      "capability_or_proposal_pointers": [],
+      "origin_synthesis_claim": "SB-C07",
+      "synthesis_claim_ids": [
+        "SB-C07",
+        "SA-C03",
+        "SA-C05"
+      ],
+      "decision_id": "F-D07",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-T018",
+          "role": "methodological_context",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-P003",
+          "role": "methodological_context",
+          "passage_pointer": "Context and Category H; all body categories read",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "role": "counterevidence",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "role": "counterevidence",
+          "passage_pointer": "Refactoring at scale; What humans still do",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-X003",
+          "role": "counterevidence",
+          "passage_pointer": "Refactoring — Surprisingly Good; Where It Falls Short",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z005",
+          "role": "counterevidence",
+          "passage_pointer": "Chapters 1–4; What I Learned",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        }
+      ]
+    },
+    {
+      "id": "F-C08",
+      "statement": "Source evidence can support factual reorientation; it is not a complete task-memory system or a proprietary knowledge moat.",
+      "verdict": "narrow",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Developer resuming work across sessions and maintaining exceptions at changed revisions.",
+      "conditions": "Keep intent, rejected approaches and pending work separate from regenerable source facts. Existing receipts are task/root-bound; inspectability is not seamless relocation.",
+      "strongest_supported_case": "Frozen evidence store and reconciliation mechanisms preserve source-versioned facts; L037 describes reusable learned skills and Z006 legitimate exceptions.",
+      "strongest_countercase": "T007 already uses handoffs; native memory, Git/PR history and runbooks are substitutes. Saved revision-safe decisions are proposed, not proved by fingerprint suppression.",
+      "failure_scenario": "Old exception hides new risk, or a new session knows callers but repeats an abandoned approach whose reason was conversational.",
+      "weakest_assumption": "Avoided reconstruction exceeds capture, retrieval, freshness, exception maintenance and correction.",
+      "local_implication": "Test factual reorientation separately; portability must preserve guards, not bypass root/task checks.",
+      "paid_implication": "Local knowledge remains free; accumulated files alone create neither exclusive data nor demand.",
+      "minimal_falsification_test": "Across three related changes including rename and stable-identity semantic change, compare ordinary handoffs plus native tools against added source evidence. Record net work and stale decisions; reject compounding if costs exceed avoided reconstruction or changed assumptions stay suppressed.",
+      "test_id": "F-T08",
+      "evidence_ids": [
+        "CW-T007",
+        "CW-L037",
+        "CW-L034",
+        "CW-Z006"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y008",
+        "CW-T012",
+        "CW-Z012",
+        "CW-X011"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L05-F02",
+        "L09-F03",
+        "L10-F01",
+        "L10-F02",
+        "L10-F03",
+        "L10-F04",
+        "L10-F05",
+        "L10-F06",
+        "L12-F02"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-L034",
+          "original_url": "https://jseverino.com/portfolio/building-a-custom-mcp-layer/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:86",
+          "passage_pointer": "The Sensitivity Gate; Recall in Practice",
+          "capture_pointers": [],
+          "source_access": "opened_full",
+          "limits": "Builder case, not ordinary buyer. Full prose read; screenshots and code implementation not independently inspected. Does not prove security.",
+          "evidence_type": "first_person_report",
+          "segment": "personal tool builder"
+        },
+        {
+          "evidence_id": "CW-L037",
+          "original_url": "https://david.coffee/i-still-prefer-mcp-over-skills/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:89",
+          "passage_pointer": "Skills + MCP",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-L037.txt",
+            "sources/phase-A-nonauthor/CW-L037.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Explicit commercial interest in MCP hosting/tunneling; not ordinary-user proof. Broad host capabilities and security claims not adopted.",
+          "evidence_type": "first_person_report",
+          "segment": "MCP product builder"
+        },
+        {
+          "evidence_id": "CW-T007",
+          "original_url": "https://github.com/anthropics/claude-code/issues/83790",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:13",
+          "passage_pointer": "Body and all 1 comments; comment IDs in source registry",
+          "capture_pointers": [
+            "sources/phase-A-nonauthor/CW-T007.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-T012",
+          "original_url": "https://github.com/openai/codex/issues/37955",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:18",
+          "passage_pointer": "Original issue body: stale paths and documentation/enforcement mismatch findings",
+          "capture_pointers": [],
+          "source_access": "opened_full",
+          "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution. Host field describes a repository-documentation audit, not a demonstrated mixed-host user incident. Later-comment additions excluded from this author-specific finding.",
+          "evidence_type": "first_person_report",
+          "segment": "automated documentation-audit builder"
+        },
+        {
+          "evidence_id": "CW-X011",
+          "original_url": "https://github.com/openai/codex/issues/36712",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:45",
+          "passage_pointer": "Body: What issue are you seeing?",
+          "capture_pointers": [],
+          "source_access": "opened_partial",
+          "limits": "Web body inspected; REST rate-limited, comments not enumerated. No full-thread credit.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-Y008",
+          "original_url": "https://forum.cursor.com/t/applying-shared-coding-guidelines-across-multiple-repos-with-bugbot/133667",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:128",
+          "passage_pointer": "posts 1-13,15,17,20",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y008.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "File-reference limitation resolved per maintainer; separate-repo access not thereby proven. No new current host gap.",
+          "evidence_type": "first_person_report",
+          "segment": "Developer maintaining shared guidelines"
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+          "passage_pointer": "Refactoring at scale; What humans still do",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z006.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited.",
+          "evidence_type": "first_person_report",
+          "segment": "founding engineer; developer-tool builder"
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "original_url": "https://github.com/oraios/serena/discussions/131",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+          "passage_pointer": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z012.txt",
+            "sources/phase-A-nonauthor/CW-Z012.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once.",
+          "evidence_type": "maintainer_confirmation",
+          "segment": "semantic-tool maintainers and contributor"
+        }
+      ],
+      "capability_or_proposal_pointers": [
+        "inputs/scripts/lib/evidence-store.mjs:278-291",
+        "inputs/scripts/lib/evidence-core.mjs:134-160"
+      ],
+      "origin_synthesis_claim": "SB-C08",
+      "synthesis_claim_ids": [
+        "SB-C08",
+        "SA-C06",
+        "SA-C07",
+        "SA-C10",
+        "SA-C11"
+      ],
+      "decision_id": "F-D08",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-T007",
+          "role": "direct_support",
+          "passage_pointer": "Body and all 1 comments; comment IDs in source registry",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L037",
+          "role": "direct_support",
+          "passage_pointer": "Skills + MCP",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L034",
+          "role": "direct_support",
+          "passage_pointer": "The Sensitivity Gate; Recall in Practice",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "role": "direct_support",
+          "passage_pointer": "Refactoring at scale; What humans still do",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y008",
+          "role": "counterevidence",
+          "passage_pointer": "posts 1-13,15,17,20",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-T012",
+          "role": "counterevidence",
+          "passage_pointer": "Original issue body: stale paths and documentation/enforcement mismatch findings",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "role": "counterevidence",
+          "passage_pointer": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-X011",
+          "role": "counterevidence",
+          "passage_pointer": "Body: What issue are you seeing?",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        }
+      ]
+    },
+    {
+      "id": "F-C09",
+      "statement": "Paid coordination is a separate residual-work hypothesis; adequate CI gets the first chance to eliminate the job.",
+      "verdict": "unresolved_from_existing_evidence",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Accountable owner of recurring producer/consumer checks plus an identified budget owner; Y007 is a champion, not a confirmed buyer.",
+      "conditions": "Explicit permitted repository/revision pairs, agreed executable checks, recurrent chasing/rerun/assembly left after adequate CI.",
+      "strongest_supported_case": "Y007 reports repeatedly invoking an assistant and inability to migrate soon to a monorepo; managed scheduling, recovery and revision reconciliation could remove effort.",
+      "strongest_countercase": "The same reporter accepts CI as more appropriate and had not investigated it. Y005 builds internally; Y012 already has cheap traceability.",
+      "failure_scenario": "A two-checkout type-check CI job solves it once; a service adds credentials, triage and fees without recurring work removal.",
+      "weakest_assumption": "There is a persistent coordination bottleneck distinct from one-time CI setup and from test semantics.",
+      "local_implication": "Keep the engine independently useful and free, even if not central to these checks.",
+      "paid_implication": "Candidate service owns dispatch, reruns, failures and usable result delivery; humans own permitted scope, behavior interpretation and merge. No build or offer is validated.",
+      "minimal_falsification_test": "Reconstruct two actual changes with a consenting team and buyer; inspect/cost the simplest adequate CI path first. If residual recurring work is absent, reject this paid case. Only a surviving case justifies a separately authorized bounded service comparison.",
+      "test_id": "F-T09",
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-Y005",
+        "CW-Y012"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L01-F06",
+        "L02-F05",
+        "L02-F06",
+        "L04-F06",
+        "L06-F01",
+        "L06-F02",
+        "L07-F04",
+        "L08-F04",
+        "L09-F04",
+        "L10-F06",
+        "L11-F02",
+        "L12-F04"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-Y005",
+          "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:125",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y005.txt",
+            "sources/phase-A-nonauthor/CW-Y005.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP.",
+          "evidence_type": "first_person_report",
+          "segment": "Internal review-system builder"
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+          "passage_pointer": "posts 1,5,6",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y007.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+          "evidence_type": "first_person_report",
+          "segment": "Developer in multi-repo team"
+        },
+        {
+          "evidence_id": "CW-Y012",
+          "original_url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:132",
+          "passage_pointer": "Solutions; Artifacts; Where we are now",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y012.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents.",
+          "evidence_type": "first_person_report",
+          "segment": "Team practitioner / consultant"
+        }
+      ],
+      "capability_or_proposal_pointers": [
+        "inputs/reports/user-centric-value-strategy/STRATEGY.md#Connect developer value to a paid team job",
+        "inputs/CHARTER.md#The boundary"
+      ],
+      "origin_synthesis_claim": "SB-C09",
+      "synthesis_claim_ids": [
+        "SB-C09",
+        "SA-C02",
+        "SA-C07",
+        "SA-C08",
+        "SA-C09",
+        "SA-C10",
+        "SA-C11"
+      ],
+      "decision_id": "F-D09",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-Y007",
+          "role": "direct_support",
+          "passage_pointer": "posts 1,5,6",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "role": "counterevidence",
+          "passage_pointer": "posts 1,5,6",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "role": "counterevidence",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y012",
+          "role": "counterevidence",
+          "passage_pointer": "Solutions; Artifacts; Where we are now",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L020",
+          "role": "counterevidence",
+          "passage_pointer": "comment 48407230",
+          "qualification": "A team reports satisfactory internal per-repository review, with human review retained for knowledge sharing. Include the selected team's actual internal tooling in the baseline; reject generic external-artifact value. One self-report is not comparative population evidence."
+        },
+        {
+          "evidence_id": "CW-L056",
+          "role": "counterevidence",
+          "passage_pointer": "orchestration, incremental re-review and failure recovery sections",
+          "qualification": "Vendor internal orchestration, incremental re-review and recovery challenge coordinator distinctiveness. Compare these functions where actually available to the selected team; vendor self-use is not independent accuracy, procurement or Codeweb demand evidence."
+        }
+      ],
+      "editor_additions": [
+        "A team reports satisfactory internal per-repository review, with human review retained for knowledge sharing. Include the selected team's actual internal tooling in the baseline; reject generic external-artifact value. One self-report is not comparative population evidence.",
+        "Vendor internal orchestration, incremental re-review and recovery challenge coordinator distinctiveness. Compare these functions where actually available to the selected team; vendor self-use is not independent accuracy, procurement or Codeweb demand evidence."
+      ]
+    },
+    {
+      "id": "F-C10",
+      "statement": "Shared reliance requires usable revision-specific handoffs and legitimate information flows; compulsory usage is not earned dependence.",
+      "verdict": "revise",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Author, reviewer, repository owner and source-policy owner receiving allowed check evidence.",
+      "conditions": "Recipient must identify checked revisions, failures, unknowns and next owner without rebuilding the packet. A–B and B–C permission does not imply A–C permission.",
+      "strongest_supported_case": "Y004 explicitly asks about non-transitive derived-context isolation; Y007 suggests shared cross-repo states can drift; Y012 supports inspectable handoffs.",
+      "strongest_countercase": "Own PR96 metadata and free gate artifacts already expose linked checks; Y008 records a resolved rules-reference limitation. Evaluation requests prove neither breach nor approval.",
+      "failure_scenario": "Shared context leaks across forbidden pairs, or every run needs manual redaction and chasing while mandatory report links inflate usage.",
+      "weakest_assumption": "A small service can remove more handoff work than ownership, policy and maintenance add.",
+      "local_implication": "Local execution avoids some transfers but does not itself prove what a connected host receives.",
+      "paid_implication": "Test all participating roles and policy costs; a manager mandate does not establish renewal value.",
+      "minimal_falsification_test": "Use one allowed and one forbidden transitive repository pair with an owner/revision change. Check derived-field provenance and deletion plan, then compare reviewer reconstruction with ordinary PR/CI. Fail if disallowed data flows or equivalent assembly remains manual.",
+      "test_id": "F-T10",
+      "evidence_ids": [
+        "CW-Y004",
+        "CW-Y007",
+        "CW-Y012"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y008",
+        "CW-Y005"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L06-F04",
+        "L08-F05",
+        "L10-F05",
+        "L11-F01",
+        "L11-F03",
+        "L11-F04"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-Y004",
+          "original_url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:124",
+          "passage_pointer": "posts 1,6,7",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y004.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "No purchase authority, rejection, approval, or technical breach demonstrated.",
+          "evidence_type": "first_person_report",
+          "segment": "Organization evaluator with compliance constraints"
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:125",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y005.txt",
+            "sources/phase-A-nonauthor/CW-Y005.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP.",
+          "evidence_type": "first_person_report",
+          "segment": "Internal review-system builder"
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+          "passage_pointer": "posts 1,5,6",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y007.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+          "evidence_type": "first_person_report",
+          "segment": "Developer in multi-repo team"
+        },
+        {
+          "evidence_id": "CW-Y008",
+          "original_url": "https://forum.cursor.com/t/applying-shared-coding-guidelines-across-multiple-repos-with-bugbot/133667",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:128",
+          "passage_pointer": "posts 1-13,15,17,20",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y008.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "File-reference limitation resolved per maintainer; separate-repo access not thereby proven. No new current host gap.",
+          "evidence_type": "first_person_report",
+          "segment": "Developer maintaining shared guidelines"
+        },
+        {
+          "evidence_id": "CW-Y012",
+          "original_url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:132",
+          "passage_pointer": "Solutions; Artifacts; Where we are now",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y012.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents.",
+          "evidence_type": "first_person_report",
+          "segment": "Team practitioner / consultant"
+        }
+      ],
+      "capability_or_proposal_pointers": [],
+      "origin_synthesis_claim": "SB-C10",
+      "synthesis_claim_ids": [
+        "SB-C10",
+        "SA-C06",
+        "SA-C07",
+        "SA-C08",
+        "SA-C09",
+        "SA-C10"
+      ],
+      "decision_id": "F-D10",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-Y004",
+          "role": "direct_support",
+          "passage_pointer": "posts 1,6,7",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "role": "direct_support",
+          "passage_pointer": "posts 1,5,6",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y012",
+          "role": "direct_support",
+          "passage_pointer": "Solutions; Artifacts; Where we are now",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y008",
+          "role": "counterevidence",
+          "passage_pointer": "posts 1-13,15,17,20",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "role": "counterevidence",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-L021",
+          "role": "direct_support",
+          "passage_pointer": "comment 48408485",
+          "qualification": "Centralized coverage can serve a legitimate governance job because local review cannot be assumed. Retained automation must be scored for coverage and cost separately from voluntary individual return; mandate alone is not earned reliance."
+        }
+      ],
+      "editor_additions": [
+        "Centralized coverage can serve a legitimate governance job because local review cannot be assumed. Retained automation must be scored for coverage and cost separately from voluntary individual return; mandate alone is not earned reliance."
+      ]
+    },
+    {
+      "id": "F-C11",
+      "statement": "Neither author-count pricing nor hypothetical labor arithmetic establishes paid-attributable value, purchase or renewal.",
+      "verdict": "unresolved_from_existing_evidence",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Actual buyer paying for residual coordination and users who benefit, distinguished from a public advocate.",
+      "conditions": "Separate setup, ongoing triage, policy work and service delivery costs; exclude free local and adequate-CI savings.",
+      "strongest_supported_case": "Y001 describes paid complex review and billing friction; Y002 shows availability/support expectations can matter commercially.",
+      "strongest_countercase": "These concern other review products. Y010 is contemplated temporary use, not observed renewal. The charter price and wage/time illustration are intentions and invented inputs, not outcomes.",
+      "failure_scenario": "Gross assumed wages make a bill look attractive even though CI supplies the benefit and contractor/author counts misprice it.",
+      "weakest_assumption": "The buyer perceives sufficient net recurring service value and can fund it at sustainable delivery cost.",
+      "local_implication": "Free usefulness does not create a purchase obligation.",
+      "paid_implication": "No current Codeweb offer, buyer or numerical revenue ceiling is established; author metric needs testing without silently amending charter.",
+      "minimal_falsification_test": "For a qualified team compare actual residual-work ledger with hypothetical eligible-author invoice, then separately authorized payment and later renewal decisions. Net nonpositive benefit, absent authority or CI substitution defeats this case; enthusiasm is insufficient.",
+      "test_id": "F-T11",
+      "evidence_ids": [
+        "CW-Y001",
+        "CW-Y002"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y010",
+        "CW-Y004",
+        "CW-Y005",
+        "CW-Y007"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L06-F03",
+        "L06-F05",
+        "L06-F06"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-Y001",
+          "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:121",
+          "passage_pointer": "posts 1 and 3",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y001.txt",
+            "sources/phase-A-nonauthor/CW-Y001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent.",
+          "evidence_type": "first_person_report",
+          "segment": "Eight-developer team participant"
+        },
+        {
+          "evidence_id": "CW-Y002",
+          "original_url": "https://forum.cursor.com/t/bugbot-stopped-being-triggered/156739",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:122",
+          "passage_pointer": "posts 1,17,19,21",
+          "capture_pointers": [],
+          "source_access": "opened_full",
+          "limits": "May pricing changed; do not present April allowance as current. Cancellation is self-report.",
+          "evidence_type": "first_person_report",
+          "segment": "Individual subscriber"
+        },
+        {
+          "evidence_id": "CW-Y004",
+          "original_url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:124",
+          "passage_pointer": "posts 1,6,7",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y004.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "No purchase authority, rejection, approval, or technical breach demonstrated.",
+          "evidence_type": "first_person_report",
+          "segment": "Organization evaluator with compliance constraints"
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:125",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y005.txt",
+            "sources/phase-A-nonauthor/CW-Y005.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP.",
+          "evidence_type": "first_person_report",
+          "segment": "Internal review-system builder"
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+          "passage_pointer": "posts 1,5,6",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y007.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+          "evidence_type": "first_person_report",
+          "segment": "Developer in multi-repo team"
+        },
+        {
+          "evidence_id": "CW-Y010",
+          "original_url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:130",
+          "passage_pointer": "post 1",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y010.txt",
+            "sources/phase-A-nonauthor/CW-Y010.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Outside two-year preference; proposed purchase, not completed sale or observed downgrade.",
+          "evidence_type": "first_person_report",
+          "segment": "Consultant advising a client"
+        }
+      ],
+      "capability_or_proposal_pointers": [
+        "inputs/CHARTER.md#Price intent",
+        "inputs/reports/user-centric-value-strategy/STRATEGY.md#What would make the bill feel obvious"
+      ],
+      "origin_synthesis_claim": "SB-C11",
+      "synthesis_claim_ids": [
+        "SB-C11",
+        "SA-C10",
+        "SA-C11"
+      ],
+      "decision_id": "F-D11",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-Y001",
+          "role": "methodological_context",
+          "passage_pointer": "posts 1 and 3",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y002",
+          "role": "methodological_context",
+          "passage_pointer": "posts 1,17,19,21",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y010",
+          "role": "counterevidence",
+          "passage_pointer": "post 1",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y004",
+          "role": "counterevidence",
+          "passage_pointer": "posts 1,6,7",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "role": "counterevidence",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "role": "counterevidence",
+          "passage_pointer": "posts 1,5,6",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        }
+      ]
+    },
+    {
+      "id": "F-C12",
+      "statement": "Retain a useful free tool as a legitimate ceiling; reject automatic progression from a successful brief to a durable paid business.",
+      "verdict": "reject",
+      "evidence_type": "synthesis inference from preserved primary records, selected original passages and frozen capabilities; proposed effects unobserved",
+      "supported_actor_task": "Product decision-maker choosing the next bounded learning investment across local and paid jobs.",
+      "conditions": "Corpus is problem-selected and includes builders, partial threads, historical versions and grouped authors; counts are not prevalence.",
+      "strongest_supported_case": "Recurring missing-context reports warrant a falsifiable local mechanism; infrequent consequential work can matter and supported evidence collection is a real candidate job.",
+      "strongest_countercase": "No Codeweb behavior comparison, longitudinal reliance, withdrawal, actual buyer or renewal closes the causal chain. Larger memory/review/platform ideas add assumptions rather than proof.",
+      "failure_scenario": "Two actionable pilot findings are treated as permission for a hosted platform while local recurrence and residual paid work remain absent.",
+      "weakest_assumption": "A chain of individually plausible steps implies demand and commercial scale.",
+      "local_implication": "Provisional sprint success permits further bounded learning only. Original five-person/ten-change/two-week targets remain unchanged and are not executed here.",
+      "paid_implication": "Test paid work on its own merits; do not broaden into a platform to rescue a weak signal or quantify a market ceiling from this corpus.",
+      "minimal_falsification_test": "Use separate decision records for technical readiness, first useful decision, later voluntary use, withdrawal loss, residual team work, payment and renewal. Any missing link stays unresolved; no-opportunity is distinct from failure. Stop the corresponding hypothesis when its competent baseline wins.",
+      "test_id": "F-T12",
+      "evidence_ids": [
+        "CW-T018",
+        "CW-Z003",
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Z001",
+        "CW-Y007",
+        "CW-Y005"
+      ],
+      "confidence_reason": "Evidence supports the mechanism or boundary, not a measured Codeweb customer outcome. Source-specific limits remain attached.",
+      "finding_ids": [
+        "L01-F03",
+        "L01-F05",
+        "L12-F01",
+        "L12-F05"
+      ],
+      "sources": [
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-T018.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "evidence_type": "first_person_report",
+          "segment": "unknown"
+        },
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-X001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "evidence_type": "independent_measurement",
+          "segment": "tool builder/researcher"
+        },
+        {
+          "evidence_id": "CW-Y001",
+          "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:121",
+          "passage_pointer": "posts 1 and 3",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y001.txt",
+            "sources/phase-A-nonauthor/CW-Y001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent.",
+          "evidence_type": "first_person_report",
+          "segment": "Eight-developer team participant"
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:125",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y005.txt",
+            "sources/phase-A-nonauthor/CW-Y005.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP.",
+          "evidence_type": "first_person_report",
+          "segment": "Internal review-system builder"
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+          "passage_pointer": "posts 1,5,6",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Y007.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+          "evidence_type": "first_person_report",
+          "segment": "Developer in multi-repo team"
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z001.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts.",
+          "evidence_type": "first_person_report",
+          "segment": "individual maintaining personal projects"
+        },
+        {
+          "evidence_id": "CW-Z003",
+          "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:111",
+          "passage_pointer": "Quantifying code duplication; methodological weaknesses",
+          "capture_pointers": [
+            "sources/phase-B-nonauthor/CW-Z003.txt"
+          ],
+          "source_access": "opened_full",
+          "limits": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed.",
+          "evidence_type": "first_person_report",
+          "segment": "experienced solo developer; later duplication-tool builder"
+        }
+      ],
+      "capability_or_proposal_pointers": [],
+      "origin_synthesis_claim": "SB-C12",
+      "synthesis_claim_ids": [
+        "SB-C12",
+        "SA-C01",
+        "SA-C02",
+        "SA-C05",
+        "SA-C11",
+        "SA-C12"
+      ],
+      "decision_id": "F-D12",
+      "editorial_status": "hypothesis_or_boundary_not_customer_validation",
+      "evidence_edges": [
+        {
+          "evidence_id": "CW-T018",
+          "role": "methodological_context",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z003",
+          "role": "methodological_context",
+          "passage_pointer": "Quantifying code duplication; methodological weaknesses",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y001",
+          "role": "methodological_context",
+          "passage_pointer": "posts 1 and 3",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-X001",
+          "role": "counterevidence",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "role": "counterevidence",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "role": "counterevidence",
+          "passage_pointer": "posts 1,5,6",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "role": "counterevidence",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "qualification": "Supports only the attributed mechanism, alternative or limitation in this claim; proposed Codeweb effect remains unobserved."
+        }
+      ]
+    }
+  ],
+  "edge_policy": "Only final evidence_edges declare direct support. Historical synthesis/lens associations are contextual unless explicitly typed otherwise. Direct support for a proposed mechanism is not observed Codeweb effect.",
+  "capability_namespace": "CAP:; original capability/proposal pointers retained on each claim and in original lens records."
+}

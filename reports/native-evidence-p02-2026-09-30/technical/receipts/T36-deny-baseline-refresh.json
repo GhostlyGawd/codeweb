@@ -1,0 +1,23 @@
+{
+  "id": "T36-deny-baseline-refresh",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/refresh.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/.codeweb/graph.baseline.json",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:13.438Z",
+  "end": "2026-10-01T01:50:13.475Z",
+  "durationMs": 37.028291999999965,
+  "exit": 2,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": "the baseline is read-only: refresh graph.json instead; use --baseline there to start a new edit\n"
+}

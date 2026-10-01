@@ -1,0 +1,185 @@
+
+  [FEATURE] One-click session handoff: end a session into a new linked one, shown as a thread in the session list · Issue #83790 · anthropics/claude-code · GitHub
+      Skip to content
+Navigation Menu
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub CopilotWrite better code with AI
+GitHub Copilot appDirect agents from issue to merge
+MCP RegistryIntegrate external tools
+DEVELOPER WORKFLOWS
+ActionsAutomate any workflow
+CodespacesInstant dev environments
+IssuesPlan and track work
+Code ReviewManage code changes
+Code QualityEnforce quality at merge
+APPLICATION SECURITY
+GitHub Advanced SecurityFind and fix vulnerabilities
+Code securitySecure your code as you build
+Secret protectionStop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+View all resources
+Open Source
+COMMUNITY
+GitHub SponsorsFund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+GitHub Stars
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platformAI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced SecurityEnterprise-grade security features
+Copilot for BusinessEnterprise-grade AI features
+Premium SupportEnterprise-grade 24/7 support
+Pricing
+Search/
+Sign inSign up
+Appearance settings
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+Dismiss alert
+{{ message }}
+        anthropics
+    /
+      claude-code
+    Public
+Notifications
+    You must be signed in to change notification settings
+Fork
+    25.1k
+          Star
+          149k
+        Code
+        Issues
+          5k+
+        Pull requests
+          707
+        Actions
+        Security and quality
+          32
+        Insights
+Additional navigation options
+          Code
+          Issues
+          Pull requests
+          Actions
+          Security and quality
+          Insights
+[FEATURE] One-click session handoff: end a session into a new linked one, shown as a thread in the session list #83790
+New issueCopy link
+New issueCopy link
+Open
+Open
+[FEATURE] One-click session handoff: end a session into a new linked one, shown as a thread in the session list#83790
+Copy link
+Labels
+area:desktopstaleIssue is inactiveIssue is inactive
+Description
+GabrielBrodersen
+opened on Aug 4, 2026
+Issue body actions
+Preflight Checklist
+ I have searched existing requests and this feature hasn't been requested yet (related but different: Feature Request: Session Handoff / Continuity Support #11455 asks for generic continuity/cross-machine handoff, [FEATURE] Organize sessions into folders/groups in the recents list #74141 asks for manual folders/groups in the recents list — this request is about continuation as a first-class action that produces the grouping automatically)
+ This is a single feature request (not multiple features)
+Problem Statement
+With prompt caching, session cost is roughly context size × turns — for my usage ~96% of spend is cache reads. The cheapest way to work is therefore many short sessions instead of one long one: end a session at a task boundary and continue in a fresh, small-context session.
+Claude Code has no native support for this pattern, so it's all manual:
+Ending a session means asking the model to write a "handoff prompt" (goal, next step, links), copy-pasting it into a new session, and hoping the model included a pointer back to the source transcript.
+The session list then fills with lookalike entries ("regression testing status", "regression testing status", "regression next steps"…) with no indication they're one piece of work. After a meeting or a day away, reconstructing which of 10 sessions is the live tip of which piece of work is real overhead.
+Proposed Solution
+A "Continue in new session" action (Desktop button and/or CLI command): the model writes a handoff summary, the current session ends, and a new session starts seeded with that summary — like /compact, but into a fresh session, keeping the small-context cost benefit.
+The new session is linked to its predecessor as a thread: the session list renders the chain grouped/ordered (or collapsible to the latest tip), so a multi-session piece of work reads as one story. Archive-the-thread becomes one action when the work ships.
+The linked successor can read its predecessor's transcript on demand (the transcript-search tools already exist), so the handoff summary doesn't have to carry everything.
+Alternative Solutions
+Currently emulated with: a skill that writes handoff prompts including the source session's title, search_session_transcripts in the successor to reach back, a strict title convention (<clone>: <thread> — <topic>) applied via set_session_title, and spawn_task chips to make the handoff one click. It works, but it's a stack of conventions doing what one primitive could.
+Priority
+High - Significant impact on productivity
+Feature Category
+Other (Desktop app session management)
+Use Case Example
+I'm running an iOS release across a day: kickoff → regression testing → bug triage → release tickets. Each phase is a natural session boundary.
+At each boundary I click "Continue in new session"; the handoff carries the 3-line state and the ticket links.
+Coming back after meetings, the session list shows one thread ("10.35.0 release", 6 sessions, tip: "release tickets") instead of six unrelated-looking entries.
+When the release ships, I archive the thread in one action.
+Reactions are currently unavailable
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+Metadata
+Metadata
+AssigneesNo one assigned
+Labels
+area:desktopstaleIssue is inactiveIssue is inactive
+TypeNo type
+ProjectsNo projects
+MilestoneNo milestone
+RelationshipsNone yet
+DevelopmentNo branches or pull requests
+Issue actions
+Open in GitHub Copilot app
+Footer
+        © 2026 GitHub, Inc.
+Footer navigation
+            Terms
+            Privacy
+              Security
+              Status
+            Community
+            Docs
+            Contact
+      Manage cookies
+        Do not share my personal information
+    You can’t perform that action at this time.

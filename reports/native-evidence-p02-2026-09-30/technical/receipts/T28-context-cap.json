@@ -1,0 +1,26 @@
+{
+  "id": "T28-context-cap",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/context-pack.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/.codeweb/graph.json",
+    "popular",
+    "--limit",
+    "2",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:12.562Z",
+  "end": "2026-10-01T01:50:12.597Z",
+  "durationMs": 35.512833999999884,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"symbol\":\"popular\",\"matched\":[\"subject.mjs:popular\"],\"sourceAvailable\":true,\"summary\":\"popular: 8 caller(s), 0 callee(s), blast radius 8 — graph is stale for 2+ file(s); run codeweb_refresh\",\"mode\":\"call-site windows (±3 lines)\",\"target\":[{\"id\":\"subject.mjs:popular\",\"label\":\"popular\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":4,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"body\":\"export function popular(value) {\\n  return value * 2;\\n}\"}],\"callers\":[{\"id\":\"popular0.mjs:frequent0\",\"label\":\"frequent0\",\"kind\":\"function\",\"file\":\"popular0.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"windowEvidence\":{\"status\":\"shown\",\"matchedLines\":1,\"shownLines\":1,\"remaining\":0},\"windows\":[{\"startLine\":2,\"endLine\":4,\"callLines\":[3],\"text\":\"export function frequent0() {\\n  return popular(0);\\n}\"}]},{\"id\":\"popular1.mjs:frequent1\",\"label\":\"frequent1\",\"kind\":\"function\",\"file\":\"popular1.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"windowEvidence\":{\"status\":\"shown\",\"matchedLines\":1,\"shownLines\":1,\"remaining\":0},\"windows\":[{\"startLine\":2,\"endLine\":4,\"callLines\":[3],\"text\":\"export function frequent1() {\\n  return popular(1);\\n}\"}]}],\"callees\":[],\"blastRadius\":{\"count\":8,\"ids\":[\"popular0.mjs:frequent0\",\"popular1.mjs:frequent1\",\"popular2.mjs:frequent2\",\"popular3.mjs:frequent3\",\"popular4.mjs:frequent4\",\"popular5.mjs:frequent5\",\"popular6.mjs:frequent6\",\"popular7.mjs:frequent7\"]},\"moreCallers\":{\"remaining\":6,\"nextOffset\":2},\"stale\":{\"count\":2,\"files\":[\"subject.mjs\",\"./ (dir changed — new/removed files)\"]},\"analysis\":{\"scope\":\"mapped-call-graph\",\"freshness\":\"stale\",\"listsComplete\":false,\"sourceEvidenceComplete\":true,\"limitations\":[\"unmapped-calls\",\"list-budget\",\"stale-graph\",\"external-callers\"],\"nextSteps\":[\"Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.\",\"Increase limit (CLI: --limit) or request MCP full:true for all mapped neighbors.\",\"Refresh the map (MCP: codeweb_refresh) before relying on recorded locations.\",\"Check package consumers before changing an exported contract.\"]}}\n",
+  "stderr": ""
+}

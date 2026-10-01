@@ -1,0 +1,36 @@
+{
+  "assignment": "L09",
+  "issue_identifier": "COD-88",
+  "issue_id": "a607cbae-3a0e-43a1-9e8b-7386ff63c26c",
+  "run_id": "ecdb87a7-76f8-4cfa-8a0b-0a1ff8bde6dd",
+  "session_identity": {
+    "value": "01a0f095-9182-7f73-8720-c2cc8026cde5",
+    "source": "CODEX_THREAD_ID environment",
+    "independently_verified": false
+  },
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "initial_input_verification": {
+    "files": 192,
+    "all_match": true
+  },
+  "final_input_verification": {
+    "files": 192,
+    "all_match": true
+  },
+  "created_at": "2026-09-30T04:36:18.041066+00:00",
+  "first_draft_context": "Fresh supplied task conversation; no other lens outputs read. Lead must verify runtime sessions. Shared filesystem is procedural isolation only.",
+  "correction_attempts": 0,
+  "self_review_approval": false,
+  "outputs": [
+    {
+      "path": "lenses/09-withdrawal-test.md",
+      "sha256": "1054c9814dcc9a62ce684bb49ef9c4f598bf701f9a2cf8a97422f7ee3fb00a2b",
+      "first_draft_history": "history/L09-first-draft/09-withdrawal-test.md"
+    },
+    {
+      "path": "lenses/09-findings.json",
+      "sha256": "2be3adcd0ed583e4194c7a205b083ff579aa10e44a442ad71d67a03928c567fd",
+      "first_draft_history": "history/L09-first-draft/09-findings.json"
+    }
+  ]
+}

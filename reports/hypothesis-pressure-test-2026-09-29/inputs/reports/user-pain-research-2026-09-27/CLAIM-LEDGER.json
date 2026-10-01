@@ -1,0 +1,112 @@
+{
+  "claims": [
+    {
+      "id": "H1",
+      "claim": "Conditional consumer/reuse job, not universal brief",
+      "priority": "high",
+      "evidence_ids": [
+        "CW-T018",
+        "CW-Z003",
+        "CW-X001",
+        "CW-Z001"
+      ]
+    },
+    {
+      "id": "H2",
+      "claim": "Context can reduce false positives with recall/effort tradeoffs",
+      "priority": "high",
+      "evidence_ids": [
+        "CW-L023",
+        "CW-Z012"
+      ]
+    },
+    {
+      "id": "H3",
+      "claim": "Actual surface/worktree invocation is a prerequisite",
+      "priority": "high",
+      "evidence_ids": [
+        "CW-T002",
+        "CW-T004",
+        "CW-X009",
+        "CW-L026"
+      ]
+    },
+    {
+      "id": "H4",
+      "claim": "Empty/generated results must not imply completeness",
+      "priority": "high",
+      "evidence_ids": [
+        "CW-Z007",
+        "CW-Z011"
+      ]
+    },
+    {
+      "id": "H5",
+      "claim": "Receipt must beat existing PR/CI processes",
+      "priority": "high",
+      "evidence_ids": [
+        "CW-L022",
+        "CW-Y005",
+        "CW-Y012"
+      ]
+    },
+    {
+      "id": "H6",
+      "claim": "Hosted cross-repo job is plausible, buyer/value unproven",
+      "priority": "high",
+      "evidence_ids": [
+        "CW-Y007",
+        "CW-Y004",
+        "CW-Y001"
+      ]
+    },
+    {
+      "id": "H7",
+      "claim": "Provider switching does not establish structural demand",
+      "priority": "high",
+      "evidence_ids": [
+        "CW-Y002",
+        "CW-Y003",
+        "CW-L055"
+      ]
+    },
+    {
+      "id": "H8",
+      "claim": "Structural checks do not replace behavior or execution verification",
+      "priority": "high",
+      "evidence_ids": [
+        "CW-T022",
+        "CW-X013",
+        "CW-Z004"
+      ]
+    }
+  ],
+  "high_priority_evidence_ids": [
+    "CW-L022",
+    "CW-L023",
+    "CW-L026",
+    "CW-L055",
+    "CW-T002",
+    "CW-T004",
+    "CW-T018",
+    "CW-T022",
+    "CW-X001",
+    "CW-X009",
+    "CW-X013",
+    "CW-Y001",
+    "CW-Y002",
+    "CW-Y003",
+    "CW-Y004",
+    "CW-Y005",
+    "CW-Y007",
+    "CW-Y012",
+    "CW-Z001",
+    "CW-Z003",
+    "CW-Z004",
+    "CW-Z007",
+    "CW-Z011",
+    "CW-Z012"
+  ],
+  "other_records": 108,
+  "minimum_other_sample": 22
+}

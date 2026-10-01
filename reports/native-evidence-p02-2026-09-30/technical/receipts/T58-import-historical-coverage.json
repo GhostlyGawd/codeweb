@@ -1,0 +1,24 @@
+{
+  "id": "T58-import-historical-coverage",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/coverage.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/.codeweb/graph.json",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/recorded.lcov",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:14.775Z",
+  "end": "2026-10-01T01:50:14.812Z",
+  "durationMs": 36.90937500000018,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"ok\":true,\"graph\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/.codeweb/graph.json\",\"symbolsSeen\":2,\"symbolsCovered\":1,\"filesMapped\":1,\"note\":\"explain/tests/context answers now carry measured-coverage facts; re-annotate after codeweb_refresh\"}\n",
+  "stderr": ""
+}

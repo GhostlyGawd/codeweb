@@ -1,0 +1,85 @@
+{
+  "name": "@ghostlygawd/codeweb",
+  "version": "0.15.0",
+  "mcpName": "io.github.GhostlyGawd/codeweb",
+  "type": "module",
+  "description": "Your agents break less code and burn fewer tokens. codeweb maps your repo into a deterministic call/import graph; 28 MCP tools answer impact, callers, and duplication before agents write. Claude Code plugin & MCP server; zero required dependencies, runs locally.",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "claude-code",
+    "code-analysis",
+    "static-analysis",
+    "call-graph",
+    "dependency-graph",
+    "codebase-map",
+    "impact-analysis",
+    "code-visualization",
+    "architecture",
+    "agent-tools",
+    "dead-code",
+    "duplication",
+    "refactoring"
+  ],
+  "homepage": "https://ghostlygawd.github.io/codeweb/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GhostlyGawd/codeweb.git"
+  },
+  "license": "MIT",
+  "bin": {
+    "codeweb": "bin/codeweb.mjs",
+    "codeweb-mcp": "bin/codeweb-mcp.mjs",
+    "codeweb-query": "bin/codeweb-query.mjs",
+    "codeweb-diff": "bin/codeweb-diff.mjs"
+  },
+  "files": [
+    "bin",
+    "scripts",
+    "!scripts/check",
+    "!scripts/spec_lint.py",
+    "!scripts/hook-check",
+    "!scripts/hook-protect",
+    "!scripts/**/__pycache__/**",
+    "!scripts/**/*.pyc",
+    "hooks",
+    "skills",
+    "agents",
+    "commands",
+    ".claude-plugin",
+    "CHANGELOG.md",
+    "LICENSE",
+    "SECURITY.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "build:site": "node site/build.mjs",
+    "version-sync": "node scripts/version-sync.mjs",
+    "check-consistency": "node scripts/check-consistency.mjs",
+    "release": "node scripts/release.mjs",
+    "optimize": "node scripts/optimize.mjs",
+    "trend": "node scripts/trend.mjs",
+    "context-pack": "node scripts/context-pack.mjs",
+    "simulate-edit": "node scripts/simulate-edit.mjs",
+    "hotspots": "node scripts/hotspots.mjs",
+    "campaign": "node scripts/campaign.mjs",
+    "bench": "node scripts/bench.mjs",
+    "bench:all": "node bench/all.mjs",
+    "stats": "node scripts/stats.mjs",
+    "reading-order": "node scripts/reading-order.mjs",
+    "annotate": "node scripts/annotate.mjs",
+    "bench:ts-engine": "node scripts/bench-ts-engine.mjs",
+    "coverage": "node scripts/coverage.mjs"
+  },
+  "optionalDependencies": {
+    "web-tree-sitter": "0.26.9"
+  },
+  "author": "GhostlyGawd (https://github.com/GhostlyGawd)"
+}

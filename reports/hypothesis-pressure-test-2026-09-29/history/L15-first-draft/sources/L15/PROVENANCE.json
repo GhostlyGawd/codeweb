@@ -1,0 +1,41 @@
+{
+  "sources": [
+    {
+      "evidence_id": "CW-L056",
+      "url": "https://blog.cloudflare.com/ai-code-review/",
+      "retrieved_at": "2026-09-30T04:57:17.141814+00:00",
+      "path": "CW-L056.html",
+      "sha256": "96d8e0e44bc7d2f1d910a895a334b460cae452dcca61031ab2e6fd96d6b1d597",
+      "bytes": 377980,
+      "status": "captured"
+    },
+    {
+      "evidence_id": "CW-Z002",
+      "url": "https://its-boris.com/blog/sprint-retro-what-we-shipped-and-what-broke",
+      "retrieved_at": "2026-09-30T04:57:17.142070+00:00",
+      "path": "CW-Z002.html",
+      "sha256": "d9930ab3fb758af6842e27b9c2cdd8e28f94737665e50b283ea888d6e30ca572",
+      "bytes": 105391,
+      "status": "captured"
+    },
+    {
+      "evidence_id": "CW-L021",
+      "url": "https://hn.algolia.com/api/v1/items/48408485",
+      "retrieved_at": "2026-09-30T04:57:17.142143+00:00",
+      "path": "CW-L021.json",
+      "sha256": "ceef6f78c3d5f13af70dc4481c8525e3ba44e432a3451ecac9718ae72c9bb379",
+      "bytes": 783,
+      "status": "captured"
+    },
+    {
+      "evidence_id": "CW-L020",
+      "url": "https://hn.algolia.com/api/v1/items/48407230",
+      "retrieved_at": "2026-09-30T04:57:17.142197+00:00",
+      "path": "CW-L020.json",
+      "sha256": "7ff4617774839dd01a22b103dd4e8fa96d54a3de9a7c961e23458cf8a984d425",
+      "bytes": 1995,
+      "status": "captured"
+    }
+  ],
+  "limits": "Targeted original passages inspected, not full external corpus. HTML capture is preservation, not proof every paragraph read. HN web open failed; original comment API used."
+}

@@ -1,0 +1,18 @@
+{
+  "recorded_at": "2026-09-30T21:10:16.028676+00:00",
+  "skill_validation": {
+    "tool": "skill-creator/scripts/quick_validate.py",
+    "isolated_dependency_runner": "uv run --with pyyaml --no-project",
+    "installed_copy": "pass",
+    "repository_copy": "pass"
+  },
+  "live_document_links": {
+    "checked": 27,
+    "missing": []
+  },
+  "historical_snapshots": {
+    "checked": 6,
+    "mismatches": []
+  },
+  "skill_copies_identical": true
+}

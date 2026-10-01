@@ -1,0 +1,14 @@
+{
+  "verified_at": "2026-10-01T02:50:02.103337+00:00",
+  "status": "pass",
+  "material_findings": 65,
+  "claims": 12,
+  "test_ids": 12,
+  "work_records": 21,
+  "task_dependencies": "acyclic",
+  "frozen_packet_files_hash_verified": 545,
+  "carry_over_records": 6,
+  "live_local_links_checked": 87,
+  "source_or_reference_mismatches": [],
+  "scope": "Offline artifact consistency and preservation; not host readiness, strategic proof or customer validation."
+}

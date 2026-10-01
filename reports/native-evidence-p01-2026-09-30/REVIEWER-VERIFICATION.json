@@ -1,0 +1,484 @@
+{
+  "recorded_at": "2026-10-01T00:27:19.304463+00:00",
+  "reviewer": "independent P-01 reviewer",
+  "worktree": "$LOCAL_TMP/codeweb-p01-3tylipwm",
+  "base_and_head": "fd3b637e9ad4e1f7265799298761bc1ee83fe76c",
+  "candidate_files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "b330997cd7f5499bfff99446dcb9d9573d5d8663ff6b32eb90a1e17432e0978d"
+    },
+    {
+      "path": "scripts/find-similar.mjs",
+      "sha256": "a9b9cd3a7f3c097e4a0cc3ba8fefee1f98349bfe58fba518a9882e7c5ef3bf0b"
+    },
+    {
+      "path": "scripts/mcp-server.mjs",
+      "sha256": "67bea39f000592963826db38b6078da40c6a8b46e5d12892d5d8d020c8800453"
+    },
+    {
+      "path": "tests/find-similar-output.test.mjs",
+      "sha256": "1a3151af95c3fcd97ce81fc82e215b6e4bfbcbf083084a91d91e58c52b45052a"
+    },
+    {
+      "path": "tests/test_ac_pins.py",
+      "sha256": "66d1fc4b7d154fd67e7d9e8d3dd4b7128c65f9b769ca8d56d1e672267dc0bf7a"
+    }
+  ],
+  "independent_checks": [
+    {
+      "name": "independent regression on archived base",
+      "command": [
+        "node",
+        "--test",
+        "tests/find-similar-output.test.mjs"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "passed": 1,
+      "failed": 6,
+      "stdout": "\u2716 ac_34: empty, supported-zero and incomplete maps give bounded no-candidate output with unchanged JSON (37.503ms)\n\u2716 ac_34: conflicting contracts and intentional same-file duplication are source candidates, not automatic reuse (34.245625ms)\n\u2716 ac_34: different-syntax equivalents and missing bodies retain zero-result/count behavior (34.620917ms)\n\u2716 ac_34: human truncation names omitted counts and a working --k expansion (36.801667ms)\n\u2716 ac_34: body-cap control excludes a matching tail and structural mode names its limits (36.975709ms)\n\u2714 ac_34: ordinary source/candidate/usage/graph errors still exit 2 without successful result text (177.096459ms)\n\u2716 ac_34: MCP tool discovery presents bounded comparison and preserves similarity JSON transport (75.903458ms)\n\u2139 tests 7\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 6\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 476.258042\n\n\u2716 failing tests:\n\ntest at tests/find-similar-output.test.mjs:35:1\n\u2716 ac_34: empty, supported-zero and incomplete maps give bounded no-candidate output with unchanged JSON (37.503ms)\n  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /no candidates.*available mapped bodies/i. Input:\n  \n  'find-similar: candidate (7 shingles) vs 0 existing symbols\\n' +\n    '  no similar existing symbol (>=15%) \u2014 looks novel; safe to write.\\n'\n  \n      at TestContext.<anonymous> (file://$LOCAL_TMP/cw-p01-review-k1ke09nd/base/tests/find-similar-output.test.mjs:42:14)\n      at Test.runInAsyncScope (node:async_hooks:226:14)\n      at Test.run (node:internal/test_runner/test:1397:25)\n      at Test.start (node:internal/test_runner/test:1257:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'find-similar: candidate (7 shingles) vs 0 existing symbols\\n  no similar existing symbol (>=15%) \u2014 looks novel; safe to write.\\n',\n    expected: /no candidates.*available mapped bodies/i,\n    operator: 'match',\n    diff: 'simple'\n  }\n\ntest at tests/find-similar-output.test.mjs:53:1\n\u2716 ac_34: conflicting contracts and intentional same-file duplication are source candidates, not automatic reuse (34.245625ms)\n  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /2 source candidates for comparison/. Input:\n  \n  'find-similar: candidate (7 shingles) vs 2 existing symbols\\n' +\n    '  2 similar \u2014 consider reusing instead of re-implementing:\\n' +\n    '  [100% high  ] bounds.js:high  (bounds.js:2)\\n' +\n    '  [100% high  ] bounds.js:low  (bounds.js:1)\\n'\n  \n      at TestContext.<anonymous> (file://$LOCAL_TMP/cw-p01-review-k1ke09nd/base/tests/find-similar-output.test.mjs:62:12)\n      at Test.runInAsyncScope (node:async_hooks:226:14)\n      at Test.run (node:internal/test_runner/test:1397:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)\n      at Test.postRun (node:internal/test_runner/test:1537:19)\n      at Test.run (node:internal/test_runner/test:1462:12)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'find-similar: candidate (7 shingles) vs 2 existing symbols\\n  2 similar \u2014 consider reusing instead of re-implementing:\\n  [100% high  ] bounds.js:high  (bounds.js:2)\\n  [100% high  ] bounds.js:low  (bounds.js:1)\\n',\n    expected: /2 source candidates for comparison/,\n    operator: 'match',\n    diff: 'simple'\n  }\n\ntest at tests/find-similar-output.test.mjs:78:1\n\u2716 ac_34: different-syntax equivalents and missing bodies retain zero-result/count behavior (34.620917ms)\n  AssertionError [ERR_ASSERTION]: the comparison mode is visible\n      at assertLimits (file://$LOCAL_TMP/cw-p01-review-k1ke09nd/base/tests/find-similar-output.test.mjs:23:10)\n      at TestContext.<anonymous> (file://$LOCAL_TMP/cw-p01-review-k1ke09nd/base/tests/find-similar-output.test.mjs:84:7)\n      at Test.runInAsyncScope (node:async_hooks:226:14)\n      at Test.run (node:internal/test_runner/test:1397:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)\n      at Test.postRun (node:internal/test_runner/test:1537:19)\n      at Test.run (node:internal/test_runner/test:1462:12)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: 'find-similar: candidate (6 shingles) vs 1 existing symbols\\n  no similar existing symbol (>=15%) \u2014 looks novel; safe to write.\\n',\n    expected: /lexical/,\n    operator: 'match',\n    diff: 'simple'\n  }\n\ntest at tests/find-similar-output.test.mjs:93:1\n\u2716 ac_34: human truncation names omitted counts and a working --k expansion (36.801667ms)\n  AssertionError [ERR_ASSERTION]: the comparison mode is visible\n      at assertLimits (file://$LOCAL_TMP/cw-p01-review-k1ke09nd/base/tests/find-similar-output.test.mjs:23:10)\n      at TestContext.<anonymous> (file://$LOCAL_TMP/cw-p01-review-k1ke09nd/base/tests/find-similar-output.test.mjs:99:5)\n      at Test.runInAsyncScope (node:async_hooks:226:14)\n      at Test.run (node:internal/test_runner/test:1397:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)\n      at Test.postRun (node:internal/test_runner/test:1537:19)\n      at Test.run (node:internal/test_runner/test:1462:12)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: 'find-similar: candidate (2 shingles) vs 3 existing symbols\\n  1 similar \u2014 consider reusing instead of re-implementing:\\n  [100% high  ] same.js:a  (same.js:1)\\n',\n    expected: /lexical/,\n    operator: 'match',\n    diff: 'simple'\n  }\n\ntest at tests/find-similar-output.test.mjs:113:1\n\u2716 ac_34: body-cap control excludes a matching tail and structural mode names its limits (36.975709ms)\n  AssertionError [ERR_ASSERTION]: the comparison mode is visible\n      at assertLimits (file://$LOCAL_TMP/cw-p01-review-k1ke09nd/base/tests/find-similar-output.test.mjs:23:10)\n      at TestContext.<anonymous> (file://$LOCAL_TMP/cw-p01-review-k1ke09nd/base/tests/find-similar-output.test.mjs:119:5)\n      at Test.runInAsyncScope (node:async_hooks:226:14)\n      at Test.run (node:internal/test_runner/test:1397:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)\n      at Test.postRun (node:internal/test_runner/test:1537:19)\n      at Test.run (node:internal/test_runner/test:1462:12)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: 'find-similar: candidate (1 shingles) vs 1 existing symbols\\n  no similar existing symbol (>=15%) \u2014 looks novel; safe to write.\\n',\n    expected: /lexical/,\n    operator: 'match',\n    diff: 'simple'\n  }\n\ntest at tests/find-similar-output.test.mjs:149:1\n\u2716 ac_34: MCP tool discovery presents bounded comparison and preserves similarity JSON transport (75.903458ms)\n  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /mapped non-test.*candidates.*comparison/i. Input:\n  \n  'Before writing a function, ask \"does something already do this?\": ranks existing bodies by similarity to a candidate `signature` or `body` snippet. structural:true matches identifier-renamed (Type-2) clones. Call to AVOID re-implementing existing logic.'\n  \n      at TestContext.<anonymous> (file://$LOCAL_TMP/cw-p01-review-k1ke09nd/base/tests/find-similar-output.test.mjs:161:12)\n      at Test.runInAsyncScope (node:async_hooks:226:14)\n      at Test.run (node:internal/test_runner/test:1397:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)\n      at Test.postRun (node:internal/test_runner/test:1537:19)\n      at Test.run (node:internal/test_runner/test:1462:12)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'Before writing a function, ask \"does something already do this?\": ranks existing bodies by similarity to a candidate `signature` or `body` snippet. structural:true matches identifier-renamed (Type-2) clones. Call to AVOID re-implementing existing logic.',\n    expected: /mapped non-test.*candidates.*comparison/i,\n    operator: 'match',\n    diff: 'simple'\n  }\n",
+      "stderr": ""
+    },
+    {
+      "name": "base/candidate exact CLI JSON/stdout/stderr/exit parity",
+      "comparisons": 36,
+      "paths": [
+        "live",
+        "sidecar",
+        "stale-sidecar"
+      ],
+      "cases": [
+        "signature",
+        "body-file",
+        "stdin",
+        "empty-signature",
+        "zero-shingle numeric signature",
+        "cap-hidden tail",
+        "structural",
+        "truncated",
+        "expanded",
+        "fractional k",
+        "zero k",
+        "negative k"
+      ],
+      "threshold_assertions": "exact 0.15 included, 3/21 excluded; method included, class/test excluded",
+      "samples": [
+        {
+          "path": "live",
+          "json": {
+            "candidate": {
+              "source": "signature",
+              "shingles": 3,
+              "mode": "lexical"
+            },
+            "index": "live",
+            "bodyLineCap": 400,
+            "matches": [
+              {
+                "id": "dup00.js:fn",
+                "label": "fn",
+                "file": "dup00.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup01.js:fn",
+                "label": "fn",
+                "file": "dup01.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup02.js:fn",
+                "label": "fn",
+                "file": "dup02.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup03.js:fn",
+                "label": "fn",
+                "file": "dup03.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup04.js:fn",
+                "label": "fn",
+                "file": "dup04.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup05.js:fn",
+                "label": "fn",
+                "file": "dup05.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup06.js:fn",
+                "label": "fn",
+                "file": "dup06.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup07.js:fn",
+                "label": "fn",
+                "file": "dup07.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup08.js:fn",
+                "label": "fn",
+                "file": "dup08.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup09.js:fn",
+                "label": "fn",
+                "file": "dup09.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              }
+            ],
+            "count": 16,
+            "scanned": 19,
+            "more": {
+              "remaining": 6
+            }
+          },
+          "human_stdout": "find-similar: candidate (3 shingles, lexical) across 19 mapped non-test function/method symbols\n  >=15% shingle similarity; existing bodies limited to first 400 lines; candidate uncapped.\n  10 source candidates for comparison:\n  [100% high  ] dup00.js:fn  (dup00.js:1)\n  [100% high  ] dup01.js:fn  (dup01.js:1)\n  [100% high  ] dup02.js:fn  (dup02.js:1)\n  [100% high  ] dup03.js:fn  (dup03.js:1)\n  [100% high  ] dup04.js:fn  (dup04.js:1)\n  [100% high  ] dup05.js:fn  (dup05.js:1)\n  [100% high  ] dup06.js:fn  (dup06.js:1)\n  [100% high  ] dup07.js:fn  (dup07.js:1)\n  [100% high  ] dup08.js:fn  (dup08.js:1)\n  [100% high  ] dup09.js:fn  (dup09.js:1)\n  6 additional candidates omitted; rerun with --k 16 to show all.\n  Missing bodies and unmapped code may hide candidates. Similarity does not establish equivalent behavior, novelty, or safe reuse; inspect source and run relevant tests.\n"
+        },
+        {
+          "path": "sidecar",
+          "json": {
+            "candidate": {
+              "source": "signature",
+              "shingles": 3,
+              "mode": "lexical"
+            },
+            "index": "sidecar",
+            "bodyLineCap": 400,
+            "matches": [
+              {
+                "id": "dup00.js:fn",
+                "label": "fn",
+                "file": "dup00.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup01.js:fn",
+                "label": "fn",
+                "file": "dup01.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup02.js:fn",
+                "label": "fn",
+                "file": "dup02.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup03.js:fn",
+                "label": "fn",
+                "file": "dup03.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup04.js:fn",
+                "label": "fn",
+                "file": "dup04.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup05.js:fn",
+                "label": "fn",
+                "file": "dup05.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup06.js:fn",
+                "label": "fn",
+                "file": "dup06.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup07.js:fn",
+                "label": "fn",
+                "file": "dup07.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup08.js:fn",
+                "label": "fn",
+                "file": "dup08.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup09.js:fn",
+                "label": "fn",
+                "file": "dup09.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              }
+            ],
+            "count": 16,
+            "scanned": 19,
+            "more": {
+              "remaining": 6
+            }
+          },
+          "human_stdout": "find-similar: candidate (3 shingles, lexical) across 19 mapped non-test function/method symbols\n  >=15% shingle similarity; existing bodies limited to first 400 lines; candidate uncapped.\n  10 source candidates for comparison:\n  [100% high  ] dup00.js:fn  (dup00.js:1)\n  [100% high  ] dup01.js:fn  (dup01.js:1)\n  [100% high  ] dup02.js:fn  (dup02.js:1)\n  [100% high  ] dup03.js:fn  (dup03.js:1)\n  [100% high  ] dup04.js:fn  (dup04.js:1)\n  [100% high  ] dup05.js:fn  (dup05.js:1)\n  [100% high  ] dup06.js:fn  (dup06.js:1)\n  [100% high  ] dup07.js:fn  (dup07.js:1)\n  [100% high  ] dup08.js:fn  (dup08.js:1)\n  [100% high  ] dup09.js:fn  (dup09.js:1)\n  6 additional candidates omitted; rerun with --k 16 to show all.\n  Missing bodies and unmapped code may hide candidates. Similarity does not establish equivalent behavior, novelty, or safe reuse; inspect source and run relevant tests.\n"
+        },
+        {
+          "path": "stale-sidecar",
+          "json": {
+            "candidate": {
+              "source": "signature",
+              "shingles": 3,
+              "mode": "lexical"
+            },
+            "index": "live",
+            "bodyLineCap": 400,
+            "matches": [
+              {
+                "id": "dup00.js:fn",
+                "label": "fn",
+                "file": "dup00.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup01.js:fn",
+                "label": "fn",
+                "file": "dup01.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup02.js:fn",
+                "label": "fn",
+                "file": "dup02.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup03.js:fn",
+                "label": "fn",
+                "file": "dup03.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup04.js:fn",
+                "label": "fn",
+                "file": "dup04.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup05.js:fn",
+                "label": "fn",
+                "file": "dup05.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup06.js:fn",
+                "label": "fn",
+                "file": "dup06.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup07.js:fn",
+                "label": "fn",
+                "file": "dup07.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup08.js:fn",
+                "label": "fn",
+                "file": "dup08.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              },
+              {
+                "id": "dup09.js:fn",
+                "label": "fn",
+                "file": "dup09.js",
+                "line": 1,
+                "domain": "review",
+                "sim": 1,
+                "tier": "high"
+              }
+            ],
+            "count": 16,
+            "scanned": 19,
+            "more": {
+              "remaining": 6
+            }
+          },
+          "human_stdout": "find-similar: candidate (3 shingles, lexical) across 19 mapped non-test function/method symbols\n  >=15% shingle similarity; existing bodies limited to first 400 lines; candidate uncapped.\n  10 source candidates for comparison:\n  [100% high  ] dup00.js:fn  (dup00.js:1)\n  [100% high  ] dup01.js:fn  (dup01.js:1)\n  [100% high  ] dup02.js:fn  (dup02.js:1)\n  [100% high  ] dup03.js:fn  (dup03.js:1)\n  [100% high  ] dup04.js:fn  (dup04.js:1)\n  [100% high  ] dup05.js:fn  (dup05.js:1)\n  [100% high  ] dup06.js:fn  (dup06.js:1)\n  [100% high  ] dup07.js:fn  (dup07.js:1)\n  [100% high  ] dup08.js:fn  (dup08.js:1)\n  [100% high  ] dup09.js:fn  (dup09.js:1)\n  6 additional candidates omitted; rerun with --k 16 to show all.\n  Missing bodies and unmapped code may hide candidates. Similarity does not establish equivalent behavior, novelty, or safe reuse; inspect source and run relevant tests.\n"
+        }
+      ],
+      "result": "pass"
+    },
+    {
+      "name": "base/candidate MCP RPC parity",
+      "cases": 8,
+      "result": "pass",
+      "schemas_identical": true,
+      "initialize_identical": true,
+      "tool_results_identical": true,
+      "ordinary_validation_and_large_body_error_retained": true,
+      "new_description": "Before writing a function, rank mapped non-test function/method source candidates for comparison with a signature or body snippet (>=15% similarity; existing bodies limited to first 400 lines, candidate uncapped). structural:true uses identifier-normalized shingles. Missing bodies and unmapped code may hide candidates; similarity does not establish equivalent behavior, novelty, or safe reuse. Inspect source and run relevant tests."
+    },
+    {
+      "name": "candidate remains uncapped past line 400",
+      "result": "pass",
+      "candidate_lines": 401,
+      "candidate_shingles": 6,
+      "matched_tail_at_line": 401,
+      "payload": {
+        "candidate": {
+          "source": "stdin",
+          "shingles": 6,
+          "mode": "lexical"
+        },
+        "index": "live",
+        "bodyLineCap": 400,
+        "matches": [
+          {
+            "id": "tail.js:fn",
+            "label": "fn",
+            "file": "tail.js",
+            "line": 1,
+            "domain": "unassigned",
+            "sim": 0.166667,
+            "tier": "low"
+          }
+        ],
+        "count": 1,
+        "scanned": 1
+      }
+    }
+  ],
+  "probe_harness_correction": "Initial temporary archive probe used /var path alias; server entrypoint compares argv path with canonical import path, so MCP returned no replies. Rerun with real paths. Initial attempt yielded no MCP product evidence. No product changes made.",
+  "verdict": "PASS",
+  "blockers": [],
+  "completed_at": "2026-10-01T00:29:09.401877+00:00",
+  "node_version": "v26.7.0",
+  "python_version": "3.14.7",
+  "targeted_checks": [
+    {
+      "command": "node --test tests/find-similar-output.test.mjs tests/find-similar.test.mjs tests/structural-clone.test.mjs",
+      "exit_code": 0,
+      "passed": 18,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "node --test tests/mcp.test.mjs tests/mcp-budget.test.mjs tests/mcp-staleness-parity.test.mjs tests/mcp-scenarios.test.mjs",
+      "exit_code": 0,
+      "passed": 52,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "python3 scripts/spec_lint.py",
+      "exit_code": 0,
+      "result": "34 live ACs, all built and test-pinned"
+    },
+    {
+      "command": "python3 -m unittest tests.test_ac_pins.TestAcPins.test_ac_34_bounded_similarity_output",
+      "exit_code": 0,
+      "passed": 1
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "protected_harness_unchanged": true,
+  "candidate_matches_implementer_handoff": true,
+  "full_gate": "not run by reviewer; root owns execution",
+  "limits": [
+    "P-01 modified similarity surface only; not full NED/host readiness",
+    "Structural and test-provenance preservation inferred from unchanged code plus existing regression controls; no complete failed/skipped/stale/current/invalid-test-oracle matrix",
+    "No user benefit, safe reuse, semantic substitutability or comparative workflow benefit established"
+  ]
+}

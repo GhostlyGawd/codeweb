@@ -1,0 +1,23 @@
+{
+  "id": "T69-real-extraction-failure-cli",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/refresh.mjs",
+    "$LOCAL_TMP/codeweb-p02-supplement-mshorI/extraction-fail/.codeweb/graph.json",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:52:49.089Z",
+  "end": "2026-10-01T01:52:49.218Z",
+  "durationMs": 129.17208300000004,
+  "exit": 2,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": "extract failed: /Library/Developer/CommandLineTools/usr/bin/ctags: illegal option -- -\nusage: ctags [-BFTaduwvx] [-f tagsfile] file ...\n[extract] no supported source files under $LOCAL_TMP/codeweb-p02-supplement-mshorI/extraction-fail\n[extract]   looked for: .js .mjs .cjs .jsx .ts .tsx .mts .cts .py .rs .go .java .cs .rb .php .kt .kts .swift .c .h .cpp .cc .cxx .hpp .hh .hxx (node_modules, dist, vendor and friends are skipped)\n[extract]   wrong directory? Point at the code root. Non-native language? In Claude Code, the\n[extract]   /codeweb command falls back to agent-based mapping — no extractor needed.\n[extract]   (Intentionally sparse target? --allow-empty writes an empty map.)\n"
+}

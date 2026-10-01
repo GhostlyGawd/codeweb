@@ -1,0 +1,7 @@
+{
+  "change": "rare +2 to +3 after mapped +2",
+  "before_sha256": "7952c7830b970fd51203d2a504b61e5f57b66239ca9091c4b17cf7df962a4357",
+  "after_sha256": "1cf1aff563b075b160d39b8d29a0978bb6ebc20550054c4b48858b15a48f51b0",
+  "baseline_sha256": "25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd",
+  "purpose": "deliberately stale mapped source before actual native recovery"
+}

@@ -1,0 +1,21 @@
+[
+  {
+    "kind": "duplicate-logic",
+    "confidence": "high",
+    "drifted": false,
+    "bodySim": 1,
+    "severity": "low",
+    "title": "`packOrders` re-implemented in 2 files",
+    "domains": [
+      "(root)"
+    ],
+    "nodes": [
+      "one.mjs:packOrders",
+      "two.mjs:packOrders"
+    ],
+    "evidence": "2 definitions of `packOrders()` across 2 files, 1 domain(s); median 12 LOC. body-confirmed (avg 100%, min 100%). Sites: one.mjs, two.mjs",
+    "recommendation": "Extract one `packOrders` into `lib/`; import at the 2 sites; delete the local copies.",
+    "fingerprint": "f9ae6c42f168b0c5",
+    "id": "ov1"
+  }
+]

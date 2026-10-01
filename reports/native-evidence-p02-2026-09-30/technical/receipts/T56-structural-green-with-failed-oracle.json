@@ -1,0 +1,24 @@
+{
+  "id": "T56-structural-green-with-failed-oracle",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/diff.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/.codeweb/graph.json",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/.codeweb/graph.json",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:14.699Z",
+  "end": "2026-10-01T01:50:14.734Z",
+  "durationMs": 35.38504200000034,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"before\":\"codeweb-p02-tech-s5LQzF/behavior\",\"after\":\"codeweb-p02-tech-s5LQzF/behavior\",\"nodes\":{\"added\":[],\"removed\":[],\"renamed\":[]},\"edges\":{\"added\":0,\"removed\":0},\"domains\":{\"before\":1,\"after\":1},\"crossDomainEdges\":{\"before\":0,\"after\":0,\"delta\":0},\"overlaps\":{\"added\":[],\"removed\":[]},\"cycles\":{\"added\":[],\"removed\":[]},\"orphans\":{\"added\":[],\"removed\":[]},\"regressions\":[],\"ok\":true,\"verdict\":{\"ok\":true,\"check\":\"orphan-gate\",\"scope\":\"full\",\"checks\":{\"newCycles\":[],\"lostCallers\":[],\"newDuplications\":[]}},\"analysis\":{\"scope\":\"mapped-graph-delta\",\"checks\":{\"cycles\":\"evaluated\",\"lostCallers\":\"evaluated\",\"duplication\":\"evaluated\",\"behavior\":\"not-evaluated\"},\"nextSteps\":[\"Mapped structural checks do not establish behavioral correctness; run the relevant tests.\"]}}\n",
+  "stderr": ""
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "assignment": "L12",
+  "issue_identifier": "COD-91",
+  "issue_id": "b095ce67-4c3e-4a89-8733-391b8527ce07",
+  "run_id": "d4f5357a-1928-4b1d-bc5d-f9e5164b1be6",
+  "session_identity": {
+    "CODEX_SESSION_ID": "01a0f097-088a-7562-b884-2a07ed4650a1",
+    "CODEX_THREAD_ID": "01a0f097-088a-7562-b884-2a07ed4650a1"
+  },
+  "created_at": "2026-09-30T04:37:40.318894+00:00",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "initial_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "final_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "first_draft_context": "Fresh assigned task conversation; no other lens outputs opened. Lead must independently verify runtime sessions; shared filesystem isolation is procedural.",
+  "correction_attempts_used": 0,
+  "self_approval": false,
+  "outputs": [
+    {
+      "path": "lenses/12-ceiling-of-the-hypothesis.md",
+      "sha256": "841fb9b5509a2f82632116155c9aaba8d1d6ff3b87fbc6b6a933c6b29010c819"
+    },
+    {
+      "path": "lenses/12-findings.json",
+      "sha256": "ba5dca9e8d3f6b3a03104b81ae144d13b5162c29a446a3f4cb0a1800d053eb30"
+    },
+    {
+      "path": "sources/L12-public-reopens.json",
+      "sha256": "a0909ec9a1b23a0123de79c12f070e05ce4318e761aa26ceea92fa058c6a7e51"
+    }
+  ],
+  "first_draft_history": "history/L12-first-draft/",
+  "validation": {
+    "findings": 5,
+    "all_evidence_ids_resolve": true,
+    "required_fields_present": true
+  },
+  "source_gaps": [
+    "No other pressure-test lens outputs read; fresh task conversation, runtime session independence requires lead verification.",
+    "All 192 frozen file hashes verified; full availability is not a claim that all evidence records or captures were substantively reread.",
+    "Selected original evidence records and capability docs inspected; three load-bearing public sources reopened with rendered captures.",
+    "No participant observation, behavioral experiment, installed-host test, customer simulation, external send or product modification.",
+    "Public source counts are not prevalence; builder measurements do not establish ordinary-user effects.",
+    "No numerical revenue ambition or unit economics established; no observed Codeweb purchase/renewal."
+  ]
+}

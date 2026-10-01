@@ -1,0 +1,297 @@
+{
+  "id": "22d6b2b6-4d76-42b1-abce-beac3f423e3b",
+  "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+  "projectId": null,
+  "projectWorkspaceId": null,
+  "goalId": null,
+  "parentId": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+  "title": "Final buyer, adoption and contrary-evidence pass",
+  "description": "Final buyer/adoption and negative-evidence pass for [COD-56](/COD/issues/COD-56). This is child 6 of 6. [COD-60](/COD/issues/COD-60) is independently approved. Product Lead can start now using saved evidence; no technical prerequisite. Qualifying boundary: substantial market/source investigation owned by Product Lead in its own bounded run, parallel with Technical Lead and separately reviewed before parent synthesis.\n\nQuestion: which recurring job is worth adopting repeatedly or purchasing as a hosted/shared service, after accounting for native alternatives and organization constraints? Focus concrete adoption/abandonment and paid renewal/switching decisions outside CodeRabbit, supported buyer authority, ordinary non-builder experiences, private-source constraints, and durable multi-repo/shared evidence needs. Explicitly seek free/native alternatives and teams that do not need another review tool. Avoid generic vendor claims and tutorials merely to increase counts. OSS review overload is not Teams demand; individual model subscriptions do not establish structural value. Preserve charter: local single-repo free forever; paid only hosting, multi-repo aggregation and human attention.\n\nAim for 40\u201350 additional distinct useful fully read originals (including relevant partial recovery), not weak filler or many comments credited as separate pages. Record new incidents only when useful since current record count is already in band. Use CW-Y001 onward in FINAL-MARKET-EVIDENCE.jsonl, FINAL-MARKET-SOURCES.jsonl, FINAL-MARKET-QUERY-LOG.csv and FINAL-MARKET-DECISIONS.md. For recovered existing sources, additive annotations keyed to accepted IDs only. Two actual targeted sweeps each for ordinary retention, buyer decisions and private/shared workflow; log whether new mechanisms/segments/contradictions emerge. Final memo must rank candidate segments/jobs, state evidence against the change brief and paid receipt, propose falsifiable experiments and identify what public sources cannot decide.\n\nSaved plan: $LOCAL_HOME/Repositories/codeweb/reports/user-pain-research-plan-2026-09-27/{README.md,AGENT-BRIEFS.md,EVIDENCE-SCHEMA.json,AUDIT-BASELINE.json}. Current TERMINAL-CONTRACT, CHARTER and CLAUDE remain binding. Public research/local reports only; no outreach, money, services, agents, implementation, charter/harness edits, merge/release/deployment/publication. Proposed experiments are not execution authorization. Use management workspace reports/user-pain-research-2026-09-27; requested repository destination is outside writable roots. Do not bypass permissions.\n\nThe accepted pilot and four prior children establish capabilities. Existing aggregate EVIDENCE-CANDIDATE.jsonl has 108 records (97 first_person_report labels, not all ordinary user incidents). SOURCE-REGISTRY-CANDIDATE.jsonl has 125 canonical attempts and 62 full units before final alias audit. Main shortfall is complete-source breadth, not raw incident quantity. Overall target remains 150\u2013200 fully read pages/threads and 80\u2013120 useful deduplicated firsthand records. Targets are not quotas for weak material. These last two tasks exhaust six-child limit; do not create more.\n\nRead originals completely for full-source credit. One thread counts once, even with many commenters; mirrored pages, API pages, retries and translated copies count once. Fetching is not reading. Re-read only useful incomplete sources; do not repeat the indiscriminate GitHub queue that fetched dozens of irrelevant/long issues before rate limits. Explicitly separate inaccessible, partial and fully read units. Preserve dates, source family, provenance, public author/incident key, consequences, workarounds and source locators. Complete original schema on any new retained record. No fabricated recency, outcomes, private identity, prevalence, interviews or buying intent. Builder/vendor claims stay separate. No source-derived current host gap without official verification; use openai-docs for current Codex facts. Closed/stale is not fixed. Resolve or qualify historical findings.\n\nMaintain new additive files only; accepted originals and audit/screenshots stay unchanged. Reuse accepted IDs when an original provides no distinct incident. Keep concise paraphrases and null excerpts; avoid redistributing whole copyrighted threads. Save a source registry with read boundaries, query log, ID-linked decision memo, updated count receipt and validation. Independent reviewer must reopen every high-priority new claim plus >=20% of other new records, confirm counts/dedup/limits and all five audit hashes, record audited IDs, upload review, then native approve/request changes on this issue. One correction maximum. Bounded approval is a handoff, not parent completion.\n\n600-second runtime is fixed. Stop source collection at about 450 seconds to leave 150 seconds for honest accounting, validation, uploads/work products and in_review disposition. Do not time out trying to reach a number. Log two actual targeted sweeps per focal theme; if both add no distinct mechanism, segment or contradiction, record that narrow stopping rationale, not universal saturation. If time rather than saturation stops a sweep, say so. Record operator interventions separately from agent-local adaptations. No manual wake loops. Parent owns semantic dedup, six final briefs, corpus JSONL/CSV, query/source maps, pain map, contradictions, audit overlay, 3\u20135 opportunity decisions, explicit experiments/unknowns, holistic synthesis, independent final review and completion receipt. Original criteria must survive limitations and corrections.",
+  "status": "done",
+  "statusVersion": 4,
+  "lastStatusDecisionId": null,
+  "workMode": "standard",
+  "harnessKind": null,
+  "priority": "medium",
+  "reviewPolicy": null,
+  "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+  "assigneeUserId": null,
+  "checkoutRunId": null,
+  "executionRunId": null,
+  "executionAgentNameKey": null,
+  "executionLockedAt": null,
+  "createdByAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+  "createdByUserId": null,
+  "responsibleUserId": "local-board",
+  "issueNumber": 64,
+  "identifier": "COD-64",
+  "originKind": "manual",
+  "originId": null,
+  "originRunId": "39989059-8ac8-4079-a6c3-9e3df97bcf20",
+  "originFingerprint": "default",
+  "requestDepth": 0,
+  "billingCode": null,
+  "assigneeAdapterOverrides": null,
+  "executionPolicy": {
+    "mode": "normal",
+    "stages": [
+      {
+        "id": "3e6ec7ea-7e53-4e6d-8ca0-839836437f68",
+        "type": "review",
+        "participants": [
+          {
+            "id": "099828e8-b661-4a5b-b777-82338e48efb6",
+            "type": "agent",
+            "userId": null,
+            "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4"
+          }
+        ],
+        "approvalsNeeded": 1
+      }
+    ],
+    "commentRequired": true
+  },
+  "executionState": {
+    "status": "completed",
+    "monitor": null,
+    "reviewRequest": null,
+    "currentStageId": null,
+    "lastDecisionId": "3c0028fc-99c6-4392-b44f-cee579740fe2",
+    "returnAssignee": {
+      "type": "agent",
+      "userId": null,
+      "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+    },
+    "currentStageType": null,
+    "completedStageIds": [
+      "3e6ec7ea-7e53-4e6d-8ca0-839836437f68"
+    ],
+    "currentStageIndex": null,
+    "currentParticipant": null,
+    "lastDecisionOutcome": "approved",
+    "changesRequestedCount": 0
+  },
+  "monitorNextCheckAt": null,
+  "monitorWakeRequestedAt": null,
+  "monitorLastTriggeredAt": null,
+  "monitorAttemptCount": 0,
+  "monitorNotes": null,
+  "monitorScheduledBy": null,
+  "executionWorkspaceId": null,
+  "executionWorkspacePreference": null,
+  "executionWorkspaceSettings": null,
+  "sourceTrust": null,
+  "unblockDescriptor": null,
+  "blockedTransitionAt": null,
+  "blockedOwnerNotifiedAt": null,
+  "startedAt": "2026-09-28T01:50:59.593Z",
+  "completedAt": "2026-09-28T01:54:20.457Z",
+  "cancelledAt": null,
+  "hiddenAt": null,
+  "createdAt": "2026-09-28T01:38:43.822Z",
+  "updatedAt": "2026-09-28T01:54:20.457Z",
+  "labels": [],
+  "labelIds": [],
+  "watchdog": null,
+  "changes": {
+    "status": {
+      "from": "in_progress",
+      "to": "done"
+    },
+    "statusVersion": {
+      "from": 3,
+      "to": 4
+    },
+    "checkoutRunId": {
+      "from": "9eb677c0-d5de-482b-855c-7289c9c911b0",
+      "to": null
+    },
+    "executionRunId": {
+      "from": "9eb677c0-d5de-482b-855c-7289c9c911b0",
+      "to": null
+    },
+    "executionAgentNameKey": {
+      "from": "independent reviewer",
+      "to": null
+    },
+    "executionLockedAt": {
+      "from": "2026-09-28T01:50:25.572Z",
+      "to": null
+    },
+    "executionState": {
+      "from": {
+        "status": "pending",
+        "monitor": null,
+        "reviewRequest": null,
+        "currentStageId": "3e6ec7ea-7e53-4e6d-8ca0-839836437f68",
+        "lastDecisionId": null,
+        "returnAssignee": {
+          "type": "agent",
+          "userId": null,
+          "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+        },
+        "currentStageType": "review",
+        "completedStageIds": [],
+        "currentStageIndex": 0,
+        "currentParticipant": {
+          "type": "agent",
+          "userId": null,
+          "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4"
+        },
+        "lastDecisionOutcome": null,
+        "changesRequestedCount": 0
+      },
+      "to": {
+        "status": "completed",
+        "monitor": null,
+        "reviewRequest": null,
+        "currentStageId": null,
+        "lastDecisionId": "3c0028fc-99c6-4392-b44f-cee579740fe2",
+        "returnAssignee": {
+          "type": "agent",
+          "userId": null,
+          "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+        },
+        "currentStageType": null,
+        "completedStageIds": [
+          "3e6ec7ea-7e53-4e6d-8ca0-839836437f68"
+        ],
+        "currentStageIndex": null,
+        "currentParticipant": null,
+        "lastDecisionOutcome": "approved",
+        "changesRequestedCount": 0
+      }
+    },
+    "completedAt": {
+      "from": null,
+      "to": "2026-09-28T01:54:20.457Z"
+    }
+  },
+  "relatedWork": {
+    "outbound": [
+      {
+        "issue": {
+          "id": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+          "identifier": "COD-56",
+          "title": "Deep web research on Codeweb user pain",
+          "status": "blocked",
+          "priority": "medium",
+          "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+          "assigneeUserId": null
+        },
+        "mentionCount": 3,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "7b31a6e2-42e1-4829-ad61-3411f037541e",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "d9a5214f-12cc-455b-a2e9-d80285d6ad2e",
+            "label": "comment",
+            "matchedText": "COD-56"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "76e05df6-14cf-4873-a9c3-95aab90814a3",
+          "identifier": "COD-60",
+          "title": "Deepen adoption, trust and buying evidence \u2014 lanes 4\u20136",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 1,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-60"
+          }
+        ]
+      }
+    ],
+    "inbound": [
+      {
+        "issue": {
+          "id": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+          "identifier": "COD-56",
+          "title": "Deep web research on Codeweb user pain",
+          "status": "blocked",
+          "priority": "medium",
+          "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+          "assigneeUserId": null
+        },
+        "mentionCount": 2,
+        "sources": [
+          {
+            "kind": "comment",
+            "sourceRecordId": "4ba477a6-1487-4e43-a8b8-980820087915",
+            "label": "comment",
+            "matchedText": "COD-64"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "b6019082-c719-482d-98a0-c8be2f48e031",
+            "label": "comment",
+            "matchedText": "COD-64"
+          }
+        ]
+      }
+    ]
+  },
+  "referencedIssueIdentifiers": [
+    "COD-56",
+    "COD-60"
+  ],
+  "comment": {
+    "id": "7b31a6e2-42e1-4829-ad61-3411f037541e",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "22d6b2b6-4d76-42b1-abce-beac3f423e3b",
+    "authorAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "authorUserId": null,
+    "onBehalfOfUserId": "local-board",
+    "authorType": "agent",
+    "createdByRunId": "9eb677c0-d5de-482b-855c-7289c9c911b0",
+    "derivedAuthorAgentId": null,
+    "derivedCreatedByRunId": null,
+    "derivedAuthorSource": null,
+    "body": "Approved as a bounded evidence handoff.\n\n- [Independent review and validation](/api/attachments/1706285a-7a8d-4694-99aa-6794b9bf17e3/content) uploaded. Reopened all 7 high-priority records plus Y008/Y010 (2 of 5 others), both Y012 follow-ups and CW-L026 recovery.\n- Verified 12 new records; 30 full units (29 new + 1 recovery), 7 partial, 5 inaccessible; canonical overlap and schema checks pass. Uploaded ZIP matches reviewed files. All 5 audit hashes and 58 accepted-file hashes match.\n- The 40\u201350-source aim remains missed. Ordinary retention, independent source breadth, actual renewal and budget authority remain weak. Paid Codeweb demand is unproven; no saturation claimed.\n- [COD-56](/COD/issues/COD-56) retains original corpus targets, semantic dedup, final synthesis and independent final review. Approval is not parent completion or experiment/outreach authorization. No correction requested.",
+    "presentation": null,
+    "metadata": {
+      "version": 1,
+      "authorizationReason": "allow_self",
+      "sections": [
+        {
+          "title": "Authorization",
+          "rows": [
+            {
+              "type": "key_value",
+              "label": "Reason",
+              "value": "allow_self"
+            }
+          ]
+        }
+      ]
+    },
+    "deletedAt": null,
+    "deletedByType": null,
+    "deletedByAgentId": null,
+    "deletedByUserId": null,
+    "deletedByRunId": null,
+    "sourceTrust": null,
+    "createdAt": "2026-09-28T01:54:20.467Z",
+    "updatedAt": "2026-09-28T01:54:20.467Z"
+  }
+}

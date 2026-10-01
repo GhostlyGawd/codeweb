@@ -1,0 +1,25 @@
+{
+  "id": "T10-cli-missing-map",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/query.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/absent.json",
+    "--impact",
+    "low",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:11.085Z",
+  "end": "2026-10-01T01:50:11.122Z",
+  "durationMs": 37.365583999999956,
+  "exit": 2,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": "graph not found: $LOCAL_TMP/codeweb-p02-tech-s5LQzF/absent.json — build it first (run /codeweb, or: node scripts/run.mjs <target> --out-dir <target>/.codeweb)\n"
+}

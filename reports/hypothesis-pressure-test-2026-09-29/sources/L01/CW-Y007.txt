@@ -1,0 +1,105 @@
+Any way of using multiple repositories in bugbot? - Help - Cursor - Community Forum
+Cursor - Community Forum
+Any way of using multiple repositories in bugbot?
+Support
+Help
+bugbot
+Tanzir_Hasan
+(Tanzir Hasan)
+February 17, 2026,  3:21pm
+1
+I wish to achieve the following: I update my backend code, and bugbot will look at my frontend prs (or even just main) and tell me that I messed something up because the types no longer work as the frontend expects. I don’t have an easy way of doing it with bugbot so I’ve just been resorting to
+@claude
+which is actually quite good for this, but I don’t want to do that all the time. Are there any ways around this?
+valentinoPereira
+(Nvidia RTX Pro 6000)
+February 19, 2026,  6:47am
+3
+NO.
+For type failures on different repos, you might be able to
+set it up
+on CI github actions. and hack your way there.
+Instead I’ll suggest to switch to a monorepo pattern instead of maintaining separate repos. I’ve had my share of separate repos and they have always let me down. More here:
+Benefits and challenges of monorepo development practices - CircleCI
+deanrie
+(Dean Rie)
+February 19, 2026,  5:02pm
+5
+Hey, cross-repo context isn’t supported in Bugbot right now. It only reviews PRs within a single repository.
+A few workarounds to consider:
+Monorepo: If you can move backend and frontend into one repo, Bugbot will naturally see both sides when reviewing changes. This also makes cross-boundary type checks easier with standard CI tools.
+Team Rules: If you’re on a Teams plan, you can set shared Bugbot rules that apply to all connected repos. This won’t enable cross-repo type checking, but it helps enforce consistent standards. See the docs for details:
+Bugbot | Cursor Docs
+CI-based approach: Set up a GitHub Action that checks out both repos and runs type checking in the PR. The community reply above links to a good pattern for this.
+For the specific goal of catching type mismatches between frontend and backend, a monorepo or a CI pipeline will likely work better than Bugbot. Even if cross-repo were supported, static type checking tools are more reliable for catching these issues.
+This has come up before, and the team knows there’s interest in cross-repo support. There’s no timeline yet, but your report helps with prioritization.
+Tanzir_Hasan
+(Tanzir Hasan)
+February 19, 2026,  8:20pm
+6
+Yeah a monorepo would solve this quite nicely. Unfortunately the codebase is enormous and won’t be made a monorepo any time soon, I haven’t investigated the CI approach but I imagine that is also difficult to implement but regardless both of those are more correct than trying to use bugbot. Thank you both for the response, I’ll try to convince my team to prioritize a monorepo in the next few months.
+shamashel
+(Michael Gabriel)
+March 5, 2026, 11:32am
+7
+@deanrie
+Echoing the same issue from my team. Is there any particular reason github agentic workflows supports this but bugbot can’t, or is this on the roadmap? If needed, I can have someone from my company communicate this through more official channels
+deanrie
+(Dean Rie)
+March 13, 2026,  8:44am
+8
+Hey
+@shamashel
+, good question. BugBot currently works within a single repository. It only analyzes the PR diff and the code in that repo. GitHub’s Agentic Workflows and similar tools work differently because they spin up a full agent that can clone and navigate multiple repos. BugBot is more focused on the individual PR context, which is a deliberate tradeoff for speed and reliability.
+There’s no cross-repo support on the roadmap right now, but we’ve noted the interest. I also saw a separate feature request here:
+Multi-Repo BugBot Support
+. That’s helpful for tracking demand.
+If your team wants to push this through official channels, that works too. Your account rep or sales contact can pass it along. The more concrete the use case is, like “we need type consistency checks between repos X and Y”, the easier it is to prioritize.
+In the meantime, a CI-based approach, like checking out both repos in a GitHub Action, is probably the most practical way to catch cross-repo issues automatically.
+Related topics
+Topic
+Replies
+Views
+Activity
+Multi-Repo BugBot Support
+Feature Requests
+bugbot
+,
+github
+0
+80
+March 5, 2026
+Applying shared coding guidelines across multiple repos with Bugbot
+Discussions
+bugbot
+11
+409
+January 29, 2026
+BugBot for all PRs
+Bug Reports
+bugbot
+,
+github
+1
+51
+July 16, 2026
+BugBot in BitBucket Cloud not working
+Bug Reports
+bugbot
+7
+168
+August 31, 2026
+Bugbot doesn't catch all issues on first pass - multiple review cycles needed
+Bug Reports
+bugbot
+19
+1446
+April 13, 2026
+Home
+Categories
+Guidelines
+Terms of Service
+Privacy Policy
+Powered by
+Discourse
+, best viewed with JavaScript enabled

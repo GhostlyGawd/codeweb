@@ -1,0 +1,25 @@
+{
+  "id": "T11-cli-corrupt-map",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/query.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/corrupt.json",
+    "--impact",
+    "low",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:11.122Z",
+  "end": "2026-10-01T01:50:11.160Z",
+  "durationMs": 37.81820899999997,
+  "exit": 2,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": "invalid JSON in $LOCAL_TMP/codeweb-p02-tech-s5LQzF/corrupt.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)\n"
+}

@@ -1,0 +1,7 @@
+{
+  "runnerReceipt": "receipts/T79-current-executed-coverage.json",
+  "sourceBeforeSha256": "668631f22b7e890c9d8bb2cd1c312594c5391e280ff4269f94f6c15f30997377",
+  "sourceAfterSha256": "8c0443865b5107101c51bb602183d72bbfc087cd868d1f96fdc72cb04116d387",
+  "coverageSha256": "a9fcd0a537e59007ba4371077db295e8c69b667168328d314e96bd359406a02b",
+  "root": "$LOCAL_TMP/codeweb-p02-supplement-mshorI/behavior"
+}

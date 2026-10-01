@@ -1,0 +1,132 @@
+{
+  "root": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "corrections": [
+    {
+      "original": "T49-mcp-similarity",
+      "corrected": "T74-corrected-mcp-similarity",
+      "reason": "Our probe passed unsupported k to MCP; retry omits k."
+    },
+    {
+      "original": "T50-overlap",
+      "corrected": "T71-corrected-overlap",
+      "reason": "Our probe passed graph as a positional arg; overlap uses scoped CODEWEB_WS."
+    },
+    {
+      "original": "T62-targeted-suites",
+      "corrected": "T78-corrected-stats-test",
+      "reason": "Our CODEWEB_NO_STATS=1 hid required stats. Rerun only the failing test with default enabled."
+    }
+  ],
+  "receipts": [
+    {
+      "id": "T63-fresh-refresh",
+      "exit": 0,
+      "durationMs": 135.347583
+    },
+    {
+      "id": "T64-fresh-context",
+      "exit": 0,
+      "durationMs": 34.577292
+    },
+    {
+      "id": "T65-fresh-hook",
+      "exit": 0,
+      "durationMs": 36.395917
+    },
+    {
+      "id": "T66-stale-stamped-hook",
+      "exit": 0,
+      "durationMs": 36.63766699999999
+    },
+    {
+      "id": "T67-codex-shaped-hook",
+      "exit": 0,
+      "durationMs": 32.99920800000001
+    },
+    {
+      "id": "T68-real-extraction-failure-hook",
+      "exit": 0,
+      "durationMs": 176.21337500000004
+    },
+    {
+      "id": "T69-real-extraction-failure-cli",
+      "exit": 2,
+      "durationMs": 129.17208300000004
+    },
+    {
+      "id": "T70-intentional-extract",
+      "exit": 0,
+      "durationMs": 68.40925000000004
+    },
+    {
+      "id": "T71-corrected-overlap",
+      "exit": 0,
+      "durationMs": 38.64091700000006
+    },
+    {
+      "id": "T72-intentional-dismissal",
+      "exit": 0,
+      "durationMs": 35.39104099999997
+    },
+    {
+      "id": "T73-dismissal-repeat-overlap",
+      "exit": 0,
+      "durationMs": 34.49333300000001
+    },
+    {
+      "id": "T74-corrected-mcp-similarity",
+      "exit": 0,
+      "durationMs": 77.47833400000002
+    },
+    {
+      "id": "T75-empty-deadcode-json",
+      "exit": 0,
+      "durationMs": 34.39712499999996
+    },
+    {
+      "id": "T76-incomplete-deadcode-json",
+      "exit": 0,
+      "durationMs": 35.57958299999996
+    },
+    {
+      "id": "T77-incomplete-deadcode-mcp",
+      "exit": 0,
+      "durationMs": 71.35054200000002
+    },
+    {
+      "id": "T78-corrected-stats-test",
+      "exit": 0,
+      "durationMs": 783.662042
+    },
+    {
+      "id": "T79-current-executed-coverage",
+      "exit": 0,
+      "durationMs": 86.71837500000015
+    },
+    {
+      "id": "T80-measured-extract",
+      "exit": 0,
+      "durationMs": 65.35729199999992
+    },
+    {
+      "id": "T81-import-executed-coverage",
+      "exit": 0,
+      "durationMs": 34.67699999999991
+    },
+    {
+      "id": "T82-executed-coverage-explain",
+      "exit": 0,
+      "durationMs": 37.323708000000124
+    },
+    {
+      "id": "T83-executed-stale-coverage-explain",
+      "exit": 0,
+      "durationMs": 35.28512499999988
+    },
+    {
+      "id": "T84-current-after-edit-fails",
+      "exit": 1,
+      "durationMs": 74.36295900000005
+    }
+  ]
+}

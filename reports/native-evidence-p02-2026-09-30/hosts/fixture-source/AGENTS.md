@@ -1,0 +1,1 @@
+This is a disposable local Codeweb host fixture. Only this fixture and its .codeweb graph may be edited. No networking, GitHub, credential inspection, extra services, or subagents. Source-linked evidence is limited to supported source relationships. Do not assume structural verdicts establish behavior.

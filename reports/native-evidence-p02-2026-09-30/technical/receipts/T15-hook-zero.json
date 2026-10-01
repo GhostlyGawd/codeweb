@@ -1,0 +1,21 @@
+{
+  "id": "T15-hook-zero",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/zero/subject.mjs\"}}",
+  "start": "2026-10-01T01:50:11.267Z",
+  "end": "2026-10-01T01:50:11.298Z",
+  "durationMs": 31.73929099999998,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": ""
+}

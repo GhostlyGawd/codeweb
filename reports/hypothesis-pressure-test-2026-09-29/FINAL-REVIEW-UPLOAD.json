@@ -1,0 +1,53 @@
+{
+  "attachment": {
+    "id": "abf36d62-ee85-49f2-a841-2070c9aaeffd",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+    "issueCommentId": null,
+    "assetId": "d4c7f975-a3c9-42e7-b185-a5425290048c",
+    "provider": "local_disk",
+    "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/573b8d18-80c7-4b18-84b5-aecd340601f8/2026/09/30/e38a2d5b-c8d8-44d8-872f-14d8ab49ffd9-FINAL-REVIEW-DELIVERY.zip",
+    "contentType": "application/zip",
+    "byteSize": 8530,
+    "sha256": "f3e73e64697adc9d68e20a232a6e3601dbecb434ac19bc649ff04fe8dfc5d651",
+    "originalFilename": "FINAL-REVIEW-DELIVERY.zip",
+    "createdByAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "createdByUserId": null,
+    "createdAt": "2026-09-30T05:17:28.089Z",
+    "updatedAt": "2026-09-30T05:17:28.089Z",
+    "contentPath": "/api/attachments/abf36d62-ee85-49f2-a841-2070c9aaeffd/content",
+    "openPath": "/api/attachments/abf36d62-ee85-49f2-a841-2070c9aaeffd/content",
+    "downloadPath": "/api/attachments/abf36d62-ee85-49f2-a841-2070c9aaeffd/content?download=1"
+  },
+  "work_product": {
+    "id": "0464d8b9-0b8d-437e-9b2b-5a59b73b30bf",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "projectId": null,
+    "issueId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+    "executionWorkspaceId": null,
+    "runtimeServiceId": null,
+    "type": "artifact",
+    "provider": "paperclip",
+    "externalId": null,
+    "title": "Final independent review and hash checks",
+    "url": null,
+    "status": "ready_for_review",
+    "reviewState": "needs_board_review",
+    "isPrimary": false,
+    "healthStatus": "unknown",
+    "summary": null,
+    "metadata": {
+      "byteSize": 8530,
+      "openPath": "/api/attachments/abf36d62-ee85-49f2-a841-2070c9aaeffd/content",
+      "contentPath": "/api/attachments/abf36d62-ee85-49f2-a841-2070c9aaeffd/content",
+      "contentType": "application/zip",
+      "attachmentId": "abf36d62-ee85-49f2-a841-2070c9aaeffd",
+      "downloadPath": "/api/attachments/abf36d62-ee85-49f2-a841-2070c9aaeffd/content?download=1",
+      "originalFilename": "FINAL-REVIEW-DELIVERY.zip"
+    },
+    "sourceTrust": null,
+    "createdByRunId": "c50b5679-6b4a-4d6e-befa-59203a339da7",
+    "createdAt": "2026-09-30T05:17:28.098Z",
+    "updatedAt": "2026-09-30T05:17:28.098Z"
+  }
+}

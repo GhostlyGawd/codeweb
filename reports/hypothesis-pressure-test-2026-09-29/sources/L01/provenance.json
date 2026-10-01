@@ -1,0 +1,98 @@
+[
+  {
+    "evidence_id": "CW-T018",
+    "url": "https://news.ycombinator.com/item?id=48033774",
+    "retrieved_at": "2026-09-30T03:59:21.580115+00:00",
+    "boundary": "HTML response and derived text; linked repositories, scripts, images and unloaded comments excluded",
+    "status": "captured",
+    "final_url": "https://news.ycombinator.com/item?id=48033774",
+    "html_path": "sources/L01/CW-T018.html",
+    "text_path": "sources/L01/CW-T018.txt",
+    "sha256": "b717900277ead78de576f2aa7b94e16691c7f6674b900b1265d1bff24a2605a6",
+    "text_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897"
+  },
+  {
+    "evidence_id": "CW-Z003",
+    "url": "https://ngof.nikhaldimann.com/p/deja-code",
+    "retrieved_at": "2026-09-30T03:59:21.580382+00:00",
+    "boundary": "HTML response and derived text; linked repositories, scripts, images and unloaded comments excluded",
+    "status": "captured",
+    "final_url": "https://ngof.nikhaldimann.com/p/deja-code",
+    "html_path": "sources/L01/CW-Z003.html",
+    "text_path": "sources/L01/CW-Z003.txt",
+    "sha256": "c2576945f061860d9fb4feaf98c2298f92dd759289439d49b9b1a38084a6f759",
+    "text_sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b"
+  },
+  {
+    "evidence_id": "CW-X001",
+    "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+    "retrieved_at": "2026-09-30T03:59:21.580472+00:00",
+    "boundary": "HTML response and derived text; linked repositories, scripts, images and unloaded comments excluded",
+    "status": "captured",
+    "final_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+    "html_path": "sources/L01/CW-X001.html",
+    "text_path": "sources/L01/CW-X001.txt",
+    "sha256": "b156be2a53106ae09c28edc2fa372c7b386a0a9c241e06070428914ecd894d37",
+    "text_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6"
+  },
+  {
+    "evidence_id": "CW-Z001",
+    "url": "https://shan-verse.com/blog/codex-after-the-update/",
+    "retrieved_at": "2026-09-30T03:59:21.580531+00:00",
+    "boundary": "HTML response and derived text; linked repositories, scripts, images and unloaded comments excluded",
+    "status": "captured",
+    "final_url": "https://shan-verse.com/blog/codex-after-the-update/",
+    "html_path": "sources/L01/CW-Z001.html",
+    "text_path": "sources/L01/CW-Z001.txt",
+    "sha256": "503a424830bc7f4e36093b8b76c0b9f58e9ac1110cb85611d2829d8e8c8ddc6e",
+    "text_sha256": "f06ceefb7d3c95cc528d03eae7461b9012fb16c9e08745aa8a5f2dfe81fa7cfd"
+  },
+  {
+    "evidence_id": "CW-P003",
+    "url": "https://github.com/anthropics/claude-code/issues/39703",
+    "retrieved_at": "2026-09-30T03:59:21.580616+00:00",
+    "boundary": "HTML response and derived text; linked repositories, scripts, images and unloaded comments excluded",
+    "status": "captured",
+    "final_url": "https://github.com/anthropics/claude-code/issues/39703",
+    "html_path": "sources/L01/CW-P003.html",
+    "text_path": "sources/L01/CW-P003.txt",
+    "sha256": "37443d3ab4f6e581e25a335f8926a1dc4704d394719f5760095b64e5c275041d",
+    "text_sha256": "dd7a415ec9bd6ab34b1218c73b0363b7f4dcb81925791c829ecac9266133e0f0"
+  },
+  {
+    "evidence_id": "CW-L048",
+    "url": "https://news.ycombinator.com/item?id=49321400",
+    "retrieved_at": "2026-09-30T03:59:21.580677+00:00",
+    "boundary": "HTML response and derived text; linked repositories, scripts, images and unloaded comments excluded",
+    "status": "captured",
+    "final_url": "https://news.ycombinator.com/item?id=49321400",
+    "html_path": "sources/L01/CW-L048.html",
+    "text_path": "sources/L01/CW-L048.txt",
+    "sha256": "5ec8e8a65d10c3c83109d2163ece1d2b738e2dcc376545e6699b98a918f054e3",
+    "text_sha256": "2a6d49781c8ad6448b79778e7fbc694340a5db2b8f23e8b1f1cc9d9789cc5b41"
+  },
+  {
+    "evidence_id": "CW-Z006",
+    "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+    "retrieved_at": "2026-09-30T03:59:21.580755+00:00",
+    "boundary": "HTML response and derived text; linked repositories, scripts, images and unloaded comments excluded",
+    "status": "captured",
+    "final_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+    "html_path": "sources/L01/CW-Z006.html",
+    "text_path": "sources/L01/CW-Z006.txt",
+    "sha256": "cfbf9d35ee6707b49568072265c54c178f205bb708f02e01d29345c547983bf1",
+    "text_sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d"
+  },
+  {
+    "evidence_id": "CW-Y007",
+    "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+    "retrieved_at": "2026-09-30T03:59:21.580840+00:00",
+    "boundary": "HTML response and derived text; linked repositories, scripts, images and unloaded comments excluded",
+    "status": "captured",
+    "final_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+    "html_path": "sources/L01/CW-Y007.html",
+    "text_path": "sources/L01/CW-Y007.txt",
+    "sha256": "054a9ce2b30cda3d46a0800cf18a7bd0657bf105cea98b893d9283d7290033bd",
+    "text_sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42"
+  }
+]

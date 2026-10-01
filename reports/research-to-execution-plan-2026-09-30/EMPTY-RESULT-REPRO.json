@@ -1,0 +1,19 @@
+{
+  "recorded_at": "2026-09-30T21:42:58.996258+00:00",
+  "package_version": "0.15.0",
+  "package_integrity": "sha512-kgulqr9TAlOifJT5Upw8Z7A7T4KOHa6jdkSS855pW2WeV8jKuamJ/zffVup8ey4fC41FFK8iT1iSgeSIVzHKdg==",
+  "node_version": "v26.7.0",
+  "fixture": "A real source directory with control.js and a deliberately empty/incomplete supplied map. Candidate is text; target code is not executed.",
+  "argv": [
+    "node",
+    "$LOCAL_TMP/codeweb-empty-result-proof-f7sbdrqy/package/scripts/find-similar.mjs",
+    "$LOCAL_TMP/codeweb-empty-result-proof-f7sbdrqy/graph.json",
+    "--signature",
+    "function proposed(value) { return value * 7; }"
+  ],
+  "exit_code": 0,
+  "stdout": "find-similar: candidate (7 shingles) vs 0 existing symbols\n  no similar existing symbol (>=15%) \u2014 looks novel; safe to write.\n",
+  "stderr": "",
+  "unsupported_safety_claim_observed": true,
+  "scope": "Published CLI empty-result behavior only; no host/participant trial and no behavioral code-safety inference."
+}

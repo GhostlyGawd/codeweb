@@ -1,0 +1,32 @@
+
+[run] extract
+/Library/Developer/CommandLineTools/usr/bin/ctags: illegal option -- -
+usage: ctags [-BFTaduwvx] [-f tagsfile] file ...
+[extract] 12 symbols, 7 edges (7 call + 0 import) from 4 files (regex engine); dropped 0 ambiguous bare-call edges (0 short-name); scanned 4/4 file(s); edged 4/4 (cache on); ast: off -> $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/fragment.json
+[run] extract done in 90ms
+
+[run] cluster
+hubs stripped (indeg>=12): 0
+domains: 1 (hub-named)
+isolated-after-dehub: 3 (25%)
+--- top 1 domain ---
+  12 src
+[run] cluster done in 33ms
+
+[run] overlap
+source: FOUND — body-confirmed
+actionable 0 · needs review 0 · dismissed 0
+--- top findings ---
+[run] overlap done in 36ms
+
+[run] optimize
+codeweb optimize: 0 actionable finding(s) · 0 ready · 0 blocked · 0 judgement · ~0 LOC reclaimable
+  full advisory: $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/optimize.md
+[run] optimize done in 36ms
+
+[run] report
+[codeweb] wrote $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/report.html
+[codeweb] 12 nodes, 7 edges, 1 domains — actionable 0 · needs review 0 · dismissed 0
+[codeweb] updated $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json (meta.generatedAt + meta.stats persisted)
+[codeweb] wrote $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/report.md
+[run] report done in 40ms

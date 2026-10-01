@@ -1,0 +1,3 @@
+retrieved_at,lane,query,engine,result
+2026-09-28T00:30:52.305900+00:00,1,"site.github.com/anthropics/claude-code/issues ""MCP"" ""ignored""",web.search_query,Discovery returned primary GitHub reports and counterevidence candidates; snippets not used as evidence
+2026-09-28T00:30:52.305900+00:00,1,"site.github.com/anthropics/claude-code/issues ""refactor"" ""files""",web.search_query,Discovery returned primary GitHub reports and counterevidence candidates; snippets not used as evidence

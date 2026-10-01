@@ -1,0 +1,471 @@
+{
+  "schema_version": 1,
+  "assignment": "06 \u2014 Buyer and paid-service value",
+  "hypotheses": [
+    "H6",
+    "H7"
+  ],
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "issue_id": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+  "issue_identifier": "COD-85",
+  "run_id": "818156ef-42b4-4323-b6e2-fa2a14a47bdb",
+  "session_identity": "01a0f080-987a-7d91-93ee-b2307a2a6ea2",
+  "overall_verdict": "revise",
+  "overall_statement": "Retain only a conditional residual-coordination paid hypothesis for qualification. Reject repackaged free receipts as the paid job; buyer authority, net incremental savings, purchase and renewal remain unestablished.",
+  "findings": [
+    {
+      "id": "L06-F01",
+      "statement": "H6 needs a narrower candidate buyer: an accountable owner of recurring multi-repository check coordination, whose residual work survives adequate CI. No such confirmed Codeweb buyer is established.",
+      "evidence_type": "Inference from attributed public self-reports and frozen product documentation; no Codeweb customer trial",
+      "supported_actor_segment": "Observed: multi-repo developer/champion (Y007); review-tool payment participant (Y001); compliance evaluator (Y004). Proposed, unobserved buyer: engineering/platform owner with budget authority over the coordination job.",
+      "supported_task": "Obtain results for explicit producer/consumer revisions and get them to the responsible reviewers.",
+      "relevant_conditions": [
+        "Repeated cross-repo changes",
+        "Named consumer owners and runnable checks",
+        "Recurring human coordination after the best feasible CI baseline",
+        "Buyer has authority and source-policy permission"
+      ],
+      "strongest_supported_case": "Y007 describes recurring manual invocation and a migration constraint. Y001 shows adjacent review can attract reported payment.",
+      "strongest_countercase": "Y007 accepts CI as more correct and has not tried it. A champion asking the team to prioritize work is not the buyer. Y004 establishes an evaluator, not a sale.",
+      "evidence_ids": [
+        "CW-Y007",
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-Y004"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "passage_pointer": "posts 1, 5, 6; exposed lines 7\u201331",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 127",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y007]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+        },
+        {
+          "evidence_id": "CW-Y001",
+          "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "passage_pointer": "posts 1 and 3; exposed lines 9\u201348",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 121",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y001]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Historical price and intended retention, not observed renewal; no Codeweb buying intent."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "passage_pointer": "posts 1, 5, 6; exposed lines 7\u201331",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 127",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y007]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+        },
+        {
+          "evidence_id": "CW-Y004",
+          "original_url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "passage_pointer": "posts 1, 6, 7; exposed lines 11\u201358",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 124",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y004]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "No purchase authority, rejection, approval, or technical breach demonstrated."
+        }
+      ],
+      "failure_scenario": "An enthusiastic developer introduces Codeweb, but the budget owner funds a one-time CI integration; no recurring coordination budget remains.",
+      "verdict": "narrow",
+      "weakest_assumption": "A recurring residual coordination job exists after ordinary CI, and its owner can actually buy outsourcing.",
+      "local_implication": "Local success can produce a champion without creating an organization buying need.",
+      "paid_implication": "Qualify the job and actual buying authority before treating any user as a paid lead; do not infer a company-size ICP.",
+      "confidence_reason": "Moderate confidence in the observed pain and role distinctions; low confidence in the proposed buyer because no authority or residual-work observation exists.",
+      "minimal_falsification_test": "With one consenting team, inspect two recent cross-repo changes and its feasible CI alternative; identify who actually authorized the last comparable tool spend. Falsify this candidate if no recurring residual task or empowered owner can be named. Proposal only."
+    },
+    {
+      "id": "L06-F02",
+      "statement": "Reject a paid shared-receipt offer that merely republishes free structural checks and existing PR artifacts; coordination must demonstrably take work over.",
+      "evidence_type": "Inference from attributed public self-reports and frozen product documentation; no Codeweb customer trial",
+      "supported_actor_segment": "Authors, reviewers and internal tool owners already using CI/PR history; sophisticated internal builders are a countersegment.",
+      "supported_task": "Run agreed checks, track revisions and expose outcomes without repeated manual chasing or artifact assembly.",
+      "relevant_conditions": [
+        "Compare with configured CI, not a deliberately weak manual baseline",
+        "Keep behavioral test results separate from static analysis",
+        "Record actual supported checks and source revisions"
+      ],
+      "strongest_supported_case": "Y007 motivates automated execution; a managed service could own dispatch, reruns, failures and result delivery for explicit relationships.",
+      "strongest_countercase": "Y012 reuses artifacts already produced during development. Y005 builds internally. Frozen ci-gate.md already documents free sticky source-linked review and history.",
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y012",
+        "CW-Y005"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "passage_pointer": "posts 1, 5, 6; exposed lines 7\u201331",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 127",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y007]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-Y012",
+          "original_url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "passage_pointer": "Solutions; Artifacts; Where we are now; exposed lines 14\u201341,49\u201353",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 132",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y012]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents."
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "passage_pointer": "Why Build; Unix Philosophy; Dev Lifecycle; exposed lines 23\u201329,78\u201380,112\u2013118",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 125",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y005]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP."
+        }
+      ],
+      "failure_scenario": "A hosted page wraps the free Action output while people still choose revisions, chase owners, repair runners and copy results. All savings came from CI setup.",
+      "verdict": "reject",
+      "weakest_assumption": "The hosted layer can remove coordination beyond what the team can already automate adequately.",
+      "local_implication": "Keep free local/gate evidence useful regardless of paid viability; structural green is not behavioral correctness.",
+      "paid_implication": "Only residual service operation is a defensible paid increment. Static consumer maps cannot replace cross-repo type or contract tests.",
+      "confidence_reason": "High confidence in documented free overlap and original alternative accounts; actual hosted increment remains unbuilt/unmeasured.",
+      "minimal_falsification_test": "For the same agreed two-repo check, compare adequate existing CI plus ordinary PR artifacts with proposed managed coordination. Log every human handoff and recovery action. Reject if the service changes presentation but removes no recurring task. Proposal only."
+    },
+    {
+      "id": "L06-F03",
+      "statement": "Per-active-author pricing is an unvalidated proxy for coordination value; neither author count nor PR count alone explains this job.",
+      "evidence_type": "Inference from attributed public self-reports and frozen product documentation; no Codeweb customer trial",
+      "supported_actor_segment": "Billing participant/champion in an eight-developer team; actual budget approver remains unidentified.",
+      "supported_task": "Pay predictably for recurring useful review/coordination without paying for departed or unrelated contributors.",
+      "relevant_conditions": [
+        "Charter intent is about EUR10 per author committing in trailing 90 days, not a live price",
+        "Distinguish author, bot, contractor, reviewer and benefiting repository owner",
+        "Observe eligible coordination events and complexity separately from seat count"
+      ],
+      "strongest_supported_case": "Y001 values review of complex changes even from infrequent contributors; always-running service can matter despite sparse PRs.",
+      "strongest_countercase": "The same account objects to billing fit and contractor charges. Its annual terms differ from Codeweb's proposed trailing-90-day measure, so it is not a direct forecast.",
+      "evidence_ids": [
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y001",
+        "CW-Y010"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Y001",
+          "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "passage_pointer": "posts 1 and 3; exposed lines 9\u201348",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 121",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y001]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Historical price and intended retention, not observed renewal; no Codeweb buying intent."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-Y001",
+          "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "passage_pointer": "posts 1 and 3; exposed lines 9\u201348",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 121",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y001]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Historical price and intended retention, not observed renewal; no Codeweb buying intent."
+        },
+        {
+          "evidence_id": "CW-Y010",
+          "original_url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+          "passage_pointer": "post 1; exposed lines 7\u201318",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 130",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y010]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Outside two-year preference; proposed purchase, not completed sale or observed downgrade."
+        }
+      ],
+      "failure_scenario": "Many authors touch unrelated code while only two owners coordinate a few repository boundaries; the bill grows without additional work removed. Conversely a low-volume high-value team is underdescribed by usage counts.",
+      "verdict": "revise",
+      "weakest_assumption": "Active-author count tracks value well enough that a buyer accepts a predictable bill.",
+      "local_implication": "Do not restrict free local capability to manufacture a seat-based upgrade.",
+      "paid_implication": "Preserve the ratified price intent as hypothetical; test its fit, without silently changing pricing policy or issuing an offer.",
+      "confidence_reason": "Strong single-account evidence of metric tension; no distribution, current competitor pricing, or Codeweb price acceptance established.",
+      "minimal_falsification_test": "For one qualified team, reconstruct a trailing-90-day eligible-author roster, separating bot/contractor identities, and compare the hypothetical invoice with actual coordination events and beneficiaries. Ask the real buyer to explain what budget would fund it. Reject the metric for that team if cost changes independently of the purchased job. No offer or charge authorized."
+    },
+    {
+      "id": "L06-F04",
+      "statement": "Repository-policy and setup work may consume or prevent the paid benefit; aggregation permission is not transitive.",
+      "evidence_type": "Inference from attributed public self-reports and frozen product documentation; no Codeweb customer trial",
+      "supported_actor_segment": "Organization compliance evaluator; security/source owners are adoption gatekeepers, distinct from users and economic buyers.",
+      "supported_task": "Authorize only permitted repository combinations and their retained derived evidence.",
+      "relevant_conditions": [
+        "Explicit permitted relationships",
+        "Derived artifacts, caches, logs, retention and deletion covered",
+        "No blanket permission inferred from access to repositories individually"
+      ],
+      "strongest_supported_case": "Y004 makes information boundaries an explicit evaluation requirement; credible handling might make a scoped service acceptable.",
+      "strongest_countercase": "The public exchange ends at referral to security materials. Neither approval nor breach nor paid demand is established. Y007's functional need alone supplies no source-policy approval.",
+      "evidence_ids": [
+        "CW-Y004"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-Y004"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Y004",
+          "original_url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "passage_pointer": "posts 1, 6, 7; exposed lines 11\u201358",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 124",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y004]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "No purchase authority, rejection, approval, or technical breach demonstrated."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "passage_pointer": "posts 1, 5, 6; exposed lines 7\u201331",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 127",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y007]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+        },
+        {
+          "evidence_id": "CW-Y004",
+          "original_url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "passage_pointer": "posts 1, 6, 7; exposed lines 11\u201358",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 124",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y004]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "No purchase authority, rejection, approval, or technical breach demonstrated."
+        }
+      ],
+      "failure_scenario": "A/B and B/C are allowed but shared derived evidence indirectly joins A/C; the buyer cannot approve the service, or maintaining policy costs more than the coordination saved.",
+      "verdict": "revise",
+      "weakest_assumption": "A useful minimum data flow can be approved and maintained at less effort than it removes.",
+      "local_implication": "Local operation avoids some transfers but does not establish organizational compliance automatically.",
+      "paid_implication": "A bounded permitted-data specification and setup cost belong in buyer qualification; do not expand into a generic compliance platform.",
+      "confidence_reason": "High confidence in the stated evaluator requirements; actual implementation, approval time and outcome unknown.",
+      "minimal_falsification_test": "Before a hosted pilot, present the exact two-repo data-flow/retention/deletion design to the team's actual source-policy owner, record permitted scope and work required. Falsify feasibility if the needed flow cannot be approved or setup/maintenance exhausts the measured benefit. No real source upload is authorized here."
+    },
+    {
+      "id": "L06-F05",
+      "statement": "H7 survives: competitor cancellation and intended retention reveal service expectations, not Codeweb structural demand or renewal.",
+      "evidence_type": "Inference from attributed public self-reports and frozen product documentation; no Codeweb customer trial",
+      "supported_actor_segment": "Individual subscriber (Y002), adjacent-tool payment participant (Y001), and consultant advising a separate client (Y010).",
+      "supported_task": "Receive reliable contracted service and decide whether to continue paying when the job persists.",
+      "relevant_conditions": [
+        "Separate paid purchase, intended continuation and observed renewal",
+        "Historical entitlement disputes are not claims about current product limits",
+        "Initial project need may end"
+      ],
+      "strongest_supported_case": "Y002 cancellation follows entitlement/support confusion as well as low overall usage. This supports observable failure states and reliable service delivery as necessary conditions.",
+      "strongest_countercase": "Y001 expresses intended continued use, not completed renewal. Y010 considers temporary branch monitoring; it is an old proposed purchase, not observed churn.",
+      "evidence_ids": [
+        "CW-Y002"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y001",
+        "CW-Y010"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Y002",
+          "original_url": "https://forum.cursor.com/t/bugbot-stopped-being-triggered/156739",
+          "passage_pointer": "posts 17, 19, 21; exposed lines 141\u2013153",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 122",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y002]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "May pricing changed; do not present April allowance as current. Cancellation is self-report."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-Y001",
+          "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "passage_pointer": "posts 1 and 3; exposed lines 9\u201348",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 121",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y001]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Historical price and intended retention, not observed renewal; no Codeweb buying intent."
+        },
+        {
+          "evidence_id": "CW-Y010",
+          "original_url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+          "passage_pointer": "post 1; exposed lines 7\u201318",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 130",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y010]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Outside two-year preference; proposed purchase, not completed sale or observed downgrade."
+        }
+      ],
+      "failure_scenario": "A team pays during a migration, completes the work and stops needing coordination; alternatively silent failed runs force users to chase support and defeat the service promise.",
+      "verdict": "retain",
+      "weakest_assumption": "A supported coordination job recurs long enough, and reliably enough, for an empowered buyer to renew voluntarily.",
+      "local_implication": "Host-switching sentiment cannot establish structural-tool need or local repeated use.",
+      "paid_implication": "Treat purchase and renewal as distinct missing observations. Demonstrate recovery/entitlement clarity, but do not mistake those table-stakes properties for the reason to buy.",
+      "confidence_reason": "Strong distinction between recorded events and inference. No Codeweb purchase/renewal evidence; Y010 is dated 2021 and only a mechanism counterexample.",
+      "minimal_falsification_test": "Only after a separately authorized qualified pilot, record the actual buyer's payment decision and a later real renewal decision with reasons and continuing coordination load. A free extension or stated enthusiasm does not pass. Loss of the job or reversion to adequate CI falsifies durable subscription value for that segment."
+    },
+    {
+      "id": "L06-F06",
+      "statement": "The strategy's labor illustration is gross hypothetical value, not net paid-attributable savings or an economic buying result.",
+      "evidence_type": "Inference from attributed public self-reports and frozen product documentation; no Codeweb customer trial",
+      "supported_actor_segment": "Proposed economic buyer responsible for engineering capacity; observed public accounts do not identify a Codeweb budget owner.",
+      "supported_task": "Compare the fully loaded incremental service burden with the best feasible free/local/CI alternative.",
+      "relevant_conditions": [
+        "Same supported work and coverage in both arms",
+        "Exclude free local benefits",
+        "Include setup, policy review, triage, runner failures, maintenance and billing administration",
+        "Count saved capacity separately from realizable cash savings"
+      ],
+      "strongest_supported_case": "Y007 provides a plausible repeated manual task, and Y001 shows payment for useful adjacent review is possible.",
+      "strongest_countercase": "Neither account measures Codeweb time savings. Y004 adds adoption costs; Y005 and Y012 show internal/process substitutes. Price willingness cannot be derived from assumed wages.",
+      "evidence_ids": [
+        "CW-Y007",
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y004",
+        "CW-Y005",
+        "CW-Y012"
+      ],
+      "supporting_evidence": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "passage_pointer": "posts 1, 5, 6; exposed lines 7\u201331",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 127",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y007]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+        },
+        {
+          "evidence_id": "CW-Y001",
+          "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "passage_pointer": "posts 1 and 3; exposed lines 9\u201348",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 121",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y001]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Historical price and intended retention, not observed renewal; no Codeweb buying intent."
+        }
+      ],
+      "opposing_evidence": [
+        {
+          "evidence_id": "CW-Y004",
+          "original_url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "passage_pointer": "posts 1, 6, 7; exposed lines 11\u201358",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 124",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y004]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "No purchase authority, rejection, approval, or technical breach demonstrated."
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "passage_pointer": "Why Build; Unix Philosophy; Dev Lifecycle; exposed lines 23\u201329,78\u201380,112\u2013118",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 125",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y005]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP."
+        },
+        {
+          "evidence_id": "CW-Y012",
+          "original_url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "passage_pointer": "Solutions; Artifacts; Where we are now; exposed lines 14\u201341,49\u201353",
+          "frozen_record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:line 132",
+          "capture_pointer": "sources/L06-source-addendum.json#sources[evidence_id=CW-Y012]",
+          "access_limit": "Reopened exposed original text",
+          "source_limit": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents."
+        }
+      ],
+      "failure_scenario": "A dashboard appears to save ten hours against manual copying, but configured CI removes the same work; service setup and false-result triage make incremental savings zero or negative.",
+      "verdict": "unresolved_from_existing_evidence",
+      "weakest_assumption": "Recurring measured hours removed beyond adequate CI exceed all newly introduced work, and the buyer values that capacity enough to pay.",
+      "local_implication": "Local discovery/inspection savings must remain in the local outcome ledger.",
+      "paid_implication": "Do not present EUR750 gross value, a savings multiple or a low sticker price as proof of a purchase. Net savings and willingness to pay remain separate tests.",
+      "confidence_reason": "High confidence that the numerical example is explicitly invented; no measured values to estimate commercial viability.",
+      "minimal_falsification_test": "Measure one team's matched recurring check workflow against adequate CI. Use the accounting equation below with actual setup and recovery time; stop the paid hypothesis for that case if net increment is nonpositive. If positive, separately test authorized payment and later renewal. Proposal only."
+    }
+  ],
+  "capability_and_strategy_sources": [
+    {
+      "path": "inputs/CHARTER.md",
+      "sections": [
+        "The boundary: free forever / Teams",
+        "Invariants"
+      ]
+    },
+    {
+      "path": "inputs/docs/ci-gate.md",
+      "sections": [
+        "The gate as a reviewer",
+        "What it does"
+      ]
+    },
+    {
+      "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+      "sections": [
+        "Connect developer value to a paid team job",
+        "What would make the bill feel obvious"
+      ]
+    },
+    {
+      "path": "inputs/reports/product-proof-sprint-plan/README.md",
+      "sections": [
+        "Ownership and adjacent work"
+      ]
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/CLAIM-LEDGER.json",
+      "sections": [
+        "H6",
+        "H7"
+      ]
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-REVIEW.md",
+      "sections": [
+        "Source audit",
+        "Decision boundaries"
+      ]
+    }
+  ],
+  "economics": {
+    "units": "one common observation horizon; actual team-specific loaded hourly cost",
+    "formula": "net_paid_increment_before_fee = hourly_cost * (residual_coordination_hours_with_adequate_CI - residual_hours_with_service - incremental_setup_policy_hours_amortized - service_triage_recovery_maintenance_hours) - incremental_nonfee_costs; net_after_fee = net_paid_increment_before_fee - service_fee",
+    "caveat": "Disjoint time buckets; account for CI setup cost in comparator; no local savings double-counting, speculative prevented outage value, or cash savings inferred from freed time. State amortization horizon and sensitivity; do not hide upfront expense.",
+    "strategy_example_only": {
+      "authors": 10,
+      "EUR_per_author_month": 10,
+      "minutes_saved_per_author_week": 15,
+      "weeks": 4,
+      "gross_hours": 10,
+      "assumed_EUR_loaded_hour": 75,
+      "gross_EUR": 750,
+      "fee_EUR": 100,
+      "observed": false
+    }
+  },
+  "source_addendum": "sources/L06-source-addendum.json",
+  "limits": [
+    "No participant trial, external send, purchase, product edit or new service performed.",
+    "Seven original public text reopens, no images/private materials. Remaining H7 records Y003/L055 read as frozen evidence records only; no fresh original verification used to enlarge the conclusion.",
+    "No current competitor price/capability claims; historical disputes preserve dates and resolutions.",
+    "Public self-reports are not controlled observations; source counts are not prevalence.",
+    "No other pressure-test lens output read. Procedural shared-filesystem isolation, not access control; lead must verify runtime freshness independently.",
+    "No claim of cross-repo runtime completeness, semantic reuse, behavioral safety, or buyer demand from model agreement."
+  ]
+}

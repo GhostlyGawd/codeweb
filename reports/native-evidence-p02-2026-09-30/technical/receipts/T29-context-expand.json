@@ -1,0 +1,25 @@
+{
+  "id": "T29-context-expand",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/context-pack.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/.codeweb/graph.json",
+    "popular",
+    "--full-bodies",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:12.597Z",
+  "end": "2026-10-01T01:50:12.632Z",
+  "durationMs": 34.34204100000011,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"symbol\":\"popular\",\"matched\":[\"subject.mjs:popular\"],\"sourceAvailable\":true,\"summary\":\"popular: 8 caller(s), 0 callee(s), blast radius 8 — graph is stale for 2+ file(s); run codeweb_refresh\",\"mode\":\"full-bodies\",\"target\":[{\"id\":\"subject.mjs:popular\",\"label\":\"popular\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":4,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"body\":\"export function popular(value) {\\n  return value * 2;\\n}\"}],\"callers\":[{\"id\":\"popular0.mjs:frequent0\",\"label\":\"frequent0\",\"kind\":\"function\",\"file\":\"popular0.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"body\":\"export function frequent0() {\\n  return popular(0);\\n}\"},{\"id\":\"popular1.mjs:frequent1\",\"label\":\"frequent1\",\"kind\":\"function\",\"file\":\"popular1.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"body\":\"export function frequent1() {\\n  return popular(1);\\n}\"},{\"id\":\"popular2.mjs:frequent2\",\"label\":\"frequent2\",\"kind\":\"function\",\"file\":\"popular2.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"body\":\"export function frequent2() {\\n  return popular(2);\\n}\"},{\"id\":\"popular3.mjs:frequent3\",\"label\":\"frequent3\",\"kind\":\"function\",\"file\":\"popular3.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"body\":\"export function frequent3() {\\n  return popular(3);\\n}\"},{\"id\":\"popular4.mjs:frequent4\",\"label\":\"frequent4\",\"kind\":\"function\",\"file\":\"popular4.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"body\":\"export function frequent4() {\\n  return popular(4);\\n}\"},{\"id\":\"popular5.mjs:frequent5\",\"label\":\"frequent5\",\"kind\":\"function\",\"file\":\"popular5.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"body\":\"export function frequent5() {\\n  return popular(5);\\n}\"},{\"id\":\"popular6.mjs:frequent6\",\"label\":\"frequent6\",\"kind\":\"function\",\"file\":\"popular6.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"body\":\"export function frequent6() {\\n  return popular(6);\\n}\"},{\"id\":\"popular7.mjs:frequent7\",\"label\":\"frequent7\",\"kind\":\"function\",\"file\":\"popular7.mjs\",\"line\":2,\"loc\":3,\"domain\":\"unassigned\",\"exports\":true,\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"body\":\"export function frequent7() {\\n  return popular(7);\\n}\"}],\"callees\":[],\"blastRadius\":{\"count\":8,\"ids\":[\"popular0.mjs:frequent0\",\"popular1.mjs:frequent1\",\"popular2.mjs:frequent2\",\"popular3.mjs:frequent3\",\"popular4.mjs:frequent4\",\"popular5.mjs:frequent5\",\"popular6.mjs:frequent6\",\"popular7.mjs:frequent7\"]},\"stale\":{\"count\":2,\"files\":[\"subject.mjs\",\"./ (dir changed — new/removed files)\"]},\"analysis\":{\"scope\":\"mapped-call-graph\",\"freshness\":\"stale\",\"listsComplete\":true,\"sourceEvidenceComplete\":true,\"limitations\":[\"unmapped-calls\",\"stale-graph\",\"external-callers\"],\"nextSteps\":[\"Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.\",\"Refresh the map (MCP: codeweb_refresh) before relying on recorded locations.\",\"Check package consumers before changing an exported contract.\"]}}\n",
+  "stderr": ""
+}

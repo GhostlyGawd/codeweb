@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "strict": false,
+  "target": "$LOCAL_TMP/codeweb-p02-nhppa5tq/.claude-plugin/plugin.json",
+  "manifest": {
+    "file": "$LOCAL_TMP/codeweb-p02-nhppa5tq/.claude-plugin/plugin.json",
+    "type": "plugin",
+    "errors": [],
+    "warnings": [],
+    "notes": []
+  },
+  "contents": [
+    {
+      "file": "$LOCAL_TMP/codeweb-p02-nhppa5tq/CLAUDE.md",
+      "type": "plugin",
+      "errors": [],
+      "warnings": [
+        {
+          "path": "root",
+          "message": "CLAUDE.md at the plugin root is not loaded as project context. To ship context with your plugin, use a skill (skills/<name>/SKILL.md) instead.",
+          "code": null
+        }
+      ],
+      "notes": []
+    }
+  ]
+}

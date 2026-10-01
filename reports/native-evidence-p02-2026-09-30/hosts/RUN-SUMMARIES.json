@@ -1,0 +1,1818 @@
+[
+  {
+    "run": "candidate-pin",
+    "receipt": "candidate-pin.receipt.json",
+    "duration_seconds": 0.038117170333862305,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": true,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "claude-auth-status",
+    "receipt": "claude-auth-status.receipt.json",
+    "duration_seconds": 0.2026512622833252,
+    "exit_code": 1,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "claude-plugin-validate",
+    "receipt": "claude-plugin-validate.receipt.json",
+    "duration_seconds": 0.4328927993774414,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "claude-scoped-discovery-corrected",
+    "receipt": "claude-scoped-discovery-corrected.receipt.json",
+    "duration_seconds": 0.06475114822387695,
+    "exit_code": 1,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "claude-scoped-discovery",
+    "receipt": "claude-scoped-discovery.receipt.json",
+    "duration_seconds": 0.13883090019226074,
+    "exit_code": 1,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "claude-shipped-plugin-manifest",
+    "receipt": "claude-shipped-plugin-manifest.receipt.json",
+    "duration_seconds": 0.4152541160583496,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "codex-login-status",
+    "receipt": "codex-login-status.receipt.json",
+    "duration_seconds": 0.03822016716003418,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "codex-specific-config-disable",
+    "receipt": "codex-specific-config-disable.receipt.json",
+    "duration_seconds": 0.049455881118774414,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "codex-specific-config-discovery",
+    "receipt": "codex-specific-config-discovery.receipt.json",
+    "duration_seconds": 0.05851602554321289,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "cold-corrected-sol",
+    "receipt": "cold-corrected-sol.receipt.json",
+    "duration_seconds": 52.34466314315796,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [
+      {
+        "event_line": 6,
+        "tool": "codeweb_refresh",
+        "server": "codeweb",
+        "arguments": {
+          "baseline": true
+        },
+        "status": "failed",
+        "error": {
+          "message": "MCP tool call requires approval, but approval policy is never"
+        },
+        "result": null,
+        "parsed_result": null,
+        "request_to_result_seconds": null,
+        "tool_elapsed_seconds": null
+      }
+    ],
+    "source_open_events": [
+      {
+        "event_line": 11,
+        "command": "/bin/zsh -lc \"cat 'src/popular.mjs'\"",
+        "request_to_source_open_seconds": null,
+        "exit_code": 0
+      },
+      {
+        "event_line": 14,
+        "command": "/bin/zsh -lc \"cat 'src/library.mjs'\"",
+        "request_to_source_open_seconds": null,
+        "exit_code": 0
+      },
+      {
+        "event_line": 17,
+        "command": "/bin/zsh -lc \"cat 'src/duplicates.mjs'\"",
+        "request_to_source_open_seconds": null,
+        "exit_code": 0
+      },
+      {
+        "event_line": 18,
+        "command": "/bin/zsh -lc \"cat 'src/consumer.mjs'\"",
+        "request_to_source_open_seconds": null,
+        "exit_code": 0
+      }
+    ],
+    "edit_events": []
+  },
+  {
+    "run": "cold",
+    "receipt": "cold.receipt.json",
+    "duration_seconds": 2.728292942047119,
+    "exit_code": 1,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "disabled-native-control",
+    "receipt": "disabled-native-control.receipt.json",
+    "duration_seconds": 50.514179706573486,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": true,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [
+      {
+        "event_line": 14,
+        "command": "/bin/zsh -lc \"cat AGENTS.md && rg --files -g '\"'! .git'\"' -g '\"'!node_modules'\"' . && sed -n '1,160p' src/library.mjs && cat package.json\"",
+        "request_to_source_open_seconds": 24.167722940444946,
+        "exit_code": 1
+      },
+      {
+        "event_line": 15,
+        "command": "/bin/zsh -lc \"cat .codeweb/history.jsonl && git status --porcelain=v1 && git log -1 --format='%H %s' && git show HEAD:src/library.mjs\"",
+        "request_to_source_open_seconds": 24.238699913024902,
+        "exit_code": 0
+      },
+      {
+        "event_line": 18,
+        "command": "/bin/zsh -lc \"rg --files --hidden .codeweb src && cat src/consumer.mjs src/duplicates.mjs src/popular.mjs && rg -n 'quiet|library' src .codeweb --hidden\"",
+        "request_to_source_open_seconds": 31.347421884536743,
+        "exit_code": 0
+      },
+      {
+        "event_line": 26,
+        "command": "/bin/zsh -lc 'git diff --check && git diff -- src/library.mjs && git status --short --untracked-files=all && cat .codeweb/history.jsonl'",
+        "request_to_source_open_seconds": 44.23737812042236,
+        "exit_code": 0
+      }
+    ],
+    "edit_events": [
+      {
+        "event_line": 22,
+        "changes": [
+          {
+            "path": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/src/library.mjs",
+            "kind": "update"
+          }
+        ],
+        "request_to_edit_seconds": 37.11896085739136,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "run": "enabled-native-control",
+    "receipt": "enabled-native-control.receipt.json",
+    "duration_seconds": 41.86737394332886,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": true,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [
+      {
+        "event_line": 20,
+        "command": "/bin/zsh -lc 'git diff -- src/library.mjs; git show HEAD:src/library.mjs; cat src/library.mjs'",
+        "request_to_source_open_seconds": 18.756431102752686,
+        "exit_code": 0
+      },
+      {
+        "event_line": 26,
+        "command": "/bin/zsh -lc 'cat src/consumer.mjs src/duplicates.mjs src/popular.mjs; cat package.json 2>/dev/null || true'",
+        "request_to_source_open_seconds": 23.909069061279297,
+        "exit_code": 0
+      }
+    ],
+    "edit_events": [
+      {
+        "event_line": 29,
+        "changes": [
+          {
+            "path": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/src/library.mjs",
+            "kind": "update"
+          }
+        ],
+        "request_to_edit_seconds": 29.592532873153687,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "run": "host-versions",
+    "receipt": "host-versions.receipt.json",
+    "duration_seconds": 0.1279599666595459,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": true,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "linked-fixture-map",
+    "receipt": "linked-fixture-map.receipt.json",
+    "duration_seconds": 0.28365278244018555,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "linked-fixture-prepare",
+    "receipt": "linked-fixture-prepare.receipt.json",
+    "duration_seconds": 0.03915095329284668,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "linked-native",
+    "receipt": "linked-native.receipt.json",
+    "duration_seconds": 77.77094602584839,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [
+      {
+        "event_line": 8,
+        "tool": "codeweb_refresh",
+        "server": "codeweb",
+        "arguments": {
+          "baseline": true
+        },
+        "status": "failed",
+        "error": {
+          "message": "MCP tool call requires approval, but approval policy is never"
+        },
+        "result": null,
+        "parsed_result": null,
+        "request_to_result_seconds": null,
+        "tool_elapsed_seconds": null
+      },
+      {
+        "event_line": 17,
+        "tool": "codeweb_context",
+        "server": "codeweb",
+        "arguments": {
+          "symbol": "src/library.mjs:rare",
+          "graph": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/.codeweb/graph.json"
+        },
+        "status": "failed",
+        "error": {
+          "message": "MCP tool call requires approval, but approval policy is never"
+        },
+        "result": null,
+        "parsed_result": null,
+        "request_to_result_seconds": null,
+        "tool_elapsed_seconds": null
+      },
+      {
+        "event_line": 19,
+        "tool": "codeweb_impact",
+        "server": "codeweb",
+        "arguments": {
+          "symbol": "rare",
+          "graph": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/.codeweb/graph.json"
+        },
+        "status": "failed",
+        "error": {
+          "message": "MCP tool call requires approval, but approval policy is never"
+        },
+        "result": null,
+        "parsed_result": null,
+        "request_to_result_seconds": null,
+        "tool_elapsed_seconds": null
+      }
+    ],
+    "source_open_events": [
+      {
+        "event_line": 23,
+        "command": "/bin/zsh -lc 'cat src/library.mjs src/consumer.mjs'",
+        "request_to_source_open_seconds": null,
+        "exit_code": 0
+      }
+    ],
+    "edit_events": []
+  },
+  {
+    "run": "native-state-matrix",
+    "receipt": "native-state-matrix.receipt.json",
+    "duration_seconds": 26.21266508102417,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": true,
+    "request_to_first_source_evidence_seconds": 17.607547998428345,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [
+      {
+        "event_line": 5,
+        "tool": "codeweb_context",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/states/corrupt/.codeweb/graph.json",
+          "symbol": "rare"
+        },
+        "status": "failed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "invalid JSON in $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/states/corrupt/.codeweb/graph.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": null,
+        "request_to_result_seconds": 17.501954078674316,
+        "tool_elapsed_seconds": 0.0740668773651123
+      },
+      {
+        "event_line": 7,
+        "tool": "codeweb_context",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "symbol": "notPresent"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"symbol\":\"notPresent\",\"found\":false,\"hint\":\"no symbol matches \\\"notPresent\\\" \u2014 try codeweb_find \\\"<free text>\\\" (concept search, no name needed)\"}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "symbol": "notPresent",
+          "found": false,
+          "hint": "no symbol matches \"notPresent\" \u2014 try codeweb_find \"<free text>\" (concept search, no name needed)"
+        },
+        "request_to_result_seconds": 17.503241062164307,
+        "tool_elapsed_seconds": 0.001207113265991211
+      },
+      {
+        "event_line": 9,
+        "tool": "codeweb_context",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/states/missing/.codeweb/graph.json",
+          "symbol": "rare"
+        },
+        "status": "failed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "graph not found: $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/states/missing/.codeweb/graph.json \u2014 build it first (run /codeweb, or: node scripts/run.mjs <target> --out-dir <target>/.codeweb)\nno graph found \u2014 pass `graph`, or build one for this repo with the codeweb_map tool (or /codeweb). The graph lives at <target>/.codeweb/graph.json."
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": null,
+        "request_to_result_seconds": 17.544722080230713,
+        "tool_elapsed_seconds": 0.04142189025878906
+      },
+      {
+        "event_line": 11,
+        "tool": "codeweb_context",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/states/unsupported-empty/.codeweb/graph.json",
+          "symbol": "rare"
+        },
+        "status": "failed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "the map at $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/states/unsupported-empty/.codeweb/graph.json is EMPTY (built with --allow-empty; no supported source found) \u2014 structural answers would be vacuous, not \"0 findings\". Re-map at the code root, or use the /codeweb agent fallback for non-native languages."
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": null,
+        "request_to_result_seconds": 17.545422077178955,
+        "tool_elapsed_seconds": 0.0006659030914306641
+      },
+      {
+        "event_line": 13,
+        "tool": "codeweb_context",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/states/generated/.codeweb/graph.json",
+          "symbol": "src/generated.mjs:manufactured",
+          "captureEvidence": true,
+          "task": "P02_host_generated"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"mode\":\"evidence\",\"schemaVersion\":1,\"state\":\"captured\",\"task\":\"P02_host_generated\",\"receiptId\":\"eae33253cda48d8aef924fc1b6db09fd266e5702b019e9677d09c28da9bf477d\",\"baseline\":{\"inventoryDigest\":\"d503c88ab988acbea2feff1f323836fcf1e5fb4076aea0608b9054cf08c3865f\",\"graphDigest\":\"002ecc01c42b42ff0d9b359735727eb23e4343a294b37b0beca4b6c903c7de6c\",\"analyzerIdentity\":{\"profile\":\"native-regex-snapshot-v1\",\"nodeVersion\":\"v26.7.0\",\"runtimeDigest\":\"2868a01827a3ccf13b5ea2d8186838cf0a3ef342300987d0c471aeec87833979\",\"discoveryDigest\":\"6426b2a9bd12e9b5a30873959b6fa55af921a402bfe4aa7ddcf3b51c0304fef1\",\"engine\":\"regex\",\"ctags\":false,\"ast\":false,\"relationVersion\":1,\"projectionVersion\":1,\"schemaVersion\":1},\"optionsDigest\":\"c832979a7581c437c147a0381a614238e570e2833f56dd2640b4fee14d53a0c7\",\"profile\":\"native-regex-snapshot-v1\"},\"target\":{\"id\":\"src/generated.mjs:manufactured\",\"label\":\"manufactured\",\"file\":\"src/generated.mjs\",\"line\":2,\"loc\":1,\"kind\":\"function\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"sourceSha256\":\"a056cc8d678b62a636dc393191078e79266e82e465f39727fa9c3c065eefa655\"},\"sections\":{\"callers\":{\"total\":0,\"receiptId\":\"eae33253cda48d8aef924fc1b6db09fd266e5702b019e9677d09c28da9bf477d\",\"section\":\"callers\",\"offset\":0},\"callees\":{\"total\":0,\"receiptId\":\"eae33253cda48d8aef924fc1b6db09fd266e5702b019e9677d09c28da9bf477d\",\"section\":\"callees\",\"offset\":0},\"impact\":{\"total\":0,\"receiptId\":\"eae33253cda48d8aef924fc1b6db09fd266e5702b019e9677d09c28da9bf477d\",\"section\":\"impact\",\"offset\":0},\"questions\":{\"total\":1,\"receiptId\":\"eae33253cda48d8aef924fc1b6db09fd266e5702b019e9677d09c28da9bf477d\",\"section\":\"questions\",\"offset\":0}},\"limitations\":[\"external-callers\",\"isolated-discovery-does-not-apply-ignore-files\",\"unmapped-calls\"],\"nextSteps\":[\"Read a historical section using its receipt ID, task, section and offset.\"],\"savedGraphProvenance\":{\"engine\":\"regex + de-hubbed dir-seeded call-cohesion clustering\"}}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "mode": "evidence",
+          "schemaVersion": 1,
+          "state": "captured",
+          "task": "P02_host_generated",
+          "receiptId": "eae33253cda48d8aef924fc1b6db09fd266e5702b019e9677d09c28da9bf477d",
+          "baseline": {
+            "inventoryDigest": "d503c88ab988acbea2feff1f323836fcf1e5fb4076aea0608b9054cf08c3865f",
+            "graphDigest": "002ecc01c42b42ff0d9b359735727eb23e4343a294b37b0beca4b6c903c7de6c",
+            "analyzerIdentity": {
+              "profile": "native-regex-snapshot-v1",
+              "nodeVersion": "v26.7.0",
+              "runtimeDigest": "2868a01827a3ccf13b5ea2d8186838cf0a3ef342300987d0c471aeec87833979",
+              "discoveryDigest": "6426b2a9bd12e9b5a30873959b6fa55af921a402bfe4aa7ddcf3b51c0304fef1",
+              "engine": "regex",
+              "ctags": false,
+              "ast": false,
+              "relationVersion": 1,
+              "projectionVersion": 1,
+              "schemaVersion": 1
+            },
+            "optionsDigest": "c832979a7581c437c147a0381a614238e570e2833f56dd2640b4fee14d53a0c7",
+            "profile": "native-regex-snapshot-v1"
+          },
+          "target": {
+            "id": "src/generated.mjs:manufactured",
+            "label": "manufactured",
+            "file": "src/generated.mjs",
+            "line": 2,
+            "loc": 1,
+            "kind": "function",
+            "exports": true,
+            "signature": {
+              "params": [
+                "value"
+              ],
+              "returns": null,
+              "raw": "value"
+            },
+            "sourceSha256": "a056cc8d678b62a636dc393191078e79266e82e465f39727fa9c3c065eefa655"
+          },
+          "sections": {
+            "callers": {
+              "total": 0,
+              "receiptId": "eae33253cda48d8aef924fc1b6db09fd266e5702b019e9677d09c28da9bf477d",
+              "section": "callers",
+              "offset": 0
+            },
+            "callees": {
+              "total": 0,
+              "receiptId": "eae33253cda48d8aef924fc1b6db09fd266e5702b019e9677d09c28da9bf477d",
+              "section": "callees",
+              "offset": 0
+            },
+            "impact": {
+              "total": 0,
+              "receiptId": "eae33253cda48d8aef924fc1b6db09fd266e5702b019e9677d09c28da9bf477d",
+              "section": "impact",
+              "offset": 0
+            },
+            "questions": {
+              "total": 1,
+              "receiptId": "eae33253cda48d8aef924fc1b6db09fd266e5702b019e9677d09c28da9bf477d",
+              "section": "questions",
+              "offset": 0
+            }
+          },
+          "limitations": [
+            "external-callers",
+            "isolated-discovery-does-not-apply-ignore-files",
+            "unmapped-calls"
+          ],
+          "nextSteps": [
+            "Read a historical section using its receipt ID, task, section and offset."
+          ],
+          "savedGraphProvenance": {
+            "engine": "regex + de-hubbed dir-seeded call-cohesion clustering"
+          }
+        },
+        "request_to_result_seconds": 17.607547998428345,
+        "tool_elapsed_seconds": 0.062068939208984375
+      }
+    ],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "preauthorized-cold",
+    "receipt": "preauthorized-cold.receipt.json",
+    "duration_seconds": 69.47295427322388,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": true,
+    "request_to_first_source_evidence_seconds": 23.40245223045349,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [
+      {
+        "event_line": 5,
+        "tool": "codeweb_refresh",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "baseline": true
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"graph\":\"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json\",\"root\":\"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe\",\"analysis\":{\"status\":\"no-known-incompleteness\",\"diagnosticCount\":0,\"diagnostics\":[]},\"before\":{\"nodes\":12,\"edges\":7},\"after\":{\"nodes\":12,\"edges\":7},\"domainsReattached\":12,\"scanned\":\"0\",\"sidecars\":[\"brief\",\"index-lite\",\"stale-stamps\",\"similar-index\"],\"baseline\":\"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.baseline.json\"}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "root": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+          "analysis": {
+            "status": "no-known-incompleteness",
+            "diagnosticCount": 0,
+            "diagnostics": []
+          },
+          "before": {
+            "nodes": 12,
+            "edges": 7
+          },
+          "after": {
+            "nodes": 12,
+            "edges": 7
+          },
+          "domainsReattached": 12,
+          "scanned": "0",
+          "sidecars": [
+            "brief",
+            "index-lite",
+            "stale-stamps",
+            "similar-index"
+          ],
+          "baseline": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.baseline.json"
+        },
+        "request_to_result_seconds": 16.42350721359253,
+        "tool_elapsed_seconds": 0.19164419174194336
+      },
+      {
+        "event_line": 7,
+        "tool": "codeweb_explain",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "symbol": "src/library.mjs:rare"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"symbol\":\"src/library.mjs:rare\",\"matched\":[\"src/library.mjs:rare\"],\"cards\":[{\"callersRelyOn\":{\"sites\":1,\"awaited\":0,\"argRange\":[1,1]},\"id\":\"src/library.mjs:rare\",\"label\":\"rare\",\"kind\":\"function\",\"role\":\"product\",\"domain\":\"src\",\"at\":\"src/library.mjs:1\",\"loc\":1,\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"complexity\":1,\"maxDepth\":1,\"dependents\":{\"callers\":1,\"tests\":0,\"blastRadius\":1,\"blastDomains\":1},\"topCallers\":[\"src/consumer.mjs:consequential\"],\"topCallees\":[],\"tests\":[],\"findings\":[],\"summary\":\"function rare (product, src) \u2014 1 caller(s), 0 test(s), blast 1 across 1 domain(s); args 1\"}],\"summary\":\"function rare (product, src) \u2014 1 caller(s), 0 test(s), blast 1 across 1 domain(s); args 1\"}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "symbol": "src/library.mjs:rare",
+          "matched": [
+            "src/library.mjs:rare"
+          ],
+          "cards": [
+            {
+              "callersRelyOn": {
+                "sites": 1,
+                "awaited": 0,
+                "argRange": [
+                  1,
+                  1
+                ]
+              },
+              "id": "src/library.mjs:rare",
+              "label": "rare",
+              "kind": "function",
+              "role": "product",
+              "domain": "src",
+              "at": "src/library.mjs:1",
+              "loc": 1,
+              "exports": true,
+              "signature": {
+                "params": [
+                  "value"
+                ],
+                "returns": null,
+                "raw": "value"
+              },
+              "complexity": 1,
+              "maxDepth": 1,
+              "dependents": {
+                "callers": 1,
+                "tests": 0,
+                "blastRadius": 1,
+                "blastDomains": 1
+              },
+              "topCallers": [
+                "src/consumer.mjs:consequential"
+              ],
+              "topCallees": [],
+              "tests": [],
+              "findings": [],
+              "summary": "function rare (product, src) \u2014 1 caller(s), 0 test(s), blast 1 across 1 domain(s); args 1"
+            }
+          ],
+          "summary": "function rare (product, src) \u2014 1 caller(s), 0 test(s), blast 1 across 1 domain(s); args 1"
+        },
+        "request_to_result_seconds": 23.40245223045349,
+        "tool_elapsed_seconds": 0.010226011276245117
+      },
+      {
+        "event_line": 9,
+        "tool": "codeweb_impact",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "symbol": "src/library.mjs:rare"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"query\":\"impact\",\"symbol\":\"src/library.mjs:rare\",\"summary\":\"editing src/library.mjs:rare touches 1 function(s) across 1 domain(s)\",\"closure\":\"transitive callers via call+inherit edges \u2014 ref/import/test users are listed by the dependents query\",\"matched\":[\"src/library.mjs:rare\"],\"results\":[\"src/consumer.mjs:consequential\"],\"domains\":[\"src\"],\"count\":1}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "query": "impact",
+          "symbol": "src/library.mjs:rare",
+          "summary": "editing src/library.mjs:rare touches 1 function(s) across 1 domain(s)",
+          "closure": "transitive callers via call+inherit edges \u2014 ref/import/test users are listed by the dependents query",
+          "matched": [
+            "src/library.mjs:rare"
+          ],
+          "results": [
+            "src/consumer.mjs:consequential"
+          ],
+          "domains": [
+            "src"
+          ],
+          "count": 1
+        },
+        "request_to_result_seconds": 23.405994415283203,
+        "tool_elapsed_seconds": 0.0035200119018554688
+      },
+      {
+        "event_line": 11,
+        "tool": "codeweb_context",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "symbol": "src/library.mjs:rare"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"symbol\":\"src/library.mjs:rare\",\"matched\":[\"src/library.mjs:rare\"],\"sourceAvailable\":true,\"summary\":\"src/library.mjs:rare: 1 caller(s), 0 callee(s), blast radius 1\",\"mode\":\"call-site windows (\u00b13 lines)\",\"target\":[{\"id\":\"src/library.mjs:rare\",\"label\":\"rare\",\"kind\":\"function\",\"file\":\"src/library.mjs\",\"line\":1,\"loc\":1,\"domain\":\"src\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"body\":\"export function rare(value) { return value + 1; }\"}],\"callers\":[{\"id\":\"src/consumer.mjs:consequential\",\"label\":\"consequential\",\"kind\":\"function\",\"file\":\"src/consumer.mjs\",\"line\":2,\"loc\":1,\"domain\":\"src\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"windowEvidence\":{\"status\":\"shown\",\"matchedLines\":1,\"shownLines\":1,\"remaining\":0},\"windows\":[{\"startLine\":2,\"endLine\":2,\"callLines\":[2],\"text\":\"export function consequential(value) { return rare(value); }\"}]}],\"callees\":[],\"blastRadius\":{\"count\":1,\"ids\":[\"src/consumer.mjs:consequential\"]},\"analysis\":{\"scope\":\"mapped-call-graph\",\"freshness\":\"unchanged-stamps\",\"listsComplete\":true,\"sourceEvidenceComplete\":true,\"limitations\":[\"unmapped-calls\",\"external-callers\"],\"nextSteps\":[\"Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.\",\"Check package consumers before changing an exported contract.\"]}}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "symbol": "src/library.mjs:rare",
+          "matched": [
+            "src/library.mjs:rare"
+          ],
+          "sourceAvailable": true,
+          "summary": "src/library.mjs:rare: 1 caller(s), 0 callee(s), blast radius 1",
+          "mode": "call-site windows (\u00b13 lines)",
+          "target": [
+            {
+              "id": "src/library.mjs:rare",
+              "label": "rare",
+              "kind": "function",
+              "file": "src/library.mjs",
+              "line": 1,
+              "loc": 1,
+              "domain": "src",
+              "exports": true,
+              "signature": {
+                "params": [
+                  "value"
+                ],
+                "returns": null,
+                "raw": "value"
+              },
+              "body": "export function rare(value) { return value + 1; }"
+            }
+          ],
+          "callers": [
+            {
+              "id": "src/consumer.mjs:consequential",
+              "label": "consequential",
+              "kind": "function",
+              "file": "src/consumer.mjs",
+              "line": 2,
+              "loc": 1,
+              "domain": "src",
+              "exports": true,
+              "signature": {
+                "params": [
+                  "value"
+                ],
+                "returns": null,
+                "raw": "value"
+              },
+              "windowEvidence": {
+                "status": "shown",
+                "matchedLines": 1,
+                "shownLines": 1,
+                "remaining": 0
+              },
+              "windows": [
+                {
+                  "startLine": 2,
+                  "endLine": 2,
+                  "callLines": [
+                    2
+                  ],
+                  "text": "export function consequential(value) { return rare(value); }"
+                }
+              ]
+            }
+          ],
+          "callees": [],
+          "blastRadius": {
+            "count": 1,
+            "ids": [
+              "src/consumer.mjs:consequential"
+            ]
+          },
+          "analysis": {
+            "scope": "mapped-call-graph",
+            "freshness": "unchanged-stamps",
+            "listsComplete": true,
+            "sourceEvidenceComplete": true,
+            "limitations": [
+              "unmapped-calls",
+              "external-callers"
+            ],
+            "nextSteps": [
+              "Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.",
+              "Check package consumers before changing an exported contract."
+            ]
+          }
+        },
+        "request_to_result_seconds": 23.409363269805908,
+        "tool_elapsed_seconds": 0.003319978713989258
+      },
+      {
+        "event_line": 20,
+        "tool": "codeweb_impact",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "symbol": "src/library.mjs:popular",
+          "full": true
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"query\":\"impact\",\"symbol\":\"src/library.mjs:popular\",\"summary\":\"editing src/library.mjs:popular touches 6 function(s) across 1 domain(s)\",\"closure\":\"transitive callers via call+inherit edges \u2014 ref/import/test users are listed by the dependents query\",\"matched\":[\"src/library.mjs:popular\"],\"results\":[\"src/popular.mjs:fan0\",\"src/popular.mjs:fan1\",\"src/popular.mjs:fan2\",\"src/popular.mjs:fan3\",\"src/popular.mjs:fan4\",\"src/popular.mjs:fan5\"],\"domains\":[\"src\"],\"count\":6}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "query": "impact",
+          "symbol": "src/library.mjs:popular",
+          "summary": "editing src/library.mjs:popular touches 6 function(s) across 1 domain(s)",
+          "closure": "transitive callers via call+inherit edges \u2014 ref/import/test users are listed by the dependents query",
+          "matched": [
+            "src/library.mjs:popular"
+          ],
+          "results": [
+            "src/popular.mjs:fan0",
+            "src/popular.mjs:fan1",
+            "src/popular.mjs:fan2",
+            "src/popular.mjs:fan3",
+            "src/popular.mjs:fan4",
+            "src/popular.mjs:fan5"
+          ],
+          "domains": [
+            "src"
+          ],
+          "count": 6
+        },
+        "request_to_result_seconds": 33.82259511947632,
+        "tool_elapsed_seconds": 0.003454923629760742
+      },
+      {
+        "event_line": 22,
+        "tool": "codeweb_find_similar",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "body": "export function compareC(value) { return value + 1; }"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"candidate\":{\"source\":\"stdin\",\"shingles\":8,\"mode\":\"lexical\"},\"index\":\"sidecar\",\"bodyLineCap\":400,\"matches\":[{\"id\":\"src/duplicates.mjs:compareA\",\"label\":\"compareA\",\"file\":\"src/duplicates.mjs\",\"line\":1,\"domain\":\"src\",\"sim\":0.6,\"tier\":\"high\"},{\"id\":\"src/duplicates.mjs:compareB\",\"label\":\"compareB\",\"file\":\"src/duplicates.mjs\",\"line\":2,\"domain\":\"src\",\"sim\":0.6,\"tier\":\"high\"},{\"id\":\"src/library.mjs:rare\",\"label\":\"rare\",\"file\":\"src/library.mjs\",\"line\":1,\"domain\":\"src\",\"sim\":0.6,\"tier\":\"high\"},{\"id\":\"src/library.mjs:popular\",\"label\":\"popular\",\"file\":\"src/library.mjs\",\"line\":2,\"domain\":\"src\",\"sim\":0.230769,\"tier\":\"low\"},{\"id\":\"src/library.mjs:quiet\",\"label\":\"quiet\",\"file\":\"src/library.mjs\",\"line\":3,\"domain\":\"src\",\"sim\":0.230769,\"tier\":\"low\"}],\"count\":5,\"scanned\":12}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "candidate": {
+            "source": "stdin",
+            "shingles": 8,
+            "mode": "lexical"
+          },
+          "index": "sidecar",
+          "bodyLineCap": 400,
+          "matches": [
+            {
+              "id": "src/duplicates.mjs:compareA",
+              "label": "compareA",
+              "file": "src/duplicates.mjs",
+              "line": 1,
+              "domain": "src",
+              "sim": 0.6,
+              "tier": "high"
+            },
+            {
+              "id": "src/duplicates.mjs:compareB",
+              "label": "compareB",
+              "file": "src/duplicates.mjs",
+              "line": 2,
+              "domain": "src",
+              "sim": 0.6,
+              "tier": "high"
+            },
+            {
+              "id": "src/library.mjs:rare",
+              "label": "rare",
+              "file": "src/library.mjs",
+              "line": 1,
+              "domain": "src",
+              "sim": 0.6,
+              "tier": "high"
+            },
+            {
+              "id": "src/library.mjs:popular",
+              "label": "popular",
+              "file": "src/library.mjs",
+              "line": 2,
+              "domain": "src",
+              "sim": 0.230769,
+              "tier": "low"
+            },
+            {
+              "id": "src/library.mjs:quiet",
+              "label": "quiet",
+              "file": "src/library.mjs",
+              "line": 3,
+              "domain": "src",
+              "sim": 0.230769,
+              "tier": "low"
+            }
+          ],
+          "count": 5,
+          "scanned": 12
+        },
+        "request_to_result_seconds": 38.52096509933472,
+        "tool_elapsed_seconds": 0.07566094398498535
+      },
+      {
+        "event_line": 29,
+        "tool": "codeweb_diff",
+        "server": "codeweb",
+        "arguments": {
+          "before": "baseline",
+          "after": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "refresh": true
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"before\":\"T/codeweb-p02-hosts-ibn2supe\",\"after\":\"T/codeweb-p02-hosts-ibn2supe\",\"nodes\":{\"added\":[],\"removed\":[],\"renamed\":[]},\"edges\":{\"added\":0,\"removed\":0},\"domains\":{\"before\":1,\"after\":1},\"crossDomainEdges\":{\"before\":0,\"after\":0,\"delta\":0},\"overlaps\":{\"added\":[],\"removed\":[]},\"cycles\":{\"added\":[],\"removed\":[]},\"orphans\":{\"added\":[],\"removed\":[]},\"regressions\":[],\"ok\":true,\"verdict\":{\"ok\":true,\"check\":\"orphan-gate\",\"scope\":\"full\",\"checks\":{\"newCycles\":[],\"lostCallers\":[],\"newDuplications\":[]}},\"analysis\":{\"scope\":\"mapped-graph-delta\",\"checks\":{\"cycles\":\"evaluated\",\"lostCallers\":\"evaluated\",\"duplication\":\"not-evaluated\",\"behavior\":\"not-evaluated\"},\"nextSteps\":[\"Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.\",\"Mapped structural checks do not establish behavioral correctness; run the relevant tests.\"]},\"verification\":{\"before\":\"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.baseline.json\",\"beforeSha256\":\"25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd\",\"after\":\"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json\",\"refreshed\":true}}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "before": "T/codeweb-p02-hosts-ibn2supe",
+          "after": "T/codeweb-p02-hosts-ibn2supe",
+          "nodes": {
+            "added": [],
+            "removed": [],
+            "renamed": []
+          },
+          "edges": {
+            "added": 0,
+            "removed": 0
+          },
+          "domains": {
+            "before": 1,
+            "after": 1
+          },
+          "crossDomainEdges": {
+            "before": 0,
+            "after": 0,
+            "delta": 0
+          },
+          "overlaps": {
+            "added": [],
+            "removed": []
+          },
+          "cycles": {
+            "added": [],
+            "removed": []
+          },
+          "orphans": {
+            "added": [],
+            "removed": []
+          },
+          "regressions": [],
+          "ok": true,
+          "verdict": {
+            "ok": true,
+            "check": "orphan-gate",
+            "scope": "full",
+            "checks": {
+              "newCycles": [],
+              "lostCallers": [],
+              "newDuplications": []
+            }
+          },
+          "analysis": {
+            "scope": "mapped-graph-delta",
+            "checks": {
+              "cycles": "evaluated",
+              "lostCallers": "evaluated",
+              "duplication": "not-evaluated",
+              "behavior": "not-evaluated"
+            },
+            "nextSteps": [
+              "Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.",
+              "Mapped structural checks do not establish behavioral correctness; run the relevant tests."
+            ]
+          },
+          "verification": {
+            "before": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.baseline.json",
+            "beforeSha256": "25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd",
+            "after": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+            "refreshed": true
+          }
+        },
+        "request_to_result_seconds": 52.01932907104492,
+        "tool_elapsed_seconds": 0.21703672409057617
+      }
+    ],
+    "source_open_events": [
+      {
+        "event_line": 15,
+        "command": "/bin/zsh -lc 'nl -ba src/library.mjs'",
+        "request_to_source_open_seconds": 29.65004801750183,
+        "exit_code": 0
+      },
+      {
+        "event_line": 17,
+        "command": "/bin/zsh -lc 'nl -ba src/consumer.mjs'",
+        "request_to_source_open_seconds": 29.661226987838745,
+        "exit_code": 0
+      },
+      {
+        "event_line": 24,
+        "command": "/bin/zsh -lc 'nl -ba src/duplicates.mjs'",
+        "request_to_source_open_seconds": 41.46008610725403,
+        "exit_code": 0
+      },
+      {
+        "event_line": 32,
+        "command": "/bin/zsh -lc 'nl -ba src/library.mjs'",
+        "request_to_source_open_seconds": 56.796815156936646,
+        "exit_code": 0
+      }
+    ],
+    "edit_events": [
+      {
+        "event_line": 27,
+        "changes": [
+          {
+            "path": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/src/library.mjs",
+            "kind": "update"
+          }
+        ],
+        "request_to_edit_seconds": 48.24681615829468,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "run": "preauthorized-linked",
+    "receipt": "preauthorized-linked.receipt.json",
+    "duration_seconds": 60.31840705871582,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": true,
+    "request_to_first_source_evidence_seconds": 30.25519299507141,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [
+      {
+        "event_line": 7,
+        "tool": "codeweb_refresh",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/.codeweb/graph.json",
+          "baseline": true
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"graph\":\"$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/.codeweb/graph.json\",\"root\":\"$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh\",\"analysis\":{\"status\":\"no-known-incompleteness\",\"diagnosticCount\":0,\"diagnostics\":[]},\"before\":{\"nodes\":12,\"edges\":7},\"after\":{\"nodes\":12,\"edges\":7},\"domainsReattached\":12,\"scanned\":\"0\",\"sidecars\":[\"brief\",\"index-lite\",\"stale-stamps\",\"similar-index\"],\"baseline\":\"$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/.codeweb/graph.baseline.json\"}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "graph": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/.codeweb/graph.json",
+          "root": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh",
+          "analysis": {
+            "status": "no-known-incompleteness",
+            "diagnosticCount": 0,
+            "diagnostics": []
+          },
+          "before": {
+            "nodes": 12,
+            "edges": 7
+          },
+          "after": {
+            "nodes": 12,
+            "edges": 7
+          },
+          "domainsReattached": 12,
+          "scanned": "0",
+          "sidecars": [
+            "brief",
+            "index-lite",
+            "stale-stamps",
+            "similar-index"
+          ],
+          "baseline": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/.codeweb/graph.baseline.json"
+        },
+        "request_to_result_seconds": 23.980488777160645,
+        "tool_elapsed_seconds": 0.17892670631408691
+      },
+      {
+        "event_line": 10,
+        "tool": "codeweb_impact",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/.codeweb/graph.json",
+          "symbol": "rare"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"query\":\"impact\",\"symbol\":\"rare\",\"summary\":\"editing rare touches 1 function(s) across 1 domain(s)\",\"closure\":\"transitive callers via call+inherit edges \u2014 ref/import/test users are listed by the dependents query\",\"matched\":[\"src/library.mjs:rare\"],\"results\":[\"src/consumer.mjs:consequential\"],\"domains\":[\"src\"],\"count\":1}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "query": "impact",
+          "symbol": "rare",
+          "summary": "editing rare touches 1 function(s) across 1 domain(s)",
+          "closure": "transitive callers via call+inherit edges \u2014 ref/import/test users are listed by the dependents query",
+          "matched": [
+            "src/library.mjs:rare"
+          ],
+          "results": [
+            "src/consumer.mjs:consequential"
+          ],
+          "domains": [
+            "src"
+          ],
+          "count": 1
+        },
+        "request_to_result_seconds": 30.25519299507141,
+        "tool_elapsed_seconds": 0.00710606575012207
+      },
+      {
+        "event_line": 12,
+        "tool": "codeweb_context",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh/.codeweb/graph.json",
+          "symbol": "src/library.mjs:rare"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"symbol\":\"src/library.mjs:rare\",\"matched\":[\"src/library.mjs:rare\"],\"sourceAvailable\":true,\"summary\":\"src/library.mjs:rare: 1 caller(s), 0 callee(s), blast radius 1\",\"mode\":\"call-site windows (\u00b13 lines)\",\"target\":[{\"id\":\"src/library.mjs:rare\",\"label\":\"rare\",\"kind\":\"function\",\"file\":\"src/library.mjs\",\"line\":1,\"loc\":1,\"domain\":\"src\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"body\":\"export function rare(value) { return value + 1; }\"}],\"callers\":[{\"id\":\"src/consumer.mjs:consequential\",\"label\":\"consequential\",\"kind\":\"function\",\"file\":\"src/consumer.mjs\",\"line\":2,\"loc\":1,\"domain\":\"src\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"windowEvidence\":{\"status\":\"shown\",\"matchedLines\":1,\"shownLines\":1,\"remaining\":0},\"windows\":[{\"startLine\":2,\"endLine\":2,\"callLines\":[2],\"text\":\"export function consequential(value) { return rare(value); }\"}]}],\"callees\":[],\"blastRadius\":{\"count\":1,\"ids\":[\"src/consumer.mjs:consequential\"]},\"analysis\":{\"scope\":\"mapped-call-graph\",\"freshness\":\"unchanged-stamps\",\"listsComplete\":true,\"sourceEvidenceComplete\":true,\"limitations\":[\"unmapped-calls\",\"external-callers\"],\"nextSteps\":[\"Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.\",\"Check package consumers before changing an exported contract.\"]}}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "symbol": "src/library.mjs:rare",
+          "matched": [
+            "src/library.mjs:rare"
+          ],
+          "sourceAvailable": true,
+          "summary": "src/library.mjs:rare: 1 caller(s), 0 callee(s), blast radius 1",
+          "mode": "call-site windows (\u00b13 lines)",
+          "target": [
+            {
+              "id": "src/library.mjs:rare",
+              "label": "rare",
+              "kind": "function",
+              "file": "src/library.mjs",
+              "line": 1,
+              "loc": 1,
+              "domain": "src",
+              "exports": true,
+              "signature": {
+                "params": [
+                  "value"
+                ],
+                "returns": null,
+                "raw": "value"
+              },
+              "body": "export function rare(value) { return value + 1; }"
+            }
+          ],
+          "callers": [
+            {
+              "id": "src/consumer.mjs:consequential",
+              "label": "consequential",
+              "kind": "function",
+              "file": "src/consumer.mjs",
+              "line": 2,
+              "loc": 1,
+              "domain": "src",
+              "exports": true,
+              "signature": {
+                "params": [
+                  "value"
+                ],
+                "returns": null,
+                "raw": "value"
+              },
+              "windowEvidence": {
+                "status": "shown",
+                "matchedLines": 1,
+                "shownLines": 1,
+                "remaining": 0
+              },
+              "windows": [
+                {
+                  "startLine": 2,
+                  "endLine": 2,
+                  "callLines": [
+                    2
+                  ],
+                  "text": "export function consequential(value) { return rare(value); }"
+                }
+              ]
+            }
+          ],
+          "callees": [],
+          "blastRadius": {
+            "count": 1,
+            "ids": [
+              "src/consumer.mjs:consequential"
+            ]
+          },
+          "analysis": {
+            "scope": "mapped-call-graph",
+            "freshness": "unchanged-stamps",
+            "listsComplete": true,
+            "sourceEvidenceComplete": true,
+            "limitations": [
+              "unmapped-calls",
+              "external-callers"
+            ],
+            "nextSteps": [
+              "Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.",
+              "Check package consumers before changing an exported contract."
+            ]
+          }
+        },
+        "request_to_result_seconds": 34.95440697669983,
+        "tool_elapsed_seconds": 0.005799055099487305
+      }
+    ],
+    "source_open_events": [
+      {
+        "event_line": 14,
+        "command": "/bin/zsh -lc \"nl -ba src/library.mjs; nl -ba src/consumer.mjs; shasum -a 256 .codeweb/graph.baseline.json; python3 -c 'import json,pathlib; d=json.loads(pathlib.Path(\\\".codeweb/graph.json\\\").read_text()); print(\\\"graph_root\\\",d[\\\"meta\\\"][\\\"root\\\"])'; rg --files --hidden .codeweb\"",
+        "request_to_source_open_seconds": 43.27326798439026,
+        "exit_code": 0
+      }
+    ],
+    "edit_events": []
+  },
+  {
+    "run": "preauthorized-warm-recovery",
+    "receipt": "preauthorized-warm-recovery.receipt.json",
+    "duration_seconds": 52.253146171569824,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": true,
+    "request_to_first_source_evidence_seconds": 20.634531021118164,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [
+      {
+        "event_line": 17,
+        "tool": "codeweb_impact",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "symbol": "src/library.mjs:rare"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"query\":\"impact\",\"symbol\":\"src/library.mjs:rare\",\"summary\":\"editing src/library.mjs:rare touches 1 function(s) across 1 domain(s) \u2014 graph is stale for 1+ file(s); run codeweb_refresh\",\"closure\":\"transitive callers via call+inherit edges \u2014 ref/import/test users are listed by the dependents query\",\"matched\":[\"src/library.mjs:rare\"],\"results\":[\"src/consumer.mjs:consequential\"],\"domains\":[\"src\"],\"count\":1,\"stale\":{\"count\":1,\"files\":[\"src/library.mjs\"]}}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "query": "impact",
+          "symbol": "src/library.mjs:rare",
+          "summary": "editing src/library.mjs:rare touches 1 function(s) across 1 domain(s) \u2014 graph is stale for 1+ file(s); run codeweb_refresh",
+          "closure": "transitive callers via call+inherit edges \u2014 ref/import/test users are listed by the dependents query",
+          "matched": [
+            "src/library.mjs:rare"
+          ],
+          "results": [
+            "src/consumer.mjs:consequential"
+          ],
+          "domains": [
+            "src"
+          ],
+          "count": 1,
+          "stale": {
+            "count": 1,
+            "files": [
+              "src/library.mjs"
+            ]
+          }
+        },
+        "request_to_result_seconds": 20.634531021118164,
+        "tool_elapsed_seconds": 0.011788129806518555
+      },
+      {
+        "event_line": 19,
+        "tool": "codeweb_context",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "symbol": "src/library.mjs:rare"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"symbol\":\"src/library.mjs:rare\",\"matched\":[\"src/library.mjs:rare\"],\"sourceAvailable\":true,\"summary\":\"src/library.mjs:rare: 1 caller(s), 0 callee(s), blast radius 1 \u2014 graph is stale for 1+ file(s); run codeweb_refresh\",\"mode\":\"call-site windows (\u00b13 lines)\",\"target\":[{\"id\":\"src/library.mjs:rare\",\"label\":\"rare\",\"kind\":\"function\",\"file\":\"src/library.mjs\",\"line\":1,\"loc\":1,\"domain\":\"src\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"body\":\"export function rare(value) { return value + 3; }\"}],\"callers\":[{\"id\":\"src/consumer.mjs:consequential\",\"label\":\"consequential\",\"kind\":\"function\",\"file\":\"src/consumer.mjs\",\"line\":2,\"loc\":1,\"domain\":\"src\",\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"windowEvidence\":{\"status\":\"shown\",\"matchedLines\":1,\"shownLines\":1,\"remaining\":0},\"windows\":[{\"startLine\":2,\"endLine\":2,\"callLines\":[2],\"text\":\"export function consequential(value) { return rare(value); }\"}]}],\"callees\":[],\"blastRadius\":{\"count\":1,\"ids\":[\"src/consumer.mjs:consequential\"]},\"stale\":{\"count\":1,\"files\":[\"src/library.mjs\"]},\"analysis\":{\"scope\":\"mapped-call-graph\",\"freshness\":\"stale\",\"listsComplete\":true,\"sourceEvidenceComplete\":true,\"limitations\":[\"unmapped-calls\",\"stale-graph\",\"external-callers\"],\"nextSteps\":[\"Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.\",\"Refresh the map (MCP: codeweb_refresh) before relying on recorded locations.\",\"Check package consumers before changing an exported contract.\"]}}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "symbol": "src/library.mjs:rare",
+          "matched": [
+            "src/library.mjs:rare"
+          ],
+          "sourceAvailable": true,
+          "summary": "src/library.mjs:rare: 1 caller(s), 0 callee(s), blast radius 1 \u2014 graph is stale for 1+ file(s); run codeweb_refresh",
+          "mode": "call-site windows (\u00b13 lines)",
+          "target": [
+            {
+              "id": "src/library.mjs:rare",
+              "label": "rare",
+              "kind": "function",
+              "file": "src/library.mjs",
+              "line": 1,
+              "loc": 1,
+              "domain": "src",
+              "exports": true,
+              "signature": {
+                "params": [
+                  "value"
+                ],
+                "returns": null,
+                "raw": "value"
+              },
+              "body": "export function rare(value) { return value + 3; }"
+            }
+          ],
+          "callers": [
+            {
+              "id": "src/consumer.mjs:consequential",
+              "label": "consequential",
+              "kind": "function",
+              "file": "src/consumer.mjs",
+              "line": 2,
+              "loc": 1,
+              "domain": "src",
+              "exports": true,
+              "signature": {
+                "params": [
+                  "value"
+                ],
+                "returns": null,
+                "raw": "value"
+              },
+              "windowEvidence": {
+                "status": "shown",
+                "matchedLines": 1,
+                "shownLines": 1,
+                "remaining": 0
+              },
+              "windows": [
+                {
+                  "startLine": 2,
+                  "endLine": 2,
+                  "callLines": [
+                    2
+                  ],
+                  "text": "export function consequential(value) { return rare(value); }"
+                }
+              ]
+            }
+          ],
+          "callees": [],
+          "blastRadius": {
+            "count": 1,
+            "ids": [
+              "src/consumer.mjs:consequential"
+            ]
+          },
+          "stale": {
+            "count": 1,
+            "files": [
+              "src/library.mjs"
+            ]
+          },
+          "analysis": {
+            "scope": "mapped-call-graph",
+            "freshness": "stale",
+            "listsComplete": true,
+            "sourceEvidenceComplete": true,
+            "limitations": [
+              "unmapped-calls",
+              "stale-graph",
+              "external-callers"
+            ],
+            "nextSteps": [
+              "Check callbacks, dynamic dispatch, and relevant tests before editing; no mapped callers does not prove unused code.",
+              "Refresh the map (MCP: codeweb_refresh) before relying on recorded locations.",
+              "Check package consumers before changing an exported contract."
+            ]
+          }
+        },
+        "request_to_result_seconds": 23.6304030418396,
+        "tool_elapsed_seconds": 0.006054878234863281
+      },
+      {
+        "event_line": 21,
+        "tool": "codeweb_impact",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "symbol": "src/library.mjs:quiet"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"query\":\"impact\",\"symbol\":\"src/library.mjs:quiet\",\"summary\":\"editing src/library.mjs:quiet touches 0 function(s) across 0 domain(s) \u2014 graph is stale for 1+ file(s); run codeweb_refresh\",\"closure\":\"transitive callers via call+inherit edges \u2014 ref/import/test users are listed by the dependents query\",\"matched\":[\"src/library.mjs:quiet\"],\"results\":[],\"domains\":[],\"count\":0,\"stale\":{\"count\":1,\"files\":[\"src/library.mjs\"]}}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "query": "impact",
+          "symbol": "src/library.mjs:quiet",
+          "summary": "editing src/library.mjs:quiet touches 0 function(s) across 0 domain(s) \u2014 graph is stale for 1+ file(s); run codeweb_refresh",
+          "closure": "transitive callers via call+inherit edges \u2014 ref/import/test users are listed by the dependents query",
+          "matched": [
+            "src/library.mjs:quiet"
+          ],
+          "results": [],
+          "domains": [],
+          "count": 0,
+          "stale": {
+            "count": 1,
+            "files": [
+              "src/library.mjs"
+            ]
+          }
+        },
+        "request_to_result_seconds": 27.02811098098755,
+        "tool_elapsed_seconds": 0.004453897476196289
+      },
+      {
+        "event_line": 24,
+        "tool": "codeweb_refresh",
+        "server": "codeweb",
+        "arguments": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json"
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"graph\":\"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json\",\"root\":\"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe\",\"analysis\":{\"status\":\"no-known-incompleteness\",\"diagnosticCount\":0,\"diagnostics\":[]},\"before\":{\"nodes\":12,\"edges\":7},\"after\":{\"nodes\":12,\"edges\":7},\"domainsReattached\":12,\"scanned\":\"1\",\"sidecars\":[\"brief\",\"index-lite\",\"stale-stamps\",\"similar-index\"]}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "graph": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "root": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+          "analysis": {
+            "status": "no-known-incompleteness",
+            "diagnosticCount": 0,
+            "diagnostics": []
+          },
+          "before": {
+            "nodes": 12,
+            "edges": 7
+          },
+          "after": {
+            "nodes": 12,
+            "edges": 7
+          },
+          "domainsReattached": 12,
+          "scanned": "1",
+          "sidecars": [
+            "brief",
+            "index-lite",
+            "stale-stamps",
+            "similar-index"
+          ]
+        },
+        "request_to_result_seconds": 31.908024072647095,
+        "tool_elapsed_seconds": 0.18407821655273438
+      },
+      {
+        "event_line": 26,
+        "tool": "codeweb_diff",
+        "server": "codeweb",
+        "arguments": {
+          "before": "baseline",
+          "after": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+          "refresh": true
+        },
+        "status": "completed",
+        "error": null,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"before\":\"T/codeweb-p02-hosts-ibn2supe\",\"after\":\"T/codeweb-p02-hosts-ibn2supe\",\"nodes\":{\"added\":[],\"removed\":[],\"renamed\":[]},\"edges\":{\"added\":0,\"removed\":0},\"domains\":{\"before\":1,\"after\":1},\"crossDomainEdges\":{\"before\":0,\"after\":0,\"delta\":0},\"overlaps\":{\"added\":[],\"removed\":[]},\"cycles\":{\"added\":[],\"removed\":[]},\"orphans\":{\"added\":[],\"removed\":[]},\"regressions\":[],\"ok\":true,\"verdict\":{\"ok\":true,\"check\":\"orphan-gate\",\"scope\":\"full\",\"checks\":{\"newCycles\":[],\"lostCallers\":[],\"newDuplications\":[]}},\"analysis\":{\"scope\":\"mapped-graph-delta\",\"checks\":{\"cycles\":\"evaluated\",\"lostCallers\":\"evaluated\",\"duplication\":\"not-evaluated\",\"behavior\":\"not-evaluated\"},\"nextSteps\":[\"Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.\",\"Mapped structural checks do not establish behavioral correctness; run the relevant tests.\"]},\"verification\":{\"before\":\"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.baseline.json\",\"beforeSha256\":\"25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd\",\"after\":\"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json\",\"refreshed\":true}}"
+            }
+          ],
+          "structured_content": null
+        },
+        "parsed_result": {
+          "before": "T/codeweb-p02-hosts-ibn2supe",
+          "after": "T/codeweb-p02-hosts-ibn2supe",
+          "nodes": {
+            "added": [],
+            "removed": [],
+            "renamed": []
+          },
+          "edges": {
+            "added": 0,
+            "removed": 0
+          },
+          "domains": {
+            "before": 1,
+            "after": 1
+          },
+          "crossDomainEdges": {
+            "before": 0,
+            "after": 0,
+            "delta": 0
+          },
+          "overlaps": {
+            "added": [],
+            "removed": []
+          },
+          "cycles": {
+            "added": [],
+            "removed": []
+          },
+          "orphans": {
+            "added": [],
+            "removed": []
+          },
+          "regressions": [],
+          "ok": true,
+          "verdict": {
+            "ok": true,
+            "check": "orphan-gate",
+            "scope": "full",
+            "checks": {
+              "newCycles": [],
+              "lostCallers": [],
+              "newDuplications": []
+            }
+          },
+          "analysis": {
+            "scope": "mapped-graph-delta",
+            "checks": {
+              "cycles": "evaluated",
+              "lostCallers": "evaluated",
+              "duplication": "not-evaluated",
+              "behavior": "not-evaluated"
+            },
+            "nextSteps": [
+              "Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.",
+              "Mapped structural checks do not establish behavioral correctness; run the relevant tests."
+            ]
+          },
+          "verification": {
+            "before": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.baseline.json",
+            "beforeSha256": "25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd",
+            "after": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/.codeweb/graph.json",
+            "refreshed": true
+          }
+        },
+        "request_to_result_seconds": 35.69498419761658,
+        "tool_elapsed_seconds": 0.20659112930297852
+      }
+    ],
+    "source_open_events": [
+      {
+        "event_line": 28,
+        "command": "/bin/zsh -lc 'nl -ba src/library.mjs'",
+        "request_to_source_open_seconds": 41.32491612434387,
+        "exit_code": 0
+      },
+      {
+        "event_line": 31,
+        "command": "/bin/zsh -lc 'nl -ba src/consumer.mjs'",
+        "request_to_source_open_seconds": 41.336313009262085,
+        "exit_code": 0
+      }
+    ],
+    "edit_events": []
+  },
+  {
+    "run": "state-empty-cli-prep",
+    "receipt": "state-empty-cli-prep.receipt.json",
+    "duration_seconds": 0.2968270778656006,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": true,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "state-generated-cli-prep",
+    "receipt": "state-generated-cli-prep.receipt.json",
+    "duration_seconds": 0.28939318656921387,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": true,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "supplementary-claude-adapter-canonical",
+    "receipt": "supplementary-claude-adapter-canonical.receipt.json",
+    "duration_seconds": 0.03813886642456055,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "supplementary-claude-adapter",
+    "receipt": "supplementary-claude-adapter.receipt.json",
+    "duration_seconds": 0.035472869873046875,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "supplementary-cli-fixture-map",
+    "receipt": "supplementary-cli-fixture-map.receipt.json",
+    "duration_seconds": 0.2844669818878174,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "supplementary-codex-adapter-canonical",
+    "receipt": "supplementary-codex-adapter-canonical.receipt.json",
+    "duration_seconds": 0.0460050106048584,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  },
+  {
+    "run": "supplementary-codex-adapter",
+    "receipt": "supplementary-codex-adapter.receipt.json",
+    "duration_seconds": 0.03654909133911133,
+    "exit_code": 0,
+    "timed_out": false,
+    "per_event_timestamps_available": false,
+    "request_to_first_source_evidence_seconds": null,
+    "permission_wait_seconds": null,
+    "permission_note": "No interactive permission wait measured; original denials and explicitly preauthorized conditions are separate.",
+    "calls": [],
+    "source_open_events": [],
+    "edit_events": []
+  }
+]

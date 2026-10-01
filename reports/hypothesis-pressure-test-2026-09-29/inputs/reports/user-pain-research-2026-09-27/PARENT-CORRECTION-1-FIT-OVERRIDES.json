@@ -1,0 +1,101 @@
+{
+  "correction": 1,
+  "scope": "Only final derivative codeweb_fit and fit_reasoning; reviewed historical handoffs preserved",
+  "records": [
+    {
+      "id": "CW-L001",
+      "codeweb_fit": "unsupported",
+      "fit_reasoning": "Inference: the reported approach is unchanged human review standards and smaller PRs. Mapped callers or duplicate candidates do not enforce change size or reviewer discipline, and this account reports no missing structural information. Retain as evidence that an existing process can suffice."
+    },
+    {
+      "id": "CW-L002",
+      "codeweb_fit": "unknown",
+      "fit_reasoning": "Inference: multiple review configurations found serious issues, but the account does not identify the defects or missing relationships. Without knowing whether mapped consumers or reuse evidence were relevant, no incremental Codeweb mechanism can be assigned."
+    },
+    {
+      "id": "CW-L003",
+      "codeweb_fit": "unsupported",
+      "fit_reasoning": "Inference: the reported problem is continuing suggestions and an unclear merge threshold. A deterministic relationship map cannot choose acceptance criteria, suppress model preference changes or decide when review is complete. The account does not tie a disputed finding to missing caller information."
+    },
+    {
+      "id": "CW-L004",
+      "codeweb_fit": "unsupported",
+      "fit_reasoning": "Inference: small PRs, explicit acceptance criteria and tailored review questions reportedly work. Codeweb cannot supply the intended acceptance criteria, and this successful workflow identifies no unmet structural-discovery job. Retain as an existing-process alternative."
+    },
+    {
+      "id": "CW-L005",
+      "codeweb_fit": "unsupported",
+      "fit_reasoning": "Inference: a native reviewer returning approval is counterevidence to inevitable review loops. It reports neither missing relationships nor a defect Codeweb could address; a graph does not determine the model’s stopping behavior."
+    },
+    {
+      "id": "CW-L008",
+      "codeweb_fit": "unknown",
+      "fit_reasoning": "Inference: trial rejection, manual filtering and vague context-related false positives establish an alternative and review burden. The account does not say whether the missing context was mapped code relationships, business intent or something else. Specific disputed findings are needed before attributing a structural benefit."
+    },
+    {
+      "id": "CW-L009",
+      "codeweb_fit": "unknown",
+      "fit_reasoning": "Inference: a second model reportedly finds real issues and the user wants team deployment, but the issue classes and deployment barrier are unspecified. Neither proves that caller/reuse evidence would improve review or that shared Codeweb evidence is the required team capability."
+    },
+    {
+      "id": "CW-L014",
+      "codeweb_fit": "unsupported",
+      "fit_reasoning": "Inference: resetting configuration, removing frameworks and upgrading changed several variables together. A repository map cannot establish the cause of the usability improvement or repair configuration overhead. This is an integration-cost constraint and counterexample to adding tools by default."
+    },
+    {
+      "id": "CW-L015",
+      "codeweb_fit": "unsupported",
+      "fit_reasoning": "Inference: the user saw no benefit from an additional structural tool on a small repository and removed it. No missing caller or reuse job is reported. Codeweb would need a separately demonstrated task advantage to overcome this direct adoption counterexample."
+    },
+    {
+      "id": "CW-L016",
+      "codeweb_fit": "unsupported",
+      "fit_reasoning": "Inference: leaving BugBot followed a billing-model change. Codeweb’s mapped relationships and similarity candidates cannot restore another provider’s flat pricing. This informs predictable hosted-service expectations, not structural-analysis demand."
+    },
+    {
+      "id": "CW-L017",
+      "codeweb_fit": "unknown",
+      "fit_reasoning": "Inference: satisfaction with paid review and rarely hitting limits establish perceived service value. The report does not identify which defects required structural information or whether native tools would miss them. A Codeweb benefit cannot be inferred from the price or team size."
+    },
+    {
+      "id": "CW-L018",
+      "codeweb_fit": "unsupported",
+      "fit_reasoning": "Inference: the cited reasons are provider security concerns and team-requested removal. A structural graph cannot remediate the provider exploit or establish acceptable review noise/security posture. Keep this as service-trust and abandonment evidence, not a demonstrated map use case."
+    },
+    {
+      "id": "CW-L019",
+      "codeweb_fit": "unknown",
+      "fit_reasoning": "Inference: the solo user values logical-bug detection and could not reproduce the same quality with alternatives. No concrete bug or relationship is supplied, so neither Codeweb’s caller graph nor body similarity can be connected to the claimed advantage."
+    },
+    {
+      "id": "CW-L020",
+      "codeweb_fit": "unknown",
+      "fit_reasoning": "Inference: the team reports a satisfactory internal wrapper with repository-specific skills and full-source access, while human review shares knowledge. There is no concrete missed relationship or unsatisfied retrieval requirement showing that Codeweb adds to this existing solution; maps also do not replace knowledge-sharing review."
+    },
+    {
+      "id": "CW-L021",
+      "codeweb_fit": "partial",
+      "fit_reasoning": "Inference: Codeweb’s existing CI gate can run mapped structural checks centrally, addressing the narrow need not to rely on voluntary local invocation. That would cover only structural checks, not the general review rules described here. The reported token expense is not attributed to redundant exploration, so no cost-saving claim follows."
+    },
+    {
+      "id": "CW-L022",
+      "codeweb_fit": "partial",
+      "fit_reasoning": "Inference: the team explicitly uses deterministic entry-point orientation and subsequent path inspection. Codeweb’s extracted caller/dependent queries could supply bounded relationship candidates for that inspection, but do not replace Semgrep entry-point rules, taint tracing, threat models or exploit validation. They also do not by themselves fix voluntary adoption or the long review duration."
+    },
+    {
+      "id": "CW-L023",
+      "codeweb_fit": "partial",
+      "fit_reasoning": "Inference: the experiment’s disputed findings required facts outside the target file. Codeweb can locate extracted callers/dependents for source inspection, a plausible way to reach some of that context. It does not prove production call order, thread identity or runtime invariants, and no Codeweb replay was run. Preserve the observed precision/recall tradeoff rather than claiming a net quality improvement."
+    },
+    {
+      "id": "CW-L024",
+      "codeweb_fit": "unsupported",
+      "fit_reasoning": "Inference: this comparison concerns browser-tool transport, lazy loading and snapshot output in Playwright workflows. Codeweb’s repository graph does not change those mechanisms. The account informs how to test MCP versus CLI integration today, not a structural-analysis advantage."
+    },
+    {
+      "id": "CW-L025",
+      "codeweb_fit": "unsupported",
+      "fit_reasoning": "Inference: the reported job is sequencing development-service API operations through scripts and skills. Codeweb’s structural queries do not supply that orchestration, authentication or service data. Keep the migration as an integration preference and existing-workflow alternative, not a missing code-relationship problem."
+    }
+  ]
+}

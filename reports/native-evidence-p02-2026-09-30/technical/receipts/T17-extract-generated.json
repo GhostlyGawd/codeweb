@@ -1,0 +1,25 @@
+{
+  "id": "T17-extract-generated",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/extract-symbols.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/generated",
+    "--no-ctags",
+    "--engine",
+    "regex"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:11.783Z",
+  "end": "2026-10-01T01:50:11.847Z",
+  "durationMs": 63.76354200000014,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"meta\":{\"root\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/generated\",\"target\":\"codeweb-p02-tech-s5LQzF/generated\",\"engine\":\"regex\",\"languages\":[\"javascript\"],\"symbols\":1,\"analysis\":{\"status\":\"no-known-incompleteness\",\"diagnosticCount\":0,\"diagnostics\":[]},\"sources\":{\"subject.mjs\":{\"s\":43,\"m\":1790819411659,\"h\":\"6347581be178848a7f16c97e11b36ab5a0ee980b\"}},\"dirs\":{\".\":1790819411783}},\"nodes\":[{\"id\":\"subject.mjs:standalone\",\"label\":\"standalone\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":1,\"loc\":1,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[],\"returns\":null,\"raw\":\"\"},\"complexity\":1,\"maxDepth\":1}],\"edges\":[]}",
+  "stderr": "[extract] 1 symbols, 0 edges (0 call + 0 import) from 1 files (regex engine); dropped 0 ambiguous bare-call edges (0 short-name); scanned 1/1 file(s); edged 1/1; ast: off\n"
+}

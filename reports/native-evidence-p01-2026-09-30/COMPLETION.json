@@ -1,0 +1,70 @@
+{
+  "recorded_at": "2026-10-01T00:37:10.544723+00:00",
+  "work_id": "P-01",
+  "execution_status": "reviewed_and_locally_verified_candidate",
+  "scope": "Similarity-output surface, not full NED/host readiness",
+  "workflow": "direct Codex with native subagents",
+  "worker_model_requests": {
+    "implementer": "gpt-6.1-sol / high",
+    "reviewer": "gpt-6.1-sol / high"
+  },
+  "base_sha": "fd3b637e9ad4e1f7265799298761bc1ee83fe76c",
+  "branch": "codex/p01-honest-similarity-output",
+  "candidate_files": [
+    {
+      "path": "SPEC.md",
+      "sha256": "b330997cd7f5499bfff99446dcb9d9573d5d8663ff6b32eb90a1e17432e0978d"
+    },
+    {
+      "path": "scripts/find-similar.mjs",
+      "sha256": "a9b9cd3a7f3c097e4a0cc3ba8fefee1f98349bfe58fba518a9882e7c5ef3bf0b"
+    },
+    {
+      "path": "scripts/mcp-server.mjs",
+      "sha256": "67bea39f000592963826db38b6078da40c6a8b46e5d12892d5d8d020c8800453"
+    },
+    {
+      "path": "tests/find-similar-output.test.mjs",
+      "sha256": "1a3151af95c3fcd97ce81fc82e215b6e4bfbcbf083084a91d91e58c52b45052a"
+    },
+    {
+      "path": "tests/test_ac_pins.py",
+      "sha256": "66d1fc4b7d154fd67e7d9e8d3dd4b7128c65f9b769ca8d56d1e672267dc0bf7a"
+    }
+  ],
+  "independent_review": "PASS",
+  "independent_review_evidence": "REVIEW.md",
+  "full_gate": {
+    "started_at": "2026-10-01T00:30:02.871295+00:00",
+    "finished_at": "2026-10-01T00:30:41.387035+00:00",
+    "command": [
+      "sh",
+      "scripts/check"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 38.516,
+    "node_version": "v26.7.0",
+    "evidence": "FULL-GATE.log",
+    "log_sha256": "e030726ae91401e2571bc0ef9c332d658f9f03defd39d084442369493dc8aaee",
+    "all_checks_passed_marker": true,
+    "source_changed_by_gate": false
+  },
+  "product_test_summary": {
+    "tests": 1278,
+    "pass": 1218,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 60,
+    "todo": 0
+  },
+  "python_checks": 46,
+  "golden_evals": 5,
+  "published_package_updated": false,
+  "merged_to_main": false,
+  "host_runtime_matrix_completed": false,
+  "customer_value": "unobserved",
+  "comparative_workflow_benefit": "unobserved",
+  "paperclip_started": false,
+  "required_next_work": "P-02 target/uncertainty/recovery/host preflight; P-04 final field readiness",
+  "source_frozen": true
+}

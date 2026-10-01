@@ -1,0 +1,19 @@
+{
+  "id": "supplementary-claude-adapter",
+  "command": [
+    "node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "prompt": "{\"cwd\": \"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe\", \"tool_name\": \"Edit\", \"hook_event_name\": \"PreToolUse\", \"tool_input\": {\"file_path\": \"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/src/library.mjs\", \"old_string\": \"export function rare(value) { return value + 1; }\", \"new_string\": \"export function rare(value) { return value + 2; }\"}}",
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819505.8924181,
+  "end_epoch": 1790819505.928139,
+  "duration_seconds": 0.035472869873046875,
+  "timeout_seconds": 15,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/supplementary-claude-adapter.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/supplementary-claude-adapter.stderr.txt"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "T35-verify-repair",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/diff.mjs",
+    "baseline",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/.codeweb/graph.json",
+    "--refresh",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:13.265Z",
+  "end": "2026-10-01T01:50:13.438Z",
+  "durationMs": 172.22699999999986,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"before\":\"codeweb-p02-tech-s5LQzF/target\",\"after\":\"codeweb-p02-tech-s5LQzF/target\",\"nodes\":{\"added\":[],\"removed\":[],\"renamed\":[]},\"edges\":{\"added\":0,\"removed\":0},\"domains\":{\"before\":1,\"after\":1},\"crossDomainEdges\":{\"before\":0,\"after\":0,\"delta\":0},\"overlaps\":{\"added\":[],\"removed\":[]},\"cycles\":{\"added\":[],\"removed\":[]},\"orphans\":{\"added\":[],\"removed\":[]},\"regressions\":[],\"ok\":true,\"verdict\":{\"ok\":true,\"check\":\"orphan-gate\",\"scope\":\"full\",\"checks\":{\"newCycles\":[],\"lostCallers\":[],\"newDuplications\":[]}},\"analysis\":{\"scope\":\"mapped-graph-delta\",\"checks\":{\"cycles\":\"evaluated\",\"lostCallers\":\"evaluated\",\"duplication\":\"not-evaluated\",\"behavior\":\"not-evaluated\"},\"nextSteps\":[\"Duplication was not evaluated: refresh dropped findings. Rebuild both snapshots with the full pipeline, or review changed symbols with codeweb_review gate:true.\",\"Mapped structural checks do not establish behavioral correctness; run the relevant tests.\"]},\"verification\":{\"before\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/.codeweb/graph.baseline.json\",\"beforeSha256\":\"99ccab18b3640ba2550f849d8e96ada4dc2693cc4fc4c6ca99aa886bf4d987ce\",\"after\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/.codeweb/graph.json\",\"refreshed\":true}}\n",
+  "stderr": ""
+}

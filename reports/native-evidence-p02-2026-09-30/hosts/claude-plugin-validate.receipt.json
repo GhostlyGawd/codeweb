@@ -1,0 +1,22 @@
+{
+  "id": "claude-plugin-validate",
+  "command": [
+    "claude",
+    "plugin",
+    "validate",
+    "--json",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819368.490719,
+  "end_epoch": 1790819368.924937,
+  "duration_seconds": 0.4328927993774414,
+  "timeout_seconds": 30,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/claude-plugin-validate.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/claude-plugin-validate.stderr.txt"
+}

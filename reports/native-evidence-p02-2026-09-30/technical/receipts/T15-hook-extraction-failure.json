@@ -1,0 +1,21 @@
+{
+  "id": "T15-hook-extraction-failure",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/extraction-failure/subject.mjs\"}}",
+  "start": "2026-10-01T01:50:12.027Z",
+  "end": "2026-10-01T01:50:12.064Z",
+  "durationMs": 36.43908299999998,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"[codeweb] editing subject.mjs: 1 symbol(s), 1 in-repo dependent edge(s) (most depended-on: standalone ×1).\\n  function standalone (product, undefined) — 1 caller(s), 0 test(s), blast 1 across 1 domain(s)\\n  top callers: consumer.mjs:consumer\\n  → codeweb_context for a bounded edit window; codeweb_impact for the full blast radius.\"}}\n",
+  "stderr": ""
+}

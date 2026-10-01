@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "strict": false,
+  "target": "$LOCAL_TMP/codeweb-p02-nhppa5tq/.claude-plugin/marketplace.json",
+  "manifest": {
+    "file": "$LOCAL_TMP/codeweb-p02-nhppa5tq/.claude-plugin/marketplace.json",
+    "type": "marketplace",
+    "errors": [],
+    "warnings": [],
+    "notes": []
+  },
+  "contents": []
+}

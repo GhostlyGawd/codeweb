@@ -1,0 +1,930 @@
+{
+  "schema_version": 1,
+  "assignment": "01 — User need and segment",
+  "issue_id": "375bee1a-6e50-4430-bef6-20cf523f4771",
+  "run_id": "766096ef-4afa-4384-bbb6-4fc8f565d43f",
+  "session_id": "01a0f075-e05a-7182-88b4-87174020a54b",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "verdict": "narrow",
+  "local_verdict": "narrow",
+  "paid_verdict": "unresolved_from_existing_evidence",
+  "findings": [
+    {
+      "id": "L01-F01",
+      "statement": "Reuse uncertainty is a credible conditional job, but the supported audience is narrower than all weekly coding-agent users.",
+      "evidence_type": "source-grounded inference from public first-person reports",
+      "supported_actor_segment": "Experienced solo maintainers; a mixed-host author whose occupation and repository scale remain unknown. The strongest detailed solo account later became a duplication-tool builder.",
+      "task": "Adding a feature or extending utilities in an evolving repository with existing implementations.",
+      "conditions": [
+        "Agent overlooks existing utilities",
+        "Human can judge whether reuse is appropriate",
+        "Known repeated reprompting or consolidation work"
+      ],
+      "evidence_ids": [
+        "CW-T018",
+        "CW-Z003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z006",
+        "CW-Z001"
+      ],
+      "strongest_supported_case": "T018 reports recurring utility duplication and slower review. Z003 describes repeated reuse prompts on GitGuessr, with human-directed deduplicating commits.",
+      "strongest_countercase": "Z006 reports successful consolidation after human pattern selection, including intentional duplication. Z001 reports successful bounded native modularization.",
+      "recurrence": "Qualitative repetition within individual accounts; no task denominator, weekly incidence or measured recovery duration.",
+      "consequence": "Reprompting and consolidation effort are reported; prevented production defects and net Codeweb savings are unobserved.",
+      "failure_scenario": "A brief correctly finds similar code but the real difficulty is choosing the abstraction; it adds reading without changing the plan.",
+      "verdict": "narrow",
+      "weakest_assumption": "Discovering an overlooked implementation is the limiting step rather than architectural judgment or model compliance.",
+      "minimal_falsification_test": "Proposed only: on two naturally occurring reuse tasks from a non-tool-building maintainer, record the native plan, then reveal candidates and independently adjudicate changed decisions and all added effort. No correct incremental decision on either task defeats this initial participant-level case.",
+      "local_implication": "Test optional reuse inspection where the user has a recent concrete repeated burden; similarity is an inspection lead, not permission to merge.",
+      "paid_implication": "Single-repo reuse remains free; these reports do not identify a paying coordination job.",
+      "confidence_reason": "Moderate confidence that the reported pain exists; low confidence in prevalence or a Codeweb remedy. Z003 is one author/context, not separate incidents for its follow-up.",
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "source_passage": "Story body and author reply 48035884; complete four-comment tree read",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+          "segment": "unknown",
+          "segment_basis": null,
+          "limitations": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "capture_pointer": "sources/L01/CW-T018.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F01",
+            "L01-F03",
+            "L01-F05"
+          ]
+        },
+        {
+          "evidence_id": "CW-Z003",
+          "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:111",
+          "source_passage": "Quantifying code duplication; methodological weaknesses",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "segment": "experienced solo developer; later duplication-tool builder",
+          "segment_basis": "Author describes own project/workflow in the source",
+          "limitations": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed.",
+          "capture_pointer": "sources/L01/CW-Z003.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F01",
+            "L01-F05"
+          ]
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Z006",
+          "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+          "source_passage": "Refactoring at scale; What humans still do",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "segment": "founding engineer; developer-tool builder",
+          "segment_basis": "Author describes own project/workflow in the source",
+          "limitations": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited.",
+          "capture_pointer": "sources/L01/CW-Z006.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F01",
+            "L01-F04"
+          ]
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "source_passage": "The Old Projects I Refactored; How I Use Codex Now",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "segment": "individual maintaining personal projects",
+          "segment_basis": "Author describes own project/workflow in the source",
+          "limitations": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts.",
+          "capture_pointer": "sources/L01/CW-Z001.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F01",
+            "L01-F03",
+            "L01-F05"
+          ]
+        }
+      ],
+      "access_coverage_limits": "Public self-reports and a preliminary pilot; no observed Codeweb user comparison, current reproduction, interviews or buyer commitments. See per-source capture/access boundaries."
+    },
+    {
+      "id": "L01-F02",
+      "statement": "Scope failures can have real consequences, but cross-module consumer discovery is only one possible cause and remedy.",
+      "evidence_type": "source-grounded inference from public first-person reports; preliminary independent measurement",
+      "supported_actor_segment": "Ordinary application maintainer (Python desktop); distinguish this experience from the tool-builder experiment.",
+      "task": "Renaming, removing variables, or refactoring working application code.",
+      "conditions": [
+        "Reference verification omitted",
+        "Same-file closure and replacement errors included",
+        "Supported map coverage must be checked per task"
+      ],
+      "evidence_ids": [
+        "CW-P003",
+        "CW-X001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-T023",
+        "CW-X001"
+      ],
+      "strongest_supported_case": "P003 Category H reports recursion, NameError and AttributeError after unchecked edits. X001 suggests retrieval precision can matter in noisy reference tasks.",
+      "strongest_countercase": "P003 itself proposes grep and post-edit checks; several examples are same-file errors. X001 found cleaner references without better overall recall. T023 reports a successful constrained legacy refactor with characterization tests.",
+      "recurrence": "P003 is one grouped project narrative with multiple examples, not 55 independent customer incidents; current reproduction absent.",
+      "consequence": "Reported application breakage is concrete; neither a measured defect rate nor proof that a pre-edit map prevents it.",
+      "failure_scenario": "A trigger requiring another-module consumer suppresses a same-file closure risk, or a caller list arrives but the agent still fails to inspect it.",
+      "verdict": "revise",
+      "weakest_assumption": "The lost reference would be represented, surfaced and acted upon before the harmful edit.",
+      "minimal_falsification_test": "Proposed only: take one real past rename failure, inspect whether the supported brief identifies the missed site, then compare a fresh similar task against normal grep plus tests. Reject the consumer mechanism for that task if the site is omitted or the baseline already catches it at lower effort.",
+      "local_implication": "Separate consumer-scope and reuse eligibility/scoring. Do not recruit solely for cross-file work or count returned edges as behavioral protection.",
+      "paid_implication": "Local harm does not imply hosted value; no paid attribution established.",
+      "confidence_reason": "Moderate confidence in reported harm; low causal confidence. Historical model/version and proposed rather than verified workarounds remain explicit.",
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-P003",
+          "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+          "source_passage": "Context and Category H; all body categories read",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T00:38:53.019153+00:00",
+          "segment": "Python desktop application developer",
+          "segment_basis": "Author describes daily work on own 67K-line Python/Tkinter application.",
+          "limitations": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+          "capture_pointer": "sources/L01/CW-P003.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F02",
+            "L01-F03",
+            "L01-F05"
+          ]
+        },
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "source_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+          "segment": "tool builder/researcher",
+          "segment_basis": "AgentConnect engineering author; own pilot",
+          "limitations": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "capture_pointer": "sources/L01/CW-X001.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F02",
+            "L01-F03",
+            "L01-F05"
+          ]
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-T023",
+          "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1qobg1g/how_to_refactor_50k_lines_of_legacy_code_without/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:29",
+          "source_passage": "Original post lines 21–94 read; remainder not inspected",
+          "original_access": "opened_partial",
+          "original_retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+          "segment": "Django maintainer",
+          "segment_basis": "Author describes their own Django monolith refactor.",
+          "limitations": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction. Resolved means completion claimed by the author for this refactor, not independent verification or a general product fix.",
+          "capture_pointer": null,
+          "capture_status": "frozen_record_only_no_new_reopen",
+          "finding_ids": [
+            "L01-F02",
+            "L01-F05"
+          ]
+        },
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "source_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+          "segment": "tool builder/researcher",
+          "segment_basis": "AgentConnect engineering author; own pilot",
+          "limitations": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "capture_pointer": "sources/L01/CW-X001.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F02",
+            "L01-F03",
+            "L01-F05"
+          ]
+        }
+      ],
+      "access_coverage_limits": "Public self-reports and a preliminary pilot; no observed Codeweb user comparison, current reproduction, interviews or buyer commitments. See per-source capture/access boundaries."
+    },
+    {
+      "id": "L01-F03",
+      "statement": "Successful ordinary native workflows are a real exclusion case, not noise to remove from recruitment.",
+      "evidence_type": "source-grounded inference from public first-person reports; preliminary independent measurement",
+      "supported_actor_segment": "Personal-project maintainers and users of small/familiar repositories; repository ambiguity matters more than host membership alone.",
+      "task": "Bounded modularization, straightforward reference lookup, and small maintenance changes.",
+      "conditions": [
+        "Existing search produces manageable results",
+        "Task boundaries and tests are clear",
+        "No recent costly missed-consumer or reuse episode"
+      ],
+      "evidence_ids": [
+        "CW-Z001",
+        "CW-X001",
+        "CW-L015"
+      ],
+      "opposing_evidence_ids": [
+        "CW-T018",
+        "CW-P003"
+      ],
+      "strongest_supported_case": "Z001 completed a modularization with constraints, tests and diff review. X001 found no retrieval gain on its clean TypeScript example. L015 reports removing an extra structural tool from a small repository.",
+      "strongest_countercase": "T018 and P003 show that personal/application work can still contain repeated reuse or reference failures; smallness alone is not an exclusion rule.",
+      "recurrence": "Successful task/workflow reports and one abandonment account; no measured frequency distribution.",
+      "consequence": "An unnecessary integration can add setup and reading without changing a decision.",
+      "failure_scenario": "Recruit only enthusiasts with already-known failures, then label the result useful for ordinary weekly users whose baseline is already adequate.",
+      "verdict": "narrow",
+      "weakest_assumption": "A recent concrete uncertainty, rather than tool enthusiasm or repository size alone, predicts incremental benefit.",
+      "minimal_falsification_test": "Proposed only: retain at least one unprompted small/familiar native-success task in the planned pilot and measure setup/reading as well as outcomes. If such tasks show equal decisions and extra effort, exclude unsolicited briefs for that condition.",
+      "local_implication": "H1 remains conditional. A null result should narrow eligible tasks instead of prompting additional tool-use instructions.",
+      "paid_implication": "No purchase inference; paying for the host does not show demand for structural evidence.",
+      "confidence_reason": "Strong evidence against universality, weak evidence for a precise segmentation threshold. X001 is a tiny builder pilot, not an ordinary-user prevalence sample.",
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-Z001",
+          "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "source_passage": "The Old Projects I Refactored; How I Use Codex Now",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "segment": "individual maintaining personal projects",
+          "segment_basis": "Author describes own project/workflow in the source",
+          "limitations": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts.",
+          "capture_pointer": "sources/L01/CW-Z001.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F01",
+            "L01-F03",
+            "L01-F05"
+          ]
+        },
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "source_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+          "segment": "tool builder/researcher",
+          "segment_basis": "AgentConnect engineering author; own pilot",
+          "limitations": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "capture_pointer": "sources/L01/CW-X001.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F02",
+            "L01-F03",
+            "L01-F05"
+          ]
+        },
+        {
+          "evidence_id": "CW-L015",
+          "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:67",
+          "source_passage": "UnrulyThesis reply",
+          "original_access": "opened_partial",
+          "original_retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+          "segment": "unknown",
+          "segment_basis": null,
+          "limitations": "Historical account; relative date only. No general conclusion about current Serena capability.",
+          "capture_pointer": null,
+          "capture_status": "frozen_record_only_no_new_reopen",
+          "finding_ids": [
+            "L01-F03"
+          ]
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "source_passage": "Story body and author reply 48035884; complete four-comment tree read",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+          "segment": "unknown",
+          "segment_basis": null,
+          "limitations": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "capture_pointer": "sources/L01/CW-T018.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F01",
+            "L01-F03",
+            "L01-F05"
+          ]
+        },
+        {
+          "evidence_id": "CW-P003",
+          "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+          "source_passage": "Context and Category H; all body categories read",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T00:38:53.019153+00:00",
+          "segment": "Python desktop application developer",
+          "segment_basis": "Author describes daily work on own 67K-line Python/Tkinter application.",
+          "limitations": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+          "capture_pointer": "sources/L01/CW-P003.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F02",
+            "L01-F03",
+            "L01-F05"
+          ]
+        }
+      ],
+      "access_coverage_limits": "Public self-reports and a preliminary pilot; no observed Codeweb user comparison, current reproduction, interviews or buyer commitments. See per-source capture/access boundaries."
+    },
+    {
+      "id": "L01-F04",
+      "statement": "Reviewers have an adjacent need for architectural triage, which is not equivalent to the author’s pre-edit reuse lookup.",
+      "evidence_type": "source-grounded inference from public first-person reports",
+      "supported_actor_segment": "Team developer/reviewer; open-source maintainer. Vendor replies in the same discussion are not independent customer validation.",
+      "task": "Reviewing large agent-assisted diffs and deciding whether coupling or duplication is acceptable.",
+      "conditions": [
+        "Large/noisy PRs",
+        "Need to connect a concrete change to a design concern",
+        "Reviewer still owns architecture and merge judgment"
+      ],
+      "evidence_ids": [
+        "CW-L048",
+        "CW-X006"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L051",
+        "CW-L001",
+        "CW-Z006"
+      ],
+      "strongest_supported_case": "L048 describes duplicate/coupled code missed by automated reviews and an unwieldy PR interface; X006 describes review becoming the limiting step.",
+      "strongest_countercase": "In the same HN thread L051 reports a useful custom architecture reviewer. L001 reports existing review standards and smaller PRs suffice; Z006 keeps abstraction selection with humans.",
+      "recurrence": "Repeated workflow frustration is described, but reviewer minutes, defect yield and Codeweb task recurrence are not measured.",
+      "consequence": "Attention and architecture judgment remain scarce; adding another evidence summary may worsen the burden.",
+      "failure_scenario": "The brief supplies callers but the reviewer still must reconstruct intent across the full diff, while small PR discipline would have removed more work.",
+      "verdict": "narrow",
+      "weakest_assumption": "Source-linked structural evidence can reduce a specific reviewer decision cost rather than merely narrate the diff.",
+      "minimal_falsification_test": "Proposed only: one actual reviewer compares their normal PR workflow with a source-linked concern on a matched change; independently score correct triage and total reading. No changed decision or longer review rejects this proposed reviewer use for that case.",
+      "local_implication": "Keep reviewer trials distinct from author reuse tasks; do not count one person in two roles as independent demand.",
+      "paid_implication": "Review burden alone identifies neither purchasing authority nor a service that removes coordination.",
+      "confidence_reason": "Moderate confidence in the adjacent pain; weak evidence it is the same job. The same-thread positive rival must survive synthesis.",
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-L048",
+          "original_url": "https://news.ycombinator.com/item?id=49321400",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:100",
+          "source_passage": "Root 49321400",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:04:40.794822+00:00",
+          "segment": "team developer/reviewer",
+          "segment_basis": "Refers to colleagues and own projects.",
+          "limitations": "Self-report, no observed task or independent replication. Not evidence of Codeweb use or demand.",
+          "capture_pointer": "sources/L01/CW-L048.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F04"
+          ]
+        },
+        {
+          "evidence_id": "CW-X006",
+          "original_url": "https://renanfranca.github.io/when-plan-mode-was-no-longer-enough.html",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:40",
+          "source_passage": "First disappointment; seed4j-cli example; What this approach still does not solve",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+          "segment": "open-source maintainer",
+          "segment_basis": "Author identifies Seed4J and JHipster core membership",
+          "limitations": "Resolved refers to reported workflow improvement, not all testing defects. Linked plan/issue not reopened; one author context.",
+          "capture_pointer": null,
+          "capture_status": "frozen_record_only_no_new_reopen",
+          "finding_ids": [
+            "L01-F04"
+          ]
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-L051",
+          "original_url": "https://news.ycombinator.com/item?id=49321400",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:103",
+          "source_passage": "Comment 49353756",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:04:40.794822+00:00",
+          "segment": "unknown",
+          "segment_basis": null,
+          "limitations": "Self-reported satisfaction, no measured accuracy or purchase amount; considered disabling Copilot but has not reported doing so.",
+          "capture_pointer": "sources/L01/CW-L048.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F04"
+          ]
+        },
+        {
+          "evidence_id": "CW-L001",
+          "original_url": "https://www.reddit.com/r/codereview/comments/1vuddna/how_are_you_actually_reviewing_ai_generated_code/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:53",
+          "source_passage": "OkPosition4563 reply; rendered lines 310–315",
+          "original_access": "opened_partial",
+          "original_retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+          "segment": "team developer",
+          "segment_basis": "Mentions coworkers and own AI use.",
+          "limitations": "Self-report; no independent replication. Thread completeness and exact date unavailable.",
+          "capture_pointer": null,
+          "capture_status": "frozen_record_only_no_new_reopen",
+          "finding_ids": [
+            "L01-F04"
+          ]
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+          "source_passage": "Refactoring at scale; What humans still do",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "segment": "founding engineer; developer-tool builder",
+          "segment_basis": "Author describes own project/workflow in the source",
+          "limitations": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited.",
+          "capture_pointer": "sources/L01/CW-Z006.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F01",
+            "L01-F04"
+          ]
+        }
+      ],
+      "access_coverage_limits": "Public self-reports and a preliminary pilot; no observed Codeweb user comparison, current reproduction, interviews or buyer commitments. See per-source capture/access boundaries."
+    },
+    {
+      "id": "L01-F05",
+      "statement": "The collected audience is a convenience sample for mechanism discovery; its size cannot establish that the proposed segment has frequent unmet need.",
+      "evidence_type": "source-grounded inference from public first-person reports; preliminary independent measurement",
+      "supported_actor_segment": "Public issue reporters, engineering writers, tool builders/researchers and selected ordinary users; unknown occupations stay unknown.",
+      "task": "Inferring audience prevalence and choosing pilot participants from the frozen research.",
+      "conditions": [
+        "Problem-oriented public queries",
+        "Self-selection into issue trackers and blogs",
+        "Repeated author/context records",
+        "Partial threads and date gaps"
+      ],
+      "evidence_ids": [
+        "CW-X001",
+        "CW-Z003",
+        "CW-T018"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z001",
+        "CW-P003",
+        "CW-T023"
+      ],
+      "strongest_supported_case": "The query log explicitly seeks ignored MCP, missed callers and refactor bugs. X001 is a builder pilot; Z003 combines firsthand development and later tool building. T018 lacks a verified segment.",
+      "strongest_countercase": "Z001, P003 and T023 show the corpus is not exclusively tool builders; positive/null searches and counterexamples were retained. That improves hypothesis quality without making the sample representative.",
+      "recurrence": "No denominator of all edits or developers; neither source count nor several examples by one author measures recurrence.",
+      "consequence": "The proposed five weekly users could reproduce the same selection bias if selected for tool interest or pre-known structural trouble.",
+      "failure_scenario": "A problem-selected pilot succeeds on curated cases while ordinary users seldom have eligible tasks and never voluntarily return.",
+      "verdict": "revise",
+      "weakest_assumption": "Publicly articulate tool-adjacent users have the same pain frequency and adoption burden as intended ordinary users.",
+      "minimal_falsification_test": "Proposed only: before invitations, classify builder/reviewer/ordinary roles and recent tasks; prospectively log all task opportunities, including ineligible and native-success cases. If relevant uncertainty does not recur within the planned two-week window, narrow the recurrence claim and report the shortfall, without manufacturing tasks.",
+      "local_implication": "Use task history as eligibility evidence and maintain a denominator; five participants and ten changes are learning targets, not representativeness or prevalence estimates.",
+      "paid_implication": "Do not extrapolate public subscription discussion or builder capability to a buyer market.",
+      "confidence_reason": "High confidence in sampling limitation from query log and source metadata. True prevalence remains unresolved, not proven rare. Supporting process pointers: QUERY-LOG.csv rows 2–17 and REVIEW.md retained limitations.",
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "source_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+          "segment": "tool builder/researcher",
+          "segment_basis": "AgentConnect engineering author; own pilot",
+          "limitations": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "capture_pointer": "sources/L01/CW-X001.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F02",
+            "L01-F03",
+            "L01-F05"
+          ]
+        },
+        {
+          "evidence_id": "CW-Z003",
+          "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:111",
+          "source_passage": "Quantifying code duplication; methodological weaknesses",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "segment": "experienced solo developer; later duplication-tool builder",
+          "segment_basis": "Author describes own project/workflow in the source",
+          "limitations": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed.",
+          "capture_pointer": "sources/L01/CW-Z003.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F01",
+            "L01-F05"
+          ]
+        },
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "source_passage": "Story body and author reply 48035884; complete four-comment tree read",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+          "segment": "unknown",
+          "segment_basis": null,
+          "limitations": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "capture_pointer": "sources/L01/CW-T018.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F01",
+            "L01-F03",
+            "L01-F05"
+          ]
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Z001",
+          "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "source_passage": "The Old Projects I Refactored; How I Use Codex Now",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+          "segment": "individual maintaining personal projects",
+          "segment_basis": "Author describes own project/workflow in the source",
+          "limitations": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts.",
+          "capture_pointer": "sources/L01/CW-Z001.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F01",
+            "L01-F03",
+            "L01-F05"
+          ]
+        },
+        {
+          "evidence_id": "CW-P003",
+          "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+          "source_passage": "Context and Category H; all body categories read",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T00:38:53.019153+00:00",
+          "segment": "Python desktop application developer",
+          "segment_basis": "Author describes daily work on own 67K-line Python/Tkinter application.",
+          "limitations": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+          "capture_pointer": "sources/L01/CW-P003.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F02",
+            "L01-F03",
+            "L01-F05"
+          ]
+        },
+        {
+          "evidence_id": "CW-T023",
+          "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1qobg1g/how_to_refactor_50k_lines_of_legacy_code_without/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:29",
+          "source_passage": "Original post lines 21–94 read; remainder not inspected",
+          "original_access": "opened_partial",
+          "original_retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+          "segment": "Django maintainer",
+          "segment_basis": "Author describes their own Django monolith refactor.",
+          "limitations": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction. Resolved means completion claimed by the author for this refactor, not independent verification or a general product fix.",
+          "capture_pointer": null,
+          "capture_status": "frozen_record_only_no_new_reopen",
+          "finding_ids": [
+            "L01-F02",
+            "L01-F05"
+          ]
+        }
+      ],
+      "access_coverage_limits": "Public self-reports and a preliminary pilot; no observed Codeweb user comparison, current reproduction, interviews or buyer commitments. See per-source capture/access boundaries."
+    },
+    {
+      "id": "L01-F06",
+      "statement": "The prospective paid segment is an unconfirmed team champion with a recurring cross-repo check, not an established buyer for managed evidence.",
+      "evidence_type": "source-grounded inference from public first-person reports",
+      "supported_actor_segment": "Developer in a multi-repository team; internal review-system builder as a competing segment; buyer authority unknown.",
+      "task": "Checking frontend/backend compatibility after backend changes and coordinating review evidence.",
+      "conditions": [
+        "Separate producer/consumer repositories",
+        "Repeated manual invocation",
+        "CI alternative not yet evaluated in the source"
+      ],
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-Y005"
+      ],
+      "strongest_supported_case": "Y007 reports repeatedly invoking Claude for cross-repo checks and wanting that work handled automatically.",
+      "strongest_countercase": "The same author accepts CI or a monorepo as the more appropriate answer and has not investigated CI. Y005 describes a sophisticated organization choosing internal tooling.",
+      "recurrence": "Repetition is qualitative; no cadence, net labor cost, purchase commitment or renewal record.",
+      "consequence": "A possible automation burden is visible, but unmeasured and potentially solved by ordinary type-checking CI.",
+      "failure_scenario": "The champion configures a simple two-repository CI check and the purported paid coordination job disappears.",
+      "verdict": "unresolved_from_existing_evidence",
+      "weakest_assumption": "There is recurring residual coordination work after adequate CI, and someone with authority will pay to remove it.",
+      "minimal_falsification_test": "Proposed only: with an actual team, reconstruct its last two cross-repo checks, identify check owner and buyer, and compare effort with the simplest CI alternative. If no residual recurring job or authorized buyer exists, reject this paid segment before any offer.",
+      "local_implication": "Do not use this team job to justify charging for local consumer/reuse inspection.",
+      "paid_implication": "Keep paid hypothesis separate and unresolved; no hosted implementation, offer, outreach or payment is authorized by this lens.",
+      "confidence_reason": "Low confidence in paid fit. Historical host limitations are not current capability claims; the original forum account does not establish failed CI delivery.",
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+          "source_passage": "posts 1,5,6",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+          "segment": "Developer in multi-repo team",
+          "segment_basis": "Author says enormous codebase and intends to convince team.",
+          "limitations": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+          "capture_pointer": "sources/L01/CW-Y007.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F06"
+          ]
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+          "source_passage": "posts 1,5,6",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+          "segment": "Developer in multi-repo team",
+          "segment_basis": "Author says enormous codebase and intends to convince team.",
+          "limitations": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+          "capture_pointer": "sources/L01/CW-Y007.txt",
+          "capture_status": "targeted_reopen",
+          "finding_ids": [
+            "L01-F06"
+          ]
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:125",
+          "source_passage": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "original_access": "opened_full",
+          "original_retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+          "segment": "Internal review-system builder",
+          "segment_basis": "Engineering retrospective explicitly describes building Iris.",
+          "limitations": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP.",
+          "capture_pointer": null,
+          "capture_status": "frozen_record_only_no_new_reopen",
+          "finding_ids": [
+            "L01-F06"
+          ]
+        }
+      ],
+      "access_coverage_limits": "Public self-reports and a preliminary pilot; no observed Codeweb user comparison, current reproduction, interviews or buyer commitments. See per-source capture/access boundaries."
+    }
+  ],
+  "source_index": {
+    "CW-L001": {
+      "original_url": "https://www.reddit.com/r/codereview/comments/1vuddna/how_are_you_actually_reviewing_ai_generated_code/",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:53",
+      "source_passage": "OkPosition4563 reply; rendered lines 310–315",
+      "original_access": "opened_partial",
+      "original_retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+      "segment": "team developer",
+      "segment_basis": "Mentions coworkers and own AI use.",
+      "limitations": "Self-report; no independent replication. Thread completeness and exact date unavailable.",
+      "capture_pointer": null,
+      "capture_status": "frozen_record_only_no_new_reopen",
+      "finding_ids": [
+        "L01-F04"
+      ]
+    },
+    "CW-L015": {
+      "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:67",
+      "source_passage": "UnrulyThesis reply",
+      "original_access": "opened_partial",
+      "original_retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+      "segment": "unknown",
+      "segment_basis": null,
+      "limitations": "Historical account; relative date only. No general conclusion about current Serena capability.",
+      "capture_pointer": null,
+      "capture_status": "frozen_record_only_no_new_reopen",
+      "finding_ids": [
+        "L01-F03"
+      ]
+    },
+    "CW-L048": {
+      "original_url": "https://news.ycombinator.com/item?id=49321400",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:100",
+      "source_passage": "Root 49321400",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T01:04:40.794822+00:00",
+      "segment": "team developer/reviewer",
+      "segment_basis": "Refers to colleagues and own projects.",
+      "limitations": "Self-report, no observed task or independent replication. Not evidence of Codeweb use or demand.",
+      "capture_pointer": "sources/L01/CW-L048.txt",
+      "capture_status": "targeted_reopen",
+      "finding_ids": [
+        "L01-F04"
+      ]
+    },
+    "CW-L051": {
+      "original_url": "https://news.ycombinator.com/item?id=49321400",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:103",
+      "source_passage": "Comment 49353756",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T01:04:40.794822+00:00",
+      "segment": "unknown",
+      "segment_basis": null,
+      "limitations": "Self-reported satisfaction, no measured accuracy or purchase amount; considered disabling Copilot but has not reported doing so.",
+      "capture_pointer": "sources/L01/CW-L048.txt",
+      "capture_status": "targeted_reopen",
+      "finding_ids": [
+        "L01-F04"
+      ]
+    },
+    "CW-P003": {
+      "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+      "source_passage": "Context and Category H; all body categories read",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T00:38:53.019153+00:00",
+      "segment": "Python desktop application developer",
+      "segment_basis": "Author describes daily work on own 67K-line Python/Tkinter application.",
+      "limitations": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+      "capture_pointer": "sources/L01/CW-P003.txt",
+      "capture_status": "targeted_reopen",
+      "finding_ids": [
+        "L01-F02",
+        "L01-F03",
+        "L01-F05"
+      ]
+    },
+    "CW-T018": {
+      "original_url": "https://news.ycombinator.com/item?id=48033774",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+      "source_passage": "Story body and author reply 48035884; complete four-comment tree read",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+      "segment": "unknown",
+      "segment_basis": null,
+      "limitations": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+      "capture_pointer": "sources/L01/CW-T018.txt",
+      "capture_status": "targeted_reopen",
+      "finding_ids": [
+        "L01-F01",
+        "L01-F03",
+        "L01-F05"
+      ]
+    },
+    "CW-T023": {
+      "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1qobg1g/how_to_refactor_50k_lines_of_legacy_code_without/",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:29",
+      "source_passage": "Original post lines 21–94 read; remainder not inspected",
+      "original_access": "opened_partial",
+      "original_retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+      "segment": "Django maintainer",
+      "segment_basis": "Author describes their own Django monolith refactor.",
+      "limitations": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction. Resolved means completion claimed by the author for this refactor, not independent verification or a general product fix.",
+      "capture_pointer": null,
+      "capture_status": "frozen_record_only_no_new_reopen",
+      "finding_ids": [
+        "L01-F02",
+        "L01-F05"
+      ]
+    },
+    "CW-X001": {
+      "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+      "source_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+      "segment": "tool builder/researcher",
+      "segment_basis": "AgentConnect engineering author; own pilot",
+      "limitations": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+      "capture_pointer": "sources/L01/CW-X001.txt",
+      "capture_status": "targeted_reopen",
+      "finding_ids": [
+        "L01-F02",
+        "L01-F03",
+        "L01-F05"
+      ]
+    },
+    "CW-X006": {
+      "original_url": "https://renanfranca.github.io/when-plan-mode-was-no-longer-enough.html",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:40",
+      "source_passage": "First disappointment; seed4j-cli example; What this approach still does not solve",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+      "segment": "open-source maintainer",
+      "segment_basis": "Author identifies Seed4J and JHipster core membership",
+      "limitations": "Resolved refers to reported workflow improvement, not all testing defects. Linked plan/issue not reopened; one author context.",
+      "capture_pointer": null,
+      "capture_status": "frozen_record_only_no_new_reopen",
+      "finding_ids": [
+        "L01-F04"
+      ]
+    },
+    "CW-Y005": {
+      "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:125",
+      "source_passage": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+      "segment": "Internal review-system builder",
+      "segment_basis": "Engineering retrospective explicitly describes building Iris.",
+      "limitations": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP.",
+      "capture_pointer": null,
+      "capture_status": "frozen_record_only_no_new_reopen",
+      "finding_ids": [
+        "L01-F06"
+      ]
+    },
+    "CW-Y007": {
+      "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+      "source_passage": "posts 1,5,6",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+      "segment": "Developer in multi-repo team",
+      "segment_basis": "Author says enormous codebase and intends to convince team.",
+      "limitations": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+      "capture_pointer": "sources/L01/CW-Y007.txt",
+      "capture_status": "targeted_reopen",
+      "finding_ids": [
+        "L01-F06"
+      ]
+    },
+    "CW-Z001": {
+      "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+      "source_passage": "The Old Projects I Refactored; How I Use Codex Now",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+      "segment": "individual maintaining personal projects",
+      "segment_basis": "Author describes own project/workflow in the source",
+      "limitations": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts.",
+      "capture_pointer": "sources/L01/CW-Z001.txt",
+      "capture_status": "targeted_reopen",
+      "finding_ids": [
+        "L01-F01",
+        "L01-F03",
+        "L01-F05"
+      ]
+    },
+    "CW-Z003": {
+      "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:111",
+      "source_passage": "Quantifying code duplication; methodological weaknesses",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+      "segment": "experienced solo developer; later duplication-tool builder",
+      "segment_basis": "Author describes own project/workflow in the source",
+      "limitations": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed.",
+      "capture_pointer": "sources/L01/CW-Z003.txt",
+      "capture_status": "targeted_reopen",
+      "finding_ids": [
+        "L01-F01",
+        "L01-F05"
+      ]
+    },
+    "CW-Z006": {
+      "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+      "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+      "source_passage": "Refactoring at scale; What humans still do",
+      "original_access": "opened_full",
+      "original_retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+      "segment": "founding engineer; developer-tool builder",
+      "segment_basis": "Author describes own project/workflow in the source",
+      "limitations": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited.",
+      "capture_pointer": "sources/L01/CW-Z006.txt",
+      "capture_status": "targeted_reopen",
+      "finding_ids": [
+        "L01-F01",
+        "L01-F04"
+      ]
+    }
+  },
+  "process_evidence": [
+    "inputs/reports/user-pain-research-2026-09-27/QUERY-LOG.csv",
+    "inputs/reports/user-pain-research-2026-09-27/REVIEW.md",
+    "inputs/reports/product-proof-sprint-plan/README.md"
+  ],
+  "independence": {
+    "other_lens_outputs_read": false,
+    "fresh_context": "This task began in the supplied fresh conversation; CODEX_THREAD_ID recorded, runtime isolation requires lead verification.",
+    "shared_filesystem": "Procedural isolation, not access control."
+  }
+}

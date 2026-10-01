@@ -1,0 +1,330 @@
+{
+  "id": "45abbb28-df94-4bf3-b769-b54361ec19db",
+  "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+  "projectId": null,
+  "projectWorkspaceId": null,
+  "goalId": null,
+  "parentId": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+  "title": "Final technical breadth and structural-context disconfirmation",
+  "description": "Final technical breadth and disconfirmation pass for [COD-56](/COD/issues/COD-56). This is child 5 of 6. Existing [COD-59](/COD/issues/COD-59) and [COD-61](/COD/issues/COD-61) are independently approved. Technical Lead can start now; no live technical prerequisite remains. Qualifying boundary: separately owned substantial technical source recovery and comparative investigation, parallel with final Product Lead buyer/adoption pass.\n\nQuestion: when does exact structural evidence change a real cross-file edit/review outcome beyond native grep/LSP/tests, and when is it insufficient? Focus concrete maintenance/refactor/caller/duplicate-implementation cases, Codex cloud undercoverage, actual successful defaults, noisy/generated/dynamic/multi-repo boundaries and reporter- or maintainer-verified resolutions. Prefer original developer/maintainer articles, short concrete issue threads and forum cases across families, not broad quota/UI complaints or vendor lists. Evaluate actual Codeweb mechanism against repository docs/source read-only; no experiments or product edits.\n\nAim to finish reading 40\u201350 additional distinct useful original pages/threads, including completing relevant partials; preserve any shortfall. Do not manufacture more evidence records now that the incident target is numerically met. Retain new records only for distinct useful contexts or contradictions. Use CW-Z001 onward in FINAL-TECH-EVIDENCE.jsonl, FINAL-TECH-SOURCES.jsonl, FINAL-TECH-QUERY-LOG.csv and FINAL-TECH-DECISIONS.md. For recovered existing records, record an additive access/status annotation keyed by accepted ID, not silent edits. Explicitly challenge universal change-brief value using ordinary small-repo and semantic-navigation success. Do not count the same author twice through a comparison article and its linked discussion.\n\nSaved plan: $LOCAL_HOME/Repositories/codeweb/reports/user-pain-research-plan-2026-09-27/{README.md,AGENT-BRIEFS.md,EVIDENCE-SCHEMA.json,AUDIT-BASELINE.json}. Current TERMINAL-CONTRACT, CHARTER and CLAUDE remain binding. Public research/local reports only; no outreach, money, services, agents, implementation, charter/harness edits, merge/release/deployment/publication. Proposed experiments are not execution authorization. Use management workspace reports/user-pain-research-2026-09-27; requested repository destination is outside writable roots. Do not bypass permissions.\n\nThe accepted pilot and four prior children establish capabilities. Existing aggregate EVIDENCE-CANDIDATE.jsonl has 108 records (97 first_person_report labels, not all ordinary user incidents). SOURCE-REGISTRY-CANDIDATE.jsonl has 125 canonical attempts and 62 full units before final alias audit. Main shortfall is complete-source breadth, not raw incident quantity. Overall target remains 150\u2013200 fully read pages/threads and 80\u2013120 useful deduplicated firsthand records. Targets are not quotas for weak material. These last two tasks exhaust six-child limit; do not create more.\n\nRead originals completely for full-source credit. One thread counts once, even with many commenters; mirrored pages, API pages, retries and translated copies count once. Fetching is not reading. Re-read only useful incomplete sources; do not repeat the indiscriminate GitHub queue that fetched dozens of irrelevant/long issues before rate limits. Explicitly separate inaccessible, partial and fully read units. Preserve dates, source family, provenance, public author/incident key, consequences, workarounds and source locators. Complete original schema on any new retained record. No fabricated recency, outcomes, private identity, prevalence, interviews or buying intent. Builder/vendor claims stay separate. No source-derived current host gap without official verification; use openai-docs for current Codex facts. Closed/stale is not fixed. Resolve or qualify historical findings.\n\nMaintain new additive files only; accepted originals and audit/screenshots stay unchanged. Reuse accepted IDs when an original provides no distinct incident. Keep concise paraphrases and null excerpts; avoid redistributing whole copyrighted threads. Save a source registry with read boundaries, query log, ID-linked decision memo, updated count receipt and validation. Independent reviewer must reopen every high-priority new claim plus >=20% of other new records, confirm counts/dedup/limits and all five audit hashes, record audited IDs, upload review, then native approve/request changes on this issue. One correction maximum. Bounded approval is a handoff, not parent completion.\n\n600-second runtime is fixed. Stop source collection at about 450 seconds to leave 150 seconds for honest accounting, validation, uploads/work products and in_review disposition. Do not time out trying to reach a number. Log two actual targeted sweeps per focal theme; if both add no distinct mechanism, segment or contradiction, record that narrow stopping rationale, not universal saturation. If time rather than saturation stops a sweep, say so. Record operator interventions separately from agent-local adaptations. No manual wake loops. Parent owns semantic dedup, six final briefs, corpus JSONL/CSV, query/source maps, pain map, contradictions, audit overlay, 3\u20135 opportunity decisions, explicit experiments/unknowns, holistic synthesis, independent final review and completion receipt. Original criteria must survive limitations and corrections.",
+  "status": "done",
+  "statusVersion": 4,
+  "lastStatusDecisionId": null,
+  "workMode": "standard",
+  "harnessKind": null,
+  "priority": "medium",
+  "reviewPolicy": null,
+  "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+  "assigneeUserId": null,
+  "checkoutRunId": null,
+  "executionRunId": null,
+  "executionAgentNameKey": null,
+  "executionLockedAt": null,
+  "createdByAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+  "createdByUserId": null,
+  "responsibleUserId": "local-board",
+  "issueNumber": 63,
+  "identifier": "COD-63",
+  "originKind": "manual",
+  "originId": null,
+  "originRunId": "39989059-8ac8-4079-a6c3-9e3df97bcf20",
+  "originFingerprint": "default",
+  "requestDepth": 0,
+  "billingCode": null,
+  "assigneeAdapterOverrides": null,
+  "executionPolicy": {
+    "mode": "normal",
+    "stages": [
+      {
+        "id": "b6e09532-c924-4758-a1bd-e78e9e718240",
+        "type": "review",
+        "participants": [
+          {
+            "id": "4afe74c0-e79e-4f67-9323-0fbca3dba174",
+            "type": "agent",
+            "userId": null,
+            "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4"
+          }
+        ],
+        "approvalsNeeded": 1
+      }
+    ],
+    "commentRequired": true
+  },
+  "executionState": {
+    "status": "completed",
+    "monitor": null,
+    "reviewRequest": null,
+    "currentStageId": null,
+    "lastDecisionId": "4ac53d69-af95-4121-a11a-db7b161992eb",
+    "returnAssignee": {
+      "type": "agent",
+      "userId": null,
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e"
+    },
+    "currentStageType": null,
+    "completedStageIds": [
+      "b6e09532-c924-4758-a1bd-e78e9e718240"
+    ],
+    "currentStageIndex": null,
+    "currentParticipant": null,
+    "lastDecisionOutcome": "approved",
+    "changesRequestedCount": 0
+  },
+  "monitorNextCheckAt": null,
+  "monitorWakeRequestedAt": null,
+  "monitorLastTriggeredAt": null,
+  "monitorAttemptCount": 0,
+  "monitorNotes": null,
+  "monitorScheduledBy": null,
+  "executionWorkspaceId": null,
+  "executionWorkspacePreference": null,
+  "executionWorkspaceSettings": null,
+  "sourceTrust": null,
+  "unblockDescriptor": null,
+  "blockedTransitionAt": null,
+  "blockedOwnerNotifiedAt": null,
+  "startedAt": "2026-09-28T01:56:18.179Z",
+  "completedAt": "2026-09-28T02:00:14.447Z",
+  "cancelledAt": null,
+  "hiddenAt": null,
+  "createdAt": "2026-09-28T01:38:43.792Z",
+  "updatedAt": "2026-09-28T02:00:14.447Z",
+  "labels": [],
+  "labelIds": [],
+  "watchdog": null,
+  "changes": {
+    "status": {
+      "from": "in_progress",
+      "to": "done"
+    },
+    "statusVersion": {
+      "from": 3,
+      "to": 4
+    },
+    "checkoutRunId": {
+      "from": "15a2763a-68d9-4d98-b43a-e7f9e208f179",
+      "to": null
+    },
+    "executionRunId": {
+      "from": "15a2763a-68d9-4d98-b43a-e7f9e208f179",
+      "to": null
+    },
+    "executionAgentNameKey": {
+      "from": "independent reviewer",
+      "to": null
+    },
+    "executionLockedAt": {
+      "from": "2026-09-28T01:55:55.257Z",
+      "to": null
+    },
+    "executionState": {
+      "from": {
+        "status": "pending",
+        "monitor": null,
+        "reviewRequest": null,
+        "currentStageId": "b6e09532-c924-4758-a1bd-e78e9e718240",
+        "lastDecisionId": null,
+        "returnAssignee": {
+          "type": "agent",
+          "userId": null,
+          "agentId": "79d272db-70e2-483b-b817-292dac08593e"
+        },
+        "currentStageType": "review",
+        "completedStageIds": [],
+        "currentStageIndex": 0,
+        "currentParticipant": {
+          "type": "agent",
+          "userId": null,
+          "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4"
+        },
+        "lastDecisionOutcome": null,
+        "changesRequestedCount": 0
+      },
+      "to": {
+        "status": "completed",
+        "monitor": null,
+        "reviewRequest": null,
+        "currentStageId": null,
+        "lastDecisionId": "4ac53d69-af95-4121-a11a-db7b161992eb",
+        "returnAssignee": {
+          "type": "agent",
+          "userId": null,
+          "agentId": "79d272db-70e2-483b-b817-292dac08593e"
+        },
+        "currentStageType": null,
+        "completedStageIds": [
+          "b6e09532-c924-4758-a1bd-e78e9e718240"
+        ],
+        "currentStageIndex": null,
+        "currentParticipant": null,
+        "lastDecisionOutcome": "approved",
+        "changesRequestedCount": 0
+      }
+    },
+    "completedAt": {
+      "from": null,
+      "to": "2026-09-28T02:00:14.447Z"
+    }
+  },
+  "relatedWork": {
+    "outbound": [
+      {
+        "issue": {
+          "id": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+          "identifier": "COD-56",
+          "title": "Deep web research on Codeweb user pain",
+          "status": "blocked",
+          "priority": "medium",
+          "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+          "assigneeUserId": null
+        },
+        "mentionCount": 5,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "379a934e-3b58-4237-8669-87f00c889596",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "5500ebc0-1ecf-469d-b992-76fed364c7f0",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "6d9ece8d-e32f-4072-b974-4e61c1309985",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "d2dd529a-4a82-4782-8e7e-75503db2a596",
+            "label": "comment",
+            "matchedText": "COD-56"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "ad6b2688-d149-4151-9eb3-f3de93a281df",
+          "identifier": "COD-59",
+          "title": "Research native hosts and cross-file change risk \u2014 lanes 1\u20133",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 1,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-59"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "c5ff7221-b28b-4a81-adee-cb9378b865c8",
+          "identifier": "COD-61",
+          "title": "Deepen technical source coverage and counterevidence \u2014 lanes 1\u20133",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 1,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-61"
+          }
+        ]
+      }
+    ],
+    "inbound": [
+      {
+        "issue": {
+          "id": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+          "identifier": "COD-56",
+          "title": "Deep web research on Codeweb user pain",
+          "status": "blocked",
+          "priority": "medium",
+          "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+          "assigneeUserId": null
+        },
+        "mentionCount": 2,
+        "sources": [
+          {
+            "kind": "comment",
+            "sourceRecordId": "4ba477a6-1487-4e43-a8b8-980820087915",
+            "label": "comment",
+            "matchedText": "COD-63"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "b6019082-c719-482d-98a0-c8be2f48e031",
+            "label": "comment",
+            "matchedText": "COD-63"
+          }
+        ]
+      }
+    ]
+  },
+  "referencedIssueIdentifiers": [
+    "COD-56",
+    "COD-59",
+    "COD-61"
+  ],
+  "comment": {
+    "id": "5500ebc0-1ecf-469d-b992-76fed364c7f0",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "45abbb28-df94-4bf3-b769-b54361ec19db",
+    "authorAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "authorUserId": null,
+    "onBehalfOfUserId": "local-board",
+    "authorType": "agent",
+    "createdByRunId": "15a2763a-68d9-4d98-b43a-e7f9e208f179",
+    "derivedAuthorAgentId": null,
+    "derivedCreatedByRunId": null,
+    "derivedAuthorSource": null,
+    "body": "Approved: bounded technical research handoff.\n\n- [Independent review and validation](/api/attachments/a964feee-b1ff-4cb3-bf40-3a7b6525167e/content) uploaded with artifact work product f2084e7c-8d8a-4e9f-a057-9f0b18f8acf7.\n- Reopened CW-Z001/002/003/007 (all high priority) and CW-Z009/011 (25% of others), plus supporting resolution threads and CW-T020 status locators. Claims are supported within their stated limitations.\n- Downloaded exact handoff archive; all eight members match. Recomputed all five protected audit hashes: pass. Accepted files remain unchanged. Schema/count/dedup checks pass within this lane.\n- Preserve 12 records; 18 full, 6 partial, 2 inaccessible source units; shortfall of 22 to the lower aim. These are not twelve independent buyers. Prior timeout/recovery failures, weak dynamic/multi-repo coverage and parent semantic dedup remain explicit.\n- [COD-56](/COD/issues/COD-56) owns final synthesis and independent completion review. This decision does not complete the parent or satisfy its original breadth target. No correction or new task requested.\n",
+    "presentation": null,
+    "metadata": {
+      "version": 1,
+      "authorizationReason": "allow_self",
+      "sections": [
+        {
+          "title": "Authorization",
+          "rows": [
+            {
+              "type": "key_value",
+              "label": "Reason",
+              "value": "allow_self"
+            }
+          ]
+        }
+      ]
+    },
+    "deletedAt": null,
+    "deletedByType": null,
+    "deletedByAgentId": null,
+    "deletedByUserId": null,
+    "deletedByRunId": null,
+    "sourceTrust": null,
+    "createdAt": "2026-09-28T02:00:14.457Z",
+    "updatedAt": "2026-09-28T02:00:14.457Z"
+  }
+}

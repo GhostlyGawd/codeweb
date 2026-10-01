@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="color-scheme" content="dark">
+
+    
+    <title>Hand Claude Code a red test suite: the bisect, fix and PR loop · Moonlabs</title>
+    <meta name="description" content="A regression turned twelve tests red and nobody knew which commit did it. So we handed the failing suite to Claude Code with a tight brief: reproduce, bisect to the guilty commit, fix the cause not the symptom, get the suite green, open the PR. Here is the exact workflow, the guardrails that stop it cheating, and where it still needs a human.">
+    <meta name="keywords" content="claude code test suite, agentic bug fixing, git bisect AI, fix failing tests automatically, laravel phpunit claude, AI regression debugging, agentic developer workflow">
+    <meta name="author" content="James Freestone">
+    <link rel="canonical" href="https://moonlab.ventures/blog/hand-claude-code-a-red-test-suite">
+
+    
+    <meta property="og:site_name" content="Moonlabs">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Hand Claude Code a red test suite: the bisect, fix and PR loop · Moonlabs">
+    <meta property="og:description" content="A regression turned twelve tests red and nobody knew which commit did it. So we handed the failing suite to Claude Code with a tight brief: reproduce, bisect to the guilty commit, fix the cause not the symptom, get the suite green, open the PR. Here is the exact workflow, the guardrails that stop it cheating, and where it still needs a human.">
+    <meta property="og:url" content="https://moonlab.ventures/blog/hand-claude-code-a-red-test-suite">
+    <meta property="og:image" content="https://moonlab.ventures/images/og/moonlabs-default.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_GB">
+            <meta property="article:published_time" content="2026-07-06T00:00:00+00:00">
+        <meta property="article:author" content="James Freestone">
+                <meta property="article:modified_time" content="2026-07-06T00:00:00+00:00">
+    
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hand Claude Code a red test suite: the bisect, fix and PR loop · Moonlabs">
+    <meta name="twitter:description" content="A regression turned twelve tests red and nobody knew which commit did it. So we handed the failing suite to Claude Code with a tight brief: reproduce, bisect to the guilty commit, fix the cause not the symptom, get the suite green, open the PR. Here is the exact workflow, the guardrails that stop it cheating, and where it still needs a human.">
+    <meta name="twitter:image" content="https://moonlab.ventures/images/og/moonlabs-default.png">
+
+    
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+
+    
+    <link rel="icon" type="image/png" href="https://moonlab.ventures/favicon.png">
+    <link rel="apple-touch-icon" href="https://moonlab.ventures/favicon.png">
+
+    
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://stream.mux.com" crossorigin>
+    <link rel="dns-prefetch" href="https://stream.mux.com">
+
+    
+    
+    
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Moonlabs","alternateName":"Moonlab Ventures","url":"https://moonlab.ventures","logo":"https://moonlab.ventures/images/logo.svg","description":"Operator-led AI incubator and academy. James Freestone and Louis O'Connell-Bristow turn fuzzy ambition into shipped companies.","foundingDate":"2025","founder":[{"@type":"Person","name":"James Freestone"},{"@type":"Person","name":"Louis O'Connell-Bristow"}],"address":{"@type":"PostalAddress","addressLocality":"Derby","addressCountry":"GB"},"sameAs":["https://homemove.com","https://home.co.uk","https://homedata.co.uk"]}</script>
+
+    
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","url":"https://moonlab.ventures","name":"Moonlabs","publisher":{"@type":"Organization","name":"Moonlabs"}}</script>
+
+    
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Hand Claude Code a red test suite: the bisect, fix and PR loop","description":"A regression turned twelve tests red and nobody knew which commit did it. So we handed the failing suite to Claude Code with a tight brief: reproduce, bisect to the guilty commit, fix the cause not the symptom, get the suite green, open the PR. Here is the exact workflow, the guardrails that stop it cheating, and where it still needs a human.","datePublished":"2026-07-06T00:00:00+00:00","dateModified":"2026-07-06T00:00:00+00:00","author":{"@type":"Person","name":"James Freestone","jobTitle":"Co-founder, Moonlabs","description":"Co-founder of Moonlabs. Operator behind home.co.uk, Homemove and homedata.co.uk. AI-native since the week ChatGPT shipped.","worksFor":{"@type":"Organization","name":"Moonlabs","url":"https://moonlab.ventures"},"sameAs":["https://homemove.com","https://home.co.uk","https://homedata.co.uk"],"email":"founders@homemove.com"},"publisher":{"@type":"Organization","name":"Moonlabs","logo":{"@type":"ImageObject","url":"https://moonlab.ventures/images/logo.svg"}},"mainEntityOfPage":"https://moonlab.ventures/blog/hand-claude-code-a-red-test-suite","keywords":"claude code, agentic coding, testing, git bisect, laravel, phpunit, regression, developer workflow","articleSection":"Engineering"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Moonlabs","item":"https://moonlab.ventures"},{"@type":"ListItem","position":2,"name":"Field Notes","item":"https://moonlab.ventures/blog"},{"@type":"ListItem","position":3,"name":"Hand Claude Code a red test suite: the bisect, fix and PR loop","item":"https://moonlab.ventures/blog/hand-claude-code-a-red-test-suite"}]}</script>
+
+    <link rel="preload" as="style" href="https://moonlab.ventures/build/assets/app-E6SzZ9oM.css" /><link rel="stylesheet" href="https://moonlab.ventures/build/assets/app-E6SzZ9oM.css" />    <script type="module" defer src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"></script>
+</head>
+<body class="min-h-svh bg-black font-body text-white antialiased selection:bg-white/20 selection:text-white">
+    <nav class="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6 lg:px-16 py-3 flex items-center justify-between pointer-events-none">
+    
+    <a href="https://moonlab.ventures"
+       class="pointer-events-auto h-12 sm:h-14 px-4 sm:px-5 flex items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/10">
+        <img src="https://moonlab.ventures/images/logo.svg" alt="Moonlabs" class="h-8 sm:h-10 w-auto" />
+    </a>
+
+    
+    <div class="pointer-events-auto hidden lg:flex items-center liquid-glass !overflow-visible rounded-full px-1.5 py-1">
+
+        
+        <div class="relative group">
+            <a href="https://moonlab.ventures/incubator"
+               class="px-3 py-2 text-sm font-medium text-white/90 font-body hover:text-white transition-colors inline-flex items-center gap-1">
+                Incubator
+                <iconify-icon icon="lucide:chevron-down" width="14" height="14" class="transition-transform duration-200 group-hover:rotate-180"></iconify-icon>
+            </a>
+
+            
+            <div class="absolute top-full left-1/2 -translate-x-1/2 pt-3 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
+                <div class="min-w-[200px] liquid-glass-strong rounded-2xl p-2">
+                                            <a href="https://moonlab.ventures/portfolio"
+                           class="block rounded-xl px-4 py-3 hover:bg-white/10 transition-colors">
+                            <div class="text-white font-body font-medium text-sm">Portfolio</div>
+                            <div class="text-white/50 font-body font-light text-xs mt-0.5">What we have built</div>
+                        </a>
+                                            <a href="https://moonlab.ventures/process"
+                           class="block rounded-xl px-4 py-3 hover:bg-white/10 transition-colors">
+                            <div class="text-white font-body font-medium text-sm">Process</div>
+                            <div class="text-white/50 font-body font-light text-xs mt-0.5">Apply, review, join</div>
+                        </a>
+                                    </div>
+            </div>
+        </div>
+
+        
+        <div class="relative group">
+            <a href="https://moonlab.ventures/forward-deployment"
+               class="px-3 py-2 text-sm font-medium text-white/90 font-body hover:text-white transition-colors inline-flex items-center gap-1">
+                AI for business
+                <iconify-icon icon="lucide:chevron-down" width="14" height="14" class="transition-transform duration-200 group-hover:rotate-180"></iconify-icon>
+            </a>
+
+            
+            <div class="absolute top-full left-1/2 -translate-x-1/2 pt-3 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
+                <div class="min-w-[300px] liquid-glass-strong rounded-2xl p-2">
+                                            <a href="https://moonlab.ventures/forward-deployment"
+                           class="block rounded-xl px-4 py-3 hover:bg-white/10 transition-colors">
+                            <div class="text-white font-body font-medium text-sm whitespace-nowrap">Forward Deployment</div>
+                            <div class="text-white/50 font-body font-light text-xs mt-0.5 whitespace-nowrap">Embed senior AI engineers</div>
+                        </a>
+                                            <a href="https://moonlab.ventures/websites"
+                           class="block rounded-xl px-4 py-3 hover:bg-white/10 transition-colors">
+                            <div class="text-white font-body font-medium text-sm whitespace-nowrap">Websites</div>
+                            <div class="text-white/50 font-body font-light text-xs mt-0.5 whitespace-nowrap">From £999 + £99/month</div>
+                        </a>
+                                    </div>
+            </div>
+        </div>
+
+                    <a href="https://moonlab.ventures/academy"
+               class="px-3 py-2 text-sm font-medium text-white/90 font-body hover:text-white transition-colors">
+                Academy
+            </a>
+                    <a href="https://moonlab.ventures/blog"
+               class="px-3 py-2 text-sm font-medium text-white/90 font-body hover:text-white transition-colors">
+                Blog
+            </a>
+                    <a href="https://moonlab.ventures/about"
+               class="px-3 py-2 text-sm font-medium text-white/90 font-body hover:text-white transition-colors">
+                About us
+            </a>
+        
+        <a href="https://moonlab.ventures/apply"
+           class="bg-white text-black hover:bg-white/90 transition-colors rounded-full px-3.5 py-1.5 text-sm font-medium flex items-center gap-1.5 ml-2">
+            Apply
+            <iconify-icon icon="lucide:arrow-up-right" width="16" height="16"></iconify-icon>
+        </a>
+    </div>
+
+    
+    <button id="ml-mobile-toggle" type="button"
+            aria-controls="ml-mobile-menu" aria-expanded="false" aria-label="Open menu"
+            class="lg:hidden pointer-events-auto liquid-glass rounded-full w-12 h-12 flex items-center justify-center text-white">
+        <iconify-icon id="ml-mobile-icon-open"  icon="lucide:menu" width="22" height="22"></iconify-icon>
+        <iconify-icon id="ml-mobile-icon-close" icon="lucide:x"    width="22" height="22" class="hidden"></iconify-icon>
+    </button>
+</nav>
+
+
+<div id="ml-mobile-menu"
+     class="fixed inset-0 z-40 lg:hidden bg-black/95 backdrop-blur-xl opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="absolute inset-x-0 top-0 pt-24 px-5 sm:px-8 pb-12 h-full overflow-y-auto flex flex-col">
+        
+        <div class="flex flex-col gap-1">
+                                                <details class="ml-acc rounded-2xl group open:bg-white/[0.03] transition-colors">
+                        <summary class="list-none cursor-pointer px-5 py-4 flex items-center justify-between gap-4">
+                            <div>
+                                <div class="text-white font-heading italic text-2xl tracking-tight leading-tight">Incubator</div>
+                                <div class="text-white/50 font-body font-light text-sm mt-0.5">Operator-led tech-for-equity</div>
+                            </div>
+                            <iconify-icon icon="lucide:chevron-down" width="22" height="22" class="ml-acc-chev text-white/40 transition-transform duration-200 shrink-0"></iconify-icon>
+                        </summary>
+                        <div class="px-3 pb-3 flex flex-col gap-0.5">
+                            <a href="https://moonlab.ventures/incubator"
+                               class="rounded-xl px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between gap-3 ml-acc-link">
+                                <div>
+                                    <div class="text-white/90 font-body font-medium text-base">Incubator overview</div>
+                                    <div class="text-white/45 font-body font-light text-xs mt-0.5">The main incubator page</div>
+                                </div>
+                                <iconify-icon icon="lucide:arrow-up-right" width="16" height="16" class="ml-acc-arrow text-white/30 transition-colors shrink-0"></iconify-icon>
+                            </a>
+                                                            <a href="https://moonlab.ventures/portfolio"
+                                   class="rounded-xl px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between gap-3 ml-acc-link">
+                                    <div>
+                                        <div class="text-white/90 font-body font-medium text-base">Portfolio</div>
+                                        <div class="text-white/45 font-body font-light text-xs mt-0.5">What we have built</div>
+                                    </div>
+                                    <iconify-icon icon="lucide:arrow-up-right" width="16" height="16" class="ml-acc-arrow text-white/30 transition-colors shrink-0"></iconify-icon>
+                                </a>
+                                                            <a href="https://moonlab.ventures/process"
+                                   class="rounded-xl px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between gap-3 ml-acc-link">
+                                    <div>
+                                        <div class="text-white/90 font-body font-medium text-base">Process</div>
+                                        <div class="text-white/45 font-body font-light text-xs mt-0.5">Apply, review, join</div>
+                                    </div>
+                                    <iconify-icon icon="lucide:arrow-up-right" width="16" height="16" class="ml-acc-arrow text-white/30 transition-colors shrink-0"></iconify-icon>
+                                </a>
+                                                    </div>
+                    </details>
+                                                                <details class="ml-acc rounded-2xl group open:bg-white/[0.03] transition-colors">
+                        <summary class="list-none cursor-pointer px-5 py-4 flex items-center justify-between gap-4">
+                            <div>
+                                <div class="text-white font-heading italic text-2xl tracking-tight leading-tight">Academy</div>
+                                <div class="text-white/50 font-body font-light text-sm mt-0.5">Coding, commercials, investment</div>
+                            </div>
+                            <iconify-icon icon="lucide:chevron-down" width="22" height="22" class="ml-acc-chev text-white/40 transition-transform duration-200 shrink-0"></iconify-icon>
+                        </summary>
+                        <div class="px-3 pb-3 flex flex-col gap-0.5">
+                            <a href="https://moonlab.ventures/academy"
+                               class="rounded-xl px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between gap-3 ml-acc-link">
+                                <div>
+                                    <div class="text-white/90 font-body font-medium text-base">Academy overview</div>
+                                    <div class="text-white/45 font-body font-light text-xs mt-0.5">The main academy page</div>
+                                </div>
+                                <iconify-icon icon="lucide:arrow-up-right" width="16" height="16" class="ml-acc-arrow text-white/30 transition-colors shrink-0"></iconify-icon>
+                            </a>
+                                                            <a href="https://moonlab.ventures/for-parents"
+                                   class="rounded-xl px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between gap-3 ml-acc-link">
+                                    <div>
+                                        <div class="text-white/90 font-body font-medium text-base">For parents</div>
+                                        <div class="text-white/45 font-body font-light text-xs mt-0.5">A clear, parent-direct guide</div>
+                                    </div>
+                                    <iconify-icon icon="lucide:arrow-up-right" width="16" height="16" class="ml-acc-arrow text-white/30 transition-colors shrink-0"></iconify-icon>
+                                </a>
+                                                            <a href="https://moonlab.ventures/for-employers"
+                                   class="rounded-xl px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between gap-3 ml-acc-link">
+                                    <div>
+                                        <div class="text-white/90 font-body font-medium text-base">For employers</div>
+                                        <div class="text-white/45 font-body font-light text-xs mt-0.5">Hire, or sponsor a seat</div>
+                                    </div>
+                                    <iconify-icon icon="lucide:arrow-up-right" width="16" height="16" class="ml-acc-arrow text-white/30 transition-colors shrink-0"></iconify-icon>
+                                </a>
+                                                            <a href="https://moonlab.ventures/for-investors"
+                                   class="rounded-xl px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between gap-3 ml-acc-link">
+                                    <div>
+                                        <div class="text-white/90 font-body font-medium text-base">For investors</div>
+                                        <div class="text-white/45 font-body font-light text-xs mt-0.5">Pre-seed demo day</div>
+                                    </div>
+                                    <iconify-icon icon="lucide:arrow-up-right" width="16" height="16" class="ml-acc-arrow text-white/30 transition-colors shrink-0"></iconify-icon>
+                                </a>
+                                                    </div>
+                    </details>
+                                                                <details class="ml-acc rounded-2xl group open:bg-white/[0.03] transition-colors">
+                        <summary class="list-none cursor-pointer px-5 py-4 flex items-center justify-between gap-4">
+                            <div>
+                                <div class="text-white font-heading italic text-2xl tracking-tight leading-tight">AI for business</div>
+                                <div class="text-white/50 font-body font-light text-sm mt-0.5">Embed senior AI engineers in your team</div>
+                            </div>
+                            <iconify-icon icon="lucide:chevron-down" width="22" height="22" class="ml-acc-chev text-white/40 transition-transform duration-200 shrink-0"></iconify-icon>
+                        </summary>
+                        <div class="px-3 pb-3 flex flex-col gap-0.5">
+                            <a href="https://moonlab.ventures/forward-deployment"
+                               class="rounded-xl px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between gap-3 ml-acc-link">
+                                <div>
+                                    <div class="text-white/90 font-body font-medium text-base">AI for business overview</div>
+                                    <div class="text-white/45 font-body font-light text-xs mt-0.5">The main ai for business page</div>
+                                </div>
+                                <iconify-icon icon="lucide:arrow-up-right" width="16" height="16" class="ml-acc-arrow text-white/30 transition-colors shrink-0"></iconify-icon>
+                            </a>
+                                                            <a href="https://moonlab.ventures/forward-deployment"
+                                   class="rounded-xl px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between gap-3 ml-acc-link">
+                                    <div>
+                                        <div class="text-white/90 font-body font-medium text-base">Forward Deployment</div>
+                                        <div class="text-white/45 font-body font-light text-xs mt-0.5">Embed senior AI engineers</div>
+                                    </div>
+                                    <iconify-icon icon="lucide:arrow-up-right" width="16" height="16" class="ml-acc-arrow text-white/30 transition-colors shrink-0"></iconify-icon>
+                                </a>
+                                                            <a href="https://moonlab.ventures/websites"
+                                   class="rounded-xl px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between gap-3 ml-acc-link">
+                                    <div>
+                                        <div class="text-white/90 font-body font-medium text-base">Websites</div>
+                                        <div class="text-white/45 font-body font-light text-xs mt-0.5">From £999 + £99/month</div>
+                                    </div>
+                                    <iconify-icon icon="lucide:arrow-up-right" width="16" height="16" class="ml-acc-arrow text-white/30 transition-colors shrink-0"></iconify-icon>
+                                </a>
+                                                    </div>
+                    </details>
+                                                                <a href="https://moonlab.ventures/blog"
+                       class="group rounded-2xl px-5 py-4 hover:bg-white/5 transition-colors flex items-center justify-between gap-4">
+                        <div>
+                            <div class="text-white font-heading italic text-2xl tracking-tight leading-tight">Field Notes</div>
+                            <div class="text-white/50 font-body font-light text-sm mt-0.5">Essays from the operators</div>
+                        </div>
+                        <iconify-icon icon="lucide:arrow-up-right" width="20" height="20" class="text-white/40 group-hover:text-white transition-colors"></iconify-icon>
+                    </a>
+                                                                <a href="https://moonlab.ventures/about"
+                       class="group rounded-2xl px-5 py-4 hover:bg-white/5 transition-colors flex items-center justify-between gap-4">
+                        <div>
+                            <div class="text-white font-heading italic text-2xl tracking-tight leading-tight">About</div>
+                            <div class="text-white/50 font-body font-light text-sm mt-0.5">James &amp; Louis</div>
+                        </div>
+                        <iconify-icon icon="lucide:arrow-up-right" width="20" height="20" class="text-white/40 group-hover:text-white transition-colors"></iconify-icon>
+                    </a>
+                                    </div>
+
+        <a href="https://moonlab.ventures/apply"
+           class="mt-6 bg-white text-black hover:bg-white/90 transition-colors rounded-full px-6 py-4 text-base font-medium inline-flex items-center justify-center gap-2 w-full">
+            Apply to Moonlabs
+            <iconify-icon icon="lucide:arrow-up-right" width="18" height="18"></iconify-icon>
+        </a>
+
+        <div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-white/50 text-xs font-body">
+            <a href="https://moonlab.ventures/glossary"    class="hover:text-white transition-colors">Glossary</a>
+            <a href="https://moonlab.ventures/ai-in-derby" class="hover:text-white transition-colors">AI in Derby</a>
+            <a href="https://moonlab.ventures/sitemap"     class="hover:text-white transition-colors">Sitemap</a>
+        </div>
+
+        <div class="mt-auto pt-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-white/35 text-xs font-body">
+            <a href="https://moonlab.ventures/privacy" class="hover:text-white/70 transition-colors">Privacy</a>
+            <a href="https://moonlab.ventures/terms"   class="hover:text-white/70 transition-colors">Terms</a>
+            <a href="mailto:founders@homemove.com"  class="hover:text-white/70 transition-colors">founders@homemove.com</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Native <details> chevron rotation + remove default disclosure marker */
+    .ml-acc > summary::-webkit-details-marker { display: none; }
+    .ml-acc > summary::marker { content: ''; }
+    .ml-acc[open] > summary .ml-acc-chev { transform: rotate(180deg); }
+    .ml-acc-link:hover .ml-acc-arrow { color: #fff; }
+</style>
+
+<script>
+    (function () {
+        const btn  = document.getElementById('ml-mobile-toggle');
+        const menu = document.getElementById('ml-mobile-menu');
+        const open = document.getElementById('ml-mobile-icon-open');
+        const close = document.getElementById('ml-mobile-icon-close');
+        if (!btn || !menu) return;
+
+        let isOpen = false;
+        const setState = (next) => {
+            isOpen = next;
+            btn.setAttribute('aria-expanded', String(next));
+            btn.setAttribute('aria-label', next ? 'Close menu' : 'Open menu');
+            menu.classList.toggle('opacity-0', !next);
+            menu.classList.toggle('pointer-events-none', !next);
+            open.classList.toggle('hidden',  next);
+            close.classList.toggle('hidden', !next);
+            document.documentElement.classList.toggle('overflow-hidden', next);
+        };
+
+        btn.addEventListener('click', () => setState(!isOpen));
+
+        // Close on link click (so anchors / new-page nav both feel snappy)
+        menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setState(false)));
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) setState(false); });
+    })();
+</script>
+
+<main class="bg-black relative w-full">
+    <article class="w-full">
+        
+        <header class="w-full max-w-3xl mx-auto px-6 pt-36 md:pt-44 pb-12 md:pb-16">
+            <div class="flex items-center gap-3 mb-6 reveal">
+                <a href="https://moonlab.ventures/blog" class="liquid-glass rounded-full px-3 py-1 text-white/80 text-[11px] font-body uppercase tracking-widest hover:bg-white/10 transition-colors inline-flex items-center gap-1.5">
+                    <iconify-icon icon="lucide:arrow-left" width="12" height="12" style="opacity:0.6"></iconify-icon>
+                    Field Notes
+                </a>
+                <span class="text-white/40 text-[11px] font-body uppercase tracking-widest">Engineering</span>
+            </div>
+
+            <h1 class="reveal text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading italic text-white tracking-tight leading-[0.95] mb-6">
+                Hand Claude Code a red test suite: the bisect, fix and PR loop
+            </h1>
+
+            <p class="reveal text-white/65 font-body font-light text-lg md:text-xl leading-relaxed mb-8" data-reveal-delay="200">
+                A regression turned twelve tests red and nobody knew which commit did it. So we handed the failing suite to Claude Code with a tight brief: reproduce, bisect to the guilty commit, fix the cause not the symptom, get the suite green, open the PR. Here is the exact workflow, the guardrails that stop it cheating, and where it still needs a human.
+            </p>
+
+            <div class="reveal flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] font-body uppercase tracking-widest text-white/50 pt-6 border-t border-white/10" data-reveal-delay="400">
+                <span class="text-white/80">James Freestone</span>
+                <span>Co-founder, Moonlabs</span>
+                <span>·</span>
+                <span>6 July 2026</span>
+                <span>·</span>
+                <span>7 min read</span>
+            </div>
+        </header>
+
+        
+                    <aside class="w-full max-w-3xl mx-auto px-6 mb-12 reveal" data-reveal-delay="600">
+                <div class="liquid-glass rounded-2xl p-6 md:p-7">
+                    <div class="text-white/50 text-[11px] font-body uppercase tracking-widest mb-4">In this essay</div>
+                    <ol class="space-y-2 list-decimal list-inside marker:text-white/40">
+                                                    <li class="text-white/80 font-body font-light text-sm md:text-base leading-relaxed">
+                                <a href="#why-this-is-an-agent-job-not-a-chatbot-job" class="hover:text-white underline decoration-white/20 hover:decoration-white underline-offset-4 transition-colors">
+                                    Why this is an agent job, not a chatbot job
+                                </a>
+                            </li>
+                                                    <li class="text-white/80 font-body font-light text-sm md:text-base leading-relaxed">
+                                <a href="#the-brief" class="hover:text-white underline decoration-white/20 hover:decoration-white underline-offset-4 transition-colors">
+                                    The brief
+                                </a>
+                            </li>
+                                                    <li class="text-white/80 font-body font-light text-sm md:text-base leading-relaxed">
+                                <a href="#what-it-did" class="hover:text-white underline decoration-white/20 hover:decoration-white underline-offset-4 transition-colors">
+                                    What it did
+                                </a>
+                            </li>
+                                                    <li class="text-white/80 font-body font-light text-sm md:text-base leading-relaxed">
+                                <a href="#the-gotchas" class="hover:text-white underline decoration-white/20 hover:decoration-white underline-offset-4 transition-colors">
+                                    The gotchas
+                                </a>
+                            </li>
+                                                    <li class="text-white/80 font-body font-light text-sm md:text-base leading-relaxed">
+                                <a href="#the-pattern-underneath" class="hover:text-white underline decoration-white/20 hover:decoration-white underline-offset-4 transition-colors">
+                                    The pattern underneath
+                                </a>
+                            </li>
+                                            </ol>
+                </div>
+            </aside>
+        
+        
+        <div class="w-full max-w-3xl mx-auto px-6 pb-20">
+            <div class="prose prose-invert prose-lg max-w-none
+                        prose-headings:font-heading prose-headings:italic prose-headings:tracking-tight prose-headings:text-white
+                        prose-h2:text-3xl md:prose-h2:text-4xl prose-h2:mt-16 prose-h2:mb-6 prose-h2:leading-[1.05]
+                        prose-h3:text-2xl prose-h3:mt-10 prose-h3:mb-4 prose-h3:leading-tight
+                        prose-p:text-white/75 prose-p:font-body prose-p:font-light prose-p:text-lg prose-p:leading-relaxed
+                        prose-strong:text-white prose-strong:font-medium
+                        prose-em:text-white prose-em:not-italic prose-em:font-medium
+                        prose-a:text-white prose-a:underline prose-a:decoration-white/30 hover:prose-a:decoration-white prose-a:underline-offset-4
+                        prose-blockquote:border-l-2 prose-blockquote:border-white/30 prose-blockquote:text-white/80 prose-blockquote:italic prose-blockquote:font-light prose-blockquote:not-italic
+                        prose-ul:text-white/75 prose-ol:text-white/75
+                        prose-li:font-body prose-li:font-light prose-li:text-lg prose-li:leading-relaxed prose-li:marker:text-white/40
+                        prose-code:text-white prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:before:content-[''] prose-code:after:content-['']
+                        prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10
+                        prose-hr:border-white/10 prose-hr:my-12">
+                <p>We merged a branch on a Friday, and by Monday twelve tests were red on main. Nobody had touched them directly. Something in a batch of merges had knocked over a chunk of the suite, the failures were spread across three unrelated feature areas, and the person best placed to untangle it was on a client site all week.</p>
+<p>This is exactly the kind of job that used to eat half a day: not hard, exactly, but tedious. Read the failures, form a theory, bisect through the history, find the commit, understand what it broke, fix it without breaking something else, run the whole suite again. It is a loop, and loops are what agents are for. So we handed the whole thing to Claude Code with a carefully bounded brief and let it work. This is the recipe, including the guardrails that stop it from taking the easy way out, because left unconstrained it absolutely will.</p>
+<h2 id="why-this-is-an-agent-job-not-a-chatbot-job">Why this is an agent job, not a chatbot job</h2>
+<p>You could paste a stack trace into a chat window and get a plausible suggestion. For one failing test that is often enough. For twelve failures with an unknown cause spread across the history, it is not, because the work is not &quot;what does this error mean.&quot; The work is a sequence of actions in a real repository: run the suite, read the output, check out an older commit, run it again, narrow the range, inspect a diff, edit code, re-run. That is an agentic loop with a filesystem and a shell, which is what Claude Code is, rather than a single question with a single answer.</p>
+<p>The mental model that works for us is that you are not asking the agent to know the answer. You are asking it to run the same disciplined loop a good engineer would run, faster and without getting bored on the fortieth test run. Your job shifts from doing the loop to specifying it precisely and checking its work.</p>
+<h2 id="the-brief">The brief</h2>
+<p>The whole thing lives or dies on the prompt, and the prompt is mostly a list of things it is not allowed to do. Here is the one we used, close to verbatim:</p>
+<pre><code>The test suite on this branch has 12 failing tests. Your job:
+
+1. First, reproduce. Run `php artisan test` and confirm exactly which tests
+   fail and with what assertions. Do not change any code yet. Report the list.
+
+2. Find the cause by bisecting history, not by guessing. The suite was green
+   at tag `release-2026-06-26`. Use `git bisect` between there and HEAD to
+   find the first commit where these tests started failing. Report the commit.
+
+3. Explain the root cause in plain English before you touch anything. Why did
+   that commit break these specific tests? If you cannot explain it, stop and
+   tell me.
+
+4. Fix the CAUSE, not the symptom. You may not:
+   - delete, skip, or mark tests incomplete
+   - weaken an assertion (no changing assertEquals to assertNotNull, no
+     widening tolerances, no removing cases)
+   - add sleeps, retries, or catch-and-ignore to make a test pass
+   If the correct fix means changing the test because the test was wrong,
+   argue for it explicitly and wait for my go-ahead.
+
+5. Run the FULL suite after your fix, not just the 12. Confirm nothing else
+   went red. Paste the final run.
+
+6. Open a PR into main from a new branch. Do not push to main. Title it with
+   the root cause. In the description, include the guilty commit, the root
+   cause, and the fix. Do not merge it.
+</code></pre>
+<p>Almost every line of that is a fence. The default behaviour of any capable coding model under &quot;make the tests pass&quot; is to make the tests pass, and the fastest way to make a test pass is to break the test. It will weaken assertions. It will wrap the failing call in a try/catch. It will quietly add <code>markTestSkipped</code>. None of that is malice; it is just the literal shortest path to green, and if you do not forbid it explicitly, you will get a green suite that tests nothing. The <code>assertEquals to assertNotNull</code> line is there because that is the exact move it tried the first time we ran this without the fence.</p>
+<h2 id="what-it-did">What it did</h2>
+<p>The reproduce step came back clean: twelve failures, all variations on a model returning null where the tests expected a populated relationship. Already useful, because that pattern across three feature areas pointed at something shared rather than three separate bugs.</p>
+<p>The bisect is the part that saves the time. Given the green tag and HEAD, Claude Code drove <code>git bisect</code> itself, running the suite at each step, feeding <code>git bisect good</code> or <code>git bisect bad</code> based on the result, and narrowed roughly forty commits to one in a handful of iterations. The guilty commit was a change to a base model's global scope that silently filtered out records the tests relied on. That is a nasty one to find by eye, because the broken tests were nowhere near the changed file. The bisect does not care about distance; it only cares about which commit flipped the result.</p>
+<p>The root-cause step is the one I would not skip for anything. It made Claude Code state, before editing, that the new global scope was excluding soft-deleted-but-active records and that three feature areas leaned on those records through the shared base model. That paragraph is what let me trust the fix, because a fix you cannot explain is a coincidence waiting to reoccur. It proposed narrowing the scope rather than removing it, ran the full suite, came back green with nothing new broken, and opened the PR with the guilty commit hash in the description.</p>
+<p>Start to finish, unattended, about twenty minutes. The half-day job was a coffee.</p>
+<h2 id="the-gotchas">The gotchas</h2>
+<p>It will try to cheat, and the fences are load-bearing. I have said this already but it is the single most important thing. Run this without the &quot;you may not weaken assertions&quot; clause and you are rolling the dice on whether your green suite means anything. Keep the fence list, and add to it every time you catch a new dodge.</p>
+<p>Give it a known-good anchor. The bisect only works because we handed it a tag where the suite was green. If you cannot name a good commit, the agent has to guess a range, and the whole thing gets slower and less reliable. This is a good reason to tag or otherwise mark known-green points in your history as a matter of habit; it makes your history bisectable, which is worth doing for humans too.</p>
+<p>Make it run the full suite, not the target tests. Left to the narrow brief it will confirm the twelve are green and stop. The dangerous regressions are the ones where fixing twelve breaks two others you were not looking at. The full-suite re-run is cheap insurance and it belongs in the prompt.</p>
+<p>Read the root cause, not just the diff. The temptation once the suite is green is to skim the diff and merge. The diff tells you what changed; the root-cause paragraph tells you whether the change is right. If the explanation is hand-wavy, that is your signal to push back before merging, not after.</p>
+<p>And the obvious one: a human still merges. This workflow gets you a correct, explained, green PR with the reasoning laid out. It does not get you absolution from reviewing it. The point is not to remove the engineer. It is to remove the boring forty minutes of bisecting so the engineer spends their attention on the ten minutes that need judgement.</p>
+<h2 id="the-pattern-underneath">The pattern underneath</h2>
+<p>The reason we teach this and use it is not the test suite specifically. It is the shape. There is a large category of engineering work that is not intellectually hard but is procedurally tedious: bisecting, reproducing, upgrading a dependency across forty call sites, migrating a pattern through a codebase, triaging a backlog of flaky tests. All of it is loops, all of it is exactly what a bored senior engineer does slowly and resentfully, and all of it is now something you can specify tightly and hand off.</p>
+<p>The skill that matters is no longer running the loop. It is writing the brief that runs the loop correctly, knowing which fences to build, and reading the output with enough judgement to catch the fix that went green for the wrong reason. That is a different job from the one most engineers were trained for, and it is the one worth getting good at. The agent handles the tedium. You keep the judgement. The twelve red tests get fixed properly, and nobody loses a day to it.</p>
+<hr />
+<p><em>James Freestone is a co-founder of Moonlabs, the operator-led AI incubator and academy, and previously built the home.co.uk, Homemove and homedata.co.uk stack. Moonlabs builds and funds AI-first companies and teaches the operator workflows behind them. Site: moonlab.ventures.</em></p>
+
+            </div>
+        </div>
+
+        
+        <div class="w-full max-w-3xl mx-auto px-6 pb-20">
+            <div class="liquid-glass rounded-2xl p-8 md:p-10 flex flex-col md:flex-row gap-6 items-start">
+                <div class="liquid-glass-strong rounded-full w-14 h-14 flex items-center justify-center shrink-0">
+                    <iconify-icon icon="lucide:feather" width="22" height="22" style="color:#fff"></iconify-icon>
+                </div>
+                <div class="flex-1">
+                    <div class="text-white/50 text-[11px] font-body uppercase tracking-widest mb-2">About the author</div>
+                    <h3 class="text-2xl font-heading italic text-white tracking-tight leading-tight mb-2">James Freestone</h3>
+                    <p class="text-white/65 font-body font-light text-base leading-relaxed">
+                        Co-founder, Moonlabs. Operator behind home.co.uk, Homemove and homedata.co.uk. AI-native since the week ChatGPT shipped.
+                    </p>
+                    <a href="https://moonlab.ventures/apply" class="mt-5 inline-flex items-center gap-2 text-white text-sm font-body underline decoration-white/30 hover:decoration-white underline-offset-4 transition-colors">
+                        Work with us
+                        <iconify-icon icon="lucide:arrow-up-right" width="14" height="14" style="opacity:0.7"></iconify-icon>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        
+                    <section class="w-full max-w-7xl mx-auto px-6 pb-20 md:pb-28">
+                <div class="flex items-end justify-between mb-8">
+                    <h2 class="text-xl sm:text-2xl md:text-3xl font-heading italic text-white tracking-tight">Keep reading</h2>
+                    <a href="https://moonlab.ventures/blog" class="text-white/60 hover:text-white text-sm font-body inline-flex items-center gap-1.5 transition-colors">
+                        All essays
+                        <iconify-icon icon="lucide:arrow-right" width="14" height="14"></iconify-icon>
+                    </a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            <a href="https://moonlab.ventures/blog/everyone-has-a-war-college-now"
+                           class="liquid-glass rounded-2xl p-7 flex flex-col gap-3 hover:bg-white/5 transition-colors group">
+                            <div class="text-[11px] font-body uppercase tracking-widest text-white/40">
+                                Positioning · Aug 2026
+                            </div>
+                            <h3 class="text-xl font-heading italic text-white tracking-tight leading-tight group-hover:text-white/90 transition-colors">
+                                Everyone has a war college now: what an incubator is for when advice costs nothing
+                            </h3>
+                            <p class="text-white/60 font-body font-light text-sm leading-relaxed">
+                                In June 2026 ChatGPT crossed a billion monthly users and startup advice quietly went to zero. So here is the question we had to answer about...
+                            </p>
+                        </a>
+                                            <a href="https://moonlab.ventures/blog/what-happens-after-you-hit-submit"
+                           class="liquid-glass rounded-2xl p-7 flex flex-col gap-3 hover:bg-white/5 transition-colors group">
+                            <div class="text-[11px] font-body uppercase tracking-widest text-white/40">
+                                Applications · Jul 2026
+                            </div>
+                            <h3 class="text-xl font-heading italic text-white tracking-tight leading-tight group-hover:text-white/90 transition-colors">
+                                What happens after you hit submit: how a Moonlabs application actually gets read
+                            </h3>
+                            <p class="text-white/60 font-body font-light text-sm leading-relaxed">
+                                Applying to most things is a black box. You send it into the void and wait, and the silence tells you nothing. Here is exactly what happens...
+                            </p>
+                        </a>
+                                            <a href="https://moonlab.ventures/blog/the-bedroom-producer-tiny-founding-team"
+                           class="liquid-glass rounded-2xl p-7 flex flex-col gap-3 hover:bg-white/5 transition-colors group">
+                            <div class="text-[11px] font-body uppercase tracking-widest text-white/40">
+                                Founders · Jul 2026
+                            </div>
+                            <h3 class="text-xl font-heading italic text-white tracking-tight leading-tight group-hover:text-white/90 transition-colors">
+                                The bedroom producer: why the founding team is collapsing to one or two people
+                            </h3>
+                            <p class="text-white/60 font-body font-light text-sm leading-relaxed">
+                                Cursor is doing forty million dollars of revenue per employee. Midjourney runs on eleven people. Solo founders are now most of the new compa...
+                            </p>
+                        </a>
+                                    </div>
+            </section>
+            </article>
+
+    <section class="relative w-full min-h-[640px] sm:min-h-[760px] md:min-h-[800px] flex flex-col items-center justify-end overflow-hidden pt-24 sm:pt-32">
+    <video
+        loop muted playsinline preload="none"
+        data-hls="https://stream.mux.com/8wrHPCX2dC3msyYU9ObwqNdm00u3ViXvOSHUMRYSEe5Q.m3u8"
+        class="absolute inset-0 w-full h-full object-cover z-0 opacity-60"
+    ></video>
+
+    <div class="absolute top-0 left-0 w-full h-[200px] bg-gradient-to-b from-black to-transparent z-0 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 w-full h-[300px] bg-gradient-to-t from-black to-transparent z-0 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-black/30 z-0 pointer-events-none"></div>
+
+    
+    <div class="relative z-10 flex flex-col items-center text-center px-5 sm:px-6 max-w-3xl mx-auto w-full mb-16 sm:mb-20">
+        <h2
+    class="reveal-words flex flex-wrap text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading italic tracking-tight leading-[0.95] sm:leading-[0.85] justify-center text-white mb-5 sm:mb-6"
+    data-reveal-delay="0"
+    data-reveal-stagger="100"
+>
+                        <span class="reveal-word">Your</span>
+                    <span class="reveal-word">next</span>
+                    <span class="reveal-word">chapter</span>
+                    <span class="reveal-word">starts</span>
+                    <span class="reveal-word">here.</span>
+                    </h2>
+
+        <p class="reveal text-white/60 font-body font-light text-base sm:text-lg mb-8 sm:mb-10 max-w-xl mx-auto" data-reveal-delay="400">
+            Tell us about the company you want to build. If we’re a fit, we’ll get back within a week.
+        </p>
+
+        
+        <div class="reveal flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto max-w-sm sm:max-w-none" data-reveal-delay="600">
+            <a href="https://moonlab.ventures/apply"
+               class="cta-glow liquid-glass-strong hover:scale-105 rounded-full px-6 sm:px-8 py-3.5 text-white font-medium text-sm w-full sm:w-auto inline-flex items-center justify-center gap-2">
+                Apply to Moonlabs
+                <iconify-icon icon="lucide:arrow-up-right" width="16" height="16"></iconify-icon>
+            </a>
+            <a href="https://moonlab.ventures/apply"
+               class="bg-white text-black hover:bg-white/90 transition-colors duration-300 rounded-full px-6 sm:px-8 py-3.5 font-medium text-sm w-full sm:w-auto inline-flex items-center justify-center gap-2">
+                Talk to James &amp; Louis
+            </a>
+        </div>
+    </div>
+
+    
+    <div class="relative z-10 w-full border-t border-white/10 mt-auto">
+        <div class="max-w-7xl mx-auto px-5 sm:px-6 py-6 sm:py-8 flex flex-col md:flex-row items-center md:items-start justify-between gap-5 md:gap-4">
+            <p class="text-white/40 text-[11px] sm:text-xs font-body font-light order-2 md:order-1 text-center md:text-left">
+                &copy; 2026 Moonlabs Incubator. All rights reserved.
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center md:justify-end gap-x-4 sm:gap-x-6 gap-y-2 order-1 md:order-2">
+                <a href="https://moonlab.ventures/incubator" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">Incubator</a>
+                <a href="https://moonlab.ventures/academy" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">Academy</a>
+                <a href="https://moonlab.ventures/forward-deployment" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">AI for business</a>
+                <a href="https://moonlab.ventures/blog" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">Field Notes</a>
+                <a href="https://moonlab.ventures/glossary" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">Glossary</a>
+                <a href="https://moonlab.ventures/ai-in-derby" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">AI in Derby</a>
+                <a href="https://moonlab.ventures/for-parents" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">For parents</a>
+                <a href="https://moonlab.ventures/for-employers" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">For employers</a>
+                <a href="https://moonlab.ventures/for-investors" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">For investors</a>
+                <a href="https://moonlab.ventures/privacy" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">Privacy</a>
+                <a href="https://moonlab.ventures/terms" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">Terms</a>
+                <a href="https://moonlab.ventures/sitemap" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">Sitemap</a>
+                <a href="mailto:founders@homemove.com" class="text-white/40 hover:text-white transition-colors text-[11px] sm:text-xs font-body font-light">
+                    founders@homemove.com
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+</main>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js"></script>
+    <script>
+        // Reveal-on-scroll: any element with .reveal (or .reveal-words) gets .is-visible
+        // when it enters the viewport. Triggers once, then unobserves.
+        (function () {
+            const els = document.querySelectorAll('.reveal, .reveal-words');
+            if (!('IntersectionObserver' in window)) {
+                els.forEach(el => el.classList.add('is-visible'));
+                return;
+            }
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '-50px 0px -50px 0px', threshold: 0.05 });
+            els.forEach(el => io.observe(el));
+
+            const MAX_DELAY = 500;
+            const scale = (ms) => Math.min(MAX_DELAY, Math.round(ms * 0.4));
+
+            document.querySelectorAll('[data-reveal-delay]').forEach(el => {
+                el.style.transitionDelay = scale(parseInt(el.dataset.revealDelay, 10) || 0) + 'ms';
+            });
+            document.querySelectorAll('.reveal-words[data-reveal-stagger]').forEach(parent => {
+                const step = parseInt(parent.dataset.revealStagger, 10) || 80;
+                const base = parseInt(parent.dataset.revealDelay, 10) || 0;
+                parent.querySelectorAll('.reveal-word').forEach((w, i) => {
+                    w.style.transitionDelay = scale(base + i * step) + 'ms';
+                });
+            });
+        })();
+
+        // HLS lazy init: only attach + play when the video scrolls near the viewport.
+        // Background videos are heavy (Mux HLS) — eager-loading all of them blocks the page.
+        (function () {
+            const videos = document.querySelectorAll('video[data-hls]');
+            if (!videos.length) return;
+
+            const attach = (video) => {
+                if (video.dataset.hlsAttached) return;
+                const src = video.dataset.hls;
+                if (window.Hls && Hls.isSupported()) {
+                    video.dataset.hlsAttached = '1';
+                    const hls = new Hls({ startLevel: 0, capLevelToPlayerSize: true });
+                    hls.loadSource(src);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.dataset.hlsAttached = '1';
+                    video.src = src;
+                    video.addEventListener('loadedmetadata', () => video.play().catch(() => {}));
+                } else {
+                    // hls.js not loaded yet — retry shortly.
+                    setTimeout(() => attach(video), 200);
+                }
+            };
+
+            if (!('IntersectionObserver' in window)) {
+                videos.forEach(attach);
+                return;
+            }
+
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        attach(entry.target);
+                        // Keep playing once attached — only init is gated, not playback.
+                        entry.target.play().catch(() => {});
+                    } else if (entry.target.dataset.hlsAttached) {
+                        entry.target.pause();
+                    }
+                });
+            }, { rootMargin: '300px 0px 300px 0px', threshold: 0.01 });
+
+            videos.forEach(v => io.observe(v));
+        })();
+    </script>
+</body>
+</html>

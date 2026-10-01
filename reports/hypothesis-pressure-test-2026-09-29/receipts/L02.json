@@ -1,0 +1,88 @@
+{
+  "assignment": "02 \u2014 Incremental value and alternatives",
+  "issue_identifier": "COD-81",
+  "issue_id": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+  "run_id": "f7326cb1-7ec5-446f-912a-a1eaaaa45b26",
+  "session_id": "01a0f075-e447-7802-bd11-d6f12b75b1fc",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "completed_at": "2026-09-30T04:02:08.215150+00:00",
+  "attempt": "first_draft",
+  "correction_attempts": 0,
+  "independent_review": "not performed; no self approval",
+  "isolation": {
+    "other_lens_outputs_read": false,
+    "first_draft_context": "Current task-specific session; no other lens drafts read. Runtime freshness is for Product Lead to independently verify.",
+    "boundary": "Procedural shared-filesystem isolation, not access control."
+  },
+  "initial_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "final_verification": {
+    "files": 192,
+    "all_hashes_match": true
+  },
+  "outputs": [
+    {
+      "path": "history/L02-first-draft/02-findings.json",
+      "sha256": "af1064b53620fae0fb5a024efc6db0295d46c84a75b2af8184ee316c283e222d",
+      "bytes": 32609
+    },
+    {
+      "path": "history/L02-first-draft/02-incremental-value-and-alternatives.md",
+      "sha256": "8c6ea25119cc6b276ab6474ef94a054265876d1e738657a5bbad2ade1ab8e5cc",
+      "bytes": 20543
+    },
+    {
+      "path": "lenses/02-findings.json",
+      "sha256": "af1064b53620fae0fb5a024efc6db0295d46c84a75b2af8184ee316c283e222d",
+      "bytes": 32609
+    },
+    {
+      "path": "lenses/02-incremental-value-and-alternatives.md",
+      "sha256": "8c6ea25119cc6b276ab6474ef94a054265876d1e738657a5bbad2ade1ab8e5cc",
+      "bytes": 20543
+    },
+    {
+      "path": "source-addenda/L02/CW-L023.html",
+      "sha256": "45ad340f4acb95726650827fedc9e7f7c4bcfc8b15f44c6b38750cb80342a439",
+      "bytes": 123297
+    },
+    {
+      "path": "source-addenda/L02/CW-X001.html",
+      "sha256": "b156be2a53106ae09c28edc2fa372c7b386a0a9c241e06070428914ecd894d37",
+      "bytes": 96988
+    },
+    {
+      "path": "source-addenda/L02/CW-Y005.html",
+      "sha256": "20b151c2bf9d155dce3147a18705c684132f2980fe65828d1776897ec8b0a632",
+      "bytes": 68044
+    },
+    {
+      "path": "source-addenda/L02/CW-Y007.html",
+      "sha256": "4d4cb75e0e0a3a5150182618625b5fb8906ffed64888b07bc4d38c6ec922022d",
+      "bytes": 49135
+    },
+    {
+      "path": "source-addenda/L02/CW-Y012.html",
+      "sha256": "5a3b6e34baed019eb2f85340b90a85e49f15fba11be160d5bffaa361eccb8eeb",
+      "bytes": 23512
+    },
+    {
+      "path": "source-addenda/L02/CW-Z003.html",
+      "sha256": "c2576945f061860d9fb4feaf98c2298f92dd759289439d49b9b1a38084a6f759",
+      "bytes": 176908
+    },
+    {
+      "path": "source-addenda/L02/CW-Z012.html",
+      "sha256": "f763eb80077396b56c9ccc3456eaeb600a96b597cd7ff099fbac60deb7819ca6",
+      "bytes": 606869
+    },
+    {
+      "path": "source-addenda/L02/PROVENANCE.json",
+      "sha256": "464bd29ad84d37db9499ecef3167a61dcdb93dd4c61d857b5c66c564479fd0ca",
+      "bytes": 3871
+    }
+  ],
+  "receipt_hash_note": "Receipt hash is provided by portable package/delivery record, not recursively inside itself."
+}

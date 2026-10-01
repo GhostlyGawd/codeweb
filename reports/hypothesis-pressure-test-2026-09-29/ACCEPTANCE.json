@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "approved_at_recorded": "2026-09-30T03:40:53.578604+00:00",
+  "user_authorization": "approved.",
+  "objective": "Pressure-test the local and paid product/user-need hypotheses, including the transformation from useful to materially missed if removed; preserve full collected research and breadcrumb all conclusions.",
+  "substantive_assignments": 15,
+  "lens_assignments": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12"
+  ],
+  "synthesis_assignments": [
+    "A",
+    "B"
+  ],
+  "adversarial_fidelity_assignment": "15",
+  "phase_child_limits": [
+    6,
+    6,
+    3
+  ],
+  "max_concurrent_runs": 3,
+  "fresh_first_drafts_required": true,
+  "synthesis_first_drafts_blinded_from_each_other": true,
+  "final_editor_cannot_approve_own_output": true,
+  "preserve_material_findings_with_dispositions": true,
+  "bidirectional_source_breadcrumbs_required": true,
+  "all_original_evidence_ids_have_usage_or_nonuse_reason": true,
+  "final_hash_bound_review_required": true,
+  "requested_output_directory": "$LOCAL_HOME/Repositories/codeweb/reports/hypothesis-pressure-test-2026-09-29",
+  "permitted_worker_staging": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/cycle-01/workspace/reports/hypothesis-pressure-test-2026-09-29",
+  "approved_scope": "Existing-research/capability review with targeted public source checks and local artifacts. No participant trial, external sends, purchases, product implementation, charter change, release, or publication.",
+  "frozen_artifacts": {
+    "PLAN.md": "2c8d6fc05e4c19da40a0c548e347de47b55b36195c556b22e58220c62cd82786",
+    "ASSIGNMENTS.md": "96b05a7c0130bd110be373943bfc03082b449210107c33b3b2eb47b031fabe30",
+    "INPUT-MANIFEST.json": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+    "INPUTS.zip": "79e1f940851e7468467140a0c78ae8fba0e273b4a456c26a67c970188647ca59",
+    "FREEZE-RECEIPT.json": "3794cd7c21ec4a649b4f2e1ca8a19ebd6d1058eb43f25221e36b944fd9d6bec9"
+  }
+}

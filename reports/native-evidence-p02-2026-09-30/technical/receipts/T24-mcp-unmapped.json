@@ -1,0 +1,21 @@
+{
+  "id": "T24-mcp-unmapped",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/mcp-server.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{},\"clientInfo\":{\"name\":\"p02-own-probe\",\"version\":\"1\"}}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"codeweb_impact\",\"arguments\":{\"graph\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/.codeweb/graph.json\",\"symbol\":\"missing\"}}}\n",
+  "start": "2026-10-01T01:50:12.416Z",
+  "end": "2026-10-01T01:50:12.453Z",
+  "durationMs": 36.87374999999997,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"codeweb\",\"version\":\"0.15.0\"},\"instructions\":\"codeweb answers structural questions about a mapped repo (graph.json) deterministically — no LLM, ~100ms.\\nLoop: BEFORE editing a symbol call codeweb_context (bounded edit window) or codeweb_impact (blast radius); codeweb_dependents lists mapped users of it (call+import+inherit+test+ref).\\nBEFORE editing call codeweb_refresh {baseline:true} once to capture a fresh baseline. AFTER editing call codeweb_diff {before:\\\"baseline\\\", refresh:true} to refresh and verify in one call. Ordinary/automatic refreshes preserve this baseline. Legacy refresh {snapshot:true} then diff {} remains available.\\nOptional evidence loop: codeweb_context {symbol, captureEvidence:true, task} captures a receipt using an isolated regex snapshot. After editing pass evidenceReceipt and the same task to codeweb_review. Inspect evidence.state separately from verdict; historical pages never imply current currency.\\nBefore WRITING a new function call codeweb_find_similar (does this exist?) and codeweb_placement (where does it belong?).\\nBefore a refactor, codeweb_simulate pre-flights a delete/merge/move; after verifying a finding is wrong, codeweb_annotate suppresses it so it stops resurfacing.\\nNo symbol name yet? codeweb_find turns a concept (\\\"retry backoff\\\") into ranked starting symbols.\\n`graph` is optional — the server finds the nearest .codeweb/graph.json from cwd. No graph yet? codeweb_map builds one (~3s for 3k symbols).\\nResponses are budgeted (top-N + more:{remaining, nextOffset}). Pass full:true for the unabridged list, or limit/offset to page (campaign/reading_order take `budget` instead; deadcode/context cap per tier via limit only).\"}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"query\\\":\\\"impact\\\",\\\"symbol\\\":\\\"missing\\\",\\\"found\\\":false,\\\"hint\\\":\\\"no symbol matches \\\\\\\"missing\\\\\\\" — try codeweb_find \\\\\\\"<free text>\\\\\\\" (concept search, no name needed)\\\"}\"}]}}\n",
+  "stderr": ""
+}

@@ -1,0 +1,791 @@
+{
+  "id": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+  "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+  "projectId": null,
+  "projectWorkspaceId": null,
+  "goalId": null,
+  "parentId": null,
+  "title": "Deep web research on Codeweb user pain",
+  "description": "The user has now explicitly authorized execution: \"ok. go ahead.\" Start the saved research plan; this supersedes its planning-only start boundary. The objective is the complete deep web research pass and independent holistic synthesis, not merely a dispatch receipt. Preserve all original acceptance criteria.\n\n# Prepared Product Lead objective\n\nTitle: Deep web research on Codeweb user pain\n\nUser intent: Preserve the existing six-lens Codeweb audit, perform another substantial swarm research pass using public web user evidence about the problems around native Claude Code/Codex use, cross-file change confidence, ease of use, trust, and paid value; then synthesize a holistic picture. The user requested this plan before dispatch. This document is the prepared execution scope, not a record that agents have begun.\n\nRead `reports/user-pain-research-plan-2026-09-27/README.md`, `AGENT-BRIEFS.md`, `EVIDENCE-SCHEMA.json`, and `AUDIT-BASELINE.json` in `$LOCAL_HOME/Repositories/codeweb`. Preserve the audit and screenshots with unchanged hashes. Query live Paperclip tasks and agents before creating a research parent to avoid duplicate work. Preserve active website COD-54/COD-55 and historical user gates/candidates.\n\nOwn decomposition into at most six bounded child assignments under TERMINAL-CONTRACT, using existing roles, one concurrent run per role, with available capacity and native continuation/review. Do not create agents or services. Confirm actual worker search/fetch/citation ability in the first lane before scaling. Produce public-source secondary user research; do not invent interviews or treat anecdotes as prevalence or proven Codeweb demand.\n\nTarget 150\u2013200 fully read source pages/threads and 80\u2013120 deduplicated useful firsthand evidence records, with honest coverage limits rather than filler. Prioritize the last six months; use older sources for persistence/history and resolve stale issues. Collect successful workflows and contrary evidence as well as complaints. Separate host/model problems from mechanisms Codeweb could address; challenge the change-brief/receipt hypothesis.\n\nSave the requested corpus, six lane briefs, source/query maps, pain map, contradictions, audit overlay, opportunity decisions, independent review, and completion receipt under `reports/user-pain-research-2026-09-27/`. Each important claim must be supported by opened source content, dates, provenance, and an evidence ID. Independent review verifies all high-priority claims and at least 20% of the other records, and checks original audit hashes. Preserve original completion criteria through corrections.\n\nCompletion requires a supported synthesis selecting potential segments, recurring jobs, native integration requirements, adoption gaps, and charter-compatible paid opportunities, plus concrete experiments and explicit remaining unknowns. Source volume and successful task statuses alone do not satisfy the objective. Report actual runtime/access limitations and interventions.\n\nScope is read-only public research and local artifacts. No outreach, purchases, code changes, charter changes, merge, release, deployment, or publication. The lead owns sourcing; do not ask the founder to supply contacts or run research logistics.\n\n\nLive pre-dispatch readback: no existing user-pain research objective; COD-55 remains running under COD-54. Use idle capacity for research and queue Technical Lead work behind that delivery without interrupting it. Original audit plus all four screenshot SHA-256 values matched the saved manifest. Root ordinary exec launcher returned EMFILE (too many open files); the existing Paperclip CLI works from a Node execution context. This is a root launch transport workaround, not a research-worker capability proof. Record it as an operator intervention if relevant. Do not ask the founder to route children or gather sources. Return source-supported completion through native review and durable artifacts.",
+  "status": "done",
+  "statusVersion": 12,
+  "lastStatusDecisionId": null,
+  "workMode": "standard",
+  "harnessKind": null,
+  "priority": "medium",
+  "reviewPolicy": null,
+  "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+  "assigneeUserId": null,
+  "checkoutRunId": null,
+  "executionRunId": null,
+  "executionAgentNameKey": null,
+  "executionLockedAt": null,
+  "createdByAgentId": null,
+  "createdByUserId": "local-board",
+  "responsibleUserId": "local-board",
+  "issueNumber": 56,
+  "identifier": "COD-56",
+  "originKind": "manual",
+  "originId": null,
+  "originRunId": null,
+  "originFingerprint": "default",
+  "requestDepth": 0,
+  "billingCode": null,
+  "assigneeAdapterOverrides": null,
+  "executionPolicy": {
+    "mode": "normal",
+    "stages": [
+      {
+        "id": "03b0ddb8-e761-4c24-b5cf-be9194112038",
+        "type": "review",
+        "participants": [
+          {
+            "id": "f3121b90-9982-424c-a394-63dd0b19eb4e",
+            "type": "agent",
+            "userId": null,
+            "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4"
+          }
+        ],
+        "approvalsNeeded": 1
+      }
+    ],
+    "commentRequired": true
+  },
+  "executionState": {
+    "status": "completed",
+    "monitor": null,
+    "reviewRequest": null,
+    "currentStageId": null,
+    "lastDecisionId": "9eff0e05-deab-483d-9833-6259fff69fbb",
+    "returnAssignee": {
+      "type": "agent",
+      "userId": null,
+      "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+    },
+    "currentStageType": null,
+    "completedStageIds": [
+      "03b0ddb8-e761-4c24-b5cf-be9194112038"
+    ],
+    "currentStageIndex": null,
+    "currentParticipant": null,
+    "lastDecisionOutcome": "approved",
+    "changesRequestedCount": 0
+  },
+  "monitorNextCheckAt": null,
+  "monitorWakeRequestedAt": null,
+  "monitorLastTriggeredAt": null,
+  "monitorAttemptCount": 0,
+  "monitorNotes": null,
+  "monitorScheduledBy": null,
+  "executionWorkspaceId": null,
+  "executionWorkspacePreference": null,
+  "executionWorkspaceSettings": null,
+  "sourceTrust": null,
+  "unblockDescriptor": null,
+  "blockedTransitionAt": "2026-09-28T01:38:43.851Z",
+  "blockedOwnerNotifiedAt": null,
+  "startedAt": "2026-09-28T02:19:58.920Z",
+  "completedAt": "2026-09-28T02:22:34.465Z",
+  "cancelledAt": null,
+  "hiddenAt": null,
+  "createdAt": "2026-09-28T00:28:36.452Z",
+  "updatedAt": "2026-09-28T02:22:34.465Z",
+  "labels": [],
+  "labelIds": [],
+  "watchdog": null,
+  "changes": {
+    "status": {
+      "from": "in_progress",
+      "to": "done"
+    },
+    "statusVersion": {
+      "from": 11,
+      "to": 12
+    },
+    "checkoutRunId": {
+      "from": "2ecaedd2-d732-4333-a363-4209bd537dbc",
+      "to": null
+    },
+    "executionRunId": {
+      "from": "2ecaedd2-d732-4333-a363-4209bd537dbc",
+      "to": null
+    },
+    "executionAgentNameKey": {
+      "from": "independent reviewer",
+      "to": null
+    },
+    "executionLockedAt": {
+      "from": "2026-09-28T02:19:45.946Z",
+      "to": null
+    },
+    "executionState": {
+      "from": {
+        "status": "pending",
+        "monitor": null,
+        "reviewRequest": null,
+        "currentStageId": "03b0ddb8-e761-4c24-b5cf-be9194112038",
+        "lastDecisionId": "4102c54c-486a-4878-887c-84f2ab17997c",
+        "returnAssignee": {
+          "type": "agent",
+          "userId": null,
+          "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+        },
+        "currentStageType": "review",
+        "completedStageIds": [],
+        "currentStageIndex": 0,
+        "currentParticipant": {
+          "type": "agent",
+          "userId": null,
+          "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4"
+        },
+        "lastDecisionOutcome": "changes_requested",
+        "changesRequestedCount": 1
+      },
+      "to": {
+        "status": "completed",
+        "monitor": null,
+        "reviewRequest": null,
+        "currentStageId": null,
+        "lastDecisionId": "9eff0e05-deab-483d-9833-6259fff69fbb",
+        "returnAssignee": {
+          "type": "agent",
+          "userId": null,
+          "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+        },
+        "currentStageType": null,
+        "completedStageIds": [
+          "03b0ddb8-e761-4c24-b5cf-be9194112038"
+        ],
+        "currentStageIndex": null,
+        "currentParticipant": null,
+        "lastDecisionOutcome": "approved",
+        "changesRequestedCount": 0
+      }
+    },
+    "completedAt": {
+      "from": null,
+      "to": "2026-09-28T02:22:34.465Z"
+    }
+  },
+  "relatedWork": {
+    "outbound": [
+      {
+        "issue": {
+          "id": "99e588ce-f5e9-4160-88be-359908d07a8f",
+          "identifier": "COD-57",
+          "title": "Verify research-worker source access and first-lane method",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 3,
+        "sources": [
+          {
+            "kind": "comment",
+            "sourceRecordId": "776a1223-4e4a-4798-bef6-4829fb9140fc",
+            "label": "comment",
+            "matchedText": "COD-57"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "d3402c40-f904-438c-b269-b7427c2af2b5",
+            "label": "comment",
+            "matchedText": "COD-57"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "f20dfb1e-e0a8-4cff-af78-a08cbfb08df0",
+            "label": "comment",
+            "matchedText": "COD-57"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "ad6b2688-d149-4151-9eb3-f3de93a281df",
+          "identifier": "COD-59",
+          "title": "Research native hosts and cross-file change risk \u2014 lanes 1\u20133",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 3,
+        "sources": [
+          {
+            "kind": "comment",
+            "sourceRecordId": "776a1223-4e4a-4798-bef6-4829fb9140fc",
+            "label": "comment",
+            "matchedText": "COD-59"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "b6019082-c719-482d-98a0-c8be2f48e031",
+            "label": "comment",
+            "matchedText": "COD-59"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "bc136212-dfdd-4392-b69d-f228778db657",
+            "label": "comment",
+            "matchedText": "COD-59"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "76e05df6-14cf-4873-a9c3-95aab90814a3",
+          "identifier": "COD-60",
+          "title": "Deepen adoption, trust and buying evidence \u2014 lanes 4\u20136",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 3,
+        "sources": [
+          {
+            "kind": "comment",
+            "sourceRecordId": "218c429d-a68f-4018-9b1b-5950094d5c0d",
+            "label": "comment",
+            "matchedText": "COD-60"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "b6019082-c719-482d-98a0-c8be2f48e031",
+            "label": "comment",
+            "matchedText": "COD-60"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "bc136212-dfdd-4392-b69d-f228778db657",
+            "label": "comment",
+            "matchedText": "COD-60"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "c5ff7221-b28b-4a81-adee-cb9378b865c8",
+          "identifier": "COD-61",
+          "title": "Deepen technical source coverage and counterevidence \u2014 lanes 1\u20133",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 3,
+        "sources": [
+          {
+            "kind": "comment",
+            "sourceRecordId": "218c429d-a68f-4018-9b1b-5950094d5c0d",
+            "label": "comment",
+            "matchedText": "COD-61"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "b6019082-c719-482d-98a0-c8be2f48e031",
+            "label": "comment",
+            "matchedText": "COD-61"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "bc136212-dfdd-4392-b69d-f228778db657",
+            "label": "comment",
+            "matchedText": "COD-61"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "495dee50-9a5e-4551-8dfe-cb23c6ecfd67",
+          "identifier": "COD-55",
+          "title": "Build and verify v6 supporting proof and whole-page flow",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 2,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-55"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "f20dfb1e-e0a8-4cff-af78-a08cbfb08df0",
+            "label": "comment",
+            "matchedText": "COD-55"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "45abbb28-df94-4bf3-b769-b54361ec19db",
+          "identifier": "COD-63",
+          "title": "Final technical breadth and structural-context disconfirmation",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 2,
+        "sources": [
+          {
+            "kind": "comment",
+            "sourceRecordId": "4ba477a6-1487-4e43-a8b8-980820087915",
+            "label": "comment",
+            "matchedText": "COD-63"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "b6019082-c719-482d-98a0-c8be2f48e031",
+            "label": "comment",
+            "matchedText": "COD-63"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "22d6b2b6-4d76-42b1-abce-beac3f423e3b",
+          "identifier": "COD-64",
+          "title": "Final buyer, adoption and contrary-evidence pass",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 2,
+        "sources": [
+          {
+            "kind": "comment",
+            "sourceRecordId": "4ba477a6-1487-4e43-a8b8-980820087915",
+            "label": "comment",
+            "matchedText": "COD-64"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "b6019082-c719-482d-98a0-c8be2f48e031",
+            "label": "comment",
+            "matchedText": "COD-64"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "caeafb8c-9b47-4a8a-8c9e-83c16640a91f",
+          "identifier": "COD-54",
+          "title": "Refine Codeweb whole-page coherence and supporting proof",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+          "assigneeUserId": null
+        },
+        "mentionCount": 1,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-54"
+          }
+        ]
+      }
+    ],
+    "inbound": [
+      {
+        "issue": {
+          "id": "ad6b2688-d149-4151-9eb3-f3de93a281df",
+          "identifier": "COD-59",
+          "title": "Research native hosts and cross-file change risk \u2014 lanes 1\u20133",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 9,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "9cdc2834-47ca-41d0-926b-bacc1488cc38",
+            "label": "artifact-review-05f5bc39-e6b9-48d7-985a-0626a01fcae4",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "38fd8d01-00dd-46ee-b8e7-d41af31abc4d",
+            "label": "artifact-review-1d587fb4-1c90-44d5-aaee-a6b7f4be7f0e",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "2cd87514-f28d-41b3-b378-3a236708a3c6",
+            "label": "artifact-review-7788636b-65a6-47e0-8a9a-2dbe774031d9",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "c098bcfc-bfcb-4405-9229-aca0d8f8653c",
+            "label": "artifact-review-9fca4812-4ad8-4db3-95a7-edc54dc913ef",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "1ea1249c-705b-4aa1-81f2-d5cc69d1bcc5",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "63f2511a-fa9a-4fb3-a763-30144e276d89",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "aa0fea04-e65c-4b27-9305-86852ac73964",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "ecc3dc66-3a6e-4b12-a992-b5dc8b88bc8e",
+            "label": "comment",
+            "matchedText": "COD-56"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "76e05df6-14cf-4873-a9c3-95aab90814a3",
+          "identifier": "COD-60",
+          "title": "Deepen adoption, trust and buying evidence \u2014 lanes 4\u20136",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 8,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "c0a71aea-5c98-4d0d-8fa7-9745dd1df6fb",
+            "label": "artifact-review-6926088a-6973-4850-979f-01ce29827d96",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "671c478c-0438-4d21-afc7-2a77d58bbca2",
+            "label": "artifact-review-b3b0317f-1918-42ba-9a97-a5a251b814aa",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "6f77019c-d623-47d9-aca3-4ffe5a603e07",
+            "label": "artifact-review-b659bde2-1016-4319-b512-09423f921ab1",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "124ed53a-8356-49fd-828f-63248bf7aa3d",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "61dd7e63-a462-4e52-948c-055d19c7b73b",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "7ff075ac-3a57-4e1b-b98a-9bbb924ece71",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "cbb8ab25-8ef0-4d8c-b065-3a8015007207",
+            "label": "comment",
+            "matchedText": "COD-56"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "99e588ce-f5e9-4160-88be-359908d07a8f",
+          "identifier": "COD-57",
+          "title": "Verify research-worker source access and first-lane method",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 5,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "0cdc1b67-20c9-44e1-a801-371cc1287fa9",
+            "label": "artifact-review-3c5f8d9c-4af4-4572-8514-0bcc579c2d70",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "9341ad0e-6c2e-4779-83f4-447df4d12c41",
+            "label": "artifact-review-657a5b0f-16cc-46d6-bf01-04fcc688b724",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "0441e795-cfef-49c8-bbec-68183f3574f0",
+            "label": "comment",
+            "matchedText": "/COD/issues/COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "2cfcb3ee-462d-4a8a-bc0b-8673207ccbab",
+            "label": "comment",
+            "matchedText": "COD-56"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "c5ff7221-b28b-4a81-adee-cb9378b865c8",
+          "identifier": "COD-61",
+          "title": "Deepen technical source coverage and counterevidence \u2014 lanes 1\u20133",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 5,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "ee06a779-8b96-4438-8d6d-82a3da90fe45",
+            "label": "artifact-review-56ae2a6b-8422-49c1-b311-8fb9839b6cd0",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "document",
+            "sourceRecordId": "05f1dd9c-089f-4c91-ae6d-c66bd4de72b4",
+            "label": "artifact-review-ffe3215f-7ebe-4f35-9c96-b29c72a76869",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "2e7d90e6-ccd0-4708-977a-48bc51d54b15",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "9c915abd-d31f-4405-8e88-372cc9d20824",
+            "label": "comment",
+            "matchedText": "COD-56"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "45abbb28-df94-4bf3-b769-b54361ec19db",
+          "identifier": "COD-63",
+          "title": "Final technical breadth and structural-context disconfirmation",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 5,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "379a934e-3b58-4237-8669-87f00c889596",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "5500ebc0-1ecf-469d-b992-76fed364c7f0",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "6d9ece8d-e32f-4072-b974-4e61c1309985",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "d2dd529a-4a82-4782-8e7e-75503db2a596",
+            "label": "comment",
+            "matchedText": "COD-56"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "22d6b2b6-4d76-42b1-abce-beac3f423e3b",
+          "identifier": "COD-64",
+          "title": "Final buyer, adoption and contrary-evidence pass",
+          "status": "done",
+          "priority": "medium",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 3,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "7b31a6e2-42e1-4829-ad61-3411f037541e",
+            "label": "comment",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "d9a5214f-12cc-455b-a2e9-d80285d6ad2e",
+            "label": "comment",
+            "matchedText": "COD-56"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "07a33962-6318-4259-9203-83030eb6c92e",
+          "identifier": "COD-58",
+          "title": "Refine Codeweb repository map orientation and selection",
+          "status": "done",
+          "priority": "high",
+          "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+          "assigneeUserId": null
+        },
+        "mentionCount": 2,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-56"
+          },
+          {
+            "kind": "comment",
+            "sourceRecordId": "04c2f26e-86dd-4f35-8a13-5cf4999c0b66",
+            "label": "comment",
+            "matchedText": "COD-56"
+          }
+        ]
+      },
+      {
+        "issue": {
+          "id": "af22844b-f7fa-415e-b6e2-c979ed188d93",
+          "identifier": "COD-62",
+          "title": "Implement and independently review v7 repository map orientation",
+          "status": "done",
+          "priority": "high",
+          "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "assigneeUserId": null
+        },
+        "mentionCount": 1,
+        "sources": [
+          {
+            "kind": "description",
+            "sourceRecordId": null,
+            "label": "description",
+            "matchedText": "COD-56"
+          }
+        ]
+      }
+    ]
+  },
+  "referencedIssueIdentifiers": [
+    "COD-57",
+    "COD-59",
+    "COD-60",
+    "COD-61",
+    "COD-55",
+    "COD-63",
+    "COD-64",
+    "COD-54"
+  ],
+  "comment": {
+    "id": "67c69059-1313-42c7-8f46-7d911998cf50",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+    "authorAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "authorUserId": null,
+    "onBehalfOfUserId": "local-board",
+    "authorType": "agent",
+    "createdByRunId": "2ecaedd2-d732-4333-a363-4209bd537dbc",
+    "derivedAuthorAgentId": null,
+    "derivedCreatedByRunId": null,
+    "derivedAuthorSource": null,
+    "body": "Approved after the one bounded parent correction.\n\n- [Complete approved research package, signed review and completion receipt](/api/attachments/63eb9525-808e-4046-a8a3-ddd369213efd/content). F1 resolved: all 19 fit judgments now have record-specific reasoning; ten unsupported, six unknown, three narrowly partial. Only the intended two corpus fields changed. Historical evidence remains byte-identical.\n- Original final audit covered all 24 high-priority supporting records and 22/108 others (20.37%). Correction review checked all 19 changes against that evidence, exact before/after attachments, every submitted archive member, manifests, CSV parity and all five baseline hashes. No new source credits claimed.\n- Approval accepts delivery of the transparently limited research/synthesis, not full target achievement. Coverage remains 110 fully read sources versus 150\u2013200, 40 short. Requested repository placement remains incomplete; management workspace and this portable package are actual delivery paths. These explicit exceptions remain in COMPLETION.json.\n- Synthesis supports conditional pre-edit evidence as a testable free workflow and hosted cross-repo coordination as an unvalidated paid hypothesis. Customer retention, purchasing authority and incremental Codeweb value remain unknown. No experiments, outreach, purchases, product changes or releases authorized. Runtime failures and intervention record remain preserved.\n\nNo remaining review correction. Closing the research-delivery objective with the documented limitations.",
+    "presentation": null,
+    "metadata": {
+      "version": 1,
+      "authorizationReason": "allow_self",
+      "sections": [
+        {
+          "title": "Authorization",
+          "rows": [
+            {
+              "type": "key_value",
+              "label": "Reason",
+              "value": "allow_self"
+            }
+          ]
+        }
+      ]
+    },
+    "deletedAt": null,
+    "deletedByType": null,
+    "deletedByAgentId": null,
+    "deletedByUserId": null,
+    "deletedByRunId": null,
+    "sourceTrust": null,
+    "createdAt": "2026-09-28T02:22:34.476Z",
+    "updatedAt": "2026-09-28T02:22:34.476Z"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "frozen_at": "2026-09-30T04:53:01.632025+00:00",
+  "issue_id": "265838d5-9909-432f-bb3a-34e2a353087b",
+  "run_id": "00bd5207-ad81-464f-8f5d-c944ad621199",
+  "files": [
+    {
+      "path": "SA.json",
+      "sha256": "7c49e42e91ebf0ef506ded78c4ce80a1d0993344a155a5411d0f3271f44e9a82"
+    },
+    {
+      "path": "SYNTHESIS-A-MAPPING.json",
+      "sha256": "1259e162e6543ea4ad53dca9728bc7f9f4b466e0cad105e69042d6c7cabcda7a"
+    },
+    {
+      "path": "SYNTHESIS-A.md",
+      "sha256": "2a8a2b34ecbaea0fcdd772a226334a2d1413493040f4339fe7b701a95df9b688"
+    }
+  ]
+}

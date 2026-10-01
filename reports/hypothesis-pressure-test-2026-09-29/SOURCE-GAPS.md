@@ -1,0 +1,7 @@
+# Source and outcome gaps
+
+The corpus contains 132 canonical records and 110 declared fully read source units in its historical audit; neither number is a population estimate. The earlier source-volume shortfall remains. Some source dates are unresolved, some threads/comments were inaccessible or partial, and many external pages have no full capture. Preserve original EVIDENCE.jsonl, SOURCE-REGISTRY.jsonl, query logs, notes, source snapshots and corrections within inputs/ and INPUTS.zip. REFERENCE-CAPTURE-INVENTORY.json records historical available/missing temporary captures.
+
+EVIDENCE-USE.json and editor/SOURCE-GAP-INDEX.json list all 132 record-specific access boundaries and capture availability. A local capture does not prove every linked source or thread was read. Closure is not a verified fix; vendor/builder accounts and repeated incident bundles are not ordinary independent customer samples. Historical version/price reports are not current capability/price claims. No visual comparison with newer site candidates was performed.
+
+Runtime and capability premises remain frozen observations. No host runtime preflight, participant trial, purchase, renewal, withdrawal or compounding measurement occurred here. Policy feasibility, economic value and sufficient recurring opportunity remain unresolved. No customer answers were simulated. Source placement and independent final approval remain pending parent work.

@@ -1,0 +1,926 @@
+AI Coding Agents: Hands-On Test of Codex, Claude CLI & Gemini CLI | Omer's playground
+root@omeratagun:~$ ssh
+[email protected]
+Welcome. Uptime: forever. Coffee: yes.
+Omer's playground
+In pursuit of knowledge, driven by curiosity.
+blog
+about
+switch theme
+cat 2025-06-28-ai-coding-agents-experiment.mdx
+AI Coding Agents: Hands-On Test of Codex, Claude CLI & Gemini CLI
+2025-06-28 · 16 min read
+#codex
+#claude cli
+#gemini cli
+table of contents
+The Test Subjects
+Chapter 1: Codex
+Chapter 2 — Codex + Claude CLI Tag Team
+Aaand finally i figured out that i have no clue what is going on and nothing works.
+Third chapter: The Whole Zoo: Gemini CLI × Claude CLI × Codex + Human
+Fourth chapter: Gemini CLI + Claude CLI + Codex + Human review
+What I Learned
+“Hmm… maybe that side project I keep avoiding could write itself?”
+We’re officially in the age of AI-assisted coding—at least according to the shiny slide decks from every AI CEO on the planet. Over the past few weeks I put that claim to the test, unleashing
+Codex Cloud
+,
+Claude CLI
+, and the brand-new
+Gemini CLI
+on two personal projects. Here’s how that rodeo went.
+The Test Subjects
+Diagramat
+– a green-field diagram editor à la draw.io, built from scratch in an npm work-spaced monorepo.
+eDominations v2
+– a 2017 browser game I mothballed in 2022. Goal: port the backend from Laravel/MySQL to NestJS/Postgres and modernise the whole stack.
+Chapter 1: Codex
+Maybe the best one so far. Not because it is the best model out there but because its concurrency capability. You are not locked into your IDE to use CLI tools from other models. As well as, you do not have any safety concerns with the data that can mistakenly be leaked by using terminal commands.
+Initially, I have created a repository to develop diagramming editor.
+My idea was to prepare an npm workspaces so that I can split the code into multiple packages and have a monorepo with all the linters, tests.
+Prepared all deployment yaml files for k8s cluster and CI/CD pipelines for GitHub Actions.
+So instead of locally testing the changes, i could quickly look from my mobile if things go well.
+Goal was to eliminate halucination and have a clear structure to work with.
+This did work well in the beginning, when I described the project to the codex, it was able to understand and deliver not bad results.
+However, it was repetitive and once in a while could get lost and do entirely different things.
+I had to be careful about what I was asking and how I was asking it.
+I have figured out that codex works best when you provide AGENTS.md file in the root of your repository. This file should contain the description of the project, its structure, and how to run it.
+It should also contain the instructions on how to use the codex. This way, codex can understand the context of the project and provide better results.
+AGENTS.md file i used for this project was like this:
+copy
+```markdown
+# Repository Guidelines for Agents
+This repository is a Node.js monorepo managed with **npm workspaces**. Node 22 is required.
+## Project Goal
+This project aims to build a robust, feature-rich diagramming editor similar to [draw.io](https://www.drawio.com). The implementation should closely mirror the usability and key functionalities provided by draw\.io, ensuring a smooth, intuitive user experience.
+## Key Architectural Principles
+The following principles guide all code contributions and implementations:
+### Modularity
+* All components should be designed as loosely coupled, reusable modules.
+* Ensure each module has clear, minimal dependencies.
+* Follow package boundaries clearly defined within the `packages/` directory.
+* Design modules as plug-and-play packages so they can be swapped or extended with minimal friction, mirroring draw.io's scalability.
+### SOLID Principles
+All code should adhere strictly to the SOLID principles:
+* **Single Responsibility Principle (SRP)**: Each module or class should have a single clear purpose.
+* **Open/Closed Principle (OCP)**: Modules should be open for extension but closed for modification.
+* **Liskov Substitution Principle (LSP)**: Derived classes must be substitutable for their base classes without altering correctness.
+* **Interface Segregation Principle (ISP)**: Favor specific interfaces over general-purpose ones.
+* **Dependency Inversion Principle (DIP)**: Depend on abstractions rather than concrete implementations.
+### Heavy Testing
+* Every new feature or module should come with comprehensive unit tests.
+* Integration and end-to-end (E2E) tests are essential, ensuring seamless interactions among components.
+* Tests must be clear, readable, and maintainable.
+* Aim for high test coverage, particularly for core logic and user interactions.
+## Directory Overview
+* `packages/` – Core libraries and reusable modules following SOLID principles.
+* `ui-shell/vanilla/` – Demo UI built with Vite + Tailwind, adhering to modular and testable design.
+* `k8s/` – Kubernetes manifests for deployment.
+## Common Commands
+Run these commands from the repository root:
+### Install all dependencies
+```sh
+npm install --workspaces --include-workspace-root
+### Run unit tests
+```sh
+npm test
+### Run Playwright E2E tests
+```sh
+npm test --workspace e2e
+This spins up the demo UI on port 5173 and executes all tests located in `e2e/tests`.
+### Lint all packages
+```sh
+npm run lint
+### Start the demo UI in dev mode
+```sh
+npm run dev --workspace ui-shell/vanilla
+Opens the demo UI at [http://localhost:5173](http://localhost:5173).
+### Build the production UI
+```sh
+npm run build --workspace ui-shell/vanilla
+Output is placed in `ui-shell/vanilla/dist`.
+### Docker
+```sh
+docker compose up # builds and serves on port 3002
+### Kubernetes
+Manifest files reside in `k8s/`. Apply them using:
+```sh
+kubectl apply -f k8s
+## Development Guidelines for Agents
+* **Clearly defined tasks:** Implement tasks in small, incremental changes, clearly describing input and output expectations.
+* **Code readability:** Write clean, well-documented code. Clearly comment any complex logic or design decisions.
+* **Automated feedback loops:** Regularly run linting, formatting, and tests to ensure high-quality code.
+* **Lint checks:** Ensure `npm run lint` passes without any warnings or errors before committing.
+* **Continuous integration:** Use automated CI/CD pipelines to validate code quickly and reliably.
+* **Meaningful abstractions:** Whenever you implement logic, extract it into well-named, reusable functions. Favor small, standalone functions to encourage composability.
+* **Minimize conditionals:** Avoid large `if`/`else` blocks. Prefer early returns or design patterns such as strategy or polymorphism to keep flow control clear and modular.
+* **Feature visibility:** Every new feature must also be enabled in the demo UI so a human tester can manually exercise it. Avoid implementing functionality that cannot be accessed through the interface.
+## Notes
+* ESLint runs automatically upon commit via Husky, enforcing code quality.
+* Refer to the `README.md` for comprehensive details on features and repository layout.
+After couple of iterations, codex new what to do and how to do it.
+In the end of the 700+ commits done by codex, i had a working prototype of a diagramming editor that was able to render diagrams and export them as images.
+It was not perfect, but it was a good start. In overall it was a good experience.
+You can read more about the project
+here
+.
+Chapter 2 — Codex + Claude CLI Tag Team
+Back in 2022, i had started v2 for eDominations which is a browser game that i had published its first version in 2017.
+Before i stopped working on v2 i had a working version missing some features.
+Written in React as SPA, laravel as backend and mysql as database. All you had to do was docker compose up and you were ready to go.
+Wanted to test the coding agents with this project if they can nicely and quickly port it to a new stack. Goal was rewriting from Laravel into NestJS and MySQL into Postgres.
+Now that i had experience with codex, i wanted to see if it thrives with a more complex project. Well, in the beginning started well. Codex was able to understand the project since i provided AGENTS.md rather first commit.
+This time we were on stereoids with Codex. First i made sure it analyzed the project when i asked a task to do and come up with a plan and a task list.
+This way, i was able to see if it was on the right track or not. If it was not, i could correct it and ask to do it again.
+After couple of days, codex provided 4x concurrency to the codex cloud. Hence, i got even faster results. However, it was too delusional no matter what i did.
+Lesser descriptions, more comments, more instructions, it was not able to deliver what i wanted. Simply i tried everything i could think of.
+Dont take this project lightly, in a single repository, there were client, legacy service, new service, 2 additional microservices for cdn proxy and socket service for live chat. Not an easy with limited context length.
+AGENTS.md file i used for this project was like this:
+copy
+# Repository Guidelines for Agents
+This repository is a browser game called eDominations includes couple of services.
+## Project Goal
+This project aims to build an amazing and entertaining browser based multiplayer strategy game with robust, feature-rich backend services. The game is designed to be modular, scalable, and maintainable, allowing for easy addition of new features and enhancements over time.
+Short term goal is to rewrite the PHP application into NestJS in
+`service-nest`
+and migrate the database from MySQL to PostgreSQL.
+## Key Architectural Principles
+The following principles guide all code contributions and implementations:
+### Modularity
+*
+All components should be designed as loosely coupled, reusable modules.
+*
+Ensure each module has clear, minimal dependencies.
+*
+Design modules as plug-and-play packages so they can be swapped or extended with minimal friction.
+### SOLID Principles
+All code should adhere strictly to the SOLID principles:
+*
+**Single Responsibility Principle (SRP)**
+: Each module or class should have a single clear purpose.
+*
+**Open/Closed Principle (OCP)**
+: Modules should be open for extension but closed for modification.
+*
+**Liskov Substitution Principle (LSP)**
+: Derived classes must be substitutable for their base classes without altering correctness.
+*
+**Interface Segregation Principle (ISP)**
+: Favor specific interfaces over general-purpose ones.
+*
+**Dependency Inversion Principle (DIP)**
+: Depend on abstractions rather than concrete implementations.
+### Heavy Testing
+*
+Every new feature or module should come with comprehensive unit tests.
+*
+Integration and end-to-end (E2E) tests are essential, ensuring seamless interactions among components.
+*
+Tests must be clear, readable, and maintainable.
+*
+Aim for high test coverage, particularly for core logic and user interactions.
+## Directory Overview
+*
+`client/`
+– React client application. Face of the game, built with TypeScript and React.
+*
+`service/`
+– Laravel application, the original backend of the game, slated to be replaced by the NestJS implementation in
+`service-nest`
+.
+*
+`service-nest/`
+– NestJS backend hosting modular microservices, including the WebSocket service.
+*
+`service-nest/src/microservices/cdn/`
+– standalone CDN microservice for serving game assets.
+*
+`service-nest/src/microservices/socket/`
+– NestJS microservice responsible for WebSocket communication.
+*
+`k8s/`
+– Kubernetes manifests for deployment.
+*
+`docs/`
+– central documentation hub for design notes, API references, and migration guides.
+## Common Commands
+Run these commands from the repository root:
+### Docker
+```sh
+docker
+compose
+up
+### service-nest
+Run
+`
+npm
+run build`
+before
+executing
+any
+tasks
+in
+`
+service-nest
+`
+.
+Run
+`
+npm
+run start`
+to
+start
+the
+NestJS
+application
+whenever
+you
+work
+on
+new
+features
+or
+debugging
+tasks.
+## Development Guidelines for Agents
+*
+**
+Clearly defined tasks:
+**
+Implement tasks in small, incremental changes, clearly describing input and output expectations.
+*
+**
+Code readability:
+**
+Write clean, well-documented code. Clearly comment any complex logic or design decisions.
+*
+**
+Automated feedback loops:
+**
+Regularly run linting, formatting, and tests to ensure high-quality code.
+*
+**
+Lint checks:
+**
+Ensure
+`
+npm
+run lint`
+passes
+without
+any
+warnings
+or
+errors
+before
+committing.
+*
+**
+Continuous integration:
+**
+Use automated CI/CD pipelines to validate code quickly and reliably.
+*
+**
+Meaningful abstractions:
+**
+Whenever you implement logic, extract it into well-named, reusable functions. Favor small, standalone functions to encourage composability.
+*
+**
+Minimize conditionals:
+**
+Avoid large
+`if`
+/
+`else`
+blocks.
+Prefer
+early
+returns
+or
+design
+patterns
+such
+as
+strategy
+or
+polymorphism
+to
+keep
+flow
+control
+clear
+and
+modular.
+*
+**
+Feature visibility:
+**
+Every new feature must also be enabled in the demo UI so a human tester can manually exercise it. Avoid implementing functionality that cannot be accessed through the interface.
+No result excited me. Thats when i decided to try out Claude CLI. I had a good experience with it in the past, so i thought it would be a good idea to give it a try.
+Well when you initiate your claude cli, you can
+/init
+and let it do its job and prepare a nice AGENTS.md alike file for you. Same purpose as AGENTS.md. However this time i let it cook. So it did a nice meal for itself.
+copy
+# CLAUDE.md
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Project Overview
+eDominations v2 is a browser-based multiplayer strategy game built as a monorepo with microservices architecture. The project is migrating from a PHP/Laravel backend to NestJS with PostgreSQL.
+## Architecture
+### Core Services
+-
+**client/**
+: React TypeScript SPA for the game interface
+-
+**service-nest/**
+: NestJS backend with domain-driven design, including:
+-
+Main API service on port 3001
+-
+CDN microservice on port 3036 (
+`service-nest/src/microservices/cdn/`
+)
+-
+WebSocket microservice on port 3035 (
+`service-nest/src/microservices/socket/`
+)
+-
+**service/**
+: Legacy Laravel backend (being phased out)
+-
+**k8s/**
+: Kubernetes deployment manifests
+-
+**docs/**
+: Project documentation
+### Domain Structure
+The NestJS service follows domain-driven design with domains in
+`service-nest/src/domains/`
+:
+-
+**user/**
+: User management, profiles, training, travel
+-
+**battles/**
+: Combat system, battlehits, wars
+-
+**country/**
+: Countries, regions, politics, economics
+-
+**company/**
+: Business system, employees, market
+-
+**journalism/**
+: Articles, newspapers, comments
+-
+**alliance/**
+: Player alliances and diplomacy
+-
+**energy/**
+: Energy system and logging
+-
+**elections/**
+: Political elections and voting
+-
+**chat/**
+: In-game messaging and chat
+-
+**cron/**
+: Scheduled tasks and game events
+## Development Commands
+### Docker Development
+```bash
+# Start all services
+docker
+compose
+up
+# Start specific services
+docker
+compose
+up
+client
+service-nest
+postgres
+redis
+### service-nest (NestJS Backend)
+```
+bash
+cd
+service-nest
+# Build (required before most tasks)
+npm
+run build
+# Development
+npm
+run start:dev
+# Main API with hot reload
+npm
+run start:cdn
+# CDN microservice
+npm
+run start:socket
+# WebSocket microservice
+# Testing
+npm
+run test
+# Unit tests
+npm
+run test:e2e
+# End-to-end tests
+npm
+run test:cov
+# Coverage report
+# Linting
+npm
+run lint
+# Auto-fix linting issues
+npm
+run lint:ci
+# Check linting (CI mode)
+# Database
+npm
+run migration:run
+# Run migrations
+npm
+run migration:revert
+# Revert last migration
+npm
+run seed
+# Seed database
+### client (React Frontend)
+```
+bash
+cd
+client
+# Development
+npm
+run
+dev
+# Start with Tailwind compilation
+npm
+start
+# React dev server only
+npm
+run
+tailwind
+# Tailwind CSS compilation
+# Testing
+npm
+run
+test
+# Unit tests
+npm
+run
+e2e
+# Cypress e2e tests
+npm
+run
+dev:cy
+# Cypress interactive mode
+# Linting
+npm
+run
+lint
+# ESLint check
+npm
+run
+lint:fix
+# Auto-fix linting issues
+npm
+run
+format
+# Prettier formatting
+# Build
+npm
+run
+build
+# Production build
+## Database & Infrastructure
+### PostgreSQL
+-
+**
+Host
+**
+:
+postgres
+(in
+Docker
+) or localhost
+-
+**
+Port
+**
+:
+5432
+-
+**
+Database
+**
+:
+edominations
+-
+**
+Admin
+UI
+**
+:
+pgAdmin
+on
+port
+5050
+(
+[email protected]
+/
+admin
+)
+### Redis
+-
+**
+Host
+**
+:
+redis
+(in
+Docker
+) or localhost
+-
+**
+Port
+**
+:
+6379
+-
+Used
+for
+caching
+and
+WebSocket
+scaling
+## Testing Strategy
+### Unit Tests
+-
+Located
+alongside
+source
+files
+in
+`
+__tests__/
+`
+directories
+-
+NestJS
+uses
+Jest
+with
+TypeORM
+test
+utilities
+-
+React
+uses
+Testing
+Library
+and
+Jest
+### E2E Tests
+-
+NestJS:
+`
+service-nest/test/*.e2e-spec.ts
+`
+using
+Testcontainers
+-
+React:
+`
+client/cypress/e2e/
+`
+using
+Cypress
+### Key Test Patterns
+-
+Use
+`
+beforeEach
+`
+for
+clean database state in e2e tests
+-
+Mock
+external
+dependencies
+in
+unit
+tests
+-
+Test
+both
+success
+and
+error
+scenarios
+-
+Include
+integration
+tests
+for
+complex
+domain
+interactions
+## Code Conventions
+### NestJS Backend
+-
+Use
+domain-driven
+design
+with
+modules
+per
+business
+domain
+-
+Controllers
+handle
+HTTP
+requests,
+services
+contain
+business
+logic
+-
+TypeORM
+entities
+with
+proper
+relationships
+and
+indexes
+-
+DTOs
+for
+request/response
+validation
+using
+class-validator
+-
+Comprehensive
+error
+handling
+with
+proper
+HTTP
+status
+codes
+### React Frontend
+-
+TypeScript
+with
+strict
+typing
+-
+Functional
+components
+with
+hooks
+-
+Tailwind
+CSS
+for
+styling
+-
+Context
+for
+global
+state
+management
+-
+Component
+colocation
+(components
+near
+their
+usage
+)
+## Development Workflow
+1.
+**
+Before
+starting
+**
+:
+Run
+`
+npm
+run build`
+in
+`
+service-nest/
+`
+2.
+**
+Testing
+**
+:
+Always
+run
+tests
+before
+committing
+changes
+3.
+**
+Linting
+**
+:
+Use
+`
+npm
+run lint`
+to
+check
+code
+quality
+4.
+**
+Database
+changes
+**
+:
+Create
+migrations
+for
+schema
+changes
+5.
+**
+Feature
+development
+**
+:
+Follow
+domain
+boundaries
+when
+adding
+functionality
+## Migration Context
+The
+project
+is
+actively
+migrating
+from
+Laravel/MySQL
+to
+NestJS/PostgreSQL.
+When
+working
+on
+features:
+-
+Prefer
+implementing
+new
+functionality
+in
+`
+service-nest/
+`
+-
+Database
+schema
+is
+defined
+in
+TypeORM
+migrations
+-
+Legacy
+Laravel
+code
+in
+`
+service/
+`
+is
+reference
+only
+-
+Game
+logic
+should
+be
+implemented
+in
+appropriate
+domain
+modules
+## Environment Configuration
+### Docker Environment Files
+-
+`
+client/.env.docker
+`
+:
+Client
+configuration
+for
+Docker
+-
+`
+service-nest/.env
+`
+:
+Main
+NestJS
+service
+config
+-
+`
+service-nest/.env.socket
+`
+:
+WebSocket
+service
+config
+-
+`
+service-nest/.env.cdn
+`
+:
+CDN
+service
+config
+### Key Environment Variables
+-
+`
+DB_HOST
+`
+,
+`
+DB_PORT
+`
+,
+`
+DB_USERNAME
+`
+,
+`
+DB_PASSWORD
+`
+,
+`
+DB_DATABASE
+`
+:
+PostgreSQL
+connection
+-
+`
+REDIS_HOST
+`
+,
+`
+REDIS_PORT
+`
+:
+Redis
+connection
+-
+`
+JWT_SECRET
+`
+,
+`
+JWT_EXPIRES_IN
+`
+:
+Authentication
+configuration
+Did a great job. Finally i got some accurae results and felt that tool got me covered. Only the problem that damage by Codex was done a little.
+Even though i had over 600 tests in total with e2e tests. Unit tests were rather testing framework itself than actually testing something :).
+My poor M1 macbook pro started burning and heating up like a furnace.
+Its summer, i dont need furnace.
+Aaand finally i figured out that i have no clue what is going on and nothing works.
+Third chapter: The Whole Zoo: Gemini CLI × Claude CLI × Codex + Human
+Why not staff a full AI scrum team?
+Spinning 2 clones of the repo—one per agent—worked technically, but juggling PRs felt like herding caffeinated cats.
+After all the pain and suffering, i decided to give it a try with human review. Don’t get me wrong, i did review previously but whenever a sets of tasks was completed. Not like every PR careful review. Whenever i asked claude to do something, i would review the code and see if it was on the right track or not. Manual testing alongside e2e tests, like a primate i was clicking here and there to see if things were working as expected.
+Claude was way more impressive than codex. It did truly felt like understood but the limitation with entry package was a problem. Right at the moment i am about to complete the task with Claude, it was like “Nope, not today”. You have got to wait for some amount of time, chill your horses and then come back to me.
+Fourth chapter: Gemini CLI + Claude CLI + Codex + Human review
+I did started the question myself “Why not use all of them together?”. Since Codex handles all its operations on the cloud all i was to clone repository twice and spawn gemini and cloud in each clone of the same repository.
+All of a sudden, i was leading a team of 3 AI agents and myself. I was the product owner, codex was the developer, gemini was the tester and claude was the reviewer. Joking, they did all work i was just clicking on merge.
+After couple of days of struggle, i don’t think i ever felt this bad that i am so disconnected, battling with 3 AI agents to get the job done
+while i had no clue of the project’s latest status.
+What I Learned
+AI agents ≠ architects. Give them a blueprint; don’t ask them to design the house.
+Supervision is non-negotiable. Unshepherded agents will drift off-spec.
+Generate tests, then audit them. Half their assertions checked nothing useful.
+Boilerplate? Perfect use-case. CI configs, CRUD layers, doc scaffolding—let the bots grind.
+Small, isolated functions shine. The narrower the task, the crisper the output.
+Stay in the loop. If you stop reading the code, you stop knowing your project.
+Most importantly, knowing the project is how we find comfort and knowledge day by day ( focus, discipline e.g ). If you let bot do all the work, highly likely you will instruct it wrong eventually.
+cd ..
+GitHub icon
+LinkedIn icon
+© 2026 Omer Atagun

@@ -1,0 +1,147 @@
+Ask HN: What tools are you using for human code review of AI-assisted code? | Hacker News
+Hacker News
+new
+|
+past
+|
+comments
+|
+ask
+|
+show
+|
+jobs
+|
+submit
+login
+Ask HN: What tools are you using for human code review of AI-assisted code?
+13 points
+by
+dafelst
+43 days ago
+|
+hide
+|
+past
+|
+favorite
+|
+11 comments
+A good proportion of us and our colleagues are now churning out agent-assisted code at an incredible rate, with some of it that is actually good, and a lot that is not so good. I'm personally finding that the real quality gate for our projects is now how thoroughly the generated code was human reviewed to ensure that it is not just correct, but architecturally sensible.
+AI code review tools like coderabbit and copilot, or even pointing claude code at a PR are all generally pretty good at finding bugs and style nits, but less good at finding duplicate code, module cross coupling, bad separation of concerns, and so on, even if prompted to do so.
+I'm finding that github's PR interface is not really cutting it for me, it was janky even when the reviews were small, but now at the size they're at, it is becoming unmanageable.  Add to that the extra noise of mixing in agent reviews, and people "meat-proxying" in copy-pasted agent output, and it's getting pretty noisy and difficult to navigate.
+What have you all found that works well for streamlining human review of AI assisted code? Tools and process suggestions are welcome.
+ArnaudDebray
+34 days ago
+|
+next
+[–]
+Hey,
+the fact that Github's PR interface isn't suited anymore and that review must go from detailed style/code focus towards architecture and high-level design really resonates with a pain I've had for months.
+A friend and I are just building something to solve that. In a nutshell we capture the AI sessions along the development to extract the key decisions and choices. We then use that to help navigate the diff and guide the reviewer towards what matters.
+Feel free to have a look =>
+https://www.herve.review/
+we're reaching the end of the beta phase, but happy to still loop you in :)
+othmanosx
+34 days ago
+|
+prev
+|
+next
+[–]
+Me and my team use
+https://pyor.review
+instead of github, which I built myself, it’s a far better alternative and fixes our exact pain points
+taurath
+43 days ago
+|
+prev
+|
+next
+[–]
+I’m considering a set of skills that I can apply common lenses to PRs (metrics, error handling, testability + tests, architecture, security), and fetch the code and pr details via the GitHub CLI or an MCP.  This seems like it might get absurdly expensive, but maybe w the right tuning it’ll be possible to run most of them on smaller models. Each would let me zoom in on its area and help me through the process of reviewing.
+The problem is with full on misses that I’d be able to catch by going line by line. The more static analysis and style enforcement the better - I’m still not sure whether it will come out as a benefit, esp when you consider cost of tokens. AI often creates its own extra work alongside the benefits, and it’s a bit like nicotine in that it works for a minute but then you’ll need to keep applying it to even return to baseline.
+ryanchants
+42 days ago
+|
+parent
+|
+next
+[–]
+That's what I do[0]. I run a gauntlet of judges against the PR, each with a strict lane to check.
+0:
+https://github.com/jacquardlabs/gauntlet
+joshgachnang
+41 days ago
+|
+prev
+|
+next
+[–]
+BugBot in Cursor has been great, I rarely find myself looking at it and disagreeing, especially with medium/high impact. I also have a custom architecture reviewer that just runs Claude, that's been great for finding duplicate code, boundary breaking, etc. We still have Github Copilot reviewing because it will (very occasionally) catch something BugBot missed, but the false positive rate is wayyyy higher, to the point I've considered disabling it a few times.
+BonanKou
+42 days ago
+|
+prev
+|
+next
+[–]
+TBH I just use another ClaudeCode to review or ask the agent to explain its reasoning process with me. I personally believe the reviewable unit shouldn't be the final diff. Instead, review the decision trace: plan, assumptions, etc. And if you agree with the agent's decision trace, probably you will also agree how the code was implemented
+ArnaudDebray
+34 days ago
+|
+parent
+|
+next
+[–]
+the reviewable unit shouldn't be the final diff. Instead, review the decision trace => I can't agree more
+juanpflores
+42 days ago
+|
+prev
+|
+next
+[–]
+Hey there!
+Coderabbit DX staff here. We have a new interface we are exploring for code review called change stack. Would love to hear your feedback on it and learn of the issues you mentioned above. If you have a PR we could take a look at I can bring this to the tea,
+cjg007
+41 days ago
+|
+prev
+|
+next
+[–]
+It seems most people directly issue review commands to the LLM, whereas my approach is to use different skills to perform repeated cross-checks, and after each check I add corresponding tests to prevent regressions.
+wbnns
+43 days ago
+|
+prev
+|
+next
+[–]
+Most of the time I just give Claude Code the PR link and then do the human side of the review based on the feedback it gives me.
+Sometimes I'll prompt again to scrutinize further.
+mandarinclips
+43 days ago
+|
+prev
+|
+next
+[–]
+I use Gemini most of the time when using different AI tools because it's free.I occasionally use grok build.And I rarely do code reviews anymore.
+Guidelines
+|
+FAQ
+|
+Lists
+|
+API
+|
+Security
+|
+Legal
+|
+Apply to YC
+|
+Contact
+Search:

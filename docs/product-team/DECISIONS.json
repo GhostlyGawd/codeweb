@@ -1,0 +1,2610 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-10-01T02:50:01.943454+00:00",
+  "authority": "Derived living decisions; frozen research and charter remain separate authorities.",
+  "review_status": "critic_pass_completed_same_session",
+  "source_packet": "reports/hypothesis-pressure-test-2026-09-29",
+  "source_coverage_sha256": "d1da94ff82e13682a69bb93e2ccbbcf4cde19718bfe476abc1c6b662b818c27a",
+  "disposition_meanings": {
+    "build_now": "A current reproduced gap supports a scoped change, not a new product-effect claim.",
+    "verify_current": "Check current supported behavior before choosing any implementation.",
+    "apply_now": "A scope, comparison or interpretation constraint applies to planned work.",
+    "test_first": "A proposed effect/job needs actual observations before expansion.",
+    "later": "A separately bounded follow-on question with an explicit entry condition.",
+    "reject_claim": "Reject the named unsupported claim or investment rationale; preserve the source finding."
+  },
+  "findings": [
+    {
+      "finding_id": "L01-F01",
+      "statement": "Reuse uncertainty is a credible conditional job, but the supported audience is narrower than all weekly coding-agent users.",
+      "disposition": "test_first",
+      "decision_reason": "Screen for recent unresolved reuse decisions; analyze reuse separately from affected-consumer inspection.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C01"
+      ],
+      "source_decision_ids": [
+        "F-D01"
+      ],
+      "test_ids": [
+        "F-T01"
+      ],
+      "evidence_ids": [
+        "CW-T018",
+        "CW-Z003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z006",
+        "CW-Z001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L01-F01",
+        "lens_file": "lenses/01-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L01-F02",
+      "statement": "Scope failures can have real consequences, but cross-module consumer discovery is only one possible cause and remedy.",
+      "disposition": "apply_now",
+      "decision_reason": "Include same-file reference cases and retain native search/tests as capable remedies.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C01",
+        "F-C03"
+      ],
+      "source_decision_ids": [
+        "F-D01",
+        "F-D03"
+      ],
+      "test_ids": [
+        "F-T01",
+        "F-T03"
+      ],
+      "evidence_ids": [
+        "CW-P003",
+        "CW-X001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-T023",
+        "CW-X001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L01-F02",
+        "lens_file": "lenses/01-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L01-F03",
+      "statement": "Successful ordinary native workflows are a real exclusion case, not noise to remove from recruitment.",
+      "disposition": "apply_now",
+      "decision_reason": "Keep familiar native-success cases and measure unsolicited evidence burden.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C01",
+        "F-C12"
+      ],
+      "source_decision_ids": [
+        "F-D01",
+        "F-D12"
+      ],
+      "test_ids": [
+        "F-T01",
+        "F-T12"
+      ],
+      "evidence_ids": [
+        "CW-Z001",
+        "CW-X001",
+        "CW-L015"
+      ],
+      "opposing_evidence_ids": [
+        "CW-T018",
+        "CW-P003"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L01-F03",
+        "lens_file": "lenses/01-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L01-F04",
+      "statement": "Reviewers have an adjacent need for architectural triage, which is not equivalent to the author’s pre-edit reuse lookup.",
+      "disposition": "later",
+      "decision_reason": "Require a named reviewer reconstruction/triage step before a separate reviewer trial.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-REVIEW"
+      ],
+      "claim_ids": [
+        "F-C04"
+      ],
+      "source_decision_ids": [
+        "F-D04"
+      ],
+      "test_ids": [
+        "F-T04"
+      ],
+      "evidence_ids": [
+        "CW-L048",
+        "CW-X006"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L051",
+        "CW-L001",
+        "CW-Z006"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L01-F04",
+        "lens_file": "lenses/01-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L01-F05",
+      "statement": "The collected audience is a convenience sample for mechanism discovery; its size cannot establish that the proposed segment has frequent unmet need.",
+      "disposition": "apply_now",
+      "decision_reason": "Record role, selection method, opportunities and nonuse; selected public posts do not estimate prevalence.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "G-01"
+      ],
+      "claim_ids": [
+        "F-C12"
+      ],
+      "source_decision_ids": [
+        "F-D12"
+      ],
+      "test_ids": [
+        "F-T12"
+      ],
+      "evidence_ids": [
+        "CW-X001",
+        "CW-Z003",
+        "CW-T018"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z001",
+        "CW-P003",
+        "CW-T023"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L01-F05",
+        "lens_file": "lenses/01-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L01-F06",
+      "statement": "The prospective paid segment is an unconfirmed team champion with a recurring cross-repo check, not an established buyer for managed evidence.",
+      "disposition": "test_first",
+      "decision_reason": "Qualify the recurring check owner and budget buyer; adequate CI must leave residual work.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-Y005"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L01-F06",
+        "lens_file": "lenses/01-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L02-F01",
+      "statement": "The useful incremental answer is a justified additional consumer to inspect, not a more precise or longer relationship list. Retain this only for tasks where native retrieval leaves consequential uncertainty.",
+      "disposition": "test_first",
+      "decision_reason": "Score correct changed inspection decisions, not relationship-list length.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C01",
+        "F-C04"
+      ],
+      "source_decision_ids": [
+        "F-D01",
+        "F-D04"
+      ],
+      "test_ids": [
+        "F-T01",
+        "F-T04"
+      ],
+      "evidence_ids": [
+        "CW-X001",
+        "CW-L023"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Z001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L02-F01",
+        "lens_file": "lenses/02-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L02-F02",
+      "statement": "Codeweb could move candidate discovery before implementation, but must beat native search plus ordinary duplication detection on the actual reuse decision. Fewer duplicated lines alone is not success.",
+      "disposition": "test_first",
+      "decision_reason": "Compare actual reuse decisions with native search/clone detection and intentional-duplication controls.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C01",
+        "F-C03"
+      ],
+      "source_decision_ids": [
+        "F-D01",
+        "F-D03"
+      ],
+      "test_ids": [
+        "F-T01",
+        "F-T03"
+      ],
+      "evidence_ids": [
+        "CW-T018",
+        "CW-Z003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z003",
+        "CW-Z012"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L02-F02",
+        "lens_file": "lenses/02-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L02-F03",
+      "statement": "Lower query bytes, fewer tool calls or fewer returned false matches do not establish lower total cost. A brief succeeds only after setup, refresh, reading and downstream verification are counted.",
+      "disposition": "apply_now",
+      "decision_reason": "Count setup, refresh, reads, retries, tests and review; bytes and calls are separate technical measures.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C04"
+      ],
+      "source_decision_ids": [
+        "F-D04"
+      ],
+      "test_ids": [
+        "F-T04"
+      ],
+      "evidence_ids": [
+        "CW-X001",
+        "CW-Z012"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L02-F03",
+        "lens_file": "lenses/02-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L02-F04",
+      "statement": "Codeweb may help locate evidence that changes a review judgment; it cannot replace inspection of runtime invariants or actual compiler/test execution. Compare against repository access, not a deliberately context-starved reviewer.",
+      "disposition": "apply_now",
+      "decision_reason": "Both conditions receive normal repository/test access and actual behavioral verification.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C03",
+        "F-C04"
+      ],
+      "source_decision_ids": [
+        "F-D03",
+        "F-D04"
+      ],
+      "test_ids": [
+        "F-T03",
+        "F-T04"
+      ],
+      "evidence_ids": [
+        "CW-L023"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L023",
+        "CW-Z004",
+        "CW-Y007"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L02-F04",
+        "lens_file": "lenses/02-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L02-F05",
+      "statement": "A generic additional change receipt is not a demonstrated job. A source-linked artifact earns value only if it removes a specific evidence-reconstruction step left by ordinary PR practice.",
+      "disposition": "later",
+      "decision_reason": "Evaluate an extra receipt only against a specific remaining reviewer reconstruction job.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-REVIEW"
+      ],
+      "claim_ids": [
+        "F-C04",
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D04",
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T04",
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-Y012",
+        "CW-L023"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y012",
+        "CW-Y005"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L02-F05",
+        "lens_file": "lenses/02-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L02-F06",
+      "statement": "The paid hypothesis survives only as untested residual coordination work: getting agreed checks run, rerun and shared with accurate revision/status provenance beyond adequate CI.",
+      "disposition": "test_first",
+      "decision_reason": "Measure recurring dispatch/retry/sharing work after a working CI baseline, including policy upkeep.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-Y005",
+        "CW-Y012"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L02-F06",
+        "lens_file": "lenses/02-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L03-F01",
+      "statement": "Availability must be claimed per observed host surface and worktree; installation metadata is insufficient.",
+      "disposition": "verify_current",
+      "decision_reason": "Verify each host/surface/worktree with observed discovery and delivery; do not infer parity from installation.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-02"
+      ],
+      "claim_ids": [
+        "F-C02"
+      ],
+      "source_decision_ids": [
+        "F-D02"
+      ],
+      "test_ids": [
+        "F-T02"
+      ],
+      "evidence_ids": [
+        "CW-T002",
+        "CW-T004",
+        "CW-X009"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L026",
+        "CW-L024"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L03-F01",
+        "lens_file": "lenses/03-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "scoped_native_codex_available_broader_surfaces_unverified",
+      "user_outcome_status": "unobserved",
+      "result_refs": [
+        "reports/native-evidence-p02-2026-09-30/MATRIX.json",
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+      ],
+      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+    },
+    {
+      "finding_id": "L03-F02",
+      "statement": "A six-line limit must protect the edit-relevant consumer and uncertainty, not merely truncate a ranked list.",
+      "disposition": "verify_current",
+      "decision_reason": "Check low-fan-in edited targets; exact or declared ambiguous scope must beat popularity-based selection.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-02"
+      ],
+      "claim_ids": [
+        "F-C02"
+      ],
+      "source_decision_ids": [
+        "F-D02"
+      ],
+      "test_ids": [
+        "F-T02"
+      ],
+      "evidence_ids": [
+        "CW-X001",
+        "CW-L023"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z012",
+        "CW-Z009"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L03-F02",
+        "lens_file": "lenses/03-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "target_relevance_failure_reproduced",
+      "user_outcome_status": "unobserved",
+      "result_refs": [
+        "reports/native-evidence-p02-2026-09-30/MATRIX.json",
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+      ],
+      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+    },
+    {
+      "finding_id": "L03-F03",
+      "statement": "One-second warm evidence is an end-to-end pre-edit target, not an engine-speed or installed-readiness result.",
+      "disposition": "apply_now",
+      "decision_reason": "Record request-to-usable-evidence latency per run; one second remains a provisional design target.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-02"
+      ],
+      "claim_ids": [
+        "F-C02"
+      ],
+      "source_decision_ids": [
+        "F-D02"
+      ],
+      "test_ids": [
+        "F-T02"
+      ],
+      "evidence_ids": [
+        "CW-Y006",
+        "CW-T006"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L024"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L03-F03",
+        "lens_file": "lenses/03-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "per_run_native_timings_observed_not_speed_claim",
+      "user_outcome_status": "unobserved",
+      "result_refs": [
+        "reports/native-evidence-p02-2026-09-30/MATRIX.json",
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+      ],
+      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+    },
+    {
+      "finding_id": "L03-F04",
+      "statement": "Mistaken suppression is a first-class failure: silence must not imply safe isolation.",
+      "disposition": "verify_current",
+      "decision_reason": "Distinguish empty supported results from missing, corrupt, stale, unsupported or suppressed evidence.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-02"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "source_decision_ids": [
+        "F-D02",
+        "F-D03"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "evidence_ids": [
+        "CW-Z007",
+        "CW-Z011",
+        "CW-X009"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Z009"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L03-F04",
+        "lens_file": "lenses/03-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "mapped_unavailable_distinction_failure_reproduced",
+      "user_outcome_status": "unobserved",
+      "result_refs": [
+        "reports/native-evidence-p02-2026-09-30/MATRIX.json",
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+      ],
+      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+    },
+    {
+      "finding_id": "L03-F05",
+      "statement": "On-demand recovery must preserve the pre-edit baseline and permissions; another reminder to remap leaves recurring work with the user.",
+      "disposition": "verify_current",
+      "decision_reason": "Verify permission-respecting recovery, original-baseline preservation and disable/uninstall behavior.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-02"
+      ],
+      "claim_ids": [
+        "F-C02"
+      ],
+      "source_decision_ids": [
+        "F-D02"
+      ],
+      "test_ids": [
+        "F-T02"
+      ],
+      "evidence_ids": [
+        "CW-001",
+        "CW-Z007",
+        "CW-T004"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L026",
+        "CW-Z012"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L03-F05",
+        "lens_file": "lenses/03-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "baseline_survival_verified_mapped_recovery_gap_retained",
+      "user_outcome_status": "unobserved",
+      "result_refs": [
+        "reports/native-evidence-p02-2026-09-30/MATRIX.json",
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+      ],
+      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+    },
+    {
+      "finding_id": "L03-F06",
+      "statement": "The decisive experience measure is changed decisions per total attention spent, not card delivery or six-line compliance.",
+      "disposition": "test_first",
+      "decision_reason": "Score correct decisions and combined attention; a delivered card is not preference or value.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C04"
+      ],
+      "source_decision_ids": [
+        "F-D04"
+      ],
+      "test_ids": [
+        "F-T04"
+      ],
+      "evidence_ids": [
+        "CW-L023",
+        "CW-X001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z012",
+        "CW-Z009",
+        "CW-L024"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L03-F06",
+        "lens_file": "lenses/03-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L04-F01",
+      "statement": "Retain mapped consumers as source-inspection leads; reject an exhaustive affected-code or safe-deletion interpretation.",
+      "disposition": "apply_now",
+      "decision_reason": "Remove exhaustive/safe-deletion implications and label dynamic/generated boundaries.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-01"
+      ],
+      "claim_ids": [
+        "F-C03"
+      ],
+      "source_decision_ids": [
+        "F-D03"
+      ],
+      "test_ids": [
+        "F-T03"
+      ],
+      "evidence_ids": [
+        "L04-C01",
+        "L04-C03",
+        "CW-L023"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z007",
+        "CW-Z011",
+        "CW-X001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L04-F01",
+        "lens_file": "lenses/04-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L04-F02",
+      "statement": "Similarity supports candidate comparison, not semantic reuse; reject the frozen CLI’s empty-result safety wording.",
+      "disposition": "build_now",
+      "decision_reason": "Replace the reproduced published empty-result safety claim; retain similarity as a comparison lead.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-01"
+      ],
+      "claim_ids": [
+        "F-C03"
+      ],
+      "source_decision_ids": [
+        "F-D03"
+      ],
+      "test_ids": [
+        "F-T03"
+      ],
+      "evidence_ids": [
+        "L04-C02",
+        "L04-C08"
+      ],
+      "opposing_evidence_ids": [
+        "L04-C07",
+        "CW-Z011"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L04-F02",
+        "lens_file": "lenses/04-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "corrected_in_reviewed_candidate_awaiting_merge_release",
+      "user_outcome_status": "unobserved",
+      "result_refs": [
+        "reports/research-to-execution-plan-2026-09-30/EMPTY-RESULT-REPRO.json",
+        "reports/native-evidence-p01-2026-09-30/COMPLETION.json",
+        "reports/native-evidence-p01-2026-09-30/DELIVERY.json"
+      ],
+      "last_reviewed_at": "2026-10-01T00:46:03.127625+00:00",
+      "revisit_when": "P-02 host/output coverage verification, merge/release decisions or new contrary evidence; no customer effect measured."
+    },
+    {
+      "finding_id": "L04-F03",
+      "statement": "Preserved baselines and explicit evidence receipts support auditable structural change, but unchanged/green and refresh are narrower than complete verification.",
+      "disposition": "verify_current",
+      "decision_reason": "Reuse existing receipt/baseline work; verify refresh/duplication and incomplete-baseline distinctions.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-02"
+      ],
+      "claim_ids": [
+        "F-C03"
+      ],
+      "source_decision_ids": [
+        "F-D03"
+      ],
+      "test_ids": [
+        "F-T03"
+      ],
+      "evidence_ids": [
+        "L04-C01",
+        "L04-C03",
+        "L04-C04"
+      ],
+      "opposing_evidence_ids": [
+        "L04-C06",
+        "CW-X013"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L04-F03",
+        "lens_file": "lenses/04-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "original_baseline_and_receipt_survival_verified",
+      "user_outcome_status": "unobserved",
+      "result_refs": [
+        "reports/native-evidence-p02-2026-09-30/MATRIX.json",
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+      ],
+      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+    },
+    {
+      "finding_id": "L04-F04",
+      "statement": "Honest uncertainty exists in explicit outputs but the ambient hooks do not establish the proposed universal failure/coverage presentation.",
+      "disposition": "verify_current",
+      "decision_reason": "Test ambient failure paths separately from explicit diagnostic/evidence outputs.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-02"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "source_decision_ids": [
+        "F-D02",
+        "F-D03"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "evidence_ids": [
+        "L04-C05",
+        "L04-C06",
+        "CW-Z007"
+      ],
+      "opposing_evidence_ids": [
+        "L04-C01",
+        "L04-C07"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L04-F04",
+        "lens_file": "lenses/04-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "ambient_mapped_failure_states_reproduced_host_trust_unverified",
+      "user_outcome_status": "unobserved",
+      "result_refs": [
+        "reports/native-evidence-p02-2026-09-30/MATRIX.json",
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+      ],
+      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+    },
+    {
+      "finding_id": "L04-F05",
+      "statement": "Test-neighbor edges, recorded coverage, structural verdicts and behavioral success require separate provenance; reject a single synthetic verified label.",
+      "disposition": "apply_now",
+      "decision_reason": "Keep structural verdicts, test-neighbor hints, recorded coverage and executed tests distinct.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-01"
+      ],
+      "claim_ids": [
+        "F-C03"
+      ],
+      "source_decision_ids": [
+        "F-D03"
+      ],
+      "test_ids": [
+        "F-T03"
+      ],
+      "evidence_ids": [
+        "L04-C03",
+        "L04-C04",
+        "CW-T022",
+        "CW-X013",
+        "CW-Z004"
+      ],
+      "opposing_evidence_ids": [
+        "L04-C01",
+        "L04-C07"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L04-F05",
+        "lens_file": "lenses/04-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L04-F06",
+      "statement": "H2 survives only as a contextual-inspection hypothesis with recall and effort tradeoffs; the paid coordination promise remains technically unproven.",
+      "disposition": "test_first",
+      "decision_reason": "Score local recall/effort tradeoffs; leave hosted coordination capability to its separate evaluation.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C04",
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D04",
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T04",
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-L023",
+        "L04-C01",
+        "L04-C07"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z012",
+        "CW-X001",
+        "CW-Y012",
+        "CW-Z004"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L04-F06",
+        "lens_file": "lenses/04-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L05-F01",
+      "statement": "Recurring reuse uncertainty is supported; repeated voluntary Codeweb reliance is not established.",
+      "disposition": "test_first",
+      "decision_reason": "Observe voluntary later use after initial usefulness without treating prompts as return.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-03"
+      ],
+      "claim_ids": [
+        "F-C05"
+      ],
+      "source_decision_ids": [
+        "F-D05"
+      ],
+      "test_ids": [
+        "F-T05"
+      ],
+      "evidence_ids": [
+        "CW-Z003",
+        "CW-T018"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z001",
+        "CW-X001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L05-F01",
+        "lens_file": "lenses/05-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L05-F02",
+      "statement": "Familiarity can erase first-use value; repeated orientation is a distinct, only partly addressable burden.",
+      "disposition": "test_first",
+      "decision_reason": "Distinguish familiar work from new/changed-module orientation; capture reduced future need as a possible outcome.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-03"
+      ],
+      "claim_ids": [
+        "F-C05",
+        "F-C08"
+      ],
+      "source_decision_ids": [
+        "F-D05",
+        "F-D08"
+      ],
+      "test_ids": [
+        "F-T05",
+        "F-T08"
+      ],
+      "evidence_ids": [
+        "CW-L037",
+        "CW-T007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z012",
+        "CW-L015"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L05-F02",
+        "lens_file": "lenses/05-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L05-F03",
+      "statement": "Low calendar frequency need not mean low value; lack of an eligible task must not be scored as churn.",
+      "disposition": "apply_now",
+      "decision_reason": "Classify no eligible opportunity as inconclusive, separately from eligible nonuse or workflow access failure.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-03"
+      ],
+      "claim_ids": [
+        "F-C05"
+      ],
+      "source_decision_ids": [
+        "F-D05"
+      ],
+      "test_ids": [
+        "F-T05"
+      ],
+      "evidence_ids": [
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y010",
+        "CW-Z001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L05-F03",
+        "lens_file": "lenses/05-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L05-F04",
+      "statement": "Repeated noise and intentional duplication can turn a correct finding into a reason to stop using the brief.",
+      "disposition": "apply_now",
+      "decision_reason": "Respect intentional duplication and capture noisy/unwanted interventions in the pilot.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-01"
+      ],
+      "claim_ids": [
+        "F-C03",
+        "F-C05"
+      ],
+      "source_decision_ids": [
+        "F-D03",
+        "F-D05"
+      ],
+      "test_ids": [
+        "F-T03",
+        "F-T05"
+      ],
+      "evidence_ids": [
+        "CW-L023",
+        "CW-Z006"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L051",
+        "CW-T018"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L05-F04",
+        "lens_file": "lenses/05-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L05-F05",
+      "statement": "Automatic invocation and installed defaults are not voluntary return; repeated prompting would defeat the stated reliance loop.",
+      "disposition": "apply_now",
+      "decision_reason": "Track automatic delivery, prompted use and voluntary choice separately.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-03"
+      ],
+      "claim_ids": [
+        "F-C05"
+      ],
+      "source_decision_ids": [
+        "F-D05"
+      ],
+      "test_ids": [
+        "F-T05"
+      ],
+      "evidence_ids": [
+        "CW-001",
+        "CW-L022"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y001",
+        "CW-L051"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L05-F05",
+        "lens_file": "lenses/05-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L05-F06",
+      "statement": "The proof sprint needs an opportunity-based longitudinal record before either reliance claim can survive as more than a hypothesis.",
+      "disposition": "apply_now",
+      "decision_reason": "Use an opportunity-based follow-up record; expanded withdrawal testing stays separate.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-03"
+      ],
+      "claim_ids": [
+        "F-C05",
+        "F-C06"
+      ],
+      "source_decision_ids": [
+        "F-D05",
+        "F-D06"
+      ],
+      "test_ids": [
+        "F-T05",
+        "F-T06"
+      ],
+      "evidence_ids": [
+        "CW-T018",
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Y010",
+        "CW-Z012"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L05-F06",
+        "lens_file": "lenses/05-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L06-F01",
+      "statement": "H6 needs a narrower candidate buyer: an accountable owner of recurring multi-repository check coordination, whose residual work survives adequate CI. No such confirmed Codeweb buyer is established.",
+      "disposition": "test_first",
+      "decision_reason": "Find the check owner and budget authority; neither a public advocate nor a role title establishes buying.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-Y007",
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-Y004"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L06-F01",
+        "lens_file": "lenses/06-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L06-F02",
+      "statement": "Reject a paid shared-receipt offer that merely republishes free structural checks and existing PR artifacts; coordination must demonstrably take work over.",
+      "disposition": "reject_claim",
+      "decision_reason": "Reject charging for repackaged free checks/ordinary PR artifacts as the present paid rationale.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C04",
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D04",
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T04",
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y012",
+        "CW-Y005"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L06-F02",
+        "lens_file": "lenses/06-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L06-F03",
+      "statement": "Per-active-author pricing is an unvalidated proxy for coordination value; neither author count nor PR count alone explains this job.",
+      "disposition": "test_first",
+      "decision_reason": "Treat active-author pricing as charter intent and test its fit only against actual service value.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-02"
+      ],
+      "claim_ids": [
+        "F-C11"
+      ],
+      "source_decision_ids": [
+        "F-D11"
+      ],
+      "test_ids": [
+        "F-T11"
+      ],
+      "evidence_ids": [
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y001",
+        "CW-Y010"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L06-F03",
+        "lens_file": "lenses/06-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L06-F04",
+      "statement": "Repository-policy and setup work may consume or prevent the paid benefit; aggregation permission is not transitive.",
+      "disposition": "later",
+      "decision_reason": "Assess permitted source pairs, setup and non-transitive sharing before hosted evidence aggregation.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-SHARED"
+      ],
+      "claim_ids": [
+        "F-C10"
+      ],
+      "source_decision_ids": [
+        "F-D10"
+      ],
+      "test_ids": [
+        "F-T10"
+      ],
+      "evidence_ids": [
+        "CW-Y004"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-Y004"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L06-F04",
+        "lens_file": "lenses/06-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L06-F05",
+      "statement": "H7 survives: competitor cancellation and intended retention reveal service expectations, not Codeweb structural demand or renewal.",
+      "disposition": "apply_now",
+      "decision_reason": "Keep adjacent-product cancellations/retention as context, not Codeweb demand or renewal evidence.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-02"
+      ],
+      "claim_ids": [
+        "F-C11"
+      ],
+      "source_decision_ids": [
+        "F-D11"
+      ],
+      "test_ids": [
+        "F-T11"
+      ],
+      "evidence_ids": [
+        "CW-Y002"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y001",
+        "CW-Y010"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L06-F05",
+        "lens_file": "lenses/06-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L06-F06",
+      "statement": "The strategy's labor illustration is gross hypothetical value, not net paid-attributable savings or an economic buying result.",
+      "disposition": "reject_claim",
+      "decision_reason": "Reject hypothetical wage arithmetic as observed net savings; collect actual costs and buyer decisions.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-02"
+      ],
+      "claim_ids": [
+        "F-C11"
+      ],
+      "source_decision_ids": [
+        "F-D11"
+      ],
+      "test_ids": [
+        "F-T11"
+      ],
+      "evidence_ids": [
+        "CW-Y007",
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y004",
+        "CW-Y005",
+        "CW-Y012"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L06-F06",
+        "lens_file": "lenses/06-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L07-F01",
+      "statement": "A plausible expansion candidate is independently scoping a shared-utility extension across unfamiliar consumers; the corpus suggests an inspection aid but does not establish that Codeweb unlocks that task.",
+      "disposition": "later",
+      "decision_reason": "Use a real deferred task and declared expert-help/scoping barrier if a capability-expansion study is justified.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-CAPABILITY"
+      ],
+      "claim_ids": [
+        "F-C07"
+      ],
+      "source_decision_ids": [
+        "F-D07"
+      ],
+      "test_ids": [
+        "F-T07"
+      ],
+      "evidence_ids": [
+        "CW-T018",
+        "CW-P003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-X003",
+        "CW-Z006"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L07-F01",
+        "lens_file": "lenses/07-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L07-F02",
+      "statement": "Inspection evidence cannot grant permission to enlarge a change safely; mapped completeness and passing structure cannot establish runtime or semantic compatibility.",
+      "disposition": "apply_now",
+      "decision_reason": "Structural inspection cannot authorize broader semantic/runtime changes; ordinary validation remains.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-01"
+      ],
+      "claim_ids": [
+        "F-C03",
+        "F-C07"
+      ],
+      "source_decision_ids": [
+        "F-D03",
+        "F-D07"
+      ],
+      "test_ids": [
+        "F-T03",
+        "F-T07"
+      ],
+      "evidence_ids": [
+        "CW-Z007",
+        "CW-Z011",
+        "CW-Z005",
+        "CW-Z006"
+      ],
+      "opposing_evidence_ids": [
+        "CW-P003",
+        "CW-T018"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L07-F02",
+        "lens_file": "lenses/07-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L07-F03",
+      "statement": "The strongest observed expansion belongs to existing coding-agent workflows; a separate incremental Codeweb effect remains unresolved.",
+      "disposition": "apply_now",
+      "decision_reason": "Keep host/model/expert help comparable so agent gains are not attributed to Codeweb.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-01"
+      ],
+      "claim_ids": [
+        "F-C07"
+      ],
+      "source_decision_ids": [
+        "F-D07"
+      ],
+      "test_ids": [
+        "F-T07"
+      ],
+      "evidence_ids": [
+        "CW-Z001",
+        "CW-Z006",
+        "CW-T020",
+        "CW-X001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-T018",
+        "CW-P003"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L07-F03",
+        "lens_file": "lenses/07-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L07-F04",
+      "statement": "Cross-repository checking is a separate possible paid task, but current evidence supports a coordination question rather than demonstrated capability expansion.",
+      "disposition": "test_first",
+      "decision_reason": "Evaluate the multi-repo coordination job separately from any local capability-expansion claim.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y004",
+        "CW-Z005"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L07-F04",
+        "lens_file": "lenses/07-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L08-F01",
+      "statement": "Narrow local ownership to assembling inspectable source evidence for a declared task; the product does not own the reuse or change-scope decision.",
+      "disposition": "apply_now",
+      "decision_reason": "Own bounded factual collection; the maintainer retains suitability, intent and scope decisions.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-01"
+      ],
+      "claim_ids": [
+        "F-C01",
+        "F-C02"
+      ],
+      "source_decision_ids": [
+        "F-D01",
+        "F-D02"
+      ],
+      "test_ids": [
+        "F-T01",
+        "F-T02"
+      ],
+      "evidence_ids": [
+        "CW-T018"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Z011"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L08-F01",
+        "lens_file": "lenses/08-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L08-F02",
+      "statement": "Freshness and uncertainty handling are part of the collection job; reporting that a map is stale does not itself take over refresh and recovery.",
+      "disposition": "verify_current",
+      "decision_reason": "Measure who performs refresh/recovery and prevent silent stale evidence use.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-02"
+      ],
+      "claim_ids": [
+        "F-C02"
+      ],
+      "source_decision_ids": [
+        "F-D02"
+      ],
+      "test_ids": [
+        "F-T02"
+      ],
+      "evidence_ids": [
+        "CW-Z007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z012"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L08-F02",
+        "lens_file": "lenses/08-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "refresh_survival_verified_ambient_recovery_ownership_pending",
+      "user_outcome_status": "unobserved",
+      "result_refs": [
+        "reports/native-evidence-p02-2026-09-30/MATRIX.json",
+        "reports/native-evidence-p02-2026-09-30/review/REVIEW.md"
+      ],
+      "last_reviewed_at": "2026-10-01T02:50:01.943454+00:00",
+      "revisit_when": "P-03 repairs and P-04 claimed-surface verification; no user-value or field-readiness inference from partial passes."
+    },
+    {
+      "finding_id": "L08-F03",
+      "statement": "A factual structural collection job can be complete while behavioral validation remains explicitly unfinished; tests require a separate execution and interpretation owner.",
+      "disposition": "apply_now",
+      "decision_reason": "Declare the owner/state of behavioral verification independently of completed structural collection.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-01"
+      ],
+      "claim_ids": [
+        "F-C03"
+      ],
+      "source_decision_ids": [
+        "F-D03"
+      ],
+      "test_ids": [
+        "F-T03"
+      ],
+      "evidence_ids": [
+        "CW-X013",
+        "CW-T022",
+        "CW-Z004"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L08-F03",
+        "lens_file": "lenses/08-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L08-F04",
+      "statement": "The plausible paid complete job is revision-aware coordination of agreed checks through result delivery and failure recovery; demand and superiority over CI remain unresolved.",
+      "disposition": "test_first",
+      "decision_reason": "Require revision-aware check delivery/recovery to remove residual work beyond adequate CI.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y004",
+        "CW-Y002"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L08-F04",
+        "lens_file": "lenses/08-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L08-F05",
+      "statement": "Handoff is complete only when the recipient can use current evidence without reconstructing it; producing a receipt or summary alone is not result sharing ownership.",
+      "disposition": "later",
+      "decision_reason": "Require recipient revision/failure/next-owner comprehension without reconstructing the packet.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-REVIEW"
+      ],
+      "claim_ids": [
+        "F-C04",
+        "F-C10"
+      ],
+      "source_decision_ids": [
+        "F-D04",
+        "F-D10"
+      ],
+      "test_ids": [
+        "F-T04",
+        "F-T10"
+      ],
+      "evidence_ids": [
+        "CW-Y012",
+        "CW-Z004"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y001",
+        "CW-Z012"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L08-F05",
+        "lens_file": "lenses/08-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L09-F01",
+      "statement": "Narrow the potential recurring withdrawal loss to rebuilding a useful consumer/reuse inspection shortlist on later consequential changes.",
+      "disposition": "later",
+      "decision_reason": "Compare later matched tasks with/without the aid after familiarity, retaining source/tools/history.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-WITHDRAWAL"
+      ],
+      "claim_ids": [
+        "F-C06"
+      ],
+      "source_decision_ids": [
+        "F-D06"
+      ],
+      "test_ids": [
+        "F-T06"
+      ],
+      "evidence_ids": [
+        "CW-T018",
+        "CW-Z003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Z006",
+        "CW-Z011"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L09-F01",
+        "lens_file": "lenses/09-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L09-F02",
+      "statement": "Removal may improve the workflow; voluntary reinstatement must beat capable substitutes, not merely restore a familiar interface.",
+      "disposition": "later",
+      "decision_reason": "Allow adaptation and capable substitutes; record neutral voluntary reinstatement and subsequent use.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-WITHDRAWAL"
+      ],
+      "claim_ids": [
+        "F-C06"
+      ],
+      "source_decision_ids": [
+        "F-D06"
+      ],
+      "test_ids": [
+        "F-T06"
+      ],
+      "evidence_ids": [
+        "CW-L015",
+        "CW-X001",
+        "CW-Z012"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L024",
+        "CW-Z003"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L09-F02",
+        "lens_file": "lenses/09-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L09-F03",
+      "statement": "Knowledge and exported evidence that survive removal are a successful durable benefit but weaken claims of ongoing dependence.",
+      "disposition": "apply_now",
+      "decision_reason": "Retained exports/learning can be durable benefit even when continued dependence disappears.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-03"
+      ],
+      "claim_ids": [
+        "F-C06",
+        "F-C08"
+      ],
+      "source_decision_ids": [
+        "F-D06",
+        "F-D08"
+      ],
+      "test_ids": [
+        "F-T06",
+        "F-T08"
+      ],
+      "evidence_ids": [
+        "CW-L037",
+        "CW-Z003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L025",
+        "CW-X001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L09-F03",
+        "lens_file": "lenses/09-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L09-F04",
+      "statement": "The paid withdrawal mechanism would be renewed chasing, rerunning and assembling agreed checks; withdrawing free local tools cannot test it.",
+      "disposition": "later",
+      "decision_reason": "A paid removal comparison must concern returned coordination work, never removal of free local tooling.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C06",
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D06",
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T06",
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-Y007",
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-Y010",
+        "CW-Y012"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L09-F04",
+        "lens_file": "lenses/09-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L09-F05",
+      "statement": "The proof sprint can detect first usefulness and voluntary return, but two tasks per participant cannot by itself establish post-familiarity withdrawal loss.",
+      "disposition": "apply_now",
+      "decision_reason": "Two tasks per person cannot establish withdrawal loss; preserve the original pilot boundary.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-03"
+      ],
+      "claim_ids": [
+        "F-C05",
+        "F-C06"
+      ],
+      "source_decision_ids": [
+        "F-D05",
+        "F-D06"
+      ],
+      "test_ids": [
+        "F-T05",
+        "F-T06"
+      ],
+      "evidence_ids": [
+        "CW-X001",
+        "CW-Z012"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L024",
+        "CW-Y001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L09-F05",
+        "lens_file": "lenses/09-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L10-F01",
+      "statement": "Retain a narrow mechanism: task-owned, source-versioned structural receipts can avoid reconstructing which mapped relationships were inspected; accumulating receipts does not establish increasing usefulness or restore task intent.",
+      "disposition": "later",
+      "decision_reason": "Evaluate source-fact reorientation separately from intent/planning memory; reuse existing receipts.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-KNOWLEDGE"
+      ],
+      "claim_ids": [
+        "F-C08"
+      ],
+      "source_decision_ids": [
+        "F-D08"
+      ],
+      "test_ids": [
+        "F-T08"
+      ],
+      "evidence_ids": [
+        "K10-RECEIPTS",
+        "K10-FRESH"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X011",
+        "K10-STORE",
+        "K10-STRATEGY"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L10-F01",
+        "lens_file": "lenses/10-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L10-F02",
+      "statement": "Existing false-positive suppression is not proof of revision-safe saved decisions; a rationale must become eligible for rechecking when its relevant assumptions change.",
+      "disposition": "later",
+      "decision_reason": "Recheck saved rationale when relevant meaning/assumptions change, including stable source identity.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-KNOWLEDGE"
+      ],
+      "claim_ids": [
+        "F-C08"
+      ],
+      "source_decision_ids": [
+        "F-D08"
+      ],
+      "test_ids": [
+        "F-T08"
+      ],
+      "evidence_ids": [
+        "K10-ANNOTATE",
+        "CW-Z006"
+      ],
+      "opposing_evidence_ids": [
+        "K10-STRATEGY",
+        "K10-FRESH"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L10-F02",
+        "lens_file": "lenses/10-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L10-F03",
+      "statement": "Reusable knowledge has credible native and user-owned substitutes; Codeweb must add maintained source evidence rather than claim ownership of project memory.",
+      "disposition": "apply_now",
+      "decision_reason": "Compare native handoffs, memory, Git/PR history and runbooks instead of claiming project-memory ownership.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-KNOWLEDGE"
+      ],
+      "claim_ids": [
+        "F-C08"
+      ],
+      "source_decision_ids": [
+        "F-D08"
+      ],
+      "test_ids": [
+        "F-T08"
+      ],
+      "evidence_ids": [
+        "CW-L037",
+        "CW-L034"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y008",
+        "K10-STRATEGY"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L10-F03",
+        "lens_file": "lenses/10-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L10-F04",
+      "statement": "Knowledge compounds only when avoided reconstruction exceeds capture, freshness, retrieval and exception-maintenance work; storage growth is not an outcome.",
+      "disposition": "later",
+      "decision_reason": "Measure reconstruction avoided minus capture, retrieval, freshness and maintenance costs.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-KNOWLEDGE"
+      ],
+      "claim_ids": [
+        "F-C08"
+      ],
+      "source_decision_ids": [
+        "F-D08"
+      ],
+      "test_ids": [
+        "F-T08"
+      ],
+      "evidence_ids": [
+        "K10-FRESH",
+        "CW-Z006",
+        "CW-L034"
+      ],
+      "opposing_evidence_ids": [
+        "K10-STORE",
+        "CW-T012"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L10-F04",
+        "lens_file": "lenses/10-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L10-F05",
+      "statement": "Portable inspectable records and legitimate information boundaries are prerequisites for shared context; current task/workspace binding is not seamless cross-project memory.",
+      "disposition": "later",
+      "decision_reason": "Preserve root/task guards and permitted transfers; current inspectability is not seamless portability.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-SHARED"
+      ],
+      "claim_ids": [
+        "F-C08",
+        "F-C10"
+      ],
+      "source_decision_ids": [
+        "F-D08",
+        "F-D10"
+      ],
+      "test_ids": [
+        "F-T08",
+        "F-T10"
+      ],
+      "evidence_ids": [
+        "K10-STORE",
+        "CW-Y004"
+      ],
+      "opposing_evidence_ids": [
+        "K10-STORE",
+        "CW-L034"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L10-F05",
+        "lens_file": "lenses/10-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L10-F06",
+      "statement": "Reject proprietary-data or moat claims from evidence accumulation; narrow the paid hypothesis to demonstrably removed service coordination.",
+      "disposition": "reject_claim",
+      "decision_reason": "Reject a proprietary knowledge moat inferred from accumulated receipts; paid value needs removed service work.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C08",
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D08",
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T08",
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "K10-STRATEGY",
+        "K10-RECEIPTS"
+      ],
+      "opposing_evidence_ids": [
+        "K10-CHARTER",
+        "CW-Y008",
+        "CW-Y004"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L10-F06",
+        "lens_file": "lenses/10-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L11-F01",
+      "statement": "Shared facts can reduce repeated factual reconstruction, but ordinary PR/CI artifacts already supply much of this mechanism.",
+      "disposition": "later",
+      "decision_reason": "Compare shared factual reconstruction against the selected team's existing PR/CI artifacts.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-REVIEW"
+      ],
+      "claim_ids": [
+        "F-C04",
+        "F-C10"
+      ],
+      "source_decision_ids": [
+        "F-D04",
+        "F-D10"
+      ],
+      "test_ids": [
+        "F-T04",
+        "F-T10"
+      ],
+      "evidence_ids": [
+        "L11-S02",
+        "CW-Y012"
+      ],
+      "opposing_evidence_ids": [
+        "L11-S01",
+        "CW-T019"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L11-F01",
+        "lens_file": "lenses/11-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L11-F02",
+      "statement": "Cross-repository revision reconciliation is a plausible narrower coordination job, not demonstrated shared Codeweb dependence.",
+      "disposition": "test_first",
+      "decision_reason": "Qualify recurring revision reconciliation and avoid inferring shared dependence from plausibility.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-Y007",
+        "L11-S03"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "L11-S01"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L11-F02",
+        "lens_file": "lenses/11-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L11-F03",
+      "statement": "Shared evidence needs explicit ownership and permitted information flows; cross-repo aggregation can increase coordination instead of reducing it.",
+      "disposition": "later",
+      "decision_reason": "Name source-policy and result owners and measure coordination introduced as well as removed.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-SHARED"
+      ],
+      "claim_ids": [
+        "F-C10"
+      ],
+      "source_decision_ids": [
+        "F-D10"
+      ],
+      "test_ids": [
+        "F-T10"
+      ],
+      "evidence_ids": [
+        "CW-Y004",
+        "L11-S03"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y008",
+        "L11-S02"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L11-F03",
+        "lens_file": "lenses/11-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L11-F04",
+      "statement": "Earned shared reliance remains unproven; removing a mandated gate is not a valid withdrawal test.",
+      "disposition": "apply_now",
+      "decision_reason": "Score organizational coverage separately; a compulsory gate is not voluntary dependence.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "E-03"
+      ],
+      "claim_ids": [
+        "F-C06",
+        "F-C10"
+      ],
+      "source_decision_ids": [
+        "F-D06",
+        "F-D10"
+      ],
+      "test_ids": [
+        "F-T06",
+        "F-T10"
+      ],
+      "evidence_ids": [
+        "CW-Y007",
+        "CW-Y012"
+      ],
+      "opposing_evidence_ids": [
+        "L11-S01",
+        "CW-Y005",
+        "CW-Y001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L11-F04",
+        "lens_file": "lenses/11-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L12-F01",
+      "statement": "Even a perfectly delivered consumer/reuse brief owns a bounded discovery step, not the full job of maintaining sound abstractions or verifying a change. Its usefulness does not establish lasting reliance.",
+      "disposition": "apply_now",
+      "decision_reason": "Keep the complete local claim bounded to factual collection and the maintained evidence scope.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-01"
+      ],
+      "claim_ids": [
+        "F-C01",
+        "F-C12"
+      ],
+      "source_decision_ids": [
+        "F-D01",
+        "F-D12"
+      ],
+      "test_ids": [
+        "F-T01",
+        "F-T12"
+      ],
+      "evidence_ids": [
+        "CW-Z003",
+        "CW-T018"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Z001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L12-F01",
+        "lens_file": "lenses/12-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L12-F02",
+      "statement": "Repeated context reconstruction is a deeper local job candidate, but repository facts cover only part of the task state people need to resume work.",
+      "disposition": "later",
+      "decision_reason": "Require a demonstrated recurring reorientation burden before expanding local knowledge features.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "F-KNOWLEDGE"
+      ],
+      "claim_ids": [
+        "F-C08"
+      ],
+      "source_decision_ids": [
+        "F-D08"
+      ],
+      "test_ids": [
+        "F-T08"
+      ],
+      "evidence_ids": [
+        "CW-T007",
+        "CW-Z003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z012",
+        "CW-Z001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L12-F02",
+        "lens_file": "lenses/12-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L12-F03",
+      "statement": "Supported change evidence has a broader review job than a pre-edit brief, but an accurate evidence digest does not discharge behavioral verification or human understanding; much of the delivery already exists for free.",
+      "disposition": "apply_now",
+      "decision_reason": "Reuse free existing evidence delivery; a digest does not replace behavioral verification or understanding.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "P-01"
+      ],
+      "claim_ids": [
+        "F-C03",
+        "F-C04"
+      ],
+      "source_decision_ids": [
+        "F-D03",
+        "F-D04"
+      ],
+      "test_ids": [
+        "F-T03",
+        "F-T04"
+      ],
+      "evidence_ids": [
+        "CW-Y012",
+        "CW-L023"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z009",
+        "CW-Y005"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L12-F03",
+        "lens_file": "lenses/12-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L12-F04",
+      "statement": "Managed coordination is the only compared candidate that clearly crosses the charter’s paid boundary, but the strongest source asks for dependable cross-repo compatibility checking, not inherently for a new coordination vendor.",
+      "disposition": "test_first",
+      "decision_reason": "Test demand for the check job and competent substitutes before proposing a new coordination vendor.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "B-01"
+      ],
+      "claim_ids": [
+        "F-C09"
+      ],
+      "source_decision_ids": [
+        "F-D09"
+      ],
+      "test_ids": [
+        "F-T09"
+      ],
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y004",
+        "CW-Y005",
+        "CW-Y007"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L12-F04",
+        "lens_file": "lenses/12-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    },
+    {
+      "finding_id": "L12-F05",
+      "statement": "The automatic progression from useful free brief to durable commercial business is unsupported. Retain the free hypothesis for testing and reject that progression as the present investment rationale.",
+      "disposition": "reject_claim",
+      "decision_reason": "Reject automatic free-to-paid progression; decide local and paid hypotheses from separate results.",
+      "owner": "Codex session owning the selected work",
+      "work_ids": [
+        "D-01"
+      ],
+      "claim_ids": [
+        "F-C12"
+      ],
+      "source_decision_ids": [
+        "F-D12"
+      ],
+      "test_ids": [
+        "F-T12"
+      ],
+      "evidence_ids": [
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-X001",
+        "CW-Z001"
+      ],
+      "source_pointer": {
+        "path": "reports/hypothesis-pressure-test-2026-09-29/FINDING-COVERAGE.json",
+        "finding_id": "L12-F05",
+        "lens_file": "lenses/12-findings.json"
+      },
+      "evidence_status": "Preserved public-source inference/context; no observed Codeweb participant effect",
+      "execution_status": "decision_recorded",
+      "user_outcome_status": "unobserved",
+      "result_refs": [],
+      "last_reviewed_at": "2026-09-30T21:47:36.245342+00:00",
+      "revisit_when": "New selected-task evidence, affected source/host change, or the linked work's entry condition is met."
+    }
+  ]
+}

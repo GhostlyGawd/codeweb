@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-30T21:07:34.021635+00:00",
+  "user_instruction": "yeah lets cut paperclip out",
+  "operation": "Direct Codex with repository-backed plans, tasks, decisions and evidence",
+  "paperclip_runtime": {
+    "paused_agents": [
+      {
+        "id": "79d272db-70e2-483b-b817-292dac08593e",
+        "name": "Technical Lead",
+        "status": "paused"
+      },
+      {
+        "id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+        "name": "Independent Reviewer",
+        "status": "paused"
+      },
+      {
+        "id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+        "name": "Product Lead",
+        "status": "paused"
+      }
+    ],
+    "running_workers_before_stop": 0,
+    "server": "stopped",
+    "embedded_database": "stopped",
+    "shutdown_verification": {
+      "ports": {
+        "3100": {
+          "accepts_connections": false
+        },
+        "54329": {
+          "accepts_connections": false
+        }
+      },
+      "matched_runner_processes": [],
+      "start_script_exit_code": 1,
+      "start_script_message": "Codeweb retired Paperclip on 2026-09-30. Use Codex directly with docs/product-team/CURRENT.md and TERMINAL-CONTRACT.md. Historical state remains preserved locally."
+    },
+    "active_issue_schedules": [],
+    "routine_count": 0,
+    "former_scheduled_followup": {
+      "identifier": "COD-21",
+      "status_at_retirement": "done",
+      "attempt_count": 1
+    }
+  },
+  "preservation": {
+    "total_issue_records_captured": 94,
+    "unfinished_records_exported": 6,
+    "original_instruction_manifest": [
+      {
+        "path": "docs/product-team/history/paperclip-2026-09-30/CURRENT.md",
+        "bytes": 7298,
+        "sha256": "4058e1404b4f49290d98216e3982ae2e09b4599700a4dc58897696fc70b11dd9"
+      },
+      {
+        "path": "docs/product-team/history/paperclip-2026-09-30/TERMINAL-CONTRACT.md",
+        "bytes": 4313,
+        "sha256": "93412648471a121480093546cf3381c70ac63a514e5f85932d2816f4cf951c20"
+      },
+      {
+        "path": "docs/product-team/history/paperclip-2026-09-30/OPERATING-SPEC.md",
+        "bytes": 6846,
+        "sha256": "7564754554cfc5145c14938b2487d27c0926a8ab3c42705b42768823dbf1899c"
+      },
+      {
+        "path": "docs/product-team/history/paperclip-2026-09-30/INSTALLED-SKILL.md",
+        "bytes": 3436,
+        "sha256": "103c171bea50afea478be062b3dfbeff1428b5d70a4fef4976d830476b69a550"
+      },
+      {
+        "path": "docs/product-team/history/paperclip-2026-09-30/REPOSITORY-SKILL.md",
+        "bytes": 3436,
+        "sha256": "103c171bea50afea478be062b3dfbeff1428b5d70a4fef4976d830476b69a550"
+      },
+      {
+        "path": "docs/product-team/history/paperclip-2026-09-30/LEARNINGS-2026-09-15-browser-recovery.md",
+        "bytes": 5768,
+        "sha256": "b69b9726956437c521d413932ef68ee25e74da212fc86ad2a8dd8aa42db01ff6"
+      }
+    ],
+    "private_state_backup": {
+      "path": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/retired-2026-09-30/paperclip-state.tar.gz",
+      "bytes": 245144528,
+      "sha256": "ca32bbc0bfbc142c12e108e584faa322e7a83c57a8096ad0f71d81b5ba3bf753",
+      "members": 3249,
+      "cold_database": true,
+      "private_local_backup": true
+    },
+    "research_files_checked_unchanged": 711,
+    "research_hash_mismatches": [],
+    "original_state_and_worktrees_retained": true
+  },
+  "scope": {
+    "product_code_changed": false,
+    "outreach_sent": false,
+    "release_or_deployment": false,
+    "new_agents_or_scheduler_created": false,
+    "comparative_benefit_claimed": false
+  }
+}

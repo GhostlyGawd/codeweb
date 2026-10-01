@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "status": "pending_dependency_delivery",
+  "complete": false,
+  "findings_verified": 0,
+  "findings": [],
+  "required_lenses": [
+    "01",
+    "03",
+    "05"
+  ],
+  "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+  "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+  "triage_run_id": "64f06b51-c9b8-4343-89a3-6ddfaa6e57e0",
+  "verification_run_id": null,
+  "recorded_at": "2026-09-30T04:01:21.024328+00:00",
+  "source_comment_id": "f4238430-4df8-4457-a175-a97ddafe26f1",
+  "required_per_finding": [
+    "finding_id",
+    "lens_author_agent_id",
+    "verifier_agent_id",
+    "verifier_run_id",
+    "report_sha256",
+    "input_sha256",
+    "supporting_original_passage_or_capture_pointers",
+    "opposing_original_passage_or_capture_pointers",
+    "capability_evidence_pointers",
+    "disposition",
+    "correction_history"
+  ],
+  "closure_rules": [
+    "Product Lead verifies every material finding against original supporting and opposing passages/captures and capability evidence.",
+    "Preserve first drafts. At most one correction per existing lens task, structured resume:true and native blockers.",
+    "Include completed verification artifact in identical synthesis input packet without a preferred strategic verdict.",
+    "Verify fresh and procedurally blinded synthesis contexts. Final reviewer authors neither synthesis nor final edited recommendation.",
+    "Do not treat this pending record as completed verification or phase acceptance."
+  ],
+  "activation_receipt_sha256": "c0727c0ae6bb7eb030cbe530cb27edfba8d95c264595a200fed7592fa258c474"
+}

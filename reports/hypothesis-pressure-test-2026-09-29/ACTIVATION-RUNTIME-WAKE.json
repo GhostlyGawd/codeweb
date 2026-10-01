@@ -1,0 +1,7 @@
+{
+  "recorded_at": "2026-09-30T03:54:22.657787+00:00",
+  "exit_code": 0,
+  "stdout": "{\n  \"status\": \"skipped\",\n  \"reason\": \"wakeup_skipped\",\n  \"message\": \"Wakeup was skipped.\",\n  \"issueId\": \"573b8d18-80c7-4b18-84b5-aecd340601f8\",\n  \"executionRunId\": null,\n  \"executionAgentId\": null,\n  \"executionAgentName\": null\n}\n",
+  "stderr": "",
+  "idempotency_key": "cod76-activation-recovery-01"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "T97-advisory-permission-output",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w/subject.mjs\",\"old_string\":\"x + 1\",\"new_string\":\"x + 2\"}}",
+  "start": "2026-10-01T01:54:42.885Z",
+  "end": "2026-10-01T01:54:42.921Z",
+  "durationMs": 35.549125000000004,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"[codeweb] editing subject.mjs: 1 symbol(s), 1 in-repo dependent edge(s) (most depended-on: low ×1).\\n  function low (product, unassigned) — 1 caller(s), 0 test(s), blast 1 across 1 domain(s); args 1\\n  top callers: consumer.mjs:consumer\\n  → codeweb_context for a bounded edit window; codeweb_impact for the full blast radius.\"}}\n",
+  "stderr": ""
+}

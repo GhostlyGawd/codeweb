@@ -1,0 +1,99 @@
+{
+  "validated_at": "2026-09-28T01:13:45.163212+00:00",
+  "initial_unchanged": {
+    "L456-EVIDENCE.jsonl": true,
+    "L456-SOURCES.jsonl": true,
+    "L456-QUERY-LOG.csv": true,
+    "L456-PROGRESS.json": true
+  },
+  "audit_hashes": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "expected": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "actual": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "expected": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "actual": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "expected": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "actual": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "expected": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "actual": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560"
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "expected": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "actual": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c"
+    }
+  ],
+  "supplement_records": 28,
+  "supplement_firsthand": 24,
+  "supplement_vendor_claims": 3,
+  "supplement_maintainer_confirmation": 1,
+  "supplement_sources_registered": 21,
+  "supplement_opened": 20,
+  "supplement_full_retained": 15,
+  "supplement_full_excluded": 2,
+  "supplement_partial": 3,
+  "supplement_inaccessible": 1,
+  "queries": 26,
+  "combined_records": 56,
+  "combined_firsthand": 50,
+  "combined_opened": 42,
+  "combined_full_retained": 22,
+  "combined_full_excluded": 3,
+  "independent_review_passed": false,
+  "high_priority_ids": [
+    "CW-L001",
+    "CW-L008",
+    "CW-L022",
+    "CW-L023",
+    "CW-L024",
+    "CW-L025",
+    "CW-L026",
+    "CW-L029",
+    "CW-L030",
+    "CW-L031",
+    "CW-L032",
+    "CW-L035",
+    "CW-L037",
+    "CW-L038",
+    "CW-L039",
+    "CW-L040",
+    "CW-L041",
+    "CW-L043",
+    "CW-L044",
+    "CW-L046",
+    "CW-L048",
+    "CW-L051",
+    "CW-L052",
+    "CW-L055",
+    "CW-L056"
+  ],
+  "minimum_remaining_review_sample": 7,
+  "global_dedup": "No URL overlap with initial L456, saved L123 or pilot corpus; parent must reconcile concurrent technical supplement and author/incident repetitions.",
+  "correction_attempt": 1,
+  "corrected_ids": [
+    "CW-L032",
+    "CW-L043",
+    "CW-L044",
+    "CW-L046",
+    "CW-L052",
+    "CW-L053",
+    "CW-L054",
+    "CW-L055"
+  ],
+  "correction_checks": {
+    "only_requested_record_fields_changed": true,
+    "jsonl_csv_equal": true,
+    "cncf_thread_date_preserved": true,
+    "counts_unchanged": true
+  }
+}

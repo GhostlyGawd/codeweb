@@ -1,0 +1,17 @@
+{
+  "id": "T52-behavior-current",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "--test",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/current.test.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "start": "2026-10-01T01:50:14.400Z",
+  "end": "2026-10-01T01:50:14.477Z",
+  "durationMs": 76.64879199999996,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "✔ current valid oracle (0.306458ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 44.973916\n",
+  "stderr": ""
+}

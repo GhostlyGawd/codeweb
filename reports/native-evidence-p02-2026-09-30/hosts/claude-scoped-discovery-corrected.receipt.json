@@ -1,0 +1,26 @@
+{
+  "id": "claude-scoped-discovery-corrected",
+  "command": [
+    "claude",
+    "mcp",
+    "list",
+    "--restricted",
+    "--setting-sources",
+    "",
+    "--strict-mcp-config",
+    "--mcp-config",
+    "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/claude-mcp-scoped.json"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819464.529897,
+  "end_epoch": 1790819464.594972,
+  "duration_seconds": 0.06475114822387695,
+  "timeout_seconds": 30,
+  "timed_out": false,
+  "exit_code": 1,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/claude-scoped-discovery-corrected.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/claude-scoped-discovery-corrected.stderr.txt"
+}

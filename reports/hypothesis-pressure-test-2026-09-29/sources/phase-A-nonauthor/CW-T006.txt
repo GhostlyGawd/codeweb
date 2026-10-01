@@ -1,0 +1,191 @@
+
+  [FEATURE] Support sub-agents using '--watch' flags on 'build' and 'test' commands to eliminate dry-start costs · Issue #70680 · anthropics/claude-code · GitHub
+      Skip to content
+Navigation Menu
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub CopilotWrite better code with AI
+GitHub Copilot appDirect agents from issue to merge
+MCP RegistryIntegrate external tools
+DEVELOPER WORKFLOWS
+ActionsAutomate any workflow
+CodespacesInstant dev environments
+IssuesPlan and track work
+Code ReviewManage code changes
+Code QualityEnforce quality at merge
+APPLICATION SECURITY
+GitHub Advanced SecurityFind and fix vulnerabilities
+Code securitySecure your code as you build
+Secret protectionStop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+View all resources
+Open Source
+COMMUNITY
+GitHub SponsorsFund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+GitHub Stars
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platformAI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced SecurityEnterprise-grade security features
+Copilot for BusinessEnterprise-grade AI features
+Premium SupportEnterprise-grade 24/7 support
+Pricing
+Search/
+Sign inSign up
+Appearance settings
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+Dismiss alert
+{{ message }}
+        anthropics
+    /
+      claude-code
+    Public
+Notifications
+    You must be signed in to change notification settings
+Fork
+    25.1k
+          Star
+          149k
+        Code
+        Issues
+          5k+
+        Pull requests
+          707
+        Actions
+        Security and quality
+          32
+        Insights
+Additional navigation options
+          Code
+          Issues
+          Pull requests
+          Actions
+          Security and quality
+          Insights
+[FEATURE] Support sub-agents using '--watch' flags on 'build' and 'test' commands to eliminate dry-start costs #70680
+New issueCopy link
+New issueCopy link
+Closed as not planned
+Closed as not planned
+[FEATURE] Support sub-agents using '--watch' flags on 'build' and 'test' commands to eliminate dry-start costs#70680
+Copy link
+Labels
+area:agentsenhancementNew feature or requestNew feature or requeststaleIssue is inactiveIssue is inactive
+Description
+DevonBT
+opened on Jun 24, 2026
+Issue body actions
+Preflight Checklist
+ I have searched existing requests and this feature hasn't been requested yet
+ This is a single feature request (not multiple features)
+Problem Statement
+Improve sub-agents ability to monitor long-running processes like build or test invoked with a --watch flag and continuously report updates to the primary agent. For example, an Angular app test suite might be invoked with ng test --watch
+In a workflow that asks Claude to confirm tests pass after changes, a lot of time is lost waiting for test suite spin-up. A developer avoids this wait by running the build/test suite in a second terminal with --watch, maybe a forked agent can emulate this behaviour.
+Proposed Solution
+My Claude workflow asks the primary agent to run the test suite after making changes, in the spirit of test-driven development's tight iteration cycles and constant vigilance to the test suite status.
+A lot of time is lost waiting for the primary agent to dry-start the test suite. It would be convenient if it analyzed the test suite for the project, determined how to run the test suite with a --watch flag, and use a sub-agent monitoring the watched suite to provide low latency status updates to the primary agent.
+Presumably other watch-able commands, like build, lint, format etc. could be supported.
+Although this dry-start latency is especially egregious in workflows that run the test suite very often, like TDD does, it would still be beneficial for other styles of workflow to provide rapid feedback to the primary agent.
+Alternative Solutions
+Currently I just tolerate the extra latency waiting for test suites to start. I could run the test suite with a --watch flag on my own in a second terminal, and relay the results to Claude, but that would be cumbersome.
+Priority
+Low - Nice to have
+Feature Category
+Performance and speed
+Use Case Example
+Example scenario:
+I ask Claude to implement a new feature.
+It follows a TDD workflow, and uses the 'red, green, refactor' mantra to guide the order of operation.
+Claude implements a failing test, runs the suite, and verifies that the suite failed in the expected manner.
+Claude implements the code required to pass the test, and runs the test suite a second time, verifying that it fully passes.
+Claude analyzes for appropriate refactors. If any refactors are warranted, they are made, then the test suite is run again to ensure no regressions.
+This covers a single cycle and implements a single requirement for the feature. Already we expect the test suite to run two or three times. That's a lot of down-time for the primary agent to wait for dry starts.
+Typically a feature will require multiple cycles, each cycle targeting a single requirement. So the time loss is multiplied by the complexity of the feature.
+As a developer, I avoid the dry start time loss by monitoring a second terminal with the test suite running in --watch mode. Presumably a sub-agent could emulate this.
+Additional Context
+No response
+Reactions are currently unavailable
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+Metadata
+Metadata
+AssigneesNo one assigned
+Labels
+area:agentsenhancementNew feature or requestNew feature or requeststaleIssue is inactiveIssue is inactive
+TypeNo type
+ProjectsNo projects
+MilestoneNo milestone
+RelationshipsNone yet
+DevelopmentNo branches or pull requests
+Issue actions
+Open in GitHub Copilot app
+Footer
+        © 2026 GitHub, Inc.
+Footer navigation
+            Terms
+            Privacy
+              Security
+              Status
+            Community
+            Docs
+            Contact
+      Manage cookies
+        Do not share my personal information
+    You can’t perform that action at this time.

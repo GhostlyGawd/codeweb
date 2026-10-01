@@ -1,0 +1,38 @@
+{
+  "parent": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+  "pilot": "99e588ce-f5e9-4160-88be-359908d07a8f",
+  "pilot_identifier": "COD-57",
+  "website_dependency": "495dee50-9a5e-4551-8dfe-cb23c6ecfd67",
+  "lanes123": {
+    "id": "ad6b2688-d149-4151-9eb3-f3de93a281df",
+    "identifier": "COD-59"
+  },
+  "supplement_children": [
+    {
+      "id": "76e05df6-14cf-4873-a9c3-95aab90814a3",
+      "identifier": "COD-60",
+      "owner": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "blockers": []
+    },
+    {
+      "id": "c5ff7221-b28b-4a81-adee-cb9378b865c8",
+      "identifier": "COD-61",
+      "owner": "79d272db-70e2-483b-b817-292dac08593e",
+      "blockers": [
+        "ad6b2688-d149-4151-9eb3-f3de93a281df"
+      ]
+    }
+  ],
+  "final_collection_children": [
+    {
+      "id": "45abbb28-df94-4bf3-b769-b54361ec19db",
+      "identifier": "COD-63",
+      "owner": "79d272db-70e2-483b-b817-292dac08593e"
+    },
+    {
+      "id": "22d6b2b6-4d76-42b1-abce-beac3f423e3b",
+      "identifier": "COD-64",
+      "owner": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+    }
+  ]
+}

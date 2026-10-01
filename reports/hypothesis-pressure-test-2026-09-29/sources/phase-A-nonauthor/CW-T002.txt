@@ -1,0 +1,234 @@
+
+  Cloud sessions never install plugins declared in .claude/settings.json, and /plugin is unavailable to fix it · Issue #88214 · anthropics/claude-code · GitHub
+      Skip to content
+Navigation Menu
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub CopilotWrite better code with AI
+GitHub Copilot appDirect agents from issue to merge
+MCP RegistryIntegrate external tools
+DEVELOPER WORKFLOWS
+ActionsAutomate any workflow
+CodespacesInstant dev environments
+IssuesPlan and track work
+Code ReviewManage code changes
+Code QualityEnforce quality at merge
+APPLICATION SECURITY
+GitHub Advanced SecurityFind and fix vulnerabilities
+Code securitySecure your code as you build
+Secret protectionStop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+View all resources
+Open Source
+COMMUNITY
+GitHub SponsorsFund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+GitHub Stars
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platformAI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced SecurityEnterprise-grade security features
+Copilot for BusinessEnterprise-grade AI features
+Premium SupportEnterprise-grade 24/7 support
+Pricing
+Search/
+Sign inSign up
+Appearance settings
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+Dismiss alert
+{{ message }}
+        anthropics
+    /
+      claude-code
+    Public
+Notifications
+    You must be signed in to change notification settings
+Fork
+    25.1k
+          Star
+          149k
+        Code
+        Issues
+          5k+
+        Pull requests
+          707
+        Actions
+        Security and quality
+          32
+        Insights
+Additional navigation options
+          Code
+          Issues
+          Pull requests
+          Actions
+          Security and quality
+          Insights
+Cloud sessions never install plugins declared in .claude/settings.json, and /plugin is unavailable to fix it #88214
+New issueCopy link
+New issueCopy link
+Open
+Open
+Cloud sessions never install plugins declared in .claude/settings.json, and /plugin is unavailable to fix it#88214
+Copy link
+Labels
+area:claude-code-webClaude Code on the web. claude.com/codeClaude Code on the web. claude.com/codearea:pluginsbugSomething isn't workingSomething isn't workinghas reproHas detailed reproduction stepsHas detailed reproduction stepsplatform:webIssue specifically occurs on the webIssue specifically occurs on the webstaleIssue is inactiveIssue is inactive
+Description
+bassboy2k
+opened on Aug 20, 2026
+Issue body actions
+Summary
+In a cloud session (Claude Code on the web), plugins declared in a repo's
+.claude/settings.json are never installed. installed_plugins.json stays empty, none of the
+plugins' skills or agents load, and there is no way to remediate from inside the session.
+This is specifically about the cloud surface, where the documented contract is different from
+local. Cloud environments → What carries over from your setup
+states:
+Plugins declared in .claude/settings.json — Yes — Installed at session start from the
+marketplace you declared. Requires network access to reach the marketplace source
+That auto-install does not happen. And unlike the local case, there is no fallback: /plugin
+is documented as unavailable in cloud sessions,
+so /plugin install cannot be used to fix it.
+Environment
+Claude Code on the web, Anthropic-hosted cloud environment, Ubuntu 24.04 x86_64, running as root
+Network access: Trusted (the marketplace fetch itself succeeds — see below)
+Five plugins declared in the repo's .claude/settings.json, from the public
+claude-plugins-official marketplace (anthropics/claude-plugins-official)
+Evidence
+Observed 2026-08-20 in a cached (non-first) cloud session.
+The marketplace syncs fine, so this is not network. known_marketplaces.json was written
+during this boot:
+{ "claude-plugins-official": {
+    "source": { "source": "github", "repo": "anthropics/claude-plugins-official" },
+    "installLocation": "/root/.claude/plugins/marketplaces/claude-plugins-official",
+    "lastUpdated": "2026-08-20T03:29:09.879Z" } }
+and its catalog on disk contains every declared plugin:
+$ ls ~/.claude/plugins/marketplaces/claude-plugins-official/plugins/ | grep -E 'ruby-lsp|swift-lsp'
+ruby-lsp
+swift-lsp
+But nothing is installed:
+$ cat ~/.claude/plugins/installed_plugins.json
+{ "version": 2, "plugins": {} }
+$ ls ~/.claude/plugins/synced/
+(empty)
+And the cache holds only metadata, no plugin content — no manifest, no skills, no agents:
+$ find ~/.claude/plugins/cache -maxdepth 6
+.../cache/claude-plugins-official/ruby-lsp/1.0.0/README.md
+.../cache/claude-plugins-official/ruby-lsp/1.0.0/LICENSE
+.../cache/claude-plugins-official/swift-lsp/1.0.0/README.md
+.../cache/claude-plugins-official/swift-lsp/1.0.0/LICENSE
+That looks like the fetch starts and stops after the metadata files.
+Confirmed by what the session can actually see. pr-review-toolkit ships six agents:
+$ ls ~/.claude/plugins/marketplaces/claude-plugins-official/plugins/pr-review-toolkit/agents
+code-reviewer.md  code-simplifier.md  comment-analyzer.md
+pr-test-analyzer.md  silent-failure-hunter.md  type-design-analyzer.md
+None of the six appear in the session's available agent types.
+Two secondary observations
+1. Plugin state is rebuilt from empty on every boot. The whole ~/.claude/plugins/ tree is
+stamped with the current boot time in every session, while other snapshot-restored files carry
+their original mtimes. So even a successful install could not persist across sessions in the
+same environment — which matters because cloud environments boot from a cached filesystem
+snapshot rather than re-running setup.
+2. Only one marketplace registers. extraKnownMarketplaces declared both
+claude-plugins-official and claude-code-plugins (source anthropics/claude-code). Only the
+former ever appears in known_marketplaces.json in a cloud session. Both register normally on
+macOS, and claude-code-plugins also resolves fine when passed to claude-code-action in CI —
+so this appears specific to the cloud session's marketplace registration.
+Expected
+Either the documented auto-install works, or a cloud session reports at startup that declared
+plugins could not be installed. Today it is silent: the plugins simply are not there, and the
+absence looks identical to not having declared them.
+Impact
+Any team sharing plugins through committed .claude/settings.json — the documented
+team-sharing pattern — gets those plugins on developer machines and in CI, but not in cloud
+sessions. Because /plugin is unavailable there, nothing in the repo or in the session can
+work around it.
+Related
+Plugins: enabled-in-settings but never installed loads nothing silently; marketplace autoUpdate never updates existing installs #83422 — same "enabled in settings but never installed, silently" shape, but reported for
+local sessions where /plugin install is an available remedy. In cloud it is not, and the
+documentation promises auto-install rather than requesting it.
+Settings-driven plugin auto-install (enabledPlugins) writes installed_plugins.json without populating plugins/cache/ #76759 — the inverse population failure (installed_plugins.json written without the cache
+populated); here the cache is partially populated and the record is missing.
+Reactions are currently unavailable
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+Metadata
+Metadata
+AssigneesNo one assigned
+Labels
+area:claude-code-webClaude Code on the web. claude.com/codeClaude Code on the web. claude.com/codearea:pluginsbugSomething isn't workingSomething isn't workinghas reproHas detailed reproduction stepsHas detailed reproduction stepsplatform:webIssue specifically occurs on the webIssue specifically occurs on the webstaleIssue is inactiveIssue is inactive
+TypeNo type
+ProjectsNo projects
+MilestoneNo milestone
+RelationshipsNone yet
+DevelopmentNo branches or pull requests
+Issue actions
+Open in GitHub Copilot app
+Footer
+        © 2026 GitHub, Inc.
+Footer navigation
+            Terms
+            Privacy
+              Security
+              Status
+            Community
+            Docs
+            Contact
+      Manage cookies
+        Do not share my personal information
+    You can’t perform that action at this time.

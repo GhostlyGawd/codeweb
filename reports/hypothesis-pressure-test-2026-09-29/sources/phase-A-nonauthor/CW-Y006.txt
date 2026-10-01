@@ -1,0 +1,120 @@
+
+    Is Cursor extremely slow for you since the 0.49 update? - Bug Reports - Cursor - Community Forum
+  Cursor - Community Forum
+      Is Cursor extremely slow for you since the 0.49 update?
+                Support
+                Bug Reports
+                emanuelgrammenos
+                    April 23, 2025, 12:04pm
+              1
+ I’ve checked the forum and haven’t seen this issue reported yet.
+ Since updating to Cursor 0.49 (currently running version 0.49.4), the app has become extremely slow. Tool invocation now takes unusually long — sometimes over a minute — before anything happens. This lag occurs consistently across sessions.
+ Steps to reproduce:
+1.	Launch Cursor (version 0.49.4)
+2.	Attempt to use any AI tool (e.g., Sonnet 3.7 or ChatGPT-4.1)
+3.	Observe delay before tool becomes responsive (often > 60 seconds)
+ System Info:
+•	Device: Mac mini (2024)
+•	Chip: Apple M4
+•	Memory: 16 GB
+•	OS: macOS Sequoia 15.3.2
+•	Cursor version: 0.49.4
+•	Tools used: Sonnet 3.7, ChatGPT-4.1
+ Yes, this issue significantly disrupts my workflow and makes Cursor nearly unusable.
+                rumor
+                    April 23, 2025,  8:25pm
+              2
+gpt4.1, cursor 0.49.4, agent mode, win11 - a real generation starts after 2-4 secs after the prompt is entered.
+For me, the cursor is extremely fast (<5 secs is nothing compared to the result it produces).
+                emanuelgrammenos
+                    April 25, 2025, 11:04am
+              3
+Interesting, so maybe it is a problem with the region… i am in europe.
+                Jesper
+                (Jesper)
+                    April 25, 2025, 11:08am
+              4
+Same issue. For me, most often it is not even responding after 60 seconds - just “Generating…”.
+Cursor has become unusable after the update - but was working very well before.
+In Europe.
+                emanuelgrammenos
+                    April 26, 2025,  7:37am
+              5
+I previously reported that Cursor became extremely slow after updating to version 0.49.4, especially when invoking AI tools (sometimes delays of over 60 seconds).
+The solution in my case:
+I disabled referencing past chats and deactivated all MCP servers I was using (see screenshots).
+After doing this, Cursor returned to normal speed and tools became responsive again.
+•
+supabase (Tool: query)
+•
+mem0
+•
+browser-tools (Tools like getConsoleLogs, getNetworkErrors, runSEOAudit, etc.)
+                imgemo
+                    April 26, 2025,  8:53am
+              6
+It’s the same for me. I use it on windows 10 though, but it is extremely slow, and crashes a lot. the last 2 updates has caused this.
+                vikram2784
+                    May 2, 2025, 10:20am
+              7
+Same here! Its painstakingly slow after the update. Worst is - it makes my whole system unresponsive . Extremely extremely annoying. Almost unusable.
+Its gets stuck forever with this light green bar that keeps looping left to right, at the top left corner (below the menu) of the IDE.
+Screenshot at 2025-05-02 15-35-25409×111 4.24 KB
+I am on ubuntu 24.04.2
+Cursor:
+Version: 0.49.6
+VSCode Version: 1.96.2
+Commit: 0781e811de386a0c5bcb07ceb259df8ff8246a50
+Date: 2025-04-25T04:44:33.500Z
+Electron: 34.3.4
+Chromium: 132.0.6834.210
+Node.js: 20.18.3
+V8: 13.2.152.41-electron.0
+OS: Linux x64 6.8.0-58-generic
+                Ralph123x
+                (Ralph)
+                    May 12, 2025,  8:07pm
+              8
+It is slow for me too. Not the query part, rather the entire UI is slow. I notice  that light green bar that keeps looping left to right too. I been using 0.48.9, and that’s been great. However, 0.49.6 is still causing the issue for me. The UI is very laggy.
+                hayatiakyuz
+                (Hayatiakyuz)
+                    May 14, 2025,  3:05am
+              9
+same…
+    Related topics
+          Topic
+          Replies
+          Views
+          Activity
+                Cursor is Slowing Down Severely After 0.49.4 – Is It Being Sunset?
+                      Bug Reports
+              2
+              398
+              April 22, 2025
+                Cursor is unusable, extremely slow since this morning
+                      Bug Reports
+                      performance
+              31
+              2846
+              May 6, 2026
+                Time to first byte increased to unbearable values
+                      Bug Reports
+              3
+              77
+              September 24, 2025
+                Today, Cursor is slow again generating chat responses
+                      Bug Reports
+              19
+              1183
+              July 15, 2025
+                Update to continue using the Agent
+                      Bug Reports
+              3
+              8718
+              September 8, 2025
+          Home 
+          Categories 
+          Guidelines 
+            Terms of Service 
+            Privacy Policy 
+Powered by Discourse, best viewed with JavaScript enabled

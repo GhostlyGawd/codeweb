@@ -1,0 +1,105 @@
+{
+  "recorded_at": "2026-09-30T21:58:17.706064+00:00",
+  "scope": "Static existence/identity checks and overlap grouping; no source change, render, visual judgment or completion claim.",
+  "items": [
+    {
+      "original_id": "COD-65",
+      "original_status": "blocked",
+      "mapped_work": "WEB-01",
+      "disposition": "needs_current_candidate_and_acceptance_reconciliation",
+      "lineage": "later art-direction / selected-A lineage",
+      "artifact_paths_checked": [
+        {
+          "path": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/cycle-01/workspace/codeweb-map-v7-cod58",
+          "exists": true,
+          "sha256": null
+        },
+        {
+          "path": "$LOCAL_HOME/Repositories/design-system-experiment/.runs/codeweb-art-directions/BRIEF-AND-REFERENCE-LOCK.md",
+          "exists": true,
+          "sha256": "363dc654c5d0baeb750ebbae46e7c71f9eadb61d335c60ef1b4861d7edeccbe3"
+        }
+      ],
+      "visual_quality_or_acceptance_verified": false
+    },
+    {
+      "original_id": "COD-66",
+      "original_status": "in_review",
+      "mapped_work": "WEB-01",
+      "disposition": "needs_current_candidate_and_acceptance_reconciliation",
+      "lineage": "later art-direction / selected-A lineage",
+      "artifact_paths_checked": [
+        {
+          "path": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/cycle-01/workspace/codeweb-art-directions-cod65",
+          "exists": true,
+          "sha256": null
+        },
+        {
+          "path": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/cycle-01/workspace/codeweb-map-v7-cod58",
+          "exists": true,
+          "sha256": null
+        },
+        {
+          "path": "$LOCAL_HOME/Repositories/design-system-experiment/.runs/codeweb-art-directions/BRIEF-AND-REFERENCE-LOCK.md",
+          "exists": true,
+          "sha256": "363dc654c5d0baeb750ebbae46e7c71f9eadb61d335c60ef1b4861d7edeccbe3"
+        }
+      ],
+      "visual_quality_or_acceptance_verified": false
+    },
+    {
+      "original_id": "COD-75",
+      "original_status": "blocked",
+      "mapped_work": "WEB-01",
+      "disposition": "needs_current_candidate_and_acceptance_reconciliation",
+      "lineage": "later art-direction / selected-A lineage",
+      "artifact_paths_checked": [
+        {
+          "path": "$LOCAL_HOME/Repositories/design-system-experiment/evidence/adoption/codeweb-01/selected-a/DESIGN-SYSTEM.md",
+          "exists": true,
+          "sha256": "6611a1df03a6769d7ba9705c730fe86105bea0ce72da8c1e239b16a3ed89020f"
+        }
+      ],
+      "visual_quality_or_acceptance_verified": false
+    },
+    {
+      "original_id": "COD-70",
+      "original_status": "in_review",
+      "mapped_work": "WEB-01",
+      "disposition": "needs_current_candidate_and_acceptance_reconciliation",
+      "lineage": "later art-direction / selected-A lineage",
+      "artifact_paths_checked": [
+        {
+          "path": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/cycle-01/workspace/codeweb-selected-a-cod67",
+          "exists": true,
+          "sha256": null
+        }
+      ],
+      "visual_quality_or_acceptance_verified": false
+    },
+    {
+      "original_id": "COD-47",
+      "original_status": "blocked",
+      "mapped_work": "WEB-01",
+      "disposition": "needs_current_candidate_and_acceptance_reconciliation",
+      "lineage": "earlier wide-workbench candidate",
+      "artifact_paths_checked": [],
+      "visual_quality_or_acceptance_verified": false
+    },
+    {
+      "original_id": "COD-50",
+      "original_status": "in_review",
+      "mapped_work": "WEB-01",
+      "disposition": "needs_current_candidate_and_acceptance_reconciliation",
+      "lineage": "earlier wide-workbench candidate",
+      "artifact_paths_checked": [
+        {
+          "path": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/cycle-01/workspace/codeweb-first-use-v2-cod47",
+          "exists": true,
+          "sha256": null
+        }
+      ],
+      "visual_quality_or_acceptance_verified": false
+    }
+  ]
+}

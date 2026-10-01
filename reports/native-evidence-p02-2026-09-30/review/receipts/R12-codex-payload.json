@@ -1,0 +1,21 @@
+{
+  "id": "R12-codex-payload",
+  "command": [
+    "/opt/homebrew/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_NO_RECEIPTS": "1",
+    "CODEWEB_NO_PROMO": "1"
+  },
+  "stdin": "{\"tool_name\": \"apply_patch\", \"tool_input\": {\"command\": \"*** Begin Patch\\n*** Update File: $LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/target/subject.mjs\\n@@\\n- return value + 1;\\n+ return value + 2;\\n*** End Patch\"}}",
+  "start": "2026-10-01T02:23:38.806942+00:00",
+  "end": "2026-10-01T02:23:38.844965+00:00",
+  "durationSeconds": 0.038067499990575016,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+}

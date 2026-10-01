@@ -1,0 +1,250 @@
+[
+  {
+    "id": "CW-T018",
+    "url": "https://news.ycombinator.com/item?id=48033774",
+    "capture": "sources/L01/CW-T018.txt",
+    "sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897",
+    "access": "existing_original_capture"
+  },
+  {
+    "id": "CW-Z003",
+    "url": "https://ngof.nikhaldimann.com/p/deja-code",
+    "capture": "sources/L01/CW-Z003.txt",
+    "sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b",
+    "access": "existing_original_capture"
+  },
+  {
+    "id": "CW-Z006",
+    "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+    "capture": "sources/L01/CW-Z006.txt",
+    "sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d",
+    "access": "existing_original_capture"
+  },
+  {
+    "id": "CW-Z001",
+    "url": "https://shan-verse.com/blog/codex-after-the-update/",
+    "capture": "sources/L01/CW-Z001.txt",
+    "sha256": "f06ceefb7d3c95cc528d03eae7461b9012fb16c9e08745aa8a5f2dfe81fa7cfd",
+    "access": "existing_original_capture"
+  },
+  {
+    "id": "CW-P003",
+    "url": "https://github.com/anthropics/claude-code/issues/39703",
+    "capture": "sources/L01/CW-P003.txt",
+    "sha256": "dd7a415ec9bd6ab34b1218c73b0363b7f4dcb81925791c829ecac9266133e0f0",
+    "access": "existing_original_capture"
+  },
+  {
+    "id": "CW-X001",
+    "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+    "capture": "sources/L01/CW-X001.txt",
+    "sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+    "access": "existing_original_capture"
+  },
+  {
+    "id": "CW-T023",
+    "url": "https://www.reddit.com/r/ClaudeCode/comments/1qobg1g/how_to_refactor_50k_lines_of_legacy_code_without/",
+    "access": "original_passage_via_web",
+    "capture": "sources/phase-A-nonauthor/CW-T023-READ-NOTE.json",
+    "sha256": "d213f3e2037f3535194acc9c7f87292fd131ba47bebacf3b5c77f5b6fd4111a1",
+    "direct_fetch_error_preserved": "HTTP Error 403: Blocked"
+  },
+  {
+    "id": "CW-L015",
+    "url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+    "access": "original_passage_via_web",
+    "capture": "sources/phase-A-nonauthor/CW-L015-READ-NOTE.json",
+    "sha256": "dbdc321d20927dc8bf223f2ea504d1ddb188acf74825bc7eaeeab8565476acba",
+    "direct_fetch_error_preserved": "HTTP Error 403: Blocked"
+  },
+  {
+    "id": "CW-L048",
+    "url": "https://news.ycombinator.com/item?id=49321400",
+    "capture": "sources/L01/CW-L048.txt",
+    "sha256": "2a6d49781c8ad6448b79778e7fbc694340a5db2b8f23e8b1f1cc9d9789cc5b41",
+    "access": "existing_original_capture"
+  },
+  {
+    "id": "CW-X006",
+    "url": "https://renanfranca.github.io/when-plan-mode-was-no-longer-enough.html",
+    "capture": "sources/phase-A-nonauthor/CW-X006.txt",
+    "sha256": "741179e6bbaee2636a7a94b70532e5e40fd336b211e28ef7503f65f8d6f037d4",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.033832+00:00"
+  },
+  {
+    "id": "CW-L051",
+    "url": "https://news.ycombinator.com/item?id=49321400",
+    "capture": "sources/phase-A-nonauthor/CW-L051.txt",
+    "sha256": "6c929497b104bee9a21401bc3b179f33cdc94e8a4793ca47d23ac8deb3bca83a",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.296660+00:00"
+  },
+  {
+    "id": "CW-L001",
+    "url": "https://www.reddit.com/r/codereview/comments/1vuddna/how_are_you_actually_reviewing_ai_generated_code/",
+    "access": "original_passage_via_web",
+    "capture": "sources/phase-A-nonauthor/CW-L001-READ-NOTE.json",
+    "sha256": "a17a37c2535bb6cb30593e323cab5bbab5a05c63e43dd436abc140c3a9db93d8",
+    "direct_fetch_error_preserved": "HTTP Error 403: Blocked"
+  },
+  {
+    "id": "CW-Y007",
+    "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+    "capture": "sources/L01/CW-Y007.txt",
+    "sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+    "access": "existing_original_capture"
+  },
+  {
+    "id": "CW-Y005",
+    "url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+    "capture": "sources/phase-A-nonauthor/CW-Y005.txt",
+    "sha256": "5c1a2bc9d740da12a37db00d4a1d32af71241a4ed05d956963a856153a5a2463",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.366372+00:00"
+  },
+  {
+    "id": "CW-T002",
+    "url": "https://github.com/anthropics/claude-code/issues/88214",
+    "capture": "sources/phase-A-nonauthor/CW-T002.txt",
+    "sha256": "cde137553c87ffdf2d465d0967e5262afe0308d2a6b8a5330c8ca604249a1894",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.687169+00:00"
+  },
+  {
+    "id": "CW-T004",
+    "url": "https://github.com/anthropics/claude-code/issues/97515",
+    "capture": "sources/phase-A-nonauthor/CW-T004.txt",
+    "sha256": "2647a1fc7b899ca8a8f3d908af466600974507ecd734161c7739c171957febd9",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.606375+00:00"
+  },
+  {
+    "id": "CW-X009",
+    "url": "https://github.com/openai/codex/issues/27133",
+    "capture": "sources/phase-A-nonauthor/CW-X009.txt",
+    "sha256": "0d40d250c5879c5721aec4de6a712a9b301b155ca880a7387b38e3662a287a10",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.843900+00:00"
+  },
+  {
+    "id": "CW-L026",
+    "url": "https://forum.cursor.com/t/bugbot-without-background-agents/157812",
+    "capture": "sources/phase-A-nonauthor/CW-L026.txt",
+    "sha256": "52fd9b7c59f911038ac99dbb1f3f75e9401033763e57c678c6afd9cc8a96b4b0",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.155707+00:00"
+  },
+  {
+    "id": "CW-L024",
+    "url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+    "capture": "sources/phase-A-nonauthor/CW-L024.txt",
+    "sha256": "f9f34c73db717c68ffe9d031361363dfe35dfd57b8d85504c03859a5b1eabf83",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.176757+00:00"
+  },
+  {
+    "id": "CW-L023",
+    "url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+    "capture": "sources/phase-A-nonauthor/CW-L023.txt",
+    "sha256": "7752eaa9fe1ac81daa6d0ff8526f75b0e8542cc4d38be60852a8e8aab3e292e1",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.082670+00:00"
+  },
+  {
+    "id": "CW-Z012",
+    "url": "https://github.com/oraios/serena/discussions/131",
+    "capture": "sources/phase-A-nonauthor/CW-Z012.txt",
+    "sha256": "dd59dd53ddae113f258f050b3058dae6a0436349972aa755ebbe88a5b4cfccc2",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.751721+00:00"
+  },
+  {
+    "id": "CW-Z009",
+    "url": "https://simonwillison.net/2025/Jun/3/openai-codex-pr/",
+    "capture": "sources/phase-A-nonauthor/CW-Z009.txt",
+    "sha256": "b9d3dcb142cae769a2f31fe94e7adbc8a674ef00e2b0bbd1bb90b64c3f87a0ea",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.304676+00:00"
+  },
+  {
+    "id": "CW-Y006",
+    "url": "https://forum.cursor.com/t/is-cursor-extremely-slow-for-you-since-the-0-49-update/82831",
+    "capture": "sources/phase-A-nonauthor/CW-Y006.txt",
+    "sha256": "f9770d37deee208aa3afbfeb391e030d5b0057d0395951781d30904a5ba2caf8",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.284468+00:00"
+  },
+  {
+    "id": "CW-T006",
+    "url": "https://github.com/anthropics/claude-code/issues/70680",
+    "capture": "sources/phase-A-nonauthor/CW-T006.txt",
+    "sha256": "1910fb30c23c7c06b841b39bcbf07c58075ecb016f1d6df552650b39ba61fa78",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.774148+00:00"
+  },
+  {
+    "id": "CW-Z007",
+    "url": "https://github.com/oraios/serena/issues/1814",
+    "capture": "sources/phase-A-nonauthor/CW-Z007.txt",
+    "sha256": "da0bc0a104fca0a86f29f7e3263ff89393b7b6a45f9d8844b409a9e0c958de28",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.825586+00:00"
+  },
+  {
+    "id": "CW-Z011",
+    "url": "https://github.com/oraios/serena/issues/1432",
+    "capture": "sources/phase-A-nonauthor/CW-Z011.txt",
+    "sha256": "35235bc80eca532bb2e09db3d2734b7644d2eb681bd1f5aa3f7465101d94f7da",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:22.120449+00:00"
+  },
+  {
+    "id": "CW-001",
+    "url": "https://github.com/anthropics/claude-code/issues/47565",
+    "capture": "sources/phase-A-nonauthor/CW-001.txt",
+    "sha256": "3adf1e0a207df9a6b31e4e6232fa87cb41dd8702f4e4ae4ee8afdf9e4bdd5dea",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:22.066301+00:00"
+  },
+  {
+    "id": "CW-L037",
+    "url": "https://david.coffee/i-still-prefer-mcp-over-skills/",
+    "capture": "sources/phase-A-nonauthor/CW-L037.txt",
+    "sha256": "38999a668054f2f44fa75347468a6859585fecb1fb0990e8f60cc2c33092a426",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.485017+00:00"
+  },
+  {
+    "id": "CW-T007",
+    "url": "https://github.com/anthropics/claude-code/issues/83790",
+    "capture": "sources/phase-A-nonauthor/CW-T007.txt",
+    "sha256": "0afb123356f51cd30b37e769c0c6e05c1ab7a4ba8366292341b70db40e5e3533",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.963077+00:00"
+  },
+  {
+    "id": "CW-Y001",
+    "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+    "capture": "sources/phase-A-nonauthor/CW-Y001.txt",
+    "sha256": "cb3048e07205f09d040625d836d9a7894bb0a9c1f6777ef38a013f029bb9d13f",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.612085+00:00"
+  },
+  {
+    "id": "CW-Y010",
+    "url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+    "capture": "sources/phase-A-nonauthor/CW-Y010.txt",
+    "sha256": "21582a6a32fbcf4eaeade1176330e0312fbf40b05c5d89375c35f67b078914f4",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:22.142814+00:00"
+  },
+  {
+    "id": "CW-L022",
+    "url": "https://www.synthesia.io/post/automating-code-security-reviews-with-claude-mythos-level-capabilities",
+    "capture": "sources/phase-A-nonauthor/CW-L022.txt",
+    "sha256": "5d42aabe9a076c0f68966c56eaa095a37c0feab816b9d7b2d0b3390ef3dd1459",
+    "access": "retrieved_original_html",
+    "retrieved_at": "2026-09-30T04:16:21.751395+00:00"
+  }
+]

@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "assignment": "L09 — Withdrawal test",
+  "issue_id": "a607cbae-3a0e-43a1-9e8b-7386ff63c26c",
+  "run_id": "ecdb87a7-76f8-4cfa-8a0b-0a1ff8bde6dd",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "overall_verdict": "narrow",
+  "customer_withdrawal_effect": "unresolved_from_existing_evidence",
+  "findings": [
+    {
+      "id": "L09-F01",
+      "statement": "Narrow the potential recurring withdrawal loss to rebuilding a useful consumer/reuse inspection shortlist on later consequential changes.",
+      "evidence_type": "Inference from original public records and frozen product documentation; proposed withdrawal mechanism, not observed Codeweb outcome",
+      "supported_actor_segment_task": "Agent-heavy developer changing unfamiliar shared implementations in an owned repository; the strongest reuse account is an experienced solo developer who later built a duplication tool.",
+      "relevant_conditions": "Later tasks introduce changed consumers or unfamiliar implementations; mapping is fresh and covers the relevant source; inspecting the brief costs less than independently reconstructing it.",
+      "evidence_ids": [
+        "CW-T018",
+        "CW-Z003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Z006",
+        "CW-Z011"
+      ],
+      "strongest_supported_case": "CW-Z003 describes repeated human intervention to locate reuse opportunities. Source-backed candidates could shorten that rediscovery before a later edit; removal could return those searches and review prompts. This is an inference, not measured savings.",
+      "strongest_countercase": "CW-X001 reports task-dependent native-search success; CW-Z006 keeps abstraction choice with people. A body match is not semantic suitability and source relationships do not cover all runtime consumers.",
+      "failure_scenario": "A familiar developer already knows the utility, or native search finds the same consumer immediately; the brief adds reading and creates an unnecessary abstraction.",
+      "verdict": "narrow",
+      "weakest_assumption": "A later brief changes a correct decision beyond what the now-familiar person and native tools already supply.",
+      "local_implication": "Test repeated net discovery/verification effort and independently judged missed consumers or inappropriate reuse; do not claim safe larger edits or minutes saved yet.",
+      "paid_implication": "Any local gain remains free single-repo value; it supplies no paid-attributable loss.",
+      "confidence_reason": "Moderate confidence in the bounded mechanism and countercases; low confidence in any Codeweb effect because no familiar-user removal comparison exists.",
+      "minimal_falsification_test": "After familiarization, compare at least two distinct matched eligible changes with Codeweb against two without, retain normal tests and native tools, and adjudicate inspection/reuse decisions from source. No recurring net advantage falsifies this participant/task mechanism.",
+      "unresolved_test": "After familiarization, compare at least two distinct matched eligible changes with Codeweb against two without, retain normal tests and native tools, and adjudicate inspection/reuse decisions from source. No recurring net advantage falsifies this participant/task mechanism.",
+      "access_coverage_limits": "Public accounts are contextual self-reports or small studies, not sampled prevalence or Codeweb users. See evidence index for exact access boundaries."
+    },
+    {
+      "id": "L09-F02",
+      "statement": "Removal may improve the workflow; voluntary reinstatement must beat capable substitutes, not merely restore a familiar interface.",
+      "evidence_type": "Inference from original public records and frozen product documentation; proposed withdrawal mechanism, not observed Codeweb outcome",
+      "supported_actor_segment_task": "Developers with small, clean or already familiar repositories, and users comparing integration routes.",
+      "relevant_conditions": "Native grep/LSP, source reading, compiler/tests, duplication detection and ordinary host review remain enabled and competently configured in all arms.",
+      "evidence_ids": [
+        "CW-L015",
+        "CW-X001",
+        "CW-Z012"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L024",
+        "CW-Z003"
+      ],
+      "strongest_supported_case": "CW-L015 is a specific report of removing Serena on a small repository without seeing benefit; CW-Z012 records verification rereads erasing token savings. These support a credible null or beneficial-removal outcome.",
+      "strongest_countercase": "CW-L024 reports reintroducing some MCP servers after comparing equivalent workflows; that is a useful reinstatement analogy, but concerns browser tooling and a vendor practitioner, not Codeweb dependence.",
+      "failure_scenario": "A control loses its native navigation configuration or gets unfamiliar replacement tools; measured discomfort is then incorrectly attributed to lost Codeweb value.",
+      "verdict": "reject",
+      "weakest_assumption": "Tool preference or invocation volume tracks consequential loss.",
+      "local_implication": "Reject indispensability inferred from liking, reminders, usage counts or installation. Reinstatement plus task-level net benefit is stronger; reinstatement alone remains preference.",
+      "paid_implication": "Paying for an adjacent product or retaining a subscription cannot establish a Codeweb buyer or renewal.",
+      "confidence_reason": "Moderate confidence in the bounded mechanism and countercases; low confidence in any Codeweb effect because no familiar-user removal comparison exists.",
+      "minimal_falsification_test": "Keep competent native alternatives available; allow a short adaptation period after removal, then provide a neutral optional re-enable route. Record actual choice and subsequent eligible-task use with reasons and outcomes, not a request to turn it back on.",
+      "unresolved_test": "Keep competent native alternatives available; allow a short adaptation period after removal, then provide a neutral optional re-enable route. Record actual choice and subsequent eligible-task use with reasons and outcomes, not a request to turn it back on.",
+      "access_coverage_limits": "Public accounts are contextual self-reports or small studies, not sampled prevalence or Codeweb users. See evidence index for exact access boundaries."
+    },
+    {
+      "id": "L09-F03",
+      "statement": "Knowledge and exported evidence that survive removal are a successful durable benefit but weaken claims of ongoing dependence.",
+      "evidence_type": "Inference from original public records and frozen product documentation; proposed withdrawal mechanism, not observed Codeweb outcome",
+      "supported_actor_segment_task": "Developer revisiting a repository or reviewer reusing earlier source-linked facts and decisions.",
+      "relevant_conditions": "Existing notes, source links, Git history and legitimately shared local artifacts stay available; new tasks use changed revisions rather than replaying identical code.",
+      "evidence_ids": [
+        "CW-L037",
+        "CW-Z003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L025",
+        "CW-X001"
+      ],
+      "strongest_supported_case": "CW-L037 describes packaging learned workflow quirks into skills to avoid rediscovery. Analogously, learning a project or retaining a useful shortlist can outlast the generating tool.",
+      "strongest_countercase": "CW-L025 replaces integrations with scripts and skills; portable learned procedure can carry the job. Neither account establishes Codeweb project-memory behavior.",
+      "failure_scenario": "The study deletes notes or withholds exported evidence, then counts the imposed reconstruction burden as earned reliance. Alternatively it repeats an identical task and mistakes recall for no value ever delivered.",
+      "verdict": "narrow",
+      "weakest_assumption": "Useful new facts must be recomputed frequently enough that retained knowledge cannot replace the tool.",
+      "local_implication": "Distinguish one-time orientation value from fresh-evidence value on later changed source. Do not manufacture lock-in; no claim that proposed saved exceptions are implemented.",
+      "paid_implication": "Exportable history is not a moat or reason to charge for local data; paid loss must involve service work that actually stops.",
+      "confidence_reason": "Moderate confidence in the bounded mechanism and countercases; low confidence in any Codeweb effect because no familiar-user removal comparison exists.",
+      "minimal_falsification_test": "Preserve prior artifacts in withdrawal, measure familiar unchanged-code controls and separate new-revision tasks. If benefits survive unaided on later tasks, classify them as learning/portable value, not recurring dependence.",
+      "unresolved_test": "Preserve prior artifacts in withdrawal, measure familiar unchanged-code controls and separate new-revision tasks. If benefits survive unaided on later tasks, classify them as learning/portable value, not recurring dependence.",
+      "access_coverage_limits": "Public accounts are contextual self-reports or small studies, not sampled prevalence or Codeweb users. See evidence index for exact access boundaries."
+    },
+    {
+      "id": "L09-F04",
+      "statement": "The paid withdrawal mechanism would be renewed chasing, rerunning and assembling agreed checks; withdrawing free local tools cannot test it.",
+      "evidence_type": "Inference from original public records and frozen product documentation; proposed withdrawal mechanism, not observed Codeweb outcome",
+      "supported_actor_segment_task": "An actual producer/consumer repository team with a named check owner and buyer; public CW-Y007 identifies a developer/champion, not verified buying authority.",
+      "relevant_conditions": "A supported hosted coordination service must first demonstrably perform the agreed job; free local Codeweb and normal CI stay available during hosted-service withdrawal.",
+      "evidence_ids": [
+        "CW-Y007",
+        "CW-Y001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007",
+        "CW-Y010",
+        "CW-Y012"
+      ],
+      "strongest_supported_case": "CW-Y007 reports repeatedly invoking Claude for cross-repo checks. A service could remove scheduling and collection work; CW-Y001 cautions that consequential low-frequency changes can matter despite low PR volume.",
+      "strongest_countercase": "The same CW-Y007 thread proposes checking out both repos in CI and type checking. CW-Y010 describes only a contemplated temporary paid period, not an observed sale or withdrawal. Existing PR artifacts also compete.",
+      "failure_scenario": "Pausing a hosted service deliberately disables CI or hides past results; teams spend time repairing the induced outage and that is called willingness to pay.",
+      "verdict": "unresolved_from_existing_evidence",
+      "weakest_assumption": "A recurring coordination burden remains after adequate ordinary CI and exceeds setup, triage and maintenance costs.",
+      "local_implication": "Keep free local capabilities identical in both paid-test arms. No transferred local savings.",
+      "paid_implication": "No paid Codeweb withdrawal, buyer, purchase or renewal result exists in this packet. Retain only a conditional service test; no implementation or offer is authorized here.",
+      "confidence_reason": "Moderate confidence in the bounded mechanism and countercases; low confidence in any Codeweb effect because no familiar-user removal comparison exists.",
+      "minimal_falsification_test": "First observe one real coordination cycle and trial the strongest CI alternative. Only if incremental service work remains, later compare matched cycles with service on/off, preserve check execution and history, and measure human chasing/rerun/assembly minutes plus revision completeness. Buyer-chosen restoration and later actual payment/renewal are separate evidence.",
+      "unresolved_test": "First observe one real coordination cycle and trial the strongest CI alternative. Only if incremental service work remains, later compare matched cycles with service on/off, preserve check execution and history, and measure human chasing/rerun/assembly minutes plus revision completeness. Buyer-chosen restoration and later actual payment/renewal are separate evidence.",
+      "access_coverage_limits": "Public accounts are contextual self-reports or small studies, not sampled prevalence or Codeweb users. See evidence index for exact access boundaries."
+    },
+    {
+      "id": "L09-F05",
+      "statement": "The proof sprint can detect first usefulness and voluntary return, but two tasks per participant cannot by itself establish post-familiarity withdrawal loss.",
+      "evidence_type": "Inference from original public records and frozen product documentation; proposed withdrawal mechanism, not observed Codeweb outcome",
+      "supported_actor_segment_task": "Consenting ordinary weekly coding-agent users on real consequential changes; investigators and tool builders must be labeled separately.",
+      "relevant_conditions": "Freeze host/model/package revisions, trigger/output rules, task allocation and scoring before comparison; measure eligible opportunities, not calendar time alone.",
+      "evidence_ids": [
+        "CW-X001",
+        "CW-Z012"
+      ],
+      "opposing_evidence_ids": [
+        "CW-L024",
+        "CW-Y001"
+      ],
+      "strongest_supported_case": "The pilot cautions about small samples and task-dependent interface effects. Verification rereads can cancel narrow savings; the comparison therefore needs total effort and accuracy after familiarization.",
+      "strongest_countercase": "An infrequent consequential task can justify return even with low usage. A short window with no eligible tasks is inconclusive, not rejection; a simple reinstatement can be informative without proving causal magnitude.",
+      "failure_scenario": "An identical task is repeated after the answer is learned; easier tasks land in the removal arm; a new model improves during the trial; a facilitator reminds participants to use the product.",
+      "verdict": "revise",
+      "weakest_assumption": "The proposed observation window supplies enough comparable later tasks after proficiency and novelty have stabilized.",
+      "local_implication": "Add the proposed withdrawal protocol below to a future authorized study; do not relabel the unexecuted ten-change sprint as reliance evidence.",
+      "paid_implication": "Run the paid comparison separately only after a real service/job exists. No participant outreach is authorized by this report.",
+      "confidence_reason": "Moderate confidence in the bounded mechanism and countercases; low confidence in any Codeweb effect because no familiar-user removal comparison exists.",
+      "minimal_falsification_test": "Use the preregistered matched-task and continued-access controls below. A single-person alternating test can falsify a strong universal dependence claim but cannot estimate market prevalence.",
+      "unresolved_test": "Use the preregistered matched-task and continued-access controls below. A single-person alternating test can falsify a strong universal dependence claim but cannot estimate market prevalence.",
+      "access_coverage_limits": "Public accounts are contextual self-reports or small studies, not sampled prevalence or Codeweb users. See evidence index for exact access boundaries."
+    }
+  ],
+  "evidence_index": {
+    "CW-L015": {
+      "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+      "passage_locator": "UnrulyThesis reply",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:67",
+      "source_access": "opened_partial",
+      "retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+      "notes_and_limits": "Historical account; relative date only. No general conclusion about current Serena capability.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-L024": {
+      "original_url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+      "passage_locator": "There’s no difference anymore?; final paragraphs",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:76",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+      "notes_and_limits": "Three repetitions of one task, vendor-affiliated self-measurement. Claims about general host behavior require official verification; no general MCP/CLI superiority inferred.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-L025": {
+      "original_url": "https://nickperkins.au/article/skills-over-mcps/",
+      "passage_locator": "What I did instead; The thing MCPs can’t do; tradeoff",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:77",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+      "notes_and_limits": "Firsthand migration; broad claims about eager loading or unavailable CLIs not adopted as current facts. Counterexample is CW-L024.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-L037": {
+      "original_url": "https://david.coffee/i-still-prefer-mcp-over-skills/",
+      "passage_locator": "Skills + MCP",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:89",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T01:04:40.794822+00:00",
+      "notes_and_limits": "Explicit commercial interest in MCP hosting/tunneling; not ordinary-user proof. Broad host capabilities and security claims not adopted.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-T018": {
+      "original_url": "https://news.ycombinator.com/item?id=48033774",
+      "passage_locator": "Story body and author reply 48035884; complete four-comment tree read",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+      "notes_and_limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-X001": {
+      "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+      "passage_locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+      "notes_and_limits": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+      "evidence_type": "independent_measurement"
+    },
+    "CW-Y001": {
+      "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+      "passage_locator": "posts 1 and 3",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:121",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+      "notes_and_limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-Y007": {
+      "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+      "passage_locator": "posts 1,5,6",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+      "notes_and_limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-Y010": {
+      "original_url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+      "passage_locator": "post 1",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:130",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+      "notes_and_limits": "Outside two-year preference; proposed purchase, not completed sale or observed downgrade.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-Y012": {
+      "original_url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+      "passage_locator": "Solutions; Artifacts; Where we are now",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:132",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+      "notes_and_limits": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-Z003": {
+      "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+      "passage_locator": "Quantifying code duplication; methodological weaknesses",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:111",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+      "notes_and_limits": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-Z006": {
+      "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+      "passage_locator": "Refactoring at scale; What humans still do",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+      "notes_and_limits": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited.",
+      "evidence_type": "first_person_report"
+    },
+    "CW-Z011": {
+      "original_url": "https://github.com/oraios/serena/issues/1432",
+      "passage_locator": "Capability matrix in body",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:119",
+      "source_access": "opened_partial",
+      "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+      "notes_and_limits": "Full body only; comments unavailable. Closed with #1434, but linked PR inaccessible, so resolution not verified.",
+      "evidence_type": "maintainer_confirmation"
+    },
+    "CW-Z012": {
+      "original_url": "https://github.com/oraios/serena/discussions/131",
+      "passage_locator": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+      "source_access": "opened_full",
+      "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+      "notes_and_limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once.",
+      "evidence_type": "maintainer_confirmation"
+    }
+  },
+  "withdrawal_protocol": {
+    "status": "Proposal only; no trial, recruitment, outreach or product change executed or authorized by this assignment.",
+    "target_estimand": "After familiarization and adaptation, recurring net loss attributable to withdrawing active Codeweb on eligible tasks while keeping learned knowledge, artifacts and strong substitutes.",
+    "baseline": "Observe each participant normal native workflow before Codeweb: plan, searches, source reading, tests, decisions and elapsed/active effort. Freeze native configuration; do not cripple it.",
+    "familiarization": "Use distinct consented tasks until the participant can invoke/recover/disable the tool unaided and interpret stale/empty/unsupported outcomes, with at least two later unprompted eligible uses. This proposed criterion is not observed. Log novelty and troubleshooting separately; if proficiency is not reached, classify activation friction, not established withdrawal loss.",
+    "allocation": "Match distinct tasks prospectively by repository familiarity, mapped scope, expected difficulty, ambiguity, change type and maintainer-estimated risk. Counterbalance active/withdrawn order across participants and task pairs. Use at least two matched pairs per participant after familiarization as a falsification pilot, not a powered prevalence estimate. Include continued-access participants over the same interval to expose learning, calendar and host/model drift.",
+    "controls": "Include easy/familiar isolated edits and generated/dynamic ambiguous cases; maintain separate eligible-task and control denominators. Do not reuse the exact solved task for time comparisons. Preserve tests and compiler checks in every arm. Record order, interruptions, versions, warm/cold state and access failures.",
+    "withdrawal": "Disable active Codeweb hooks/tools/instructions and any automatic new brief delivery, verify that state, preserve source, Git history, earlier exports and participant knowledge. For local effect, keep hosted service absent/constant; for a paid test, keep local Codeweb on and pause only incremental service coordination. Allow adaptation before scoring recurring loss; record initial transition cost separately.",
+    "outcomes": "Per task: active discovery+inspection+verification+triage+refresh/setup amortization minutes; wall-clock wait separately; correct changed inspection/reuse decisions; material omissions; needless reads/edits; completed/failed/skipped/unknown checks. A blinded independent maintainer adjudicates decisions and task difficulty from source and actual project checks; no static result counts as behavioral correctness.",
+    "decision_rule": "Freeze a participant-specific practically meaningful time delta in minutes before measuring. Support a time mechanism only if withdrawn-minus-active net effort exceeds that delta on two distinct eligible pairs without worse active-arm quality. Separately, a consequential omission corrected only with Codeweb can support a decision-quality mechanism after independent adjudication and time accounting; it does not establish population safety. Report mixed and null pairs, not only medians. If substitutes match/better both outcomes after adaptation, reject recurring dependence for that tested segment/task. No eligible tasks, missing checks or access failure leave the withdrawal effect unresolved.",
+    "reinstatement": "After scored withdrawal, make re-enabling available once in a neutral way with no prompts, rewards, mandated gate or withheld artifacts. Observe whether the participant chooses restoration and uses it on subsequent eligible work. Count opportunities and decisions; record reason and net outcome. Choice alone is not causal evidence; non-return without an eligible opportunity is not rejection.",
+    "novelty_and_carryover": "Retained knowledge biases immediate removal toward no loss but is genuine delivered value. Separate unchanged familiar tasks from fresh changes; account for participant learning and continued-access controls. Model stochasticity, unblinded participant expectations and small samples remain limitations even after counterbalancing.",
+    "ownership_and_authority": "Product Lead owns proposed sourcing/logistics and any later authorization request; Technical Lead owns host-state validation; a non-author reviewer owns outcome adjudication. Missing customer participation remains missing external evidence, never founder homework or synthetic interviews."
+  },
+  "source_addendum": [
+    {
+      "evidence_id": "CW-Z003",
+      "url": "https://ngof.nikhaldimann.com/p/deja-code",
+      "locator": "Article lines 21–34, 57–59 and 71–77 in web open",
+      "note": "Reviewed main article text; no linked repo, charts, comments or footnoted studies independently inspected. Supports repeat prompting and duplication caveats; author numerical counterfactual not adopted.",
+      "checked_at_utc": "2026-09-30T04:36:18.041066+00:00",
+      "method": "web.run open",
+      "capture_kind": "durable access/provenance note, not a complete HTML snapshot"
+    },
+    {
+      "evidence_id": "CW-X001",
+      "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+      "locator": "Article sections Comparing two code retrieval interfaces; Noisy codebases; Output shape; final limitations",
+      "note": "Reviewed main article text and tables; linked experiment repo and images not inspected. Small builder pilot, no Codeweb measurement.",
+      "checked_at_utc": "2026-09-30T04:36:18.041066+00:00",
+      "method": "web.run open",
+      "capture_kind": "durable access/provenance note, not a complete HTML snapshot"
+    },
+    {
+      "evidence_id": "CW-Y007",
+      "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+      "locator": "Exposed posts 1, 3, 5; post 6 header only in web response",
+      "note": "Current reopen is partial: confirms repeated manual checking and CI substitute, but does not independently recover post 6 acceptance passage. That portion relies on frozen original record.",
+      "checked_at_utc": "2026-09-30T04:36:18.041066+00:00",
+      "method": "web.run open",
+      "capture_kind": "durable access/provenance note, not a complete HTML snapshot"
+    },
+    {
+      "evidence_id": "CW-Z012",
+      "url": "https://github.com/oraios/serena/discussions/131",
+      "locator": "GitHub discussion opened; body not returned in this bounded output",
+      "note": "Reachability only for this reopen, not an additional passage review. Substantive judgment uses frozen original evidence record.",
+      "checked_at_utc": "2026-09-30T04:36:18.041066+00:00",
+      "method": "web.run open",
+      "capture_kind": "durable access/provenance note, not a complete HTML snapshot"
+    }
+  ],
+  "capability_pointers": [
+    "inputs/docs/reference.md:65-97 — static checks and baseline limits",
+    "inputs/scripts/find-similar.mjs:1-80 — token-shingle/structural candidates, body cap, source requirement",
+    "inputs/docs/gtm-cofounder/founder-brief.md — Core five and intake evidence",
+    "inputs/reports/user-centric-value-strategy/STRATEGY.md — Earn repeated reliance and Connect developer value to a paid team job",
+    "inputs/reports/product-proof-sprint-plan/README.md — Sprint sequence and Proposed decision gate"
+  ],
+  "source_gaps": [
+    "No Codeweb familiar-user withdrawal observation, reinstatement outcome, buyer or renewal.",
+    "No source counts treated as prevalence. Corpus includes builders, partial reads, unknown dates and missing external page captures.",
+    "No current host capability inferred from historical complaints. No images used as visual evidence.",
+    "No other pressure-test lens output read. Shared filesystem independence is procedural; runtime session freshness awaits lead verification."
+  ]
+}

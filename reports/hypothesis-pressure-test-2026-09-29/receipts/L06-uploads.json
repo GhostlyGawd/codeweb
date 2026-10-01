@@ -1,0 +1,30 @@
+[
+  {
+    "path": "lenses/06-buyer-and-paid-service-value.md",
+    "attachment_id": "6a58caca-37a6-4b0d-afce-c6223dee7731",
+    "work_product_id": "e6fd4208-907c-44d6-ac43-165cd105544a",
+    "download_sha256_verified": true,
+    "sha256": "8c2211df7e8ba75ed1147af64cd1a7f3064a5daf1759acf3f8ba56871558876a"
+  },
+  {
+    "path": "lenses/06-findings.json",
+    "attachment_id": "fffe5201-9873-4b16-993f-a6dca9c8eb80",
+    "work_product_id": "5836e91b-aa77-426d-9236-35d1e9c64d72",
+    "download_sha256_verified": true,
+    "sha256": "61340bd24705ed87ffac61a78985c938a9f5a7bd66743e74bbba5d0c8178eca6"
+  },
+  {
+    "path": "receipts/L06.json",
+    "attachment_id": "fa9f213c-caa9-49da-bab6-8ce51fbc37db",
+    "work_product_id": "7c3c74ee-95d1-47ed-acdc-fbb0c04f958f",
+    "download_sha256_verified": true,
+    "sha256": "9795777a808fa86c5c059f034a4acdd38d93627f5025f18e84b4fda58108d3b7"
+  },
+  {
+    "path": "sources/L06-source-addendum.json",
+    "attachment_id": "8e283263-08a8-41a8-89d6-6a808bfe12c4",
+    "work_product_id": "047b4c94-f4e4-4f66-af5a-e37aa08a8537",
+    "download_sha256_verified": true,
+    "sha256": "540ea59b12f58e6aa4c14d1c33600c16ba768c2741f90df4d54d690d647b6229"
+  }
+]

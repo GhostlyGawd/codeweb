@@ -1,0 +1,21 @@
+{
+  "id": "T74-corrected-mcp-similarity",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/mcp-server.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"codeweb_find_similar\",\"arguments\":{\"graph\":\"$LOCAL_TMP/codeweb-p02-supplement-mshorI/intentional/.codeweb/graph.json\",\"body\":\"export function packOrders(list) {\\n const out = [];\\n let total = 0;\\n for (const it of list) {\\n total += it.qty;\\n out.push(it.qty * 2);\\n }\\n const avg = total / list.length;\\n out.sort();\\n console.log(avg);\\n return out;\\n}\\n\"}}}\n",
+  "start": "2026-10-01T01:52:49.399Z",
+  "end": "2026-10-01T01:52:49.477Z",
+  "durationMs": 77.47833400000002,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"candidate\\\":{\\\"source\\\":\\\"stdin\\\",\\\"shingles\\\":50,\\\"mode\\\":\\\"lexical\\\"},\\\"index\\\":\\\"live\\\",\\\"bodyLineCap\\\":400,\\\"matches\\\":[{\\\"id\\\":\\\"one.mjs:packOrders\\\",\\\"label\\\":\\\"packOrders\\\",\\\"file\\\":\\\"one.mjs\\\",\\\"line\\\":1,\\\"domain\\\":\\\"unassigned\\\",\\\"sim\\\":1,\\\"tier\\\":\\\"high\\\"},{\\\"id\\\":\\\"two.mjs:packOrders\\\",\\\"label\\\":\\\"packOrders\\\",\\\"file\\\":\\\"two.mjs\\\",\\\"line\\\":1,\\\"domain\\\":\\\"unassigned\\\",\\\"sim\\\":1,\\\"tier\\\":\\\"high\\\"}],\\\"count\\\":2,\\\"scanned\\\":2}\"}]}}\n",
+  "stderr": ""
+}

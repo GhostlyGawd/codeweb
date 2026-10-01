@@ -1,0 +1,133 @@
+Applying shared coding guidelines across multiple repos with Bugbot - Discussions - Cursor - Community Forum
+Cursor - Community Forum
+Applying shared coding guidelines across multiple repos with Bugbot
+Discussions
+bugbot
+giorgosera
+September 16, 2025,  4:46pm
+1
+Has anyone found a way to make Bugbot use context from one repository in another?
+My use case is that I keep documentation and coding guidelines in a dedicated “docs” repo, and I’d like Bugbot to automatically apply those guidelines when reviewing PRs in a different code repo. From the docs it looks like Bugbot’s context is scoped per-repository only — but I’m wondering if anyone has a workaround (e.g. linking repos, symlinks, shared .cursor/BUGBOT.md references, or org-level config).
+Is cross-repo context possible today, or is the only option to duplicate the guidelines into each repo?
+jkaplan
+(Jon Kaplan)
+September 16, 2025,  5:02pm
+3
+Currently the best way is to duplicate BUGBOT.md into each repo! This is on our mind though
+giorgosera
+September 16, 2025,  5:07pm
+5
+Thanks for the answer. But what if I reference specific file paths in the bugbot.md?
+My actual guidelines exist in .md files which I reference in my BUGBOT.md.
+jkaplan
+(Jon Kaplan)
+September 16, 2025,  5:41pm
+7
+Currently that won’t work for BUGBOT.md at all. The model will read what’s in that file but won’t jump to other files to read what’s in there!
+giorgosera
+September 16, 2025,  6:53pm
+9
+I see. That’s surprising. I thought I saw somewhere in the docs that you could reference files but I might misremember!
+So my BUBGOT.md never really worked
+jkaplan
+(Jon Kaplan)
+September 16, 2025,  6:54pm
+11
+Haha I guess not, but is it a good sign that you didn’t even notice? Bugbot seems to naturally be working well!
+giorgosera
+September 16, 2025,  7:13pm
+13
+It does but in this case I was struggling to understand if my bugbot.md was working. I was not really happy with its performance and now I know why.
+In any case thanks for letting me know.
+Luisa
+(Luisa)
+November 11, 2025,  9:55pm
+15
+@giorgosera
+I found that team rules worked really well for all our repos! How many rules do you have defined?
+You can find them in cursor dashboard → bugbot → team rules. Here is a sample of some I defined.
+image
+2188×574 46.8 KB
+jkaplan
+(Jon Kaplan)
+November 11, 2025, 10:37pm
+17
+@giorgosera
+you should be able to reference other files now
+we implemented this functionality a while ago!
+glf
+January 28, 2026,  4:49pm
+19
+hey
+@jkaplan
+! can you clarify what is the best way/syntax to reference other files inside
+BUGBOT.md
+? we have our own documentation inside our repo and would love to reference them instead of duplicating their content in
+BUGBOT.md
+.
+jkaplan
+(Jon Kaplan)
+January 28, 2026, 11:36pm
+20
+Relative markdown links are explicitly fed to the model, like this “Follow the rules laid out in (my coding standards)[./.cursor/rules/codingstandards.mdc]”
+Anything else may work but it’s up to the agent
+glf
+January 29, 2026,  7:27am
+21
+thanks, this helps a ton! and just to clarify, when you say
+relative
+, it is not relative to the path of the
+BUGBOT.md
+file, right? so we start from the root as you wrote, for instance
+[our api pattern](./docs/patterns/api.md)
+(where
+.docs
+is at the root).
+Related topics
+Topic
+Replies
+Views
+Activity
+Does BUGBOT.md support referencing files in same repo?
+Help
+rules
+,
+bugbot
+5
+447
+March 23, 2026
+Extend Bug Bot rules to support file references
+Feature Requests
+rules
+,
+bugbot
+0
+96
+February 23, 2026
+BUGBOT.md Not Applied in PR Review
+Bug Reports
+bugbot
+4
+299
+November 26, 2025
+Supports for custom rules in BugBot
+Feature Requests
+13
+1501
+August 6, 2025
+Does Bugbot respect .cursor/rules or only BUGBOT.md?
+Help
+rules
+,
+bugbot
+1
+171
+May 29, 2026
+Home
+Categories
+Guidelines
+Terms of Service
+Privacy Policy
+Powered by
+Discourse
+, best viewed with JavaScript enabled

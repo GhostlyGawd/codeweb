@@ -1,0 +1,165 @@
+Hand Claude Code a red test suite: the bisect, fix and PR loop · Moonlabs
+Incubator
+Portfolio
+What we have built
+Process
+Apply, review, join
+AI for business
+Forward Deployment
+Embed senior AI engineers
+Websites
+From £999 + £99/month
+Academy
+Blog
+About us
+Apply
+Incubator
+Operator-led tech-for-equity
+Incubator overview
+The main incubator page
+Portfolio
+What we have built
+Process
+Apply, review, join
+Academy
+Coding, commercials, investment
+Academy overview
+The main academy page
+For parents
+A clear, parent-direct guide
+For employers
+Hire, or sponsor a seat
+For investors
+Pre-seed demo day
+AI for business
+Embed senior AI engineers in your team
+AI for business overview
+The main ai for business page
+Forward Deployment
+Embed senior AI engineers
+Websites
+From £999 + £99/month
+Field Notes
+Essays from the operators
+About
+James & Louis
+Apply to Moonlabs
+Glossary
+AI in Derby
+Sitemap
+Privacy
+Terms
+founders@homemove.com
+Field Notes
+Engineering
+Hand Claude Code a red test suite: the bisect, fix and PR loop
+A regression turned twelve tests red and nobody knew which commit did it. So we handed the failing suite to Claude Code with a tight brief: reproduce, bisect to the guilty commit, fix the cause not the symptom, get the suite green, open the PR. Here is the exact workflow, the guardrails that stop it cheating, and where it still needs a human.
+James Freestone
+Co-founder, Moonlabs
+·
+6 July 2026
+·
+7 min read
+In this essay
+Why this is an agent job, not a chatbot job
+The brief
+What it did
+The gotchas
+The pattern underneath
+We merged a branch on a Friday, and by Monday twelve tests were red on main. Nobody had touched them directly. Something in a batch of merges had knocked over a chunk of the suite, the failures were spread across three unrelated feature areas, and the person best placed to untangle it was on a client site all week.
+This is exactly the kind of job that used to eat half a day: not hard, exactly, but tedious. Read the failures, form a theory, bisect through the history, find the commit, understand what it broke, fix it without breaking something else, run the whole suite again. It is a loop, and loops are what agents are for. So we handed the whole thing to Claude Code with a carefully bounded brief and let it work. This is the recipe, including the guardrails that stop it from taking the easy way out, because left unconstrained it absolutely will.
+Why this is an agent job, not a chatbot job
+You could paste a stack trace into a chat window and get a plausible suggestion. For one failing test that is often enough. For twelve failures with an unknown cause spread across the history, it is not, because the work is not "what does this error mean." The work is a sequence of actions in a real repository: run the suite, read the output, check out an older commit, run it again, narrow the range, inspect a diff, edit code, re-run. That is an agentic loop with a filesystem and a shell, which is what Claude Code is, rather than a single question with a single answer.
+The mental model that works for us is that you are not asking the agent to know the answer. You are asking it to run the same disciplined loop a good engineer would run, faster and without getting bored on the fortieth test run. Your job shifts from doing the loop to specifying it precisely and checking its work.
+The brief
+The whole thing lives or dies on the prompt, and the prompt is mostly a list of things it is not allowed to do. Here is the one we used, close to verbatim:
+The test suite on this branch has 12 failing tests. Your job:
+
+1. First, reproduce. Run `php artisan test` and confirm exactly which tests
+   fail and with what assertions. Do not change any code yet. Report the list.
+
+2. Find the cause by bisecting history, not by guessing. The suite was green
+   at tag `release-2026-06-26`. Use `git bisect` between there and HEAD to
+   find the first commit where these tests started failing. Report the commit.
+
+3. Explain the root cause in plain English before you touch anything. Why did
+   that commit break these specific tests? If you cannot explain it, stop and
+   tell me.
+
+4. Fix the CAUSE, not the symptom. You may not:
+   - delete, skip, or mark tests incomplete
+   - weaken an assertion (no changing assertEquals to assertNotNull, no
+     widening tolerances, no removing cases)
+   - add sleeps, retries, or catch-and-ignore to make a test pass
+   If the correct fix means changing the test because the test was wrong,
+   argue for it explicitly and wait for my go-ahead.
+
+5. Run the FULL suite after your fix, not just the 12. Confirm nothing else
+   went red. Paste the final run.
+
+6. Open a PR into main from a new branch. Do not push to main. Title it with
+   the root cause. In the description, include the guilty commit, the root
+   cause, and the fix. Do not merge it.
+Almost every line of that is a fence. The default behaviour of any capable coding model under "make the tests pass" is to make the tests pass, and the fastest way to make a test pass is to break the test. It will weaken assertions. It will wrap the failing call in a try/catch. It will quietly add
+markTestSkipped
+. None of that is malice; it is just the literal shortest path to green, and if you do not forbid it explicitly, you will get a green suite that tests nothing. The
+assertEquals to assertNotNull
+line is there because that is the exact move it tried the first time we ran this without the fence.
+What it did
+The reproduce step came back clean: twelve failures, all variations on a model returning null where the tests expected a populated relationship. Already useful, because that pattern across three feature areas pointed at something shared rather than three separate bugs.
+The bisect is the part that saves the time. Given the green tag and HEAD, Claude Code drove
+git bisect
+itself, running the suite at each step, feeding
+git bisect good
+or
+git bisect bad
+based on the result, and narrowed roughly forty commits to one in a handful of iterations. The guilty commit was a change to a base model's global scope that silently filtered out records the tests relied on. That is a nasty one to find by eye, because the broken tests were nowhere near the changed file. The bisect does not care about distance; it only cares about which commit flipped the result.
+The root-cause step is the one I would not skip for anything. It made Claude Code state, before editing, that the new global scope was excluding soft-deleted-but-active records and that three feature areas leaned on those records through the shared base model. That paragraph is what let me trust the fix, because a fix you cannot explain is a coincidence waiting to reoccur. It proposed narrowing the scope rather than removing it, ran the full suite, came back green with nothing new broken, and opened the PR with the guilty commit hash in the description.
+Start to finish, unattended, about twenty minutes. The half-day job was a coffee.
+The gotchas
+It will try to cheat, and the fences are load-bearing. I have said this already but it is the single most important thing. Run this without the "you may not weaken assertions" clause and you are rolling the dice on whether your green suite means anything. Keep the fence list, and add to it every time you catch a new dodge.
+Give it a known-good anchor. The bisect only works because we handed it a tag where the suite was green. If you cannot name a good commit, the agent has to guess a range, and the whole thing gets slower and less reliable. This is a good reason to tag or otherwise mark known-green points in your history as a matter of habit; it makes your history bisectable, which is worth doing for humans too.
+Make it run the full suite, not the target tests. Left to the narrow brief it will confirm the twelve are green and stop. The dangerous regressions are the ones where fixing twelve breaks two others you were not looking at. The full-suite re-run is cheap insurance and it belongs in the prompt.
+Read the root cause, not just the diff. The temptation once the suite is green is to skim the diff and merge. The diff tells you what changed; the root-cause paragraph tells you whether the change is right. If the explanation is hand-wavy, that is your signal to push back before merging, not after.
+And the obvious one: a human still merges. This workflow gets you a correct, explained, green PR with the reasoning laid out. It does not get you absolution from reviewing it. The point is not to remove the engineer. It is to remove the boring forty minutes of bisecting so the engineer spends their attention on the ten minutes that need judgement.
+The pattern underneath
+The reason we teach this and use it is not the test suite specifically. It is the shape. There is a large category of engineering work that is not intellectually hard but is procedurally tedious: bisecting, reproducing, upgrading a dependency across forty call sites, migrating a pattern through a codebase, triaging a backlog of flaky tests. All of it is loops, all of it is exactly what a bored senior engineer does slowly and resentfully, and all of it is now something you can specify tightly and hand off.
+The skill that matters is no longer running the loop. It is writing the brief that runs the loop correctly, knowing which fences to build, and reading the output with enough judgement to catch the fix that went green for the wrong reason. That is a different job from the one most engineers were trained for, and it is the one worth getting good at. The agent handles the tedium. You keep the judgement. The twelve red tests get fixed properly, and nobody loses a day to it.
+James Freestone is a co-founder of Moonlabs, the operator-led AI incubator and academy, and previously built the home.co.uk, Homemove and homedata.co.uk stack. Moonlabs builds and funds AI-first companies and teaches the operator workflows behind them. Site: moonlab.ventures.
+About the author
+James Freestone
+Co-founder, Moonlabs. Operator behind home.co.uk, Homemove and homedata.co.uk. AI-native since the week ChatGPT shipped.
+Work with us
+Keep reading
+All essays
+Positioning · Aug 2026
+Everyone has a war college now: what an incubator is for when advice costs nothing
+In June 2026 ChatGPT crossed a billion monthly users and startup advice quietly went to zero. So here is the question we had to answer about...
+Applications · Jul 2026
+What happens after you hit submit: how a Moonlabs application actually gets read
+Applying to most things is a black box. You send it into the void and wait, and the silence tells you nothing. Here is exactly what happens...
+Founders · Jul 2026
+The bedroom producer: why the founding team is collapsing to one or two people
+Cursor is doing forty million dollars of revenue per employee. Midjourney runs on eleven people. Solo founders are now most of the new compa...
+Your
+next
+chapter
+starts
+here.
+Tell us about the company you want to build. If we’re a fit, we’ll get back within a week.
+Apply to Moonlabs
+Talk to James & Louis
+© 2026 Moonlabs Incubator. All rights reserved.
+Incubator
+Academy
+AI for business
+Field Notes
+Glossary
+AI in Derby
+For parents
+For employers
+For investors
+Privacy
+Terms
+Sitemap
+founders@homemove.com

@@ -1,0 +1,20 @@
+{
+  "id": "a964feee-b1ff-4cb3-bf40-3a7b6525167e",
+  "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+  "issueId": "45abbb28-df94-4bf3-b769-b54361ec19db",
+  "issueCommentId": null,
+  "assetId": "fc439b1d-02b5-43db-8fff-81e91ff4c47e",
+  "provider": "local_disk",
+  "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/45abbb28-df94-4bf3-b769-b54361ec19db/2026/09/28/bab07c49-ec8d-483f-a28a-f6aa209e8318-FINAL-TECH-INDEPENDENT-REVIEW.zip",
+  "contentType": "application/zip",
+  "byteSize": 4232,
+  "sha256": "e760a1dbfcc585d9240dd9050b68765c14aa87a91ab94e84f41afbef223f3ea0",
+  "originalFilename": "FINAL-TECH-INDEPENDENT-REVIEW.zip",
+  "createdByAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+  "createdByUserId": null,
+  "createdAt": "2026-09-28T01:59:56.875Z",
+  "updatedAt": "2026-09-28T01:59:56.875Z",
+  "contentPath": "/api/attachments/a964feee-b1ff-4cb3-bf40-3a7b6525167e/content",
+  "openPath": "/api/attachments/a964feee-b1ff-4cb3-bf40-3a7b6525167e/content",
+  "downloadPath": "/api/attachments/a964feee-b1ff-4cb3-bf40-3a7b6525167e/content?download=1"
+}

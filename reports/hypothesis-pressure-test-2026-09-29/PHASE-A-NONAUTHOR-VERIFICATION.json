@@ -1,0 +1,1383 @@
+{
+  "schema_version": 1,
+  "complete": true,
+  "status": "non_author_source_verification_complete",
+  "verified_at": "2026-09-30T04:19:51.761066+00:00",
+  "findings_verified": 18,
+  "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+  "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+  "findings": [
+    {
+      "finding_id": "L01-F01",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/01-user-need-and-segment.md",
+      "report_sha256": "dd0ac7f2db5f4ff571a58a92e0c1efca7e1e2a43472d934f898d66c5e89e7e1e",
+      "finding_table_sha256": "7a73d775b2d21cee5e7f2192487a660d744765a739c571b3a1ade1e34097fecf",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-T018",
+            "original_url": "https://news.ycombinator.com/item?id=48033774",
+            "original_passage": "Story body and author reply 48035884; complete four-comment tree read",
+            "verifier_capture": "sources/L01/CW-T018.txt",
+            "capture_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z003",
+            "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+            "original_passage": "Quantifying code duplication; methodological weaknesses",
+            "verifier_capture": "sources/L01/CW-Z003.txt",
+            "capture_sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-Z006",
+            "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+            "original_passage": "Refactoring at scale; What humans still do",
+            "verifier_capture": "sources/L01/CW-Z006.txt",
+            "capture_sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z001",
+            "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+            "original_passage": "The Old Projects I Refactored; How I Use Codex Now",
+            "verifier_capture": "sources/L01/CW-Z001.txt",
+            "capture_sha256": "f06ceefb7d3c95cc528d03eae7461b9012fb16c9e08745aa8a5f2dfe81fa7cfd",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "Original T018 and Z003 support repeated prompting and utility duplication within those accounts; Z006 keeps abstraction judgment human and Z001 reports a bounded successful refactor. No prevalence or Codeweb effect follows.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L01-F02",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/01-user-need-and-segment.md",
+      "report_sha256": "dd0ac7f2db5f4ff571a58a92e0c1efca7e1e2a43472d934f898d66c5e89e7e1e",
+      "finding_table_sha256": "7a73d775b2d21cee5e7f2192487a660d744765a739c571b3a1ade1e34097fecf",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-P003",
+            "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+            "original_passage": "Context and Category H; all body categories read",
+            "verifier_capture": "sources/L01/CW-P003.txt",
+            "capture_sha256": "dd7a415ec9bd6ab34b1218c73b0363b7f4dcb81925791c829ecac9266133e0f0",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-X001",
+            "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+            "original_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+            "verifier_capture": "sources/L01/CW-X001.txt",
+            "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-T023",
+            "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1qobg1g/how_to_refactor_50k_lines_of_legacy_code_without/",
+            "original_passage": "Original post lines 21\u201394 read; remainder not inspected",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-T023-READ-NOTE.json",
+            "capture_sha256": "d213f3e2037f3535194acc9c7f87292fd131ba47bebacf3b5c77f5b6fd4111a1",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-X001",
+            "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+            "original_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+            "verifier_capture": "sources/L01/CW-X001.txt",
+            "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_qualification",
+      "reason": "P003 Category H contains same-file recursion, closure and partial-rename failures; X001 distinguishes precision from unchanged recall. T023 supports a constrained testing workflow, with qualification below.",
+      "qualification": "CW-T023 full post also uses CodeRabbit on every PR and human review. Carry only constrained-workflow success; do not recast this as a native-tools-only success or independently verified result. Original lens already declares its partial read boundary; this qualification extends that boundary without changing its finding.",
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L01-F03",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/01-user-need-and-segment.md",
+      "report_sha256": "dd0ac7f2db5f4ff571a58a92e0c1efca7e1e2a43472d934f898d66c5e89e7e1e",
+      "finding_table_sha256": "7a73d775b2d21cee5e7f2192487a660d744765a739c571b3a1ade1e34097fecf",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-Z001",
+            "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+            "original_passage": "The Old Projects I Refactored; How I Use Codex Now",
+            "verifier_capture": "sources/L01/CW-Z001.txt",
+            "capture_sha256": "f06ceefb7d3c95cc528d03eae7461b9012fb16c9e08745aa8a5f2dfe81fa7cfd",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-X001",
+            "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+            "original_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+            "verifier_capture": "sources/L01/CW-X001.txt",
+            "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-L015",
+            "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+            "original_passage": "UnrulyThesis reply",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L015-READ-NOTE.json",
+            "capture_sha256": "dbdc321d20927dc8bf223f2ea504d1ddb188acf74825bc7eaeeab8565476acba",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-T018",
+            "original_url": "https://news.ycombinator.com/item?id=48033774",
+            "original_passage": "Story body and author reply 48035884; complete four-comment tree read",
+            "verifier_capture": "sources/L01/CW-T018.txt",
+            "capture_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-P003",
+            "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+            "original_passage": "Context and Category H; all body categories read",
+            "verifier_capture": "sources/L01/CW-P003.txt",
+            "capture_sha256": "dd7a415ec9bd6ab34b1218c73b0363b7f4dcb81925791c829ecac9266133e0f0",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "Z001 describes a constrained modularization; X001 reports clean-repository overhead and L015 explicitly reports removing Serena. T018/P003 prevent treating repository size as a sufficient exclusion.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L01-F04",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/01-user-need-and-segment.md",
+      "report_sha256": "dd0ac7f2db5f4ff571a58a92e0c1efca7e1e2a43472d934f898d66c5e89e7e1e",
+      "finding_table_sha256": "7a73d775b2d21cee5e7f2192487a660d744765a739c571b3a1ade1e34097fecf",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-L048",
+            "original_url": "https://news.ycombinator.com/item?id=49321400",
+            "original_passage": "Root 49321400",
+            "verifier_capture": "sources/L01/CW-L048.txt",
+            "capture_sha256": "2a6d49781c8ad6448b79778e7fbc694340a5db2b8f23e8b1f1cc9d9789cc5b41",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-X006",
+            "original_url": "https://renanfranca.github.io/when-plan-mode-was-no-longer-enough.html",
+            "original_passage": "First disappointment; seed4j-cli example; What this approach still does not solve",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-X006.txt",
+            "capture_sha256": "741179e6bbaee2636a7a94b70532e5e40fd336b211e28ef7503f65f8d6f037d4",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-L051",
+            "original_url": "https://news.ycombinator.com/item?id=49321400",
+            "original_passage": "Comment 49353756",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L051.txt",
+            "capture_sha256": "6c929497b104bee9a21401bc3b179f33cdc94e8a4793ca47d23ac8deb3bca83a",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-L001",
+            "original_url": "https://www.reddit.com/r/codereview/comments/1vuddna/how_are_you_actually_reviewing_ai_generated_code/",
+            "original_passage": "OkPosition4563 reply; rendered lines 310\u2013315",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L001-READ-NOTE.json",
+            "capture_sha256": "a17a37c2535bb6cb30593e323cab5bbab5a05c63e43dd436abc140c3a9db93d8",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z006",
+            "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+            "original_passage": "Refactoring at scale; What humans still do",
+            "verifier_capture": "sources/L01/CW-Z006.txt",
+            "capture_sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "L048 root and X006 describe architecture/review burden. L051 reports a useful custom architecture reviewer; L001 retains ordinary review standards; Z006 leaves abstraction decisions human. These are adjacent jobs, not interchangeable author/buyer evidence.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L01-F05",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/01-user-need-and-segment.md",
+      "report_sha256": "dd0ac7f2db5f4ff571a58a92e0c1efca7e1e2a43472d934f898d66c5e89e7e1e",
+      "finding_table_sha256": "7a73d775b2d21cee5e7f2192487a660d744765a739c571b3a1ade1e34097fecf",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-X001",
+            "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+            "original_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+            "verifier_capture": "sources/L01/CW-X001.txt",
+            "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z003",
+            "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+            "original_passage": "Quantifying code duplication; methodological weaknesses",
+            "verifier_capture": "sources/L01/CW-Z003.txt",
+            "capture_sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-T018",
+            "original_url": "https://news.ycombinator.com/item?id=48033774",
+            "original_passage": "Story body and author reply 48035884; complete four-comment tree read",
+            "verifier_capture": "sources/L01/CW-T018.txt",
+            "capture_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-Z001",
+            "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+            "original_passage": "The Old Projects I Refactored; How I Use Codex Now",
+            "verifier_capture": "sources/L01/CW-Z001.txt",
+            "capture_sha256": "f06ceefb7d3c95cc528d03eae7461b9012fb16c9e08745aa8a5f2dfe81fa7cfd",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-P003",
+            "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+            "original_passage": "Context and Category H; all body categories read",
+            "verifier_capture": "sources/L01/CW-P003.txt",
+            "capture_sha256": "dd7a415ec9bd6ab34b1218c73b0363b7f4dcb81925791c829ecac9266133e0f0",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-T023",
+            "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1qobg1g/how_to_refactor_50k_lines_of_legacy_code_without/",
+            "original_passage": "Original post lines 21\u201394 read; remainder not inspected",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-T023-READ-NOTE.json",
+            "capture_sha256": "d213f3e2037f3535194acc9c7f87292fd131ba47bebacf3b5c77f5b6fd4111a1",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_qualification",
+      "reason": "Original query log selects pain mechanisms. X001 is a builder pilot; Z003 describes its own project. Z001/P003/T023 broaden the corpus without establishing representativeness or an opportunity denominator.",
+      "qualification": "CW-T023 full post also uses CodeRabbit on every PR and human review. Carry only constrained-workflow success; do not recast this as a native-tools-only success or independently verified result. Original lens already declares its partial read boundary; this qualification extends that boundary without changing its finding.",
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L01-F06",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/01-user-need-and-segment.md",
+      "report_sha256": "dd0ac7f2db5f4ff571a58a92e0c1efca7e1e2a43472d934f898d66c5e89e7e1e",
+      "finding_table_sha256": "7a73d775b2d21cee5e7f2192487a660d744765a739c571b3a1ade1e34097fecf",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-Y007",
+            "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+            "original_passage": "posts 1,5,6",
+            "verifier_capture": "sources/L01/CW-Y007.txt",
+            "capture_sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-Y007",
+            "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+            "original_passage": "posts 1,5,6",
+            "verifier_capture": "sources/L01/CW-Y007.txt",
+            "capture_sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Y005",
+            "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+            "original_passage": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Y005.txt",
+            "capture_sha256": "5c1a2bc9d740da12a37db00d4a1d32af71241a4ed05d956963a856153a5a2463",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "Y007 author reports repeated checks but accepts CI/monorepo alternatives without trying CI. Y005 explicitly prefers internal narrow tooling. Buyer authority and residual paid work are not established.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L03-F01",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/03-native-experience-and-attention.md",
+      "report_sha256": "5f5198c9d8551c12627a546f3e9afd9dc837bbc6a7604af9e16a64ac8c529d47",
+      "finding_table_sha256": "81aadfd65aa90c1786b6e427d5bdf3087639a225c0a9499be3096f89df6d7e63",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-T002",
+            "original_url": "https://github.com/anthropics/claude-code/issues/88214",
+            "original_passage": "Body and all 0 comments; comment IDs in source registry",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-T002.txt",
+            "capture_sha256": "cde137553c87ffdf2d465d0967e5262afe0308d2a6b8a5330c8ca604249a1894",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-T004",
+            "original_url": "https://github.com/anthropics/claude-code/issues/97515",
+            "original_passage": "Body and all 0 comments; comment IDs in source registry",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-T004.txt",
+            "capture_sha256": "2647a1fc7b899ca8a8f3d908af466600974507ecd734161c7739c171957febd9",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-X009",
+            "original_url": "https://github.com/openai/codex/issues/27133",
+            "original_passage": "Body reproduction; comment 5233430635; comment 5416744725",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-X009.txt",
+            "capture_sha256": "0d40d250c5879c5721aec4de6a712a9b301b155ca880a7387b38e3662a287a10",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-L026",
+            "original_url": "https://forum.cursor.com/t/bugbot-without-background-agents/157812",
+            "original_passage": "Original post; support reply 6; author confirmation 7",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L026.txt",
+            "capture_sha256": "52fd9b7c59f911038ac99dbb1f3f75e9401033763e57c678c6afd9cc8a96b4b0",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-L024",
+            "original_url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+            "original_passage": "There\u2019s no difference anymore?; final paragraphs",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L024.txt",
+            "capture_sha256": "f9f34c73db717c68ffe9d031361363dfe35dfd57b8d85504c03859a5b1eabf83",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/README.md:217-229 (plugin restart versus per-client MCP registration)",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        },
+        {
+          "pointer": "inputs/docs/reference.md:269-272 (Codex CLI 0.154.0 assessment; Claude and all-tool certification excluded)",
+          "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69"
+        },
+        {
+          "pointer": "inputs/hooks/hooks.json:1-39 (host-specific event matchers)",
+          "sha256": "9b64aa9af1e20277fb9751dbea1a8a140c1cf7037dc45832f26545d01dd5d498"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "T002 and T004 report missing plugins on specific surfaces; X009 contains a worktree reproduction. L026 includes successful trigger-syntax correction; L024 reports comparable equivalent-workflow context use. Frozen reference limits its exercised baseline to a named Codex version.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L03-F02",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/03-native-experience-and-attention.md",
+      "report_sha256": "5f5198c9d8551c12627a546f3e9afd9dc837bbc6a7604af9e16a64ac8c529d47",
+      "finding_table_sha256": "81aadfd65aa90c1786b6e427d5bdf3087639a225c0a9499be3096f89df6d7e63",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-X001",
+            "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+            "original_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+            "verifier_capture": "sources/L01/CW-X001.txt",
+            "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-L023",
+            "original_url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+            "original_passage": "Parts 1, 5; limitations 23.5\u201323.7",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L023.txt",
+            "capture_sha256": "7752eaa9fe1ac81daa6d0ff8526f75b0e8542cc4d38be60852a8e8aab3e292e1",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-Z012",
+            "original_url": "https://github.com/oraios/serena/discussions/131",
+            "original_passage": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z012.txt",
+            "capture_sha256": "dd59dd53ddae113f258f050b3058dae6a0436349972aa755ebbe88a5b4cfccc2",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z009",
+            "original_url": "https://simonwillison.net/2025/Jun/3/openai-codex-pr/",
+            "original_passage": "Setup script; prompt; result paragraph",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z009.txt",
+            "capture_sha256": "b9d3dcb142cae769a2f31fe94e7adbc8a674ef00e2b0bbd1bb90b64c3f87a0ea",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/hooks/pre-edit-impact.mjs:58-105 (highest incoming-edge symbol; card assembly)",
+          "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb"
+        },
+        {
+          "pointer": "inputs/hooks/pre-edit-impact.mjs:147-164 (four callers, two tests and expansion instruction)",
+          "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb"
+        },
+        {
+          "pointer": "inputs/reports/user-centric-value-strategy/STRATEGY.md, Make the useful path feel native (proposed three consumers/two candidates/six lines)",
+          "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "X001 supports inline source and task-dependent precision; L023 Part 5 supports external context with recall tradeoff. Z012 records reread burden; Z009 reports a bounded native success. Hook selects highest incoming-edge symbol and caps four callers/two tests; proposed six-line format is not established.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L03-F03",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/03-native-experience-and-attention.md",
+      "report_sha256": "5f5198c9d8551c12627a546f3e9afd9dc837bbc6a7604af9e16a64ac8c529d47",
+      "finding_table_sha256": "81aadfd65aa90c1786b6e427d5bdf3087639a225c0a9499be3096f89df6d7e63",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-Y006",
+            "original_url": "https://forum.cursor.com/t/is-cursor-extremely-slow-for-you-since-the-0-49-update/82831",
+            "original_passage": "posts 1 and 5",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Y006.txt",
+            "capture_sha256": "f9770d37deee208aa3afbfeb391e030d5b0057d0395951781d30904a5ba2caf8",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-T006",
+            "original_url": "https://github.com/anthropics/claude-code/issues/70680",
+            "original_passage": "Body and all 2 comments; comment IDs in source registry",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-T006.txt",
+            "capture_sha256": "1910fb30c23c7c06b841b39bcbf07c58075ecb016f1d6df552650b39ba61fa78",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-L024",
+            "original_url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+            "original_passage": "There\u2019s no difference anymore?; final paragraphs",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L024.txt",
+            "capture_sha256": "f9f34c73db717c68ffe9d031361363dfe35dfd57b8d85504c03859a5b1eabf83",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/hooks/pre-edit-impact.mjs:22-34 (sidecar/fallback paths and code-comment timing claims, not measurements by this review)",
+          "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb"
+        },
+        {
+          "pointer": "inputs/hooks/hooks.json (10-second pre-edit and 30-second post-edit timeouts are ceilings, not latency evidence)",
+          "sha256": "9b64aa9af1e20277fb9751dbea1a8a140c1cf7037dc45832f26545d01dd5d498"
+        },
+        {
+          "pointer": "inputs/CHARTER.md, Non-goals 1 (no resident daemon)",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "Y006 changes two variables and includes a fast counterreport; T006 is a cold-test-start complaint. L024 compares equivalent transports, not Codeweb latency. Sidecar comments and hook timeouts cannot verify end-to-end one-second delivery.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L03-F04",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/03-native-experience-and-attention.md",
+      "report_sha256": "5f5198c9d8551c12627a546f3e9afd9dc837bbc6a7604af9e16a64ac8c529d47",
+      "finding_table_sha256": "81aadfd65aa90c1786b6e427d5bdf3087639a225c0a9499be3096f89df6d7e63",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-Z007",
+            "original_url": "https://github.com/oraios/serena/issues/1814",
+            "original_passage": "Summary; Additional suggestion; Note on scoping",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z007.txt",
+            "capture_sha256": "da0bc0a104fca0a86f29f7e3263ff89393b7b6a45f9d8844b409a9e0c958de28",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z011",
+            "original_url": "https://github.com/oraios/serena/issues/1432",
+            "original_passage": "Capability matrix in body",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z011.txt",
+            "capture_sha256": "35235bc80eca532bb2e09db3d2734b7644d2eb681bd1f5aa3f7465101d94f7da",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-X009",
+            "original_url": "https://github.com/openai/codex/issues/27133",
+            "original_passage": "Body reproduction; comment 5233430635; comment 5416744725",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-X009.txt",
+            "capture_sha256": "0d40d250c5879c5721aec4de6a712a9b301b155ca880a7387b38e3662a287a10",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-X001",
+            "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+            "original_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+            "verifier_capture": "sources/L01/CW-X001.txt",
+            "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z009",
+            "original_url": "https://simonwillison.net/2025/Jun/3/openai-codex-pr/",
+            "original_passage": "Setup script; prompt; result paragraph",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z009.txt",
+            "capture_sha256": "b9d3dcb142cae769a2f31fe94e7adbc8a674ef00e2b0bbd1bb90b64c3f87a0ea",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/hooks/pre-edit-impact.mjs:44-64 (null on unreadable/no-node/no-edge paths)",
+          "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb"
+        },
+        {
+          "pointer": "inputs/hooks/pre-edit-impact.mjs:113-139 (unmapped/no-entry returns and best-effort staleness)",
+          "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb"
+        },
+        {
+          "pointer": "inputs/hooks/pre-edit-impact.mjs:170-197 (caught failures and non-blocking exit)",
+          "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb"
+        },
+        {
+          "pointer": "inputs/hooks/session-brief.mjs:24-46 (once-per-workspace unmapped nudge)",
+          "sha256": "c7080bb4dcbd84747128ba686a5532307ed139831c4342990233c488ce161ce1"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "Z007 body distinguishes crash/empty results and scope omissions; Z011 retains generated-symbol gaps and text/compiler alternatives. Frozen pre-edit hook has several null/fail-open paths. X001/Z009 retain adequate-native countercases. Historical closed issues do not prove current defects.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L03-F05",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/03-native-experience-and-attention.md",
+      "report_sha256": "5f5198c9d8551c12627a546f3e9afd9dc837bbc6a7604af9e16a64ac8c529d47",
+      "finding_table_sha256": "81aadfd65aa90c1786b6e427d5bdf3087639a225c0a9499be3096f89df6d7e63",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-001",
+            "original_url": "https://github.com/anthropics/claude-code/issues/47565",
+            "original_passage": "Issue body: What Claude Actually Did; Additional Context items 6\u20137",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-001.txt",
+            "capture_sha256": "3adf1e0a207df9a6b31e4e6232fa87cb41dd8702f4e4ae4ee8afdf9e4bdd5dea",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z007",
+            "original_url": "https://github.com/oraios/serena/issues/1814",
+            "original_passage": "Summary; Additional suggestion; Note on scoping",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z007.txt",
+            "capture_sha256": "da0bc0a104fca0a86f29f7e3263ff89393b7b6a45f9d8844b409a9e0c958de28",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-T004",
+            "original_url": "https://github.com/anthropics/claude-code/issues/97515",
+            "original_passage": "Body and all 0 comments; comment IDs in source registry",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-T004.txt",
+            "capture_sha256": "2647a1fc7b899ca8a8f3d908af466600974507ecd734161c7739c171957febd9",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-L026",
+            "original_url": "https://forum.cursor.com/t/bugbot-without-background-agents/157812",
+            "original_passage": "Original post; support reply 6; author confirmation 7",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L026.txt",
+            "capture_sha256": "52fd9b7c59f911038ac99dbb1f3f75e9401033763e57c678c6afd9cc8a96b4b0",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z012",
+            "original_url": "https://github.com/oraios/serena/discussions/131",
+            "original_passage": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z012.txt",
+            "capture_sha256": "dd59dd53ddae113f258f050b3058dae6a0436349972aa755ebbe88a5b4cfccc2",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/docs/cli.md:108-142 (baseline capture, preservation, missing-baseline limit)",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/hooks/pre-edit-impact.mjs:182-195 (additionalContext only; host permission retained)",
+          "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb"
+        },
+        {
+          "pointer": "inputs/hooks/session-brief.mjs:43-45 (on-demand mapping nudge)",
+          "sha256": "c7080bb4dcbd84747128ba686a5532307ed139831c4342990233c488ce161ce1"
+        },
+        {
+          "pointer": "inputs/README.md:311-325 (repair against original baseline and behavioral tests)",
+          "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "CW-001 reports repeated reminders, T004 restart nonrecovery and Z007 resource recovery limits. L026 resolved invocation and Z012 configuration recovery oppose universal failure. Frozen CLI preserves explicit baseline across refresh and rejects reconstructing lost before-state; hook emits context without permission approval.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L03-F06",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/03-native-experience-and-attention.md",
+      "report_sha256": "5f5198c9d8551c12627a546f3e9afd9dc837bbc6a7604af9e16a64ac8c529d47",
+      "finding_table_sha256": "81aadfd65aa90c1786b6e427d5bdf3087639a225c0a9499be3096f89df6d7e63",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-L023",
+            "original_url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+            "original_passage": "Parts 1, 5; limitations 23.5\u201323.7",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L023.txt",
+            "capture_sha256": "7752eaa9fe1ac81daa6d0ff8526f75b0e8542cc4d38be60852a8e8aab3e292e1",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-X001",
+            "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+            "original_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+            "verifier_capture": "sources/L01/CW-X001.txt",
+            "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-Z012",
+            "original_url": "https://github.com/oraios/serena/discussions/131",
+            "original_passage": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z012.txt",
+            "capture_sha256": "dd59dd53ddae113f258f050b3058dae6a0436349972aa755ebbe88a5b4cfccc2",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z009",
+            "original_url": "https://simonwillison.net/2025/Jun/3/openai-codex-pr/",
+            "original_passage": "Setup script; prompt; result paragraph",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z009.txt",
+            "capture_sha256": "b9d3dcb142cae769a2f31fe94e7adbc8a674ef00e2b0bbd1bb90b64c3f87a0ea",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-L024",
+            "original_url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+            "original_passage": "There\u2019s no difference anymore?; final paragraphs",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L024.txt",
+            "capture_sha256": "f9f34c73db717c68ffe9d031361363dfe35dfd57b8d85504c03859a5b1eabf83",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/hooks/session-brief.mjs:1-6 and preview (session briefing is a separate injection)",
+          "sha256": "c7080bb4dcbd84747128ba686a5532307ed139831c4342990233c488ce161ce1"
+        },
+        {
+          "pointer": "inputs/hooks/post-edit-diff.mjs:91-115 (deduplicates post-edit regressions against baseline; does not establish overall attention savings)",
+          "sha256": "127a48f34a8b77bf077746e9b69fad13edabb3a6f2782fce64be3cb7b6be007e"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md, Measure decisions and total effort; Proposed decision gate",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "L023/X001 support possible contextual decision value with recall/cost tradeoffs; Z012/Z009/L024 oppose universal benefit. Session/pre/post hooks are separate inputs. Frozen sprint explicitly measures total effort and later return; no effect is observed here.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L05-F01",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/05-repeated-reliance.md",
+      "report_sha256": "9d57d8d5cdc7e2ee6e7056b13416bfad481e540df26a4c5ce730a7d7361a889e",
+      "finding_table_sha256": "06f1fea5466d083fcffa75abf40b9c0c6cb51369fc5a4c32cc6bdca643438e03",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-Z003",
+            "original_url": "https://ngof.nikhaldimann.com/p/deja-code",
+            "original_passage": "Quantifying code duplication; methodological weaknesses",
+            "verifier_capture": "sources/L01/CW-Z003.txt",
+            "capture_sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-T018",
+            "original_url": "https://news.ycombinator.com/item?id=48033774",
+            "original_passage": "Story body and author reply 48035884; complete four-comment tree read",
+            "verifier_capture": "sources/L01/CW-T018.txt",
+            "capture_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-Z001",
+            "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+            "original_passage": "The Old Projects I Refactored; How I Use Codex Now",
+            "verifier_capture": "sources/L01/CW-Z001.txt",
+            "capture_sha256": "f06ceefb7d3c95cc528d03eae7461b9012fb16c9e08745aa8a5f2dfe81fa7cfd",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-X001",
+            "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+            "original_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+            "verifier_capture": "sources/L01/CW-X001.txt",
+            "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "Z003/T018 describe recurrent pain but not Codeweb return. Z001/X001 preserve adequate baseline conditions. Repeated problem is not repeated adoption.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L05-F02",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/05-repeated-reliance.md",
+      "report_sha256": "9d57d8d5cdc7e2ee6e7056b13416bfad481e540df26a4c5ce730a7d7361a889e",
+      "finding_table_sha256": "06f1fea5466d083fcffa75abf40b9c0c6cb51369fc5a4c32cc6bdca643438e03",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-L037",
+            "original_url": "https://david.coffee/i-still-prefer-mcp-over-skills/",
+            "original_passage": "Skills + MCP",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L037.txt",
+            "capture_sha256": "38999a668054f2f44fa75347468a6859585fecb1fb0990e8f60cc2c33092a426",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-T007",
+            "original_url": "https://github.com/anthropics/claude-code/issues/83790",
+            "original_passage": "Body and all 1 comments; comment IDs in source registry",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-T007.txt",
+            "capture_sha256": "0afb123356f51cd30b37e769c0c6e05c1ab7a4ba8366292341b70db40e5e3533",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-Z012",
+            "original_url": "https://github.com/oraios/serena/discussions/131",
+            "original_passage": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z012.txt",
+            "capture_sha256": "dd59dd53ddae113f258f050b3058dae6a0436349972aa755ebbe88a5b4cfccc2",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-L015",
+            "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+            "original_passage": "UnrulyThesis reply",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L015-READ-NOTE.json",
+            "capture_sha256": "dbdc321d20927dc8bf223f2ea504d1ddb188acf74825bc7eaeeab8565476acba",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "L037 describes writing learned connector quirks into skills; T007 describes manual session handoff. Z012 maintainer and L015 small-repo user support familiarity/native alternatives. Structural mapping cannot silently become project-decision memory.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L05-F03",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/05-repeated-reliance.md",
+      "report_sha256": "9d57d8d5cdc7e2ee6e7056b13416bfad481e540df26a4c5ce730a7d7361a889e",
+      "finding_table_sha256": "06f1fea5466d083fcffa75abf40b9c0c6cb51369fc5a4c32cc6bdca643438e03",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-Y001",
+            "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+            "original_passage": "posts 1 and 3",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Y001.txt",
+            "capture_sha256": "cb3048e07205f09d040625d836d9a7894bb0a9c1f6777ef38a013f029bb9d13f",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-Y010",
+            "original_url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+            "original_passage": "post 1",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Y010.txt",
+            "capture_sha256": "21582a6a32fbcf4eaeade1176330e0312fbf40b05c5d89375c35f67b078914f4",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z001",
+            "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+            "original_passage": "The Old Projects I Refactored; How I Use Codex Now",
+            "verifier_capture": "sources/L01/CW-Z001.txt",
+            "capture_sha256": "f06ceefb7d3c95cc528d03eae7461b9012fb16c9e08745aa8a5f2dfe81fa7cfd",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "Y001 values sparse complex PR review and automatic operation. Y010 considers only a future temporary subscription; Z001 retains successful native work. Eligibility-based follow-up is a proposed inference, not a retention measurement.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L05-F04",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/05-repeated-reliance.md",
+      "report_sha256": "9d57d8d5cdc7e2ee6e7056b13416bfad481e540df26a4c5ce730a7d7361a889e",
+      "finding_table_sha256": "06f1fea5466d083fcffa75abf40b9c0c6cb51369fc5a4c32cc6bdca643438e03",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-L023",
+            "original_url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+            "original_passage": "Parts 1, 5; limitations 23.5\u201323.7",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L023.txt",
+            "capture_sha256": "7752eaa9fe1ac81daa6d0ff8526f75b0e8542cc4d38be60852a8e8aab3e292e1",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z006",
+            "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+            "original_passage": "Refactoring at scale; What humans still do",
+            "verifier_capture": "sources/L01/CW-Z006.txt",
+            "capture_sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-L051",
+            "original_url": "https://news.ycombinator.com/item?id=49321400",
+            "original_passage": "Comment 49353756",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L051.txt",
+            "capture_sha256": "6c929497b104bee9a21401bc3b179f33cdc94e8a4793ca47d23ac8deb3bca83a",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-T018",
+            "original_url": "https://news.ycombinator.com/item?id=48033774",
+            "original_passage": "Story body and author reply 48035884; complete four-comment tree read",
+            "verifier_capture": "sources/L01/CW-T018.txt",
+            "capture_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "L023 reports recurring false positives and recall tradeoff; Z006 explicitly distinguishes intentional duplication. L051 keeps a noisy tool for occasional catches and T018 reports actual reuse burden. No universal noise threshold follows.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L05-F05",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/05-repeated-reliance.md",
+      "report_sha256": "9d57d8d5cdc7e2ee6e7056b13416bfad481e540df26a4c5ce730a7d7361a889e",
+      "finding_table_sha256": "06f1fea5466d083fcffa75abf40b9c0c6cb51369fc5a4c32cc6bdca643438e03",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-001",
+            "original_url": "https://github.com/anthropics/claude-code/issues/47565",
+            "original_passage": "Issue body: What Claude Actually Did; Additional Context items 6\u20137",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-001.txt",
+            "capture_sha256": "3adf1e0a207df9a6b31e4e6232fa87cb41dd8702f4e4ae4ee8afdf9e4bdd5dea",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-L022",
+            "original_url": "https://www.synthesia.io/post/automating-code-security-reviews-with-claude-mythos-level-capabilities",
+            "original_passage": "Building a map; Security Context; From self-serve to CI",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L022.txt",
+            "capture_sha256": "5d42aabe9a076c0f68966c56eaa095a37c0feab816b9d7b2d0b3390ef3dd1459",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-Y001",
+            "original_url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+            "original_passage": "posts 1 and 3",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Y001.txt",
+            "capture_sha256": "cb3048e07205f09d040625d836d9a7894bb0a9c1f6777ef38a013f029bb9d13f",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-L051",
+            "original_url": "https://news.ycombinator.com/item?id=49321400",
+            "original_passage": "Comment 49353756",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-L051.txt",
+            "capture_sha256": "6c929497b104bee9a21401bc3b179f33cdc94e8a4793ca47d23ac8deb3bca83a",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "CW-001 reports skipped tools despite prompting; L022 explicitly reports concentrated self-serve adoption and moves to nonblocking CI. Y001 values defaults and L051 keeps tools voluntarily. Invocation counts cannot distinguish these mechanisms.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    },
+    {
+      "finding_id": "L05-F06",
+      "lens_author_agent_id": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "verifier_agent_id": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "verifier_run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "report": "lenses/05-repeated-reliance.md",
+      "report_sha256": "9d57d8d5cdc7e2ee6e7056b13416bfad481e540df26a4c5ce730a7d7361a889e",
+      "finding_table_sha256": "06f1fea5466d083fcffa75abf40b9c0c6cb51369fc5a4c32cc6bdca643438e03",
+      "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "original_pointers": {
+        "supporting": [
+          {
+            "evidence_id": "CW-T018",
+            "original_url": "https://news.ycombinator.com/item?id=48033774",
+            "original_passage": "Story body and author reply 48035884; complete four-comment tree read",
+            "verifier_capture": "sources/L01/CW-T018.txt",
+            "capture_sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Y007",
+            "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+            "original_passage": "posts 1,5,6",
+            "verifier_capture": "sources/L01/CW-Y007.txt",
+            "capture_sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ],
+        "opposing": [
+          {
+            "evidence_id": "CW-X001",
+            "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+            "original_passage": "Sections: agents route by task; noisy codebases; output shape; limitations",
+            "verifier_capture": "sources/L01/CW-X001.txt",
+            "capture_sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Y010",
+            "original_url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+            "original_passage": "post 1",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Y010.txt",
+            "capture_sha256": "21582a6a32fbcf4eaeade1176330e0312fbf40b05c5d89375c35f67b078914f4",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          },
+          {
+            "evidence_id": "CW-Z012",
+            "original_url": "https://github.com/oraios/serena/discussions/131",
+            "original_passage": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+            "verifier_capture": "sources/phase-A-nonauthor/CW-Z012.txt",
+            "capture_sha256": "dd59dd53ddae113f258f050b3058dae6a0436349972aa755ebbe88a5b4cfccc2",
+            "read_boundary": "Targeted text passages; no linked-study reproduction, images, or whole-thread completeness asserted."
+          }
+        ]
+      },
+      "capability_evidence": [
+        {
+          "pointer": "inputs/scripts/find-similar.mjs:64-107",
+          "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+        },
+        {
+          "pointer": "inputs/docs/cli.md:108-142",
+          "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+        },
+        {
+          "pointer": "inputs/reports/product-proof-sprint-plan/README.md",
+          "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e"
+        },
+        {
+          "pointer": "inputs/CHARTER.md",
+          "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd"
+        }
+      ],
+      "disposition": "verified_with_stated_limits",
+      "reason": "Frozen sprint calls for later voluntary choice but contains no longitudinal result. Y007 provides a possible recurring check while accepting CI; X001, Y010 and Z012 preserve adequate alternatives, temporary need and recovery. Proposed observation remains unexecuted.",
+      "qualification": null,
+      "correction": {
+        "requested": false,
+        "attempts_used": 0,
+        "reason": "No material author correction required; source boundary qualification retained in verifier packet."
+      }
+    }
+  ],
+  "source_index": "sources/phase-A-nonauthor/INDEX.json",
+  "packet_requirement": "Include this exact artifact and all referenced captures in identical synthesis inputs. No preferred strategic verdict is supplied. Synthesis contexts must be fresh and procedurally blinded; final reviewer authors neither synthesis nor final edited recommendation.",
+  "limits": [
+    "Text-source verification, not customer/capability reproduction.",
+    "Historical self-reports retain dates, resolved outcomes and bounded access.",
+    "Shared-filesystem isolation is procedural.",
+    "Phase verification does not complete the parent objective or canonical placement."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "T41-extract-similarity",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/extract-symbols.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/similarity",
+    "--no-ctags",
+    "--engine",
+    "regex"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:13.936Z",
+  "end": "2026-10-01T01:50:14.004Z",
+  "durationMs": 67.74341700000014,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"meta\":{\"root\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/similarity\",\"target\":\"codeweb-p02-tech-s5LQzF/similarity\",\"engine\":\"regex\",\"languages\":[\"javascript\"],\"symbols\":8,\"analysis\":{\"status\":\"no-known-incompleteness\",\"diagnosticCount\":0,\"diagnostics\":[]},\"sources\":{\"a.mjs\":{\"s\":67,\"m\":1790819413936,\"h\":\"3f76adb74458fefd3e69b4aa4c479b240461457e\"},\"b.mjs\":{\"s\":69,\"m\":1790819413936,\"h\":\"552c5bcbf4b1b29ef2928296effd88e9d88b1e72\"},\"equivalent.mjs\":{\"s\":122,\"m\":1790819413936,\"h\":\"39177f81aec9a47e60fea633fa2c03739f298bd4\"},\"intentional0.mjs\":{\"s\":71,\"m\":1790819413937,\"h\":\"bbd8ce1645f1c57d3b48668a51de279979a262d9\"},\"intentional1.mjs\":{\"s\":71,\"m\":1790819413937,\"h\":\"efb424ff0f5b67ee1e470cb2db1acef6f4296a25\"},\"intentional2.mjs\":{\"s\":71,\"m\":1790819413937,\"h\":\"8812f492598c4bd613af3b622d8ab872e668e175\"},\"intentional3.mjs\":{\"s\":71,\"m\":1790819413937,\"h\":\"0658429f4d660405f055f7006cc7b73ee20f1697\"},\"long.mjs\":{\"s\":11185,\"m\":1790819413937,\"h\":\"220837ec7aef3f0f1cd207b5827382fc1a37a8f6\"}},\"dirs\":{\".\":1790819413937}},\"nodes\":[{\"id\":\"a.mjs:addTax\",\"label\":\"addTax\",\"kind\":\"function\",\"file\":\"a.mjs\",\"line\":1,\"loc\":3,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"cents\"],\"returns\":null,\"raw\":\"cents\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"b.mjs:discount\",\"label\":\"discount\",\"kind\":\"function\",\"file\":\"b.mjs\",\"line\":1,\"loc\":3,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"cents\"],\"returns\":null,\"raw\":\"cents\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"equivalent.mjs:addTaxAlternative\",\"label\":\"addTaxAlternative\",\"kind\":\"function\",\"file\":\"equivalent.mjs\",\"line\":1,\"loc\":5,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"n\"],\"returns\":null,\"raw\":\"n\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"intentional0.mjs:duplicate0\",\"label\":\"duplicate0\",\"kind\":\"function\",\"file\":\"intentional0.mjs\",\"line\":1,\"loc\":3,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"cents\"],\"returns\":null,\"raw\":\"cents\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"intentional1.mjs:duplicate1\",\"label\":\"duplicate1\",\"kind\":\"function\",\"file\":\"intentional1.mjs\",\"line\":1,\"loc\":3,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"cents\"],\"returns\":null,\"raw\":\"cents\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"intentional2.mjs:duplicate2\",\"label\":\"duplicate2\",\"kind\":\"function\",\"file\":\"intentional2.mjs\",\"line\":1,\"loc\":3,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"cents\"],\"returns\":null,\"raw\":\"cents\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"intentional3.mjs:duplicate3\",\"label\":\"duplicate3\",\"kind\":\"function\",\"file\":\"intentional3.mjs\",\"line\":1,\"loc\":3,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"cents\"],\"returns\":null,\"raw\":\"cents\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"long.mjs:huge\",\"label\":\"huge\",\"kind\":\"function\",\"file\":\"long.mjs\",\"line\":1,\"loc\":423,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"cents\"],\"returns\":null,\"raw\":\"cents\"},\"complexity\":1,\"maxDepth\":1}],\"edges\":[]}",
+  "stderr": "[extract] 8 symbols, 0 edges (0 call + 0 import) from 8 files (regex engine); dropped 0 ambiguous bare-call edges (0 short-name); scanned 8/8 file(s); edged 8/8; ast: off\n"
+}

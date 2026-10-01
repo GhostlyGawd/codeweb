@@ -1,0 +1,82 @@
+{
+  "checked_at": "2026-09-28T00:38:53.019153+00:00",
+  "schema_required_fields": 32,
+  "records": 5,
+  "families": 3,
+  "dedup_including_seed": true,
+  "audit_checks": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "sha256": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "bytes": 10760,
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "sha256": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "bytes": 915748,
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "sha256": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "bytes": 889366,
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "sha256": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "bytes": 187178,
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "sha256": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "bytes": 293562,
+      "matches": true
+    }
+  ],
+  "saved_plan_hashes": {
+    "DISPATCH-BRIEF.md": "fac23f26285b1a261a56549506e1a953754ef98c8917b5cdb6026fc1eb823b9e",
+    "PLAN-CHECK.json": "e83e95d3b185e24c7892c2a3d0fcbceb9f5997d52c497ce9a5a572e76858fb0a",
+    "EVIDENCE-SCHEMA.json": "16208b28b9e020428f499f704f5b39c93917e973f0f88f26cabf1beeea2db7e8",
+    "AUDIT-BASELINE.json": "8d2a60a494421bde8b3e5ba3f189a36c7a7d2ad6c7d799e17dadea56fc96503d",
+    "README.md": "3078240c65fa675255e158c7ebc604d48fd6b62496851bda635769f9a4188eaf",
+    "AGENT-BRIEFS.md": "330be3ec31516e34292a75cc7eb466cc3ca8dc85ef61785496c96a3fd3e145fe"
+  },
+  "source_fetch_metadata": [
+    {
+      "issue": 63451,
+      "body_sha256": "d9667bbc50f8485d062649a4e791d47e401ea04fe28f663873983c1a951623cc",
+      "reported_comments": 5,
+      "read_comment_ids": [
+        4576668661,
+        4581410818,
+        4581946351,
+        4875456448,
+        5541728658
+      ]
+    },
+    {
+      "issue": 39703,
+      "body_sha256": "28e3268ef7ee274310c2951ee6fddaf12d05c706929f9bdc85ff6f735ab99340",
+      "reported_comments": 2,
+      "read_comment_ids": [
+        4323168812,
+        4372137953
+      ]
+    },
+    {
+      "issue": 53803,
+      "body_sha256": "dcf11436fcb1a0898fb149d7c95f724cc11481221e83ec8e0af948df207c149c",
+      "reported_comments": 5,
+      "read_comment_ids": [
+        4325107434,
+        4325510598,
+        4403478616,
+        4658508696,
+        5254520789
+      ]
+    }
+  ]
+}

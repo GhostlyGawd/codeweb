@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>I Stopped Using MCPs and Replaced Them with Skills and Scripts | Nick Perkins</title>
+<meta name="description" content="Replacing MCP servers with skills and scripts for lighter, faster agentic AI workflows with lower context overhead.">
+<meta name="author" content="Nick Perkins">
+<link rel="canonical" href="https://nickperkins.au/article/skills-over-mcps/">
+<meta property="og:site_name" content="Nick Perkins">
+<meta property="og:title" content="I Stopped Using MCPs and Replaced Them with Skills and Scripts">
+<meta property="og:description" content="Replacing MCP servers with skills and scripts for lighter, faster agentic AI workflows with lower context overhead.">
+<meta property="og:url" content="https://nickperkins.au/article/skills-over-mcps/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en">
+
+<meta property="article:published_time" content="2026-06-20T10:00:00&#43;10:00">
+<meta property="article:modified_time" content="2026-06-20T10:00:00&#43;10:00">
+<meta property="article:tag" content="ai"><meta property="article:tag" content="mcp"><meta property="article:tag" content="skills"><meta property="article:tag" content="developer experience"><meta property="article:tag" content="agentic workflows">
+
+
+<meta property="og:image" content="https://nickperkins.au/images/nick.jpeg">
+
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="I Stopped Using MCPs and Replaced Them with Skills and Scripts">
+<meta name="twitter:description" content="Replacing MCP servers with skills and scripts for lighter, faster agentic AI workflows with lower context overhead.">
+
+<meta name="twitter:image" content="https://nickperkins.au/images/nick.jpeg">
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "\"I Stopped Using MCPs and Replaced Them with Skills and Scripts\"",
+  "description": "\"Replacing MCP servers with skills and scripts for lighter, faster agentic AI workflows with lower context overhead.\"",
+  "datePublished": "2026-06-20T10:00:00\u002b10:00",
+  "dateModified": "2026-06-20T10:00:00\u002b10:00",
+  "author": {
+    "@type": "Person",
+    "name": "\"Nick Perkins\""
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "\"Nick Perkins\""
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "\"https://nickperkins.au/article/skills-over-mcps/\""
+  }
+}
+</script>
+
+
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/css/style.min.bbf0bb3573b2592c932912770921dc20107d3e6b1503f4b461369d589ac3514d.css" integrity="sha256-u/C7NXOyWSyTKRJ3CSHcIBB9PmsVA/S0YTadWJrDUU0=">
+
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+<header class="header">
+  <div class="container header__inner">
+    <a href="https://nickperkins.au/" class="header__logo">
+    <img src="/images/nick.jpeg" alt="Nick Perkins" class="header__avatar" width="64" height="64" loading="eager">
+    </a>
+    <div class="header__titles">
+      <p class="header__title"><a href="https://nickperkins.au/">Nick Perkins</a></p>
+      <p class="header__subtitle">Software Engineer. Volunteer Motorsport Official. ADHD Brain. Bit of a nerd.</p>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <ul class="nav__list">
+        <li class="nav__item"><a href="/page/search/" class="nav__link">Search</a></li>
+        
+        <li class="nav__item"><a href="/archive/" class="nav__link" >Archive</a></li>
+        
+        <li class="nav__item"><a href="/page/about/" class="nav__link" >About Nick</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <main class="main" id="main-content">
+    
+<div class="container">
+  <article class="article">
+    <h1 class="article__title">I Stopped Using MCPs and Replaced Them with Skills and Scripts</h1>
+    <div class="article__meta">
+      <time datetime="2026-06-20T10:00:00&#43;10:00">20 Jun 2026</time>
+      <a href="/categories/ai-development/" class="article__category">AI Development</a>
+    </div>
+    
+    <nav class="toc" aria-label="Table of contents">
+      <h2 class="toc__title">Contents</h2>
+      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#the-problem-with-mcps">The problem with MCPs</a></li>
+    <li><a href="#what-i-did-instead">What I did instead</a></li>
+    <li><a href="#the-thing-mcps-cant-do">The thing MCPs can&rsquo;t do</a></li>
+    <li><a href="#when-i-still-use-mcps">When I still use MCPs</a></li>
+    <li><a href="#the-tradeoff">The tradeoff</a></li>
+  </ul>
+</nav>
+    </nav>
+    
+    <div class="article__content">
+      <p>Everyone&rsquo;s excited about MCPs. The Model Context Protocol is supposed to be the standard way AI agents talk to external services. And it is good, for what it is. But I&rsquo;ve been replacing MCPs with skills and scripts in my own workflows, and honestly, I&rsquo;m not going back.</p>
+<h2 id="the-problem-with-mcps">The problem with MCPs</h2>
+<p>When you load an MCP server, all of its tool definitions get injected into the agent&rsquo;s context. Every tool name, every parameter schema, every description. The Atlassian MCP alone exposes dozens of tools across Jira and Confluence. That&rsquo;s a lot of schema sitting in your context window before you&rsquo;ve even asked the agent to do anything.</p>
+<p>Then when the agent calls a tool, the response comes back and takes up more context. And it stays there. You&rsquo;re paying a context tax for every MCP you load, whether you use it or not.</p>
+<p>This matters because context window is finite. Every token spent on tool schemas is a token the agent can&rsquo;t use for your actual work. When you&rsquo;re doing complex agentic work, that adds up fast.</p>
+<p>And it&rsquo;s not just about context anymore. It&rsquo;s about cost. GitHub Copilot moved to usage-based billing in April 2026. You get a monthly allowance of AI credits and every token counts against it. Those MCP schemas sitting in your context? You&rsquo;re paying for them on every single request, whether you use the tool or not. Load the Atlassian MCP and you&rsquo;re burning credits on dozens of tool definitions you might not even touch in that session.</p>
+<h2 id="what-i-did-instead">What I did instead</h2>
+<p>I built skills for Jira, Confluence, and Atlas that call the Atlassian API directly via scripts. A skill file is just markdown. It tells the agent how to use a tool. No schemas injected. No context tax. The agent loads it when it needs it, runs a command, moves on. For Jira and Confluence, the MCP exists but I don&rsquo;t use it. For Atlas, there isn&rsquo;t even an MCP. The skill was the only option.</p>
+<p>For GitHub, I use <code>gh</code> CLI instead of a GitHub MCP. It&rsquo;s already installed, it handles auth, and the agent can call it from a terminal. The skill file just tells the agent which commands to use for common workflows: create a PR, check CI status, review a diff.</p>
+<p>The result is faster, lighter, and the agent has more context available for the actual work.</p>
+<h2 id="the-thing-mcps-cant-do">The thing MCPs can&rsquo;t do</h2>
+<p>I have a skill that automates my weekly Atlas project updates. It&rsquo;s not a single API call. It&rsquo;s a workflow.</p>
+<p>The skill tells the agent to work through a folder of project data. For each project, it knows to review the Jira work items and epics, check for status changes since last week, look for any discussions of risks, and then draft an update in the format I need. The data lives in a folder, the logic lives in the skill file, and the agent orchestrates the whole thing end to end.</p>
+<p>An MCP can give you a &ldquo;create Atlas update&rdquo; tool. It can&rsquo;t tell the agent to review Jira epics first, check for risk discussions, and format the output a specific way. That&rsquo;s workflow logic, not API access. MCPs are API wrappers. Skills are workflow instructions.</p>
+<p>The context overhead matters, but this matters more. My problem isn&rsquo;t &ldquo;how does the agent call the Atlas API.&rdquo; It&rsquo;s &ldquo;how does the agent know what to do before calling the Atlas API, and what to do with the result.&rdquo; MCPs don&rsquo;t help with that.</p>
+<h2 id="when-i-still-use-mcps">When I still use MCPs</h2>
+<p>MCPs aren&rsquo;t useless. They shine when there&rsquo;s no CLI or API you can call from a script. Figma is the main one I&rsquo;ve hit. There&rsquo;s no <code>figma</code> CLI you can run from a terminal, so the MCP is the only way to interact with it programmatically.</p>
+<p>But that&rsquo;s a short list. Most services I use in development (GitHub, Jira, Confluence, Slack, AWS) have CLIs or REST APIs that a script can call. And if there&rsquo;s a CLI, a skill file is almost always the lighter option.</p>
+<h2 id="the-tradeoff">The tradeoff</h2>
+<p>You might think MCPs give you standardisation: any agent that supports MCP can use any MCP server. But every major AI coding tool now supports skills natively. Copilot, Claude Code, Cursor, OpenCode, they all read skill files from a directory. ChatGPT doesn&rsquo;t do this natively yet, but you can paste a skill into custom instructions and get the same effect. The standardisation argument doesn&rsquo;t hold up anymore.</p>
+<p>If you&rsquo;re building agentic workflows and your context window is feeling tight, look at which MCPs you&rsquo;re loading and ask yourself: could this be a script and a skill file instead? For most of mine, the answer was yes.</p>
+<p>Speaking of skills, remember that testing skill I mentioned a few months back? I finally cleaned it up and released it. It&rsquo;s a generalized version that works with Copilot, Claude Code, Cursor, and others. Same idea as everything above: no MCP, no tool server, no schema in your context. Just a markdown file that tells the agent how to write tests at the right level.</p>
+<p><a href="https://github.com/nickperkins/testing-skill">github.com/nickperkins/testing-skill</a></p>
+
+    </div>
+    
+    <div class="article__tags">
+      <a href="/tags/ai/" class="tag">ai</a><a href="/tags/mcp/" class="tag">mcp</a><a href="/tags/skills/" class="tag">skills</a><a href="/tags/developer-experience/" class="tag">developer experience</a><a href="/tags/agentic-workflows/" class="tag">agentic workflows</a>
+    </div>
+    
+    
+    
+    <section class="article__signoff">
+      <p class="article__signoff-text">Thanks for reading. I'm Nick, and this is my personal blog. If you got something out of this, there's more where it came from.</p>
+      
+      <a href="https://nickperkins.au/article/agent-communication-protocol/" class="article__signoff-link">Read next: Agent to Agent Communication: MCP Is the Wrong Layer →</a>
+      <a href="https://nickperkins.au/archive/" class="article__signoff-link article__signoff-link--secondary">All writing →</a>
+      
+    </section>
+  </article>
+</div>
+
+  </main>
+  <footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__social-row">
+      
+      <a href="https://mastodon.au/@nicholosophy" class="footer__social" rel="noopener me" target="_blank" aria-label="Follow Nick on mastodon">
+        
+<svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <path d="M23.193 7.88c0-5.207-3.411-6.733-3.411-6.733C18.062.357 15.59.025 13.037 0h-.076c-2.553.025-5.024.357-6.745 2.147 0 0-3.411 1.526-3.411 6.733 0 1.19-.023 2.615.014 4.121.123 4.99.925 9.903 5.592 11.117 2.147.578 3.991.7 5.48.615 2.69-.149 4.206-.962 4.206-.962l-.089-1.964s-1.924.608-4.083.534c-2.139-.072-4.398-.227-4.747-2.792a5.54 5.54 0 0 1-.048-.8s2.1.512 4.766.634c1.628.084 3.155-.107 4.706-.316 2.974-.396 5.565-2.444 5.893-4.335.519-2.99.427-7.303.427-7.303zm-3.766 7.478h-2.497v-6.1c0-1.288-.542-1.943-1.626-1.943-1.198 0-1.797.775-1.797 2.307v3.33H10.01V9.622c0-1.532-.6-2.307-1.797-2.307-1.084 0-1.626.655-1.626 1.943v6.1H4.09v-6.235c0-1.288.329-2.313.986-3.074.68-.762 1.57-1.153 2.671-1.153 1.277 0 2.243.49 2.87 1.47l.617 1.04.617-1.04c.627-.98 1.593-1.47 2.87-1.47 1.101 0 1.991.391 2.671 1.153.657.761.986 1.786.986 3.074v6.235z"/>
+</svg>
+
+
+      </a>
+      
+      <a href="https://github.com/nickperkins" class="footer__social" rel="noopener me" target="_blank" aria-label="Follow Nick on github">
+        
+<svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+</svg>
+
+
+      </a>
+      
+      <a href="https://nickperkins.au/index.xml" class="footer__social" aria-label="RSS feed" rel="alternate">
+        
+<svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20A2.18 2.18 0 0 1 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
+</svg>
+
+
+      </a>
+    </div>
+    
+    <a href="https://nickperkins.au/archive/" class="footer__archive-link">Browse the archive →</a>
+    
+  </div>
+  <div class="container footer__bottom">
+    <p class="footer__copyright">
+      © 2017–2026 Nick Perkins
+    </p>
+  </div>
+</footer>
+
+  
+
+<script>
+(function() {
+  var toc = document.querySelector('.toc');
+  if (!toc) return;
+  var links = toc.querySelectorAll('a[href^="#"]');
+  var headings = [];
+  links.forEach(function(link) {
+    var id = link.getAttribute('href').slice(1);
+    var heading = document.getElementById(id);
+    if (heading) headings.push({ link: link, el: heading });
+  });
+  if (!headings.length) return;
+  var active = null;
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      var match = headings.find(function(h) { return h.el === entry.target; });
+      if (!match) return;
+      if (entry.isIntersecting) {
+        if (active) active.removeAttribute('aria-current');
+        match.link.setAttribute('aria-current', 'true');
+        active = match.link;
+      }
+    });
+  }, { rootMargin: '-80px 0px -70% 0px' });
+  headings.forEach(function(h) { observer.observe(h.el); });
+})();
+</script>
+
+
+  
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-12HBDJH65Y"></script>
+      <script>
+        var doNotTrack = false;
+        if ( true ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-12HBDJH65Y');
+        }
+      </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"7ba039297ed9427e9085f1ae11d81656","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "run_id": "a0a29f19-4506-447a-855b-1fe2a61d6996",
+  "status_write_confirmed": false,
+  "failures": 2,
+  "http_status": 422,
+  "reason": "unblockDescriptor required",
+  "actual_issue_status": "in_progress",
+  "comment_id": "58e53165-5f69-4895-b538-df682995a658",
+  "unblock_owner": "root terminal",
+  "action": "Mirror complete staged packet and supply verified ROOT-PLACEMENT-RECEIPT.json",
+  "fallback": "adapter/runtime status channel"
+}

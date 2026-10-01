@@ -1,0 +1,15 @@
+{
+  "started_at": "2026-10-01T00:30:02.871295+00:00",
+  "finished_at": "2026-10-01T00:30:41.387035+00:00",
+  "command": [
+    "sh",
+    "scripts/check"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 38.516,
+  "node_version": "v26.7.0",
+  "evidence": "FULL-GATE.log",
+  "log_sha256": "e030726ae91401e2571bc0ef9c332d658f9f03defd39d084442369493dc8aaee",
+  "all_checks_passed_marker": true,
+  "source_changed_by_gate": false
+}

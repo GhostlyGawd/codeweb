@@ -1,0 +1,22 @@
+{
+  "id": "claude-shipped-plugin-manifest",
+  "command": [
+    "claude",
+    "plugin",
+    "validate",
+    "--json",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/.claude-plugin/plugin.json"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819416.528555,
+  "end_epoch": 1790819416.9440808,
+  "duration_seconds": 0.4152541160583496,
+  "timeout_seconds": 30,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/claude-shipped-plugin-manifest.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/claude-shipped-plugin-manifest.stderr.txt"
+}

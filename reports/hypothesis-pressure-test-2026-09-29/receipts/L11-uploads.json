@@ -1,0 +1,26 @@
+[
+  {
+    "path": "lenses/11-shared-team-dependence.md",
+    "attachment_id": "f0f23b0d-0772-49ca-a8d3-94907148c102",
+    "work_product_id": "1a156b5e-e45b-40c3-82fc-49cc541f77e3",
+    "url": "/api/attachments/f0f23b0d-0772-49ca-a8d3-94907148c102/content"
+  },
+  {
+    "path": "lenses/11-findings.json",
+    "attachment_id": "801cf7c7-88eb-4835-8e49-9f7a48db2a0e",
+    "work_product_id": "78bce7c0-7b2c-4630-9308-e35d6b82db4b",
+    "url": "/api/attachments/801cf7c7-88eb-4835-8e49-9f7a48db2a0e/content"
+  },
+  {
+    "path": "receipts/L11.json",
+    "attachment_id": "77c13649-5d8f-450b-9f31-f1560adb9397",
+    "work_product_id": "7c2ceeb1-c011-4b17-b024-58644030c7d5",
+    "url": "/api/attachments/77c13649-5d8f-450b-9f31-f1560adb9397/content"
+  },
+  {
+    "path": "receipts/L11-delivery.zip",
+    "attachment_id": "baf8df8c-1ab2-4e53-85ed-134827d958d3",
+    "work_product_id": "1a98b90f-98b9-4124-ba92-e20e47f937f5",
+    "url": "/api/attachments/baf8df8c-1ab2-4e53-85ed-134827d958d3/content"
+  }
+]

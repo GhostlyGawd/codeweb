@@ -1,0 +1,21 @@
+{
+  "id": "T77-incomplete-deadcode-mcp",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/mcp-server.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"codeweb_deadcode\",\"arguments\":{\"graph\":\"$LOCAL_TMP/codeweb-p02-supplement-mshorI/incomplete.json\"}}}\n",
+  "start": "2026-10-01T01:52:49.548Z",
+  "end": "2026-10-01T01:52:49.619Z",
+  "durationMs": 71.35054200000002,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"target\\\":\\\"target\\\",\\\"summary\\\":\\\"1 orphan(s): 1 safe to delete, 0 need review\\\",\\\"totals\\\":{\\\"orphans\\\":1,\\\"safe\\\":1,\\\"review\\\":0,\\\"suppressed\\\":0},\\\"excluded\\\":0,\\\"excludedByRole\\\":{},\\\"note\\\":\\\"extraction drops ambiguous call edges (precision over recall), so a genuinely-called symbol can surface here — cross-check before deleting\\\",\\\"safe\\\":[{\\\"id\\\":\\\"missing.mjs:risky\\\",\\\"file\\\":\\\"missing.mjs\\\",\\\"domain\\\":\\\"unassigned\\\",\\\"loc\\\":3,\\\"reason\\\":\\\"no production caller, not exported, no test edge, not in a test file — high-confidence dead\\\",\\\"fingerprint\\\":\\\"9c3f50975477d509\\\"}],\\\"review\\\":[],\\\"suppressed\\\":[]}\"}]}}\n",
+  "stderr": ""
+}

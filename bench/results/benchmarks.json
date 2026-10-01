@@ -212,7 +212,7 @@
   },
   "tsEngine": {
     "bench": "ts-engine (cold extraction, regex vs tree-sitter tier)",
-    "target": "/Users/rhenmcleod/Repositories/codeweb/bench/corpus/axios",
+    "target": "$LOCAL_HOME/Repositories/codeweb/bench/corpus/axios",
     "reps": 3,
     "symbols": 942,
     "withComplexity": 739,

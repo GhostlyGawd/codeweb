@@ -1,0 +1,18 @@
+# Team review and trust — integrated brief
+
+Final synthesis candidate; independent final review pending. Claims are reported/qualified as in [corpus](../EVIDENCE.jsonl). Coverage spans pilot, original lanes, supplements and final targeted sweeps; [source map](../SOURCE-MAP.md) gives exact boundaries. No saturation claimed.
+
+- [CW-L001](https://www.reddit.com/r/codereview/comments/1vuddna/how_are_you_actually_reviewing_ai_generated_code/): Reports little difference in AI-authored coworker PRs under the same review standards. **Limit:** Self-report; no independent replication. Thread completeness and exact date unavailable.
+- [CW-L022](https://www.synthesia.io/post/automating-code-security-reviews-with-claude-mythos-level-capabilities): Reports slow voluntary adoption and review variance; moved a stack-specific security skill into nonblocking CI. **Limit:** Company self-report, not independently replicated. Full article read; figures not visually inspected or used. HN gbrindisi is same author/workflow, not another incident.
+- [CW-L023](https://edgelog.dev/blog/how-many-ai-code-reviews/): Reports repository access removed four recurring false positives in a firmware case, with lower recall; repeated fixing also grew code. **Limit:** Full article read in overlapping chunks; author adjudication, three small tasks, two models, no independent rerun. Tool-builder case. Not a model leaderboard or proven Codeweb effect.
+- [CW-L030](https://www.jvt.me/posts/2026/08/02/ai-maintainer/): Reports increasing Renovate review backlog with a three-person core team; linters and documentation help but do not remove review or human communication work. **Limit:** Article text fully read; client-rendered Webmentions not read and not counted. LLM-assisted author analysis not independently rerun; no causal effect size adopted.
+- [CW-Y005](https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/): Built internal review rather than buying general tooling; replaced bespoke retrieval tools with a sandboxed filesystem and shell. **Limit:** Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP.
+- [CW-Y012](https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/): Kept generated summaries but found them insufficient; tried stacked PRs then risk tiers and attached existing artifacts. **Limit:** Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents.
+
+**Synthesis/inference:** Review remains accountable human work. Context can improve adjudication, but small diffs, behavioral checks, local knowledge and communication remain essential.
+
+**Decision and proposed experiment:** Audit change: a receipt must help a correct decision with less total effort. Compare source-linked packets with normal PR material during review and later regression reconstruction. No experiment executed or authorized by this report.
+
+**Segments and moments:** use only the source-supported segments in each record. The primary proposed audience remains agent-heavy developers working their own repository, with reviewers secondary; builder demonstrations are distinct from ordinary-user outcomes. Before-edit, review/merge, return-use and buy/renew moments must not be collapsed.
+
+**Unknowns:** incremental Codeweb effect, actual recurrence outside purposive public samples, ordinary-user week-two reuse, current host/version transfer and paid authority. See [contradictions](../CONTRADICTIONS.md) and [opportunity decisions](../OPPORTUNITY-DECISIONS.md). Earlier briefs and correction histories remain unmodified.

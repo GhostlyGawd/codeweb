@@ -1,0 +1,25 @@
+{
+  "id": "T70-intentional-extract",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/extract-symbols.mjs",
+    "$LOCAL_TMP/codeweb-p02-supplement-mshorI/intentional",
+    "--no-ctags",
+    "--engine",
+    "regex"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:52:49.219Z",
+  "end": "2026-10-01T01:52:49.288Z",
+  "durationMs": 68.40925000000004,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"meta\":{\"root\":\"$LOCAL_TMP/codeweb-p02-supplement-mshorI/intentional\",\"target\":\"codeweb-p02-supplement-mshorI/intentional\",\"engine\":\"regex\",\"languages\":[\"javascript\"],\"symbols\":2,\"analysis\":{\"status\":\"no-known-incompleteness\",\"diagnosticCount\":0,\"diagnostics\":[]},\"sources\":{\"one.mjs\":{\"s\":219,\"m\":1790819569219,\"h\":\"32d6d8b45ed6bff89716d73c861a8c56fbfaa047\"},\"two.mjs\":{\"s\":219,\"m\":1790819569220,\"h\":\"32d6d8b45ed6bff89716d73c861a8c56fbfaa047\"}},\"dirs\":{\".\":1790819569220}},\"nodes\":[{\"id\":\"one.mjs:packOrders\",\"label\":\"packOrders\",\"kind\":\"function\",\"file\":\"one.mjs\",\"line\":1,\"loc\":12,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"list\"],\"returns\":null,\"raw\":\"list\"},\"complexity\":2,\"maxDepth\":2},{\"id\":\"two.mjs:packOrders\",\"label\":\"packOrders\",\"kind\":\"function\",\"file\":\"two.mjs\",\"line\":1,\"loc\":12,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"list\"],\"returns\":null,\"raw\":\"list\"},\"complexity\":2,\"maxDepth\":2}],\"edges\":[]}",
+  "stderr": "[extract] 2 symbols, 0 edges (0 call + 0 import) from 2 files (regex engine); dropped 0 ambiguous bare-call edges (0 short-name); scanned 2/2 file(s); edged 2/2; ast: off\n"
+}

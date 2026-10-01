@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "assignment": "L06",
+  "issue_id": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+  "issue_identifier": "COD-85",
+  "agent_id": "79d272db-70e2-483b-b817-292dac08593e",
+  "run_id": "818156ef-42b4-4323-b6e2-fa2a14a47bdb",
+  "session_identity": "01a0f080-987a-7d91-93ee-b2307a2a6ea2",
+  "session_identity_source": "CODEX_THREAD_ID injected environment",
+  "created_at": "2026-09-30T04:13:35.083246+00:00",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "verified_input_files": 192,
+  "input_hashes_match_before_and_after": true,
+  "first_draft_context": "This assignment context contains no prior lens output; runtime independence remains for lead to verify.",
+  "other_lens_outputs_read": false,
+  "isolation_limit": "Shared filesystem; procedural isolation only",
+  "attempt": 1,
+  "corrections_used": 0,
+  "first_draft_preserved": "history/L06-first-draft/",
+  "outputs": [
+    {
+      "path": "lenses/06-buyer-and-paid-service-value.md",
+      "sha256": "8c2211df7e8ba75ed1147af64cd1a7f3064a5daf1759acf3f8ba56871558876a"
+    },
+    {
+      "path": "lenses/06-findings.json",
+      "sha256": "61340bd24705ed87ffac61a78985c938a9f5a7bd66743e74bbba5d0c8178eca6"
+    },
+    {
+      "path": "sources/L06-source-addendum.json",
+      "sha256": "540ea59b12f58e6aa4c14d1c33600c16ba768c2741f90df4d54d690d647b6229"
+    }
+  ],
+  "review_state": "delivered for independent synthesis/review, not self-approved"
+}

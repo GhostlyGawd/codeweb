@@ -1,0 +1,28 @@
+{
+  "id": "codex-specific-config-discovery",
+  "command": [
+    "codex",
+    "mcp",
+    "get",
+    "codeweb",
+    "--json",
+    "-c",
+    "mcp_servers.codeweb.command=\"node\"",
+    "-c",
+    "mcp_servers.codeweb.args=[\"$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/mcp-server.mjs\"]",
+    "-c",
+    "mcp_servers.codeweb.env={CODEWEB_NO_AUTOREFRESH=\"1\"}"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819452.150754,
+  "end_epoch": 1790819452.209525,
+  "duration_seconds": 0.05851602554321289,
+  "timeout_seconds": 15,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/codex-specific-config-discovery.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/codex-specific-config-discovery.stderr.txt"
+}

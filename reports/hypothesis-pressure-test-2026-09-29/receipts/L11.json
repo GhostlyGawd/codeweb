@@ -1,0 +1,65 @@
+{
+  "assignment": "L11",
+  "issue_identifier": "COD-90",
+  "issue_id": "240c3739-aedd-40ee-8382-aa1c0803b438",
+  "run_id": "d339a9e1-2486-45e3-8744-8bf2a9342773",
+  "session_identity": "01a0f08b-d2d5-7b91-a3a8-ef298b06f39f",
+  "created_at": "2026-09-30T04:25:11.246107+00:00",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "initial_and_final_input_verification": {
+    "verified_files": 192,
+    "all_hashes_match": true
+  },
+  "outputs": [
+    {
+      "path": "lenses/11-shared-team-dependence.md",
+      "sha256": "8cd05efdb383bee01e29c2072e96b91aa3e77d7d648fdf922cfc81e606e8855b"
+    },
+    {
+      "path": "lenses/11-findings.json",
+      "sha256": "6dfcafb89273792f55323a299d1834ec7e830361103ba63d7ab4d123c26c326e"
+    },
+    {
+      "path": "sources/L11/PR96-checks.json",
+      "sha256": "a5624bcfbd40acf5d393b869afe524af633b79a8f8b8e9c38bb8416a2e8535e8"
+    },
+    {
+      "path": "sources/L11/CW-Y004.json",
+      "sha256": "c183f66537437d98463f83318613e43191d2ad9a717686b6901d85d444dd3ddc"
+    },
+    {
+      "path": "sources/L11/provenance.json",
+      "sha256": "d6f3d8f91f2a3b6d8bf77ffa144c715b6f5621eaf15b2f86d21410a44b0a9c91"
+    },
+    {
+      "path": "sources/L11/PR96-comments.json",
+      "sha256": "78742be8fb5d68007abd6fd0cfc9ede1c50ddf5cef2a61b6ea0ba1a83961a861"
+    },
+    {
+      "path": "sources/L11/CW-Y012.html",
+      "sha256": "5a3b6e34baed019eb2f85340b90a85e49f15fba11be160d5bffaa361eccb8eeb"
+    },
+    {
+      "path": "sources/L11/PR96.json",
+      "sha256": "779b0ab848dd3268b0a9e8c035d77aa9316c2acf1214f28dd441eff216304781"
+    },
+    {
+      "path": "sources/L11/CW-Y007.json",
+      "sha256": "488c04c210ba98b486e0fb8a12eb1cb3c81ac19db266fdb5baa6897607eda8ac"
+    },
+    {
+      "path": "history/L11/first-draft/11-findings.json",
+      "sha256": "6dfcafb89273792f55323a299d1834ec7e830361103ba63d7ab4d123c26c326e"
+    },
+    {
+      "path": "history/L11/first-draft/11-shared-team-dependence.md",
+      "sha256": "8cd05efdb383bee01e29c2072e96b91aa3e77d7d648fdf922cfc81e606e8855b"
+    }
+  ],
+  "first_draft_preserved": "history/L11/first-draft",
+  "corrective_attempts": 0,
+  "other_lens_outputs_read": false,
+  "runtime_independence_verified_by_author": false,
+  "lead_runtime_verification_required": true,
+  "self_review_approval": false
+}

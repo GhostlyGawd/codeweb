@@ -1,0 +1,239 @@
+Grep beats LSP? Why coding agents ignore your fancier tools — AgentConnect Blog
+Docs
+Blog
+Star
+1.4k
+Get started
+All posts
+Engineering
+9 min read
+Grep beats LSP? Why coding agents ignore your fancier tools
+I compared grep with LSP-backed semantic navigation across code-finding and editing tasks. The results show why a tool's LLM-friendliness may matter as much as the capability behind it.
+PX
+Pengcheng Xu
+Engineering
+·
+2026-08-12
+Copy link
+Why would a coding agent ignore a retrieval interface that returns more precise results?
+I ran into this in a small study comparing lexical search with
+grep
+against LSP-backed semantic navigation. I expected semantic navigation to reduce noise and save tokens. Instead, the agents mostly stayed with
+grep
+, and when I forced them to use the semantic path first, task success sometimes fell.
+Precision turned out to be only part of what makes a tool LLM-friendly. The tool also has to return enough context for the next step, in a shape the model can act on directly. Familiarity may matter too: the model may have learned similar action paths during training. The interface effects show up directly in the results below. I cannot prove that training explains the result, but it fits the data.
+Either way, a model does not use a tool in isolation. It uses it through a harness that defines the available actions, their inputs, and the context that comes back.
+A model and its familiar tool loop act as one capability surface.
+Comparing two code retrieval interfaces
+grep
+performs lexical search: it finds matching text and returns the file path, line, and matched content. The LSP-backed tools perform semantic navigation through three capabilities: references, definitions, and document symbols. They can tell a real function call from the same word in a comment.
+LSP also offers diagnostics, rename, and code actions. I did not test those, so the results apply only to the three navigation capabilities above.
+The pilot covered three Claude models, several Python and TypeScript repositories, and three task types: code localization, reference-completeness, and multi-file rename. Each cell ran two or three times, so treat the numbers as signals rather than verdicts.
+I compared token use only when both approaches completed the task. A failed run can look efficient simply because it stopped early.
+The agents route by task
+On simple code-localization tasks, all three models chose the semantic tool only 0% to 6% of the time when both were available. Forcing a semantic-first path cut success from 100% to 89%.
+Reference-completeness tasks, where the agent has to find every caller, looked different: the models chose semantic navigation 45% to 57% of the time.
+Share of semantic tool calls when both tools are available and the agent chooses freely.
+Task
+Opus 4.8
+Sonnet 4.6
+Haiku 4.5
+Localization
+0%
+4%
+6%
+Reference-completeness
+45%
+50%
+57%
+Multi-file rename
+3%
+—
+—
+What the LSP path bought on reference tasks was precision: 1.00 against 0.76 for
+grep
+, meaning every returned site was a real call and the false matches from same-named text were gone.
+Recall, the share of true call sites the agent eventually found, stayed near 0.66 in both arms. Cleaner results did not turn into more calls found. The agent still stopped before it had worked through everything, and a different backend does not fix that. For the stronger models, the precision gain also cost more tokens rather than saving them.
+Noisy codebases are where LSP pays
+On remeda, a clean TypeScript repository,
+grep
+already resolved every reference correctly. Switching to LSP added nothing to F1 and used 16% more tokens. F1 combines precision and recall; no change means retrieval quality did not move.
+On hono, another TypeScript repository,
+grep
+precision was only 0.51 because the same identifiers appear in many places. There LSP improved F1 by 0.246 and used 12% fewer tokens.
+The Python repository requests sat in between: +0.072 F1, 19% more tokens.
+F1 gain from semantic retrieval on reference-completeness (ΔF1 = LSP − grep).
+Repo
+Language
+grep precision
+ΔF1 (LSP − grep)
+Token cost
+remeda
+TypeScript
+1.00
++0.000
++16%
+hono
+TypeScript
+0.51
++0.246
+−12%
+requests
+Python
+0.76
++0.072
++19%
+Two repositories in the same language gave opposite verdicts, so "statically typed languages suit LSP" is the wrong predictor. What matters is how many false matches
+grep
+produces on that codebase. Where
+grep
+is already clean, semantic navigation is pure overhead; where the same names are everywhere, the precision pays for itself.
+Output shape changes agent behavior
+The LSP-backed tools initially returned only a location: file path, line, and column. The agent knew where a reference was but had to open the file to see the code before deciding anything.
+grep
+returns the line itself:
+src/auth.ts:42: return validateToken(token)
+Location and content arrive together, so the model can judge relevance without another read.
+So I changed the semantic-navigation response to attach two lines of source on either side of each reference. The backend and the set of references stayed the same; only what the model saw changed.
+On the multi-file rename tasks, pass@1 for the LSP path rose from 0.67 to 0.83, and follow-up file reads fell from 15.2 to 3.2 per episode, below
+grep
+'s own 4.3.
+Multi-file rename, Opus 4.8, pyright with a pre-warmed index. Both LSP arms share one backend and differ only in output shape.
+Arm
+pass@1
+Site recall
+Tokens
+Follow-up reads
+grep
+1.00
+1.000
+2,451
+4.3
+LSP — locations only
+0.67
+0.930
+4,131
+15.2
+LSP + inline context
+0.83
+0.958
+3,336
+3.2
+With locations only, the model has to plan a read, call the tool, and digest the result before it can act. With the source inline, those steps go away.
+Anthropic makes the same point in
+Writing effective tools for agents
+: tools are interfaces for non-deterministic agents, so the context they return is part of the design. A semantically correct tool still makes a poor workflow if every result costs several extra actions to interpret.
+Whether familiarity drove the improvement is open. Models may have seen many
+grep
+-shaped trajectories in training, and the inline format may resemble what they know. Or each response simply carried more useful information. Both explanations fit the result, and this study did not manipulate training data, so it cannot separate them.
+Some tasks favor lexical search by construction
+There is also a difference no interface change can remove: LSP and
+grep
+retrieve different sets. A semantic reference is a real symbol relationship in code. A rename may also need to touch comments, docstrings, configuration, and string literals, which
+find_references
+will not return by design and
+grep
+will.
+semantic references ⊂ textual occurrences
+For text-wide edits,
+grep
+can be the better retrieval tool even for a model with perfect training on LSP-backed navigation.
+That leaves two explanations for
+grep
+'s advantage in this study:
+Structure.
+Some tasks need textual completeness, which the tested semantic tools do not provide. The study supports this directly.
+Distribution.
+The model may have more practice with familiar tools and result shapes. This is consistent with the routing and output-format results, but the study cannot prove it.
+The harness is part of the system
+A coding agent is more than a model. Around the model sits a harness: the instructions in context, the tools available, their input schemas, the shape of their results and errors, and the loop that decides what the model sees next.
+agent capability = model × harness
+In this study the LSP backend never changed, and neither did the model. Returning a few lines of source was enough to move the success rate and the number of file reads.
+Anthropic's work on
+effective harnesses for long-running agents
+makes the same point at a longer time scale: environment setup, progress artifacts, and verification routines decide what an agent can accomplish across sessions. Inside a single tool loop, result format, error messages, and fallback paths do the same job.
+When post-training includes agent trajectories, the harness also defines the prompts, tool calls, results, and recovery paths in those examples. A model trained through repeated use of
+read
+,
+grep
+,
+edit
+, and
+bash
+may learn policies that depend on those interfaces. Move it into a different tool layer and its effective capability can change.
+This is why benchmark results for a model do not transfer unchanged to a different runtime.
+Six checks before adding a tool
+LSP did improve retrieval quality on noisy code, and a small response-format change removed most follow-up reads, so I am not arguing against LSP, MCP, or new agent skills. I am arguing for testing a new tool inside the full agent loop before relying on it. Start with the native tool surface, then check:
+Test real tasks at equal accuracy.
+Lower token use is not a win if success also fell.
+Measure whether the agent calls it.
+A tool being available does not mean the model knows when to use it.
+Return enough context for the next decision.
+path:line:content
+usually works better than a bare location object.
+Keep a native fallback.
+Semantic and lexical search solve different problems.
+Route by the task and the codebase.
+A noisy repository may benefit from semantic navigation. A text-wide edit still needs
+grep
+.
+Reinforce the new trajectory when it matters.
+A prompt can introduce a tool, but it may not create a reliable policy for using it.
+Building effective agents
+recommends simple, composable patterns. Tools are no different: more of them does not make a more capable agent.
+Conclusion
+Semantic navigation cut false matches, but that only paid off where
+grep
+was noisy. Returned as bare locations, the more precise results caused more reads; with a few lines of source attached, the same results became easy to use. Evaluating a new tool means watching whether the agent chooses it, whether the task succeeds, what it costs, and whether the output supports the next step.
+For the full experimental setup, task definitions, and results, see
+Does a Language Server Save Tokens for Coding Agents?
+.
+This is the product principle behind AgentConnect: use an open protocol to connect agents, while keeping each model together with its native runtime and tool loop.
+Star AgentConnect on GitHub
+agentconnect-md/agentconnect
+Get started with AgentConnect
+docs.agentconnect.md
+This is a preliminary pilot with small task sets, a few repositories, three Claude models, and two to three rollouts per cell. I tested LSP-backed navigation through references, definitions, and document symbols; I did not test
+textDocument/rename
+, diagnostics, or code actions. A rename-capable LSP might perform differently on the refactoring tasks where
+grep
+did best. The edit tasks were local and are not standard SWE-bench scores. These findings are useful signals, not a final verdict across all models, tools, and codebases.
+#
+agent-harness
+#
+tool-use
+#
+ACP
+#
+engineering
+On this page
+Comparing two code retrieval interfaces
+The agents route by task
+Noisy codebases are where LSP pays
+Output shape changes agent behavior
+Some tasks favor lexical search by construction
+The harness is part of the system
+Six checks before adding a tool
+Conclusion
+Keep reading
+All posts →
+Product
+Reusable, testable decisions for agent orchestration with Jev
+Product
+Introducing Linear support
+Product
+Introducing Gitea support
+Put an agent in your first channel.
+Open source and self-hosted — run AgentConnect on your own infrastructure, bring any agent, and keep full control. No lock-in.
+Get started
+Star
+1.4k
+Agent
+Connect
+Docs
+Blog
+Terms
+Privacy
+English
+English
+中文

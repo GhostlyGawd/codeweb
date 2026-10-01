@@ -1,0 +1,173 @@
+{
+  "checked_at": "2026-09-30T05:12:43.895792+00:00",
+  "run_id": "0ced2b48-6953-462e-b708-707094d4980a",
+  "output_manifest_sha256": "b4a3b39bc088966261f600cc1ec6f3bc74ca66a5496d907aa31c703815d6140b",
+  "verified_files": {
+    "frozen": 192,
+    "synthesis": 344,
+    "output": 496
+  },
+  "lens_findings": 65,
+  "canonical_evidence_records": 132,
+  "reciprocal_edges_verified": 1222,
+  "claims_with_decisions_and_tests": 12,
+  "completed_tasks": [
+    {
+      "id": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+      "identifier": "COD-77",
+      "status": "done",
+      "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "parentId": "573b8d18-80c7-4b18-84b5-aecd340601f8"
+    },
+    {
+      "id": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "identifier": "COD-78",
+      "status": "done",
+      "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "parentId": "573b8d18-80c7-4b18-84b5-aecd340601f8"
+    },
+    {
+      "id": "5e929c74-6224-4f8c-b865-38f840720b34",
+      "identifier": "COD-79",
+      "status": "done",
+      "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "parentId": "573b8d18-80c7-4b18-84b5-aecd340601f8"
+    },
+    {
+      "id": "375bee1a-6e50-4430-bef6-20cf523f4771",
+      "identifier": "COD-80",
+      "status": "done",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+    },
+    {
+      "id": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+      "identifier": "COD-81",
+      "status": "done",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+    },
+    {
+      "id": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+      "identifier": "COD-82",
+      "status": "done",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+    },
+    {
+      "id": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+      "identifier": "COD-83",
+      "status": "done",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+    },
+    {
+      "id": "a578154c-75d4-48de-bb1c-13a93fa55398",
+      "identifier": "COD-84",
+      "status": "done",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+    },
+    {
+      "id": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+      "identifier": "COD-85",
+      "status": "done",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "parentId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37"
+    },
+    {
+      "id": "d89a661f-67ec-44c9-892d-c91cc346da58",
+      "identifier": "COD-86",
+      "status": "done",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf"
+    },
+    {
+      "id": "bc105098-f7d1-44a0-8e23-ba3e3b1b86a0",
+      "identifier": "COD-87",
+      "status": "done",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf"
+    },
+    {
+      "id": "a607cbae-3a0e-43a1-9e8b-7386ff63c26c",
+      "identifier": "COD-88",
+      "status": "done",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf"
+    },
+    {
+      "id": "b069b0f2-e4f1-4ac4-806e-7131bafd6447",
+      "identifier": "COD-89",
+      "status": "done",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf"
+    },
+    {
+      "id": "240c3739-aedd-40ee-8382-aa1c0803b438",
+      "identifier": "COD-90",
+      "status": "done",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf"
+    },
+    {
+      "id": "b095ce67-4c3e-4a89-8733-391b8527ce07",
+      "identifier": "COD-91",
+      "status": "done",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "parentId": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf"
+    },
+    {
+      "id": "265838d5-9909-432f-bb3a-34e2a353087b",
+      "identifier": "COD-92",
+      "status": "done",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "parentId": "5e929c74-6224-4f8c-b865-38f840720b34"
+    },
+    {
+      "id": "1fd63335-ee92-422c-888e-9db5dfaf7b5a",
+      "identifier": "COD-93",
+      "status": "done",
+      "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "parentId": "5e929c74-6224-4f8c-b865-38f840720b34"
+    },
+    {
+      "id": "892c9083-ce03-4257-afdc-3beb443e1b01",
+      "identifier": "COD-94",
+      "status": "done",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "parentId": "5e929c74-6224-4f8c-b865-38f840720b34"
+    }
+  ],
+  "interventions": [
+    {
+      "kind": "root_bootstrap_activation_repair",
+      "count": 1,
+      "updates": 14,
+      "receipt": "ACTIVATION-BATCH-RECEIPT.json",
+      "receipt_sha256": "c0727c0ae6bb7eb030cbe530cb27edfba8d95c264595a200fed7592fa258c474"
+    }
+  ],
+  "failed_continuations": [
+    {
+      "run_id": "449652d7-7628-40a4-a10f-46c5b367926c",
+      "cross_issue_cap": 20,
+      "phase_C_assignment": "HTTP429 rejected",
+      "monitor_attempts": [
+        "HTTP400 schema validation",
+        "HTTP409 unresolved dependency"
+      ],
+      "monitor_scheduled": false,
+      "uploads": "helper failed before network upload because mktemp path was not writable"
+    },
+    {
+      "actor": "root",
+      "ordinary_board_followup": "HTTP409 unresolved blockers",
+      "sanctioned_runtime_wake": "skipped",
+      "source": "root comment b58ba38f-ce08-4d27-9618-515788114938"
+    }
+  ],
+  "final_review": "pending",
+  "canonical_placement": "pending; outside worker writable roots",
+  "complete": false
+}

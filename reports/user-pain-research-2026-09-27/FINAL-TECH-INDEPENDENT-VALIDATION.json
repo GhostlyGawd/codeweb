@@ -1,0 +1,65 @@
+{
+  "audit_hashes": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "actual": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "actual": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "actual": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "actual": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "actual": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "matches": true
+    }
+  ],
+  "accepted_files_changed": [],
+  "records": 12,
+  "access": {
+    "opened_full": 18,
+    "opened_partial": 6,
+    "inaccessible": 2
+  },
+  "missing_fields": {},
+  "unique_ids": true,
+  "unique_incident_keys": true,
+  "unique_sources": true,
+  "audited_ids": [
+    "CW-Z001",
+    "CW-Z002",
+    "CW-Z003",
+    "CW-Z007",
+    "CW-Z009",
+    "CW-Z011"
+  ],
+  "uploaded_archive_sha256": "476991e8e73a96dedf4fb22469dacb7fd5682fc5bb75a5159bd6a5c923246fa9",
+  "archive_integrity_ok": true,
+  "archive_members_match_local": true,
+  "reviewed_at": "2026-09-28T01:59:21.578530+00:00",
+  "decision": "approve_bounded_handoff",
+  "high_priority_audited": 4,
+  "other_audited": 2,
+  "other_total": 8,
+  "new_full_units": 17,
+  "recovered_full_units": 1,
+  "shortfall_to_40_including_recovery": 22,
+  "exact_evidence_overlap": [],
+  "source_overlaps": [
+    "FT-S017/CW-T020 previously partial",
+    "FT-S024/CW-X014 still partial"
+  ],
+  "parent_completion": false
+}

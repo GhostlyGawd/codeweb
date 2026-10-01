@@ -1,0 +1,133 @@
+
+	Experiments with AI Code Review — Engineering Blog - Wealthfront
+X
+          	Our team
+              Blog
+            Careers
+      Menu
+Engineering Blog – Wealthfront
+Find out what makes our engineering team tick.
+Experiments with AI Code Review		
+by Austin McKee
+			August 03, 2026   
+Part of a series on Wealthfront’s AI Developer Tooling
+Why Code Review?
+At Wealthfront, our arc of AI adoption has followed a familiar pattern: from skepticism to experimentation to deep adoption in the code lifecycle. Just a few years ago, in the dark era of “AI coding is just fancy autocomplete,” we heard rumors of Meta using LLMs to review code diffs. We were skeptical- models can copy boilerplate, but surely review is where we humans are most valuable! Later that month in a post-mortem, an engineer pasted a misbehaving branch diff into GPT-3.5 and asked, “please review for bugs.” The bug under discussion, a missed SQL filter in a refactor, had slipped past both automated testing and code review. It was caught instantly by the LLM.
+Things escalated quickly. How many historical bugs could an LLM catch from just the diff? (many). Can this new “Claude Code” looping tool catch even non-obvious bugs through exploration? (yes). Are there other people working on this? (yes, but we think we can do better). This realization started a multi-year experiment to leverage AI in the Wealthfront code factory. It was our first step toward building our ideal harness for AI-augmented code review.
+Why Build?
+At Wealthfront we have a strong propensity to build over buy. Writing code is our core competency. We find we are almost always better served solving our narrow problems directly with a little code instead of adopting someone’s general solution containing lots of code. Additionally, we didn’t like the code review solutions available at the time.
+General-purpose harnesses like Claude Code had too little structure. At the time, AI could not be trusted to stay on task or conserve its context window. Sub-agents, in their infancy, were promising but had problems with error propagation.
+We believed “AI code review” companies were targeting unrealistic goals. They were trying to hit a unit price of around $0.25 per review and 2-3 minutes. This was the era when AI companies thought that $20 per user per month was a good price point. We believed then, and still believe now, that a good review is invaluable: we wanted to pay $20 per review and were happy to wait 15 minutes or more.
+AI systems are only as good as the context they have available. For both writing and reviewing code, the only system that can truly understand and control its environment is the one you write yourself.
+So, we acquired API keys from Anthropic, OpenAI and Google and started building.
+First Attempts
+The science of context engineering requires choosing exactly what tokens are visible to an LLM and playing to that model’s strengths. Nobody has produced rules for this that last longer than two model generations. Our first few attempts were predictably not great. 
+We first tried a “document gathering” structure. We would ask a cheap model to crawl the codebase looking for files relevant to a pull request. The cheap model would then compile a list of documents it found. Then, in a single shot, we would ask an expensive model to review the diff and documents to produce a review as a structured tool call. This didn’t work at all. You can’t ask a model to “find relevant documents”- the task isn’t specific enough. It will think everything is relevant, then spend unbounded time in rabbit holes finding every document! 
+In some sense everything is relevant, but with over 20 million lines of code (the majority of it tests) in over 350 repositories, specialization and abstraction are required. We tried more experiments with more structures, and even a few experiments with no structure, before we found something we liked.
+Initial Release
+Our first reviewer was built in Java on our existing IRIS (Internal Resource Interaction System) service. It had quite a bit of structure:
+Gemini 2.5 Pro was chosen to be the top-level model and author of the review comments. It was given the branch diff and an overview of the review process.
+Gemini 2.5 Pro was required to call a tool called propose_research_questions. This tool allowed it to explore the codebase via research agents.
+The research agents were each given a task to answer a question. They were allowed to loop within cost and time limits.
+These research agents used Gemini 2.5 Flash: a cheap model, trading judgement for speed.
+The task of “answering the question” gave these agents a purpose. In reality, we discarded what they wrote and only kept the primary sources they used to find an answer.
+After these agents finished their turn, we presented to them all files they had read and asked for a “relevancy score” for each, 1 through 9. ‘Structured output mode’ with a dynamically generated JSON schema kept outputs precise.
+We consolidated the most relevant sources and asked an expensive model, Gemini 2.5 Pro, to either end research or recurse.
+It could end research by writing a final report.
+Or, if the answer was incomplete, it could recurse by calling propose_research_questions and incorporating the results.
+The top-level Gemini 2.5 Pro was allowed to call propose_research_questions up to three times with three questions each.
+Finally, the top-level agent was asked to write comments via a dedicated tool.
+This worked well. The structure led agents to perform deep research in the domain, and they discovered many non-obvious bugs through wide correlation of the codebase. 
+However, a year passed, models changed, and we thought we could do even better. 
+Many problems were only discovered by ‘accident’ while the agent looked at something unrelated.
+The cost of a review wasn’t well correlated with the complexity and risk of the change. The cost of recursive exploration was somewhat random, and the top-level agent had little leeway to expand or short-circuit a review. This made sense with Gemini 2.5, which was poor with open-ended delegation, but new Anthropic and OpenAI releases appeared to have better judgement.
+LLMs are strongly biased to do what you ask. If you ask an LLM to find problems, it finds problems, even if it must make them up. The signal-to-noise ratio of comments was poor, and even perfect pull requests would get a few comments.
+The agents’ tools weren’t very expressive (read file, read JIRA ticket, JIRA search, regex code search, etc.), and therefore we had lots of tools. Meanwhile, model providers were beginning to RL-train their models specifically to use generic shell tools to find files efficiently. 
+Iris Code Review
+We then switched to a model-driven antagonistic review.
+Opus 4 now takes the lead and has wide latitude to view the diff, delegate to agents, and explore the code itself.
+Opus has access to general tools of its own and can spawn fast, general-purpose research agents.
+When it finds a potential problem, it’s asked to call propose_possible_problems.
+This spawns two sub-agents per problem: one model to argue that the concern is real and one model to argue it isn’t.
+GPT-5 is the highly-paid prosecution intentionally predisposed to “investigate and find evidence of the problem.” To reduce hallucinations, we give it an ‘out’ and say null results are expected and fine.
+Gemini 3.0 Flash is the cheap defense told “we have a feeling this isn’t a problem,” and to “please investigate and find evidence this isn’t a problem.” 
+The two agents finish their investigations and present their evidence with primary sources back to Opus.
+Opus 4 is asked to weigh the evidence impartially, make a decision, and continue with the review.
+At its own discretion, Opus can end its exploration and write the final comments.
+This works extremely well. The sub-agents have clear, actionable goals. Giving each model a distinct role (plaintiff, defendant, judge) tends to produce better evidence and clearer judgement. Additionally, a number of smaller tactics have increased reliability:
+Freeform, then Instructions, then Structure
+After a long agent loop Opus struggled to call structured tools properly. Our review_pull_request tool schema isn’t that large, yet many reviews showed Opus hallucinating file names, regretting comments it started (e.g. “hmm actually scratch that”), or even forgetting how to close out a JSON string and panicking for thousands of tokens. Our solution:
+Allow Opus to write a freeform review as a text file
+Allow Opus to iterate on the file using its native str_replace_based_edit_tool until it’s done
+Append new developer instructions explaining how to call review_pull_request with the proper JSON format
+Require that Opus call the tool
+Unix Philosophy with Tools
+Dozens of bespoke tools to retrieve data (read: MCP) inevitably lead to poor tool calling performance and context bloat. On the other hand, modern models are now RL-trained to use standard unix shell tools to retrieve data. We first had tools for reading code, pull requests, Sentry issues, tickets, and more. We replaced all of these with what we call our “AI reading room”- a sandboxed environment containing all this data on a single filesystem on a large SSD. We now only expose a simple read_file tool and encourage it to use a shell for anything else.  
+Directed Research
+Despite the new framework, we noticed there were still some questions the agent never thought to ask. For example, it rarely prioritized measuring the code against existing, historical data in the database. We now nudge Opus by spawning a few pointed sub-agents at the start of the review, then we ask it to consider the feedback when the sub-agents are done. We have three of these:
+A “project background” agent researches the changes in the context of a larger project, reducing the agent’s instinct to panic over missing features.
+An “existing data” agent can query the database and research how the code will behave when deployed to the product: its effect size, missed edge cases, etc. 
+A “checklist” agent has access to around 80 engineer-written quality checks and attempts to find violations
+Performance
+After launch we asked every engineer to consider the comments and reply to them with a rating between one and five:
+Actively harmful feedback
+The bot is encouraging an engineer to make a bad change to the PR or asking the engineer to deviate from Wealthfront’s patterns or practices.
+I regret having to read this bot feedback.
+Annoying, weird response
+The bot is saying something that doesn’t really make sense.
+I regret having to read this bot feedback.
+Neutral response
+It might be valid feedback in different context, but it’s also annoying and more of a nit.
+It could be a bug under different circumstances and is probably worth considering, but I also would have been fine never seeing this.
+Useful response
+I’m glad I considered it. I will probably not make large changes, and things could’ve been fine either way, but the bot is being net-useful.
+Great response
+The bot helped prevent a bug from being merged.
+The results were better than we hoped. Our initial release showed ratings following a bell curve. The mean, median and mode centered on three. With antagonistic review, the ratings morphed into stairs:
+This was caused by a small increase in the absolute number of fours and fives and a dramatic decrease in the number of ones and twos. Antagonistic review slightly increased true positives and greatly decreased the number of false positives- most pull requests now receive no comments and few receive more than one. Signal is everything when interacting with humans prone to noise fatigue, and this was a great result.
+Average review time: 10 minutes
+Average cost: $4
+The Dev Lifecycle
+Despite huge improvements in model and harness performance, we don’t believe human review should disappear. Instead, we try to keep human and AI reviews purely additive, trying to separate reviews by time to keep the reviewers’ independence. 
+First, an engineer is expected to do a self-review. Second, they click “Ready for Review,” which triggers the Iris AI review. After that, they add other engineers for peer review. Ultimately, the peer review is blocking but the AI review is not. Once peer review approves, they can merge and deploy without waiting for Iris if they want.
+Looking Forward
+In the era of AI coding, human review is being scrutinized as a bottleneck to writing software. While that may be true, we have no current interest in removing that bottleneck. We’ve instead chosen to view AI as a potent additional reviewer to find things our tests didn’t catch. With that said we’re not absolutists- at the very least the age of human nitpicking is drawing to a close. If you can nit it, you can also write a rule for AI to find it and fix it. 
+We don’t know what software engineering will look like in a few years. Nobody does. In the year since we rebuilt Iris, new models like Sol and Fable have upended context engineering again, and we’re already looking for an efficient way to leverage their power. Whatever happens, we’re a software company that is measured by the products we build and the software inside them. Whenever we can write code that allows us to write better code faster, we will.
+Disclosures
+The information contained in this blog is provided for general informational purposes only, and should not be construed as investment or tax advice. Nothing in this communication should be construed as a solicitation, offer, or recommendation, to buy or sell any security. Any links provided to other server sites are offered as a matter of convenience and are not intended to imply that Wealthfront Advisers or its affiliates endorses, sponsors, promotes and/or is affiliated with the owners of or participants in those sites, or endorses any information contained on those sites, unless expressly stated otherwise.
+Investment management and advisory services are provided by Wealthfront Advisers LLC (“Wealthfront Advisers”), an SEC-registered investment adviser, and brokerage related products are provided by Wealthfront Brokerage LLC (“Wealthfront Brokerage”), a Member of FINRA/SIPC. Financial planning tools are provided by Wealthfront Software LLC (“Wealthfront Software”).
+Wealthfront Advisers, Wealthfront Brokerage, and Wealthfront Software are wholly-owned subsidiaries of Wealthfront Corporation.
+© 2026 Wealthfront Corporation. All rights reserved.
+		Posted in wealthfront engineering 	
+Post navigation
+7 Words, 7 Journeys: The Wealthfront New College Grad Experience
+Optimizing Redshift Write Patterns: Tackling Tombstones and Ghost Rows
+Recent Articles
+					Optimizing Redshift Write Patterns: Tackling Tombstones and Ghost Rows
+											August 24, 2026
+					Experiments with AI Code Review
+											August 3, 2026
+					7 Words, 7 Journeys: The Wealthfront New College Grad Experience
+											August 3, 2026
+					Tuning Android build nodes for maximum throughput
+											June 25, 2026
+					Putting the Tech in Fintech: How We Use FIX to Execute Trades at Scale
+											April 21, 2026
+					How we standardized MariaDB in our Integration Server
+											March 26, 2026
+					XcodeGen and the quest to modularize the Wealthfront iOS app
+											March 2, 2026
+					New Leaders, New Perspectives: Why We Joined Wealthfront Engineering
+											February 12, 2026
+Interested in what you see here?
+		Join our team
+Careers
+Legal
+Methodology
+Contact
+Help Center
+Press
+Back to top
+This blog is powered by Wealthfront Corporation (formerly known as Wealthfront Inc.). The information contained in this blog is provided for general informational purposes, and should not be construed as investment advice. Any links provided to other server sites are offered as a matter of convenience and are not intended to imply that Wealthfront Corporation endorses, sponsors, promotes and/or is affiliated with the owners of or participants in those sites, or endorses any information contained on those sites, unless expressly stated otherwise.
+Wealthfront Corporation may from time to time publish content in this blog and/or on this site that has been created by affiliated or unaffiliated contributors. These contributors may include Wealthfront employees, other financial advisors, third-party authors who are paid a fee by Wealthfront, or other parties. Unless otherwise noted, the content of such posts does not necessarily represent the actual views or opinions of Wealthfront or any of its officers, directors, or employees. The opinions expressed by guest bloggers and/or blog interviewees are strictly their own and do not necessarily represent those of Wealthfront Corporation.
+© 2026 Wealthfront Corporation.  All rights reserved. Please read important legal disclosures about this blog.

@@ -1,0 +1,21 @@
+{
+  "id": "T95-generated-selector-mcp",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/mcp-server.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"codeweb_context\",\"arguments\":{\"graph\":\"$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w/.codeweb/graph.json\",\"symbol\":\"dist/generated.mjs:generated\"}}}\n",
+  "start": "2026-10-01T01:54:42.808Z",
+  "end": "2026-10-01T01:54:42.848Z",
+  "durationMs": 40.17370800000003,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"symbol\\\":\\\"dist/generated.mjs:generated\\\",\\\"found\\\":false,\\\"hint\\\":\\\"no symbol matches \\\\\\\"dist/generated.mjs:generated\\\\\\\" — try codeweb_find \\\\\\\"<free text>\\\\\\\" (concept search, no name needed)\\\"}\"}]}}\n",
+  "stderr": ""
+}

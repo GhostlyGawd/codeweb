@@ -1,0 +1,22 @@
+{
+  "assignment": "L03",
+  "issue_id": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+  "issue_identifier": "COD-82",
+  "run_id": "ece66b7f-e96f-4c26-8890-574f99aef49d",
+  "session_identity": "01a0f07b-67b6-7022-89ae-b9a898e9e47a",
+  "session_identity_source": "CODEX_THREAD_ID environment",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "verified_input_files": 192,
+  "initial_and_final_hashes_match": true,
+  "output_sha256": {
+    "lenses/03-native-experience-and-attention.md": "5f5198c9d8551c12627a546f3e9afd9dc837bbc6a7604af9e16a64ac8c529d47",
+    "lenses/03-findings.json": "81aadfd65aa90c1786b6e427d5bdf3087639a225c0a9499be3096f89df6d7e63"
+  },
+  "first_draft_history": "history/L03-first-draft/",
+  "correction_attempts_used": 0,
+  "other_lens_outputs_read": false,
+  "independence_limit": "Fresh task context is reported from this run identity; other lens outputs were not read. Shared filesystem isolation is procedural. Product Lead must independently verify runtime-session freshness.",
+  "created_at": "2026-09-30T04:07:25.709963+00:00",
+  "verdict": "revise",
+  "self_review_approval": false
+}

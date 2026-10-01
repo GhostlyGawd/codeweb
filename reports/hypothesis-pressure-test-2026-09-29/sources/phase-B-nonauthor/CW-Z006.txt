@@ -1,0 +1,334 @@
+Claude as second contributor: Git stats - Florian Bruniaux
+Skip to main content
+FB
+.
+Home
+Projects
+Blog
+Guides
+Media
+Background / CV
+About
+Sponsor
+Contact
+Home
+Projects
+Blog
+Guides
+Media
+Background / CV
+About
+Sponsor
+Contact
+Home
+Projects
+Blog
+Guides
+Media
+Background / CV
+About
+Sponsor
+Contact
+Share on LinkedIn
+← Back to blog
+Build
+technique
+ai
+claude-code
+open-source
+workflow
+engineering
+git
+ai-coding
+solo-builder
+🇬🇧 EN
+Claude is my second contributor: what real Git stats show
+6 contributors in our git history. One is an AI. What the commit patterns actually look like after months of Claude Code, beyond the marketing claims.
+Jump to summary
+May 12, 2026
+•
+23 min read
+•
+Updated Sep 12, 2026
+Written by
+Florian Bruniaux
+AI Founding Engineer at
+Méthode Aristote
+, 13 years scaling engineering teams from developer to CTO. Builds open-source developer tools, see
+what else I've shipped
+.
+Where this fits
+Adoption stage:
+Scale
+Make AI-assisted engineering reliable, governable, measurable, and sustainable across teams.
+See the Scale guidance
+TL;DR
+What
+Details
+The numbers (May 2026)
+905 PRs merged. 74 releases. 9 months since v1.0.0.
+Claude’s share
+70% of PRs carry a Claude attribution in the body. Second contributor by any measure.
+What Claude does
+Scaffolding, refactoring, test generation, documentation, repetitive patterns. The AI config system itself.
+What humans still do
+Architecture decisions, complex debugging, product judgment, security review. Infrastructure trade-offs.
+How it changed
+From one handwritten CLAUDE.md to 77 AI instruction files, 13 CI workflows, 3 dedicated to AI governance.
+Open source output
+Claude Code Ultimate Guide (430K+ lines), CC Bridge, CCBoard, RTK contributions.
+The honest assessment
+Claude is not a developer. Claude is the most productive tool I’ve ever used. The distinction still matters.
+Started as a February 2026 snapshot. Updated to May 2026 with current data.
+The May snapshot records six human contributors by commit count. Claude participation is tracked separately through pull-request attribution, not as a seventh human author.
+70% of merged PRs carry a Claude attribution in the body. 905 pull requests total, 894 since the project started in August 2025. By that metric, Claude is the most consistently present contributor to this codebase.
+What the commit stats measure
+Three selected monthly counts reported in this REX. They show activity, not time saved or a controlled estimate of Claude’s causal effect.
+View full-size
+.
+The 70% figure counts PRs where the pull request body contains a Co-Authored-By Claude trailer, a “Generated with Claude Code” reference, or an explicit Claude attribution. It’s not a perfect count: attribution wasn’t standardized from day one, and early PRs (pre-October 2025) don’t carry consistent trailers, but it’s verifiable from the GitHub API, which makes it more reliable than trying to attribute commits after the fact.
+What the 70% includes:
+New service and repository files following the 3-tier pattern (same structure, different domain logic)
+Unit test generation for established patterns
+Refactoring passes across many files simultaneously
+Documentation generation and maintenance
+The AI instruction system itself: 77 files describing how to work with Claude on this project
+What it doesn’t capture: the decisions about what to build, the architecture choices, the debugging sessions where the behavior was wrong in a way Claude couldn’t see, and significant chunks of code that humans wrote independently without attribution.
+PR count is a cleaner signal than commit count for this kind of analysis. One Claude session might produce 3 files and show up as one commit. PRs represent units that were shipped, reviewed, validated, and merged. 70% of those units carried Claude participation.
+Historical snapshot of May 12, 2026: 634 of 905 merged PRs carried the attribution described in this article, about 70%. The complement is absence of a recorded match, not proof of no AI participation.
+View full-size
+.
+What Claude does
+Scaffolding new patterns
+The 3-tier architecture at Méthode Aristote (Router = validation, Service = business logic + permissions, Repository = CRUD only) is consistent across 70+ services. When I need a new service, the entire chain is replicable: tRPC router with Zod validation, service layer with typed inputs and permission checks, repository with Prisma queries.
+Claude knows this pattern because it’s in the codebase and in the CLAUDE.md context. Creating the fifteenth service with this pattern is work Claude does well and fast. Creating the first one required the architectural decision that Claude wasn’t part of.
+Test generation
+In January 2026: services (45 tests), repositories (174 tests), adapters (64 tests), all in focused sessions over a few weeks. Writing unit tests for established patterns is exactly the kind of repetitive, well-defined work where AI output is reliable and fast. By May 2026, the repo has 864 test files across all layers.
+The tests needed review. Some edge cases were missed. Some assertions were semantically correct but didn’t test the right thing. Human review caught those. The baseline generation was Claude’s.
+Refactoring at scale
+Code duplication from 55% to 8%. That’s a lot of files to touch, a lot of patterns to identify and consolidate. Claude handles the mechanical application of a refactoring pattern across many files faster than any human workflow I’ve found. The identification of what to refactor (which patterns were worth consolidating, which apparent duplication was intentional) was human judgment.
+The January cycle combined 283 tests, more than 70 resolved SonarCloud issues and a reported duplication reduction from 55% to 8%. These are different measures; resolving 70 issues does not by itself establish that none remained.
+Documentation
+The Claude Code Ultimate Guide: 430,000+ lines across 1,000+ files. Maintained with AI assistance because maintaining it manually at that volume would be impossible. Structure, editorial decisions, examples from actual production experience: all mine. Claude generates from notes and rough drafts.
+The AI instruction system itself
+The 77-file system in
+doc/guides/ai-instructions/
+(rules, modules, developer profiles, skill indexes) is largely Claude-generated from design sessions. It describes how to work with Claude on this project. It grew from a single CLAUDE.md file to a structured documentation layer with its own tests and CI validation. More on that below.
+What humans still do
+Architecture decisions
+The 3-tier architecture exists because I decided it should. I chose Neon PostgreSQL over Supabase, tRPC over REST, and Clerk for authentication. Claude did not make those trade-offs.
+When the initial polling approach was generating 17,000 requests per day and saturating the Neon connection pool at 905 connections, the diagnosis came from reading logs, correlating Sentry events, and understanding the connection lifecycle. Claude helped implement the SSE migration once the hypothesis was formed. The hypothesis took human work to form.
+Then, several months later, when SSE had its own limitations (rate limits, auth complexity, long-lived connection management), the decision to move to Pusher was another architecture call. Not obvious. There’s a real cost to adopting a managed real-time service: vendor dependency, pricing model, integration surface. We moved anyway. Claude implemented the migration across the codebase once the decision was made.
+The polling-to-SSE results from the author’s REX. The lower load and the stabilization work belong to the same migration; these are not results of the later move to Pusher.
+View full-size
+.
+Complex debugging
+The 20,000 orphan streams cleaned up in December 2025 didn’t announce themselves. Debugging why streams were orphaned required reading logs, correlating Sentry events, understanding the connection lifecycle. Claude was useful once the hypothesis was formed. Forming the hypothesis was the hard part.
+Security review
+The IDOR fix (ANY → TEAM/ASSIGNED permissions) that resolved 8,600+ Sentry events. The CVE-2025-55182 patch. The pre-push security hooks that run on every commit. These required understanding attack surfaces, thinking adversarially, knowing what the permission model was supposed to enforce. Claude operates within the security model. Building and reviewing it is human work.
+Product judgment
+What to build next, what user feedback means architecturally, when a feature request is actually a UX symptom with a different fix, when to ship and when to hold.
+Claude can implement any feature I describe, but that’s not the same as knowing which one matters.
+The infrastructure kept evolving
+Between February and May 2026, two things happened that aren’t visible in the commit count.
+The real-time stack changed again
+The February 2026 story ended with the SSE migration: polling (17,000 req/day) → SSE (under 500). That was the winning state in February. By March, SSE was replaced by Pusher. The migration was complete by mid-April, the dead code removed immediately after.
+The Pusher decision involved real trade-offs: switching from a self-hosted SSE implementation to a managed third-party service means a recurring cost, a new integration surface, and a dependency on an external vendor. These are architecture calls I made. Claude implemented channel auth, subscription management, and error handling across the full stack once the approach was set. Pusher was introduced in v1.7.1 on March 10, the migration was complete by April 17, 38 days from decision to dead code removed.
+Every infrastructure change followed the same division of work. I made the adoption decision and its rationale explicit, then Claude applied it across the codebase.
+The CI grew AI-specific gates
+In August 2025, there was one workflow: a handwritten
+claude.yml
+copied from the GitHub marketplace. In May 2026, there are 13 workflows totaling ~2,700 lines of YAML. Three of them are specifically about AI governance:
+claude-code-review.yml
+(87 lines): runs a Claude Code review on every pull request automatically
+ai-config-check.yml
+(83 lines): validates that the AI instruction system hasn’t drifted from the actual codebase
+claude.yml
+(50 lines): the original Claude Code general workflow
+The
+ai-config-check.yml
+workflow runs a tool called
+ctxtest
+(13 facts about the codebase that should be verifiably true) (Next.js version, database patterns, team conventions). If the AI context description and the actual codebase diverge, CI fails. It’s a test suite for the instructions we give to Claude, not for application code. CI was already enforcing code quality; it now also enforces AI context quality.
+The AI config became infrastructure
+In February 2026, the CLAUDE.md approach was: one big file, maintained manually, updated when things broke. By May 2026, it’s a different system.
+doc/guides/ai-instructions/
+contains 77 files. Rules organized by domain (architecture, code conventions, git workflow, security, React patterns, TypeScript, TDD). Modules with reference material for specific contexts (Knock notifications, Storybook conventions, business domain). Five developer profiles, one per human on the team, that configure which rules apply to which person and which files they’re allowed to modify.
+The total is ~5,900 lines of AI instruction documentation, maintained as a structured system with its own validation. When a developer profile says Augustin owns the tutoring flow, the pre-commit hook enforces that Claude can’t modify those files for another developer’s session without flagging it. In April 2026, the AI context quality score reached A+ (150/150 on the internal eval). That’s a number generated by
+pnpm ai:validate
+, which checks completeness, accuracy, and freshness of the AI instruction system against the actual codebase.
+Humans write the rules, Claude operates within them, CI enforces that they stay accurate, and
+pnpm ai:sync
+keeps the system documented. Maintenance now means passing the CI gate instead of manually updating CLAUDE.md only when something breaks.
+The open source output
+Beyond Méthode Aristote, I shipped 9 separate projects during the same period. Not sequentially: in parallel, while the main platform was running. The pattern is the same across all of them.
+The AI tooling layer
+Claude Code Ultimate Guide
+(
+GitHub
+)
+(22K lines, 204 templates, 271 quiz questions, a security threat database tracking 15 CVEs and 655 malicious skills): the field moves fast enough that maintaining this manually would be a full-time job. Claude generates from notes and rough drafts. Structure, editorial decisions, examples from production: mine.
+ctxharness
+came directly out of the Méthode Aristote
+ctxtest
+workflow. Your
+CLAUDE.md
+says Prisma 7.5. Your
+package.json
+has
+^7.7.0
+. Your agent is reasoning against stale facts on every session, silently. ctxharness catches it: 20 extractors, 15 scanners, 3 layers of context engineering testing. Built because I had the problem first.
+CCBoard
+(
+GitHub
+)
+is a real-time TUI and web dashboard for monitoring Claude Code sessions. Token consumption, response times, session history, hook execution, MCP server health. Built in Rust. The monitoring infrastructure I wanted but didn’t have.
+cc-sessions
+is a fast Rust CLI to search, browse, and analyze Claude Code session history. I wouldn’t have touched a Rust project without the Claude Code workflow making it viable.
+cc-copilot-bridge
+(
+GitHub
+)
+solves a specific problem: ran out of Claude credits, had Copilot credits unused. The bridge lets you route Claude Code through your Copilot subscription. Architecture decision and problem identification: mine. Implementation: Claude.
+Claude Cowork Guide
+(
+GitHub
+)
+covers the non-coder side, 28 business workflows and 70 copy-paste prompts for Claude Desktop users. HR, finance, marketing, sales. Complementary to the developer guide, different audience entirely.
+The developer tools
+dep-scope
+answers a question Knip and Depcheck leave open: which symbols use a package, how often, across how many files, and whether a native alternative would let you delete it entirely. It has 195 native alternative mappings, 371 tests, and LLM migration prompt generation that pipes directly into Claude Code. The problem existed long before I had the workflow to build the tool.
+StarMapper
+(
+GitHub
+)
+lets you paste a GitHub repo URL and get a world map of every developer who starred it. No login, just a URL and a GitHub token. Built it in a weekend because the data was interesting and the workflow made it fast enough to be worth attempting.
+RTK
+is Patrick’s project. A CLI proxy that reduces token consumption 60-90% on dev commands by filtering noise before it reaches the model. When I saw the approach, I became a contributor. RTK is now in my daily workflow and mentioned elsewhere in this article as Layer 1 of the context engineering stack.
+Is Claude a developer or a tool?
+The question surfaces regularly. The answer I’ve landed on is that the distinction is less useful than it seems.
+Claude doesn’t have goals or a stake in the product working. Previous approaches that failed only matter if they’re still in the context window. A debugging session going in circles doesn’t frustrate it, because frustration requires caring about the outcome.
+Those are properties of the system. They make Claude extremely useful for well-defined implementation work where the pattern is clear, the scope is bounded, and the output can be reviewed.
+The 70% PR attribution is real. What it means is that a meaningful portion of the implementation work on this codebase was produced by an AI working within specifications and patterns that humans defined. That changes what individual developer productivity looks like. It doesn’t change what judgment, experience, and product sense are worth.
+The honest accounting
+9 months of production development, as of May 2026:
+905 PRs merged
+(894 since August 2025). 408 in the last 3 months, against 497 in the first seven, roughly equivalent output in less than half the time. April 2026 was the single most active month at 178 PRs. The velocity is increasing, not plateauing.
+74 releases
+, v1.0.0 on August 27, 2025 to v1.15.3 on May 11, 2026
+6 human contributors
+by commit count: Florian (1,338), Nicolas (455, ×6.7 since February), Augustin (237), plus Jacques, Mathis, Victor
+1 AI contributor
+: 70% PR attribution (634 of 905), no separate commit authorship, present in the majority of shipped work
+13 CI workflows
+(~2,700 lines of YAML), 3 dedicated to AI governance
+The stable division of work is clear. Claude handles implementation that fits a defined scope. Humans handle what to build next and how to resolve a system-level conflict.
+The scope of “defined” changed. The 3-tier pattern was defined early and Claude scaffolds it reliably. The AI instruction system grew from one file to 77, and Claude now generates and maintains it from design sessions. AI reviews each PR, while the AI context has a CI gate that fails if it drifts from reality. The infrastructure for working with Claude has become as substantial as the application infrastructure.
+The useful distinction is between six human contributors, automated dependency activity and Claude-attributed pull requests. These are different categories rather than interchangeable entries in one contributor ranking. Claude provides implementation assistance within work whose direction the humans set. What changed is where my attention goes: less time generating boilerplate, more time on the problems where experience and judgment actually matter.
+Stats from the Méthode Aristote repository as of May 12, 2026. PR attribution measured via GitHub API (Co-Authored-By and Claude Code body mentions). Open source projects available at
+github.com/FlorianBruniaux
+. For the mechanics behind Claude Code and the configuration system,
+Claude Code Under the Hood
+covers the architecture.
+YSNK
+(You should now know)
+ai-config-check.yml
+runs
+ctxtest
+, 13 verifiable facts about the codebase, and fails CI if the AI instructions drift from what’s actually true. A test suite for the context you feed Claude, not for the app
+Developer profiles gate who Claude can touch: if a teammate owns a specific flow, a pre-commit hook flags Claude editing those files under someone else’s session
+The Pusher migration took 38 days from decision to dead code removed, a second real-time rewrite after SSE. The same split held both times: human call, Claude execution
+ctxharness and dep-scope both exist because the pain showed up on this exact codebase first: stale CLAUDE.md facts, undetected dead dependencies
+AI context quality hit A+ (150/150) in April 2026 via
+pnpm ai:validate
+, a number that only exists because the instructions are tested like code now
+Claude Code Guide
+Build
+Go Further in the Claude Code Guide
+Practical resources selected to help you take the next step.
+Workflows
+Reuse runnable patterns for planning, delivery, verification, and delegation.
+Open the Guide
+↗
+Context Engineering
+Control context budgets, assembly, reduction, and quality as an engineering system.
+Open the Guide
+↗
+Open-source galaxy
+Projects used in this path
+CC-Sessions
+📋
+Index and search local Claude Code session history.
+Session Search
+Local-first
+Knowledge Retrieval
+Download as PDF
+Related appearances
+Live appearances and podcast episodes about this article.
+Une équipe produit qui shippe avec l'IA : ce que ça veut dire vraiment
+· Just a click
+Apr 2026
+De CTO avec 30 devs à Solo Engineer boosté à l'IA
+· The Product Crew
+Mar 2026
+7 mois, 1200 commits, 600 PRs, 50 releases
+· Dev with AI
+Feb 2026
+Related articles
+From afterthought to infrastructure: how AI config evolves in a real project
+Nine months of AI configuration in one production project: evolving responsibilities, profile-based generation and a measured reduction in always-on lines.
+AI velocity is bidirectional
+Everyone talks about shipping 10x faster with AI. Nobody talks about accumulating debt 10x faster. 7 months of production data from a real EdTech platform.
+UVAL: the protocol I built to stop accepting code I don't understand
+Jeremy Twei coined it. Addy Osmani popularized it. Margaret-Anne Storey extended it to teams. Here's what I built to fight all three.
+Go deeper
+Step-by-step guides that put this into practice.
+Plan-execute: running 20+ agents on a migration
+A worked example of a 243-file migration split across bounded agents, with a shared brief, local checks and sequential merge validation.
+Claude Code security: the attack surface nobody audits
+Hooks are shell scripts with your user permissions. MCP servers are third-party code with access to your credentials. Their timing and access depend on the configured events and server.
+Claude Code setup, level by level
+Three configuration layers for project context, daily tools and persistent memory, with checks for what loads and how it behaves.
+← Previous
+Claude Code under the hood
+Next →
+1/6 · Opposite AI results: what context can explain
+Site
+Home
+About
+Background / CV
+Projects
+Guides
+AI Engineering Paths
+Blog
+Media
+Mentions
+Sponsor
+Contact
+Sitemap
+Ecosystem
+StarMapper
+Claude Code Guide
+Claude Cowork Guide
+RTK
+ccboard
+cc-sessions
+cc-copilot-bridge
+dep-scope
+gsc-mcp
+yt-insights
+claude-code-plugins
+ctxharness
+flow-lean
+cc-skill-usage
+agentsec-triage
+github-roast-tpc
+Bel Étage
+GitHub
+LinkedIn
+Twitter
+Email
+RSS
+Test, ship, improve, and repeat
+© 2026 Florian Bruniaux. All rights reserved.
+Contact

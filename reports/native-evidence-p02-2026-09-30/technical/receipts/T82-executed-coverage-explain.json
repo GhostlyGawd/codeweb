@@ -1,0 +1,24 @@
+{
+  "id": "T82-executed-coverage-explain",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/explain.mjs",
+    "$LOCAL_TMP/codeweb-p02-supplement-mshorI/behavior/.codeweb/graph.json",
+    "low",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:52:50.591Z",
+  "end": "2026-10-01T01:52:50.628Z",
+  "durationMs": 37.323708000000124,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"symbol\":\"low\",\"matched\":[\"subject.mjs:low\"],\"cards\":[{\"caveat\":\"0 in-repo callers but exported — external use possible\",\"id\":\"subject.mjs:low\",\"label\":\"low\",\"kind\":\"function\",\"role\":\"product\",\"domain\":\"unassigned\",\"at\":\"subject.mjs:1\",\"loc\":3,\"exports\":true,\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"complexity\":1,\"maxDepth\":1,\"dependents\":{\"callers\":0,\"tests\":1,\"blastRadius\":0,\"blastDomains\":0},\"coverage\":\"covered by the recorded run (peak 1 hit)\",\"topCallers\":[],\"topCallees\":[],\"tests\":[\"current.test.mjs:<module>\"],\"findings\":[],\"summary\":\"function low (product, unassigned) — 0 caller(s), 1 test(s), blast 0 across 0 domain(s); ⚠ 0 in-repo callers but exported — external use possible\"}],\"summary\":\"function low (product, unassigned) — 0 caller(s), 1 test(s), blast 0 across 0 domain(s); ⚠ 0 in-repo callers but exported — external use possible\"}\n",
+  "stderr": ""
+}

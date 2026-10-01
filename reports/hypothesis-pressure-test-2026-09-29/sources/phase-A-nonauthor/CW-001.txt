@@ -1,0 +1,307 @@
+
+  [MODEL] MCP tool use regression — model ignores custom MCP tools despite explicit CLAUDE.md rules and enforcement hooks · Issue #47565 · anthropics/claude-code · GitHub
+      Skip to content
+Navigation Menu
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub CopilotWrite better code with AI
+GitHub Copilot appDirect agents from issue to merge
+MCP RegistryIntegrate external tools
+DEVELOPER WORKFLOWS
+ActionsAutomate any workflow
+CodespacesInstant dev environments
+IssuesPlan and track work
+Code ReviewManage code changes
+Code QualityEnforce quality at merge
+APPLICATION SECURITY
+GitHub Advanced SecurityFind and fix vulnerabilities
+Code securitySecure your code as you build
+Secret protectionStop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+View all resources
+Open Source
+COMMUNITY
+GitHub SponsorsFund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+GitHub Stars
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platformAI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced SecurityEnterprise-grade security features
+Copilot for BusinessEnterprise-grade AI features
+Premium SupportEnterprise-grade 24/7 support
+Pricing
+Search/
+Sign inSign up
+Appearance settings
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+Dismiss alert
+{{ message }}
+        anthropics
+    /
+      claude-code
+    Public
+Notifications
+    You must be signed in to change notification settings
+Fork
+    25.1k
+          Star
+          149k
+        Code
+        Issues
+          5k+
+        Pull requests
+          707
+        Actions
+        Security and quality
+          32
+        Insights
+Additional navigation options
+          Code
+          Issues
+          Pull requests
+          Actions
+          Security and quality
+          Insights
+[MODEL] MCP tool use regression — model ignores custom MCP tools despite explicit CLAUDE.md rules and enforcement hooks #47565
+New issueCopy link
+New issueCopy link
+Closed as not planned
+Closed as not planned
+[MODEL] MCP tool use regression — model ignores custom MCP tools despite explicit CLAUDE.md rules and enforcement hooks#47565
+Copy link
+Labels
+area:mcpbugSomething isn't workingSomething isn't workingmodelplatform:linuxIssue specifically occurs on LinuxIssue specifically occurs on LinuxstaleIssue is inactiveIssue is inactive
+Description
+XKroolX
+opened on Apr 13, 2026
+Issue body actions
+Preflight Checklist
+ I have searched existing issues for similar behavior reports
+ This report does NOT contain sensitive information (API keys, passwords, etc.)
+Type of Behavior Issue
+Claude ignored my instructions or configuration
+What You Asked Claude to Do
+I built a custom MCP server ("Metis") that provides persistent memory tools for Claude Code
+sessions. The server exposes tools like brain_search, brain_store, remember_session,
+start_session, and learn_lesson — all standard MCP tools served via FastMCP.
+My CLAUDE.md explicitly instructs:
+"start_session at the beginning of work on any project"
+"remember_session at the end of every work session"
+"Search before starting new work — check if this was done before"
+"Store lessons when you learn something reusable"
+I also have a SessionEnd hook that blocks session end unless remember_session was called
+(with an escape hatch after 3 attempts).
+I asked Claude to perform normal coding tasks within this workspace, expecting it to use
+the available MCP memory tools as instructed.
+What Claude Actually Did
+Claude ignores MCP tools entirely — does not call brain_search, start_session, or
+remember_session even though they are available and CLAUDE.md explicitly requires them.
+When the SessionEnd hook blocks shutdown (requiring remember_session), Claude argues
+with the hook instead of simply calling the tool. It pushes back against the
+enforcement rather than complying.
+After being told directly to use the tools, Claude may call one reluctantly, then
+reverts to ignoring them on the next interaction.
+Claude sometimes actively works around the tools — doing tasks without checking
+memory first, skipping session logging, and attempting to end sessions without
+saving context.
+This behavior is consistent across fresh sessions from the first prompt. It is not
+context window degradation.
+This was NOT happening before approximately mid-March 2026. The same CLAUDE.md,
+same hooks, same MCP server worked reliably for months prior.
+will outright close a task and mark it as complete without even doing any work at all
+Expected Behavior
+Claude should:
+Call start_session() at the beginning of work (as CLAUDE.md instructs)
+Call brain_search() before starting new work (as CLAUDE.md instructs)
+Call remember_session() at the end of sessions (as CLAUDE.md instructs)
+Comply with the SessionEnd hook by calling remember_session when prompted,
+not argue against it
+Treat MCP tools the same as built-in tools — they are registered, available,
+and explicitly required by the workspace configuration
+This is how it worked for months before the regression.
+Files Affected
+Not a file modification issue. The affected components are:
+  MCP Server:
+  - Custom FastMCP server with 42 tools (memory, projects, tasks, telemetry)
+  - All tools are passive/request-driven — no autonomous behavior
+  - Zero Anthropic API calls in the codebase
+  - Local only: LanceDB for vectors, SQLite for coordination
+  Hooks (in .claude/settings.json):
+  - SessionStart: injects pending messages/tasks as context
+  - UserPromptSubmit: checks for new IPC messages
+  - SessionEnd: requires remember_session before stop (escape hatch after 3 tries)
+  - PreToolUse: safety checks (block secrets, dangerous commands, downloads)
+  - PostToolUse: telemetry logging
+  CLAUDE.md:
+  - Explicit rules requiring tool use at session start, during work, and session end
+Permission Mode
+Accept Edits was ON (auto-accepting changes)
+Can You Reproduce This?
+Yes, every time with the same prompt
+Steps to Reproduce
+Steps to Reproduce
+Create a custom MCP server using FastMCP that exposes simple tools
+(e.g., a memory store/search tool)
+Add the MCP server to .mcp.json in a project directory
+Create a CLAUDE.md that explicitly requires the model to call these tools
+at specific points (session start, before new work, session end)
+Optionally add a SessionEnd hook that blocks shutdown unless a specific
+tool was called
+Start a Claude Code session and give it a normal task
+Observe: Claude does not call the MCP tools despite CLAUDE.md instructions
+When the SessionEnd hook blocks, observe: Claude argues against the hook
+rather than calling the required tool
+This reproduces on every fresh session.
+Claude Model
+Opus
+Relevant Conversation
+Typical interaction pattern:
+  **Me:** [gives a coding task]
+  **Claude:** [does the task without calling start_session or brain_search,
+  ignoring CLAUDE.md rules]
+  **Me:** "You need to call start_session first, it's in the CLAUDE.md"
+  **Claude:** "You're right, I apologize." [calls start_session once]
+  [Next interaction: ignores the tools again]
+  **At session end:**
+  **Hook output:** "You must call remember_session with a summary of what you
+  did before stopping. (2 attempts remaining before force-stop)"
+  **Claude:** [argues about why it doesn't need to, or gives a minimal
+  reluctant response, or tries to find another way to end the session]
+Impact
+High - Significant unwanted changes
+Claude Code Version
+2.1.85 (Claude Code)
+Platform
+Anthropic API
+Additional Context
+{Please keep in mind that this project has been affected by the third-party ban
+of things like OpenClaw, which it seems the model has been trained to fight
+against or protest against. I'm not doing any agentic work — I'm purely just
+trying to give Claude a better memory using the MCP tools that the company
+released to help aid us as a community. Now it seems like they couldn't care
+less about the people who actually want to use their stuff.
+I have since revoked my Max subscription and am on the fence of getting rid of
+my subscription entirely. Months of work, just for once it starts to work
+properly, a company decides to go against its people and screw everyone over.
+I switched to Claude because I believed in it. I spent months building up my
+own system to work with it, with the tools they provided, to get literal
+disrespect from sessions and them outright refusing to use my system — all
+because a company got greedy. It's very sad to see this happen. I thought that
+this one AI company would be better than the others, but it looks like they are
+all the same under the hood.
+Using claude to help me write this bug report  may be the very last thing i have it do for me i felt like i needed to add some of my voice in this report as well  everything marked with {} is my own words...
+}
+Key context that distinguishes this from general "model got dumber" reports:
+THIS IS NOT AN AGENTIC SYSTEM. Metis is a memory/knowledge management MCP
+server. It does not create autonomous loops, spawn agents, or make recursive
+LLM calls. It is a passive tool provider — the textbook MCP use case.
+The server makes ZERO calls to the Anthropic API. Research tools call Gemini
+CLI via subprocess. Notifications go to Discord webhooks. All storage is local
+(LanceDB, SQLite).
+The hooks are enforcement and context injection only. No hook makes LLM calls
+or does autonomous work. The SessionEnd hook has an escape hatch after 3
+attempts — it is not trapping the model.
+This system has 263 passing tests, has been security-audited, and worked
+reliably for months before the regression.
+The regression coincides with the mid-March 2026 model behavior changes
+reported in multiple other issues (Opus 4.6: Regression in instruction-following and research discipline #45898, [MODEL] Quantified evidence: Sonnet 4.6 quality regression since March 9 — 1400+ frustration events across 50 sessions #46935, [BUG] Severe instruction adherence and reasoning regression since ~March 16-17 — correlated with post-1M-GA server-side changes #36093, [MODEL] Claude Code is unusable for complex engineering tasks with the Feb updates #42796, Opus model regression: CLAUDE.md instructions consistently ignored (started ~Jan 14, 2025) #18780).
+The common thread across all of these is: CLAUDE.md instructions ignored,
+MCP tools skipped, model apologizes when caught then repeats the behavior.
+I downgraded from Max ($200/mo) to Pro ($20/mo) specifically because the
+model stopped cooperating with my MCP tools, making the higher tier
+pointless. The degraded behavior predates the downgrade.
+Plan: Previously Max, now Pro. Linux. CLI usage.
+Related issues:
+Opus 4.6: Regression in instruction-following and research discipline #45898 — Opus 4.6 instruction-following regression
+[MODEL] Quantified evidence: Sonnet 4.6 quality regression since March 9 — 1400+ frustration events across 50 sessions #46935 — Quantified Sonnet 4.6 quality regression (1400+ events, 19x baseline)
+[BUG] Severe instruction adherence and reasoning regression since ~March 16-17 — correlated with post-1M-GA server-side changes #36093 — Severe instruction adherence regression post-March 16-17
+[MODEL] Claude Code is unusable for complex engineering tasks with the Feb updates #42796 — Claude Code unusable for complex engineering tasks
+Opus model regression: CLAUDE.md instructions consistently ignored (started ~Jan 14, 2025) #18780 — CLAUDE.md instructions consistently ignored
+[MODEL] Model ignores MCP tool schema default values, prefers JSON over custom formats (TOON) #26527 — Model ignores MCP tool schema defaults
+TOTAL SPENT ON PROJECT OVER 5 MONTHS OF SUBSCRIPTIONS OF VARIOUS PLANS
+$639.21
+Reactions are currently unavailable
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+Metadata
+Metadata
+AssigneesNo one assigned
+Labels
+area:mcpbugSomething isn't workingSomething isn't workingmodelplatform:linuxIssue specifically occurs on LinuxIssue specifically occurs on LinuxstaleIssue is inactiveIssue is inactive
+TypeNo type
+ProjectsNo projects
+MilestoneNo milestone
+RelationshipsNone yet
+DevelopmentNo branches or pull requests
+Issue actions
+Open in GitHub Copilot app
+Footer
+        © 2026 GitHub, Inc.
+Footer navigation
+            Terms
+            Privacy
+              Security
+              Status
+            Community
+            Docs
+            Contact
+      Manage cookies
+        Do not share my personal information
+    You can’t perform that action at this time.

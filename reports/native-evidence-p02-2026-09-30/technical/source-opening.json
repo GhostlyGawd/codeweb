@@ -1,0 +1,19 @@
+{
+  "openedAt": "2026-10-01T01:50:12.632Z",
+  "fixtureRoot": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target",
+  "contextReceipt": "receipts/T02-cli-exact-context.json",
+  "files": [
+    {
+      "file": "subject.mjs",
+      "path": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/subject.mjs",
+      "sha256": "2bfe5ce81e7d37311824740753c4a6091b217128d1953f55abec521680fe6a42",
+      "text": "export function low(value) {\n  return value + 1;\n}\nexport function popular(value) {\n  return value * 2;\n}\nfunction local(value) {\n  return low(value);\n}\nexport function zero(value) {\n  return value - 1;\n}\n"
+    },
+    {
+      "file": "consequential.mjs",
+      "path": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/consequential.mjs",
+      "sha256": "d70bd8e55367c56aa0ce74405c053dfad276f3c7283af95f5360687c8e82595a",
+      "text": "import { low } from './subject.mjs';\nexport function consequential() {\n  return low(10);\n}\n"
+    }
+  ]
+}

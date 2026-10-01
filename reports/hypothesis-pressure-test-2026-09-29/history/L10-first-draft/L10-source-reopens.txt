@@ -1,0 +1,578 @@
+I Still Prefer MCP Over Skills | David Mohl (https://david.coffee/i-still-prefer-mcp-over-skills/)
+citeturn0view0 [wordlim: 200] Crawled: yesterday; Content type: text/html; Source: open({"ref_id":"https://david.coffee/i-still-prefer-mcp-over-skills/","lineno":null}); Total lines: 106
+L0: cite0†Home L1: 
+L2:   * cite1†about L3:   * cite2†projects+apps L4:   * cite3†bluesky †bsky.app L5:   * cite4†github †github.com L6:   * cite5†twitter †x.com L7:   * cite6†rss L8: # I Still Prefer MCP Over Skills
+L9: 
+L10: April 2, 2026 · 9 min · 1807 words
+L11: 
+L12: cite7†Image: Skills vs MCP L13: 
+L14: Table of Contents
+L15: 
+L16:   * cite8†What I Love About MCP L17:   * cite9†The Friction with Skills L18:   * cite10†Connectors vs. Manuals L19:     * cite11†Skills + MCP = Creating manuals for connectors L20: TL;DR: The AI space is pushing hard for “Skills” as the new standard for giving LLMs capabilities, but I’m not a fan. Skills are great for pure knowledge and teaching an LLM how to use an existing tool. But for giving an LLM actual access to services, the Model Context Protocol (MCP) is the far superior, more pragmatic architectural choice. We should be building connectors, not just more CLIs.
+L21: 
+L22: * * *
+L23: Maybe it’s an artifact of spending too much time on X, but lately, the narrative that “MCP is dead” and “Skills are the new standard” has been hammered into my brain. Everywhere I look, someone is celebrating the death of the Model Context Protocol in favor of dropping a `SKILL.md` into their repository.
+L24: I am a very heavy AI user. I use Claude Code, Codex, and Gemini for coding. I rely on ChatGPT, Claude, and Perplexity almost every day to manage everything from Notion notes to my DEVONthink databases, and even my emails.
+L25: 
+L26: I just don’t like Skills.
+L27: 
+L28: I hope MCP sticks around. I really don’t want a future where every single service integration requires a dedicated CLI and a markdown manual.
+L29: Here’s why I think the push for Skills as a universal solution is a step backward, and why MCP still gets the architecture right.
+L30: 
+L31: cite12†Image: Claude retrieving user feedback from Kikuyo via MCP L32: 
+L33: Claude pulling recent user feedback from Kikuyo through the Kikuyo MCP, no CLI needed.
+L34: ## What I Love About MCPcite8†# L35: 
+L36: The core philosophy of MCP is simple: it’s an API abstraction. The LLM doesn’t need to understand the how; it just needs to know the what. If the LLM wants to interact with DEVONthink, it calls `devonthink.do_x()`, and the MCP server handles the rest.
+L37: 
+L38: This separation of concerns brings some unbeatable advantages:
+L39:   * Zero-Install Remote Usage: For remote MCP servers, you don’t need to install anything locally. You just point your client to the MCP server URL, and it works.
+L40:   * Seamless Updates: When a remote MCP server is updated with new tools or resources, every client instantly gets the latest version. No need to push updates, upgrade packages, or reinstall binaries.
+L41:   * Saner Auth: Authentication is handled gracefully (often with OAuth). Once the client finishes the handshake, it can perform actions against the MCP. You aren’t forcing the user to manage raw tokens and secrets in plain text.
+L42:   * True Portability: My remote MCP servers work from anywhere: my Mac, my phone, the web. It doesn’t matter. I can manage my Notion via my LLM of choice from wherever a client is available.
+L43:   * Sandboxing: Remote MCPs are naturally sandboxed. They expose a controlled interface rather than giving the LLM raw execution power in your local environment.
+L44:   * Smart Discovery: Modern apps (ChatGPT, Claude, etc.) have tool search built-in. They only look for and load tools when they are actually needed, saving precious context window.
+L45:   * Frictionless Auto-Updates: Even for local setups, an MCP installed directly via `npx -y` or `uv` can auto-update on every launch.
+L46: ## The Friction with Skillscite9†# L47: 
+L48: Not all Skills are the same. A pure knowledge skill (one that teaches the LLM how to format a commit message, write tests a certain way, or use your internal jargon) actually works well. The problems start when a Skill requires a CLI to actually do something.
+L49: 
+L50: My biggest gripe with Skills is the assumption that every environment can, or should, run arbitrary CLIs.
+L51: Most “capability” skills from OpenClaw or similar require you to install a dedicated CLI (`gogcli`, `remindctl`, etc.) to be usable. But what if you aren’t in a local terminal? ChatGPT can’t run CLIs. Neither can Perplexity or the standard web version of Claude. Unless you are using a full-blown compute environment (like Perplexity Computer, Claude Cowork, Claude Code, or Codex), any skill that relies on a CLI is dead on arrival.
+L52: 
+L53: This leads to a cascade of annoying UX and architectural problems:
+L54:   * The Deployment Mess: CLIs need to be published, managed, and installed through binaries, NPM, uv, etc.
+L55:   * The Secret Management Nightmare: Where do you put the API tokens required to authenticate? If you’re lucky, the environment has a `.env` file you can dump plain-text secrets into. Some ephemeral environments wipe themselves, meaning your CLI works today but forgets your secrets tomorrow.
+L56:   * Fragmented Ecosystems: Skill management is currently the wild west. When a skill updates, you have to reinstall it. Some tools support installing skills via `npx skills`, but that only works in Codex and Claude Code, not Claude Cowork or standard Claude. Pure knowledge skills work in Claude, but most others don’t. Some tools support a “skills marketplace,” others don’t. Some can install from GitHub, others can’t.
+L57: You try to install an OpenClaw skill into Claude and it explodes with YAML parsing errors because the metadata fields don’t match.
+L58:   * Context Bloat: Using a skill often requires loading the entire `SKILL.md` into the LLM’s context window, rather than just exposing the single tool signature it needs. It’s like forcing someone to read the entire car’s owner’s manual when all they want to do is call `car.turn_on()`.
+L59: If a Skill’s instructions start with “install this CLI first,” you’ve just added an unnecessary abstraction layer and extra steps. Why not just use a remote MCP instead?
+L60: 
+L61: cite13†Image: Codex loading a skill to understand Phoenix colocated hooks L62: 
+L63: Codex pulling up a pure knowledge skill to learn how Phoenix colocated hooks work. No CLI, no MCP, just context.
+L64: ## Connectors vs. Manualscite10†# L65: 
+L66: I don’t want Skills to become the de facto way to connect an LLM to a service. We can explain API shapes in a Skill so the LLM can `curl` it, but how is that better than providing a clean, strongly-typed interface via MCP?
+L67: 
+L68: Here’s how I think the ecosystem should look:
+L69: When to use MCP: MCP should be the standard for giving an LLM an interface to connect to something: a website, a service, an application. The service or application itself should dictate and own the interface it exposes.
+L70:   * Take Google Calendar. A `gcal` CLI is fine. The problem is a Skill that tells the LLM to install it, manage auth tokens, and shell out to it. An OAuth-backed remote MCP owned by Google handles auth at the protocol level, and works from any client without any setup (cite14†Google now offers exactly this†developers.google.com ).
+L71:   * Notion has `mcp.notion.so/mcp` available natively, instead of forcing me to download `notion-cli` and deal with auth. They own the interface, so they can add or patch tools at any time and every client gets it without a reinstall.
+L72:   * Hopper’s built-in MCP sits inside the live disassembler session, so `step()` is the instruction you have open. A `hopper-cli` has none of that context.
+L73:   * Xcode ships with a built-in MCP that sits inside the current project, so it already knows the build, the env, the tooling. An `xcode-cli` has none of that context.
+L74: When to use Skills: Skills should be “pure.” They should focus on knowledge and context.
+L75:   * Teaching existing tools: I love having a `.claude/skills` folder that teaches the LLM how to use tools I already have installed. A skill explaining how to use `curl`, `git`, `gh`, or `gcloud` makes complete sense. We don’t need a “curl MCP”. We just need to teach the LLM how to construct good `curl` commands. However, a dedicated remote GitHub MCP makes much more sense for managing issues than relying on a `gh` CLI skill.
+L76:   * Standardizing workflows: Skills are perfect for teaching Claude your business jargon, internal communication style, or organizational structure.
+L77:   * Teaching format handling: This is another great example and what Anthropic does as well with the cite15†PDF Skill†github.com : it explains how to deal with PDF files and how to manipulate them with Python.
+L78:   * Secret Management patterns: Having a skill that tells Claude “Use `fnox` for this repo, here is how to use it” just makes sense. Every time we deal with secrets, Claude pulls up the skill. That’s way better than building a custom MCP just to call `get_secret()`.
+L79: cite16†Image: ls -al .claude/skills in a React Router repo L80: Skills living directly in the repo. The LLM picks them up automatically when working in that project.
+L81: 
+L82: Shower thought: Maybe the terminology is the problem. Skills should just be called `LLM_MANUAL.md`, and MCPs should be called `Connectors`.
+L83: 
+L84: Both have their place.
+L85: 
+L86: MCP is the interface to connect to an external thing. A Skill is the manual for how to interact with a thing.
+L87: ### Skills + MCP = Creating manuals for connectorscite11†# L88: 
+L89: A skill that explains how to use an MCP server actually makes a lot of sense. Not to replace the MCP, but to give the LLM context before it starts calling tools. What the service does, how the tools relate to each other, when to use which one. A knowledge layer on top of a connector layer. That’s the combination I’d want.
+L90: And this is actually a pattern I’ve been using more and more in practice. When I’m working with an MCP server, I inevitably discover gotchas and non-obvious patterns: a date format that needs to be `YYYY-MM-DD` instead of `YYYYMMDD`, a search function that truncates results unless you bump a parameter, a tool name that doesn’t do what you’d expect. Rather than rediscovering these every session, I just ask Claude to wrap everything we learned into a Skill.
+L91: The LLM already has the context from our conversation, so it writes the Skill with all the gotchas, common patterns, and corrected assumptions baked in.
+L92: cite17†Image: Claude packaging learnings from a NotePlan MCP session into a reusable Skill L93: 
+L94: After discovering backlink gotchas and date format quirks in the NotePlan MCP, I asked Claude to package everything into a skill. Now every future session starts with that knowledge.
+L95: The result is a Skill that acts as a cheat sheet for the MCP, not a replacement for it. The MCP still handles the actual connection and tool execution. The Skill just makes sure the LLM doesn’t waste tokens stumbling through the same pitfalls I already solved. It’s the combination of both that makes the experience actually smooth.
+L96: At the same time, I’ll keep maintaining my dotfiles repo full of Skills for procedures I use often, and I’ll keep dropping `.claude/skills` into my repositories to guide the AI’s behavior.
+L97: 
+L98: I just hope the industry doesn’t abandon the Model Context Protocol. The dream of seamless AI integration relies on standardized interfaces, not a fractured landscape of hacky CLIs. I’m still holding out hope for official Skyscanner, Booking.com, Trip.com, and Agoda.com MCPs.
+L99: 
+L100: * * *
+L101: Speaking of remote MCPs: I built cite18†MCP Nest†mcpnest.dev specifically for this problem. A lot of useful MCP servers are local-only (stdio) by nature, think Fastmail, Gmail, or anything that runs on your machine. MCP Nest hosts them in the cloud so they become remotely accessible, usable from Claude, ChatGPT, Perplexity, or any MCP-capable client, across all your devices. If you want your local MCPs to work everywhere without exposing your machine directly, that’s what it’s for.
+L102: If you’re into MCP and are looking for a way to access MCP servers running on your Mac in your favorite LLM, check out cite19†Warplet†warplet.app , which creates secured remote tunnels. MCP Nest hosts; Warplet tunnels from your Mac.
+L103: 
+L104: cite20†« PrevKikuyo: Collect User Feedback for ALL Your Small Projects L105: cite21†Next »Reflecting on one month of trying to market my dotfiles syncing app --------------------------------------------------------------------------------
+Building a Custom MCP Layer for My Technical Vault and Workflow | Joe Severino (https://jseverino.com/portfolio/building-a-custom-mcp-layer/)
+citeturn0view1 [wordlim: 200] Crawled: last month; Content type: text/html; Source: open({"ref_id":"https://jseverino.com/portfolio/building-a-custom-mcp-layer/","lineno":null}); Total lines: 152
+L0:   * cite0†About L1:   * cite1†Portfolio L2:   * cite2†Resume L3:   * cite3†Contact L4: 
+L5:   * cite0†About L6:   * cite1†Portfolio L7:   * cite2†Resume L8:   * cite3†Contact L9: 
+L10: Cybersecurity • Networking • AI
+L11: 
+L12: # Building a Custom MCP Layer for My Technical Vault and Workflow
+L13: 
+L14: May 29, 2026
+L15: 
+L16: cite4†Image: Claude Code routing two operational questions through the severino-vault-mcp server, pulling the Generate Homelab Certificate and Publish a Writeup runbooks back instead of a generic tutorial. L17: ## Overview
+L18: 
+L19: I keep a personal Obsidian vault that documents my homelab, VPS, and the tools I’ve built around them. About eighty markdown files live in there now, covering runbooks, infrastructure notes, project indexes, and reference material. Every doc has a small metadata block at the top that tags it with an ID, a type, and a sensitivity label. That structure is what makes the vault legible to everything else in my workflow.
+L20: cite5†severino-vault-mcp†github.com is a small Python server I built so any AI assistant on my Mac can use that documentation directly. It runs locally, lets the assistant search and read the vault, and refuses to release anything tagged restricted unless I explicitly unlock it. Two other pieces sit alongside it: Severino HQ, a private Django app that turns the same vault metadata into a portfolio and operations dashboard, and a small CLI toolchain that wraps the repeatable commands the runbooks describe.
+L21: This writeup walks through the documentation conventions, the MCP itself, how the sensitivity gate works, and how the pieces fit together.
+L22: ## The System At A Glance
+L23: 
+L24:     `Obsidian Vault
+L25:       ├─ 01 Projects/
+L26:       ├─ 02 Infrastructure/
+L27:       ├─ 03 Runbooks/
+L28:       └─ 04 Reference/
+L29:             │
+L30:             ├── MCP Server → AI assistants / local models
+L31:             │       └── sensitivity gate before model context
+L32:             │
+L33:             ├── Severino HQ → project/content/asset dashboard
+L34:             │
+L35:             └── CLI Tools → repeatable local operations
+L36:     `
+L37: One vault. Three consumers. Each one reads the same frontmatter for a different purpose.
+L38: ## Why MCP
+L39: 
+L40: Model Context Protocol is Anthropic’s open standard for letting an AI host talk to a local tool over stdio. The host (Claude Code, Codex, Cline, a local model client) spawns the MCP server as a child process and shuts it down when the session ends. Since the server is spawned locally over stdio, there is no network listener or remote authentication surface to manage.
+L41: That fit what I wanted. The vault sits on my laptop. The assistant should read it when I’m talking to it and stop reading it the moment I’m not.
+L42: ## The Vault Comes First
+L43: 
+L44: The MCP only works because the vault is structured. Every doc under `01 Projects/`, `02 Infrastructure/`, and `03 Runbooks/` has a YAML frontmatter block with a stable `doc_id`, a `doc_type`, a `system`, an `environment`, a `status`, a `sensitivity`, and a `last_reviewed` date. Obsidian reads it, Severino HQ reads it, and the MCP reads it. One source, three consumers.
+L45: cite6†Image An infrastructure note for Caddy. The properties at the top are the schema the rest of the system hangs off of. If a doc doesn’t have frontmatter, it doesn’t exist as far as the MCP or HQ are concerned.
+L46: 
+L47: New docs always start from a template so the block never gets skipped:
+L48: 
+L49: cite7†Image The runbook template in `00 Templates/`. Pre-filled frontmatter, goal, prerequisites, steps, expected results, verify, rollback, common mistakes.
+L50: `00 Inbox/` is the loose end of the vault. Ideas land there fast, without frontmatter, and graduate into projects or runbooks later:
+L51: 
+L52: cite8†Image A captured note about adding a phptest cross-language pre-deploy gate. Frontmatter gets added when it becomes a real runbook.
+L53: 
+L54: `01 Projects/` holds one folder per active project with an `index.md` linked back to the GitHub repo it represents:
+L55: cite9†Image The project index for the Severino Labs Security Layer plugin. The `project_path` field points at the real repo on disk.
+L56: 
+L57: `03 Runbooks/` is the operational layer. Short, command-first docs that the MCP surfaces first when I ask “how do I”:
+L58: 
+L59: cite10†Image The Manage Homelab VM runbook. When the assistant calls `find_runbook("restart homelab VM")`, this is what comes back.
+L60: 
+L61: `04 Reference/` is for primers and meta material. Lighter frontmatter, still discoverable through `search_body`:
+L62: cite11†Image A GitHub Actions primer in `04 Reference/`.
+L63: ## The MCP
+L64: 
+L65: The MCP is a small Python package. It’s installed with `uv tool install` and registered with each AI host that needs it. When the host launches, it spawns a `severino-vault-mcp` subprocess and talks to it over stdio.
+L66: Property  | Value
+L67: --- | ---
+L68: Host  | Local Mac only
+L69: Install path  | `~/Documents/Code/Assets/severino-vault-mcp/`
+L70: Binary  | `~/.local/bin/severino-vault-mcp`
+L71: Transport  | stdio
+L72: Repo  | cite5†`joeseverino/severino-vault-mcp`†github.com (MIT)
+L73: Stack  | Python 3.11+, `mcp>=1.27`, hand-rolled YAML frontmatter parser
+L74: 
+L75: The tool surface is small. Each tool answers a specific shape of question and the assistant chains them when it needs to.
+L76: Tool  | Mode  | Answers
+L77: --- | --- | ---
+L78: `find_runbook(query)`  | read  | “How do I add an NPM proxy host?”
+L79: `lookup_system(name)`  | read  | “Tell me everything about AdGuard Home”
+L80: `read_doc(doc_id)`  | read  | Returns the body under the sensitivity gate
+L81: `search_body(query)`  | read  | rg-backed full-text search
+L82: `inventory_for_project(slug)`  | read  | “What docs are tied to homelab-dns?”
+L83: `recent_changes(days)`  | read  | Vault git log within indexed folders
+L84: `add_frontmatter(...)`  | write  | Adds validated frontmatter to an untagged doc
+L85: `update_frontmatter(...)`  | write  | Mutates fields on a tagged doc (`doc_id` is immutable)
+L86: Two MCP resources sit alongside the tools, `vault://quick-index` for navigation and `vault://doc/{doc_id}` for stable reads, so a host can pin a specific runbook into context without a search round-trip.
+L87: ## The Sensitivity Gate
+L88: 
+L89: Sensitivity is an enum the MCP enforces in code on every read.
+L90: Sensitivity  | What the LLM gets
+L91: --- | ---
+L92: `public`  | Full body
+L93: `internal`  | Full body. Most operational runbooks.
+L94: `sensitive`  | Full body with an advisory in the response. DNS configs, firewall rules, TLS workflows.
+L95: `restricted`  | Body withheld by default. Caller has to pass `include_restricted=True`, the local config has to enable the unlock flow, a keychain or hash check has to pass, and the attempt is written to an audit log on disk.
+L96: The runbooks I tag `restricted` are the ones that touch real secrets: the offline CA workflow, credential rotation, the age-based encryption setup. Even if an assistant asks for one of those by exact `doc_id`, the body does not leave my machine without an explicit local unlock I configure first.
+L97: 
+L98: Prompt-level rules are advisory. The sensitivity gate runs in Python before the body ever reaches the response.
+L99: ## Recall in Practice
+L100: 
+L101: The same MCP works across hosts because MCP is the standard, not a Claude-specific thing. Here’s Claude Code in iTerm, answering a homelab cert question through `find_runbook` and `read_doc`:
+L102: 
+L103: cite12†Image The reply is the five-step procedure from `rb-generate-homelab-cert` verbatim: boot the offline VM, run `cert-gen <service>.homelab`, enter the passphrase, retrieve the files, update the cert inventory in Local PKI.
+L104: And here’s a local Qwen2.5-7B model running in LM Studio, talking to the same MCP, answering how to add a DNS rewrite:
+L105: 
+L106: cite13†Image The `find_runbook` and `read_doc` calls show up in the tool panel on the right. The steps in the response come from the AdGuard rewrite runbook in my vault. A small local model with no training data about my stack answers correctly because the knowledge lives in the MCP.
+L107: ## Severino HQ: The Browser View
+L108: 
+L109: The MCP makes the vault legible to an assistant. cite14†Severino HQ†github.com is what makes it legible to me at a browser tab. HQ is a private Django app running in Docker on my homelab server, reachable only over Tailscale through Nginx Proxy Manager. It reads the same vault frontmatter and turns it into structured records.
+L110: cite15†Image The HQ dashboard. Active projects, draft content, published content, asset count, and a “docs to review” counter that nags me when a `last_reviewed` date drifts past 180 days.
+L111: 
+L112: When I publish a writeup, the same `published: true` flag in the writeup’s frontmatter is what HQ uses to flip the `ContentItem.status`.
+L113: cite16†Image The HQ content record for my Zero-Trust Private Infrastructure writeup. Description, tags, related project, published URL, all derived from the writeup frontmatter at sync time.
+L114: 
+L115: The propagation is one command:
+L116: 
+L117:     `hq sync
+L118:     `
+L119: 
+L120: `hq sync` walks the vault on the Mac, builds a manifest of every doc with frontmatter, and pipes it into `manage.py import_docs_manifest -` running inside the HQ container over SSH. `doc_id` is the upsert key, so re-running is idempotent.
+L121: The split between the MCP and HQ is deliberate. The MCP is for an assistant in a conversation. HQ is for me reviewing the portfolio, tracking expenses, or scanning what’s stale. Both read the vault. Neither owns it.
+L122: ## The Toolchain
+L123: 
+L124: The CLI toolchain at `~/Documents/Code/Assets/tools/` is symlinked into `~/.local/bin/`. These are the commands the runbooks tell me to run.
+L125: Tool  | Purpose
+L126: --- | ---
+L127: `vault`  | Git sync/status around the vault
+L128: `inbox`  | Fast capture into `00 Inbox/`
+L129: `hq`  | Sync, deploy, logs, restart, create records
+L130: `site`  | Sync/build/publish the public Astro site
+L131: `cert-gen`  | Sign a new homelab cert via the offline CA VM
+L132: `encrypt` / `decrypt` / `open-age`  | Age-based file encryption workflows
+L133: `backup`  | Mirror configured files into the backup area
+L134: `dns-test`  | DNS resolver checks
+L135: The rule I follow: if a procedure takes more than one shell command, it should be a tool. The runbook then says “run `cert-gen <host>`” and that’s the whole answer, which is exactly what the MCP quotes back.
+L136: ## What’s Next
+L137: 
+L138: A few improvements are still on the list:
+L139: 
+L140:   * More resource templates for hosts that prefer pinning specific docs over searching.
+L141:   * Streaming responses for long bodies so a 5000-word writeup doesn’t eat the assistant’s context budget when it only needs a section.
+L142:   * Wider local-model coverage in the test suite. Right now I run regression tests against Claude and Qwen, and I’d like to add at least two more local model classes, which may require a new Mac since I only have 8GB of RAM.
+L143: ### Technologies Used
+L144: 
+L145: cite17†Claude Code cite18†Django cite19†Docker cite20†LM Studio cite21†Model Context Protocol cite22†Obsidian cite23†Python cite24†Tailscale cite25†YAML L146: 
+L147: * * *
+L148: 
+L149: [Button: ×]
+L150: 
+L151: cite26†</> View Source†github.com --------------------------------------------------------------------------------
+Request for Documentation: Bugbot repository isolation boundaries for GitLab - Help - Cursor - Community Forum (https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666)
+citeturn0view2 [wordlim: 200] Crawled: 3 days ago; Content type: text/html; Source: open({"ref_id":"https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666","lineno":null}); Total lines: 70
+L0: cite0†Cursor - Community Forum L1: # cite1†Request for Documentation: Bugbot repository isolation boundaries for GitLab L2: 
+L3: cite2†Support cite3†Help L4: 
+L5: cite4†security , cite5†privacy-mode , cite6†gitlab , cite7†bugbot L6: 
+L7: cite8†Philipp_Nolte (Philipp Nolte) July 14, 2026, 6:40am 1
+L8: 
+L9: Hi Cursor team,
+L10: 
+L11: we are evaluating Bugbot for GitLab and need documentation of its repository-isolation boundaries for our compliance assessment.
+L12: We are still building our understanding of how Bugbot handles repository context. A simple high-level explanation of the processing and isolation model would already be very helpful, even if some implementation details cannot be shared publicly.
+L13: From our review of the current public documentation, we understand that Bugbot is enabled per repository, retrieves additional context dynamically, and persists data such as findings, learned rules, analytics, and patch IDs. Team Rules can also apply across all repositories in a team. However, we could not find documentation of the technical isolation boundaries, data provenance, or possible reuse of this persisted and derived context across repositories.
+L14: Our compliance requirements allow only specific repository combinations. As an abstract example, assume three repositories, A, B, and C:
+L15: 
+L16: - A and B may be processed together.
+L17: 
+L18: - B and C may be processed together.
+L19: 
+L20: - A and C must never be processed together.
+L21: 
+L22: - A, B, and C must never be processed together in a single context.
+L23: 
+L24: - Repository B must not act as an indirect bridge through which information flows between A and C.
+L25: This restriction applies to model requests, indexes, caches, learned rules, tool results, agent sessions, and any other persisted or derived context.
+L26: 
+L27: Assume Bugbot is enabled individually for all three repositories in the same GitLab group and Cursor organization. We would not configure MCP tools, automatic fixes, or Cloud Agents.
+L28: 
+L29: Could Cursor document:
+L30: 1. When reviewing a merge request, can Bugbot’s built-in tools access only the current repository, or also other repositories connected to the same Cursor organization or GitLab installation?
+L31: 
+L32: 2. Does Bugbot create or reuse persistent code-derived data such as embeddings, indexes, summaries, file caches, tool results, learned rules, or previous review context?
+L33: 
+L34: 3. What is the isolation boundary for this data: repository, GitLab project, GitLab installation, Cursor team, or Cursor organization?
+L35: 4. Can information derived from one repository be used in a later review of another repository, either directly or through team rules, learned rules, caches, analytics, or agent memory?
+L36: 
+L37: 5. Does enabling Bugbot separately per repository guarantee isolated processing contexts?
+L38: 
+L39: 6. Can Cursor enforce the non-transitive policy described above? If not, what isolation model is required, for example separate Cursor organizations, GitLab applications, or service accounts?
+L40: 7. Is data provenance tracked for persisted or derived content so that information-flow restrictions can be enforced?
+L41: 
+L42: 8. Does Privacy Mode provide any repository-level isolation guarantee, or does it only govern training and retention?
+L43: 9. What retention and deletion periods apply to each category of data Bugbot persists, for example MR diffs, prompts, tool results, findings, learned rules, analytics, patch IDs, logs, caches, and backups? Do different periods apply during normal operation, after disabling Bugbot for a repository, and after disconnecting the GitLab integration? How can a complete deletion per repository be triggered and verified?
+L44: We would appreciate documentation explaining not only what can be configured in the UI, but also how repository data is technically separated during processing and storage. This would help us assess Bugbot accurately and identify a compliant setup without making assumptions about its internal architecture.
+L45: 
+L46: Thank you very much for your help!
+L47: 
+L48: cite9†mohitjain (Mohit) July 14, 2026, 8:52am 6
+L49: Hi Philipp,
+L50: This is the kind of question our security team should handle directly, rather than a public forum thread. A compliance assessment of repository isolation, data provenance, and retention/deletion deserves a precise, documented answer we can stand behind, and it’s not something we’d want to characterize informally in a public post.
+L51: Could you email cite10†[email protected] with these questions? That gets it to the people who can give you a formal, written response and share the relevant security documentation. You can also request our security materials directly through the cite11†Trust Center†trust.cursor.com (“Request access” in the top right).
+L52: 
+L53: Once you’ve sent that over, feel free to reply here and I’ll help make sure it lands with the right team.
+L54: 
+L55: cite8†Philipp_Nolte (Philipp Nolte) July 15, 2026, 6:42am 7
+L56: 
+L57: Hi Mohit,
+L58: thank you very much for your guidance and support. I’ve sent the questions to cite12†[email protected] and have also requested access to the security materials through the Trust Center.
+L59: 
+L60: Best regards,
+L61: Philipp
+L62: 
+L63:   * cite0†Home L64:   * cite13†Categories L65:   * cite14†Guidelines L66:   * cite15†Terms of Service L67:   * cite16†Privacy Policy L68: 
+L69: Powered by cite17†Discourse†www.discourse.org , best viewed with JavaScript enabled
+--------------------------------------------------------------------------------
+Claude as Second Contributor: Git Stats - Florian Bruniaux (https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/)
+citeturn0view3 [wordlim: 200] Crawled: 4 weeks ago; Content type: text/html; Source: open({"ref_id":"https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/","lineno":null}); Total lines: 221
+L0: cite0†Skip to main content L1: 
+L2: cite1†FB. cite1†Home cite2†Projects cite3†Blog cite4†Guides cite5†Media cite6†Background / CV cite7†About cite8†Contact L3: 
+L4: cite1†Home cite2†Projects cite3†Blog cite4†Guides cite5†Media cite6†Background / CV cite7†About cite8†Contact L5: 
+L6:   * cite1†Home L7:   * cite2†Projects L8:   * cite3†Blog L9:   * cite4†Guides L10:   * cite5†Media L11:   * cite6†Background / CV L12:   * cite7†About L13:   * cite8†Contact L14: 
+
+
+Applying shared coding guidelines across multiple repos with Bugbot - Discussions - Cursor - Community Forum (https://forum.cursor.com/t/applying-shared-coding-guidelines-across-multiple-repos-with-bugbot/133667)
+citeturn1view0 [wordlim: 200] Crawled: 3 days ago; Content type: text/html; Source: open({"ref_id":"https://forum.cursor.com/t/applying-shared-coding-guidelines-across-multiple-repos-with-bugbot/133667","lineno":null}); Total lines: 70
+L0: cite0†Cursor - Community Forum L1: # cite1†Applying shared coding guidelines across multiple repos with Bugbot L2: 
+L3: cite2†Discussions L4: 
+L5: cite3†bugbot L6: 
+L7: cite4†giorgosera September 16, 2025, 4:46pm 1
+L8: 
+L9: Has anyone found a way to make Bugbot use context from one repository in another?
+L10: My use case is that I keep documentation and coding guidelines in a dedicated “docs” repo, and I’d like Bugbot to automatically apply those guidelines when reviewing PRs in a different code repo. From the docs it looks like Bugbot’s context is scoped per-repository only — but I’m wondering if anyone has a workaround (e.g. linking repos, symlinks, shared .cursor/BUGBOT.md references, or org-level config).
+L11: Is cross-repo context possible today, or is the only option to duplicate the guidelines into each repo?
+L12: 
+L13: cite5†jkaplan (Jon Kaplan) September 16, 2025, 5:02pm 3
+L14: 
+L15: Currently the best way is to duplicate BUGBOT.md into each repo! This is on our mind though
+L16: 
+L17: cite4†giorgosera September 16, 2025, 5:07pm 5
+L18: 
+L19: Thanks for the answer. But what if I reference specific file paths in the bugbot.md?
+L20: 
+L21: My actual guidelines exist in .md files which I reference in my BUGBOT.md.
+L22: cite5†jkaplan (Jon Kaplan) September 16, 2025, 5:41pm 7
+L23: 
+L24: Currently that won’t work for BUGBOT.md at all. The model will read what’s in that file but won’t jump to other files to read what’s in there!
+L25: 
+L26: cite4†giorgosera September 16, 2025, 6:53pm 9
+L27: 
+L28: I see. That’s surprising. I thought I saw somewhere in the docs that you could reference files but I might misremember!
+L29: 
+L30: So my BUBGOT.md never really worked cite6†Image: :person_facepalming:†emoji.discourse-cdn.com cite7†Image: :grinning_face:†emoji.discourse-cdn.com L31: cite5†jkaplan (Jon Kaplan) September 16, 2025, 6:54pm 11
+L32: 
+L33: Haha I guess not, but is it a good sign that you didn’t even notice? Bugbot seems to naturally be working well!
+L34: 
+L35: cite4†giorgosera September 16, 2025, 7:13pm 13
+L36: 
+L37: It does but in this case I was struggling to understand if my bugbot.md was working. I was not really happy with its performance and now I know why.
+L38: 
+L39: In any case thanks for letting me know.
+L40: 
+L41: cite8†Luisa (Luisa) November 11, 2025, 9:55pm 15
+L42: cite4†@giorgosera I found that team rules worked really well for all our repos! How many rules do you have defined?
+L43: 
+L44: You can find them in cursor dashboard → bugbot → team rules. Here is a sample of some I defined.
+L45: 
+L46: cite9†image2188×574 46.8 KB†us1.discourse-cdn.com L47: 
+L48: cite5†jkaplan (Jon Kaplan) November 11, 2025, 10:37pm 17
+L49: 
+L50: cite4†@giorgosera you should be able to reference other files now cite10†Image: :slight_smile:†emoji.discourse-cdn.com we implemented this functionality a while ago!
+L51: cite11†glf January 28, 2026, 4:49pm 19
+L52: 
+L53: hey cite5†@jkaplan ! can you clarify what is the best way/syntax to reference other files inside `BUGBOT.md`? we have our own documentation inside our repo and would love to reference them instead of duplicating their content in `BUGBOT.md`.
+L54: 
+L55: cite5†jkaplan (Jon Kaplan) January 28, 2026, 11:36pm 20
+L56: 
+L57: Relative markdown links are explicitly fed to the model, like this “Follow the rules laid out in (my coding standards)[./.cursor/rules/codingstandards.mdc]”
+L58: Anything else may work but it’s up to the agent
+L59: 
+L60: cite11†glf January 29, 2026, 7:27am 21
+L61: 
+L62: thanks, this helps a ton! and just to clarify, when you say `relative`, it is not relative to the path of the `BUGBOT.md` file, right? so we start from the root as you wrote, for instance `[our api pattern](./docs/patterns/api.md)` (where `.docs` is at the root).
+L63: 
+L64:   * cite0†Home L65:   * cite12†Categories L66:   * cite13†Guidelines L67:   * cite14†Terms of Service L68:   * cite15†Privacy Policy L69: Powered by cite16†Discourse†www.discourse.org , best viewed with JavaScript enabled
+--------------------------------------------------------------------------------
+AGENTS.md: two stale file references, two internal restatements, and two doc-vs-enforcement mismatches · Issue #37955 · openai/codex · GitHub (https://github.com/openai/codex/issues/37955)
+citeturn1view1 [wordlim: 200] Crawled: last week; Content type: text/html; Source: open({"ref_id":"https://github.com/openai/codex/issues/37955","lineno":null}); Total lines: 211
+L0: cite0†Skip to content L1: ## Navigation Menu
+L2: 
+L3: cite1†Sign in L4: 
+L5: Appearance settings
+L6: 
+L7:   * Platform
+L8: 
+L9:     * AI CODE CREATION
+L10:       * cite2†GitHub CopilotWrite better code with AI L11:       * cite3†GitHub Copilot appDirect agents from issue to merge L12:       * cite4†MCP RegistryIntegrate external tools L13: 
+L14:     * DEVELOPER WORKFLOWS
+L15:       * cite5†ActionsAutomate any workflow L16:       * cite6†CodespacesInstant dev environments L17:       * cite7†IssuesPlan and track work L18:       * cite8†Code ReviewManage code changes L19:       * cite9†Code QualityEnforce quality at merge L20:     * APPLICATION SECURITY
+L21:       * cite10†GitHub Advanced SecurityFind and fix vulnerabilities L22:       * cite11†Code securitySecure your code as you build --------------------------------------------------------------------------------
+Claude as Second Contributor: Git Stats - Florian Bruniaux (https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/)
+citeturn1view2 [wordlim: 200] Crawled: 4 weeks ago; Content type: text/html; Source: open({"ref_id":"https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/","lineno":120}); Total lines: 221
+L0: cite0†Skip to main content L1: 
+L2: cite1†FB. cite1†Home cite2†Projects cite3†Blog cite4†Guides cite5†Media cite6†Background / CV cite7†About cite8†Contact L3: 
+L4: cite1†Home cite2†Projects cite3†Blog cite4†Guides cite5†Media cite6†Background / CV cite7†About cite8†Contact L5: 
+L6:   * cite1†Home L7:   * cite2†Projects L8:   * cite3†Blog L9:   * cite4†Guides L10:   * cite5†Media L11:   * cite6†Background / CV L12:   * cite7†About L13:   * cite8†Contact L14: 
+L15: cite3†← Back to blog L16: 
+L17: technique ai claude-code open-source workflow engineering git ai-coding solo-builder 🇬🇧 EN
+L18: # Claude is my second contributor: what real Git stats show
+L19: 
+L20: 6 contributors in our git history. One is an AI. What the commit patterns actually look like after months of Claude Code, beyond the marketing claims.
+L21: 
+L22: May 12, 2026 • 25 min read
+L23: 
+L24: cite9†Image: Florian Bruniaux L25: 
+L26: Written by cite7†Florian Bruniaux L27: 
+L28: AI Founding Engineer at cite10†Méthode Aristote†methode-aristote.fr , 13 years scaling engineering teams from developer to CTO. Builds open-source developer tools, see cite2†what else I've shipped .
+L29: ## TL;DR
+L30: What  | Details
+L31: --- | ---
+L32: The numbers (May 2026)  | 905 PRs merged. 74 releases. 9 months since v1.0.0.
+L33: Claude’s share  | 70% of PRs carry a Claude attribution in the body. Second contributor by any measure.
+L34: What Claude does  | Scaffolding, refactoring, test generation, documentation, repetitive patterns. The AI config system itself.
+L35: What humans still do  | Architecture decisions, complex debugging, product judgment, security review. Infrastructure trade-offs.
+L36: How it changed  | From one handwritten CLAUDE.md to 77 AI instruction files, 13 CI workflows, 3 dedicated to AI governance.
+L37: Open source output  | Claude Code Ultimate Guide (430K+ lines), CC Bridge, CCBoard, RTK contributions.
+L38: The honest assessment  | Claude is not a developer. Claude is the most productive tool I’ve ever used. The distinction still matters.
+L39: Started as a February 2026 snapshot. Updated to May 2026 with current data.
+L40: 
+L41: Our git history shows 6 contributors to the Méthode Aristote repository. One of them is an AI.
+L42: 
+L43: 70% of merged PRs carry a Claude attribution in the body. 905 pull requests total, 894 since the project started in August 2025. By that metric, Claude is the most consistently present contributor to this codebase.
+L44: 
+L45: * * *
+L46: ## What the commit stats measure
+L47: 
+L48: cite11†Image: Commit velocity chart: 57 commits in August 2025, 171 in September, 289 in November, x5 acceleration after the Claude Code deep dive in mid-August The inflection point. Mid-August 2025: Claude Code deep dive, nightly tooling sessions, configs rebuilt from scratch. The x5 in commit velocity wasn’t about working more hours.
+L49: The 70% figure counts PRs where the pull request body contains a Co-Authored-By Claude trailer, a “Generated with Claude Code” reference, or an explicit Claude attribution. It’s not a perfect count: attribution wasn’t standardized from day one, and early PRs (pre-October 2025) don’t carry consistent trailers, but it’s verifiable from the GitHub API, which makes it more reliable than trying to attribute commits after the fact.
+L50: 
+L51: What the 70% includes:
+L52:   * New service and repository files following the 3-tier pattern (same structure, different domain logic)
+L53:   * Unit test generation for established patterns
+L54:   * Refactoring passes across many files simultaneously
+L55:   * Documentation generation and maintenance
+L56:   * The AI instruction system itself: 77 files describing how to work with Claude on this project
+L57: What it doesn’t capture: the decisions about what to build, the architecture choices, the debugging sessions where the behavior was wrong in a way Claude couldn’t see, and significant chunks of code that humans wrote independently without attribution.
+L58: PR count is a cleaner signal than commit count for this kind of analysis. One Claude session might produce 3 files and show up as one commit. PRs represent units that were shipped, reviewed, validated, and merged. 70% of those units carried Claude participation.
+L59: cite12†Image: Slide from a February 2026 presentation: Claude is the 2nd GitHub contributor with 479 commits and 36% of the codebase From a February 2026 team presentation. The slide showed commit-level attribution, which was harder to measure consistently. PR-level attribution (70%) is the number that holds up to scrutiny.
+L60: 
+L61: * * *
+L62: ## What Claude does
+L63: 
+L64: Scaffolding new patterns
+L65: 
+L66: The 3-tier architecture at Méthode Aristote (Router = validation, Service = business logic + permissions, Repository = CRUD only) is consistent across 70+ services. When I need a new service, the entire chain is replicable: tRPC router with Zod validation, service layer with typed inputs and permission checks, repository with Prisma queries.
+L67: Claude knows this pattern because it’s in the codebase and in the CLAUDE.md context. Creating the fifteenth service with this pattern is work Claude does well and fast. Creating the first one required the architectural decision that Claude wasn’t part of.
+L68: 
+L69: Test generation
+L70: In January 2026: services (45 tests), repositories (174 tests), adapters (64 tests), all in focused sessions over a few weeks. Writing unit tests for established patterns is exactly the kind of repetitive, well-defined work where AI output is reliable and fast. By May 2026, the repo has 864 test files across all layers.
+L71: The tests needed review. Some edge cases were missed. Some assertions were semantically correct but didn’t test the right thing. Human review caught those. The baseline generation was Claude’s.
+L72: 
+L73: Refactoring at scale
+L74: Code duplication from 55% to 8%. That’s a lot of files to touch, a lot of patterns to identify and consolidate. Claude handles the mechanical application of a refactoring pattern across many files faster than any human workflow I’ve found. The identification of what to refactor (which patterns were worth consolidating, which apparent duplication was intentional) was human judgment.
+L75: cite13†Image: Technical debt cleared: 283 tests added, 70+ SonarCloud issues resolved to 0, code duplication from 55% to 8% The numbers from one refactoring cycle in January 2026. The 283 tests and 70+ issue reduction are Claude-assisted output. The decision to run the SonarCloud audit and act on it was human judgment.
+L76: 
+L77: Documentation
+L78: The Claude Code Ultimate Guide: 430,000+ lines across 1,000+ files. Maintained with AI assistance because maintaining it manually at that volume would be impossible. Structure, editorial decisions, examples from actual production experience: all mine. Claude generates from notes and rough drafts.
+L79: 
+L80: The AI instruction system itself
+L81: The 77-file system in `doc/guides/ai-instructions/` (rules, modules, developer profiles, skill indexes) is largely Claude-generated from design sessions. It describes how to work with Claude on this project. It grew from a single CLAUDE.md file to a structured documentation layer with its own tests and CI validation. More on that below.
+L82: 
+L83: * * *
+L84: ## What humans still do
+L85: 
+L86: Architecture decisions
+L87: 
+L88: The 3-tier architecture exists because I decided it should. I chose Neon PostgreSQL over Supabase, tRPC over REST, and Clerk for authentication. Claude did not make those trade-offs.
+L89: When the initial polling approach was generating 17,000 requests per day and saturating the Neon connection pool at 905 connections, the diagnosis came from reading logs, correlating Sentry events, and understanding the connection lifecycle. Claude helped implement the SSE migration once the hypothesis was formed. The hypothesis took human work to form.
+L90: Then, several months later, when SSE had its own limitations (rate limits, auth complexity, long-lived connection management), the decision to move to Pusher was another architecture call. Not obvious. There’s a real cost to adopting a managed real-time service: vendor dependency, pricing model, integration surface. We moved anyway. Claude implemented the migration across the codebase once the decision was made.
+L91: cite14†Image: SSE migration results: 17,000 to 500 requests/day, 16,000 to under 10 daily 404 errors, 905 to under 200 Neon connections The polling-to-SSE results. A few months later, SSE itself got replaced by Pusher. Each migration was a separate architecture decision that Claude implemented but didn’t drive.
+L92: 
+L93: Complex debugging
+L94: The 20,000 orphan streams cleaned up in December 2025 didn’t announce themselves. Debugging why streams were orphaned required reading logs, correlating Sentry events, understanding the connection lifecycle. Claude was useful once the hypothesis was formed. Forming the hypothesis was the hard part.
+L95: 
+L96: Security review
+L97: The IDOR fix (ANY → TEAM/ASSIGNED permissions) that resolved 8,600+ Sentry events. The CVE-2025-55182 patch. The pre-push security hooks that run on every commit. These required understanding attack surfaces, thinking adversarially, knowing what the permission model was supposed to enforce. Claude operates within the security model. Building and reviewing it is human work.
+L98: 
+L99: Product judgment
+L100: What to build next, what user feedback means architecturally, when a feature request is actually a UX symptom with a different fix, when to ship and when to hold.
+L101: 
+L102: Claude can implement any feature I describe, but that’s not the same as knowing which one matters.
+L103: 
+L104: * * *
+L105: ## The infrastructure kept evolving
+L106: 
+L107: Between February and May 2026, two things happened that aren’t visible in the commit count.
+L108: 
+L109: The real-time stack changed again
+L110: 
+L111: The February 2026 story ended with the SSE migration: polling (17,000 req/day) → SSE (under 500). That was the winning state in February. By March, SSE was replaced by Pusher. The migration was complete by mid-April, the dead code removed immediately after.
+L112: The Pusher decision involved real trade-offs: switching from a self-hosted SSE implementation to a managed third-party service means a recurring cost, a new integration surface, and a dependency on an external vendor. These are architecture calls I made. Claude implemented channel auth, subscription management, and error handling across the full stack once the approach was set. Pusher was introduced in v1.7.1 on March 10, the migration was complete by April 17, 38 days from decision to dead code removed.
+L113: Every infrastructure change followed the same division of work. I made the adoption decision and its rationale explicit, then Claude applied it across the codebase.
+L114: 
+L115: The CI grew AI-specific gates
+L116: 
+L117: In August 2025, there was one workflow: a handwritten `claude.yml` copied from the GitHub marketplace. In May 2026, there are 13 workflows totaling ~2,700 lines of YAML. Three of them are specifically about AI governance:
+L118:   * `claude-code-review.yml` (87 lines): runs a Claude Code review on every pull request automatically
+L119:   * `ai-config-check.yml` (83 lines): validates that the AI instruction system hasn’t drifted from the actual codebase
+L120:   * `claude.yml` (50 lines): the original Claude Code general workflow
+L121: The `ai-config-check.yml` workflow runs a tool called `ctxtest` (13 facts about the codebase that should be verifiably true) (Next.js version, database patterns, team conventions). If the AI context description and the actual codebase diverge, CI fails. It’s a test suite for the instructions we give to Claude, not for application code. CI was already enforcing code quality; it now also enforces AI context quality.
+L122: 
+L123: * * *
+L124: ## The AI config became infrastructure
+L125: 
+L126: In February 2026, the CLAUDE.md approach was: one big file, maintained manually, updated when things broke. By May 2026, it’s a different system.
+L127: `doc/guides/ai-instructions/` contains 77 files. Rules organized by domain (architecture, code conventions, git workflow, security, React patterns, TypeScript, TDD). Modules with reference material for specific contexts (Knock notifications, Storybook conventions, business domain). Five developer profiles, one per human on the team, that configure which rules apply to which person and which files they’re allowed to modify.
+L128: The total is ~5,900 lines of AI instruction documentation, maintained as a structured system with its own validation. When a developer profile says Augustin owns the tutoring flow, the pre-commit hook enforces that Claude can’t modify those files for another developer’s session without flagging it. In April 2026, the AI context quality score reached A+ (150/150 on the internal eval).
+L129: That’s a number generated by `pnpm ai:validate`, which checks completeness, accuracy, and freshness of the AI instruction system against the actual codebase.
+L130: Humans write the rules, Claude operates within them, CI enforces that they stay accurate, and `pnpm ai:sync` keeps the system documented. Maintenance now means passing the CI gate instead of manually updating CLAUDE.md only when something breaks.
+L131: 
+L132: * * *
+L133: ## The open source output
+L134: 
+L135: Beyond Méthode Aristote, I shipped 9 separate projects during the same period. Not sequentially: in parallel, while the main platform was running. The pattern is the same across all of them.
+L136: 
+L137: The AI tooling layer
+L138: cite15†Claude Code Ultimate Guide†cc.bruniaux.com (cite16†GitHub†github.com ) (22K lines, 204 templates, 271 quiz questions, a security threat database tracking 15 CVEs and 655 malicious skills): the field moves fast enough that maintaining this manually would be a full-time job. Claude generates from notes and rough drafts. Structure, editorial decisions, examples from production: mine.
+L139: cite17†ctxharness†github.com came directly out of the Méthode Aristote `ctxtest` workflow. Your `CLAUDE.md` says Prisma 7.5. Your `package.json` has `^7.7.0`. Your agent is reasoning against stale facts on every session, silently. ctxharness catches it: 20 extractors, 15 scanners, 3 layers of context engineering testing. Built because I had the problem first.
+L140: cite18†CCBoard†ccboard.bruniaux.com (cite19†GitHub†github.com ) is a real-time TUI and web dashboard for monitoring Claude Code sessions. Token consumption, response times, session history, hook execution, MCP server health. Built in Rust. The monitoring infrastructure I wanted but didn’t have.
+L141: 
+L142: cite20†cc-sessions†github.com is a fast Rust CLI to search, browse, and analyze Claude Code session history. I wouldn’t have touched a Rust project without the Claude Code workflow making it viable.
+L143: cite21†cc-copilot-bridge†ccbridge.bruniaux.com (cite22†GitHub†github.com ) solves a specific problem: ran out of Claude credits, had Copilot credits unused. The bridge lets you route Claude Code through your Copilot subscription. Architecture decision and problem identification: mine. Implementation: Claude.
+L144: cite23†Claude Cowork Guide†cowork.bruniaux.com (cite24†GitHub†github.com ) covers the non-coder side, 28 business workflows and 70 copy-paste prompts for Claude Desktop users. HR, finance, marketing, sales. Complementary to the developer guide, different audience entirely.
+L145: 
+L146: The developer tools
+L147: cite25†dep-scope†github.com answers a question Knip and Depcheck leave open: which symbols use a package, how often, across how many files, and whether a native alternative would let you delete it entirely. It has 195 native alternative mappings, 371 tests, and LLM migration prompt generation that pipes directly into Claude Code. The problem existed long before I had the workflow to build the tool.
+L148: cite26†StarMapper†starmapper.bruniaux.com (cite27†GitHub†github.com ) lets you paste a GitHub repo URL and get a world map of every developer who starred it. No login, just a URL and a GitHub token. Built it in a weekend because the data was interesting and the workflow made it fast enough to be worth attempting.
+L149: cite28†RTK†github.com is Patrick’s project. A CLI proxy that reduces token consumption 60-90% on dev commands by filtering noise before it reaches the model. When I saw the approach, I became a contributor. RTK is now in my daily workflow and mentioned elsewhere in this article as Layer 1 of the context engineering stack.
+L150: cite29†Image: 4 open source repos: Claude Code Ultimate Guide, CC Bridge, RTK, CCBoard. Slide from early 2026 showing the first wave of parallel projects. The early 2026 overview covered 4 repos. By May 2026 the count is 9. The pattern held across all of them.
+L151: 
+L152: * * *
+L153: ## Is Claude a developer or a tool?
+L154: 
+L155: The question surfaces regularly. The answer I’ve landed on is that the distinction is less useful than it seems.
+L156: 
+L157: Claude doesn’t have goals or a stake in the product working. Previous approaches that failed only matter if they’re still in the context window. A debugging session going in circles doesn’t frustrate it, because frustration requires caring about the outcome.
+L158: Those are properties of the system. They make Claude extremely useful for well-defined implementation work where the pattern is clear, the scope is bounded, and the output can be reviewed.
+L159: The 70% PR attribution is real. What it means is that a meaningful portion of the implementation work on this codebase was produced by an AI working within specifications and patterns that humans defined. That changes what individual developer productivity looks like. It doesn’t change what judgment, experience, and product sense are worth.
+L160: 
+L161: * * *
+L162: ## The honest accounting
+L163: 
+L164: 9 months of production development, as of May 2026:
+L165:   * 905 PRs merged (894 since August 2025). 408 in the last 3 months, against 497 in the first seven, roughly equivalent output in less than half the time. April 2026 was the single most active month at 178 PRs. The velocity is increasing, not plateauing.
+L166:   * 74 releases, v1.0.0 on August 27, 2025 to v1.15.3 on May 11, 2026
+L167:   * 6 human contributors by commit count: Florian (1,338), Nicolas (455, ×6.7 since February), Augustin (237), plus Jacques, Mathis, Victor
+L168:   * 1 AI contributor: 70% PR attribution (634 of 905), no separate commit authorship, present in the majority of shipped work
+L169:   * 13 CI workflows (~2,700 lines of YAML), 3 dedicated to AI governance
+L170: cite30†Image: 7-month summary slide: 7 months, 1200 commits, 600 PRs, 50 releases, 5 contributors, 150 students, 10 days non-tech to prod, 4 open source repos, -97% SSE traffic The February 2026 summary slide. By May 2026: 905 PRs, 74 releases, 6 human contributors, 3 further infrastructure migrations.
+L171: The stable division of work is clear. Claude handles implementation that fits a defined scope. Humans handle what to build next and how to resolve a system-level conflict.
+L172: The scope of “defined” changed. The 3-tier pattern was defined early and Claude scaffolds it reliably. The AI instruction system grew from one file to 77, and Claude now generates and maintains it from design sessions. AI reviews each PR, while the AI context has a CI gate that fails if it drifts from reality. The infrastructure for working with Claude has become as substantial as the application infrastructure.
+L173: The GitHub stats say 7 contributors. The practical breakdown is 1 architect, 1 AI implementation layer, 5 humans with different domains of ownership, and 1 automated dependency tool. The AI is in the second slot. What that slot actually contains is implementation throughput at a scale that changes what’s possible for the humans who set the direction. What changed is where my attention goes: less time generating boilerplate, more time on the problems where experience and judgment actually matter.
+L174: 
+L175: * * *
+L176: Stats from the Méthode Aristote repository as of May 12, 2026. PR attribution measured via GitHub API (Co-Authored-By and Claude Code body mentions). Open source projects available at cite31†github.com/FlorianBruniaux†github.com . For the mechanics behind Claude Code and the configuration system, cite32†Claude Code Under the Hood covers the architecture.
+L177: 
+L178: * * *
+L179: ## YSNK
+L180: 
+L181: (You should now know)
+L182:   * `ai-config-check.yml` runs `ctxtest`, 13 verifiable facts about the codebase, and fails CI if the AI instructions drift from what’s actually true. A test suite for the context you feed Claude, not for the app
+L183:   * Developer profiles gate who Claude can touch: if a teammate owns a specific flow, a pre-commit hook flags Claude editing those files under someone else’s session
+L184:   * The Pusher migration took 38 days from decision to dead code removed, a second real-time rewrite after SSE. The same split held both times: human call, Claude execution
+L185:   * ctxharness and dep-scope both exist because the pain showed up on this exact codebase first: stale CLAUDE.md facts, undetected dead dependencies
+L186:   * AI context quality hit A+ (150/150) in April 2026 via `pnpm ai:validate`, a number that only exists because the instructions are tested like code now
+L187: ## Go further
+L188: 
+L189: If this topic interests you and you want to move from understanding to practice, I created two free guides for different profiles.
+L190: cite15†Do you develop software or lead a technical team? Claude Code Ultimate Guide The guide covers workflows, security, methods, and configuration. Explore the guide →†cc.bruniaux.com cite23†Do you want to use AI without coding? Claude Cowork Guide The guide provides paths and examples for automating office tasks without a terminal. Explore the guide →†cowork.bruniaux.com L191: 
+L192: Download as PDF
+L193: ## Related appearances
+L194: 
+L195: Live appearances and podcast episodes about this article.
+L196: 
+L197:   * cite33†Une équipe produit qui shippe avec l'IA : ce que ça veut dire vraiment · Just a click Apr 2026†justaclick.fr L198:   * cite34†De CTO avec 30 devs à Solo Engineer boosté à l'IA · The Product Crew Mar 2026†www.youtube.com L199:   * cite35†7 mois, 1200 commits, 600 PRs, 50 releases · Dev with AI Feb 2026†www.youtube.com L200: ## Related articles
+L201: cite36†From afterthought to infrastructure: how AI config evolves in a real project 506 commits. 407 files. 8.6% of all repo activity. How AI config evolved from afterthought to infrastructure over 9 months on a real production codebase. cite37†AI velocity is bidirectional Everyone talks about shipping 10x faster with AI. Nobody talks about accumulating debt 10x faster.
+L202: 7 months of production data from a real EdTech platform. cite38†UVAL: the protocol I built to stop accepting code I don't understand Jeremy Twei coined it. Addy Osmani popularized it. Margaret-Anne Storey extended it to teams. Here's what I built to fight all three. L203: ## Go deeper
+L204: 
+L205: Step-by-step guides that put this into practice.
+L206: cite39†Claude Code security: the attack surface nobody audits Hooks are shell scripts with your user permissions. MCP servers are third-party code with access to your credentials. Both run before the model reasons. cite40†Claude Code setup, level by level Three levels of configuration, each with a concrete result.
+L207: From a 10-line CLAUDE.md to an agent that remembers your project across sessions. cite41†Context engineering: the L0-to-L5 playbook A step-by-step playbook to move from a 50-line CLAUDE.md (L0) to versioned, CI-enforced context (L5), with the concrete failure mode each level fixes. L208: cite32†← Previous Claude Code under the hood cite42†Next → 1/6 · The same model, opposite results: context is the variable L209: 
+L210: Site
+L211: 
+L212: cite1†Home cite7†About cite6†Background / CV cite2†Projects cite4†Guides cite3†Blog cite5†Media cite43†Mentions cite8†Contact cite44†Sitemap L213: 
+L214: Ecosystem
+L215: cite26†StarMapper†starmapper.bruniaux.com cite15†Claude Code Guide†cc.bruniaux.com cite23†Claude Cowork Guide†cowork.bruniaux.com cite45†RTK†crates.io cite18†ccboard†ccboard.bruniaux.com cite20†cc-sessions†github.com cite21†cc-copilot-bridge†ccbridge.bruniaux.com cite46†dep-scope†www.npmjs.com cite47†gsc-mcp†pypi.org cite48†yt-insights†pypi.org cite49†claude-code-plugins cite50†ctxharness cite51†flow-lean cite52†cc-skill-usage cite53†agentsec-triage cite54†github-roast-tpc cite55†Bel Étage†www.bel-etage.bruniaux.com L216: cite31†GitHub†github.com cite56†LinkedIn†www.linkedin.com cite57†Twitter†twitter.com Email cite58†RSS L217: 
+L218: © 2026 Florian Bruniaux. All rights reserved.
+L219: 
+L220: cite8†Contact 

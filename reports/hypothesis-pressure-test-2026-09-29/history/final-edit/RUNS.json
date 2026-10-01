@@ -1,0 +1,317 @@
+{
+  "interim": true,
+  "observed_at": "2026-09-30T03:59:11.945808+00:00",
+  "runs": [
+    {
+      "id": "64f06b51-c9b8-4343-89a3-6ddfaa6e57e0",
+      "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "status": "queued",
+      "startedAt": null,
+      "finishedAt": null,
+      "sessionIdBefore": null,
+      "sessionIdAfter": null,
+      "contextSnapshot": {
+        "issueId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+        "taskId": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+        "taskKey": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+        "commentId": "f4238430-4df8-4457-a175-a97ddafe26f1",
+        "wakeCommentId": "f4238430-4df8-4457-a175-a97ddafe26f1",
+        "wakeReason": "issue_commented",
+        "wakeSource": "automation",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "47750c7b-6cad-4138-a2cb-7498b3f06566",
+      "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "status": "running",
+      "startedAt": "2026-09-30T03:58:05.943Z",
+      "finishedAt": null,
+      "sessionIdBefore": "01a0f066-aab0-7602-9a6f-d3e78d467b4f",
+      "sessionIdAfter": null,
+      "contextSnapshot": {
+        "issueId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+        "taskId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+        "taskKey": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+        "commentId": "b58ba38f-ce08-4d27-9618-515788114938",
+        "wakeCommentId": "b58ba38f-ce08-4d27-9618-515788114938",
+        "wakeReason": "issue_commented",
+        "wakeSource": "automation",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "818156ef-42b4-4323-b6e2-fa2a14a47bdb",
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "queued",
+      "startedAt": null,
+      "finishedAt": null,
+      "sessionIdBefore": null,
+      "sessionIdAfter": null,
+      "contextSnapshot": {
+        "issueId": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+        "taskId": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+        "taskKey": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "82d1566c-5c11-42c4-b9f7-ce3d2ed06f09",
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "queued",
+      "startedAt": null,
+      "finishedAt": null,
+      "sessionIdBefore": null,
+      "sessionIdAfter": null,
+      "contextSnapshot": {
+        "issueId": "a578154c-75d4-48de-bb1c-13a93fa55398",
+        "taskId": "a578154c-75d4-48de-bb1c-13a93fa55398",
+        "taskKey": "a578154c-75d4-48de-bb1c-13a93fa55398",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "ac1bcc5f-e0a6-46d6-8c23-5ec4b5bc2a41",
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "queued",
+      "startedAt": null,
+      "finishedAt": null,
+      "sessionIdBefore": null,
+      "sessionIdAfter": null,
+      "contextSnapshot": {
+        "issueId": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+        "taskId": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+        "taskKey": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "ece66b7f-e96f-4c26-8890-574f99aef49d",
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "queued",
+      "startedAt": null,
+      "finishedAt": null,
+      "sessionIdBefore": null,
+      "sessionIdAfter": null,
+      "contextSnapshot": {
+        "issueId": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+        "taskId": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+        "taskKey": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "f7326cb1-7ec5-446f-912a-a1eaaaa45b26",
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "running",
+      "startedAt": "2026-09-30T03:57:32.966Z",
+      "finishedAt": null,
+      "sessionIdBefore": null,
+      "sessionIdAfter": null,
+      "contextSnapshot": {
+        "issueId": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+        "taskId": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+        "taskKey": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "766096ef-4afa-4384-bbb6-4fc8f565d43f",
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "running",
+      "startedAt": "2026-09-30T03:57:31.490Z",
+      "finishedAt": null,
+      "sessionIdBefore": null,
+      "sessionIdAfter": null,
+      "contextSnapshot": {
+        "issueId": "375bee1a-6e50-4430-bef6-20cf523f4771",
+        "taskId": "375bee1a-6e50-4430-bef6-20cf523f4771",
+        "taskKey": "375bee1a-6e50-4430-bef6-20cf523f4771",
+        "wakeReason": "issue_assigned",
+        "wakeSource": "assignment",
+        "wakeTriggerDetail": "system"
+      }
+    },
+    {
+      "id": "449652d7-7628-40a4-a10f-46c5b367926c",
+      "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "status": "succeeded",
+      "startedAt": "2026-09-30T03:40:54.626Z",
+      "finishedAt": "2026-09-30T03:46:10.344Z",
+      "sessionIdBefore": null,
+      "sessionIdAfter": "01a0f066-aab0-7602-9a6f-d3e78d467b4f",
+      "contextSnapshot": {
+        "issueId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+        "taskId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+        "taskKey": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+        "wakeReason": "Prompt issue handoff",
+        "wakeSource": "on_demand",
+        "wakeTriggerDetail": "manual"
+      }
+    }
+  ],
+  "interventions": [
+    {
+      "kind": "root_bootstrap_activation_repair",
+      "count": 1,
+      "updates": 14,
+      "receipt": "ACTIVATION-BATCH-RECEIPT.json",
+      "receipt_sha256": "c0727c0ae6bb7eb030cbe530cb27edfba8d95c264595a200fed7592fa258c474"
+    }
+  ],
+  "failed_continuations": [
+    {
+      "run_id": "449652d7-7628-40a4-a10f-46c5b367926c",
+      "cross_issue_cap": 20,
+      "phase_C_assignment": "HTTP429 rejected",
+      "monitor_attempts": [
+        "HTTP400 schema validation",
+        "HTTP409 unresolved dependency"
+      ],
+      "monitor_scheduled": false,
+      "uploads": "helper failed before network upload because mktemp path was not writable"
+    },
+    {
+      "actor": "root",
+      "ordinary_board_followup": "HTTP409 unresolved blockers",
+      "sanctioned_runtime_wake": "skipped",
+      "source": "root comment b58ba38f-ce08-4d27-9618-515788114938"
+    }
+  ],
+  "independence": "Runtime session fields recorded as observed; complete first-draft and synthesis isolation verification remains pending.",
+  "phase_triage": [
+    {
+      "issue": "COD-77",
+      "run_id": "64f06b51-c9b8-4343-89a3-6ddfaa6e57e0",
+      "recorded_at": "2026-09-30T04:01:21.024328+00:00",
+      "checkout_http_status": 422,
+      "reason": "six unresolved native lens blockers; comment triage only",
+      "recovery_attempted": false,
+      "verification_artifact": "PHASE-A-NONAUTHOR-VERIFICATION.json"
+    }
+  ],
+  "phase_verifications": [
+    {
+      "phase": "A",
+      "run_id": "a2e44e09-0b22-4a3a-9544-58ea254d6cf0",
+      "lens_runs": [
+        {
+          "id": "818156ef-42b4-4323-b6e2-fa2a14a47bdb",
+          "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+          "status": "succeeded",
+          "startedAt": "2026-09-30T04:09:14.491Z",
+          "finishedAt": "2026-09-30T04:14:37.850Z",
+          "sessionIdBefore": null,
+          "sessionIdAfter": "01a0f080-987a-7d91-93ee-b2307a2a6ea2",
+          "contextSnapshot": {
+            "issueId": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+            "taskId": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+            "taskKey": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+            "wakeReason": "issue_assigned",
+            "wakeSource": "assignment",
+            "wakeTriggerDetail": "system"
+          }
+        },
+        {
+          "id": "82d1566c-5c11-42c4-b9f7-ce3d2ed06f09",
+          "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "status": "succeeded",
+          "startedAt": "2026-09-30T04:08:18.745Z",
+          "finishedAt": "2026-09-30T04:13:22.980Z",
+          "sessionIdBefore": null,
+          "sessionIdAfter": "01a0f07f-bece-7833-8fb9-cdf7eb04ac59",
+          "contextSnapshot": {
+            "issueId": "a578154c-75d4-48de-bb1c-13a93fa55398",
+            "taskId": "a578154c-75d4-48de-bb1c-13a93fa55398",
+            "taskKey": "a578154c-75d4-48de-bb1c-13a93fa55398",
+            "wakeReason": "issue_assigned",
+            "wakeSource": "assignment",
+            "wakeTriggerDetail": "system"
+          }
+        },
+        {
+          "id": "ac1bcc5f-e0a6-46d6-8c23-5ec4b5bc2a41",
+          "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+          "status": "succeeded",
+          "startedAt": "2026-09-30T04:03:32.013Z",
+          "finishedAt": "2026-09-30T04:09:14.443Z",
+          "sessionIdBefore": null,
+          "sessionIdAfter": "01a0f07b-5eb2-7b93-ae01-563d66c62a13",
+          "contextSnapshot": {
+            "issueId": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+            "taskId": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+            "taskKey": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+            "wakeReason": "issue_assigned",
+            "wakeSource": "assignment",
+            "wakeTriggerDetail": "system"
+          }
+        },
+        {
+          "id": "ece66b7f-e96f-4c26-8890-574f99aef49d",
+          "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "status": "succeeded",
+          "startedAt": "2026-09-30T04:03:34.314Z",
+          "finishedAt": "2026-09-30T04:08:18.679Z",
+          "sessionIdBefore": null,
+          "sessionIdAfter": "01a0f07b-67b6-7022-89ae-b9a898e9e47a",
+          "contextSnapshot": {
+            "issueId": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+            "taskId": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+            "taskKey": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+            "wakeReason": "issue_assigned",
+            "wakeSource": "assignment",
+            "wakeTriggerDetail": "system"
+          }
+        },
+        {
+          "id": "f7326cb1-7ec5-446f-912a-a1eaaaa45b26",
+          "agentId": "79d272db-70e2-483b-b817-292dac08593e",
+          "status": "succeeded",
+          "startedAt": "2026-09-30T03:57:32.966Z",
+          "finishedAt": "2026-09-30T04:03:31.950Z",
+          "sessionIdBefore": null,
+          "sessionIdAfter": "01a0f075-e447-7802-bd11-d6f12b75b1fc",
+          "contextSnapshot": {
+            "issueId": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+            "taskId": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+            "taskKey": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+            "wakeReason": "issue_assigned",
+            "wakeSource": "assignment",
+            "wakeTriggerDetail": "system"
+          }
+        },
+        {
+          "id": "766096ef-4afa-4384-bbb6-4fc8f565d43f",
+          "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+          "status": "succeeded",
+          "startedAt": "2026-09-30T03:57:31.490Z",
+          "finishedAt": "2026-09-30T04:03:34.251Z",
+          "sessionIdBefore": null,
+          "sessionIdAfter": "01a0f075-e05a-7182-88b4-87174020a54b",
+          "contextSnapshot": {
+            "issueId": "375bee1a-6e50-4430-bef6-20cf523f4771",
+            "taskId": "375bee1a-6e50-4430-bef6-20cf523f4771",
+            "taskKey": "375bee1a-6e50-4430-bef6-20cf523f4771",
+            "wakeReason": "issue_assigned",
+            "wakeSource": "assignment",
+            "wakeTriggerDetail": "system"
+          }
+        }
+      ],
+      "receipt": "PHASE-A-RECEIPT.json",
+      "fresh_sessions_verified": true,
+      "source_findings_verified": 18,
+      "corrections_requested": 0
+    }
+  ]
+}

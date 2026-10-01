@@ -1,0 +1,3 @@
+Error: Invalid MCP configuration:
+MCP config file not found: $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/mcp
+MCP config file not found: $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/list

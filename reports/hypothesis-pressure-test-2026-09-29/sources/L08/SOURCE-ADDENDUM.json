@@ -1,0 +1,26 @@
+[
+  {
+    "evidence_id": "CW-Y007",
+    "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+    "capture_path": "sources/L08/CW-Y007.html",
+    "sha256": "38beba8c3c65ecbf02f738fc18eb56d341abd10b37c48f370fa4a085f3e1e509",
+    "retrieved_at": "2026-09-30T04:29:40.327696+00:00",
+    "access": "HTML captured; targeted original passages inspected via web tool; no linked pages or screenshots inspected"
+  },
+  {
+    "evidence_id": "CW-Z012",
+    "url": "https://github.com/oraios/serena/discussions/131",
+    "capture_path": "sources/L08/CW-Z012.html",
+    "sha256": "fa6b17b1d843daa2854493c5db518e45b5e549964e85f755f160c11c1c25d18c",
+    "retrieved_at": "2026-09-30T04:29:40.906832+00:00",
+    "access": "HTML captured; targeted original passages inspected via web tool; no linked pages or screenshots inspected"
+  },
+  {
+    "evidence_id": "CW-T018",
+    "url": "https://news.ycombinator.com/item?id=48033774",
+    "capture_path": "sources/L08/CW-T018.html",
+    "sha256": "b717900277ead78de576f2aa7b94e16691c7f6674b900b1265d1bff24a2605a6",
+    "retrieved_at": "2026-09-30T04:29:41.240791+00:00",
+    "access": "HTML captured; targeted original passages inspected via web tool; no linked pages or screenshots inspected"
+  }
+]

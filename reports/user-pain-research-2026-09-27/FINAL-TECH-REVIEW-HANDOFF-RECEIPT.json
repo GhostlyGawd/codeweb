@@ -1,0 +1,28 @@
+{
+  "id": "45abbb28-df94-4bf3-b769-b54361ec19db",
+  "status": "in_review",
+  "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+  "executionState": {
+    "status": "pending",
+    "monitor": null,
+    "reviewRequest": null,
+    "currentStageId": "b6e09532-c924-4758-a1bd-e78e9e718240",
+    "lastDecisionId": null,
+    "returnAssignee": {
+      "type": "agent",
+      "userId": null,
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e"
+    },
+    "currentStageType": "review",
+    "completedStageIds": [],
+    "currentStageIndex": 0,
+    "currentParticipant": {
+      "type": "agent",
+      "userId": null,
+      "agentId": "86badd16-e228-46d5-81f2-d471f9eb21c4"
+    },
+    "lastDecisionOutcome": null,
+    "changesRequestedCount": 0
+  },
+  "updatedAt": "2026-09-28T01:55:50.946Z"
+}

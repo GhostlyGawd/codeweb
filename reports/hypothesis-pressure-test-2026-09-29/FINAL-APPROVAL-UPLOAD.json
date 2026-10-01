@@ -1,0 +1,53 @@
+{
+  "attachment": {
+    "id": "66044149-5221-4938-a341-dcf0c506d0b4",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+    "issueCommentId": null,
+    "assetId": "6a889a3d-e140-4fa7-a3f0-60142a1f1a72",
+    "provider": "local_disk",
+    "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/573b8d18-80c7-4b18-84b5-aecd340601f8/2026/09/30/55ccdeab-3795-4abc-9003-57b163dc23ea-FINAL-APPROVAL-DELIVERY.zip",
+    "contentType": "application/zip",
+    "byteSize": 3232,
+    "sha256": "99031a3385b27210db35f9f4c50bd1d7a40682fbc3c51e369dcab8d39f561aea",
+    "originalFilename": "FINAL-APPROVAL-DELIVERY.zip",
+    "createdByAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "createdByUserId": null,
+    "createdAt": "2026-09-30T05:29:32.749Z",
+    "updatedAt": "2026-09-30T05:29:32.749Z",
+    "contentPath": "/api/attachments/66044149-5221-4938-a341-dcf0c506d0b4/content",
+    "openPath": "/api/attachments/66044149-5221-4938-a341-dcf0c506d0b4/content",
+    "downloadPath": "/api/attachments/66044149-5221-4938-a341-dcf0c506d0b4/content?download=1"
+  },
+  "work_product": {
+    "id": "4d3c6e7b-57f2-45cd-b299-a904567965f2",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "projectId": null,
+    "issueId": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+    "executionWorkspaceId": null,
+    "runtimeServiceId": null,
+    "type": "artifact",
+    "provider": "paperclip",
+    "externalId": null,
+    "title": "Final independent approval \u2014 verified canonical delivery",
+    "url": null,
+    "status": "ready_for_review",
+    "reviewState": "needs_board_review",
+    "isPrimary": false,
+    "healthStatus": "unknown",
+    "summary": null,
+    "metadata": {
+      "byteSize": 3232,
+      "openPath": "/api/attachments/66044149-5221-4938-a341-dcf0c506d0b4/content",
+      "contentPath": "/api/attachments/66044149-5221-4938-a341-dcf0c506d0b4/content",
+      "contentType": "application/zip",
+      "attachmentId": "66044149-5221-4938-a341-dcf0c506d0b4",
+      "downloadPath": "/api/attachments/66044149-5221-4938-a341-dcf0c506d0b4/content?download=1",
+      "originalFilename": "FINAL-APPROVAL-DELIVERY.zip"
+    },
+    "sourceTrust": null,
+    "createdByRunId": "148af5cf-b5f9-44fc-bf93-8db5b8efd2f3",
+    "createdAt": "2026-09-30T05:29:32.761Z",
+    "updatedAt": "2026-09-30T05:29:32.761Z"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "linked-fixture-prepare",
+  "command": [
+    "git",
+    "worktree",
+    "add",
+    "--detach",
+    "$LOCAL_TMP/codeweb-p02-host-linked-y917vnoh",
+    "HEAD"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819615.543078,
+  "end_epoch": 1790819615.5825229,
+  "duration_seconds": 0.03915095329284668,
+  "timeout_seconds": 15,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/linked-fixture-prepare.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/linked-fixture-prepare.stderr.txt"
+}

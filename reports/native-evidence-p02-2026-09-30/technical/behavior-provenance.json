@@ -1,0 +1,6 @@
+{
+  "subjectPath": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/subject.mjs",
+  "testBeforeSha256": "2bfe5ce81e7d37311824740753c4a6091b217128d1953f55abec521680fe6a42",
+  "afterEditSha256": "aba94709b9328afbc9ccfb8c1743788b6110fd710164c90c8b0a908f56e2d98a",
+  "coverageNote": "recorded.lcov is an explicitly synthetic historical coverage import, not a measured runner output; current/failed/skipped/malformed results are actual own-fixture Node runs"
+}

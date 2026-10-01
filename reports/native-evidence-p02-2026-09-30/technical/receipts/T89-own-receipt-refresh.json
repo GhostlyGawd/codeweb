@@ -1,0 +1,23 @@
+{
+  "id": "T89-own-receipt-refresh",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/refresh.mjs",
+    "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w/.codeweb/graph.json",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:54:42.322Z",
+  "end": "2026-10-01T01:54:42.461Z",
+  "durationMs": 138.238292,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"graph\":\"$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w/.codeweb/graph.json\",\"root\":\"$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w\",\"analysis\":{\"status\":\"no-known-incompleteness\",\"diagnosticCount\":0,\"diagnostics\":[]},\"before\":{\"nodes\":2,\"edges\":1},\"after\":{\"nodes\":2,\"edges\":1},\"domainsReattached\":0,\"scanned\":\"1\",\"sidecars\":[\"brief\",\"index-lite\",\"stale-stamps\",\"similar-index\"]}\n",
+  "stderr": ""
+}

@@ -1,0 +1,126 @@
+{
+  "created_at": "2026-10-01T02:45:12.162818+00:00",
+  "status": "prepared_not_implemented",
+  "scope": "Distinct demonstrated repair themes; raw case counts are not independent defect counts. Global model/client changes are environmental follow-through, not Codeweb source repair.",
+  "items": [
+    {
+      "id": "P03-R01",
+      "priority": "high",
+      "ned_ids": [
+        "NED-01"
+      ],
+      "source_cases": [
+        "TECH-02"
+      ],
+      "problem": "Incomplete or unavailable evidence still returns successful deadcode JSON/MCP safety wording.",
+      "scope": "Correct action/provenance wording and preserve compatibility; incomplete source cannot become a safe-deletion claim.",
+      "owner": "Codex P-03",
+      "verification": "Replay raw missing-source/incomplete/empty CLI and MCP controls; preserve ordinary structural/evidence semantics."
+    },
+    {
+      "id": "P03-R02",
+      "priority": "high",
+      "ned_ids": [
+        "NED-02",
+        "NED-07",
+        "NED-10"
+      ],
+      "source_cases": [
+        "TECH-06",
+        "TECH-36"
+      ],
+      "problem": "Known edit target relevant consumer is omitted in favor of a truthfully labeled but unrelated popular-symbol card.",
+      "scope": "Use supported edit selectors/content when resolvable or explicitly declare incomplete/ambiguous selection; retain valid file-summary and quiet behavior without arbitrary new semantic parser.",
+      "owner": "Codex P-03",
+      "verification": "Exact low/high/file-only/same-file controls and repeated relevant/irrelevant edit events."
+    },
+    {
+      "id": "P03-R03",
+      "priority": "high",
+      "ned_ids": [
+        "NED-04",
+        "NED-05"
+      ],
+      "source_cases": [
+        "TECH-15"
+      ],
+      "problem": "Mapped corrupt/empty evidence or previously mapped extraction failure is silent like a supported quiet case.",
+      "scope": "Give inspectable bounded diagnostics/recovery within mapped claimed scope; intentionally unmapped/out-of-scope silence is legitimate and must stay quiet.",
+      "owner": "Codex P-03",
+      "verification": "Mapped quiet/corrupt/empty/actual extraction failure controls plus out-of-scope no-noise control."
+    },
+    {
+      "id": "P03-R04",
+      "priority": "medium",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "source_cases": [
+        "TECH-12"
+      ],
+      "problem": "Parseable invalid nodes shape is normalized into an ordinary miss/empty state.",
+      "scope": "Validate supported graph shapes with an explicit invalid-state result while retaining legitimate legacy compatibility.",
+      "owner": "Codex P-03",
+      "verification": "Invalid JSON/shape and valid empty/legacy controls across CLI/MCP."
+    },
+    {
+      "id": "P03-R05",
+      "priority": "medium",
+      "ned_ids": [
+        "NED-04",
+        "NED-05"
+      ],
+      "source_cases": [
+        "TECH-14"
+      ],
+      "problem": "Graph-only hook fallback does not expose stale/unknown freshness when sidecar evidence is unavailable.",
+      "scope": "Use existing freshness evidence consistently and keep unknown distinct; do not manufacture a current map.",
+      "owner": "Codex P-03",
+      "verification": "Fresh/stamped-stale/graph-only-stale and absent-stamp controls with original baseline unchanged."
+    },
+    {
+      "id": "P03-R06",
+      "priority": "conditional",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "source_cases": [
+        "TECH-31",
+        "H-P02-14",
+        "H-P02-15"
+      ],
+      "problem": "Documented Codex apply_patch input and aliased hook entry paths do not deliver standalone context.",
+      "scope": "Declare supported ambient surfaces explicitly; repair entry/adapter compatibility only for chosen claimed surface, then verify trusted actual-host delivery. Direct payload probes alone do not prove host behavior.",
+      "owner": "Codex P-03/P-04",
+      "verification": "Canonical/alias and Claude/Codex payload parity plus actual scoped trusted runtime, or legitimate explicit ambient exclusion."
+    },
+    {
+      "id": "P03-R07",
+      "priority": "low",
+      "ned_ids": [
+        "NED-10"
+      ],
+      "source_cases": [
+        "TECH-37"
+      ],
+      "problem": "Ordinary mapped post-hook probes repeat unsupported Apple ctags usage on stderr.",
+      "scope": "Inspect optional-tool compatibility/noise without hiding extraction failure; host presentation is not yet observed.",
+      "owner": "Codex P-03",
+      "verification": "Ordinary mapped/no-regression and actual extraction-error controls; actual host stderr visibility separately."
+    }
+  ],
+  "external_unverified_owners": [
+    {
+      "owner": "Operator account setup / P-04",
+      "boundary": "Authenticated Claude delivery; no new login authorized."
+    },
+    {
+      "owner": "Codex P-04",
+      "boundary": "Trusted ambient delivery, recognized generated-dependency exclusion and actual disable/unexposure proof."
+    },
+    {
+      "owner": "Codex test harness / P-04",
+      "boundary": "Native prompt confinement and out-of-fixture instruction-read contamination."
+    }
+  ]
+}

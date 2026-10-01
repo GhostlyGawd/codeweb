@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "assignment": "15",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "findings": [
+    {
+      "id": "L15-F01",
+      "statement": "Inherited lens evidence is not automatically direct support for each synthesis claim.",
+      "verdict": "revise",
+      "evidence_type": "independent artifact and original-record fidelity audit; no participant outcomes",
+      "supported_actor_task": "Product Lead editing the exact final pressure-test packet for product decisions",
+      "conditions": "Applies to final attribution, not a demand claim made explicitly in either narrative.",
+      "strongest_supported_case": "SA-C09 lists CW-L023, L04-C01 and L04-C07 in evidence_ids while describing paid residual coordination. The canonical L023 record concerns an author-adjudicated firmware review experiment; the capability anchors concern local facts/proposals. SA original_evidence_usage promotes these inherited unions to load_bearing. This overstates the role of the evidence edge.",
+      "strongest_countercase": "SA prose explicitly leaves paid value unresolved and names Y007 as the direct manual-check account. Full findings are preserved, so the underlying nuance is recoverable.",
+      "evidence_ids": [
+        "CW-L023"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007"
+      ],
+      "source_pointers": [
+        {
+          "evidence_id": "CW-L023",
+          "original_url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:75",
+          "passage_pointer": "Parts 1, 5; limitations 23.5–23.7",
+          "capture_pointers": [],
+          "access_limits": "Full article read in overlapping chunks; author adjudication, three small tasks, two models, no independent rerun. Tool-builder case. Not a model leaderboard or proven Codeweb effect."
+        },
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+          "passage_pointer": "posts 1,5,6",
+          "capture_pointers": [],
+          "access_limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+        }
+      ],
+      "affected_claim_ids": [
+        "SA-C09",
+        "SA-C10",
+        "SA-C11"
+      ],
+      "failure_scenario": "A reader treats a local retrieval experiment as additional observed evidence of a recurring paid job.",
+      "weakest_assumption": "Automated evidence union preserves evidential role across claims.",
+      "local_versus_paid_implication": "Preserve free local inspection and separately unvalidated paid coordination; neither correction establishes demand.",
+      "confidence_reason": "Direct comparison of frozen artifacts and source records; scoped public reopens add fidelity, not customers.",
+      "minimal_falsification_test": "Traverse each final claim/evidence edge to the original passage; a reviewer must be able to explain that exact typed role without substituting the entire lens. Verify reverse edges carry identical roles.",
+      "correction_request": "In final CLAIM-LEDGER/BREADCRUMBS separate direct support, counterevidence, capability premise, methodological context and inherited lens context. Audit all claims, especially union-derived SA edges. Do not represent local precision/receipt capability as empirical paid support. Preserve A untouched; record the final edge disposition and reason.",
+      "owner": "Product Lead, phase C final editor",
+      "severity": "material_fidelity"
+    },
+    {
+      "id": "L15-F02",
+      "statement": "Shared generic nonuse reasons omit material competing mechanisms and a concrete scope failure.",
+      "verdict": "revise",
+      "evidence_type": "independent artifact and original-record fidelity audit; no participant outcomes",
+      "supported_actor_task": "Product Lead editing the exact final pressure-test packet for product decisions",
+      "conditions": "L056 is partial/vendor evidence; L020/L021 are individual HN reports. Mandate is not preference, but can serve a legitimate coverage objective. Cost-table scope is not shown to be statically mapped.",
+      "strongest_supported_case": "Both mappings demote CW-L020/L021/L056 and CW-Z002 to generic context/nonuse. L020 reports satisfactory internal per-repo review and retains human knowledge sharing; L021 explains centralized review because local execution cannot be assumed. L056 describes coordination, re-review and recovery implemented internally. Z002 reports a model-name/pricing dependency failure plus successful lexical migration, directly relevant to the claimed consumer-scope job.",
+      "strongest_countercase": "Y005/Y012 already preserve strong internal/PR alternatives; neither synthesis claims exhaustive external research. These additional accounts are self-reports/vendor or AI-coauthored cases and do not prove accuracy, Codeweb demand or superiority.",
+      "evidence_ids": [
+        "CW-L020",
+        "CW-L021",
+        "CW-L056",
+        "CW-Z002"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y005",
+        "CW-Y012",
+        "CW-X001"
+      ],
+      "source_pointers": [
+        {
+          "evidence_id": "CW-L020",
+          "original_url": "https://news.ycombinator.com/item?id=48407230",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:72",
+          "passage_pointer": "48407230",
+          "capture_pointers": [
+            "sources/L15/CW-L020.json"
+          ],
+          "access_limits": "Complete 74-node public Algolia tree read in chunks; deleted/private content excluded. One thread for page counting. Self-report; no current offer verified."
+        },
+        {
+          "evidence_id": "CW-L021",
+          "original_url": "https://news.ycombinator.com/item?id=48408485",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:73",
+          "passage_pointer": "48408485",
+          "capture_pointers": [
+            "sources/L15/CW-L021.json"
+          ],
+          "access_limits": "Complete 74-node public Algolia tree read in chunks; deleted/private content excluded. One thread for page counting. Self-report; no current offer verified."
+        },
+        {
+          "evidence_id": "CW-L056",
+          "original_url": "https://blog.cloudflare.com/ai-code-review/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:108",
+          "passage_pointer": "Opening; streaming pipeline; coordinator; re-reviews",
+          "capture_pointers": [
+            "sources/L15/CW-L056.html"
+          ],
+          "access_limits": "Vendor self-use, article partial and no independently adjudicated outcome sample. Published activity counts are not proof of detection accuracy; no effect size adopted."
+        },
+        {
+          "evidence_id": "CW-Z002",
+          "original_url": "https://its-boris.com/blog/sprint-retro-what-we-shipped-and-what-broke",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:110",
+          "passage_pointer": "What went wrong; model swap; Where it excelled/struggled",
+          "capture_pointers": [
+            "sources/L15/CW-Z002.html"
+          ],
+          "access_limits": "Vendor/builder dogfooding, AI coauthored. Headline says 100x but table says 47x; no multiplier retained. Reports fixed in same sprint, not independently reproduced."
+        },
+        {
+          "evidence_id": "CW-Y005",
+          "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:125",
+          "passage_pointer": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+          "capture_pointers": [],
+          "access_limits": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP."
+        },
+        {
+          "evidence_id": "CW-Y012",
+          "original_url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:132",
+          "passage_pointer": "Solutions; Artifacts; Where we are now",
+          "capture_pointers": [],
+          "access_limits": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents."
+        },
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointers": [],
+          "access_limits": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents."
+        }
+      ],
+      "affected_claim_ids": [
+        "SA-C01",
+        "SA-C02",
+        "SA-C08",
+        "SA-C09",
+        "SB-C01",
+        "SB-C04",
+        "SB-C09",
+        "SB-C10"
+      ],
+      "failure_scenario": "A final test compares against simple CI while ignoring a capable internal coordinator, or equates mandated invocation with no organizational value.",
+      "weakest_assumption": "A source that does not demonstrate Codeweb value can be ignored when selecting the strongest comparator.",
+      "local_versus_paid_implication": "Preserve free local inspection and separately unvalidated paid coordination; neither correction establishes demand.",
+      "confidence_reason": "Direct comparison of frozen artifacts and source records; scoped public reopens add fidelity, not customers.",
+      "minimal_falsification_test": "Read the four original records/captured passages against final alternatives and tests. Fail fidelity if the reason remains merely no direct incremental evidence while overlooking the named opposing mechanism.",
+      "correction_request": "Give these four records individual final use/nonuse dispositions explaining their specific relevance. Carry the internal coordination comparator and governance-versus-voluntary-use distinction into the final paid test or explicitly reject them with reasons. Account for Z002 as a scope/cost-table condition and native success; do not infer map coverage or reuse the inconsistent 100x/47x numbers. No new lens or product work needed.",
+      "owner": "Product Lead, phase C final editor",
+      "severity": "material_fidelity"
+    },
+    {
+      "id": "L15-F03",
+      "statement": "The final local decision rule must reconcile quality benefit with effort, rather than collapse them into a slogan.",
+      "verdict": "revise",
+      "evidence_type": "independent artifact and original-record fidelity audit; no participant outcomes",
+      "supported_actor_task": "Product Lead editing the exact final pressure-test packet for product decisions",
+      "conditions": "Tests remain unexecuted proposals; exact scoring/allocation still needs pre-registration before an authorized experiment.",
+      "strongest_supported_case": "SA-C02 requires changed decisions at acceptable total effort; SB-C04 calls for a correct changed decision at lower total burden. SB-T01 allows correct additional decision or net burden improvement. The original sprint permits two additional useful findings with no higher median effort, while requiring case-level adverse outcomes. These are not identical pass rules.",
+      "strongest_countercase": "Both drafts demand capable controls, independent adjudication, all costs and null outcomes; both explicitly preserve the original gate as provisional. This is an editorial ambiguity, not demonstrated contradictory customer evidence.",
+      "evidence_ids": [
+        "CW-X001",
+        "CW-L023"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z001",
+        "CW-Z012"
+      ],
+      "source_pointers": [
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "capture_pointers": [],
+          "access_limits": "Two–three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents."
+        },
+        {
+          "evidence_id": "CW-L023",
+          "original_url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:75",
+          "passage_pointer": "Parts 1, 5; limitations 23.5–23.7",
+          "capture_pointers": [],
+          "access_limits": "Full article read in overlapping chunks; author adjudication, three small tasks, two models, no independent rerun. Tool-builder case. Not a model leaderboard or proven Codeweb effect."
+        },
+        {
+          "evidence_id": "CW-Z001",
+          "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "capture_pointers": [],
+          "access_limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts."
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "original_url": "https://github.com/oraios/serena/discussions/131",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+          "passage_pointer": "May 30–June 2 maintainer replies; reporter May 31 recovery",
+          "capture_pointers": [],
+          "access_limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once."
+        }
+      ],
+      "affected_claim_ids": [
+        "SA-C02",
+        "SB-C01",
+        "SB-C04",
+        "SB-C12"
+      ],
+      "failure_scenario": "A useful equal-time result is rejected under one paragraph and accepted under another, or a faster wrong answer is scored as benefit.",
+      "weakest_assumption": "Lower effort, acceptable effort and more correct decisions describe the same acceptance boundary.",
+      "local_versus_paid_implication": "Preserve free local inspection and separately unvalidated paid coordination; neither correction establishes demand.",
+      "confidence_reason": "Direct comparison of frozen artifacts and source records; scoped public reopens add fidelity, not customers.",
+      "minimal_falsification_test": "Apply the written rule to hypothetical equal-time useful discovery, faster wrong answer and slower redundant output; the editor must identify admissible, failing and unresolved cases without claiming observed trial results.",
+      "correction_request": "State one provisional final decision rule with separately scored decision quality, severe misses/unwanted edits, and total effort; explain disposition of A/B wording. Preserve the original two-additional-findings/ten-changes/no-higher-median threshold as a proposal, with severe adverse cases visible. Distinguish unchanged quality/lower effort from improved quality/equal effort. Do not invent numeric risk tolerance or expand trial authority.",
+      "owner": "Product Lead, phase C final editor",
+      "severity": "material_fidelity"
+    }
+  ]
+}

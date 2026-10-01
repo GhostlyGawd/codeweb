@@ -1,0 +1,69 @@
+{
+  "created_at": "2026-09-28T01:28:38.053651+00:00",
+  "records": 18,
+  "schema_fields_present": true,
+  "ids_unique": true,
+  "incident_keys_unique": true,
+  "url_overlap_prior": [],
+  "original_hashes": {
+    "reports/user-pain-research-2026-09-27/L123-HANDOFF.md": "0c9f9dca74422a7dd1098abbb26e20166d435d02ff2849e6b7839ed8aec074dd",
+    "reports/user-pain-research-2026-09-27/L123-VALIDATION.json": "9cab39f05650ce74b519c44062f22346dc4d8d3343b0ffeafac34a9539ff558c",
+    "reports/user-pain-research-2026-09-27/L123-CORRECTION.md": "4655182ce1b549a7b57d0e6633f2c171825b582d2bdc0bea52e56d317156e6f0",
+    "reports/user-pain-research-2026-09-27/L123-QUERY-LOG.csv": "d2da6e699f5955603f849b89d845371078b8f225e33eaf2025aba9482d359212",
+    "reports/user-pain-research-2026-09-27/L123-REVIEW.md": "ecd6485570e114ddc24349f5e9b1fe387b99bb9511c6e5a23a1f781694e2cd0b",
+    "reports/user-pain-research-2026-09-27/L123-SOURCES.jsonl": "2ee8777311b02ffd7d05f7937b30741effec46f87694c90cc40b524ee3440b14",
+    "reports/user-pain-research-2026-09-27/L123-CORRECTION-UPLOAD-RECEIPTS.json": "e86b07c41014bf36773a988b8b3f203e97ed21335784e7774a5a6a28b70e99de",
+    "reports/user-pain-research-2026-09-27/L123-UPLOAD-RECEIPTS.json": "c90bc18cd08e8deb80d0d181710c7ba910abc5b1b6f1dea4cc61376464b3ee45",
+    "reports/user-pain-research-2026-09-27/L123-EVIDENCE.jsonl": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "reports/user-pain-research-2026-09-27/lanes/02-codex.md": "5ee52fc3abdbede8c4912fea91cf92c05988b1d2cd6258597a6837064ce83b01",
+    "reports/user-pain-research-2026-09-27/lanes/03-change-risk.md": "0b78a5dce6e482674a93fac527c4a574aed8bf9036d407015d575658217c8675",
+    "reports/user-pain-research-2026-09-27/lanes/01-claude.md": "42faae2c1ce7ee1d6c5f1fafc85f360e835a3878f2f2175ae4c1a895bc41d9e4"
+  },
+  "originals_unchanged": true,
+  "audit_baseline": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "sha256": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "sha256": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "sha256": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "sha256": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "matches": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "sha256": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "matches": true
+    }
+  ],
+  "full_sources": 12,
+  "partial_sources": 29,
+  "inaccessible_sources": 8,
+  "first_person_reports": 15,
+  "non_demo_first_person": 14,
+  "full_target_shortfall": [
+    33,
+    48
+  ],
+  "hashes": {
+    "L123-SUPPLEMENT-SOURCES.jsonl": "bb85f284102b63d1b4de81bf0b941dd4b5e93193321aa73bc43c9a1022fa5c44",
+    "L123-SUPPLEMENT-EVIDENCE.jsonl": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "L123-SUPPLEMENT-QUERY-LOG.csv": "8e430b66177f2162aa3fda2e4194aff8c95569f5d3c6fc09e72ccf002eb144ba",
+    "L123-SUPPLEMENT-HANDOFF.md": "b4e09cf65adc668eddc8d853becdf83a83820dbcb8dfab493954894b83b0d561",
+    "L123-SUPPLEMENT-EVIDENCE.csv": "d278fe3c8ba5e7cfe19ae2f1a4a61dc100c044b23afb6f930b3b657f8bc01b2f",
+    "lanes/03-change-risk-supplement.md": "462a1c60c06cb8284b49a8c76fd0640704234ed2ef0d48370d1e4d6d48e709d6",
+    "lanes/02-codex-supplement.md": "dbdbf372503e7ea5ecc6619cacdddb0838a793c1db49fc622d27a4c9ef246039",
+    "lanes/01-claude-supplement.md": "9c1f787a797dc7ab034ffd9109f8092cb08811f601bc8af4366d93d4686e2e7b"
+  }
+}

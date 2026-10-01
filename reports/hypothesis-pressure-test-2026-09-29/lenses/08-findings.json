@@ -1,0 +1,558 @@
+{
+  "schema_version": 1,
+  "assignment": "08 \u2014 Ownership of a complete job",
+  "verdict": "revise",
+  "local_verdict": "narrow",
+  "paid_verdict": "revise",
+  "customer_effect": "unresolved_from_existing_evidence",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "findings": [
+    {
+      "id": "L08-F01",
+      "statement": "Narrow local ownership to assembling inspectable source evidence for a declared task; the product does not own the reuse or change-scope decision.",
+      "supported_actor_task": "Agent-heavy developer extending shared utilities or inspecting cross-file consumers; CW-T018 supports the task but does not establish a representative customer segment.",
+      "relevant_conditions": "Supported source language/layout, available source, resolved target, explicit coverage; utility semantics and architectural boundaries remain human judgments.",
+      "evidence_type": "inference from first-person report and inspected repository capability",
+      "evidence_ids": [
+        "CW-T018"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-Z011"
+      ],
+      "strongest_supported_case": "The utility-duplication report exposes repeated orientation work. Context packs provide target bodies and caller windows; ranked similarity candidates can reduce the factual search portion.",
+      "strongest_countercase": "Native search can already suffice in clean code. Generated members may evade source navigation. Neither mapped relations nor token-shingle similarity establishes complete runtime scope or substitutability.",
+      "failure_scenario": "A developer receives two similar helpers, rereads both and every original caller, and still designs the abstraction unaided; a short list changed the presentation but removed no work.",
+      "verdict": "narrow",
+      "weakest_assumption": "Assembling this evidence removes searches the developer would otherwise repeat, rather than adding candidate verification.",
+      "local_implication": "Define completion as a revision-bound, source-linked evidence packet with omissions and one inspectable next step. Measure changed inspection/reuse behavior separately; never market architecture ownership.",
+      "paid_implication": "This single-repo collection belongs in free local capability; its savings cannot justify a paid coordination fee.",
+      "minimal_falsification_test": "On one consented shared-utility task and one matched native-search task, record initial plan, every lookup, candidate rejection and final inspection. Reject complete-job wording if users must rebuild the evidence packet; retain only an inspection aid if it changes no decision.",
+      "confidence_reason": "High confidence in inspected mechanism boundaries; low confidence in net task savings because no Codeweb participant outcome is present.",
+      "capability_and_proposal_ids": [
+        "CAP-context",
+        "CAP-similarity",
+        "PROPOSAL-strategy"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-T018",
+          "url": "https://news.ycombinator.com/item?id=48033774",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 24,
+          "passage_locator": "Story body and author reply 48035884; complete four-comment tree read",
+          "original_access": "opened_full",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "capture_path": "sources/L08/CW-T018.html"
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-X001",
+          "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 35,
+          "passage_locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "original_access": "opened_full",
+          "limits": "Two\u2013three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "capture_path": null
+        },
+        {
+          "evidence_id": "CW-Z011",
+          "url": "https://github.com/oraios/serena/issues/1432",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 119,
+          "passage_locator": "Capability matrix in body",
+          "original_access": "opened_partial",
+          "limits": "Full body only; comments unavailable. Closed with #1434, but linked PR inaccessible, so resolution not verified.",
+          "capture_path": null
+        }
+      ],
+      "access_coverage_limits": "Frozen original evidence records inspected; only CW-T018, CW-Y007 and CW-Z012 reopened and captured for this assignment. Other accounts retain their original access limits. No participant, host or service trial was run."
+    },
+    {
+      "id": "L08-F02",
+      "statement": "Freshness and uncertainty handling are part of the collection job; reporting that a map is stale does not itself take over refresh and recovery.",
+      "supported_actor_task": "Developer switching branches or revisiting a shared implementation across sessions, including large or partially mapped repositories.",
+      "relevant_conditions": "Distinguish the ordinary graph advisory from explicit evidence capture/reconciliation. The latter has task/root/profile checks and hash-based evidence, but selected files do not prove host activation or automatic recovery.",
+      "evidence_type": "repository observation plus inference from adjacent-tool accounts",
+      "evidence_ids": [
+        "CW-Z007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Z012"
+      ],
+      "strongest_supported_case": "An adjacent reference-query failure returned empty results after a server crash. Codeweb explicit receipts preserve source-bound relationships and unresolved questions, a useful basis for avoiding silent disappearance.",
+      "strongest_countercase": "Existing receipt reconciliation already does more than return an unversioned list. Conversely, known-context work can need no extra retrieval; configuration and verification work can erase tool savings.",
+      "failure_scenario": "The user sees stale evidence, manually refreshes, chooses a baseline, diagnoses a missing caller and then repeats the original search. New maintenance consumes the saved collection time.",
+      "verdict": "revise",
+      "weakest_assumption": "Readiness, refresh, baseline choice and recovery can be made routine without hiding unsupported or uncertain evidence.",
+      "local_implication": "Count installation, permission repair, cold mapping, baseline selection, stale recovery, interpreting omitted counts and retiring old exceptions in the local job budget. Saved exceptions are proposed, not demonstrated here.",
+      "paid_implication": "A hosted service must own reruns and stale-result invalidation operationally; merely sending stale-status notifications relocates maintenance to repository owners.",
+      "minimal_falsification_test": "Before participant testing, use a supported host and a recorded task, change revision mid-flow, remove source access, and reopen the session. Observe who refreshes and reconstructs context. Fail ownership if the user silently acts on old evidence or must manually assemble the same facts again. This is a proposed preflight, not executed.",
+      "confidence_reason": "High confidence in the inspected receipt/advisory distinction; host behavior and net recovery burden remain unmeasured. Serena fix history is version-specific and not a current blanket defect.",
+      "capability_and_proposal_ids": [
+        "CAP-freshness",
+        "CAP-receipt",
+        "CAP-core",
+        "PROPOSAL-strategy"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-Z007",
+          "url": "https://github.com/oraios/serena/issues/1814",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 115,
+          "passage_locator": "Summary; Additional suggestion; Note on scoping",
+          "original_access": "opened_partial",
+          "limits": "API rate-limited; full body read, comment completeness unverified. First-query crash fix merged Aug 20 (#1848); later-query fix #2007 remains open. No blanket fixed claim.",
+          "capture_path": null
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Z012",
+          "url": "https://github.com/oraios/serena/discussions/131",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 120,
+          "passage_locator": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+          "original_access": "opened_full",
+          "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once.",
+          "capture_path": "sources/L08/CW-Z012.html"
+        }
+      ],
+      "access_coverage_limits": "Frozen original evidence records inspected; only CW-T018, CW-Y007 and CW-Z012 reopened and captured for this assignment. Other accounts retain their original access limits. No participant, host or service trial was run."
+    },
+    {
+      "id": "L08-F03",
+      "statement": "A factual structural collection job can be complete while behavioral validation remains explicitly unfinished; tests require a separate execution and interpretation owner.",
+      "supported_actor_task": "Developer and reviewer checking an agent-produced change before merge.",
+      "relevant_conditions": "Preserved source revisions, real test commands/results and explicit skipped/failed/unknown statuses; a valid test oracle and relevant environment are required.",
+      "evidence_type": "inference from public self-reports, charter and inspected source",
+      "evidence_ids": [
+        "CW-X013",
+        "CW-T022",
+        "CW-Z004"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y007"
+      ],
+      "strongest_supported_case": "Reports of premature completion and green tests that repair the application show why a structural result cannot close the validation job. The charter forbids executing analyzed code in the local analysis path.",
+      "strongest_countercase": "Ordinary type checking and CI can own repeatable checks; the strategy already requires real project test provenance rather than claiming static proof. This narrows the promise without making source collection useless.",
+      "failure_scenario": "A reviewer sees unchanged relationships and a green status copied from a previous revision, assumes the feature works, and misses runtime breakage or an invalid test oracle.",
+      "verdict": "narrow",
+      "weakest_assumption": "Users correctly distinguish structural equality, successful command execution and validated behavior when presented together.",
+      "local_implication": "Codeweb can own structural evidence capture; project tooling/agents execute tests and maintainers judge oracle adequacy and product intent. Do not count these retained responsibilities as tasks taken over.",
+      "paid_implication": "The proposed service may coordinate explicitly permitted test runners and capture outcomes; it still does not choose business correctness or certify arbitrary compatibility.",
+      "minimal_falsification_test": "Give a reviewer a deliberately stale test result, a skipped check and an unchanged structural receipt for a changed implementation. Ask what is established and what remains. Fail the completion claim if any unavailable behavior check is treated as passed. No trial executed here.",
+      "confidence_reason": "High confidence in logical and charter boundary; public incidents are unverified and not prevalence evidence.",
+      "capability_and_proposal_ids": [
+        "CAP-core",
+        "CAP-receipt",
+        "BOUNDARY-charter",
+        "PROPOSAL-strategy"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-X013",
+          "url": "https://github.com/openai/codex/issues/24285",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 47,
+          "passage_locator": "Body: Concrete examples from AJENTIC; Expected behavior",
+          "original_access": "opened_partial",
+          "limits": "Public report only; underlying commits and traces not reproduced. Comments unavailable after REST rate limit. One project context, not each phase counted.",
+          "capture_path": null
+        },
+        {
+          "evidence_id": "CW-T022",
+          "url": "https://www.reddit.com/r/ClaudeCode/comments/1rug14a/claude_wrote_playwright_tests_that_secretly/",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 28,
+          "passage_locator": "Original post and author clarification",
+          "original_access": "opened_partial",
+          "limits": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction.",
+          "capture_path": null
+        },
+        {
+          "evidence_id": "CW-Z004",
+          "url": "https://securityatlightspeed.substack.com/p/building-a-cloud-agentic-swe-loop",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 112,
+          "passage_locator": "Attempt 1; Attempt 2; Review Findings Were Not Independently Revalidated",
+          "original_access": "opened_full",
+          "limits": "Single experiment; GPT-5.3-Codex. Author explicitly updates earlier API limitation as historical; do not claim a current missing API.",
+          "capture_path": null
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Y007",
+          "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 127,
+          "passage_locator": "posts 1,5,6",
+          "original_access": "opened_full",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+          "capture_path": "sources/L08/CW-Y007.html"
+        }
+      ],
+      "access_coverage_limits": "Frozen original evidence records inspected; only CW-T018, CW-Y007 and CW-Z012 reopened and captured for this assignment. Other accounts retain their original access limits. No participant, host or service trial was run."
+    },
+    {
+      "id": "L08-F04",
+      "statement": "The plausible paid complete job is revision-aware coordination of agreed checks through result delivery and failure recovery; demand and superiority over CI remain unresolved.",
+      "supported_actor_task": "Developer champion and repository owners coordinating backend/frontend checks; buyer authority is not demonstrated.",
+      "relevant_conditions": "Explicit repository relationships, access policy, supported commands, named check owners, tested revision tuple, rerun triggers and a destination already used by reviewers.",
+      "evidence_type": "inference from first-person cross-repo report and unbuilt proposal",
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y004",
+        "CW-Y002"
+      ],
+      "strongest_supported_case": "The original account describes recurring manual invocation. A bounded service could own dispatch, tracking, rerunning, failed-run recovery and packaging outcomes for each agreed producer/consumer revision.",
+      "strongest_countercase": "The same author accepts CI as more appropriate. Isolation evaluation and service reliability can introduce new work. No measured Codeweb service, buyer, payment or renewal establishes additional value.",
+      "failure_scenario": "Every producer change still requires an owner to discover consumers, ask for access, choose revisions, chase runs and paste results into the PR; the paid service only adds a dashboard.",
+      "verdict": "revise",
+      "weakest_assumption": "Enough recurring coordination remains after an adequate two-repo CI setup to pay for service operation and maintenance.",
+      "local_implication": "Free local results remain inputs, not paywalled proof; local convenience must not be attributed to hosted savings.",
+      "paid_implication": "Offer only an agreed check-coordination boundary: take responsibility from eligible revision event to current delivered result or explicit owned exception. Humans retain relationship policy, compatibility requirements and merge decisions.",
+      "minimal_falsification_test": "With one consenting team and an already identified recurring check, compare two change cycles against adequate CI plus ordinary PR links. Record dispatch/chasing/rerun/sharing minutes, setup and policy upkeep separately. Reject this paid job if the CI control completes it equally well or if users still do the coordination. Purchase/renewal requires later real evidence.",
+      "confidence_reason": "Medium confidence that the reported manual invocation exists; low confidence in recurrence scale, buyer fit and paid-attributable net savings. This is a proposed service, not an implemented runner.",
+      "capability_and_proposal_ids": [
+        "PROPOSAL-strategy",
+        "BOUNDARY-charter"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-Y007",
+          "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 127,
+          "passage_locator": "posts 1,5,6",
+          "original_access": "opened_full",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+          "capture_path": "sources/L08/CW-Y007.html"
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Y004",
+          "url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 124,
+          "passage_locator": "posts 1,6,7",
+          "original_access": "opened_full",
+          "limits": "No purchase authority, rejection, approval, or technical breach demonstrated.",
+          "capture_path": null
+        },
+        {
+          "evidence_id": "CW-Y002",
+          "url": "https://forum.cursor.com/t/bugbot-stopped-being-triggered/156739",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 122,
+          "passage_locator": "posts 1,17,19,21",
+          "original_access": "opened_full",
+          "limits": "May pricing changed; do not present April allowance as current. Cancellation is self-report.",
+          "capture_path": null
+        }
+      ],
+      "access_coverage_limits": "Frozen original evidence records inspected; only CW-T018, CW-Y007 and CW-Z012 reopened and captured for this assignment. Other accounts retain their original access limits. No participant, host or service trial was run."
+    },
+    {
+      "id": "L08-F05",
+      "statement": "Handoff is complete only when the recipient can use current evidence without reconstructing it; producing a receipt or summary alone is not result sharing ownership.",
+      "supported_actor_task": "Change author handing work to a reviewer or another repository owner.",
+      "relevant_conditions": "Recipient access to source/revision and check provenance, clear unresolved items and named next owner; ordinary PR history is the baseline.",
+      "evidence_type": "inference from practitioner report and inspected receipt serialization",
+      "evidence_ids": [
+        "CW-Y012",
+        "CW-Z004"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y001",
+        "CW-Z012"
+      ],
+      "strongest_supported_case": "The review-workload account found summaries insufficient. Immutable source-linked records can reduce repeated reconstruction only if the recipient actually receives and understands them.",
+      "strongest_countercase": "Paid review can provide value even on infrequent complex changes, but that is not evidence for Codeweb receipts. Existing specs, CI artifacts and PR history may already complete the handoff; an extra summary may add reading.",
+      "failure_scenario": "The author saves a local receipt, the reviewer cannot resolve its local workspace path or tested revision, and both spend another conversation reconstructing context. A complete producer artifact leaves the recipient job incomplete.",
+      "verdict": "revise",
+      "weakest_assumption": "A concise evidence handoff eliminates reconstruction without shifting it to reviewers or maintainers.",
+      "local_implication": "Task/root-bound local receipts are useful evidence machinery; cross-person portability and consumption are not proven by reading their serialization code. Keep source-policy boundaries visible.",
+      "paid_implication": "Paid sharing must deliver into the existing review destination with access, current revisions, pending-owner state and failure recovery. A separate destination is not independently valuable.",
+      "minimal_falsification_test": "Hand one real task packet to a reviewer unfamiliar with the author session, compare with an ordinary PR/CI packet, and record clarification requests plus correct identification of checked revisions and unresolved work. Fail handoff ownership if they must repeat collection or cannot identify the next owner.",
+      "confidence_reason": "Medium confidence in the handoff mechanism; no direct Codeweb recipient-use experiment or paid outcome. Adjacent accounts are distinct contexts, not a pooled success rate.",
+      "capability_and_proposal_ids": [
+        "CAP-receipt",
+        "CAP-core",
+        "PROPOSAL-strategy"
+      ],
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-Y012",
+          "url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 132,
+          "passage_locator": "Solutions; Artifacts; Where we are now",
+          "original_access": "opened_full",
+          "limits": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents.",
+          "capture_path": null
+        },
+        {
+          "evidence_id": "CW-Z004",
+          "url": "https://securityatlightspeed.substack.com/p/building-a-cloud-agentic-swe-loop",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 112,
+          "passage_locator": "Attempt 1; Attempt 2; Review Findings Were Not Independently Revalidated",
+          "original_access": "opened_full",
+          "limits": "Single experiment; GPT-5.3-Codex. Author explicitly updates earlier API limitation as historical; do not claim a current missing API.",
+          "capture_path": null
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Y001",
+          "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 121,
+          "passage_locator": "posts 1 and 3",
+          "original_access": "opened_full",
+          "limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent.",
+          "capture_path": null
+        },
+        {
+          "evidence_id": "CW-Z012",
+          "url": "https://github.com/oraios/serena/discussions/131",
+          "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+          "record_line": 120,
+          "passage_locator": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+          "original_access": "opened_full",
+          "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once.",
+          "capture_path": "sources/L08/CW-Z012.html"
+        }
+      ],
+      "access_coverage_limits": "Frozen original evidence records inspected; only CW-T018, CW-Y007 and CW-Z012 reopened and captured for this assignment. Other accounts retain their original access limits. No participant, host or service trial was run."
+    }
+  ],
+  "job_ownership_map": [
+    {
+      "stage": "Collection",
+      "product_owns_or_proposes": "Map supported source, resolve named target and collect mapped relations/candidates.",
+      "user_or_project_retains": "Choose task and repository; disclose external/generated context.",
+      "introduced_work": "Discovery scope, access and unsupported-source handling.",
+      "finding_id": "L08-F01"
+    },
+    {
+      "stage": "Context assembly",
+      "product_owns_or_proposes": "Existing target bodies, caller windows and source-linked evidence.",
+      "user_or_project_retains": "Interpret relevance and expand omitted material.",
+      "introduced_work": "Selection mistakes, extra reading and context-window management.",
+      "finding_id": "L08-F01"
+    },
+    {
+      "stage": "Freshness",
+      "product_owns_or_proposes": "Explicit snapshot/reconciliation and ordinary stale advisories exist.",
+      "user_or_project_retains": "Ordinary flow may still require refresh/baseline/recovery actions; automatic host ownership unproven.",
+      "introduced_work": "Worktree/revision changes, stale exceptions, storage and configuration.",
+      "finding_id": "L08-F02"
+    },
+    {
+      "stage": "Consumer inspection",
+      "product_owns_or_proposes": "Identify mapped paths and show call sites.",
+      "user_or_project_retains": "Inspect semantics, dynamic/generated/external consumers and actual intended effects.",
+      "introduced_work": "Investigate unknowns and missing windows.",
+      "finding_id": "L08-F01"
+    },
+    {
+      "stage": "Reuse choice",
+      "product_owns_or_proposes": "Rank lexical or normalized-body similarity candidates.",
+      "user_or_project_retains": "Decide abstraction, intentional duplication, API semantics and business tradeoffs.",
+      "introduced_work": "Reject false matches; maintain revision-scoped exceptions if later implemented.",
+      "finding_id": "L08-F01"
+    },
+    {
+      "stage": "Actual tests",
+      "product_owns_or_proposes": "Structural deltas/receipts; proposed links to actual project checks.",
+      "user_or_project_retains": "Project tooling executes tests; maintainers own test adequacy and behavior decisions.",
+      "introduced_work": "Runner setup, flaky checks, invalid or skipped tests and environment differences.",
+      "finding_id": "L08-F03"
+    },
+    {
+      "stage": "Coordination",
+      "product_owns_or_proposes": "Paid proposal dispatches agreed checks, reruns and reports recovery. No such operation demonstrated here.",
+      "user_or_project_retains": "Define relationships, allowed commands, permissions and escalation policy.",
+      "introduced_work": "Credential/relationship upkeep, isolation review and runner failures.",
+      "finding_id": "L08-F04"
+    },
+    {
+      "stage": "Handoffs",
+      "product_owns_or_proposes": "Persisted local evidence and proposed shared revision-linked states.",
+      "user_or_project_retains": "Recipient must inspect and act; usable transfer not proven.",
+      "introduced_work": "Access repair, clarification and assignment of unknowns.",
+      "finding_id": "L08-F05"
+    },
+    {
+      "stage": "Result sharing",
+      "product_owns_or_proposes": "Proposed delivery of current statuses to normal review surfaces.",
+      "user_or_project_retains": "Merge/release/business approval remains human authority.",
+      "introduced_work": "Duplicate dashboards, stale links, retention/deletion and notification triage.",
+      "finding_id": "L08-F05"
+    }
+  ],
+  "source_references": {
+    "CW-T018": {
+      "url": "https://news.ycombinator.com/item?id=48033774",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 24,
+      "passage_locator": "Story body and author reply 48035884; complete four-comment tree read",
+      "original_access": "opened_full",
+      "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+      "capture_path": "sources/L08/CW-T018.html"
+    },
+    "CW-T022": {
+      "url": "https://www.reddit.com/r/ClaudeCode/comments/1rug14a/claude_wrote_playwright_tests_that_secretly/",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 28,
+      "passage_locator": "Original post and author clarification",
+      "original_access": "opened_partial",
+      "limits": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction.",
+      "capture_path": null
+    },
+    "CW-X001": {
+      "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 35,
+      "passage_locator": "Sections: agents route by task; noisy codebases; output shape; limitations",
+      "original_access": "opened_full",
+      "limits": "Two\u2013three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+      "capture_path": null
+    },
+    "CW-X013": {
+      "url": "https://github.com/openai/codex/issues/24285",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 47,
+      "passage_locator": "Body: Concrete examples from AJENTIC; Expected behavior",
+      "original_access": "opened_partial",
+      "limits": "Public report only; underlying commits and traces not reproduced. Comments unavailable after REST rate limit. One project context, not each phase counted.",
+      "capture_path": null
+    },
+    "CW-Y001": {
+      "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 121,
+      "passage_locator": "posts 1 and 3",
+      "original_access": "opened_full",
+      "limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent.",
+      "capture_path": null
+    },
+    "CW-Y002": {
+      "url": "https://forum.cursor.com/t/bugbot-stopped-being-triggered/156739",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 122,
+      "passage_locator": "posts 1,17,19,21",
+      "original_access": "opened_full",
+      "limits": "May pricing changed; do not present April allowance as current. Cancellation is self-report.",
+      "capture_path": null
+    },
+    "CW-Y004": {
+      "url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 124,
+      "passage_locator": "posts 1,6,7",
+      "original_access": "opened_full",
+      "limits": "No purchase authority, rejection, approval, or technical breach demonstrated.",
+      "capture_path": null
+    },
+    "CW-Y007": {
+      "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 127,
+      "passage_locator": "posts 1,5,6",
+      "original_access": "opened_full",
+      "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+      "capture_path": "sources/L08/CW-Y007.html"
+    },
+    "CW-Y012": {
+      "url": "https://www.beyondautocomplete.nl/ai-writes-faster-than-we-can-review-heres-how-we-fixed-that/",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 132,
+      "passage_locator": "Solutions; Artifacts; Where we are now",
+      "original_access": "opened_full",
+      "limits": "Initial experiment only days old. March 28 and July 10 follow-ups are same underlying team, not independent incidents.",
+      "capture_path": null
+    },
+    "CW-Z004": {
+      "url": "https://securityatlightspeed.substack.com/p/building-a-cloud-agentic-swe-loop",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 112,
+      "passage_locator": "Attempt 1; Attempt 2; Review Findings Were Not Independently Revalidated",
+      "original_access": "opened_full",
+      "limits": "Single experiment; GPT-5.3-Codex. Author explicitly updates earlier API limitation as historical; do not claim a current missing API.",
+      "capture_path": null
+    },
+    "CW-Z007": {
+      "url": "https://github.com/oraios/serena/issues/1814",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 115,
+      "passage_locator": "Summary; Additional suggestion; Note on scoping",
+      "original_access": "opened_partial",
+      "limits": "API rate-limited; full body read, comment completeness unverified. First-query crash fix merged Aug 20 (#1848); later-query fix #2007 remains open. No blanket fixed claim.",
+      "capture_path": null
+    },
+    "CW-Z011": {
+      "url": "https://github.com/oraios/serena/issues/1432",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 119,
+      "passage_locator": "Capability matrix in body",
+      "original_access": "opened_partial",
+      "limits": "Full body only; comments unavailable. Closed with #1434, but linked PR inaccessible, so resolution not verified.",
+      "capture_path": null
+    },
+    "CW-Z012": {
+      "url": "https://github.com/oraios/serena/discussions/131",
+      "record_path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "record_line": 120,
+      "passage_locator": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+      "original_access": "opened_full",
+      "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once.",
+      "capture_path": "sources/L08/CW-Z012.html"
+    }
+  },
+  "capability_and_proposal_references": {
+    "CAP-context": {
+      "path": "inputs/scripts/context-pack.mjs",
+      "passage": "buildContextPack and ordinary context output; evidenceContext branch"
+    },
+    "CAP-similarity": {
+      "path": "inputs/scripts/find-similar.mjs",
+      "passage": "candidate shingling, non-test function/method filtering, capBody, matches.slice, count/more payload"
+    },
+    "CAP-freshness": {
+      "path": "inputs/scripts/brief.mjs",
+      "passage": "checkStaleness and codeweb_refresh advisory"
+    },
+    "CAP-receipt": {
+      "path": "inputs/scripts/lib/evidence-service.mjs",
+      "passage": "evidenceContext, evidenceReview, failure, renderEvidence"
+    },
+    "CAP-core": {
+      "path": "inputs/scripts/lib/evidence-core.mjs",
+      "passage": "questionsOf, analysisOf, reconcileQuestions, reconcileReceipt; external-consumers-unknown and needs-recheck"
+    },
+    "PROPOSAL-strategy": {
+      "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+      "passage": "The product bet; Make the useful path feel native; Connect developer value to a paid team job"
+    },
+    "PROPOSAL-sprint": {
+      "path": "inputs/reports/product-proof-sprint-plan/README.md",
+      "passage": "First concrete deliverable; Sprint sequence steps 1, 3, 4; Proposed decision gate"
+    },
+    "BOUNDARY-charter": {
+      "path": "inputs/CHARTER.md",
+      "passage": "Invariants; The boundary: free forever / Teams"
+    }
+  },
+  "source_addendum": "sources/L08/SOURCE-ADDENDUM.json",
+  "test_status": "All falsification tests proposed only; no experiment, outreach or product edits authorized/executed."
+}

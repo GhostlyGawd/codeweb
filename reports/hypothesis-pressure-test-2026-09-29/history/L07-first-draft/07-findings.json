@@ -1,0 +1,542 @@
+{
+  "schema_version": 1,
+  "assignment": "L07",
+  "issue_identifier": "COD-86",
+  "issue_id": "d89a661f-67ec-44c9-892d-c91cc346da58",
+  "run_id": "e8fdf514-cafb-4493-a52c-c2d7970115da",
+  "session_id": "01a0f090-4bd4-7132-ba85-86a11ee00e91",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "overall_verdict": "narrow",
+  "conclusion": "Only a conditional inspection-aid hypothesis survives; consequential task expansion attributable to Codeweb remains unproven.",
+  "findings": [
+    {
+      "id": "L07-F01",
+      "statement": "A plausible expansion candidate is independently scoping a shared-utility extension across unfamiliar consumers; the corpus suggests an inspection aid but does not establish that Codeweb unlocks that task.",
+      "evidence_type": [
+        "first_person_report",
+        "repository_documented_capability",
+        "inference",
+        "untested_proposed_behavior"
+      ],
+      "supported_actor": "Agent-heavy maintainer extending shared code in their own repository; strongest pain record has unknown occupational segment, so ordinary-developer generalization remains conditional.",
+      "task": "Extend an existing utility while preserving callers in other modules and decide whether an existing implementation is suitable for reuse.",
+      "conditions": [
+        "Current map covers the relevant source and named consumers.",
+        "Developer understands intended behavior and can inspect candidate bodies.",
+        "Scope uncertainty, rather than missing permissions or business requirements, is the limiting work.",
+        "Native search/LSP baseline leaves a material consumer or candidate undiscovered."
+      ],
+      "evidence_ids": [
+        "CW-T018",
+        "CW-P003"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X001",
+        "CW-X003",
+        "CW-Z006"
+      ],
+      "capability_refs": [
+        "L07-CAP01",
+        "L07-CAP02",
+        "L07-CAP03"
+      ],
+      "strongest_supported_case": "CW-T018 reports working features accompanied by duplicated utilities and costly upfront review; CW-P003 reports reference-related refactor breakage. A source-linked consumer or candidate can direct inspection before the change.",
+      "strongest_countercase": "Native refactors already succeed (CW-X003); retrieval may add overhead without recall gains (CW-X001). Finding similar code does not settle whether it should share a lifecycle (CW-Z006).",
+      "causal_mechanism": [
+        "Reported duplicate/reference burden creates a candidate information bottleneck.",
+        "Mapped dependents and candidate bodies expose concrete places to inspect.",
+        "Inspection confirms a missed consumer or suitable implementation and changes the edit plan.",
+        "Developer executes a bounded change with ordinary behavior checks and less expert scoping help.",
+        "Only the first two steps have pain/documentation support; decision change, reduced help and completion are unobserved for Codeweb."
+      ],
+      "failure_scenario": "The brief repeats all native findings, or recommends merging helpers whose business rules differ; interpretation costs exceed saved search effort.",
+      "verdict": "narrow",
+      "weakest_assumption": "A missing structural fact is the binding constraint on undertaking the task rather than merely a convenient lookup.",
+      "local_implication": "Retain conditional pre-edit scoping as a free local hypothesis; avoid a demonstrated capability-expansion claim.",
+      "paid_implication": "Any single-repository inspection gain belongs to free local value and cannot justify a hosted bill.",
+      "confidence_reason": "Moderate support for reported pain and available interfaces; low confidence in Codeweb-specific task expansion because no observed comparison bridges the mechanism.",
+      "minimal_falsification_test": "L07-T01: a real postponed shared-utility task with a recorded native baseline; falsified for that case if Codeweb adds no correct plan change or does not reduce the stated scoping/help barrier.",
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "evidence_type": "first_person_report",
+          "actor": "unknown",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T00:51:36.468724+00:00",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "capture_pointer": "sources/L07/CW-T018.html",
+          "reopened_this_assignment": true
+        },
+        {
+          "evidence_id": "CW-P003",
+          "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+          "passage_pointer": "Context and Category H; all body categories read",
+          "evidence_type": "first_person_report",
+          "actor": "Python desktop application developer",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T00:38:53.019153+00:00",
+          "limits": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "evidence_type": "independent_measurement",
+          "actor": "tool builder/researcher",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:26:58.170375+00:00",
+          "limits": "Two\u2013three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        },
+        {
+          "evidence_id": "CW-X003",
+          "original_url": "https://baransel.dev/post/replaced-entire-dev-workflow-with-claude-code/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:37",
+          "passage_pointer": "Refactoring \u2014 Surprisingly Good; Where It Falls Short",
+          "evidence_type": "first_person_report",
+          "actor": "developer working with a team",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:26:58.170375+00:00",
+          "limits": "Reporter-confirmed success for this task only. Business rules outside code remain a stated limitation; linked repositories not reproduced.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+          "passage_pointer": "Refactoring at scale; What humans still do",
+          "evidence_type": "first_person_report",
+          "actor": "founding engineer; developer-tool builder",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:46:44.657972+00:00",
+          "limits": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited.",
+          "capture_pointer": "sources/L07/CW-Z006.html",
+          "reopened_this_assignment": true
+        }
+      ]
+    },
+    {
+      "id": "L07-F02",
+      "statement": "Inspection evidence cannot grant permission to enlarge a change safely; mapped completeness and passing structure cannot establish runtime or semantic compatibility.",
+      "evidence_type": [
+        "repository_documented_capability",
+        "first_person_report",
+        "maintainer_confirmation",
+        "inference"
+      ],
+      "supported_actor": "Maintainer changing shared entry points, generated interfaces, dynamic calls or similar-looking implementations.",
+      "task": "Choose the scope and verification plan for a cross-module refactor or deletion.",
+      "conditions": [
+        "Dynamic/generated consumers may fall outside extraction.",
+        "Behavioral requirements and suitable tests must be supplied independently.",
+        "Similarity is only a candidate signal."
+      ],
+      "evidence_ids": [
+        "CW-Z007",
+        "CW-Z011",
+        "CW-Z005",
+        "CW-Z006"
+      ],
+      "opposing_evidence_ids": [
+        "CW-P003",
+        "CW-T018"
+      ],
+      "capability_refs": [
+        "L07-CAP01",
+        "L07-CAP03",
+        "L07-CAP04"
+      ],
+      "strongest_supported_case": "Codeweb documentation explicitly restricts list completeness to mapped relationships and rejects behavioral correctness from structural green. Adjacent-tool generated-symbol and empty-reference incidents illustrate why absence needs qualification.",
+      "strongest_countercase": "Missed-reference failures and reuse complaints still leave meaningful room for better inspection; refusing a safety guarantee does not imply the map is useless.",
+      "causal_mechanism": [
+        "Returned mapped facts narrow inspection targets.",
+        "Unmapped entry points and intended behavior remain unresolved.",
+        "A larger edit amplifies those unresolved obligations unless actual tests and source review address them."
+      ],
+      "failure_scenario": "An unmapped callback is treated as absent and deleted, or similar utilities are unified despite different semantics; the structural result is clean while behavior changes. This scenario is hypothetical, not a reported Codeweb incident.",
+      "verdict": "reject",
+      "weakest_assumption": "More visible mapped relationships are an adequate proxy for the full set of obligations of a larger change.",
+      "local_implication": "Reject the broader safe-change claim; use the brief to identify both inspection targets and unresolved questions.",
+      "paid_implication": "Shared receipts can report actual check states but cannot turn the same static evidence into a compatibility guarantee.",
+      "confidence_reason": "High confidence in the documented limitation; external examples are adjacent/historical and do not establish a present Codeweb defect.",
+      "minimal_falsification_test": "L07-T01 includes a real dynamic/generated boundary where present. Reject the expansion claim for that case if the user mistakes mapped completeness for safety or omits a maintainer-required behavioral check.",
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-Z007",
+          "original_url": "https://github.com/oraios/serena/issues/1814",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:115",
+          "passage_pointer": "Summary; Additional suggestion; Note on scoping",
+          "evidence_type": "first_person_report",
+          "actor": "developer working in Kibana monorepo",
+          "source_access": "opened_partial",
+          "retrieved_at_original": "2026-09-28T01:46:44.657972+00:00",
+          "limits": "API rate-limited; full body read, comment completeness unverified. First-query crash fix merged Aug 20 (#1848); later-query fix #2007 remains open. No blanket fixed claim.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        },
+        {
+          "evidence_id": "CW-Z011",
+          "original_url": "https://github.com/oraios/serena/issues/1432",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:119",
+          "passage_pointer": "Capability matrix in body",
+          "evidence_type": "maintainer_confirmation",
+          "actor": "maintainer / contributor",
+          "source_access": "opened_partial",
+          "retrieved_at_original": "2026-09-28T01:46:44.657972+00:00",
+          "limits": "Full body only; comments unavailable. Closed with #1434, but linked PR inaccessible, so resolution not verified.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        },
+        {
+          "evidence_id": "CW-Z005",
+          "original_url": "https://omeratagun.net/blog/ai-coding-agents-experiment",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:113",
+          "passage_pointer": "Chapters 1\u20134; What I Learned",
+          "evidence_type": "first_person_report",
+          "actor": "developer of personal diagram editor and browser game",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:46:44.657972+00:00",
+          "limits": "Historical 2025 account, not a current Codex performance finding; one author/context bundle rather than counting each comparison as independent.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+          "passage_pointer": "Refactoring at scale; What humans still do",
+          "evidence_type": "first_person_report",
+          "actor": "founding engineer; developer-tool builder",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:46:44.657972+00:00",
+          "limits": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited.",
+          "capture_pointer": "sources/L07/CW-Z006.html",
+          "reopened_this_assignment": true
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-P003",
+          "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+          "passage_pointer": "Context and Category H; all body categories read",
+          "evidence_type": "first_person_report",
+          "actor": "Python desktop application developer",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T00:38:53.019153+00:00",
+          "limits": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        },
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "evidence_type": "first_person_report",
+          "actor": "unknown",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T00:51:36.468724+00:00",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "capture_pointer": "sources/L07/CW-T018.html",
+          "reopened_this_assignment": true
+        }
+      ]
+    },
+    {
+      "id": "L07-F03",
+      "statement": "The strongest observed expansion belongs to existing coding-agent workflows; a separate incremental Codeweb effect remains unresolved.",
+      "evidence_type": [
+        "first_person_report",
+        "independent_measurement",
+        "inference"
+      ],
+      "supported_actor": "Individual revisiting old projects; separately, an experienced founding engineer/tool builder. Neither is a representative sample.",
+      "task": "Resume postponed maintenance or enter an unfamiliar implementation domain.",
+      "conditions": [
+        "Bounded goals, human architectural judgment, runnable stages and verification remain available.",
+        "Codeweb must be compared with a functioning native workflow, not unaided manual work."
+      ],
+      "evidence_ids": [
+        "CW-Z001",
+        "CW-Z006",
+        "CW-T020",
+        "CW-X001"
+      ],
+      "opposing_evidence_ids": [
+        "CW-T018",
+        "CW-P003"
+      ],
+      "capability_refs": [],
+      "strongest_supported_case": "The reopened CW-Z006 article attributes undertaking a Rust tool to the Claude workflow; CW-Z001 describes reviving old projects with bounded native-agent work. These are self-reports of the host workflow, not Codeweb outcomes.",
+      "strongest_countercase": "Native success coexists with reuse and reference failures. It leaves open a narrower class of unfamiliar shared-code tasks where extra structural evidence might change the attainable outcome.",
+      "causal_mechanism": [
+        "Agents reduce mechanical implementation and orientation effort.",
+        "Some authors undertake previously deferred work.",
+        "Neither report isolates Codeweb as the cause; transferring this expansion to a structural brief would misattribute host capability."
+      ],
+      "failure_scenario": "A study compares Codeweb plus an agent with unaided manual work, credits all completion gains to Codeweb, and counts faster lookup as a newly achievable task.",
+      "verdict": "unresolved_from_existing_evidence",
+      "weakest_assumption": "The incremental brief, rather than the host agent and ordinary verification, changes what the developer can undertake.",
+      "local_implication": "Require a recorded native-agent comparison and a predeclared task/help barrier before claiming expansion. Faster lookup alone can still be useful convenience.",
+      "paid_implication": "A host subscription or greater coding-agent throughput is not evidence of willingness to buy Codeweb coordination.",
+      "confidence_reason": "Original passages support attribution boundaries; no controlled Codeweb completion/help comparison was found in the reviewed packet.",
+      "minimal_falsification_test": "L07-T01 keeps host/model, tests and source access constant. If both conditions complete with the same expert assistance and plan quality, classify any lookup gain as efficiency rather than capability expansion.",
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-Z001",
+          "original_url": "https://shan-verse.com/blog/codex-after-the-update/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+          "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+          "evidence_type": "first_person_report",
+          "actor": "individual maintaining personal projects",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:46:44.657972+00:00",
+          "limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts.",
+          "capture_pointer": "sources/L07/CW-Z001.html",
+          "reopened_this_assignment": true
+        },
+        {
+          "evidence_id": "CW-Z006",
+          "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+          "passage_pointer": "Refactoring at scale; What humans still do",
+          "evidence_type": "first_person_report",
+          "actor": "founding engineer; developer-tool builder",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:46:44.657972+00:00",
+          "limits": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited.",
+          "capture_pointer": "sources/L07/CW-Z006.html",
+          "reopened_this_assignment": true
+        },
+        {
+          "evidence_id": "CW-T020",
+          "original_url": "https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:26",
+          "passage_pointer": "Posts 1, 4 and 11",
+          "evidence_type": "first_person_report",
+          "actor": "self-described non-coder maintaining a PHP site",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T00:51:36.468724+00:00",
+          "limits": "Posts 1\u201315 and part of 16 read; no full-thread credit. Progress is reported, migration completion not established. Reported progress and successful workflow adjustment do not establish final migration completion or current outcome. Later additive review: Original reporter reports improvement after expanding bounded iteration and correcting sandbox assumptions; modernization completion not claimed.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        },
+        {
+          "evidence_id": "CW-X001",
+          "original_url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+          "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+          "evidence_type": "independent_measurement",
+          "actor": "tool builder/researcher",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:26:58.170375+00:00",
+          "limits": "Two\u2013three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-T018",
+          "original_url": "https://news.ycombinator.com/item?id=48033774",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+          "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+          "evidence_type": "first_person_report",
+          "actor": "unknown",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T00:51:36.468724+00:00",
+          "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality.",
+          "capture_pointer": "sources/L07/CW-T018.html",
+          "reopened_this_assignment": true
+        },
+        {
+          "evidence_id": "CW-P003",
+          "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+          "passage_pointer": "Context and Category H; all body categories read",
+          "evidence_type": "first_person_report",
+          "actor": "Python desktop application developer",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T00:38:53.019153+00:00",
+          "limits": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        }
+      ]
+    },
+    {
+      "id": "L07-F04",
+      "statement": "Cross-repository checking is a separate possible paid task, but current evidence supports a coordination question rather than demonstrated capability expansion.",
+      "evidence_type": [
+        "first_person_report",
+        "strategy_proposal",
+        "inference"
+      ],
+      "supported_actor": "Developer champion coordinating backend/frontend repositories; purchase authority unknown.",
+      "task": "Assemble revision-specific compatibility-check results across explicitly related repositories.",
+      "conditions": [
+        "Supported checks exist and actual producer/consumer revisions are known.",
+        "Permissions and source boundaries allow the service to operate.",
+        "Ordinary CI fails to remove a recurring coordination burden adequately."
+      ],
+      "evidence_ids": [
+        "CW-Y007"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y004",
+        "CW-Z005"
+      ],
+      "capability_refs": [
+        "L07-CAP05"
+      ],
+      "strongest_supported_case": "CW-Y007 records manual cross-repo checks and a near-term constraint on monorepo migration, suggesting repeated coordination work.",
+      "strongest_countercase": "The same reporter accepts CI as a suitable alternative; CW-Y004 adds source-isolation constraints without establishing purchase authority. Local graph evidence cannot establish cross-service behavior (CW-Z005).",
+      "causal_mechanism": [
+        "Known consumer relationships identify checks to coordinate.",
+        "A proposed service runs agreed checks at exact revisions and assembles statuses.",
+        "Reduced chasing might let the team undertake a coordinated change with less help.",
+        "The service execution, net saved coordination work and buyer response are not demonstrated."
+      ],
+      "failure_scenario": "A normal CI job checking out both repositories gives the same actionable result; a hosted evidence layer adds setup and security evaluation without reducing coordination.",
+      "verdict": "unresolved_from_existing_evidence",
+      "weakest_assumption": "Coordination is the material remaining barrier after a competent CI alternative is available.",
+      "local_implication": "Do not extend single-repo static claims into cross-repo completeness.",
+      "paid_implication": "Test separately against ordinary CI; do not charge attribution from the free local scoping test to paid value.",
+      "confidence_reason": "Sparse public champion evidence, no Codeweb buyer or completed managed-check trial; frozen strategy labels the mechanism proposed.",
+      "minimal_falsification_test": "L07-T02: on one authorized real cross-repo change, first assemble exact-revision checks in ordinary CI and record coordination steps. If that removes the burden, reject extra managed-service value for that case. No pilot or outreach executed here.",
+      "supporting_sources": [
+        {
+          "evidence_id": "CW-Y007",
+          "original_url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+          "passage_pointer": "posts 1,5,6",
+          "evidence_type": "first_person_report",
+          "actor": "Developer in multi-repo team",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:47:44.351912+00:00",
+          "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        }
+      ],
+      "opposing_sources": [
+        {
+          "evidence_id": "CW-Y004",
+          "original_url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:124",
+          "passage_pointer": "posts 1,6,7",
+          "evidence_type": "first_person_report",
+          "actor": "Organization evaluator with compliance constraints",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:47:44.351912+00:00",
+          "limits": "No purchase authority, rejection, approval, or technical breach demonstrated.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        },
+        {
+          "evidence_id": "CW-Z005",
+          "original_url": "https://omeratagun.net/blog/ai-coding-agents-experiment",
+          "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:113",
+          "passage_pointer": "Chapters 1\u20134; What I Learned",
+          "evidence_type": "first_person_report",
+          "actor": "developer of personal diagram editor and browser game",
+          "source_access": "opened_full",
+          "retrieved_at_original": "2026-09-28T01:46:44.657972+00:00",
+          "limits": "Historical 2025 account, not a current Codex performance finding; one author/context bundle rather than counting each comparison as independent.",
+          "capture_pointer": null,
+          "reopened_this_assignment": false
+        }
+      ]
+    }
+  ],
+  "capability_sources": [
+    {
+      "id": "L07-CAP01",
+      "path": "inputs/docs/cli.md:73",
+      "passage": "Context analysis status: mapped scope, list/source evidence completeness, lexical windows, freshness and unknowns",
+      "original_url": "https://github.com/GhostlyGawd/codeweb/blob/main/docs/cli.md",
+      "boundary": "Frozen bytes control; mutable main URL is an origin locator, not a claim about current main."
+    },
+    {
+      "id": "L07-CAP02",
+      "path": "inputs/scripts/lib/tool-specs.mjs:26",
+      "passage": "TOOL_SPECS entries for dependents, impact, explain, context and find_similar",
+      "original_url": "https://github.com/GhostlyGawd/codeweb/blob/main/scripts/lib/tool-specs.mjs",
+      "boundary": "Interface inspection, not executed runtime proof."
+    },
+    {
+      "id": "L07-CAP03",
+      "path": "inputs/README.md:310",
+      "passage": "Baseline/diff loop; unsupported layouts; skipped checks; refresh drops overlap evidence; behavior caveat",
+      "original_url": "https://github.com/GhostlyGawd/codeweb/blob/main/README.md",
+      "boundary": "Frozen documentation, no host run performed."
+    },
+    {
+      "id": "L07-CAP04",
+      "path": "inputs/docs/ci-gate.md:91",
+      "passage": "Passing structural gate does not establish behavior; no mapped callers is not unused",
+      "original_url": "https://github.com/GhostlyGawd/codeweb/blob/main/docs/ci-gate.md",
+      "boundary": "Frozen documentation."
+    },
+    {
+      "id": "L07-CAP05",
+      "path": "inputs/CHARTER.md",
+      "passage": "The boundary: free forever / Teams; all local single-repo work stays free",
+      "original_url": "https://github.com/GhostlyGawd/codeweb/blob/main/CHARTER.md",
+      "boundary": "Product constraint, not demand evidence."
+    }
+  ],
+  "tests": [
+    {
+      "id": "L07-T01",
+      "status": "proposed_not_executed",
+      "task": "One real deferred extension of a shared utility with cross-module consumers, in a repository maintained by the consenting developer. Do not manufacture a postponement or select only a task known to favor Codeweb.",
+      "before": "Record why the task is deferred or needs expert help, the intended behavior, the native agent/search/LSP plan, unresolved consumer questions and a time/help budget before showing the brief. Keep expert advice from contaminating the baseline.",
+      "comparison": "Use a matched second task and counterbalance order for any comparative timing; a same-task reveal can test additional plan changes but is not an independent time trial. Hold host/model, source revision access and behavior checks constant.",
+      "measure": [
+        "Correct additional consumer/reuse decision, independently adjudicated by a maintainer with complete task knowledge.",
+        "Whether the predeclared blocker is removed and a bounded change completes with ordinary tests and relevant behavior checks.",
+        "Expert interventions/minutes and all setup, reading, recovery, implementation and verification effort.",
+        "Unsafe assumptions, unnecessary edits, unresolved dynamic/generated consumers and baseline contamination."
+      ],
+      "success": "Evidence of expansion in this case requires an objectively useful plan change tied to Codeweb evidence plus removal of the recorded task/help barrier, without additional material errors or shifting equivalent effort to reviewers. Willingness alone or faster lookup does not qualify.",
+      "failure": "No incremental correct decision; same help still required; increased total burden; or false confidence causing a missed obligation. One case can refute the proposed mechanism for that task, not estimate prevalence.",
+      "source_findings": [
+        "L07-F01",
+        "L07-F02",
+        "L07-F03"
+      ]
+    },
+    {
+      "id": "L07-T02",
+      "status": "proposed_not_executed",
+      "task": "One real cross-repo producer/consumer change with existing supported checks and permission.",
+      "comparison": "Document current manual coordination, then test whether ordinary CI at exact revisions removes it before attributing any residual work to a hosted service.",
+      "failure": "CI solves the recurring burden, required checks cannot be specified, or permitted source boundaries prevent coordination.",
+      "source_findings": [
+        "L07-F04"
+      ]
+    }
+  ],
+  "access_and_coverage_limits": [
+    "No other pressure-test lens outputs were read during this first draft; shared filesystem isolation is procedural only. Lead must independently verify runtime session freshness.",
+    "All 192 manifest-listed input files were hash-checked at start and delivery. Full packet was available; this lens used selected original records, capability files, the frozen strategy/proof sprint and prior research review, not an exhaustive reread of every original source.",
+    "Three targeted original pages reopened and captured separately; remaining external cases rely on frozen canonical records and their original access limits. Captured HTML is a separate HTTP fetch from the inspected rendered web response.",
+    "No Codeweb host experiment, participant observation, customer contact, product edit or paid trial occurred. Missing external evidence is not failed technical delivery of this report.",
+    "Historical source versions/resolutions remain bounded: CW-Z007 has a limited first-query fix and an unresolved later-query account in the frozen record; CW-Z011 resolution is unverified. No current runtime defect is asserted.",
+    "Public author self-reports, builder accounts and one small retrieval study do not establish prevalence or incremental Codeweb demand. Reopens add provenance, not new independent customer incidents."
+  ],
+  "source_reopens": "sources/L07/REOPENS.json"
+}

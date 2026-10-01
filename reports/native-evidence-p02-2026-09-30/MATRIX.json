@@ -1,0 +1,2728 @@
+{
+  "schema_version": 1,
+  "compiled_at": "2026-10-01T02:32:14.994767+00:00",
+  "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+  "status": "independently_approved_factual_delivery_with_qualifications",
+  "cases": [
+    {
+      "case_id": "TECH-01",
+      "ned_ids": [
+        "NED-01",
+        "NED-03"
+      ],
+      "surface": "CLI similarity text/JSON",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-01",
+        "nedIds": [
+          "NED-01",
+          "NED-03"
+        ],
+        "surface": "CLI similarity text/JSON",
+        "outcome": "pass",
+        "expected": "Empty, supported-zero and incomplete maps use bounded source comparison language with preserved exits and JSON.",
+        "observed": "Own no-match text is bounded; selected ac_34 runs separately exercise empty/supported-zero/incomplete controls, missing bodies, and exit-2 errors. JSON does not add behavioral or safety claims.",
+        "evidenceRefs": [
+          "receipts/T46-similar-zero-text.json",
+          "receipts/T47-similar-zero-json.json",
+          "receipts/T62-targeted-suites.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Selected tests are supplemental source assertions; no host delivery inferred."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-02",
+      "ned_ids": [
+        "NED-01"
+      ],
+      "surface": "CLI/MCP deadcode JSON",
+      "outcome": "fail",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-02",
+        "nedIds": [
+          "NED-01"
+        ],
+        "surface": "CLI/MCP deadcode JSON",
+        "outcome": "fail",
+        "expected": "Incomplete or unavailable source must not assert safe deletion.",
+        "observed": "An incomplete graph pointing to nonexistent missing.mjs returns exit 0 and summary \"1 safe to delete\"; MCP passes that same successful payload. CLI stderr has an incompleteness warning, but MCP response does not carry it. Empty JSON also retains the safe-to-delete tier label.",
+        "evidenceRefs": [
+          "receipts/T75-empty-deadcode-json.json",
+          "receipts/T76-incomplete-deadcode-json.json",
+          "receipts/T77-incomplete-deadcode-mcp.json"
+        ],
+        "severity": "high",
+        "owner": "Codex P-03",
+        "nextStep": "Repair safety wording/provenance on JSON and MCP without silently changing compatibility; review and rerun incomplete/missing-source cases.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-03",
+      "ned_ids": [
+        "NED-01",
+        "NED-06"
+      ],
+      "surface": "CLI structural diff/review",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-03",
+        "nedIds": [
+          "NED-01",
+          "NED-06"
+        ],
+        "surface": "CLI structural diff/review",
+        "outcome": "pass",
+        "expected": "Structural green and unchanged evidence cannot establish behavioral correctness.",
+        "observed": "Green structural diff marks behavior not-evaluated; receipt repair unchanged preserves unresolved questions, separates legacy verdict, and notes mapped/runtime limitations.",
+        "evidenceRefs": [
+          "receipts/T56-structural-green-with-failed-oracle.json",
+          "receipts/T35-verify-repair.json",
+          "receipts/T92-own-receipt-repair-review.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-04",
+      "ned_ids": [
+        "NED-02",
+        "NED-07"
+      ],
+      "surface": "CLI exact selector impact/context",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-04",
+        "nedIds": [
+          "NED-02",
+          "NED-07"
+        ],
+        "surface": "CLI exact selector impact/context",
+        "outcome": "pass",
+        "expected": "Known low-fan-in edit shows its relevant mapped consumer and same-file relationship.",
+        "observed": "subject.mjs:low returns consequential.mjs:consequential and subject.mjs:local; context supplies source windows and external/unmapped limits. Popular\u00d78 consumers do not displace these results.",
+        "evidenceRefs": [
+          "receipts/T00-extract-fixture.json",
+          "receipts/T01-cli-exact-impact.json",
+          "receipts/T02-cli-exact-context.json",
+          "receipts/T64-fresh-context.json",
+          "source-opening.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Initial extraction-before-.codeweb fixture had directory staleness; T64 controls fresh state."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-05",
+      "ned_ids": [
+        "NED-02"
+      ],
+      "surface": "MCP exact selector impact/context",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-05",
+        "nedIds": [
+          "NED-02"
+        ],
+        "surface": "MCP exact selector impact/context",
+        "outcome": "pass",
+        "expected": "Same known target works through actual JSON-RPC invocation.",
+        "observed": "Direct stdio JSON-RPC returns both low consumers and bounded source context for subject.mjs:low.",
+        "evidenceRefs": [
+          "receipts/T03-mcp-exact-impact.json",
+          "receipts/T04-mcp-exact-context.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Direct server invocation is technical MCP transport proof, not native host discovery."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-06",
+      "ned_ids": [
+        "NED-02",
+        "NED-07"
+      ],
+      "surface": "Pre-edit hook direct invocation known edit",
+      "outcome": "fail",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-06",
+        "nedIds": [
+          "NED-02",
+          "NED-07"
+        ],
+        "surface": "Pre-edit hook direct invocation known edit",
+        "outcome": "fail",
+        "expected": "Known low edit must concern that symbol and show its consequential consumer.",
+        "observed": "Payload names low in symbol and old/new strings, but output shows popular\u00d78 (or fresh popular\u00d75), its unrelated callers, and no low/consequential consumer. File/popular labels are truthful; failure is target selection and relevance, not a false semantic assertion.",
+        "evidenceRefs": [
+          "receipts/T05-hook-known-low-edit.json",
+          "receipts/T65-fresh-hook.json"
+        ],
+        "severity": "high",
+        "owner": "Codex P-03",
+        "nextStep": "Resolve an available supported selector or edit target, or preserve an explicitly file-only summary while ensuring relevant target evidence arrives through the claimed path.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-07",
+      "ned_ids": [
+        "NED-02"
+      ],
+      "surface": "Pre-edit hook direct invocation file-only",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-07",
+        "nedIds": [
+          "NED-02"
+        ],
+        "surface": "Pre-edit hook direct invocation file-only",
+        "outcome": "pass",
+        "expected": "File-only input explicitly labels a file summary and popularity selection.",
+        "observed": "Output says editing subject.mjs, counts all symbols/dependent edges, labels popular as most depended-on; it does not call popular the edited target.",
+        "evidenceRefs": [
+          "receipts/T06-hook-file-only.json",
+          "receipts/T65-fresh-hook.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "No claim that this file summary satisfies the known-target case."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-08",
+      "ned_ids": [
+        "NED-03"
+      ],
+      "surface": "CLI similarity conflicting contracts/different syntax/missing bodies/cap",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-08",
+        "nedIds": [
+          "NED-03"
+        ],
+        "surface": "CLI similarity conflicting contracts/different syntax/missing bodies/cap",
+        "outcome": "pass",
+        "expected": "Candidates have source links and ranking caps; similarity never establishes substitutability.",
+        "observed": "Conflicting tax/discount candidates score alike but text tells reader to inspect source/tests. Different-syntax equivalent only self-matches. Missing-body node counts toward scanned but contributes no candidate. Own huge body reports bodyLineCap 400; selected ac_34 matching-tail control verifies exclusion beyond cap.",
+        "evidenceRefs": [
+          "receipts/T41-extract-similarity.json",
+          "receipts/T42-similar-conflicting-contract.json",
+          "receipts/T43-similar-json-cap.json",
+          "receipts/T44-similar-expand.json",
+          "receipts/T45-similar-equivalent-syntax.json",
+          "receipts/T48-similar-body-cap.json",
+          "receipts/T62-targeted-suites.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Own tax-equivalence statement is mathematical under fixture nonnegative-cent inputs, not a general semantic equivalence proof. Numeric constants are omitted by lexical shingles."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-09",
+      "ned_ids": [
+        "NED-03"
+      ],
+      "surface": "MCP similarity discovery and invocation",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-09",
+        "nedIds": [
+          "NED-03"
+        ],
+        "surface": "MCP similarity discovery and invocation",
+        "outcome": "pass",
+        "expected": "MCP description names comparison limits and tool returns source-linked candidates.",
+        "observed": "Raw tools/list contains bounded comparison description; corrected body-only invocation succeeds with source locations and cap fields. First unsupported k invocation is preserved as probe error.",
+        "evidenceRefs": [
+          "receipts/T85-mcp-tools-list.json",
+          "receipts/T49-mcp-similarity.json",
+          "receipts/T74-corrected-mcp-similarity.json",
+          "SUPPLEMENT.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-10",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "surface": "CLI supported-zero versus unmapped/missing/corrupt/invocation",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-10",
+        "nedIds": [
+          "NED-04"
+        ],
+        "surface": "CLI supported-zero versus unmapped/missing/corrupt/invocation",
+        "outcome": "pass",
+        "expected": "Supported empty results, a miss, missing map, invalid JSON, and malformed invocation remain distinguishable.",
+        "observed": "Supported zero exit0/count0; unmapped exit1/found false; missing map and invalid JSON exit2 with distinct diagnostics; typo invocation exit2 with suggested --impact.",
+        "evidenceRefs": [
+          "receipts/T08-cli-zero.json",
+          "receipts/T09-cli-unmapped-symbol.json",
+          "receipts/T10-cli-missing-map.json",
+          "receipts/T11-cli-corrupt-map.json",
+          "receipts/T20-cli-invalid-invocation.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-11",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "surface": "MCP supported-zero versus unmapped/missing/corrupt/invocation",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-11",
+        "nedIds": [
+          "NED-04"
+        ],
+        "surface": "MCP supported-zero versus unmapped/missing/corrupt/invocation",
+        "outcome": "pass",
+        "expected": "Transport responses retain source-state distinctions.",
+        "observed": "Supported zero payload succeeds; unmapped found false is a successful bounded result; missing/corrupt map and invalid selector type are isError with distinct messages.",
+        "evidenceRefs": [
+          "receipts/T21-mcp-missing-map.json",
+          "receipts/T22-mcp-corrupt-map.json",
+          "receipts/T23-mcp-zero.json",
+          "receipts/T24-mcp-unmapped.json",
+          "receipts/T25-mcp-invalid-selector.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-12",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "surface": "CLI/MCP structurally corrupt JSON map",
+      "outcome": "fail",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-12",
+        "nedIds": [
+          "NED-04"
+        ],
+        "surface": "CLI/MCP structurally corrupt JSON map",
+        "outcome": "fail",
+        "expected": "Malformed graph structure must remain distinguishable from a legitimate unmapped target or supported-empty map.",
+        "observed": "nodes:{} parses; CLI normalizes it into found:false exit1, while MCP calls it EMPTY, claims built with --allow-empty/no supported source, and emits isError. Neither reports invalid structure.",
+        "evidenceRefs": [
+          "receipts/T12-cli-invalid-shape.json",
+          "receipts/T96-invalid-shape-mcp.json"
+        ],
+        "severity": "medium",
+        "owner": "Codex P-03",
+        "nextStep": "Validate required graph shape before normalizing and retain corruption-specific recovery across transports.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-13",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "surface": "CLI context and stamped pre-hook freshness",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-13",
+        "nedIds": [
+          "NED-04"
+        ],
+        "surface": "CLI context and stamped pre-hook freshness",
+        "outcome": "pass",
+        "expected": "Stale supported facts carry a stale state and usable refresh step.",
+        "observed": "CLI reports stale target/context; fresh refresh control has no stale property; changing the stamped subject adds hook map-behind warning and /codeweb next step.",
+        "evidenceRefs": [
+          "receipts/T13-cli-stale-context.json",
+          "receipts/T63-fresh-refresh.json",
+          "receipts/T64-fresh-context.json",
+          "receipts/T66-stale-stamped-hook.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Initial T14 graph-only hook lacked stale-stamps sidecar and was silent about staleness; TECH-14 covers this."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-14",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "surface": "Graph-only pre-hook freshness without sidecar",
+      "outcome": "fail",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-14",
+        "nedIds": [
+          "NED-04"
+        ],
+        "surface": "Graph-only pre-hook freshness without sidecar",
+        "outcome": "fail",
+        "expected": "Absent freshness support must be visibly unknown rather than suppressing stale status.",
+        "observed": "Raw extracted graph includes per-file sources; its changed source is detected by CLI. Hook without stale-stamps sidecar emits unchanged confident numbers without stale/unknown qualifier. Full refreshed-map sidecar path does label stale.",
+        "evidenceRefs": [
+          "receipts/T13-cli-stale-context.json",
+          "receipts/T14-hook-stale.json",
+          "receipts/T66-stale-stamped-hook.json"
+        ],
+        "severity": "medium",
+        "owner": "Codex P-03",
+        "nextStep": "Use graph fallback freshness or label freshness unknown on graph-only path; preserve cheap fail-open behavior.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-15",
+      "ned_ids": [
+        "NED-04",
+        "NED-05"
+      ],
+      "surface": "Pre/post hook empty versus unavailable states",
+      "outcome": "fail",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-15",
+        "nedIds": [
+          "NED-04",
+          "NED-05"
+        ],
+        "surface": "Pre/post hook empty versus unavailable states",
+        "outcome": "fail",
+        "expected": "Quiet ordinary zero and unavailable/corrupt/missing/unmapped/extraction failures remain inspectably distinguishable.",
+        "observed": "Zero, unmapped, missing, corrupt and empty-map direct hooks emit no contextual output and exit0. Actual no-supported-source extraction-failure post-hook also emits no contextual diagnostic or recovery step; stderr is only system ctags noise.",
+        "evidenceRefs": [
+          "receipts/T15-hook-zero.json",
+          "receipts/T15-hook-unmapped.json",
+          "receipts/T15-hook-missing.json",
+          "receipts/T15-hook-corrupt.json",
+          "receipts/T16-post-zero.json",
+          "receipts/T16-post-missing.json",
+          "receipts/T16-post-corrupt.json",
+          "receipts/T68-real-extraction-failure-hook.json"
+        ],
+        "severity": "high",
+        "owner": "Codex P-03",
+        "nextStep": "Expose bounded inspectable unavailable states/recovery without disrupting ordinary quiet edits; verify actual host-delivered states separately.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-16",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "surface": "CLI extraction unsupported/generated/missing source",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-16",
+        "nedIds": [
+          "NED-04"
+        ],
+        "surface": "CLI extraction unsupported/generated/missing source",
+        "outcome": "pass",
+        "expected": "Unsupported source and failed extraction have inspectable nonzero errors; excluded generated scope is not a supported-zero symbol answer.",
+        "observed": "Unsupported .xyz extraction exits1 with no-supported-source error. dist/generated.mjs is excluded from extracted nodes. Named generated selector is found:false in CLI and MCP, not count0 matched result. Missing root refresh and truly empty source extraction fail exit2.",
+        "evidenceRefs": [
+          "receipts/T17-extract-generated.json",
+          "receipts/T18-extract-only-unsupported.json",
+          "receipts/T19-refresh-extraction-failure.json",
+          "receipts/T69-real-extraction-failure-cli.json",
+          "receipts/T94-generated-selector-cli.json",
+          "receipts/T95-generated-selector-mcp.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Named generated miss does not explain generation-based exclusion versus any other unmapped cause. Ambient state cause remains TECH-15 failure. Initial T15 generated/unsupported inputs were generic mapped-empty subject.mjs controls, not actual generated/unsupported file paths."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-17",
+      "ned_ids": [
+        "NED-05"
+      ],
+      "surface": "CLI graph baseline lifecycle",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-17",
+        "nedIds": [
+          "NED-05"
+        ],
+        "surface": "CLI graph baseline lifecycle",
+        "outcome": "pass",
+        "expected": "Original fresh pre-edit graph survives ordinary refresh and repair.",
+        "observed": "Baseline captured before fixture edit; ordinary refresh and diff-refresh then repair refresh preserve byte hash 99ccab18b3640ba2550f849d8e96ada4dc2693cc4fc4c6ca99aa886bf4d987ce. Refreshing baseline path itself is rejected exit2.",
+        "evidenceRefs": [
+          "receipts/T31-capture-baseline.json",
+          "receipts/T32-ordinary-refresh.json",
+          "receipts/T33-verify-baseline.json",
+          "receipts/T34-repair-refresh.json",
+          "receipts/T35-verify-repair.json",
+          "receipts/T36-deny-baseline-refresh.json",
+          "baseline-hashes.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-18",
+      "ned_ids": [
+        "NED-05"
+      ],
+      "surface": "CLI missing/incomplete original baseline",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-18",
+        "nedIds": [
+          "NED-05"
+        ],
+        "surface": "CLI missing/incomplete original baseline",
+        "outcome": "pass",
+        "expected": "Missing original must not be invented; incomplete before cannot establish clean gate.",
+        "observed": "Missing baseline errors exit2 with BEFORE editing step. Incomplete baseline yields ok:false/status inconclusive/behavior not-evaluated and exits2 after refresh. Selected tests check invalid before failures preserve live bytes.",
+        "evidenceRefs": [
+          "receipts/T30-missing-original-baseline.json",
+          "receipts/T37-incomplete-before.json",
+          "receipts/T62-targeted-suites.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-19",
+      "ned_ids": [
+        "NED-05"
+      ],
+      "surface": "Explicit evidence receipt CLI/MCP lifecycle",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-19",
+        "nedIds": [
+          "NED-05"
+        ],
+        "surface": "Explicit evidence receipt CLI/MCP lifecycle",
+        "outcome": "pass",
+        "expected": "Immutable original source hashes survive refresh/repair; missing receipt stays unavailable.",
+        "observed": "Own capture creates immutable native-regex receipt; MCP historical caller page shows original source hashes. Changed review marks changed and repair marks unchanged with original unresolved question retained. Receipt SHA-256 stays 38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf; missing ID is unavailable/code missing, not a fabricated original.",
+        "evidenceRefs": [
+          "receipts/T87-own-receipt-capture.json",
+          "receipts/T88-own-receipt-page.json",
+          "receipts/T89-own-receipt-refresh.json",
+          "receipts/T90-own-receipt-review.json",
+          "receipts/T91-own-receipt-repair-refresh.json",
+          "receipts/T92-own-receipt-repair-review.json",
+          "receipts/T93-missing-evidence-original.json",
+          "receipt-hashes.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Ordinary review legacy verdict exit semantics are retained even if evidence is unavailable; verdict/evidence inspected separately."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-20",
+      "ned_ids": [
+        "NED-05",
+        "NED-08"
+      ],
+      "surface": "Advisory hook permission-output format",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-20",
+        "nedIds": [
+          "NED-05",
+          "NED-08"
+        ],
+        "surface": "Advisory hook permission-output format",
+        "outcome": "pass",
+        "expected": "Direct advisory payload must not auto-allow the edit.",
+        "observed": "Hook emits only hookEventName/additionalContext, without permissionDecision or allow field, and exits0.",
+        "evidenceRefs": [
+          "receipts/T97-advisory-permission-output.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Payload-format verification does not prove actual host permission enforcement."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-21",
+      "ned_ids": [
+        "NED-05",
+        "NED-08"
+      ],
+      "surface": "Host denied permissions/trust/recovery",
+      "outcome": "unverified",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-21",
+        "nedIds": [
+          "NED-05",
+          "NED-08"
+        ],
+        "surface": "Host denied permissions/trust/recovery",
+        "outcome": "unverified",
+        "expected": "Actual host denial must prevent unauthorized source actions; recovery names permitted next step.",
+        "observed": "No actual trusted host denial exercised by technical worker. No permission bypass attempted.",
+        "evidenceRefs": [
+          "TECHNICAL.md"
+        ],
+        "severity": "unknown",
+        "owner": "P-02 host owner / user",
+        "nextStep": "Run a scoped trusted host denial and permitted recovery sequence; preserve before/source/config hashes and denial/result timestamps.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-22",
+      "ned_ids": [
+        "NED-06"
+      ],
+      "surface": "Own current/failed/skipped/stale/malformed behavioral controls",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-22",
+        "nedIds": [
+          "NED-06"
+        ],
+        "surface": "Own current/failed/skipped/stale/malformed behavioral controls",
+        "outcome": "pass",
+        "expected": "Actual executed test statuses retain distinct provenance and intentionally invalid oracles remain red.",
+        "observed": "Author-owned current test passes1; invalid oracle fails1 exit1; skipped case skips1/pass0; malformed file fails syntax exit1; source change makes previously passing current assertion fail exit1. Structural green separately states behavior not-evaluated.",
+        "evidenceRefs": [
+          "receipts/T52-behavior-current.json",
+          "receipts/T53-behavior-failed.json",
+          "receipts/T54-behavior-skipped.json",
+          "receipts/T55-behavior-malformed.json",
+          "receipts/T56-structural-green-with-failed-oracle.json",
+          "receipts/T61-stale-test-now-fails.json",
+          "behavior-provenance.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Product does not ingest these test outcomes; these are separate real runner receipts, not automatic behavioral guarantees."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-23",
+      "ned_ids": [
+        "NED-06"
+      ],
+      "surface": "Graph test-neighbor query",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-23",
+        "nedIds": [
+          "NED-06"
+        ],
+        "surface": "Graph test-neighbor query",
+        "outcome": "pass",
+        "expected": "Mapped test relationships are retained separately from executed results.",
+        "observed": "Query lists current, failed and skipped test modules alike; they are graph test-edge neighbors, not runner outcomes. Separate actual runs establish pass/fail/skip.",
+        "evidenceRefs": [
+          "receipts/T57-test-neighbor.json",
+          "receipts/T52-behavior-current.json",
+          "receipts/T53-behavior-failed.json",
+          "receipts/T54-behavior-skipped.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "The summary wording \"test(s) exercise\" does not itself say executed or passing. Caller must inspect independent runner results; host use unverified."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-24",
+      "ned_ids": [
+        "NED-06"
+      ],
+      "surface": "Measured historical coverage and stale source",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-24",
+        "nedIds": [
+          "NED-06"
+        ],
+        "surface": "Measured historical coverage and stale source",
+        "outcome": "pass",
+        "expected": "Recorded coverage remains a past-run fact and does not assert current correctness.",
+        "observed": "Actual own-fixture LCOV runner exits0 and covers low once. Coverage import/explain says covered by recorded run. After body edit explain retains historical coverage but marks graph stale; actual rerun fails. Source/coverage hashes retained. Earlier synthetic LCOV is explicitly separated.",
+        "evidenceRefs": [
+          "receipts/T79-current-executed-coverage.json",
+          "receipts/T81-import-executed-coverage.json",
+          "receipts/T82-executed-coverage-explain.json",
+          "receipts/T83-executed-stale-coverage-explain.json",
+          "receipts/T84-current-after-edit-fails.json",
+          "executed-coverage-provenance.json",
+          "behavior-provenance.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Coverage metadata stores report basename/counts, not a source hash or test verdict; historical provenance is weaker than content-addressed evidence receipts."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-25",
+      "ned_ids": [
+        "NED-06"
+      ],
+      "surface": "Selected ordinary gate regression assertions",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-25",
+        "nedIds": [
+          "NED-06"
+        ],
+        "surface": "Selected ordinary gate regression assertions",
+        "outcome": "pass",
+        "expected": "Failed legacy structural gate stays failed when evidence mode is added or unavailable.",
+        "observed": "Selected ac_33 failing legacy gate and explicit before identity test passes, preserving exit1 old gate and verdict even with missing receipt. Other ac_23 before/diff assertions pass.",
+        "evidenceRefs": [
+          "receipts/T62-targeted-suites.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Single full product gate was not run; source immutable and candidate existing gate evidence belongs to P-01/root integration."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-26",
+      "ned_ids": [
+        "NED-07"
+      ],
+      "surface": "Source opening exact consumer/body locations",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-26",
+        "nedIds": [
+          "NED-07"
+        ],
+        "surface": "Source opening exact consumer/body locations",
+        "outcome": "pass",
+        "expected": "Returned source locations open useful actual target and consumer bytes.",
+        "observed": "Opened source files named by low context; preserved full bytes and SHA-256 with timestamps. Same-file local relationship is included. Selected ac_34 also opens conflicting bodies at returned lines.",
+        "evidenceRefs": [
+          "source-opening.json",
+          "receipts/T02-cli-exact-context.json",
+          "receipts/T62-targeted-suites.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-27",
+      "ned_ids": [
+        "NED-07"
+      ],
+      "surface": "CLI bounded impact/context and expansion",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-27",
+        "nedIds": [
+          "NED-07"
+        ],
+        "surface": "CLI bounded impact/context and expansion",
+        "outcome": "pass",
+        "expected": "Caps retain true totals and expose usable source expansion.",
+        "observed": "Popular impact shows count8 with limit2/more remaining6 and nextOffset2; offset2 changes page. Context caps callers, reports omissions and next steps; full-bodies expansion shows all8 callers.",
+        "evidenceRefs": [
+          "receipts/T26-impact-cap.json",
+          "receipts/T27-impact-expand.json",
+          "receipts/T28-context-cap.json",
+          "receipts/T29-context-expand.json",
+          "receipts/T62-targeted-suites.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Six-line provisional budget not asserted; exact hook target relevance separately fails."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-28",
+      "ned_ids": [
+        "NED-07"
+      ],
+      "surface": "Similarity omitted-count expansion",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-28",
+        "nedIds": [
+          "NED-07"
+        ],
+        "surface": "Similarity omitted-count expansion",
+        "outcome": "pass",
+        "expected": "Top-K limits keep match count and show all available candidates on expansion.",
+        "observed": "Own --k2 has true count6/more remaining4; --k20 reveals6. Text on capped selected ac_34 test names working --k expansion.",
+        "evidenceRefs": [
+          "receipts/T43-similar-json-cap.json",
+          "receipts/T44-similar-expand.json",
+          "receipts/T62-targeted-suites.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-29",
+      "ned_ids": [
+        "NED-07",
+        "NED-10"
+      ],
+      "surface": "Intentional duplication dismissal",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-29",
+        "nedIds": [
+          "NED-07",
+          "NED-10"
+        ],
+        "surface": "Intentional duplication dismissal",
+        "outcome": "pass",
+        "expected": "Intentional duplicate implementations can be dismissed without changing source or returning repeatedly.",
+        "observed": "Own same-name duplicate pair yields actionable1; annotation with intentional-boundary note suppresses stable fingerprint; repeated overlap yields actionable0/suppressed1. Only fixture .codeweb changes.",
+        "evidenceRefs": [
+          "receipts/T70-intentional-extract.json",
+          "receipts/T71-corrected-overlap.json",
+          "intentional-finding-before.json",
+          "receipts/T72-intentional-dismissal.json",
+          "receipts/T73-dismissal-repeat-overlap.json",
+          "intentional-finding-after.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-30",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "MCP direct protocol/tool discovery",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-30",
+        "nedIds": [
+          "NED-08"
+        ],
+        "surface": "MCP direct protocol/tool discovery",
+        "outcome": "pass",
+        "expected": "Native server responds to tool enumeration and explicit source-linked tools.",
+        "observed": "Direct JSON-RPC tools/list succeeds and explicit impact/context/similarity/receipt page invocations return source links.",
+        "evidenceRefs": [
+          "receipts/T85-mcp-tools-list.json",
+          "receipts/T03-mcp-exact-impact.json",
+          "receipts/T04-mcp-exact-context.json",
+          "receipts/T74-corrected-mcp-similarity.json",
+          "receipts/T88-own-receipt-page.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "This case is transport only; actual Codex/Claude host discovery and source use belong to host evidence."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-31",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "Codex documented-payload compatibility direct hook",
+      "outcome": "fail",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-31",
+        "nedIds": [
+          "NED-08"
+        ],
+        "surface": "Codex documented-payload compatibility direct hook",
+        "outcome": "fail",
+        "expected": "A claimed Codex ambient adapter must understand its actual event/tool input.",
+        "observed": "Direct apply_patch/tool_input.command payload emits no contextual output and exits0. Shipped hook matches Edit|Write|MultiEdit and reads file_path/filePath. This proves this direct payload is unsupported, not that an actual Codex hook event was tested.",
+        "evidenceRefs": [
+          "receipts/T67-codex-shaped-hook.json"
+        ],
+        "severity": "high",
+        "owner": "Codex P-03 / host owner",
+        "nextStep": "Verify actual trusted Codex event adapter; implement only if Codex ambient delivery is claimed, or document supported exclusions. Actual host runtime proof remains host owner.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-32",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "Actual host and linked-worktree native discovery/pre-edit delivery",
+      "outcome": "unverified",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-32",
+        "nedIds": [
+          "NED-08"
+        ],
+        "surface": "Actual host and linked-worktree native discovery/pre-edit delivery",
+        "outcome": "unverified",
+        "expected": "Claimed hosts and linked worktrees require actual discovery/tool use/pre-edit delivery receipts.",
+        "observed": "Technical worker intentionally did not operate host UI/runtime or global profile. Direct hooks and stdio calls supply no actual host proof.",
+        "evidenceRefs": [
+          "TECHNICAL.md"
+        ],
+        "severity": "unknown",
+        "owner": "P-02 host owner",
+        "nextStep": "Use separate hosts evidence and record each candidate/config/worktree scope; mark any unavailable host boundary unverified.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-33",
+      "ned_ids": [
+        "NED-09"
+      ],
+      "surface": "Per-run technical cold/warm/refresh/recovery timing",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-33",
+        "nedIds": [
+          "NED-09"
+        ],
+        "surface": "Per-run technical cold/warm/refresh/recovery timing",
+        "outcome": "pass",
+        "expected": "Report actual request/trigger/start/end/source-open timing per run without inferred percentiles or latency promises.",
+        "observed": "110 raw receipts include start/end/duration. Tiny fixture extraction ~54\u201368ms; direct fresh/stale pre-hook ~36\u201337ms; fresh refresh135ms; baseline operations133\u2013179ms. Source-open has its own timestamp. Individual cold processes and sequential recovery are labeled in report.",
+        "evidenceRefs": [
+          "TIMINGS.csv",
+          "RUN.json",
+          "SUPPLEMENT.json",
+          "source-opening.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "These are subprocess times on synthetic fixtures; no percentile, one-second promise, total user effort, host queue/permission delay, or client first-token timing claimed."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-34",
+      "ned_ids": [
+        "NED-09"
+      ],
+      "surface": "Actual host timing before relevant edit decision",
+      "outcome": "unverified",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-34",
+        "nedIds": [
+          "NED-09"
+        ],
+        "surface": "Actual host timing before relevant edit decision",
+        "outcome": "unverified",
+        "expected": "End-to-end host request/permission/trigger/result/source-open must arrive before relevant edit.",
+        "observed": "Technical subprocess receipts cannot measure host decision or permission waits.",
+        "evidenceRefs": [
+          "TECHNICAL.md"
+        ],
+        "severity": "unknown",
+        "owner": "P-02 host owner",
+        "nextStep": "Record actual host event/request/permission/refresh/result/source-open timestamps and edit boundary in scoped trial.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-35",
+      "ned_ids": [
+        "NED-10"
+      ],
+      "surface": "Ordinary zero/regression repeat hooks",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-35",
+        "nedIds": [
+          "NED-10"
+        ],
+        "surface": "Ordinary zero/regression repeat hooks",
+        "outcome": "pass",
+        "expected": "Ordinary no regression stays quiet; accepted repeated structural warning does not repeat against same baseline.",
+        "observed": "Ordinary post edit emits no additionalContext. First lost-callers event warns; second identical event emits no context. Supported-zero pre-hook emits no context.",
+        "evidenceRefs": [
+          "receipts/T15-hook-zero.json",
+          "receipts/T38-post-normal.json",
+          "receipts/T39-post-regression-first.json",
+          "receipts/T40-post-regression-repeat.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Post-hook stderr emits unsupported system ctags warning on mapped cases; TECH-37 records this noise separately."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-36",
+      "ned_ids": [
+        "NED-10",
+        "NED-02"
+      ],
+      "surface": "Repeated irrelevant pre-edit card",
+      "outcome": "fail",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-36",
+        "nedIds": [
+          "NED-10",
+          "NED-02"
+        ],
+        "surface": "Repeated irrelevant pre-edit card",
+        "outcome": "fail",
+        "expected": "Quiet/noisy repetitions avoid repeated irrelevant interventions.",
+        "observed": "Identical low edits generate identical popular\u00d78 pre-edit cards repeatedly, still omitting consequential low consumer. Unlike post regression dedupe there is no pre-card suppression here.",
+        "evidenceRefs": [
+          "receipts/T05-hook-known-low-edit.json",
+          "receipts/T07-hook-known-low-repeat.json"
+        ],
+        "severity": "medium",
+        "owner": "Codex P-03",
+        "nextStep": "Fix relevance first; test ordinary repeated edits and define a scoped repeat policy supported by host evidence.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-37",
+      "ned_ids": [
+        "NED-10"
+      ],
+      "surface": "Mapped post-hook stderr noise",
+      "outcome": "fail",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-37",
+        "nedIds": [
+          "NED-10"
+        ],
+        "surface": "Mapped post-hook stderr noise",
+        "outcome": "fail",
+        "expected": "Ordinary mapped edits should avoid irrelevant repeated output.",
+        "observed": "Mapped normal/quiet/repeated post-hook probes repeatedly print Apple /Library/Developer/CommandLineTools/usr/bin/ctags illegal-option usage to stderr, although extraction falls back and exits0. Actual host rendering of this stderr remains unverified.",
+        "evidenceRefs": [
+          "receipts/T16-post-zero.json",
+          "receipts/T38-post-normal.json",
+          "receipts/T40-post-regression-repeat.json"
+        ],
+        "severity": "low",
+        "owner": "Codex P-03",
+        "nextStep": "Handle unsupported ctags probe quietly while retaining genuine extraction failure diagnostics; verify host stderr treatment before claiming user interruption.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-38",
+      "ned_ids": [
+        "NED-10",
+        "NED-08"
+      ],
+      "surface": "Scoped disable/uninstall and competent control",
+      "outcome": "unverified",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-38",
+        "nedIds": [
+          "NED-10",
+          "NED-08"
+        ],
+        "surface": "Scoped disable/uninstall and competent control",
+        "outcome": "unverified",
+        "expected": "Disable/uninstall stops injection and ordinary equivalent control session remains usable.",
+        "observed": "No actual host enable/disable/uninstall or competent-control session operated by technical worker; no global profiles changed.",
+        "evidenceRefs": [
+          "TECHNICAL.md"
+        ],
+        "severity": "unknown",
+        "owner": "P-02 host owner",
+        "nextStep": "Verify documented scoped control in claimed runtime with before/after event receipts; preserve global profiles.",
+        "limits": []
+      }
+    },
+    {
+      "case_id": "TECH-39",
+      "ned_ids": [
+        "NED-05"
+      ],
+      "surface": "Selected MCP automatic-refresh original baseline survival",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-39",
+        "nedIds": [
+          "NED-05"
+        ],
+        "surface": "Selected MCP automatic-refresh original baseline survival",
+        "outcome": "pass",
+        "expected": "Background/ordinary MCP refresh must preserve original baseline while verification detects and repairs regression.",
+        "observed": "Selected ac_23 queued MCP begin/verify test exercises background refresh, adds a cycle then repairs it, checks immutable original bytes and behavior/duplication not-evaluated.",
+        "evidenceRefs": [
+          "receipts/T62-targeted-suites.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Supplemental actual Node test has inline assertions but only aggregate test stdout; own raw graph-baseline lifecycle is CLI, own raw receipt page is MCP."
+        ]
+      }
+    },
+    {
+      "case_id": "TECH-40",
+      "ned_ids": [
+        "NED-04",
+        "NED-05"
+      ],
+      "surface": "Evidence failure schemas/record tampering",
+      "outcome": "pass",
+      "source": "technical",
+      "source_file": "technical/CASES.json",
+      "original_case": {
+        "caseId": "TECH-40",
+        "nedIds": [
+          "NED-04",
+          "NED-05"
+        ],
+        "surface": "Evidence failure schemas/record tampering",
+        "outcome": "pass",
+        "expected": "Unavailable/incompatible source and imported corrupt records cannot masquerade as unchanged certainty.",
+        "observed": "Selected evidence snapshot/core/store/transport suites exercise unavailable source, mismatched workspace/task, ambiguous selector, corrupted/fabricated record fields, missing target, source changing and incomplete reconciliation; failing legacy gate remains red.",
+        "evidenceRefs": [
+          "receipts/T62-targeted-suites.json"
+        ],
+        "severity": "none",
+        "owner": "Codex P-02",
+        "nextStep": null,
+        "limits": [
+          "Selected suite assertions enumerate only exercised states; host trust denial not included, nor full unsupported source-language completeness."
+        ]
+      }
+    },
+    {
+      "case_id": "H-P02-01",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "actual Codex exec model startup",
+      "outcome": "unverified",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-01",
+        "ned_ids": [
+          "NED-08"
+        ],
+        "surface": "actual Codex exec model startup",
+        "status": "unverified",
+        "expected": "The requested native model can run for this authenticated account.",
+        "observed": "gpt-6.1-sol rejected with HTTP 400 before tools. One parent-authorized correction used installed catalog-supported gpt-6-sol/high; the rejected identifier is not silently equated with the working one.",
+        "evidence_refs": [
+          "cold.receipt.json",
+          "events/cold.stdout.txt",
+          "host-versions.receipt.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6.1-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "cold",
+            "duration_seconds": 2.728292942047119,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          },
+          {
+            "run": "host-versions",
+            "duration_seconds": 0.1279599666595459,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-04",
+        "next_step": "Resolve account/model compatibility before claiming gpt-6.1-sol native availability."
+      }
+    },
+    {
+      "case_id": "H-P02-02",
+      "ned_ids": [
+        "NED-05",
+        "NED-08"
+      ],
+      "surface": "actual Codex MCP default-policy denial",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-02",
+        "ned_ids": [
+          "NED-05",
+          "NED-08"
+        ],
+        "surface": "actual Codex MCP default-policy denial",
+        "status": "pass",
+        "expected": "The host respects ordinary approval requirements and does not edit after denied pre-edit evidence.",
+        "observed": "Native refresh was denied because approval_policy=never. Original fixture remained byte-identical; no baseline was invented. Linked context/impact were also denied. Raw events describe a policy denial, not an automatic approval-review rejection, despite one model narrative using that phrase.",
+        "evidence_refs": [
+          "cold-corrected-sol.receipt.json",
+          "linked-native.receipt.json",
+          "events/cold-corrected-sol.stdout.txt",
+          "events/linked-native.stdout.txt"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "cold-corrected-sol",
+            "duration_seconds": 52.34466314315796,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          },
+          {
+            "run": "linked-native",
+            "duration_seconds": 77.77094602584839,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-03",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "Codex MCP configuration inspection",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-03",
+        "ned_ids": [
+          "NED-08"
+        ],
+        "surface": "Codex MCP configuration inspection",
+        "status": "pass",
+        "expected": "The scoped Codeweb transport resolves to the frozen source candidate.",
+        "observed": "codex mcp get codeweb reports the candidate stdio transport. This targeted metadata read is not a live tool invocation.",
+        "evidence_refs": [
+          "codex-specific-config-discovery.receipt.json",
+          "events/codex-specific-config-discovery.stdout.txt"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "codex-specific-config-discovery",
+            "duration_seconds": 0.05851602554321289,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-04",
+      "ned_ids": [
+        "NED-02",
+        "NED-07",
+        "NED-08"
+      ],
+      "surface": "actual Codex MCP exact-target/source opening",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-04",
+        "ned_ids": [
+          "NED-02",
+          "NED-07",
+          "NED-08"
+        ],
+        "surface": "actual Codex MCP exact-target/source opening",
+        "status": "pass",
+        "expected": "Low-fan-in rare is inspected with its consequential consumer, separately from popular.",
+        "observed": "Preauthorized explain/impact/context identify src/consumer.mjs:consequential for rare. Source windows and exact files were opened before apply_patch. Popular full:true independently lists fan0 through fan5.",
+        "evidence_refs": [
+          "preauthorized-cold.receipt.json",
+          "events/preauthorized-cold.stdout.txt",
+          "RUN-SUMMARIES.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "preauthorized-cold",
+            "duration_seconds": 69.47295427322388,
+            "request_to_first_source_evidence_seconds": 23.40245223045349,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-05",
+      "ned_ids": [
+        "NED-03",
+        "NED-07"
+      ],
+      "surface": "actual Codex similarity/source comparison",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-05",
+        "ned_ids": [
+          "NED-03",
+          "NED-07"
+        ],
+        "surface": "actual Codex similarity/source comparison",
+        "status": "pass",
+        "expected": "Source-linked candidates remain comparison evidence, not behavioral substitutes.",
+        "observed": "find_similar returned five source-linked candidates, bodyLineCap=400 and lexical ranking. The agent opened duplicates.mjs and acknowledged intentional duplication and no behavioral equivalence. Broader conflicting-contract/body-cap controls belong to the technical matrix.",
+        "evidence_refs": [
+          "preauthorized-cold.receipt.json",
+          "events/preauthorized-cold.stdout.txt"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "preauthorized-cold",
+            "duration_seconds": 69.47295427322388,
+            "request_to_first_source_evidence_seconds": 23.40245223045349,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-06",
+      "ned_ids": [
+        "NED-01",
+        "NED-05",
+        "NED-06"
+      ],
+      "surface": "actual Codex baseline/edit/diff",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-06",
+        "ned_ids": [
+          "NED-01",
+          "NED-05",
+          "NED-06"
+        ],
+        "surface": "actual Codex baseline/edit/diff",
+        "status": "pass",
+        "expected": "Evidence arrives before edit; refreshed structural result preserves original baseline and separate test/behavior provenance.",
+        "observed": "rare +1\u2192+2 was applied after source-linked evidence. Baseline 25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd survived. Diff ok:true explicitly labels duplication and behavior not-evaluated; no tests were run in that session.",
+        "evidence_refs": [
+          "preauthorized-cold.receipt.json",
+          "events/preauthorized-cold.stdout.txt",
+          "snapshots/native-original-baseline.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "preauthorized-cold",
+            "duration_seconds": 69.47295427322388,
+            "request_to_first_source_evidence_seconds": 23.40245223045349,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-07",
+      "ned_ids": [
+        "NED-05",
+        "NED-08"
+      ],
+      "surface": "actual Codex detached linked worktree",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-07",
+        "ned_ids": [
+          "NED-05",
+          "NED-08"
+        ],
+        "surface": "actual Codex detached linked worktree",
+        "status": "pass",
+        "expected": "Linked source/graph/baseline are independent from the original fixture.",
+        "observed": "Native refresh/impact/context/source reads used the detached worktree graph/root. It captured its own f2d4c34eaefc9a227a4d36733d398d5a0bbcfe41101828564c732b22b3ffa3b6 baseline and made no source edit.",
+        "evidence_refs": [
+          "preauthorized-linked.receipt.json",
+          "events/preauthorized-linked.stdout.txt",
+          "LINKED.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "preauthorized-linked",
+            "duration_seconds": 60.31840705871582,
+            "request_to_first_source_evidence_seconds": 30.25519299507141,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-08",
+      "ned_ids": [
+        "NED-01",
+        "NED-04",
+        "NED-05"
+      ],
+      "surface": "actual Codex stale/zero/recovery",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-08",
+        "ned_ids": [
+          "NED-01",
+          "NED-04",
+          "NED-05"
+        ],
+        "surface": "actual Codex stale/zero/recovery",
+        "status": "pass",
+        "expected": "Stale evidence is visible, a matched zero differs from failure, and ordinary refresh preserves original baseline.",
+        "observed": "After rare +2\u2192+3 fixture preparation, impact/context warned stale and context freshness=stale. quiet matched with count0 and the same stale disclaimer. Ordinary refresh and refreshed diff retained the original 25f343... baseline; tests/behavior were not inferred.",
+        "evidence_refs": [
+          "preauthorized-warm-recovery.receipt.json",
+          "events/preauthorized-warm-recovery.stdout.txt",
+          "warm-preparation.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "preauthorized-warm-recovery",
+            "duration_seconds": 52.253146171569824,
+            "request_to_first_source_evidence_seconds": 20.634531021118164,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-09",
+      "ned_ids": [
+        "NED-01",
+        "NED-04"
+      ],
+      "surface": "actual Codex missing/corrupt/unmapped/empty states",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-09",
+        "ned_ids": [
+          "NED-01",
+          "NED-04"
+        ],
+        "surface": "actual Codex missing/corrupt/unmapped/empty states",
+        "status": "pass",
+        "expected": "Unsupported-empty evidence and missing/corrupt/unmapped failures remain distinct.",
+        "observed": "Native context returned graph-not-found, invalid-JSON, found:false with search hint, and EMPTY/vacuous-not-zero warning. Empty map came from a real unsupported-extension CLI --allow-empty fixture. Unmapped-symbol query used the owned primary graph; other paths are inside owned states.",
+        "evidence_refs": [
+          "native-state-matrix.receipt.json",
+          "events/native-state-matrix.stdout.txt",
+          "STATE-FIXTURES.json",
+          "state-empty-cli-prep.receipt.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "native-state-matrix",
+            "duration_seconds": 26.21266508102417,
+            "request_to_first_source_evidence_seconds": 17.607547998428345,
+            "per_event_timestamps_available": true
+          },
+          {
+            "run": "state-empty-cli-prep",
+            "duration_seconds": 0.2968270778656006,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-10",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "surface": "actual Codex recognized generated-dependency scope",
+      "outcome": "unverified",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-10",
+        "ned_ids": [
+          "NED-04"
+        ],
+        "surface": "actual Codex recognized generated-dependency scope",
+        "status": "unverified",
+        "expected": "A legitimately generated/dependency-excluded scope reports its boundary distinctly.",
+        "observed": "The actual src/generated.mjs with @generated comment mapped as role:product and captureEvidence returned state:captured with zero relation totals. This generated-like input does not establish the required recognized generated/dependency exclusion behavior; no manual role was invented.",
+        "evidence_refs": [
+          "native-state-matrix.receipt.json",
+          "events/native-state-matrix.stdout.txt",
+          "state-generated-cli-prep.receipt.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "native-state-matrix",
+            "duration_seconds": 26.21266508102417,
+            "request_to_first_source_evidence_seconds": 17.607547998428345,
+            "per_event_timestamps_available": true
+          },
+          {
+            "run": "state-generated-cli-prep",
+            "duration_seconds": 0.28939318656921387,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-04",
+        "next_step": "Run the documented recognized generated/dependency path in a scoped native host after technical scope rules are reviewed."
+      }
+    },
+    {
+      "case_id": "H-P02-11",
+      "ned_ids": [
+        "NED-09"
+      ],
+      "surface": "actual Codex request/result/source-open/edit timing",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-11",
+        "ned_ids": [
+          "NED-09"
+        ],
+        "surface": "actual Codex request/result/source-open/edit timing",
+        "status": "pass",
+        "expected": "Report observed per-run end-to-end timings and evidence ordering without tiny-sample promises.",
+        "observed": "Preauthorized first session 69.473s: first source evidence 23.402s, exact source opened 29.650s, edit 48.247s. Linked session 60.318s: first source evidence 30.255s, source opening 43.273s. Warm recovery 52.253s: first stale evidence 20.635s. Permission waits are unmeasured; these are process/model-inclusive timings on CLI-prepared tiny maps, not extraction-cold or percentile claims.",
+        "evidence_refs": [
+          "preauthorized-cold.receipt.json",
+          "preauthorized-linked.receipt.json",
+          "preauthorized-warm-recovery.receipt.json",
+          "RUN-SUMMARIES.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "preauthorized-cold",
+            "duration_seconds": 69.47295427322388,
+            "request_to_first_source_evidence_seconds": 23.40245223045349,
+            "per_event_timestamps_available": true
+          },
+          {
+            "run": "preauthorized-linked",
+            "duration_seconds": 60.31840705871582,
+            "request_to_first_source_evidence_seconds": 30.25519299507141,
+            "per_event_timestamps_available": true
+          },
+          {
+            "run": "preauthorized-warm-recovery",
+            "duration_seconds": 52.253146171569824,
+            "request_to_first_source_evidence_seconds": 20.634531021118164,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-12",
+      "ned_ids": [
+        "NED-10"
+      ],
+      "surface": "actual Codex scoped MCP disable and ordinary edit",
+      "outcome": "unverified",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-12",
+        "ned_ids": [
+          "NED-10"
+        ],
+        "surface": "actual Codex scoped MCP disable and ordinary edit",
+        "status": "unverified",
+        "expected": "Disabling the scoped MCP transport removes its native tool use while ordinary work remains usable.",
+        "observed": "Session config enabled=false and targeted config inspection report disabled. No Codeweb MCP calls occurred; quiet -1\u2192-2 and local checks succeeded. However the enabled control also made no MCP calls, and no runtime catalog or process-launch receipt independently proves absent exposure. Ordinary work survives; disable-stops-delivery proof is incomplete, with hook disable/plugin uninstall separate.",
+        "evidence_refs": [
+          "disabled-native-control.receipt.json",
+          "events/disabled-native-control.stdout.txt",
+          "codex-specific-config-disable.receipt.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "disabled-native-control",
+            "duration_seconds": 50.514179706573486,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": true
+          },
+          {
+            "run": "codex-specific-config-disable",
+            "duration_seconds": 0.049455881118774414,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          }
+        ],
+        "owner": "Codex / P-04",
+        "next_step": "Capture runtime tool-catalog or server-launch absence under enabled versus disabled scoped config; separately test ambient disable/uninstall after legitimate hook trust."
+      }
+    },
+    {
+      "case_id": "H-P02-13",
+      "ned_ids": [
+        "NED-10"
+      ],
+      "surface": "ordinary enabled versus disabled small-edit controls",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-13",
+        "ned_ids": [
+          "NED-10"
+        ],
+        "surface": "ordinary enabled versus disabled small-edit controls",
+        "status": "pass",
+        "expected": "Record ordinary workflow behavior honestly, including non-use of optional evidence.",
+        "observed": "Equivalent sequential arithmetic edits with identical inspection instructions: disabled 50.514s, enabled 41.867s. Neither made MCP calls; both used local source/graph inspection and Node assertions. Different constants, sequential cache state, one operator and tiny task prevent benefit/adoption inference. This is a single native non-use observation, not a customer result.",
+        "evidence_refs": [
+          "disabled-native-control.receipt.json",
+          "enabled-native-control.receipt.json",
+          "events/enabled-native-control.stdout.txt",
+          "RUN-SUMMARIES.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "disabled-native-control",
+            "duration_seconds": 50.514179706573486,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": true
+          },
+          {
+            "run": "enabled-native-control",
+            "duration_seconds": 41.86737394332886,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-14",
+      "ned_ids": [
+        "NED-02",
+        "NED-08"
+      ],
+      "surface": "supplementary shipped hook documented-payload compatibility",
+      "outcome": "fail",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-14",
+        "ned_ids": [
+          "NED-02",
+          "NED-08"
+        ],
+        "surface": "supplementary shipped hook documented-payload compatibility",
+        "status": "fail",
+        "expected": "Shipped adapter can consume an actual Codex edit payload and show relevant known-target evidence.",
+        "observed": "Standalone canonical-path documented Codex apply_patch payload with tool_input.command produced no output. Claude Edit file_path/old_string/new_string changing rare instead produced popular \u00d76 and popular callers, omitting rare consequential consumer. Edit/Write matcher aliases alone are not inferred to fail. These are adapter subprocess facts, not trusted native hook delivery.",
+        "evidence_refs": [
+          "supplementary-codex-adapter-canonical.receipt.json",
+          "supplementary-claude-adapter-canonical.receipt.json",
+          "events/supplementary-claude-adapter-canonical.stdout.txt"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "none (standalone adapter)",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "supplementary-codex-adapter-canonical",
+            "duration_seconds": 0.0460050106048584,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          },
+          {
+            "run": "supplementary-claude-adapter-canonical",
+            "duration_seconds": 0.03813886642456055,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          }
+        ],
+        "owner": "Codex / P-03",
+        "next_step": "P-03 should review supported payload extraction and exact-target/file-scope claims, then perform actual trusted native hook delivery."
+      }
+    },
+    {
+      "case_id": "H-P02-15",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "supplementary hook symlink entry execution",
+      "outcome": "fail",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-15",
+        "ned_ids": [
+          "NED-08"
+        ],
+        "surface": "supplementary hook symlink entry execution",
+        "status": "fail",
+        "expected": "Invoking the same hook through a valid filesystem alias executes its entry path.",
+        "observed": "/var candidate script entry returned silently for both payloads; canonical /private path corrected Claude output. Source entry guard compares resolve(argv[1]) with canonical fileURLToPath(import.meta.url). Candidate source remained unchanged.",
+        "evidence_refs": [
+          "supplementary-codex-adapter.receipt.json",
+          "supplementary-claude-adapter.receipt.json",
+          "supplementary-claude-adapter-canonical.receipt.json",
+          "IDENTITY.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "none (standalone adapter)",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "supplementary-codex-adapter",
+            "duration_seconds": 0.03654909133911133,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          },
+          {
+            "run": "supplementary-claude-adapter",
+            "duration_seconds": 0.035472869873046875,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          },
+          {
+            "run": "supplementary-claude-adapter-canonical",
+            "duration_seconds": 0.03813886642456055,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          }
+        ],
+        "owner": "Codex / P-03",
+        "next_step": "P-03 should decide whether supported aliased checkouts require an entry-guard repair and retest exact native install paths."
+      }
+    },
+    {
+      "case_id": "H-P02-16",
+      "ned_ids": [
+        "NED-01",
+        "NED-02",
+        "NED-04",
+        "NED-05",
+        "NED-07",
+        "NED-08",
+        "NED-09",
+        "NED-10"
+      ],
+      "surface": "Codex native ambient hooks/trust/quiet/noisy/uninstall",
+      "outcome": "unverified",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-16",
+        "ned_ids": [
+          "NED-01",
+          "NED-02",
+          "NED-04",
+          "NED-05",
+          "NED-07",
+          "NED-08",
+          "NED-09",
+          "NED-10"
+        ],
+        "surface": "Codex native ambient hooks/trust/quiet/noisy/uninstall",
+        "status": "unverified",
+        "expected": "Actual supported adapter/event/trust delivers advisory context before edits; disable/uninstall and ordinary quiet events behave correctly.",
+        "observed": "Successful exec sessions deliberately use features.hooks=false. A user hooks file exists; it was not read or trusted, so unrelated hooks were not enabled. No trusted native Codeweb hook event was observed and no global plugin uninstall was attempted.",
+        "evidence_refs": [
+          "IDENTITY.json",
+          "preauthorized-cold.receipt.json",
+          "disabled-native-control.receipt.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "preauthorized-cold",
+            "duration_seconds": 69.47295427322388,
+            "request_to_first_source_evidence_seconds": 23.40245223045349,
+            "per_event_timestamps_available": true
+          },
+          {
+            "run": "disabled-native-control",
+            "duration_seconds": 50.514179706573486,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-04",
+        "next_step": "Use a legitimately isolated active hook layer, obtain normal exact-definition trust when available, observe actual payload/context and disable/uninstall behavior."
+      }
+    },
+    {
+      "case_id": "H-P02-17",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "Claude shipped plugin manifest validation",
+      "outcome": "pass",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-17",
+        "ned_ids": [
+          "NED-08"
+        ],
+        "surface": "Claude shipped plugin manifest validation",
+        "status": "pass",
+        "expected": "Installed Claude validates the exact shipped plugin manifest without sign-in.",
+        "observed": "claude plugin validate .claude-plugin/plugin.json success:true. Warning: root CLAUDE.md is not loaded as project context; a skill is required to ship context. Marketplace validation was separate. Validation does not establish startup/tool/hook delivery.",
+        "evidence_refs": [
+          "claude-shipped-plugin-manifest.receipt.json",
+          "events/claude-shipped-plugin-manifest.stdout.txt"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Claude Code",
+        "host_version": "2.1.265",
+        "model": "none (validator)",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "claude-shipped-plugin-manifest",
+            "duration_seconds": 0.4152541160583496,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          }
+        ],
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review frozen raw receipts and retain the stated surface/scope limit."
+      }
+    },
+    {
+      "case_id": "H-P02-18",
+      "ned_ids": [
+        "NED-01",
+        "NED-02",
+        "NED-03",
+        "NED-04",
+        "NED-05",
+        "NED-06",
+        "NED-07",
+        "NED-08",
+        "NED-09",
+        "NED-10"
+      ],
+      "surface": "Claude actual authenticated tools/model/hooks/linked worktree",
+      "outcome": "unverified",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-18",
+        "ned_ids": [
+          "NED-01",
+          "NED-02",
+          "NED-03",
+          "NED-04",
+          "NED-05",
+          "NED-06",
+          "NED-07",
+          "NED-08",
+          "NED-09",
+          "NED-10"
+        ],
+        "surface": "Claude actual authenticated tools/model/hooks/linked worktree",
+        "status": "unverified",
+        "expected": "Real authenticated native discovery/tool invocation/pre-edit hook delivery is demonstrated without bypassing permission/trust.",
+        "observed": "Claude auth status loggedIn:false/authMethod:none. No sign-in/model/tool/hook session attempted. Scoped mcp-list setup failed variadic option parsing; one correction rejected --restricted. Those are probe setup errors, not product failures.",
+        "evidence_refs": [
+          "claude-auth-status.receipt.json",
+          "events/claude-auth-status.sanitized.json",
+          "claude-scoped-discovery.receipt.json",
+          "claude-scoped-discovery-corrected.receipt.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Claude Code",
+        "host_version": "2.1.265",
+        "model": "unavailable",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "claude-auth-status",
+            "duration_seconds": 0.2026512622833252,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          },
+          {
+            "run": "claude-scoped-discovery",
+            "duration_seconds": 0.13883090019226074,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          },
+          {
+            "run": "claude-scoped-discovery-corrected",
+            "duration_seconds": 0.06475114822387695,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          }
+        ],
+        "owner": "Codex / P-04",
+        "next_step": "After separately authorized authentication and legitimate scoped client setup, perform actual tools/hooks/worktree/disable matrix with ordinary trust."
+      }
+    },
+    {
+      "case_id": "H-P02-19",
+      "ned_ids": [
+        "NED-03",
+        "NED-06",
+        "NED-07"
+      ],
+      "surface": "broader native similarity/provenance/truncation controls",
+      "outcome": "unverified",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-19",
+        "ned_ids": [
+          "NED-03",
+          "NED-06",
+          "NED-07"
+        ],
+        "surface": "broader native similarity/provenance/truncation controls",
+        "status": "unverified",
+        "expected": "Actual host verifies conflicting contracts, body caps, omitted counts, stale/failed/skipped test provenance and invalid oracles.",
+        "observed": "Native smokes cover source-linked candidates, explicit full expansion, structural versus unrun-test distinctions and actual ordinary-control assertions. Broader boundary matrix is delegated technical evidence, not observed in these native sessions.",
+        "evidence_refs": [
+          "preauthorized-cold.receipt.json",
+          "RUN-SUMMARIES.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "preauthorized-cold",
+            "duration_seconds": 69.47295427322388,
+            "request_to_first_source_evidence_seconds": 23.40245223045349,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-04",
+        "next_step": "Review the technical matrix and explicitly declare remaining native boundary exclusions or run bounded targeted host cases before readiness."
+      }
+    },
+    {
+      "case_id": "H-P02-20",
+      "ned_ids": [
+        "NED-04"
+      ],
+      "surface": "actual Codex Codeweb child invocation unavailable/timeout state",
+      "outcome": "unverified",
+      "source": "hosts",
+      "source_file": "hosts/CASES.json",
+      "original_case": {
+        "id": "H-P02-20",
+        "ned_ids": [
+          "NED-04"
+        ],
+        "surface": "actual Codex Codeweb child invocation unavailable/timeout state",
+        "status": "unverified",
+        "expected": "The Codeweb tool child failing to start or timing out is distinct from supported zero.",
+        "observed": "Observed host failures include model rejection and approval denial, plus native missing/corrupt/empty graph states. A Codeweb child executable/unavailable/timeout fault was not injected in the live host; those other failures are not relabeled as this case.",
+        "evidence_refs": [
+          "cold.receipt.json",
+          "cold-corrected-sol.receipt.json",
+          "native-state-matrix.receipt.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "Codex CLI",
+        "host_version": "0.157.1",
+        "model": "gpt-6-sol/high",
+        "configuration": "Exact per-run command, graph paths, prompt and settings are in referenced receipts. Successful Codex sessions expose six tools with per-tool approve, server default prompt, scoped CODEWEB_WS, CODEWEB_NO_AUTOREFRESH=1, workspace-write, apps=false and hooks=false.",
+        "latency": [
+          {
+            "run": "cold",
+            "duration_seconds": 2.728292942047119,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          },
+          {
+            "run": "cold-corrected-sol",
+            "duration_seconds": 52.34466314315796,
+            "request_to_first_source_evidence_seconds": null,
+            "per_event_timestamps_available": false
+          },
+          {
+            "run": "native-state-matrix",
+            "duration_seconds": 26.21266508102417,
+            "request_to_first_source_evidence_seconds": 17.607547998428345,
+            "per_event_timestamps_available": true
+          }
+        ],
+        "owner": "Codex / P-04",
+        "next_step": "Review technical invocation-fault receipts and run a bounded legitimately scoped native transport/child fault case or declare a valid surface exclusion before readiness."
+      }
+    },
+    {
+      "case_id": "H-P02-GM-01",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "fresh native 6.1 Sol/high model and CLI condition",
+      "outcome": "pass",
+      "source": "hosts-global-model-update",
+      "source_file": "hosts-global-model-update/CASES.json",
+      "original_case": {
+        "id": "H-P02-GM-01",
+        "ned_ids": [
+          "NED-08"
+        ],
+        "surface": "fresh native 6.1 Sol/high model and CLI condition",
+        "status": "pass",
+        "expected": "Pinned isolated CLI accepts gpt-6.1-sol/high and performs actual Codeweb invocation.",
+        "observed": "npx pinned official 0.159.3 reports codex-cli 0.159.3. Explicit -m gpt-6.1-sol / high run completed with actual context and impact results, exit0, no model substitution or fallback configured. Tool outputs have no independent backend model/reasoning echo. Earlier 0.157.1 rejection and 6-Sol runs remain historical different configurations.",
+        "evidence_refs": [
+          "isolated-cli-version.receipt.json",
+          "native-gpt-6.1-sol.receipt.json",
+          "events/native-gpt-6.1-sol.stdout.txt"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "isolated official @openai/codex@0.159.3",
+        "host_version": "codex-cli 0.159.3",
+        "model": "gpt-6.1-sol",
+        "reasoning_effort": "high",
+        "configuration": "Exact explicit invocation in native-gpt-6.1-sol.receipt.json. User config ignored, auth retained; scoped six-tool approve, server default prompt, fixture graph pinned, workspace-write, apps=false, hooks=false.",
+        "latency": {
+          "whole_native_run_seconds": 49.16036009788513,
+          "context_request_to_result_seconds": 19.26834201812744,
+          "impact_request_to_result_seconds": 23.039688110351562
+        },
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review exact invocation and retain current-condition availability separately from earlier rejection; do not infer broader matrix revalidation."
+      }
+    },
+    {
+      "case_id": "H-P02-GM-02",
+      "ned_ids": [
+        "NED-02",
+        "NED-07",
+        "NED-08"
+      ],
+      "surface": "actual source-linked exact-target evidence/opening",
+      "outcome": "pass",
+      "source": "hosts-global-model-update",
+      "source_file": "hosts-global-model-update/CASES.json",
+      "original_case": {
+        "id": "H-P02-GM-02",
+        "ned_ids": [
+          "NED-02",
+          "NED-07",
+          "NED-08"
+        ],
+        "surface": "actual source-linked exact-target evidence/opening",
+        "status": "pass",
+        "expected": "Native context/impact identifies rare consumer and opens exact fixture source.",
+        "observed": "context matched rare with sourceAvailable:true, unchanged-stamps and consumer call-site window. impact returned src/consumer.mjs:consequential count1. Current rare body is value+3. One BSD nl multi-file source-open command failed; separate source reads succeeded.",
+        "evidence_refs": [
+          "RUN-SUMMARY.json",
+          "events/native-gpt-6.1-sol.stdout.txt"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "isolated official @openai/codex@0.159.3",
+        "host_version": "codex-cli 0.159.3",
+        "model": "gpt-6.1-sol",
+        "reasoning_effort": "high",
+        "configuration": "Exact explicit invocation in native-gpt-6.1-sol.receipt.json. User config ignored, auth retained; scoped six-tool approve, server default prompt, fixture graph pinned, workspace-write, apps=false, hooks=false.",
+        "latency": {
+          "whole_native_run_seconds": 49.16036009788513,
+          "context_request_to_result_seconds": 19.26834201812744,
+          "impact_request_to_result_seconds": 23.039688110351562
+        },
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Retain fixture-only source relationship scope; this forced-call smoke does not show natural adoption or behavioral correctness."
+      }
+    },
+    {
+      "case_id": "H-P02-GM-03",
+      "ned_ids": [
+        "NED-05"
+      ],
+      "surface": "baseline preservation",
+      "outcome": "pass",
+      "source": "hosts-global-model-update",
+      "source_file": "hosts-global-model-update/CASES.json",
+      "original_case": {
+        "id": "H-P02-GM-03",
+        "ned_ids": [
+          "NED-05"
+        ],
+        "surface": "baseline preservation",
+        "status": "pass",
+        "expected": "Read-only availability probe preserves original baseline without refresh, edit or recapture.",
+        "observed": "Baseline SHA256 25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd identical before/after; no file-change event or refresh/baseline-capture call.",
+        "evidence_refs": [
+          "native-gpt-6.1-sol.receipt.json",
+          "RUN-SUMMARY.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "isolated official @openai/codex@0.159.3",
+        "host_version": "codex-cli 0.159.3",
+        "model": "gpt-6.1-sol",
+        "reasoning_effort": "high",
+        "configuration": "Exact explicit invocation in native-gpt-6.1-sol.receipt.json. User config ignored, auth retained; scoped six-tool approve, server default prompt, fixture graph pinned, workspace-write, apps=false, hooks=false.",
+        "latency": {
+          "whole_native_run_seconds": 49.16036009788513,
+          "context_request_to_result_seconds": 19.26834201812744,
+          "impact_request_to_result_seconds": 23.039688110351562
+        },
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Review receipt/event ordering; no after-edit flow was rerun under this CLI/model condition."
+      }
+    },
+    {
+      "case_id": "H-P02-GM-04",
+      "ned_ids": [
+        "NED-08"
+      ],
+      "surface": "fixture-only shell read restriction",
+      "outcome": "fail",
+      "source": "hosts-global-model-update",
+      "source_file": "hosts-global-model-update/CASES.json",
+      "original_case": {
+        "id": "H-P02-GM-04",
+        "ned_ids": [
+          "NED-08"
+        ],
+        "surface": "fixture-only shell read restriction",
+        "status": "fail",
+        "expected": "Only fixture source and Codeweb MCP should be read during this smoke.",
+        "observed": "Native model read Codeweb product-team SKILL.md, CURRENT.md and TERMINAL-CONTRACT.md outside fixture at 12.452s, contrary to fixture-only prompt. It acknowledged deviation. These are Codeweb workflow instructions, not unrelated connector/auth/credential reads. No source writes or out-of-scope graph args observed.",
+        "evidence_refs": [
+          "RUN-SUMMARY.json",
+          "events/native-gpt-6.1-sol.stdout.txt"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "isolated official @openai/codex@0.159.3",
+        "host_version": "codex-cli 0.159.3",
+        "model": "gpt-6.1-sol",
+        "reasoning_effort": "high",
+        "configuration": "Exact explicit invocation in native-gpt-6.1-sol.receipt.json. User config ignored, auth retained; scoped six-tool approve, server default prompt, fixture graph pinned, workspace-write, apps=false, hooks=false.",
+        "latency": {
+          "whole_native_run_seconds": 49.16036009788513,
+          "context_request_to_result_seconds": 19.26834201812744,
+          "impact_request_to_result_seconds": 23.039688110351562
+        },
+        "owner": "Codex / P-04",
+        "next_step": "Keep scope failure explicit. In a future authorized isolation check, reconcile inherited Codeweb workflow instructions and fixture-only constraints; do not retry this run."
+      }
+    },
+    {
+      "case_id": "H-P02-GM-05",
+      "ned_ids": [
+        "NED-09"
+      ],
+      "surface": "new-condition request/result/source-open timing",
+      "outcome": "pass",
+      "source": "hosts-global-model-update",
+      "source_file": "hosts-global-model-update/CASES.json",
+      "original_case": {
+        "id": "H-P02-GM-05",
+        "ned_ids": [
+          "NED-09"
+        ],
+        "surface": "new-condition request/result/source-open timing",
+        "status": "pass",
+        "expected": "Record actual timings with setup correction effort and no comparative inference.",
+        "observed": "Isolated package/version command 7.083s; native run49.160s; context19.268s, impact23.040s; successful consumer/library source opening33.565/33.578s after one failed local formatting command. Per-tool durations are separately timestamped. No interactive wait measured and no tiny-sample percentile or benefit claim.",
+        "evidence_refs": [
+          "isolated-cli-version.receipt.json",
+          "RUN-SUMMARY.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "isolated official @openai/codex@0.159.3",
+        "host_version": "codex-cli 0.159.3",
+        "model": "gpt-6.1-sol",
+        "reasoning_effort": "high",
+        "configuration": "Exact explicit invocation in native-gpt-6.1-sol.receipt.json. User config ignored, auth retained; scoped six-tool approve, server default prompt, fixture graph pinned, workspace-write, apps=false, hooks=false.",
+        "latency": {
+          "whole_native_run_seconds": 49.16036009788513,
+          "context_request_to_result_seconds": 19.26834201812744,
+          "impact_request_to_result_seconds": 23.039688110351562
+        },
+        "owner": "Codex / P-02 reviewer",
+        "next_step": "Compare only identical conditions if future latency research is authorized; this smaller smoke is not a repeat of the prior longer matrix."
+      }
+    },
+    {
+      "case_id": "H-P02-GM-06",
+      "ned_ids": [
+        "NED-01",
+        "NED-02",
+        "NED-03",
+        "NED-04",
+        "NED-05",
+        "NED-06",
+        "NED-07",
+        "NED-08",
+        "NED-09",
+        "NED-10"
+      ],
+      "surface": "broader readiness/native boundary matrix in new CLI/model condition",
+      "outcome": "unverified",
+      "source": "hosts-global-model-update",
+      "source_file": "hosts-global-model-update/CASES.json",
+      "original_case": {
+        "id": "H-P02-GM-06",
+        "ned_ids": [
+          "NED-01",
+          "NED-02",
+          "NED-03",
+          "NED-04",
+          "NED-05",
+          "NED-06",
+          "NED-07",
+          "NED-08",
+          "NED-09",
+          "NED-10"
+        ],
+        "surface": "broader readiness/native boundary matrix in new CLI/model condition",
+        "status": "unverified",
+        "expected": "All claimed hosts, hooks, worktree, recovery, disable and broader provenance/similarity boundaries satisfy final candidate matrix.",
+        "observed": "This addendum performs only a read-only forced context/impact check in the original retained fixture. It does not rerun linked worktree, editing/diff, denied permissions, failure states, similarity controls, runtime disable, ambient hooks or Claude. hooks=false excludes ambient proof. Global-default loading is not tested because explicit settings use --ignore-user-config. Earlier packet stays immutable and cannot be relabeled as these new conditions.",
+        "evidence_refs": [
+          "SOURCE-CONDITION.json",
+          "native-gpt-6.1-sol.receipt.json",
+          "PREDECESSOR-INTEGRITY.json"
+        ],
+        "candidate_commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+        "candidate_path": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+        "host": "isolated official @openai/codex@0.159.3",
+        "host_version": "codex-cli 0.159.3",
+        "model": "gpt-6.1-sol",
+        "reasoning_effort": "high",
+        "configuration": "Exact explicit invocation in native-gpt-6.1-sol.receipt.json. User config ignored, auth retained; scoped six-tool approve, server default prompt, fixture graph pinned, workspace-write, apps=false, hooks=false.",
+        "latency": {
+          "whole_native_run_seconds": 49.16036009788513,
+          "context_request_to_result_seconds": 19.26834201812744,
+          "impact_request_to_result_seconds": 23.039688110351562
+        },
+        "owner": "Codex / P-04",
+        "next_step": "Reviewer combines distinct evidence honestly; P-04 owns remaining required cases or valid exclusions before unqualified readiness."
+      }
+    }
+  ],
+  "case_count": 66,
+  "outcome_counts": {
+    "pass": 43,
+    "fail": 11,
+    "unverified": 12
+  },
+  "ned_summary": {
+    "NED-01": {
+      "cases": [
+        "TECH-01",
+        "TECH-02",
+        "TECH-03",
+        "H-P02-06",
+        "H-P02-08",
+        "H-P02-09",
+        "H-P02-16",
+        "H-P02-18",
+        "H-P02-GM-06"
+      ],
+      "outcome_counts": {
+        "pass": 5,
+        "fail": 1,
+        "unverified": 3
+      },
+      "readiness": "blocked",
+      "limits": "Passing child cases do not certify full criterion. Apply review qualifications and preserve independent host/profile/model conditions."
+    },
+    "NED-02": {
+      "cases": [
+        "TECH-04",
+        "TECH-05",
+        "TECH-06",
+        "TECH-07",
+        "TECH-36",
+        "H-P02-04",
+        "H-P02-14",
+        "H-P02-16",
+        "H-P02-18",
+        "H-P02-GM-02",
+        "H-P02-GM-06"
+      ],
+      "outcome_counts": {
+        "pass": 5,
+        "fail": 3,
+        "unverified": 3
+      },
+      "readiness": "blocked",
+      "limits": "Passing child cases do not certify full criterion. Apply review qualifications and preserve independent host/profile/model conditions."
+    },
+    "NED-03": {
+      "cases": [
+        "TECH-01",
+        "TECH-08",
+        "TECH-09",
+        "H-P02-05",
+        "H-P02-18",
+        "H-P02-19",
+        "H-P02-GM-06"
+      ],
+      "outcome_counts": {
+        "pass": 4,
+        "unverified": 3
+      },
+      "readiness": "unverified",
+      "limits": "Passing child cases do not certify full criterion. Apply review qualifications and preserve independent host/profile/model conditions."
+    },
+    "NED-04": {
+      "cases": [
+        "TECH-10",
+        "TECH-11",
+        "TECH-12",
+        "TECH-13",
+        "TECH-14",
+        "TECH-15",
+        "TECH-16",
+        "TECH-40",
+        "H-P02-08",
+        "H-P02-09",
+        "H-P02-10",
+        "H-P02-16",
+        "H-P02-18",
+        "H-P02-20",
+        "H-P02-GM-06"
+      ],
+      "outcome_counts": {
+        "pass": 7,
+        "fail": 3,
+        "unverified": 5
+      },
+      "readiness": "blocked",
+      "limits": "Passing child cases do not certify full criterion. Apply review qualifications and preserve independent host/profile/model conditions."
+    },
+    "NED-05": {
+      "cases": [
+        "TECH-15",
+        "TECH-17",
+        "TECH-18",
+        "TECH-19",
+        "TECH-20",
+        "TECH-21",
+        "TECH-39",
+        "TECH-40",
+        "H-P02-02",
+        "H-P02-06",
+        "H-P02-07",
+        "H-P02-08",
+        "H-P02-16",
+        "H-P02-18",
+        "H-P02-GM-03",
+        "H-P02-GM-06"
+      ],
+      "outcome_counts": {
+        "fail": 1,
+        "pass": 11,
+        "unverified": 4
+      },
+      "readiness": "blocked",
+      "limits": "Passing child cases do not certify full criterion. Apply review qualifications and preserve independent host/profile/model conditions."
+    },
+    "NED-06": {
+      "cases": [
+        "TECH-03",
+        "TECH-22",
+        "TECH-23",
+        "TECH-24",
+        "TECH-25",
+        "H-P02-06",
+        "H-P02-18",
+        "H-P02-19",
+        "H-P02-GM-06"
+      ],
+      "outcome_counts": {
+        "pass": 6,
+        "unverified": 3
+      },
+      "readiness": "unverified",
+      "limits": "Passing child cases do not certify full criterion. Apply review qualifications and preserve independent host/profile/model conditions."
+    },
+    "NED-07": {
+      "cases": [
+        "TECH-04",
+        "TECH-06",
+        "TECH-26",
+        "TECH-27",
+        "TECH-28",
+        "TECH-29",
+        "H-P02-04",
+        "H-P02-05",
+        "H-P02-16",
+        "H-P02-18",
+        "H-P02-19",
+        "H-P02-GM-02",
+        "H-P02-GM-06"
+      ],
+      "outcome_counts": {
+        "pass": 8,
+        "fail": 1,
+        "unverified": 4
+      },
+      "readiness": "blocked",
+      "limits": "Passing child cases do not certify full criterion. Apply review qualifications and preserve independent host/profile/model conditions."
+    },
+    "NED-08": {
+      "cases": [
+        "TECH-20",
+        "TECH-21",
+        "TECH-30",
+        "TECH-31",
+        "TECH-32",
+        "TECH-38",
+        "H-P02-01",
+        "H-P02-02",
+        "H-P02-03",
+        "H-P02-04",
+        "H-P02-07",
+        "H-P02-14",
+        "H-P02-15",
+        "H-P02-16",
+        "H-P02-17",
+        "H-P02-18",
+        "H-P02-GM-01",
+        "H-P02-GM-02",
+        "H-P02-GM-04",
+        "H-P02-GM-06"
+      ],
+      "outcome_counts": {
+        "pass": 9,
+        "unverified": 7,
+        "fail": 4
+      },
+      "readiness": "blocked",
+      "limits": "Passing child cases do not certify full criterion. Apply review qualifications and preserve independent host/profile/model conditions."
+    },
+    "NED-09": {
+      "cases": [
+        "TECH-33",
+        "TECH-34",
+        "H-P02-11",
+        "H-P02-16",
+        "H-P02-18",
+        "H-P02-GM-05",
+        "H-P02-GM-06"
+      ],
+      "outcome_counts": {
+        "pass": 3,
+        "unverified": 4
+      },
+      "readiness": "unverified",
+      "limits": "Passing child cases do not certify full criterion. Apply review qualifications and preserve independent host/profile/model conditions."
+    },
+    "NED-10": {
+      "cases": [
+        "TECH-29",
+        "TECH-35",
+        "TECH-36",
+        "TECH-37",
+        "TECH-38",
+        "H-P02-12",
+        "H-P02-13",
+        "H-P02-16",
+        "H-P02-18",
+        "H-P02-GM-06"
+      ],
+      "outcome_counts": {
+        "pass": 3,
+        "fail": 2,
+        "unverified": 5
+      },
+      "readiness": "blocked",
+      "limits": "Passing child cases do not certify full criterion. Apply review qualifications and preserve independent host/profile/model conditions."
+    }
+  },
+  "full_field_readiness": false,
+  "new_61_native_result": "Explicit gpt-6.1-sol/high run accepted on official isolated CLI 0.159.3; actual context/impact, unchanged baseline. Out-of-fixture instruction reads are a failed probe-confinement condition.",
+  "review_qualifications": [
+    {
+      "source_case": "TECH-15",
+      "qualification": "No-mapping/out-of-scope silence alone is legitimate. Failure/repair scope is mapped corrupt/empty evidence or previously mapped target with failed extraction; do not make every silent file an error."
+    },
+    {
+      "source_case": "TECH-08",
+      "qualification": "Self-match addTax is 1.0; discount and four duplicate candidates are 0.714286. Conflicting bodies retrieved, but distinct scores; no semantic substitutability follows."
+    },
+    {
+      "source_case": "H-P02-GM-04",
+      "qualification": "Reads of Codeweb instruction files outside fixture are probe-confinement/attention contamination, not demonstrated product data leakage; scoped source-linked availability remains supported."
+    }
+  ]
+}

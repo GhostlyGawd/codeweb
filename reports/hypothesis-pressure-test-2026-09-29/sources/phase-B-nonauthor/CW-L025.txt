@@ -1,0 +1,53 @@
+I Stopped Using MCPs and Replaced Them with Skills and Scripts | Nick Perkins
+Skip to content
+Nick Perkins
+Software Engineer. Volunteer Motorsport Official. ADHD Brain. Bit of a nerd.
+Search
+Archive
+About Nick
+I Stopped Using MCPs and Replaced Them with Skills and Scripts
+20 Jun 2026
+AI Development
+Contents
+The problem with MCPs
+What I did instead
+The thing MCPs can’t do
+When I still use MCPs
+The tradeoff
+Everyone’s excited about MCPs. The Model Context Protocol is supposed to be the standard way AI agents talk to external services. And it is good, for what it is. But I’ve been replacing MCPs with skills and scripts in my own workflows, and honestly, I’m not going back.
+The problem with MCPs
+When you load an MCP server, all of its tool definitions get injected into the agent’s context. Every tool name, every parameter schema, every description. The Atlassian MCP alone exposes dozens of tools across Jira and Confluence. That’s a lot of schema sitting in your context window before you’ve even asked the agent to do anything.
+Then when the agent calls a tool, the response comes back and takes up more context. And it stays there. You’re paying a context tax for every MCP you load, whether you use it or not.
+This matters because context window is finite. Every token spent on tool schemas is a token the agent can’t use for your actual work. When you’re doing complex agentic work, that adds up fast.
+And it’s not just about context anymore. It’s about cost. GitHub Copilot moved to usage-based billing in April 2026. You get a monthly allowance of AI credits and every token counts against it. Those MCP schemas sitting in your context? You’re paying for them on every single request, whether you use the tool or not. Load the Atlassian MCP and you’re burning credits on dozens of tool definitions you might not even touch in that session.
+What I did instead
+I built skills for Jira, Confluence, and Atlas that call the Atlassian API directly via scripts. A skill file is just markdown. It tells the agent how to use a tool. No schemas injected. No context tax. The agent loads it when it needs it, runs a command, moves on. For Jira and Confluence, the MCP exists but I don’t use it. For Atlas, there isn’t even an MCP. The skill was the only option.
+For GitHub, I use
+gh
+CLI instead of a GitHub MCP. It’s already installed, it handles auth, and the agent can call it from a terminal. The skill file just tells the agent which commands to use for common workflows: create a PR, check CI status, review a diff.
+The result is faster, lighter, and the agent has more context available for the actual work.
+The thing MCPs can’t do
+I have a skill that automates my weekly Atlas project updates. It’s not a single API call. It’s a workflow.
+The skill tells the agent to work through a folder of project data. For each project, it knows to review the Jira work items and epics, check for status changes since last week, look for any discussions of risks, and then draft an update in the format I need. The data lives in a folder, the logic lives in the skill file, and the agent orchestrates the whole thing end to end.
+An MCP can give you a “create Atlas update” tool. It can’t tell the agent to review Jira epics first, check for risk discussions, and format the output a specific way. That’s workflow logic, not API access. MCPs are API wrappers. Skills are workflow instructions.
+The context overhead matters, but this matters more. My problem isn’t “how does the agent call the Atlas API.” It’s “how does the agent know what to do before calling the Atlas API, and what to do with the result.” MCPs don’t help with that.
+When I still use MCPs
+MCPs aren’t useless. They shine when there’s no CLI or API you can call from a script. Figma is the main one I’ve hit. There’s no
+figma
+CLI you can run from a terminal, so the MCP is the only way to interact with it programmatically.
+But that’s a short list. Most services I use in development (GitHub, Jira, Confluence, Slack, AWS) have CLIs or REST APIs that a script can call. And if there’s a CLI, a skill file is almost always the lighter option.
+The tradeoff
+You might think MCPs give you standardisation: any agent that supports MCP can use any MCP server. But every major AI coding tool now supports skills natively. Copilot, Claude Code, Cursor, OpenCode, they all read skill files from a directory. ChatGPT doesn’t do this natively yet, but you can paste a skill into custom instructions and get the same effect. The standardisation argument doesn’t hold up anymore.
+If you’re building agentic workflows and your context window is feeling tight, look at which MCPs you’re loading and ask yourself: could this be a script and a skill file instead? For most of mine, the answer was yes.
+Speaking of skills, remember that testing skill I mentioned a few months back? I finally cleaned it up and released it. It’s a generalized version that works with Copilot, Claude Code, Cursor, and others. Same idea as everything above: no MCP, no tool server, no schema in your context. Just a markdown file that tells the agent how to write tests at the right level.
+github.com/nickperkins/testing-skill
+ai
+mcp
+skills
+developer experience
+agentic workflows
+Thanks for reading. I'm Nick, and this is my personal blog. If you got something out of this, there's more where it came from.
+Read next: Agent to Agent Communication: MCP Is the Wrong Layer →
+All writing →
+Browse the archive →
+© 2017–2026 Nick Perkins

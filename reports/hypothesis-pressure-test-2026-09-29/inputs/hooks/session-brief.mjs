@@ -1,0 +1,92 @@
+#!/usr/bin/env node
+// codeweb SessionStart hook — the day-one briefing, injected before the first token is spent.
+//
+// A new session in a mapped repo starts oriented instead of exploring: one ~2KB page (areas,
+// load-bearing symbols, entry points, test layout, known issues) from the already-built graph.
+// FAIL-OPEN and cheap: unmapped cwd is a silent no-op; any error exits 0 with no output.
+
+import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
+import { normalizeGraph, buildIndex } from '../scripts/lib/graph-ops.mjs';
+import { buildBrief, renderBrief } from '../scripts/lib/brief-core.mjs';
+import { loadBriefSidecar } from '../scripts/lib/brief-sidecar.mjs'; // finding 23: serve the map-time render at the boot floor
+import { bump, attachActivity } from '../scripts/lib/stats.mjs';
+import { checkStaleness, SRC_RE, nearestWorkspace } from '../scripts/lib/cli.mjs'; // R3 nudge + THE walk (D3b)
+import { loadStaleStamps } from '../scripts/lib/stale-stamps.mjs'; // R3: stamps without the graph parse
+import { readHistory } from '../scripts/lib/history.mjs';          // R1/R8: the progression line
+import { loadNarration } from '../scripts/lib/narration.mjs';      // AI-IDEAS 3: agent-written notes, labeled
+
+const findGraph = (startDir) => nearestWorkspace(startDir)?.path ?? null;
+
+// Returns the briefing text for a SessionStart payload, or null (unmapped / unreadable).
+// COMPREHENSION #3: the marketplace promises "hooks brief every session", but on an unmapped
+// repo this hook exited with zero output — the first session after install taught "the plugin
+// doesn't work". One line, once per workspace (home-dir stamp keyed by cwd), only when the cwd
+// actually has source to map; the quiet-by-default posture survives. Fail-open everywhere.
+function unmappedNudge(cwd) {
+  try {
+    const entries = readdirSync(cwd).slice(0, 200);
+    const hasSource = entries.some((f) => SRC_RE.test(f))
+      || entries.some((d) => ['src', 'lib', 'app'].includes(d)
+           && (() => { try { return readdirSync(join(cwd, d)).slice(0, 100).some((f) => SRC_RE.test(f)); } catch { return false; } })());
+    if (!hasSource) return null;
+    const stampPath = join(homedir(), '.codeweb', 'nudged.json');
+    let doc = null; try { doc = JSON.parse(readFileSync(stampPath, 'utf8')); } catch { /* first nudge */ }
+    const dirs = (doc && doc.dirs) || {};
+    if (dirs[cwd]) return null;
+    dirs[cwd] = new Date().toISOString();
+    const keys = Object.keys(dirs);
+    if (keys.length > 100) for (const k of keys.slice(0, keys.length - 100)) delete dirs[k];
+    try { mkdirSync(join(homedir(), '.codeweb'), { recursive: true }); writeFileSync(stampPath, JSON.stringify({ dirs })); } catch { /* stamp is best-effort */ }
+    return "[codeweb] this repo isn't mapped yet — run /codeweb (or codeweb_map) to turn on briefs and impact cards.";
+  } catch { return null; }
+}
+
+export function preview(raw) {
+  let input; try { input = JSON.parse(raw); } catch { input = {}; }
+  const cwd = input?.cwd || process.cwd();
+  const graphPath = findGraph(cwd);
+  if (!graphPath) return unmappedNudge(cwd);
+  // finding 23: the brief is a pure function of the graph — the report stage pre-rendered it, so
+  // the common path is stat + one small read instead of parse + index of the whole graph (97ms on
+  // this repo, 310-328ms at 17k nodes). Stamp mismatch (graph rebuilt since) -> the parse path.
+  let payload = loadBriefSidecar(graphPath);
+  let staleMeta = null; // {root, sources, dirs} for the R3 change check, from whichever path ran
+  if (!payload) {
+    let graph; try { graph = normalizeGraph(JSON.parse(readFileSync(graphPath, 'utf8'))); } catch { return null; }
+    payload = buildBrief(graph, buildIndex(graph));
+    staleMeta = { root: graph.meta?.root, sources: graph.meta?.sources, dirs: graph.meta?.dirs };
+  } else {
+    staleMeta = loadStaleStamps(graphPath); // sidecar path: stamps sidecar keeps the boot floor
+  }
+  const brief = attachActivity(payload, graphPath);
+  // R3: the change-based nudge — the sweep is stat-only (12-17ms at 5k files), fail-open.
+  try { if (staleMeta?.sources) { const v = checkStaleness({ meta: staleMeta }); if (v) brief.stale = v; } } catch { /* nudge is best-effort */ }
+  // R1/R8: the progression line — one small file read.
+  try { const h = readHistory(graphPath, 4); if (h.length >= 2) brief.history = h; } catch { /* memory is best-effort */ }
+  // AI-IDEAS Idea 3: agent-written narration, provenance-labeled by the renderer; stale -> absent.
+  try { const n = loadNarration(graphPath); if (n) brief.narration = n; } catch { /* sidecar is best-effort */ }
+  const text = renderBrief(brief);
+  // ACTIVATION A7: an EMPTY map must not be announced as "mapped" — renderBrief already leads
+  // with the empty verdict, so the prefix only adds the path.
+  if (!brief.size || brief.size.symbols === 0) return `[codeweb] ${text}\n(map file: ${graphPath})`;
+  return `[codeweb] this repo is mapped (${graphPath}).\n${text}`;
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
+  let raw = '';
+  try { raw = readFileSync(0, 'utf8'); } catch { /* no stdin */ }
+  let msg = null;
+  try { msg = preview(raw); } catch { /* fail-open */ }
+  if (msg) {
+    try { const input = JSON.parse(raw); bump(findGraph(input?.cwd || process.cwd()), 'briefInjected'); } catch { /* receipt only */ }
+    try {
+      process.stdout.write(JSON.stringify({
+        hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext: msg },
+      }) + '\n');
+    } catch { /* ignore */ }
+  }
+  process.exit(0);
+}

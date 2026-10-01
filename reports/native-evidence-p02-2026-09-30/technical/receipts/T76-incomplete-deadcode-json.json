@@ -1,0 +1,23 @@
+{
+  "id": "T76-incomplete-deadcode-json",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/deadcode.mjs",
+    "$LOCAL_TMP/codeweb-p02-supplement-mshorI/incomplete.json",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:52:49.512Z",
+  "end": "2026-10-01T01:52:49.547Z",
+  "durationMs": 35.57958299999996,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"target\":\"target\",\"summary\":\"1 orphan(s): 1 safe to delete, 0 need review\",\"totals\":{\"orphans\":1,\"safe\":1,\"review\":0,\"suppressed\":0},\"excluded\":0,\"excludedByRole\":{},\"note\":\"extraction drops ambiguous call edges (precision over recall), so a genuinely-called symbol can surface here — cross-check before deleting\",\"safe\":[{\"id\":\"missing.mjs:risky\",\"file\":\"missing.mjs\",\"domain\":\"unassigned\",\"loc\":3,\"reason\":\"no production caller, not exported, no test edge, not in a test file — high-confidence dead\",\"fingerprint\":\"9c3f50975477d509\"}],\"review\":[],\"suppressed\":[]}\n",
+  "stderr": "[codeweb] analysis incomplete — inspect graph.meta.analysis.diagnostics; mapped results cannot establish a clean gate.\n"
+}

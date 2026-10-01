@@ -1,0 +1,316 @@
+{
+  "schema_version": 1,
+  "assignment": "10 — Compounding project knowledge",
+  "issue_identifier": "COD-89",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "overall_verdict": "narrow",
+  "sources": {
+    "K10-RECEIPTS": {
+      "type": "frozen_primary_code_and_documentation",
+      "original_url": null,
+      "original_path": "scripts/lib/evidence-core.mjs",
+      "passage_pointer": "createReceipt lines 121–136; reconcileQuestions/reconcileReceipt lines 137–183; docs/cli.md lines 200–250",
+      "capture_pointer": "inputs/scripts/lib/evidence-core.mjs; inputs/scripts/lib/evidence-service.mjs; inputs/docs/cli.md",
+      "boundary": "Source inspection only; no host runtime or customer outcome measurement."
+    },
+    "K10-STORE": {
+      "type": "frozen_primary_code_and_documentation",
+      "original_url": null,
+      "original_path": "scripts/lib/evidence-store.mjs",
+      "passage_pointer": "RECORD_LIMIT/STORE_LIMIT lines 9–11; putRecord lines 224–277; readRecord lines 278–299",
+      "capture_pointer": "inputs/scripts/lib/evidence-store.mjs; inputs/docs/cli.md lines 243–250",
+      "boundary": "Root/task restrictions and limits inspected in source; cross-machine import not exercised."
+    },
+    "K10-FRESH": {
+      "type": "frozen_primary_code_and_documentation",
+      "original_url": null,
+      "original_path": "scripts/lib/evidence-snapshot.mjs",
+      "passage_pointer": "captureSnapshot lines 148–170; docs/cli.md Context analysis status and Before and after an edit",
+      "capture_pointer": "inputs/scripts/lib/evidence-snapshot.mjs; inputs/docs/cli.md lines 72–103,108–149",
+      "boundary": "Content inventory checks are not runtime completeness or behavioral verification."
+    },
+    "K10-ANNOTATE": {
+      "type": "frozen_primary_documentation_and_interface",
+      "original_url": null,
+      "original_path": "docs/reference.md",
+      "passage_pointer": "annotate table row line 262; scripts/mcp-server.mjs lines 232–235,285–287",
+      "capture_pointer": "inputs/docs/reference.md; inputs/scripts/mcp-server.mjs",
+      "boundary": "Annotation implementation/fingerprint invalidation code is absent from frozen packet; no assertion of a demonstrated suppression defect."
+    },
+    "K10-STRATEGY": {
+      "type": "proposal",
+      "original_url": null,
+      "original_path": "reports/user-centric-value-strategy/STRATEGY.md",
+      "passage_pointer": "Make the useful path feel native, final paragraph; Earn repeated reliance; Connect developer value to a paid team job",
+      "capture_pointer": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+      "boundary": "Saved ignored duplications/preferred scopes and managed coordination are proposed, not customer results."
+    },
+    "K10-CHARTER": {
+      "type": "ratified_product_boundary",
+      "original_url": null,
+      "original_path": "CHARTER.md",
+      "passage_pointer": "Invariants; The boundary: free forever / Teams",
+      "capture_pointer": "inputs/CHARTER.md",
+      "boundary": "Authority for free-local/paid-service split, not demand evidence."
+    },
+    "CW-L037": {
+      "type": "public_self_report_or_maintainer_statement",
+      "original_url": "https://david.coffee/i-still-prefer-mcp-over-skills/",
+      "passage_pointer": "Skills + MCP; rendered lines 87–102",
+      "capture_pointer": "receipts/L10-source-reopens.txt; inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl record CW-L037",
+      "boundary": "MCP builder's self-report; commercial interest; images not inspected."
+    },
+    "CW-L034": {
+      "type": "public_self_report_or_maintainer_statement",
+      "original_url": "https://jseverino.com/portfolio/building-a-custom-mcp-layer/",
+      "passage_pointer": "The Vault Comes First lines 42–50; The Sensitivity Gate lines 87–98; Recall in Practice lines 99–106; HQ lines 109–121",
+      "capture_pointer": "receipts/L10-source-reopens.txt; inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl record CW-L034",
+      "boundary": "Personal tool builder self-report; neither implementation nor screenshots verified."
+    },
+    "CW-Z006": {
+      "type": "public_self_report_or_maintainer_statement",
+      "original_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+      "passage_pointer": "Refactoring at scale lines 73–75; AI config/CI lines 115–139; What humans still do lines 84–102",
+      "capture_pointer": "receipts/L10-source-reopens.txt; inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl record CW-Z006",
+      "boundary": "Founding engineer/tool builder; May snapshot with later update; no independently audited productivity numbers adopted."
+    },
+    "CW-Y004": {
+      "type": "public_self_report_or_maintainer_statement",
+      "original_url": "https://forum.cursor.com/t/request-for-documentation-bugbot-repository-isolation-boundaries-for-gitlab/165666",
+      "passage_pointer": "Posts 1,6,7; rendered lines 11–44,48–58",
+      "capture_pointer": "receipts/L10-source-reopens.txt; inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl record CW-Y004",
+      "boundary": "Organization evaluator's requirements; no demonstrated breach, purchase or approval."
+    },
+    "CW-Y008": {
+      "type": "public_self_report_or_maintainer_statement",
+      "original_url": "https://forum.cursor.com/t/applying-shared-coding-guidelines-across-multiple-repos-with-bugbot/133667",
+      "passage_pointer": "Posts 1,7,15,17,20; rendered lines 9–24,41–58",
+      "capture_pointer": "receipts/L10-source-reopens.txt; inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl record CW-Y008",
+      "boundary": "Historical limitation; maintainer reports file-reference support resolved. Separate-repo access not proven."
+    },
+    "CW-T012": {
+      "type": "frozen_original_evidence_record",
+      "original_url": "https://github.com/openai/codex/issues/37955",
+      "passage_pointer": "Original issue body: stale paths and documentation/enforcement mismatch findings",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl record CW-T012; L123-SOURCES.jsonl line 34",
+      "boundary": "This run read original evidence record; web reopen returned navigation only, no fresh body confirmation. Builder audit at stated commit, downstream harm unestablished."
+    },
+    "CW-X011": {
+      "type": "frozen_original_evidence_record",
+      "original_url": "https://github.com/openai/codex/issues/36712",
+      "passage_pointer": "Body: What issue are you seeing?",
+      "capture_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl record CW-X011; L123-SUPPLEMENT-SOURCES.jsonl line 30",
+      "boundary": "Historical version-specific partial body read by collector; comments not enumerated. No new reopen or current host failure claim."
+    }
+  },
+  "findings": [
+    {
+      "id": "L10-F01",
+      "statement": "Retain a narrow mechanism: task-owned, source-versioned structural receipts can avoid reconstructing which mapped relationships were inspected; accumulating receipts does not establish increasing usefulness or restore task intent.",
+      "evidence_type": [
+        "repository_observed_capability",
+        "inference",
+        "unvalidated_customer_effect"
+      ],
+      "supported_actor_segment_task": "An agent-heavy developer returning in a later session to the same supported symbol/change, or handing that inspection to a reviewer.",
+      "relevant_conditions": [
+        "Same task and source workspace; retrievable receipt ID; compatible analyzer; supported mapped relationships.",
+        "Historical source and current source distinguished; current check/reconciliation succeeds.",
+        "A repeat orientation question actually recurs and the receipt is retrieved before redoing it."
+      ],
+      "strongest_supported_case": "createReceipt preserves target source hash, graph/inventory/analyzer identity, caller/callee/impact witnesses and unresolved questions. Reconciliation names added, removed and changed witnesses. A later reader can see what was observed without recreating the old pre-edit snapshot.",
+      "strongest_countercase": "The records are explicit task-owned snapshots, not an automatically selected project memory or saved intent/architecture decision system. A persisted graph cannot resolve lost user intent; ordinary Git/PR notes remain a comparator.",
+      "evidence_ids": [
+        "K10-RECEIPTS",
+        "K10-FRESH"
+      ],
+      "opposing_evidence_ids": [
+        "CW-X011",
+        "K10-STORE",
+        "K10-STRATEGY"
+      ],
+      "failure_scenario": "A new session sees an old receipt, assumes its consumer set describes the new change, and skips current inspection; the unknown dynamic consumer never appears in either map.",
+      "verdict": "narrow",
+      "weakest_assumption": "Retrieving and validating the relevant old evidence costs less than native reorientation.",
+      "local_implication": "Keep durable evidence free locally; position it as bounded historical inspection support, not self-improving understanding.",
+      "paid_implication": "Persistence alone supplies no paid value beyond local files and existing PR evidence.",
+      "confidence_reason": "High confidence that primitives exist in frozen source; low confidence in orientation savings because no repeated Codeweb task outcome is present.",
+      "minimal_falsification_test": "On one real repository, compare a later eligible change using its prior receipt with a matched change using Git/PR notes plus native search. Include receipt discovery, reconciliation, reading and verification time. Reject the compounding mechanism if no previously completed orientation step is eliminated or any stale inference changes the plan incorrectly.",
+      "unresolved_test": "Proposed only; neither a host experiment nor a participant trial executed."
+    },
+    {
+      "id": "L10-F02",
+      "statement": "Existing false-positive suppression is not proof of revision-safe saved decisions; a rationale must become eligible for rechecking when its relevant assumptions change.",
+      "evidence_type": [
+        "documented_capability",
+        "proposal",
+        "risk_inference"
+      ],
+      "supported_actor_segment_task": "A developer repeatedly reviewing intentional duplication or a suspected false-positive dead-code finding.",
+      "relevant_conditions": [
+        "Decision is deliberate and attributable, with rationale and applicable scope.",
+        "Relevant source/relationship/ownership changes invalidate or visibly reopen it.",
+        "Suppressed counts and on-demand inspection remain visible."
+      ],
+      "strongest_supported_case": "The frozen interface documents codeweb_annotate with a finding fingerprint, optional note and list mode; the documentation describes sidecar suppressions and separate suppressed counts. Intentional duplication in CW-Z006 gives a legitimate reason to remember an exception.",
+      "strongest_countercase": "The proposal explicitly calls remembered duplication/scope decisions future conveniences. Identity-based fingerprints are documented, but the frozen packet lacks their implementation and proof that unchanged identity with changed semantics reopens a decision.",
+      "evidence_ids": [
+        "K10-ANNOTATE",
+        "CW-Z006"
+      ],
+      "opposing_evidence_ids": [
+        "K10-STRATEGY",
+        "K10-FRESH"
+      ],
+      "failure_scenario": "Two intentionally separate implementations retain their identities while one gains an authorization constraint; an old ignore decision prevents attention to newly consequential divergence. Conversely, invalidating on every unrelated edit recreates all the old triage.",
+      "verdict": "revise",
+      "weakest_assumption": "A small, stable set of revision dependencies can distinguish still-valid rationale from obsolete rationale without excessive user maintenance.",
+      "local_implication": "Treat existing annotation notes separately from proposed revision-scoped decisions. Proposed minimum record: target/finding identity, rationale, source revision or hashes, author, scope and recheck trigger; rechecking must be explicit rather than silently clearing evidence.",
+      "paid_implication": "Shared exception governance could be service work only if it removes demonstrated recurring coordination; an exception count is not evidence of value.",
+      "confidence_reason": "The gap between interface/documentation and promised semantics is clear. This is a verification requirement, not a reproduced product bug.",
+      "minimal_falsification_test": "Using a legitimate suppression, compare an irrelevant source edit, a relevant body/consumer change with stable target identity, and a rename. Require the benign case to remain inspectable without repeat adjudication and relevant changes to request recheck. Fail if a material new risk is hidden or all changes force full re-triage.",
+      "unresolved_test": "No suppression behavior experiment executed; annotation invalidation internals were not frozen."
+    },
+    {
+      "id": "L10-F03",
+      "statement": "Reusable knowledge has credible native and user-owned substitutes; Codeweb must add maintained source evidence rather than claim ownership of project memory.",
+      "evidence_type": [
+        "public_self_report",
+        "maintainer_statement",
+        "comparative_inference"
+      ],
+      "supported_actor_segment_task": "A developer who already maintains skills, repository instructions or review guidelines and wants later sessions to avoid relearning procedures.",
+      "relevant_conditions": [
+        "Host loads the intended material in the actual session.",
+        "Instructions are kept current and source-linked.",
+        "Comparison preserves the user's familiar memory workflow rather than artificially removing it."
+      ],
+      "strongest_supported_case": "CW-L037 describes turning discovered connector quirks into reusable skills; CW-L034 describes a user-owned runbook store used across hosts. They make saved local context a plausible source of repeat value.",
+      "strongest_countercase": "Both are builder accounts and demonstrate alternatives, not Codeweb dependence. CW-Y008 records a historical rules-reference failure followed by maintainer-reported support, so that old gap cannot justify a new permanent memory layer.",
+      "evidence_ids": [
+        "CW-L037",
+        "CW-L034"
+      ],
+      "opposing_evidence_ids": [
+        "CW-Y008",
+        "K10-STRATEGY"
+      ],
+      "failure_scenario": "The brief repeats a fact already present in maintained repository instructions; the user now reconciles two conflicting copies and reads more context per task.",
+      "verdict": "narrow",
+      "weakest_assumption": "Source-derived changes provide incremental value after native memory and maintained instructions are available.",
+      "local_implication": "Complement user-owned instructions with inspectable structural facts and changes. Do not rebuild a generic memory system from these reports.",
+      "paid_implication": "A buyer can already share instructions and PR history; demonstrate removed coordination beyond that baseline before attributing value to hosting.",
+      "confidence_reason": "Moderate support for reusable-context practice, weak transfer to ordinary Codeweb users; no measured substitute comparison.",
+      "minimal_falsification_test": "For a later task, hold ordinary host memory, skills, Git history and instructions constant in both conditions. Add only the Codeweb evidence delta. If the same correct decision is reached with equal or less total work in control, drop the additional-memory claim for that task class.",
+      "unresolved_test": "Current automatic-memory feature parity across hosts is not established; no version-specific host capability claim is made."
+    },
+    {
+      "id": "L10-F04",
+      "statement": "Knowledge compounds only when avoided reconstruction exceeds capture, freshness, retrieval and exception-maintenance work; storage growth is not an outcome.",
+      "evidence_type": [
+        "repository_observed_capability",
+        "public_self_report",
+        "economic_inference"
+      ],
+      "supported_actor_segment_task": "A repository maintainer returning to related changes over time and responsible for keeping contextual metadata trustworthy.",
+      "relevant_conditions": [
+        "Old evidence remains locatable and relevant.",
+        "Maintenance, source migration and false warnings are counted.",
+        "Familiar isolated changes are valid no-benefit controls."
+      ],
+      "strongest_supported_case": "Content capture and reconciliation can mechanize part of freshness checking. CW-Z006 describes CI validation of instruction facts, while CW-L034's metadata/review-date practice illustrates explicit context maintenance.",
+      "strongest_countercase": "Existing storage has 2 MiB per-record and 32 MiB total limits with no automatic cleanup; target renames require recapture. Builder-reported instruction systems do not show that their maintenance is cheaper than repeated orientation. CW-T012 records stale guidance at a particular commit.",
+      "evidence_ids": [
+        "K10-FRESH",
+        "CW-Z006",
+        "CW-L034"
+      ],
+      "opposing_evidence_ids": [
+        "K10-STORE",
+        "CW-T012"
+      ],
+      "failure_scenario": "After several refactors, obsolete receipts fill the store and renamed targets cannot reconcile. The maintainer curates records, repairs paths and rereads source for each task, consuming all claimed savings.",
+      "verdict": "narrow",
+      "weakest_assumption": "The ratio of genuinely reusable facts to obsolete or redundant facts improves over successive tasks.",
+      "local_implication": "Measure net work removed, not number of facts/receipts. Preserve historical baselines deliberately; recapture must not overwrite the pre-edit evidence needed for verification.",
+      "paid_implication": "Subtract onboarding, metadata ownership, triage and retention/deletion work from any service saving; managed retention is not yet a demonstrated paid job.",
+      "confidence_reason": "Maintenance requirements are directly visible in code/docs; net customer benefit remains unmeasured.",
+      "minimal_falsification_test": "Track three related changes across fresh sessions with a maintainer: record minutes of orientation avoided minus capture, retrieval, freshness checking, curation and correction. Include a rename and an irrelevant edit. Reject 'compounding' if cumulative net savings do not become positive or if accuracy declines.",
+      "unresolved_test": "Three changes are a small falsification screen, not a retention estimate; no measurements invented."
+    },
+    {
+      "id": "L10-F05",
+      "statement": "Portable inspectable records and legitimate information boundaries are prerequisites for shared context; current task/workspace binding is not seamless cross-project memory.",
+      "evidence_type": [
+        "repository_observed_capability",
+        "public_requirement",
+        "design_inference"
+      ],
+      "supported_actor_segment_task": "A developer moving workspaces/hosts or a reviewer accessing historical evidence, and an organization evaluator with repository isolation rules.",
+      "relevant_conditions": [
+        "Source scope and allowed readers remain attached to derived facts.",
+        "Export preserves source/analyzer identity and unknowns.",
+        "Historical inspection is distinguished from trusted import/reconciliation in another checkout."
+      ],
+      "strongest_supported_case": "JSON records, immutable paging and hashes support inspectability; explicit task/root/parent validation guards against accidental mixing. CW-Y004 shows a real evaluator asking about provenance and non-transitive derived-context boundaries.",
+      "strongest_countercase": "readRecord checks real source-root equality, task and graph-relative path. Copying JSON is therefore not enough to establish working relocation/import. Local execution alone also does not establish what a connected model may receive.",
+      "evidence_ids": [
+        "K10-STORE",
+        "CW-Y004"
+      ],
+      "opposing_evidence_ids": [
+        "K10-STORE",
+        "CW-L034"
+      ],
+      "failure_scenario": "A copied receipt either fails in a new checkout or is manually stripped of identity checks to make it load; later, a shared summary carries facts from repository A into forbidden repository C through allowed intermediary B.",
+      "verdict": "revise",
+      "weakest_assumption": "Portable handoff can preserve provenance and permissions without creating expensive remapping and policy-maintenance work.",
+      "local_implication": "Describe present records as inspectable local artifacts with workspace-bound operational reuse. Any future export/import must preserve constraints rather than disabling the guards.",
+      "paid_implication": "Do not sell pooled learning across repos without scoped provenance, deletion and allowed-flow semantics. CW-Y004 is a requirement signal, not proof of breach or buying authority.",
+      "confidence_reason": "Workspace checks are explicit in inspected source; cross-host runtime portability and organizational controls remain untested/unbuilt in reviewed materials.",
+      "minimal_falsification_test": "Copy a receipt and its source revision to another permitted checkout and inspect it without losing identity; separately test attempted reconciliation under a wrong task/root and an unauthorized A-to-C derived-context transfer. Fail portability claims if a safe handoff requires bypassing guards; fail legitimate accumulation if disallowed facts leak.",
+      "unresolved_test": "Proposed boundary test only; no relocation, service or authorization experiment executed."
+    },
+    {
+      "id": "L10-F06",
+      "statement": "Reject proprietary-data or moat claims from evidence accumulation; narrow the paid hypothesis to demonstrably removed service coordination.",
+      "evidence_type": [
+        "ratified_boundary",
+        "proposal",
+        "unsupported_commercial_inference"
+      ],
+      "supported_actor_segment_task": "A potential team buyer already coordinating supported checks and source-linked handoffs across explicitly related repositories.",
+      "relevant_conditions": [
+        "Local project facts and decisions remain free and user-controlled.",
+        "Paid service savings are isolated from free local and ordinary CI savings.",
+        "Payment and renewal require actual buyer evidence."
+      ],
+      "strongest_supported_case": "The strategy proposes a concrete service job: coordinate agreed checks, rerun on relevant changes and expose tested revisions and unresolved states. Shared source evidence could reduce repeated handoff assembly.",
+      "strongest_countercase": "The strategy itself says history alone is not a moat or purchase; the charter keeps laptop/single-repo work free. Skills, Git/PR artifacts and native shared rules supply alternatives. No Codeweb buyer, renewal or exclusive data advantage is established.",
+      "evidence_ids": [
+        "K10-STRATEGY",
+        "K10-RECEIPTS"
+      ],
+      "opposing_evidence_ids": [
+        "K10-CHARTER",
+        "CW-Y008",
+        "CW-Y004"
+      ],
+      "failure_scenario": "A team accumulates many records but still chases owners, reruns CI and explains failures manually; removing the paid view loses a dashboard but no recurring work.",
+      "verdict": "reject",
+      "weakest_assumption": "Hosting the evidence removes a recurring coordination step that adequate CI and local records do not already remove.",
+      "local_implication": "Earn reliance through trustworthy evidence, not artificial data lock-in. A useful free local tool can survive a rejected moat claim.",
+      "paid_implication": "Retain only a separately testable managed-coordination hypothesis; do not infer purchase, renewal or proprietary advantage from project history.",
+      "confidence_reason": "Strong grounds to reject the asserted commercial inference; low confidence about whether a narrower future service will succeed.",
+      "minimal_falsification_test": "On one consenting team's real recurring cross-repo check, inventory the actual chasing, rerunning and evidence-assembly steps with existing CI/PR practice; compare a bounded coordination prototype including setup and triage. If it removes no step or has nonpositive net savings, reject that paid job. Purchase and renewal would still need separate observation.",
+      "unresolved_test": "No buyer trial, external send, paid offer or service build authorized or executed in this assignment."
+    }
+  ],
+  "access_coverage_limits": [
+    "No other pressure-test lens output was read. Isolation is procedural in a shared filesystem; runtime session independence awaits lead verification.",
+    "All 192 frozen input hashes checked initially; final verification recorded in receipt. Selected original records and source passages were inspected, not all external corpus sources.",
+    "Five distinct original public sources successfully reopened for relevant passages; one GitHub reopen exposed navigation only. Capture is a web-tool rendered response, not a complete HTML archive. No screenshots used.",
+    "Frozen annotation implementation and runtime host-memory parity are not established. No user trial, behavioral experiment or customer outcome measurement was executed.",
+    "Source records include builders and historical/resolved incidents. Neither source counts nor agreement among analysts establishes prevalence or demand."
+  ]
+}

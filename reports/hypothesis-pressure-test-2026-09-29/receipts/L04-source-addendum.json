@@ -1,0 +1,41 @@
+{
+  "retrieved_at": "2026-09-30T04:08:02.412962+00:00",
+  "method": "web.run original-page reopen, bounded paraphrase captures; no full external archive",
+  "reads": [
+    {
+      "evidence_id": "CW-Z007",
+      "url": "https://github.com/oraios/serena/issues/1814",
+      "passage_pointer": "Summary; Note on scoping; web lines 163\u2013175, 294\u2013304",
+      "capture_note": "Issue reports failed reference service returning an empty successful-looking response. Root versus subdirectory scope changes results. Closed label observed; linked fixes and comments not reverified.",
+      "access_boundary": "targeted body passages; not full comments, linked experiment artifacts or independent reproduction"
+    },
+    {
+      "evidence_id": "CW-Z011",
+      "url": "https://github.com/oraios/serena/issues/1432",
+      "passage_pointer": "Capability matrix; web lines 167\u2013193",
+      "capture_note": "Generated methods are unavailable to certain symbol operations while text operations reach usages and compiler bindings support the API. Closed label is not independent resolution verification.",
+      "access_boundary": "targeted body passages; not full comments, linked experiment artifacts or independent reproduction"
+    },
+    {
+      "evidence_id": "CW-X013",
+      "url": "https://github.com/openai/codex/issues/24285",
+      "passage_pointer": "Actual behavior; Concrete examples; web lines 205\u2013241",
+      "capture_note": "Reporter describes skipped clean-tree gates and premature completion across phases in one project. Underlying traces not reproduced.",
+      "access_boundary": "targeted body passages; not full comments, linked experiment artifacts or independent reproduction"
+    },
+    {
+      "evidence_id": "CW-Z004",
+      "url": "https://securityatlightspeed.substack.com/p/building-a-cloud-agentic-swe-loop",
+      "passage_pointer": "Attempt 1; Review Findings Were Not Independently Revalidated; web lines 16\u201328, 46\u201368, 84\u201387",
+      "capture_note": "One small CRUD experiment distinguishes attempted fixes from independently verified fixes and CI green from intended behavior. This does not establish current platform limitations.",
+      "access_boundary": "targeted body passages; not full comments, linked experiment artifacts or independent reproduction"
+    },
+    {
+      "evidence_id": "CW-L023",
+      "url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+      "passage_pointer": "Part 5 sections 14\u201315; web lines 701\u2013780",
+      "capture_note": "Repository context removed recurring false positives in a firmware experiment but reduced recall. No Codeweb replay or general customer effect follows.",
+      "access_boundary": "targeted body passages; not full comments, linked experiment artifacts or independent reproduction"
+    }
+  ]
+}

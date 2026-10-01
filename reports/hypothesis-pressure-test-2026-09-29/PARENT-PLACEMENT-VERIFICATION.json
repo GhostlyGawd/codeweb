@@ -1,0 +1,22 @@
+{
+  "run_id": "23d2a331-8c72-4628-8dc4-a96d6f4697cc",
+  "receipt_sha256": "306c6c7d72972b65f91425322cb335052661d239a07a5c5d96153572e5d064b5",
+  "destination": "$LOCAL_HOME/Repositories/codeweb/reports/hypothesis-pressure-test-2026-09-29",
+  "checks": {
+    "receipt_bytes_identical": true,
+    "delivery_files": 512,
+    "frozen_files": 192,
+    "synthesis_files": 344,
+    "missing": [],
+    "mismatches": [],
+    "reviewed_content_files_unchanged": 8
+  },
+  "original_delivery_manifest_unchanged": true,
+  "administrative_updates": [
+    "COMPLETION.json",
+    "RUNS.json",
+    "CONTROL-PLANE.json"
+  ],
+  "historical_admin_location": "history/post-placement/",
+  "native_approval": false
+}

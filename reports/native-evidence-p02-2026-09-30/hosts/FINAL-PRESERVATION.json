@@ -1,0 +1,17 @@
+{
+  "original_baseline_sha256": "25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd",
+  "linked_baseline_sha256": "f2d4c34eaefc9a227a4d36733d398d5a0bbcfe41101828564c732b22b3ffa3b6",
+  "fixture_current_source_sha256": {
+    "src/popular.mjs": "117a6551aa4c146d08a7b44b4cacd2da1a8e10bfcd8a0046e9f10734d189a967",
+    "src/duplicates.mjs": "1b20db633e25ce5eb9810729e93a1681809e79feb2dad6a260731e64e8613488",
+    "src/consumer.mjs": "dea8efd479f4e52e8404f2d3b06938688fb713665afd788ca19fc66e87023d4c",
+    "src/library.mjs": "1cf1aff563b075b160d39b8d29a0978bb6ebc20550054c4b48858b15a48f51b0"
+  },
+  "linked_current_source_sha256": {
+    "src/popular.mjs": "117a6551aa4c146d08a7b44b4cacd2da1a8e10bfcd8a0046e9f10734d189a967",
+    "src/duplicates.mjs": "1b20db633e25ce5eb9810729e93a1681809e79feb2dad6a260731e64e8613488",
+    "src/consumer.mjs": "dea8efd479f4e52e8404f2d3b06938688fb713665afd788ca19fc66e87023d4c",
+    "src/library.mjs": "ced9d80d842f644fba53d35409fe1a8a2a4c88e8b1164e5041b659ce58fd0080"
+  },
+  "candidate_files_unchanged": true
+}

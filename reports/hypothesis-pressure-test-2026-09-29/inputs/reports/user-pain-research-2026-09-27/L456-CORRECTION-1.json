@@ -1,0 +1,85 @@
+{
+  "corrected_at": "2026-09-28T01:13:45.163212+00:00",
+  "attempt": 1,
+  "changes": {
+    "CW-L032": {
+      "published_at": {
+        "before": "2026-03-19",
+        "after": "2026-03-21"
+      }
+    },
+    "CW-L043": {
+      "codeweb_fit": {
+        "before": "partial",
+        "after": "unknown"
+      },
+      "fit_reasoning": {
+        "before": "Inference: structural evidence may support navigation and impact review, but does not establish intent, correctness, adoption or willingness to pay.",
+        "after": "Inference: this is a provider-limit and switching account. Codeweb could only help if avoidable repository-search tokens materially caused the interruption; the source provides no such attribution. A matched task comparison of token use and limit interruptions is needed before claiming fit."
+      }
+    },
+    "CW-L044": {
+      "codeweb_fit": {
+        "before": "partial",
+        "after": "unknown"
+      },
+      "fit_reasoning": {
+        "before": "Inference: structural evidence may support navigation and impact review, but does not establish intent, correctness, adoption or willingness to pay.",
+        "after": "Inference: complementary subscriptions and extra-credit purchases establish spending on host capacity, not a missing structural job. The source does not identify navigation or impact-analysis waste that Codeweb would remove; incremental benefit requires an observed comparison against this existing workflow."
+      }
+    },
+    "CW-L046": {
+      "codeweb_fit": {
+        "before": "partial",
+        "after": "unsupported"
+      },
+      "fit_reasoning": {
+        "before": "Inference: structural evidence may support navigation and impact review, but does not establish intent, correctness, adoption or willingness to pay.",
+        "after": "Inference: the reported constraint is manual app-use testing between changes. Codeweb reads structure without executing the app and cannot verify responsiveness or one-handed usability. This account supports testing-cadence segmentation, not Codeweb as a remedy for that testing burden."
+      }
+    },
+    "CW-L052": {
+      "codeweb_fit": {
+        "before": "partial",
+        "after": "unknown"
+      },
+      "fit_reasoning": {
+        "before": "Inference: structural evidence may support navigation and impact review, but does not establish intent, correctness, adoption or willingness to pay.",
+        "after": "Inference: satisfaction with a larger host allowance does not establish unmet structural-analysis need, even on a large codebase. No task-level evidence connects the credit consumption to repository navigation; a comparison against the satisfactory existing workflow is required."
+      }
+    },
+    "CW-L053": {
+      "codeweb_fit": {
+        "before": "partial",
+        "after": "unsupported"
+      },
+      "fit_reasoning": {
+        "before": "Inference: structural evidence may support navigation and impact review, but does not establish intent, correctness, adoption or willingness to pay.",
+        "after": "Inference: the reported workaround changes provider and billing model. Codeweb cannot change provider allowances or billing terms, and this source does not attribute consumption to redundant repository exploration. Retain as buying evidence, not structural-product fit."
+      }
+    },
+    "CW-L054": {
+      "codeweb_fit": {
+        "before": "partial",
+        "after": "unknown"
+      },
+      "fit_reasoning": {
+        "before": "Inference: structural evidence may support navigation and impact review, but does not establish intent, correctness, adoption or willingness to pay.",
+        "after": "Inference: lower self-reported spend after a provider switch does not show what work consumed tokens or whether outcomes were equivalent. There is no demonstrated Codeweb mechanism in this account; matched tasks and token attribution would be needed to assess a structural-efficiency benefit."
+      }
+    },
+    "CW-L055": {
+      "codeweb_fit": {
+        "before": "partial",
+        "after": "unknown"
+      },
+      "fit_reasoning": {
+        "before": "Inference: structural evidence may support navigation and impact review, but does not establish intent, correctness, adoption or willingness to pay.",
+        "after": "Inference: team budget pressure and perceived value after switching hosts inform service expectations, but neither identify structural review failures nor demonstrate demand for shared Codeweb evidence. Buyer authority and an incremental shared-workflow benefit remain untested."
+      }
+    }
+  },
+  "new_sources": 0,
+  "initial_corpus_immutable": true,
+  "independent_recheck_pending": true
+}

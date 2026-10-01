@@ -1,0 +1,182 @@
+{
+  "root": "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w",
+  "receiptPath": "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w/.codeweb/evidence/v1/receipts/38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf.json",
+  "receiptId": "38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf",
+  "originalSourceHash": "b0f00670ee75afc631386a6ecdc4fd3c38f9b613f578774ecafbe931db91bfae",
+  "receiptBeforeSha256": "38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf",
+  "receiptAfterOrdinaryRefreshAndRepairSha256": "38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf",
+  "receiptBody": {
+    "analysis": {
+      "diagnosticCount": 0,
+      "diagnostics": [],
+      "limitations": [
+        "external-callers",
+        "isolated-discovery-does-not-apply-ignore-files",
+        "unmapped-calls"
+      ],
+      "profile": "native-regex-snapshot-v1",
+      "sourceAvailable": true,
+      "status": "no-known-incompleteness"
+    },
+    "baseline": {
+      "analyzerIdentity": {
+        "ast": false,
+        "ctags": false,
+        "discoveryDigest": "6426b2a9bd12e9b5a30873959b6fa55af921a402bfe4aa7ddcf3b51c0304fef1",
+        "engine": "regex",
+        "nodeVersion": "v26.7.0",
+        "profile": "native-regex-snapshot-v1",
+        "projectionVersion": 1,
+        "relationVersion": 1,
+        "runtimeDigest": "2868a01827a3ccf13b5ea2d8186838cf0a3ef342300987d0c471aeec87833979",
+        "schemaVersion": 1
+      },
+      "graphDigest": "1eff0c7c4a3607159e11a6b152ff35606e98d1637ba5527842fd2a6822ef93b3",
+      "inventoryDigest": "e4ee1288c91570b39f97aa126954457ec7d09f1015f566f1d5c6cd6088ea0aee",
+      "optionsDigest": "c832979a7581c437c147a0381a614238e570e2833f56dd2640b4fee14d53a0c7",
+      "profile": "native-regex-snapshot-v1"
+    },
+    "graphRelativePath": ".codeweb/graph.json",
+    "query": {
+      "edgeKinds": {
+        "callees": [
+          "call"
+        ],
+        "callers": [
+          "call"
+        ],
+        "impact": [
+          "call",
+          "inherit"
+        ]
+      },
+      "profile": "native-regex-snapshot-v1",
+      "relationVersion": 1,
+      "selector": "subject.mjs:low",
+      "targetId": "subject.mjs:low"
+    },
+    "questions": [
+      {
+        "currentSourceSha256": "b0f00670ee75afc631386a6ecdc4fd3c38f9b613f578774ecafbe931db91bfae",
+        "file": "subject.mjs",
+        "id": "76961efa1e81ed04b53fff11dc0a8a5fdb98fd75832f028dbb6ec41a738040fe",
+        "originalSourceSha256": "b0f00670ee75afc631386a6ecdc4fd3c38f9b613f578774ecafbe931db91bfae",
+        "reason": "external-consumers-unknown",
+        "span": {
+          "column": null,
+          "line": 1
+        },
+        "state": "unresolved",
+        "targetId": "subject.mjs:low",
+        "task": "P02OwnReceipt"
+      }
+    ],
+    "relations": {
+      "callees": [],
+      "callers": [
+        {
+          "evidenceDigest": "e3fd4c514e7c253274ef1e9e73e484798faab4d920bd1a42f45ab6933f182cbf",
+          "id": "54020333d9d5126caf3ceef685007d335aaf8e8e78701848c8a2aae823e5e8f1",
+          "nodes": [
+            {
+              "file": "consumer.mjs",
+              "id": "consumer.mjs:consumer",
+              "kind": "function",
+              "line": 2,
+              "loc": 3
+            },
+            {
+              "file": "subject.mjs",
+              "id": "subject.mjs:low",
+              "kind": "function",
+              "line": 1,
+              "loc": 3
+            }
+          ],
+          "relatedId": "consumer.mjs:consumer",
+          "relation": "callers",
+          "support": [
+            {
+              "path": "consumer.mjs",
+              "sha256": "e3c5e335ea918535a9b4e45d6bfdad2bcce40a4cf4ac49f493a0712b750e12ca"
+            },
+            {
+              "path": "subject.mjs",
+              "sha256": "b0f00670ee75afc631386a6ecdc4fd3c38f9b613f578774ecafbe931db91bfae"
+            }
+          ],
+          "targetId": "subject.mjs:low",
+          "witnessPath": [
+            {
+              "from": "consumer.mjs:consumer",
+              "kind": "call",
+              "to": "subject.mjs:low"
+            }
+          ]
+        }
+      ],
+      "impact": [
+        {
+          "evidenceDigest": "dec1edb03162019c163136faa1d7ecb4b3242d33b6a6f365251eb08ac6c1f837",
+          "id": "d2ce764e798da442da4e01ab077859224b79e6c9d3395e46b98b915727062611",
+          "nodes": [
+            {
+              "file": "consumer.mjs",
+              "id": "consumer.mjs:consumer",
+              "kind": "function",
+              "line": 2,
+              "loc": 3
+            },
+            {
+              "file": "subject.mjs",
+              "id": "subject.mjs:low",
+              "kind": "function",
+              "line": 1,
+              "loc": 3
+            }
+          ],
+          "relatedId": "consumer.mjs:consumer",
+          "relation": "impact",
+          "support": [
+            {
+              "path": "consumer.mjs",
+              "sha256": "e3c5e335ea918535a9b4e45d6bfdad2bcce40a4cf4ac49f493a0712b750e12ca"
+            },
+            {
+              "path": "subject.mjs",
+              "sha256": "b0f00670ee75afc631386a6ecdc4fd3c38f9b613f578774ecafbe931db91bfae"
+            }
+          ],
+          "targetId": "subject.mjs:low",
+          "witnessPath": [
+            {
+              "from": "consumer.mjs:consumer",
+              "kind": "call",
+              "to": "subject.mjs:low"
+            }
+          ]
+        }
+      ]
+    },
+    "schemaVersion": 1,
+    "sourceRootRealpath": "$LOCAL_TMP/codeweb-p02-final-controls-DfjF3w",
+    "target": {
+      "exports": true,
+      "file": "subject.mjs",
+      "id": "subject.mjs:low",
+      "kind": "function",
+      "label": "low",
+      "line": 1,
+      "loc": 3,
+      "signature": {
+        "params": [
+          "x"
+        ],
+        "raw": "x",
+        "returns": null
+      },
+      "sourceSha256": "b0f00670ee75afc631386a6ecdc4fd3c38f9b613f578774ecafbe931db91bfae"
+    },
+    "task": "P02OwnReceipt"
+  }
+}

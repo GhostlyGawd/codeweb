@@ -1,0 +1,355 @@
+{
+  "CW-T018": {
+    "evidence_id": "CW-T018",
+    "url": "https://news.ycombinator.com/item?id=48033774",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:24",
+    "passage_pointer": "Story body and author reply 48035884; complete four-comment tree read",
+    "capture_pointer": null,
+    "source_access": "opened_full",
+    "limits": "Algolia complete story tree read; unverified firsthand account, not measured quality."
+  },
+  "CW-Z003": {
+    "evidence_id": "CW-Z003",
+    "url": "https://ngof.nikhaldimann.com/p/deja-code",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:111",
+    "passage_pointer": "Quantifying code duplication; methodological weaknesses",
+    "capture_pointer": "sources/L05/REOPEN-NOTES.json#CW-Z003",
+    "source_access": "opened_full",
+    "limits": "One author/context across this article and March follow-up; no extra incident for linked DRYwall promotion. Author warns removed lines can later disappear; no causal percentage claimed."
+  },
+  "CW-Z006": {
+    "evidence_id": "CW-Z006",
+    "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:114",
+    "passage_pointer": "Refactoring at scale; What humans still do",
+    "capture_pointer": "sources/L05/REOPEN-NOTES.json#CW-Z006",
+    "source_access": "opened_full",
+    "limits": "Updated September 12; statistics describe May snapshot. Builder account; quantities not independently audited."
+  },
+  "CW-Z001": {
+    "evidence_id": "CW-Z001",
+    "url": "https://shan-verse.com/blog/codex-after-the-update/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:109",
+    "passage_pointer": "The Old Projects I Refactored; How I Use Codex Now",
+    "capture_pointer": null,
+    "source_access": "opened_full",
+    "limits": "Surface of this particular task is unspecified; do not count as cloud incident. Product/pricing discussion not adopted as current facts."
+  },
+  "CW-P003": {
+    "evidence_id": "CW-P003",
+    "original_url": "https://github.com/anthropics/claude-code/issues/39703",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:4",
+    "source_passage": "Context and Category H; all body categories read",
+    "original_access": "opened_full",
+    "original_retrieved_at": "2026-09-28T00:38:53.019153+00:00",
+    "segment": "Python desktop application developer",
+    "segment_basis": "Author describes daily work on own 67K-line Python/Tkinter application.",
+    "limitations": "VS Code extension, not desktop app. Body plus all 2 bot comments read. One grouped author/project narrative, not 55 independent incidents. March 27 is just outside preferred six months; retained for concrete mechanism. No current reproduction or verified fix.",
+    "capture_pointer": "sources/L01/CW-P003.txt",
+    "capture_status": "targeted_reopen",
+    "finding_ids": [
+      "L01-F02",
+      "L01-F03",
+      "L01-F05"
+    ]
+  },
+  "CW-X001": {
+    "evidence_id": "CW-X001",
+    "url": "https://www.agentconnect.md/blog/grep-beat-lsp-harness/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:35",
+    "passage_pointer": "Sections: agents route by task; noisy codebases; output shape; limitations",
+    "capture_pointer": null,
+    "source_access": "opened_full",
+    "limits": "Two\u2013three runs per cell. No LSP rename/diagnostics tested. Primary article read completely; linked experiment repo not read. One study, not customer incidents."
+  },
+  "CW-T023": {
+    "evidence_id": "CW-T023",
+    "original_url": "https://www.reddit.com/r/ClaudeCode/comments/1qobg1g/how_to_refactor_50k_lines_of_legacy_code_without/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:29",
+    "source_passage": "Original post lines 21\u201394 read; remainder not inspected",
+    "original_access": "opened_partial",
+    "original_retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+    "segment": "Django maintainer",
+    "segment_basis": "Author describes their own Django monolith refactor.",
+    "limitations": "Partial thread; hidden replies not loaded. Exact date not established in opened page (relative ages only); discovery dates not promoted to publication facts. Same author/incident grouped. Self-report; no independent reproduction. Resolved means completion claimed by the author for this refactor, not independent verification or a general product fix.",
+    "capture_pointer": null,
+    "capture_status": "frozen_record_only_no_new_reopen",
+    "finding_ids": [
+      "L01-F02",
+      "L01-F05"
+    ]
+  },
+  "CW-L015": {
+    "evidence_id": "CW-L015",
+    "url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:67",
+    "passage_pointer": "UnrulyThesis reply",
+    "capture_pointer": null,
+    "source_access": "opened_partial",
+    "limits": "Historical account; relative date only. No general conclusion about current Serena capability."
+  },
+  "CW-L048": {
+    "evidence_id": "CW-L048",
+    "original_url": "https://news.ycombinator.com/item?id=49321400",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:100",
+    "source_passage": "Root 49321400",
+    "original_access": "opened_full",
+    "original_retrieved_at": "2026-09-28T01:04:40.794822+00:00",
+    "segment": "team developer/reviewer",
+    "segment_basis": "Refers to colleagues and own projects.",
+    "limitations": "Self-report, no observed task or independent replication. Not evidence of Codeweb use or demand.",
+    "capture_pointer": "sources/L01/CW-L048.txt",
+    "capture_status": "targeted_reopen",
+    "finding_ids": [
+      "L01-F04"
+    ]
+  },
+  "CW-X006": {
+    "evidence_id": "CW-X006",
+    "original_url": "https://renanfranca.github.io/when-plan-mode-was-no-longer-enough.html",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:40",
+    "source_passage": "First disappointment; seed4j-cli example; What this approach still does not solve",
+    "original_access": "opened_full",
+    "original_retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+    "segment": "open-source maintainer",
+    "segment_basis": "Author identifies Seed4J and JHipster core membership",
+    "limitations": "Resolved refers to reported workflow improvement, not all testing defects. Linked plan/issue not reopened; one author context.",
+    "capture_pointer": null,
+    "capture_status": "frozen_record_only_no_new_reopen",
+    "finding_ids": [
+      "L01-F04"
+    ]
+  },
+  "CW-L051": {
+    "evidence_id": "CW-L051",
+    "url": "https://news.ycombinator.com/item?id=49321400",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:103",
+    "passage_pointer": "Comment 49353756",
+    "capture_pointer": null,
+    "source_access": "opened_full",
+    "limits": "Self-reported satisfaction, no measured accuracy or purchase amount; considered disabling Copilot but has not reported doing so."
+  },
+  "CW-L001": {
+    "evidence_id": "CW-L001",
+    "original_url": "https://www.reddit.com/r/codereview/comments/1vuddna/how_are_you_actually_reviewing_ai_generated_code/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:53",
+    "source_passage": "OkPosition4563 reply; rendered lines 310\u2013315",
+    "original_access": "opened_partial",
+    "original_retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+    "segment": "team developer",
+    "segment_basis": "Mentions coworkers and own AI use.",
+    "limitations": "Self-report; no independent replication. Thread completeness and exact date unavailable.",
+    "capture_pointer": null,
+    "capture_status": "frozen_record_only_no_new_reopen",
+    "finding_ids": [
+      "L01-F04"
+    ]
+  },
+  "CW-Y007": {
+    "evidence_id": "CW-Y007",
+    "url": "https://forum.cursor.com/t/any-way-of-using-multiple-repositories-in-bugbot/152120",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:127",
+    "passage_pointer": "posts 1,5,6",
+    "capture_pointer": null,
+    "source_access": "opened_full",
+    "limits": "No confirmed purchase authority or willingness to pay. March host limits are historical, not asserted current."
+  },
+  "CW-Y005": {
+    "evidence_id": "CW-Y005",
+    "original_url": "https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:125",
+    "source_passage": "Why Build; Unix Philosophy; Performance; Dev Lifecycle",
+    "original_access": "opened_full",
+    "original_retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+    "segment": "Internal review-system builder",
+    "segment_basis": "Engineering retrospective explicitly describes building Iris.",
+    "limitations": "Company self-report; no independent measurement or procurement authority. Reported costs not Codeweb WTP.",
+    "capture_pointer": null,
+    "capture_status": "frozen_record_only_no_new_reopen",
+    "finding_ids": [
+      "L01-F06"
+    ]
+  },
+  "CW-T002": {
+    "evidence_id": "CW-T002",
+    "original_url": "https://github.com/anthropics/claude-code/issues/88214",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:8",
+    "passage_locator": "Body and all 0 comments; comment IDs in source registry",
+    "capture_pointer": null,
+    "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+    "source_access": "opened_full",
+    "retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+    "source_limit": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  "CW-T004": {
+    "evidence_id": "CW-T004",
+    "original_url": "https://github.com/anthropics/claude-code/issues/97515",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:10",
+    "passage_locator": "Body and all 0 comments; comment IDs in source registry",
+    "capture_pointer": null,
+    "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+    "source_access": "opened_full",
+    "retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+    "source_limit": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  "CW-X009": {
+    "evidence_id": "CW-X009",
+    "original_url": "https://github.com/openai/codex/issues/27133",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:43",
+    "passage_locator": "Body reproduction; comment 5233430635; comment 5416744725",
+    "capture_pointer": null,
+    "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+    "source_access": "opened_full",
+    "retrieved_at": "2026-09-28T01:26:58.170375+00:00",
+    "source_limit": "Body and all 10 REST comments read, one page. One grouped reporter incident. Root-cause diagnosis is user investigation, not maintainer confirmation; no fix established."
+  },
+  "CW-L026": {
+    "evidence_id": "CW-L026",
+    "original_url": "https://forum.cursor.com/t/bugbot-without-background-agents/157812",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:78",
+    "passage_locator": "Original post; support reply 6; author confirmation 7",
+    "capture_pointer": null,
+    "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+    "source_access": "opened_full",
+    "retrieved_at": "2026-09-28T00:52:16.800312+00:00",
+    "source_limit": "All rendered posts read; numbered gaps and JSON API HTTP403 prevent certifying complete thread. Resolution is author-confirmed for this incident, not a general capability test. Later additive review: Additive: exact trigger routes to review without background agents. No new incident."
+  },
+  "CW-L024": {
+    "evidence_id": "CW-L024",
+    "original_url": "https://www.checklyhq.com/blog/mcp-vs-cli-token-efficiency/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:76",
+    "passage_locator": "There\u2019s no difference anymore?; final paragraphs",
+    "capture_pointer": null,
+    "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+    "source_access": "opened_full",
+    "retrieved_at": "2026-09-28T00:50:08.047848+00:00",
+    "source_limit": "Three repetitions of one task, vendor-affiliated self-measurement. Claims about general host behavior require official verification; no general MCP/CLI superiority inferred."
+  },
+  "CW-L023": {
+    "evidence_id": "CW-L023",
+    "url": "https://edgelog.dev/blog/how-many-ai-code-reviews/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:75",
+    "passage_pointer": "Parts 1, 5; limitations 23.5\u201323.7",
+    "capture_pointer": null,
+    "source_access": "opened_full",
+    "limits": "Full article read in overlapping chunks; author adjudication, three small tasks, two models, no independent rerun. Tool-builder case. Not a model leaderboard or proven Codeweb effect."
+  },
+  "CW-Z012": {
+    "evidence_id": "CW-Z012",
+    "url": "https://github.com/oraios/serena/discussions/131",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:120",
+    "passage_pointer": "May 30\u2013June 2 maintainer replies; reporter May 31 recovery",
+    "capture_pointer": "sources/L05/REOPEN-NOTES.json#CW-Z012",
+    "source_access": "opened_full",
+    "limits": "Historical discussion; estimates in proposal and pasted model analysis not treated as measurements. Whole discussion counts once."
+  },
+  "CW-Z009": {
+    "evidence_id": "CW-Z009",
+    "original_url": "https://simonwillison.net/2025/Jun/3/openai-codex-pr/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:117",
+    "passage_locator": "Setup script; prompt; result paragraph",
+    "capture_pointer": null,
+    "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+    "source_access": "opened_full",
+    "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+    "source_limit": "Historical success, not a current speed benchmark. Linked PR not counted separately."
+  },
+  "CW-Y006": {
+    "evidence_id": "CW-Y006",
+    "original_url": "https://forum.cursor.com/t/is-cursor-extremely-slow-for-you-since-the-0-49-update/82831",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:126",
+    "passage_locator": "posts 1 and 5",
+    "capture_pointer": null,
+    "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+    "source_access": "opened_full",
+    "retrieved_at": "2026-09-28T01:47:44.351912+00:00",
+    "source_limit": "Historical version 0.49.4; two variables changed. Another user in thread reports fast operation."
+  },
+  "CW-T006": {
+    "evidence_id": "CW-T006",
+    "original_url": "https://github.com/anthropics/claude-code/issues/70680",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:12",
+    "passage_locator": "Body and all 2 comments; comment IDs in source registry",
+    "capture_pointer": null,
+    "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+    "source_access": "opened_full",
+    "retrieved_at": "2026-09-28T00:51:36.468724+00:00",
+    "source_limit": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  "CW-Z007": {
+    "evidence_id": "CW-Z007",
+    "original_url": "https://github.com/oraios/serena/issues/1814",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:115",
+    "passage_locator": "Summary; Additional suggestion; Note on scoping",
+    "capture_pointer": null,
+    "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+    "source_access": "opened_partial",
+    "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+    "source_limit": "API rate-limited; full body read, comment completeness unverified. First-query crash fix merged Aug 20 (#1848); later-query fix #2007 remains open. No blanket fixed claim."
+  },
+  "CW-Z011": {
+    "evidence_id": "CW-Z011",
+    "original_url": "https://github.com/oraios/serena/issues/1432",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:119",
+    "passage_locator": "Capability matrix in body",
+    "capture_pointer": null,
+    "capture_limit": "Frozen original evidence record and source-registry boundary inspected; full external page capture not present for this record; no new public reopen in L03.",
+    "source_access": "opened_partial",
+    "retrieved_at": "2026-09-28T01:46:44.657972+00:00",
+    "source_limit": "Full body only; comments unavailable. Closed with #1434, but linked PR inaccessible, so resolution not verified."
+  },
+  "CW-001": {
+    "evidence_id": "CW-001",
+    "url": "https://github.com/anthropics/claude-code/issues/47565",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:1",
+    "passage_pointer": "Issue body: What Claude Actually Did; Additional Context items 6\u20137",
+    "capture_pointer": null,
+    "source_access": "opened_partial",
+    "limits": "Complete issue body read through web.open; comments/activity were not exposed, so entire thread is NOT counted fully read. Closed as not planned/stale is not a verified fix. Model-caused regression and subscription reasons are self-report. Single incident, not prevalence or Codeweb purchase intent."
+  },
+  "CW-L037": {
+    "evidence_id": "CW-L037",
+    "url": "https://david.coffee/i-still-prefer-mcp-over-skills/",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:89",
+    "passage_pointer": "Skills + MCP",
+    "capture_pointer": null,
+    "source_access": "opened_full",
+    "limits": "Explicit commercial interest in MCP hosting/tunneling; not ordinary-user proof. Broad host capabilities and security claims not adopted."
+  },
+  "CW-T007": {
+    "evidence_id": "CW-T007",
+    "url": "https://github.com/anthropics/claude-code/issues/83790",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:13",
+    "passage_pointer": "Body and all 1 comments; comment IDs in source registry",
+    "capture_pointer": null,
+    "source_access": "opened_full",
+    "limits": "Complete issue body and enumerated REST comments read; attachments and linked duplicates not read. Closure alone is not resolution."
+  },
+  "CW-Y001": {
+    "evidence_id": "CW-Y001",
+    "url": "https://forum.cursor.com/t/bugbot-pricing-feedback/131907",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:121",
+    "passage_pointer": "posts 1 and 3",
+    "capture_pointer": "sources/L05/REOPEN-NOTES.json#CW-Y001",
+    "source_access": "opened_full",
+    "limits": "Historical price and intended retention, not observed renewal; no Codeweb buying intent."
+  },
+  "CW-Y010": {
+    "evidence_id": "CW-Y010",
+    "url": "https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:130",
+    "passage_pointer": "post 1",
+    "capture_pointer": null,
+    "source_access": "opened_full",
+    "limits": "Outside two-year preference; proposed purchase, not completed sale or observed downgrade."
+  },
+  "CW-L022": {
+    "evidence_id": "CW-L022",
+    "url": "https://www.synthesia.io/post/automating-code-security-reviews-with-claude-mythos-level-capabilities",
+    "record_pointer": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl:74",
+    "passage_pointer": "Building a map; Security Context; From self-serve to CI",
+    "capture_pointer": null,
+    "source_access": "opened_full",
+    "limits": "Company self-report, not independently replicated. Full article read; figures not visually inspected or used. HN gbrindisi is same author/workflow, not another incident."
+  }
+}

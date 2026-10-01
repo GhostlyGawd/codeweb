@@ -1,0 +1,42 @@
+[
+  {
+    "path": "scripts/check",
+    "sha256": "16d18888050ba912afad8dcc3d6e543ba942fe39b80f99737512e4e955ced993"
+  },
+  {
+    "path": "scripts/spec_lint.py",
+    "sha256": "3d8f3e219b7bde311be85632b216e26e0c1b379cf0a7f57c062c3ebf82b9b5d8"
+  },
+  {
+    "path": "scripts/hook-protect",
+    "sha256": "f8fc91eebf3f1560947f680eafe5af335cfda251d194eee1804dece77ad11a04"
+  },
+  {
+    "path": "scripts/hook-check",
+    "sha256": "b115ca47dbe0957a85ef399ea2714886315fe562dd71ad0cdc7860a28b9c3fcd"
+  },
+  {
+    "path": ".claude/settings.json",
+    "sha256": "7fe50689f26f07e921cc2132b0c45322ba5240d82feaab8b0da7e3a0d4d8b9dc"
+  },
+  {
+    "path": ".githooks/pre-commit",
+    "sha256": "2cac7b58832b4e3889c76041e205985ed2373c60f7fd5793c72f695e23b660a0"
+  },
+  {
+    "path": ".github/workflows/check.yml",
+    "sha256": "e9d77bbcb97311bcf70cd5827bed013c0a3fe21e4ac068429e48e7e330080b62"
+  },
+  {
+    "path": ".github/CODEOWNERS",
+    "sha256": "a3ad5860df6aef6d0de505ed5a7538a9f41ffe8b6a9609f75f8ef379c9a2be62"
+  },
+  {
+    "path": "tests/harness/test_harness.py",
+    "sha256": "f5b8e6adb92e7b2545c594103cbf142a7cb61bc689f3a464a37409ae837447c3"
+  },
+  {
+    "path": "tests/harness/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

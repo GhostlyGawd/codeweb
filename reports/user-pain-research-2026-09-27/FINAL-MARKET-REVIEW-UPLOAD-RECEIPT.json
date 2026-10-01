@@ -1,0 +1,53 @@
+{
+  "attachment": {
+    "id": "1706285a-7a8d-4694-99aa-6794b9bf17e3",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "22d6b2b6-4d76-42b1-abce-beac3f423e3b",
+    "issueCommentId": null,
+    "assetId": "1659e636-47f4-4ec8-b05b-e29067259352",
+    "provider": "local_disk",
+    "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/22d6b2b6-4d76-42b1-abce-beac3f423e3b/2026/09/28/d408deed-8b4f-4b4c-8ad3-ac389676ab52-FINAL-MARKET-REVIEW.zip",
+    "contentType": "application/zip",
+    "byteSize": 4730,
+    "sha256": "da459a694a904cc588582b327ecf764c12803564f5875179bb0abfb03c1b9471",
+    "originalFilename": "FINAL-MARKET-REVIEW.zip",
+    "createdByAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "createdByUserId": null,
+    "createdAt": "2026-09-28T01:54:04.305Z",
+    "updatedAt": "2026-09-28T01:54:04.305Z",
+    "contentPath": "/api/attachments/1706285a-7a8d-4694-99aa-6794b9bf17e3/content",
+    "openPath": "/api/attachments/1706285a-7a8d-4694-99aa-6794b9bf17e3/content",
+    "downloadPath": "/api/attachments/1706285a-7a8d-4694-99aa-6794b9bf17e3/content?download=1"
+  },
+  "workProduct": {
+    "id": "3c485bd3-fa6b-4c19-bc2c-bff54dc0f563",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "projectId": null,
+    "issueId": "22d6b2b6-4d76-42b1-abce-beac3f423e3b",
+    "executionWorkspaceId": null,
+    "runtimeServiceId": null,
+    "type": "artifact",
+    "provider": "paperclip",
+    "externalId": null,
+    "title": "Independent market evidence review",
+    "url": null,
+    "status": "ready_for_review",
+    "reviewState": "approved",
+    "isPrimary": false,
+    "healthStatus": "unknown",
+    "summary": null,
+    "metadata": {
+      "byteSize": 4730,
+      "openPath": "/api/attachments/1706285a-7a8d-4694-99aa-6794b9bf17e3/content",
+      "contentPath": "/api/attachments/1706285a-7a8d-4694-99aa-6794b9bf17e3/content",
+      "contentType": "application/zip",
+      "attachmentId": "1706285a-7a8d-4694-99aa-6794b9bf17e3",
+      "downloadPath": "/api/attachments/1706285a-7a8d-4694-99aa-6794b9bf17e3/content?download=1",
+      "originalFilename": "FINAL-MARKET-REVIEW.zip"
+    },
+    "sourceTrust": null,
+    "createdByRunId": "9eb677c0-d5de-482b-855c-7289c9c911b0",
+    "createdAt": "2026-09-28T01:54:04.317Z",
+    "updatedAt": "2026-09-28T01:54:04.317Z"
+  }
+}

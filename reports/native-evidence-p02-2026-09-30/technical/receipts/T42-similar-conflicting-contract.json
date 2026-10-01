@@ -1,0 +1,24 @@
+{
+  "id": "T42-similar-conflicting-contract",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/find-similar.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/similarity/.codeweb/graph.json",
+    "--body",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/similarity/a.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:14.005Z",
+  "end": "2026-10-01T01:50:14.044Z",
+  "durationMs": 39.766208000000006,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "find-similar: candidate (12 shingles, lexical) across 9 mapped non-test function/method symbols\n  >=15% shingle similarity; existing bodies limited to first 400 lines; candidate uncapped.\n  6 source candidates for comparison:\n  [100% high  ] a.mjs:addTax  (a.mjs:1)\n  [ 71% high  ] b.mjs:discount  (b.mjs:1)\n  [ 71% high  ] intentional0.mjs:duplicate0  (intentional0.mjs:1)\n  [ 71% high  ] intentional1.mjs:duplicate1  (intentional1.mjs:1)\n  [ 71% high  ] intentional2.mjs:duplicate2  (intentional2.mjs:1)\n  [ 71% high  ] intentional3.mjs:duplicate3  (intentional3.mjs:1)\n  Missing bodies and unmapped code may hide candidates. Similarity does not establish equivalent behavior, novelty, or safe reuse; inspect source and run relevant tests.\n",
+  "stderr": ""
+}

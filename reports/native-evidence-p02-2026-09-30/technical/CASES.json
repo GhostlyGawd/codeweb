@@ -1,0 +1,853 @@
+{
+  "schemaVersion": 1,
+  "candidateCommit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+  "scope": "Technical P-02 fixture-driven CLI, direct stdio MCP and direct hook invocation. No actual host readiness or user-value result.",
+  "frozenAt": "2026-10-01T01:58:34.576788+00:00",
+  "rawRunCount": 110,
+  "cases": [
+    {
+      "caseId": "TECH-01",
+      "nedIds": [
+        "NED-01",
+        "NED-03"
+      ],
+      "surface": "CLI similarity text/JSON",
+      "outcome": "pass",
+      "expected": "Empty, supported-zero and incomplete maps use bounded source comparison language with preserved exits and JSON.",
+      "observed": "Own no-match text is bounded; selected ac_34 runs separately exercise empty/supported-zero/incomplete controls, missing bodies, and exit-2 errors. JSON does not add behavioral or safety claims.",
+      "evidenceRefs": [
+        "receipts/T46-similar-zero-text.json",
+        "receipts/T47-similar-zero-json.json",
+        "receipts/T62-targeted-suites.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Selected tests are supplemental source assertions; no host delivery inferred."
+      ]
+    },
+    {
+      "caseId": "TECH-02",
+      "nedIds": [
+        "NED-01"
+      ],
+      "surface": "CLI/MCP deadcode JSON",
+      "outcome": "fail",
+      "expected": "Incomplete or unavailable source must not assert safe deletion.",
+      "observed": "An incomplete graph pointing to nonexistent missing.mjs returns exit 0 and summary \"1 safe to delete\"; MCP passes that same successful payload. CLI stderr has an incompleteness warning, but MCP response does not carry it. Empty JSON also retains the safe-to-delete tier label.",
+      "evidenceRefs": [
+        "receipts/T75-empty-deadcode-json.json",
+        "receipts/T76-incomplete-deadcode-json.json",
+        "receipts/T77-incomplete-deadcode-mcp.json"
+      ],
+      "severity": "high",
+      "owner": "Codex P-03",
+      "nextStep": "Repair safety wording/provenance on JSON and MCP without silently changing compatibility; review and rerun incomplete/missing-source cases.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-03",
+      "nedIds": [
+        "NED-01",
+        "NED-06"
+      ],
+      "surface": "CLI structural diff/review",
+      "outcome": "pass",
+      "expected": "Structural green and unchanged evidence cannot establish behavioral correctness.",
+      "observed": "Green structural diff marks behavior not-evaluated; receipt repair unchanged preserves unresolved questions, separates legacy verdict, and notes mapped/runtime limitations.",
+      "evidenceRefs": [
+        "receipts/T56-structural-green-with-failed-oracle.json",
+        "receipts/T35-verify-repair.json",
+        "receipts/T92-own-receipt-repair-review.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": []
+    },
+    {
+      "caseId": "TECH-04",
+      "nedIds": [
+        "NED-02",
+        "NED-07"
+      ],
+      "surface": "CLI exact selector impact/context",
+      "outcome": "pass",
+      "expected": "Known low-fan-in edit shows its relevant mapped consumer and same-file relationship.",
+      "observed": "subject.mjs:low returns consequential.mjs:consequential and subject.mjs:local; context supplies source windows and external/unmapped limits. Popular\u00d78 consumers do not displace these results.",
+      "evidenceRefs": [
+        "receipts/T00-extract-fixture.json",
+        "receipts/T01-cli-exact-impact.json",
+        "receipts/T02-cli-exact-context.json",
+        "receipts/T64-fresh-context.json",
+        "source-opening.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Initial extraction-before-.codeweb fixture had directory staleness; T64 controls fresh state."
+      ]
+    },
+    {
+      "caseId": "TECH-05",
+      "nedIds": [
+        "NED-02"
+      ],
+      "surface": "MCP exact selector impact/context",
+      "outcome": "pass",
+      "expected": "Same known target works through actual JSON-RPC invocation.",
+      "observed": "Direct stdio JSON-RPC returns both low consumers and bounded source context for subject.mjs:low.",
+      "evidenceRefs": [
+        "receipts/T03-mcp-exact-impact.json",
+        "receipts/T04-mcp-exact-context.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Direct server invocation is technical MCP transport proof, not native host discovery."
+      ]
+    },
+    {
+      "caseId": "TECH-06",
+      "nedIds": [
+        "NED-02",
+        "NED-07"
+      ],
+      "surface": "Pre-edit hook direct invocation known edit",
+      "outcome": "fail",
+      "expected": "Known low edit must concern that symbol and show its consequential consumer.",
+      "observed": "Payload names low in symbol and old/new strings, but output shows popular\u00d78 (or fresh popular\u00d75), its unrelated callers, and no low/consequential consumer. File/popular labels are truthful; failure is target selection and relevance, not a false semantic assertion.",
+      "evidenceRefs": [
+        "receipts/T05-hook-known-low-edit.json",
+        "receipts/T65-fresh-hook.json"
+      ],
+      "severity": "high",
+      "owner": "Codex P-03",
+      "nextStep": "Resolve an available supported selector or edit target, or preserve an explicitly file-only summary while ensuring relevant target evidence arrives through the claimed path.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-07",
+      "nedIds": [
+        "NED-02"
+      ],
+      "surface": "Pre-edit hook direct invocation file-only",
+      "outcome": "pass",
+      "expected": "File-only input explicitly labels a file summary and popularity selection.",
+      "observed": "Output says editing subject.mjs, counts all symbols/dependent edges, labels popular as most depended-on; it does not call popular the edited target.",
+      "evidenceRefs": [
+        "receipts/T06-hook-file-only.json",
+        "receipts/T65-fresh-hook.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "No claim that this file summary satisfies the known-target case."
+      ]
+    },
+    {
+      "caseId": "TECH-08",
+      "nedIds": [
+        "NED-03"
+      ],
+      "surface": "CLI similarity conflicting contracts/different syntax/missing bodies/cap",
+      "outcome": "pass",
+      "expected": "Candidates have source links and ranking caps; similarity never establishes substitutability.",
+      "observed": "Conflicting tax/discount candidates score alike but text tells reader to inspect source/tests. Different-syntax equivalent only self-matches. Missing-body node counts toward scanned but contributes no candidate. Own huge body reports bodyLineCap 400; selected ac_34 matching-tail control verifies exclusion beyond cap.",
+      "evidenceRefs": [
+        "receipts/T41-extract-similarity.json",
+        "receipts/T42-similar-conflicting-contract.json",
+        "receipts/T43-similar-json-cap.json",
+        "receipts/T44-similar-expand.json",
+        "receipts/T45-similar-equivalent-syntax.json",
+        "receipts/T48-similar-body-cap.json",
+        "receipts/T62-targeted-suites.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Own tax-equivalence statement is mathematical under fixture nonnegative-cent inputs, not a general semantic equivalence proof. Numeric constants are omitted by lexical shingles."
+      ]
+    },
+    {
+      "caseId": "TECH-09",
+      "nedIds": [
+        "NED-03"
+      ],
+      "surface": "MCP similarity discovery and invocation",
+      "outcome": "pass",
+      "expected": "MCP description names comparison limits and tool returns source-linked candidates.",
+      "observed": "Raw tools/list contains bounded comparison description; corrected body-only invocation succeeds with source locations and cap fields. First unsupported k invocation is preserved as probe error.",
+      "evidenceRefs": [
+        "receipts/T85-mcp-tools-list.json",
+        "receipts/T49-mcp-similarity.json",
+        "receipts/T74-corrected-mcp-similarity.json",
+        "SUPPLEMENT.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": []
+    },
+    {
+      "caseId": "TECH-10",
+      "nedIds": [
+        "NED-04"
+      ],
+      "surface": "CLI supported-zero versus unmapped/missing/corrupt/invocation",
+      "outcome": "pass",
+      "expected": "Supported empty results, a miss, missing map, invalid JSON, and malformed invocation remain distinguishable.",
+      "observed": "Supported zero exit0/count0; unmapped exit1/found false; missing map and invalid JSON exit2 with distinct diagnostics; typo invocation exit2 with suggested --impact.",
+      "evidenceRefs": [
+        "receipts/T08-cli-zero.json",
+        "receipts/T09-cli-unmapped-symbol.json",
+        "receipts/T10-cli-missing-map.json",
+        "receipts/T11-cli-corrupt-map.json",
+        "receipts/T20-cli-invalid-invocation.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": []
+    },
+    {
+      "caseId": "TECH-11",
+      "nedIds": [
+        "NED-04"
+      ],
+      "surface": "MCP supported-zero versus unmapped/missing/corrupt/invocation",
+      "outcome": "pass",
+      "expected": "Transport responses retain source-state distinctions.",
+      "observed": "Supported zero payload succeeds; unmapped found false is a successful bounded result; missing/corrupt map and invalid selector type are isError with distinct messages.",
+      "evidenceRefs": [
+        "receipts/T21-mcp-missing-map.json",
+        "receipts/T22-mcp-corrupt-map.json",
+        "receipts/T23-mcp-zero.json",
+        "receipts/T24-mcp-unmapped.json",
+        "receipts/T25-mcp-invalid-selector.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": []
+    },
+    {
+      "caseId": "TECH-12",
+      "nedIds": [
+        "NED-04"
+      ],
+      "surface": "CLI/MCP structurally corrupt JSON map",
+      "outcome": "fail",
+      "expected": "Malformed graph structure must remain distinguishable from a legitimate unmapped target or supported-empty map.",
+      "observed": "nodes:{} parses; CLI normalizes it into found:false exit1, while MCP calls it EMPTY, claims built with --allow-empty/no supported source, and emits isError. Neither reports invalid structure.",
+      "evidenceRefs": [
+        "receipts/T12-cli-invalid-shape.json",
+        "receipts/T96-invalid-shape-mcp.json"
+      ],
+      "severity": "medium",
+      "owner": "Codex P-03",
+      "nextStep": "Validate required graph shape before normalizing and retain corruption-specific recovery across transports.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-13",
+      "nedIds": [
+        "NED-04"
+      ],
+      "surface": "CLI context and stamped pre-hook freshness",
+      "outcome": "pass",
+      "expected": "Stale supported facts carry a stale state and usable refresh step.",
+      "observed": "CLI reports stale target/context; fresh refresh control has no stale property; changing the stamped subject adds hook map-behind warning and /codeweb next step.",
+      "evidenceRefs": [
+        "receipts/T13-cli-stale-context.json",
+        "receipts/T63-fresh-refresh.json",
+        "receipts/T64-fresh-context.json",
+        "receipts/T66-stale-stamped-hook.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Initial T14 graph-only hook lacked stale-stamps sidecar and was silent about staleness; TECH-14 covers this."
+      ]
+    },
+    {
+      "caseId": "TECH-14",
+      "nedIds": [
+        "NED-04"
+      ],
+      "surface": "Graph-only pre-hook freshness without sidecar",
+      "outcome": "fail",
+      "expected": "Absent freshness support must be visibly unknown rather than suppressing stale status.",
+      "observed": "Raw extracted graph includes per-file sources; its changed source is detected by CLI. Hook without stale-stamps sidecar emits unchanged confident numbers without stale/unknown qualifier. Full refreshed-map sidecar path does label stale.",
+      "evidenceRefs": [
+        "receipts/T13-cli-stale-context.json",
+        "receipts/T14-hook-stale.json",
+        "receipts/T66-stale-stamped-hook.json"
+      ],
+      "severity": "medium",
+      "owner": "Codex P-03",
+      "nextStep": "Use graph fallback freshness or label freshness unknown on graph-only path; preserve cheap fail-open behavior.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-15",
+      "nedIds": [
+        "NED-04",
+        "NED-05"
+      ],
+      "surface": "Pre/post hook empty versus unavailable states",
+      "outcome": "fail",
+      "expected": "Quiet ordinary zero and unavailable/corrupt/missing/unmapped/extraction failures remain inspectably distinguishable.",
+      "observed": "Zero, unmapped, missing, corrupt and empty-map direct hooks emit no contextual output and exit0. Actual no-supported-source extraction-failure post-hook also emits no contextual diagnostic or recovery step; stderr is only system ctags noise.",
+      "evidenceRefs": [
+        "receipts/T15-hook-zero.json",
+        "receipts/T15-hook-unmapped.json",
+        "receipts/T15-hook-missing.json",
+        "receipts/T15-hook-corrupt.json",
+        "receipts/T16-post-zero.json",
+        "receipts/T16-post-missing.json",
+        "receipts/T16-post-corrupt.json",
+        "receipts/T68-real-extraction-failure-hook.json"
+      ],
+      "severity": "high",
+      "owner": "Codex P-03",
+      "nextStep": "Expose bounded inspectable unavailable states/recovery without disrupting ordinary quiet edits; verify actual host-delivered states separately.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-16",
+      "nedIds": [
+        "NED-04"
+      ],
+      "surface": "CLI extraction unsupported/generated/missing source",
+      "outcome": "pass",
+      "expected": "Unsupported source and failed extraction have inspectable nonzero errors; excluded generated scope is not a supported-zero symbol answer.",
+      "observed": "Unsupported .xyz extraction exits1 with no-supported-source error. dist/generated.mjs is excluded from extracted nodes. Named generated selector is found:false in CLI and MCP, not count0 matched result. Missing root refresh and truly empty source extraction fail exit2.",
+      "evidenceRefs": [
+        "receipts/T17-extract-generated.json",
+        "receipts/T18-extract-only-unsupported.json",
+        "receipts/T19-refresh-extraction-failure.json",
+        "receipts/T69-real-extraction-failure-cli.json",
+        "receipts/T94-generated-selector-cli.json",
+        "receipts/T95-generated-selector-mcp.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Named generated miss does not explain generation-based exclusion versus any other unmapped cause. Ambient state cause remains TECH-15 failure. Initial T15 generated/unsupported inputs were generic mapped-empty subject.mjs controls, not actual generated/unsupported file paths."
+      ]
+    },
+    {
+      "caseId": "TECH-17",
+      "nedIds": [
+        "NED-05"
+      ],
+      "surface": "CLI graph baseline lifecycle",
+      "outcome": "pass",
+      "expected": "Original fresh pre-edit graph survives ordinary refresh and repair.",
+      "observed": "Baseline captured before fixture edit; ordinary refresh and diff-refresh then repair refresh preserve byte hash 99ccab18b3640ba2550f849d8e96ada4dc2693cc4fc4c6ca99aa886bf4d987ce. Refreshing baseline path itself is rejected exit2.",
+      "evidenceRefs": [
+        "receipts/T31-capture-baseline.json",
+        "receipts/T32-ordinary-refresh.json",
+        "receipts/T33-verify-baseline.json",
+        "receipts/T34-repair-refresh.json",
+        "receipts/T35-verify-repair.json",
+        "receipts/T36-deny-baseline-refresh.json",
+        "baseline-hashes.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": []
+    },
+    {
+      "caseId": "TECH-18",
+      "nedIds": [
+        "NED-05"
+      ],
+      "surface": "CLI missing/incomplete original baseline",
+      "outcome": "pass",
+      "expected": "Missing original must not be invented; incomplete before cannot establish clean gate.",
+      "observed": "Missing baseline errors exit2 with BEFORE editing step. Incomplete baseline yields ok:false/status inconclusive/behavior not-evaluated and exits2 after refresh. Selected tests check invalid before failures preserve live bytes.",
+      "evidenceRefs": [
+        "receipts/T30-missing-original-baseline.json",
+        "receipts/T37-incomplete-before.json",
+        "receipts/T62-targeted-suites.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": []
+    },
+    {
+      "caseId": "TECH-19",
+      "nedIds": [
+        "NED-05"
+      ],
+      "surface": "Explicit evidence receipt CLI/MCP lifecycle",
+      "outcome": "pass",
+      "expected": "Immutable original source hashes survive refresh/repair; missing receipt stays unavailable.",
+      "observed": "Own capture creates immutable native-regex receipt; MCP historical caller page shows original source hashes. Changed review marks changed and repair marks unchanged with original unresolved question retained. Receipt SHA-256 stays 38804d9ad336bd796f29de11fa8558c237211918c1d02a85a7285202ab19cebf; missing ID is unavailable/code missing, not a fabricated original.",
+      "evidenceRefs": [
+        "receipts/T87-own-receipt-capture.json",
+        "receipts/T88-own-receipt-page.json",
+        "receipts/T89-own-receipt-refresh.json",
+        "receipts/T90-own-receipt-review.json",
+        "receipts/T91-own-receipt-repair-refresh.json",
+        "receipts/T92-own-receipt-repair-review.json",
+        "receipts/T93-missing-evidence-original.json",
+        "receipt-hashes.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Ordinary review legacy verdict exit semantics are retained even if evidence is unavailable; verdict/evidence inspected separately."
+      ]
+    },
+    {
+      "caseId": "TECH-20",
+      "nedIds": [
+        "NED-05",
+        "NED-08"
+      ],
+      "surface": "Advisory hook permission-output format",
+      "outcome": "pass",
+      "expected": "Direct advisory payload must not auto-allow the edit.",
+      "observed": "Hook emits only hookEventName/additionalContext, without permissionDecision or allow field, and exits0.",
+      "evidenceRefs": [
+        "receipts/T97-advisory-permission-output.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Payload-format verification does not prove actual host permission enforcement."
+      ]
+    },
+    {
+      "caseId": "TECH-21",
+      "nedIds": [
+        "NED-05",
+        "NED-08"
+      ],
+      "surface": "Host denied permissions/trust/recovery",
+      "outcome": "unverified",
+      "expected": "Actual host denial must prevent unauthorized source actions; recovery names permitted next step.",
+      "observed": "No actual trusted host denial exercised by technical worker. No permission bypass attempted.",
+      "evidenceRefs": [
+        "TECHNICAL.md"
+      ],
+      "severity": "unknown",
+      "owner": "P-02 host owner / user",
+      "nextStep": "Run a scoped trusted host denial and permitted recovery sequence; preserve before/source/config hashes and denial/result timestamps.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-22",
+      "nedIds": [
+        "NED-06"
+      ],
+      "surface": "Own current/failed/skipped/stale/malformed behavioral controls",
+      "outcome": "pass",
+      "expected": "Actual executed test statuses retain distinct provenance and intentionally invalid oracles remain red.",
+      "observed": "Author-owned current test passes1; invalid oracle fails1 exit1; skipped case skips1/pass0; malformed file fails syntax exit1; source change makes previously passing current assertion fail exit1. Structural green separately states behavior not-evaluated.",
+      "evidenceRefs": [
+        "receipts/T52-behavior-current.json",
+        "receipts/T53-behavior-failed.json",
+        "receipts/T54-behavior-skipped.json",
+        "receipts/T55-behavior-malformed.json",
+        "receipts/T56-structural-green-with-failed-oracle.json",
+        "receipts/T61-stale-test-now-fails.json",
+        "behavior-provenance.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Product does not ingest these test outcomes; these are separate real runner receipts, not automatic behavioral guarantees."
+      ]
+    },
+    {
+      "caseId": "TECH-23",
+      "nedIds": [
+        "NED-06"
+      ],
+      "surface": "Graph test-neighbor query",
+      "outcome": "pass",
+      "expected": "Mapped test relationships are retained separately from executed results.",
+      "observed": "Query lists current, failed and skipped test modules alike; they are graph test-edge neighbors, not runner outcomes. Separate actual runs establish pass/fail/skip.",
+      "evidenceRefs": [
+        "receipts/T57-test-neighbor.json",
+        "receipts/T52-behavior-current.json",
+        "receipts/T53-behavior-failed.json",
+        "receipts/T54-behavior-skipped.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "The summary wording \"test(s) exercise\" does not itself say executed or passing. Caller must inspect independent runner results; host use unverified."
+      ]
+    },
+    {
+      "caseId": "TECH-24",
+      "nedIds": [
+        "NED-06"
+      ],
+      "surface": "Measured historical coverage and stale source",
+      "outcome": "pass",
+      "expected": "Recorded coverage remains a past-run fact and does not assert current correctness.",
+      "observed": "Actual own-fixture LCOV runner exits0 and covers low once. Coverage import/explain says covered by recorded run. After body edit explain retains historical coverage but marks graph stale; actual rerun fails. Source/coverage hashes retained. Earlier synthetic LCOV is explicitly separated.",
+      "evidenceRefs": [
+        "receipts/T79-current-executed-coverage.json",
+        "receipts/T81-import-executed-coverage.json",
+        "receipts/T82-executed-coverage-explain.json",
+        "receipts/T83-executed-stale-coverage-explain.json",
+        "receipts/T84-current-after-edit-fails.json",
+        "executed-coverage-provenance.json",
+        "behavior-provenance.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Coverage metadata stores report basename/counts, not a source hash or test verdict; historical provenance is weaker than content-addressed evidence receipts."
+      ]
+    },
+    {
+      "caseId": "TECH-25",
+      "nedIds": [
+        "NED-06"
+      ],
+      "surface": "Selected ordinary gate regression assertions",
+      "outcome": "pass",
+      "expected": "Failed legacy structural gate stays failed when evidence mode is added or unavailable.",
+      "observed": "Selected ac_33 failing legacy gate and explicit before identity test passes, preserving exit1 old gate and verdict even with missing receipt. Other ac_23 before/diff assertions pass.",
+      "evidenceRefs": [
+        "receipts/T62-targeted-suites.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Single full product gate was not run; source immutable and candidate existing gate evidence belongs to P-01/root integration."
+      ]
+    },
+    {
+      "caseId": "TECH-26",
+      "nedIds": [
+        "NED-07"
+      ],
+      "surface": "Source opening exact consumer/body locations",
+      "outcome": "pass",
+      "expected": "Returned source locations open useful actual target and consumer bytes.",
+      "observed": "Opened source files named by low context; preserved full bytes and SHA-256 with timestamps. Same-file local relationship is included. Selected ac_34 also opens conflicting bodies at returned lines.",
+      "evidenceRefs": [
+        "source-opening.json",
+        "receipts/T02-cli-exact-context.json",
+        "receipts/T62-targeted-suites.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": []
+    },
+    {
+      "caseId": "TECH-27",
+      "nedIds": [
+        "NED-07"
+      ],
+      "surface": "CLI bounded impact/context and expansion",
+      "outcome": "pass",
+      "expected": "Caps retain true totals and expose usable source expansion.",
+      "observed": "Popular impact shows count8 with limit2/more remaining6 and nextOffset2; offset2 changes page. Context caps callers, reports omissions and next steps; full-bodies expansion shows all8 callers.",
+      "evidenceRefs": [
+        "receipts/T26-impact-cap.json",
+        "receipts/T27-impact-expand.json",
+        "receipts/T28-context-cap.json",
+        "receipts/T29-context-expand.json",
+        "receipts/T62-targeted-suites.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Six-line provisional budget not asserted; exact hook target relevance separately fails."
+      ]
+    },
+    {
+      "caseId": "TECH-28",
+      "nedIds": [
+        "NED-07"
+      ],
+      "surface": "Similarity omitted-count expansion",
+      "outcome": "pass",
+      "expected": "Top-K limits keep match count and show all available candidates on expansion.",
+      "observed": "Own --k2 has true count6/more remaining4; --k20 reveals6. Text on capped selected ac_34 test names working --k expansion.",
+      "evidenceRefs": [
+        "receipts/T43-similar-json-cap.json",
+        "receipts/T44-similar-expand.json",
+        "receipts/T62-targeted-suites.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": []
+    },
+    {
+      "caseId": "TECH-29",
+      "nedIds": [
+        "NED-07",
+        "NED-10"
+      ],
+      "surface": "Intentional duplication dismissal",
+      "outcome": "pass",
+      "expected": "Intentional duplicate implementations can be dismissed without changing source or returning repeatedly.",
+      "observed": "Own same-name duplicate pair yields actionable1; annotation with intentional-boundary note suppresses stable fingerprint; repeated overlap yields actionable0/suppressed1. Only fixture .codeweb changes.",
+      "evidenceRefs": [
+        "receipts/T70-intentional-extract.json",
+        "receipts/T71-corrected-overlap.json",
+        "intentional-finding-before.json",
+        "receipts/T72-intentional-dismissal.json",
+        "receipts/T73-dismissal-repeat-overlap.json",
+        "intentional-finding-after.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": []
+    },
+    {
+      "caseId": "TECH-30",
+      "nedIds": [
+        "NED-08"
+      ],
+      "surface": "MCP direct protocol/tool discovery",
+      "outcome": "pass",
+      "expected": "Native server responds to tool enumeration and explicit source-linked tools.",
+      "observed": "Direct JSON-RPC tools/list succeeds and explicit impact/context/similarity/receipt page invocations return source links.",
+      "evidenceRefs": [
+        "receipts/T85-mcp-tools-list.json",
+        "receipts/T03-mcp-exact-impact.json",
+        "receipts/T04-mcp-exact-context.json",
+        "receipts/T74-corrected-mcp-similarity.json",
+        "receipts/T88-own-receipt-page.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "This case is transport only; actual Codex/Claude host discovery and source use belong to host evidence."
+      ]
+    },
+    {
+      "caseId": "TECH-31",
+      "nedIds": [
+        "NED-08"
+      ],
+      "surface": "Codex documented-payload compatibility direct hook",
+      "outcome": "fail",
+      "expected": "A claimed Codex ambient adapter must understand its actual event/tool input.",
+      "observed": "Direct apply_patch/tool_input.command payload emits no contextual output and exits0. Shipped hook matches Edit|Write|MultiEdit and reads file_path/filePath. This proves this direct payload is unsupported, not that an actual Codex hook event was tested.",
+      "evidenceRefs": [
+        "receipts/T67-codex-shaped-hook.json"
+      ],
+      "severity": "high",
+      "owner": "Codex P-03 / host owner",
+      "nextStep": "Verify actual trusted Codex event adapter; implement only if Codex ambient delivery is claimed, or document supported exclusions. Actual host runtime proof remains host owner.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-32",
+      "nedIds": [
+        "NED-08"
+      ],
+      "surface": "Actual host and linked-worktree native discovery/pre-edit delivery",
+      "outcome": "unverified",
+      "expected": "Claimed hosts and linked worktrees require actual discovery/tool use/pre-edit delivery receipts.",
+      "observed": "Technical worker intentionally did not operate host UI/runtime or global profile. Direct hooks and stdio calls supply no actual host proof.",
+      "evidenceRefs": [
+        "TECHNICAL.md"
+      ],
+      "severity": "unknown",
+      "owner": "P-02 host owner",
+      "nextStep": "Use separate hosts evidence and record each candidate/config/worktree scope; mark any unavailable host boundary unverified.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-33",
+      "nedIds": [
+        "NED-09"
+      ],
+      "surface": "Per-run technical cold/warm/refresh/recovery timing",
+      "outcome": "pass",
+      "expected": "Report actual request/trigger/start/end/source-open timing per run without inferred percentiles or latency promises.",
+      "observed": "110 raw receipts include start/end/duration. Tiny fixture extraction ~54\u201368ms; direct fresh/stale pre-hook ~36\u201337ms; fresh refresh135ms; baseline operations133\u2013179ms. Source-open has its own timestamp. Individual cold processes and sequential recovery are labeled in report.",
+      "evidenceRefs": [
+        "TIMINGS.csv",
+        "RUN.json",
+        "SUPPLEMENT.json",
+        "source-opening.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "These are subprocess times on synthetic fixtures; no percentile, one-second promise, total user effort, host queue/permission delay, or client first-token timing claimed."
+      ]
+    },
+    {
+      "caseId": "TECH-34",
+      "nedIds": [
+        "NED-09"
+      ],
+      "surface": "Actual host timing before relevant edit decision",
+      "outcome": "unverified",
+      "expected": "End-to-end host request/permission/trigger/result/source-open must arrive before relevant edit.",
+      "observed": "Technical subprocess receipts cannot measure host decision or permission waits.",
+      "evidenceRefs": [
+        "TECHNICAL.md"
+      ],
+      "severity": "unknown",
+      "owner": "P-02 host owner",
+      "nextStep": "Record actual host event/request/permission/refresh/result/source-open timestamps and edit boundary in scoped trial.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-35",
+      "nedIds": [
+        "NED-10"
+      ],
+      "surface": "Ordinary zero/regression repeat hooks",
+      "outcome": "pass",
+      "expected": "Ordinary no regression stays quiet; accepted repeated structural warning does not repeat against same baseline.",
+      "observed": "Ordinary post edit emits no additionalContext. First lost-callers event warns; second identical event emits no context. Supported-zero pre-hook emits no context.",
+      "evidenceRefs": [
+        "receipts/T15-hook-zero.json",
+        "receipts/T38-post-normal.json",
+        "receipts/T39-post-regression-first.json",
+        "receipts/T40-post-regression-repeat.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Post-hook stderr emits unsupported system ctags warning on mapped cases; TECH-37 records this noise separately."
+      ]
+    },
+    {
+      "caseId": "TECH-36",
+      "nedIds": [
+        "NED-10",
+        "NED-02"
+      ],
+      "surface": "Repeated irrelevant pre-edit card",
+      "outcome": "fail",
+      "expected": "Quiet/noisy repetitions avoid repeated irrelevant interventions.",
+      "observed": "Identical low edits generate identical popular\u00d78 pre-edit cards repeatedly, still omitting consequential low consumer. Unlike post regression dedupe there is no pre-card suppression here.",
+      "evidenceRefs": [
+        "receipts/T05-hook-known-low-edit.json",
+        "receipts/T07-hook-known-low-repeat.json"
+      ],
+      "severity": "medium",
+      "owner": "Codex P-03",
+      "nextStep": "Fix relevance first; test ordinary repeated edits and define a scoped repeat policy supported by host evidence.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-37",
+      "nedIds": [
+        "NED-10"
+      ],
+      "surface": "Mapped post-hook stderr noise",
+      "outcome": "fail",
+      "expected": "Ordinary mapped edits should avoid irrelevant repeated output.",
+      "observed": "Mapped normal/quiet/repeated post-hook probes repeatedly print Apple /Library/Developer/CommandLineTools/usr/bin/ctags illegal-option usage to stderr, although extraction falls back and exits0. Actual host rendering of this stderr remains unverified.",
+      "evidenceRefs": [
+        "receipts/T16-post-zero.json",
+        "receipts/T38-post-normal.json",
+        "receipts/T40-post-regression-repeat.json"
+      ],
+      "severity": "low",
+      "owner": "Codex P-03",
+      "nextStep": "Handle unsupported ctags probe quietly while retaining genuine extraction failure diagnostics; verify host stderr treatment before claiming user interruption.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-38",
+      "nedIds": [
+        "NED-10",
+        "NED-08"
+      ],
+      "surface": "Scoped disable/uninstall and competent control",
+      "outcome": "unverified",
+      "expected": "Disable/uninstall stops injection and ordinary equivalent control session remains usable.",
+      "observed": "No actual host enable/disable/uninstall or competent-control session operated by technical worker; no global profiles changed.",
+      "evidenceRefs": [
+        "TECHNICAL.md"
+      ],
+      "severity": "unknown",
+      "owner": "P-02 host owner",
+      "nextStep": "Verify documented scoped control in claimed runtime with before/after event receipts; preserve global profiles.",
+      "limits": []
+    },
+    {
+      "caseId": "TECH-39",
+      "nedIds": [
+        "NED-05"
+      ],
+      "surface": "Selected MCP automatic-refresh original baseline survival",
+      "outcome": "pass",
+      "expected": "Background/ordinary MCP refresh must preserve original baseline while verification detects and repairs regression.",
+      "observed": "Selected ac_23 queued MCP begin/verify test exercises background refresh, adds a cycle then repairs it, checks immutable original bytes and behavior/duplication not-evaluated.",
+      "evidenceRefs": [
+        "receipts/T62-targeted-suites.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Supplemental actual Node test has inline assertions but only aggregate test stdout; own raw graph-baseline lifecycle is CLI, own raw receipt page is MCP."
+      ]
+    },
+    {
+      "caseId": "TECH-40",
+      "nedIds": [
+        "NED-04",
+        "NED-05"
+      ],
+      "surface": "Evidence failure schemas/record tampering",
+      "outcome": "pass",
+      "expected": "Unavailable/incompatible source and imported corrupt records cannot masquerade as unchanged certainty.",
+      "observed": "Selected evidence snapshot/core/store/transport suites exercise unavailable source, mismatched workspace/task, ambiguous selector, corrupted/fabricated record fields, missing target, source changing and incomplete reconciliation; failing legacy gate remains red.",
+      "evidenceRefs": [
+        "receipts/T62-targeted-suites.json"
+      ],
+      "severity": "none",
+      "owner": "Codex P-02",
+      "nextStep": null,
+      "limits": [
+        "Selected suite assertions enumerate only exercised states; host trust denial not included, nor full unsupported source-language completeness."
+      ]
+    }
+  ],
+  "outcomeCounts": {
+    "pass": 28,
+    "fail": 8,
+    "unverified": 4
+  },
+  "blockers": [
+    "TECH-02",
+    "TECH-06",
+    "TECH-15",
+    "TECH-31"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "locator": "Original post paragraphs on characterization tests and incremental workflow; web-rendered lines 21\u2013150",
+  "paraphrase": "Author reports a completed Django refactor with characterization tests and constrained incremental changes. Later paragraphs describe CodeRabbit on every PR and human review, so this is not a native-tools-only comparator. Unverified self-report; relative date and unseen replies remain limited.",
+  "url": "https://www.reddit.com/r/ClaudeCode/comments/1qobg1g/how_to_refactor_50k_lines_of_legacy_code_without/",
+  "retrieved_at": "2026-09-30T04:19:51.761066+00:00",
+  "read_boundary": "Targeted original rendered passage via web tool after direct HTTP403; not a complete page archive."
+}

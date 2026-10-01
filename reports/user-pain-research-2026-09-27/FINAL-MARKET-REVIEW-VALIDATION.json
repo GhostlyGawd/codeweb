@@ -1,0 +1,65 @@
+{
+  "reviewed_at": "2026-09-28T01:53:48.697332+00:00",
+  "decision": "approve_bounded_handoff",
+  "audited_new_ids": [
+    "CW-Y001",
+    "CW-Y002",
+    "CW-Y003",
+    "CW-Y004",
+    "CW-Y005",
+    "CW-Y007",
+    "CW-Y008",
+    "CW-Y010",
+    "CW-Y012"
+  ],
+  "high_priority_sample": "7/7",
+  "other_sample": "2/5 (40%)",
+  "recovery_audited": [
+    "CW-L026"
+  ],
+  "audit_hashes": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "expected": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "actual": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "expected": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "actual": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "expected": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "actual": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "expected": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "actual": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "expected": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "actual": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "match": true
+    }
+  ],
+  "accepted_preservation_manifest": "FINAL-TECH-INITIAL-HASHES.json",
+  "accepted_files_matched": 58,
+  "submitted_zip_sha256": "a0f575403e7255dd4758bf9ce0a1d1bd7ab8b5a3a3d94bf177a7a329dbd9f580",
+  "submitted_zip_matches_local": true,
+  "counts": {
+    "new_records": 12,
+    "full": 30,
+    "new_full": 29,
+    "recovery_full": 1,
+    "partial": 7,
+    "inaccessible": 5
+  },
+  "parent_complete": false
+}

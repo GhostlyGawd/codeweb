@@ -1,0 +1,148 @@
+{
+  "correction": 1,
+  "changed_ids": [
+    "CW-L001",
+    "CW-L002",
+    "CW-L003",
+    "CW-L004",
+    "CW-L005",
+    "CW-L008",
+    "CW-L009",
+    "CW-L014",
+    "CW-L015",
+    "CW-L016",
+    "CW-L017",
+    "CW-L018",
+    "CW-L019",
+    "CW-L020",
+    "CW-L021",
+    "CW-L022",
+    "CW-L023",
+    "CW-L024",
+    "CW-L025"
+  ],
+  "changed_fields": {
+    "CW-L001": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L002": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L003": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L004": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L005": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L008": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L009": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L014": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L015": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L016": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L017": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L018": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L019": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L020": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L021": [
+      "fit_reasoning"
+    ],
+    "CW-L022": [
+      "fit_reasoning"
+    ],
+    "CW-L023": [
+      "fit_reasoning"
+    ],
+    "CW-L024": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L025": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ]
+  },
+  "no_other_corpus_fields_changed": true,
+  "csv_jsonl_parity": true,
+  "historical_corpus_inputs_unchanged": {
+    "EVIDENCE-SEED.jsonl": "307f3be087dd9e2bd85da3b87f3d305dc1bf3165033318ffb5915e6c0b69e47a",
+    "PILOT-EVIDENCE.jsonl": "1958442bf3b34099559de68e92e9df156b82d06a035862d98c36dec432b1534d",
+    "L123-EVIDENCE.jsonl": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+    "L123-SUPPLEMENT-EVIDENCE.jsonl": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+    "L456-EVIDENCE.jsonl": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+    "L456-SUPPLEMENT-EVIDENCE.jsonl": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+    "FINAL-TECH-EVIDENCE.jsonl": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+    "FINAL-MARKET-EVIDENCE.jsonl": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a"
+  },
+  "corrected_fit_counts": {
+    "unknown": 6,
+    "unsupported": 10,
+    "partial": 3
+  },
+  "record_count": 132,
+  "source_counts_unchanged": {
+    "evidence_records": 132,
+    "evidence_types": {
+      "first_person_report": 119,
+      "official_capability": 2,
+      "independent_measurement": 2,
+      "vendor_claim": 6,
+      "maintainer_confirmation": 3
+    },
+    "source_attempts_canonical": 189,
+    "source_access": {
+      "opened_full": 110,
+      "opened_partial": 66,
+      "inaccessible": 13
+    },
+    "full_sources_supporting_retained_records": 85,
+    "record_source_families": {
+      "github": 34,
+      "engineering_blog": 40,
+      "reddit": 28,
+      "hacker_news": 17,
+      "forum": 11,
+      "official_docs": 2
+    },
+    "dated_in_preferred_window": 77,
+    "dated_older": 22,
+    "unknown_publication_dates": 33
+  },
+  "baseline_check": "FINAL-BASELINE-CHECK.json",
+  "final_review": "pending native re-review",
+  "findings_remaining": "Independent Reviewer to verify F1; no second correction authorized."
+}

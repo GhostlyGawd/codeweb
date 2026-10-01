@@ -1,0 +1,75 @@
+{
+  "attachment": {
+    "id": "14ce8eda-3560-4a85-8b91-d66e87549e42",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "c5ff7221-b28b-4a81-adee-cb9378b865c8",
+    "issueCommentId": null,
+    "assetId": "cd0b168e-da3d-450e-b107-b8f99a2b89ce",
+    "provider": "local_disk",
+    "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/c5ff7221-b28b-4a81-adee-cb9378b865c8/2026/09/28/25c6d84e-7ae5-4b5b-924b-ba27b7abf434-L123-SUPPLEMENT-REVIEW.md",
+    "contentType": "text/markdown",
+    "byteSize": 11706,
+    "sha256": "6565ea7c79d9423d81af85effc893e8e5ac9d73eb576e9e003d7e60c9e468253",
+    "originalFilename": "L123-SUPPLEMENT-REVIEW.md",
+    "createdByAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "createdByUserId": null,
+    "createdAt": "2026-09-28T01:35:22.866Z",
+    "updatedAt": "2026-09-28T01:35:22.866Z",
+    "contentPath": "/api/attachments/14ce8eda-3560-4a85-8b91-d66e87549e42/content",
+    "openPath": "/api/attachments/14ce8eda-3560-4a85-8b91-d66e87549e42/content",
+    "downloadPath": "/api/attachments/14ce8eda-3560-4a85-8b91-d66e87549e42/content?download=1"
+  },
+  "workProduct": {
+    "id": "ffe3215f-7ebe-4f35-9c96-b29c72a76869",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "projectId": null,
+    "issueId": "c5ff7221-b28b-4a81-adee-cb9378b865c8",
+    "executionWorkspaceId": null,
+    "runtimeServiceId": null,
+    "type": "artifact",
+    "provider": "paperclip",
+    "externalId": null,
+    "title": "Independent review \u2014 L123 supplement X1",
+    "url": null,
+    "status": "ready_for_review",
+    "reviewState": "needs_board_review",
+    "isPrimary": false,
+    "healthStatus": "unknown",
+    "summary": "Approval of bounded handoff; all 18 records source-audited, artifact/hash checks passed, source and target limits preserved.",
+    "metadata": {
+      "byteSize": 11706,
+      "openPath": "/api/attachments/14ce8eda-3560-4a85-8b91-d66e87549e42/content",
+      "contentPath": "/api/attachments/14ce8eda-3560-4a85-8b91-d66e87549e42/content",
+      "contentType": "text/markdown",
+      "attachmentId": "14ce8eda-3560-4a85-8b91-d66e87549e42",
+      "downloadPath": "/api/attachments/14ce8eda-3560-4a85-8b91-d66e87549e42/content?download=1",
+      "originalFilename": "L123-SUPPLEMENT-REVIEW.md"
+    },
+    "sourceTrust": null,
+    "createdByRunId": "49346096-a7d1-4324-8951-d4e24974a490",
+    "createdAt": "2026-09-28T01:35:22.878Z",
+    "updatedAt": "2026-09-28T01:35:22.878Z"
+  },
+  "reviewSha256": "6565ea7c79d9423d81af85effc893e8e5ac9d73eb576e9e003d7e60c9e468253",
+  "issueStatus": "done",
+  "executionState": {
+    "status": "completed",
+    "monitor": null,
+    "reviewRequest": null,
+    "currentStageId": null,
+    "lastDecisionId": "7c04c831-bc3f-4c07-b85e-411849291e87",
+    "returnAssignee": {
+      "type": "agent",
+      "userId": null,
+      "agentId": "79d272db-70e2-483b-b817-292dac08593e"
+    },
+    "currentStageType": null,
+    "completedStageIds": [
+      "960fff7c-3460-490f-9324-00bed3a6c1e2"
+    ],
+    "currentStageIndex": null,
+    "currentParticipant": null,
+    "lastDecisionOutcome": "approved",
+    "changesRequestedCount": 0
+  }
+}

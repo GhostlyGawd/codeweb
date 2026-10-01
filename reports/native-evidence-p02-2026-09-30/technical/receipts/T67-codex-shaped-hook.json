@@ -1,0 +1,21 @@
+{
+  "id": "T67-codex-shaped-hook",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-supplement-mshorI",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": "{\"tool_name\":\"apply_patch\",\"tool_input\":{\"command\":\"*** Begin Patch\\n*** Update File: $LOCAL_TMP/codeweb-p02-supplement-mshorI/fresh/subject.mjs\\n@@\\n- return value + 1;\\n+ return value + 2;\\n*** End Patch\"}}",
+  "start": "2026-10-01T01:52:48.879Z",
+  "end": "2026-10-01T01:52:48.912Z",
+  "durationMs": 32.99920800000001,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "",
+  "stderr": ""
+}

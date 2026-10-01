@@ -1,0 +1,11 @@
+{
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "tests.test_ac_pins.TestAcPins.test_ac_34_bounded_similarity_output"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 1.042s\n\nOK\n"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "T54-behavior-skipped",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "--test",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/skipped.test.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "start": "2026-10-01T01:50:14.554Z",
+  "end": "2026-10-01T01:50:14.629Z",
+  "durationMs": 75.20233300000018,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "﹣ skipped oracle (0.260834ms) # SKIP\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 0\nℹ cancelled 0\nℹ skipped 1\nℹ todo 0\nℹ duration_ms 42.546334\n",
+  "stderr": ""
+}

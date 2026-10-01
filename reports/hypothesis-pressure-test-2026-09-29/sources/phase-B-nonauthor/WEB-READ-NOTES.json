@@ -1,0 +1,20 @@
+{
+  "read_at": "2026-09-30T04:43:15.255765+00:00",
+  "verifier_run_id": "c2a4771f-b2b5-48c0-bed8-3bc0f3bb20e2",
+  "reads": [
+    {
+      "id": "CW-L015",
+      "url": "https://www.reddit.com/r/ClaudeCode/comments/1nnftyr/huge_improvement_upgraded_to_latest_version/",
+      "locator": "UnrulyThesis reply, rendered lines 51–62",
+      "finding": "Original reply reports removing Serena after no perceived difference on a small codebase; kept Context7. Historical subjective account, no measured speedup. Direct HTTP 403; web tool recovered passage.",
+      "capture_kind": "verifier paraphrase/read note, not full archived page"
+    },
+    {
+      "id": "CW-Y008",
+      "url": "https://forum.cursor.com/t/applying-shared-coding-guidelines-across-multiple-repos-with-bugbot/133667/20",
+      "locator": "Jon Kaplan post 20, January 28 2026",
+      "finding": "Explicit relative markdown links are fed to the model; other forms may work at agent discretion. Full resolution history not independently recovered; JSON endpoint 403.",
+      "capture_kind": "verifier paraphrase/read note, not full archived page"
+    }
+  ]
+}

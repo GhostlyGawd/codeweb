@@ -1,0 +1,28 @@
+{
+  "mirroredAt": "2026-09-28T00:35:45.358Z",
+  "source": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/cycle-01/workspace/reports/user-pain-research-2026-09-27",
+  "files": [
+    {
+      "file": "BASELINE-CHECK.json",
+      "sha256": "e59cb3afb69aa1aba5628c2e6d62d6a01b02ce9151371fc4ab855266f330d691"
+    },
+    {
+      "file": "CONTROL-PLANE.json",
+      "sha256": "e0fab7bbb7fdc2335e850eb5c705e39ab412d478e00ad4856c105c14365c920f"
+    },
+    {
+      "file": "EVIDENCE-SEED.jsonl",
+      "sha256": "307f3be087dd9e2bd85da3b87f3d305dc1bf3165033318ffb5915e6c0b69e47a"
+    },
+    {
+      "file": "QUERY-LOG-SEED.csv",
+      "sha256": "58b6bad13c242910e1cefaba768f99c3003a48480c63931ff81f0c644ca92207"
+    },
+    {
+      "file": "START-RECEIPT.md",
+      "sha256": "3ae57eab39f798ecb4d20048f7129834a1b33ddfb0b5c818606e1156af0c82d5"
+    }
+  ],
+  "reason": "Worker sandbox stages outside requested repository; root mirrored the start checkpoint without changing content.",
+  "completion": false
+}

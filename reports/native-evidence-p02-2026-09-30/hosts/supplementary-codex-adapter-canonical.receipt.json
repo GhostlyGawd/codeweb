@@ -1,0 +1,19 @@
+{
+  "id": "supplementary-codex-adapter-canonical",
+  "command": [
+    "node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "prompt": "{\"cwd\": \"$LOCAL_TMP/codeweb-p02-hosts-ibn2supe\", \"tool_name\": \"apply_patch\", \"hook_event_name\": \"PreToolUse\", \"tool_input\": {\"command\": \"*** Begin Patch\\n*** Update File: $LOCAL_TMP/codeweb-p02-hosts-ibn2supe/src/library.mjs\\n@@\\n-export function rare(value) { return value + 1; }\\n+export function rare(value) { return value + 2; }\\n*** End Patch\"}}",
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819543.145803,
+  "end_epoch": 1790819543.192096,
+  "duration_seconds": 0.0460050106048584,
+  "timeout_seconds": 15,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/supplementary-codex-adapter-canonical.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/supplementary-codex-adapter-canonical.stderr.txt"
+}

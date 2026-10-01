@@ -1,0 +1,21 @@
+retrieved_at,query,engine,selection_rule,saturation
+2026-09-28T00:52:16.800312+00:00,"site.reddit.com ""MCP"" ""removed"" ""Claude""",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"site.news.ycombinator.com ""code review"" ""AI"" ""pay""",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""CodeRabbit"" ""cancelled""",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""Claude Code"" ""permissions"" ""fatigue""",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"site.reddit.com ""MCP"" ""removed"" ""tools""",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""CodeRabbit"" ""cancelled"" review tool",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""CodeRabbit"" ""stopped using""",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""code review"" ""paying"" ""Greptile""",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""MCP"" ""removed"" ""Claude"" site.reddit.com",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""CodeRabbit"" ""stopped using""",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,MCP stopped using blog developer CLI tools 2026,web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,AI code review team experience false positives blog 2026,web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,code review tool paying worth experience blog 2026,web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""MCP"" ""stopped using"" blog",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""MCP"" ""I removed"" developer",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""MCP"" ""setup"" ""I spent"" coding",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""MCP"" ""install"" ""my team"" experience 2026",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""code review"" ""we disabled"" AI",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""CodeRabbit"" ""worth"" ""my team"" blog",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established
+2026-09-28T00:52:16.800312+00:00,"""Claude Code"" ""hooks"" ""slowed""",web.search_query,Original firsthand workflows and explicit counterevidence; snippets discovery only,not established

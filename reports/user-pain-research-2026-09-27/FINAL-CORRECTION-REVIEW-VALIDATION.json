@@ -1,0 +1,122 @@
+{
+  "package_attachment": "01f1082e-de1c-4775-bf24-c366a5e122f4",
+  "package_sha256": "004bd3ab0794ca9b31418a600b022ddbac69911da6b8a2b356b578081b998f19",
+  "zip_integrity": null,
+  "archive_local_mismatches": [],
+  "manifest_mismatches": [],
+  "changed_fields": {
+    "CW-L001": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L002": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L003": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L004": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L005": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L008": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L009": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L014": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L015": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L016": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L017": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L018": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L019": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L020": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L021": [
+      "fit_reasoning"
+    ],
+    "CW-L022": [
+      "fit_reasoning"
+    ],
+    "CW-L023": [
+      "fit_reasoning"
+    ],
+    "CW-L024": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ],
+    "CW-L025": [
+      "codeweb_fit",
+      "fit_reasoning"
+    ]
+  },
+  "historical_input_mismatches": [],
+  "csv_parity": true,
+  "baseline": [
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/README.md",
+      "sha256": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "sha256": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "sha256": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "sha256": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "match": true
+    },
+    {
+      "path": "reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "sha256": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "match": true
+    }
+  ],
+  "fit_counts": {
+    "unsupported": 10,
+    "unknown": 6,
+    "partial": 3
+  },
+  "previous_source_audit": "FINAL-REVIEW-VALIDATION.json",
+  "review_run": "2ecaedd2-d732-4333-a363-4209bd537dbc",
+  "decision": "approve",
+  "F1": "resolved",
+  "review_scope": "Correction audit of all 19 changed fit judgments. Prior final audit of all 24 high-priority records plus 22/108 others remains applicable; reported facts and synthesis unchanged. No new source counts or fresh source reopens claimed in this correction heartbeat.",
+  "approved_at": "2026-09-28T02:21:49.903932+00:00"
+}

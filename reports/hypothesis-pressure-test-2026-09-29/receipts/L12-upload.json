@@ -1,0 +1,26 @@
+[
+  {
+    "path": "lenses/12-ceiling-of-the-hypothesis.md",
+    "attachment_id": "d3f8e2b1-349f-46cb-bcc2-f24f199766a2",
+    "work_product_id": "3e52f719-2032-4454-916e-3207449920ea",
+    "url": "/api/attachments/d3f8e2b1-349f-46cb-bcc2-f24f199766a2/content"
+  },
+  {
+    "path": "lenses/12-findings.json",
+    "attachment_id": "167a10f9-d405-42a8-8829-860635662b76",
+    "work_product_id": "e3a1edaf-0be1-4965-ac4b-50b2628e2d60",
+    "url": "/api/attachments/167a10f9-d405-42a8-8829-860635662b76/content"
+  },
+  {
+    "path": "receipts/L12.json",
+    "attachment_id": "91c77d94-fa9f-494d-a27a-7c451331bb72",
+    "work_product_id": "900c4e49-1f18-47ea-9841-f27663cd3d89",
+    "url": "/api/attachments/91c77d94-fa9f-494d-a27a-7c451331bb72/content"
+  },
+  {
+    "path": "sources/L12-public-reopens.json",
+    "attachment_id": "99fc7926-1d71-4a7c-8020-0e2d4bb4dd7f",
+    "work_product_id": "12f7525d-3143-48e8-98af-633ac6460475",
+    "url": "/api/attachments/99fc7926-1d71-4a7c-8020-0e2d4bb4dd7f/content"
+  }
+]

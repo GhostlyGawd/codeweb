@@ -1,0 +1,16 @@
+{
+  "status": "pass",
+  "checks": [
+    "192 files match INPUT-MANIFEST.json",
+    "344 files match SYNTHESIS-INPUT-MANIFEST.json",
+    "65 exact original findings with final dispositions",
+    "132 original records with usage/nonuse and existing capture paths",
+    "12 decisions with backwards evidence and forward tests",
+    "all reciprocal indices and claim roles match",
+    "A/B frozen first drafts unchanged",
+    "four specific countercase dispositions",
+    "paid coordination does not inherit CW-L023 as direct support",
+    "capability/proposal file paths exist"
+  ],
+  "edges": 1222
+}

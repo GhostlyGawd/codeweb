@@ -1,0 +1,53 @@
+{
+  "attachment": {
+    "id": "9c3b7b32-c96b-4c63-848c-15cf1b8a949d",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+    "issueCommentId": null,
+    "assetId": "80d24f0f-c694-467a-8676-462ec686e061",
+    "provider": "local_disk",
+    "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb/2026/09/28/c4a019d4-feab-4581-973b-5c79811bf509-FINAL-HOLISTIC-REVIEW.zip",
+    "contentType": "application/zip",
+    "byteSize": 10801,
+    "sha256": "418fc73eef554aef5b6b7da497023426f7283b775cb4fe7d22daa656187d6bbf",
+    "originalFilename": "FINAL-HOLISTIC-REVIEW.zip",
+    "createdByAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "createdByUserId": null,
+    "createdAt": "2026-09-28T02:15:23.854Z",
+    "updatedAt": "2026-09-28T02:15:23.854Z",
+    "contentPath": "/api/attachments/9c3b7b32-c96b-4c63-848c-15cf1b8a949d/content",
+    "openPath": "/api/attachments/9c3b7b32-c96b-4c63-848c-15cf1b8a949d/content",
+    "downloadPath": "/api/attachments/9c3b7b32-c96b-4c63-848c-15cf1b8a949d/content?download=1"
+  },
+  "work_product": {
+    "id": "01b8795e-1e14-494d-a6f5-6a7a04a536bd",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "projectId": null,
+    "issueId": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+    "executionWorkspaceId": null,
+    "runtimeServiceId": null,
+    "type": "artifact",
+    "provider": "paperclip",
+    "externalId": null,
+    "title": "Independent holistic research review \u2014 bounded correction",
+    "url": null,
+    "status": "ready_for_review",
+    "reviewState": "needs_board_review",
+    "isPrimary": false,
+    "healthStatus": "unknown",
+    "summary": "Audits all 24 high-priority records plus 22/108 others; requests mechanism-specific corpus fit correction. Preserves source shortfall and placement exception.",
+    "metadata": {
+      "byteSize": 10801,
+      "openPath": "/api/attachments/9c3b7b32-c96b-4c63-848c-15cf1b8a949d/content",
+      "contentPath": "/api/attachments/9c3b7b32-c96b-4c63-848c-15cf1b8a949d/content",
+      "contentType": "application/zip",
+      "attachmentId": "9c3b7b32-c96b-4c63-848c-15cf1b8a949d",
+      "downloadPath": "/api/attachments/9c3b7b32-c96b-4c63-848c-15cf1b8a949d/content?download=1",
+      "originalFilename": "FINAL-HOLISTIC-REVIEW.zip"
+    },
+    "sourceTrust": null,
+    "createdByRunId": "04a48868-eea6-46c1-a651-daf83f3f0b8d",
+    "createdAt": "2026-09-28T02:15:23.864Z",
+    "updatedAt": "2026-09-28T02:15:23.864Z"
+  }
+}

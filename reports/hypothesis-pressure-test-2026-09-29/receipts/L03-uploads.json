@@ -1,0 +1,20 @@
+[
+  {
+    "file": "lenses/03-native-experience-and-attention.md",
+    "attachment_id": "d197c2e2-0dc8-4881-af75-38e5c87e87e0",
+    "work_product_id": "b7329f95-91e8-469f-aacd-3632cdd102eb",
+    "download_sha256_verified": true
+  },
+  {
+    "file": "lenses/03-findings.json",
+    "attachment_id": "1c7b2abe-dc15-44a4-ad4a-cafbca3f0894",
+    "work_product_id": "3623f996-cb20-4672-8e44-c0cf987fd087",
+    "download_sha256_verified": true
+  },
+  {
+    "file": "receipts/L03.json",
+    "attachment_id": "23d8e7c5-f1c7-4de6-937a-2fe929cc44df",
+    "work_product_id": "35321b16-d5b2-4e5b-88ff-9f93bf080a04",
+    "download_sha256_verified": true
+  }
+]

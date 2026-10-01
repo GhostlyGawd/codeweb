@@ -1,0 +1,25 @@
+{
+  "id": "T57-test-neighbor",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/query.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior/.codeweb/graph.json",
+    "--tests",
+    "low",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:14.735Z",
+  "end": "2026-10-01T01:50:14.775Z",
+  "durationMs": 39.997167000000445,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"query\":\"tests\",\"symbol\":\"low\",\"summary\":\"3 test(s) exercise low — graph is stale for 1+ file(s); run codeweb_refresh\",\"matched\":[\"subject.mjs:low\"],\"results\":[\"current.test.mjs:<module>\",\"failed.test.mjs:<module>\",\"skipped.test.mjs:<module>\"],\"count\":3,\"stale\":{\"count\":1,\"files\":[\"./ (dir changed — new/removed files)\"]}}\n",
+  "stderr": ""
+}

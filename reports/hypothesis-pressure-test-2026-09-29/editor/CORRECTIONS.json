@@ -1,0 +1,19 @@
+{
+  "editor_run": "a40d31b2-09d8-4212-a2da-e7bb6f24cce1",
+  "changes": [
+    {
+      "finding": "L15-F01",
+      "resolution": "Typed shared forward/reverse edges; no inherited A association promoted into direct support."
+    },
+    {
+      "finding": "L15-F02",
+      "resolution": "Four source-specific final dispositions and comparator/coverage/scope tests."
+    },
+    {
+      "finding": "L15-F03",
+      "resolution": "Original provisional quality/effort gate preserved; equal-time and harm cases explicit."
+    }
+  ],
+  "drafts_modified": false,
+  "approval": "pending independent native final review"
+}

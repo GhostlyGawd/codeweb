@@ -1,0 +1,385 @@
+{
+  "candidate": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+  "fixtures": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "node": "v26.7.0",
+  "runAt": "2026-10-01T01:50:20.828Z",
+  "receipts": [
+    {
+      "id": "T00-extract-fixture",
+      "exit": 0,
+      "durationMs": 65.822209
+    },
+    {
+      "id": "T01-cli-exact-impact",
+      "exit": 0,
+      "durationMs": 36.145624999999995
+    },
+    {
+      "id": "T02-cli-exact-context",
+      "exit": 0,
+      "durationMs": 35.46570799999999
+    },
+    {
+      "id": "T03-mcp-exact-impact",
+      "exit": 0,
+      "durationMs": 39.490791
+    },
+    {
+      "id": "T04-mcp-exact-context",
+      "exit": 0,
+      "durationMs": 41.443083
+    },
+    {
+      "id": "T05-hook-known-low-edit",
+      "exit": 0,
+      "durationMs": 34.38691699999998
+    },
+    {
+      "id": "T06-hook-file-only",
+      "exit": 0,
+      "durationMs": 36.63937500000003
+    },
+    {
+      "id": "T07-hook-known-low-repeat",
+      "exit": 0,
+      "durationMs": 36.51487499999996
+    },
+    {
+      "id": "T08-cli-zero",
+      "exit": 0,
+      "durationMs": 37.35262499999999
+    },
+    {
+      "id": "T09-cli-unmapped-symbol",
+      "exit": 1,
+      "durationMs": 36.62533300000001
+    },
+    {
+      "id": "T10-cli-missing-map",
+      "exit": 2,
+      "durationMs": 37.365583999999956
+    },
+    {
+      "id": "T11-cli-corrupt-map",
+      "exit": 2,
+      "durationMs": 37.81820899999997
+    },
+    {
+      "id": "T12-cli-invalid-shape",
+      "exit": 1,
+      "durationMs": 33.32637500000004
+    },
+    {
+      "id": "T13-cli-stale-context",
+      "exit": 0,
+      "durationMs": 35.842625
+    },
+    {
+      "id": "T14-hook-stale",
+      "exit": 0,
+      "durationMs": 35.914625
+    },
+    {
+      "id": "T15-hook-zero",
+      "exit": 0,
+      "durationMs": 31.73929099999998
+    },
+    {
+      "id": "T16-post-zero",
+      "exit": 0,
+      "durationMs": 94.12225000000001
+    },
+    {
+      "id": "T15-hook-unmapped",
+      "exit": 0,
+      "durationMs": 33.115792000000056
+    },
+    {
+      "id": "T16-post-unmapped",
+      "exit": 0,
+      "durationMs": 33.97858299999996
+    },
+    {
+      "id": "T15-hook-corrupt",
+      "exit": 0,
+      "durationMs": 35.715374999999995
+    },
+    {
+      "id": "T16-post-corrupt",
+      "exit": 0,
+      "durationMs": 91.38908299999991
+    },
+    {
+      "id": "T15-hook-missing",
+      "exit": 0,
+      "durationMs": 33.58379100000002
+    },
+    {
+      "id": "T16-post-missing",
+      "exit": 0,
+      "durationMs": 36.42770799999994
+    },
+    {
+      "id": "T15-hook-generated",
+      "exit": 0,
+      "durationMs": 34.07787499999995
+    },
+    {
+      "id": "T16-post-generated",
+      "exit": 0,
+      "durationMs": 89.69787499999984
+    },
+    {
+      "id": "T17-extract-generated",
+      "exit": 0,
+      "durationMs": 63.76354200000014
+    },
+    {
+      "id": "T15-hook-unsupported",
+      "exit": 0,
+      "durationMs": 36.12741699999992
+    },
+    {
+      "id": "T16-post-unsupported",
+      "exit": 0,
+      "durationMs": 88.52808299999992
+    },
+    {
+      "id": "T18-extract-only-unsupported",
+      "exit": 1,
+      "durationMs": 54.22612500000014
+    },
+    {
+      "id": "T15-hook-extraction-failure",
+      "exit": 0,
+      "durationMs": 36.43908299999998
+    },
+    {
+      "id": "T16-post-extraction-failure",
+      "exit": 0,
+      "durationMs": 92.79491600000006
+    },
+    {
+      "id": "T19-refresh-extraction-failure",
+      "exit": 2,
+      "durationMs": 33.42062499999997
+    },
+    {
+      "id": "T20-cli-invalid-invocation",
+      "exit": 2,
+      "durationMs": 34.535167
+    },
+    {
+      "id": "T21-mcp-missing-map",
+      "exit": 0,
+      "durationMs": 76.12087500000007
+    },
+    {
+      "id": "T22-mcp-corrupt-map",
+      "exit": 0,
+      "durationMs": 77.102666
+    },
+    {
+      "id": "T23-mcp-zero",
+      "exit": 0,
+      "durationMs": 36.87341599999991
+    },
+    {
+      "id": "T24-mcp-unmapped",
+      "exit": 0,
+      "durationMs": 36.87374999999997
+    },
+    {
+      "id": "T25-mcp-invalid-selector",
+      "exit": 0,
+      "durationMs": 35.81091700000002
+    },
+    {
+      "id": "T26-impact-cap",
+      "exit": 0,
+      "durationMs": 36.64837499999999
+    },
+    {
+      "id": "T27-impact-expand",
+      "exit": 0,
+      "durationMs": 35.552374999999984
+    },
+    {
+      "id": "T28-context-cap",
+      "exit": 0,
+      "durationMs": 35.512833999999884
+    },
+    {
+      "id": "T29-context-expand",
+      "exit": 0,
+      "durationMs": 34.34204100000011
+    },
+    {
+      "id": "T30-missing-original-baseline",
+      "exit": 2,
+      "durationMs": 34.83645799999999
+    },
+    {
+      "id": "T31-capture-baseline",
+      "exit": 0,
+      "durationMs": 137.95249999999987
+    },
+    {
+      "id": "T32-ordinary-refresh",
+      "exit": 0,
+      "durationMs": 154.77133400000002
+    },
+    {
+      "id": "T33-verify-baseline",
+      "exit": 0,
+      "durationMs": 171.75225
+    },
+    {
+      "id": "T34-repair-refresh",
+      "exit": 0,
+      "durationMs": 132.5873330000004
+    },
+    {
+      "id": "T35-verify-repair",
+      "exit": 0,
+      "durationMs": 172.22699999999986
+    },
+    {
+      "id": "T36-deny-baseline-refresh",
+      "exit": 2,
+      "durationMs": 37.028291999999965
+    },
+    {
+      "id": "T37-incomplete-before",
+      "exit": 2,
+      "durationMs": 178.75999999999976
+    },
+    {
+      "id": "T38-post-normal",
+      "exit": 0,
+      "durationMs": 91.18424999999979
+    },
+    {
+      "id": "T39-post-regression-first",
+      "exit": 0,
+      "durationMs": 99.27975000000015
+    },
+    {
+      "id": "T40-post-regression-repeat",
+      "exit": 0,
+      "durationMs": 90.27349999999979
+    },
+    {
+      "id": "T41-extract-similarity",
+      "exit": 0,
+      "durationMs": 67.74341700000014
+    },
+    {
+      "id": "T42-similar-conflicting-contract",
+      "exit": 0,
+      "durationMs": 39.766208000000006
+    },
+    {
+      "id": "T43-similar-json-cap",
+      "exit": 0,
+      "durationMs": 35.640542000000096
+    },
+    {
+      "id": "T44-similar-expand",
+      "exit": 0,
+      "durationMs": 37.68362500000012
+    },
+    {
+      "id": "T45-similar-equivalent-syntax",
+      "exit": 0,
+      "durationMs": 38.96379200000001
+    },
+    {
+      "id": "T46-similar-zero-text",
+      "exit": 0,
+      "durationMs": 33.970000000000255
+    },
+    {
+      "id": "T47-similar-zero-json",
+      "exit": 0,
+      "durationMs": 36.34112499999992
+    },
+    {
+      "id": "T48-similar-body-cap",
+      "exit": 0,
+      "durationMs": 36.79404199999999
+    },
+    {
+      "id": "T49-mcp-similarity",
+      "exit": 0,
+      "durationMs": 37.29670799999985
+    },
+    {
+      "id": "T50-overlap",
+      "exit": 1,
+      "durationMs": 35.24408399999993
+    },
+    {
+      "id": "T51-extract-behavior",
+      "exit": 0,
+      "durationMs": 61.14191699999992
+    },
+    {
+      "id": "T52-behavior-current",
+      "exit": 0,
+      "durationMs": 76.64879199999996
+    },
+    {
+      "id": "T53-behavior-failed",
+      "exit": 1,
+      "durationMs": 76.96433400000024
+    },
+    {
+      "id": "T54-behavior-skipped",
+      "exit": 0,
+      "durationMs": 75.20233300000018
+    },
+    {
+      "id": "T55-behavior-malformed",
+      "exit": 1,
+      "durationMs": 69.33770800000002
+    },
+    {
+      "id": "T56-structural-green-with-failed-oracle",
+      "exit": 0,
+      "durationMs": 35.38504200000034
+    },
+    {
+      "id": "T57-test-neighbor",
+      "exit": 0,
+      "durationMs": 39.997167000000445
+    },
+    {
+      "id": "T58-import-historical-coverage",
+      "exit": 0,
+      "durationMs": 36.90937500000018
+    },
+    {
+      "id": "T59-recorded-coverage-explain",
+      "exit": 0,
+      "durationMs": 35.384250000000065
+    },
+    {
+      "id": "T60-stale-coverage-explain",
+      "exit": 0,
+      "durationMs": 37.30829100000028
+    },
+    {
+      "id": "T61-stale-test-now-fails",
+      "exit": 1,
+      "durationMs": 77.09191700000065
+    },
+    {
+      "id": "T62-targeted-suites",
+      "exit": 1,
+      "durationMs": 5865.0938750000005
+    }
+  ],
+  "fixtureFiles": [],
+  "note": "Disposable fixture directories retained for review; no product source mutation."
+}

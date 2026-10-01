@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+<script src="https://cdn.wealthfront.com/assets/cm/manager.js" type="module"></script>
+	
+
+<link rel="icon" type="image/x-icon" href="https://eng.wealthfront.com/wp-content/themes/polarisengblog/images/favicon.ico" />
+<link rel="profile" href="http://gmpg.org/xfn/11">
+<link rel="pingback" href="https://eng.wealthfront.com/xmlrpc.php">
+<link href='https://fonts.googleapis.com/css?family=Lato|Source+Sans+Pro' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="https://eng.wealthfront.com/wp-content/themes/polarisengblog/css/pure.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+
+	<!-- This site is optimized with the Yoast SEO plugin v28.6 - https://yoast.com/product/yoast-seo-wordpress/ -->
+	<title>Experiments with AI Code Review &#8212; Engineering Blog - Wealthfront</title>
+	<link rel="canonical" href="https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/" />
+	<meta property="og:locale" content="en_US" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="Experiments with AI Code Review &#8212; Engineering Blog - Wealthfront" />
+	<meta property="og:description" content="Part of a series on Wealthfront&#8217;s AI Developer Tooling Why Code Review? At Wealthfront, our arc of AI adoption has followed a familiar pattern: from skepticism to experimentation to deep adoption in the code lifecycle. Just a few years ago, in the dark era of &#8220;AI coding is just fancy autocomplete,&#8221; we heard rumors of... Read more" />
+	<meta property="og:url" content="https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/" />
+	<meta property="og:site_name" content="Engineering Blog - Wealthfront" />
+	<meta property="article:published_time" content="2026-08-03T23:34:10+00:00" />
+	<meta property="article:modified_time" content="2026-08-03T23:50:51+00:00" />
+	<meta property="og:image" content="https://eng.wealthfront.com/wp-content/uploads/2026/08/image-1-1024x271.png" />
+	<meta name="author" content="Austin McKee" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<script type="application/ld+json" class="yoast-schema-graph">{"@context":"https:\/\/schema.org","@graph":[{"@type":"Article","@id":"https:\/\/eng.wealthfront.com\/2026\/08\/03\/experiments-with-ai-code-review\/#article","isPartOf":{"@id":"https:\/\/eng.wealthfront.com\/2026\/08\/03\/experiments-with-ai-code-review\/"},"author":[{"@id":"https:\/\/eng.wealthfront.com\/#\/schema\/person\/843d808510e5ef7b8580b40319fee28e"}],"headline":"Experiments with AI Code Review","datePublished":"2026-08-03T23:34:10+00:00","dateModified":"2026-08-03T23:50:51+00:00","mainEntityOfPage":{"@id":"https:\/\/eng.wealthfront.com\/2026\/08\/03\/experiments-with-ai-code-review\/"},"wordCount":2368,"image":{"@id":"https:\/\/eng.wealthfront.com\/2026\/08\/03\/experiments-with-ai-code-review\/#primaryimage"},"thumbnailUrl":"https:\/\/eng.wealthfront.com\/wp-content\/uploads\/2026\/08\/image-1-1024x271.png","articleSection":["wealthfront engineering"],"inLanguage":"en-US"},{"@type":"WebPage","@id":"https:\/\/eng.wealthfront.com\/2026\/08\/03\/experiments-with-ai-code-review\/","url":"https:\/\/eng.wealthfront.com\/2026\/08\/03\/experiments-with-ai-code-review\/","name":"Experiments with AI Code Review &#8212; Engineering Blog - Wealthfront","isPartOf":{"@id":"https:\/\/eng.wealthfront.com\/#website"},"primaryImageOfPage":{"@id":"https:\/\/eng.wealthfront.com\/2026\/08\/03\/experiments-with-ai-code-review\/#primaryimage"},"image":{"@id":"https:\/\/eng.wealthfront.com\/2026\/08\/03\/experiments-with-ai-code-review\/#primaryimage"},"thumbnailUrl":"https:\/\/eng.wealthfront.com\/wp-content\/uploads\/2026\/08\/image-1-1024x271.png","datePublished":"2026-08-03T23:34:10+00:00","dateModified":"2026-08-03T23:50:51+00:00","author":{"@id":"https:\/\/eng.wealthfront.com\/#\/schema\/person\/843d808510e5ef7b8580b40319fee28e"},"inLanguage":"en-US","potentialAction":[{"@type":"ReadAction","target":["https:\/\/eng.wealthfront.com\/2026\/08\/03\/experiments-with-ai-code-review\/"]}]},{"@type":"ImageObject","inLanguage":"en-US","@id":"https:\/\/eng.wealthfront.com\/2026\/08\/03\/experiments-with-ai-code-review\/#primaryimage","url":"https:\/\/eng.wealthfront.com\/wp-content\/uploads\/2026\/08\/image-1.png","contentUrl":"https:\/\/eng.wealthfront.com\/wp-content\/uploads\/2026\/08\/image-1.png","width":2048,"height":542},{"@type":"WebSite","@id":"https:\/\/eng.wealthfront.com\/#website","url":"https:\/\/eng.wealthfront.com\/","name":"Engineering Blog - Wealthfront","description":"","potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/eng.wealthfront.com\/?s={search_term_string}"},"query-input":{"@type":"PropertyValueSpecification","valueRequired":true,"valueName":"search_term_string"}}],"inLanguage":"en-US"},{"@type":"Person","@id":"https:\/\/eng.wealthfront.com\/#\/schema\/person\/843d808510e5ef7b8580b40319fee28e","name":"Austin McKee","image":{"@type":"ImageObject","inLanguage":"en-US","@id":"https:\/\/secure.gravatar.com\/avatar\/7850edae6fc956db211a31804de3e89efec060b2a9d6b6902bdcac4538ade268?s=96&d=mm&r=gcdd29fd11b31b13ddb1b77b76cfa77d7","url":"https:\/\/secure.gravatar.com\/avatar\/7850edae6fc956db211a31804de3e89efec060b2a9d6b6902bdcac4538ade268?s=96&d=mm&r=g","contentUrl":"https:\/\/secure.gravatar.com\/avatar\/7850edae6fc956db211a31804de3e89efec060b2a9d6b6902bdcac4538ade268?s=96&d=mm&r=g","caption":"Austin McKee"}}]}</script>
+	<!-- / Yoast SEO plugin. -->
+
+
+<link rel="alternate" type="application/rss+xml" title="Engineering Blog - Wealthfront &raquo; Feed" href="https://eng.wealthfront.com/feed/" />
+<link rel="alternate" type="application/rss+xml" title="Engineering Blog - Wealthfront &raquo; Comments Feed" href="https://eng.wealthfront.com/comments/feed/" />
+<link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="https://eng.wealthfront.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Feng.wealthfront.com%2F2026%2F08%2F03%2Fexperiments-with-ai-code-review%2F" />
+<link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="https://eng.wealthfront.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Feng.wealthfront.com%2F2026%2F08%2F03%2Fexperiments-with-ai-code-review%2F&#038;format=xml" />
+<style id="wp-img-auto-sizes-contain-inline-css">
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+<style id="wp-emoji-styles-inline-css">
+
+	img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}
+/*# sourceURL=wp-emoji-styles-inline-css */
+</style>
+<style id="wp-block-library-inline-css">
+:root{--wp-block-synced-color:#7a00df;--wp-block-synced-color--rgb:122,0,223;--wp-bound-block-color:var(--wp-block-synced-color);--wp-editor-canvas-background:#ddd;--wp-admin-theme-color:#007cba;--wp-admin-theme-color--rgb:0,124,186;--wp-admin-theme-color-darker-10:#006ba1;--wp-admin-theme-color-darker-10--rgb:0,107,160.5;--wp-admin-theme-color-darker-20:#005a87;--wp-admin-theme-color-darker-20--rgb:0,90,135;--wp-admin-border-width-focus:2px}@media (min-resolution:192dpi){:root{--wp-admin-border-width-focus:1.5px}}.wp-element-button{cursor:pointer}:root .has-very-light-gray-background-color{background-color:#eee}:root .has-very-dark-gray-background-color{background-color:#313131}:root .has-very-light-gray-color{color:#eee}:root .has-very-dark-gray-color{color:#313131}:root .has-vivid-green-cyan-to-vivid-cyan-blue-gradient-background{background:linear-gradient(135deg,#00d084,#0693e3)}:root .has-purple-crush-gradient-background{background:linear-gradient(135deg,#34e2e4,#4721fb 50%,#ab1dfe)}:root .has-hazy-dawn-gradient-background{background:linear-gradient(135deg,#faaca8,#dad0ec)}:root .has-subdued-olive-gradient-background{background:linear-gradient(135deg,#fafae1,#67a671)}:root .has-atomic-cream-gradient-background{background:linear-gradient(135deg,#fdd79a,#004a59)}:root .has-nightshade-gradient-background{background:linear-gradient(135deg,#330968,#31cdcf)}:root .has-midnight-gradient-background{background:linear-gradient(135deg,#020381,#2874fc)}:root{--wp--preset--font-size--normal:16px;--wp--preset--font-size--huge:42px}.has-regular-font-size{font-size:1em}.has-larger-font-size{font-size:2.625em}.has-normal-font-size{font-size:var(--wp--preset--font-size--normal)}.has-huge-font-size{font-size:var(--wp--preset--font-size--huge)}:root .has-text-align-center{text-align:center}:root .has-text-align-left{text-align:left}:root .has-text-align-right{text-align:right}.has-fit-text{white-space:nowrap!important}#end-resizable-editor-section{display:none}.aligncenter{clear:both}.items-justified-left{justify-content:flex-start}.items-justified-center{justify-content:center}.items-justified-right{justify-content:flex-end}.items-justified-space-between{justify-content:space-between}.screen-reader-text{word-wrap:normal!important;border:0;clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;word-break:normal!important}.screen-reader-text:focus{background-color:#ddd;clip-path:none;color:#444;display:block;font-size:1em;height:auto;left:5px;line-height:normal;padding:15px 23px 14px;text-decoration:none;top:5px;width:auto;z-index:100000}html :where(.has-border-color){border-style:solid}html :where([style^=border-color],[style*=";border-color"],[style*="; border-color"]){border-style:solid}html :where([style^=border-top-color],[style*=";border-top-color"],[style*="; border-top-color"]){border-top-style:solid}html :where([style^=border-right-color],[style*=";border-right-color"],[style*="; border-right-color"]){border-right-style:solid}html :where([style^=border-bottom-color],[style*=";border-bottom-color"],[style*="; border-bottom-color"]){border-bottom-style:solid}html :where([style^=border-left-color],[style*=";border-left-color"],[style*="; border-left-color"]){border-left-style:solid}html :where([style^=border-width],[style*=";border-width"],[style*="; border-width"]){border-style:solid}html :where([style^=border-top-width],[style*=";border-top-width"],[style*="; border-top-width"]){border-top-style:solid}html :where([style^=border-right-width],[style*=";border-right-width"],[style*="; border-right-width"]){border-right-style:solid}html :where([style^=border-bottom-width],[style*=";border-bottom-width"],[style*="; border-bottom-width"]){border-bottom-style:solid}html :where([style^=border-left-width],[style*=";border-left-width"],[style*="; border-left-width"]){border-left-style:solid}html :where(img[class*=wp-image-]){height:auto;max-width:100%}:where(figure){margin:0 0 1em}html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:var(--wp-admin--admin-bar--height,0px)}@media screen and (max-width:600px){html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:0px}}
+
+/*# sourceURL=/wp-includes/css/dist/block-library/common.min.css */
+</style>
+<style id="wp-block-image-inline-css">
+.wp-block-image>a,.wp-block-image>figure>a{display:inline-block}.wp-block-image img{box-sizing:border-box;height:auto;max-width:100%;vertical-align:bottom}@media not (prefers-reduced-motion){.wp-block-image img.hide{visibility:hidden}.wp-block-image img.show{animation:show-content-image .4s}}.wp-block-image[style*=border-radius] img,.wp-block-image[style*=border-radius]>a{border-radius:inherit}.wp-block-image.has-custom-border img{box-sizing:border-box}.wp-block-image.aligncenter{text-align:center}.wp-block-image.alignfull>a,.wp-block-image.alignwide>a{width:100%}.wp-block-image.alignfull img,.wp-block-image.alignwide img{height:auto;width:100%}.wp-block-image .aligncenter,.wp-block-image .alignleft,.wp-block-image .alignright,.wp-block-image.aligncenter,.wp-block-image.alignleft,.wp-block-image.alignright{display:table}.wp-block-image .aligncenter>figcaption,.wp-block-image .alignleft>figcaption,.wp-block-image .alignright>figcaption,.wp-block-image.aligncenter>figcaption,.wp-block-image.alignleft>figcaption,.wp-block-image.alignright>figcaption{caption-side:bottom;display:table-caption}.wp-block-image .alignleft{float:left;margin:.5em 1em .5em 0}.wp-block-image .alignright{float:right;margin:.5em 0 .5em 1em}.wp-block-image .aligncenter{margin-left:auto;margin-right:auto}.wp-block-image :where(figcaption){margin-bottom:1em;margin-top:.5em}.wp-block-image.is-style-circle-mask img{border-radius:9999px}@supports ((-webkit-mask-image:none) or (mask-image:none)) or (-webkit-mask-image:none){.wp-block-image.is-style-circle-mask img{border-radius:0;-webkit-mask-image:url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50"/></svg>');mask-mode:alpha;-webkit-mask-position:center;mask-position:center;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain}}:root :where(.wp-block-image.is-style-rounded img,.wp-block-image .is-style-rounded img){border-radius:9999px}.wp-block-image figure{margin:0}.wp-lightbox-container{display:flex;flex-direction:column;position:relative}.wp-lightbox-container img{cursor:zoom-in}.wp-lightbox-container img:hover+button{opacity:1}.wp-lightbox-container button{align-items:center;backdrop-filter:blur(16px) saturate(180%);background-color:rgba(90,90,90,.25);border:none;border-radius:4px;cursor:zoom-in;display:flex;height:20px;justify-content:center;opacity:0;padding:0;position:absolute;right:16px;text-align:center;top:16px;width:20px;z-index:100}@media not (prefers-reduced-motion){.wp-lightbox-container button{transition:opacity .2s ease}}.wp-lightbox-container button:focus-visible{outline:3px auto rgba(90,90,90,.25);outline:3px auto -webkit-focus-ring-color;outline-offset:3px}.wp-lightbox-container button:hover{cursor:pointer;opacity:1}.wp-lightbox-container button:focus{opacity:1}.wp-lightbox-container button:focus,.wp-lightbox-container button:hover,.wp-lightbox-container button:not(:hover):not(:active):not(.has-background){background-color:rgba(90,90,90,.25);border:none}.wp-lightbox-overlay{box-sizing:border-box;cursor:zoom-out;height:100vh;left:0;overflow:hidden;position:fixed;top:0;visibility:hidden;width:100%;z-index:100000}.wp-lightbox-overlay .wp-lightbox-close-button{align-items:center;cursor:pointer;display:flex;font-family:inherit;gap:8px;justify-content:center;line-height:1;min-height:40px;min-width:40px;padding:0 4px;position:absolute;right:calc(env(safe-area-inset-right) + 16px);top:calc(env(safe-area-inset-top) + 16px);z-index:5000000}.wp-lightbox-overlay .wp-lightbox-close-button:focus,.wp-lightbox-overlay .wp-lightbox-close-button:hover,.wp-lightbox-overlay .wp-lightbox-close-button:not(:hover):not(:active):not(.has-background){background:none;border:none}.wp-lightbox-overlay .wp-lightbox-close-button:has(.wp-lightbox-close-text:not([hidden])) .wp-lightbox-close-icon svg{height:1em;width:1em}.wp-lightbox-overlay .wp-lightbox-close-icon svg{display:block}.wp-lightbox-overlay .wp-lightbox-navigation-button-next,.wp-lightbox-overlay .wp-lightbox-navigation-button-prev{align-items:center;bottom:16px;cursor:pointer;display:flex;font-family:inherit;gap:4px;justify-content:center;line-height:1;min-height:40px;min-width:40px;padding:0 8px;position:absolute;z-index:2000002}.wp-lightbox-overlay .wp-lightbox-navigation-button-next[hidden],.wp-lightbox-overlay .wp-lightbox-navigation-button-prev[hidden]{display:none}@media (min-width:960px){.wp-lightbox-overlay .wp-lightbox-navigation-button-next,.wp-lightbox-overlay .wp-lightbox-navigation-button-prev{bottom:50%;transform:translateY(-50%)}}.wp-lightbox-overlay .wp-lightbox-navigation-button-next:focus,.wp-lightbox-overlay .wp-lightbox-navigation-button-next:hover,.wp-lightbox-overlay .wp-lightbox-navigation-button-next:not(:hover):not(:active):not(.has-background),.wp-lightbox-overlay .wp-lightbox-navigation-button-prev:focus,.wp-lightbox-overlay .wp-lightbox-navigation-button-prev:hover,.wp-lightbox-overlay .wp-lightbox-navigation-button-prev:not(:hover):not(:active):not(.has-background){background:none;border:none;padding:0 8px}.wp-lightbox-overlay .wp-lightbox-navigation-button-next:has(.wp-lightbox-navigation-text:not([hidden])) .wp-lightbox-navigation-icon svg,.wp-lightbox-overlay .wp-lightbox-navigation-button-prev:has(.wp-lightbox-navigation-text:not([hidden])) .wp-lightbox-navigation-icon svg{display:block;height:1.5em;width:1.5em}.wp-lightbox-overlay .wp-lightbox-navigation-button-prev{left:calc(env(safe-area-inset-left) + 16px)}.wp-lightbox-overlay .wp-lightbox-navigation-button-next{right:calc(env(safe-area-inset-right) + 16px)}.wp-lightbox-overlay .wp-lightbox-navigation-icon svg{vertical-align:middle}.wp-lightbox-overlay .lightbox-image-container{height:var(--wp--lightbox-container-height);left:50%;overflow:hidden;position:absolute;top:50%;transform:translate(-50%,-50%);transform-origin:top left;width:var(--wp--lightbox-container-width);z-index:2000001}.wp-lightbox-overlay .wp-block-image{align-items:center;box-sizing:border-box;display:flex;height:100%;justify-content:center;margin:0;position:relative;transform-origin:0 0;width:100%;z-index:3000000}.wp-lightbox-overlay .wp-block-image img{height:var(--wp--lightbox-image-height);min-height:var(--wp--lightbox-image-height);min-width:var(--wp--lightbox-image-width);width:var(--wp--lightbox-image-width)}.wp-lightbox-overlay .wp-block-image figcaption{display:none}.wp-lightbox-overlay button{background:none;border:none}.wp-lightbox-overlay .scrim{background-color:#fff;height:100%;opacity:.9;position:absolute;width:100%;z-index:2000000}.wp-lightbox-overlay.active{visibility:visible}@media not (prefers-reduced-motion){.wp-lightbox-overlay.active{animation:turn-on-visibility .25s both}.wp-lightbox-overlay.active img{animation:turn-on-visibility .35s both}.wp-lightbox-overlay.show-closing-animation:not(.active){animation:turn-off-visibility .35s both}.wp-lightbox-overlay.show-closing-animation:not(.active) img{animation:turn-off-visibility .25s both}.wp-lightbox-overlay.zoom.active{animation:none;opacity:1;visibility:visible}.wp-lightbox-overlay.zoom.active .lightbox-image-container{animation:lightbox-zoom-in .4s}.wp-lightbox-overlay.zoom.active .lightbox-image-container img{animation:none}.wp-lightbox-overlay.zoom.active .scrim{animation:turn-on-visibility .4s forwards}.wp-lightbox-overlay.zoom.show-closing-animation:not(.active){animation:none}.wp-lightbox-overlay.zoom.show-closing-animation:not(.active) .lightbox-image-container{animation:lightbox-zoom-out .4s}.wp-lightbox-overlay.zoom.show-closing-animation:not(.active) .lightbox-image-container img{animation:none}.wp-lightbox-overlay.zoom.show-closing-animation:not(.active) .scrim{animation:turn-off-visibility .4s forwards}}@keyframes show-content-image{0%{visibility:hidden}99%{visibility:hidden}to{visibility:visible}}@keyframes turn-on-visibility{0%{opacity:0}to{opacity:1}}@keyframes turn-off-visibility{0%{opacity:1;visibility:visible}99%{opacity:0;visibility:visible}to{opacity:0;visibility:hidden}}@keyframes lightbox-zoom-in{0%{transform:translate(calc((-100vw + var(--wp--lightbox-scrollbar-width))/2 + var(--wp--lightbox-initial-left-position)),calc(-50vh + var(--wp--lightbox-initial-top-position))) scale(var(--wp--lightbox-scale))}to{transform:translate(-50%,-50%) scale(1)}}@keyframes lightbox-zoom-out{0%{transform:translate(-50%,-50%) scale(1);visibility:visible}99%{visibility:visible}to{transform:translate(calc((-100vw + var(--wp--lightbox-scrollbar-width))/2 + var(--wp--lightbox-initial-left-position)),calc(-50vh + var(--wp--lightbox-initial-top-position))) scale(var(--wp--lightbox-scale));visibility:hidden}}
+/*# sourceURL=https://eng.wealthfront.com/wp-includes/blocks/image/style.min.css */
+</style>
+<style id="wp-block-list-inline-css">
+ol,ul{box-sizing:border-box}:root :where(.wp-block-list.has-background){padding:1.25em 2.375em}
+/*# sourceURL=https://eng.wealthfront.com/wp-includes/blocks/list/style.min.css */
+</style>
+<style id="wp-block-separator-inline-css">
+@charset "UTF-8";.wp-block-separator{border:none;border-top:2px solid}:root :where(.wp-block-separator.is-style-dots){height:auto;line-height:1;text-align:center}:root :where(.wp-block-separator.is-style-dots):before{color:currentColor;content:"···";font-family:serif;font-size:1.5em;letter-spacing:2em;padding-left:2em}.wp-block-separator.is-style-dots{background:none!important;border:none!important}
+/*# sourceURL=https://eng.wealthfront.com/wp-includes/blocks/separator/style.min.css */
+</style>
+
+<style id="classic-theme-styles-inline-css">
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+/*# sourceURL=/wp-includes/css/classic-themes.min.css */
+</style>
+
+<style id="global-styles-inline-css">
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0);--wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0);}.wp-block-button{--wp--preset--dimension--25: 25%;--wp--preset--dimension--50: 50%;--wp--preset--dimension--75: 75%;--wp--preset--dimension--100: 100%;}:where(body) { margin: 0; }:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}body{padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;}:root :where(.wp-element-button, .wp-block-button__link){background-color: #32373c;border-width: 0;color: #fff;font-family: inherit;font-size: inherit;font-style: inherit;font-weight: inherit;letter-spacing: inherit;line-height: inherit;padding-top: calc(0.667em + 2px);padding-right: calc(1.333em + 2px);padding-bottom: calc(0.667em + 2px);padding-left: calc(1.333em + 2px);text-decoration: none;text-transform: inherit;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+/*# sourceURL=global-styles-inline-css */
+</style>
+
+<link rel='stylesheet' id='mo_saml_admin_settings_style-css' href='https://eng.wealthfront.com/wp-content/plugins/miniorange-saml-20-single-sign-on-multiple-idp/includes/css/jquery.ui.css?ver=7.1.2' media='all' />
+<link rel='stylesheet' id='ppress-frontend-css' href='https://eng.wealthfront.com/wp-content/plugins/wp-user-avatar/assets/css/frontend.min.css?ver=4.17.5' media='all' />
+<link rel='stylesheet' id='ppress-flatpickr-css' href='https://eng.wealthfront.com/wp-content/plugins/wp-user-avatar/assets/flatpickr/flatpickr.min.css?ver=4.17.5' media='all' />
+<link rel='stylesheet' id='ppress-select2-css' href='https://eng.wealthfront.com/wp-content/plugins/wp-user-avatar/assets/select2/select2.min.css?ver=7.1.2' media='all' />
+<link rel='stylesheet' id='wp-block-paragraph-css' href='https://eng.wealthfront.com/wp-includes/blocks/paragraph/style.min.css?ver=7.1.2' media='all' />
+<link rel='stylesheet' id='wp-block-heading-css' href='https://eng.wealthfront.com/wp-includes/blocks/heading/style.min.css?ver=7.1.2' media='all' />
+<script id="jquery-core-js" src="https://eng.wealthfront.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1"></script>
+<script id="jquery-migrate-js" src="https://eng.wealthfront.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1"></script>
+<script id="mo_saml_admin_settings_script_widget-js" src="https://eng.wealthfront.com/wp-content/plugins/miniorange-saml-20-single-sign-on-multiple-idp/includes/js/settings.min.js?ver=7.1.2"></script>
+<script id="ppress-flatpickr-js" src="https://eng.wealthfront.com/wp-content/plugins/wp-user-avatar/assets/flatpickr/flatpickr.min.js?ver=4.17.5"></script>
+<script id="ppress-select2-js" src="https://eng.wealthfront.com/wp-content/plugins/wp-user-avatar/assets/select2/select2.min.js?ver=4.17.5"></script>
+<link rel="https://api.w.org/" href="https://eng.wealthfront.com/wp-json/" /><link rel="alternate" title="JSON" type="application/json" href="https://eng.wealthfront.com/wp-json/wp/v2/posts/4164" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://eng.wealthfront.com/xmlrpc.php?rsd" />
+<meta name="generator" content="WordPress 7.1.2" />
+<link rel='shortlink' href='https://eng.wealthfront.com/?p=4164' />
+<link href="https://eng.wealthfront.com/wp-content/themes/polarisengblog/fonts/fonts.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://eng.wealthfront.com/wp-content/themes/polarisengblog/style.css" type="text/css" />
+<link rel="stylesheet" href="https://eng.wealthfront.com/wp-content/themes/polarisengblog/css/polaris.css" type="text/css" />
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['\\(','\\)']],
+                       displayMath: [['\\[','\\]'], ['$$','$$']]}});
+</script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+<script> 
+  document.addEventListener("DOMContentLoaded", function(event) { 
+    document.getElementById("wftpx").src = "https://www.wealthfront.com/tpx" + 
+      "?p=" + location.pathname + 
+      "&r=" + encodeURIComponent(document.referrer) + 
+      "&h=" + location.hostname + 
+      "&q=" + encodeURIComponent(location.search); 
+  }); 
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-72157116-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</head>
+
+<body class="wp-singular post-template-default single single-post postid-4164 single-format-standard wp-theme-polarisengblog group-blog">
+	<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <a href="https://www.wealthfront.com">
+        <img src="https://eng.wealthfront.com/wp-content/themes/polarisengblog/images/wf_logo2x.png" alt="Wealthfront" width="42" height="42" />
+      </a>
+    </div>
+    <div class="header-menu">
+      <ul>
+	    <li class="close-mobile">
+	    	<div class="close-mobile-nav-icon">X</div>
+	    </li>
+       
+        <li>
+          <a href="https://www.wealthfront.com/engineering/our-team">
+          	Our team
+          </a>
+        </li>
+        <li>
+            <a href="/" class="active">
+              Blog
+            </a>
+         </li>
+        <li>
+          <a href="https://www.wealthfront.com/careers">
+            Careers
+          </a>
+        </li> 
+
+      </ul>
+    </div>
+    <a href="#" id="toggle-collapsed-nav">
+      Menu
+    </a>
+  </div>
+</header>
+	<header id="masthead" class="site-header" role="banner">
+		<h1>Engineering Blog &#8211; Wealthfront</h1>
+		<div class="circle">
+			<p>Find out what makes our engineering team tick.</p>
+		</div>		
+	</header><!-- #masthead -->
+<div class="header-overlay"></div>
+<div id="page" class="hfeed site">
+
+	<div id="content" class="site-content">
+		<div class="pure-g wf-full-g-half-guttered">
+		    <div class="pure-u-1-1 pure-u-sm-1-1 pure-u-md-15-24">
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main" role="main">
+
+		
+			
+<article id="post-4164" class="post-4164 post type-post status-publish format-standard hentry category-uncategorized">
+	<header class="entry-header">
+		<h1 class="entry-title">Experiments with AI Code Review</h1>		<div class="author">by <a href="https://eng.wealthfront.com/author/austinmwealthfront-com/" title="Posts by Austin McKee" class="author url fn" rel="author">Austin McKee</a></div>
+		<div class="meta">
+			August 03, 2026   
+		</div><!-- .entry-meta -->
+	</header><!-- .entry-header -->
+
+	<div class="entry-content">
+		
+<p class="wp-block-paragraph"><em>Part of a series on Wealthfront&#8217;s AI Developer Tooling</em></p>
+
+
+
+<h3 class="wp-block-heading">Why Code Review?</h3>
+
+
+
+<p class="wp-block-paragraph">At Wealthfront, our arc of AI adoption has followed a familiar pattern: from skepticism to experimentation to deep adoption in the code lifecycle. Just a few years ago, in the dark era of &#8220;AI coding is just fancy autocomplete,&#8221; we heard rumors of Meta using LLMs to review code diffs. We were skeptical- models can copy boilerplate, but surely review is where we humans are most valuable! Later that month in a post-mortem, an engineer pasted a misbehaving branch diff into GPT-3.5 and asked, &#8220;please review for bugs.&#8221; The bug under discussion, a missed SQL filter in a refactor, had slipped past both automated testing and code review. It was caught instantly by the LLM.</p>
+
+
+
+<p class="wp-block-paragraph">Things escalated quickly. How many historical bugs could an LLM catch from just the diff? (many). Can this new &#8220;Claude Code&#8221; looping tool catch even non-obvious bugs through exploration? (yes). Are there other people working on this? (yes, but we think we can do better). This realization started a multi-year experiment to leverage AI in the Wealthfront code factory. It was our first step toward building our ideal harness for AI-augmented code review.</p>
+
+
+
+<h3 class="wp-block-heading">Why Build?</h3>
+
+
+
+<p class="wp-block-paragraph">At Wealthfront we have a strong propensity to build over buy. Writing code is our core competency. We find we are almost always better served solving our narrow problems directly with a little code instead of adopting someone&#8217;s general solution containing lots of code. Additionally, we didn&#8217;t like the code review solutions available at the time.</p>
+
+
+
+<ul class="wp-block-list">
+<li>General-purpose harnesses like Claude Code had too little structure. At the time, AI could not be trusted to stay on task or conserve its context window. Sub-agents, in their infancy, were promising but had problems with error propagation.</li>
+
+
+
+<li>We believed &#8220;AI code review&#8221; companies were targeting unrealistic goals. They were trying to hit a unit price of around $0.25 per review and 2-3 minutes. This was the era when AI companies thought that $20 per user per month was a good price point. We believed then, and still believe now, that a good review is invaluable: we wanted to pay $20 <em>per review</em> and were happy to wait 15 minutes or more.</li>
+
+
+
+<li>AI systems are only as good as the context they have available. For both writing and reviewing code, the only system that can truly understand and control its environment is the one you write yourself.</li>
+</ul>
+
+
+
+<p class="wp-block-paragraph">So, we acquired API keys from Anthropic, OpenAI and Google and started building.</p>
+
+
+
+<h3 class="wp-block-heading">First Attempts</h3>
+
+
+
+<p class="wp-block-paragraph">The science of context engineering requires choosing exactly what tokens are visible to an LLM and playing to that model&#8217;s strengths. Nobody has produced rules for this that last longer than two model generations. Our first few attempts were predictably not great.&nbsp;</p>
+
+
+
+<p class="wp-block-paragraph">We first tried a &#8220;document gathering&#8221; structure. We would ask a cheap model to crawl the codebase looking for files relevant to a pull request. The cheap model would then compile a list of documents it found. Then, in a single shot, we would ask an expensive model to review the diff and documents to produce a review as a structured tool call. This didn&#8217;t work at all. You can&#8217;t ask a model to &#8220;find relevant documents&#8221;- the task isn&#8217;t specific enough. It will think everything is relevant, then spend unbounded time in rabbit holes finding every document!&nbsp;</p>
+
+
+
+<p class="wp-block-paragraph">In some sense everything <em>is</em> relevant, but with over 20 million lines of code (the majority of it tests) in over 350 repositories, specialization and abstraction are required. We tried more experiments with more structures, and even a few experiments with no structure, before we found something we liked.</p>
+
+
+
+<h3 class="wp-block-heading">Initial Release</h3>
+
+
+
+<p class="wp-block-paragraph">Our first reviewer was built in Java on our existing IRIS (Internal Resource Interaction System) service. It had quite a bit of structure:</p>
+
+
+
+<ol class="wp-block-list">
+<li>Gemini 2.5 Pro was chosen to be the top-level model and author of the review comments. It was given the branch diff and an overview of the review process.</li>
+
+
+
+<li>Gemini 2.5 Pro was required to call a tool called propose_research_questions. This tool allowed it to explore the codebase via research agents.
+<ol class="wp-block-list">
+<li>The research agents were each given a task to answer a question. They were allowed to loop within cost and time limits.</li>
+
+
+
+<li>These research agents used Gemini 2.5 Flash: a cheap model, trading judgement for speed.</li>
+
+
+
+<li>The task of &#8220;answering the question&#8221; gave these agents a purpose. In reality, we discarded what they wrote and only kept the primary sources they used to find an answer.</li>
+
+
+
+<li>After these agents finished their turn, we presented to them all files they had read and asked for a &#8220;relevancy score&#8221; for each, 1 through 9. &#8216;Structured output mode&#8217; with a dynamically generated JSON schema kept outputs precise.</li>
+
+
+
+<li>We consolidated the most relevant sources and asked an expensive model, Gemini 2.5 Pro, to either end research or recurse.
+<ol class="wp-block-list">
+<li>It could end research by writing a final report.</li>
+
+
+
+<li>Or, if the answer was incomplete, it could recurse by calling propose_research_questions and incorporating the results.</li>
+</ol>
+</li>
+</ol>
+</li>
+
+
+
+<li>The top-level Gemini 2.5 Pro was allowed to call propose_research_questions up to three times with three questions each.</li>
+
+
+
+<li>Finally, the top-level agent was asked to write comments via a dedicated tool.</li>
+</ol>
+
+
+
+<p class="wp-block-paragraph">This worked well. The structure led agents to perform deep research in the domain, and they discovered many non-obvious bugs through wide correlation of the codebase.&nbsp;</p>
+
+
+
+<p class="wp-block-paragraph">However, a year passed, models changed, and we thought we could do even better.&nbsp;</p>
+
+
+
+<ol class="wp-block-list">
+<li>Many problems were only discovered by &#8216;accident&#8217; while the agent looked at something unrelated.</li>
+
+
+
+<li>The cost of a review wasn&#8217;t well correlated with the complexity and risk of the change. The cost of recursive exploration was somewhat random, and the top-level agent had little leeway to expand or short-circuit a review. This made sense with Gemini 2.5, which was poor with open-ended delegation, but new Anthropic and OpenAI releases appeared to have better judgement.</li>
+
+
+
+<li>LLMs are strongly biased to do what you ask. If you ask an LLM to find problems, it finds problems, even if it must make them up. The signal-to-noise ratio of comments was poor, and even perfect pull requests would get a few comments.</li>
+
+
+
+<li>The agents&#8217; tools weren&#8217;t very expressive (read file, read JIRA ticket, JIRA search, regex code search, etc.), and therefore we had lots of tools. Meanwhile, model providers were beginning to RL-train their models specifically to use generic shell tools to find files efficiently.&nbsp;</li>
+</ol>
+
+
+
+<h3 class="wp-block-heading">Iris Code Review</h3>
+
+
+
+<p class="wp-block-paragraph">We then switched to a model-driven antagonistic review.</p>
+
+
+
+<ol class="wp-block-list">
+<li>Opus 4 now takes the lead and has wide latitude to view the diff, delegate to agents, and explore the code itself.</li>
+
+
+
+<li>Opus has access to general tools of its own and can spawn fast, general-purpose research agents.</li>
+
+
+
+<li>When it finds a potential problem, it&#8217;s asked to call propose_possible_problems.
+<ol class="wp-block-list">
+<li>This spawns two sub-agents per problem: one model to argue that the concern is real and one model to argue it isn&#8217;t.</li>
+
+
+
+<li>GPT-5 is the highly-paid prosecution intentionally predisposed to &#8220;investigate and find evidence of the problem.&#8221; To reduce hallucinations, we give it an &#8216;out&#8217; and say null results are expected and fine.</li>
+
+
+
+<li>Gemini 3.0 Flash is the cheap defense told &#8220;we have a feeling this isn&#8217;t a problem,&#8221; and to &#8220;please investigate and find evidence this isn&#8217;t a problem.&#8221;&nbsp;</li>
+
+
+
+<li>The two agents finish their investigations and present their evidence with primary sources back to Opus.</li>
+</ol>
+</li>
+
+
+
+<li>Opus 4 is asked to weigh the evidence impartially, make a decision, and continue with the review.</li>
+
+
+
+<li>At its own discretion, Opus can end its exploration and write the final comments.</li>
+</ol>
+
+
+
+<p class="wp-block-paragraph">This works extremely well. The sub-agents have clear, actionable goals. Giving each model a distinct role (plaintiff, defendant, judge) tends to produce better evidence and clearer judgement. Additionally, a number of smaller tactics have increased reliability:</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Freeform, then Instructions, then Structure</strong></p>
+
+
+
+<p class="wp-block-paragraph">After a long agent loop Opus struggled to call structured tools properly. Our review_pull_request tool schema isn&#8217;t that large, yet many reviews showed Opus hallucinating file names, regretting comments it started (e.g. &#8220;hmm actually scratch that&#8221;), or even forgetting how to close out a JSON string and panicking for thousands of tokens. Our solution:</p>
+
+
+
+<ol class="wp-block-list">
+<li>Allow Opus to write a freeform review as a text file</li>
+
+
+
+<li>Allow Opus to iterate on the file using its native str_replace_based_edit_tool until it&#8217;s done</li>
+
+
+
+<li>Append new developer instructions explaining how to call review_pull_request with the proper JSON format</li>
+
+
+
+<li>Require that Opus call the tool</li>
+</ol>
+
+
+
+<p class="wp-block-paragraph"><strong>Unix Philosophy with Tools</strong></p>
+
+
+
+<p class="wp-block-paragraph">Dozens of bespoke tools to retrieve data (read: MCP) inevitably lead to poor tool calling performance and context bloat. On the other hand, modern models are now RL-trained to use standard unix shell tools to retrieve data. We first had tools for reading code, pull requests, Sentry issues, tickets, and more. We replaced all of these with what we call our &#8220;AI reading room&#8221;- a sandboxed environment containing all this data on a single filesystem on a large SSD. We now only expose a simple read_file tool and encourage it to use a shell for anything else.&nbsp;&nbsp;</p>
+
+
+
+<p class="wp-block-paragraph"><strong>Directed Research</strong></p>
+
+
+
+<p class="wp-block-paragraph">Despite the new framework, we noticed there were still some questions the agent never thought to ask. For example, it rarely prioritized measuring the code against existing, historical data in the database. We now nudge Opus by spawning a few pointed sub-agents at the start of the review, then we ask it to consider the feedback when the sub-agents are done. We have three of these:</p>
+
+
+
+<ol class="wp-block-list">
+<li>A &#8220;project background&#8221; agent researches the changes in the context of a larger project, reducing the agent&#8217;s instinct to panic over missing features.</li>
+
+
+
+<li>An &#8220;existing data&#8221; agent can query the database and research how the code will behave when deployed to the product: its effect size, missed edge cases, etc.&nbsp;</li>
+
+
+
+<li>A &#8220;checklist&#8221; agent has access to around 80 engineer-written quality checks and attempts to find violations</li>
+</ol>
+
+
+
+<h3 class="wp-block-heading">Performance</h3>
+
+
+
+<p class="wp-block-paragraph">After launch we asked every engineer to consider the comments and reply to them with a rating between one and five:</p>
+
+
+
+<ol class="wp-block-list">
+<li>Actively harmful feedback
+<ol class="wp-block-list">
+<li>The bot is encouraging an engineer to make a bad change to the PR or asking the engineer to deviate from Wealthfront&#8217;s patterns or practices.</li>
+
+
+
+<li>I regret having to read this bot feedback.</li>
+</ol>
+</li>
+
+
+
+<li>Annoying, weird response
+<ol class="wp-block-list">
+<li>The bot is saying something that doesn&#8217;t really make sense.</li>
+
+
+
+<li>I regret having to read this bot feedback.</li>
+</ol>
+</li>
+
+
+
+<li>Neutral response
+<ol class="wp-block-list">
+<li>It might be valid feedback in different context, but it&#8217;s also annoying and more of a nit.</li>
+
+
+
+<li>It could be a bug under different circumstances and is probably worth considering, but I also would have been fine never seeing this.</li>
+</ol>
+</li>
+
+
+
+<li>Useful response
+<ol class="wp-block-list">
+<li>I&#8217;m glad I considered it. I will probably not make large changes, and things could&#8217;ve been fine either way, but the bot is being net-useful.</li>
+</ol>
+</li>
+
+
+
+<li>Great response
+<ol class="wp-block-list">
+<li>The bot helped prevent a bug from being merged.</li>
+</ol>
+</li>
+</ol>
+
+
+
+<figure class="wp-block-image size-large"><img fetchpriority="high" decoding="async" width="1024" height="271" src="https://eng.wealthfront.com/wp-content/uploads/2026/08/image-1-1024x271.png" alt="" class="wp-image-4166" srcset="https://eng.wealthfront.com/wp-content/uploads/2026/08/image-1-1024x271.png 1024w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-1-300x79.png 300w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-1-768x203.png 768w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-1-1536x407.png 1536w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-1.png 2048w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" width="1024" height="316" src="https://eng.wealthfront.com/wp-content/uploads/2026/08/image-2-1024x316.png" alt="" class="wp-image-4167" srcset="https://eng.wealthfront.com/wp-content/uploads/2026/08/image-2-1024x316.png 1024w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-2-300x93.png 300w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-2-768x237.png 768w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-2-1536x474.png 1536w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-2.png 2048w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p class="wp-block-paragraph">The results were better than we hoped. Our initial release showed ratings following a bell curve. The mean, median and mode centered on three. With antagonistic review, the ratings morphed into stairs:</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" width="1024" height="610" src="https://eng.wealthfront.com/wp-content/uploads/2026/08/image-1024x610.png" alt="" class="wp-image-4165" srcset="https://eng.wealthfront.com/wp-content/uploads/2026/08/image-1024x610.png 1024w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-300x179.png 300w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-768x458.png 768w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image-1536x915.png 1536w, https://eng.wealthfront.com/wp-content/uploads/2026/08/image.png 1781w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p class="wp-block-paragraph">This was caused by a small increase in the absolute number of fours and fives and a dramatic decrease in the number of ones and twos. Antagonistic review slightly increased true positives and greatly decreased the number of false positives- most pull requests now receive no comments and few receive more than one. Signal is everything when interacting with humans prone to noise fatigue, and this was a great result.</p>
+
+
+
+<p class="wp-block-paragraph">Average review time: 10 minutes</p>
+
+
+
+<p class="wp-block-paragraph">Average cost: $4</p>
+
+
+
+<h3 class="wp-block-heading">The Dev Lifecycle</h3>
+
+
+
+<p class="wp-block-paragraph">Despite huge improvements in model and harness performance, we don&#8217;t believe human review should disappear. Instead, we try to keep human and AI reviews purely additive, trying to separate reviews by time to keep the reviewers&#8217; independence.&nbsp;</p>
+
+
+
+<p class="wp-block-paragraph">First, an engineer is expected to do a self-review. Second, they click &#8220;Ready for Review,&#8221; which triggers the Iris AI review. After that, they add other engineers for peer review. Ultimately, the peer review is blocking but the AI review is not. Once peer review approves, they can merge and deploy without waiting for Iris if they want.</p>
+
+
+
+<h3 class="wp-block-heading">Looking Forward</h3>
+
+
+
+<p class="wp-block-paragraph">In the era of AI coding, human review is being scrutinized as a bottleneck to writing software. While that may be true, we have no current interest in removing that bottleneck. We&#8217;ve instead chosen to view AI as a potent additional reviewer to find things our tests didn&#8217;t catch. With that said we&#8217;re not absolutists- at the very least the age of human nitpicking is drawing to a close. If you can nit it, you can also write a rule for AI to find it and fix it.&nbsp;</p>
+
+
+
+<p class="wp-block-paragraph">We don&#8217;t know what software engineering will look like in a few years. Nobody does. In the year since we rebuilt Iris, new models like Sol and Fable have upended context engineering again, and we&#8217;re already looking for an efficient way to leverage their power. Whatever happens, we&#8217;re a software company that is measured by the products we build and the software inside them. Whenever we can write code that allows us to write better code faster, we will.</p>
+
+
+
+<hr class="wp-block-separator has-alpha-channel-opacity"/>
+
+
+
+<p class="wp-block-paragraph"><strong>Disclosures</strong></p>
+
+
+
+<p class="wp-block-paragraph">The information contained in this blog is provided for general informational purposes only, and should not be construed as investment or tax advice. Nothing in this communication should be construed as a solicitation, offer, or recommendation, to buy or sell any security. Any links provided to other server sites are offered as a matter of convenience and are not intended to imply that Wealthfront Advisers or its affiliates endorses, sponsors, promotes and/or is affiliated with the owners of or participants in those sites, or endorses any information contained on those sites, unless expressly stated otherwise.</p>
+
+
+
+<p class="wp-block-paragraph">Investment management and advisory services are provided by Wealthfront Advisers LLC (“Wealthfront Advisers”), an SEC-registered investment adviser, and brokerage related products are provided by Wealthfront Brokerage LLC (&#8220;Wealthfront Brokerage&#8221;), a Member of <a href="http://finra.org/">FINRA</a>/<a href="http://sipc.org/">SIPC</a>. Financial planning tools are provided by Wealthfront Software LLC (“Wealthfront Software”).</p>
+
+
+
+<p class="wp-block-paragraph">Wealthfront Advisers, Wealthfront Brokerage, and Wealthfront Software are wholly-owned subsidiaries of Wealthfront Corporation.</p>
+
+
+
+<p class="wp-block-paragraph">© 2026<strong> </strong>Wealthfront Corporation. All rights reserved.</p>
+			</div><!-- .entry-content -->
+
+	<footer class="entry-footer">
+		<span class="cat-links">Posted in <a href="https://eng.wealthfront.com/category/uncategorized/" rel="category tag">wealthfront engineering</a> </span>	</footer><!-- .entry-footer -->
+</article><!-- #post-## -->
+
+
+
+			
+	<nav class="navigation post-navigation" aria-label="Posts">
+		<h2 class="screen-reader-text">Post navigation</h2>
+		<div class="nav-links"><div class="nav-previous"><a href="https://eng.wealthfront.com/2026/08/03/7-words-7-journeys-the-wealthfront-new-college-grad-experience/" rel="prev">7 Words, 7 Journeys: The Wealthfront New College Grad Experience</a></div><div class="nav-next"><a href="https://eng.wealthfront.com/2026/08/24/optimizing-redshift-write-patterns-tackling-tombstones-and-ghost-rows/" rel="next">Optimizing Redshift Write Patterns: Tackling Tombstones and Ghost Rows</a></div></div>
+	</nav>
+
+
+		
+		</main><!-- #main -->
+	</div><!-- #primary -->
+
+</div>
+
+<div class="pure-u-1-1 pure-u-sm-1-1 pure-u-md-2-24"></div>
+
+<div class="pure-u-1-1 pure-u-sm-1-1 pure-u-md-7-24">
+	<div id="secondary" class="widget-area" role="complementary">
+		<aside id="search-2" class="widget widget_search"><form action="/" method="get" class="search-form">
+	<input type="text" name="s" placeholder="Search" id="search" value="" />
+	<input type="image" alt="Search" src="https://eng.wealthfront.com/wp-content/themes/polarisengblog/images/icon-search.png" width="24" height="24" />
+</form></aside>
+		<aside id="recent-posts-2" class="widget widget_recent_entries">
+		<h2 class="widget-title">Recent Articles</h2>
+		<ul>
+											<li>
+					<a href="https://eng.wealthfront.com/2026/08/24/optimizing-redshift-write-patterns-tackling-tombstones-and-ghost-rows/">Optimizing Redshift Write Patterns: Tackling Tombstones and Ghost Rows</a>
+											<span class="post-date">August 24, 2026</span>
+									</li>
+											<li>
+					<a href="https://eng.wealthfront.com/2026/08/03/experiments-with-ai-code-review/" aria-current="page">Experiments with AI Code Review</a>
+											<span class="post-date">August 3, 2026</span>
+									</li>
+											<li>
+					<a href="https://eng.wealthfront.com/2026/08/03/7-words-7-journeys-the-wealthfront-new-college-grad-experience/">7 Words, 7 Journeys: The Wealthfront New College Grad Experience</a>
+											<span class="post-date">August 3, 2026</span>
+									</li>
+											<li>
+					<a href="https://eng.wealthfront.com/2026/06/25/tuning-android-build-nodes-for-maximum-throughput/">Tuning Android build nodes for maximum throughput</a>
+											<span class="post-date">June 25, 2026</span>
+									</li>
+											<li>
+					<a href="https://eng.wealthfront.com/2026/04/21/putting-the-tech-in-fintech-how-we-use-fix-to-execute-trades-at-scale/">Putting the Tech in Fintech: How We Use FIX to Execute Trades at Scale</a>
+											<span class="post-date">April 21, 2026</span>
+									</li>
+											<li>
+					<a href="https://eng.wealthfront.com/2026/03/26/how-we-standardized-mariadb-in-our-integration-server/">How we standardized MariaDB in our Integration Server</a>
+											<span class="post-date">March 26, 2026</span>
+									</li>
+											<li>
+					<a href="https://eng.wealthfront.com/2026/03/02/xcodegen-and-the-quest-to-modularize-the-wealthfront-ios-app/">XcodeGen and the quest to modularize the Wealthfront iOS app</a>
+											<span class="post-date">March 2, 2026</span>
+									</li>
+											<li>
+					<a href="https://eng.wealthfront.com/2026/02/12/new-leaders-new-perspectives-why-we-joined-wealthfront-engineering/">New Leaders, New Perspectives: Why We Joined Wealthfront Engineering</a>
+											<span class="post-date">February 12, 2026</span>
+									</li>
+					</ul>
+
+		</aside>		
+	</div><!-- #secondary -->
+	<div class="join">
+		<h2>Interested in what you see here?</h2>
+		<a href="https://www.wealthfront.com/engineering/our-team" class="button">Join our team</a>
+	</div>
+	<div class="spacer"></div>
+	<!--
+	<section class="signup" role="dialog">
+		<div class="close"><img src="https://eng.wealthfront.com/wp-content/themes/polarisengblog/images/x-close-gray.png" alt="Close" width="20" height="20"></div>
+		<div id="sign-up">
+				<h2>Subscribe to the blog</h2>
+				<h3>Get new posts delivered straight to your inbox.</h3>
+		</div>
+	  </section>
+   -->
+	</div>
+</div>	</div><!-- #content -->
+<div class="footer">
+		  <section class="footer-links">
+			 <ul class="footer-nav">
+				  <li><a href="https://www.wealthfront.com/careers">Careers</a></li>
+				  <li><a href="https://www.wealthfront.com/legal">Legal</a></li>
+				  <li><a href="https://www.wealthfront.com/methodology">Methodology</a></li>
+				  <li><a href="https://www.wealthfront.com/contact-us">Contact</a></li>
+				  <li><a href="https://www.wealthfront.com/faq">Help Center</a></li>
+				  <li><a href="https://press.wealthfront.com">Press</a></li>
+			  </ul>
+			  <div class="back-to-top" aria-hidden="true">Back to top</div>
+		  </section>
+		  <section class="footer-disclosure">
+			
+			 <p>This blog is powered by Wealthfront Corporation (formerly known as Wealthfront Inc.). The information contained in this blog is provided for general informational purposes, and should not be construed as investment advice. Any links provided to other server sites are offered as a matter of convenience and are not intended to imply that Wealthfront Corporation endorses, sponsors, promotes and/or is affiliated with the owners of or participants in those sites, or endorses any information contained on those sites, unless expressly stated otherwise.</p>
+
+			  <p>Wealthfront Corporation may from time to time publish content in this blog and/or on this site that has been created by affiliated or unaffiliated contributors. These contributors may include Wealthfront employees, other financial advisors, third-party authors who are paid a fee by Wealthfront, or other parties. Unless otherwise noted, the content of such posts does not necessarily represent the actual views or opinions of Wealthfront or any of its officers, directors, or employees. The opinions expressed by guest bloggers and/or blog interviewees are strictly their own and do not necessarily represent those of Wealthfront Corporation.</p>
+			
+				<p>&copy; 2026 <a href="https://www.wealthfront.com/">Wealthfront</a> Corporation.  All rights reserved. Please read important <a href="https://www.wealthfront.com/legal/disclosure">legal disclosures</a> about this blog.</p>
+		 
+		  </section> 
+		  	
+	  </div>
+	  
+</div><!-- #page -->
+
+<script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/wp-*.php","/wp-admin/*","/wp-content/uploads/*","/wp-content/*","/wp-content/plugins/*","/wp-content/themes/polarisengblog/*","/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+<script type="text/javascript">var jalwCurrentPost={month:"08",year:"2026"};</script><script id="ppress-frontend-script-js-extra">
+var pp_ajax_form = {"ajaxurl":"https://eng.wealthfront.com/wp-admin/admin-ajax.php","confirm_delete":"Are you sure?","deleting_text":"Deleting...","deleting_error":"An error occurred. Please try again.","nonce":"79a4a4a8ce","disable_ajax_form":"false","is_checkout":"0","is_checkout_tax_enabled":"0","is_checkout_autoscroll_enabled":"true","is_user_logged_in":"0"};
+//# sourceURL=ppress-frontend-script-js-extra
+</script>
+<script id="ppress-frontend-script-js" src="https://eng.wealthfront.com/wp-content/plugins/wp-user-avatar/assets/js/frontend.min.js?ver=4.17.5"></script>
+<script id="wealthfront-engineering-navigation-js" src="https://eng.wealthfront.com/wp-content/themes/polarisengblog/js/navigation.js?ver=20120206"></script>
+<script id="wealthfront-engineering-skip-link-focus-fix-js" src="https://eng.wealthfront.com/wp-content/themes/polarisengblog/js/skip-link-focus-fix.js?ver=20130115"></script>
+<script id="wp-emoji-settings" type="application/json">
+{"baseUrl":"https://s.w.org/images/core/emoji/17.0.2/72x72/","ext":".png","svgUrl":"https://s.w.org/images/core/emoji/17.0.2/svg/","svgExt":".svg","source":{"concatemoji":"https://eng.wealthfront.com/wp-includes/js/wp-emoji-release.min.js?ver=7.1.2"}}
+</script>
+<script type="module">
+/*! This file is auto-generated */
+var e="script#wp-emoji-settings",t=document.querySelector(e);if(!(t instanceof HTMLScriptElement))throw new Error("Element missing: "+e);const r=JSON.parse(t.text),s=(window._wpemojiSettings=r,"wpEmojiSettingsSupports"),o=["flag","emoji"];function i(e){try{var t={supportTests:e,timestamp:(new Date).valueOf()};sessionStorage.setItem(s,JSON.stringify(t))}catch(e){}}function c(e,t,n){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);t=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data);e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(n,0,0);const r=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data);return t.every((e,t)=>e===r[t])}function p(e,t){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);var n=e.getImageData(16,16,1,1);for(let e=0;e<n.data.length;e++)if(0!==n.data[e])return!1;return!0}function u(e,t,n,r){switch(t){case"flag":return n(e,"\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f","\ud83c\udff3\ufe0f\u200b\u26a7\ufe0f")?!1:!n(e,"\ud83c\udde8\ud83c\uddf6","\ud83c\udde8\u200b\ud83c\uddf6")&&!n(e,"\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f","\ud83c\udff4\u200b\udb40\udc67\u200b\udb40\udc62\u200b\udb40\udc65\u200b\udb40\udc6e\u200b\udb40\udc67\u200b\udb40\udc7f");case"emoji":return!r(e,"\ud83e\u1fac8")}return!1}function f(e,t,n,r){let a;const s=(a="undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?new OffscreenCanvas(300,150):document.createElement("canvas")).getContext("2d",{willReadFrequently:!0}),o=(s.textBaseline="top",s.font="600 32px Arial",{});return e.forEach(e=>{o[e]=t(s,e,n,r)}),o}function a(e){var t=document.createElement("script");t.src=e,t.defer=!0,document.head.appendChild(t)}r.supports={everything:!0,everythingExceptFlag:!0},new Promise(t=>{let n=function(){try{var e=JSON.parse(sessionStorage.getItem(s));if("object"==typeof e&&"number"==typeof e.timestamp&&(new Date).valueOf()<e.timestamp+604800&&"object"==typeof e.supportTests)return e.supportTests}catch(e){}return null}();if(!n){if("undefined"!=typeof Worker&&"undefined"!=typeof OffscreenCanvas&&"undefined"!=typeof URL&&URL.createObjectURL&&"undefined"!=typeof Blob)try{var e="postMessage("+f.toString()+"("+[JSON.stringify(o),u.toString(),c.toString(),p.toString()].join(",")+"));",r=new Blob([e],{type:"text/javascript"});const a=new Worker(URL.createObjectURL(r),{name:"wpTestEmojiSupports"});return void(a.onmessage=e=>{i(n=e.data),a.terminate(),t(n)})}catch(e){}i(n=f(o,u,c,p))}t(n)}).then(e=>{for(const n in e)r.supports[n]=e[n],r.supports.everything=r.supports.everything&&r.supports[n],"flag"!==n&&(r.supports.everythingExceptFlag=r.supports.everythingExceptFlag&&r.supports[n]);var t;r.supports.everythingExceptFlag=r.supports.everythingExceptFlag&&!r.supports.flag,r.supports.everything||((t=r.source||{}).concatemoji?a(t.concatemoji):t.wpemoji&&t.twemoji&&(a(t.twemoji),a(t.wpemoji)))});
+//# sourceURL=https://eng.wealthfront.com/wp-includes/js/wp-emoji-loader.min.js
+</script>
+<img height="1" width="1" style="border-style:none;" alt="" src="" id="wftpx">
+<script src="https://eng.wealthfront.com/wp-content/themes/polarisengblog/js/jquery-3.2.1.min.js" type="text/javascript"></script>
+<script src="https://eng.wealthfront.com/wp-content/themes/polarisengblog/js/polaris.js?1" type="text/javascript"></script>
+
+</body>
+</html>

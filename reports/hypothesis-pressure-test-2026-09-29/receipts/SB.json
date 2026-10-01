@@ -1,0 +1,384 @@
+{
+  "schema_version": 1,
+  "assignment": "SB",
+  "issue_identifier": "COD-93",
+  "issue_id": "1fd63335-ee92-422c-888e-9db5dfaf7b5a",
+  "run_id": "29c8f87c-54f1-47f6-9990-cb594cb74c26",
+  "session_id": "01a0f0a0-b875-7cb3-9a55-85cab8137714",
+  "created_at": "2026-09-30T04:52:14.277233+00:00",
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "synthesis_input_manifest_sha256": "4ac3b8bd9c8c0d80d0d4f491dbefcb83c66eea2efb8b6efa1fd3c91e69b0b1ba",
+  "input_checks": [
+    {
+      "manifest": "INPUT-MANIFEST.json",
+      "sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "files": 192,
+      "mismatches": []
+    },
+    {
+      "manifest": "SYNTHESIS-INPUT-MANIFEST.json",
+      "sha256": "4ac3b8bd9c8c0d80d0d4f491dbefcb83c66eea2efb8b6efa1fd3c91e69b0b1ba",
+      "files": 344,
+      "mismatches": []
+    }
+  ],
+  "files_actually_read": [
+    {
+      "path": "PLAN.md",
+      "sha256": "2c8d6fc05e4c19da40a0c548e347de47b55b36195c556b22e58220c62cd82786",
+      "read_kind": "content",
+      "boundary": "Contract/schema/manifests read; complete manifest file inventories verified."
+    },
+    {
+      "path": "ASSIGNMENTS.md",
+      "sha256": "96b05a7c0130bd110be373943bfc03082b449210107c33b3b2eb47b031fabe30",
+      "read_kind": "content",
+      "boundary": "Contract/schema/manifests read; complete manifest file inventories verified."
+    },
+    {
+      "path": "ACCEPTANCE.json",
+      "sha256": "595d2f552fac0990c0d311bbc23332adbf61928c68d47a3991ba297a06507aaf",
+      "read_kind": "content",
+      "boundary": "Contract/schema/manifests read; complete manifest file inventories verified."
+    },
+    {
+      "path": "INITIAL-VERIFICATION.json",
+      "sha256": "51b46a90233be6cb26c8cd17c9fdd0b0a67d4e0a7ea173cc8b562a8e5999b936",
+      "read_kind": "content",
+      "boundary": "Contract/schema/manifests read; complete manifest file inventories verified."
+    },
+    {
+      "path": "INPUT-MANIFEST.json",
+      "sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "read_kind": "content",
+      "boundary": "Contract/schema/manifests read; complete manifest file inventories verified."
+    },
+    {
+      "path": "SYNTHESIS-INPUT-MANIFEST.json",
+      "sha256": "4ac3b8bd9c8c0d80d0d4f491dbefcb83c66eea2efb8b6efa1fd3c91e69b0b1ba",
+      "read_kind": "content",
+      "boundary": "Contract/schema/manifests read; complete manifest file inventories verified."
+    },
+    {
+      "path": "lenses/01-user-need-and-segment.md",
+      "sha256": "dd0ac7f2db5f4ff571a58a92e0c1efca7e1e2a43472d934f898d66c5e89e7e1e",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/01-findings.json",
+      "sha256": "7a73d775b2d21cee5e7f2192487a660d744765a739c571b3a1ade1e34097fecf",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/02-incremental-value-and-alternatives.md",
+      "sha256": "8c6ea25119cc6b276ab6474ef94a054265876d1e738657a5bbad2ade1ab8e5cc",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/02-findings.json",
+      "sha256": "af1064b53620fae0fb5a024efc6db0295d46c84a75b2af8184ee316c283e222d",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/03-native-experience-and-attention.md",
+      "sha256": "5f5198c9d8551c12627a546f3e9afd9dc837bbc6a7604af9e16a64ac8c529d47",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/03-findings.json",
+      "sha256": "81aadfd65aa90c1786b6e427d5bdf3087639a225c0a9499be3096f89df6d7e63",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/04-capability-and-trust.md",
+      "sha256": "82b7a6cfc8723cef5df98a3016e48328111300666d47f0e672ead1eb6510b9ea",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/04-findings.json",
+      "sha256": "12326a31c84e58e1e399e95eddf70bdf0375a702809999b4c524f4f71b0183f1",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/05-repeated-reliance.md",
+      "sha256": "9d57d8d5cdc7e2ee6e7056b13416bfad481e540df26a4c5ce730a7d7361a889e",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/05-findings.json",
+      "sha256": "06f1fea5466d083fcffa75abf40b9c0c6cb51369fc5a4c32cc6bdca643438e03",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/06-buyer-and-paid-service-value.md",
+      "sha256": "8c2211df7e8ba75ed1147af64cd1a7f3064a5daf1759acf3f8ba56871558876a",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/06-findings.json",
+      "sha256": "61340bd24705ed87ffac61a78985c938a9f5a7bd66743e74bbba5d0c8178eca6",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/07-capability-expansion.md",
+      "sha256": "cfc6de65400fecf794da57f834024e8741739ccf65ad892d8f53cdc945d0152f",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/07-findings.json",
+      "sha256": "0e6ab824c1b2f904dce0666d9795d444983a21343a7c9e39b8e139e0d1a4c37d",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/08-ownership-of-a-complete-job.md",
+      "sha256": "57d44f843d5fcf17e731d468c121c1214aa00b0abfee34683bfc5ddd47bc7823",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/08-findings.json",
+      "sha256": "cdc3273400768af355586cbdd894d8452f03bd8d54ef7173cb7557fb117bf65f",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/09-withdrawal-test.md",
+      "sha256": "1054c9814dcc9a62ce684bb49ef9c4f598bf701f9a2cf8a97422f7ee3fb00a2b",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/09-findings.json",
+      "sha256": "2be3adcd0ed583e4194c7a205b083ff579aa10e44a442ad71d67a03928c567fd",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/10-compounding-project-knowledge.md",
+      "sha256": "9d8e281460a9be0f230333fd58e9479a4aa3351f8adee3359d418757cf993721",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/10-findings.json",
+      "sha256": "5ecdfc56aaa5e63446f2f1c87493a6001bee28b05711023e07f004f17c9ad092",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/11-shared-team-dependence.md",
+      "sha256": "8cd05efdb383bee01e29c2072e96b91aa3e77d7d648fdf922cfc81e606e8855b",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/11-findings.json",
+      "sha256": "6dfcafb89273792f55323a299d1834ec7e830361103ba63d7ab4d123c26c326e",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "lenses/12-ceiling-of-the-hypothesis.md",
+      "sha256": "841fb9b5509a2f82632116155c9aaba8d1d6ff3b87fbc6b6a933c6b29010c819",
+      "read_kind": "selected_report_content",
+      "boundary": "Report framing, material findings via complete machine table, report-specific tests/ownership/limits inspected; output display limits prevent claiming every Markdown line was reread."
+    },
+    {
+      "path": "lenses/12-findings.json",
+      "sha256": "ba5dca9e8d3f6b3a03104b81ae144d13b5162c29a446a3f4cb0a1800d053eb30",
+      "read_kind": "structured_content",
+      "boundary": "All material statements, verdicts and tests screened; complete finding records parsed and preserved; supporting/opposing original records selectively checked, not all captures reread."
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+      "read_kind": "content",
+      "boundary": "Canonical inventory screened in full; full selected load-bearing records and strategy/sprint passages read. Original external pages not universally reread."
+    },
+    {
+      "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+      "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd",
+      "read_kind": "content",
+      "boundary": "Canonical inventory screened in full; full selected load-bearing records and strategy/sprint passages read. Original external pages not universally reread."
+    },
+    {
+      "path": "inputs/reports/product-proof-sprint-plan/README.md",
+      "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e",
+      "read_kind": "content",
+      "boundary": "Canonical inventory screened in full; full selected load-bearing records and strategy/sprint passages read. Original external pages not universally reread."
+    },
+    {
+      "path": "inputs/scripts/find-similar.mjs",
+      "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8",
+      "read_kind": "selected_source_passages",
+      "boundary": "Frozen code/documentation passages or targeted line search, not runtime reproduction."
+    },
+    {
+      "path": "inputs/hooks/pre-edit-impact.mjs",
+      "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb",
+      "read_kind": "selected_source_passages",
+      "boundary": "Frozen code/documentation passages or targeted line search, not runtime reproduction."
+    },
+    {
+      "path": "inputs/docs/ci-gate.md",
+      "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0",
+      "read_kind": "selected_source_passages",
+      "boundary": "Frozen code/documentation passages or targeted line search, not runtime reproduction."
+    },
+    {
+      "path": "inputs/scripts/lib/evidence-store.mjs",
+      "sha256": "c7ceb6f2a946add0d3f270fc58bb7fd342d8bd0e59a13b96b3348eabcb9d8a90",
+      "read_kind": "selected_source_passages",
+      "boundary": "Frozen code/documentation passages or targeted line search, not runtime reproduction."
+    },
+    {
+      "path": "inputs/scripts/lib/evidence-core.mjs",
+      "sha256": "e864ec6d9a379be7ffe87111bff212c4300ecc47b111a63818317900e82b04b6",
+      "read_kind": "selected_source_passages",
+      "boundary": "Frozen code/documentation passages or targeted line search, not runtime reproduction."
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-T018.txt",
+      "sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897",
+      "read_kind": "original_capture_text",
+      "boundary": "Captured text inspected; Z003 middle separately inspected. X001 selected beginning/end with output truncation; not a complete article reread. Images and linked originals not inspected."
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y007.txt",
+      "sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+      "read_kind": "original_capture_text",
+      "boundary": "Captured text inspected; Z003 middle separately inspected. X001 selected beginning/end with output truncation; not a complete article reread. Images and linked originals not inspected."
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Z003.txt",
+      "sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b",
+      "read_kind": "original_capture_text",
+      "boundary": "Captured text inspected; Z003 middle separately inspected. X001 selected beginning/end with output truncation; not a complete article reread. Images and linked originals not inspected."
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-X001.txt",
+      "sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+      "read_kind": "original_capture_text",
+      "boundary": "Captured text inspected; Z003 middle separately inspected. X001 selected beginning/end with output truncation; not a complete article reread. Images and linked originals not inspected."
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y012.txt",
+      "sha256": "fa25749665b2c95a20640dfd164563b19babf698222ecd95b1ed3b10014a9284",
+      "read_kind": "original_capture_text",
+      "boundary": "Captured text inspected; Z003 middle separately inspected. X001 selected beginning/end with output truncation; not a complete article reread. Images and linked originals not inspected."
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y004.txt",
+      "sha256": "3de9bafccc90e5080b9538eede13d1fac61c631696a3845370c273f03dca7ce2",
+      "read_kind": "original_capture_text",
+      "boundary": "Captured text inspected; Z003 middle separately inspected. X001 selected beginning/end with output truncation; not a complete article reread. Images and linked originals not inspected."
+    },
+    {
+      "path": "PHASE-A-HASH-CHECK.json",
+      "sha256": "c984b50430c69bbfe2753410e9fde9128af75cb20b8d63a4fae70107f47a8d1f",
+      "read_kind": "verification_metadata",
+      "boundary": "Completion/hash fields and selected source-verification metadata only; no strategic phase recommendations read."
+    },
+    {
+      "path": "PHASE-B-HASH-CHECK.json",
+      "sha256": "9e11bde8064d1ecf021e7ad83b1343b313aa2b95077994f756601e9d31ce2aa4",
+      "read_kind": "verification_metadata",
+      "boundary": "Completion/hash fields and selected source-verification metadata only; no strategic phase recommendations read."
+    },
+    {
+      "path": "PHASE-A-NONAUTHOR-VERIFICATION.json",
+      "sha256": "faa8e7d90a967713feb413507d4df8062b9c76add3912ab65b065af1830a03bc",
+      "read_kind": "verification_metadata",
+      "boundary": "Completion/hash fields and selected source-verification metadata only; no strategic phase recommendations read."
+    },
+    {
+      "path": "PHASE-B-NONAUTHOR-VERIFICATION.json",
+      "sha256": "85286156827ade3171ba1fb6c06810bf1fd74ba5d2a46284238ea3d230094e75",
+      "read_kind": "verification_metadata",
+      "boundary": "Completion/hash fields and selected source-verification metadata only; no strategic phase recommendations read."
+    },
+    {
+      "path": "receipts/L04-source-addendum.json",
+      "sha256": "9296c09f387ca850a5396f707e5d59cfcfd23c95ffcd45bc9613634ca7c15201",
+      "read_kind": "selected_provenance",
+      "boundary": "Selected source-addendum metadata and bounded captured passages inspected; complete file hash verified."
+    },
+    {
+      "path": "sources/L06-source-addendum.json",
+      "sha256": "540ea59b12f58e6aa4c14d1c33600c16ba768c2741f90df4d54d690d647b6229",
+      "read_kind": "selected_provenance",
+      "boundary": "Selected source-addendum metadata and bounded captured passages inspected; complete file hash verified."
+    },
+    {
+      "path": "sources/L12-public-reopens.json",
+      "sha256": "a0909ec9a1b23a0123de79c12f070e05ce4318e761aa26ceea92fa058c6a7e51",
+      "read_kind": "selected_provenance",
+      "boundary": "Selected source-addendum metadata and bounded captured passages inspected; complete file hash verified."
+    }
+  ],
+  "other_governance_files_read": [
+    "$LOCAL_HOME/Repositories/codeweb/docs/product-team/TERMINAL-CONTRACT.md",
+    "$LOCAL_HOME/Repositories/codeweb/docs/product-team/CURRENT.md",
+    "$LOCAL_HOME/Repositories/codeweb/CHARTER.md",
+    "$LOCAL_HOME/Repositories/codeweb/CLAUDE.md"
+  ],
+  "runtime_check": {
+    "endpoint": "/api/heartbeat-runs/29c8f87c-54f1-47f6-9990-cb594cb74c26",
+    "id": "29c8f87c-54f1-47f6-9990-cb594cb74c26",
+    "status_at_check": "running",
+    "started_at": "2026-09-30T04:44:19.820Z",
+    "session_id_before": null,
+    "session_id_after_at_check": null,
+    "issue_id": "1fd63335-ee92-422c-888e-9db5dfaf7b5a",
+    "meaning": "API confirms this fresh task run with no prior session ID; injected current thread identity recorded. Post-run independent session verification remains with lead/reviewer."
+  },
+  "isolation": {
+    "other_synthesis_read": false,
+    "other_synthesis_receipt_review_mapping_read": false,
+    "parent_analysis_read": false,
+    "phase_recommendations_read": false,
+    "shared_model_limit": "Same model family/shared frozen framing can correlate errors; separate thread is not epistemic independence.",
+    "shared_filesystem_limit": "Procedural exclusion, not access control."
+  },
+  "verification": {
+    "material_findings": 65,
+    "unique_findings": 65,
+    "lenses": 12,
+    "claims": 12,
+    "original_evidence_usage_entries": 132,
+    "all_claim_links_resolve": true,
+    "input_hashes_unchanged": true,
+    "independent_approval": false
+  },
+  "outputs": [
+    {
+      "path": "SYNTHESIS-B.md",
+      "sha256": "f7099e30f872085106095b0582c7f42ba23d0da60fa940e3264aa7e6f81454a0",
+      "bytes": 45527
+    },
+    {
+      "path": "SYNTHESIS-B-MAPPING.json",
+      "sha256": "905104b2702c460fa813a71abf024706d05743b3dd55add25ba0039de33cc04b",
+      "bytes": 853012
+    }
+  ],
+  "correction_attempts_used": 0,
+  "first_draft_directory": "history/synthesis-B",
+  "freeze_note": "Read-only copies plus SHA256 bind first draft; filesystem owner could still change modes, so this is procedural immutability, not WORM storage.",
+  "tests_executed": "Only artifact schema/link/count/hash checks; no product/customer/runtime behavior test.",
+  "new_customer_evidence": 0
+}

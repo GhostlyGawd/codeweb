@@ -1,0 +1,26 @@
+[
+  {
+    "file": "PILOT.md",
+    "attachmentId": "24c06735-1cdd-45b5-af1a-1a1d58e06c57",
+    "contentPath": "/api/attachments/24c06735-1cdd-45b5-af1a-1a1d58e06c57/content",
+    "workProductId": "657a5b0f-16cc-46d6-bf01-04fcc688b724"
+  },
+  {
+    "file": "PILOT-EVIDENCE.jsonl",
+    "attachmentId": "5bcac313-8742-4cba-8726-6ee5cc9fd616",
+    "contentPath": "/api/attachments/5bcac313-8742-4cba-8726-6ee5cc9fd616/content",
+    "workProductId": "cb016f50-33a0-4956-b22c-9701e2c60bd2"
+  },
+  {
+    "file": "PILOT-SOURCE-MAP.md",
+    "attachmentId": "ff4f122c-1c6c-4f14-a70a-a103a5eb8272",
+    "contentPath": "/api/attachments/ff4f122c-1c6c-4f14-a70a-a103a5eb8272/content",
+    "workProductId": "05018622-b558-4c76-bf57-11ca170ad40d"
+  },
+  {
+    "file": "PILOT-VALIDATION.json",
+    "attachmentId": "7c49d11e-5846-4a96-8d7c-82a2561acec9",
+    "contentPath": "/api/attachments/7c49d11e-5846-4a96-8d7c-82a2561acec9/content",
+    "workProductId": "95a674c3-3a92-4ed7-8656-e54b18a9d9ff"
+  }
+]

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Is it easy to revert from Developer edition to Community edition? - SonarQube Server / Community Build - Sonar Community</title>
+    <meta name="description" content="Hi, 
+
+Short version: my client is considering subscribing to the Developer Edition for a year, but reverting to the Community Edition after. Is that something possible or does it require a lot of work for database migrat…">
+    <meta name="generator" content="Discourse 2026.10.0-latest - https://github.com/discourse/discourse version fbada87188358fd72eb6abdcd2e4f13c921940fc">
+<link rel="icon" type="image/png" href="https://europe1.discourse-cdn.com/sonarsource/uploads/sonarcommunity/optimized/3X/5/b/5b45c94bfc9f75230c4bf9284ead89f998c27076_2_32x32.png">
+<link rel="apple-touch-icon" type="image/png" href="https://europe1.discourse-cdn.com/sonarsource/uploads/sonarcommunity/optimized/3X/4/0/406ed50fac50ffd4775c6dae9c70e62f1833ac16_2_180x180.svg">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1a1a1a">
+
+<meta name="color-scheme" content="light dark">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<link rel="canonical" href="https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189" />
+
+<meta name="discourse-track-view-session-id" content="4zMp16O0ov83Z60sLotIoz1tCTTyUff7">
+  <link rel="search" type="application/opensearchdescription+xml" href="https://community.sonarsource.com/opensearch.xml" title="Sonar Community Search">
+
+    
+    <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/color_definitions_sonar-light_12_28_7f004ca8a8e568012b901dc083707d79aafc1bc1.css?__ws=community.sonarsource.com" media="(prefers-color-scheme: light)" rel="stylesheet" class="light-scheme" data-scheme-id="12"/><link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/color_definitions_royal-dark_16_28_8303b36c58f1a61d7bcc33413e92a4a33765ff14.css?__ws=community.sonarsource.com" media="(prefers-color-scheme: dark)" rel="stylesheet" class="dark-scheme" data-scheme-id="16"/>
+
+<link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/common_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="common"  />
+
+
+
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/automation_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="automation"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/chat_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="chat"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/checklist_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="checklist"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-ai_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-ai"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-akismet_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-akismet"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-antivirus_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-antivirus"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-assign_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-assign"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-cakeday_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-cakeday"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-data-explorer_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-data-explorer"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-details_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-details"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-gamification_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-gamification"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-github_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-github"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-jira_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-jira"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-lazy-videos_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-lazy-videos"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-local-dates_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-local-dates"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-narrative-bot_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-narrative-bot"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-policy_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-policy"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-presence_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-presence"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-reactions_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-reactions"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-solved_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-solved"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-templates_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-templates"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-topic-voting_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-topic-voting"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-user-notes_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-user-notes"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-yearly-review_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="discourse-yearly-review"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/footnote_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="footnote"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/hosted-site_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="hosted-site"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/poll_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="poll"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/spoiler-alert_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="spoiler-alert"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/chat_mobile_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="(width < 40rem)" rel="stylesheet" data-target="chat_mobile"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-ai_mobile_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="(width < 40rem)" rel="stylesheet" data-target="discourse-ai_mobile"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-assign_mobile_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="(width < 40rem)" rel="stylesheet" data-target="discourse-assign_mobile"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-gamification_mobile_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="(width < 40rem)" rel="stylesheet" data-target="discourse-gamification_mobile"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-reactions_mobile_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="(width < 40rem)" rel="stylesheet" data-target="discourse-reactions_mobile"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/chat_desktop_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="(width >= 40rem)" rel="stylesheet" data-target="chat_desktop"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-ai_desktop_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="(width >= 40rem)" rel="stylesheet" data-target="discourse-ai_desktop"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-gamification_desktop_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="(width >= 40rem)" rel="stylesheet" data-target="discourse-gamification_desktop"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/discourse-reactions_desktop_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="(width >= 40rem)" rel="stylesheet" data-target="discourse-reactions_desktop"  />
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/poll_desktop_c01859c999ab4a67311fb3e080e67cbf8a2128c8.css?__ws=community.sonarsource.com" media="(width >= 40rem)" rel="stylesheet" data-target="poll_desktop"  />
+
+  <link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/common_theme_17_00a4855363fd510d1929775d3bb318b66d52cf5c.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="17" data-theme-name="custom header links"/>
+<link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/common_theme_9_7abbf792072d5907375e3ca43306b65d6ef741d8.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="9" data-theme-name="discotoc"/>
+<link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/common_theme_8_97a0f356e3ebe5e9ebf6dc817b302481c9f21347.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="8" data-theme-name="discourse-category-banners"/>
+<link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/common_theme_19_ab3feb7daf9d473f72f92f9fb352e5eaf87e7b94.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="19" data-theme-name="easy footer"/>
+<link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/common_theme_5_21b42bbabbfc240814e37e3b835b4c39117a0979.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="5" data-theme-name="unformatted code detector"/>
+<link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/common_theme_26_1c00b173042fea4115a6e033f1457949f3ca4358.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="26" data-theme-name="solved-fix"/>
+<link href="https://dub1.discourse-cdn.com/sonarsource/stylesheets/common_theme_28_1c75b1edd76e3fcf86fef4c78aa18a61d58db318.css?__ws=community.sonarsource.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="28" data-theme-name="default"/>
+  
+  
+
+    <meta name="google-site-verification" content="1dDnWfVpN9-PX7baNTnoS21PbWmB_M-DYZoD6T1LZBw">
+    <meta id="data-ga-universal-analytics" data-tracking-code="G-9JZ0GZ5TC6" data-json="{&quot;cookieDomain&quot;:&quot;auto&quot;}" data-auto-link-domains="">
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9JZ0GZ5TC6" nonce="2rzGwHJEzbSsoVIrL5RQDVazC"></script>
+  <script defer src="https://europe1.discourse-cdn.com/sonarsource/assets/js/google-universal-analytics-v4-43cb071f.js" data-discourse-entrypoint="js/google-universal-analytics-v4" nonce="2rzGwHJEzbSsoVIrL5RQDVazC"></script>
+
+
+        <link rel="alternate nofollow" type="application/rss+xml" title="RSS feed of &#39;Is it easy to revert from Developer edition to Community edition?&#39;" href="https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189.rss" />
+    <meta property="og:site_name" content="Sonar Community" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:image" content="https://europe1.discourse-cdn.com/sonarsource/uploads/sonarcommunity/original/3X/9/7/972305529fa12b4c7371143424c7d1b066491dae.png" />
+<meta property="og:image" content="https://europe1.discourse-cdn.com/sonarsource/uploads/sonarcommunity/original/3X/4/0/406ed50fac50ffd4775c6dae9c70e62f1833ac16.svg" />
+<meta property="og:url" content="https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189" />
+<meta name="twitter:url" content="https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189" />
+<meta property="og:title" content="Is it easy to revert from Developer edition to Community edition?" />
+<meta name="twitter:title" content="Is it easy to revert from Developer edition to Community edition?" />
+<meta property="og:description" content="Hi,   Short version: my client is considering subscribing to the Developer Edition for a year, but reverting to the Community Edition after. Is that something possible or does it require a lot of work for database migration or other?   I’m sorry of asking these here, but I failed to find the answers in the documentation.  For those who’d like a bit more of context, we use SonarQube Community Edition with our CI. However, we have a lot of topics going on, with a lot of branches on a lot of (Maven..." />
+<meta name="twitter:description" content="Hi,   Short version: my client is considering subscribing to the Developer Edition for a year, but reverting to the Community Edition after. Is that something possible or does it require a lot of work for database migration or other?   I’m sorry of asking these here, but I failed to find the answers in the documentation.  For those who’d like a bit more of context, we use SonarQube Community Edition with our CI. However, we have a lot of topics going on, with a lot of branches on a lot of (Maven..." />
+<meta property="og:article:section" content="SonarQube Server / Community Build" />
+<meta property="og:article:section:color" content="4c9bd6" />
+<meta property="og:article:tag" content="license" />
+<meta property="og:article:tag" content="upgrade" />
+<meta name="twitter:label1" value="Reading time" />
+<meta name="twitter:data1" value="1 min 🕑" />
+<meta name="twitter:label2" value="Likes" />
+<meta name="twitter:data2" value="1 ❤" />
+<meta property="article:published_time" content="2021-04-06T12:27:15+00:00" />
+<meta property="og:ignore_canonical" content="true" />
+
+
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"QAPage","name":"Is it easy to revert from Developer edition to Community edition?","datePublished":"2021-04-06T12:27:15.152Z","mainEntity":{"@type":"Question","answerCount":1,"author":{"@type":"Person","name":"chop","url":"https://community.sonarsource.com/u/chop"},"dateModified":"2021-04-06T12:38:03.900Z","datePublished":"2021-04-06T12:27:15.152Z","name":"Is it easy to revert from Developer edition to Community edition?","text":"Hi,\n\nShort version: my client is considering subscribing to the Developer Edition for a year, but reverting to the Community Edition after. Is that something possible or does it require a lot of work for database migration or other?\n\nI’m sorry of asking these here, but I failed to find the answers&hellip;","upvoteCount":0,"suggestedAnswer":[{"@type":"Answer","author":{"@type":"Person","name":"Colin","url":"https://community.sonarsource.com/u/Colin"},"dateModified":"2021-04-06T12:47:26.454Z","datePublished":"2021-04-06T12:47:26.445Z","text":"Hey there.\n\nYou only need to start a Community Edition of SonarQube of the same version against your database – no database migration needed. Of course, if you are analyzing branches, you will no longer have access to those branches after downgrading.","upvoteCount":1,"url":"https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189/2"}]}}</script>
+  </head>
+  <body class="crawler ">
+    <div data-testid="info-stripe" role="complementary" class="webinar-banner" id="info-banner">
+  <div class="webinar-banner-content">
+    <span class="webinar-banner-label">The next Sonar developer survey is open and calling for responses!</span>
+    <a href="https://repdata.decipherinc.com/survey/selfserve/53b/082665601?list=99&amp;s=2" target="_blank" rel="noopener noreferrer" class="webinar-banner-link">
+      Take the survey 
+    </a>
+  </div>
+  <button id="close-banner" aria-label="Close banner" class="webinar-banner-close">✕</button>
+</div>
+
+<script defer="" src="https://dub1.discourse-cdn.com/sonarsource/theme-javascripts/358601cbd0259f2260684793549d8683ccdce7ee.js?__ws=community.sonarsource.com" data-theme-id="28" nonce="2rzGwHJEzbSsoVIrL5RQDVazC"></script>
+
+    <header>
+  <a href="/">Sonar Community</a>
+</header>
+
+    <div id="main-outlet" class="wrap" role="main">
+        <div id="topic-title">
+    <h1>
+      <a href="/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189">Is it easy to revert from Developer edition to Community edition?</a>
+    </h1>
+
+      <div class="topic-category" itemscope itemtype="http://schema.org/BreadcrumbList">
+          <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+            <a href="/c/sq/10" class="badge-wrapper bullet" itemprop="item">
+              <span class='badge-category-bg' style='background-color: #4c9bd6'></span>
+              <span class='badge-category clear-badge'>
+                <span class='category-name' itemprop='name'>SonarQube Server / Community Build</span>
+              </span>
+            </a>
+            <meta itemprop="position" content="1" />
+          </span>
+      </div>
+
+      <div class="topic-category">
+        <div class='discourse-tags list-tags'>
+            <a href='https://community.sonarsource.com/tag/license' class='discourse-tag' rel="tag">license</a>, 
+            <a href='https://community.sonarsource.com/tag/upgrade' class='discourse-tag' rel="tag">upgrade</a>
+        </div>
+      </div>
+  </div>
+
+  
+
+    <div itemscope="itemscope" itemtype="https://schema.org/QAPage">
+      <meta itemprop='name' content='Is it easy to revert from Developer edition to Community edition?'>
+      <link itemprop='url' href='https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189'>
+      <meta itemprop='datePublished' content='2021-04-06T12:27:15Z'>
+      <meta itemprop='keywords' content='license, upgrade'>
+
+        <div itemprop="mainEntity" itemscope="itemscope" itemtype="https://schema.org/Question">
+          <meta itemprop='answerCount' content='1'><meta itemprop='datePublished' content='2021-04-06T12:27:15Z'><meta itemprop='name' content='Is it easy to revert from Developer edition to Community edition?'><meta itemprop='upvoteCount' content='0'>
+
+
+          <div id='post_1' data-qa-question="true" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.sonarsource.com/u/chop'><span itemprop="name">chop</span></a>
+                  <meta itemprop='url' content='https://community.sonarsource.com/u/chop'>
+                (Cyrille)
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time  datetime='2021-04-06T12:27:15Z' class='post-time'>
+                    April 6, 2021, 12:27pm
+                  </time>
+                  <meta itemprop='dateModified' content='2021-04-06T12:38:03Z'>
+              <span itemprop="position">1</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Hi,</p>
+<blockquote>
+<p><strong>Short version: my client is considering subscribing to the Developer Edition for a year, but reverting to the Community Edition after. Is that something possible or does it require a lot of work for database migration or other?</strong></p>
+</blockquote>
+<p>I’m sorry of asking these here, but I failed to find the answers in the documentation.</p>
+<p>For those who’d like a bit more of context, we use SonarQube Community Edition with our CI. However, we have a lot of topics going on, with a lot of branches on a lot of (Maven) projects (microservice-like), and monitoring the code smells and issues is a mess (different branches with different versions wreak additional havoc among all that).</p>
+<p>I’m on the verge of convincing my client to subscribe to a Developer Edition, but they think of doing it for one year and then revert to Community Edition as Developer Edition would be less relevant. They are however worried that it’ll require work migrating from Community to Developer and then some more for migrating from Developer to Community.</p>
+<p>About Community → Developer, <a href="https://community.sonarsource.com/t/migration-from-sonarqube-community-edition-to-sonarqube-developer-edition/11585/2">this post</a> seems to indicate that, if we use the same version, it’s fairly transparent.</p>
+<p>About Developer → Community, though, it’s less clear. Concretely, <strong>would it be possible to just not renew the license but keep the Developer bundle</strong> (losing the Developer-exclusive features, of course)? And <strong>if we later wished to revert to a Community binary (for upgrading, for instance), would a database migration be necessary?</strong></p>
+            </div>
+
+
+
+            
+
+
+          </div>
+          <div id='post_2' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.sonarsource.com/u/Colin'><span itemprop="name">Colin</span></a>
+                  <meta itemprop='url' content='https://community.sonarsource.com/u/Colin'>
+                (Colin)
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2021-04-06T12:47:26Z' class='post-time'>
+                    April 6, 2021, 12:47pm
+                  </time>
+                  <meta itemprop='dateModified' content='2021-04-06T12:47:26Z'>
+              <span itemprop="position">2</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Hey there.</p>
+<p>You only need to start a Community Edition of SonarQube of the same version against your database – no database migration needed. Of course, if you are analyzing branches, you will no longer have access to those branches after downgrading.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='1'><meta itemprop='url' content='https://community.sonarsource.com/t/is-it-easy-to-revert-from-developer-edition-to-community-edition/41189/2'>
+          </div>
+
+        </div>
+    </div>
+
+
+    <div id="related-topics" class="more-topics__list " role="complementary" aria-labelledby="related-topics-title">
+  <h3 id="related-topics-title" class="more-topics__list-title">
+    Related topics
+  </h3>
+  <div class="topic-list-container" itemscope itemtype='http://schema.org/ItemList'>
+    <meta itemprop='itemListOrder' content='http://schema.org/ItemListOrderDescending'>
+    <table class='topic-list'>
+      <thead>
+        <tr>
+          <th>Topic</th>
+          <th></th>
+          <th class="replies">Replies</th>
+          <th class="views">Views</th>
+          <th>Activity</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="topic-list-item" id="topic-list-item-91190">
+            <td class="main-link" itemprop='itemListElement' itemscope itemtype='http://schema.org/ListItem'>
+              <meta itemprop='position' content='1'>
+              <span class="link-top-line">
+                <a itemprop='url' href='https://community.sonarsource.com/t/migrating-project-from-sonarqube-community-to-developer-edition/91190' class='title raw-link raw-topic-link'>Migrating project from sonarqube community to developer edition</a>
+              </span>
+              <div class="link-bottom-line">
+                  <a href='/c/sq/10' class='badge-wrapper bullet'>
+                    <span class='badge-category-bg' style='background-color: #4c9bd6'></span>
+                    <span class='badge-category clear-badge'>
+                      <span class='category-name'>SonarQube Server / Community Build</span>
+                    </span>
+                  </a>
+                  <div class="discourse-tags">
+                  </div>
+              </div>
+            </td>
+            <td class="replies">
+              <span class='posts' title='posts'>4</span>
+            </td>
+            <td class="views">
+              <span class='views' title='views'>787</span>
+            </td>
+            <td>
+              June 3, 2024
+            </td>
+          </tr>
+          <tr class="topic-list-item" id="topic-list-item-6064">
+            <td class="main-link" itemprop='itemListElement' itemscope itemtype='http://schema.org/ListItem'>
+              <meta itemprop='position' content='2'>
+              <span class="link-top-line">
+                <a itemprop='url' href='https://community.sonarsource.com/t/upgrade-from-community-to-developer-will-it-use-the-same-db/6064' class='title raw-link raw-topic-link'>Upgrade from Community to Developer, will it use the same DB?</a>
+              </span>
+              <div class="link-bottom-line">
+                  <a href='/c/sq/10' class='badge-wrapper bullet'>
+                    <span class='badge-category-bg' style='background-color: #4c9bd6'></span>
+                    <span class='badge-category clear-badge'>
+                      <span class='category-name'>SonarQube Server / Community Build</span>
+                    </span>
+                  </a>
+                  <div class="discourse-tags">
+                  </div>
+              </div>
+            </td>
+            <td class="replies">
+              <span class='posts' title='posts'>1</span>
+            </td>
+            <td class="views">
+              <span class='views' title='views'>4996</span>
+            </td>
+            <td>
+              January 23, 2019
+            </td>
+          </tr>
+          <tr class="topic-list-item" id="topic-list-item-11585">
+            <td class="main-link" itemprop='itemListElement' itemscope itemtype='http://schema.org/ListItem'>
+              <meta itemprop='position' content='3'>
+              <span class="link-top-line">
+                <a itemprop='url' href='https://community.sonarsource.com/t/migration-from-sonarqube-community-edition-to-sonarqube-developer-edition/11585' class='title raw-link raw-topic-link'>Migration from SonarQube community edition to SonarQube Developer edition</a>
+              </span>
+              <div class="link-bottom-line">
+                  <a href='/c/sq/10' class='badge-wrapper bullet'>
+                    <span class='badge-category-bg' style='background-color: #4c9bd6'></span>
+                    <span class='badge-category clear-badge'>
+                      <span class='category-name'>SonarQube Server / Community Build</span>
+                    </span>
+                  </a>
+                  <div class="discourse-tags">
+                  </div>
+              </div>
+            </td>
+            <td class="replies">
+              <span class='posts' title='posts'>1</span>
+            </td>
+            <td class="views">
+              <span class='views' title='views'>7673</span>
+            </td>
+            <td>
+              July 8, 2019
+            </td>
+          </tr>
+          <tr class="topic-list-item" id="topic-list-item-106018">
+            <td class="main-link" itemprop='itemListElement' itemscope itemtype='http://schema.org/ListItem'>
+              <meta itemprop='position' content='4'>
+              <span class="link-top-line">
+                <a itemprop='url' href='https://community.sonarsource.com/t/can-anyone-assist-with-the-migration-from-the-community-edition-to-a-developer-edition/106018' class='title raw-link raw-topic-link'>Can anyone assist with the migration from the Community Edition to a Developer Edition?</a>
+              </span>
+              <div class="link-bottom-line">
+                  <a href='/c/sq/10' class='badge-wrapper bullet'>
+                    <span class='badge-category-bg' style='background-color: #4c9bd6'></span>
+                    <span class='badge-category clear-badge'>
+                      <span class='category-name'>SonarQube Server / Community Build</span>
+                    </span>
+                  </a>
+                  <div class="discourse-tags">
+                      <a href='https://community.sonarsource.com/tag/sonarqube/25' class='discourse-tag'>sonarqube</a>
+                      
+                  </div>
+              </div>
+            </td>
+            <td class="replies">
+              <span class='posts' title='posts'>1</span>
+            </td>
+            <td class="views">
+              <span class='views' title='views'>209</span>
+            </td>
+            <td>
+              December 15, 2023
+            </td>
+          </tr>
+          <tr class="topic-list-item" id="topic-list-item-150526">
+            <td class="main-link" itemprop='itemListElement' itemscope itemtype='http://schema.org/ListItem'>
+              <meta itemprop='position' content='5'>
+              <span class="link-top-line">
+                <a itemprop='url' href='https://community.sonarsource.com/t/sonarqube-server-migration-community-edition-to-developer-edition/150526' class='title raw-link raw-topic-link'>SonarQube server Migration – Community Edition to Developer Edition</a>
+              </span>
+              <div class="link-bottom-line">
+                  <a href='/c/sq/10' class='badge-wrapper bullet'>
+                    <span class='badge-category-bg' style='background-color: #4c9bd6'></span>
+                    <span class='badge-category clear-badge'>
+                      <span class='category-name'>SonarQube Server / Community Build</span>
+                    </span>
+                  </a>
+                  <div class="discourse-tags">
+                      <a href='https://community.sonarsource.com/tag/sonarqube/25' class='discourse-tag'>sonarqube</a>
+                      
+                  </div>
+              </div>
+            </td>
+            <td class="replies">
+              <span class='posts' title='posts'>1</span>
+            </td>
+            <td class="views">
+              <span class='views' title='views'>99</span>
+            </td>
+            <td>
+              October 15, 2025
+            </td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+
+
+    </div>
+    <footer class="container wrap">
+  <nav class='crawler-nav'>
+    <ul>
+      <li itemscope itemtype='http://schema.org/SiteNavigationElement'>
+        <span itemprop='name'>
+          <a href='/' itemprop="url">Home </a>
+        </span>
+      </li>
+      <li itemscope itemtype='http://schema.org/SiteNavigationElement'>
+        <span itemprop='name'>
+          <a href='/categories' itemprop="url">Categories </a>
+        </span>
+      </li>
+      <li itemscope itemtype='http://schema.org/SiteNavigationElement'>
+        <span itemprop='name'>
+          <a href='/guidelines' itemprop="url">Guidelines </a>
+        </span>
+      </li>
+        <li itemscope itemtype='http://schema.org/SiteNavigationElement'>
+          <span itemprop='name'>
+            <a href='https://www.sonarsource.com/legal/website-terms-of-use/' itemprop="url">Terms of Service </a>
+          </span>
+        </li>
+        <li itemscope itemtype='http://schema.org/SiteNavigationElement'>
+          <span itemprop='name'>
+            <a href='https://www.sonarsource.com/company/privacy/' itemprop="url">Privacy Policy </a>
+          </span>
+        </li>
+    </ul>
+  </nav>
+  <p class='powered-by-link'>Powered by <a href="https://www.discourse.org">Discourse</a>, best viewed with JavaScript enabled</p>
+</footer>
+
+    
+    
+  </body>
+  
+</html>

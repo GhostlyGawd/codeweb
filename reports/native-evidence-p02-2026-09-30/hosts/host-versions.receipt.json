@@ -1,0 +1,20 @@
+{
+  "id": "host-versions",
+  "command": [
+    "python3",
+    "-c",
+    "import subprocess,json;print(json.dumps({n:subprocess.check_output(c,text=True).strip() for n,c in [('codex',['codex','--version']),('claude',['claude','--version']),('node',['node','--version']),('git',['git','--version'])]}))"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819829.245748,
+  "end_epoch": 1790819829.374051,
+  "duration_seconds": 0.1279599666595459,
+  "timeout_seconds": 15,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/host-versions.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/host-versions.stderr.txt"
+}

@@ -1,0 +1,2126 @@
+{
+  "schema_version": 1,
+  "assignment": "SA",
+  "issue_identifier": "COD-92",
+  "issue_id": "265838d5-9909-432f-bb3a-34e2a353087b",
+  "run_id": "00bd5207-ad81-464f-8f5d-c944ad621199",
+  "agent_id": "79d272db-70e2-483b-b817-292dac08593e",
+  "session_identity": "01a0f0a0-a926-79e3-9832-d16bee6eae07",
+  "session_identity_source": "CODEX_THREAD_ID injected environment",
+  "runtime_check": {
+    "id": "00bd5207-ad81-464f-8f5d-c944ad621199",
+    "status": "running",
+    "startedAt": "2026-09-30T04:44:15.895Z",
+    "sessionIdBefore": null,
+    "sessionIdAfter": null
+  },
+  "runtime_check_interpretation": "Fresh issue context supported by null prior runtime session and a distinct injected thread. Completed runtime session and cross-synthesis separation require independent lead check; no B identity or output was read.",
+  "lens_session_comparisons": [
+    {
+      "lens": 1,
+      "recorded_identity": "01a0f075-e05a-7182-88b4-87174020a54b",
+      "different_from_current": true
+    },
+    {
+      "lens": 2,
+      "recorded_identity": "01a0f075-e447-7802-bd11-d6f12b75b1fc",
+      "different_from_current": true
+    },
+    {
+      "lens": 3,
+      "recorded_identity": "01a0f07b-67b6-7022-89ae-b9a898e9e47a",
+      "different_from_current": true
+    },
+    {
+      "lens": 4,
+      "recorded_identity": "01a0f07b-5eb2-7b93-ae01-563d66c62a13",
+      "different_from_current": true
+    },
+    {
+      "lens": 5,
+      "recorded_identity": {
+        "source": "CODEX_THREAD_ID",
+        "value": "01a0f07f-bece-7833-8fb9-cdf7eb04ac59",
+        "runtime_independence_verification": "pending lead inspection; no other lens drafts read"
+      },
+      "different_from_current": true
+    },
+    {
+      "lens": 6,
+      "recorded_identity": "01a0f080-987a-7d91-93ee-b2307a2a6ea2",
+      "different_from_current": true
+    },
+    {
+      "lens": 7,
+      "recorded_identity": {
+        "provider": "CODEX_THREAD_ID",
+        "value": "01a0f090-4bd4-7132-ba85-86a11ee00e91"
+      },
+      "different_from_current": true
+    },
+    {
+      "lens": 8,
+      "recorded_identity": "01a0f091-b09a-7ed1-b81f-df94239ce5ae",
+      "different_from_current": true
+    },
+    {
+      "lens": 9,
+      "recorded_identity": {
+        "value": "01a0f095-9182-7f73-8720-c2cc8026cde5",
+        "source": "CODEX_THREAD_ID environment",
+        "independently_verified": false
+      },
+      "different_from_current": true
+    },
+    {
+      "lens": 10,
+      "recorded_identity": "01a0f08b-d307-7010-827f-344b19800e1e",
+      "different_from_current": true
+    },
+    {
+      "lens": 11,
+      "recorded_identity": "01a0f08b-d2d5-7b91-a3a8-ef298b06f39f",
+      "different_from_current": true
+    },
+    {
+      "lens": 12,
+      "recorded_identity": {
+        "CODEX_SESSION_ID": "01a0f097-088a-7562-b884-2a07ed4650a1",
+        "CODEX_THREAD_ID": "01a0f097-088a-7562-b884-2a07ed4650a1"
+      },
+      "different_from_current": true
+    }
+  ],
+  "input_manifest_sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+  "synthesis_input_manifest_sha256": "4ac3b8bd9c8c0d80d0d4f491dbefcb83c66eea2efb8b6efa1fd3c91e69b0b1ba",
+  "verification": [
+    {
+      "manifest": "INPUT-MANIFEST.json",
+      "sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "files_verified": 192,
+      "mismatches": []
+    },
+    {
+      "manifest": "SYNTHESIS-INPUT-MANIFEST.json",
+      "sha256": "4ac3b8bd9c8c0d80d0d4f491dbefcb83c66eea2efb8b6efa1fd3c91e69b0b1ba",
+      "files_verified": 344,
+      "mismatches": []
+    }
+  ],
+  "files_actually_read": [
+    {
+      "path": "ASSIGNMENTS.md",
+      "sha256": "96b05a7c0130bd110be373943bfc03082b449210107c33b3b2eb47b031fabe30",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "INPUT-MANIFEST.json",
+      "sha256": "748f176be9d48ccf383ff6a6a601b56e7a8337bc898d27c2f1c319462a7e9852",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "PHASE-A-NONAUTHOR-VERIFICATION.json",
+      "sha256": "faa8e7d90a967713feb413507d4df8062b9c76add3912ab65b065af1830a03bc",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "PHASE-B-NONAUTHOR-VERIFICATION.json",
+      "sha256": "85286156827ade3171ba1fb6c06810bf1fd74ba5d2a46284238ea3d230094e75",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "PLAN.md",
+      "sha256": "2c8d6fc05e4c19da40a0c548e347de47b55b36195c556b22e58220c62cd82786",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/.claude-plugin/plugin.json",
+      "sha256": "4a77129826a30ac7d67028c556240247d1643d6c434433ec62f76bedcc64004a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/CHARTER.md",
+      "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/CLAUDE.md",
+      "sha256": "6c552fbb42b5900adb521d69ec5e9b3ba3cf65a8ee2d2a6469dae7c4a3ac8ce7",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/README.md",
+      "sha256": "9c80062b854910f09c682ab94c2a5e1449fde874462a40a0f5b10bc71ba9e33b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/SPEC.md",
+      "sha256": "508c03f2557a68bb973c561c92cc0d499c4f8fb0e2aa09b497b80b52f9dda300",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/ci-gate.md",
+      "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/cli.md",
+      "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/gtm-cofounder/founder-brief.md",
+      "sha256": "1ef09b7a58246dd1cd260370c5d7f75102ce18be064f3e398481a348964618fb",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/gtm-cofounder/gtm-roadmap.md",
+      "sha256": "c957f293a15b2ab9aea1358eec63b034a40f105392a28d9d2d78c9855d8966e3",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/gtm-cofounder/research-2026-09-15/README.md",
+      "sha256": "b96fe05733871d1456652fd4957acc46a7ea5364ec2cb19fa5bb7c17ff2dcdbb",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/gtm-cofounder/research-2026-09-15/evidence.csv",
+      "sha256": "aa698a09dca46d77ee608f544dfed5bbbcaea6e81e39f4a01d5960f35a41ddaf",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/gtm-cofounder/research-2026-09-15/evidence.json",
+      "sha256": "112c4f56fa25e06e396c0a8bf32e10da99d513a75b1df8f6ff4c664b355ed4e9",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/gtm-cofounder/research-2026-09-15/evidence.md",
+      "sha256": "51fe9827b707be805643c58451d5ce42643afacd04ada008c0b79706740f19e1",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/gtm-cofounder/research-2026-09-15/method.md",
+      "sha256": "d7a79baf380a4ab166283ca19b42e8b6a41a24778901c9ef048bd64a6d10f990",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/product-team/CURRENT.md",
+      "sha256": "4058e1404b4f49290d98216e3982ae2e09b4599700a4dc58897696fc70b11dd9",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/product-team/TERMINAL-CONTRACT.md",
+      "sha256": "93412648471a121480093546cf3381c70ac63a514e5f85932d2816f4cf951c20",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/docs/reference.md",
+      "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/hooks/hooks.json",
+      "sha256": "9b64aa9af1e20277fb9751dbea1a8a140c1cf7037dc45832f26545d01dd5d498",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/hooks/post-edit-diff.mjs",
+      "sha256": "127a48f34a8b77bf077746e9b69fad13edabb3a6f2782fce64be3cb7b6be007e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/hooks/pre-edit-impact.mjs",
+      "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/hooks/session-brief.mjs",
+      "sha256": "c7080bb4dcbd84747128ba686a5532307ed139831c4342990233c488ce161ce1",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/package.json",
+      "sha256": "21501c70a08fea99386d965bccbfca589a50530b7bb051d08ab52bec0380cb62",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reference-captures/codeweb-ref-depot.jpg",
+      "sha256": "641d92286ba72a57019bc90f9ec03843f06064db0a41fb2a9ba4022f4a159126",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reference-captures/codeweb-ref-linear.jpg",
+      "sha256": "5c308224e140ecd5438a325c5c3e6cca447e7c4871b897f8b025fd07f20ec6a6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reference-captures/codeweb-ref-sst.jpg",
+      "sha256": "0e93ab139c72d8ec03855105382fd44362fe3fd3c707cdb41e0173d5f91cc1b9",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/product-indispensability-audit-2026-09-26/01-home-desktop.png",
+      "sha256": "a911ca6894db1a4eba1abd8b991c680a4385e13004205d9acad467862ba81858",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/product-indispensability-audit-2026-09-26/02-get-started-desktop.png",
+      "sha256": "a99f37989d8ea36e6fee12da42feca36eb95e9c8f5e441eed1ece31e4e8e88c6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/product-indispensability-audit-2026-09-26/03-demo-desktop.png",
+      "sha256": "3402c69c0758e124cf8a5d6b0328a963fcfff3263efc9cf491965bc450ba8560",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/product-indispensability-audit-2026-09-26/04-home-mobile.png",
+      "sha256": "c419f1ab93d28acd0f129f55bf3b6ac16e8a81fe9b0e175f5a5245238b1e976c",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/product-indispensability-audit-2026-09-26/README.md",
+      "sha256": "f8dac824d6125ddaec18c1ed523b9ce7d9ec023a42bf406edc802b132ce0d92f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/product-proof-sprint-plan/README.md",
+      "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-centric-value-strategy/REVIEW-DELIVERY.json",
+      "sha256": "d87ebd9b892fd0fc055164c13181534c0ce04acf413319375de3f349caa8470d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-centric-value-strategy/REVIEW-DISPATCH.json",
+      "sha256": "60f9da7c188a0ed8bb2ab0a05186138ceb697e9de200a9f92599763719dbc56a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-centric-value-strategy/REVIEW-FOLLOWUP.json",
+      "sha256": "f3077c0a082afd18531afb16fb0a73482d23ec871b6724d33e00115a3356fbe1",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-centric-value-strategy/REVIEW.md",
+      "sha256": "318c321ad8f93315ffdbd2fe73bd7f795ab98eb5090db5c06f08ca2cdc628611",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+      "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-centric-value-strategy/history/REVIEW-v1.md",
+      "sha256": "cabf067b669793e6fc6149a8c0523425593323f8eb41acd14ede087a8d828e8e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-centric-value-strategy/history/STRATEGY-v1.md",
+      "sha256": "db14346701fbd9096eaf84eb80a9c7c72b20f41c3135f34bf4391df38f8f367d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/ASSEMBLE.py",
+      "sha256": "5116945c7acccac5187b11744b19b773652a4e71c3b4ff5642edcdcc941edaa5",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/AUDIT-OVERLAY.md",
+      "sha256": "bf1ccb8bf9a91ee8476bddbd1c613776e2cf820cae14e50d47e49c3decf75dc4",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/BASELINE-CHECK.json",
+      "sha256": "e59cb3afb69aa1aba5628c2e6d62d6a01b02ce9151371fc4ab855266f330d691",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/CLAIM-LEDGER.json",
+      "sha256": "050bed1873ac304225de55f94c8ba496dc2038d7d327fe73c402d399150fafa6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/COMPLETION.json",
+      "sha256": "c0a47087e25a6e4f6b3d9eedd44628920f376ecf249ee2b28715b99d9b2c6bdd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/CONTRADICTIONS.md",
+      "sha256": "9b02fdf259389bd69d9d82b107149b2ee66d4d4cc84a0f10c23686edb31adf6b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/CONTROL-PLANE.json",
+      "sha256": "7f90debbaec8fc6acef7b5e75751d97fbb78427393259f7a763016c8d1262e71",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/COUNTS.json",
+      "sha256": "cbe8537896ac61de5efd058e81aa7545eec7277f21a496850c4e2b5aa8af955b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/DEDUPLICATION.md",
+      "sha256": "bc0d38790869ff01d6a3ca0c6963d2db08c5f42c999ce6c62e4f9cb4200b1d71",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/DELIVERY-RECEIPT.json",
+      "sha256": "8f27497d17d85bcaec751af0a852da11f4cf148590c46142dd53ee04f655eb92",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/DISPATCH-RECEIPT.json",
+      "sha256": "325d182b83dd4a65e4c9d6a81086447829c3ced6e7b850bfb64c6d5f5ccfe068",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE-CANDIDATE.jsonl",
+      "sha256": "31080d9b88bb7cdad41a76128a7d1c7264047ec4fd392dedc8808a9f3781e79c",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE-PROVENANCE.json",
+      "sha256": "d1f7832ac46597bcd38f9169be2b0f359ed6619264b2534af9b53f3320baf847",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE-SEED.jsonl",
+      "sha256": "307f3be087dd9e2bd85da3b87f3d305dc1bf3165033318ffb5915e6c0b69e47a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.csv",
+      "sha256": "6860377e9de041fa43381ae729442239d51fdcddb4667dcef9146ea8beb429b6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-APPROVAL-DECISION.json",
+      "sha256": "817d32e46ac7549064325fd8289168e2c85fb1ea5cd7401c229641f85468a7d8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-APPROVAL-UPLOAD.json",
+      "sha256": "e9df89640b541a2afe73910ae07d580736e543e3551db96d64a9f2f6499934e5",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-APPROVED-MANIFEST.json",
+      "sha256": "dfd71831fba06e29e78fd61b6c299e8485c674d815b3f3b98eed37105ba46653",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-BASELINE-CHECK.json",
+      "sha256": "fb62260e0a8b354b59dbac1673c5674f1a1676ada4867ca7b9726ca2412be701",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-COLLECTION-BOUNDARY.md",
+      "sha256": "85ff3d42fde925212fd909814b3911d9ff321eb900cfc3d26afe17d61cf07c36",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-CORRECTION-REVIEW-VALIDATION.json",
+      "sha256": "32c56262954501c96243613be58642eeff9e5631545a397958d8de4b65411235",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-HOLISTIC-REVIEW-DECISION.json",
+      "sha256": "4c435e8ad8f6375919b5729c5aae1e476aa0eafa963c25abaa55da6b3c4d9797",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-HOLISTIC-REVIEW-UPLOAD.json",
+      "sha256": "827249b45dfa2200ee4118ac477517aaef98bb20e8cfb2fb70948308936bd88b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-DECISIONS.md",
+      "sha256": "afb2b631ab29cbcc4acbc5cc2f6dfd36b045622fcf24a45cc43d161a93bbe2a5",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-EVIDENCE.jsonl",
+      "sha256": "5a30341ad9728a6387fd73005491d915c294f2161eeca36cb313435d07abb56a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-QUERY-LOG.csv",
+      "sha256": "9cb64563a0e3b02ca6cb291f963939ee0bba53e170ac0d33dedb205cfad527b5",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-RECOVERY.jsonl",
+      "sha256": "61a80f3fe33974c229ec3a84c8dbe6db4d41629ea513b796ecbc233f3ed47393",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-REVIEW-DECISION-RECEIPT.json",
+      "sha256": "29e8af2f17ec78f530dd87eb238a9692c23eda2fbbe530f1a2e35912f4b13b12",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-REVIEW-UPLOAD-RECEIPT.json",
+      "sha256": "b43528772e696f75f67d4ce5abbfe24db2bcd8daffb081e165eb389d869aa100",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-REVIEW-VALIDATION.json",
+      "sha256": "66088af309cb7251433400bc58aabd1625e73a7d5bec77956ada5629f28d239e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-REVIEW.md",
+      "sha256": "669cec8fc471c99d552bd758daf1776570eb8b619a1d5921d069bae1a116f0d7",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-SOURCES.jsonl",
+      "sha256": "eea1e8da58ed48fb1ac634a4766a2327f6fecfdb9ae0b7b59cb3dae39da65bc8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-UPLOAD-RECEIPT.json",
+      "sha256": "1667554ca8f1ce2d599af3887599141b72623db8fb2494e07a95fb009560bef2",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-MARKET-VALIDATION.json",
+      "sha256": "ccc5eba7a28f4ed94cd1d13ae9845c77c77f18bb04f717b4a7dd94d1579476e0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-REVIEW-SAMPLE.json",
+      "sha256": "3d54ec70e040a043a7bbae6ed41e86befa39d7618e2d7c8488deecf086d99063",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-REVIEW-VALIDATION.json",
+      "sha256": "e02780e7b8e1bf0655e3b6b3bcbb3e489397b04321cf31080245c8a8a363356d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-ACCESS-ANNOTATIONS.jsonl",
+      "sha256": "f694ca5a2945b91966d18e74aedbd620a732c1ce7fcd88a99d2374e5d46db681",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-DECISIONS.md",
+      "sha256": "de24756c21b6896089bf1647535befdc9afff0cf5b9be5c50f21701b39847653",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-EVIDENCE.jsonl",
+      "sha256": "00391275a7121dd2416e4d60d56b5b629a31d6104a1bd65f783390cceb21b47b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-INDEPENDENT-DECISION-RECEIPT.json",
+      "sha256": "52ca6e8eccc103326a22451d9b5ca28fe706524d2a6ddb5ec9af7e7703d00375",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-INDEPENDENT-REVIEW.md",
+      "sha256": "12d885a1a475c3c74c29e457b50c1e395c6ae7d971fd8120a53e8176a8fde9bb",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-INDEPENDENT-UPLOAD-RECEIPT.json",
+      "sha256": "3c06ce6abd607156411dfee24401bd2987e1c848cc2fd580cb2fb6919b8b81ef",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-INDEPENDENT-VALIDATION.json",
+      "sha256": "12763c703f0bd2b1915ceba6b1f218f372fcef81553fbc4ea0fb5e9e211f84a0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-INITIAL-HASHES.json",
+      "sha256": "ec3e1a22c897724e43a2579f81ea4d90ed6b6bc0751b8d70a8b402bcdc6cbb55",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-QUERY-LOG.csv",
+      "sha256": "91ebe633487bd5874040292cdb249c7fa929cc9e8b928c7349a67a864838598f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-RECOVERY-BLOCKER.json",
+      "sha256": "76cd0fcc860746486b0cd41a5479730864a8b971eff042408d55ec8609f72794",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-RECOVERY-VALIDATION.json",
+      "sha256": "9459f4e9428a0a69ff32f4adb710d804063c8e9c76e24f7944fafdb394365a9d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-REVIEW-HANDOFF-RECEIPT.json",
+      "sha256": "530e280654296cf3596c1b00f40e373fc14ac707bf92214b524e6de855f4b3f8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-SOURCES.jsonl",
+      "sha256": "ee67d7267706c23b7e88b9c321d7f4eab28b4cb647a8a5c6ed8735a6149cab9f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-UPLOAD-RECEIPT.json",
+      "sha256": "8d27d768b93a9a34e0438b438aadc8ec490c9ba3f92716155e9c2f8b3300f04d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-VALIDATION.json",
+      "sha256": "275569c66d205e6659439abb900eb7bd768623291a6f08914b6fd61cdcd16b1d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/FINAL-TECH-WORK-PRODUCT.json",
+      "sha256": "9412404f13f8b11f94fab979a5467ded86b387695153681df3043e8a35c6096a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-CORRECTION-UPLOAD-RECEIPTS.json",
+      "sha256": "e86b07c41014bf36773a988b8b3f203e97ed21335784e7774a5a6a28b70e99de",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-CORRECTION.md",
+      "sha256": "4655182ce1b549a7b57d0e6633f2c171825b582d2bdc0bea52e56d317156e6f0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-EVIDENCE.jsonl",
+      "sha256": "da29705d3e9105f7c88a5164a88a722cf8c4d6c93c8828ed006c6c7af22a00e4",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-HANDOFF.md",
+      "sha256": "0c9f9dca74422a7dd1098abbb26e20166d435d02ff2849e6b7839ed8aec074dd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-QUERY-LOG.csv",
+      "sha256": "d2da6e699f5955603f849b89d845371078b8f225e33eaf2025aba9482d359212",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-REVIEW.md",
+      "sha256": "ecd6485570e114ddc24349f5e9b1fe387b99bb9511c6e5a23a1f781694e2cd0b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-SOURCES.jsonl",
+      "sha256": "2ee8777311b02ffd7d05f7937b30741effec46f87694c90cc40b524ee3440b14",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-SUPPLEMENT-EVIDENCE.csv",
+      "sha256": "d278fe3c8ba5e7cfe19ae2f1a4a61dc100c044b23afb6f930b3b657f8bc01b2f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-SUPPLEMENT-EVIDENCE.jsonl",
+      "sha256": "bdf41238c9d648332fc11c24dcbceffdd348a8f6fe0cb323d5ba58635c0d1a16",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-SUPPLEMENT-HANDOFF.md",
+      "sha256": "b4e09cf65adc668eddc8d853becdf83a83820dbcb8dfab493954894b83b0d561",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-SUPPLEMENT-QUERY-LOG.csv",
+      "sha256": "8e430b66177f2162aa3fda2e4194aff8c95569f5d3c6fc09e72ccf002eb144ba",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-SUPPLEMENT-REVIEW-RECEIPT.json",
+      "sha256": "f02692067c6ce5f3a926a115ef4aadbafd671597e51dd1d003d518dc43d58f56",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-SUPPLEMENT-REVIEW.md",
+      "sha256": "6565ea7c79d9423d81af85effc893e8e5ac9d73eb576e9e003d7e60c9e468253",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-SUPPLEMENT-SOURCES.jsonl",
+      "sha256": "bb85f284102b63d1b4de81bf0b941dd4b5e93193321aa73bc43c9a1022fa5c44",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-SUPPLEMENT-UPLOAD-RECEIPTS.json",
+      "sha256": "d8eca59ec4bf0f3657efd2f22e1f48af93e9391e65a6a7c01b7e345b32716759",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-SUPPLEMENT-VALIDATION.json",
+      "sha256": "85c0bb1b07c7e1554d6a57df42be27e47e34d91374615b848826516f405e6ebe",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-UPLOAD-RECEIPTS.json",
+      "sha256": "c90bc18cd08e8deb80d0d181710c7ba910abc5b1b6f1dea4cc61376464b3ee45",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L123-VALIDATION.json",
+      "sha256": "9cab39f05650ce74b519c44062f22346dc4d8d3343b0ffeafac34a9539ff558c",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-CHECKPOINT-VALIDATION.json",
+      "sha256": "d4d2d6071e6ad6c2f9de2d33e173cc67bcb6ab81aac960725f830ef12b20a566",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-CORRECTION-1-UPLOAD-RECEIPTS.json",
+      "sha256": "44b970bdba56670eb6c8bc85421be131162242b6143862a3ae610b2f314d8d6b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-CORRECTION-1.json",
+      "sha256": "e4d0db05b9dfc8d45003c92b3a452fdd5216ff91d64646dbfd2deb5e527d5392",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-CORRECTION-1.md",
+      "sha256": "4cf2d9784dfe529fd31a0dcc7fa4d3a9e171c5e538a68d7708f3ac2684911e36",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-EVIDENCE.jsonl",
+      "sha256": "9102eda907950e8ab9abc497c61b4e26ee1d3f6854b3b92aee3ecad0b66c2cc9",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-HANDOFF.md",
+      "sha256": "1bd56c5af5b6f18e0a25b40c756884a81de76c395832d1755d6d6df5c0ba9394",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-INITIAL-HASHES.json",
+      "sha256": "c1cdaa484b2a20f888d00c1d535d459a6af590558d2070a8426d53c74c00a280",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-PROGRESS.json",
+      "sha256": "cb7c7b51a1ca8bcef01be40549856246c7af093d25c16132fc68b83352cf11b7",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-QUERY-LOG.csv",
+      "sha256": "a02cbf1c11f02577d357c2d2eb5c0966bee56433957fad8f3338c083240d8ae5",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-REVIEW-APPROVAL-RECEIPT.json",
+      "sha256": "c62e7d47dd83553b58cb97027e82511909679c22c6e0786b56c40b0ed0420205",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-REVIEW-UPLOAD-RECEIPT.json",
+      "sha256": "bda059be810ecc848e6369946941e9ab67ccae44f1aab2dbc43c678f17be6997",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-REVIEW.md",
+      "sha256": "ba36d8e0fbdc4633798f4e179784b645eec48bebbc8289d82e903f5f4236e720",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-SOURCES.jsonl",
+      "sha256": "f07bd58abde4769fa4d58ba0c5bb3761d5d5bfee4c8c1f94c1b85c50ed434570",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-SUPPLEMENT-EVIDENCE.csv",
+      "sha256": "51b2c433cbf95ffb57a54e2030a2715f6b652cc246a6d0f8b685fc879eb2a2e0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-SUPPLEMENT-EVIDENCE.jsonl",
+      "sha256": "319b6df6c5454117f7dacd69b4f0bc7a572d7028dce017dda2d1591fb8527d79",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-SUPPLEMENT-QUERY-LOG.csv",
+      "sha256": "d60adcce638a2a36c208dda21c587747482dc5022bbcd098a3920fb296936a58",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-SUPPLEMENT-SOURCES.jsonl",
+      "sha256": "ef79cdbb4424505757acb8d4cc864711cf571d1ac2ab74cfc0f101bdb274b81f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-SUPPLEMENT-VALIDATION.json",
+      "sha256": "a24a0931b58ffa4f617021e04257eb58f60d76cb0f5864094cc976fd858000dd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/L456-UPLOAD-RECEIPTS.json",
+      "sha256": "dbad70884efb72676bce84a466d023f9ec39b4f4da140031af0e32c67cf874de",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/OPPORTUNITY-DECISIONS.md",
+      "sha256": "bbfc1c01e0217c0186450fdd1e9a78535bddd6e1951345c7d37f9498ad794f95",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PACKAGE-MANIFEST.json",
+      "sha256": "e8f8318f516b24dcc77fb4311e36eb256351090a445816baf00b9477a9ffee39",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PAIN-MAP.md",
+      "sha256": "5f86bd659543caac775f4c6b221c2c15c0bb289b0d2b180f28ee8d4a8baef7d0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PARENT-CORRECTION-1-BEFORE.jsonl",
+      "sha256": "2d2d47c4b3e5be40081dc7d92811784c60a7a5b64c8c9e753b10363aa395a002",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PARENT-CORRECTION-1-FIT-OVERRIDES.json",
+      "sha256": "e455c4bca1541aedb661019e78d1dd46b2d2588beb58530b16bb99b99f8566de",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PARENT-CORRECTION-1-PREVIOUS-MANIFEST.json",
+      "sha256": "1b124a60c61641c8f54aaff6ad7c4e1ccf68450e264d5a893f26e6265d0b82ec",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PARENT-CORRECTION-1-REQUEST.md",
+      "sha256": "8f2264bb5d533fa34ad9f813439976ee8800e7e5cda3e98d99fde5bc1218e60e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PARENT-CORRECTION-1-VALIDATION.json",
+      "sha256": "e0067a9a9758e068313848940c564e0d4a9cca576cba1288f135cfd614454602",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PARENT-CORRECTION-1.md",
+      "sha256": "79e274895eff278eb260d36d28f3546c336aad907bec626bc465aea33a6fdd6c",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PILOT-EVIDENCE.jsonl",
+      "sha256": "1958442bf3b34099559de68e92e9df156b82d06a035862d98c36dec432b1534d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PILOT-REVIEW.md",
+      "sha256": "743a5f582cc82eee26733e05f4e6cb57d2731ea65bd82ab61a9a553f4ff963e5",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PILOT-SOURCE-MAP.md",
+      "sha256": "dc008d5d4bac29b1efe3156453e21beedf8f7c651cc240263d10179551509b4f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PILOT-UPLOAD-RECEIPT.json",
+      "sha256": "3575d4ea79b584e343db11150819bfe46ba5c7ec7c80da67f332e5bd72a7be1c",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PILOT-VALIDATION.json",
+      "sha256": "d158c702a05e9d2384bc177686a6a90d8f66cd208b639d1bfd72e8729b97e4fe",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/PILOT.md",
+      "sha256": "abbed95967f324db8eef4b96e69eadbdbb32797151ffb57212a99677794b7b08",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/QUERY-LOG-SEED.csv",
+      "sha256": "58b6bad13c242910e1cefaba768f99c3003a48480c63931ff81f0c644ca92207",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/QUERY-LOG.csv",
+      "sha256": "b23907741001f9092a1fed50d7aae12a24835c9c608951249d8519fa155f5ba0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/README.md",
+      "sha256": "88d477ae1214fe11c808e9b759ecbc5a17bb973720049075d42d532190764c07",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/RECONCILIATION-CHECKPOINT.json",
+      "sha256": "de600d23c31aa676715b6d72ee11020c238a3800a71675b405cfa04e55ddd81d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/RESEARCH-APPROVED-PACKAGE.zip",
+      "sha256": "068fac8a43faa78331b3f3ffde38364ec2f027cb5b83c3ad535fc4f04dd47dbb",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/REVIEW.md",
+      "sha256": "c77c1830d8461be6bc725b87abfc018f9b8da6d2149f7b4de289aaf707cca585",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/SOURCE-MAP.md",
+      "sha256": "4d85c73d5c3c9d7996029da32e92565be7213e3a0320cf5b2b2c5f24b30343b9",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/SOURCE-REGISTRY-CANDIDATE.jsonl",
+      "sha256": "2e4dcac3390cc380e0192247d8d3da4659f525fa9247640d342829828950c2c8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/SOURCE-REGISTRY.jsonl",
+      "sha256": "e82f4ee9d5908f433ae27ac0981a2dac5933d1a5f8e4f52456be4eed8ea80412",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/START-RECEIPT.md",
+      "sha256": "3ae57eab39f798ecb4d20048f7129834a1b33ddfb0b5c818606e1156af0c82d5",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/STATUS.md",
+      "sha256": "1a087c87d412483d4b2b7033ef5bceceb2de0188019d75b014463619efbcf5da",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/WAVE-2-HANDOFF.md",
+      "sha256": "690534bcac77e3b63f015c50b1e41ab0f5470662091852f610889116d9429b9a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/checkpoints/start/BASELINE-CHECK.json",
+      "sha256": "e59cb3afb69aa1aba5628c2e6d62d6a01b02ce9151371fc4ab855266f330d691",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/checkpoints/start/CONTROL-PLANE.json",
+      "sha256": "e0fab7bbb7fdc2335e850eb5c705e39ab412d478e00ad4856c105c14365c920f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/checkpoints/start/EVIDENCE-SEED.jsonl",
+      "sha256": "307f3be087dd9e2bd85da3b87f3d305dc1bf3165033318ffb5915e6c0b69e47a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/checkpoints/start/MIRROR-RECEIPT.json",
+      "sha256": "7f4742bb0bb55890a838ad43d65f4c5f9870011c47f867ddaf609eddf30fa394",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/checkpoints/start/QUERY-LOG-SEED.csv",
+      "sha256": "58b6bad13c242910e1cefaba768f99c3003a48480c63931ff81f0c644ca92207",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/checkpoints/start/START-RECEIPT.md",
+      "sha256": "3ae57eab39f798ecb4d20048f7129834a1b33ddfb0b5c818606e1156af0c82d5",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/01-claude-final.md",
+      "sha256": "0d3062eeb0e7e031a62e84045e254df5ca082e9af6a88456f1c989935c640f85",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/01-claude-supplement.md",
+      "sha256": "9c1f787a797dc7ab034ffd9109f8092cb08811f601bc8af4366d93d4686e2e7b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/01-claude.md",
+      "sha256": "42faae2c1ce7ee1d6c5f1fafc85f360e835a3878f2f2175ae4c1a895bc41d9e4",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/02-codex-final.md",
+      "sha256": "57a2bddb843a791424c461f586eb7cd02885af35db516e5ca6622dbb28c8f833",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/02-codex-supplement.md",
+      "sha256": "dbdbf372503e7ea5ecc6619cacdddb0838a793c1db49fc622d27a4c9ef246039",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/02-codex.md",
+      "sha256": "5ee52fc3abdbede8c4912fea91cf92c05988b1d2cd6258597a6837064ce83b01",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/03-change-risk-final.md",
+      "sha256": "457cfc7059bacb89f26d7c2212402eadfbb6d4d819376cc90de15270889d89e3",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/03-change-risk-supplement.md",
+      "sha256": "462a1c60c06cb8284b49a8c76fd0640704234ed2ef0d48370d1e4d6d48e709d6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/03-change-risk.md",
+      "sha256": "0b78a5dce6e482674a93fac527c4a574aed8bf9036d407015d575658217c8675",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/04-adoption-final.md",
+      "sha256": "7035356d070ecfe77ae2336b5f3b4dfd7580a0ef5f97398b2d37fbf47408deb0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/04-adoption.md",
+      "sha256": "e7049d82fe980b77a40312c31df0f54d6fd6324bb157095c09db11b9f63aa490",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/05-trust-final.md",
+      "sha256": "273f64b9ad1f73feeb0946d7b74796724c46616d7289959d55761dcd88ddfb3c",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/05-trust.md",
+      "sha256": "0784849e0a279320e2a9f92b370050224614b4adddda88481d33b622cf2acc19",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/06-value-final.md",
+      "sha256": "4bd6540bf1c702b5de02202b4308c591982d412595fe4ebbab80c1b64b7715a9",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/lanes/06-value.md",
+      "sha256": "1a3c87167ea4e8f0424c3db971b6dab1bae2c279b57cb436495e7394856b128f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-plan-2026-09-27/AGENT-BRIEFS.md",
+      "sha256": "330be3ec31516e34292a75cc7eb466cc3ca8dc85ef61785496c96a3fd3e145fe",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-plan-2026-09-27/AUDIT-BASELINE.json",
+      "sha256": "8d2a60a494421bde8b3e5ba3f189a36c7a7d2ad6c7d799e17dadea56fc96503d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-plan-2026-09-27/DISPATCH-BRIEF.md",
+      "sha256": "fac23f26285b1a261a56549506e1a953754ef98c8917b5cdb6026fc1eb823b9e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-plan-2026-09-27/EVIDENCE-SCHEMA.json",
+      "sha256": "16208b28b9e020428f499f704f5b39c93917e973f0f88f26cabf1beeea2db7e8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-plan-2026-09-27/PLAN-CHECK.json",
+      "sha256": "e83e95d3b185e24c7892c2a3d0fcbceb9f5997d52c497ce9a5a572e76858fb0a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/reports/user-pain-research-plan-2026-09-27/README.md",
+      "sha256": "3078240c65fa675255e158c7ebc604d48fd6b62496851bda635769f9a4188eaf",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/scripts/brief.mjs",
+      "sha256": "dd57cdae3d4b1744e1ce1de5e3787b0e008b1eab04444f0dec384b247ef799a0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/scripts/context-pack.mjs",
+      "sha256": "f17ecabc8caab0aaaefefc3fe1a2a6543f90bff011cd044321484bb8036ffae6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/scripts/explain.mjs",
+      "sha256": "f01f2a52150b10d84f599a9d80c14502100e1f4e3097ef8d50ba611469841841",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/scripts/find-similar.mjs",
+      "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/scripts/lib/evidence-core.mjs",
+      "sha256": "e864ec6d9a379be7ffe87111bff212c4300ecc47b111a63818317900e82b04b6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/scripts/lib/evidence-service.mjs",
+      "sha256": "f54c86132866dfe5f06a8d32077e01f32fbfaac86f2da88b377c607a7af0fa92",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/scripts/lib/evidence-snapshot.mjs",
+      "sha256": "4e2112d483f7e82ce4ea31fd7259ea90cdc3d5311d5fb16af44dfd0ab117740a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/scripts/lib/evidence-store.mjs",
+      "sha256": "c7ceb6f2a946add0d3f270fc58bb7fd342d8bd0e59a13b96b3348eabcb9d8a90",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/scripts/lib/tool-specs.mjs",
+      "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "inputs/scripts/mcp-server.mjs",
+      "sha256": "19d4972ffc182d4e3b3cd7dbb7a56a7930dc8dee34fa74c1ab62792a90e31425",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/01-findings.json",
+      "sha256": "7a73d775b2d21cee5e7f2192487a660d744765a739c571b3a1ade1e34097fecf",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/01-user-need-and-segment.md",
+      "sha256": "dd0ac7f2db5f4ff571a58a92e0c1efca7e1e2a43472d934f898d66c5e89e7e1e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/02-findings.json",
+      "sha256": "af1064b53620fae0fb5a024efc6db0295d46c84a75b2af8184ee316c283e222d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/02-incremental-value-and-alternatives.md",
+      "sha256": "8c6ea25119cc6b276ab6474ef94a054265876d1e738657a5bbad2ade1ab8e5cc",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/03-findings.json",
+      "sha256": "81aadfd65aa90c1786b6e427d5bdf3087639a225c0a9499be3096f89df6d7e63",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/03-native-experience-and-attention.md",
+      "sha256": "5f5198c9d8551c12627a546f3e9afd9dc837bbc6a7604af9e16a64ac8c529d47",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/04-capability-and-trust.md",
+      "sha256": "82b7a6cfc8723cef5df98a3016e48328111300666d47f0e672ead1eb6510b9ea",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/04-findings.json",
+      "sha256": "12326a31c84e58e1e399e95eddf70bdf0375a702809999b4c524f4f71b0183f1",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/05-findings.json",
+      "sha256": "06f1fea5466d083fcffa75abf40b9c0c6cb51369fc5a4c32cc6bdca643438e03",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/05-repeated-reliance.md",
+      "sha256": "9d57d8d5cdc7e2ee6e7056b13416bfad481e540df26a4c5ce730a7d7361a889e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/06-buyer-and-paid-service-value.md",
+      "sha256": "8c2211df7e8ba75ed1147af64cd1a7f3064a5daf1759acf3f8ba56871558876a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/06-findings.json",
+      "sha256": "61340bd24705ed87ffac61a78985c938a9f5a7bd66743e74bbba5d0c8178eca6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/07-capability-expansion.md",
+      "sha256": "cfc6de65400fecf794da57f834024e8741739ccf65ad892d8f53cdc945d0152f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/07-findings.json",
+      "sha256": "0e6ab824c1b2f904dce0666d9795d444983a21343a7c9e39b8e139e0d1a4c37d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/08-findings.json",
+      "sha256": "cdc3273400768af355586cbdd894d8452f03bd8d54ef7173cb7557fb117bf65f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/08-ownership-of-a-complete-job.md",
+      "sha256": "57d44f843d5fcf17e731d468c121c1214aa00b0abfee34683bfc5ddd47bc7823",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/09-findings.json",
+      "sha256": "2be3adcd0ed583e4194c7a205b083ff579aa10e44a442ad71d67a03928c567fd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/09-withdrawal-test.md",
+      "sha256": "1054c9814dcc9a62ce684bb49ef9c4f598bf701f9a2cf8a97422f7ee3fb00a2b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/10-compounding-project-knowledge.md",
+      "sha256": "9d8e281460a9be0f230333fd58e9479a4aa3351f8adee3359d418757cf993721",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/10-findings.json",
+      "sha256": "5ecdfc56aaa5e63446f2f1c87493a6001bee28b05711023e07f004f17c9ad092",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/11-findings.json",
+      "sha256": "6dfcafb89273792f55323a299d1834ec7e830361103ba63d7ab4d123c26c326e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/11-shared-team-dependence.md",
+      "sha256": "8cd05efdb383bee01e29c2072e96b91aa3e77d7d648fdf922cfc81e606e8855b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/12-ceiling-of-the-hypothesis.md",
+      "sha256": "841fb9b5509a2f82632116155c9aaba8d1d6ff3b87fbc6b6a933c6b29010c819",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "lenses/12-findings.json",
+      "sha256": "ba5dca9e8d3f6b3a03104b81ae144d13b5162c29a446a3f4cb0a1800d053eb30",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "receipts/L04-source-addendum.json",
+      "sha256": "9296c09f387ca850a5396f707e5d59cfcfd23c95ffcd45bc9613634ca7c15201",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "receipts/L10-source-reopens.txt",
+      "sha256": "b372f6f3aae476a76a5797c4f45d995200e2f348477b690af2add8b2bc092fd1",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "source-addenda/L02/CW-L023.html",
+      "sha256": "45ad340f4acb95726650827fedc9e7f7c4bcfc8b15f44c6b38750cb80342a439",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "source-addenda/L02/CW-X001.html",
+      "sha256": "b156be2a53106ae09c28edc2fa372c7b386a0a9c241e06070428914ecd894d37",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "source-addenda/L02/CW-Y005.html",
+      "sha256": "20b151c2bf9d155dce3147a18705c684132f2980fe65828d1776897ec8b0a632",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "source-addenda/L02/CW-Y007.html",
+      "sha256": "4d4cb75e0e0a3a5150182618625b5fb8906ffed64888b07bc4d38c6ec922022d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "source-addenda/L02/CW-Y012.html",
+      "sha256": "5a3b6e34baed019eb2f85340b90a85e49f15fba11be160d5bffaa361eccb8eeb",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "source-addenda/L02/CW-Z003.html",
+      "sha256": "c2576945f061860d9fb4feaf98c2298f92dd759289439d49b9b1a38084a6f759",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "source-addenda/L02/CW-Z012.html",
+      "sha256": "f763eb80077396b56c9ccc3456eaeb600a96b597cd7ff099fbac60deb7819ca6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "source-addenda/L02/PROVENANCE.json",
+      "sha256": "464bd29ad84d37db9499ecef3167a61dcdb93dd4c61d857b5c66c564479fd0ca",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-L048.html",
+      "sha256": "5ec8e8a65d10c3c83109d2163ece1d2b738e2dcc376545e6699b98a918f054e3",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-L048.txt",
+      "sha256": "2a6d49781c8ad6448b79778e7fbc694340a5db2b8f23e8b1f1cc9d9789cc5b41",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-P003.html",
+      "sha256": "37443d3ab4f6e581e25a335f8926a1dc4704d394719f5760095b64e5c275041d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-P003.txt",
+      "sha256": "dd7a415ec9bd6ab34b1218c73b0363b7f4dcb81925791c829ecac9266133e0f0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-T018.html",
+      "sha256": "b717900277ead78de576f2aa7b94e16691c7f6674b900b1265d1bff24a2605a6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-T018.txt",
+      "sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-X001.html",
+      "sha256": "b156be2a53106ae09c28edc2fa372c7b386a0a9c241e06070428914ecd894d37",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-X001.txt",
+      "sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-Y007.html",
+      "sha256": "054a9ce2b30cda3d46a0800cf18a7bd0657bf105cea98b893d9283d7290033bd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-Y007.txt",
+      "sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-Z001.html",
+      "sha256": "503a424830bc7f4e36093b8b76c0b9f58e9ac1110cb85611d2829d8e8c8ddc6e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-Z001.txt",
+      "sha256": "f06ceefb7d3c95cc528d03eae7461b9012fb16c9e08745aa8a5f2dfe81fa7cfd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-Z003.html",
+      "sha256": "c2576945f061860d9fb4feaf98c2298f92dd759289439d49b9b1a38084a6f759",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-Z003.txt",
+      "sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-Z006.html",
+      "sha256": "cfbf9d35ee6707b49568072265c54c178f205bb708f02e01d29345c547983bf1",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/CW-Z006.txt",
+      "sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L01/provenance.json",
+      "sha256": "55b84846f11b77c90738b7bbd94d10178111ab0c38b3a1bda13d00576b412eff",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L05/REOPEN-NOTES.json",
+      "sha256": "84213a408d9b5d4cc9e7b9954690c06852b512e4426dfc6141ee7eda8386f864",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L06-source-addendum.json",
+      "sha256": "540ea59b12f58e6aa4c14d1c33600c16ba768c2741f90df4d54d690d647b6229",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L07/CW-T018.html",
+      "sha256": "b717900277ead78de576f2aa7b94e16691c7f6674b900b1265d1bff24a2605a6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L07/CW-Z001.html",
+      "sha256": "453a82853a45368168656f41ee9194ac27d933862d278b14ed35cf0448abc5f9",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L07/CW-Z006.html",
+      "sha256": "cfbf9d35ee6707b49568072265c54c178f205bb708f02e01d29345c547983bf1",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L07/REOPENS.json",
+      "sha256": "13323f41264b1e8a0aa181bef7ff186d841f27e7c5a65e63da9fa49c13ecad11",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L08/CW-T018.html",
+      "sha256": "b717900277ead78de576f2aa7b94e16691c7f6674b900b1265d1bff24a2605a6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L08/CW-Y007.html",
+      "sha256": "38beba8c3c65ecbf02f738fc18eb56d341abd10b37c48f370fa4a085f3e1e509",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L08/CW-Z012.html",
+      "sha256": "fa6b17b1d843daa2854493c5db518e45b5e549964e85f755f160c11c1c25d18c",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L08/SOURCE-ADDENDUM.json",
+      "sha256": "fa1c9e846bccfa96a8e42d9f812bc30379061aea06f184f84e975c981dbf489a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L11/CW-Y004.json",
+      "sha256": "c183f66537437d98463f83318613e43191d2ad9a717686b6901d85d444dd3ddc",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L11/CW-Y007.json",
+      "sha256": "488c04c210ba98b486e0fb8a12eb1cb3c81ac19db266fdb5baa6897607eda8ac",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L11/CW-Y012.html",
+      "sha256": "5a3b6e34baed019eb2f85340b90a85e49f15fba11be160d5bffaa361eccb8eeb",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L11/PR96-checks.json",
+      "sha256": "a5624bcfbd40acf5d393b869afe524af633b79a8f8b8e9c38bb8416a2e8535e8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L11/PR96-comments.json",
+      "sha256": "78742be8fb5d68007abd6fd0cfc9ede1c50ddf5cef2a61b6ea0ba1a83961a861",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L11/PR96.json",
+      "sha256": "779b0ab848dd3268b0a9e8c035d77aa9316c2acf1214f28dd441eff216304781",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L11/provenance.json",
+      "sha256": "d6f3d8f91f2a3b6d8bf77ffa144c715b6f5621eaf15b2f86d21410a44b0a9c91",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/L12-public-reopens.json",
+      "sha256": "a0909ec9a1b23a0123de79c12f070e05ce4318e761aa26ceea92fa058c6a7e51",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-001.html",
+      "sha256": "4157db5f0f923f97cf7144bd4d67e82a3a4978f615626db58e49e9a3ea87773f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-001.txt",
+      "sha256": "3adf1e0a207df9a6b31e4e6232fa87cb41dd8702f4e4ae4ee8afdf9e4bdd5dea",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L001-READ-NOTE.json",
+      "sha256": "a17a37c2535bb6cb30593e323cab5bbab5a05c63e43dd436abc140c3a9db93d8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L015-READ-NOTE.json",
+      "sha256": "dbdc321d20927dc8bf223f2ea504d1ddb188acf74825bc7eaeeab8565476acba",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L022.html",
+      "sha256": "dec62159b4ec0c8c735785b6c1a31be437f91117b117cede0ff1914a5f6eecb3",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L022.txt",
+      "sha256": "5d42aabe9a076c0f68966c56eaa095a37c0feab816b9d7b2d0b3390ef3dd1459",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L023.html",
+      "sha256": "45ad340f4acb95726650827fedc9e7f7c4bcfc8b15f44c6b38750cb80342a439",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L023.txt",
+      "sha256": "7752eaa9fe1ac81daa6d0ff8526f75b0e8542cc4d38be60852a8e8aab3e292e1",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L024.html",
+      "sha256": "97be86816da47f9a9838ded3905862a5c7497730d1401b151595a12d9a611c33",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L024.txt",
+      "sha256": "f9f34c73db717c68ffe9d031361363dfe35dfd57b8d85504c03859a5b1eabf83",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L026.html",
+      "sha256": "a562c0258117db658cf4a492d6e0091ed946eaaa308999d362c8b5200b787cb9",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L026.txt",
+      "sha256": "52fd9b7c59f911038ac99dbb1f3f75e9401033763e57c678c6afd9cc8a96b4b0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L037.html",
+      "sha256": "8e77cdbbfe88c8433478d7e4f18fd69a81904a3ea8bf8e8471e9c7d11911d001",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L037.txt",
+      "sha256": "38999a668054f2f44fa75347468a6859585fecb1fb0990e8f60cc2c33092a426",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L051.html",
+      "sha256": "5ec8e8a65d10c3c83109d2163ece1d2b738e2dcc376545e6699b98a918f054e3",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-L051.txt",
+      "sha256": "6c929497b104bee9a21401bc3b179f33cdc94e8a4793ca47d23ac8deb3bca83a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-T002.html",
+      "sha256": "1ea130b9d6b1df7495d032fe391780e545b155971d4776f6eaf0e1ab2b96d435",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-T002.txt",
+      "sha256": "cde137553c87ffdf2d465d0967e5262afe0308d2a6b8a5330c8ca604249a1894",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-T004.html",
+      "sha256": "20189d08be98c1d1b1bd8cfb834c7702eae9bac6c5f1802a64a7d681041da950",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-T004.txt",
+      "sha256": "2647a1fc7b899ca8a8f3d908af466600974507ecd734161c7739c171957febd9",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-T006.html",
+      "sha256": "4a1ba5fdf6eb21498bfa03691100a16c02a5a438684e9afd6a98a646e71fe48d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-T006.txt",
+      "sha256": "1910fb30c23c7c06b841b39bcbf07c58075ecb016f1d6df552650b39ba61fa78",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-T007.html",
+      "sha256": "e9ecea9e9f162b7d5c1b065cbb6a66416d6f26da069058ee1390a327aa70d094",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-T007.txt",
+      "sha256": "0afb123356f51cd30b37e769c0c6e05c1ab7a4ba8366292341b70db40e5e3533",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-T023-READ-NOTE.json",
+      "sha256": "d213f3e2037f3535194acc9c7f87292fd131ba47bebacf3b5c77f5b6fd4111a1",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-X006.html",
+      "sha256": "7f571e7c0990dad513d395067efc128f7c93a3bd3e6549efb4b97c27e7db529a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-X006.txt",
+      "sha256": "741179e6bbaee2636a7a94b70532e5e40fd336b211e28ef7503f65f8d6f037d4",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-X009.html",
+      "sha256": "2dee978c09da62fe09e61c1f8f487e24c2e8a2c9811076c9a608272caa3791e8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-X009.txt",
+      "sha256": "0d40d250c5879c5721aec4de6a712a9b301b155ca880a7387b38e3662a287a10",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Y001.html",
+      "sha256": "47e18dd6d4a73f957fb7e6003421ade366e385ee6ca3dd17a318034049403a08",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Y001.txt",
+      "sha256": "cb3048e07205f09d040625d836d9a7894bb0a9c1f6777ef38a013f029bb9d13f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Y005.html",
+      "sha256": "20b151c2bf9d155dce3147a18705c684132f2980fe65828d1776897ec8b0a632",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Y005.txt",
+      "sha256": "5c1a2bc9d740da12a37db00d4a1d32af71241a4ed05d956963a856153a5a2463",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Y006.html",
+      "sha256": "6fd58a6bce8ce515d85fb2bb55888d3f6cc347e93850e009ee85a46d0146f9cf",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Y006.txt",
+      "sha256": "f9770d37deee208aa3afbfeb391e030d5b0057d0395951781d30904a5ba2caf8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Y010.html",
+      "sha256": "4ec46acb2421025866d078da2aaf6f1a2efd1e06ab99f6c3c0f9edaa81877ef9",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Y010.txt",
+      "sha256": "21582a6a32fbcf4eaeade1176330e0312fbf40b05c5d89375c35f67b078914f4",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Z007.html",
+      "sha256": "82da80aef6804d866331198f221da42410e762f3c2d36572e78e99daf494b776",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Z007.txt",
+      "sha256": "da0bc0a104fca0a86f29f7e3263ff89393b7b6a45f9d8844b409a9e0c958de28",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Z009.html",
+      "sha256": "2d24246e5be9d192fd32a229c71f1c6fec857a80831fc604939035cdfc2ee1fd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Z009.txt",
+      "sha256": "b9d3dcb142cae769a2f31fe94e7adbc8a674ef00e2b0bbd1bb90b64c3f87a0ea",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Z011.html",
+      "sha256": "3636433d15afbbcd218271e682911ced52d8cf823d19664f86b5ccf54ed83725",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Z011.txt",
+      "sha256": "35235bc80eca532bb2e09db3d2734b7644d2eb681bd1f5aa3f7465101d94f7da",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Z012.html",
+      "sha256": "a2b1c7aedf472ad863f1b3d84a962750b061bce34a5aba1453dfd1125569ea6f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/CW-Z012.txt",
+      "sha256": "dd59dd53ddae113f258f050b3058dae6a0436349972aa755ebbe88a5b4cfccc2",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-A-nonauthor/INDEX.json",
+      "sha256": "6838a045961a75464b95af2ae21793890f63647a1bde02252cf99513f976e3af",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-L024.txt",
+      "sha256": "f9f34c73db717c68ffe9d031361363dfe35dfd57b8d85504c03859a5b1eabf83",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-L025.html",
+      "sha256": "f54bc454fb9638c4937ed8b790120cd5ebee6780d07f0ba787ac88fce7d9f1d7",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-L025.txt",
+      "sha256": "e38f01a38572f14729d82f80a71bdcccdf808a5c1f336d83435cce4c9bce047e",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-L037.txt",
+      "sha256": "38999a668054f2f44fa75347468a6859585fecb1fb0990e8f60cc2c33092a426",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-P003.txt",
+      "sha256": "dd7a415ec9bd6ab34b1218c73b0363b7f4dcb81925791c829ecac9266133e0f0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-T018.txt",
+      "sha256": "6ac6a1c54f5db65c04db7b102a713353df39b98dc35d018d8516780aa8c0d897",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-T019.html",
+      "sha256": "19f69452dc829ca3d277ee8c752dd20fdd03ac80c8be2431c86d60badda15690",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-T019.txt",
+      "sha256": "c92235785b88815ea97ac49f80bdd33cd394cc810ce262d3981242dda2358af0",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-T020.html",
+      "sha256": "21cb4073aabf49f29b8735916f77c9c6d4c6a302ba0ee4548d915ae2c8ec62dd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-T020.txt",
+      "sha256": "4a87b777c440369898e76d58651538f63af55d0be1b9a1ad940771068ca49411",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-X001.txt",
+      "sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-X003.html",
+      "sha256": "84b9f4e5a54d485b5dcf42db67de29609de6d2f7bfc043121f990a0c7d0e6513",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-X003.txt",
+      "sha256": "6ecb4f30771f9c39334035b0604bd241a0db649f82a56533c12c2e9ddc88849d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y001.txt",
+      "sha256": "cb3048e07205f09d040625d836d9a7894bb0a9c1f6777ef38a013f029bb9d13f",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y004.html",
+      "sha256": "e675fed034ecac2df646e80810e7780b5a9425deb54459b942894736937256f8",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y004.txt",
+      "sha256": "3de9bafccc90e5080b9538eede13d1fac61c631696a3845370c273f03dca7ce2",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y005.txt",
+      "sha256": "5c1a2bc9d740da12a37db00d4a1d32af71241a4ed05d956963a856153a5a2463",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y007.txt",
+      "sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y008.html",
+      "sha256": "727117f6169ba8cf8d3b7f7c4c1faf8fd0a76eeac0f2e10665a79ac964508577",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y008.txt",
+      "sha256": "becd9ab77157c09ee4e307a89168354935f04c805b7a951517d2238819d30c1a",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y010.txt",
+      "sha256": "21582a6a32fbcf4eaeade1176330e0312fbf40b05c5d89375c35f67b078914f4",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y012.txt",
+      "sha256": "fa25749665b2c95a20640dfd164563b19babf698222ecd95b1ed3b10014a9284",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Z001.txt",
+      "sha256": "f06ceefb7d3c95cc528d03eae7461b9012fb16c9e08745aa8a5f2dfe81fa7cfd",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Z003.txt",
+      "sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Z005.html",
+      "sha256": "9fc227bdd3e8404af7fc5a0f6f24de27697ee6663d1652969ed4fc15442495f6",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Z005.txt",
+      "sha256": "d16006e75ed066e80347b6653a246734b728382171fd194871716419a4ded42b",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Z006.txt",
+      "sha256": "301d104a27c2fa76cf553d0d76f100745b407a16fca224c7b63dc6b44faa625d",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Z007.txt",
+      "sha256": "da0bc0a104fca0a86f29f7e3263ff89393b7b6a45f9d8844b409a9e0c958de28",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Z011.txt",
+      "sha256": "35235bc80eca532bb2e09db3d2734b7644d2eb681bd1f5aa3f7465101d94f7da",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Z012.txt",
+      "sha256": "dd59dd53ddae113f258f050b3058dae6a0436349972aa755ebbe88a5b4cfccc2",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/INDEX.json",
+      "sha256": "413ea606517e2e86dae4c1f08ff408b1a00c3b1c9c6b2a0f4a15081d6f578c16",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    },
+    {
+      "path": "sources/phase-B-nonauthor/WEB-READ-NOTES.json",
+      "sha256": "c3af09973bb9d372898d7c90e1dc0ad9390c73e62cf6e1a9b95735780cf1c601",
+      "mode": "byte_hash_verification; available in complete packet, not necessarily substantive reread"
+    }
+  ],
+  "substantive_reads": [
+    {
+      "path": "PLAN.md",
+      "sha256": "2c8d6fc05e4c19da40a0c548e347de47b55b36195c556b22e58220c62cd82786",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "ASSIGNMENTS.md",
+      "sha256": "96b05a7c0130bd110be373943bfc03082b449210107c33b3b2eb47b031fabe30",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "ACCEPTANCE.json",
+      "sha256": "595d2f552fac0990c0d311bbc23332adbf61928c68d47a3991ba297a06507aaf",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "INITIAL-VERIFICATION.json",
+      "sha256": "51b46a90233be6cb26c8cd17c9fdd0b0a67d4e0a7ea173cc8b562a8e5999b936",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "PHASE-A-NONAUTHOR-VERIFICATION.json",
+      "sha256": "faa8e7d90a967713feb413507d4df8062b9c76add3912ab65b065af1830a03bc",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "PHASE-B-NONAUTHOR-VERIFICATION.json",
+      "sha256": "85286156827ade3171ba1fb6c06810bf1fd74ba5d2a46284238ea3d230094e75",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/CHARTER.md",
+      "sha256": "7351bb78809bb400d3c36c90a13d70605aa1d9b29b2e2d684757edfa23a395fd",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/CLAUDE.md",
+      "sha256": "6c552fbb42b5900adb521d69ec5e9b3ba3cf65a8ee2d2a6469dae7c4a3ac8ce7",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/reports/user-centric-value-strategy/STRATEGY.md",
+      "sha256": "41cf6053723b3a968de0ca1df66fd86f2c11f2a0c88c5aba8aac055aa22975cd",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/reports/product-proof-sprint-plan/README.md",
+      "sha256": "7bd8e07a2edbb6437328033990ff30a788083b1a7417ddc5f4bce350c4507e2e",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/reports/user-pain-research-2026-09-27/EVIDENCE.jsonl",
+      "sha256": "aab1d5e64ee07d52a5e127a2d0dca169a2825f560c7daa2b8b7dd23d64f2be41",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/hooks/pre-edit-impact.mjs",
+      "sha256": "c723aa6f06aa8c6c2d73dc238d21bba0a6306d53eb894b9390758c321300c6bb",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/scripts/find-similar.mjs",
+      "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/scripts/lib/evidence-store.mjs",
+      "sha256": "c7ceb6f2a946add0d3f270fc58bb7fd342d8bd0e59a13b96b3348eabcb9d8a90",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/scripts/lib/evidence-core.mjs",
+      "sha256": "e864ec6d9a379be7ffe87111bff212c4300ecc47b111a63818317900e82b04b6",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/docs/reference.md",
+      "sha256": "5da5b078122ff76d90c0b818ed246601363f85d0e8a2dea529bbf9fc39f6cf69",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "inputs/docs/ci-gate.md",
+      "sha256": "2891e4aceea00bcd1a9ecf7ea059457c52aaed89e950a937cb5fa497c66095d0",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Y007.txt",
+      "sha256": "7ad0c5b9278fd3cc868496724aa2180bf3bda95703cba91579e8cfee72ae3d42",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-Z003.txt",
+      "sha256": "618e73ca847de70829b88038038c1eb19ef31a66d14d575da405d53d5011a20b",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "sources/phase-B-nonauthor/CW-X001.txt",
+      "sha256": "2c7d1d3a91320e4385dc5a6145140ac0bcb920a199527164a6a0e28310c6e0d6",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "sources/L05/REOPEN-NOTES.json",
+      "sha256": "84213a408d9b5d4cc9e7b9954690c06852b512e4426dfc6141ee7eda8386f864",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "sources/L06-source-addendum.json",
+      "sha256": "540ea59b12f58e6aa4c14d1c33600c16ba768c2741f90df4d54d690d647b6229",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "sources/L08/SOURCE-ADDENDUM.json",
+      "sha256": "fa1c9e846bccfa96a8e42d9f812bc30379061aea06f184f84e975c981dbf489a",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "sources/L12-public-reopens.json",
+      "sha256": "a0909ec9a1b23a0123de79c12f070e05ce4318e761aa26ceea92fa058c6a7e51",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "receipts/L04-source-addendum.json",
+      "sha256": "9296c09f387ca850a5396f707e5d59cfcfd23c95ffcd45bc9613634ca7c15201",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/01-findings.json",
+      "sha256": "7a73d775b2d21cee5e7f2192487a660d744765a739c571b3a1ade1e34097fecf",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/01-user-need-and-segment.md",
+      "sha256": "dd0ac7f2db5f4ff571a58a92e0c1efca7e1e2a43472d934f898d66c5e89e7e1e",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/02-findings.json",
+      "sha256": "af1064b53620fae0fb5a024efc6db0295d46c84a75b2af8184ee316c283e222d",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/02-incremental-value-and-alternatives.md",
+      "sha256": "8c6ea25119cc6b276ab6474ef94a054265876d1e738657a5bbad2ade1ab8e5cc",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/03-findings.json",
+      "sha256": "81aadfd65aa90c1786b6e427d5bdf3087639a225c0a9499be3096f89df6d7e63",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/03-native-experience-and-attention.md",
+      "sha256": "5f5198c9d8551c12627a546f3e9afd9dc837bbc6a7604af9e16a64ac8c529d47",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/04-capability-and-trust.md",
+      "sha256": "82b7a6cfc8723cef5df98a3016e48328111300666d47f0e672ead1eb6510b9ea",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/04-findings.json",
+      "sha256": "12326a31c84e58e1e399e95eddf70bdf0375a702809999b4c524f4f71b0183f1",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/05-findings.json",
+      "sha256": "06f1fea5466d083fcffa75abf40b9c0c6cb51369fc5a4c32cc6bdca643438e03",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/05-repeated-reliance.md",
+      "sha256": "9d57d8d5cdc7e2ee6e7056b13416bfad481e540df26a4c5ce730a7d7361a889e",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/06-buyer-and-paid-service-value.md",
+      "sha256": "8c2211df7e8ba75ed1147af64cd1a7f3064a5daf1759acf3f8ba56871558876a",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/06-findings.json",
+      "sha256": "61340bd24705ed87ffac61a78985c938a9f5a7bd66743e74bbba5d0c8178eca6",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/07-capability-expansion.md",
+      "sha256": "cfc6de65400fecf794da57f834024e8741739ccf65ad892d8f53cdc945d0152f",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/07-findings.json",
+      "sha256": "0e6ab824c1b2f904dce0666d9795d444983a21343a7c9e39b8e139e0d1a4c37d",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/08-findings.json",
+      "sha256": "cdc3273400768af355586cbdd894d8452f03bd8d54ef7173cb7557fb117bf65f",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/08-ownership-of-a-complete-job.md",
+      "sha256": "57d44f843d5fcf17e731d468c121c1214aa00b0abfee34683bfc5ddd47bc7823",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/09-findings.json",
+      "sha256": "2be3adcd0ed583e4194c7a205b083ff579aa10e44a442ad71d67a03928c567fd",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/09-withdrawal-test.md",
+      "sha256": "1054c9814dcc9a62ce684bb49ef9c4f598bf701f9a2cf8a97422f7ee3fb00a2b",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/10-compounding-project-knowledge.md",
+      "sha256": "9d8e281460a9be0f230333fd58e9479a4aa3351f8adee3359d418757cf993721",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/10-findings.json",
+      "sha256": "5ecdfc56aaa5e63446f2f1c87493a6001bee28b05711023e07f004f17c9ad092",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/11-findings.json",
+      "sha256": "6dfcafb89273792f55323a299d1834ec7e830361103ba63d7ab4d123c26c326e",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/11-shared-team-dependence.md",
+      "sha256": "8cd05efdb383bee01e29c2072e96b91aa3e77d7d648fdf922cfc81e606e8855b",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/12-ceiling-of-the-hypothesis.md",
+      "sha256": "841fb9b5509a2f82632116155c9aaba8d1d6ff3b87fbc6b6a933c6b29010c819",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    },
+    {
+      "path": "lenses/12-findings.json",
+      "sha256": "ba5dca9e8d3f6b3a03104b81ae144d13b5162c29a446a3f4cb0a1800d053eb30",
+      "boundary": "Findings and report introductions/sections/limits; canonical records at reported-problem/alternative level with selected complete records; original captures and code targeted passages. Not exhaustive external-page reread."
+    }
+  ],
+  "additional_identity_reads": [
+    "receipts/L01.json",
+    "receipts/L02.json",
+    "receipts/L03.json",
+    "receipts/L04.json",
+    "receipts/L05.json",
+    "receipts/L06.json",
+    "receipts/L07.json",
+    "receipts/L08.json",
+    "receipts/L09.json",
+    "receipts/L10.json",
+    "receipts/L11.json",
+    "receipts/L12.json"
+  ],
+  "blinding": {
+    "other_synthesis_read": false,
+    "phase_recommendations_read": false,
+    "parent_running_analysis_read": false,
+    "limitation": "Shared model/team and shared filesystem; procedural isolation only. No independent statistical or customer evidence is created."
+  },
+  "outputs": [
+    {
+      "path": "SYNTHESIS-A.md",
+      "sha256": "2a8a2b34ecbaea0fcdd772a226334a2d1413493040f4339fe7b701a95df9b688",
+      "bytes": 33219
+    },
+    {
+      "path": "SYNTHESIS-A-MAPPING.json",
+      "sha256": "1259e162e6543ea4ad53dca9728bc7f9f4b466e0cad105e69042d6c7cabcda7a",
+      "bytes": 700479
+    }
+  ],
+  "coverage": {
+    "claims": 12,
+    "lens_reports": 12,
+    "material_findings": 65,
+    "dispositions": 65,
+    "canonical_evidence_usage_records": 132,
+    "checks": "Exact finding ID set and unique claim IDs validated; counterevidence and original finding payloads preserved."
+  },
+  "first_draft_frozen_at": "2026-09-30T04:53:01.632025+00:00",
+  "first_draft_directory": "history/synthesis-A",
+  "freeze_method": "exclusive creation plus read-only mode 0444; hashes bound in FREEZE.json. Procedural immutability, not tamper-proof access control.",
+  "correction_attempts_used": 0,
+  "self_approval": false,
+  "new_external_reopens": 0,
+  "participant_or_runtime_experiments_executed": false
+}

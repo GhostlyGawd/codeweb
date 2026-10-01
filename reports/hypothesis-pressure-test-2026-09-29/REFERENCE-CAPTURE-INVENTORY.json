@@ -1,0 +1,29 @@
+[
+  {
+    "original_path": "/tmp/codeweb-ref-depot.jpg",
+    "source_url": "https://images.refero.design/styles/depot.dev/707c2922-e428-4ee4-847c-9791290712d1/preview_0.jpg",
+    "purpose": "available reference capture from the September 26 design research; not a customer evidence record",
+    "status": "preserved",
+    "snapshot_path": "inputs/reference-captures/codeweb-ref-depot.jpg",
+    "bytes": 102640,
+    "sha256": "641d92286ba72a57019bc90f9ec03843f06064db0a41fb2a9ba4022f4a159126"
+  },
+  {
+    "original_path": "/tmp/codeweb-ref-linear.jpg",
+    "source_url": "https://images.refero.design/styles/linear.app/11d3e58a-87d7-4a9a-bbf5-720f4fd3ffc6/preview_0.jpg",
+    "purpose": "available reference capture from the September 26 design research; not a customer evidence record",
+    "status": "preserved",
+    "snapshot_path": "inputs/reference-captures/codeweb-ref-linear.jpg",
+    "bytes": 55070,
+    "sha256": "5c308224e140ecd5438a325c5c3e6cca447e7c4871b897f8b025fd07f20ec6a6"
+  },
+  {
+    "original_path": "/tmp/codeweb-ref-sst.jpg",
+    "source_url": "https://images.refero.design/styles/sst.dev/7b6c53c7-7145-476e-aed8-f2367eef3adb/preview_0.jpg",
+    "purpose": "available reference capture from the September 26 design research; not a customer evidence record",
+    "status": "preserved",
+    "snapshot_path": "inputs/reference-captures/codeweb-ref-sst.jpg",
+    "bytes": 74798,
+    "sha256": "0e93ab139c72d8ec03855105382fd44362fe3fd3c707cdb41e0173d5f91cc1b9"
+  }
+]

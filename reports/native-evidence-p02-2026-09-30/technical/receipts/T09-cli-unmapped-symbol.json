@@ -1,0 +1,25 @@
+{
+  "id": "T09-cli-unmapped-symbol",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/query.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/target/.codeweb/graph.json",
+    "--impact",
+    "missing",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:11.048Z",
+  "end": "2026-10-01T01:50:11.085Z",
+  "durationMs": 36.62533300000001,
+  "exit": 1,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"query\":\"impact\",\"symbol\":\"missing\",\"found\":false,\"hint\":\"no symbol matches \\\"missing\\\" — try codeweb_find \\\"<free text>\\\" (concept search, no name needed)\"}\n",
+  "stderr": ""
+}

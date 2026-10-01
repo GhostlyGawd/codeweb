@@ -1,0 +1,74 @@
+{
+  "attachment": {
+    "id": "1903cc40-5ca2-410e-83f7-8eda33a0c638",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "76e05df6-14cf-4873-a9c3-95aab90814a3",
+    "issueCommentId": null,
+    "assetId": "5f0dbf0a-240f-4387-917e-0743ac1a4951",
+    "provider": "local_disk",
+    "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/76e05df6-14cf-4873-a9c3-95aab90814a3/2026/09/28/d38532f3-2b53-4bf9-8c4d-ed20fc85c6c3-L456-REVIEW-APPROVED.md",
+    "contentType": "text/markdown",
+    "byteSize": 14027,
+    "sha256": "ba36d8e0fbdc4633798f4e179784b645eec48bebbc8289d82e903f5f4236e720",
+    "originalFilename": "L456-REVIEW-APPROVED.md",
+    "createdByAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "createdByUserId": null,
+    "createdAt": "2026-09-28T01:16:00.902Z",
+    "updatedAt": "2026-09-28T01:16:00.902Z",
+    "contentPath": "/api/attachments/1903cc40-5ca2-410e-83f7-8eda33a0c638/content",
+    "openPath": "/api/attachments/1903cc40-5ca2-410e-83f7-8eda33a0c638/content",
+    "downloadPath": "/api/attachments/1903cc40-5ca2-410e-83f7-8eda33a0c638/content?download=1"
+  },
+  "workProduct": {
+    "id": "b3b0317f-1918-42ba-9a97-a5a251b814aa",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "projectId": null,
+    "issueId": "76e05df6-14cf-4873-a9c3-95aab90814a3",
+    "executionWorkspaceId": null,
+    "runtimeServiceId": null,
+    "type": "artifact",
+    "provider": "paperclip",
+    "externalId": null,
+    "title": "L456 independent review \u2014 approved after correction 1",
+    "url": null,
+    "status": "ready_for_review",
+    "reviewState": "approved",
+    "isPrimary": false,
+    "healthStatus": "unknown",
+    "summary": "Final bounded evidence approval; 32-record original audit plus exact correction verification; parent coverage and synthesis remain.",
+    "metadata": {
+      "byteSize": 14027,
+      "openPath": "/api/attachments/1903cc40-5ca2-410e-83f7-8eda33a0c638/content",
+      "contentPath": "/api/attachments/1903cc40-5ca2-410e-83f7-8eda33a0c638/content",
+      "contentType": "text/markdown",
+      "attachmentId": "1903cc40-5ca2-410e-83f7-8eda33a0c638",
+      "downloadPath": "/api/attachments/1903cc40-5ca2-410e-83f7-8eda33a0c638/content?download=1",
+      "originalFilename": "L456-REVIEW-APPROVED.md"
+    },
+    "sourceTrust": null,
+    "createdByRunId": "0df2319f-f402-462e-9c4c-66f3f34af966",
+    "createdAt": "2026-09-28T01:16:00.913Z",
+    "updatedAt": "2026-09-28T01:16:00.913Z"
+  },
+  "status": "done",
+  "executionState": {
+    "status": "completed",
+    "monitor": null,
+    "reviewRequest": null,
+    "currentStageId": null,
+    "lastDecisionId": "f6f84a9b-3496-48c8-9722-87603170fdb5",
+    "returnAssignee": {
+      "type": "agent",
+      "userId": null,
+      "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+    },
+    "currentStageType": null,
+    "completedStageIds": [
+      "6c6b1f2e-5496-42a7-956a-eefab923efef"
+    ],
+    "currentStageIndex": null,
+    "currentParticipant": null,
+    "lastDecisionOutcome": "approved",
+    "changesRequestedCount": 0
+  }
+}

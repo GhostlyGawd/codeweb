@@ -1,0 +1,38 @@
+[
+  {
+    "evidence_id": "CW-T018",
+    "url": "https://news.ycombinator.com/item?id=48033774",
+    "retrieved_at": "2026-09-30T04:28:08.295423+00:00",
+    "read_boundary": "Story body and reporter reply 48035884; reopened rendered complete four-comment page.",
+    "method": "web.open rendered text followed by independent HTTP HTML preservation",
+    "new_customer_incident": false,
+    "capture": "sources/L07/CW-T018.html",
+    "sha256": "b717900277ead78de576f2aa7b94e16691c7f6674b900b1265d1bff24a2605a6",
+    "http_status": 200,
+    "final_url": "https://news.ycombinator.com/item?id=48033774"
+  },
+  {
+    "evidence_id": "CW-Z006",
+    "url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/",
+    "retrieved_at": "2026-09-30T04:28:08.295672+00:00",
+    "read_boundary": "Refactoring at scale; What humans still do; The AI tooling layer, cc-sessions paragraph. Complete rendered article inspected; linked repositories and images not audited.",
+    "method": "web.open rendered text followed by independent HTTP HTML preservation",
+    "new_customer_incident": false,
+    "capture": "sources/L07/CW-Z006.html",
+    "sha256": "cfbf9d35ee6707b49568072265c54c178f205bb708f02e01d29345c547983bf1",
+    "http_status": 200,
+    "final_url": "https://www.florian.bruniaux.com/blog/articles/claude-is-my-second-contributor/"
+  },
+  {
+    "evidence_id": "CW-Z001",
+    "url": "https://shan-verse.com/blog/codex-after-the-update/",
+    "retrieved_at": "2026-09-30T04:28:08.295758+00:00",
+    "read_boundary": "The Old Projects I Refactored; How I Use Codex Now; Why Use Codex. Complete rendered article inspected; unloaded comments, linked repos and product/pricing claims excluded.",
+    "method": "web.open rendered text followed by independent HTTP HTML preservation",
+    "new_customer_incident": false,
+    "capture": "sources/L07/CW-Z001.html",
+    "sha256": "453a82853a45368168656f41ee9194ac27d933862d278b14ed35cf0448abc5f9",
+    "http_status": 200,
+    "final_url": "https://shan-verse.com/blog/codex-after-the-update/"
+  }
+]

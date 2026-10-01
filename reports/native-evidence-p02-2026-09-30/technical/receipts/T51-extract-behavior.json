@@ -1,0 +1,25 @@
+{
+  "id": "T51-extract-behavior",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/extract-symbols.mjs",
+    "$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior",
+    "--no-ctags",
+    "--engine",
+    "regex"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-tech-s5LQzF",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T01:50:14.338Z",
+  "end": "2026-10-01T01:50:14.400Z",
+  "durationMs": 61.14191699999992,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "{\"meta\":{\"root\":\"$LOCAL_TMP/codeweb-p02-tech-s5LQzF/behavior\",\"target\":\"codeweb-p02-tech-s5LQzF/behavior\",\"engine\":\"regex\",\"languages\":[\"javascript\"],\"symbols\":7,\"analysis\":{\"status\":\"no-known-incompleteness\",\"diagnosticCount\":0,\"diagnostics\":[]},\"sources\":{\"current.test.mjs\":{\"s\":163,\"m\":1790819414339,\"h\":\"a21631f4fe9a5dd9caddec19748ecf3080b2d966\"},\"failed.test.mjs\":{\"s\":172,\"m\":1790819414339,\"h\":\"4c00dacb5a3b0ab65ae1d696ef94795e92425425\"},\"malformed.test.mjs\":{\"s\":61,\"m\":1790819414339,\"h\":\"60806fbd0d0752794fdb2d66b089d7f2865ae8dd\"},\"skipped.test.mjs\":{\"s\":171,\"m\":1790819414339,\"h\":\"d9962bbda7242aaad1fd91ee0826b0131f8be05b\"},\"subject.mjs\":{\"s\":205,\"m\":1790819414339,\"h\":\"360c5bab33f2c37ce00e366c9841b2dddaffc69d\"}},\"dirs\":{\".\":1790819414339}},\"nodes\":[{\"id\":\"subject.mjs:low\",\"label\":\"low\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":1,\"loc\":3,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"subject.mjs:popular\",\"label\":\"popular\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":4,\"loc\":3,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"subject.mjs:local\",\"label\":\"local\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":7,\"loc\":3,\"exports\":false,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"subject.mjs:zero\",\"label\":\"zero\",\"kind\":\"function\",\"file\":\"subject.mjs\",\"line\":10,\"loc\":3,\"exports\":true,\"domain\":\"\",\"summary\":\"\",\"role\":\"product\",\"signature\":{\"params\":[\"value\"],\"returns\":null,\"raw\":\"value\"},\"complexity\":1,\"maxDepth\":1},{\"id\":\"current.test.mjs:<module>\",\"label\":\"<module>\",\"kind\":\"module\",\"file\":\"current.test.mjs\",\"line\":1,\"loc\":1,\"exports\":false,\"domain\":\"\",\"summary\":\"\",\"role\":\"test\"},{\"id\":\"failed.test.mjs:<module>\",\"label\":\"<module>\",\"kind\":\"module\",\"file\":\"failed.test.mjs\",\"line\":1,\"loc\":1,\"exports\":false,\"domain\":\"\",\"summary\":\"\",\"role\":\"test\"},{\"id\":\"skipped.test.mjs:<module>\",\"label\":\"<module>\",\"kind\":\"module\",\"file\":\"skipped.test.mjs\",\"line\":1,\"loc\":1,\"exports\":false,\"domain\":\"\",\"summary\":\"\",\"role\":\"test\"}],\"edges\":[{\"from\":\"current.test.mjs:<module>\",\"to\":\"subject.mjs:low\",\"kind\":\"test\",\"weight\":1},{\"from\":\"failed.test.mjs:<module>\",\"to\":\"subject.mjs:low\",\"kind\":\"test\",\"weight\":1},{\"from\":\"skipped.test.mjs:<module>\",\"to\":\"subject.mjs:low\",\"kind\":\"test\",\"weight\":1},{\"from\":\"subject.mjs:local\",\"to\":\"subject.mjs:low\",\"kind\":\"call\",\"weight\":1}]}",
+  "stderr": "[extract] 7 symbols, 4 edges (4 call + 0 import) from 5 files (regex engine); dropped 0 ambiguous bare-call edges (0 short-name); scanned 5/5 file(s); edged 5/5; ast: off\n"
+}

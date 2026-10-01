@@ -1,0 +1,98 @@
+
+    BugBot without Background Agents? - Bug Reports - Cursor - Community Forum
+  Cursor - Community Forum
+      BugBot without Background Agents?
+                Support
+                Bug Reports
+            privacy-mode, 
+            gitlab, 
+            bugbot
+                olivertilk
+                (Oliver Tilk)
+                    April 15, 2026,  2:20pm
+              1
+Where does the bug appear (feature/product)?
+BugBot
+Describe the Bug
+Is it possible to enable BugBot in Gitlab without background agents while on the legacy privacy mode? We disabled AutoFix, which requires background agents, but I am still seeing the following error message when trying to start a review: “Please finish setting up background agents. Go to Cursor”. We are using the Gitlab SaaS, not self hosting.
+Steps to Reproduce
+Connect Cursor to Gitlab, while in the legacy privacy mode
+Enable BugBot on a repo, turn off Autofix
+Tag BugBot on an MR to start a review, observe the error message
+Expected Behavior
+BugBot performs a code review of the MR
+Screenshots / Screen Recordings
+BugBot.png1144×236 30.2 KB
+Operating System
+MacOS
+Version Information
+IDE/CLI not applicable
+Does this stop you from using Cursor
+No - Cursor works, but with this issue
+                mohitjain
+                (Mohit)
+                    April 16, 2026,  4:32am
+              6
+Hi @olivertilk,
+BugBot code reviews can work without background agents – they use a separate code path. The issue is with the command you used to trigger the review.
+Looking at your screenshot, it appears the comment was “can you review this MR?” – BugBot requires specific command syntax to trigger a review. Try commenting one of these on the MR instead:
+@bugbot run
+@cursor review
+The natural language phrasing gets picked up by a different handler (the background agents path), which is why you see the “finish setting up background agents” error even though you don’t need them for BugBot reviews.
+Could you try using one of those exact commands and let us know if the review triggers successfully?
+For reference, the BugBot docs cover the available trigger commands.
+                olivertilk
+                (Oliver Tilk)
+                    April 16, 2026,  7:57pm
+              7
+Hi Mohit,
+Thank you, that worked!
+    Related topics
+          Topic
+          Replies
+          Views
+          Activity
+                Unable to use @cursor if bugbot is not enabled
+                      Bug Reports
+                      bugbot
+              2
+              160
+              September 10, 2025
+                Bug bot is enabled for my repo but not running on PR
+                      Bug Reports
+                      bugbot
+                      , 
+                      github
+              2
+              85
+              April 21, 2026
+                Bugbot stopped being triggered
+                      Bug Reports
+                      bugbot
+                      , 
+                      github
+              14
+              356
+              April 27, 2026
+                BugBot stopped working in GitLab repo
+                      Bug Reports
+                      bugbot
+                      , 
+                      gitlab
+              1
+              68
+              July 10, 2026
+                Gitlab self-hosted : repos provisionning issue
+                      Bug Reports
+                      bugbot
+                      , 
+                      gitlab
+              6
+              157
+              June 10, 2026
+          Home 
+          Categories 
+          Guidelines 
+            Terms of Service 
+            Privacy Policy 
+Powered by Discourse, best viewed with JavaScript enabled

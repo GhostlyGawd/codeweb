@@ -1,0 +1,50 @@
+[
+  {
+    "file": "L123-HANDOFF.md",
+    "attachmentId": "2e940dd5-4da1-41eb-9f75-b5f1a099df95",
+    "workProductId": "7788636b-65a6-47e0-8a9a-2dbe774031d9",
+    "url": null
+  },
+  {
+    "file": "L123-VALIDATION.json",
+    "attachmentId": "48112a76-0720-4b8e-a529-1754672cf1b6",
+    "workProductId": "4434a2a2-1a31-4e86-bbc3-3ca142aa35a5",
+    "url": null
+  },
+  {
+    "file": "L123-QUERY-LOG.csv",
+    "attachmentId": "ffdcff9a-9150-4c9b-8690-adb1f0ce6f83",
+    "workProductId": "71f311d1-ccaa-4d31-883e-b6c2559c5996",
+    "url": null
+  },
+  {
+    "file": "L123-SOURCES.jsonl",
+    "attachmentId": "943257f1-a9d2-4425-ac86-f866f7a5ab05",
+    "workProductId": "e0f16266-8edb-49e7-9c2c-6b6cec25163d",
+    "url": null
+  },
+  {
+    "file": "L123-EVIDENCE.jsonl",
+    "attachmentId": "62432a23-9e1e-4a88-998f-e29d2bbabff9",
+    "workProductId": "98f9854b-da16-4fbc-8203-3f4a48a308ef",
+    "url": null
+  },
+  {
+    "file": "01-claude.md",
+    "attachmentId": "3e974a0b-5479-45e7-ac6b-b6cb9314be8c",
+    "workProductId": "b6823745-b3c7-404f-af72-429ff33a50cb",
+    "url": null
+  },
+  {
+    "file": "02-codex.md",
+    "attachmentId": "ae144e93-c077-4b69-aa13-39eb66a44c98",
+    "workProductId": "b842cdbe-ca78-41ae-a200-dd45f841c667",
+    "url": null
+  },
+  {
+    "file": "03-change-risk.md",
+    "attachmentId": "b1aa3897-1bf0-4bf7-a49c-3574dbace4d7",
+    "workProductId": "45e7ec3c-9a22-44aa-ba80-e87ce37588b7",
+    "url": null
+  }
+]

@@ -1,0 +1,44 @@
+{
+  "files": [
+    {
+      "path": ".codeweb/history.jsonl",
+      "sha256": "506be1be261119359ce0efef5313522ed768c796d3c20a863b46bc387383ee73"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "c3244f9d0d62c15ae228209e64e4d5661ec110bfed73ec9cb1686655aad270fa"
+    },
+    {
+      "path": "SPEC.md",
+      "sha256": "508c03f2557a68bb973c561c92cc0d499c4f8fb0e2aa09b497b80b52f9dda300"
+    },
+    {
+      "path": "docs/cli.md",
+      "sha256": "6c3015e28c643b7edc2ee4d7d83a249cefcb3e5448ad137338c78ca0dba2bc1b"
+    },
+    {
+      "path": "scripts/context-pack.mjs",
+      "sha256": "f17ecabc8caab0aaaefefc3fe1a2a6543f90bff011cd044321484bb8036ffae6"
+    },
+    {
+      "path": "scripts/extract-symbols.mjs",
+      "sha256": "8c5cdad5d73ffda2a0c74c76de1136e22a49661653287deabbbbd1b2bc821c86"
+    },
+    {
+      "path": "scripts/lib/tool-specs.mjs",
+      "sha256": "6656c8b35c499ec22aae27434e769d6e5e520444f43aad4ce84c165bf0c24625"
+    },
+    {
+      "path": "scripts/mcp-server.mjs",
+      "sha256": "19d4972ffc182d4e3b3cd7dbb7a56a7930dc8dee34fa74c1ab62792a90e31425"
+    },
+    {
+      "path": "scripts/review.mjs",
+      "sha256": "d871315f7548d5e63ab61858ad609adabf577a2f75742dfc2bc8d41ad702db44"
+    },
+    {
+      "path": "tests/test_ac_pins.py",
+      "sha256": "cd4159e78db609d12babcc6f509c59105e5871db06f3cf4ba6742d76c6f34f6e"
+    }
+  ]
+}

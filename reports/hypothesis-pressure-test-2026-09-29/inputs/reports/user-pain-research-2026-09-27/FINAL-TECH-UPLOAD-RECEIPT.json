@@ -1,0 +1,20 @@
+{
+  "id": "a990dff1-276a-4bf9-940a-59f4a94c8fa2",
+  "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+  "issueId": "45abbb28-df94-4bf3-b769-b54361ec19db",
+  "issueCommentId": null,
+  "assetId": "62ef90e9-84f2-4853-8ddd-7c6560bb0c36",
+  "provider": "local_disk",
+  "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/45abbb28-df94-4bf3-b769-b54361ec19db/2026/09/28/92944df7-4a2c-431f-8c47-49a967772a43-FINAL-TECH-HANDOFF.zip",
+  "contentType": "application/zip",
+  "byteSize": 20890,
+  "sha256": "476991e8e73a96dedf4fb22469dacb7fd5682fc5bb75a5159bd6a5c923246fa9",
+  "originalFilename": "FINAL-TECH-HANDOFF.zip",
+  "createdByAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+  "createdByUserId": null,
+  "createdAt": "2026-09-28T01:55:27.453Z",
+  "updatedAt": "2026-09-28T01:55:27.453Z",
+  "contentPath": "/api/attachments/a990dff1-276a-4bf9-940a-59f4a94c8fa2/content",
+  "openPath": "/api/attachments/a990dff1-276a-4bf9-940a-59f4a94c8fa2/content",
+  "downloadPath": "/api/attachments/a990dff1-276a-4bf9-940a-59f4a94c8fa2/content?download=1"
+}

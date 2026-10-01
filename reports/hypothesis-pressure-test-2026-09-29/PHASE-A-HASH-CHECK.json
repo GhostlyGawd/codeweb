@@ -1,0 +1,48 @@
+{
+  "input_files": 192,
+  "frozen_inputs_mismatches": [],
+  "lens_checks": [
+    {
+      "lens": 1,
+      "findings": 6,
+      "receipt_hashes_match": true,
+      "first_drafts_identical": true,
+      "mismatches": []
+    },
+    {
+      "lens": 2,
+      "findings": 6,
+      "receipt_hashes_match": true,
+      "first_drafts_identical": true,
+      "mismatches": []
+    },
+    {
+      "lens": 3,
+      "findings": 6,
+      "receipt_hashes_match": true,
+      "first_drafts_identical": true,
+      "mismatches": []
+    },
+    {
+      "lens": 4,
+      "findings": 6,
+      "receipt_hashes_match": true,
+      "first_drafts_identical": true,
+      "mismatches": []
+    },
+    {
+      "lens": 5,
+      "findings": 6,
+      "receipt_hashes_match": true,
+      "first_drafts_identical": true,
+      "mismatches": []
+    },
+    {
+      "lens": 6,
+      "findings": 6,
+      "receipt_hashes_match": true,
+      "first_drafts_identical": true,
+      "mismatches": []
+    }
+  ]
+}

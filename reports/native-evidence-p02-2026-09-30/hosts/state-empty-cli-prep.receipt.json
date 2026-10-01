@@ -1,0 +1,22 @@
+{
+  "id": "state-empty-cli-prep",
+  "command": [
+    "node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/bin/codeweb.mjs",
+    "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/states/unsupported-empty",
+    "--allow-empty",
+    "--json"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790820175.065321,
+  "end_epoch": 1790820175.362356,
+  "duration_seconds": 0.2968270778656006,
+  "timeout_seconds": 30,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": "25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd",
+  "baseline_after_sha256": "25f343b54f0eb02b9393ac06ad252dd0ecd56f2ff55c34ef26b8fd5c394297fd",
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/state-empty-cli-prep.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/state-empty-cli-prep.stderr.txt"
+}

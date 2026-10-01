@@ -1,0 +1,555 @@
+
+   Project-level .codex/hooks.json is silently ignored when Codex runs inside a git worktree · Issue #27133 · openai/codex · GitHub
+      Skip to content
+Navigation Menu
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub CopilotWrite better code with AI
+GitHub Copilot appDirect agents from issue to merge
+MCP RegistryIntegrate external tools
+DEVELOPER WORKFLOWS
+ActionsAutomate any workflow
+CodespacesInstant dev environments
+IssuesPlan and track work
+Code ReviewManage code changes
+Code QualityEnforce quality at merge
+APPLICATION SECURITY
+GitHub Advanced SecurityFind and fix vulnerabilities
+Code securitySecure your code as you build
+Secret protectionStop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+View all resources
+Open Source
+COMMUNITY
+GitHub SponsorsFund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+GitHub Stars
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platformAI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced SecurityEnterprise-grade security features
+Copilot for BusinessEnterprise-grade AI features
+Premium SupportEnterprise-grade 24/7 support
+Pricing
+Search/
+Sign inSign up
+Appearance settings
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+Dismiss alert
+{{ message }}
+        openai
+    /
+      codex
+    Public
+Notifications
+    You must be signed in to change notification settings
+Fork
+    19.9k
+          Star
+          127k
+        Code
+        Issues
+          5k+
+        Pull requests
+          166
+        Discussions
+        Actions
+        Security and quality
+          1
+        Insights
+Additional navigation options
+          Code
+          Issues
+          Pull requests
+          Discussions
+          Actions
+          Security and quality
+          Insights
+ Project-level .codex/hooks.json is silently ignored when Codex runs inside a git worktree #27133
+New issueCopy link
+New issueCopy link
+Open
+Open
+ Project-level .codex/hooks.json is silently ignored when Codex runs inside a git worktree#27133
+Copy link
+Labels
+CLIIssues related to the Codex CLIIssues related to the Codex CLIbugSomething isn't workingSomething isn't workingconfigIssues involving config.toml, config keys, config merging, or config updatesIssues involving config.toml, config keys, config merging, or config updateshooksIssues related to event hooksIssues related to event hooks
+Description
+yaodiff
+opened on Jun 9, 2026
+Issue body actions
+What version of Codex CLI is running?
+0.137.0
+What subscription do you have?
+pro
+Which model were you using?
+gpt-5.5
+What platform is your computer?
+Linux 5.15.120.bsk.3-amd64 x86_64
+What terminal emulator and version are you using (if applicable)?
+tmux
+Codex doctor report
+{
+  "schemaVersion": 1,
+  "generatedAt": "1780985871s since unix epoch",
+  "overallStatus": "warning",
+  "codexVersion": "0.137.0",
+  "checks": {
+    "app_server.status": {
+      "id": "app_server.status",
+      "category": "app-server",
+      "status": "ok",
+      "summary": "background server is not running",
+      "details": {
+        "control socket": "~/.codex/app-server-control/app-server-control.sock",
+        "daemon state dir": "~/.codex/app-server-daemon",
+        "mode": "ephemeral",
+        "pid file": "~/.codex/app-server-daemon/app-server.pid (missing)",
+        "settings": "~/.codex/app-server-daemon/settings.json (missing)",
+        "status": "not running",
+        "update-loop pid file": "~/.codex/app-server-daemon/app-server-updater.pid (missing)"
+      },
+      "remediation": null,
+      "durationMs": 0
+    },
+    "auth.credentials": {
+      "id": "auth.credentials",
+      "category": "auth",
+      "status": "ok",
+      "summary": "auth is configured",
+      "details": {
+        "auth file": "~/.codex/auth.json",
+        "auth storage mode": "File",
+        "stored API key": "false",
+        "stored ChatGPT tokens": "true",
+        "stored agent identity": "false",
+        "stored auth mode": "chatgpt"
+      },
+      "remediation": null,
+      "durationMs": 0
+    },
+    "config.load": {
+      "id": "config.load",
+      "category": "config",
+      "status": "ok",
+      "summary": "config loaded",
+      "details": {
+        "CODEX_HOME": "~/.codex",
+        "config.toml": "~/.codex/config.toml",
+        "config.toml parse": "ok",
+        "cwd": "<worktree-root>/<project>",
+        "enabled feature flags": "shell_tool, unified_exec, shell_snapshot, sqlite, memories, hooks, enable_request_compression, network_proxy, multi_agent, apps, tool_suggest, plugins, in_app_browser, browser_use, browser_use_external, computer_use, plugin_sharing, image_generation, skill_mcp_dependency_install, steer, guardian_approval, goals, collaboration_modes, tool_call_mcp_elicitation, personality, fast_mode, tui_app_server, workspace_dependencies",
+        "feature flag overrides": "terminal_resize_reflow=false, memories=true, network_proxy=true",
+        "feature flags enabled": "28",
+        "legacy feature flag": "codex_hooks -> hooks",
+        "log dir": "~/.codex/log",
+        "mcp servers": "1",
+        "model": "gpt-5.5",
+        "model provider": "openai",
+        "sqlite home": "~/.codex"
+      },
+      "remediation": null,
+      "durationMs": 0
+    },
+    "git.environment": {
+      "id": "git.environment",
+      "category": "git",
+      "status": "ok",
+      "summary": "git version 2.39.5",
+      "details": {
+        ".git entry": "file -> <repo-cache>/<project>.git/worktrees/<project>",
+        "PATH git #1": "/usr/bin/git",
+        "PATH git #2": "/bin/git",
+        "PATH git entries": "2",
+        "git branch": "<feature-branch>",
+        "git build options": "git version 2.39.5; cpu: x86_64; no commit associated with this build; sizeof-long: 8; sizeof-size_t: 8; shell-path: /bin/sh",
+        "git exec path": "/usr/lib/git-core",
+        "git version": "git version 2.39.5",
+        "repo detected": "true",
+        "repo root": "<worktree-root>/<project>",
+        "selected git": "/usr/bin/git"
+      },
+      "remediation": null,
+      "durationMs": 33
+    },
+    "installation": {
+      "id": "installation",
+      "category": "install",
+      "status": "ok",
+      "summary": "installation looks consistent",
+      "details": {
+        "PATH codex #1": "~/.nvm/versions/node/v24.13.0/bin/codex",
+        "current executable": "<nvm-root>/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin/codex",
+        "install context": "npm",
+        "managed by bun": "false",
+        "managed by npm": "true",
+        "managed package root": "<nvm-root>/lib/node_modules/@openai/codex",
+        "npm update target": "~/.nvm/versions/node/v24.13.0/lib/node_modules/@openai/codex"
+      },
+      "remediation": null,
+      "durationMs": 76
+    },
+    "mcp.config": {
+      "id": "mcp.config",
+      "category": "mcp",
+      "status": "ok",
+      "summary": "MCP configuration is locally consistent",
+      "details": {
+        "configured servers": "1",
+        "disabled servers": "0",
+        "stdio servers": "1"
+      },
+      "remediation": null,
+      "durationMs": 0
+    },
+    "network.env": {
+      "id": "network.env",
+      "category": "network",
+      "status": "ok",
+      "summary": "network-related environment looks readable",
+      "details": {
+        "proxy env vars present": "HTTP_PROXY, HTTPS_PROXY, ALL_PROXY, NO_PROXY, no_proxy"
+      },
+      "remediation": null,
+      "durationMs": 0
+    },
+    "network.provider_reachability": {
+      "id": "network.provider_reachability",
+      "category": "reachability",
+      "status": "ok",
+      "summary": "active provider endpoints are reachable over HTTP",
+      "details": {
+        "ChatGPT base URL": "https://chatgpt.com/backend-api/ reachable (HTTP 403)",
+        "reachability mode": "ChatGPT auth"
+      },
+      "remediation": null,
+      "durationMs": 454
+    },
+    "network.websocket_reachability": {
+      "id": "network.websocket_reachability",
+      "category": "websocket",
+      "status": "ok",
+      "summary": "Responses WebSocket handshake succeeded",
+      "details": {
+        "DNS": "1 IPv4, 1 IPv6, first IPv4",
+        "auth mode": "chatgpt",
+        "connect timeout": "15000 ms",
+        "endpoint": "wss://chatgpt.com/backend-api/<redacted>",
+        "handshake result": "HTTP 101 Switching Protocols",
+        "model provider": "openai",
+        "models etag present": "true",
+        "provider name": "OpenAI",
+        "proxy env vars present": "HTTP_PROXY, HTTPS_PROXY, ALL_PROXY, NO_PROXY, no_proxy",
+        "reasoning header": "false",
+        "server model present": "false",
+        "supports websockets": "true",
+        "wire API": "responses"
+      },
+      "remediation": null,
+      "durationMs": 1003
+    },
+    "runtime.provenance": {
+      "id": "runtime.provenance",
+      "category": "runtime",
+      "status": "ok",
+      "summary": "running npm on linux-x86_64",
+      "details": {
+        "commit": "unknown",
+        "install method": "npm",
+        "platform": "linux-x86_64",
+        "version": "0.137.0"
+      },
+      "remediation": null,
+      "durationMs": 0
+    },
+    "runtime.search": {
+      "id": "runtime.search",
+      "category": "search",
+      "status": "ok",
+      "summary": "search is OK (bundled)",
+      "details": {
+        "search provider": "bundled"
+      },
+      "remediation": null,
+      "durationMs": 0
+    },
+    "sandbox.helpers": {
+      "id": "sandbox.helpers",
+      "category": "sandbox",
+      "status": "ok",
+      "summary": "sandbox configuration is readable",
+      "details": {
+        "approval policy": "OnRequest",
+        "filesystem sandbox": "unrestricted",
+        "network sandbox": "enabled"
+      },
+      "remediation": null,
+      "durationMs": 0
+    },
+    "state.paths": {
+      "id": "state.paths",
+      "category": "state",
+      "status": "ok",
+      "summary": "state paths and databases are inspectable",
+      "details": {
+        "CODEX_HOME": "~/.codex (dir)",
+        "active rollout files": "137 files, 179334758 total bytes",
+        "archived rollout files": "2 files, 92761 total bytes",
+        "goals DB": "~/.codex/goals_1.sqlite (file) integrity ok",
+        "log DB": "~/.codex/logs_2.sqlite (file) integrity ok",
+        "memories DB": "~/.codex/memories_1.sqlite (file) integrity ok",
+        "state DB": "~/.codex/state_5.sqlite (file) integrity ok"
+      },
+      "remediation": null,
+      "durationMs": 562
+    },
+    "state.rollout_db_parity": {
+      "id": "state.rollout_db_parity",
+      "category": "threads",
+      "status": "ok",
+      "summary": "rollout files and state DB thread inventory agree",
+      "details": {
+        "default model provider": "openai",
+        "rollout DB active files": "137",
+        "rollout DB active rows": "137",
+        "rollout DB archived files": "2",
+        "rollout DB archived rows": "2",
+        "rollout DB model providers": "openai=139",
+        "rollout DB rows": "139",
+        "rollout DB sources": "vscode=98, exec=23, cli=10, subagent:review=5, subagent:thread_spawn=2, subagent:other=1"
+      },
+      "remediation": null,
+      "durationMs": 5479
+    },
+    "system.environment": {
+      "id": "system.environment",
+      "category": "system",
+      "status": "ok",
+      "summary": "OS language en-US",
+      "details": {
+        "LANG": "zh_CN.UTF-8",
+        "LC_ALL": "en_US.UTF-8",
+        "LC_CTYPE": "UTF-8",
+        "os": "Linux [64-bit]",
+        "os language": "en-US",
+        "os type": "Linux",
+        "os version": "Unknown"
+      },
+      "remediation": null,
+      "durationMs": 11
+    },
+    "terminal.env": {
+      "id": "terminal.env",
+      "category": "terminal",
+      "status": "ok",
+      "summary": "terminal metadata was detected",
+      "details": {
+        "COLORTERM": "truecolor",
+        "FORCE_COLOR": "3",
+        "TERM": "tmux-256color",
+        "color output": "disabled (stdout is not a terminal)",
+        "effective locale": "en_US.UTF-8",
+        "stderr is terminal": "false",
+        "stdin is terminal": "false",
+        "stdout is terminal": "false",
+        "terminal": "unknown",
+        "terminal size": "80x24"
+      },
+      "remediation": null,
+      "durationMs": 2
+    },
+    "terminal.title": {
+      "id": "terminal.title",
+      "category": "title",
+      "status": "ok",
+      "summary": "terminal title default",
+      "details": {
+        "terminal title activity": "true",
+        "terminal title items": "activity, project-name",
+        "terminal title project source": "git repo root",
+        "terminal title project value": "<project>",
+        "terminal title source": "default"
+      },
+      "remediation": null,
+      "durationMs": 0
+    },
+    "updates.status": {
+      "id": "updates.status",
+      "category": "updates",
+      "status": "warning",
+      "summary": "update configuration is locally consistent",
+      "details": {
+        "cached latest version": "0.137.0",
+        "check for update on startup": "true",
+        "last checked at": "2026-06-08T17:54:25Z",
+        "latest version probe": "curl: (22) The requested URL returned error: 403",
+        "update action": "npm install -g @openai/codex",
+        "version cache": "~/.codex/version.json"
+      },
+      "remediation": null,
+      "durationMs": 470
+    }
+  }
+}
+What issue are you seeing?
+When Codex runs inside a git worktree (.git is a file, not a directory), project-level hooks defined in <worktree-root>/.codex/hooks.json are silently not loaded or executed. Only user-level hooks from ~/.codex/hooks.json fire.
+I tested three projects on the same machine with identical user-level hooks config:
+Project
+.git type
+Project hooks.json SessionStart hooks
+Actual SessionStart hooks fired
+test_case
+directory (normal repo)
+1
+3 (2 user + 1 project)
+crm_space
+file (worktree)
+2
+2 (user only, 0 project)
+infra_product
+file (worktree)
+2
+2 (user only, 0 project)
+Key observations:
+--dangerously-bypass-hook-trust does not change the result — still only 2 hooks in worktree mode. This rules out a trust issue.
+codex doctor correctly identifies the worktree as a project (project source: git repo root, showing the worktree path).
+The .codex/hooks.json file exists and is valid JSON at the worktree root.
+infra_product has 13 trusted_hash entries in ~/.codex/config.toml for its project hooks — they still don't fire.
+No error messages are shown. The project hooks are simply not discovered.
+What steps can reproduce the bug?
+# 1. Create a repo with a worktree
+cd /tmp && mkdir hook-repro && cd hook-repro
+git init main && cd main
+git config user.email "test@test.com" && git config user.name "test"
+echo "hello" > file.txt && git add . && git commit -m "init"
+git worktree add ../wt -b feature
+# 2. Add project-level hooks to the worktree
+cd ../wt
+mkdir -p .codex
+cat > .codex/config.toml << 'EOF'
+[features]
+hooks = true
+EOF
+cat > .codex/hooks.json << 'EOF'
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo PROJECT_HOOK_FIRED >> /tmp/codex-hook-probe.log"
+          }
+        ]
+      }
+    ]
+  }
+}
+EOF
+# 3. Run codex in the worktree
+rm -f /tmp/codex-hook-probe.log
+codex exec --dangerously-bypass-hook-trust "echo hello"
+# 4. Check
+cat /tmp/codex-hook-probe.log
+# Expected: contains "PROJECT_HOOK_FIRED"
+# Actual:   file does not exist — project hook never fired
+# 5. Compare: do the same in the main (non-worktree) repo
+cd ../main
+mkdir -p .codex
+cp ../wt/.codex/config.toml .codex/
+cp ../wt/.codex/hooks.json .codex/
+rm -f /tmp/codex-hook-probe.log
+codex exec --dangerously-bypass-hook-trust "echo hello"
+cat /tmp/codex-hook-probe.log
+# Result: contains "PROJECT_HOOK_FIRED" ✓
+What is the expected behavior?
+Project-level .codex/hooks.json placed at the worktree working tree root (the path returned by git rev-parse --show-toplevel) should be discovered and loaded, the same way it works in a normal (non-worktree) repository.
+Additional information
+Root cause hypothesis: In a git worktree, .git is a file containing gitdir: /path/to/.git/worktrees/<name>. The hooks discovery code likely resolves the project root by looking for a .git directory, or by using git rev-parse --git-common-dir (which returns the main repo's .git path), instead of using git rev-parse --show-toplevel (which correctly returns the worktree working tree root). This causes the hooks scanner to look for .codex/hooks.json at the wrong location.
+Evidence supporting this: I found a stale trusted_hash entry in ~/.codex/config.toml keyed to a .codex/hooks.json path at the bare repo cache parent directory (where --git-common-dir resolves), not at the worktree working tree — suggesting codex previously resolved the hooks config path to that location.
+Workaround: Register hooks at the user level (~/.codex/hooks.json) instead of project level. User-level hooks fire correctly regardless of worktree status.
+Reactions are currently unavailable
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+Metadata
+Metadata
+AssigneesNo one assigned
+Labels
+CLIIssues related to the Codex CLIIssues related to the Codex CLIbugSomething isn't workingSomething isn't workingconfigIssues involving config.toml, config keys, config merging, or config updatesIssues involving config.toml, config keys, config merging, or config updateshooksIssues related to event hooksIssues related to event hooks
+TypeNo type
+ProjectsNo projects
+MilestoneNo milestone
+RelationshipsNone yet
+DevelopmentNo branches or pull requests
+Issue actions
+Open in GitHub Copilot app
+Footer
+        © 2026 GitHub, Inc.
+Footer navigation
+            Terms
+            Privacy
+              Security
+              Status
+            Community
+            Docs
+            Contact
+      Manage cookies
+        Do not share my personal information
+    You can’t perform that action at this time.

@@ -1,0 +1,261 @@
+{
+  "started_at": "2026-09-30T03:57:27.808100+00:00",
+  "reason": "One root bootstrap repair after coordinator rate cap and blocked follow-up/wake prevented assignment continuation. Existing task matrix preserved.",
+  "task_matrix_source": "$LOCAL_HOME/.local/share/codeweb-paperclip-pilot/cycle-01/workspace/reports/hypothesis-pressure-test-2026-09-29/CONTROL-PLANE.json",
+  "updates": [
+    {
+      "key": "L01",
+      "identifier": "COD-80",
+      "id": "375bee1a-6e50-4430-bef6-20cf523f4771",
+      "previous_assignee": null,
+      "assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "todo"
+    },
+    {
+      "key": "L02",
+      "identifier": "COD-81",
+      "id": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+      "previous_assignee": null,
+      "assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "todo"
+    },
+    {
+      "key": "L03",
+      "identifier": "COD-82",
+      "id": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+      "previous_assignee": null,
+      "assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "todo"
+    },
+    {
+      "key": "L04",
+      "identifier": "COD-83",
+      "id": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+      "previous_assignee": null,
+      "assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "todo"
+    },
+    {
+      "key": "L05",
+      "identifier": "COD-84",
+      "id": "a578154c-75d4-48de-bb1c-13a93fa55398",
+      "previous_assignee": null,
+      "assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "todo"
+    },
+    {
+      "key": "L06",
+      "identifier": "COD-85",
+      "id": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+      "previous_assignee": null,
+      "assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "todo"
+    },
+    {
+      "key": "L07",
+      "identifier": "COD-86",
+      "id": "d89a661f-67ec-44c9-892d-c91cc346da58",
+      "previous_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "blocked"
+    },
+    {
+      "key": "L08",
+      "identifier": "COD-87",
+      "id": "bc105098-f7d1-44a0-8e23-ba3e3b1b86a0",
+      "previous_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "blocked"
+    },
+    {
+      "key": "L09",
+      "identifier": "COD-88",
+      "id": "a607cbae-3a0e-43a1-9e8b-7386ff63c26c",
+      "previous_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "blocked"
+    },
+    {
+      "key": "L10",
+      "identifier": "COD-89",
+      "id": "b069b0f2-e4f1-4ac4-806e-7131bafd6447",
+      "previous_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "blocked"
+    },
+    {
+      "key": "L11",
+      "identifier": "COD-90",
+      "id": "240c3739-aedd-40ee-8382-aa1c0803b438",
+      "previous_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "blocked"
+    },
+    {
+      "key": "L12",
+      "identifier": "COD-91",
+      "id": "b095ce67-4c3e-4a89-8733-391b8527ce07",
+      "previous_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "blocked"
+    },
+    {
+      "key": "SA",
+      "identifier": "COD-92",
+      "id": "265838d5-9909-432f-bb3a-34e2a353087b",
+      "previous_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "assignee": "79d272db-70e2-483b-b817-292dac08593e",
+      "status": "blocked"
+    },
+    {
+      "key": "adversarial",
+      "identifier": "COD-94",
+      "id": "892c9083-ce03-4257-afdc-3beb443e1b01",
+      "previous_assignee": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "assignee": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "status": "blocked"
+    }
+  ],
+  "readbacks": [
+    {
+      "id": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+      "identifier": "COD-77",
+      "status": "blocked",
+      "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "executionRunId": null
+    },
+    {
+      "id": "cd0cc8cb-59bc-48ad-845e-6d938aab2bbf",
+      "identifier": "COD-78",
+      "status": "blocked",
+      "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "executionRunId": null
+    },
+    {
+      "id": "5e929c74-6224-4f8c-b865-38f840720b34",
+      "identifier": "COD-79",
+      "status": "blocked",
+      "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "executionRunId": null
+    },
+    {
+      "id": "375bee1a-6e50-4430-bef6-20cf523f4771",
+      "identifier": "COD-80",
+      "status": "in_progress",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "executionRunId": "766096ef-4afa-4384-bbb6-4fc8f565d43f"
+    },
+    {
+      "id": "a9ac96fc-1dbf-4981-b01d-1984d88217bb",
+      "identifier": "COD-81",
+      "status": "in_progress",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "executionRunId": "f7326cb1-7ec5-446f-912a-a1eaaaa45b26"
+    },
+    {
+      "id": "26a76a68-4fe4-408d-8dc8-9418dd5e003a",
+      "identifier": "COD-82",
+      "status": "todo",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "executionRunId": null
+    },
+    {
+      "id": "a3294b08-b019-4ccc-816d-5766e59f90b1",
+      "identifier": "COD-83",
+      "status": "todo",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "executionRunId": null
+    },
+    {
+      "id": "a578154c-75d4-48de-bb1c-13a93fa55398",
+      "identifier": "COD-84",
+      "status": "todo",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "executionRunId": null
+    },
+    {
+      "id": "f3d31ac5-0a32-4c96-be9e-4aab46566c3d",
+      "identifier": "COD-85",
+      "status": "todo",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "executionRunId": null
+    },
+    {
+      "id": "d89a661f-67ec-44c9-892d-c91cc346da58",
+      "identifier": "COD-86",
+      "status": "blocked",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "executionRunId": null
+    },
+    {
+      "id": "bc105098-f7d1-44a0-8e23-ba3e3b1b86a0",
+      "identifier": "COD-87",
+      "status": "blocked",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "executionRunId": null
+    },
+    {
+      "id": "a607cbae-3a0e-43a1-9e8b-7386ff63c26c",
+      "identifier": "COD-88",
+      "status": "blocked",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "executionRunId": null
+    },
+    {
+      "id": "b069b0f2-e4f1-4ac4-806e-7131bafd6447",
+      "identifier": "COD-89",
+      "status": "blocked",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "executionRunId": null
+    },
+    {
+      "id": "240c3739-aedd-40ee-8382-aa1c0803b438",
+      "identifier": "COD-90",
+      "status": "blocked",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "executionRunId": null
+    },
+    {
+      "id": "b095ce67-4c3e-4a89-8733-391b8527ce07",
+      "identifier": "COD-91",
+      "status": "blocked",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "executionRunId": null
+    },
+    {
+      "id": "265838d5-9909-432f-bb3a-34e2a353087b",
+      "identifier": "COD-92",
+      "status": "blocked",
+      "assigneeAgentId": "79d272db-70e2-483b-b817-292dac08593e",
+      "executionRunId": null
+    },
+    {
+      "id": "1fd63335-ee92-422c-888e-9db5dfaf7b5a",
+      "identifier": "COD-93",
+      "status": "blocked",
+      "assigneeAgentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00",
+      "executionRunId": null
+    },
+    {
+      "id": "892c9083-ce03-4257-afdc-3beb443e1b01",
+      "identifier": "COD-94",
+      "status": "blocked",
+      "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+      "executionRunId": null
+    }
+  ],
+  "completion": false,
+  "verified_at": "2026-09-30T03:58:05.186568+00:00",
+  "activation_complete": true,
+  "updates_count": 14,
+  "coordination_comments": [
+    {
+      "issue_id": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+      "id": "b58ba38f-ce08-4d27-9618-515788114938"
+    },
+    {
+      "issue_id": "a7388229-9e7d-4978-9ad4-0eb128c9dc37",
+      "id": "f4238430-4df8-4457-a175-a97ddafe26f1"
+    }
+  ]
+}

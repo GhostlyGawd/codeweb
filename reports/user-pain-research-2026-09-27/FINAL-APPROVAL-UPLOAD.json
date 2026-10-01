@@ -1,0 +1,53 @@
+{
+  "attachment": {
+    "id": "63eb9525-808e-4046-a8a3-ddd369213efd",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "issueId": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+    "issueCommentId": null,
+    "assetId": "564a3361-f113-4508-b835-31fa68d04b82",
+    "provider": "local_disk",
+    "objectKey": "a3d32595-a6ed-4347-ad78-8d3543b47cd7/issues/7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb/2026/09/28/ad1245c6-b579-42c5-b7c8-2e08d2057318-RESEARCH-APPROVED-PACKAGE.zip",
+    "contentType": "application/zip",
+    "byteSize": 496533,
+    "sha256": "068fac8a43faa78331b3f3ffde38364ec2f027cb5b83c3ad535fc4f04dd47dbb",
+    "originalFilename": "RESEARCH-APPROVED-PACKAGE.zip",
+    "createdByAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+    "createdByUserId": null,
+    "createdAt": "2026-09-28T02:22:12.262Z",
+    "updatedAt": "2026-09-28T02:22:12.262Z",
+    "contentPath": "/api/attachments/63eb9525-808e-4046-a8a3-ddd369213efd/content",
+    "openPath": "/api/attachments/63eb9525-808e-4046-a8a3-ddd369213efd/content",
+    "downloadPath": "/api/attachments/63eb9525-808e-4046-a8a3-ddd369213efd/content?download=1"
+  },
+  "work_product": {
+    "id": "2ec2b64d-58ad-4578-a446-ebf43ca9daad",
+    "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+    "projectId": null,
+    "issueId": "7ee2ea4b-1046-40a7-91bf-a05ffe37f9fb",
+    "executionWorkspaceId": null,
+    "runtimeServiceId": null,
+    "type": "artifact",
+    "provider": "paperclip",
+    "externalId": null,
+    "title": "Approved user-pain research and independent review",
+    "url": null,
+    "status": "ready_for_review",
+    "reviewState": "none",
+    "isPrimary": true,
+    "healthStatus": "unknown",
+    "summary": "Complete research package with final signed approval, evidence, six briefs and completion receipt. Source breadth target and requested repository placement remain explicit exceptions.",
+    "metadata": {
+      "byteSize": 496533,
+      "openPath": "/api/attachments/63eb9525-808e-4046-a8a3-ddd369213efd/content",
+      "contentPath": "/api/attachments/63eb9525-808e-4046-a8a3-ddd369213efd/content",
+      "contentType": "application/zip",
+      "attachmentId": "63eb9525-808e-4046-a8a3-ddd369213efd",
+      "downloadPath": "/api/attachments/63eb9525-808e-4046-a8a3-ddd369213efd/content?download=1",
+      "originalFilename": "RESEARCH-APPROVED-PACKAGE.zip"
+    },
+    "sourceTrust": null,
+    "createdByRunId": "2ecaedd2-d732-4333-a363-4209bd537dbc",
+    "createdAt": "2026-09-28T02:22:12.274Z",
+    "updatedAt": "2026-09-28T02:22:12.274Z"
+  }
+}

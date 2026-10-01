@@ -1,0 +1,16 @@
+{
+  "recorded_at": "2026-10-01T00:46:03.127625+00:00",
+  "commit": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+  "branch": "codex/p01-honest-similarity-output",
+  "pull_request": {
+    "headRefOid": "5da4d883c6e7056a4a419f23df86ab6f1c546a75",
+    "isDraft": true,
+    "number": 98,
+    "state": "OPEN",
+    "url": "https://github.com/GhostlyGawd/codeweb/pull/98"
+  },
+  "merge_or_release_performed": false,
+  "github_author_account": "GhostlyGawd",
+  "ci_status": "10/10 success",
+  "ci_evidence": "CI.json"
+}

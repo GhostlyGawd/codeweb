@@ -1,0 +1,28 @@
+{
+  "id": "codex-specific-config-disable",
+  "command": [
+    "codex",
+    "mcp",
+    "get",
+    "codeweb",
+    "--json",
+    "-c",
+    "mcp_servers.codeweb.command=\"node\"",
+    "-c",
+    "mcp_servers.codeweb.args=[\"$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/mcp-server.mjs\"]",
+    "-c",
+    "mcp_servers.codeweb.enabled=false"
+  ],
+  "prompt": null,
+  "cwd": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe",
+  "start_epoch": 1790819505.928365,
+  "end_epoch": 1790819505.978098,
+  "duration_seconds": 0.049455881118774414,
+  "timeout_seconds": 15,
+  "timed_out": false,
+  "exit_code": 0,
+  "baseline_before_sha256": null,
+  "baseline_after_sha256": null,
+  "private_stdout": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/codex-specific-config-disable.stdout.txt",
+  "private_stderr": "$LOCAL_TMP/codeweb-p02-hosts-ibn2supe/private-receipts/codex-specific-config-disable.stderr.txt"
+}

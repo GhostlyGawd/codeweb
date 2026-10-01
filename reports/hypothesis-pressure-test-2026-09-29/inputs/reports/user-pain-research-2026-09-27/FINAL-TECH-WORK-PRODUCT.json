@@ -1,0 +1,31 @@
+{
+  "id": "d1ba612f-4b66-4d56-87c4-cc9d965ccd43",
+  "companyId": "a3d32595-a6ed-4347-ad78-8d3543b47cd7",
+  "projectId": null,
+  "issueId": "45abbb28-df94-4bf3-b769-b54361ec19db",
+  "executionWorkspaceId": null,
+  "runtimeServiceId": null,
+  "type": "artifact",
+  "provider": "paperclip",
+  "externalId": null,
+  "title": "Final technical evidence and disconfirmation handoff",
+  "url": null,
+  "status": "ready_for_review",
+  "reviewState": "needs_board_review",
+  "isPrimary": true,
+  "healthStatus": "unknown",
+  "summary": "12 records; 18 full, 6 partial, 2 inaccessible sources. Shortfall of 22 preserved. Memo and five-hash validation; no parent completion claim.",
+  "metadata": {
+    "byteSize": 20890,
+    "openPath": "/api/attachments/a990dff1-276a-4bf9-940a-59f4a94c8fa2/content",
+    "contentPath": "/api/attachments/a990dff1-276a-4bf9-940a-59f4a94c8fa2/content",
+    "contentType": "application/zip",
+    "attachmentId": "a990dff1-276a-4bf9-940a-59f4a94c8fa2",
+    "downloadPath": "/api/attachments/a990dff1-276a-4bf9-940a-59f4a94c8fa2/content?download=1",
+    "originalFilename": "FINAL-TECH-HANDOFF.zip"
+  },
+  "sourceTrust": null,
+  "createdByRunId": "ac1f2ef8-6a0e-4749-ba16-6e5f684b8adc",
+  "createdAt": "2026-09-28T01:55:27.463Z",
+  "updatedAt": "2026-09-28T01:55:27.463Z"
+}

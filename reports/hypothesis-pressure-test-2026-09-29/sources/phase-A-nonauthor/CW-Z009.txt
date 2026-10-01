@@ -1,0 +1,101 @@
+
+PR #537: Fix Markdown in og descriptions
+Simon Willison’s Weblog
+    Subscribe
+    Sponsored by: Greptile — AI code reviewers catch bugs at run time and manage your code. Trusted by Nvidia, Netflix, and many more
+3rd June 2025 - Link Blog
+PR #537: Fix Markdown in og descriptions. Since OpenAI Codex is now available to us ChatGPT Plus subscribers I decided to try it out against my blog.
+It's a very nice implementation of the GitHub-connected coding "agent" pattern, as also seen in Google's Jules and Microsoft's Copilot Coding Agent.
+First I had to configure an environment for it. My Django blog uses PostgreSQL which isn't part of the default Codex container, so I had Claude Sonnet 4 help me come up with a startup recipe to get PostgreSQL working.
+I attached my simonw/simonwillisonblog GitHub repo and used the following as the "setup script" for the environment:
+# Install PostgreSQL
+apt-get update && apt-get install -y postgresql postgresql-contrib
+# Start PostgreSQL service
+service postgresql start
+# Create a test database and user
+sudo -u postgres createdb simonwillisonblog
+sudo -u postgres psql -c "CREATE USER testuser WITH PASSWORD 'testpass';"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE simonwillisonblog TO testuser;"
+sudo -u postgres psql -c "ALTER USER testuser CREATEDB;"
+pip install -r requirements.txt
+I left "Agent internet access" off for reasons described previously.
+Then I prompted Codex with the following (after one previous experimental task to check that it could run my tests):
+Notes and blogmarks can both use Markdown.
+They serve meta property="og:description" content=" tags on the page, but those tags include that raw Markdown which looks bad on social media previews.
+Fix it so they instead use just the text with markdown stripped - so probably render it to HTML and then strip the HTML tags.
+Include passing tests.
+Try to run the tests, the postgresql details are:
+database = simonwillisonblog
+username = testuser
+password = testpass
+Put those in the DATABASE_URL environment variable.
+I left it to churn away for a few minutes (4m12s, to be precise) and it came back with a fix that edited two templates and added one more (passing) test. Here's that change in full.
+And sure enough, the social media cards for my posts now look like this - no visible Markdown any more:
+Posted 3rd June 2025 at 11:58 pm
+Recent articles
+OpenAI DevDay 2026 live blog - 29th September 2026
+2026 in LLMs (so far) - 27th September 2026
+Claude Opus 5.5, GPT-6 Sol, GPT-6 Luna, and a new price war - 22nd September 2026
+This is a link post by Simon Willison, posted on 3rd June 2025.
+            django
+            589
+            github
+            195
+            postgresql
+            160
+            testing
+            95
+            ai
+            2,257
+            openai
+            469
+            generative-ai
+            2,001
+            chatgpt
+            204
+            llms
+            1,968
+            ai-assisted-programming
+            407
+            ai-agents
+            111
+            coding-agents
+            253
+            async-coding-agents
+            17
+            jules
+            6
+            codex
+            58
+    Monthly briefing
+    Sponsor me for $10/month and get a curated email digest of the month's most important LLM developments.
+    Pay me to send you less!
+    Sponsor & subscribe
+Disclosures
+Colophon
+©
+2002
+2003
+2004
+2005
+2006
+2007
+2008
+2009
+2010
+2011
+2012
+2013
+2014
+2015
+2016
+2017
+2018
+2019
+2020
+2021
+2022
+2023
+2024
+2025
+2026

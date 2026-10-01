@@ -1,0 +1,65 @@
+
+    Is it easy to revert from Developer edition to Community edition? - SonarQube Server / Community Build - Sonar Community
+    The next Sonar developer survey is open and calling for responses!
+      Take the survey 
+  ✕
+  Sonar Community
+      Is it easy to revert from Developer edition to Community edition?
+                SonarQube Server / Community Build
+            license, 
+            upgrade
+                chop
+                (Cyrille)
+                    April 6, 2021, 12:27pm
+              1
+Hi,
+Short version: my client is considering subscribing to the Developer Edition for a year, but reverting to the Community Edition after. Is that something possible or does it require a lot of work for database migration or other?
+I’m sorry of asking these here, but I failed to find the answers in the documentation.
+For those who’d like a bit more of context, we use SonarQube Community Edition with our CI. However, we have a lot of topics going on, with a lot of branches on a lot of (Maven) projects (microservice-like), and monitoring the code smells and issues is a mess (different branches with different versions wreak additional havoc among all that).
+I’m on the verge of convincing my client to subscribe to a Developer Edition, but they think of doing it for one year and then revert to Community Edition as Developer Edition would be less relevant. They are however worried that it’ll require work migrating from Community to Developer and then some more for migrating from Developer to Community.
+About Community → Developer, this post seems to indicate that, if we use the same version, it’s fairly transparent.
+About Developer → Community, though, it’s less clear. Concretely, would it be possible to just not renew the license but keep the Developer bundle (losing the Developer-exclusive features, of course)? And if we later wished to revert to a Community binary (for upgrading, for instance), would a database migration be necessary?
+                Colin
+                (Colin)
+                    April 6, 2021, 12:47pm
+              2
+Hey there.
+You only need to start a Community Edition of SonarQube of the same version against your database – no database migration needed. Of course, if you are analyzing branches, you will no longer have access to those branches after downgrading.
+    Related topics
+          Topic
+          Replies
+          Views
+          Activity
+                Migrating project from sonarqube community to developer edition
+                      SonarQube Server / Community Build
+              4
+              787
+              June 3, 2024
+                Upgrade from Community to Developer, will it use the same DB?
+                      SonarQube Server / Community Build
+              1
+              4996
+              January 23, 2019
+                Migration from SonarQube community edition to SonarQube Developer edition
+                      SonarQube Server / Community Build
+              1
+              7673
+              July 8, 2019
+                Can anyone assist with the migration from the Community Edition to a Developer Edition?
+                      SonarQube Server / Community Build
+                      sonarqube
+              1
+              209
+              December 15, 2023
+                SonarQube server Migration – Community Edition to Developer Edition
+                      SonarQube Server / Community Build
+                      sonarqube
+              1
+              99
+              October 15, 2025
+          Home 
+          Categories 
+          Guidelines 
+            Terms of Service 
+            Privacy Policy 
+Powered by Discourse, best viewed with JavaScript enabled

@@ -1,0 +1,27 @@
+{
+  "id": "573b8d18-80c7-4b18-84b5-aecd340601f8",
+  "identifier": "COD-76",
+  "status": "done",
+  "completedAt": "2026-09-30T05:29:52.127Z",
+  "assigneeAgentId": "86badd16-e228-46d5-81f2-d471f9eb21c4",
+  "executionState": {
+    "status": "completed",
+    "monitor": null,
+    "reviewRequest": null,
+    "currentStageId": null,
+    "lastDecisionId": "a087d07f-a57b-4cf3-a43c-3afe08a07bfe",
+    "returnAssignee": {
+      "type": "agent",
+      "userId": null,
+      "agentId": "47d9b132-0c5f-45f1-9cb1-e1143ba53e00"
+    },
+    "currentStageType": null,
+    "completedStageIds": [
+      "6087c96e-2ec8-4cb9-988c-0d1d1d7f02bd"
+    ],
+    "currentStageIndex": null,
+    "currentParticipant": null,
+    "lastDecisionOutcome": "approved",
+    "changesRequestedCount": 0
+  }
+}

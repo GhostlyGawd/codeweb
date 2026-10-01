@@ -1,0 +1,21 @@
+{
+  "id": "R10-known-target-repeat",
+  "command": [
+    "/opt/homebrew/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/hooks/pre-edit-impact.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_NO_RECEIPTS": "1",
+    "CODEWEB_NO_PROMO": "1"
+  },
+  "stdin": "{\"tool_name\": \"Edit\", \"tool_input\": {\"file_path\": \"$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/target/subject.mjs\", \"old_string\": \"value + 1\", \"new_string\": \"value + 2\", \"symbol\": \"subject.mjs:low\"}}",
+  "start": "2026-10-01T02:23:38.734073+00:00",
+  "end": "2026-10-01T02:23:38.770653+00:00",
+  "durationSeconds": 0.03661745798308402,
+  "exit": 0,
+  "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"[codeweb] editing subject.mjs: 4 symbol(s), 7 in-repo dependent edge(s) (most depended-on: popular \u00d75).\\n  function popular (product, unassigned) \u2014 5 caller(s), 0 test(s), blast 5 across 1 domain(s); args 1\\n  top callers: fan0.mjs:fan0, fan1.mjs:fan1, fan2.mjs:fan2, fan3.mjs:fan3\\n  \u2192 codeweb_context for a bounded edit window; codeweb_impact for the full blast radius.\"}}\n",
+  "stderr": ""
+}

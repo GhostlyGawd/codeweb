@@ -1,0 +1,19 @@
+{
+  "complete": false,
+  "stage": "phase_a_verified_phase_b_pending",
+  "activation_complete": true,
+  "root_bootstrap_repairs": 1,
+  "activation_updates": 14,
+  "runs_receipt": "RUNS.json",
+  "final_review_complete": false,
+  "canonical_source_placement_complete": false,
+  "non_author_phase_verification_required": true,
+  "remaining": "All original acceptance checks remain; activation is not analytical completion.",
+  "phase_a_non_author_verification": {
+    "artifact": "PHASE-A-NONAUTHOR-VERIFICATION.json",
+    "complete": true,
+    "findings": 18
+  },
+  "phase_a_complete": true,
+  "phase_a_receipt": "PHASE-A-RECEIPT.json"
+}

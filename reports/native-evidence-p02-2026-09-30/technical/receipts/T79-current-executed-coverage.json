@@ -1,0 +1,20 @@
+{
+  "id": "T79-current-executed-coverage",
+  "command": [
+    "/opt/homebrew/Cellar/node/26.7.0/bin/node",
+    "--test",
+    "--experimental-test-coverage",
+    "--test-reporter=lcov",
+    "$LOCAL_TMP/codeweb-p02-supplement-mshorI/behavior/current.test.mjs"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq",
+  "envOverrides": {},
+  "start": "2026-10-01T01:52:50.403Z",
+  "end": "2026-10-01T01:52:50.490Z",
+  "durationMs": 86.71837500000015,
+  "exit": 0,
+  "signal": null,
+  "error": null,
+  "stdout": "TN:\nSF:../codeweb-p02-supplement-mshorI/behavior/subject.mjs\nFN:1,low\nFNDA:1,low\nFNF:1\nFNH:1\nBRDA:1,0,0,1\nBRDA:1,1,0,1\nBRF:2\nBRH:2\nDA:1,1\nDA:2,1\nDA:3,1\nLH:3\nLF:3\nend_of_record\n",
+  "stderr": ""
+}

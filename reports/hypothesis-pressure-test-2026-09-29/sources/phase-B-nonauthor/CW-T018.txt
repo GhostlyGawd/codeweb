@@ -1,0 +1,86 @@
+How to improve code quality of Claude Code and codex (on 2026-05) | Hacker News
+Hacker News
+new
+|
+past
+|
+comments
+|
+ask
+|
+show
+|
+jobs
+|
+submit
+login
+How to improve code quality of Claude Code and codex (on 2026-05)
+2 points
+by
+david_d8912
+4 months ago
+|
+hide
+|
+past
+|
+favorite
+|
+4 comments
+I'm using both claude code (opus-4.7) and codex (gpt-5.5). The agents are perfectly capable of delivering most features hands free these days, but the code quality is still miserable without another few rounds of prompt. And it's worse for personal vibe project without well-written history code files.
+Simple example would be a poor extension of existing util methods, agent always duplicate and create new method instead of think about gracefully extending existing methods.
+How are you guys solving this issue? A carefully maintained claude.md imo is only a mitigation, not a scalable solution.
+verdverm
+4 months ago
+|
+next
+[–]
+staying human-in-the-loop, more upfront prompt effort, more/better instructions, starting to look at agent teams/workflows (think openclaw but not openclaw)
+You can run the claw like workflows by hand with a few sessions and a plan.md or whatever you want to call it (make a plan.md, implement plan.md, review, maybe repeat)
+david_d8912
+4 months ago
+|
+parent
+|
+next
+[–]
+Yeah that's what I'm doing, upfront work & code review. But it drastically slowing down the dev speed.
+verdverm
+4 months ago
+|
+root
+|
+parent
+|
+next
+[–]
+I've been using Scion [1] lately to put my agents in the background (not claw styling it yet)
+It's hard to gauge dev speed, putting in the thought upfront sometimes seems worth it, other times I just fire off some idea and it brings back more things to think about, which I would have spent a bunch of time figuring out where the gap came from. Being involved in the iteration still makes a ton of sense to me. I think some of what we are doing now is figuring out when/where to use this, which is really only gained through experience. It's super hard to explain, like intuitions we have about various things we do in life.
+[1]
+https://googlecloudplatform.github.io/scion/overview/
+david_d8912
+4 months ago
+|
+root
+|
+parent
+|
+next
+[–]
+So it's a cli agent swarm? any difference to the omc, everything-cc swarm features
+Guidelines
+|
+FAQ
+|
+Lists
+|
+API
+|
+Security
+|
+Legal
+|
+Apply to YC
+|
+Contact
+Search:

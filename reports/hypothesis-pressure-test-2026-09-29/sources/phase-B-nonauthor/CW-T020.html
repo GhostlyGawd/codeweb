@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>How to achieve greater code refactoring automation? - Codex CLI - OpenAI Developer Community</title>
+    <meta name="description" content="Currently working on a php code modernization project (5.2 &gt; 7.4 &gt; 8.0 &gt; 8.3 &gt; 8.4). I have a copy of the website codebase and database on a local staging server, with Git, Codex CLI and Playwright installed. 
+I’m not a …">
+    <meta name="generator" content="Discourse 2026.10.0-latest - https://github.com/discourse/discourse version 2590ea9db1b7c38dcf80298aefd3e7cb3afe1f2b">
+<link rel="icon" type="image/svg+xml" href="https://us1.discourse-cdn.com/openai1/optimized/4X/0/9/e/09e6028ae29015201ba12d4ade0ec72250797f89_2_32x32.svg">
+<link rel="apple-touch-icon" type="image/png" href="https://us1.discourse-cdn.com/openai1/optimized/4X/e/5/d/e5d0db747b8673d263cea6db3e4736ae59f34731_2_180x180.png">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F5F5F5">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+
+<meta name="color-scheme" content="light dark">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<link rel="canonical" href="https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318" />
+
+<meta name="discourse-track-view-session-id" content="gkUL7JYsloCOfrV4fpUxkEJlf8KxcU6H">
+  <link rel="search" type="application/opensearchdescription+xml" href="https://community.openai.com/opensearch.xml" title="OpenAI Developer Community Search">
+
+    
+    <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/color_definitions_light_4_15_4f842d78ed7a937ee4f04e52156f0017aa20b22d.css?__ws=community.openai.com" media="(prefers-color-scheme: light)" rel="stylesheet" class="light-scheme" data-scheme-id="4"/><link href="https://sea2.discourse-cdn.com/openai1/stylesheets/color_definitions_dark-new_9_15_e0eb396c4de8f3e363c2e36ca6cf8ef541d13997.css?__ws=community.openai.com" media="(prefers-color-scheme: dark)" rel="stylesheet" class="dark-scheme" data-scheme-id="9"/>
+
+<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/common_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="common"  />
+
+
+
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/automation_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="automation"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/chat_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="chat"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/checklist_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="checklist"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-adplugin_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-adplugin"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-ai_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-ai"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-akismet_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-akismet"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-cakeday_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-cakeday"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-chat-integration_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-chat-integration"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-data-explorer_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-data-explorer"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-details_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-details"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-gamification_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-gamification"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-github_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-github"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-lazy-videos_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-lazy-videos"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-local-dates_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-local-dates"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-math_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-math"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-narrative-bot_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-narrative-bot"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-policy_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-policy"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-presence_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-presence"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-reactions_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-reactions"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-solved_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-solved"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-templates_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-templates"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-topic-voting_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-topic-voting"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-user-notes_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-user-notes"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-workflows_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-workflows"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-yearly-review_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-yearly-review"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/footnote_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="footnote"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/hosted-site_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="hosted-site"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/poll_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="poll"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/spoiler-alert_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="spoiler-alert"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/chat_mobile_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="(width < 40rem)" rel="stylesheet" data-target="chat_mobile"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-ai_mobile_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="(width < 40rem)" rel="stylesheet" data-target="discourse-ai_mobile"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-gamification_mobile_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="(width < 40rem)" rel="stylesheet" data-target="discourse-gamification_mobile"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-reactions_mobile_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="(width < 40rem)" rel="stylesheet" data-target="discourse-reactions_mobile"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/chat_desktop_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="(width >= 40rem)" rel="stylesheet" data-target="chat_desktop"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-ai_desktop_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="(width >= 40rem)" rel="stylesheet" data-target="discourse-ai_desktop"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-gamification_desktop_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="(width >= 40rem)" rel="stylesheet" data-target="discourse-gamification_desktop"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-reactions_desktop_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="(width >= 40rem)" rel="stylesheet" data-target="discourse-reactions_desktop"  />
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/poll_desktop_d2f2dc6f9c6ea286759466ecc3cddca50784f66d.css?__ws=community.openai.com" media="(width >= 40rem)" rel="stylesheet" data-target="poll_desktop"  />
+
+  <link href="https://sea2.discourse-cdn.com/openai1/stylesheets/common_theme_10_e0a14371d15558c9e91c5d4d03cffd35a9803ce0.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="10" data-theme-name="category banners"/>
+<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/common_theme_4_d17973b839d43d04466912287e5340fae3da3605.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="4" data-theme-name="custom header links"/>
+<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/common_theme_12_b99fa99dda3913ef08b41b868b89ac3ed3db5587.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="12" data-theme-name="discourse-mermaid-theme-component"/>
+<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/common_theme_5_19845e650ef68bfd947738b9e57f510271ae2054.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="5" data-theme-name="easy footer"/>
+<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/common_theme_16_6f65f7ccac6e8cc7c4d9e5f637588a92072c8e39.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="16" data-theme-name="sidebar theme toggle"/>
+<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/common_theme_13_8f72eabb19409900469b56b7c2efbb8623c2b3fb.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="13" data-theme-name="hide-footer-chat"/>
+<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/common_theme_9_ea27aac584627a74c4d47a7b2f2465bf327859e7.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="9" data-theme-name="quickfixes"/>
+<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/common_theme_15_5614b7f60718771958f062e6430fabe7692f21c3.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="common_theme" data-theme-id="15" data-theme-name="light mode"/>
+  
+  
+
+    <script type="text/discourse-plugin" version="0.8" nonce="ylwoiAtwnlIq4DmReTObL0QHs">
+  const HIDDEN_CATEGORY_IDS = [23, 24, 25, 26];
+  const TARGET_GROUPS = ['trust_level_0']; // Add your group names here
+
+  api.onPageChange(() => {
+    const currentUser = api.getCurrentUser();
+    if (!currentUser) return;
+
+    const inTargetGroup = currentUser.groups.some(g => TARGET_GROUPS.includes(g.name));
+    if (!inTargetGroup) return;
+
+    // Only run inside new topic composer
+    const composer = document.querySelector('.composer.new-topic');
+    if (!composer) return;
+
+    const interval = setInterval(() => {
+      HIDDEN_CATEGORY_IDS.forEach(id => {
+        const row = document.querySelector(`.composer.new-topic .select-kit-row[data-value="${id}"]`);
+        if (row) row.style.display = 'none';
+      });
+    }, 300);
+
+    // Clear once loaded
+    setTimeout(() => clearInterval(interval), 5000);
+  });
+</script>
+
+    <meta id="data-ga-universal-analytics" data-tracking-code="G-62J2E5SERF" data-json="{&quot;cookieDomain&quot;:&quot;auto&quot;}" data-auto-link-domains="">
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-62J2E5SERF" nonce="ylwoiAtwnlIq4DmReTObL0QHs"></script>
+  <script defer src="https://us1.discourse-cdn.com/openai1/assets/js/google-universal-analytics-v4-43cb071f.js" data-discourse-entrypoint="js/google-universal-analytics-v4" nonce="ylwoiAtwnlIq4DmReTObL0QHs"></script>
+
+
+        <link rel="alternate nofollow" type="application/rss+xml" title="RSS feed of &#39;How to achieve greater code refactoring automation?&#39;" href="https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318.rss" />
+    <meta property="og:site_name" content="OpenAI Developer Community" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://us1.discourse-cdn.com/openai1/original/4X/0/4/c/04c8546833f0824a49d21f50e2b08dd44bfd3d05.png" />
+<meta property="og:image" content="https://us1.discourse-cdn.com/openai1/original/4X/0/4/c/04c8546833f0824a49d21f50e2b08dd44bfd3d05.png" />
+<meta property="og:url" content="https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318" />
+<meta name="twitter:url" content="https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318" />
+<meta property="og:title" content="How to achieve greater code refactoring automation?" />
+<meta name="twitter:title" content="How to achieve greater code refactoring automation?" />
+<meta property="og:description" content="Currently working on a php code modernization project (5.2 &gt; 7.4 &gt; 8.0 &gt; 8.3 &gt; 8.4). I have a copy of the website codebase and database on a local staging server, with Git, Codex CLI and Playwright installed.  I’m not a coder so I’m following instructions from ChatGPT Pro on my Windows PC, pasting back and forth with the staging server via Putty/SSH. The iteration loop is basically:  paste bash command → paste compact output back to ChatGPT → inspect → patch → lint → smoke → commit/checkpoint.  C..." />
+<meta name="twitter:description" content="Currently working on a php code modernization project (5.2 &gt; 7.4 &gt; 8.0 &gt; 8.3 &gt; 8.4). I have a copy of the website codebase and database on a local staging server, with Git, Codex CLI and Playwright installed.  I’m not a coder so I’m following instructions from ChatGPT Pro on my Windows PC, pasting back and forth with the staging server via Putty/SSH. The iteration loop is basically:  paste bash command → paste compact output back to ChatGPT → inspect → patch → lint → smoke → commit/checkpoint.  C..." />
+<meta property="og:article:section" content="Codex" />
+<meta property="og:article:section:color" content="0088CC" />
+<meta property="og:article:section" content="Codex CLI" />
+<meta property="og:article:section:color" content="0088CC" />
+<meta property="og:article:tag" content="chatgpt" />
+<meta name="twitter:label1" value="Reading time" />
+<meta name="twitter:data1" value="5 mins 🕑" />
+<meta name="twitter:label2" value="Likes" />
+<meta name="twitter:data2" value="24 ❤" />
+<meta property="article:published_time" content="2026-06-30T03:18:47+00:00" />
+<meta property="og:ignore_canonical" content="true" />
+
+
+    <link rel="alternate" type="text/markdown" href="https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318.md">
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"QAPage","name":"How to achieve greater code refactoring automation?","datePublished":"2026-06-30T03:18:47.797Z","mainEntity":{"@type":"Question","answerCount":15,"author":{"@type":"Person","name":"KevinH","url":"https://community.openai.com/u/KevinH"},"dateModified":"2026-06-30T03:18:47.917Z","datePublished":"2026-06-30T03:18:47.797Z","name":"How to achieve greater code refactoring automation?","text":"Currently working on a php code modernization project (5.2 &gt; 7.4 &gt; 8.0 &gt; 8.3 &gt; 8.4). I have a copy of the website codebase and database on a local staging server, with Git, Codex CLI and Playwright installed.\n\nI’m not a coder so I’m following instructions from ChatGPT Pro on my Windows PC, pasting b&hellip;","upvoteCount":2,"suggestedAnswer":[{"@type":"Answer","author":{"@type":"Person","name":"EricGT","url":"https://community.openai.com/u/EricGT"},"dateModified":"2026-06-30T09:35:55.329Z","datePublished":"2026-06-30T09:35:55.286Z","text":"[image] KevinH:\n\nI can’t help thinking there must be a more efficient, automated way to do this.\n\nCodex is one of the better answers for this kind of workflow.\n\nOpenAI now provides several ways to use Codex, including the Codex app, Codex CLI, Codex IDE extension, and Codex web. The quickstart &hellip;","upvoteCount":2,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/2"},{"@type":"Answer","author":{"@type":"Person","name":"tangweigangsir","url":"https://community.openai.com/u/tangweigangsir"},"dateModified":"2026-07-01T06:45:43.106Z","datePublished":"2026-07-01T06:45:43.047Z","text":"Since you already have Git, Codex CLI, Playwright, lint/smoke, and checkpoints, I would not try to make it fully autonomous first. The safer speed-up is to move one complete loop onto the staging box and make Codex own only that loop.\n\nA workable pattern is: create one issue class at a time, for exa&hellip;","upvoteCount":2,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/3"},{"@type":"Answer","author":{"@type":"Person","name":"KevinH","url":"https://community.openai.com/u/KevinH"},"dateModified":"2026-07-01T08:02:26.790Z","datePublished":"2026-07-01T08:02:26.757Z","text":"Thanks very much EricGT and tangweigangsir,\n\nI will read the Codex Quickstart resource. I’ve already realised that ChatGPT is not giving me all the options for how I could use Codex, or in fact many options at all! Perhaps I was expecting too much, or maybe I need to revisit my personalization and/o&hellip;","upvoteCount":1,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/4"},{"@type":"Answer","author":{"@type":"Person","name":"EricGT","url":"https://community.openai.com/u/EricGT"},"dateModified":"2026-07-01T08:16:18.237Z","datePublished":"2026-07-01T08:16:18.194Z","text":"<a class=\"mention\" href=\"/u/kevinh\">@KevinH<\/a>\n\nGlad to hear you are making progress quickly.\n\nOne of the next major things you will learn is that the models change. At times, they may seem incredibly capable, and then after an update they may appear to have been “dumbed down.” It happens. Expect it, and learn to adjust your workflow whe&hellip;","upvoteCount":3,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/5"},{"@type":"Answer","author":{"@type":"Person","name":"sergeliatko","url":"https://community.openai.com/u/sergeliatko"},"dateModified":"2026-07-01T08:25:21.541Z","datePublished":"2026-07-01T08:25:21.498Z","text":"Great thread here.\n\nPersonally for refactoring I heavily rely on IDE (PHP storm) calling agents from the console inside the IDE\n\nAlso I have released this PHP storm skill which might help your agent to work with IDE:\n\n[image]\n\n<a href=\"https://github.com/TechSpokes/skill-ide-phpstorm-mcp\" target=\"_blank\" rel=\"noopener\">GitHub - TechSpokes/skill-ide-phpstorm-mcp: IDE PHPStorm MCP&hellip;<\/a>","upvoteCount":3,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/6"},{"@type":"Answer","author":{"@type":"Person","name":"sergeliatko","url":"https://community.openai.com/u/sergeliatko"},"dateModified":"2026-07-01T09:29:00.344Z","datePublished":"2026-07-01T09:29:00.311Z","text":"Also adding the latest version of Markdown guidance for agents :\n\n<a href=\"https://gist.github.com/sergeliatko/ceb0ed1506ba800c5323b42b30589739\" target=\"_blank\" rel=\"noopener\">https://gist.github.com/sergeliatko/ceb0ed1506ba800c5323b42b30589739<\/a>\n\nmarkdown.instructions.md\n\n---\n\napplyTo: &quot;**/*.md&quot;\n\n---\n\n# Markdown Formatting Rules\n\n## The background\n\nFour audiences read Markdown files in this reposito&hellip;","upvoteCount":2,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/7"},{"@type":"Answer","author":{"@type":"Person","name":"merefield","url":"https://community.openai.com/u/merefield"},"dateModified":"2026-07-01T09:57:45.558Z","datePublished":"2026-07-01T09:36:12.897Z","text":"Codex CLI is perfect for refactoring.\n\nUnfortunately it helps a lot to have significant dev experience to do this.\n\nWhy?  Because it allows you to set choice, tasteful guardrails and architecture for the new version.\n\nBut keep going and try to learn from the changes and issues you encounter and perh&hellip;","upvoteCount":3,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/8"},{"@type":"Answer","author":{"@type":"Person","name":"sergeliatko","url":"https://community.openai.com/u/sergeliatko"},"dateModified":"2026-07-01T09:45:55.035Z","datePublished":"2026-07-01T09:45:55.003Z","text":"[image] KevinH:\n\npasting back and forth with the staging server via Putty/SSH.\n\nWamp64 on Windows + PHP Storm with automated deployment on the development server + Playwright will basically allow your agents editing code live, inspecting code per profile defined in the IDE using the MCP server &hellip;","upvoteCount":1,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/9"},{"@type":"Answer","author":{"@type":"Person","name":"merefield","url":"https://community.openai.com/u/merefield"},"dateModified":"2026-07-01T10:13:22.820Z","datePublished":"2026-07-01T09:47:07.121Z","text":"One more thing:\n\n[image] KevinH:\n\nI’m not a coder so I’m following instructions from ChatGPT Pro on my Windows PC, pasting back and forth with the staging server via Putty/SSH. The iteration loop is basically:\n\npaste bash command → paste compact output back to ChatGPT → inspect → patch → lint → s&hellip;","upvoteCount":2,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/10"},{"@type":"Answer","author":{"@type":"Person","name":"KevinH","url":"https://community.openai.com/u/KevinH"},"dateModified":"2026-07-02T12:40:36.892Z","datePublished":"2026-07-02T12:40:36.835Z","text":"Thanks to everyone for the feedback, suggestions and resource links - I will definitely explore those. I wish I had known about this forum before I started this project!\n\nRe copying and pasting back and forth between ChatGPT and Codex, it’s definitely tedious and time consuming, but from my (none de&hellip;","upvoteCount":1,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/11"},{"@type":"Answer","author":{"@type":"Person","name":"merefield","url":"https://community.openai.com/u/merefield"},"dateModified":"2026-07-02T13:00:45.826Z","datePublished":"2026-07-02T13:00:45.793Z","text":"Great to hear you have good test coverage! :flexed_biceps:t3::rocket::raising_hands:t3:","upvoteCount":0,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/12"},{"@type":"Answer","author":{"@type":"Person","name":"EricGT","url":"https://community.openai.com/u/EricGT"},"dateModified":"2026-07-02T13:27:53.911Z","datePublished":"2026-07-02T13:27:53.868Z","text":"[image] KevinH:\n\nThe tests may not be 100% exhaustive, but I believe they exercise a very high proportion of the functionality.\n\n[image]\n\n<a href=\"https://community.openai.com/t/tips-and-tricks-for-using-codex/1373143/2\">Tips and Tricks for using Codex<\/a> <a class=\"badge-category__wrapper \" href=\"/c/codex/37\">Codex<\/a>\n\nIt is also important to emphasize that 100% test coverage of the core code is ess&hellip;","upvoteCount":1,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/13"},{"@type":"Answer","author":{"@type":"Person","name":"tangweigangsir","url":"https://community.openai.com/u/tangweigangsir"},"dateModified":"2026-07-03T11:28:42.192Z","datePublished":"2026-07-03T11:28:42.160Z","text":"Since you are moving PHP 5.2 → 8.x and already have staging, Git, Codex CLI, and Playwright, I would not try to make ChatGPT drive Codex through a long copy/paste loop.\n\nA cleaner split is: ChatGPT stays the planner/reviewer, and Codex owns one tiny batch on the staging server.\n\nFor example:\n\ncreat&hellip;","upvoteCount":0,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/14"},{"@type":"Answer","author":{"@type":"Person","name":"sergeliatko","url":"https://community.openai.com/u/sergeliatko"},"dateModified":"2026-07-03T11:36:24.006Z","datePublished":"2026-07-03T11:36:23.973Z","text":"And timely I have just released the version 1.4.0 of the PHPStorm Skill for codex (updated refactoring capabilities and HTTP requests support from codex via IDE):\n\n[image]\n\n<a href=\"https://github.com/TechSpokes/skill-ide-phpstorm-mcp\" target=\"_blank\" rel=\"noopener\">GitHub - TechSpokes/skill-ide-phpstorm-mcp: IDE PHPStorm MCP server best practices. Helps AI...<\/a>\n\nIDE PHPStorm &hellip;","upvoteCount":1,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/15"},{"@type":"Answer","author":{"@type":"Person","name":"kilderesobral","url":"https://community.openai.com/u/kilderesobral"},"dateModified":"2026-07-06T21:11:30.928Z","datePublished":"2026-07-06T21:11:30.886Z","text":"You already have most of the right ingredients: staging, Git, Codex CLI, Playwright, smoke tests and a disposable database. The main improvement I would make is not to aim for full autonomy immediately, but to move the whole technical loop into Codex CLI and make ChatGPT only the planner/reviewer.\n\nI&hellip;","upvoteCount":0,"url":"https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/16"}]}}</script>
+  </head>
+  <body class="crawler ">
+    
+    <header>
+  <a href="/">OpenAI Developer Community</a>
+</header>
+
+    <div id="main-outlet" class="wrap" role="main">
+        <div id="topic-title">
+    <h1>
+      <a href="/t/how-to-achieve-greater-code-refactoring-automation/1385318">How to achieve greater code refactoring automation?</a>
+    </h1>
+
+      <div class="topic-category" itemscope itemtype="http://schema.org/BreadcrumbList">
+          <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+            <a href="/c/codex/37" class="badge-wrapper bullet" itemprop="item">
+              <span class='badge-category-bg' style='background-color: #0088CC'></span>
+              <span class='badge-category clear-badge'>
+                <span class='category-name' itemprop='name'>Codex</span>
+              </span>
+            </a>
+            <meta itemprop="position" content="1" />
+          </span>
+          <span itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+            <a href="/c/codex/codex-cli/39" class="badge-wrapper bullet" itemprop="item">
+              <span class='badge-category-bg' style='background-color: #0088CC'></span>
+              <span class='badge-category clear-badge'>
+                <span class='category-name' itemprop='name'>Codex CLI</span>
+              </span>
+            </a>
+            <meta itemprop="position" content="2" />
+          </span>
+      </div>
+
+      <div class="topic-category">
+        <div class='discourse-tags list-tags'>
+            <a href='https://community.openai.com/tag/chatgpt' class='discourse-tag' rel="tag">chatgpt</a>
+        </div>
+      </div>
+  </div>
+
+  
+
+    <div itemscope="itemscope" itemtype="https://schema.org/QAPage">
+      <meta itemprop='name' content='How to achieve greater code refactoring automation?'>
+      <link itemprop='url' href='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318'>
+      <meta itemprop='datePublished' content='2026-06-30T03:18:47Z'>
+      <meta itemprop='keywords' content='chatgpt'>
+
+        <div itemprop="mainEntity" itemscope="itemscope" itemtype="https://schema.org/Question">
+          <meta itemprop='answerCount' content='15'><meta itemprop='datePublished' content='2026-06-30T03:18:47Z'><meta itemprop='name' content='How to achieve greater code refactoring automation?'><meta itemprop='upvoteCount' content='2'>
+
+
+          <div id='post_1' data-qa-question="true" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/KevinH'><span itemprop="name">KevinH</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/KevinH'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time  datetime='2026-06-30T03:18:47Z' class='post-time'>
+                    June 30, 2026,  3:18am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-06-30T03:18:47Z'>
+              <span itemprop="position">1</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Currently working on a php code modernization project (5.2 &gt; 7.4 &gt; 8.0 &gt; 8.3 &gt; 8.4). I have a copy of the website codebase and database on a local staging server, with Git, Codex CLI and Playwright installed.</p>
+<p>I’m not a coder so I’m following instructions from ChatGPT Pro on my Windows PC, pasting back and forth with the staging server via Putty/SSH. The iteration loop is basically:<br>
+paste bash command → paste compact output back to ChatGPT → inspect → patch → lint → smoke → commit/checkpoint.</p>
+<p>ChatGPT says it wouldn’t be safe to use Cursor Ai or Rector PHP.</p>
+<p>I’m making good progress - currently working through issues with PHP 8.3, but it’s <em>very</em> time consuming.</p>
+<p>ChatGPT agrees to use of Codex CLI occasionally for straightforward batch editing and some analysis of PHP files and categorization of issues to tackle, and have prompted ChatGPT to create some ‘helper scripts’, but I can’t help thinking there must be a more efficient, automated way to do this. Can’t believe there isn’t even some way interface ChatGPT to the Codex CLI on my staging server!</p>
+<p>I’d love to hear suggestions as to how I could improve my workflow.</p>
+            </div>
+
+
+
+            
+
+
+          </div>
+          <div id='post_2' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/EricGT'><span itemprop="name">EricGT</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/EricGT'>
+                
+              </span>
+
+
+                <link itemprop="image" href="https://us1.discourse-cdn.com/openai1/original/4X/2/9/9/299c3b38f3dfaf76af003495d976655464f4e1f5.jpeg">
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-06-30T09:35:55Z' class='post-time'>
+                    June 30, 2026,  9:35am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-06-30T09:35:55Z'>
+              <span itemprop="position">2</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <aside class="quote no-group" data-username="KevinH" data-post="1" data-topic="1385318">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://avatars.discourse-cdn.com/v4/letter/k/4af34b/48.png" class="avatar"> KevinH:</div>
+<blockquote>
+<p>I can’t help thinking there must be a more efficient, automated way to do this.</p>
+</blockquote>
+</aside>
+<p>Codex is one of the better answers for this kind of workflow.</p>
+<p>OpenAI now provides several ways to use Codex, including the Codex app, Codex CLI, Codex IDE extension, and Codex web. The quickstart page is a good place to begin:</p>
+<aside class="onebox allowlistedgeneric" data-onebox-src="https://developers.openai.com/codex/quickstart">
+  <header class="source">
+      <img src="https://us1.discourse-cdn.com/openai1/original/4X/4/e/6/4e6c215b527d954515a2695f3754a6bce3aa56f7.png" class="site-icon" alt="" data-dominant-color="399CF9" width="48" height="48">
+
+      <a href="https://developers.openai.com/codex/quickstart" target="_blank" rel="noopener">developers.openai.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="aspect-image" style="--aspect-ratio:690/362;"><img src="https://us1.discourse-cdn.com/openai1/optimized/4X/2/9/9/299c3b38f3dfaf76af003495d976655464f4e1f5_2_690x362.jpeg" class="thumbnail" alt="" data-dominant-color="3B47BC" width="690" height="362"></div>
+
+<h3><a href="https://developers.openai.com/codex/quickstart" target="_blank" rel="noopener">Quickstart – Codex | OpenAI Developers</a></h3>
+
+  <p>Start using Codex in your IDE, CLI, or the cloud</p>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Before Codex, and even before ChatGPT had artifacts, I was doing a workflow very similar to what you describe. The main limitation with using ChatGPT directly for programming is that, by design, ChatGPT has limited ability to read, edit, and manage files on your local machine.</p>
+<p>Codex is designed more specifically for that kind of work. For example, the Codex CLI can read, modify, and run code in the selected local directory, and the IDE extension can work inside supported editors.</p>
+<p>That said, I would be very careful when first using Codex, or any similar AI coding agent. Treat it like giving a capable but still fallible assistant access to your project files. Start with a test project, use version control, make backups, review diffs before accepting changes, and avoid running it on anything important until you understand how it behaves.</p>
+<p>Used carefully, it can remove a lot of manual copy/paste work. Used carelessly, it can also make unwanted changes very quickly.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='2'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/2'>
+          </div>
+          <div id='post_3' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/tangweigangsir'><span itemprop="name">tangweigangsir</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/tangweigangsir'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-01T06:45:43Z' class='post-time'>
+                    July 1, 2026,  6:45am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-01T06:45:43Z'>
+              <span itemprop="position">3</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Since you already have Git, Codex CLI, Playwright, lint/smoke, and checkpoints, I would not try to make it fully autonomous first. The safer speed-up is to move one complete loop onto the staging box and make Codex own only that loop.</p>
+<p>A workable pattern is: create one issue class at a time, for example one PHP 8.3 fatal/error family, let Codex inspect files and propose a small patch, require it to run the exact lint/smoke commands, then force it to stop with a diff plus command transcript before commit. Keep ChatGPT for deciding the next batch and reviewing failures, not for copying every command output.</p>
+<p>The main guardrail I would add is a per-task contract: allowed paths, max files changed, required tests, and a rollback/checkpoint command. That should remove most paste-back work without giving a tool permission to rewrite the whole modernization in one run.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='2'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/3'>
+          </div>
+          <div id='post_4' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/KevinH'><span itemprop="name">KevinH</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/KevinH'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-01T08:02:26Z' class='post-time'>
+                    July 1, 2026,  8:02am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-01T08:02:26Z'>
+              <span itemprop="position">4</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Thanks very much EricGT and tangweigangsir,</p>
+<p>I will read the Codex Quickstart resource. I’ve already realised that ChatGPT is not giving me all the options for how I could use Codex, or in fact many options at all! Perhaps I was expecting too much, or maybe I need to revisit my personalization and/or project instructions.</p>
+<p>I’m pleased to say that since I wrote the post above yesterday I’ve made a lot of progress by questioning some ChatGPTs assumptions and decisions regarding Codex use. It was being overly cautious with its prompts for Codex, only allowing Codex to fix three php warnings at a time, so I suggested we allow Codex to iterate continually until one of numerous stop conditions was met.</p>
+<p>Then I found that Codex was stopping interation due to blockers such as PHP bind failures, MySQL socket access issues and file permissions problems. I’ve realised that ChatGPT was too quick to dismiss these as Codex sandbox restrictions which could not be overcome without giving Codex full file system access. When I questioned this ChatGPT found that there are sandbox control tweaks that would allow Codex to do what it needed in a safe way.</p>
+<p>Each time we resolve a blocker Codex works for longer. I’m thrilled that it just worked for 8m 52s (the longest time yet) and my list of php 8.3 warnings is steadily reducing!</p>
+<p>At the end of each run it summarises what it has done:<br>
+Files changed<br>
+Tests run<br>
+Results, with logs created<br>
+Diff summary<br>
+Git status<br>
+Recommended next steps</p>
+<p>I feed this back to ChatGPT, it reviews the diffs and if appropriate I run a script which does the commit, tag, bundle and updates the project log.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='1'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/4'>
+          </div>
+          <div id='post_5' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/EricGT'><span itemprop="name">EricGT</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/EricGT'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-01T08:16:18Z' class='post-time'>
+                    July 1, 2026,  8:16am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-01T08:16:18Z'>
+              <span itemprop="position">5</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p><a class="mention" href="/u/kevinh">@KevinH</a></p>
+<p>Glad to hear you are making progress quickly.</p>
+<p>One of the next major things you will learn is that the models change. At times, they may seem incredibly capable, and then after an update they may appear to have been “dumbed down.” It happens. Expect it, and learn to adjust your workflow when it does.</p>
+<p>With longer sessions, you may also start to notice conversation compression. This can be disruptive, because important context may be lost, which can make the process appear to go off track. In some cases, it can even damage the direction of a project if critical details are compressed away.</p>
+<p>Since Codex is still <a href="https://github.com/openai/codex/commits/main/">changing</a> quickly and regressions do happen, it is worth keeping a close eye on the <a href="https://github.com/openai/codex/issues">Codex issues</a>.</p>
+<p>I could go on for quite a while, but the main advice is this: be active about backups, use Git commits frequently, and guard against changes to your workflow that you do not control.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='3'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/5'>
+          </div>
+          <div id='post_6' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/sergeliatko'><span itemprop="name">sergeliatko</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/sergeliatko'>
+                
+              </span>
+
+
+                <link itemprop="image" href="https://us1.discourse-cdn.com/openai1/original/4X/a/a/3/aa36e28f12efcb4d8a65f130546d83ebfc97b807.png">
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-01T08:25:21Z' class='post-time'>
+                    July 1, 2026,  8:25am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-01T08:25:21Z'>
+              <span itemprop="position">6</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Great thread here.</p>
+<p>Personally for refactoring I heavily rely on IDE (PHP storm) calling agents from the console inside the IDE</p>
+<p>Also I have released this PHP storm skill which might help your agent to work with IDE:</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/TechSpokes/skill-ide-phpstorm-mcp">
+  <header class="source">
+
+      <a href="https://github.com/TechSpokes/skill-ide-phpstorm-mcp" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="https://us1.discourse-cdn.com/openai1/optimized/4X/a/a/3/aa36e28f12efcb4d8a65f130546d83ebfc97b807_2_690x344.png" class="thumbnail" data-dominant-color="F5F5F1">
+
+  <h3><a href="https://github.com/TechSpokes/skill-ide-phpstorm-mcp" target="_blank" rel="noopener">GitHub - TechSpokes/skill-ide-phpstorm-mcp: IDE PHPStorm MCP server best practices. Helps AI...</a></h3>
+
+    <p><span class="github-repo-description">IDE PHPStorm MCP server best practices. Helps AI agents to leverage your IDE tools for better efficiency.</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Also what helps a lot is having the architecture overview document created by the agent after the analysis of your code base with weak spots flagged during the analysis.</p>
+<p>And some alignment on the documentation is also good to help agent produce better code.</p>
+<p>Here are some examples I put in the repository as adopted conventions:</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/TechSpokes/agency-specifications-files-agents-md">
+  <header class="source">
+
+      <a href="https://github.com/TechSpokes/agency-specifications-files-agents-md" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="https://us1.discourse-cdn.com/openai1/optimized/4X/2/f/e/2fe3b28df006e4fc80675f50d39ae1ca7e4568de_2_690x344.png" class="thumbnail" data-dominant-color="F6F6F6">
+
+  <h3><a href="https://github.com/TechSpokes/agency-specifications-files-agents-md" target="_blank" rel="noopener">GitHub - TechSpokes/agency-specifications-files-agents-md: AGENTS.md file guidelines</a></h3>
+
+    <p><span class="github-repo-description">AGENTS.md file guidelines</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/TechSpokes/agency-specifications-files-readme-md">
+  <header class="source">
+
+      <a href="https://github.com/TechSpokes/agency-specifications-files-readme-md" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="https://us1.discourse-cdn.com/openai1/optimized/4X/2/1/0/210836f413787bbbb186f44e3f79a3ff6be5b9a5_2_690x344.png" class="thumbnail" data-dominant-color="F7F6F7">
+
+  <h3><a href="https://github.com/TechSpokes/agency-specifications-files-readme-md" target="_blank" rel="noopener">GitHub - TechSpokes/agency-specifications-files-readme-md: Readme.md Specification</a></h3>
+
+    <p><span class="github-repo-description">Readme.md Specification</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<aside class="onebox githubgist" data-onebox-src="https://gist.github.com/sergeliatko/2e3f2a165797db81337c598e9f5f2c53">
+  <header class="source">
+
+      <a href="https://gist.github.com/sergeliatko/2e3f2a165797db81337c598e9f5f2c53" target="_blank" rel="noopener">gist.github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://gist.github.com/sergeliatko/2e3f2a165797db81337c598e9f5f2c53" target="_blank" rel="noopener">https://gist.github.com/sergeliatko/2e3f2a165797db81337c598e9f5f2c53</a></h4>
+
+  <h5>code-commenting-specification-v2.md</h5>
+  <pre><code class="Markdown"># Code Commenting Specification
+
+Version 2.0.0
+
+A specification for code commenting in multi-entity codebases where humans, AI agents, and automated tools collaborate.
+
+## 1. Abstract
+
+This specification defines principles, a tag vocabulary, requirement levels, and guidelines for code comments in software projects. It treats code comments as a form of cross-intelligence context transfer: persistent, asynchronous messages embedded in source code that carry information not available from the code itself.
+</code></pre>
+   This file has been truncated. <a href="https://gist.github.com/sergeliatko/2e3f2a165797db81337c598e9f5f2c53" target="_blank" rel="noopener">show original</a>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+<p>Hope that helps.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='3'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/6'>
+          </div>
+          <div id='post_7' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/sergeliatko'><span itemprop="name">sergeliatko</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/sergeliatko'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-01T09:29:00Z' class='post-time'>
+                    July 1, 2026,  9:29am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-01T09:29:00Z'>
+              <span itemprop="position">7</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Also adding the latest version of Markdown guidance for agents :</p>
+<aside class="onebox githubgist" data-onebox-src="https://gist.github.com/sergeliatko/ceb0ed1506ba800c5323b42b30589739">
+  <header class="source">
+
+      <a href="https://gist.github.com/sergeliatko/ceb0ed1506ba800c5323b42b30589739" target="_blank" rel="noopener">gist.github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <h4><a href="https://gist.github.com/sergeliatko/ceb0ed1506ba800c5323b42b30589739" target="_blank" rel="noopener">https://gist.github.com/sergeliatko/ceb0ed1506ba800c5323b42b30589739</a></h4>
+
+  <h5>markdown.instructions.md</h5>
+  <pre><code class="Markdown">---
+applyTo: "**/*.md"
+---
+
+# Markdown Formatting Rules
+
+## The background
+
+Four audiences read Markdown files in this repository:
+</code></pre>
+   This file has been truncated. <a href="https://gist.github.com/sergeliatko/ceb0ed1506ba800c5323b42b30589739" target="_blank" rel="noopener">show original</a>
+
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='2'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/7'>
+          </div>
+          <div id='post_8' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/merefield'><span itemprop="name">merefield</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/merefield'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-01T09:36:12Z' class='post-time'>
+                    July 1, 2026,  9:36am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-01T09:57:45Z'>
+              <span itemprop="position">8</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Codex CLI is perfect for refactoring.</p>
+<p>Unfortunately it helps a lot to have significant dev experience to do this.</p>
+<p>Why?  Because it allows you to set choice, tasteful guardrails and architecture for the new version.</p>
+<p>But keep going and try to learn from the changes and issues you encounter and perhaps you can improve your software engineering prowess.</p>
+<p>One key thing to think about when refactoring - I don’t believe you can automate this effectively without full test coverage on the original.</p>
+<p>So my question to you is - what is the state of the unit and behavioural test suite of the original?</p>
+<p>Do you have a requirements document - it’s better to have full test coverage but a requirements definition can be used as second best.</p>
+<p>Only when you have a full test suite will you be able to automate a port imho - then you can loop until all test pass on the new version.  Unfortunately, depending on the severity of the port - the tests might need altering (e.g. change of class names, div structure from new frameworks etc.) - and this will add to the challenge.</p>
+<p>I would expect this to be an iterative project if you can’t supply those pre-requisites.</p>
+<p>Try to create those artifacts as part of the port as that will put you in a much better position for future changes.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='3'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/8'>
+          </div>
+          <div id='post_9' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/sergeliatko'><span itemprop="name">sergeliatko</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/sergeliatko'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-01T09:45:55Z' class='post-time'>
+                    July 1, 2026,  9:45am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-01T09:45:55Z'>
+              <span itemprop="position">9</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <aside class="quote no-group" data-username="KevinH" data-post="1" data-topic="1385318">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://avatars.discourse-cdn.com/v4/letter/k/4af34b/48.png" class="avatar"> KevinH:</div>
+<blockquote>
+<p>pasting back and forth with the staging server via Putty/SSH.</p>
+</blockquote>
+</aside>
+<p>Wamp64 on Windows + PHP Storm with automated deployment on the development server + Playwright will basically allow your agents editing code live, inspecting code per profile defined in the IDE using the MCP server and fixing the errors, and checking the result immediately on the development server.</p>
+<p>This is probably the fastest setup I have come up with after playing with that for quite a while.</p>
+<p>By automated deployment I mean the setting in the tools → deployment → auto upload, plus “accept external changes”. Which makes your IDE automatically deploy scripts as the agent is editing them.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='1'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/9'>
+          </div>
+          <div id='post_10' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/merefield'><span itemprop="name">merefield</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/merefield'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-01T09:47:07Z' class='post-time'>
+                    July 1, 2026,  9:47am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-01T10:13:22Z'>
+              <span itemprop="position">10</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>One more thing:</p>
+<aside class="quote no-group" data-username="KevinH" data-post="1" data-topic="1385318">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://avatars.discourse-cdn.com/v4/letter/k/4af34b/48.png" class="avatar"> KevinH:</div>
+<blockquote>
+<p>I’m not a coder so I’m following instructions from ChatGPT Pro on my Windows PC, pasting back and forth with the staging server via Putty/SSH. The iteration loop is basically:<br>
+paste bash command → paste compact output back to ChatGPT → inspect → patch → lint → smoke → commit/checkpoint.</p>
+</blockquote>
+</aside>
+<p>Yuk!!</p>
+<p><strong>DO NOT CUT AND PASTE!</strong></p>
+<p>Get the project running locally and run codex cli over the code locally!</p>
+<p>Time spent cut &amp; pasting is incredibly unproductive (and tiring!)!!</p>
+<p>You do not really need ChatGPT <em>and</em> Codex CLI - your Codex CLI session context will benefit from all discussion.  Use ChatGPT auth login from Codex CLI to benefit from your bundled credits.</p>
+<p>(one alternative I do occasionally is install codex remotely - but the key thing is to work on codex-cli locally wrt to the code)</p>
+<p>(you can also use remote tooling effectively too, e.g. VSCode remote, but you will need more memory on your server to run the required integration effectively)</p>
+<p>btw, when you need to work on the command line check out this project:</p>
+<aside class="quote quote-modified" data-post="1" data-topic="1379589">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img alt="" width="24" height="24" src="https://sea2.discourse-cdn.com/openai1/user_avatar/community.openai.com/merefield/48/14812_2.png" class="avatar">
+    <div class="quote-title__text-content">
+      <a href="https://community.openai.com/t/clai-your-useful-command-line-helper/1379589">&gt; clai: your useful command line helper!</a> <a class="badge-category__wrapper " href="/c/codex/37"><span data-category-id="37" style="--category-badge-color: #0088CC; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category --style-square " title="Discussions related to ChatGPT’s coding tools and abilities, such as the Codex agent, Canvas, working with IDEs in the macOS app, or gpt-4.1."><span class="badge-category__name">Codex</span></span></a>
+    </div>
+  </div>
+  <blockquote>
+    Hey guys, I’d like to present my ongoing project I co-authored (with the help of codex-cli <img width="20" height="20" src="https://emoji.discourse-cdn.com/twitter/raising_hands.png?v=15" title="raising_hands" alt="raising_hands" class="emoji"> ).  This extremely useful command line tool that provides a natural language way to describe what you want to happen at the terminal. 
+AI has brought a lot of budding new developers into the space and it is extremely useful for CLI beginners, making the terminal much more accessible for all. 
+It is also great for experienced users - very handy for formulating complex piped commands, or ones…
+  </blockquote>
+</aside>
+
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='2'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/10'>
+          </div>
+          <div id='post_11' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/KevinH'><span itemprop="name">KevinH</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/KevinH'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-02T12:40:36Z' class='post-time'>
+                    July 2, 2026, 12:40pm
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-02T12:40:36Z'>
+              <span itemprop="position">11</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Thanks to everyone for the feedback, suggestions and resource links - I will definitely explore those. I wish I had known about this forum before I started this project!</p>
+<p>Re copying and pasting back and forth between ChatGPT and Codex, it’s definitely tedious and time consuming, but from my (none developer) perspective, who had used ChatGPT since 2023, and never used Codex, I didn’t know what I didn’t know.</p>
+<p>I asked ChatGPT from the outset about using Codex, but as I am sure you all know, ChatGPT tends to just run with whatever it comes up with first. Several times I did ask it if there were other workflows and tools I could use to improve efficiency but it didn’t come up with much. It seems to behave like a control freak at times!</p>
+<p>Things like developing helper scripts and using Playwright were prompted by me. I also started using VS Code locally with an SSH plugin so it could access the files on the staging server, but ChatGPT recommended against using other tools like Cursor, and I found I was only using the terminal in VS Code, so I went back to using PuTTY.</p>
+<p>Next time I will ask ChatGPT to list all the different approaches and tools that could be used! Perhaps I will ask Gemini and Claude to cross-check!</p>
+<p><a class="mention" href="/u/merefield">@merefield</a> , to answer your question about testing - I have a significant behavioural test suite, comprising over 100 tests addressing both front end and back end (admin) functionality, including mutative tests which create, modify and delete database entries on a disposable copy of the database, with automated logging, and cleanup/reset. The tests may not be 100% exhaustive, but I believe they exercise a very high proportion of the functionality.</p>
+<p>Once I have finished the upgrade to PHP 8.3 I may take a different approach to get up to 8.4.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='1'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/11'>
+          </div>
+          <div id='post_12' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/merefield'><span itemprop="name">merefield</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/merefield'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-02T13:00:45Z' class='post-time'>
+                    July 2, 2026,  1:00pm
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-02T13:00:45Z'>
+              <span itemprop="position">12</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Great to hear you have good test coverage! <img src="https://emoji.discourse-cdn.com/twitter/flexed_biceps/3.png?v=15" title=":flexed_biceps:t3:" class="emoji" alt=":flexed_biceps:t3:" loading="lazy" width="20" height="20"><img src="https://emoji.discourse-cdn.com/twitter/rocket.png?v=15" title=":rocket:" class="emoji" alt=":rocket:" loading="lazy" width="20" height="20"><img src="https://emoji.discourse-cdn.com/twitter/raising_hands/3.png?v=15" title=":raising_hands:t3:" class="emoji" alt=":raising_hands:t3:" loading="lazy" width="20" height="20"></p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='0'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/12'>
+          </div>
+          <div id='post_13' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/EricGT'><span itemprop="name">EricGT</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/EricGT'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-02T13:27:53Z' class='post-time'>
+                    July 2, 2026,  1:27pm
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-02T13:27:53Z'>
+              <span itemprop="position">13</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <aside class="quote no-group" data-username="KevinH" data-post="11" data-topic="1385318">
+<div class="title">
+<div class="quote-controls"></div>
+<img alt="" width="24" height="24" src="https://avatars.discourse-cdn.com/v4/letter/k/4af34b/48.png" class="avatar"> KevinH:</div>
+<blockquote>
+<p>The tests may not be 100% exhaustive, but I believe they exercise a very high proportion of the functionality.</p>
+</blockquote>
+</aside>
+<aside class="quote quote-modified" data-post="2" data-topic="1373143">
+  <div class="title">
+    <div class="quote-controls"></div>
+    <img alt="" width="24" height="24" src="https://sea2.discourse-cdn.com/openai1/user_avatar/community.openai.com/ericgt/48/20571_2.png" class="avatar">
+    <div class="quote-title__text-content">
+      <a href="https://community.openai.com/t/tips-and-tricks-for-using-codex/1373143/2">Tips and Tricks for using Codex</a> <a class="badge-category__wrapper " href="/c/codex/37"><span data-category-id="37" style="--category-badge-color: #0088CC; --category-badge-text-color: #FFFFFF;" data-drop-close="true" class="badge-category --style-square " title="Discussions related to ChatGPT’s coding tools and abilities, such as the Codex agent, Canvas, working with IDEs in the macOS app, or gpt-4.1."><span class="badge-category__name">Codex</span></span></a>
+    </div>
+  </div>
+  <blockquote>
+    It is also important to emphasize that 100% test coverage of the core code is essential. Yes, it is a significant amount of work, and yes, it can feel like you are writing tests for situations that “should never happen.” 
+However, the current mindset of many programmers still assumes they are programming only with other humans. When AI is involved, that assumption breaks down. An AI often has visibility into the entire codebase and will actively use any available paths to satisfy the prompt—even…
+  </blockquote>
+</aside>
+
+<p>Click the link, there are many more useful tips and tricks in the topic.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='1'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/13'>
+          </div>
+          <div id='post_14' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/tangweigangsir'><span itemprop="name">tangweigangsir</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/tangweigangsir'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-03T11:28:42Z' class='post-time'>
+                    July 3, 2026, 11:28am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-03T11:28:42Z'>
+              <span itemprop="position">14</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>Since you are moving PHP 5.2 → 8.x and already have staging, Git, Codex CLI, and Playwright, I would not try to make ChatGPT drive Codex through a long copy/paste loop.</p>
+<p>A cleaner split is: ChatGPT stays the planner/reviewer, and Codex owns one tiny batch on the staging server.</p>
+<p>For example:</p>
+<ol>
+<li>create a branch or checkpoint</li>
+<li>pick one warning family or compatibility issue</li>
+<li>let Codex patch only that family</li>
+<li>run php -l plus one targeted smoke or Playwright path</li>
+<li>commit or revert before the next batch</li>
+</ol>
+<p>For old PHP, I would also treat Rector as a diagnostic or narrow dry-run tool rather than a global rewrite button. “Unsafe globally” does not mean useless for finding repeated upgrade patterns.</p>
+<p>The main automation gain is not full autonomy. It is making every agent run produce a reversible patch plus a test result, instead of moving snippets between two chats.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='0'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/14'>
+          </div>
+          <div id='post_15' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/sergeliatko'><span itemprop="name">sergeliatko</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/sergeliatko'>
+                
+              </span>
+
+
+                <link itemprop="image" href="https://us1.discourse-cdn.com/openai1/original/4X/a/a/3/aa36e28f12efcb4d8a65f130546d83ebfc97b807.png">
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-03T11:36:23Z' class='post-time'>
+                    July 3, 2026, 11:36am
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-03T11:36:23Z'>
+              <span itemprop="position">15</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>And timely I have just released the version 1.4.0 of the PHPStorm Skill for codex (updated refactoring capabilities and HTTP requests support from codex via IDE):</p>
+<aside class="onebox githubrepo" data-onebox-src="https://github.com/TechSpokes/skill-ide-phpstorm-mcp">
+  <header class="source">
+
+      <a href="https://github.com/TechSpokes/skill-ide-phpstorm-mcp" target="_blank" rel="noopener">github.com</a>
+  </header>
+
+  <article class="onebox-body">
+    <div class="github-row" data-github-private-repo="false">
+  <img width="690" height="344" src="https://us1.discourse-cdn.com/openai1/optimized/4X/a/a/3/aa36e28f12efcb4d8a65f130546d83ebfc97b807_2_690x344.png" class="thumbnail" data-dominant-color="F5F5F1">
+
+  <h3><a href="https://github.com/TechSpokes/skill-ide-phpstorm-mcp" target="_blank" rel="noopener">GitHub - TechSpokes/skill-ide-phpstorm-mcp: IDE PHPStorm MCP server best practices. Helps AI...</a></h3>
+
+    <p><span class="github-repo-description">IDE PHPStorm MCP server best practices. Helps AI agents to leverage your IDE tools for better efficiency.</span></p>
+</div>
+
+  </article>
+
+  <div class="onebox-metadata">
+    
+    
+  </div>
+
+  <div style="clear: both"></div>
+</aside>
+
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='1'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/15'>
+          </div>
+          <div id='post_16' itemprop="suggestedAnswer" itemscope="itemscope" itemtype="https://schema.org/Answer" class='topic-body crawler-post'>
+            <div class='crawler-post-meta'>
+              <span class="creator" itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+                <a rel='nofollow' href='https://community.openai.com/u/kilderesobral'><span itemprop="name">kilderesobral</span></a>
+                  <meta itemprop='url' content='https://community.openai.com/u/kilderesobral'>
+                
+              </span>
+
+
+
+              <span class="crawler-post-infos">
+                  <time itemprop="datePublished" datetime='2026-07-06T21:11:30Z' class='post-time'>
+                    July 6, 2026,  9:11pm
+                  </time>
+                  <meta itemprop='dateModified' content='2026-07-06T21:11:30Z'>
+              <span itemprop="position">16</span>
+              </span>
+            </div>
+            <div class='post' itemprop="text">
+              <p>You already have most of the right ingredients: staging, Git, Codex CLI, Playwright, smoke tests and a disposable database. The main improvement I would make is not to aim for full autonomy immediately, but to move the whole technical loop into Codex CLI and make ChatGPT only the planner/reviewer.</p>
+<p>I would create an <code>AGENTS.md</code> file with strict rules: allowed paths, max files per run, one compatibility issue family at a time, required lint/smoke/Playwright commands, stop conditions, and a mandatory final report with changed files, test results, diff summary and recommendation.</p>
+<p>For a PHP 5.2 → 8.x migration, I would separate “compatibility modernization” from “refactoring”. First make the code run safely on PHP 8.3/8.4 with minimal behavioral change. Only after that, consider architectural refactoring.</p>
+<p>I would also not dismiss Rector completely. I would not run it globally, but it can be useful in dry-run mode or on one narrow rule/directory at a time, always behind Git and tests.</p>
+<p>The safer automation loop would be:</p>
+<ol>
+<li>
+<p>create branch/checkpoint;</p>
+</li>
+<li>
+<p>collect warnings/errors;</p>
+</li>
+<li>
+<p>pick one error family;</p>
+</li>
+<li>
+<p>let Codex patch only that family;</p>
+</li>
+<li>
+<p>run php -l, smoke tests and targeted Playwright tests;</p>
+</li>
+<li>
+<p>review diff;</p>
+</li>
+<li>
+<p>commit or rollback;</p>
+</li>
+<li>
+<p>repeat.</p>
+</li>
+</ol>
+<p>The big gain is to stop copying commands between ChatGPT and PuTTY. Let Codex CLI operate where the code is, and use ChatGPT for strategy, reviewing summaries, and deciding the next batch.</p>
+            </div>
+
+
+
+            
+
+<meta itemprop='upvoteCount' content='0'><meta itemprop='url' content='https://community.openai.com/t/how-to-achieve-greater-code-refactoring-automation/1385318/16'>
+          </div>
+
+        </div>
+    </div>
+
+
+    <div id="related-topics" class="more-topics__list " role="complementary" aria-labelledby="related-topics-title">
+  <h3 id="related-topics-title" class="more-topics__list-title">
+    Related topics
+  </h3>
+  <div class="topic-list-container" itemscope itemtype='http://schema.org/ItemList'>
+    <meta itemprop='itemListOrder' content='http://schema.org/ItemListOrderDescending'>
+    <table class='topic-list'>
+      <thead>
+        <tr>
+          <th>Topic</th>
+          <th></th>
+          <th class="replies">Replies</th>
+          <th class="views">Views</th>
+          <th>Activity</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="topic-list-item" id="topic-list-item-1374390">
+            <td class="main-link" itemprop='itemListElement' itemscope itemtype='http://schema.org/ListItem'>
+              <meta itemprop='position' content='1'>
+              <span class="link-top-line">
+                <a itemprop='url' href='https://community.openai.com/t/when-vibe-coding-turns-into-an-unfixable-mess/1374390' class='title raw-link raw-topic-link'>When vibe coding turns into an unfixable mess</a>
+              </span>
+              <div class="link-bottom-line">
+                  <a href='/c/codex/37' class='badge-wrapper bullet'>
+                    <span class='badge-category-bg' style='background-color: #0088CC'></span>
+                    <span class='badge-category clear-badge'>
+                      <span class='category-name'>Codex</span>
+                    </span>
+                  </a>
+                  <div class="discourse-tags">
+                  </div>
+              </div>
+            </td>
+            <td class="replies">
+              <span class='posts' title='posts'>21</span>
+            </td>
+            <td class="views">
+              <span class='views' title='views'>2231</span>
+            </td>
+            <td>
+              March 11, 2026
+            </td>
+          </tr>
+          <tr class="topic-list-item" id="topic-list-item-1366694">
+            <td class="main-link" itemprop='itemListElement' itemscope itemtype='http://schema.org/ListItem'>
+              <meta itemprop='position' content='2'>
+              <span class="link-top-line">
+                <a itemprop='url' href='https://community.openai.com/t/gpt-5-5-1-and-5-2-codex-quality-degrading-over-last-month-or-so/1366694' class='title raw-link raw-topic-link'>GPT 5 &amp; 5.1 (and 5.2) Codex quality degrading over last month or so</a>
+              </span>
+              <div class="link-bottom-line">
+                  <a href='/c/api/feedback/31' class='badge-wrapper bullet'>
+                    <span class='badge-category-bg' style='background-color: #92278F'></span>
+                    <span class='badge-category clear-badge'>
+                      <span class='category-name'>Feedback</span>
+                    </span>
+                  </a>
+                  <div class="discourse-tags">
+                  </div>
+              </div>
+            </td>
+            <td class="replies">
+              <span class='posts' title='posts'>13</span>
+            </td>
+            <td class="views">
+              <span class='views' title='views'>6130</span>
+            </td>
+            <td>
+              January 29, 2026
+            </td>
+          </tr>
+          <tr class="topic-list-item" id="topic-list-item-1399241">
+            <td class="main-link" itemprop='itemListElement' itemscope itemtype='http://schema.org/ListItem'>
+              <meta itemprop='position' content='3'>
+              <span class="link-top-line">
+                <a itemprop='url' href='https://community.openai.com/t/chatgpt-codex-project-delegation-and-validation/1399241' class='title raw-link raw-topic-link'>ChatGPT ↔ Codex Project Delegation and Validation</a>
+              </span>
+              <div class="link-bottom-line">
+                  <a href='/c/chatgpt/feature-requests/24' class='badge-wrapper bullet'>
+                    <span class='badge-category-bg' style='background-color: #92278F'></span>
+                    <span class='badge-category clear-badge'>
+                      <span class='category-name'>Feature requests</span>
+                    </span>
+                  </a>
+                  <div class="discourse-tags">
+                      <a href='https://community.openai.com/tag/github/4' class='discourse-tag'>github</a>
+                      ,&nbsp;
+                      <a href='https://community.openai.com/tag/codex/6' class='discourse-tag'>codex</a>
+                      ,&nbsp;
+                      <a href='https://community.openai.com/tag/chatgpt/16' class='discourse-tag'>chatgpt</a>
+                      ,&nbsp;
+                      <a href='https://community.openai.com/tag/feature-request/213' class='discourse-tag'>feature-request</a>
+                      ,&nbsp;
+                      <a href='https://community.openai.com/tag/integration/463' class='discourse-tag'>integration</a>
+                      
+                  </div>
+              </div>
+            </td>
+            <td class="replies">
+              <span class='posts' title='posts'>10</span>
+            </td>
+            <td class="views">
+              <span class='views' title='views'>152</span>
+            </td>
+            <td>
+              September 21, 2026
+            </td>
+          </tr>
+          <tr class="topic-list-item" id="topic-list-item-1397120">
+            <td class="main-link" itemprop='itemListElement' itemscope itemtype='http://schema.org/ListItem'>
+              <meta itemprop='position' content='4'>
+              <span class="link-top-line">
+                <a itemprop='url' href='https://community.openai.com/t/has-anyone-automated-a-chatgpt-codex-orchestration-loop/1397120' class='title raw-link raw-topic-link'>Has anyone automated a ChatGPT &lt;&gt; Codex orchestration loop?</a>
+              </span>
+              <div class="link-bottom-line">
+                  <a href='/c/chatgpt/use-cases-and-example/25' class='badge-wrapper bullet'>
+                    <span class='badge-category-bg' style='background-color: #3AB54A'></span>
+                    <span class='badge-category clear-badge'>
+                      <span class='category-name'>Use cases and examples</span>
+                    </span>
+                  </a>
+                  <div class="discourse-tags">
+                      <a href='https://community.openai.com/tag/codex/6' class='discourse-tag'>codex</a>
+                      
+                  </div>
+              </div>
+            </td>
+            <td class="replies">
+              <span class='posts' title='posts'>19</span>
+            </td>
+            <td class="views">
+              <span class='views' title='views'>538</span>
+            </td>
+            <td>
+              September 24, 2026
+            </td>
+          </tr>
+          <tr class="topic-list-item" id="topic-list-item-1382971">
+            <td class="main-link" itemprop='itemListElement' itemscope itemtype='http://schema.org/ListItem'>
+              <meta itemprop='position' content='5'>
+              <span class="link-top-line">
+                <a itemprop='url' href='https://community.openai.com/t/my-codex-feature-requests/1382971' class='title raw-link raw-topic-link'>My Codex feature requests</a>
+              </span>
+              <div class="link-bottom-line">
+                  <a href='/c/codex/37' class='badge-wrapper bullet'>
+                    <span class='badge-category-bg' style='background-color: #0088CC'></span>
+                    <span class='badge-category clear-badge'>
+                      <span class='category-name'>Codex</span>
+                    </span>
+                  </a>
+                  <div class="discourse-tags">
+                      <a href='https://community.openai.com/tag/codex/6' class='discourse-tag'>codex</a>
+                      ,&nbsp;
+                      <a href='https://community.openai.com/tag/feature-request/213' class='discourse-tag'>feature-request</a>
+                      
+                  </div>
+              </div>
+            </td>
+            <td class="replies">
+              <span class='posts' title='posts'>25</span>
+            </td>
+            <td class="views">
+              <span class='views' title='views'>1156</span>
+            </td>
+            <td>
+              September 9, 2026
+            </td>
+          </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+
+
+    </div>
+    <footer class="container wrap">
+  <nav class='crawler-nav'>
+    <ul>
+      <li itemscope itemtype='http://schema.org/SiteNavigationElement'>
+        <span itemprop='name'>
+          <a href='/' itemprop="url">Home </a>
+        </span>
+      </li>
+      <li itemscope itemtype='http://schema.org/SiteNavigationElement'>
+        <span itemprop='name'>
+          <a href='/categories' itemprop="url">Categories </a>
+        </span>
+      </li>
+      <li itemscope itemtype='http://schema.org/SiteNavigationElement'>
+        <span itemprop='name'>
+          <a href='/guidelines' itemprop="url">Guidelines </a>
+        </span>
+      </li>
+        <li itemscope itemtype='http://schema.org/SiteNavigationElement'>
+          <span itemprop='name'>
+            <a href='https://openai.com/policies/terms-of-use' itemprop="url">Terms of Service </a>
+          </span>
+        </li>
+        <li itemscope itemtype='http://schema.org/SiteNavigationElement'>
+          <span itemprop='name'>
+            <a href='https://openai.com/policies/privacy-policy' itemprop="url">Privacy Policy </a>
+          </span>
+        </li>
+    </ul>
+  </nav>
+  <p class='powered-by-link'>Powered by <a href="https://www.discourse.org">Discourse</a>, best viewed with JavaScript enabled</p>
+</footer>
+
+    
+    
+  </body>
+  
+</html>

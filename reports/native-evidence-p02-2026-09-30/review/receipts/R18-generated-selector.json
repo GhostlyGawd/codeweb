@@ -1,0 +1,24 @@
+{
+  "id": "R18-generated-selector",
+  "command": [
+    "/opt/homebrew/bin/node",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/scripts/context-pack.mjs",
+    "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures/target/.codeweb/graph.json",
+    "dist/generated.mjs:generated",
+    "--json"
+  ],
+  "cwd": "$LOCAL_TMP/codeweb-p02-nhppa5tq/reports/native-evidence-p02-2026-09-30/review/fixtures",
+  "envOverrides": {
+    "CODEWEB_NO_STATS": "1",
+    "CODEWEB_NO_AUTOREFRESH": "1",
+    "CODEWEB_NO_RECEIPTS": "1",
+    "CODEWEB_NO_PROMO": "1"
+  },
+  "stdin": null,
+  "start": "2026-10-01T02:23:39.322333+00:00",
+  "end": "2026-10-01T02:23:39.358413+00:00",
+  "durationSeconds": 0.03611370793078095,
+  "exit": 1,
+  "stdout": "{\"symbol\":\"dist/generated.mjs:generated\",\"found\":false,\"hint\":\"no symbol matches \\\"dist/generated.mjs:generated\\\" \u2014 try codeweb_find \\\"<free text>\\\" (concept search, no name needed)\"}\n",
+  "stderr": ""
+}

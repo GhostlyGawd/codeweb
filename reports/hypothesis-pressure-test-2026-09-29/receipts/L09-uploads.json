@@ -1,0 +1,23 @@
+[
+  {
+    "path": "lenses/09-withdrawal-test.md",
+    "attachment_id": "722050c2-51e2-4ea3-8e63-f1e3e9039f08",
+    "work_product_id": "49acd00d-8c22-4bfa-9358-13a03012d4e4",
+    "download_sha256_verified": true,
+    "url": "/api/attachments/722050c2-51e2-4ea3-8e63-f1e3e9039f08/content"
+  },
+  {
+    "path": "lenses/09-findings.json",
+    "attachment_id": "b44cd048-467e-4100-a5df-4bb10672bce9",
+    "work_product_id": "684e7285-6ab2-4211-8501-139f7126ecf1",
+    "download_sha256_verified": true,
+    "url": "/api/attachments/b44cd048-467e-4100-a5df-4bb10672bce9/content"
+  },
+  {
+    "path": "receipts/L09.json",
+    "attachment_id": "42880fb2-20d7-430c-ab60-18a0d53b4852",
+    "work_product_id": "af2da424-b56b-4ae4-81b2-363c93d20fc8",
+    "download_sha256_verified": true,
+    "url": "/api/attachments/42880fb2-20d7-430c-ab60-18a0d53b4852/content"
+  }
+]

@@ -1,0 +1,85 @@
+
+    Bugbot Pricing Feedback - Feedback - Cursor - Community Forum
+  Cursor - Community Forum
+      Bugbot Pricing Feedback
+                Ideas
+                Feedback
+            bugbot
+                troehrkasse
+                (Tyson Roehrkasse)
+                    August 25, 2025,  4:06pm
+              1
+Our team has been using (and loving) Bugbot ever since it was announced. It’s an incredible tool. However, now that you guys seem to have finalized pricing, we’re feeling a bit frustrated.
+Issue 1): It’s pretty dang expensive. When BugBot was first announced, you said that it would be usage-based pricing, basically API rates depending on the scope of the PR being reviewed. That would be awesome and I wish you would have stuck to it.
+However, the new pricing structure is: $40 per Github user per month, unlimited PR reviews. That’s a really steep price, especially when you have users who aren’t super active. Our org has 8 developers, but most of them only submit a handful of PRs per month, and we have to pay the full price for their handful of BugBot runs.
+So my question: Why is BugBot not charged usage-based, the same as regular Cursor?
+Issue 2): No annual plan… apparently? At least, we couldn’t figure out any way to do it, and your bot at your Pricing Questions inbox says there are no annual plans available for BugBot.
+Even with the overly expensive current pricing plan, we might be able to get our company to approve it at a discounted annual rate. Will this be an option?
+                rohannvarma
+                (Rohan Varma)
+                    August 25, 2025,  4:20pm
+              2
+Hi! Thanks for sharing feedback. I’m glad to hear that Bugbot has been useful for your team! One thing we’ve seen other teams do is to deny-list folks on their team that don’t contribute a ton of PRs. The idea behind the pricing is to make it easy for your team to use Bugbot to review every commit on every PR.
+Right now Bugbot is an add-on to the Cursor subscription and is charged at the same billing cycle as your main subscription. If you convert to the annual plan for Cursor overall, Bugbot will also be charged annually with the discount!
+Let me know if this could work for your company.
+                troehrkasse
+                (Tyson Roehrkasse)
+                    August 25, 2025,  4:44pm
+              3
+ rohannvarma:
+One thing we’ve seen other teams do is to deny-list folks on their team that don’t contribute a ton of PRs.
+We considered this, but if anything BugBot is more important for these users. The reason they have less PRs is because they work on bigger feature projects, so their PRs tend to be more complex. So while it doesn’t feel great to pay the full $40 for only a handful of BugBot uses… well, to be honest it’s well worth the cost since BugBot is just so good. I think it mostly ■■■■■ because we were expecting a usage-based model like Cursor is using.
+ rohannvarma:
+The idea behind the pricing is to make it easy for your team to use Bugbot to review every commit on every PR.
+That’s a good point, having it always run is very useful.
+ rohannvarma:
+Right now Bugbot is an add-on to the Cursor subscription and is charged at the same billing cycle as your main subscription. If you convert to the annual plan for Cursor overall, Bugbot will also be charged annually with the discount!
+Awesome! We’re already on the annual plan for Cursor.
+The invoices for BugBot are pretty vague and confusing, by the way. It charged us a lump sum without a lot of details. After some spreadsheet calculations we worked it out to $32/user/month, pro-rated till our Cursor plan renewal date which is Feb 3rd.
+So that’s good! The only downside here is that now we’ll be paying extra for some devs who won’t be putting in PRs for the whole year. For example, we have a contractor working on a short-term project for us, he’s putting in 10-15 PRs per month right now, but he’ll be done and no longer working for us by October at the latest. Kinda ■■■■■ to have paid for him all the way through February when he won’t be here, that basically nullifies the annual discount received for the rest of our team 
+TL;DR BugBot is incredibly useful and we’ll probably keep using it regardless, but would still much prefer to see a usage-based pricing option.
+                rohannvarma
+                (Rohan Varma)
+                    August 25, 2025,  4:53pm
+              4
+That all makes sense! One way to think about the value is that even with a small # of PRs, I would expect a big feature PR to have many commits being pushed to it. In that case, Bugbot runs on every commit and so the total number of reviews is likely still quite high relative to the number of PRs.
+Glad to hear you are on the yearly plan! I’ll take the feedback around yearly licenses back to the team. Right now on monthly plans, the licenses float month to month, so you would be able to reassign them.
+    Related topics
+          Topic
+          Replies
+          Views
+          Activity
+                The new usage-based Bugbot pricing punishes iterative workflows and power users
+                      Feedback
+                      bugbot
+              7
+              752
+              May 29, 2026
+                Confusion of Bugbot Pricing
+                      Help
+                      bugbot
+              1
+              287
+              May 18, 2026
+                Rate card for Bugbot Usage-based Pricing and Effort settings not visible
+                      Help
+                      bugbot
+              5
+              274
+              May 13, 2026
+                Bugbot - Too expensive
+                      Feedback
+              2
+              439
+              August 7, 2025
+                Clarification about Bugbot
+                      Help
+              3
+              293
+              July 24, 2025
+          Home 
+          Categories 
+          Guidelines 
+            Terms of Service 
+            Privacy Policy 
+Powered by Discourse, best viewed with JavaScript enabled

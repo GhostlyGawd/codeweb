@@ -1,0 +1,26 @@
+[
+  {
+    "path": "lenses/01-user-need-and-segment.md",
+    "attachment_id": "945be823-05d0-44b2-b436-c8c60e1e4706",
+    "work_product_id": "a3219504-aee6-4974-9de8-84c3aac958a2",
+    "url": "/api/attachments/945be823-05d0-44b2-b436-c8c60e1e4706/content"
+  },
+  {
+    "path": "lenses/01-findings.json",
+    "attachment_id": "c5d378b3-fad1-4570-9125-3c5c79d23899",
+    "work_product_id": "4e3ecb46-d196-418e-8632-144f2a59432a",
+    "url": "/api/attachments/c5d378b3-fad1-4570-9125-3c5c79d23899/content"
+  },
+  {
+    "path": "receipts/L01.json",
+    "attachment_id": "ad1b36f6-dc29-41a9-ac85-6fff2f2ee9ad",
+    "work_product_id": "20e440e8-9708-4316-ab7a-7bbffadd9010",
+    "url": "/api/attachments/ad1b36f6-dc29-41a9-ac85-6fff2f2ee9ad/content"
+  },
+  {
+    "path": "receipts/L01-supporting-materials.zip",
+    "attachment_id": "2bc7b366-ea4d-4612-a5a3-597f1e9a10b8",
+    "work_product_id": "3ca7ea85-31cd-4b2e-a431-f9bad1fd8bf4",
+    "url": "/api/attachments/2bc7b366-ea4d-4612-a5a3-597f1e9a10b8/content"
+  }
+]

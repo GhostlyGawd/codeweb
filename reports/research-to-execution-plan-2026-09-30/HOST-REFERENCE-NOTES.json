@@ -1,0 +1,19 @@
+{
+  "checked_at": "2026-09-30T22:05:57.026163+00:00",
+  "references": [
+    {
+      "url": "https://code.claude.com/docs/en/hooks",
+      "purpose": "Verify contextual output is distinct from permission decisions; actual installed Codeweb delivery remains to be tested."
+    },
+    {
+      "url": "https://developers.openai.com/plugins/build/plugins",
+      "purpose": "Verify runtime script availability and hook trust are requirements, not automatically achieved by installation."
+    },
+    {
+      "url": "https://developers.openai.com/plugins/guides/submit-claude-plugin",
+      "purpose": "Verify Claude hooks require adaptation; do not infer host parity."
+    }
+  ],
+  "runtime_trials": false,
+  "scope": "Documentation-informed spec constraints, not client availability proof."
+}

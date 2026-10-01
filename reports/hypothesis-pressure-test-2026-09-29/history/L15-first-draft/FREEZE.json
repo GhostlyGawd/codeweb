@@ -1,0 +1,45 @@
+{
+  "frozen_at": "2026-09-30T05:01:28.064051+00:00",
+  "files": [
+    {
+      "path": "ADVERSARIAL-REVIEW.md",
+      "sha256": "824095bf352c65e21a0414254939358e4bee7db99911e43f0331241f0e6e836a"
+    },
+    {
+      "path": "ADVERSARIAL-AUDIT.json",
+      "sha256": "b45027c2f8a216856423275c5228353ff5ea3fcf23c04331d305a3dfa8af93e0"
+    },
+    {
+      "path": "lenses/15-findings.json",
+      "sha256": "5de951e32c18abfba0bb04710871019a2bbb5eb1431d78421730d5834e716c04"
+    },
+    {
+      "path": "sources/L15/RUNTIME.json",
+      "sha256": "cc978d4668831e8ca17f48975b90a84ea4f8d1e52863b3dd32d28d2a15c6fa31"
+    },
+    {
+      "path": "sources/L15/PROVENANCE.json",
+      "sha256": "2792b9c557225e7443f52bf600ea1c6204bc238efb9fc15dc19764f73b55211c"
+    },
+    {
+      "path": "sources/L15/CW-L056.html",
+      "sha256": "96d8e0e44bc7d2f1d910a895a334b460cae452dcca61031ab2e6fd96d6b1d597"
+    },
+    {
+      "path": "sources/L15/CW-L020.json",
+      "sha256": "7ff4617774839dd01a22b103dd4e8fa96d54a3de9a7c961e23458cf8a984d425"
+    },
+    {
+      "path": "sources/L15/CW-L021.json",
+      "sha256": "ceef6f78c3d5f13af70dc4481c8525e3ba44e432a3451ecac9718ae72c9bb379"
+    },
+    {
+      "path": "sources/L15/CW-Z002.html",
+      "sha256": "d9930ab3fb758af6842e27b9c2cdd8e28f94737665e50b283ea888d6e30ca572"
+    },
+    {
+      "path": "receipts/L15.json",
+      "sha256": "c6cf3b9e5603a99996e9f03975bb3b5e1b571440d2dd94bcc2789b3559f00416"
+    }
+  ]
+}

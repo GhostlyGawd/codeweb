@@ -1,0 +1,205 @@
+
+  [BUG] Claude Code Desktop (Code tab) does not see CLI-installed plugins — confirmed not plugin-specific · Issue #97515 · anthropics/claude-code · GitHub
+      Skip to content
+Navigation Menu
+Sign in
+Appearance settings
+Platform
+AI CODE CREATION
+GitHub CopilotWrite better code with AI
+GitHub Copilot appDirect agents from issue to merge
+MCP RegistryIntegrate external tools
+DEVELOPER WORKFLOWS
+ActionsAutomate any workflow
+CodespacesInstant dev environments
+IssuesPlan and track work
+Code ReviewManage code changes
+Code QualityEnforce quality at merge
+APPLICATION SECURITY
+GitHub Advanced SecurityFind and fix vulnerabilities
+Code securitySecure your code as you build
+Secret protectionStop leaks before they start
+EXPLORE
+Why GitHub
+Documentation
+Blog
+Changelog
+Marketplace
+View all features
+Solutions
+BY COMPANY SIZE
+Enterprises
+Small and medium teams
+Startups
+Nonprofits
+BY USE CASE
+App Modernization
+DevSecOps
+DevOps
+CI/CD
+View all use cases
+BY INDUSTRY
+Healthcare
+Financial services
+Manufacturing
+Government
+View all industries
+View all solutions
+Resources
+EXPLORE BY TOPIC
+AI
+Software Development
+DevOps
+Security
+View all topics
+EXPLORE BY TYPE
+Customer stories
+Events & webinars
+Ebooks & reports
+Business insights
+GitHub Skills
+SUPPORT & SERVICES
+Documentation
+Customer support
+Community forum
+Trust center
+Partners
+View all resources
+Open Source
+COMMUNITY
+GitHub SponsorsFund open source developers
+PROGRAMS
+Security Lab
+Maintainer Community
+GitHub Stars
+Archive Program
+REPOSITORIES
+Topics
+Trending
+Collections
+Enterprise
+ENTERPRISE SOLUTIONS
+Enterprise platformAI-powered developer platform
+AVAILABLE ADD-ONS
+GitHub Advanced SecurityEnterprise-grade security features
+Copilot for BusinessEnterprise-grade AI features
+Premium SupportEnterprise-grade 24/7 support
+Pricing
+Search/
+Sign inSign up
+Appearance settings
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+Dismiss alert
+{{ message }}
+        anthropics
+    /
+      claude-code
+    Public
+Notifications
+    You must be signed in to change notification settings
+Fork
+    25.1k
+          Star
+          149k
+        Code
+        Issues
+          5k+
+        Pull requests
+          707
+        Actions
+        Security and quality
+          32
+        Insights
+Additional navigation options
+          Code
+          Issues
+          Pull requests
+          Actions
+          Security and quality
+          Insights
+[BUG] Claude Code Desktop (Code tab) does not see CLI-installed plugins — confirmed not plugin-specific #97515
+New issueCopy link
+New issueCopy link
+Open
+Open
+[BUG] Claude Code Desktop (Code tab) does not see CLI-installed plugins — confirmed not plugin-specific#97515
+Copy link
+Labels
+area:desktoparea:pluginsbugSomething isn't workingSomething isn't workingduplicateThis issue or pull request already existsThis issue or pull request already existsplatform:wslIssue specifically occurs on WSLIssue specifically occurs on WSL
+Description
+panjozek-ctrl
+opened on Sep 26, 2026
+Issue body actions
+Preflight Checklist
+ I have searched existing issues and this hasn't been reported yet
+ This is a single bug report (please file separate reports for different bugs)
+ I am using the latest version of Claude Code
+What's Wrong?
+Plugins installed and enabled via the Claude Code CLI (inside WSL2) are not visible or usable inside the Desktop app's Code tab, even though both share the same ~/.claude/settings.json configuration file. This is not specific to one plugin — tested with two independently-sourced plugins (a third-party one and the official pyright-lsp), both invisible.
+What Should Happen?
+A plugin enabled in ~/.claude/settings.json (confirmed via claude plugin list as installed and enabled, scope user) should be available as a skill/command inside any Claude Code session — CLI or Desktop app — that reads the same config file and points at the same WSL folder.
+Error Messages/Logs
+No error is shown — the plugin's skills/commands simply do not appear in the available tools/skills list. No exception, no warning.
+Steps to Reproduce
+Install and enable a plugin via the Claude Code CLI inside a WSL2 distro, e.g. claude plugin install @ (confirm with claude plugin list showing Status: ✔ enabled).
+Confirm ~/.claude/settings.json lists it under "enabledPlugins".
+Open Claude Code Desktop app, go to the Code tab, and open a session pointed at a project folder inside that same WSL distro (e.g. \wsl.localhost\Ubuntu... / /mnt/c/... shared path).
+Ask the assistant to check its available skills/tools for anything matching the plugin's name.
+Observe: nothing from the plugin appears — confirmed both in the live session and in a freshly spawned sub-agent (which starts with no session memory, ruling out stale session state).
+Fully quit and restart the Desktop application (not just the tab/session) and repeat step 4 — still nothing.
+Repeat steps 1–6 with a second, unrelated plugin (official pyright-lsp@claude-plugins-official) — same result, ruling out this being specific to one plugin or marketplace.
+Claude Model
+Sonnet (default)
+Is this a regression?
+I don't know
+Last Working Version
+No response
+Claude Code Version
+2.1.283
+Platform
+Anthropic API
+Operating System
+Windows
+Terminal/Shell
+WSL (Windows Subsystem for Linux)
+Additional Information
+claude plugin list output confirming both plugins as installed/enabled (available on request — can paste as a config file attachment).
+Relevant ~/.claude/settings.json snippet:
+"enabledPlugins": {
+"pyright-lsp@claude-plugins-official": true,
+"ruflo-core@ruflo": true
+},
+"extraKnownMarketplaces": {
+"claude-plugins-official": {"source": {"source": "github", "repo": "anthropics/claude-plugins-official"}},
+"ruflo": {"source": {"source": "github", "repo": "ruvnet/ruflo"}}
+}
+Reactions are currently unavailable
+Activity
+Sign up for free to join this conversation on GitHub. Already have an account? Sign in to comment
+Metadata
+Metadata
+AssigneesNo one assigned
+Labels
+area:desktoparea:pluginsbugSomething isn't workingSomething isn't workingduplicateThis issue or pull request already existsThis issue or pull request already existsplatform:wslIssue specifically occurs on WSLIssue specifically occurs on WSL
+TypeNo type
+ProjectsNo projects
+MilestoneNo milestone
+RelationshipsNone yet
+DevelopmentNo branches or pull requests
+Issue actions
+Open in GitHub Copilot app
+Footer
+        © 2026 GitHub, Inc.
+Footer navigation
+            Terms
+            Privacy
+              Security
+              Status
+            Community
+            Docs
+            Contact
+      Manage cookies
+        Do not share my personal information
+    You can’t perform that action at this time.
