@@ -1,0 +1,9 @@
+{
+  "command": [
+    "python3",
+    "scripts/spec_lint.py"
+  ],
+  "exit_code": 0,
+  "stdout": "OK  SPEC.md: 34 live AC(s), 34 built and test-pinned\n",
+  "stderr": ""
+}

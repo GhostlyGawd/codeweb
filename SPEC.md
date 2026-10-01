@@ -102,6 +102,11 @@ the `check:` commands above are what brief 144 runs verbatim.
 - **AC-28** — CLI mapping rejects existing file targets without --out-dir, including file symlinks, with exit 2 and a concise stderr message naming the target and directory recovery action before creating output; explicit-output file mapping, missing targets and supported directory symlinks retain their existing behavior | check: `node --test --test-name-pattern=ac_28 tests/first-use-target.test.mjs` | status: built
 - **AC-29** — MCP codeweb_map rejects existing file targets without out with an actionable isError tool result before creating output; explicit-out file mapping remains successful, responses contain no stack trace and the server exits normally after stdin closes | check: `node --test --test-name-pattern=ac_29 tests/first-use-target.test.mjs` | status: built
 
+- **AC-34** — similarity output offers mapped non-test source candidates for comparison without novelty, safety or equivalent-behavior guarantees; human output exposes the existing threshold, body cap and omitted-count expansion while JSON fields, scoring, ranking and exit/error behavior remain compatible | check: `node --test tests/find-similar-output.test.mjs tests/find-similar.test.mjs tests/structural-clone.test.mjs` | status: built
+
+AC-34 pins P-01's similarity-output correction only. The broader native evidence delivery
+matrix, actual host delivery and user outcomes remain pending separate verification.
+
 ## Interfaces
 
 ### Product clarity release contract — 2026-09-05

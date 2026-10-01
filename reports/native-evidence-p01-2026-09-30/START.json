@@ -1,0 +1,46 @@
+{
+  "started_at": "2026-10-01T00:12:42.292903+00:00",
+  "work_id": "P-01",
+  "base_sha": "fd3b637e9ad4e1f7265799298761bc1ee83fe76c",
+  "branch": "codex/p01-honest-similarity-output",
+  "worktree": "/var/folders/3r/mm394ldj6fx82vpdgz3tmwj00000gp/T/codeweb-p01-3tylipwm",
+  "working_assumption": "Direct Codex; route clarification remains optional/pending. Paperclip is not started.",
+  "requested_worker_model": "gpt-6.1-sol",
+  "requested_reasoning": "high",
+  "user_instruction": "ok go ahead",
+  "product_owner": "implementation subagent; root integrates/reports; separate reviewer judges final candidate",
+  "scope": "Correct the unsupported similarity safety/semantic output claim; preserve public query/ranking/JSON/exit contracts and demonstrate applicable similarity-output acceptance. Full host/NED readiness remains P-02/P-04.",
+  "root_working_tree_preserved": true,
+  "source_snapshots": [
+    {
+      "path": "scripts/find-similar.mjs",
+      "sha256": "f8b57acb8e9a87cc2a402a66f831c1c671932be37e4f303ade01369cb81839c8"
+    },
+    {
+      "path": "SPEC.md",
+      "sha256": "ebd83c3772b30c807569c22c3835ae19845693cdb95707cfa68c8739cf23f958"
+    },
+    {
+      "path": "tests/find-similar.test.mjs",
+      "sha256": "0efe9017a77764348c22168f053306ab6eee45f0d006ab0a13fba434c3955092"
+    },
+    {
+      "path": "scripts/check",
+      "sha256": "16d18888050ba912afad8dcc3d6e543ba942fe39b80f99737512e4e955ced993"
+    },
+    {
+      "path": "scripts/spec_lint.py",
+      "sha256": "3d8f3e219b7bde311be85632b216e26e0c1b379cf0a7f57c062c3ebf82b9b5d8"
+    },
+    {
+      "path": "docs/harness.md",
+      "sha256": "f95cc66fecc38c5ce99d7d0f04615e955d86d771fa389c0eaa8774b1d3a612bd"
+    }
+  ],
+  "implementation_agent": {
+    "task_name": "/root/p01_implementer",
+    "requested_model": "gpt-6.1-sol",
+    "requested_reasoning": "high",
+    "status": "running"
+  }
+}
