@@ -27,3 +27,11 @@ Personal setup, raw correspondence and client source stay outside public publica
 
 References establish mapped use, not an actual runtime invocation. Computed dispatch, component factories and unresolved runtime bindings remain bounded analysis.
 The shipped apply command currently executes ready-tier merges; campaign deletion proposals are separate advisory output.
+
+## Inversion repairs (AC-37/38, unreleased source)
+
+Declaration and usage discovery share executable JSX masking. Block-local bindings end with their block; `var` retains function scope. Parameters, callback parameters and catch bindings suppress unrelated same-named calls. ES namespace members resolve through exported surfaces, while default objects/classes and CommonJS imports retain their distinct handling.
+
+Simple immutable callable aliases can resolve through local/imported targets and short alias chains. Mutable/unsupported known callable aliases and Python decorator factories carry limitations. Literal Python decorators add a reference from the affected definition. The inventory is a bounded static model, not a complete JS/TypeScript/Python interpreter; complex binding patterns are diagnosed rather than accepted as complete.
+
+Export visibility, default identity and local export-clause changes participate in cache invalidation. Existing name-delta reuse remains incremental for unrelated files. Informational find/explain/context/risk responses retain partial mapped facts with `analysis.status: incomplete` and typed `analysis.completeness`; these useful responses are not protocol errors. Action/decision tools still withhold a clean gate when required analysis is unavailable.

@@ -1,9 +1,9 @@
 // Bounded usage scanning over already masked source. No target code executes.
 // JSX uses require a self-closing or paired tag; TS generics are not render sites.
 export function scanStaticUsages(masked, file) {
-  const jsx = [], values = [], tags = [], expressionBindings = [];
+  const jsx = [], values = [], tags = [], expressionBindings = [], decorators = [];
   const isJs = /\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(file);
-  if (!isJs && !file.endsWith('.py')) return { jsx, values, code: masked, expressionBindings };
+  if (!isJs && !file.endsWith('.py')) return { jsx, values, code: masked, expressionBindings, decorators };
   const starts = [0];
   for (let i = 0; i < masked.length; i++) if (masked[i] === '\n') starts.push(i + 1);
   const position = (offset) => {
@@ -86,5 +86,8 @@ export function scanStaticUsages(masked, file) {
       values.push({ name: m[1], ...position(at), kind: 'ref' });
     }
   }
-  return { jsx, values, code, expressionBindings };
+  if (file.endsWith('.py')) for (const m of code.matchAll(/^[\t ]*@([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)\s*(\([^\n]*\))?\s*$/gm)) {
+    decorators.push({ name: m[1], ...position(m.index + m[0].indexOf('@')), kind: 'ref', factory: !!m[2] });
+  }
+  return { jsx, values, code, expressionBindings, decorators };
 }

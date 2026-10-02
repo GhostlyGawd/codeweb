@@ -18,6 +18,7 @@ import { isTestFile } from './graph-ops.mjs';
 import { buildInnermostIndex } from './enclosing.mjs';
 import { importCandidates } from './import-resolve.mjs'; // finding #11: the ONE entry-candidate list (pub walk shares it)
 import { scanStaticUsages } from './static-usages.mjs';
+import { createLexicalBindings } from './lexical-bindings.mjs';
 import { DIAGNOSTIC_CAP } from './analysis-completeness.mjs';
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
@@ -34,7 +35,7 @@ export const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
 export function createEdgeDeriver(ctx) {
   const { byName, pkgOf, roleFor, resolveFileMember, closureLocalIds, legacyFallback, kindById } = ctx;
 
-  function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap, externalBindings) {
+  function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap, externalBindings, namespaceOnly) {
     const usages = scanStaticUsages(lines.join('\n'), r);
     lines = usages.code.split('\n');
     const local = []; const localSet = new Set();
@@ -45,6 +46,10 @@ export function createEdgeDeriver(ctx) {
     };
     let hasModule = false, ambiguous = 0, shortDropped = 0;
     const isPy = r.endsWith('.py');
+    const isJs = /\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(r);
+    const lexical = isJs ? createLexicalBindings(usages.code, ranges) : null;
+    const atLine = (line, column = 0) => lexical ? lexical.starts[line - 1] + column : 0;
+    for (const d of lexical?.diagnostics || []) diagnose(d.code, d.line, '');
     // finding #17 (T-17.1): the file's CANDIDATE name set — every name reaching addEdge, recorded
     // after the KEYWORDS return and BEFORE the aliased/byName gate, so alias locals, decl-line
     // self-captures, and names that resolved to NOTHING this run are all included (an unresolvable
@@ -127,34 +132,68 @@ export function createEdgeDeriver(ctx) {
       if (!bindingsByScope.has(owner)) bindingsByScope.set(owner, new Set());
       bindingsByScope.get(owner).add(name);
     };
-    for (let i = 0; i < lines.length; i++) {
-      const pattern = isPy ? /^[\t ]*([A-Za-z_]\w*)\s*(?::[\w.[\],| \t]+)?\s*=(?!=)/g : /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)/g;
-      for (const match of lines[i].matchAll(pattern)) {
-        bindLocal(match[1], i);
-      }
-      if (!isPy) for (const match of lines[i].matchAll(/\b(?:const|let|var)\s*\{([^}]*)\}\s*=/g)) {
-        for (const part of match[1].split(',')) {
-          const name = (part.split(':').at(-1) || '').split('=')[0].trim().replace(/^\.\.\./, '');
-          if (/^[A-Za-z_$][\w$]*$/.test(name)) bindLocal(name, i);
-        }
-      }
+    if (isPy) for (let i = 0; i < lines.length; i++) {
+      for (const match of lines[i].matchAll(/^[\t ]*([A-Za-z_]\w*)\s*(?::[\w.[\],| \t]+)?\s*=(?!=)/g)) bindLocal(match[1], i);
     }
     const sameFileClasses = new Map(ranges.filter((rg) => rg.kind === 'class').map((rg) => [rg.name, rg.id]));
     // The CLASS node a name refers to (imported class alias OR a same-file class) — for ref edges from
     // `instanceof X` and `X.staticMethod()`. Null for non-classes (an object alias like `utils`).
     const classOf = (name) => (classAliasMap && classAliasMap.get(name)) || sameFileClasses.get(name) || null;
-    const localDeclarationAt = (name, line) => {
+    const localDeclarationAt = (name, line, offset = atLine(line)) => {
       const ancestors = []; for (let scope = enclosing(line); scope; scope = parentOf.get(scope)) ancestors.push(scope);
-      const candidates = (lexicalByName.get(name) || []).filter(rg => !parentOf.get(rg) || ancestors.includes(parentOf.get(rg)));
+      const candidates = (lexicalByName.get(name) || []).filter(rg => {
+        if (parentOf.get(rg) && !ancestors.includes(parentOf.get(rg))) return false;
+        if (!lexical) return true;
+        const declaration = atLine(rg.start, Math.max(0, (lines[rg.start - 1] || '').indexOf(rg.name)));
+        const scope = lexical.scopeAt(declaration);
+        return scope.start <= offset && scope.end >= offset;
+      });
       let nearest = Infinity;
       for (const rg of candidates) nearest = Math.min(nearest, parentOf.get(rg) ? ancestors.indexOf(parentOf.get(rg)) : ancestors.length);
       const chosen = candidates.filter(rg => (parentOf.get(rg) ? ancestors.indexOf(parentOf.get(rg)) : ancestors.length) === nearest);
-      return chosen.length === 1 ? chosen[0].id : null;
+      return chosen.length === 1 ? chosen[0].id : chosen.length > 1 && chosen.every(rg => rg.kind === 'function') ? chosen.at(-1).id : null;
     };
-    const addEdge = (lineIdx, name, kind = 'call') => {
+    const parameterAt = (name, line) => {
+      for (let scope = enclosing(line); scope; scope = parentOf.get(scope)) if (valueParamsOf.get(scope)?.has(name)) return true;
+      return false;
+    };
+    const bindingAt = (name, offset) => {
+      const binding = lexical?.bindingAt(name, offset);
+      // A resolved require declaration is import evidence, not an unrelated local shadow.
+      return binding?.reference === 'require' && (aliasMap?.has(name) || nsAliasMap?.has(name)) ? null : binding;
+    };
+    const memberTarget = (name, member) => nsAliasMap?.has(name)
+      ? resolveFileMember(nsAliasMap.get(name), member, { exportsOnly: namespaceOnly?.has(name) ?? false }) : null;
+    const knownTarget = (name, offset, seen = new Set()) => {
+      if (seen.has(name) || seen.size > 16) return null;
+      const [root, member, ...rest] = name.split('.');
+      const line = lexical?.lineAt(offset) || 1;
+      if (parameterAt(root, line) || externalBindings?.has(root)) return null;
+      const binding = bindingAt(root, offset);
+      if (binding) {
+        if (member || !binding.alias || offset <= binding.init) return null;
+        const next = new Set(seen); next.add(name);
+        return knownTarget(binding.alias, binding.init, next);
+      }
+      if (rest.length) return null;
+      if (member) return memberTarget(root, member);
+      return localDeclarationAt(root, line, offset) || aliasMap?.get(root) || null;
+    };
+    const addEdge = (lineIdx, name, kind = 'call', column = 0) => {
       if (KEYWORDS.has(name)) return;
       cand.add(name); // finding #17: pre-gate — see the declaration above
       if (usages.expressionBindings.some(binding => binding.name === name && lineIdx + 1 >= binding.start && lineIdx + 1 <= binding.end)) return;
+      const offset = atLine(lineIdx + 1, column);
+      if (['call','ref'].includes(kind) && parameterAt(name, lineIdx + 1)) return;
+      const binding = bindingAt(name, offset);
+      if (binding) {
+        const target = knownTarget(name, offset);
+        if (target) addResolved(lineIdx, target, kind);
+        else if (kind === 'call' && binding.reference && !externalBindings?.has(binding.reference.split('.')[0]) &&
+          (byName.has(binding.reference) || aliasMap?.has(binding.reference) || lexical.bindingAt(binding.reference, binding.init)))
+          diagnose('unsupported-callable-alias', lineIdx + 1, name);
+        return;
+      }
       const aliased = aliasMap && aliasMap.get(name);
       if (!aliased && !byName.has(name)) return;
       if (kind === 'call') {
@@ -179,8 +218,9 @@ export function createEdgeDeriver(ctx) {
       let callerId;
       if (caller) callerId = caller.id;
       else { callerId = r + ':<module>'; hasModule = true; } // module/top-level scope
-      let calleeId = aliased || sameFileByName.get(name);
+      let calleeId = aliased || localDeclarationAt(name, lineIdx + 1, offset);
       if (!calleeId) {
+        if (isJs && lexicalByName.has(name)) { diagnose('unresolved-lexical-call', lineIdx + 1, name); return; }
         if (kind === 'call' || kind === 'ref') {
           // finding #10 (T-10.4): PARAM SHADOW — a bare name token-bound by the signature of ANY
           // enclosing range never reaches the fallback (alias/same-file resolution already missed;
@@ -237,10 +277,11 @@ export function createEdgeDeriver(ctx) {
     };
     // Push an edge to an ALREADY-RESOLVED callee id — used for namespace/default import member-access,
     // where the callee is resolved via the import binding rather than bare-name lookup.
-    const addResolved = (lineIdx, calleeId, kind = 'call') => {
+    const addResolved = (lineIdx, calleeId, kind = 'call', ownerId = null) => {
       const caller = enclosing(lineIdx + 1);
       let callerId;
       if (caller) callerId = caller.id; else { callerId = r + ':<module>'; hasModule = true; }
+      if (ownerId) callerId = ownerId;
       if (!calleeId || calleeId === callerId) return;
       const edgeKind = ((kind === 'call' || kind === 'ref') && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
       const key = callerId + ' ' + calleeId + ' ' + edgeKind; // call & ref to the same target coexist
@@ -343,14 +384,15 @@ export function createEdgeDeriver(ctx) {
         // a genuine collision still drops through the ordinary ambiguity gate.
         if (isCpp && ln[m.index - 1] === '>' && ln[m.index - 2] === '-') continue;
         if (ln[m.index - 1] === '.' && ln[m.index - 2] !== '.') {
+          cand.add(m[1]); // export visibility can change without changing the name or the importer
           // member call obj.fn(): resolve ONLY when obj is a namespace/default import alias (a param or
           // local obj.method() must stay unresolved — see reference-edges PRECISION). This recovers the
           // cross-file usage the bare-name pass can't see (util.merge(), AxiosHeaders.from()).
           const before = ln.slice(0, m.index - 1);
           const om = /([A-Za-z_$][\w$]*)$/.exec(before);
-          if (om) {
+          if (om && !parameterAt(om[1], i + 1) && !bindingAt(om[1], atLine(i + 1, m.index))) {
             if (nsAliasMap && nsAliasMap.has(om[1])) {
-              const calleeId = resolveFileMember(nsAliasMap.get(om[1]), m[1]);
+              const calleeId = memberTarget(om[1], m[1]);
               if (calleeId) addResolved(i, calleeId, 'call');
             }
             const cls = classOf(om[1]);
@@ -358,19 +400,20 @@ export function createEdgeDeriver(ctx) {
             // X.member.call(...) / X.member.apply(...): the real invocation is of X-file:member.
             if ((m[1] === 'call' || m[1] === 'apply') && nsAliasMap) {
               const chain = /([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)$/.exec(before);
-              if (chain && nsAliasMap.has(chain[1])) {
-                const calleeId = resolveFileMember(nsAliasMap.get(chain[1]), chain[2]);
+              if (chain && nsAliasMap.has(chain[1]) && !parameterAt(chain[1], i + 1) && !bindingAt(chain[1], atLine(i + 1, m.index))) {
+                cand.add(chain[2]);
+                const calleeId = memberTarget(chain[1], chain[2]);
                 if (calleeId) addResolved(i, calleeId, 'call');
               }
             }
           }
           continue; // not an import-alias member -> stay precision-safe (no edge)
         }
-        addEdge(i, m[1]);
+        addEdge(i, m[1], 'call', m.index);
       }
       if (!sigLine) { // finding #10 (T-10.2): a signature line's params are bindings, not references
         refRe.lastIndex = 0;
-        while ((m = refRe.exec(ln))) addEdge(i, m[1], 'ref'); // a bare identifier ARGUMENT is a reference (callback/value), not an invocation
+        while ((m = refRe.exec(ln))) addEdge(i, m[1], 'ref', m.index + m[0].lastIndexOf(m[1])); // a bare identifier ARGUMENT is a reference (callback/value), not an invocation
       }
       instanceofRe.lastIndex = 0;
       while ((m = instanceofRe.exec(ln))) { const cls = classOf(m[1]); if (cls) addResolved(i, cls, 'ref'); }
@@ -380,7 +423,8 @@ export function createEdgeDeriver(ctx) {
     const lexicalTarget = (use) => {
       const [name, member, ...rest] = use.name.split('.');
       cand.add(name); if (member) cand.add(member);
-      if (!member && !aliasMap?.has(name) && !lexicalByName.has(name)) return null;
+      if (!member && !aliasMap?.has(name) && !lexicalByName.has(name) && !lexical?.bindingAt(name, use.offset)) return null;
+      if (lexical) return knownTarget(use.name, use.offset);
       const owner = enclosing(use.line);
       const ancestors = new Set();
       for (let scope = owner; scope; scope = parentOf.get(scope)) {
@@ -389,7 +433,7 @@ export function createEdgeDeriver(ctx) {
       }
       if (bindingsByScope.get(null)?.has(name)) return null;
       if (rest.length) return null;
-      if (member) return nsAliasMap?.has(name) ? resolveFileMember(nsAliasMap.get(name), member) : null;
+      if (member) return memberTarget(name, member);
       const candidates = lexicalByName.get(name) || [];
       const accessible = candidates.filter(rg => !parentOf.get(rg) || ancestors.has(parentOf.get(rg)));
       const ancestry = [...ancestors];
@@ -404,6 +448,13 @@ export function createEdgeDeriver(ctx) {
       const kind = target && (kindById?.get(target) || ranges.find(rg => rg.id === target)?.kind);
       if (target && (!kind || ['function', 'method', 'class'].includes(kind))) addResolved(use.line - 1, target, use.kind);
       else if (use.kind === 'call' && !externalBindings?.has(use.name.split('.')[0])) diagnose('unresolved-jsx-component', use.line, use.name);
+    }
+    for (const use of usages.decorators || []) {
+      const owner = ranges.filter(rg => rg.start > use.line && ['function','method','class'].includes(rg.kind)).sort((a,b) => a.start - b.start)[0];
+      const target = lexicalTarget(use);
+      if (target && owner) addResolved(use.line - 1, target, 'ref', owner.id);
+      else if (!['staticmethod','classmethod','property'].includes(use.name) && !externalBindings?.has(use.name.split('.')[0])) diagnose('unresolved-decorator', use.line, use.name);
+      if (use.factory) diagnose('unsupported-decorator-factory', use.line, use.name);
     }
     return { edges: local, hasModule, ambiguous, short: shortDropped, cand: [...cand].sort(), analysis };
   }

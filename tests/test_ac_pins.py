@@ -211,6 +211,14 @@ class TestAcPins(unittest.TestCase):
         proc = _run(["node", "--test", "tests/static-usages.test.mjs"])
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
 
+    def test_ac_37_inversion_source_correctness(self):
+        proc = _run(["node", "--test", "tests/inversion-correctness.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_38_partial_information_transport(self):
+        proc = _run(["node", "--test", "tests/inversion-transport.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

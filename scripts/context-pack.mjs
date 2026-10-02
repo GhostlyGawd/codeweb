@@ -14,6 +14,7 @@
 
 import { buildIndex, resolveSymbol, suggestSymbols } from './lib/graph-ops.mjs';
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: one payload assembler, two transports (CLI + MCP fast path)
+import { qualifyInformation } from './lib/analysis-completeness.mjs';
 
 const USAGE = 'usage: context-pack.mjs <graph.json> <symbol> [--window N] [--full-bodies] [--limit N] [--capture-evidence --task ID | --receipt ID --task ID --section NAME [--result ID] [--offset N]] [--json]   (or set CODEWEB_WS)';
 import { die, emitJson, finish, loadGraph, sourceReader, parseArgs } from './lib/cli.mjs';
@@ -62,7 +63,7 @@ if (!ids.length) {
     // old stderr die() left MCP parity replying an EMPTY string on a miss.
     const payload = { symbol, found: false, hint: `no symbol matches "${symbol}" — try codeweb_find "<free text>" (concept search, no name needed)${suggestions.length ? ' or a near-match below' : ''}` };
     if (suggestions.length) payload.suggestions = suggestions;
-    emitJson(payload, 1);
+    emitJson(qualifyInformation(payload, graph), 1);
   } else {
     die(`symbol not found: ${symbol}${suggestions.length ? ` — near matches: ${suggestions.join(', ')}` : ''} (concept search: find.mjs "<free text>")`, 1);
   }

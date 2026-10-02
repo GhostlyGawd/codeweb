@@ -30,6 +30,7 @@ import { findSymbols } from './lib/find-core.mjs';
 import { buildBrief } from './lib/brief-core.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's card assembler, in-process
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
+import { qualifyInformation } from './lib/analysis-completeness.mjs';
 import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
 import { sourceReader, editDistance } from './lib/cli.mjs';
 import { BANDS, BODY_LINE_CAP } from './lib/shingles.mjs';
@@ -571,9 +572,6 @@ function handleToolCall(id, params) {
   if (graphPath && STRUCTURAL_TOOLS.has(tool.name)) {
     try {
       const checkedGraph = cachedGraph(resolve(graphPath)).graph;
-      if (checkedGraph.meta?.analysis?.status === 'incomplete' && !QUERY_KIND[tool.name]) {
-        return errResult(id, JSON.stringify({ status: 'inconclusive', analysis: checkedGraph.meta.analysis, hint: 'Analysis incomplete: inspect diagnostic source locations and callers; this partial graph cannot establish a clean result.' }));
-      }
       if (checkedGraph.nodes.length === 0) {
         return errResult(id, `the map at ${graphPath} is EMPTY (built with --allow-empty; no supported source found) — structural answers would be vacuous, not "0 findings". Re-map at the code root, or use the /codeweb agent fallback for non-native languages.`);
       }
@@ -617,6 +615,7 @@ function handleToolCall(id, params) {
         if (remaining > 0) payload.more = { remaining, nextOffset: offset + items.length };
         const stale = staleOnce(resolve(graphPath), entry);
         if (stale) { payload.stale = stale; payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`; }
+        qualifyInformation(payload, graph);
         return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
       }
     } catch { /* fall through to the spawned artifact */ }
@@ -634,12 +633,14 @@ function handleToolCall(id, params) {
         const suggestions = suggestSymbols(graph, args.symbol);
         const payload = { symbol: args.symbol, found: false, hint: `no symbol matches "${args.symbol}" — try codeweb_find "<free text>" (concept search, no name needed)${suggestions.length ? ' or a near-match below' : ''}` };
         if (suggestions.length) payload.suggestions = suggestions;
+        qualifyInformation(payload, graph);
         return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
       }
       const cards = buildCards(graph, index, sourceReader(graph.meta && graph.meta.root), ids);
       const payload = { symbol: args.symbol, matched: ids, cards, summary: cards.map((c) => c.summary).join(' | ') };
       const stale = staleOnce(resolve(graphPath), entry);
       if (stale) { payload.stale = stale; payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`; }
+      qualifyInformation(payload, graph);
       return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
     } catch { /* fall through to the spawned artifact */ }
   }
@@ -655,6 +656,7 @@ function handleToolCall(id, params) {
         const suggestions = suggestSymbols(graph, args.symbol);
         const payload = { symbol: args.symbol, found: false, hint: `no symbol matches "${args.symbol}" — try codeweb_find "<free text>" (concept search, no name needed)${suggestions.length ? ' or a near-match below' : ''}` };
         if (suggestions.length) payload.suggestions = suggestions;
+        qualifyInformation(payload, graph);
         return reply(id, { content: [{ type: 'text', text: JSON.stringify(payload) }] });
       }
       const limit = args.limit != null ? Number(args.limit) : (args.full ? null : tool.budget.value);
