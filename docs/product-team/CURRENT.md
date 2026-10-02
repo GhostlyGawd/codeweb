@@ -6,9 +6,9 @@ Updated October 1, 2026. Operate directly through Codex under [TERMINAL-CONTRACT
 
 ## Current priority
 
-**Product correctness delivered; repository consolidation prepared (P-05).** [The repaired candidate](../../reports/static-usage-p05-2026-10-01/README.md) is frozen at `fbda8e6dd749ea8641c7192dc8cdaaf604c27737` in [draft PR #101](https://github.com/GhostlyGawd/codeweb/pull/101). It includes the earlier P-01/P-03/P-04 source changes and the JSX/reference repair on main. The source gate passed 1,303 product checks, seven skips, 48 Python checks and five evals; all ten source CI checks passed. P-05 was owned and checked by the active session; no independent agent review is claimed.
+**Product correctness and repository consolidation delivered (P-05).** [The repaired candidate](../../reports/static-usage-p05-2026-10-01/README.md) is frozen at `fbda8e6dd749ea8641c7192dc8cdaaf604c27737` in [draft PR #101](https://github.com/GhostlyGawd/codeweb/pull/101). It includes the earlier P-01/P-03/P-04 source changes and the JSX/reference repair on main. The source gate passed 1,303 product checks, seven skips, 48 Python checks and five evals; all ten source CI checks passed. P-05 was owned and checked by the active session; no independent agent review is claimed.
 
-Identity provisioning and outreach remain deferred by the user. Generic fixtures verify the supplied failure modes; the client repositories and their reported totals remain unavailable for verification. Current plans and sanitized research are consolidated with the tested source; original working bytes and private research are preserved outside public publication. Source merge and release remain separate.
+Identity provisioning and outreach remain deferred by the user. Generic fixtures verify the supplied failure modes; the client repositories and their reported totals remain unavailable for verification. The primary checkout now uses `codex/codeweb-workspace`, with exact CI-tested source and sanitized current plans. Original working bytes and private research are archived outside this repository; the existing local history edit remains in place. Source merge and release remain separate.
 
 The [research-to-execution planning packet](../../reports/research-to-execution-plan-2026-09-30/README.md) is prepared and reviewed with a disclosed same-session critic pass. [PLAN.md](PLAN.md) defines direction, [DECISIONS.json](DECISIONS.json) accounts for every one of the 65 material findings, and [TASKS.json](TASKS.json) is the authoritative work record. Planning completion is not product/user validation.
 
@@ -33,6 +33,8 @@ The [original approved pressure test](../../reports/hypothesis-pressure-test-202
 The [GTM roadmap](../gtm-cofounder/gtm-roadmap.md) now reflects the completed packet and [scorecard](SCORECARD.md) definitions. The charter's free-local/no-telemetry boundary, selected positioning, Teams permission and price intent remain intact. No automatic progression from a successful local brief to buying is assumed.
 
 ## Continuity
+
+Start product work in this primary checkout. PR #101 is the consolidated source candidate for main; earlier draft source PRs remain historical review records. The next product work is remaining first-run/native usability under P-04, with Claude still pending by user choice.
 
 [BACKLOG.md](BACKLOG.md) preserves six unfinished website records; all map to WEB-01 for current-candidate/overlap reconciliation. Original acceptance and later user decisions still govern; no new visual quality or old-objective completion is claimed.
 
