@@ -32,6 +32,7 @@ import { buildCards } from './lib/explain-core.mjs'; // finding 20: explain's ca
 import { buildContextPack } from './lib/context-core.mjs'; // finding 20: context-pack's assembler, in-process
 import { bump, attachActivity, receiptPayload } from './lib/stats.mjs';
 import { sourceReader, editDistance } from './lib/cli.mjs';
+import { BANDS, BODY_LINE_CAP } from './lib/shingles.mjs';
 import { hasEvidenceArguments, validateEvidenceArgs, evidenceCliArgs } from './lib/evidence-args.mjs';
 import { TOOL_SPECS, QUERY_TOOL_SPECS } from './lib/tool-specs.mjs'; // D1: THE tool-interface manifest
 import { discoverGraph, discoverUnsupported, NO_GRAPH, cachedGraph, staleOnce } from './lib/mcp-graphs.mjs'; // D2: graph serving state
@@ -149,7 +150,7 @@ const TOOL_BEHAVIOR = {
   codeweb_callees: (s) => ({ argv: (a) => ['--callees', a.symbol],
     description: `Direct callees (the functions a symbol calls). Budgeted: top ${s.budget.value} by default.` }),
   codeweb_impact: (s) => ({ argv: (a) => ['--impact', a.symbol],
-    description: `Blast radius: every function transitively affected by changing a symbol, plus the domains touched. Call this BEFORE editing a symbol. Budgeted: summary + top ${s.budget.value} by fan-in (count is the true total; full:true for every id).` }),
+    description: `Mapped transitive impact through supported graph edges, plus domains touched. Unmapped or dynamic relationships may be missing; this is source-graph evidence. Call BEFORE editing. Budgeted: summary + top ${s.budget.value} by fan-in (count is the mapped total; full:true for all mapped ids).` }),
   codeweb_cycles: (s) => ({ argv: () => ['--cycles'],
     description: `File-level dependency cycles (circular imports/calls). Budgeted: top ${s.budget.value} by default.` }),
   codeweb_orphans: (s) => ({ argv: () => ['--orphans'],
@@ -179,7 +180,7 @@ const TOOL_BEHAVIOR = {
     valid: (a) => (a.signature || a.body) ? null : 'pass `signature` (a candidate signature) or `body` (a code snippet)',
     argv: (a) => a.body ? ['--stdin', ...(a.structural ? ['--structural'] : [])] : ['--signature', a.signature, ...(a.structural ? ['--structural'] : [])],
     input: (a) => a.body || undefined,
-    description: 'Before writing a function, ask "does something already do this?": ranks existing bodies by similarity to a candidate `signature` or `body` snippet. structural:true matches identifier-renamed (Type-2) clones. Call to AVOID re-implementing existing logic.' }),
+    description: `Before writing a function, rank mapped non-test function/method source candidates for comparison with a signature or body snippet (>=${BANDS.low * 100}% similarity; existing bodies limited to first ${BODY_LINE_CAP} lines, candidate uncapped). structural:true uses identifier-normalized shingles. Missing bodies and unmapped code may hide candidates; similarity does not establish equivalent behavior, novelty, or safe reuse. Inspect source and run relevant tests.` }),
   codeweb_placement: () => ({ argv: (a) => ['--calls', a.calls],
     description: 'Where a NEW symbol belongs: given the comma-separated ids/labels it will call, suggests the domain + file by callee gravity, and warns if it duplicates an existing symbol.' }),
   // FORMS F11: limit/full were advertised here but wired to nothing (no budget entry, no CLI
@@ -198,7 +199,7 @@ const TOOL_BEHAVIOR = {
   codeweb_break_cycles: (s) => ({ argv: () => [],
     description: `For each file dependency cycle, the cheapest dependency edge to sever — verified to actually break the cycle. Budgeted: top ${s.budget.value} cycles by default.` }),
   codeweb_deadcode: (s) => ({ argv: (a) => (a.all ? ['--all'] : []),
-    description: `Confidence-tiered dead-code: safe-to-delete vs review-first (test-guarded or entrypoint-like), each with its loc span. Budgeted: top ${s.budget.value} per tier by span (totals stay true; full:true for everything).` }),
+    description: `Mapped orphan candidates grouped by structural review flags, with source availability, incompleteness and freshness. Deletion safety is not established; unmapped calls may hide use. Budgeted: top ${s.budget.value} per tier by span (totals stay true; full:true for all mapped candidates).` }),
   // FORMS F12: `into` demoted to optional — the CLI picks the canonical survivor itself when
   // --into is omitted; a required field the engine can infer is form friction.
   codeweb_codemod: () => ({ argv: (a) => ['--merge', a.merge, ...(a.into ? ['--into', a.into] : [])],
@@ -206,7 +207,7 @@ const TOOL_BEHAVIOR = {
   codeweb_hotspots: (s) => ({ argv: (a) => (a.all ? ['--all'] : []),
     description: `Rank symbols by refactoring priority (complexity x fan-in x churn): where to focus first. Budgeted: top ${s.budget.value} with raw components.` }),
   codeweb_campaign: (s) => ({ argv: (a) => (a.all ? ['--all'] : []),
-    description: `One ordered, gated optimization worklist (dead-code deletes + verified cycle cuts + duplicate merges), pre-flighted so applying in order never introduces a cycle. Budgeted: top ${s.budget.value} ROI steps by default (\`budget\` N or full:true for the whole plan).` }),
+    description: `Ordered optimization candidates (orphan deletions, cycle cuts, duplicate merges), checked in a mapped-graph simulation for new cycles when applied in order. The simulation does not establish runtime safety or behavior. Budgeted: top ${s.budget.value} ROI steps by default (\`budget\` N or full:true for the whole plan).` }),
   // API F4: `scope` without `value` used to be silently DROPPED by argv() — the tool answered
   // the whole-repo question instead of the scoped one (the exact trap the CLI's --scope
   // enumeration hardened against, FORMS F8, resurrected one transport over). The messages speak

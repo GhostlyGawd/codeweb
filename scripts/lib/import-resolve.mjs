@@ -264,6 +264,7 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
     // Spec Q2 (member path): `flask.render_template(...)` through `import flask` — the member is a
     // re-export in the package __init__; follow it exactly like the from-import path does.
     if (fileRel.endsWith('.py')) { const viaReExport = pyReExportResolve(fileRel, name); if (viaReExport) return viaReExport; }
+    else if (/\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(fileRel)) { const viaReExport = resolveReExport(fileRel, name); if (viaReExport) return viaReExport; }
     return null;
   };
 
@@ -292,7 +293,7 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
    * replay rule's per-file inputs.
    */
   function bindFileImports({ fAbs, r, isPy, isCpp, text, aId, defaultExportByFile, kindById }) {
-    const amap = new Map(), nsmap = new Map(), classmap = new Map(), edges = [];
+    const amap = new Map(), nsmap = new Map(), classmap = new Map(), external = new Set(), edges = [];
     const deps = new Set(), bindCand = new Set();
     // Record-and-return: every resolved target joins `deps` (finding #17's bindDeps). The name is
     // free to be anything — the extractor's fallback no longer targets closure-locals (the `dep`
@@ -301,7 +302,13 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
     const addDep = (t) => { if (t) deps.add(t); return t; };
     let m;
     const addNamed = (namesStr, spec) => {
-      const target = addDep(resolveImport(fAbs, spec)); if (!target) return;
+      const target = addDep(resolveImport(fAbs, spec));
+      if (!target) {
+        if (!spec.startsWith('.') && !spec.startsWith('/') && !/^[@~]\//.test(spec)) for (const part of namesStr.split(',')) {
+          const segments = part.trim().split(/\s+as\s+/); if (segments.at(-1)) external.add(segments.at(-1).trim());
+        }
+        return;
+      }
       // A named import FROM a .json target (`import { version } from './package.json'`, TS
       // resolveJsonModule) has no symbol nodes to bind to — a JSON file is file-level in the map.
       // Emit the coarse module edge so the file dependency survives instead of vanishing.
@@ -361,7 +368,8 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
     // node (created on demand below), NOT on its anchor symbol — member-access now produces the precise
     // per-symbol edges, so attributing the coarse edge to one symbol only pollutes its dependents.
     const addModuleBinding = (local, spec, isDefault) => {
-      const t = addDep(resolveImport(fAbs, spec)); if (!t) return;
+      const t = addDep(resolveImport(fAbs, spec));
+      if (!t) { if (local && !spec.startsWith('.') && !spec.startsWith('/') && !/^[@~]\//.test(spec)) external.add(local); return; }
       if (local) nsmap.set(local, t);
       // A default import binds the target's default export: attribute to its single owning symbol when
       // there is one (class/fn AxiosError), else the module object (object-default barrel -> <module>).
@@ -399,7 +407,7 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
       while ((m = esDefault.exec(text))) addModuleBinding(m[1], m[2], true);
       while ((m = esSide.exec(text))) addSide(m[1]);
     }
-    return { amap, nsmap, classmap, edges, deps, bindCand };
+    return { amap, nsmap, classmap, external, edges, deps, bindCand };
   }
 
   return {

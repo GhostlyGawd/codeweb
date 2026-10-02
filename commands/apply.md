@@ -13,6 +13,8 @@ merges only**, every accept/reject decided by the deterministic gate, never by y
 
 - **Ready tier only.** Never touch `blocked` or `review` tier items — blocked means the gate
   already rejected the naive merge; review means a human judgement the user has not delegated.
+- **Merge steps only.** Campaign `delete` proposals require source review and separate explicit
+  deletion authorization. A green structural gate does not establish unused code or deletion safety.
 - **The gate owns the verdict.** You simulate, edit, and run tests; `codeweb_diff` (exit 1 on a
   new cycle / new duplication / lost callers) and the test subset decide. You never overrule them.
 - **Revert on any failure.** A red diff-gate or failing test subset → `git checkout` the touched

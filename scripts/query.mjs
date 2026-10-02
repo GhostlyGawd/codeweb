@@ -75,13 +75,17 @@ if (p.analysis?.status === 'incomplete') console.log(`  analysis: ${p.analysis.n
 if (p.query === 'callers' || p.query === 'callees' || p.query === 'tests') {
   const extra = p.matched.length > 1 ? ` (${p.matched.length} matches: ${p.matched.join(', ')})` : '';
   console.log(`${p.query} of ${p.symbol}${extra}: ${p.count}`);
+  if (p.referenceCount) console.log(`  ${p.referenceCount} mapped reference user(s) — use codeweb_dependents`);
+  if (p.caveat) console.log(`  ${p.caveat}`);
   for (const r of p.results) console.log(`  ${r}`);
 } else if (p.query === 'dependents') {
   const extra = p.matched.length > 1 ? ` (${p.matched.length} matches)` : '';
   console.log(`dependents of ${p.symbol}${extra}: ${p.count} (call ${p.byKind.call.length}, import ${p.byKind.import.length}, inherit ${p.byKind.inherit.length}, test ${p.byKind.test.length}, ref ${p.byKind.ref.length})`);
+  if (p.caveat) console.log(`  ${p.caveat}`);
   for (const r of p.results) console.log(`  ${r}`);
 } else if (p.query === 'impact') {
-  console.log(`impact of ${p.symbol}: ${p.count} functions across ${p.domains.length} domains`);
+  console.log(`impact of ${p.symbol}: ${p.count} mapped consumers across ${p.domains.length} domains`);
+  console.log(`  scope: ${p.closure}`);
   if (p.domains.length) console.log(`  domains: ${p.domains.join(', ')}`);
   for (const r of p.results) console.log(`  ${r}`);
 } else if (p.query === 'cycles') {

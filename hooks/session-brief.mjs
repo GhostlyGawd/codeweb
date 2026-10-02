@@ -13,7 +13,7 @@ import { normalizeGraph, buildIndex } from '../scripts/lib/graph-ops.mjs';
 import { buildBrief, renderBrief } from '../scripts/lib/brief-core.mjs';
 import { loadBriefSidecar } from '../scripts/lib/brief-sidecar.mjs'; // finding 23: serve the map-time render at the boot floor
 import { bump, attachActivity } from '../scripts/lib/stats.mjs';
-import { checkStaleness, SRC_RE, nearestWorkspace } from '../scripts/lib/cli.mjs'; // R3 nudge + THE walk (D3b)
+import { checkStaleness, SRC_RE, nearestWorkspace, sameFile } from '../scripts/lib/cli.mjs'; // R3 nudge + THE walk (D3b)
 import { loadStaleStamps } from '../scripts/lib/stale-stamps.mjs'; // R3: stamps without the graph parse
 import { readHistory } from '../scripts/lib/history.mjs';          // R1/R8: the progression line
 import { loadNarration } from '../scripts/lib/narration.mjs';      // AI-IDEAS 3: agent-written notes, labeled
@@ -75,7 +75,7 @@ export function preview(raw) {
   return `[codeweb] this repo is mapped (${graphPath}).\n${text}`;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
+if (process.argv[1] && sameFile(process.argv[1], fileURLToPath(import.meta.url))) {
   let raw = '';
   try { raw = readFileSync(0, 'utf8'); } catch { /* no stdin */ }
   let msg = null;

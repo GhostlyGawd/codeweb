@@ -2,7 +2,7 @@
 // Samples are bounded independently of the exact diagnostic count. Evidence is
 // masked code only: string/comment contents must never enter diagnostics.
 export const DIAGNOSTIC_CAP = 20;
-export const INCOMPLETE_STEP = 'Analysis incomplete: same-line JS/TS declarations may be missing or have incorrect call ownership. Inspect the diagnostic locations and their callers in source; do not accept this graph as a clean gate.';
+export const INCOMPLETE_STEP = 'Analysis incomplete: declarations or usage targets may be missing or ambiguous. Inspect the diagnostic locations and their consumers in source; do not accept this graph as a clean gate.';
 
 export function sameLineDeclarations(masked, file) {
   let count = 0;
