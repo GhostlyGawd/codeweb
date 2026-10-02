@@ -17,6 +17,8 @@ import { KEYWORDS, parseSignature, CPP_RE, C_FAMILY_RE } from './lang-rules.mjs'
 import { isTestFile } from './graph-ops.mjs';
 import { buildInnermostIndex } from './enclosing.mjs';
 import { importCandidates } from './import-resolve.mjs'; // finding #11: the ONE entry-candidate list (pub walk shares it)
+import { scanStaticUsages } from './static-usages.mjs';
+import { DIAGNOSTIC_CAP } from './analysis-completeness.mjs';
 
 // Derive the file path from a node id (`<file>:<label>`); ids use '/' in paths and ':' only as the
 // label separator, so the last ':' splits them. (One truth — the orchestrator imports this back.)
@@ -30,10 +32,17 @@ export const idFile = (id) => id.slice(0, id.lastIndexOf(':'));
  * per file (orchestrator) and callable in-process (tests + the in-process hook).
  */
 export function createEdgeDeriver(ctx) {
-  const { byName, pkgOf, roleFor, resolveFileMember, closureLocalIds, legacyFallback } = ctx;
+  const { byName, pkgOf, roleFor, resolveFileMember, closureLocalIds, legacyFallback, kindById } = ctx;
 
-  function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap) {
+  function deriveFileEdges(r, lines, ranges, aliasMap, nsAliasMap, classAliasMap, externalBindings) {
+    const usages = scanStaticUsages(lines.join('\n'), r);
+    lines = usages.code.split('\n');
     const local = []; const localSet = new Set();
+    const analysis = { count: 0, diagnostics: [] };
+    const diagnose = (code, line, name) => {
+      analysis.count++;
+      if (analysis.diagnostics.length < DIAGNOSTIC_CAP) analysis.diagnostics.push({ code, file: r, line, column: Math.max(1, (lines[line - 1] || '').indexOf(name) + 1), evidence: (lines[line - 1] || '').trim().slice(0, 160) });
+    };
     let hasModule = false, ambiguous = 0, shortDropped = 0;
     const isPy = r.endsWith('.py');
     // finding #17 (T-17.1): the file's CANDIDATE name set — every name reaching addEdge, recorded
@@ -62,6 +71,7 @@ export function createEdgeDeriver(ctx) {
     // only — `ranges` objects also live in the scan cache and must not grow non-JSON state.
     const startLines = new Set(ranges.map((rg) => rg.start));
     const paramsOf = new Map(); // range -> Set(identifier tokens in its signature)
+    const valueParamsOf = new Map(); // binding names, excluding default-value/type expressions
     const sweepInto = (set, s) => { for (const t of s.match(/[A-Za-z_$][\w$]*/g) || []) set.add(t); };
     // Unbalanced paren depth of `name`'s param list on its decl line (0 = balanced or no list).
     const sigSpill = (ln, name, set) => {
@@ -81,7 +91,14 @@ export function createEdgeDeriver(ctx) {
       const set = new Set();
       const sig = parseSignature(lines[rg.start - 1] || '', rg.name, isPy);
       if (sig) sweepInto(set, sig.raw);
+      const bound = sig ? new Set(sig.params) : set;
+      if (sig && /^[\s]*[\[{]/.test(sig.raw)) sweepInto(bound, sig.raw.split('=')[0]);
+      if (!sig) {
+        const arrow = /\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*(?:async\s+)?([A-Za-z_$][\w$]*)\s*=>/.exec(lines[rg.start - 1] || '');
+        if (arrow) bound.add(arrow[1]);
+      }
       paramsOf.set(rg, set);
+      valueParamsOf.set(rg, bound);
     }
     // Round 2, finding #12: every declaration start line per NAME. addEdge skips a match whose name
     // has a declaration starting on that line — a getter/setter pair or an overload impl line used to
@@ -93,6 +110,26 @@ export function createEdgeDeriver(ctx) {
     const declStarts = new Map(); // name -> Set(1-based start lines)
     for (const rg of ranges) { let s = declStarts.get(rg.name); if (!s) declStarts.set(rg.name, s = new Set()); s.add(rg.start); }
     const sameFileByName = new Map(ranges.map((rg) => [rg.name, rg.id]));
+    const lexicalByName = new Map(), parentOf = new Map(), scopes = [];
+    for (const rg of [...ranges].sort((a, b) => a.start - b.start || b.end - a.end)) {
+      while (scopes.length && (scopes.at(-1).end < rg.end || scopes.at(-1).start === rg.start)) scopes.pop();
+      parentOf.set(rg, scopes.at(-1) || null); scopes.push(rg);
+      if (['function', 'method', 'class'].includes(rg.kind)) {
+        if (!lexicalByName.has(rg.name)) lexicalByName.set(rg.name, []);
+        lexicalByName.get(rg.name).push(rg);
+      }
+    }
+    const bindingsByScope = new Map();
+    for (let i = 0; i < lines.length; i++) {
+      const pattern = isPy ? /^[\t ]*([A-Za-z_]\w*)\s*(?::[\w.[\],| \t]+)?\s*=(?!=)/g : /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)/g;
+      for (const match of lines[i].matchAll(pattern)) {
+        const name = match[1];
+        if ((lexicalByName.get(name) || []).some(rg => rg.start === i + 1)) continue;
+        const owner = enclosing(i + 1);
+        if (!bindingsByScope.has(owner)) bindingsByScope.set(owner, new Set());
+        bindingsByScope.get(owner).add(name);
+      }
+    }
     const sameFileClasses = new Map(ranges.filter((rg) => rg.kind === 'class').map((rg) => [rg.name, rg.id]));
     // The CLASS node a name refers to (imported class alias OR a same-file class) — for ref edges from
     // `instanceof X` and `X.staticMethod()`. Null for non-classes (an object alias like `utils`).
@@ -102,6 +139,12 @@ export function createEdgeDeriver(ctx) {
       cand.add(name); // finding #17: pre-gate — see the declaration above
       const aliased = aliasMap && aliasMap.get(name);
       if (!aliased && !byName.has(name)) return;
+      if (kind === 'ref') {
+        for (let scope = enclosing(lineIdx + 1); scope; scope = parentOf.get(scope)) {
+          if (valueParamsOf.get(scope)?.has(name) || bindingsByScope.get(scope)?.has(name)) return;
+        }
+        if (bindingsByScope.get(null)?.has(name)) return;
+      }
       if (declStarts.get(name)?.has(lineIdx + 1)) return; // any same-named declaration line — finding #12 (subsumes the old own-definition guard)
       const caller = enclosing(lineIdx + 1);
       let callerId;
@@ -154,7 +197,7 @@ export function createEdgeDeriver(ctx) {
           calleeId = inPkg[0];
         }
         else if (legacyFallback) calleeId = defs[0];
-        else { ambiguous++; return; }
+        else { ambiguous++; if (kind === 'call' && inPkg.length > 1) diagnose('ambiguous-call-target', lineIdx + 1, name); return; }
       }
       if (!calleeId || calleeId === callerId) return;
       const edgeKind = ((kind === 'call' || kind === 'ref') && isTestFile(r) && !isTestFile(idFile(calleeId))) ? 'test' : kind;
@@ -301,7 +344,37 @@ export function createEdgeDeriver(ctx) {
       instanceofRe.lastIndex = 0;
       while ((m = instanceofRe.exec(ln))) { const cls = classOf(m[1]); if (cls) addResolved(i, cls, 'ref'); }
     }
-    return { edges: local, hasModule, ambiguous, short: shortDropped, cand: [...cand].sort() };
+    // New usage sites resolve only through lexical declarations or import evidence.
+    // A unique name elsewhere in the repository is not evidence for a value binding.
+    const lexicalTarget = (use) => {
+      const [name, member, ...rest] = use.name.split('.');
+      cand.add(name); if (member) cand.add(member);
+      if (!member && !aliasMap?.has(name) && !lexicalByName.has(name)) return null;
+      const owner = enclosing(use.line);
+      const ancestors = new Set();
+      for (let scope = owner; scope; scope = parentOf.get(scope)) {
+        ancestors.add(scope);
+        if (valueParamsOf.get(scope)?.has(name) || bindingsByScope.get(scope)?.has(name)) return null;
+      }
+      if (bindingsByScope.get(null)?.has(name)) return null;
+      if (rest.length) return null;
+      if (member) return nsAliasMap?.has(name) ? resolveFileMember(nsAliasMap.get(name), member) : null;
+      const candidates = lexicalByName.get(name) || [];
+      const accessible = candidates.filter(rg => !parentOf.get(rg) || ancestors.has(parentOf.get(rg)));
+      const ancestry = [...ancestors];
+      const rank = (rg) => parentOf.get(rg) ? ancestry.indexOf(parentOf.get(rg)) : ancestry.length;
+      const nearest = accessible.length ? Math.min(...accessible.map(rank)) : Infinity;
+      const targets = accessible.filter(rg => rank(rg) === nearest);
+      if (targets.length === 1) return targets[0].id;
+      return targets.length ? null : aliasMap?.get(name) || null;
+    };
+    for (const use of [...usages.jsx, ...usages.values]) {
+      const target = lexicalTarget(use);
+      const kind = target && (kindById?.get(target) || ranges.find(rg => rg.id === target)?.kind);
+      if (target && (!kind || ['function', 'method', 'class'].includes(kind))) addResolved(use.line - 1, target, use.kind);
+      else if (use.kind === 'call' && !externalBindings?.has(use.name.split('.')[0])) diagnose('unresolved-jsx-component', use.line, use.name);
+    }
+    return { edges: local, hasModule, ambiguous, short: shortDropped, cand: [...cand].sort(), analysis };
   }
 
   return { deriveFileEdges };

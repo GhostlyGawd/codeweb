@@ -6,7 +6,7 @@
 // documented Node way to guarantee a full flush. stderr messages are small (< pipe buffer), so
 // die() may still hard-exit.
 
-import { readFileSync, existsSync, statSync, writeFileSync, renameSync, rmSync } from 'node:fs';
+import { readFileSync, existsSync, statSync, writeFileSync, renameSync, rmSync, realpathSync } from 'node:fs';
 import { resolve, dirname, join, basename } from 'node:path';
 import { normalizeGraph } from './graph-ops.mjs';
 import { sha1 } from './hash.mjs';
@@ -179,7 +179,7 @@ export function loadGraph(pathArg, { usage = null } = {}) {
   if (!existsSync(abs)) die(`graph not found: ${abs} — build it first (run /codeweb, or: node scripts/run.mjs <target> --out-dir <target>/.codeweb)`, 2);
   let graph;
   try { graph = normalizeGraph(JSON.parse(readFileSync(abs, 'utf8'))); }
-  catch (e) { die(`invalid JSON in ${abs}: ${e.message}`, 2); }
+  catch (e) { die(`${e.code === 'INVALID_GRAPH' ? 'invalid graph' : 'invalid JSON'} in ${abs}: ${e.message}`, 2); }
   if (graph.meta?.analysis?.status === 'incomplete') console.error('[codeweb] analysis incomplete — inspect graph.meta.analysis.diagnostics; mapped results cannot establish a clean gate.');
   return { graph, abs };
 }
@@ -249,6 +249,13 @@ export function findTarget(filePath) {
   return ws ? { root: ws.root, baseline: ws.path } : null;
 }
 
+// Entry guards must work through filesystem aliases (including macOS /var and
+// /tmp). Importing a handler still never runs its stdin/main path.
+export function sameFile(a, b) {
+  const real = (p) => { try { return realpathSync(p); } catch { return resolve(p); } };
+  return real(a) === real(b);
+}
+
 /**
  * Cached, best-effort source access for a graph's target (meta.root) — THE body reader
  * (context-pack, find-similar, diff rename-matching all read node spans; the logic lives once).
@@ -304,4 +311,3 @@ export function checkStaleness(graph, { verify = process.env.CODEWEB_VERIFY_FRES
   }
   return stale.length ? { count: stale.length, files: stale.slice(0, 8) } : null;
 }
-

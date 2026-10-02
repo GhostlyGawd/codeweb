@@ -9,6 +9,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+### Fixed
+- Map supported JSX component renders and known function values, including Python handler registration and JSX event properties. Impact follows reference consumers; direct-call answers expose reference users separately.
+- Keep incomplete or dynamic maps and JSX component-like orphans out of deletion proposals. Preserve unresolved-target and ambiguous-call diagnostics through extraction caches.
+
 ### Added
 - Add opt-in local evidence receipts to context and review. Agents can compare previously mapped callers with a fresh source snapshot and read bounded historical pages. See `docs/cli.md`.
 

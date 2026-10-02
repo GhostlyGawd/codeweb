@@ -396,7 +396,7 @@ export function parseSignature(line, name, isPy) {
 
 // Files using dynamic dispatch (computed member calls, getattr, non-literal require, event
 // emitters) hide call edges no static map can see — recorded per file for answer-time calibration.
-export const DYNAMIC_RE = /\[[A-Za-z_$][\w$]*\]\s*\(|\bgetattr\s*\(|require\s*\(\s*[^'"`)\s]|\.emit\s*\(|globalThis\s*\[|window\s*\[/;
+export const DYNAMIC_RE = /\[[A-Za-z_$][\w$]*\]\s*\(|\bgetattr\s*\(|\bimportlib\s*\.\s*import_module\s*\(|require\s*\(\s*[^'"`)\s]|\.emit\s*\(|globalThis\s*\[|window\s*\[/;
 
 /** The C++ extension family — one truth, shared by langOf and the extractor's tier dispatch. */
 export const CPP_RE = /\.(cpp|cc|cxx|hpp|hh|hxx)$/;

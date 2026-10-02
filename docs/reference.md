@@ -42,7 +42,7 @@ Once `graph.json` exists, `scripts/query.mjs` answers the structural questions a
 before they edit — read-only, deterministic, no LLM in the loop:
 
 ```
-node scripts/query.mjs <graph.json> --impact  <symbol>   # blast radius: transitive callers + domains touched
+node scripts/query.mjs <graph.json> --impact  <symbol>   # mapped call/inherit/reference consumers + domains
 node scripts/query.mjs <graph.json> --callers <symbol>   # direct callers
 node scripts/query.mjs <graph.json> --callees <symbol>   # direct callees
 node scripts/query.mjs <graph.json> --cycles             # file-level dependency cycles (SCCs)
@@ -363,6 +363,6 @@ codeweb/
 ```
 
 
-Known unsupported same-line JS/TS declarations make gate comparisons inconclusive,
+Known unsupported declarations, unresolved local JSX and ambiguous call targets make gate comparisons inconclusive,
 with `ok:false`, diagnostic locations, and CLI exit 2. See [incomplete extraction](cli.md#known-incomplete-extraction).
 An unflagged graph does not prove full extraction coverage.

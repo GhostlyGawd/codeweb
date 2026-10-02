@@ -35,6 +35,7 @@ export function buildIndexLite(graph, stamp, reader = () => null) {
   const index = buildIndex(graph);
   const files = {};
   for (const [file, nodes] of [...byFile.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
+    if (nodes.every((n) => n.role === 'generated' || n.role === 'vendored')) continue;
     let total = 0, top = null;
     for (const n of nodes) {
       const c = inCount.get(n.id) || 0;
@@ -61,7 +62,7 @@ export function buildIndexLite(graph, stamp, reader = () => null) {
       // The card the hook would have fetched via the explain subprocess — same sort, same builder.
       const topNode = nodes.slice().sort((a, b) => (inCount.get(b.id) || 0) - (inCount.get(a.id) || 0))[0];
       const card = buildCards(graph, index, reader, [topNode.id])[0];
-      entry.card = { summary: card.summary, topCallers: card.topCallers, tests: card.tests };
+      entry.card = { summary: card.summary, topCallers: card.topCallers, tests: card.tests, callerCount: card.dependents.callers };
       entry.topId = topNode.id;
       const callerFiles = [...new Set((card.topCallers || [])
         .map((id) => id.slice(0, id.lastIndexOf(':')))
@@ -70,5 +71,5 @@ export function buildIndexLite(graph, stamp, reader = () => null) {
     }
     files[file] = entry;
   }
-  return { version: 1, stamp, files };
+  return { version: 1, stamp, files, nodeCount: graph.nodes.length };
 }
