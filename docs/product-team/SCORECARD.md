@@ -53,3 +53,7 @@ The manual [planning validator](../../reports/research-to-execution-plan-2026-09
 ## Current measurement implementation — October 1
 
 [LOCAL-01 preparation](../experiments/local-01/README.md) provides private explicit records and an offline validator/summary, verified with 44 author and 38 independent synthetic checks. No participant outcomes were measured. Local stats remain local and optional; their counts/correlations do not prove task value, causality or eligible return. The existing public acquisition snapshot recorded 94 weekly retrievals on September 28 and unknown external gate adoption; neither supplies a user list. Discovery, screened, consenting, enrolled, setup and useful-task states remain distinct. Contact, participant and source records stay private. Actual allocation, adjudicator, consent and control exposure must be confirmed before measurement.
+
+## Current technical delivery — October 2
+
+[The v0.16.0 packet](../../reports/codex-native-release-2026-10-02/README.md) verifies released source, ordinary Codex CLI use, individual interactive approval, lifecycle controls and signature/provenance. It supersedes the historical source-versus-package gap above. No new participants or real trial changes were observed; existing users, return and paid demand remain unknown. Local counters stay local.

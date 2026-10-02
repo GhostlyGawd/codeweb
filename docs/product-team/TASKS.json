@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-02T06:55:58.740373+00:00",
+  "updated_at": "2026-10-02T14:04:20.439051+00:00",
   "record_type": "Repository work record; no queue, agent service or scheduler",
   "current_planning_task": "PLAN-001",
-  "next_product_task": "P-04",
+  "next_product_task": "WEB-01",
   "tasks": [
     {
       "id": "PLAN-001",
@@ -109,6 +109,10 @@
         "commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
         "actor": "GhostlyGawd",
         "merged_at": "2026-10-02T02:38:44Z"
+      },
+      "package_delivery": {
+        "version": "0.16.0",
+        "result_ref": "reports/codex-native-release-2026-10-02/RELEASE.json"
       }
     },
     {
@@ -205,6 +209,10 @@
         "commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
         "actor": "GhostlyGawd",
         "merged_at": "2026-10-02T02:38:44Z"
+      },
+      "package_delivery": {
+        "version": "0.16.0",
+        "result_ref": "reports/codex-native-release-2026-10-02/RELEASE.json"
       }
     },
     {
@@ -244,15 +252,16 @@
       "acceptance": "All applicable NED cases have evidence; P-03 resolved when needed; exact candidate identity and independent review requirement satisfied.",
       "result_refs": [
         "reports/native-evidence-p04-2026-10-01/README.md",
-        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json"
+        "reports/native-evidence-p04-2026-10-01/SCOPED-CANDIDATE.json",
+        "reports/codex-native-release-2026-10-02/README.md"
       ],
-      "authority": "User approved continuing native workflow verification. Claude verification explicitly remains pending. Known owned-fixture scoped reads/writes and necessary bounded metadata corrections are authorized; no new authentication, global trust/profile changes, release, merge or outreach.",
-      "last_updated_at": "2026-10-01T20:30:22.358560+00:00",
+      "authority": "Original bounded scope: user approved native workflow verification without release or global trust changes. Later user approval completed ordinary Codex setup/lifecycle and publication in P-04C/REL-01. Claude verification and outreach remain deferred.",
+      "last_updated_at": "2026-10-02T14:04:20.439051+00:00",
       "entry_condition": "Reviewed P03 source is immutable baseline; native catalog audit found metadata-safety correction required before final candidate freeze.",
-      "readiness_state": "scoped_eight_tool_codex_explicit_mcp_candidate_frozen_broader_readiness_unverified",
-      "required_followup": "Broad P-04 remains open: default onboarding/permissions, filtered frontend/global lifecycle, faithful product skill and Claude when later authorized. Controlled Codex-only learning may use the separately approved exact candidate.",
+      "readiness_state": "scoped_candidate_preserved_ordinary_CLI_delivery_complete_broader_all_host_readiness_open",
+      "required_followup": "Broad all-host field readiness remains open: deferred Claude, automatic hook delivery, desktop GUI and independent review of the extension are not claimed. Approved ordinary Codex CLI/release scope is completed in P-04C/REL-01.",
       "candidate_source_base": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
-      "declared_scope": "Controlled Codex CLI explicit MCP-only learning under observed per-tool preauthorization. Claude remains pending; native skill/default/global/frontend/ambient scope not approved.",
+      "declared_scope": "Original eight-tool preauthorized MCP-only candidate remains frozen. Later installed MCP/skill and ordinary interactive approval/lifecycle verification are delivered in P-04C; wider desktop GUI, automatic hooks and deferred Claude are unclaimed.",
       "scoped_delivery_status": "done",
       "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
       "draft_pr": "https://github.com/GhostlyGawd/codeweb/pull/100",
@@ -263,7 +272,9 @@
         "commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
         "actor": "GhostlyGawd",
         "merged_at": "2026-10-02T02:38:44Z"
-      }
+      },
+      "codex_ordinary_scope_status": "done",
+      "codex_release_version": "0.16.0"
     },
     {
       "id": "G-01",
@@ -752,6 +763,10 @@
         "work": "P-06",
         "result_ref": "reports/inversion-audit-2026-10-02/FINDINGS.json",
         "summary": "Post-merge inversion audit found a block-scope regression and namespace JSX precision failure plus older definition/coverage gaps. Historical gate success does not certify these cases."
+      },
+      "package_delivery": {
+        "version": "0.16.0",
+        "result_ref": "reports/codex-native-release-2026-10-02/RELEASE.json"
       }
     },
     {
@@ -851,7 +866,76 @@
         "method": "squash",
         "actor": "GhostlyGawd"
       },
-      "remaining_gate": "Npm release remains separate; broader P-04 host usability, Claude and customer value remain pending or unobserved."
+      "remaining_gate": "Source and npm v0.16.0 release are complete; broader all-host readiness, deferred Claude and actual customer value remain pending or unobserved.",
+      "package_delivery": {
+        "version": "0.16.0",
+        "result_ref": "reports/codex-native-release-2026-10-02/RELEASE.json"
+      }
+    },
+    {
+      "id": "P-04C",
+      "title": "Verify ordinary installed Codex CLI workflow and lifecycle",
+      "execution_status": "done",
+      "outcome_status": "native_CLI_mechanism_verified_customer_effect_unobserved",
+      "owner": "Codex",
+      "lane": "Product",
+      "depends_on": [
+        "P-07"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "finding_ids": [],
+      "acceptance": "Actual installed plugin/MCP/skill source use, coding/baseline/review, individual interactive approval and disable/remove/reinstall are verified in declared CLI conditions, with failures and exclusions retained.",
+      "result_refs": [
+        "reports/codex-native-release-2026-10-02/README.md",
+        "reports/codex-native-release-2026-10-02/NATIVE.json",
+        "reports/codex-native-release-2026-10-02/LIFECYCLE.json"
+      ],
+      "authority": "User approved finishing ordinary Codex setup/lifecycle. Necessary product fixes and Codeweb-only host settings authorized; Claude/outreach remain deferred.",
+      "source_commit": "7c96cdc699da5c64eb4d9d66c26479e60da93f79",
+      "versions_tested": [
+        "0.159.2",
+        "0.160.0"
+      ],
+      "independent_agent_review": "Not claimed for this extension; actual native executions, independent behavior oracles and CI establish declared scope.",
+      "last_updated_at": "2026-10-02T14:04:20.439051+00:00"
+    },
+    {
+      "id": "REL-01",
+      "title": "Publish the verified native and correctness release",
+      "execution_status": "done",
+      "outcome_status": "published_artifacts_verified_customer_effect_unobserved",
+      "owner": "Codex",
+      "lane": "Distribution",
+      "depends_on": [
+        "P-04C",
+        "P-07"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "finding_ids": [],
+      "acceptance": "Required checks, main merge before tag, GitHub/VSIX/npm publication, signature/provenance and installed package byte match verified; privacy/original evidence preserved.",
+      "result_refs": [
+        "reports/codex-native-release-2026-10-02/README.md",
+        "reports/codex-native-release-2026-10-02/RELEASE.json"
+      ],
+      "authority": "User explicitly approved publishing after ordinary native verification. No outreach, paid service or VS Code Marketplace publication.",
+      "source_commit": "7c96cdc699da5c64eb4d9d66c26479e60da93f79",
+      "release_version": "0.16.0",
+      "release_url": "https://github.com/GhostlyGawd/codeweb/releases/tag/v0.16.0",
+      "last_updated_at": "2026-10-02T14:04:20.439051+00:00"
     }
   ]
 }

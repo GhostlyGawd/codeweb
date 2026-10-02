@@ -1,0 +1,105 @@
+{
+  "requested_model": "gpt-6.1-sol",
+  "reasoning": "xhigh",
+  "backend_model_echo_independently_verified": false,
+  "versions_tested": [
+    "0.159.2",
+    "0.160.0"
+  ],
+  "ordinary_conditions": "Existing profile with no ignored config, server overrides or Codeweb tool preapprovals; this is distinct from factory-default permissions.",
+  "cases": [
+    {
+      "case": "ORDINARY-BEFORE",
+      "successful_Codeweb_calls": [
+        "codeweb_map",
+        "codeweb_brief",
+        "codeweb_dependents",
+        "codeweb_callers",
+        "codeweb_context",
+        "codeweb_impact"
+      ],
+      "failed_Codeweb_calls": [],
+      "process_result_recorded": true
+    },
+    {
+      "case": "SKILL-BEFORE",
+      "successful_Codeweb_calls": [
+        "codeweb_dependents"
+      ],
+      "failed_Codeweb_calls": [],
+      "process_result_recorded": true
+    },
+    {
+      "case": "ORDINARY-AFTER",
+      "successful_Codeweb_calls": [],
+      "failed_Codeweb_calls": [],
+      "process_result_recorded": true
+    },
+    {
+      "case": "ORDINARY-WIRED",
+      "successful_Codeweb_calls": [],
+      "failed_Codeweb_calls": [],
+      "process_result_recorded": true
+    },
+    {
+      "case": "CODEX160-PLUGIN",
+      "successful_Codeweb_calls": [
+        "codeweb_refresh",
+        "codeweb_callers",
+        "codeweb_context"
+      ],
+      "failed_Codeweb_calls": [],
+      "process_result_recorded": true
+    },
+    {
+      "case": "PLUGIN159-CWD",
+      "successful_Codeweb_calls": [
+        "codeweb_refresh",
+        "codeweb_context",
+        "codeweb_dependents"
+      ],
+      "failed_Codeweb_calls": [],
+      "process_result_recorded": true
+    },
+    {
+      "case": "CODING-FINAL",
+      "successful_Codeweb_calls": [
+        "codeweb_map",
+        "codeweb_refresh",
+        "codeweb_context",
+        "codeweb_impact",
+        "codeweb_dependents",
+        "codeweb_diff",
+        "codeweb_review"
+      ],
+      "failed_Codeweb_calls": [],
+      "process_result_recorded": true
+    },
+    {
+      "case": "STANDARD-POLICY",
+      "successful_Codeweb_calls": [],
+      "failed_Codeweb_calls": [
+        "codeweb_map",
+        "codeweb_context",
+        "codeweb_refresh",
+        "codeweb_diff"
+      ],
+      "process_result_recorded": true
+    }
+  ],
+  "interactive_default_permissions": {
+    "client": "Actual CLI TUI0.159.2 with fresh no-daemon session",
+    "policy": "on-request",
+    "sandbox": "workspace-write",
+    "approval_observed": "codeweb_context on owned fixture",
+    "approved": "once only",
+    "persistent_policy_or_trust_changed": false,
+    "result": "Mapped two known consumers and readable source; no source edit",
+    "unrelated_hook_definitions": "continued without trusting"
+  },
+  "constrained_noninteractive": "Codex exec cannot answer interactive MCP approval; failure retained rather than called native-ready",
+  "appserver_model_test": "Timed out without MCP; retained as a nonpassing diagnostic, not evidence of default-use success",
+  "coding_postconditions": "Independent owned-fixture Node oracle passed; actual map/context/impact/baseline/diff/review calls observed",
+  "hooks": "Codex overlay explicitly ships MCP+skills with no automatic hook delivery claim",
+  "desktop_GUI_and_Claude": "not claimed"
+}

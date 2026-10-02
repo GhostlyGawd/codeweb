@@ -1,0 +1,61 @@
+{
+  "scope": "Fresh client discovery; config enable/disable, cache removal and reinstall; other settings preserved",
+  "cases": [
+    {
+      "case": "LIFECYCLE-ENABLED",
+      "server_count": 1,
+      "Codeweb_tools": 28,
+      "Codeweb_skills": [],
+      "complete": true
+    },
+    {
+      "case": "LIFECYCLE-DISABLED",
+      "server_count": 0,
+      "Codeweb_tools": 0,
+      "Codeweb_skills": [],
+      "complete": true
+    },
+    {
+      "case": "LIFECYCLE-REMOVED",
+      "server_count": 0,
+      "Codeweb_tools": 0,
+      "Codeweb_skills": [],
+      "complete": true
+    },
+    {
+      "case": "LIFECYCLE-REINSTALLED",
+      "server_count": 1,
+      "Codeweb_tools": 28,
+      "Codeweb_skills": [
+        {
+          "name": "codeweb:codebase-anatomy",
+          "enabled": true
+        },
+        {
+          "name": "codeweb:codeweb",
+          "enabled": true
+        }
+      ],
+      "complete": true
+    },
+    {
+      "case": "PUBLISHED-HOST",
+      "server_count": 1,
+      "Codeweb_tools": 28,
+      "Codeweb_skills": [
+        {
+          "name": "codeweb:codebase-anatomy",
+          "enabled": true
+        },
+        {
+          "name": "codeweb:codeweb",
+          "enabled": true
+        }
+      ],
+      "complete": true
+    }
+  ],
+  "installation_source_final": "Published GitHub repository pinned to v0.16.0; temporary marketplace removed",
+  "active_local_Codeweb_CLI": "Upgraded the existing Codeweb-only installation from0.14.0 to0.16.0; local doctor passes",
+  "Codex_application_or_auth_replaced": false
+}

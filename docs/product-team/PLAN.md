@@ -2,7 +2,7 @@
 
 Diagnosis: We have a working local product and preserved problem research, but no observed evidence that Codeweb improves an ordinary maintainer's decisions enough to earn recurring use or a separate paid purchase.
 
-Updated September 30, 2026. Owner: the active Codex session. Status: planning packet; linked delivery and field work are not completed. [CURRENT.md](CURRENT.md) is the session entry point, [TASKS.json](TASKS.json) holds work state, and [DECISIONS.json](DECISIONS.json) holds the authoritative derived finding dispositions. [DECISIONS.md](DECISIONS.md) and [BACKLOG.md](BACKLOG.md) are readable navigation. This is a repository workflow, not a service or scheduler.
+Updated October 2, 2026. Owner: the active Codex session. Status: verified native CLI/source/release delivery complete; actual field work and customer effects remain pending. [CURRENT.md](CURRENT.md) is the session entry point, [TASKS.json](TASKS.json) holds work state, and [DECISIONS.json](DECISIONS.json) holds the authoritative derived finding dispositions. [DECISIONS.md](DECISIONS.md) and [BACKLOG.md](BACKLOG.md) are readable navigation. This is a repository workflow, not a service or scheduler.
 
 ## Outcome and user
 
@@ -14,17 +14,17 @@ Keep two free local jobs separate: **consumer-scope inspection** and **reuse-can
 
 ## Current baseline
 
-The [baseline](../../reports/research-to-execution-plan-2026-09-30/BASELINE.json) pins the published package, main and dirty working copy separately. The published version is 0.15.0; main is fd3b637e9ad4e1f7265799298761bc1ee83fe76c. PR #96 first-use corrections and PR #97 evidence reconciliation are merged. Evidence receipts are newer source-based functionality and are not in the published 0.15.0 package.
+The [original baseline](../../reports/research-to-execution-plan-2026-09-30/BASELINE.json) preserves September 30 package/main/dirty-copy identities. Current main is `7c96cdc699da5c64eb4d9d66c26479e60da93f79`, and npm v0.16.0 is signature/provenance verified. Source corrections, local receipts and the coding skill are published; [the release packet](../../reports/codex-native-release-2026-10-02/README.md) distinguishes native technical delivery from user outcomes.
 
-The published similarity CLI's empty-result safety wording was [reproduced](../../reports/research-to-execution-plan-2026-09-30/EMPTY-RESULT-REPRO.json). Source inspection also retains popularity-based hook selection and silent failure concerns; host-runtime reproduction of those paths remains pending. Repair and test demonstrated gaps rather than rebuilding the existing receipt engine.
+The earlier published similarity CLI's empty-result safety wording was [reproduced](../../reports/research-to-execution-plan-2026-09-30/EMPTY-RESULT-REPRO.json). Source inspection also retains popularity-based hook selection and silent failure concerns; host-runtime reproduction of those paths remains pending. Repair and test demonstrated gaps rather than rebuilding the existing receipt engine.
 
 The September 22 internal replay correctly presented a new caller but added roughly 0.53 seconds and 384 output bytes in one serial run. The ordinary flow could identify it with an extra targeted query. No participant made a decision. This supports mechanism availability, not savings, better decisions or release value. [Replay report](../../reports/evidence-real-task-2026-09-22/README.md).
 
 ## Now
 
-Complete the planning packet, then execute **P-01**, the bounded correction of unsupported safety wording and output distinctions. In the same initiative, **P-02/P-03/P-04** establish target, uncertainty, recovery and actual host readiness using the [native evidence spec](../specs/native-evidence-delivery.md). P-03 exists only for reproduced gaps. Reuse current context, impact, similarity, baseline and optional receipt mechanisms.
+P-01/P-03/P-05/P-07 corrections and P-04C ordinary Codex CLI delivery are released. Product presentation work starts with WEB-01 reconciliation. Automatic hooks, desktop GUI and deferred Claude remain separate host scopes. Prepare real-task learning on the released candidate without treating technical verification as indispensability.
 
-Prepare **G-01**, qualified prospects and exact drafts, and **E-01**, the frozen comparison protocol, without waiting for cosmetic completeness. Field invitations use actual send authorization; participant consent and readiness are required before trials. This is preparation alongside one product source workstream, not permission for unsolicited messages.
+**G-01** prospect/draft preparation and **E-01** comparison-protocol preparation are delivered; actual participant allocation and consent remain pending. Field invitations require send authorization; outreach remains deferred. The released candidate is available for later consented trials.
 
 The [finding register](DECISIONS.md) gives all 65 findings an explicit disposition. A scope/evidence guardrail is not automatically a new feature. Keep claim/test IDs and counterevidence attached to each action.
 

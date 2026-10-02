@@ -1,0 +1,40 @@
+{
+  "version": "0.16.0",
+  "main_commit": "7c96cdc699da5c64eb4d9d66c26479e60da93f79",
+  "tested_head": "8ce35c13694a733b63a1dcd0c2e716999ceb9af9",
+  "pr": "https://github.com/GhostlyGawd/codeweb/pull/103",
+  "release_url": "https://github.com/GhostlyGawd/codeweb/releases/tag/v0.16.0",
+  "tag": "v0.16.0",
+  "publisher": "GhostlyGawd using the gated GitHub release workflow",
+  "workflow_url": "https://github.com/GhostlyGawd/codeweb/actions/runs/37013939353",
+  "workflow_conclusion": "success",
+  "npm_integrity": "sha512-8p7YXTq1tn/ZpFt84G69RRMk48m2f3l25S+E/EnKOHSrKVGJ3KWRCwuq2C+X2wxLjtEsvDsqJ1dLLhLFLNVMHA==",
+  "npm_registry_signature_verified": true,
+  "npm_attestation_verified": true,
+  "npm_provenance_type": "https://slsa.dev/provenance/v1",
+  "assets": [
+    "codeweb-lens.vsix"
+  ],
+  "VS_Code_Marketplace_published": false,
+  "source_paths_byte_matched_in_primary": 51,
+  "registry_files_byte_matched_to_verified_source": 144,
+  "required_dependencies_added": false,
+  "protected_harness_changed": false,
+  "local_history_edit_preserved": true,
+  "gate": {
+    "product_pass": 1333,
+    "skipped": 7,
+    "python_checks": 52,
+    "evals": 5,
+    "pre_merge_CI_pass": 10
+  },
+  "benchmark": {
+    "approx_tokens_12_call_session": 14313,
+    "unchanged_budget": 20000,
+    "scope": "One internal self-repo output benchmark; not ordinary developer savings"
+  },
+  "independent_agent_review": "not claimed for this extension",
+  "human_user_outcomes": "unobserved",
+  "Claude": "deferred per user choice",
+  "outreach_or_founder_identity_setup": "deferred"
+}

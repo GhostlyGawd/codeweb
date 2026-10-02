@@ -1,16 +1,16 @@
 {
-  "verified_at": "2026-10-02T06:55:59.327183+00:00",
+  "verified_at": "2026-10-02T14:13:17.613262+00:00",
   "status": "pass",
   "material_findings": 65,
   "claims": 12,
   "test_ids": 12,
-  "work_records": 24,
+  "work_records": 26,
   "task_dependencies": "acyclic",
   "source_integrity_basis": "sanitized-public-derivative",
   "public_derivative_files_hash_verified": 545,
   "original_frozen_bytes": "verified separately in private archive",
   "carry_over_records": 6,
-  "live_local_links_checked": 108,
+  "live_local_links_checked": 113,
   "source_or_reference_mismatches": [],
   "scope": "Offline artifact consistency and preservation; not host readiness, strategic proof or customer validation."
 }

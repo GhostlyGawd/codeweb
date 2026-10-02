@@ -1,0 +1,32 @@
+{
+  "release": "0.16.0",
+  "source_commit": "7c96cdc699da5c64eb4d9d66c26479e60da93f79",
+  "scope": "Generic product/release verification summaries; private raw/session/host identities are separate",
+  "files": [
+    {
+      "path": "LIFECYCLE.json",
+      "sha256": "52fef5557ca1cc8ee4c152ab8887c4721d95e9f3994aa6b08103c1430049b9a4",
+      "bytes": 1536
+    },
+    {
+      "path": "NATIVE.json",
+      "sha256": "90c2f5c8bce6e9f748b5f13231041ea74ecec8ecbcc0d5d1d2a7785fdf6d5b83",
+      "bytes": 3260
+    },
+    {
+      "path": "README.md",
+      "sha256": "23cec1d08ee3e7228ce2f5780644af12f05c9bea9d66a49cc1875193554cfb26",
+      "bytes": 3814
+    },
+    {
+      "path": "RELEASE.json",
+      "sha256": "c3414553939440ae65c900b65fbf80dc031dfca7fe16c2aa4219116b7efba2f0",
+      "bytes": 1569
+    },
+    {
+      "path": "SOURCE-HASHES.json",
+      "sha256": "e09fda328dbf81584462bc707290dd594b4c821869e229cc8f0f7cd620a41375",
+      "bytes": 5275
+    }
+  ]
+}

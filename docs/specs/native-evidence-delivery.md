@@ -58,3 +58,7 @@ Follow the project-required check/review process for the actual change. Report a
 ## Limits and expansion
 
 Six-line output and one-second warm delivery are provisional research budgets, not hard results or release promises. Choose a compact form that retains the needed fact and uncertainty, and let user-task evidence determine further simplification. New multi-repo inference, task memory, semantic clone decisions, hosted billing and a redesigned website are outside this spec.
+
+## October 2 native CLI and release result
+
+[The released candidate](../../reports/codex-native-release-2026-10-02/README.md) completes the approved ordinary Codex CLI scope: installed tool/skill use, source opening, baseline/review, individual approval and lifecycle discovery. Noninteractive approval failure and a nonpassing app-server diagnostic remain evidence. Broader all-host readiness is not inferred: Claude is deferred; automatic hooks, desktop GUI, independent agent review of the extension and customer outcomes are unclaimed.
