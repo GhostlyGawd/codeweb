@@ -1,0 +1,113 @@
+{
+  "baseline": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+  "lenses": [
+    {
+      "id": "L01",
+      "lens": "Coverage",
+      "disposition": "observed_gaps",
+      "finding_ids": [
+        "INV-F05",
+        "INV-F06"
+      ],
+      "evidence_summary": "Literal aliases/decorators miss users; wrapper is a detected incomplete-analysis limit.",
+      "inversion_question": "Which known consumers would we miss before an edit?"
+    },
+    {
+      "id": "L02",
+      "lens": "Precision",
+      "disposition": "observed_failures",
+      "finding_ids": [
+        "INV-F01",
+        "INV-F02",
+        "INV-F03",
+        "INV-F04"
+      ],
+      "evidence_summary": "Source/AST/runtime oracles refute the returned binding/definition judgments.",
+      "inversion_question": "Which returned fact could point at the wrong code or delete live content?"
+    },
+    {
+      "id": "L03",
+      "lens": "Freshness",
+      "disposition": "documented_boundary",
+      "finding_ids": [],
+      "evidence_summary": "Same-input cold/warm/full agree; preserved size/mtime makes normal stamp cache stale. Full and content inventory recover.",
+      "inversion_question": "What edit could make stale facts look current?"
+    },
+    {
+      "id": "L04",
+      "lens": "Baselines",
+      "disposition": "control_passed",
+      "finding_ids": [],
+      "evidence_summary": "Original baseline bytes remain through refresh, structural red and repair; red exit1, repair exit0.",
+      "inversion_question": "Could checking an edit destroy the original comparison?"
+    },
+    {
+      "id": "L05",
+      "lens": "Uncertainty",
+      "disposition": "observed_gap",
+      "finding_ids": [
+        "INV-F07"
+      ],
+      "evidence_summary": "Detected wrapper/missing syntax produce diagnostic limits, but informational transports differ.",
+      "inversion_question": "Where could unknown or partial be mistaken for complete?"
+    },
+    {
+      "id": "L06",
+      "lens": "Gate meaning",
+      "disposition": "expected_scope_limit",
+      "finding_ids": [],
+      "evidence_summary": "Changed arithmetic yields structural green and executed behavioral oracle red; behavior is not evaluated.",
+      "inversion_question": "What broken program could still get a structural green?"
+    },
+    {
+      "id": "L07",
+      "lens": "Transport consistency",
+      "disposition": "observed_gap",
+      "finding_ids": [
+        "INV-F07"
+      ],
+      "evidence_summary": "Eight paired actual CLI/MCP calls on the same incomplete graph; fresh input rerun removes stamp confound.",
+      "inversion_question": "Could the same question get incompatible confidence over CLI and MCP?"
+    },
+    {
+      "id": "L08",
+      "lens": "Native fit",
+      "disposition": "limited_observation",
+      "finding_ids": [],
+      "evidence_summary": "Three initially confounded uncued runs use no MCP; required-startup uncued run lists28 server tools and makes no calls. Explicit map/context availability succeeds. Small task and user config ignored; no adoption conclusion.",
+      "inversion_question": "Could an available tool still be unused in ordinary work?"
+    },
+    {
+      "id": "L09",
+      "lens": "Recovery",
+      "disposition": "control_passed",
+      "finding_ids": [],
+      "evidence_summary": "Doctor distinguishes missing/corrupt/empty/mapped graph with recovery steps.",
+      "inversion_question": "What broken first-run state would leave someone without a next step?"
+    },
+    {
+      "id": "L10",
+      "lens": "Distribution",
+      "disposition": "recorded_release_gap",
+      "finding_ids": [],
+      "evidence_summary": "Registry0.15.0 remains unchanged; source fixes are on main and release is still pending. Source pack dry-run includes product artifacts.",
+      "inversion_question": "Could users install an older build while we discuss source fixes?"
+    },
+    {
+      "id": "L11",
+      "lens": "Privacy",
+      "disposition": "expected_local_preview_boundary",
+      "finding_ids": [],
+      "evidence_summary": "A synthetic source literal appears in local context source preview. This is not remote telemetry or evidence of actual leakage; raw sharing remains an owner-reviewed boundary.",
+      "inversion_question": "What source content could appear in an output someone shares?"
+    },
+    {
+      "id": "L12",
+      "lens": "Actual value",
+      "disposition": "unobserved_customer_outcome",
+      "finding_ids": [],
+      "evidence_summary": "Controlled tasks satisfy postconditions, including the native control. Timings are one task/configuration each and do not establish causal savings, retention or willingness to pay.",
+      "inversion_question": "Could an adequate native alternative make Codeweb unnecessary?"
+    }
+  ]
+}

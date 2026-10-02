@@ -1,0 +1,243 @@
+{
+  "scope": "Synthetic source facts checked outside Codeweb; no client code executed",
+  "babel_parser": "7.29.9",
+  "babel_results": [
+    {
+      "id": "jsx_text",
+      "valid_parse": true,
+      "function_declarations": [
+        {
+          "name": "Page",
+          "line": 4,
+          "params": []
+        }
+      ],
+      "jsx_text": [
+        "\nfunction pretend()\n"
+      ],
+      "parser": "@babel/parser 7.29.9"
+    },
+    {
+      "id": "shadow",
+      "valid_parse": true,
+      "function_declarations": [
+        {
+          "name": "invoke",
+          "line": 4,
+          "params": [
+            "target"
+          ]
+        },
+        {
+          "name": "target",
+          "line": 1,
+          "params": []
+        }
+      ],
+      "jsx_text": [],
+      "parser": "@babel/parser 7.29.9"
+    },
+    {
+      "id": "block",
+      "valid_parse": true,
+      "function_declarations": [
+        {
+          "name": "invoke",
+          "line": 4,
+          "params": []
+        },
+        {
+          "name": "target",
+          "line": 1,
+          "params": []
+        }
+      ],
+      "jsx_text": [],
+      "parser": "@babel/parser 7.29.9"
+    },
+    {
+      "id": "alias",
+      "valid_parse": true,
+      "function_declarations": [
+        {
+          "name": "invoke",
+          "line": 5,
+          "params": []
+        },
+        {
+          "name": "target",
+          "line": 1,
+          "params": []
+        }
+      ],
+      "jsx_text": [],
+      "parser": "@babel/parser 7.29.9"
+    },
+    {
+      "id": "private_member",
+      "valid_parse": true,
+      "function_declarations": [
+        {
+          "name": "Page",
+          "line": 2,
+          "params": []
+        }
+      ],
+      "jsx_text": [],
+      "parser": "@babel/parser 7.29.9"
+    }
+  ],
+  "python_ast": [
+    {
+      "name": "decorate",
+      "decorators": []
+    },
+    {
+      "name": "action",
+      "decorators": [
+        "Name(id='decorate', ctx=Load())"
+      ]
+    }
+  ],
+  "controlled_js": {
+    "alias": {
+      "controlled_handwritten_fixture": true,
+      "executed_outside_codeweb_runtime": true,
+      "actual_stdout": "1\n",
+      "exit_code": 0
+    },
+    "alias_import": {
+      "controlled_handwritten_fixture": true,
+      "executed_outside_codeweb_runtime": true,
+      "actual_stdout": "1\n",
+      "exit_code": 0
+    },
+    "block": {
+      "controlled_handwritten_fixture": true,
+      "executed_outside_codeweb_runtime": true,
+      "actual_stdout": "1\n",
+      "exit_code": 0
+    },
+    "shadow": {
+      "controlled_handwritten_fixture": true,
+      "executed_outside_codeweb_runtime": true,
+      "actual_stdout": "7\n",
+      "exit_code": 0
+    }
+  },
+  "namespace": {
+    "exported_namespace_keys": [
+      "Visible"
+    ],
+    "Hidden_exported": false
+  },
+  "older_source_comparison": [
+    {
+      "id": "block",
+      "baseline": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [
+        {
+          "from": "a.js:invoke",
+          "to": "a.js:target",
+          "kind": "call",
+          "weight": 1
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "shadow",
+      "baseline": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [
+        {
+          "from": "a.js:invoke",
+          "to": "a.js:target",
+          "kind": "call",
+          "weight": 1
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "jsx_text",
+      "baseline": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+      "nodes": [
+        "a.tsx:pretend",
+        "a.tsx:Page"
+      ],
+      "edges": [],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "alias",
+      "baseline": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "decorator",
+      "baseline": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+      "nodes": [
+        "a.py:decorate",
+        "a.py:action"
+      ],
+      "edges": [],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "private_member",
+      "baseline": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+      "nodes": [
+        "page.tsx:Page",
+        "ui.js:Hidden",
+        "ui.js:Visible",
+        "ui.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "page.tsx:Page",
+          "to": "ui.js:<module>",
+          "kind": "import",
+          "weight": 1
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      }
+    }
+  ]
+}

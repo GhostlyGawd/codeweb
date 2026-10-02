@@ -1,0 +1,71 @@
+{
+  "codex_cli": "0.159.2",
+  "requested_model": "gpt-6.1-sol",
+  "requested_reasoning": "xhigh",
+  "backend_model_echo_independently_verified": false,
+  "global_config_changed": false,
+  "user_config_ignored": true,
+  "user_rules_may_remain": true,
+  "conditions": [
+    {
+      "condition": "native_control",
+      "process_exit": 0,
+      "elapsed_seconds_single_trial": 82.054,
+      "completed_codeweb_tools": [],
+      "postconditions": "controlled normalization/display task passed",
+      "classification": "confounded no-external-services instruction; optional startup/config limits"
+    },
+    {
+      "condition": "mcp_default_prompt",
+      "process_exit": 0,
+      "elapsed_seconds_single_trial": 63.841,
+      "completed_codeweb_tools": [],
+      "postconditions": "controlled normalization/display task passed",
+      "classification": "confounded no-external-services instruction; optional startup/config limits"
+    },
+    {
+      "condition": "mcp_owned_tools_approved",
+      "process_exit": 0,
+      "elapsed_seconds_single_trial": 64.61,
+      "completed_codeweb_tools": [],
+      "postconditions": "controlled normalization/display task passed",
+      "classification": "confounded no-external-services instruction; optional startup/config limits"
+    },
+    {
+      "condition": "uncued_required",
+      "process_exit": 0,
+      "elapsed_seconds_single_trial": 65.541,
+      "completed_codeweb_tools": [],
+      "postconditions": "controlled normalization/display task passed",
+      "classification": "required-startup uncued single small task"
+    },
+    {
+      "condition": "availability",
+      "process_exit": 0,
+      "elapsed_seconds_single_trial": 50.038,
+      "completed_codeweb_tools": [
+        "codeweb_map",
+        "codeweb_context",
+        "codeweb_dependents"
+      ],
+      "postconditions": "explicit source-query availability only",
+      "classification": "explicit availability control"
+    }
+  ],
+  "uncued_traffic": {
+    "request_methods": [
+      "initialize",
+      "notifications/initialized",
+      "tools/list"
+    ],
+    "server_definitions_listed": 28,
+    "tools_call_count": 0
+  },
+  "limitations": [
+    "One small synthetic task; capable native alternative",
+    "Initial prompt could discourage MCP use",
+    "Frontend filtered model tool catalog not independently captured",
+    "No causal time savings, normal-profile readiness, participant retention or willingness to pay measured",
+    "Claude pending per existing user decision"
+  ]
+}

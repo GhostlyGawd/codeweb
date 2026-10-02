@@ -1,0 +1,258 @@
+{
+  "source_commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+  "input_analysis": {
+    "status": "incomplete",
+    "diagnosticCount": 1,
+    "diagnostics": [
+      {
+        "code": "unsupported-same-line-declaration",
+        "file": "a.js",
+        "line": 1,
+        "column": 32,
+        "evidence": "import { beta } from         ; export function alpha() { return beta(); }"
+      }
+    ]
+  },
+  "fixture": {
+    "a.js": "import { beta } from './b.js'; export function alpha() { return beta(); }\n",
+    "b.js": "export function beta() {\n return 1;\n}\nfunction unused() {\n return 2;\n}\n"
+  },
+  "paired_results": [
+    {
+      "tool": "impact",
+      "cli_exit": 2,
+      "cli_has_analysis": true,
+      "cli_completeness": "incomplete",
+      "cli_result_fields": [
+        "query",
+        "symbol",
+        "summary",
+        "closure",
+        "matched",
+        "results",
+        "domains",
+        "count",
+        "analysis"
+      ],
+      "mcp_isError": false,
+      "mcp_has_analysis": true,
+      "mcp_completeness": "incomplete",
+      "mcp_result_fields": [
+        "query",
+        "symbol",
+        "summary",
+        "closure",
+        "matched",
+        "results",
+        "domains",
+        "count",
+        "analysis"
+      ]
+    },
+    {
+      "tool": "find",
+      "cli_exit": 0,
+      "cli_has_analysis": false,
+      "cli_completeness": null,
+      "cli_result_fields": [
+        "query",
+        "terms",
+        "summary",
+        "results",
+        "count",
+        "domains"
+      ],
+      "mcp_isError": true,
+      "mcp_has_analysis": true,
+      "mcp_completeness": "incomplete",
+      "mcp_result_fields": [
+        "status",
+        "analysis",
+        "hint"
+      ]
+    },
+    {
+      "tool": "explain",
+      "cli_exit": 0,
+      "cli_has_analysis": false,
+      "cli_completeness": null,
+      "cli_result_fields": [
+        "symbol",
+        "matched",
+        "cards",
+        "summary"
+      ],
+      "mcp_isError": true,
+      "mcp_has_analysis": true,
+      "mcp_completeness": "incomplete",
+      "mcp_result_fields": [
+        "status",
+        "analysis",
+        "hint"
+      ]
+    },
+    {
+      "tool": "context",
+      "cli_exit": 0,
+      "cli_has_analysis": true,
+      "cli_completeness": "incomplete",
+      "cli_result_fields": [
+        "symbol",
+        "matched",
+        "sourceAvailable",
+        "summary",
+        "mode",
+        "target",
+        "callers",
+        "callees",
+        "blastRadius",
+        "analysis"
+      ],
+      "mcp_isError": true,
+      "mcp_has_analysis": true,
+      "mcp_completeness": "incomplete",
+      "mcp_result_fields": [
+        "status",
+        "analysis",
+        "hint"
+      ]
+    },
+    {
+      "tool": "deadcode",
+      "cli_exit": 0,
+      "cli_has_analysis": true,
+      "cli_completeness": "incomplete",
+      "cli_result_fields": [
+        "target",
+        "summary",
+        "totals",
+        "excluded",
+        "excludedByRole",
+        "note",
+        "analysis",
+        "safe",
+        "review",
+        "suppressed"
+      ],
+      "mcp_isError": false,
+      "mcp_has_analysis": true,
+      "mcp_completeness": "incomplete",
+      "mcp_result_fields": [
+        "target",
+        "summary",
+        "totals",
+        "excluded",
+        "excludedByRole",
+        "note",
+        "analysis",
+        "safe",
+        "review",
+        "suppressed"
+      ]
+    },
+    {
+      "tool": "risk",
+      "cli_exit": 0,
+      "cli_has_analysis": false,
+      "cli_completeness": null,
+      "cli_result_fields": [
+        "target",
+        "summary",
+        "weights",
+        "maxes",
+        "count",
+        "ranked",
+        "excluded",
+        "excludedByRole"
+      ],
+      "mcp_isError": false,
+      "mcp_has_analysis": false,
+      "mcp_completeness": null,
+      "mcp_result_fields": [
+        "target",
+        "summary",
+        "weights",
+        "maxes",
+        "count",
+        "ranked",
+        "excluded",
+        "excludedByRole"
+      ]
+    },
+    {
+      "tool": "review",
+      "cli_exit": 2,
+      "cli_has_analysis": true,
+      "cli_completeness": "incomplete",
+      "cli_result_fields": [
+        "changedSymbols",
+        "blastRadius",
+        "domainsTouched",
+        "callerCounts",
+        "filesChanged",
+        "structural",
+        "newDuplications",
+        "verdict",
+        "analysis",
+        "review"
+      ],
+      "mcp_isError": false,
+      "mcp_has_analysis": true,
+      "mcp_completeness": "incomplete",
+      "mcp_result_fields": [
+        "changedSymbols",
+        "blastRadius",
+        "domainsTouched",
+        "callerCounts",
+        "filesChanged",
+        "structural",
+        "newDuplications",
+        "verdict",
+        "analysis",
+        "review"
+      ]
+    },
+    {
+      "tool": "diff",
+      "cli_exit": 2,
+      "cli_has_analysis": true,
+      "cli_completeness": "incomplete",
+      "cli_result_fields": [
+        "before",
+        "after",
+        "nodes",
+        "edges",
+        "domains",
+        "crossDomainEdges",
+        "overlaps",
+        "cycles",
+        "orphans",
+        "regressions",
+        "ok",
+        "status",
+        "verdict",
+        "analysis"
+      ],
+      "mcp_isError": false,
+      "mcp_has_analysis": true,
+      "mcp_completeness": "incomplete",
+      "mcp_result_fields": [
+        "before",
+        "after",
+        "nodes",
+        "edges",
+        "domains",
+        "crossDomainEdges",
+        "overlaps",
+        "cycles",
+        "orphans",
+        "regressions",
+        "ok",
+        "status",
+        "verdict",
+        "analysis"
+      ]
+    }
+  ],
+  "freshness_control": "Graph folder created before extraction; stale first iteration retained privately and superseded by clean rerun"
+}

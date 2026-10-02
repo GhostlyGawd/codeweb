@@ -1,0 +1,19 @@
+{
+  "source_commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+  "public_reproduction": {
+    "primary_observations": 16,
+    "primary_unmet_expectations": 28,
+    "paired_transport_observations": 8,
+    "meaning": "Audit execution completed; unmet expectations are reported product gaps, not a clean gate."
+  },
+  "source_and_protected_files_changed": false,
+  "pre_documentation_tracked_files_hash_checked": 1808,
+  "documentation_changes_allowlisted": true,
+  "unrelated_history_unchanged": true,
+  "private_original_checkout_files_reverified": 1746,
+  "private_moved_original_files_reverified": 1658,
+  "raw_private_archive": "outside repository; full retained raw outputs verified by SHA256",
+  "independent_agent_review": "not claimed",
+  "customer_validation": "not observed",
+  "new_packet_spec_local_links_verified": 9
+}

@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-02T04:04:33.967478+00:00",
+  "baseline": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+  "findings": [
+    {
+      "id": "INV-F01",
+      "title": "A block-local binding hides a real outer call and yields a deletion proposal",
+      "kind": "confirmed_regression",
+      "priority": "first",
+      "cases": [
+        "block"
+      ],
+      "harm": "A genuinely invoked function enters deadcode.safe and campaign delete steps. No deletion was executed.",
+      "expected": "The block-local target ends with its block; invoke calls the outer target.",
+      "observed": "No call/ref edge from invoke to target; no-known-incompleteness, zero diagnostics, target in safe and campaign delete.",
+      "oracle": "Controlled Node invocation returns1; Babel parses the block and outer call.",
+      "before_P05": "The earlier95bf source records invoke -> target correctly.",
+      "source_refs": [
+        "scripts/lib/edge-derive.mjs"
+      ],
+      "repair_direction": "Represent lexical block binding extents, not a whole-function shadow-name set. Verify inner and outer calls separately.",
+      "baseline": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+      "status": "observed_in_synthetic_fixture",
+      "customer_harm_observed": false,
+      "observed_evidence_refs": [
+        "OBSERVATIONS.json",
+        "ORACLES.json"
+      ],
+      "proposed_repair_task": "P-07"
+    },
+    {
+      "id": "INV-F02",
+      "title": "JSX literal text becomes a phantom function and deletion proposal",
+      "kind": "confirmed_definition_bug",
+      "priority": "first",
+      "cases": [
+        "jsx_text"
+      ],
+      "harm": "A source edit proposal can remove UI text as if it were a function. No deletion was executed.",
+      "expected": "Only Page is a function declaration; function pretend() is JSXText.",
+      "observed": "pretend node extracted, no-known-incompleteness, zero diagnostics, safe tier and campaign delete step.",
+      "oracle": "Pinned Babel7.29.9 valid TSX AST: Page FunctionDeclaration and literal JSXText, no pretend declaration.",
+      "before_P05": "Same phantom definition exists in95bf. Edge masking fixed JSX child-text calls, not definition discovery.",
+      "source_refs": [
+        "scripts/lib/lang-rules.mjs",
+        "scripts/extract-symbols.mjs",
+        "scripts/lib/static-usages.mjs"
+      ],
+      "repair_direction": "Use consistent executable-source masking for declaration discovery, usage scans and completeness diagnostics.",
+      "baseline": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+      "status": "observed_in_synthetic_fixture",
+      "customer_harm_observed": false,
+      "observed_evidence_refs": [
+        "OBSERVATIONS.json",
+        "ORACLES.json"
+      ],
+      "proposed_repair_task": "P-07"
+    },
+    {
+      "id": "INV-F03",
+      "title": "A same-named parameter is mistaken for a global function",
+      "kind": "confirmed_false_positive",
+      "priority": "next",
+      "cases": [
+        "shadow"
+      ],
+      "harm": "Wrong callers and impact can direct inspection at the wrong implementation.",
+      "expected": "invoke(target) calls its parameter, not the module target declaration.",
+      "observed": "invoke -> module target call edge; zero diagnostics.",
+      "oracle": "Controlled invoke(()=>7) returns7; Babel records target as the parameter binding.",
+      "before_P05": "Same false edge exists in95bf.",
+      "source_refs": [
+        "scripts/lib/edge-derive.mjs"
+      ],
+      "repair_direction": "Resolve binding shadowing before same-file/import/global candidate selection for call kinds.",
+      "baseline": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+      "status": "observed_in_synthetic_fixture",
+      "customer_harm_observed": false,
+      "observed_evidence_refs": [
+        "OBSERVATIONS.json",
+        "ORACLES.json"
+      ],
+      "proposed_repair_task": "P-07"
+    },
+    {
+      "id": "INV-F04",
+      "title": "Namespace JSX access reaches a private non-exported function",
+      "kind": "confirmed_false_positive",
+      "priority": "next",
+      "cases": [
+        "private_member"
+      ],
+      "harm": "The graph invents a callable member that the imported namespace does not expose.",
+      "expected": "UI.Hidden has no exported binding; a real Visible control may resolve.",
+      "observed": "Page -> Hidden call edge with no diagnostic.",
+      "oracle": "Controlled ES-module namespace contains only Visible; Babel validates the JSX syntax.",
+      "before_P05": "95bf did not produce this JSX edge; the new JSX member path introduced the invalid resolution.",
+      "source_refs": [
+        "scripts/lib/import-resolve.mjs",
+        "scripts/lib/edge-derive.mjs"
+      ],
+      "repair_direction": "Resolve namespace export surfaces separately from default object/class member surfaces.",
+      "baseline": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+      "status": "observed_in_synthetic_fixture",
+      "customer_harm_observed": false,
+      "observed_evidence_refs": [
+        "OBSERVATIONS.json",
+        "ORACLES.json"
+      ],
+      "proposed_repair_task": "P-07"
+    },
+    {
+      "id": "INV-F05",
+      "title": "A known function-value alias loses its invoking consumer",
+      "kind": "confirmed_coverage_gap",
+      "priority": "next",
+      "cases": [
+        "alias",
+        "alias_import"
+      ],
+      "harm": "Impact includes the assignment/module reference but omits invoke; it can understate what changes.",
+      "expected": "Track the known target through const alias = target and alias().",
+      "observed": "Assignment ref retained, invocation relationship absent, no diagnostic; imported case retains coarse import but impact still misses invoke.",
+      "oracle": "Controlled Node invocation returns1 in both fixtures.",
+      "before_P05": "The local alias invocation is omitted in 95bf too. The imported alias variant was checked on current main; no older-source comparison is claimed for that variant.",
+      "source_refs": [
+        "scripts/lib/edge-derive.mjs",
+        "scripts/lib/static-usages.mjs"
+      ],
+      "repair_direction": "Track simple immutable callable aliases with reassignment/shadow controls, or explicitly report unsupported resolution.",
+      "baseline": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+      "status": "observed_in_synthetic_fixture",
+      "customer_harm_observed": false,
+      "observed_evidence_refs": [
+        "OBSERVATIONS.json",
+        "ORACLES.json"
+      ],
+      "proposed_repair_task": "P-07"
+    },
+    {
+      "id": "INV-F06",
+      "title": "Python decorator use is absent from mapped dependencies",
+      "kind": "confirmed_coverage_gap",
+      "priority": "later",
+      "cases": [
+        "decorator"
+      ],
+      "harm": "Changing a literal decorator has zero mapped impact on the decorated function.",
+      "expected": "Record or qualify the known @decorate dependency.",
+      "observed": "decorate and action nodes, no edges, no-known-incompleteness and zero diagnostics.",
+      "oracle": "Python ast records action.decorator_list with Name(decorate).",
+      "before_P05": "Same omission exists in95bf.",
+      "source_refs": [
+        "scripts/lib/edge-derive.mjs",
+        "scripts/lib/static-usages.mjs"
+      ],
+      "repair_direction": "Model literal decorator references separately from unknown framework dispatch.",
+      "baseline": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+      "status": "observed_in_synthetic_fixture",
+      "customer_harm_observed": false,
+      "observed_evidence_refs": [
+        "OBSERVATIONS.json",
+        "ORACLES.json"
+      ],
+      "proposed_repair_task": "P-07"
+    },
+    {
+      "id": "INV-F07",
+      "title": "Incomplete analysis has inconsistent visibility and usefulness across tools",
+      "kind": "confirmed_transport_confidence_gap",
+      "priority": "next",
+      "cases": [
+        "partial"
+      ],
+      "harm": "Warnings may disappear from machine-readable results, while usable partial information is discarded elsewhere.",
+      "expected": "One typed limitation contract across informational/advisory/decision surfaces, with explicit per-tool action semantics.",
+      "observed": "CLI find/explain return normal JSON exit0 without in-band analysis; MCP returns isError and status/analysis/hint without normal result. Context CLI retains typed useful partial data but MCP replaces it. Risk lacks in-band incompleteness on both transports. Impact/deadcode/review/diff retain typed limits.",
+      "oracle": "Identical known incomplete graph fed to actual CLI and long-lived MCP server; clean freshness rerun recorded.",
+      "source_refs": [
+        "scripts/mcp-server.mjs",
+        "scripts/find.mjs",
+        "scripts/explain.mjs",
+        "scripts/risk.mjs",
+        "scripts/lib/context-core.mjs"
+      ],
+      "repair_direction": "Shared analysis envelope; preserve useful informational partial results while action gates remain inconclusive.",
+      "baseline": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+      "status": "observed_in_synthetic_fixture",
+      "customer_harm_observed": false,
+      "observed_evidence_refs": [
+        "TRANSPORT-SUMMARY.json"
+      ],
+      "proposed_repair_task": "P-07"
+    }
+  ],
+  "count_semantics": "Seven distinct issue families; aliases and requested-engine repetitions are not independent bugs."
+}

@@ -1,0 +1,424 @@
+{
+  "source_commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+  "scope": "Allowlisted derivative of corrected synthetic fixture outputs; raw originals archived privately",
+  "observations": [
+    {
+      "case": "wrapper",
+      "requested_engine": "regex",
+      "complexity_engine": null,
+      "nodes": [
+        "ui.tsx:Inner",
+        "ui.tsx:Page",
+        "ui.tsx:<module>"
+      ],
+      "edges": [
+        {
+          "from": "ui.tsx:<module>",
+          "to": "ui.tsx:Inner",
+          "kind": "ref"
+        }
+      ],
+      "analysis_status": "incomplete",
+      "diagnostic_count": 1,
+      "impact": [
+        "ui.tsx:<module>"
+      ],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "wrapper",
+      "requested_engine": "tree-sitter",
+      "complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "ui.tsx:Inner",
+        "ui.tsx:Page",
+        "ui.tsx:<module>"
+      ],
+      "edges": [
+        {
+          "from": "ui.tsx:<module>",
+          "to": "ui.tsx:Inner",
+          "kind": "ref"
+        }
+      ],
+      "analysis_status": "incomplete",
+      "diagnostic_count": 1,
+      "impact": [
+        "ui.tsx:<module>"
+      ],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "alias",
+      "requested_engine": "regex",
+      "complexity_engine": null,
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke",
+        "a.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "a.js:<module>",
+          "to": "a.js:target",
+          "kind": "ref"
+        }
+      ],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [
+        "a.js:<module>"
+      ],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "alias",
+      "requested_engine": "tree-sitter",
+      "complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke",
+        "a.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "a.js:<module>",
+          "to": "a.js:target",
+          "kind": "ref"
+        }
+      ],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [
+        "a.js:<module>"
+      ],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "shadow",
+      "requested_engine": "regex",
+      "complexity_engine": null,
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [
+        {
+          "from": "a.js:invoke",
+          "to": "a.js:target",
+          "kind": "call"
+        }
+      ],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [
+        "a.js:invoke"
+      ],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "shadow",
+      "requested_engine": "tree-sitter",
+      "complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [
+        {
+          "from": "a.js:invoke",
+          "to": "a.js:target",
+          "kind": "call"
+        }
+      ],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [
+        "a.js:invoke"
+      ],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "decorator",
+      "requested_engine": "regex",
+      "complexity_engine": null,
+      "nodes": [
+        "a.py:decorate",
+        "a.py:action"
+      ],
+      "edges": [],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "decorator",
+      "requested_engine": "tree-sitter",
+      "complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "a.py:decorate",
+        "a.py:action"
+      ],
+      "edges": [],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "jsx_text",
+      "requested_engine": "regex",
+      "complexity_engine": null,
+      "nodes": [
+        "a.tsx:pretend",
+        "a.tsx:Page"
+      ],
+      "edges": [],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [],
+      "safe": [
+        "a.tsx:pretend"
+      ],
+      "review": []
+    },
+    {
+      "case": "jsx_text",
+      "requested_engine": "tree-sitter",
+      "complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "a.tsx:pretend",
+        "a.tsx:Page"
+      ],
+      "edges": [],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [],
+      "safe": [
+        "a.tsx:pretend"
+      ],
+      "review": []
+    },
+    {
+      "case": "private_member",
+      "requested_engine": "regex",
+      "complexity_engine": null,
+      "nodes": [
+        "page.tsx:Page",
+        "ui.js:Hidden",
+        "ui.js:Visible",
+        "ui.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "page.tsx:Page",
+          "to": "ui.js:Hidden",
+          "kind": "call"
+        },
+        {
+          "from": "page.tsx:Page",
+          "to": "ui.js:<module>",
+          "kind": "import"
+        }
+      ],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [
+        "page.tsx:Page"
+      ],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "private_member",
+      "requested_engine": "tree-sitter",
+      "complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "page.tsx:Page",
+        "ui.js:Hidden",
+        "ui.js:Visible",
+        "ui.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "page.tsx:Page",
+          "to": "ui.js:Hidden",
+          "kind": "call"
+        },
+        {
+          "from": "page.tsx:Page",
+          "to": "ui.js:<module>",
+          "kind": "import"
+        }
+      ],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [
+        "page.tsx:Page"
+      ],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "block",
+      "requested_engine": "regex",
+      "complexity_engine": null,
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [],
+      "safe": [
+        "a.js:target"
+      ],
+      "review": []
+    },
+    {
+      "case": "block",
+      "requested_engine": "tree-sitter",
+      "complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [],
+      "safe": [
+        "a.js:target"
+      ],
+      "review": []
+    },
+    {
+      "case": "alias_import",
+      "requested_engine": "regex",
+      "complexity_engine": null,
+      "nodes": [
+        "lib.js:target",
+        "use.js:invoke",
+        "use.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "use.js:<module>",
+          "to": "lib.js:target",
+          "kind": "ref"
+        },
+        {
+          "from": "use.js:invoke",
+          "to": "lib.js:target",
+          "kind": "import"
+        }
+      ],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [
+        "use.js:<module>"
+      ],
+      "safe": [],
+      "review": []
+    },
+    {
+      "case": "alias_import",
+      "requested_engine": "tree-sitter",
+      "complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "lib.js:target",
+        "use.js:invoke",
+        "use.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "use.js:<module>",
+          "to": "lib.js:target",
+          "kind": "ref"
+        },
+        {
+          "from": "use.js:invoke",
+          "to": "lib.js:target",
+          "kind": "import"
+        }
+      ],
+      "analysis_status": "no-known-incompleteness",
+      "diagnostic_count": 0,
+      "impact": [
+        "use.js:<module>"
+      ],
+      "safe": [],
+      "review": []
+    }
+  ],
+  "cleanup_campaign_proposals": [
+    {
+      "case": "block",
+      "exit_code": 0,
+      "delete_steps": [
+        {
+          "id": "del:a.js:target",
+          "type": "delete",
+          "op": {
+            "kind": "delete",
+            "ids": [
+              "a.js:target"
+            ]
+          },
+          "roi": 3,
+          "gate": {
+            "ok": true
+          },
+          "delta": {
+            "locReclaimed": 3,
+            "cyclesBroken": 0
+          },
+          "cumulative": {
+            "locReclaimed": 3,
+            "cyclesBroken": 0
+          }
+        }
+      ],
+      "summary": "1 step(s): 0 cut, 1 delete, 0 merge \u2014 projected -3 LOC, 0 cycle(s) broken (gate-green in order)"
+    },
+    {
+      "case": "jsx_text",
+      "exit_code": 0,
+      "delete_steps": [
+        {
+          "id": "del:a.tsx:pretend",
+          "type": "delete",
+          "op": {
+            "kind": "delete",
+            "ids": [
+              "a.tsx:pretend"
+            ]
+          },
+          "roi": 2,
+          "gate": {
+            "ok": true
+          },
+          "delta": {
+            "locReclaimed": 2,
+            "cyclesBroken": 0
+          },
+          "cumulative": {
+            "locReclaimed": 2,
+            "cyclesBroken": 0
+          }
+        }
+      ],
+      "summary": "1 step(s): 0 cut, 1 delete, 0 merge \u2014 projected -2 LOC, 0 cycle(s) broken (gate-green in order)"
+    }
+  ]
+}

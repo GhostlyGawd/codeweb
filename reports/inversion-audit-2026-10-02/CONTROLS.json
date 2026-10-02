@@ -1,0 +1,89 @@
+{
+  "source_commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+  "scope": "Bounded synthetic controls, not production certification",
+  "existing_tests": {
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0,
+    "suites": [
+      "context-analysis",
+      "analysis-completeness",
+      "edit-baseline",
+      "doctor",
+      "evidence-snapshot"
+    ]
+  },
+  "cache": {
+    "identical_cold_warm_full_edges_equal": true,
+    "preserved_size_mtime_edit": {
+      "size_equal": true,
+      "stamp_equal": true,
+      "warm_matches_full": false,
+      "content_snapshot_matches_full": true,
+      "classification": "Documented stamp-cache boundary; full/content-based extraction recovers"
+    },
+    "new_file_found": true,
+    "new_file_warm_full_edges_equal": true
+  },
+  "baseline": {
+    "initial_exit": 0,
+    "refresh_exit": 0,
+    "structural_red_exit": 1,
+    "repaired_exit": 0,
+    "original_bytes_preserved": true
+  },
+  "behavior_scope": {
+    "structural_diff_exit": 0,
+    "controlled_behavior_oracle_exit": 1,
+    "expected_value": 4,
+    "actual_value": 2,
+    "classification": "Expected scope limit: structural checks do not execute or prove behavior"
+  },
+  "recovery": [
+    {
+      "case": "RECOVERY-MISSING",
+      "ok": false,
+      "graph_status": "missing",
+      "issues": [
+        "graph-missing"
+      ]
+    },
+    {
+      "case": "RECOVERY-CORRUPT",
+      "ok": false,
+      "graph_status": "invalid",
+      "issues": [
+        "graph-invalid"
+      ]
+    },
+    {
+      "case": "RECOVERY-EMPTY",
+      "ok": false,
+      "graph_status": "empty",
+      "issues": [
+        "freshness-unknown",
+        "graph-empty"
+      ]
+    },
+    {
+      "case": "RECOVERY-MAPPED",
+      "ok": true,
+      "graph_status": "mapped",
+      "issues": []
+    }
+  ],
+  "privacy": {
+    "synthetic_marker_in_local_context": true,
+    "remote_disclosure_observed": false,
+    "remote_telemetry_tested": false,
+    "classification": "Expected source preview; sharing source output still requires owner judgment"
+  },
+  "distribution": {
+    "fresh_registry_version": "0.15.0",
+    "registry_integrity": "sha512-kgulqr9TAlOifJT5Upw8Z7A7T4KOHa6jdkSS855pW2WeV8jKuamJ/zffVup8ey4fC41FFK8iT1iSgeSIVzHKdg==",
+    "source_pack_file_count": 140,
+    "static_usages_in_source_pack": true,
+    "npm_publication_performed": false
+  },
+  "primary_tracked_files_unchanged_before_documentation": 1808
+}

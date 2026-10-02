@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-02T02:43:13.885214+00:00",
+  "updated_at": "2026-10-02T04:16:18.148984+00:00",
   "record_type": "Repository work record; no queue, agent service or scheduler",
   "current_planning_task": "PLAN-001",
-  "next_product_task": "P-04",
+  "next_product_task": "P-07",
   "tasks": [
     {
       "id": "PLAN-001",
@@ -747,7 +747,88 @@
       },
       "merge_status": "merged",
       "main_commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
-      "merge_authorization": "User approved the prepared PR101 source merge as GhostlyGawd; npm release separate."
+      "merge_authorization": "User approved the prepared PR101 source merge as GhostlyGawd; npm release separate.",
+      "follow_up_counterevidence": {
+        "work": "P-06",
+        "result_ref": "reports/inversion-audit-2026-10-02/FINDINGS.json",
+        "summary": "Post-merge inversion audit found a block-scope regression and namespace JSX precision failure plus older definition/coverage gaps. Historical gate success does not certify these cases."
+      }
+    },
+    {
+      "id": "P-06",
+      "title": "Audit Codeweb by inverting harmful user decisions",
+      "execution_status": "done",
+      "outcome_status": "technical_counterevidence_delivered_customer_effect_unobserved",
+      "owner": "Codex",
+      "lane": "Product investigation",
+      "depends_on": [
+        "P-05"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "finding_ids": [],
+      "supplemental_finding_ids": [
+        "INV-F01",
+        "INV-F02",
+        "INV-F03",
+        "INV-F04",
+        "INV-F05",
+        "INV-F06",
+        "INV-F07"
+      ],
+      "acceptance": "Twelve lens dispositions, synthetic failure cases, independent source oracles, downstream cleanup checks, controls and native limitations saved with raw private breadcrumbs; product source and original research preserved.",
+      "result_refs": [
+        "reports/inversion-audit-2026-10-02/README.md",
+        "reports/inversion-audit-2026-10-02/FINDINGS.json",
+        "reports/inversion-audit-2026-10-02/CONTROLS.json",
+        "reports/inversion-audit-2026-10-02/NATIVE-SUMMARY.json"
+      ],
+      "authority": "User approved the proposed inversion audit. No product source fix, outreach, release or new source merge performed in this work.",
+      "source_base": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+      "independent_review": "Not claimed; active Codex session owns this audit. AST/runtime oracles establish source facts separately from Codeweb.",
+      "last_updated_at": "2026-10-02T04:16:18.148984+00:00"
+    },
+    {
+      "id": "P-07",
+      "title": "Repair inversion audit binding, definition and confidence gaps",
+      "execution_status": "planned",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Product",
+      "depends_on": [
+        "P-06"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "finding_ids": [],
+      "supplemental_finding_ids": [
+        "INV-F01",
+        "INV-F02",
+        "INV-F03",
+        "INV-F04",
+        "INV-F05",
+        "INV-F06",
+        "INV-F07"
+      ],
+      "acceptance": "Staged requirements correct the two unsafe cleanup proposals first, then binding/export accuracy, bounded coverage and consistent typed uncertainty. Each family has independent positive/negative controls and downstream checks; required source gate passes.",
+      "result_refs": [
+        "docs/specs/inversion-correctness-repair.md",
+        "reports/inversion-audit-2026-10-02/FINDINGS.json"
+      ],
+      "authority": "Prepared repair plan following the approved audit; implementation not performed. Merge, release and outward actions retain their own scope.",
+      "last_updated_at": "2026-10-02T04:16:18.148984+00:00"
     }
   ]
 }

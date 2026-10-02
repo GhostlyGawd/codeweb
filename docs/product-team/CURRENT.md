@@ -6,7 +6,11 @@ Updated October 1, 2026. Operate directly through Codex under [TERMINAL-CONTRACT
 
 ## Current priority
 
-**Product correctness and repository consolidation delivered (P-05).** [The repaired candidate](../../reports/static-usage-p05-2026-10-01/README.md) is frozen at `fbda8e6dd749ea8641c7192dc8cdaaf604c27737` in [merged PR #101](https://github.com/GhostlyGawd/codeweb/pull/101). The user approved its source merge as GhostlyGawd; main now contains the exact tested source at `9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e`, including P-01/P-03/P-04 and the JSX/reference repair. The source gate passed 1,303 product checks, seven skips, 48 Python checks and five evals; all ten source CI checks passed. P-05 was owned and checked by the active session; no independent agent review is claimed.
+**Inversion audit delivered (P-06); correctness repair is next (P-07).** [The reproducible packet](../../reports/inversion-audit-2026-10-02/README.md) records seven source/transport issue families on merged main. Two synthetic cases reach campaign deletion proposals: a live outer function and phantom JSX-text declaration. No deletion occurred. The block-scope case is a P-05 regression, and the namespace/private-export false edge is also new; earlier successful gates did not cover these cases. Thirty-four existing controls passed. Product source is unchanged during this audit. [The staged repair requirements](../specs/inversion-correctness-repair.md) prioritize cleanup correctness, binding/export resolution and consistent uncertainty. P-07 is proposed implementation, not delivered work.
+
+All twelve lenses have bounded dispositions. An explicit native availability control works; a required-startup uncued small task listed server tools without calling them and still completed with native tools. This does not prove normal-profile readiness, indispensability or causal savings. Raw runs and personal/native session details remain archived privately; public files are synthetic cases and allowlisted summaries.
+
+**Earlier product correctness and repository consolidation delivery (P-05), with new counterevidence above.** [The repaired candidate](../../reports/static-usage-p05-2026-10-01/README.md) is frozen at `fbda8e6dd749ea8641c7192dc8cdaaf604c27737` in [merged PR #101](https://github.com/GhostlyGawd/codeweb/pull/101). The user approved its source merge as GhostlyGawd; main now contains the exact tested source at `9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e`, including P-01/P-03/P-04 and the JSX/reference repair. The source gate passed 1,303 product checks, seven skips, 48 Python checks and five evals; all ten source CI checks passed. P-05 was owned and checked by the active session; no independent agent review is claimed.
 
 Identity provisioning and outreach remain deferred by the user. Generic fixtures verify the supplied failure modes; the client repositories and their reported totals remain unavailable for verification. The primary checkout now uses `codex/codeweb-workspace`, with exact CI-tested source and sanitized current plans. Original working bytes and private research are archived outside this repository; the existing local history edit remains in place. The source merge is complete; npm release remains separate.
 
@@ -34,7 +38,7 @@ The [GTM roadmap](../gtm-cofounder/gtm-roadmap.md) now reflects the completed pa
 
 ## Continuity
 
-Start product work in this primary checkout. PR #101 is the merged consolidated source change; earlier draft source PRs remain historical review records. Their product changes are included in #101. The next product work is remaining first-run/native usability under P-04, with Claude still pending by user choice.
+Start product work in this primary checkout. PR #101 is the merged consolidated source change; earlier draft source PRs remain historical review records. Their product changes are included in #101. The next product work is the P-07 inversion correctness repair. Broader first-run/native usability under P-04 remains open, with Claude still pending by user choice.
 
 [BACKLOG.md](BACKLOG.md) preserves six unfinished website records; all map to WEB-01 for current-candidate/overlap reconciliation. Original acceptance and later user decisions still govern; no new visual quality or old-objective completion is claimed.
 

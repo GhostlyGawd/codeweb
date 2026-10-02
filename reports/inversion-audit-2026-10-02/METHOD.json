@@ -1,0 +1,39 @@
+{
+  "source_commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+  "private_execution": "Archived outside public repository; no host configuration/auth/session logs published",
+  "oracle_dependency": "@babel/parser7.29.9 installed in private audit oracle only; Codeweb dependencies unchanged",
+  "oracle_integrity": "sha512-CjXrNHTnvqBVqHgdBysY3vk2T8tpJHb5/RMeHJBTyVa9xgugCB0CJTx/3oO8RV2QRQP391RWpB7D6hLjm8V9uA==",
+  "existing_control_tests_passed": 34,
+  "existing_control_tests_failed": 0,
+  "primary_fixture_observations": 16,
+  "requested_engines": [
+    "regex",
+    "tree-sitter"
+  ],
+  "same_code_paths_shared": true,
+  "independent_oracles": [
+    "Babel JSX AST",
+    "Python AST",
+    "Controlled JS execution and ES-module namespace",
+    "Actual CLI/MCP results",
+    "Baseline byte comparison",
+    "Codeweb server stdio traffic"
+  ],
+  "claude": "pending per user decision",
+  "new_product_code_changes": false,
+  "new_customer_data": false,
+  "sources": [
+    {
+      "purpose": "Independent parser options",
+      "url": "https://babeljs.io/docs/babel-parser"
+    },
+    {
+      "purpose": "Scoped MCP configuration",
+      "url": "https://developers.openai.com/codex/mcp/"
+    },
+    {
+      "purpose": "Noninteractive controlled execution",
+      "url": "https://developers.openai.com/codex/noninteractive/"
+    }
+  ]
+}

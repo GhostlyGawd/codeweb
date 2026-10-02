@@ -1,0 +1,31 @@
+{
+  "synthetic_handwritten_only": true,
+  "cases": {
+    "wrapper": {
+      "ui.tsx": "function Inner() {\n  return <div />;\n}\nconst Wrapped = memo(Inner);\nexport function Page() {\n  return <Wrapped />;\n}\n"
+    },
+    "alias": {
+      "a.js": "function target() {\n return 1;\n}\nconst alias = target;\nexport function invoke() {\n return alias();\n}\n"
+    },
+    "shadow": {
+      "a.js": "function target() {\n return 1;\n}\nexport function invoke(target) {\n return target();\n}\n"
+    },
+    "decorator": {
+      "a.py": "def decorate(fn):\n    return fn\n\n@decorate\ndef action():\n    return 1\n"
+    },
+    "jsx_text": {
+      "a.tsx": "const help = <pre>\nfunction pretend()\n</pre>;\nexport function Page() {\n return help;\n}\n"
+    },
+    "private_member": {
+      "ui.js": "function Hidden() {\n return null;\n}\nexport function Visible() {\n return null;\n}\n",
+      "page.tsx": "import * as UI from './ui.js';\nexport function Page() {\n return <UI.Hidden />;\n}\n"
+    },
+    "block": {
+      "a.js": "function target() {\n return 1;\n}\nexport function invoke() {\n { const target = 99; }\n return target();\n}\n"
+    },
+    "alias_import": {
+      "lib.js": "export function target() {\n return 1;\n}\n",
+      "use.js": "import {target as original} from './lib.js';\nconst alias = original;\nexport function invoke() {\n return alias();\n}\n"
+    }
+  }
+}
