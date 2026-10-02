@@ -82,7 +82,17 @@ def validate():
 
     for wid in tasks:
         walk(wid)
-    manifest = read(PACKET / 'FINAL-DELIVERY-MANIFEST.json')['files']
+    original_manifest_path = PACKET / 'FINAL-DELIVERY-MANIFEST.json'
+    original_manifest = read(original_manifest_path)['files']
+    derivative_path = REPORT / 'PUBLIC-DERIVATIVE-MANIFEST.json'
+    public_derivative = derivative_path.is_file()
+    if public_derivative:
+        derivative = read(derivative_path)
+        require(derivative['original_manifest_sha256'] == hashlib.sha256(original_manifest_path.read_bytes()).hexdigest(), 'Original manifest identity changed')
+        manifest = derivative['files']
+        require(len(manifest) == len(original_manifest) and {e['path'] for e in manifest} == {e['path'] for e in original_manifest}, 'Public derivative omitted frozen paths')
+    else:
+        manifest = original_manifest
     for entry in manifest:
         path = PACKET / entry['path']
         require(path.is_file() and path.stat().st_size == entry['bytes'], 'Frozen file missing/size changed: ' + entry['path'])
@@ -113,7 +123,9 @@ def validate():
         'verified_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
         'status': 'pass', 'material_findings': len(findings), 'claims': len(claims),
         'test_ids': len(known_tests), 'work_records': len(tasks), 'task_dependencies': 'acyclic',
-        'frozen_packet_files_hash_verified': len(manifest), 'carry_over_records': len(carry),
+        'source_integrity_basis': 'sanitized-public-derivative' if public_derivative else 'private-frozen-original',
+        **({'public_derivative_files_hash_verified': len(manifest), 'original_frozen_bytes': 'verified separately in private archive'} if public_derivative else {'frozen_packet_files_hash_verified': len(manifest)}),
+        'carry_over_records': len(carry),
         'live_local_links_checked': link_count, 'source_or_reference_mismatches': [],
         'scope': 'Offline artifact consistency and preservation; not host readiness, strategic proof or customer validation.'}
 

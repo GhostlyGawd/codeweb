@@ -5,6 +5,8 @@ unreleased may be absent from the published npm package.
 
 ## Start with your task
 
+For current product work, start with [CURRENT.md](product-team/CURRENT.md), then [TASKS.json](product-team/TASKS.json). [The scorecard](product-team/SCORECARD.md) separates delivered implementation from observed user outcomes.
+
 | Task | Reading path |
 | --- | --- |
 | Use Codeweb on a repository | [Install and map](../README.md) → [CLI and configuration](cli.md) → [tools and outputs](reference.md). |

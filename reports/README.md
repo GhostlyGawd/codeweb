@@ -20,3 +20,7 @@ Each report preserves findings at the date it ran. Use current
 
 Record each new audit's scope and baseline, then link its findings to implementation and
 verification evidence. A historical finding is not automatically an open task.
+
+## Current product work
+
+[The product work record](../docs/product-team/CURRENT.md) is the active starting point. [The JSX/function-value repair](static-usage-p05-2026-10-01/README.md) records the current correction; dated audit folders preserve their original reviewed scope.

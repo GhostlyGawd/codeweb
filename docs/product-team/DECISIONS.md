@@ -96,3 +96,7 @@ Use the frozen CLAIM-LEDGER.json and BREADCRUMBS.json for exact support/countere
 Technical update: L04-F02 is corrected on the separately reviewed candidate in [PR #98](https://github.com/GhostlyGawd/codeweb/pull/98), linked to AC-34. The published package and broader NED/host readiness remain separate; see the authoritative live register and work record for current state.
 
 P-02 update: targeted native/CLI/hook observations and reviewer qualifications are in the [reviewed matrix](../../reports/native-evidence-p02-2026-09-30/MATRIX.json). Findings remain hypotheses for user benefit; mapped-state/target repairs move to P-03 and full readiness remains blocked/unverified.
+
+## October 1 product correctness follow-up
+
+P-05 is now linked bidirectionally to L03-F01, L03-F02, L03-F04, L04-F01, L07-F02. Original finding statements, evidence/test IDs, counterevidence and source archives remain unchanged. The supplied client totals are unverified; generic reproductions and implementation checks provide the new technical evidence.

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-01T02:50:01.943454+00:00",
+  "updated_at": "2026-10-02T02:20:53.019631+00:00",
   "record_type": "Repository work record; no queue, agent service or scheduler",
   "current_planning_task": "PLAN-001",
-  "next_product_task": "P-03",
+  "next_product_task": "P-05",
   "tasks": [
     {
       "id": "PLAN-001",
@@ -357,7 +357,8 @@
       "depends_on": [
         "P-04",
         "G-02",
-        "E-01"
+        "E-01",
+        "P-05"
       ],
       "claim_ids": [
         "F-C01",
@@ -676,6 +677,47 @@
       "authority": "Planning/drafting approved in this turn. Product execution is a linked proposed next action; sends, transactions, releases and hosted setup use the user's actual scoped authorization.",
       "last_updated_at": "2026-09-30T21:47:36.245342+00:00",
       "entry_condition": "A qualified shared-check case and legitimate permitted/forbidden scope are defined before cross-repo evidence use."
+    },
+    {
+      "id": "P-05",
+      "title": "Repair static JSX/function-value usage and consolidate the working repository",
+      "execution_status": "in_progress",
+      "outcome_status": "unobserved",
+      "owner": "Codex",
+      "lane": "Product",
+      "depends_on": [
+        "P-03"
+      ],
+      "claim_ids": [
+        "F-C02",
+        "F-C03"
+      ],
+      "test_ids": [
+        "F-T02",
+        "F-T03"
+      ],
+      "finding_ids": [
+        "L03-F01",
+        "L03-F02",
+        "L03-F04",
+        "L04-F01",
+        "L07-F02"
+      ],
+      "acceptance": "Generic before/after reproductions, supported usage/impact/cleanup fixes, honest cached diagnostics and required gate; reviewed source and sanitized current plans reconciled while original work remains recoverable. Reported client totals remain unverified.",
+      "result_refs": [
+        "reports/static-usage-p05-2026-10-01/README.md",
+        "reports/static-usage-p05-2026-10-01/VERIFICATION.json"
+      ],
+      "authority": "User requested product correctness and repository organization before identity/outreach setup. Generic fixtures and implementation authorized; client repositories unavailable. No issue posting, release or merge authorization inferred.",
+      "last_updated_at": "2026-10-02T02:20:53.019631+00:00",
+      "source_base": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
+      "initial_reproduction": "Nine baseline regression tests run before implementation; logs private.",
+      "verification_status": "Full source gate: 1303 product pass, 7 skips, 48 Python checks, 5 evals; all ten source CI checks passed, including benchmarks and self-review.",
+      "independent_review": "Not claimed; this pass is owned and checked by the active Codex session.",
+      "source_commit": "fbda8e6dd749ea8641c7192dc8cdaaf604c27737",
+      "draft_pr": "https://github.com/GhostlyGawd/codeweb/pull/101",
+      "source_delivery_status": "done",
+      "repository_consolidation_status": "prepared"
     }
   ]
 }
