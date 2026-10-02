@@ -227,3 +227,41 @@ test('ac_36 defaults and callbacks: default values count as use; bound callback 
     assert.ok(!hasEdge(f.graph.edges, 'defaults.js:singleArrow', 'defaults.js:handler', 'ref'));
   } finally { cleanup(f.dir); }
 });
+
+test('ac_36 local bindings: destructured external functions do not collide with repository names', async () => {
+  const f = await mapped({
+    'one.js': 'export function run() {\n  return 1;\n}\n',
+    'two.js': 'export function run() {\n  return 2;\n}\n',
+    'external.js': 'export function configure() {\n  const { execFileSync: run } = external;\n  return run();\n}\n',
+    'consumer.js': "const { run } = require('./one.js');\nexport function configure() {\n  return run();\n}\n",
+  });
+  try {
+    assert.equal(f.graph.meta.analysis.status, 'no-known-incompleteness');
+    assert.ok(!f.graph.edges.some(e => e.from === 'external.js:configure' && e.to.endsWith(':run')));
+    assert.ok(hasEdge(f.graph.edges, 'consumer.js:configure', 'one.js:run', 'call'));
+  } finally { cleanup(f.dir); }
+});
+
+test('ac_36 imports: explicit external bindings never fall back to similarly named project functions', async () => {
+  const f = await mapped({
+    'external.js': "import { writeFileSync } from 'node:fs';\nexport function save(path, text) {\n  writeFileSync(path, text);\n}\n",
+    'one.js': 'export function writeFileSync() {\n  return 1;\n}\n',
+    'two.js': 'export function writeFileSync() {\n  return 2;\n}\n',
+  });
+  try {
+    assert.equal(f.graph.meta.analysis.status, 'no-known-incompleteness');
+    assert.ok(!f.graph.edges.some(e => e.from === 'external.js:save' && e.to.endsWith(':writeFileSync')));
+  } finally { cleanup(f.dir); }
+});
+
+test('ac_36 expression bindings: named IIFE recursion and object methods are not ambiguous global calls', async () => {
+  const f = await mapped({
+    'one.js': 'export function walk() {\n  return 1;\n}\nexport function focus() {\n  return 1;\n}\n',
+    'two.js': 'export function walk() {\n  return 2;\n}\nexport function focus() {\n  return 2;\n}\n',
+    'local.js': 'export function visit(input) {\n  (function walk(value) {\n    if (value) walk(null);\n  })(input);\n  const api = { focus() { return 1; } };\n  return api;\n}\n',
+  });
+  try {
+    assert.equal(f.graph.meta.analysis.status, 'no-known-incompleteness');
+    assert.ok(!f.graph.edges.some(e => e.from === 'local.js:visit' && /:(?:walk|focus)$/.test(e.to)));
+  } finally { cleanup(f.dir); }
+});

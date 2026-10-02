@@ -120,30 +120,59 @@ export function createEdgeDeriver(ctx) {
       }
     }
     const bindingsByScope = new Map();
+    const bindLocal = (name, lineIdx) => {
+      if ((lexicalByName.get(name) || []).some(rg => rg.start === lineIdx + 1)) return;
+      if ((aliasMap?.has(name) || nsAliasMap?.has(name)) && /=\s*require\s*\(/.test(lines[lineIdx])) return;
+      const owner = enclosing(lineIdx + 1);
+      if (!bindingsByScope.has(owner)) bindingsByScope.set(owner, new Set());
+      bindingsByScope.get(owner).add(name);
+    };
     for (let i = 0; i < lines.length; i++) {
       const pattern = isPy ? /^[\t ]*([A-Za-z_]\w*)\s*(?::[\w.[\],| \t]+)?\s*=(?!=)/g : /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)/g;
       for (const match of lines[i].matchAll(pattern)) {
-        const name = match[1];
-        if ((lexicalByName.get(name) || []).some(rg => rg.start === i + 1)) continue;
-        const owner = enclosing(i + 1);
-        if (!bindingsByScope.has(owner)) bindingsByScope.set(owner, new Set());
-        bindingsByScope.get(owner).add(name);
+        bindLocal(match[1], i);
+      }
+      if (!isPy) for (const match of lines[i].matchAll(/\b(?:const|let|var)\s*\{([^}]*)\}\s*=/g)) {
+        for (const part of match[1].split(',')) {
+          const name = (part.split(':').at(-1) || '').split('=')[0].trim().replace(/^\.\.\./, '');
+          if (/^[A-Za-z_$][\w$]*$/.test(name)) bindLocal(name, i);
+        }
       }
     }
     const sameFileClasses = new Map(ranges.filter((rg) => rg.kind === 'class').map((rg) => [rg.name, rg.id]));
     // The CLASS node a name refers to (imported class alias OR a same-file class) — for ref edges from
     // `instanceof X` and `X.staticMethod()`. Null for non-classes (an object alias like `utils`).
     const classOf = (name) => (classAliasMap && classAliasMap.get(name)) || sameFileClasses.get(name) || null;
+    const localDeclarationAt = (name, line) => {
+      const ancestors = []; for (let scope = enclosing(line); scope; scope = parentOf.get(scope)) ancestors.push(scope);
+      const candidates = (lexicalByName.get(name) || []).filter(rg => !parentOf.get(rg) || ancestors.includes(parentOf.get(rg)));
+      let nearest = Infinity;
+      for (const rg of candidates) nearest = Math.min(nearest, parentOf.get(rg) ? ancestors.indexOf(parentOf.get(rg)) : ancestors.length);
+      const chosen = candidates.filter(rg => (parentOf.get(rg) ? ancestors.indexOf(parentOf.get(rg)) : ancestors.length) === nearest);
+      return chosen.length === 1 ? chosen[0].id : null;
+    };
     const addEdge = (lineIdx, name, kind = 'call') => {
       if (KEYWORDS.has(name)) return;
       cand.add(name); // finding #17: pre-gate — see the declaration above
+      if (usages.expressionBindings.some(binding => binding.name === name && lineIdx + 1 >= binding.start && lineIdx + 1 <= binding.end)) return;
       const aliased = aliasMap && aliasMap.get(name);
       if (!aliased && !byName.has(name)) return;
+      if (kind === 'call') {
+        for (let scope = enclosing(lineIdx + 1); scope; scope = parentOf.get(scope)) {
+          if (bindingsByScope.get(scope)?.has(name)) return;
+        }
+        if (bindingsByScope.get(null)?.has(name)) return;
+      }
       if (kind === 'ref') {
         for (let scope = enclosing(lineIdx + 1); scope; scope = parentOf.get(scope)) {
           if (valueParamsOf.get(scope)?.has(name) || bindingsByScope.get(scope)?.has(name)) return;
         }
         if (bindingsByScope.get(null)?.has(name)) return;
+      }
+      if (externalBindings?.has(name)) {
+        const local = localDeclarationAt(name, lineIdx + 1);
+        if (local) addResolved(lineIdx, local, kind);
+        return; // explicit external import is not an ambiguous repository call
       }
       if (declStarts.get(name)?.has(lineIdx + 1)) return; // any same-named declaration line — finding #12 (subsumes the old own-definition guard)
       const caller = enclosing(lineIdx + 1);
@@ -296,6 +325,8 @@ export function createEdgeDeriver(ctx) {
       if (isCpp && CPP_PROTO_RE.test(ln)) continue; // a prototype declares; it does not call (and its params are bindings, not refs)
       callRe.lastIndex = 0; let m;
       while ((m = callRe.exec(ln))) {
+        // An object-method declarator is not a call to a repo-wide same-named function.
+        if (/[,{]\s*$/.test(ln.slice(0, m.index)) && /^\s*\([^)]*\)\s*\{/.test(ln.slice(m.index + m[1].length))) continue;
         // Round 2, finding #9: `...fn(` (the char before the `.` is another `.`) is a SPREAD call,
         // not a member call — the backward identifier match below can never succeed on dots, so the
         // member branch silently dropped the edge (trend.mjs:metrics showed 0 callers). Fall through

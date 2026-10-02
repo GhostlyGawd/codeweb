@@ -6,10 +6,12 @@ Generic fixtures reproduced eight failures before implementation, with one negat
 
 Tests cover both requested engines, lexical/import bindings, namespace re-exports, shadowing, type syntax, JSX text, cold/warm/full caches, default callbacks, actual CLI/MCP output and versioned receipt witnesses. New receipts use relation version 2; older records remain readable and incompatible analyzer comparisons remain inconclusive.
 
-The complete source gate passed: 1,300 product checks passed, seven skipped, 48 Python checks and five evals. The skipped optional/platform cases remain outside this result. Failed intermediate receipt/import checks and original working bytes are retained privately.
+The complete source gate passed: 1,303 product checks passed, seven skipped, 48 Python checks and five evals. The skipped optional/platform cases remain outside this result. Failed intermediate receipt/import checks and original working bytes are retained privately.
 
 This consolidates P-01/P-03/P-04 product changes on the current main baseline without importing their raw research/setup records. The protected harness remains unchanged. Main merge, npm release, ordinary native-host usability and user benefit are separate.
 
 The implementation was owned and checked by the active Codex session; no independent agent review is claimed for P-05. The earlier bounded reviews remain historical evidence for their exact sources.
 
 Unresolved computed dispatch, component factories and unsupported bindings remain limits. References establish source use, not runtime invocation. The apply command explicitly executes merge steps; deletion proposals require separate source review and authorization.
+
+The existing benchmark gate passes with a valid twelve-call session. Explicit external imports, destructured bindings and named expression scopes are distinguished from genuine ambiguous project calls. The generated changelog is current; no CI predicate or budget was relaxed.

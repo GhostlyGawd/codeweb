@@ -1,9 +1,9 @@
 // Bounded usage scanning over already masked source. No target code executes.
 // JSX uses require a self-closing or paired tag; TS generics are not render sites.
 export function scanStaticUsages(masked, file) {
-  const jsx = [], values = [], tags = [];
+  const jsx = [], values = [], tags = [], expressionBindings = [];
   const isJs = /\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(file);
-  if (!isJs && !file.endsWith('.py')) return { jsx, values, code: masked };
+  if (!isJs && !file.endsWith('.py')) return { jsx, values, code: masked, expressionBindings };
   const starts = [0];
   for (let i = 0; i < masked.length; i++) if (masked[i] === '\n') starts.push(i + 1);
   const position = (offset) => {
@@ -59,6 +59,15 @@ export function scanStaticUsages(masked, file) {
     previous = tag.end;
   }
   const code = chars ? chars.join('') : masked;
+  if (isJs) for (const m of code.matchAll(/[=(,:]\s*function\s+([A-Za-z_$][\w$]*)\s*\(/g)) {
+    let at = m.index + m[0].length, parens = 1;
+    for (; at < code.length && parens > 0; at++) { if (code[at] === '(') parens++; else if (code[at] === ')') parens--; }
+    while (at < code.length && /\s/.test(code[at])) at++;
+    if (code[at] !== '{') continue;
+    let end = at + 1, braces = 1;
+    for (; end < code.length && braces > 0; end++) { if (code[end] === '{') braces++; else if (code[end] === '}') braces--; }
+    expressionBindings.push({ name: m[1], start: position(m.index).line, end: position(end).line });
+  }
   const bindingSpans = [];
   if (isJs) for (const m of code.matchAll(/^[\t ]*(?:import\b(?!\s*\()|export\s+(?:type\s+)?\{)/gm)) {
     let braces = 0, end = m.index;
@@ -77,5 +86,5 @@ export function scanStaticUsages(masked, file) {
       values.push({ name: m[1], ...position(at), kind: 'ref' });
     }
   }
-  return { jsx, values, code };
+  return { jsx, values, code, expressionBindings };
 }
