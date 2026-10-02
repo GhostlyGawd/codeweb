@@ -219,6 +219,14 @@ class TestAcPins(unittest.TestCase):
         proc = _run(["node", "--test", "tests/inversion-transport.test.mjs"])
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
 
+    def test_ac_39_codex_launch_recipes(self):
+        proc = _run(["node", "--test", "tests/codex-launch-recipes.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
+    def test_ac_40_codex_workflow_package(self):
+        proc = _run(["node", "--test", "tests/codex-workflow-packaging.test.mjs"])
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

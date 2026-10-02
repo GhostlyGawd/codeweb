@@ -112,8 +112,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }   # required — the gate diffs against the PR base
-      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.15.0
-        with: { target: src, comment: true, codeweb-ref: v0.15.0 }   # comment posts the review on the PR
+      - uses: GhostlyGawd/codeweb/.github/actions/codeweb-gate@v0.16.0
+        with: { target: src, comment: true, codeweb-ref: v0.16.0 }   # comment posts the review on the PR
 ```
 
 Locally: `node scripts/ci-gate.mjs --base <ref> [--target <subdir>]`. Pure removals do not count as structural regressions; a brand-new uncalled function is reported but doesn't fail the build.

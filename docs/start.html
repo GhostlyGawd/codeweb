@@ -19,7 +19,7 @@
 <meta name="google-site-verification" content="XtDZ8jymdrgm7ImH0L2hdtJ9Axy_B-9EnzLZk9pUMkQ">
 <meta name="theme-color" content="#060608">
 <link rel="canonical" href="https://ghostlygawd.github.io/codeweb/start.html">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.15.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"codeweb","applicationCategory":"DeveloperApplication","operatingSystem":"Windows, macOS, Linux (Node.js >= 22)","softwareVersion":"0.16.0","description":"Deterministic call/import graph of your codebase — 28 MCP tools for coding agents plus a self-contained interactive map. Runs entirely locally; reads code, never executes it.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"license":"https://opensource.org/licenses/MIT","codeRepository":"https://github.com/GhostlyGawd/codeweb","url":"https://ghostlygawd.github.io/codeweb/","sameAs":["https://github.com/GhostlyGawd/codeweb","https://www.npmjs.com/package/@ghostlygawd/codeweb"]}</script>
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
@@ -215,7 +215,7 @@ node codeweb/scripts/run.mjs /path/to/your/project</code></pre>
     <div class="section-head">
       <span class="eyebrow">npm quickstart</span>
       <h2 id="npm-quickstart">Map, edit, detect, repair</h2>
-      <p class="lead">Requires Node.js ≥ 22, npm, and a POSIX shell. Run these four blocks in the same shell from any directory. They create a temporary project, install the pinned v0.15.0 package, and use its binaries; no Codeweb source checkout is needed.</p>
+      <p class="lead">Requires Node.js ≥ 22, npm, and a POSIX shell. Run these four blocks in the same shell from any directory. They create a temporary project, install the pinned v0.16.0 package, and use its binaries; no Codeweb source checkout is needed.</p>
     </div>
     <div class="grid cols-2">
       <div class="card">
@@ -223,7 +223,7 @@ node codeweb/scripts/run.mjs /path/to/your/project</code></pre>
         <p>Create two source files with one dependency. Codeweb analyzes them without executing them.</p>
 <!-- npm-quickstart: executable step -->
 <pre><code>demo=$(mktemp -d "${TMPDIR:-/tmp}/codeweb-npm.XXXXXX") || exit 1
-npm install --prefix "$demo/tools" --omit=optional --ignore-scripts --no-audit --no-fund @ghostlygawd/codeweb@0.15.0
+npm install --prefix "$demo/tools" --omit=optional --ignore-scripts --no-audit --no-fund @ghostlygawd/codeweb@0.16.0
 export PATH="$demo/tools/node_modules/.bin:$PATH"
 mkdir "$demo/project"
 cd "$demo/project" || exit 1
@@ -333,7 +333,7 @@ node scripts/diff.mjs baseline "$demo/.codeweb/graph.json" --refresh
       </div>
     </div>
     <div class="footer-base">
-      <span>codeweb v0.15.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
+      <span>codeweb v0.16.0 · MIT · © 2026 <a href="https://github.com/GhostlyGawd">GhostlyGawd</a></span>
       <span>Deterministic build · zero third-party requests on this page</span>
     </div>
   </div>
