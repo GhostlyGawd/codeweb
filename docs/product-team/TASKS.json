@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-02T02:25:15.905278+00:00",
+  "updated_at": "2026-10-02T02:43:13.885214+00:00",
   "record_type": "Repository work record; no queue, agent service or scheduler",
   "current_planning_task": "PLAN-001",
   "next_product_task": "P-04",
@@ -103,7 +103,13 @@
       "scope_note": "Applicable similarity surface delivered; full NED/host readiness stays P-02/P-04. Main/published package are not changed by branch delivery.",
       "central_acceptance_ids": [
         "AC-34"
-      ]
+      ],
+      "consolidated_source_merge": {
+        "pr": 101,
+        "commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+        "actor": "GhostlyGawd",
+        "merged_at": "2026-10-02T02:38:44Z"
+      }
     },
     {
       "id": "P-02",
@@ -193,7 +199,13 @@
       "source_commit": "669303fa4fbd1b326eb4c1fb8588cc0d30cb2a28",
       "draft_pr": "https://github.com/GhostlyGawd/codeweb/pull/99",
       "completion_scope": "R01-R05/R07 source repairs and existing-surface entry aliases from R06; separate review, local gate and all ten GitHub checks pass. Actual host readiness and user value remain separate.",
-      "remaining_work_owner": "P-04"
+      "remaining_work_owner": "P-04",
+      "consolidated_source_merge": {
+        "pr": 101,
+        "commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+        "actor": "GhostlyGawd",
+        "merged_at": "2026-10-02T02:38:44Z"
+      }
     },
     {
       "id": "P-04",
@@ -245,7 +257,13 @@
       "source_commit": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
       "draft_pr": "https://github.com/GhostlyGawd/codeweb/pull/100",
       "full_product_field_ready": false,
-      "scoped_completion": "Source95bf, local gate1230/60skip/47Py/5evals, all10sourceCI,49native results matched server traffic;139installed files match,1334host files and8symlinks independently audited. Exact scoped candidate approved; no all-host readiness or user value."
+      "scoped_completion": "Source95bf, local gate1230/60skip/47Py/5evals, all10sourceCI,49native results matched server traffic;139installed files match,1334host files and8symlinks independently audited. Exact scoped candidate approved; no all-host readiness or user value.",
+      "consolidated_source_merge": {
+        "pr": 101,
+        "commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+        "actor": "GhostlyGawd",
+        "merged_at": "2026-10-02T02:38:44Z"
+      }
     },
     {
       "id": "G-01",
@@ -709,7 +727,7 @@
         "reports/static-usage-p05-2026-10-01/VERIFICATION.json"
       ],
       "authority": "User requested product correctness and repository organization before identity/outreach setup. Generic fixtures and implementation authorized; client repositories unavailable. No issue posting, release or merge authorization inferred.",
-      "last_updated_at": "2026-10-02T02:25:15.905278+00:00",
+      "last_updated_at": "2026-10-02T02:43:13.885214+00:00",
       "source_base": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
       "initial_reproduction": "Nine baseline regression tests run before implementation; logs private.",
       "verification_status": "Full source gate: 1303 product pass, 7 skips, 48 Python checks, 5 evals; all ten source CI checks passed, including benchmarks and self-review.",
@@ -720,7 +738,16 @@
       "repository_consolidation_status": "done",
       "working_branch": "codex/codeweb-workspace",
       "completion_scope": "Supported usage/impact/cleanup corrections checked on generic cases; current primary checkout has exact CI-tested source and sanitized live plans. Original files archived privately; unrelated local history edit retained.",
-      "remaining_gate": "Main merge/npm release require their actual scope; actual client totals, ordinary host usability and customer value remain unverified."
+      "remaining_gate": "Npm release requires its own scope; actual client totals, ordinary host usability and customer value remain unverified.",
+      "consolidated_source_merge": {
+        "pr": 101,
+        "commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+        "actor": "GhostlyGawd",
+        "merged_at": "2026-10-02T02:38:44Z"
+      },
+      "merge_status": "merged",
+      "main_commit": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+      "merge_authorization": "User approved the prepared PR101 source merge as GhostlyGawd; npm release separate."
     }
   ]
 }

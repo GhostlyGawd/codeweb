@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-02T02:25:15.905278+00:00",
+  "updated_at": "2026-10-02T02:43:13.885214+00:00",
   "authority": "Derived living decisions; frozen research and charter remain separate authorities.",
   "review_status": "critic_pass_completed_same_session",
   "source_packet": "reports/hypothesis-pressure-test-2026-09-29",
@@ -553,7 +553,7 @@
         "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
         "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       },
-      "current_followup": "P-05 source and repository consolidation delivered: generic cases/full CI pass, current source active, private originals preserved. Actual client totals and customer value remain unverified."
+      "current_followup": "P-05 source and repository consolidation delivered; approved PR101 source merged to main at 9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e. Generic/full CI checks pass; package release, actual client totals and customer value remain unverified."
     },
     {
       "finding_id": "L03-F02",
@@ -617,7 +617,7 @@
         "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
         "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       },
-      "current_followup": "P-05 source and repository consolidation delivered: generic cases/full CI pass, current source active, private originals preserved. Actual client totals and customer value remain unverified."
+      "current_followup": "P-05 source and repository consolidation delivered; approved PR101 source merged to main at 9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e. Generic/full CI checks pass; package release, actual client totals and customer value remain unverified."
     },
     {
       "finding_id": "L03-F03",
@@ -734,7 +734,7 @@
         "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
         "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       },
-      "current_followup": "P-05 source and repository consolidation delivered: generic cases/full CI pass, current source active, private originals preserved. Actual client totals and customer value remain unverified."
+      "current_followup": "P-05 source and repository consolidation delivered; approved PR101 source merged to main at 9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e. Generic/full CI checks pass; package release, actual client totals and customer value remain unverified."
     },
     {
       "finding_id": "L03-F05",
@@ -898,7 +898,7 @@
         "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
         "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       },
-      "current_followup": "P-05 source and repository consolidation delivered: generic cases/full CI pass, current source active, private originals preserved. Actual client totals and customer value remain unverified."
+      "current_followup": "P-05 source and repository consolidation delivered; approved PR101 source merged to main at 9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e. Generic/full CI checks pass; package release, actual client totals and customer value remain unverified."
     },
     {
       "finding_id": "L04-F02",
@@ -1742,7 +1742,7 @@
         "status": "scoped_codex_explicit_mcp_learning_candidate_approved",
         "limits": "Eight-tool preauthorized condition only; Claude, skills, defaults and broader lifecycle remain pending/unverified. No human task benefit or natural use is observed."
       },
-      "current_followup": "P-05 source and repository consolidation delivered: generic cases/full CI pass, current source active, private originals preserved. Actual client totals and customer value remain unverified."
+      "current_followup": "P-05 source and repository consolidation delivered; approved PR101 source merged to main at 9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e. Generic/full CI checks pass; package release, actual client totals and customer value remain unverified."
     },
     {
       "finding_id": "L07-F03",
