@@ -1,6 +1,6 @@
 // Pure evidence projection and reconciliation. Target source is never read or executed here.
 import { createHash } from 'node:crypto';
-import { buildIndex, callersOf, calleesOf, impactOf, resolveSymbol } from './graph-ops.mjs';
+import { buildIndex, callersOf, calleesOf, resolveSymbol } from './graph-ops.mjs';
 import { buildContextPack } from './context-core.mjs';
 
 export class EvidenceError extends Error {}
@@ -75,17 +75,17 @@ function analysisOf(snapshot) {
 }
 function baselineOf(s) {return {inventoryDigest:s.inventoryDigest,graphDigest:hash(projectGraph(s.graph,s.sourceHashes,s.profile)),analyzerIdentity:s.analyzerIdentity,optionsDigest:s.optionsDigest,profile:s.profile};}
 const pathKey = e => tupleBytes([e.from,e.to,e.kind]);
-function pathsTo(graph,target) {
+function pathsTo(graph,target,relationVersion=1) {
   const incoming=new Map();
-  for(const e of graph.edges) if(e.kind==='call'||e.kind==='inherit') {if(!incoming.has(e.to))incoming.set(e.to,[]);incoming.get(e.to).push({from:e.from,to:e.to,kind:e.kind});}
+  for(const e of graph.edges) if(e.kind==='call'||e.kind==='inherit'||(relationVersion===2&&e.kind==='ref')) {if(!incoming.has(e.to))incoming.set(e.to,[]);incoming.get(e.to).push({from:e.from,to:e.to,kind:e.kind});}
   for(const list of incoming.values())list.sort((a,b)=>Buffer.compare(pathKey(a),pathKey(b)));
   const paths=new Map([[target,[]]]),queue=[target];
   for(let i=0;i<queue.length;i++) {const current=queue[i];for(const e of incoming.get(current)||[])if(!paths.has(e.from)){paths.set(e.from,[e,...paths.get(current)]);queue.push(e.from);}}
   return paths;
 }
-function relationsOf(snapshot,target) {
-  const ix=buildIndex(snapshot.graph),paths=pathsTo(snapshot.graph,target.id);
-  const memberships={callers:callersOf(ix,[target.id]),callees:calleesOf(ix,[target.id]),impact:impactOf(ix,[target.id])};
+function relationsOf(snapshot,target,relationVersion=snapshot.analyzerIdentity.relationVersion) {
+  const ix=buildIndex(snapshot.graph),paths=pathsTo(snapshot.graph,target.id,relationVersion);
+  const memberships={callers:callersOf(ix,[target.id]),callees:calleesOf(ix,[target.id]),impact:[...paths.keys()].filter(id=>id!==target.id).sort(compare)};
   const relations={};
   for(const [relation,ids] of Object.entries(memberships))relations[relation]=sorted(ids.map(relatedId=>{
     const witnessPath=relation==='impact'?paths.get(relatedId):[{from:relation==='callers'?relatedId:target.id,to:relation==='callers'?target.id:relatedId,kind:'call'}];
@@ -110,7 +110,7 @@ function questionsOf(snapshot,target,relations,task,context=null) {
     return {id,task,targetId:target.id,...c,originalSourceSha256:digest,currentSourceSha256:digest,state:'unresolved'};
   }),x=>x.id));
 }
-function queryOf(symbol,target,s) {return {selector:symbol,targetId:target.id,relationVersion:1,profile:s.profile,edgeKinds:{callers:['call'],callees:['call'],impact:['call','inherit']}};}
+function queryOf(symbol,target,s) {const relationVersion=s.analyzerIdentity.relationVersion;return {selector:symbol,targetId:target.id,relationVersion,profile:s.profile,edgeKinds:{callers:['call'],callees:['call'],impact:relationVersion===2?['call','inherit','ref']:['call','inherit']}};}
 function contextEvidence(snapshot,target) {
   if(!snapshot.sourceReader)return null;
   return buildContextPack(snapshot.graph,buildIndex(snapshot.graph),snapshot.sourceReader,[target.id],{symbol:target.id,limit:null,staleInfo:null});
@@ -159,7 +159,7 @@ export function reconcileReceipt(receipt,snapshot,{legacyGraph}={}) {
   if(receipt.analysis.status==='incomplete'||analysis.status==='incomplete')reasons.push('extraction-incomplete');
   const target=n?targetProjection(n,snapshot.sourceHashes):receipt.target;
   let relations={callers:[],callees:[],impact:[]};
-  if(n)relations=relationsOf(snapshot,target);
+  if(n)relations=relationsOf(snapshot,target,receipt.query.relationVersion);
   const context=n?contextEvidence(snapshot,target):null;
   const freshQuestions=n?questionsOf(snapshot,target,relations,receipt.task,context):[];
   const questions=reconcileQuestions(receipt.questions,freshQuestions,snapshot,reasons.length>0);
@@ -189,13 +189,13 @@ const number = v => {if(!Number.isSafeInteger(v)||v<0)fail('Invalid integer');};
 const boolean = v => {if(typeof v!=='boolean')fail('Invalid boolean');};
 function list(v,fn,key) {if(!Array.isArray(v))fail('Expected array');v.forEach(fn);if(key){const ids=v.map(key);if(new Set(ids).size!==ids.length||canonicalJSON(ids)!==canonicalJSON([...ids].sort(compare)))fail('Noncanonical set');}}
 function targetSchema(t) {keys(t,['id','label','file','line','loc','kind','exports','signature','sourceSha256']);str(t.id);str(t.file);nullable(t.label,str);nullable(t.kind,str);nullable(t.signature,v=>{if(typeof v==='string'){str(v);return;}keys(v,['params','returns','raw']);list(v.params,str);nullable(v.returns,str);str(v.raw);});nullable(t.line,number);nullable(t.loc,number);boolean(t.exports);nullable(t.sourceSha256,digest);}
-function baselineSchema(b) {keys(b,['inventoryDigest','graphDigest','analyzerIdentity','optionsDigest','profile']);digest(b.inventoryDigest);digest(b.graphDigest);digest(b.optionsDigest);str(b.profile);const a=b.analyzerIdentity;keys(a,['profile','nodeVersion','runtimeDigest','discoveryDigest','engine','ctags','ast','relationVersion','projectionVersion','schemaVersion']);for(const k of ['profile','nodeVersion','engine'])str(a[k]);digest(a.runtimeDigest);digest(a.discoveryDigest);boolean(a.ctags);boolean(a.ast);for(const k of ['relationVersion','projectionVersion','schemaVersion'])if(a[k]!==1)fail('Unsupported analyzer version');}
-function querySchema(q) {keys(q,['selector','targetId','relationVersion','profile','edgeKinds']);str(q.selector);str(q.targetId);if(q.relationVersion!==1||q.profile!==PROFILE)fail('Unsupported query');keys(q.edgeKinds,['callers','callees','impact']);if(canonicalJSON(q.edgeKinds)!==canonicalJSON({callers:['call'],callees:['call'],impact:['call','inherit']}))fail('Invalid edge semantics');}
+function baselineSchema(b) {keys(b,['inventoryDigest','graphDigest','analyzerIdentity','optionsDigest','profile']);digest(b.inventoryDigest);digest(b.graphDigest);digest(b.optionsDigest);str(b.profile);const a=b.analyzerIdentity;keys(a,['profile','nodeVersion','runtimeDigest','discoveryDigest','engine','ctags','ast','relationVersion','projectionVersion','schemaVersion']);for(const k of ['profile','nodeVersion','engine'])str(a[k]);digest(a.runtimeDigest);digest(a.discoveryDigest);boolean(a.ctags);boolean(a.ast);if(![1,2].includes(a.relationVersion))fail('Unsupported analyzer version');for(const k of ['projectionVersion','schemaVersion'])if(a[k]!==1)fail('Unsupported analyzer version');}
+function querySchema(q) {keys(q,['selector','targetId','relationVersion','profile','edgeKinds']);str(q.selector);str(q.targetId);if(![1,2].includes(q.relationVersion)||q.profile!==PROFILE)fail('Unsupported query');keys(q.edgeKinds,['callers','callees','impact']);if(canonicalJSON(q.edgeKinds)!==canonicalJSON({callers:['call'],callees:['call'],impact:q.relationVersion===2?['call','inherit','ref']:['call','inherit']}))fail('Invalid edge semantics');}
 function analysisSchema(a) {keys(a,['status','diagnosticCount','diagnostics','limitations','profile','sourceAvailable']);if(!['incomplete','no-known-incompleteness'].includes(a.status))fail();str(a.profile);number(a.diagnosticCount);boolean(a.sourceAvailable);list(a.limitations,str,x=>x);list(a.diagnostics,d=>{keys(d,['code','file','line','column','evidence']);str(d.code);str(d.file);nullable(d.line,number);nullable(d.column,number);nullable(d.evidence,str);},canonicalJSON);}
 function relationSchema(r) {
   keys(r,['id','relation','targetId','relatedId','witnessPath','nodes','support','evidenceDigest']);digest(r.id);digest(r.evidenceDigest);for(const k of ['relation','targetId','relatedId'])str(r[k]);
   if(!['callers','callees','impact'].includes(r.relation)||r.id!==tupleHash([r.relation,r.targetId,r.relatedId]))fail('Relation identity mismatch');
-  list(r.witnessPath,e=>{keys(e,['from','to','kind']);str(e.from);str(e.to);if(!['call','inherit'].includes(e.kind))fail();});
+  list(r.witnessPath,e=>{keys(e,['from','to','kind']);str(e.from);str(e.to);if(!['call','inherit','ref'].includes(e.kind))fail();});
   list(r.nodes,n=>{keys(n,['id','file','line','loc','kind']);str(n.id);str(n.file);nullable(n.line,number);nullable(n.loc,number);nullable(n.kind,str);},n=>n.id);
   list(r.support,s=>{keys(s,['path','sha256']);str(s.path);digest(s.sha256);},s=>s.path);
   if(r.evidenceDigest!==hash({id:r.id,witnessPath:r.witnessPath,nodes:r.nodes,support:r.support}))fail('Witness digest mismatch');
@@ -215,6 +215,10 @@ function currentWitnessMatchesTarget(relation,target) {
   if(relation.support.find(s=>s.path===target.file)?.sha256!==target.sourceSha256)fail('Witness target source mismatch');
 }
 function recordSemantics(record,isReceipt) {
+  if(record.query.relationVersion!==record.baseline.analyzerIdentity.relationVersion)fail('Query/analyzer relation version mismatch');
+  for(const relation of [...Object.values(record.relations).flat(),...Object.values(record.deltas||{}).flat()]) {
+    if(relation.witnessPath.some(edge=>!record.query.edgeKinds[relation.relation].includes(edge.kind)))fail('Witness exceeds declared edge semantics');
+  }
   if(isReceipt&&!record.analysis.sourceAvailable)fail('Capture requires source availability');
   if(record.analysis.diagnosticCount<record.analysis.diagnostics.length)fail('Diagnostic count underflow');
   const current=new Map(Object.values(record.relations).flat().map(r=>[r.id,r]));

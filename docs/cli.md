@@ -215,10 +215,22 @@ form provide lightweight installation/map diagnostics; they do not verify a clie
 
 ## Known incomplete extraction
 
-Known unsupported same-line JS/TS declarations are recorded in `graph.meta.analysis`.
+Known unsupported same-line JS/TS declarations, unresolved local JSX targets and ambiguous
+call candidates are recorded in `graph.meta.analysis`.
 An `incomplete` status includes an exact diagnostic count and at most 20 samples with
 file, line, column, and masked-source evidence. Strings and comments are not copied
 into those samples. An unflagged graph does not prove complete syntax coverage.
+
+JSX renders resolve through local declarations and supported imports. Known function values
+in callbacks, containers and handler registration produce `ref` edges; direct callers remain
+call-only. Impact follows call, inheritance and reference users transitively.
+
+The deadcode `safe` key is a legacy structural tier. Incomplete maps, detected dynamic
+dispatch and JSX component-like orphans require review and supply no deletion proposals.
+
+New evidence receipts use relation version 2 for reference-aware impact witnesses.
+Version 1 records remain readable; reconciliation across analyzer versions is inconclusive
+and preserves the original receipt.
 
 Diff and review comparisons involving a diagnosed incomplete snapshot return
 `ok:false`, `status:"inconclusive"`, diagnostics in `analysis.completeness`, and exit 2.

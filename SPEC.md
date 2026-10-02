@@ -45,6 +45,11 @@ resolves; it cannot verify a stranger's card, and this spec claims nothing more.
 
 ## Acceptance criteria
 
+- **AC-36** — supported JSX component and function-value uses resolve through lexical/import bindings without fabricated direct calls; reference users participate in impact and all blast counters; unresolved usage and ambiguous call targets retain bounded completeness diagnostics through caches; JSX, dynamic and incomplete cleanup candidates require review across CLI/MCP | check: `node --test tests/static-usages.test.mjs` | status: built
+
+AC-36 tightens AC-35 cleanup classification: the legacy tier keys remain, while incomplete
+or dynamic maps and JSX component orphans now require review.
+
 Grammar (parsed by `scripts/spec_lint.py` — one line per AC):
 `- **AC-n** — <criterion> | check: ` `` `<command>` `` ` | status: next|built|dropped`
 
@@ -101,6 +106,19 @@ the `check:` commands above are what brief 144 runs verbatim.
 
 - **AC-28** — CLI mapping rejects existing file targets without --out-dir, including file symlinks, with exit 2 and a concise stderr message naming the target and directory recovery action before creating output; explicit-output file mapping, missing targets and supported directory symlinks retain their existing behavior | check: `node --test --test-name-pattern=ac_28 tests/first-use-target.test.mjs` | status: built
 - **AC-29** — MCP codeweb_map rejects existing file targets without out with an actionable isError tool result before creating output; explicit-out file mapping remains successful, responses contain no stack trace and the server exits normally after stdin closes | check: `node --test --test-name-pattern=ac_29 tests/first-use-target.test.mjs` | status: built
+
+- **AC-34** — similarity output offers mapped non-test source candidates for comparison without novelty, safety or equivalent-behavior guarantees; human output exposes the existing threshold, body cap and omitted-count expansion while JSON fields, scoring, ranking and exit/error behavior remain compatible | check: `node --test tests/find-similar-output.test.mjs tests/find-similar.test.mjs tests/structural-clone.test.mjs` | status: built
+
+AC-34 pins P-01's similarity-output correction only. The broader native evidence delivery
+matrix, actual host delivery and user outcomes remain pending separate verification.
+
+- **AC-35** — deadcode CLI/MCP preserves structural tier keys while carrying source/completeness provenance and no deletion guarantee; served deadcode/impact/campaign descriptions retain mapped-source or simulation limits and bounded expansion without deletion/runtime guarantees; advisory hooks target resolvable mapped edits, retain same-file and external consumers with bounded expansion, qualify file-only/ambiguous/stale/unknown evidence, distinguish mapped invalid/empty/extraction failure from quiet supported and excluded cases, preserve original baselines and permission flow, and work through filesystem entry aliases without optional ctags stderr noise | check: `node --test tests/native-evidence-repairs.test.mjs` | status: built
+
+AC-35 pins P-03's bounded handler and transport repairs (P03-R01–R05/R07 and entry
+aliases from conditional R06; NED-01/02/04/05/07/10). The shipped hook metadata
+declares Claude Code events and Edit/Write/MultiEdit payloads. Direct handler probes
+do not prove trusted client startup or ambient delivery. Codex MCP/skill use remains
+separate from unverified Codex ambient delivery, owned by P-04 under NED-08.
 
 ## Interfaces
 

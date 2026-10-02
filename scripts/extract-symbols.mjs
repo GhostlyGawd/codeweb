@@ -19,8 +19,8 @@ import { execFileSync } from 'node:child_process';
 import { relative, resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url'; // finding #40 (T-40.3): main-guard idiom (the hooks' verbatim compare)
 import { isTestFile, roleOf, compileRoleOverrides } from './lib/graph-ops.mjs'; // F4/v7: test predicate + code-role (shared, one truth)
-import { atomicWrite, parseArgs } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
-import { SRC_RE } from './lib/common.mjs'; // finding 25: one truth for the mappable-source list (the copy here could drift)
+import { atomicWrite, parseArgs, sameFile } from './lib/cli.mjs'; // finding 3: cache/fragment writes are rename-atomic (hooks + refresh read them concurrently)
+import { SRC_RE, EXTRACTION_SKIP } from './lib/common.mjs'; // discovery scope shared with hooks
 import { scanSymbols, bodyEnd, parseSignature, DYNAMIC_RE, langOf, CPP_RE, C_RE, C_FAMILY_RE } from './lib/lang-rules.mjs'; // finding 25: pure per-language rules
 import { createImportResolver, defaultExportOf, importCandidates } from './lib/import-resolve.mjs'; // finding 25: cross-file name binding, one place; finding #11: shared specifier-candidate list
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
@@ -32,7 +32,7 @@ import { sha1 } from './lib/hash.mjs'; // one truth — codeweb's own gate flagg
 import { loadTsEngine, loadLangEngine, probeAst } from './lib/ts-engine.mjs'; // optional tree-sitter tiers (JS/TS + Java/C# dispatch)
 
 // Shared discovery vocabulary; evidence snapshots select the fallback walk explicitly.
-export const EXTRACTION_SKIP = /(^|[\\/])(node_modules|\.git|dist|build|out|vendor|third_party|\.codeweb|coverage)([\\/]|$)/;
+export { EXTRACTION_SKIP } from './lib/common.mjs';
 export const EXTRACTION_MANIFESTS = Object.freeze(['package.json', 'Cargo.toml', 'go.mod', 'pyproject.toml', 'pom.xml', 'build.gradle', 'build.gradle.kts', 'Gemfile', 'composer.json', 'Package.swift']);
 
 // F0: bump when scanSymbols/ctagsSymbols OUTPUT or the cache format changes — invalidates stale caches.
@@ -72,7 +72,7 @@ export const EXTRACTION_MANIFESTS = Object.freeze(['package.json', 'Cargo.toml',
 // what EXISTING C++ files resolve to, because a quoted `#include "x.h"` had no candidate before.
 // v21: COD-9 cached declaration diagnostics; invalidate unqualified old caches.
 // v22: multiline control-head regex masking in diagnostic scanning.
-const SCANNER_VERSION = 22; // v18 (JSON tier) over v17: derivation-semantics change (WS-D review) —
+const SCANNER_VERSION = 23; // JSX/value uses and cached edge-completeness diagnostics.
 // the bare-name fallback excludes closure-local targets (closureLocalIds), and symbolSig annotates
 // eligibility so a nesting flip invalidates cached edges. A previous-version cache is discarded at
 // load (one cold rebuild, never a crash) — the read gate below only accepts an exact version match.
@@ -141,7 +141,10 @@ if (!existsSync(root)) throw new ExtractError(1, `[extract] not found: ${root}`)
 const SRC = SRC_RE; // finding 25: the extractor and the hooks share ONE source-extension list
 const SKIP = EXTRACTION_SKIP;
 
-function tryExec(cmd, args) { try { return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 28 }); } catch { return null; } }
+// Optional accelerators may reject our flags (Apple ctags is not Universal
+// Ctags). Capture their diagnostics while falling back; extractor failures still
+// throw ExtractError and are reported by the CLI or mapped advisory hook.
+function tryExec(cmd, args) { try { return execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 28, stdio: ['pipe', 'pipe', 'pipe'] }); } catch { return null; } }
 function toolExists(cmd) { return tryExec(cmd, ['--version']) != null; }
 
 // ---- enumerate source files ----
@@ -251,7 +254,7 @@ function ctagsBatchOnce() {
   if (ctagsBatch !== undefined) return ctagsBatch;
   try {
     const out = execFileSync('ctags', ['--output-format=json', '--fields=+n-P', '-f', '-', '-L', '-'],
-      { encoding: 'utf8', maxBuffer: 1 << 28, input: files.join('\n') });
+      { encoding: 'utf8', maxBuffer: 1 << 28, input: files.join('\n'), stdio: ['pipe', 'pipe', 'pipe'] });
     ctagsBatch = new Map();
     parseCtagsLines(out, ctagsBatch);
   } catch { ctagsBatch = null; }
@@ -451,7 +454,8 @@ for (const f of files) {
     : { s: -1, m: 0, h: contentHash }; // never-fresh stamp for a file that kept changing
   const fileAnalysis = isJsTs ? sameLineDeclarations(maskJs(text, { statementRegex: true }), r) : { count: 0, diagnostics: [] };
   analysisParts.push(fileAnalysis);
-  const isDyn = DYNAMIC_RE.test(text);
+  const dynamicCode = isPy ? maskedOnce(r, 'py', text) : isJsTs ? maskedOnce(r, 'js', text) : text;
+  const isDyn = DYNAMIC_RE.test(dynamicCode) || (isPy && /\bset_defaults\s*\([^)]*\bfunc\s*=/.test(dynamicCode) && /\.func\s*\(/.test(dynamicCode));
   if (isDyn) dynamicFiles.push(r);
   let syms;
   let astHit = null; // the cache entry serving this file's AST products (fully-valid hit only)
@@ -824,6 +828,7 @@ const pkgSig = sha1(pkgBoundaries.join('\n')); // finding #17: pkg-boundary repa
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
 const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
 const classAliasByFile = new Map(); // fileAbs -> Map(localName -> CLASS node id) [default import whose default export is a class — for instanceof/static-method ref edges]
+const externalByFile = new Map();
 const importEdges = [];
 // finding 10: cached bindings embed RESOLVED target ids/files, so they are reusable only while
 // both the symbol set and the file list stand still — the same rule the F9 edge cache lives by.
@@ -918,6 +923,7 @@ for (const f of files) {
     if (b.a.length) aliasByFile.set(f, new Map(b.a));
     if (b.ns.length) nsAliasByFile.set(f, new Map(b.ns));
     if (b.cls.length) classAliasByFile.set(f, new Map(b.cls));
+    if (b.external?.length) externalByFile.set(f, new Set(b.external));
     for (const pair of b.ie) importEdges.push(pair);
     bindReplayed.add(r);
   };
@@ -938,15 +944,16 @@ for (const f of files) {
     replayBind(bindEntry.bind);
     continue;
   }
-  const { amap, nsmap, classmap, edges: bindEdges, deps, bindCand } = resolver.bindFileImports({
+  const { amap, nsmap, classmap, external, edges: bindEdges, deps, bindCand } = resolver.bindFileImports({
     fAbs: f, r, isPy, isCpp: C_FAMILY_RE.test(r), text: textOf(f, fsRec), aId: anchorId(r), defaultExportByFile, kindById,
   });
   for (const pair of bindEdges) importEdges.push(pair);
   if (amap.size) aliasByFile.set(f, amap);
   if (nsmap.size) nsAliasByFile.set(f, nsmap);
   if (classmap.size) classAliasByFile.set(f, classmap);
+  if (external.size) externalByFile.set(f, external);
   if (bindEntry) {
-    bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], ie: bindEdges };
+    bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], external: [...external], ie: bindEdges };
     bindEntry.bindDeps = [...deps].sort();   // finding #17 (T-17.3)
     bindEntry.bindCand = [...bindCand].sort();
     cacheDirty = true;
@@ -962,7 +969,7 @@ const LEGACY_FALLBACK = !input && !!process.env.CODEWEB_LEGACY_FALLBACK; // A/B 
 // method), closureLocalIds (WS-D-review magnet fix), legacyFallback (the env read stays here);
 // KEYWORDS/parseSignature/isTestFile/buildInnermostIndex are the lib's own pure-module imports.
 // The edge loop below (cache replay/record) + #17 delta/dirty-label computation stay orchestration.
-const { deriveFileEdges } = createEdgeDeriver({ byName, pkgOf, roleFor, resolveFileMember, closureLocalIds, legacyFallback: LEGACY_FALLBACK });
+const { deriveFileEdges } = createEdgeDeriver({ byName, pkgOf, roleFor, resolveFileMember, closureLocalIds, legacyFallback: LEGACY_FALLBACK, kindById });
 
 const edges = [];
 let ambiguousDropped = 0, shortNameDropped = 0, edgedCount = 0;
@@ -994,15 +1001,16 @@ for (const f of edgeFiles) {
     || (deltaDirty && prev && prev.cand && !prev.cand.some((n) => deltaDirty.has(n)) && bindReplayed.has(r));
   let result;
   if (prev && cacheEntry && prev.hash === cacheEntry.hash && prev.edges && prev.ids && deltaOk) {
-    result = { edges: decodeEntryEdges(prev), hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0, short: prev.short || 0, cand: prev.cand }; // reuse (#19: decode fresh objects)
+    result = { edges: decodeEntryEdges(prev), hasModule: !!prev.hasModule, ambiguous: prev.ambiguous || 0, short: prev.short || 0, cand: prev.cand, analysis: prev.edgeAnalysis || { count: 0, diagnostics: [] } }; // reuse (#19: decode fresh objects)
   } else {
     // finding 10: text + mask only on the derive path — an edge-cache hit never touches the file
     const text = textOf(f, rec);
     const lines = (r.endsWith('.py') ? maskedOnce(r, 'py', text) : r.endsWith('.rb') ? maskedOnce(r, 'rb', text) : /\.(jsx?|mjs|cjs|tsx?|mts|cts|java|cs|php|kt|kts|swift|c|h|cpp|cc|cxx|hpp|hh|hxx)$/.test(r) ? maskedOnce(r, 'js', text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
-    result = deriveFileEdges(r, lines, rec.ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f));
+    result = deriveFileEdges(r, lines, rec.ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f), externalByFile.get(f));
     edgedCount++;
   }
-  if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; cacheEntry.short = result.short; if (result.cand) cacheEntry.cand = result.cand; }
+  if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; cacheEntry.short = result.short; cacheEntry.edgeAnalysis = result.analysis; if (result.cand) cacheEntry.cand = result.cand; }
+  if (result.analysis) analysisParts.push(result.analysis);
   if (result.hasModule && !nodeIdSet.has(r + ':<module>')) {
     nodes.push({ id: r + ':<module>', label: '<module>', kind: 'module', file: r, line: 1, loc: 1, exports: false, domain: '', summary: '', role: roleFor(r) });
     nodeIdSet.add(r + ':<module>');
@@ -1017,7 +1025,7 @@ if (newCache) { newCache.symbolSig = symbolSig; newCache.bindSig = bindSig; newC
 // Deduped against the call edges by (from,to): caller ids are file-local, so this set has no
 // cross-file collisions and matches the original single-edgeSet behaviour exactly.
 let importEdgeCount = 0;
-const edgeKeys = new Set(edges.map((e) => e.from + ' ' + e.to));
+const edgeKeys = new Set(edges.filter(e => e.kind !== 'ref').map((e) => e.from + ' ' + e.to));
 // A coarse module-import edge (namespace/default/side) targets the imported file's <module> node,
 // created on demand here so a symbol-less barrel still gets a node. This keeps the file-level "imports
 // this module" signal (fileCycles/coupling unchanged — same file-pair) without polluting a symbol.
@@ -1167,7 +1175,7 @@ const anyAstLoaded = astEngineLoadedThisRun;
 const astState = anyAstLoaded ? 'loaded' : (!astAvailable || astLoadFailed) ? 'off' : 'idle';
 const banner = `[extract] ${nodes.length} symbols, ${edges.length} edges (${edges.length - importEdgeCount} call + ${importEdgeCount} import) from ${files.length} files${jsonMappedCount ? ` (+${jsonMappedCount} json)` : ''} (${useCtags ? 'ctags' : 'regex'}${opts.engine !== 'regex' && astProbe.ts ? '+tree-sitter' : ''} engine); dropped ${ambiguousDropped} ambiguous bare-call edges (${shortNameDropped} short-name)${dispatchNote}; scanned ${scanCount}/${files.length} file(s); edged ${edgedCount}/${edgeFiles.length}${opts.cache ? ' (cache on)' : ''}; ast: ${astState}`;
   const diagnosticBanner = fragment.meta.analysis.status === 'incomplete'
-    ? `\n[extract] analysis incomplete: ${fragment.meta.analysis.diagnosticCount} unsupported same-line declaration(s); inspect meta.analysis.diagnostics (file/line/column/evidence).` : '';
+    ? `\n[extract] analysis incomplete: ${fragment.meta.analysis.diagnosticCount} known extraction limitation(s); inspect meta.analysis.diagnostics (file/line/column/evidence).` : '';
   return { fragment, banner: banner + diagnosticBanner };
 }
 
@@ -1212,10 +1220,6 @@ async function main() {
 // a symlink (macOS `/tmp` -> `/private/tmp` is the everyday case), so the process exits 0 having
 // written nothing. Falls back to the lexical form when a path cannot be realpath'd (deleted or
 // unreadable), which is the pre-existing behavior.
-const sameFile = (a, b) => {
-  const real = (p) => { try { return realpathSync(p); } catch { return resolve(p); } };
-  return real(a) === real(b);
-};
 if (process.argv[1] && sameFile(process.argv[1], fileURLToPath(import.meta.url))) {
   main();
 }

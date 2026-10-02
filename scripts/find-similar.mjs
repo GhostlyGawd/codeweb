@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// codeweb find-similar — reuse-at-write-time. Before an agent writes a function, it asks "does
-// something already do this?": shingle a candidate body/signature and rank existing non-test
-// function bodies by token-shingle Jaccard. Turns codeweb's post-hoc duplication detection into
-// write-time PREVENTION. Read-only, deterministic. Shares the K=3 shingler with overlap.mjs via
+// codeweb find-similar — source candidates for comparison before writing a function. Shingle
+// a candidate body/signature and rank mapped non-test function bodies by token-shingle Jaccard.
+// Similarity does not establish equivalent behavior or safe reuse. Read-only, deterministic.
+// Shares the K=3 shingler with overlap.mjs via
 // ./lib/shingles.mjs (one truth).
 //
 // finding #26 (SURFACED behavior change): existing function/method bodies are shingled on their FIRST
@@ -108,11 +108,14 @@ const payload = {
 if (matches.length > top.length) payload.more = { remaining: matches.length - top.length };
 
 if (json) { emitJson(payload); } else {
-  console.log(`find-similar: candidate (${payload.candidate.shingles} shingles) vs ${payload.scanned} existing symbols`);
-  if (!top.length) console.log('  no similar existing symbol (>=15%) — looks novel; safe to write.');
+  console.log(`find-similar: candidate (${payload.candidate.shingles} shingles, ${payload.candidate.mode}) across ${payload.scanned} mapped non-test function/method symbols`);
+  console.log(`  >=${BANDS.low * 100}% shingle similarity; existing bodies limited to first ${payload.bodyLineCap} lines; candidate uncapped.`);
+  if (!top.length) console.log('  no candidates at or above threshold in available mapped bodies.');
   else {
-    console.log(`  ${top.length} similar — consider reusing instead of re-implementing:`);
+    console.log(`  ${top.length} source candidate${top.length === 1 ? '' : 's'} for comparison:`);
     for (const m of top) console.log(`  [${(m.sim * 100).toFixed(0).padStart(3)}% ${m.tier.padEnd(6)}] ${m.id}  (${m.file}:${m.line})`);
+    if (payload.more) console.log(`  ${payload.more.remaining} additional candidates omitted; rerun with --k ${payload.count} to show all.`);
   }
+  console.log('  Missing bodies and unmapped code may hide candidates. Similarity does not establish equivalent behavior, novelty, or safe reuse; inspect source and run relevant tests.');
   finish(0);
 }

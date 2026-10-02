@@ -113,7 +113,7 @@ function analyzerIdentity() {
     profile: EVIDENCE_PROFILE, nodeVersion: process.version,
     runtimeDigest: hash(names.map(path => ({ path, sha256: sha256(readFileSync(join(scripts, path))) }))),
     discoveryDigest: hash({ source: SRC_RE.source, skip: EXTRACTION_SKIP.source, manifests: EXTRACTION_MANIFESTS }),
-    engine: 'regex', ctags: false, ast: false, relationVersion: 1, projectionVersion: 1, schemaVersion: 1,
+    engine: 'regex', ctags: false, ast: false, relationVersion: 2, projectionVersion: 1, schemaVersion: 1,
   };
 }
 
