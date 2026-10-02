@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-10-02T01:39:26.228395+00:00",
+  "recorded_at": "2026-10-02T02:13:30.531565+00:00",
   "baseline_main": "fd3b637e9ad4e1f7265799298761bc1ee83fe76c",
   "prior_reviewed_candidate": "95bf6178f1c3979d3ed169329002daa9a41fb73d",
   "acceptance": "AC-36",
@@ -8,13 +8,13 @@
     "failed": 8,
     "negative_controls_passed": 1
   },
-  "focused_usage_checks": 17,
+  "focused_usage_checks": 20,
   "gate": {
     "command": "sh scripts/check",
     "passed": true,
     "product": {
-      "tests": 1307,
-      "pass": 1300,
+      "tests": 1310,
+      "pass": 1303,
       "fail": 0,
       "skipped": 7
     },
@@ -38,7 +38,7 @@
     "scripts/lib/analysis-completeness.mjs": "07f564527b9afdf6af290f41264c8f3e7a5a26293913e7bdddf1778d9ade86f8",
     "scripts/lib/cli.mjs": "afd1ef70b16c88e88494d167996f29f991ba89bb3633687109b61099dc5fb24d",
     "scripts/lib/common.mjs": "a3c88e91ab4a161f4c0f55d917752670637c830aa6023f8da02afbc656a177bd",
-    "scripts/lib/edge-derive.mjs": "06b6c495346f0e7b6977878cc3f4a0c8f9c5862e97951bcaeae865c5e1c808c3",
+    "scripts/lib/edge-derive.mjs": "0704d832f9dede3779eb7942f57a62817a716b01d4b387f1be5ee88f9df391be",
     "scripts/lib/evidence-core.mjs": "3b072e0419426c5deb543b319373e0a0a2fad92556756da8eaa7a68211490ea7",
     "scripts/lib/evidence-snapshot.mjs": "f73a9e1a4d0e5d7ceef24f8e78642cf7a40a28312fc0801341d3d2f6a9fa70ba",
     "scripts/lib/graph-ops.mjs": "f6d8ef324c3fcb879c442d5815f7a45779bca12e5fd48a3a13f2d5813059ff83",
@@ -48,13 +48,13 @@
     "scripts/lib/index-lite.mjs": "cdb7ce4ff6c45ab0a2f00643329e4083ff7afcce5e6fa25630135568048c0ecf",
     "scripts/lib/lang-rules.mjs": "0f30e4c7801478794600b8c5beba0f60c57c4ff5576bb5a33f1fd99730458399",
     "scripts/lib/query-core.mjs": "0c59c5deac7aaf7b593d274bd750315b4bb12cd564cc91378d9ce6ada887ecdf",
-    "scripts/lib/static-usages.mjs": "111e323a67cb47ed77331471329d2dec77626e7294f82d481f88878237191f05",
+    "scripts/lib/static-usages.mjs": "0100d533a74eb437ba33ee75a08020199369cc0dfa0f9517a7fcc6e116ca213a",
     "scripts/mcp-server.mjs": "e25117a179a901edadb0cb96ddcbfec670e77de51e09a61fdaeeecfc596cc11d",
     "scripts/query.mjs": "0369252aaa8816032ad06d81096692748dc0c8704084659437de11dfcf0b8a42",
     "tests/find-similar-output.test.mjs": "1a3151af95c3fcd97ce81fc82e215b6e4bfbcbf083084a91d91e58c52b45052a",
     "tests/native-evidence-repairs.test.mjs": "79fa10f40519d8ab781310da431e5318e46e688658e24b5e37012b01f7f24821",
     "tests/post-edit-diff.test.mjs": "a241ec74496a3d71c45145f7b80fe41eb9da65de8a16a8dd933cb47a670a0c7b",
-    "tests/static-usages.test.mjs": "992c8a933843e130e79a2ec10d45272f365ad0ac2d78c47b042efae5c4b644d6",
+    "tests/static-usages.test.mjs": "b37301a0670fc29026e96212c9a8050a451793084a09a0257ed14eb15eb581d3",
     "tests/test_ac_pins.py": "a6cb7237652d982ed32174af40078a9aeb1ce0d63bc3ad23a5c5d21cd4e7a3c5"
   },
   "protected_harness_changed": false,
@@ -63,5 +63,15 @@
   "reported_client_counts_verified": false,
   "independent_agent_review": "not claimed",
   "actual_user_outcomes": "unobserved",
-  "release": "unreleased source candidate"
+  "release": "unreleased source candidate",
+  "benchmark": {
+    "gate": "passed",
+    "pipeline_cold_ms": 1413,
+    "pipeline_warm_ms": 161,
+    "twelve_call_session_valid": true,
+    "session_approx_tokens": 7303,
+    "ts_engine_benchmark": "skipped; pinned corpus absent"
+  },
+  "self_review_gate": "passed without changing CI or budgets",
+  "ci_initial_failures": "Preserved privately: external/local-expression binding ambiguity and generated changelog freshness; repaired in source."
 }
