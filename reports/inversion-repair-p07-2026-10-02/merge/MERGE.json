@@ -1,0 +1,16 @@
+{
+  "recorded_at": "2026-10-02T06:55:58.740373+00:00",
+  "pr": "https://github.com/GhostlyGawd/codeweb/pull/102",
+  "tested_head": "3077eebbf9d1f2421001c8d1872c3ede699f8abb",
+  "main_commit": "c13df7ae842e4ebbb909599bec2dcacc9df4ea8b",
+  "actor": "GhostlyGawd",
+  "merge_method": "squash",
+  "merged_at": "2026-10-02T06:52:35Z",
+  "authorization": "User explicitly requested merge of the verified PR102 candidate",
+  "pre_merge_ci_success": 10,
+  "main_source_paths_byte_matched_to_verified_candidate": 21,
+  "primary_source_paths_byte_matched": 21,
+  "unrelated_local_history_preserved": true,
+  "npm_publication_performed": false,
+  "customer_outcomes": "unobserved"
+}

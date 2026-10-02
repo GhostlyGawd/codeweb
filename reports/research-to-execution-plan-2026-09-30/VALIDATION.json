@@ -1,5 +1,5 @@
 {
-  "verified_at": "2026-10-02T06:39:16.573464+00:00",
+  "verified_at": "2026-10-02T06:55:59.327183+00:00",
   "status": "pass",
   "material_findings": 65,
   "claims": 12,
@@ -10,7 +10,7 @@
   "public_derivative_files_hash_verified": 545,
   "original_frozen_bytes": "verified separately in private archive",
   "carry_over_records": 6,
-  "live_local_links_checked": 106,
+  "live_local_links_checked": 108,
   "source_or_reference_mismatches": [],
   "scope": "Offline artifact consistency and preservation; not host readiness, strategic proof or customer validation."
 }
