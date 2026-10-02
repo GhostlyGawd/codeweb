@@ -9,6 +9,10 @@ notes so validated results, papers, and new tools never get lost in commit histo
 
 ## [Unreleased]
 
+_Nothing yet. Open work lands here before it ships in the next tagged release._
+
+## [0.16.0] - 2026-10-02
+
 ### Fixed
 - Preserve live outer calls after block-local shadows and keep JSX text out of declaration discovery. Multiline callback bodies retain their enclosing function/arrow extents. Cleanup/campaign proposals no longer include the reproduced live-function and phantom-text cases.
 - Resolve simple immutable callable aliases and literal Python decorator dependencies; qualify unsupported callable aliases and decorator factories. Respect parameter/callback bindings and ES namespace export surfaces, including cache invalidation on visibility changes.
@@ -17,6 +21,7 @@ notes so validated results, papers, and new tools never get lost in commit histo
 - Keep incomplete or dynamic maps and JSX component-like orphans out of deletion proposals. Preserve unresolved-target and ambiguous-call diagnostics through extraction caches.
 
 ### Added
+- Bundle a focused `codeweb` coding skill for mapped caller inspection, reuse comparison and structural edit verification in Codex. Document the plugin installation path and recognize an installed `codeweb-mcp` binary in local configuration checks.
 - Add opt-in local evidence receipts to context and review. Agents can compare previously mapped callers with a fresh source snapshot and read bounded historical pages. See `docs/cli.md`.
 
 ## [0.15.0] - 2026-09-14
@@ -2007,7 +2012,8 @@ The deterministic engine and its evidence base.
   ~490k oracle comparisons; the study found and fixed two real engine bugs the 286-test
   suite had missed (`paper/`).
 
-[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/GhostlyGawd/codeweb/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/GhostlyGawd/codeweb/compare/v0.12.0...v0.13.0

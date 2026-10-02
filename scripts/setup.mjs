@@ -16,4 +16,4 @@ const steps = [
   'To remove this setup, remove only the codeweb server entry that you added.',
 ];
 if (opts.json) emitJson({ recipe, written: false, steps });
-else emitText(`${recipe.label}: ${recipe.configPath}\n\n${recipe.content}\n\n${steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}\n\nNo configuration was written. A local doctor check does not verify an editor connection.`);
+else emitText(`${recipe.label}: ${recipe.configPath}\n\n${recipe.content}\n\n${steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}${recipe.id === 'codex' ? '\n\nFor the bundled coding skill and MCP server together:\ncodex plugin marketplace add GhostlyGawd/codeweb\ncodex plugin add codeweb@codeweb\nUse the plugin or the standalone server entry; avoid duplicate Codeweb servers.' : ''}\n\nNo configuration was written. A local doctor check does not verify an editor connection.`);

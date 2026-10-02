@@ -45,6 +45,9 @@ resolves; it cannot verify a stranger's card, and this spec claims nothing more.
 
 ## Acceptance criteria
 
+- **AC-39** — Codex local configuration checks recognize the canonical package recipe and an installed direct binary with optional args omitted, distinguish disabled/ambiguous/foreign entries without executing or revealing supplied values, and retain actual host connection as unverified | check: `node --test tests/codex-launch-recipes.test.mjs` | status: built
+- **AC-40** — the focused Codeweb coding skill ships beside the static runtime, references live MCP operations, tracks the package version and supports mapped source inspection/reuse/structural review without depending on Claude-only shell variables | check: `node --test tests/codex-workflow-packaging.test.mjs` | status: built
+
 - **AC-37** — lexical block/parameter bindings, JSX executable declaration boundaries and namespace export surfaces avoid the reproduced false facts and cleanup proposals; immutable aliases and literal decorators expose affected consumers, while unsupported aliases/factories are diagnosed; cold/warm/full caches retain resolution and export changes invalidate old edges | check: `node --test tests/inversion-correctness.test.mjs` | status: built
 - **AC-38** — informational find/explain/context/risk answers retain useful partial results with shared typed completeness on CLI and MCP; incomplete decision gates remain inconclusive and cleanup proposals remain withheld; missing matches are qualified and repaired graphs recover without restart | check: `node --test tests/inversion-transport.test.mjs` | status: built
 
