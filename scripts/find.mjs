@@ -12,6 +12,7 @@ import { die, emitJson, emitText, loadGraph, capList, checkStaleness, parseArgs 
 import { buildIndex } from './lib/graph-ops.mjs';
 import { findSymbols } from './lib/find-core.mjs';
 import { budgetOf } from './lib/tool-specs.mjs'; // D1: the default top-N is THE spec budget, not a second literal
+import { qualifyInformation } from './lib/analysis-completeness.mjs';
 
 const USAGE = 'usage: find.mjs <graph.json> <query words...> [--limit 10] [--offset N] [--full] [--json]'; // F10: --full was real but hidden
 // finding 24: THE flag loop (lib/cli.mjs parseArgs) — one unknown-flag policy, --help included.
@@ -43,6 +44,7 @@ const payload = {
 if (c.remaining > 0) payload.more = { remaining: c.remaining, nextOffset: c.offset + c.items.length };
 const stale = checkStaleness(graph);
 if (stale) { payload.stale = stale; payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`; }
+qualifyInformation(payload, graph);
 
 if (json) { emitJson(payload); } else {
   const L = [payload.summary];

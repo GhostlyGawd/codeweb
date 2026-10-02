@@ -304,8 +304,8 @@ export function bodyEnd(lines, startIdx, isPy) {
   // (`function f({ a, b }) {`) or an object-literal default (`f(o = { x: 1 }) {`) — must NOT be
   // read as the body brace, or the body would end at the signature line (the destructuring `{ }`
   // balances to zero before the real body opens), mis-attributing every body call to <module>. The
-  // structural body braces are always at paren depth 0; object-literal call args inside the body sit
-  // at paren depth >= 1 and are balanced, so skipping them is strictly safe.
+  // first body brace is outside the parameter list. Once it opens, count ALL body braces,
+  // including callbacks/objects inside call arguments; their closing braces must stay balanced.
   let depth = 0, started = false, paren = 0;
   for (let i = startIdx; i < lines.length; i++) {
     const s = stripSC(lines[i]);
@@ -313,12 +313,12 @@ export function bodyEnd(lines, startIdx, isPy) {
       const ch = s[c];
       if (ch === '(') paren++;
       else if (ch === ')') { if (paren > 0) paren--; }
-      else if (paren === 0) {
+      else if (started || paren === 0) {
         if (ch === '{') { depth++; started = true; }
         else if (ch === '}') { depth--; if (started && depth <= 0) return i; }
       }
     }
-    if (!started && /;\s*$/.test(s)) return i;     // brace-less body (arrow/expr) ending in ';'
+    if (!started && paren === 0 && /;\s*$/.test(s)) return i; // a callback's semicolon does not end its outer expression
   }
   return lines.length - 1;
 }

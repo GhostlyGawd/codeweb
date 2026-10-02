@@ -45,6 +45,9 @@ resolves; it cannot verify a stranger's card, and this spec claims nothing more.
 
 ## Acceptance criteria
 
+- **AC-37** — lexical block/parameter bindings, JSX executable declaration boundaries and namespace export surfaces avoid the reproduced false facts and cleanup proposals; immutable aliases and literal decorators expose affected consumers, while unsupported aliases/factories are diagnosed; cold/warm/full caches retain resolution and export changes invalidate old edges | check: `node --test tests/inversion-correctness.test.mjs` | status: built
+- **AC-38** — informational find/explain/context/risk answers retain useful partial results with shared typed completeness on CLI and MCP; incomplete decision gates remain inconclusive and cleanup proposals remain withheld; missing matches are qualified and repaired graphs recover without restart | check: `node --test tests/inversion-transport.test.mjs` | status: built
+
 - **AC-36** — supported JSX component and function-value uses resolve through lexical/import bindings without fabricated direct calls; reference users participate in impact and all blast counters; unresolved usage and ambiguous call targets retain bounded completeness diagnostics through caches; JSX, dynamic and incomplete cleanup candidates require review across CLI/MCP | check: `node --test tests/static-usages.test.mjs` | status: built
 
 AC-36 tightens AC-35 cleanup classification: the legacy tier keys remain, while incomplete

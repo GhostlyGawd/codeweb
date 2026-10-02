@@ -10,6 +10,9 @@ notes so validated results, papers, and new tools never get lost in commit histo
 ## [Unreleased]
 
 ### Fixed
+- Preserve live outer calls after block-local shadows and keep JSX text out of declaration discovery. Multiline callback bodies retain their enclosing function/arrow extents. Cleanup/campaign proposals no longer include the reproduced live-function and phantom-text cases.
+- Resolve simple immutable callable aliases and literal Python decorator dependencies; qualify unsupported callable aliases and decorator factories. Respect parameter/callback bindings and ES namespace export surfaces, including cache invalidation on visibility changes.
+- Keep useful partial find/explain/context/risk results on CLI and MCP with shared in-band completeness. Incomplete decision gates remain inconclusive.
 - Map supported JSX component renders and known function values, including Python handler registration and JSX event properties. Impact follows reference consumers; direct-call answers expose reference users separately.
 - Keep incomplete or dynamic maps and JSX component-like orphans out of deletion proposals. Preserve unresolved-target and ambiguous-call diagnostics through extraction caches.
 

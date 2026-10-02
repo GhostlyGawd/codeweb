@@ -52,3 +52,18 @@ export function incompleteAnalysis(...graphs) {
     nextSteps: [INCOMPLETE_STEP],
   };
 }
+
+// Informational answers remain useful on a partial map. Machine consumers must receive
+// the same typed limit on both transports; a valid partial answer is not a transport error.
+export function qualifyInformation(payload, graph) {
+  const completeness = incompleteAnalysis(graph);
+  if (!completeness) return payload;
+  payload.analysis = {
+    scope: 'mapped-graph', freshness: payload.stale ? 'stale' : 'unknown',
+    ...payload.analysis, status: 'incomplete', completeness,
+  };
+  const omitted = completeness.diagnosticCount - completeness.diagnostics.length;
+  if (omitted > 0) payload.analysis.omitted = { ...payload.analysis.omitted, diagnostics: omitted };
+  if (payload.summary && !/analysis incomplete/i.test(payload.summary)) payload.summary += ' — analysis incomplete; mapped results only';
+  return payload;
+}

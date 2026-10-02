@@ -13,6 +13,7 @@ import { resolve, dirname } from 'node:path';
 import { buildIndex, scopeNote } from './lib/graph-ops.mjs';
 import { RISK_WEIGHTS, rankRisk } from './lib/risk.mjs';
 import { churnFromGit } from './lib/churn.mjs'; // finding 27: ONE bounded, HEAD-cached git-churn parser (shared with hotspots)
+import { qualifyInformation } from './lib/analysis-completeness.mjs';
 
 const USAGE = 'usage: risk.mjs <graph.json> [--changed <file,...>] [--limit N] [--offset N] [--churn <map.json> | --git] [--all] [--json]'; // F10: --limit was real but hidden
 import { die, emitJson, finish, capList, loadGraph, parseArgs } from './lib/cli.mjs';
@@ -50,6 +51,7 @@ const capped = capList(ranked, limit, offset);
 const payload = { target: graph.meta?.target || 'target', summary: `${ranked.length} symbol(s) ranked by change-risk${changed != null ? ' (changed only)' : ''}`, weights: RISK_WEIGHTS, maxes, count: ranked.length, ranked: capped.items, excluded: riskScope.excluded, excludedByRole: riskScope.excludedByRole };
 if (riskScope.excluded) payload.summary += ` — ${scopeNote(riskScope)}`;
 if (capped.truncated) payload.more = { remaining: capped.remaining, nextOffset: capped.offset + capped.items.length };
+qualifyInformation(payload, graph);
 
 if (json) { emitJson(payload); } else {
 

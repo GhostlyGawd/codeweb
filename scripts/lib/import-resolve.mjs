@@ -151,6 +151,15 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
         if (orig && orig !== 'default') map.set(exported, { target, orig });
       }
     }
+    // Local export clauses also change the namespace surface without changing any symbol id.
+    // Retain them in the re-export signature so a cached consumer cannot replay a removed alias.
+    const localCode = maskedOnce(relPath, 'js', text);
+    for (const local of localCode.matchAll(/\bexport\s*\{([^}]*)\}(?!\s*from\b)/g)) {
+      for (const part of local[1].split(',')) {
+        const pair = part.trim().split(/\s+as\s+/);
+        if (/^[A-Za-z_$][\w$]*$/.test(pair[0]) && /^[A-Za-z_$][\w$]*$/.test(pair.at(-1))) map.set(pair.at(-1), { target: relPath, orig: pair[0] });
+      }
+    }
     if (map.size) reExportByFile.set(relPath, map);
     const stars = [];
     esStarReExportRe.lastIndex = 0;
@@ -256,7 +265,41 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
     if (out != null || depth === 0) pyReExportMemo.set(memoKey, { out, files: childFiles });
     return out;
   };
-  const resolveFileMember = (fileRel, name) => {
+  const exportSurfaces = new Map();
+  const nodesByFile = new Map();
+  for (const n of nodes) { if (!nodesByFile.has(n.file)) nodesByFile.set(n.file, []); nodesByFile.get(n.file).push(n); }
+  const exportSurface = (fileRel) => {
+    if (exportSurfaces.has(fileRel)) return exportSurfaces.get(fileRel);
+    const surface = new Map();
+    const abs = absByRel.get(fileRel), record = abs && fileSyms.get(abs);
+    const code = record ? maskedOnce(fileRel, 'js', textOf(abs, record)) : '';
+    const lines = code.split(/\r?\n/);
+    for (const n of nodesByFile.get(fileRel) || []) if (n.exports && n.kind !== 'module') {
+      if (!/\bexport\s+default\b/.test(lines[n.line - 1] || '')) surface.set(n.label, n.id);
+      else surface.set('default', n.id);
+    }
+    for (const m of code.matchAll(/\bexport\s*\{([^}]*)\}(?!\s*from\b)/g)) {
+      for (const part of m[1].split(',')) {
+        const pair = part.trim().split(/\s+as\s+/), id = fileRel + ':' + pair[0];
+        if (nodeIdSet.has(id)) surface.set(pair.at(-1), id);
+      }
+    }
+    exportSurfaces.set(fileRel, surface);
+    return surface;
+  };
+  const resolveExportMember = (fileRel, name, seen = new Set()) => {
+    const key = fileRel + ':' + name;
+    if (seen.has(key)) return null;
+    const next = new Set(seen); next.add(key);
+    const direct = exportSurface(fileRel).get(name); if (direct) return direct;
+    const hop = reExportByFile.get(fileRel)?.get(name);
+    if (hop) return resolveExportMember(hop.target, hop.orig, next);
+    if (name === 'default') return null; // export-star does not forward default
+    const hits = new Set((starReExportByFile.get(fileRel) || []).map(f => resolveExportMember(f, name, next)).filter(Boolean));
+    return hits.size === 1 ? [...hits][0] : null;
+  };
+  const resolveFileMember = (fileRel, name, { exportsOnly = false } = {}) => {
+    if (exportsOnly) return resolveExportMember(fileRel, name);
     const exact = fileRel + ':' + name;
     if (nodeIdSet.has(exact)) return exact;
     const m = memberByFile.get(exact);
@@ -293,7 +336,7 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
    * replay rule's per-file inputs.
    */
   function bindFileImports({ fAbs, r, isPy, isCpp, text, aId, defaultExportByFile, kindById }) {
-    const amap = new Map(), nsmap = new Map(), classmap = new Map(), external = new Set(), edges = [];
+    const amap = new Map(), nsmap = new Map(), classmap = new Map(), external = new Set(), namespace = new Set(), edges = [];
     const deps = new Set(), bindCand = new Set();
     // Record-and-return: every resolved target joins `deps` (finding #17's bindDeps). The name is
     // free to be anything — the extractor's fallback no longer targets closure-locals (the `dep`
@@ -403,11 +446,11 @@ export function createImportResolver({ rel, relSet, absByRel, fileSyms, textOf, 
       while ((m = reqNamed.exec(text))) addNamed(m[1], m[2]);
       while ((m = esNamed.exec(text))) addNamed(m[1], m[2]);
       while ((m = reqDefault.exec(text))) addModuleBinding(m[1], m[2], true);
-      while ((m = esStar.exec(text))) addModuleBinding(m[1], m[2], false);
+      while ((m = esStar.exec(text))) { addModuleBinding(m[1], m[2], false); namespace.add(m[1]); }
       while ((m = esDefault.exec(text))) addModuleBinding(m[1], m[2], true);
       while ((m = esSide.exec(text))) addSide(m[1]);
     }
-    return { amap, nsmap, classmap, external, edges, deps, bindCand };
+    return { amap, nsmap, classmap, external, namespace, edges, deps, bindCand };
   }
 
   return {
