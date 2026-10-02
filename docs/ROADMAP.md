@@ -37,10 +37,18 @@ Current status within that pick:
   the local product keeps taking no accounts, no telemetry, and no license keys. Hosted
   availability is not verified by this repository’s readiness evidence; pricing remains intent.
 
-**0.15.0 release preparation.** Known unsupported same-line JS/TS declarations now
+**0.15.0 delivered.** Known unsupported same-line JS/TS declarations now
 produce bounded diagnostics and an inconclusive gate result. This contains the reported
 false-clean case without claiming complete parser coverage. Baseline, context, doctor,
 and product-clarity work are integrated; the release checks cover their combined behavior.
+
+**0.16.0 release preparation.** Scoped JSX/value/binding repairs and conservative cleanup
+flags now ship with compact typed partial answers. The coding skill and Codex MCP declaration
+support the everyday inspect → edit → review loop. Ordinary CLI configuration, actual native
+use, versioned package artifacts and lifecycle controls are verified separately.
+
+Claude and
+customer benefit remain pending; runtime consumers can be unmapped.
 
 Still parked, still gated on an explicit operator go (charter non-goal 7):
 

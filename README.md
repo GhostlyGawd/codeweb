@@ -112,7 +112,7 @@ org? That is the planned scope of [codeweb Teams](https://ghostlygawd.github.io/
 
 ## See it in action
 
-Each screenshot below shows a generated report for **axios** (278 symbols, 7 domains).
+Each screenshot below shows a generated report for **axios** (280 symbols, 7 domains).
 The screenshots are not mockups.
 
 codeweb found 3 real duplications in axios and rejected 12 false positives. Read
@@ -127,8 +127,8 @@ the function's **blast radius** and shows the symbols that the change can affect
 Your agents can get the same answer from the `codeweb_impact` MCP tool before they edit the code.
 
 <div align="center">
-<img src="assets/screens/axios-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph — the selected block wears the accent with a viewfinder frame, blast edges lit across three domains, 27 callers listed in the inspector" width="760">
-<br><sub>Selecting <code>AxiosError</code> in axios lights up its <b>31 callers across the domains that depend on it</b> — try it yourself in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
+<img src="assets/screens/axios-blast-radius.png" alt="codeweb blast radius: AxiosError selected in the axios graph, with its mapped users highlighted in the inspector" width="760">
+<br><sub><code>AxiosError</code> has <b>20 callers across the domains that depend on it</b>; reference and import users are separate mapped relationships. Explore them in the <a href="https://ghostlygawd.github.io/codeweb/">living map</a>.</sub>
 </div>
 
 ### Navigate the whole system
@@ -136,7 +136,7 @@ Your agents can get the same answer from the `codeweb_impact` MCP tool before th
 The force-directed map shows the extracted symbols. You can collapse symbols into domains. Search, drag,
 zoom, or select a node to trace its callers and dependencies.
 
-<img src="assets/screens/axios-graph.png" alt="codeweb Graph tab on axios: eight domain blocks (helpers, core, adapters, cancel, defaults, platform) sized by symbol count and linked by stippled call edges" width="100%">
+<img src="assets/screens/axios-graph.png" alt="codeweb Graph tab on axios: domain blocks (helpers, core, adapters, cancel, defaults, platform) sized by symbol count and linked by stippled call edges" width="100%">
 
 ### Findings — stop guessing what to refactor
 
@@ -225,6 +225,18 @@ impact cards, and all 28 tools:
 /plugin install codeweb
 ```
 Restart Claude Code to register the `/codeweb` command, agents, and skill.
+
+**Using Codex?** Install the bundled coding skill and local MCP server:
+```bash
+codex plugin marketplace add GhostlyGawd/codeweb
+codex plugin add codeweb@codeweb
+```
+Reload Codex, then use `$codeweb` to inspect callers before an edit, compare existing
+implementations, or review a structural change. The plugin uses your existing tool permissions.
+
+The plugin/MCP workflow is verified with Codex CLI 0.159.2 and 0.160.0. If a client does not expose
+bundled tools, use the standalone MCP recipe below with the coding skill. Manage each configured
+entry when disabling or removing Codeweb. This workflow does not claim automatic hook delivery.
 
 **Choose your MCP client:** [The setup page](https://ghostlygawd.github.io/codeweb/start.html#other-clients)
 provides one recipe for Claude Code, Cursor, Windsurf, Gemini CLI, or Codex. Print a recipe

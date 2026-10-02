@@ -116,7 +116,7 @@ test('B7: every "N symbols … M domains" and "N callers" caption matches docs/d
   const g = JSON.parse(read('docs', 'demo', 'axios.graph.json'));
   const nodes = g.nodes.length;
   const domains = (g.domains && g.domains.length) || new Set(g.nodes.map((n) => n.domain)).size;
-  const axiosErrorCallers = g.edges.filter((e) => e.to === 'core/AxiosError.js:AxiosError').length;
+  const axiosErrorCallers = new Set(g.edges.filter((e) => e.to === 'core/AxiosError.js:AxiosError' && e.kind === 'call').map(e=>e.from)).size;
   const pages = ['README.md', join('site', 'content', 'index.html'), join('site', 'content', 'start.html'), join('site', 'content', 'case-study.html')];
   let checked = 0;
   for (const rel of pages) {

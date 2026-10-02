@@ -56,12 +56,14 @@ export const PROSE_FILES = [
   'docs/reference.md',
   'tests/README.md',
   '.claude-plugin/marketplace.json',
+  '.codex-plugin/plugin.json',
   'site/content/index.html',
   'site/content/product.html',
   'site/content/start.html',
   'site/content/research.html',
   'commands/codeweb.md',
   'skills/codebase-anatomy/SKILL.md',
+  'skills/codeweb/SKILL.md',
   'skills/codebase-anatomy/references/engine-detection.md',
   'scripts/lib/product-copy.mjs', // D6: the stdout claim strings are prose too
   'docs/cli.md', // D1: "--help wins and this file has a bug" — now its counts and tool names are gated
@@ -149,7 +151,18 @@ export function syncTargets(version, count) {
       ],
     },
     {
+      file: '.codex-plugin/plugin.json',
+      subs: [
+        [/("version":\s*")[^"]+(")/, `$1${version}$2`],
+        [/(\d+)(\s+MCP tools)/, `${count}$2`],
+      ],
+    },
+    {
       file: 'skills/codebase-anatomy/SKILL.md',
+      subs: [[/(^  version:\s*).+$/m, `$1${version}`]],
+    },
+    {
+      file: 'skills/codeweb/SKILL.md',
       subs: [[/(^  version:\s*).+$/m, `$1${version}`]],
     },
     {

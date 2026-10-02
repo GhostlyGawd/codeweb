@@ -1,17 +1,23 @@
 {
-  "capturedOn": "2026-09-05",
+  "source": "docs/demo/index.html",
+  "graph": "docs/demo/axios.graph.json",
   "sourceCommit": "a209bfb1e5dcbce3cecbf4bd955339d006358887",
-  "productVersion": "0.14.0",
-  "workflow": "https://github.com/GhostlyGawd/codeweb/actions/runs/33937357302",
-  "headCommit": "d31bcb3c31ea812bbb03ea1a91f907c59fad17f8",
-  "testedMergeCommit": "680b157ec15d68d3d03c82f124addb7854df3564",
-  "templateSha256": "ca662b30e314283e80c1cdabaa6a3869e49a0f34f476c4076415d606b913e3ad",
-  "inspection": "All five captured report frames inspected; source, counts, selected caller evidence, and current finding labels confirmed.",
-  "files": {
-    "axios-findings.png": "cf81b54cba530dde2eaa085d0c916c7605c3a627973389973e1534225b235271",
-    "axios-graph.png": "bb5e5700ce232f52a10daf4e84e717e725e1443cd798a34daa0d97859f4f16be",
-    "axios-treemap.png": "60ee24a80a0cfce01fcd409a71201cfee68f4f08ca6be7d3b5f3c49cfb1425fa",
-    "axios-matrix.png": "a35d1704e6899ec0d12e5e1f89764bfdcbfa1af41c64fe689494f43f4fee3c29",
-    "axios-blast-radius.png": "d9f4f2e7e4fb18983ebc3578bdcea63d5aac237e4a8b71573c04ac1696eae1fc"
-  }
+  "extractorVersion": "0.16.0",
+  "rendererVersion": "0.16.0",
+  "inspected_images": [
+    "axios-graph.png",
+    "axios-blast-radius.png",
+    "axios-findings.png",
+    "axios-treemap.png",
+    "axios-matrix.png"
+  ],
+  "images": {
+    "axios-graph.png": "b25f10ff29562f89c52c8b00abb891fe6e77b5a2c5fbaee760a5491932f63ed7",
+    "axios-blast-radius.png": "fbd5bf35e1b1313d16509f25fa2b9fdc07ea5cf9141de98e4176a1635617d079",
+    "axios-findings.png": "310ce2ef22b279f49ce52dbaffc23bd96166ce4ebbe8df52410ea7e919a184ff",
+    "axios-treemap.png": "acb8027281a8e1fa7a2fa95e802524923320fa4634c28ac20221a7c18d8a9490",
+    "axios-matrix.png": "3d8a6144141f9e45c01d695faec44b3e5aab241d42be1d2c4e6b69c756643292"
+  },
+  "template_sha256": "ca662b30e314283e80c1cdabaa6a3869e49a0f34f476c4076415d606b913e3ad",
+  "scope": "Existing report design re-rendered from the pinned public Axios source; all five images visually inspected."
 }
