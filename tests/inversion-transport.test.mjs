@@ -6,6 +6,17 @@ import { runExtract } from '../scripts/extract-symbols.mjs';
 import { normalizeGraph } from '../scripts/lib/graph-ops.mjs';
 import { tmpDir, cleanup, writeTree, runNode, script } from './helpers.mjs';
 import { startServer, initServer } from './mcp-harness.mjs';
+import { incompleteAnalysis, qualifyInformation, TOOL_DIAGNOSTIC_CAP } from '../scripts/lib/analysis-completeness.mjs';
+
+test('ac_38 diagnostic budgets preserve counts, omitted samples and both snapshots without changing stored evidence', () => {
+  const graph = { meta:{ analysis:{ status:'incomplete',diagnosticCount:17,diagnostics:Array.from({length:17},(_,i)=>({file:'a.js',line:i+1,column:1,code:'unsupported-same-line-declaration'})) } } };
+  const original=JSON.stringify(graph); const a=qualifyInformation({results:['a.js:known']},graph).analysis;
+  assert.equal(a.completeness.diagnosticCount,17); assert.equal(a.completeness.diagnostics.length,TOOL_DIAGNOSTIC_CAP);
+  assert.equal(a.completeness.omittedDiagnostics,14); assert.equal(a.omitted.diagnostics,14);
+  const both=incompleteAnalysis(graph,graph); assert.equal(both.diagnosticCount,34);
+  assert.ok(both.diagnostics.some(d=>d.snapshot==='before')); assert.ok(both.diagnostics.some(d=>d.snapshot==='after'));
+  assert.equal(JSON.stringify(graph),original);
+});
 
 test('ac_38 informational CLI/MCP preserve useful partial answers with shared in-band limits', async () => {
   const dir = tmpDir('codeweb-inversion-transport-'); let server;
