@@ -2,6 +2,7 @@
 // Samples are bounded independently of the exact diagnostic count. Evidence is
 // masked code only: string/comment contents must never enter diagnostics.
 export const DIAGNOSTIC_CAP = 20;
+export const TOOL_DIAGNOSTIC_CAP = 3;
 export const INCOMPLETE_STEP = 'Analysis incomplete: declarations or usage targets may be missing or ambiguous. Inspect the diagnostic locations and their consumers in source; do not accept this graph as a clean gate.';
 
 export function sameLineDeclarations(masked, file) {
@@ -45,11 +46,19 @@ export function incompleteAnalysis(...graphs) {
   const parts = graphs.map((g, i) => ({ analysis: g?.meta?.analysis, snapshot: graphs.length > 1 ? (i === 0 ? 'before' : 'after') : 'current' }))
     .filter(({ analysis }) => analysis?.status === 'incomplete');
   if (!parts.length) return null;
+  const count = parts.reduce((n, { analysis }) => n + (analysis.diagnosticCount || analysis.diagnostics?.length || 0), 0);
+  const samples = parts.flatMap(({ analysis, snapshot }) => (analysis.diagnostics || []).map((d) => ({ ...d, snapshot })));
+  // Retain a sample from each incomplete snapshot before filling the compact answer budget.
+  const diagnostics = parts.flatMap(({ analysis, snapshot }) => analysis.diagnostics?.[0] ? [{ ...analysis.diagnostics[0], snapshot }] : []);
+  for (const d of samples) {
+    if (diagnostics.length >= TOOL_DIAGNOSTIC_CAP) break;
+    if (!diagnostics.some(p => p.snapshot === d.snapshot && p.file === d.file && p.line === d.line && p.column === d.column && p.code === d.code)) diagnostics.push(d);
+  }
   return {
     status: 'incomplete',
-    diagnosticCount: parts.reduce((n, { analysis }) => n + (analysis.diagnosticCount || analysis.diagnostics?.length || 0), 0),
-    diagnostics: parts.flatMap(({ analysis, snapshot }) => (analysis.diagnostics || []).map((d) => ({ ...d, snapshot }))).slice(0, DIAGNOSTIC_CAP),
-    nextSteps: [INCOMPLETE_STEP],
+    diagnosticCount: count, diagnostics,
+    ...(count > diagnostics.length ? { omittedDiagnostics: count - diagnostics.length } : {}),
+    nextSteps: [INCOMPLETE_STEP, ...(count > diagnostics.length ? ['Inspect each saved graph.meta.analysis.diagnostics for additional stored samples; the count remains uncapped.'] : [])],
   };
 }
 

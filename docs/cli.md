@@ -217,6 +217,8 @@ form provide lightweight installation/map diagnostics; they do not verify a clie
 
 Find, explain, context and risk retain useful results on partial maps. JSON includes `analysis.status: incomplete`, scope, freshness and bounded `analysis.completeness` diagnostics. MCP uses the same contract. A missing match in a partial map does not establish absence from source. Protocol and file-reading failures remain separate errors.
 
+Tool answers show up to three diagnostic samples with uncapped counts and explicit omitted counts. Comparisons retain a sample from each incomplete snapshot. Additional stored samples remain in each graph's `meta.analysis.diagnostics`; budgeting never changes the gate's inconclusive status.
+
 Known unsupported same-line JS/TS declarations, unresolved local JSX targets and ambiguous
 call candidates are recorded in `graph.meta.analysis`.
 An `incomplete` status includes an exact diagnostic count and at most 20 samples with
