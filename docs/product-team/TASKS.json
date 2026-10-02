@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-02T04:16:18.148984+00:00",
+  "updated_at": "2026-10-02T06:33:04.582352+00:00",
   "record_type": "Repository work record; no queue, agent service or scheduler",
   "current_planning_task": "PLAN-001",
-  "next_product_task": "P-07",
+  "next_product_task": "P-04",
   "tasks": [
     {
       "id": "PLAN-001",
@@ -797,8 +797,8 @@
     {
       "id": "P-07",
       "title": "Repair inversion audit binding, definition and confidence gaps",
-      "execution_status": "planned",
-      "outcome_status": "unobserved",
+      "execution_status": "done",
+      "outcome_status": "verified_source_delivered_customer_effect_unobserved",
       "owner": "Codex",
       "lane": "Product",
       "depends_on": [
@@ -825,10 +825,20 @@
       "acceptance": "Staged requirements correct the two unsafe cleanup proposals first, then binding/export accuracy, bounded coverage and consistent typed uncertainty. Each family has independent positive/negative controls and downstream checks; required source gate passes.",
       "result_refs": [
         "docs/specs/inversion-correctness-repair.md",
-        "reports/inversion-audit-2026-10-02/FINDINGS.json"
+        "reports/inversion-audit-2026-10-02/FINDINGS.json",
+        "reports/inversion-repair-p07-2026-10-02/README.md",
+        "reports/inversion-repair-p07-2026-10-02/VERIFICATION.json"
       ],
-      "authority": "Prepared repair plan following the approved audit; implementation not performed. Merge, release and outward actions retain their own scope.",
-      "last_updated_at": "2026-10-02T04:16:18.148984+00:00"
+      "authority": "User approved P-07 build and verification. Source implementation, tests, native/package checks and reviewable draft PR delivered; no main merge or npm publication performed.",
+      "last_updated_at": "2026-10-02T06:33:04.582352+00:00",
+      "source_commit": "3077eebbf9d1f2421001c8d1872c3ede699f8abb",
+      "draft_pr": "https://github.com/GhostlyGawd/codeweb/pull/102",
+      "source_delivery_status": "done",
+      "working_branch": "codex/codeweb-workspace",
+      "verification_status": "Full local gate: 1329 product pass, 7 skips, 50 Python checks, 5 evals; all ten final-source GitHub checks pass, including Windows, no-AST, benchmarks and structural gate.",
+      "completion_scope": "Seven bounded audit families repaired; callback extents and compact typed diagnostic answers checked; exact source in primary checkout; local package works without optional dependencies. Main merge and npm release separate.",
+      "independent_review": "No independent agent review claimed; active Codex session owns the work, with source AST/runtime oracles and actual CI.",
+      "ci_success": 10
     }
   ]
 }

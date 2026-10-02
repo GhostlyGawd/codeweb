@@ -1,0 +1,45 @@
+{
+  "tested_source_commit": "8ec713f86b03ba9ff4c0ae156f3f6485cb10b12c",
+  "codex_cli": "0.159.2",
+  "requested_model": "gpt-6.1-sol",
+  "requested_reasoning": "xhigh",
+  "backend_model_echo_independently_verified": false,
+  "condition": "Owned synthetic fixture; explicit source tools; required startup, eight preapproved tools and user config ignored",
+  "runs": [
+    {
+      "condition": "NATIVE",
+      "process_exit": 0,
+      "successful_tools": [
+        "codeweb_map",
+        "codeweb_impact",
+        "codeweb_context",
+        "codeweb_refresh",
+        "codeweb_context",
+        "codeweb_context",
+        "codeweb_diff",
+        "codeweb_review",
+        "codeweb_context"
+      ],
+      "failed_attempts": [
+        "codeweb_context"
+      ]
+    },
+    {
+      "condition": "NATIVE-FINAL",
+      "process_exit": 0,
+      "successful_tools": [
+        "codeweb_refresh",
+        "codeweb_impact",
+        "codeweb_context",
+        "codeweb_review"
+      ],
+      "failed_attempts": []
+    }
+  ],
+  "controlled_behavior_postconditions_passed": true,
+  "failed_request_note": "The edit run tried full:true in evidence mode; the server rejected this incompatible option and the client recovered with a valid request.",
+  "scope": "The later head changes compact diagnostic samples and regenerate documentation; final package/CLI/MCP checks cover that head. No new native client edit trial is claimed for the later head.",
+  "claude": "pending per existing user decision",
+  "ordinary_host_adoption_or_user_value": "unobserved",
+  "global_settings_changed": false
+}

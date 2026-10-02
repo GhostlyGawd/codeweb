@@ -1,0 +1,39 @@
+{
+  "source_commit": "3077eebbf9d1f2421001c8d1872c3ede699f8abb",
+  "source_pr": "https://github.com/GhostlyGawd/codeweb/pull/102",
+  "main_merge_performed": false,
+  "npm_release_performed": false,
+  "gate": {
+    "product_tests": 1336,
+    "product_pass": 1329,
+    "product_failed": 0,
+    "product_skipped": 7,
+    "python_checks": 50,
+    "evals": 5,
+    "required_gate": "pass"
+  },
+  "audit_reproduction": {
+    "primary_observations": 16,
+    "primary_unmet_expectations": 0,
+    "paired_transport_observations": 8,
+    "meaning": "Audit execution completed; unmet expectations are reported product gaps, not a clean gate."
+  },
+  "repository_structural_gate": "pass",
+  "native_scope": "Explicit fixture at 8ec713f; final artifact/transport checked separately",
+  "package_verification": "local final tarball with optional dependencies omitted; eight primary cases, no unsafe cleanup proposals, useful typed partial CLI/MCP answer",
+  "source_paths_byte_matched_in_primary": 21,
+  "source_and_research_privacy": "Only allowlisted source and synthetic summary derivatives published; raw/private records outside repository",
+  "independent_agent_review": "not claimed",
+  "customer_outcomes": "unobserved",
+  "ci": {
+    "successful": 10,
+    "failed": 0,
+    "pending": 0,
+    "source_commit": "3077eebbf9d1f2421001c8d1872c3ede699f8abb",
+    "detail_ref": "CI-CHECKS.json"
+  },
+  "local_tarball_sha256": "668a49a1f8ccc6014fbc8c9d3728466891ca9e5c96953cec8bdeb3c8edc2e686",
+  "local_tarball_files": 141,
+  "installed_without_optional_dependencies": true,
+  "installed_runtime_paths_byte_matched": 13
+}

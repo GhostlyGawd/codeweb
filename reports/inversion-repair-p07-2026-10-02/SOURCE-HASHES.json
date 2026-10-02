@@ -1,0 +1,30 @@
+{
+  "baseline": "9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e",
+  "source_commit": "3077eebbf9d1f2421001c8d1872c3ede699f8abb",
+  "source_paths": {
+    "CHANGELOG.md": "9bbef63491c389d7fe6f6d74fe25d108eabdc8354ab224dc1aec9ad309f117af",
+    "SPEC.md": "c178998e4a3e98223459e5ee6b6b53d6506fbae36976000a906cd8a419baf2db",
+    "docs/changelog.html": "279c8c089d9c2c06fa94080dc145e686f1987b616c6799dab370e77bbdfdfad3",
+    "docs/cli.md": "42a13969f61c72cccd79ed06b71da87ba1b5478af81b5e9d509ac457b0d86034",
+    "docs/specs/static-usage-correctness.md": "9b82e2362a11259b37e4efa1d6068a2244e0cf7ea5504609d441871d18cfbae0",
+    "scripts/context-pack.mjs": "3a9b86dd3695f88250ca1ad524e0c717b6e9cd7c716612ee5d0f1fc85f5ca92b",
+    "scripts/explain.mjs": "1956553049e2369c8afa576f1d4b0fe351b6b4a93dc4ff816499b54af955aacc",
+    "scripts/extract-symbols.mjs": "cb51ec0914ba2a84b2ee8c1da7656907f91cbac41850a505b3b34062f9f03831",
+    "scripts/find.mjs": "39dbf318f93d9f71d7366814b15616c68424d85917d4b242ce83750ace53b3d7",
+    "scripts/lib/analysis-completeness.mjs": "00991ad360b2f54843f43baf55bb5e79418ac0c1ce91a1f0fd46712d92e41937",
+    "scripts/lib/context-core.mjs": "f8d4f850c3b8e72405b94d32e0e4cc807481634b336388a720b39bc4e7606baf",
+    "scripts/lib/edge-derive.mjs": "e19df8cc55396c50fb414aef83a088c88bb24a17cebfb15e84defbbec6a1c38e",
+    "scripts/lib/import-resolve.mjs": "082516b666444ea2f350e0fcd51f2d12fbd57b178acf737af55d1c054d2e6b76",
+    "scripts/lib/lang-rules.mjs": "5171c2790470e4dff0e3f6ead5fe2ece48c0f4db4db7c018cd3facd558ffe7a7",
+    "scripts/lib/lexical-bindings.mjs": "fe692dd202cc3b3004bf5da4d31187fe8709df6b39b2294bb99f7a25843cf350",
+    "scripts/lib/static-usages.mjs": "5e8b77bef3258bce162b5695be3dd3355889092ca087241e78834d51ea87625c",
+    "scripts/mcp-server.mjs": "bb18bf0afe57db98a6e2712b3d8ffa0719df04d170c5026977c66575b2e7de71",
+    "scripts/risk.mjs": "c023af4129f1991ad28c4a53b0a775aad27503d46e2d417264aab987b25703c8",
+    "tests/inversion-correctness.test.mjs": "20f20a4efc932747fd35df8cce71f076255430c05be5416b13e7978522bd1aac",
+    "tests/inversion-transport.test.mjs": "1de59e2090b03eafc0f21f860d2f28633016a2af98817806c6fa76eddb381561",
+    "tests/test_ac_pins.py": "4eb230e1a7ab5a6f36d2d3351465a03bbd4d4a50a47e3bb6e7fe55dbcaa7c988"
+  },
+  "primary_checkout_byte_matched": true,
+  "protected_harness_changed": false,
+  "required_dependencies_changed": false
+}

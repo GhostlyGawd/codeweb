@@ -1,0 +1,12 @@
+{
+  "source_commit": "3077eebbf9d1f2421001c8d1872c3ede699f8abb",
+  "scope": "Single internal self-repo 12-call MCP benchmark; not real-user cost savings",
+  "tokens_approx": 14301,
+  "tokens_budget_unchanged": 20000,
+  "all_responses_valid": true,
+  "stage_reuse": true,
+  "loaded_corpus_engaged": true,
+  "cyclic_corpus_engaged": true,
+  "optional_corpus": "Optional Axios corpus absent; corpus-specific AST performance was not measured.",
+  "initial_ci_failure": "session token budget exceeded; default diagnostic samples compacted with uncapped totals/omitted counts and saved evidence retained; no budget change"
+}

@@ -1,6 +1,6 @@
 # Proposed inversion correctness repair
 
-Work record: P-07. Evidence: [P-06 inversion audit](../../reports/inversion-audit-2026-10-02/README.md), pinned to main `9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e`. This specification proposes implementation; the audit made no product source changes. Earlier completed gates remain historical evidence, with their bounded scope.
+Work record: P-07. Evidence: [P-06 inversion audit](../../reports/inversion-audit-2026-10-02/README.md), pinned to main `9324a6a1f422ef41d5f1c5b89e87d59fd1e9175e`. Implementation was approved and delivered as [the P-07 source candidate](../../reports/inversion-repair-p07-2026-10-02/README.md); the original audit made no product source changes. Earlier completed gates remain historical evidence, with their bounded scope.
 
 ## User problem and acceptance boundary
 

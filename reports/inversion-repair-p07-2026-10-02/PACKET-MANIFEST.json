@@ -1,0 +1,46 @@
+{
+  "source_commit": "3077eebbf9d1f2421001c8d1872c3ede699f8abb",
+  "scope": "Public synthetic verification derivatives; private raw archive identity is separate",
+  "files": [
+    {
+      "path": "BENCH-SUMMARY.json",
+      "sha256": "e995c8dd8340093236098d31f8ce1e306f2806a3492b8034855c13a96de68790",
+      "bytes": 619
+    },
+    {
+      "path": "CI-CHECKS.json",
+      "sha256": "772ae07c64c14a021d90c7eee9451a6b66ba0282776806155c25cea416e72c85",
+      "bytes": 2167
+    },
+    {
+      "path": "NATIVE-SUMMARY.json",
+      "sha256": "c3c869c52f354c68ac942c8a8c5aa9a487dbeb3166d3fa6d551634e0855564d4",
+      "bytes": 1577
+    },
+    {
+      "path": "OBSERVATIONS.json",
+      "sha256": "4a560af0a69260ae2321091c5babd1d0af58e084c33eae98a76d0cff4ef3835c",
+      "bytes": 15452
+    },
+    {
+      "path": "README.md",
+      "sha256": "3a41d4190b5cc0b1151c0670f7a243325510fcf023ca94a5de4bf6517a38a5ad",
+      "bytes": 4062
+    },
+    {
+      "path": "SOURCE-HASHES.json",
+      "sha256": "a8499bc25fb6fb7c962eff5abb9dede06dca3c923bc3182deebe2eaba9dfb818",
+      "bytes": 2376
+    },
+    {
+      "path": "TRANSPORT-SUMMARY.json",
+      "sha256": "42b57df736d9ffe3ec4ded38cfc7bd99abccb9d29ce8e14c37959e41e2fd15a5",
+      "bytes": 5676
+    },
+    {
+      "path": "VERIFICATION.json",
+      "sha256": "ff864d47e0e23a519747994b381cea1a505452074c869a853d9bda3c5330ea36",
+      "bytes": 1607
+    }
+  ]
+}

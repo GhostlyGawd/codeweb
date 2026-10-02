@@ -1,0 +1,635 @@
+{
+  "source_commit": "3077eebbf9d1f2421001c8d1872c3ede699f8abb",
+  "primary_observations": [
+    {
+      "id": "wrapper",
+      "requested_engine": "regex",
+      "actual_complexity_engine": null,
+      "nodes": [
+        "ui.tsx:Inner",
+        "ui.tsx:Page",
+        "ui.tsx:<module>"
+      ],
+      "edges": [
+        {
+          "from": "ui.tsx:<module>",
+          "to": "ui.tsx:Inner",
+          "kind": "ref"
+        }
+      ],
+      "analysis": {
+        "status": "incomplete",
+        "diagnosticCount": 1,
+        "diagnostics": [
+          {
+            "code": "unresolved-jsx-component",
+            "file": "ui.tsx",
+            "line": 6,
+            "column": 11,
+            "evidence": "return <Wrapped />;"
+          }
+        ]
+      },
+      "target": "ui.tsx:Inner",
+      "impact": [
+        "ui.tsx:<module>"
+      ],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "Unresolved JSX wrapper is visibly qualified",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "wrapper",
+      "requested_engine": "tree-sitter",
+      "actual_complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "ui.tsx:Inner",
+        "ui.tsx:Page",
+        "ui.tsx:<module>"
+      ],
+      "edges": [
+        {
+          "from": "ui.tsx:<module>",
+          "to": "ui.tsx:Inner",
+          "kind": "ref"
+        }
+      ],
+      "analysis": {
+        "status": "incomplete",
+        "diagnosticCount": 1,
+        "diagnostics": [
+          {
+            "code": "unresolved-jsx-component",
+            "file": "ui.tsx",
+            "line": 6,
+            "column": 11,
+            "evidence": "return <Wrapped />;"
+          }
+        ]
+      },
+      "target": "ui.tsx:Inner",
+      "impact": [
+        "ui.tsx:<module>"
+      ],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "Unresolved JSX wrapper is visibly qualified",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "alias",
+      "requested_engine": "regex",
+      "actual_complexity_engine": null,
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke",
+        "a.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "a.js:invoke",
+          "to": "a.js:target",
+          "kind": "call"
+        },
+        {
+          "from": "a.js:<module>",
+          "to": "a.js:target",
+          "kind": "ref"
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": "a.js:target",
+      "impact": [
+        "a.js:<module>",
+        "a.js:invoke"
+      ],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "Known outer/immutable-alias call resolves to target",
+          "passed": true
+        },
+        {
+          "expectation": "Impact contains invoking consumer",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "alias",
+      "requested_engine": "tree-sitter",
+      "actual_complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke",
+        "a.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "a.js:invoke",
+          "to": "a.js:target",
+          "kind": "call"
+        },
+        {
+          "from": "a.js:<module>",
+          "to": "a.js:target",
+          "kind": "ref"
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": "a.js:target",
+      "impact": [
+        "a.js:<module>",
+        "a.js:invoke"
+      ],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "Known outer/immutable-alias call resolves to target",
+          "passed": true
+        },
+        {
+          "expectation": "Impact contains invoking consumer",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "requested_engine": "regex",
+      "actual_complexity_engine": null,
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": "a.js:target",
+      "impact": [],
+      "safe": [
+        "a.js:target"
+      ],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "No fabricated call to a shadowed or non-exported function",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "requested_engine": "tree-sitter",
+      "actual_complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": "a.js:target",
+      "impact": [],
+      "safe": [
+        "a.js:target"
+      ],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "No fabricated call to a shadowed or non-exported function",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "decorator",
+      "requested_engine": "regex",
+      "actual_complexity_engine": null,
+      "nodes": [
+        "a.py:decorate",
+        "a.py:action",
+        "a.py:<module>"
+      ],
+      "edges": [
+        {
+          "from": "a.py:action",
+          "to": "a.py:decorate",
+          "kind": "ref"
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": "a.py:decorate",
+      "impact": [
+        "a.py:action"
+      ],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "Literal decorator use contributes a dependency",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "decorator",
+      "requested_engine": "tree-sitter",
+      "actual_complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "a.py:decorate",
+        "a.py:action",
+        "a.py:<module>"
+      ],
+      "edges": [
+        {
+          "from": "a.py:action",
+          "to": "a.py:decorate",
+          "kind": "ref"
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": "a.py:decorate",
+      "impact": [
+        "a.py:action"
+      ],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "Literal decorator use contributes a dependency",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "jsx_text",
+      "requested_engine": "regex",
+      "actual_complexity_engine": null,
+      "nodes": [
+        "a.tsx:Page"
+      ],
+      "edges": [],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": null,
+      "impact": [],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "JSX literal text produces no function declaration",
+          "passed": true
+        },
+        {
+          "expectation": "Live/non-code target is absent from safe deletion tier",
+          "passed": true
+        },
+        {
+          "expectation": "Live/non-code target is absent from campaign deletions",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "jsx_text",
+      "requested_engine": "tree-sitter",
+      "actual_complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "a.tsx:Page"
+      ],
+      "edges": [],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": null,
+      "impact": [],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "JSX literal text produces no function declaration",
+          "passed": true
+        },
+        {
+          "expectation": "Live/non-code target is absent from safe deletion tier",
+          "passed": true
+        },
+        {
+          "expectation": "Live/non-code target is absent from campaign deletions",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "private_member",
+      "requested_engine": "regex",
+      "actual_complexity_engine": null,
+      "nodes": [
+        "page.tsx:Page",
+        "ui.js:Hidden",
+        "ui.js:Visible",
+        "ui.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "page.tsx:Page",
+          "to": "ui.js:<module>",
+          "kind": "import"
+        }
+      ],
+      "analysis": {
+        "status": "incomplete",
+        "diagnosticCount": 1,
+        "diagnostics": [
+          {
+            "code": "unresolved-jsx-component",
+            "file": "page.tsx",
+            "line": 3,
+            "column": 10,
+            "evidence": "return <UI.Hidden />;"
+          }
+        ]
+      },
+      "target": "ui.js:Hidden",
+      "impact": [],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "No fabricated call to a shadowed or non-exported function",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "private_member",
+      "requested_engine": "tree-sitter",
+      "actual_complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "page.tsx:Page",
+        "ui.js:Hidden",
+        "ui.js:Visible",
+        "ui.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "page.tsx:Page",
+          "to": "ui.js:<module>",
+          "kind": "import"
+        }
+      ],
+      "analysis": {
+        "status": "incomplete",
+        "diagnosticCount": 1,
+        "diagnostics": [
+          {
+            "code": "unresolved-jsx-component",
+            "file": "page.tsx",
+            "line": 3,
+            "column": 10,
+            "evidence": "return <UI.Hidden />;"
+          }
+        ]
+      },
+      "target": "ui.js:Hidden",
+      "impact": [],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "No fabricated call to a shadowed or non-exported function",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "block",
+      "requested_engine": "regex",
+      "actual_complexity_engine": null,
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [
+        {
+          "from": "a.js:invoke",
+          "to": "a.js:target",
+          "kind": "call"
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": "a.js:target",
+      "impact": [
+        "a.js:invoke"
+      ],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "Known outer/immutable-alias call resolves to target",
+          "passed": true
+        },
+        {
+          "expectation": "Impact contains invoking consumer",
+          "passed": true
+        },
+        {
+          "expectation": "Live/non-code target is absent from safe deletion tier",
+          "passed": true
+        },
+        {
+          "expectation": "Live/non-code target is absent from campaign deletions",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "block",
+      "requested_engine": "tree-sitter",
+      "actual_complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "a.js:target",
+        "a.js:invoke"
+      ],
+      "edges": [
+        {
+          "from": "a.js:invoke",
+          "to": "a.js:target",
+          "kind": "call"
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": "a.js:target",
+      "impact": [
+        "a.js:invoke"
+      ],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "Known outer/immutable-alias call resolves to target",
+          "passed": true
+        },
+        {
+          "expectation": "Impact contains invoking consumer",
+          "passed": true
+        },
+        {
+          "expectation": "Live/non-code target is absent from safe deletion tier",
+          "passed": true
+        },
+        {
+          "expectation": "Live/non-code target is absent from campaign deletions",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "alias_import",
+      "requested_engine": "regex",
+      "actual_complexity_engine": null,
+      "nodes": [
+        "lib.js:target",
+        "use.js:invoke",
+        "use.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "use.js:invoke",
+          "to": "lib.js:target",
+          "kind": "call"
+        },
+        {
+          "from": "use.js:<module>",
+          "to": "lib.js:target",
+          "kind": "ref"
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": "lib.js:target",
+      "impact": [
+        "use.js:<module>",
+        "use.js:invoke"
+      ],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "Known outer/immutable-alias call resolves to target",
+          "passed": true
+        },
+        {
+          "expectation": "Impact contains invoking consumer",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "alias_import",
+      "requested_engine": "tree-sitter",
+      "actual_complexity_engine": "tree-sitter(web-tree-sitter@0.26.9, typescript@vscode-tree-sitter-wasm@0.3.1/abi14)",
+      "nodes": [
+        "lib.js:target",
+        "use.js:invoke",
+        "use.js:<module>"
+      ],
+      "edges": [
+        {
+          "from": "use.js:invoke",
+          "to": "lib.js:target",
+          "kind": "call"
+        },
+        {
+          "from": "use.js:<module>",
+          "to": "lib.js:target",
+          "kind": "ref"
+        }
+      ],
+      "analysis": {
+        "status": "no-known-incompleteness",
+        "diagnosticCount": 0,
+        "diagnostics": []
+      },
+      "target": "lib.js:target",
+      "impact": [
+        "use.js:<module>",
+        "use.js:invoke"
+      ],
+      "safe": [],
+      "campaign_deletes": [],
+      "checks": [
+        {
+          "expectation": "Known outer/immutable-alias call resolves to target",
+          "passed": true
+        },
+        {
+          "expectation": "Impact contains invoking consumer",
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "count_semantics": "16 requested-engine observations, not independent parsers or 16 bugs",
+  "unmet_primary_expectations": 0,
+  "paired_transport_tools": [
+    "impact",
+    "find",
+    "explain",
+    "context",
+    "deadcode",
+    "risk",
+    "review",
+    "diff"
+  ]
+}
