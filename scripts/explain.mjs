@@ -11,6 +11,7 @@
 import { buildIndex, resolveSymbol, suggestSymbols } from './lib/graph-ops.mjs';
 import { relianceLine } from './lib/reliance.mjs';
 import { buildCards } from './lib/explain-core.mjs'; // Spec P: one truth for card assembly (CLI + sidecar)
+import { qualifyInformation } from './lib/analysis-completeness.mjs';
 
 const USAGE = 'usage: explain.mjs <graph.json> <symbol> [--json]   (or set CODEWEB_WS)';
 import { die, emitJson, finish, loadGraph, checkStaleness, sourceReader, parseArgs } from './lib/cli.mjs';
@@ -36,7 +37,7 @@ if (!ids.length) {
   if (json) {
     const payload = { symbol, found: false, hint: `no symbol matches "${symbol}" — try codeweb_find "<free text>" (concept search, no name needed)${suggestions.length ? ' or a near-match below' : ''}` };
     if (suggestions.length) payload.suggestions = suggestions;
-    emitJson(payload, 1);
+    emitJson(qualifyInformation(payload, graph), 1);
   } else {
     die(`symbol not found: ${symbol}${suggestions.length ? ` — near matches: ${suggestions.join(', ')}` : ''} (concept search: find.mjs "<free text>")`, 1);
   }
@@ -49,6 +50,7 @@ else {
   const payload = { symbol, matched: ids, cards, summary: cards.map((c) => c.summary).join(' | ') };
   const stale = checkStaleness(graph);
   if (stale) { payload.stale = stale; payload.summary += ` — graph is stale for ${stale.count}+ file(s); run codeweb_refresh`; }
+  qualifyInformation(payload, graph);
 
   if (json) emitJson(payload);
   else {

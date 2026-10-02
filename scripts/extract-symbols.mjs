@@ -26,6 +26,7 @@ import { createImportResolver, defaultExportOf, importCandidates } from './lib/i
 import { cyclomatic, nestingDepth } from './lib/complexity.mjs'; // F4: per-symbol complexity/nesting
 import { sameLineDeclarations, extractionAnalysis } from './lib/analysis-completeness.mjs';
 import { maskJs, maskPy, maskRuby } from './lib/masking.mjs'; // comment/string/regex-literal blanking (one truth, shared with codemod's rewrite gate)
+import { scanStaticUsages } from './lib/static-usages.mjs';
 import { createOwnerStack } from './lib/enclosing.mjs'; // finding #21: live open-class stack (property-pinned identical to the linear scan)
 import { createEdgeDeriver, idFile, markPublicApi, resolveTypedIntents } from './lib/edge-derive.mjs'; // finding #40: per-file derivation factory + pub-API walk + typed-intent resolution; idFile (id->file split) is its one truth, imported back
 import { sha1 } from './lib/hash.mjs'; // one truth — codeweb's own gate flagged the duplicate on this branch
@@ -72,7 +73,7 @@ export const EXTRACTION_MANIFESTS = Object.freeze(['package.json', 'Cargo.toml',
 // what EXISTING C++ files resolve to, because a quoted `#include "x.h"` had no candidate before.
 // v21: COD-9 cached declaration diagnostics; invalidate unqualified old caches.
 // v22: multiline control-head regex masking in diagnostic scanning.
-const SCANNER_VERSION = 23; // JSX/value uses and cached edge-completeness diagnostics.
+const SCANNER_VERSION = 24; // aligned JSX definitions, lexical scopes, callable aliases and export surfaces.
 // the bare-name fallback excludes closure-local targets (closureLocalIds), and symbolSig annotates
 // eligibility so a nesting flip invalidates cached edges. A previous-version cache is discarded at
 // load (one cold rebuild, never a crash) — the read gate below only accepts an exact version match.
@@ -223,6 +224,7 @@ function maskedOnce(relPath, kind, text) {
       // path lives inside the quotes, which the default mode blanks.
       : kind === 'cppinc' ? maskJs(text, { keepValues: true })
       : maskJs(text, relPath.endsWith('.php') ? { hashComment: true } : undefined); // PHP `#` comments (finding #13)
+    if (kind === 'js' && /\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(relPath)) v = scanStaticUsages(v, relPath).code;
     maskCache.set(k, v);
   }
   return v;
@@ -374,7 +376,11 @@ const stampTier = !!(oldCache && !opts.full && process.env.CODEWEB_VERIFY_FRESHN
 // replayed, or any signature moved.
 let cacheDirty = !oldCache;
 let scanCount = 0;
-const scanFile = (f, text) => { scanCount++; return (useCtags && ctagsSymbols(f)) || scanSymbols(f, text, (kind) => maskedOnce(rel(f), kind, text)); };
+const scanFile = (f, text) => {
+  scanCount++;
+  const r = rel(f), executable = /\.(jsx?|mjs|cjs|tsx?|mts|cts)$/.test(r) ? maskedOnce(r, 'js', text) : text;
+  return (useCtags && ctagsSymbols(f)) || scanSymbols(f, executable, (kind) => maskedOnce(r, kind, text));
+};
 
 // ---- build nodes per file, with line ranges ----
 const nodes = [];
@@ -452,7 +458,7 @@ for (const f of files) {
   sources[r] = st
     ? { s: st.size, m: Math.round(st.mtimeMs), h: contentHash }
     : { s: -1, m: 0, h: contentHash }; // never-fresh stamp for a file that kept changing
-  const fileAnalysis = isJsTs ? sameLineDeclarations(maskJs(text, { statementRegex: true }), r) : { count: 0, diagnostics: [] };
+  const fileAnalysis = isJsTs ? sameLineDeclarations(scanStaticUsages(maskJs(text, { statementRegex: true }), r).code, r) : { count: 0, diagnostics: [] };
   analysisParts.push(fileAnalysis);
   const dynamicCode = isPy ? maskedOnce(r, 'py', text) : isJsTs ? maskedOnce(r, 'js', text) : text;
   const isDyn = DYNAMIC_RE.test(dynamicCode) || (isPy && /\bset_defaults\s*\([^)]*\bfunc\s*=/.test(dynamicCode) && /\.func\s*\(/.test(dynamicCode));
@@ -498,6 +504,8 @@ for (const f of files) {
     syms = scanFile(f, text);
   }
   const seen = new Set();
+  // A ctags accelerator also reads raw JSX: reject declarations whose executable source line is blank.
+  if (isJsTs) { const executable = maskedOnce(r, 'js', text).split(/\r?\n/); syms = syms.filter(s => executable[s.line - 1]?.trim()); }
   syms = syms.filter((s) => { const k = s.name + ':' + s.line; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => a.line - b.line);
   const lines = text.split(/\r?\n/);
   const total = lines.length;
@@ -822,11 +830,15 @@ for (const [fAbs2, rec2] of fileSyms) collectClosureLocals(rel(fAbs2), rec2.rang
 // Eligibility is part of the resolution landscape, so it ANNOTATES symbolSig ('\u0001' marker):
 // a nesting flip changes no node id, and an unannotated sig would replay every consumer's stale
 // verdict (fallback hit or drop) wholesale — the same blind-spot class rexSig closed for barrels.
-const symbolSig = sha1(nodes.map((n) => n.id + (closureLocalIds.has(n.id) ? '\u0001' : '')).slice().sort().join('\n') + '\0' + pkgBoundaries.join('\n'));
+const symbolKey = (n, locals, defaults) => n.id + (locals.has(n.id) ? '\u0001' : '') + (n.exports ? '\u0002' : '') + (defaults.get(n.file) === n.id ? '\u0003' : '');
+const nodeEligibility = new Map(nodes.map(n => [n.id, symbolKey(n, closureLocalIds, defaultExportByFile)]));
+const symbolSig = sha1([...nodeEligibility.values()].sort().join('\n') + '\0' + pkgBoundaries.join('\n'));
+if (newCache) newCache.defaultExports = [...defaultExportByFile];
 const pkgSig = sha1(pkgBoundaries.join('\n')); // finding #17: pkg-boundary repartition alone (zero label delta) must stay a wholesale flip
 
 const aliasByFile = new Map();   // fileAbs -> Map(localName -> symbolId in the target file) [named/default value]
 const nsAliasByFile = new Map(); // fileAbs -> Map(localName -> target REL file) [namespace/default OBJECT, for member access]
+const namespaceOnlyByFile = new Map(); // ES namespaces expose exports, unlike a default object/class.
 const classAliasByFile = new Map(); // fileAbs -> Map(localName -> CLASS node id) [default import whose default export is a class — for instanceof/static-method ref edges]
 const externalByFile = new Map();
 const importEdges = [];
@@ -899,15 +911,16 @@ const deltaDirty = (() => {
   // (the fallback's verdict on it changed while cand/bindDeps see nothing).
   const oldLocal = new Set();
   for (const [r2, e] of Object.entries(oldCache.files)) collectClosureLocals(r2, e.ranges, oldLocal);
+  const oldDefaults = new Map(oldCache.defaultExports || []);
   const oldByLabel = new Map();
   for (const e of Object.values(oldCache.files)) {
-    for (const n of e.nodes) { let l = oldByLabel.get(n.label); if (!l) oldByLabel.set(n.label, l = []); l.push(n.id + (oldLocal.has(n.id) ? '\u0001' : '')); }
+    for (const n of e.nodes) { let l = oldByLabel.get(n.label); if (!l) oldByLabel.set(n.label, l = []); l.push(symbolKey(n, oldLocal, oldDefaults)); }
   }
   const dirty = new Set();
   for (const [label, ids] of byName) {
     const o = oldByLabel.get(label);
     if (!o) { dirty.add(label); continue; }
-    const a = ids.map((id) => id + (closureLocalIds.has(id) ? '\u0001' : '')).sort(), b = o.sort();
+    const a = ids.map((id) => nodeEligibility.get(id)).sort(), b = o.sort();
     if (a.length !== b.length || a.some((v, i2) => v !== b[i2])) dirty.add(label);
   }
   for (const label of oldByLabel.keys()) if (!byName.has(label)) dirty.add(label);
@@ -924,6 +937,7 @@ for (const f of files) {
     if (b.ns.length) nsAliasByFile.set(f, new Map(b.ns));
     if (b.cls.length) classAliasByFile.set(f, new Map(b.cls));
     if (b.external?.length) externalByFile.set(f, new Set(b.external));
+    if (b.namespace?.length) namespaceOnlyByFile.set(f, new Set(b.namespace));
     for (const pair of b.ie) importEdges.push(pair);
     bindReplayed.add(r);
   };
@@ -944,7 +958,7 @@ for (const f of files) {
     replayBind(bindEntry.bind);
     continue;
   }
-  const { amap, nsmap, classmap, external, edges: bindEdges, deps, bindCand } = resolver.bindFileImports({
+  const { amap, nsmap, classmap, external, namespace, edges: bindEdges, deps, bindCand } = resolver.bindFileImports({
     fAbs: f, r, isPy, isCpp: C_FAMILY_RE.test(r), text: textOf(f, fsRec), aId: anchorId(r), defaultExportByFile, kindById,
   });
   for (const pair of bindEdges) importEdges.push(pair);
@@ -952,8 +966,9 @@ for (const f of files) {
   if (nsmap.size) nsAliasByFile.set(f, nsmap);
   if (classmap.size) classAliasByFile.set(f, classmap);
   if (external.size) externalByFile.set(f, external);
+  if (namespace.size) namespaceOnlyByFile.set(f, namespace);
   if (bindEntry) {
-    bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], external: [...external], ie: bindEdges };
+    bindEntry.bind = { a: [...amap], ns: [...nsmap], cls: [...classmap], external: [...external], namespace: [...namespace], ie: bindEdges };
     bindEntry.bindDeps = [...deps].sort();   // finding #17 (T-17.3)
     bindEntry.bindCand = [...bindCand].sort();
     cacheDirty = true;
@@ -1006,7 +1021,7 @@ for (const f of edgeFiles) {
     // finding 10: text + mask only on the derive path — an edge-cache hit never touches the file
     const text = textOf(f, rec);
     const lines = (r.endsWith('.py') ? maskedOnce(r, 'py', text) : r.endsWith('.rb') ? maskedOnce(r, 'rb', text) : /\.(jsx?|mjs|cjs|tsx?|mts|cts|java|cs|php|kt|kts|swift|c|h|cpp|cc|cxx|hpp|hh|hxx)$/.test(r) ? maskedOnce(r, 'js', text) : text).split(/\r?\n/); // no calls from docstrings/comments/strings
-    result = deriveFileEdges(r, lines, rec.ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f), externalByFile.get(f));
+    result = deriveFileEdges(r, lines, rec.ranges, aliasByFile.get(f), nsAliasByFile.get(f), classAliasByFile.get(f), externalByFile.get(f), namespaceOnlyByFile.get(f));
     edgedCount++;
   }
   if (cacheEntry) { cacheEntry.edges = result.edges; cacheEntry.hasModule = result.hasModule; cacheEntry.ambiguous = result.ambiguous; cacheEntry.short = result.short; cacheEntry.edgeAnalysis = result.analysis; if (result.cand) cacheEntry.cand = result.cand; }
